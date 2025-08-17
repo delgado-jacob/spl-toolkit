@@ -1,0 +1,108 @@
+# GitHub Pages Configuration for SPL Toolkit
+
+# Site settings
+title: "SPL Toolkit"
+description: "A robust, language-aware library for programmatic analysis and manipulation of Splunk SPL queries"
+baseurl: "/spl-toolkit"
+url: "https://delgado-jacob.github.io"
+
+# Theme settings
+theme: minima
+markdown: kramdown
+highlighter: rouge
+
+# kramdown settings
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+  syntax_highlighter_opts:
+    css_class: 'highlight'
+    span:
+      line_numbers: false
+    block:
+      line_numbers: true
+
+# Collections
+collections:
+  api:
+    output: true
+    permalink: /:collection/:name/
+  examples:
+    output: true
+    permalink: /:collection/:name/
+  features:
+    output: true
+    permalink: /:collection/:name/
+
+# Navigation
+header_pages:
+  - installation.md
+  - quickstart.md
+  - configuration.md
+  - api/index.md
+  - examples/index.md
+  - contributing.md
+
+# Plugins
+plugins:
+  - jekyll-feed
+  - jekyll-sitemap
+  - jekyll-seo-tag
+
+# Exclude from processing
+exclude:
+  - vendor/
+  - Gemfile
+  - Gemfile.lock
+  - node_modules/
+  - .sass-cache/
+  - .jekyll-cache/
+  - gemfiles/
+
+# Include files
+include:
+  - _pages
+
+# Defaults
+defaults:
+  - scope:
+      path: ""
+      type: "pages"
+    values:
+      layout: "page"
+  - scope:
+      path: ""
+      type: "api"
+    values:
+      layout: "page"
+  - scope:
+      path: ""
+      type: "examples"
+    values:
+      layout: "page"
+  - scope:
+      path: ""
+      type: "features"
+    values:
+      layout: "page"
+
+# Custom variables
+github:
+  repository_url: "https://github.com/delgado-jacob/spl-toolkit"
+  repository_name: "spl-toolkit"
+
+# Author
+author:
+  name: "Jacob Delgado"
+
+# Footer links
+footer_links:
+  - title: "GitHub"
+    url: "https://github.com/delgado-jacob/spl-toolkit"
+    icon: "fab fa-github"
+  - title: "Issues"
+    url: "https://github.com/delgado-jacob/spl-toolkit/issues"
+    icon: "fas fa-bug"
+  - title: "Discussions"
+    url: "https://github.com/delgado-jacob/spl-toolkit/discussions"
+    icon: "fas fa-comments"
