@@ -9,7 +9,7 @@ import (
 	"github.com/delgado-jacob/spl-toolkit/pkg/mapper"
 )
 
-const Version = "1.0.0"
+const Version = "0.1.0"
 
 func main() {
 	if len(os.Args) < 2 {

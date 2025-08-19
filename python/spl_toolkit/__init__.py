@@ -8,5 +8,5 @@ enabling programmatic analysis and manipulation of Splunk SPL queries.
 from .mapper import SPLMapper, QueryInfo
 from .exceptions import SPLMapperError
 
-__version__ = "1.0.0"
+__version__ = "0.1.0"
 __all__ = ["SPLMapper", "QueryInfo", "SPLMapperError"]

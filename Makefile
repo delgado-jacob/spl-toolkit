@@ -25,7 +25,7 @@ PYTHON=python3
 PIP=pip3
 
 # Version (can be overridden)
-VERSION?=1.0.0
+VERSION?=0.1.0
 
 # Operating system detection
 UNAME_S := $(shell uname -s)

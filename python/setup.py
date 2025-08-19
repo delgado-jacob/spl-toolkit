@@ -61,7 +61,7 @@ except Exception as e:
 
 setup(
     name="spl-toolkit",
-    version="1.0.0",
+    version="0.1.0",
     author="SPL Toolkit Team",
     author_email="team@example.com",
     description="Python bindings for SPL Toolkit - programmatic SPL query analysis and manipulation",

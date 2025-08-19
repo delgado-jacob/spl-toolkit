@@ -73,10 +73,10 @@ Use the containerized version for isolated execution:
 make docker-build
 
 # Run with Docker
-docker run --rm -v $(PWD):/workspace -w /workspace spl-toolkit:1.0.0 --help
+docker run --rm -v $(PWD):/workspace -w /workspace spl-toolkit:0.1.0 --help
 
 # Example usage
-docker run --rm -v $(PWD):/workspace -w /workspace spl-toolkit:1.0.0 \
+docker run --rm -v $(PWD):/workspace -w /workspace spl-toolkit:0.1.0 \
   map --config mappings.json --query "search src_ip=192.168.1.1"
 ```
 
