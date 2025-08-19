@@ -1,3 +1,8 @@
+---
+title: "Installation Guide"
+layout: page
+---
+
 # Installation Guide
 
 This guide covers multiple installation methods for the SPL Toolkit library.

@@ -1,3 +1,8 @@
+---
+title: "Configuration Guide"
+layout: page
+---
+
 # Configuration Guide
 
 SPL Toolkit uses JSON-based configuration files to define field mappings and conditional rules. This guide covers all configuration options and patterns.

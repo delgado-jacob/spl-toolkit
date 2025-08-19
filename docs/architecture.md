@@ -1,3 +1,8 @@
+---
+title: "Architecture Overview"
+layout: page
+---
+
 # Architecture Overview
 
 SPL Toolkit is built on a **Grammar-First Architecture** that ensures robust and accurate SPL query processing. This document provides a deep dive into the system's design principles, components, and implementation details.

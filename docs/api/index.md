@@ -1,3 +1,8 @@
+---
+title: "API Reference"
+layout: page
+---
+
 # API Reference
 
 Complete reference documentation for the SPL Toolkit library APIs.

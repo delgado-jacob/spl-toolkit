@@ -1,3 +1,8 @@
+---
+title: "Quick Start Guide"
+layout: page
+---
+
 # Quick Start Guide
 
 Get up and running with SPL Toolkit in minutes. This guide covers the most common use cases with practical examples.

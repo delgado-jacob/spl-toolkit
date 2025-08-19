@@ -1,3 +1,8 @@
+---
+title: "Go API Reference"
+layout: page
+---
+
 # Go API Reference
 
 Complete reference for the SPL Toolkit Go library.

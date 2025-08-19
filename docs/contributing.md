@@ -1,3 +1,8 @@
+---
+title: "Contributing Guide"
+layout: page
+---
+
 # Contributing Guide
 
 Thank you for your interest in contributing to SPL Toolkit! This guide will help you get started with contributing to the project.

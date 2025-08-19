@@ -1,3 +1,9 @@
+---
+title: "SPL Toolkit"
+layout: page
+description: "A robust, language-aware library for programmatic analysis and manipulation of Splunk SPL queries"
+---
+
 # SPL Toolkit
 
 A robust, language-aware library for programmatic analysis and manipulation of Splunk SPL queries, written in Go with Python bindings.

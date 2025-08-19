@@ -187,32 +187,64 @@ jobs:
           import yaml
           import sys
           import os
-          
+
+          errors = []
+
           def check_yaml_frontmatter(file_path):
-              with open(file_path, 'r') as f:
-                  content = f.read()
-              
-              if content.startswith('---'):
-                  try:
-                      end = content.find('---', 3)
-                      if end != -1:
-                          yaml_content = content[3:end]
-                          yaml.safe_load(yaml_content)
-                          print(f'✓ {file_path}: Valid YAML frontmatter')
-                      else:
-                          print(f'⚠ {file_path}: Incomplete YAML frontmatter')
-                  except yaml.YAMLError as e:
-                      print(f'✗ {file_path}: Invalid YAML frontmatter - {e}')
-                      sys.exit(1)
-              else:
-                  print(f'- {file_path}: No YAML frontmatter')
-          
-          # Check all markdown files
+              try:
+                  with open(file_path, 'r', encoding='utf-8') as f:
+                      content = f.read()
+              except Exception as e:
+                  print(f'✗ {file_path}: Cannot read file - {e}')
+                  errors.append(file_path)
+                  return
+
+              if not content.startswith('---'):
+                  print(f'✗ {file_path}: Missing YAML front matter (must start at first line)')
+                  errors.append(file_path)
+                  return
+
+              lines = content.splitlines()
+              if not lines or lines[0].strip() != '---':
+                  print(f'✗ {file_path}: Missing starting --- delimiter')
+                  errors.append(file_path)
+                  return
+
+              # Find ending delimiter line
+              end_idx = None
+              for i in range(1, len(lines)):
+                  if lines[i].strip() == '---':
+                      end_idx = i
+                      break
+
+              if end_idx is None:
+                  print(f'✗ {file_path}: Incomplete YAML front matter (no closing ---)')
+                  errors.append(file_path)
+                  return
+
+              yaml_content = '\n'.join(lines[1:end_idx])
+              try:
+                  yaml.safe_load(yaml_content) if yaml_content.strip() else {}
+                  print(f'✓ {file_path}: Valid YAML front matter')
+              except yaml.YAMLError as e:
+                  print(f'✗ {file_path}: Invalid YAML front matter - {e}')
+                  errors.append(file_path)
+
+          # Check all markdown files in docs
           for root, dirs, files in os.walk('docs'):
               for file in files:
                   if file.endswith('.md'):
-                      file_path = os.path.join(root, file)
-                      check_yaml_frontmatter(file_path)
+                      check_yaml_frontmatter(os.path.join(root, file))
+
+          # Also check repository README
+          if os.path.isfile('README.md'):
+              check_yaml_frontmatter('README.md')
+
+          if errors:
+              print('\\nFront matter validation failed for files:')
+              for f in errors:
+                  print(f' - {f}')
+              sys.exit(1)
           "
 
       - name: Check for broken internal references
@@ -236,3 +268,4 @@ jobs:
               fi
             done
           done
+
