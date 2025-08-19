@@ -57,7 +57,7 @@ fmt: ## Format Go code
 
 lint: fmt # vet ## Run linting tools
 
-test: ## Run Go tests
+test: deps ## Run Go tests
 	$(GOTEST) -v -race -coverprofile=coverage.out ./...
 
 test-coverage: test ## Run tests and show coverage

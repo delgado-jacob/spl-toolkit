@@ -13,6 +13,9 @@ RUN go mod download
 # Copy source code
 COPY . .
 
+# Ensure dependencies and go.sum are up-to-date (resolves missing checksum issues)
+RUN go mod tidy
+
 # Build the binary
 RUN CGO_ENABLED=1 GOOS=linux go build -o spl-toolkit ./cmd
 

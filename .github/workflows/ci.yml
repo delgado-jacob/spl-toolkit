@@ -173,15 +173,12 @@ jobs:
         prerelease: false
         generate_release_notes: true
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.RELEASE_MANAGER }}
         
     - name: Publish Python package to PyPI
-      env:
-        TWINE_USERNAME: __token__
-        TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
-      run: |
-        pip install twine
-        twine upload python/dist/*.whl python/dist/*.tar.gz
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        packages_dir: dist
 
   docker:
     name: Build and Push Docker Image
@@ -206,7 +203,7 @@ jobs:
       id: meta
       uses: docker/metadata-action@v5
       with:
-        images: delgado-jacob/spl-toolkit
+        images: jmd862000/spl-toolkit
         tags: |
           type=ref,event=branch
           type=ref,event=pr
