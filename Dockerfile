@@ -7,7 +7,7 @@ FROM golang:1.22-bullseye AS builder
 WORKDIR /build
 
 # Copy Go modules
-COPY go.mod go.sum ./
+COPY go.mod ./
 RUN go mod download
 
 # Copy source code
