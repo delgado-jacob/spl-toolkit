@@ -5,8 +5,8 @@ Setup script for SPL Toolkit Python bindings
 from setuptools import setup, find_packages
 import os
 import subprocess
-import shutil
 from pathlib import Path
+import platform
 
 # Read the README file
 readme_path = Path(__file__).parent.parent / "README.md"
@@ -15,6 +15,15 @@ if readme_path.exists():
         long_description = f.read()
 else:
     long_description = "SPL Toolkit - Python bindings for programmatic SPL query analysis and manipulation"
+
+# Detect shared library extension based on OS
+SYSTEM = platform.system()
+if SYSTEM == "Windows":
+    SHARED_EXT = ".dll"
+elif SYSTEM == "Darwin":
+    SHARED_EXT = ".dylib"
+else:
+    SHARED_EXT = ".so"
 
 # Build the Go shared library
 def build_go_library():
@@ -26,11 +35,12 @@ def build_go_library():
     os.chdir(project_root)
     
     # Build the shared library
+    output_path = f"python/spl_toolkit/libspl_toolkit{SHARED_EXT}"
     cmd = [
-        "go", "build", 
+        "go", "build",
         "-buildmode=c-shared",
-        "-o", "python/spl_toolkit/libspl_toolkit.so",
-        "./pkg/bindings"
+        "-o", output_path,
+        "./pkg/bindings",
     ]
     
     try:
@@ -100,8 +110,10 @@ setup(
     },
     package_data={
         "spl_toolkit": [
+            f"libspl_toolkit{SHARED_EXT}",
             "libspl_toolkit.so",
             "libspl_toolkit.dylib",
+            "libspl_toolkit.dll",
             "*.h",
         ],
     },

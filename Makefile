@@ -35,7 +35,7 @@ endif
 ifeq ($(UNAME_S),Darwin)
     SHARED_EXT=.dylib
 endif
-ifeq ($(UNAME_S),Windows)
+ifeq ($(OS),Windows_NT)
     SHARED_EXT=.dll
 endif
 
@@ -169,5 +169,5 @@ security: ## Run security analysis
 
 # Tools installation
 install-tools: ## Install development tools
-	$(GOGET) github.com/securecodewarrior/gosec/v2/cmd/gosec@latest
-	$(GOGET) golang.org/x/tools/cmd/godoc@latest
+	$(GOCMD) install github.com/securego/gosec/v2/cmd/gosec@latest
+	$(GOCMD) install golang.org/x/tools/cmd/godoc@latest

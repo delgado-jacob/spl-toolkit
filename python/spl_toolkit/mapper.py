@@ -68,9 +68,11 @@ class SPLMapper:
             # Try to find the library in common locations
             possible_paths = [
                 "./libspl_toolkit.so",
-                "./libspl_toolkit.dylib", 
+                "./libspl_toolkit.dylib",
+                "./libspl_toolkit.dll",
                 os.path.join(os.path.dirname(__file__), "libspl_toolkit.so"),
                 os.path.join(os.path.dirname(__file__), "libspl_toolkit.dylib"),
+                os.path.join(os.path.dirname(__file__), "libspl_toolkit.dll"),
             ]
             
             library_path = None
