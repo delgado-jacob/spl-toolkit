@@ -12,93 +12,9 @@ env:
   PYTHON_VERSION: '3.11'
 
 jobs:
-#  test-go:
-#    name: Test Go Code
-#    runs-on: ubuntu-latest
-#
-#    steps:
-#      - name: Checkout code
-#        uses: actions/checkout@v4
-#
-#      - name: Set up Go
-#        uses: actions/setup-go@v4
-#        with:
-#          go-version: ${{ env.GO_VERSION }}
-#
-#      - name: Cache Go modules
-#        uses: actions/cache@v3
-#        with:
-#          path: ~/go/pkg/mod
-#          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-#          restore-keys: |
-#            ${{ runner.os }}-go-
-#
-#      - name: Download dependencies
-#        run: go mod download
-#
-#      - name: Run linting
-#        run: make lint
-#
-#      - name: Run tests
-#        run: make test
-#
-#      - name: Upload coverage reports
-#        uses: codecov/codecov-action@v3
-#        with:
-#          file: ./coverage.out
-#          flags: go
-#          name: go-coverage
-#
-#  test-python:
-#    name: Test Python Bindings
-#    runs-on: ${{ matrix.os }}
-#    strategy:
-#      matrix:
-#        os: [ubuntu-latest, macos-latest, windows-latest]
-#        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
-#
-#    steps:
-#      - name: Checkout code
-#        uses: actions/checkout@v4
-#
-#      - name: Set up Go
-#        uses: actions/setup-go@v4
-#        with:
-#          go-version: ${{ env.GO_VERSION }}
-#
-#      - name: Set up Python ${{ matrix.python-version }}
-#        uses: actions/setup-python@v4
-#        with:
-#          python-version: ${{ matrix.python-version }}
-#
-#      - name: Cache Python dependencies
-#        uses: actions/cache@v3
-#        with:
-#          path: ~/.cache/pip
-#          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements-dev.txt') }}
-#          restore-keys: |
-#            ${{ runner.os }}-pip-
-#
-#      - name: Install Python dependencies
-#        run: |
-#          python -m pip install --upgrade pip
-#          pip install -r python/requirements-dev.txt
-#
-#      - name: Build shared library
-#        run: make build-shared
-#
-#      - name: Test Python bindings
-#        run: make python-test
-
-  build-python-wheels:
-    name: Build Python wheels on ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    # needs: [ test-go, test-python ]
-    strategy:
-      matrix:
-        # Must use different OS runners for binary compatibility
-        os: [ ubuntu-latest, macos-latest, windows-latest ]
-      fail-fast: false  # Don't cancel other jobs if one fails
+  test-go:
+    name: Test Go Code
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
@@ -108,164 +24,248 @@ jobs:
         uses: actions/setup-go@v4
         with:
           go-version: ${{ env.GO_VERSION }}
-          cache: true  # Enable Go module caching
 
-      - name: Set up Python 3.11
+      - name: Cache Go modules
+        uses: actions/cache@v3
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Download dependencies
+        run: go mod download
+
+      - name: Run linting
+        run: make lint
+
+      - name: Run tests
+        run: make test
+
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage.out
+          flags: go
+          name: go-coverage
+
+  test-python:
+    name: Test Python Bindings
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
-          python-version: "3.11"
+          python-version: ${{ matrix.python-version }}
 
-      - name: Install dependencies
+      - name: Cache Python dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements-dev.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install cibuildwheel==2.18.1
+          pip install -r python/requirements-dev.txt
 
-      - name: Fix Go dependencies
-        shell: bash  # Force bash shell for cross-platform compatibility
-        run: |
-          # Check if go.sum exists
-          if [ ! -f go.sum ]; then
-            echo "go.sum not found, generating it..."
-            go mod tidy
-            echo "Generated go.sum with $(wc -l < go.sum) lines"
-          else
-            echo "go.sum exists, updating dependencies..."
-            go mod tidy
-          fi
-          
-          # Download all dependencies
-          go mod download
-          go mod verify
-          
-          # Show summary
-          echo "=== Go module summary ==="
-          go list -m all | head -20
-          echo "..."
-          echo "Total dependencies: $(go list -m all | wc -l)"
+      - name: Build shared library
+        run: make build-shared
 
-      # Linux-specific build
-      - name: Pre-build Go library (Linux)
-        if: runner.os == 'Linux'
-        run: |
-          # Ensure python/spl_toolkit directory exists
-          mkdir -p python/spl_toolkit
+      - name: Test Python bindings
+        run: make python-test
 
-          # Build the Go library on the host before running cibuildwheel
-          CGO_ENABLED=1 go build -buildmode=c-shared -o python/spl_toolkit/libspl_toolkit.so ./pkg/bindings
-
-          # Verify the build
-          ls -la python/spl_toolkit/
-          file python/spl_toolkit/*.so
-
-          # Check that the library exports symbols
-          nm -D python/spl_toolkit/libspl_toolkit.so | head -20
-
-      - name: Build wheels (Linux)
-        if: runner.os == 'Linux'
-        env:
-          CIBW_BUILD: "cp3{8,9,10,11,12}-*"  # All Python versions at once
-          CIBW_SKIP: "*-musllinux* *-manylinux_i686"
-          CIBW_ARCHS_LINUX: "x86_64"  # Add "aarch64" if you need ARM support
-          CIBW_MANYLINUX_X86_64_IMAGE: "manylinux_2_28"
-          CIBW_BEFORE_BUILD_LINUX: |
-            # Library is already built, just verify it exists
-            ls -la {project}/spl_toolkit/*.so
-            file {project}/spl_toolkit/*.so
-          CIBW_REPAIR_WHEEL_COMMAND_LINUX: "auditwheel repair -w {dest_dir} {wheel}"
-          CIBW_TEST_COMMAND: "python -c 'import spl_toolkit'"
-          CIBW_ENVIRONMENT_LINUX: "CIBUILDWHEEL=1"
-        run: |
-          cd python
-          python -m cibuildwheel --output-dir ../dist
-
-      # macOS-specific build (Universal2 for both Intel and Apple Silicon)
-      - name: Pre-build Go library (macOS)
-        if: runner.os == 'macOS'
-        run: |
-          # Ensure python/spl_toolkit directory exists
-          mkdir -p python/spl_toolkit
-
-          # Build universal binary for macOS
-          echo "Building x86_64 binary..."
-          CGO_ENABLED=1 GOARCH=amd64 go build -buildmode=c-shared -o python/spl_toolkit/libspl_toolkit_amd64.dylib ./pkg/bindings
-
-          echo "Building arm64 binary..."
-          CGO_ENABLED=1 GOARCH=arm64 go build -buildmode=c-shared -o python/spl_toolkit/libspl_toolkit_arm64.dylib ./pkg/bindings
-
-          echo "Creating universal binary..."
-          lipo -create python/spl_toolkit/libspl_toolkit_amd64.dylib python/spl_toolkit/libspl_toolkit_arm64.dylib -output python/spl_toolkit/libspl_toolkit.dylib
-
-          # Clean up architecture-specific files
-          rm python/spl_toolkit/libspl_toolkit_amd64.dylib python/spl_toolkit/libspl_toolkit_arm64.dylib
-
-          # Verify the build
-          ls -la python/spl_toolkit/
-          file python/spl_toolkit/*.dylib
-          lipo -info python/spl_toolkit/*.dylib
-
-      - name: Build wheels (macOS)
-        if: runner.os == 'macOS'
-        env:
-          CIBW_BUILD: "cp3{8,9,10,11,12}-*"
-          CIBW_SKIP: "*-musllinux*"
-          CIBW_ARCHS_MACOS: "x86_64 arm64 universal2"  # Build for all architectures
-          CIBW_BEFORE_BUILD_MACOS: |
-            # Library is already built, just verify it exists
-            ls -la {project}/spl_toolkit/*.dylib
-            file {project}/spl_toolkit/*.dylib
-          CIBW_REPAIR_WHEEL_COMMAND_MACOS: "delocate-wheel --require-archs {delocate_archs} -w {dest_dir} {wheel}"
-          CIBW_TEST_COMMAND: "python -c 'import spl_toolkit'"
-          CIBW_TEST_SKIP: "*-macosx_arm64 *-macosx_universal2:arm64"  # Skip ARM tests on x86 runners
-          CIBW_ENVIRONMENT_MACOS: "CIBUILDWHEEL=1"
-        run: |
-          cd python
-          python -m cibuildwheel --output-dir ../dist
-
-      # Windows-specific build
-      - name: Pre-build Go library (Windows)
-        if: runner.os == 'Windows'
-        shell: pwsh
-        run: |
-          # Ensure python/spl_toolkit directory exists
-          New-Item -ItemType Directory -Force -Path python\spl_toolkit
-
-          # Build the Go library on the host before running cibuildwheel
-          $env:CGO_ENABLED = "1"
-          go build -buildmode=c-shared -o python\spl_toolkit\libspl_toolkit.dll .\pkg\bindings
-
-          # Verify the build
-          Get-ChildItem python\spl_toolkit\
-
-      - name: Build wheels (Windows)
-        if: runner.os == 'Windows'
-        env:
-          CIBW_BUILD: "cp3{8,9,10,11,12}-*"
-          CIBW_SKIP: "*-musllinux* *-win32"
-          CIBW_ARCHS_WINDOWS: "AMD64"
-          CIBW_BEFORE_BUILD_WINDOWS: |
-            # Library is already built, just verify it exists
-            dir {project}\spl_toolkit\*.dll
-          CIBW_TEST_COMMAND: "python -c \"import spl_toolkit\""
-          CIBW_ENVIRONMENT_WINDOWS: "CIBUILDWHEEL=1"
-        run: |
-          cd python
-          python -m cibuildwheel --output-dir ../dist
-
-      - name: Upload wheels
-        uses: actions/upload-artifact@v4
-        with:
-          name: python-wheels-${{ matrix.os }}
-          path: dist/*.whl
-
-      - name: Display built wheels
-        shell: bash
-        run: |
-          ls -la dist/ 2>/dev/null || dir dist\ 2>/dev/null || echo "No wheels built yet"
+#  build-python-wheels:
+#    name: Build Python wheels on ${{ matrix.os }}
+#    runs-on: ${{ matrix.os }}
+#    # needs: [ test-go, test-python ]
+#    strategy:
+#      matrix:
+#        # Must use different OS runners for binary compatibility
+#        os: [ ubuntu-latest, macos-latest, windows-latest ]
+#      fail-fast: false  # Don't cancel other jobs if one fails
+#
+#    steps:
+#      - name: Checkout code
+#        uses: actions/checkout@v4
+#
+#      - name: Set up Go
+#        uses: actions/setup-go@v4
+#        with:
+#          go-version: ${{ env.GO_VERSION }}
+#          cache: true  # Enable Go module caching
+#
+#      - name: Set up Python 3.11
+#        uses: actions/setup-python@v4
+#        with:
+#          python-version: "3.11"
+#
+#      - name: Install dependencies
+#        run: |
+#          python -m pip install --upgrade pip
+#          pip install cibuildwheel==2.18.1
+#
+#      - name: Fix Go dependencies
+#        shell: bash  # Force bash shell for cross-platform compatibility
+#        run: |
+#          # Check if go.sum exists
+#          if [ ! -f go.sum ]; then
+#            echo "go.sum not found, generating it..."
+#            go mod tidy
+#            echo "Generated go.sum with $(wc -l < go.sum) lines"
+#          else
+#            echo "go.sum exists, updating dependencies..."
+#            go mod tidy
+#          fi
+#
+#          # Download all dependencies
+#          go mod download
+#          go mod verify
+#
+#          # Show summary
+#          echo "=== Go module summary ==="
+#          go list -m all | head -20
+#          echo "..."
+#          echo "Total dependencies: $(go list -m all | wc -l)"
+#
+#      # Linux-specific build
+#      - name: Pre-build Go library (Linux)
+#        if: runner.os == 'Linux'
+#        run: |
+#          # Ensure python/spl_toolkit directory exists
+#          mkdir -p python/spl_toolkit
+#
+#          # Build the Go library on the host before running cibuildwheel
+#          CGO_ENABLED=1 go build -buildmode=c-shared -o python/spl_toolkit/libspl_toolkit.so ./pkg/bindings
+#
+#          # Verify the build
+#          ls -la python/spl_toolkit/
+#          file python/spl_toolkit/*.so
+#
+#          # Check that the library exports symbols
+#          nm -D python/spl_toolkit/libspl_toolkit.so | head -20
+#
+#      - name: Build wheels (Linux)
+#        if: runner.os == 'Linux'
+#        env:
+#          CIBW_BUILD: "cp3{8,9,10,11,12}-*"  # All Python versions at once
+#          CIBW_SKIP: "*-musllinux* *-manylinux_i686"
+#          CIBW_ARCHS_LINUX: "x86_64"  # Add "aarch64" if you need ARM support
+#          CIBW_MANYLINUX_X86_64_IMAGE: "manylinux_2_28"
+#          CIBW_BEFORE_BUILD_LINUX: |
+#            # Library is already built, just verify it exists
+#            ls -la {project}/spl_toolkit/*.so
+#            file {project}/spl_toolkit/*.so
+#          CIBW_REPAIR_WHEEL_COMMAND_LINUX: "auditwheel repair -w {dest_dir} {wheel}"
+#          CIBW_TEST_COMMAND: "python -c 'import spl_toolkit'"
+#          CIBW_ENVIRONMENT_LINUX: "CIBUILDWHEEL=1"
+#        run: |
+#          cd python
+#          python -m cibuildwheel --output-dir ../dist
+#
+#      # macOS-specific build (Universal2 for both Intel and Apple Silicon)
+#      - name: Pre-build Go library (macOS)
+#        if: runner.os == 'macOS'
+#        run: |
+#          # Ensure python/spl_toolkit directory exists
+#          mkdir -p python/spl_toolkit
+#
+#          # Build universal binary for macOS
+#          echo "Building x86_64 binary..."
+#          CGO_ENABLED=1 GOARCH=amd64 go build -buildmode=c-shared -o python/spl_toolkit/libspl_toolkit_amd64.dylib ./pkg/bindings
+#
+#          echo "Building arm64 binary..."
+#          CGO_ENABLED=1 GOARCH=arm64 go build -buildmode=c-shared -o python/spl_toolkit/libspl_toolkit_arm64.dylib ./pkg/bindings
+#
+#          echo "Creating universal binary..."
+#          lipo -create python/spl_toolkit/libspl_toolkit_amd64.dylib python/spl_toolkit/libspl_toolkit_arm64.dylib -output python/spl_toolkit/libspl_toolkit.dylib
+#
+#          # Clean up architecture-specific files
+#          rm python/spl_toolkit/libspl_toolkit_amd64.dylib python/spl_toolkit/libspl_toolkit_arm64.dylib
+#
+#          # Verify the build
+#          ls -la python/spl_toolkit/
+#          file python/spl_toolkit/*.dylib
+#          lipo -info python/spl_toolkit/*.dylib
+#
+#      - name: Build wheels (macOS)
+#        if: runner.os == 'macOS'
+#        env:
+#          CIBW_BUILD: "cp3{8,9,10,11,12}-*"
+#          CIBW_SKIP: "*-musllinux*"
+#          CIBW_ARCHS_MACOS: "x86_64 arm64 universal2"  # Build for all architectures
+#          CIBW_BEFORE_BUILD_MACOS: |
+#            # Library is already built, just verify it exists
+#            ls -la {project}/spl_toolkit/*.dylib
+#            file {project}/spl_toolkit/*.dylib
+#          CIBW_REPAIR_WHEEL_COMMAND_MACOS: "delocate-wheel --require-archs {delocate_archs} -w {dest_dir} {wheel}"
+#          CIBW_TEST_COMMAND: "python -c 'import spl_toolkit'"
+#          CIBW_TEST_SKIP: "*-macosx_arm64 *-macosx_universal2:arm64"  # Skip ARM tests on x86 runners
+#          CIBW_ENVIRONMENT_MACOS: "CIBUILDWHEEL=1"
+#        run: |
+#          cd python
+#          python -m cibuildwheel --output-dir ../dist
+#
+#      # Windows-specific build
+#      - name: Pre-build Go library (Windows)
+#        if: runner.os == 'Windows'
+#        shell: pwsh
+#        run: |
+#          # Ensure python/spl_toolkit directory exists
+#          New-Item -ItemType Directory -Force -Path python\spl_toolkit
+#
+#          # Build the Go library on the host before running cibuildwheel
+#          $env:CGO_ENABLED = "1"
+#          go build -buildmode=c-shared -o python\spl_toolkit\libspl_toolkit.dll .\pkg\bindings
+#
+#          # Verify the build
+#          Get-ChildItem python\spl_toolkit\
+#
+#      - name: Build wheels (Windows)
+#        if: runner.os == 'Windows'
+#        env:
+#          CIBW_BUILD: "cp3{8,9,10,11,12}-*"
+#          CIBW_SKIP: "*-musllinux* *-win32"
+#          CIBW_ARCHS_WINDOWS: "AMD64"
+#          CIBW_BEFORE_BUILD_WINDOWS: |
+#            # Library is already built, just verify it exists
+#            dir {project}\spl_toolkit\*.dll
+#          CIBW_TEST_COMMAND: "python -c \"import spl_toolkit\""
+#          CIBW_ENVIRONMENT_WINDOWS: "CIBUILDWHEEL=1"
+#        run: |
+#          cd python
+#          python -m cibuildwheel --output-dir ../dist
+#
+#      - name: Upload wheels
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: python-wheels-${{ matrix.os }}
+#          path: dist/*.whl
+#
+#      - name: Display built wheels
+#        shell: bash
+#        run: |
+#          ls -la dist/ 2>/dev/null || dir dist\ 2>/dev/null || echo "No wheels built yet"
 
   build:
     name: Build Artifacts
     runs-on: ${{ matrix.os }}
-    # needs: [test-go, test-python]
+    needs: [test-go, test-python]
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
@@ -294,56 +294,56 @@ jobs:
           path: dist/
           retention-days: 30
 
-  release:
-    name: Create Release
-    runs-on: ubuntu-latest
-    needs: [build, build-python-wheels]
-    if: startsWith(github.ref, 'refs/tags/v')
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Go
-        uses: actions/setup-go@v4
-        with:
-          go-version: ${{ env.GO_VERSION }}
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-
-      - name: Build release artifacts
-        run: make release-build
-
-      - name: Download wheel artifacts
-        uses: actions/download-artifact@v4
-        with:
-          pattern: python-wheels-*
-          path: dist/
-          merge-multiple: true
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
-        with:
-          files: dist/*
-          draft: false
-          prerelease: false
-          generate_release_notes: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.RELEASE_MANAGER }}
-
-      - name: Publish Python package to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          packages-dir: dist/
-          skip-existing: true
+#  release:
+#    name: Create Release
+#    runs-on: ubuntu-latest
+#    needs: [build, build-python-wheels]
+#    if: startsWith(github.ref, 'refs/tags/v')
+#
+#    steps:
+#      - name: Checkout code
+#        uses: actions/checkout@v4
+#
+#      - name: Set up Go
+#        uses: actions/setup-go@v4
+#        with:
+#          go-version: ${{ env.GO_VERSION }}
+#
+#      - name: Set up Python
+#        uses: actions/setup-python@v4
+#        with:
+#          python-version: ${{ env.PYTHON_VERSION }}
+#
+#      - name: Build release artifacts
+#        run: make release-build
+#
+#      - name: Download wheel artifacts
+#        uses: actions/download-artifact@v4
+#        with:
+#          pattern: python-wheels-*
+#          path: dist/
+#          merge-multiple: true
+#
+#      - name: Create GitHub Release
+#        uses: softprops/action-gh-release@v1
+#        with:
+#          files: dist/*
+#          draft: false
+#          prerelease: false
+#          generate_release_notes: true
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.RELEASE_MANAGER }}
+#
+#      - name: Publish Python package to PyPI
+#        uses: pypa/gh-action-pypi-publish@release/v1
+#        with:
+#          packages-dir: dist/
+#          skip-existing: true
 
   docker:
     name: Build and Push Docker Image
     runs-on: ubuntu-latest
-    # needs: [test-go, test-python]
+    needs: [test-go, test-python]
     if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
 
     steps:
