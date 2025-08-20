@@ -121,6 +121,7 @@ jobs:
           pip install cibuildwheel==2.18.1
 
       - name: Fix Go dependencies
+        shell: bash  # Force bash shell for cross-platform compatibility
         run: |
           # Check if go.sum exists
           if [ ! -f go.sum ]; then

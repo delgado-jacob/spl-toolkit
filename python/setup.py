@@ -139,6 +139,13 @@ def build_go_library():
 # Custom build commands
 from setuptools.command.build_py import build_py as _build_py
 from setuptools.command.build_ext import build_ext as _build_ext
+from setuptools import Extension
+
+# Create a dummy extension to force platlib
+# This tells setuptools that this is a platform-specific package
+ext_modules = [
+    Extension("spl_toolkit._dummy", sources=[])
+]
 
 class build_py_go(_build_py):
     def run(self):
@@ -158,7 +165,8 @@ class build_ext_go(_build_ext):
         # Also handle in build_ext for compatibility
         if not find_go_library():
             build_go_library()
-        super().run() if self.extensions else None
+        # Skip actual extension building since we don't have real C extensions
+        pass
 
 # Handle bdist_wheel only if wheel is installed
 try:
@@ -257,6 +265,7 @@ setup(
     },
     include_package_data=True,
     zip_safe=False,  # Due to shared library
+    ext_modules=ext_modules,  # Add dummy extension to mark as platlib
     cmdclass=cmdclass,
     keywords="splunk spl query parser field mapping analysis",
     project_urls={
