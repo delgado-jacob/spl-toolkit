@@ -112,18 +112,43 @@ jobs:
       with:
         python-version: "3.11"
 
+    - name: Install Windows dependencies
+      if: runner.os == 'Windows'
+      run: |
+        choco install golang -y
+        choco install mingw -y
+
     - name: Install cibuildwheel
       run: pip install cibuildwheel==2.18.1
 
-    - name: Build wheels with cibuildwheel
+    - name: Build Linux wheels
+      if: runner.os == 'Linux'
       env:
         CIBW_BUILD: "cp38-* cp39-* cp310-* cp311-* cp312-*"
-        CIBW_SKIP: "*musllinux* *_universal2*"  # skip musl & universal2 (Go native)
-        # Install Go inside manylinux container; add it to PATH after extraction
+        CIBW_SKIP: "*musllinux* *_universal2*"
+        CIBW_BUILD_VERBOSITY: 1
         CIBW_BEFORE_ALL_LINUX: |
           curl -sSL https://go.dev/dl/go${{ env.GO_VERSION }}.linux-amd64.tar.gz -o /tmp/go.tar.gz
           tar -C /opt -xzf /tmp/go.tar.gz
         CIBW_ENVIRONMENT_LINUX: PATH=/opt/go/bin:$PATH CGO_ENABLED=1
+      run: python -m cibuildwheel python --output-dir dist
+
+    - name: Build macOS wheels
+      if: runner.os == 'macOS'
+      env:
+        CIBW_BUILD: "cp38-* cp39-* cp310-* cp311-* cp312-*"
+        CIBW_SKIP: "*musllinux* *_universal2*"
+        CIBW_BUILD_VERBOSITY: 1
+        CIBW_ENVIRONMENT_MACOS: CGO_ENABLED=1
+      run: python -m cibuildwheel python --output-dir dist
+
+    - name: Build Windows wheels
+      if: runner.os == 'Windows'
+      env:
+        CIBW_BUILD: "cp38-* cp39-* cp310-* cp311-* cp312-*"
+        CIBW_SKIP: "*musllinux* *_universal2*"
+        CIBW_BUILD_VERBOSITY: 1
+        CIBW_ENVIRONMENT_WINDOWS: CGO_ENABLED=1
       run: python -m cibuildwheel python --output-dir dist
 
     - name: Upload wheel artifacts
