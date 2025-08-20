@@ -124,8 +124,6 @@ jobs:
           curl -sSL https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz -o /tmp/go.tar.gz
           tar -C /opt -xzf /tmp/go.tar.gz
         CIBW_ENVIRONMENT_LINUX: PATH=/opt/go/bin:$PATH
-        CIBW_ENVIRONMENT_MACOS: PATH=${{ env.PATH }}
-        CIBW_ENVIRONMENT_WINDOWS: PATH="${Env:Path}"
       run: python -m cibuildwheel python --output-dir dist
 
     - name: Upload wheel artifacts
