@@ -69,6 +69,14 @@ except Exception as e:
     print(f"Warning: Could not build Go library during setup: {e}")
     print("You may need to build it manually with: go build -buildmode=c-shared -o python/spl_toolkit/libspl_toolkit.so ./pkg/bindings")
 
+from wheel.bdist_wheel import bdist_wheel
+
+class bdist_wheel_plat(bdist_wheel):
+    def finalize_options(self):
+        super().finalize_options()
+        # Mark the wheel as non-pure so it gets a platform tag
+        self.root_is_pure = False
+
 setup(
     name="spl-toolkit",
     version="0.1.0",
@@ -119,6 +127,10 @@ setup(
     },
     include_package_data=True,
     zip_safe=False,  # Due to shared library
+    cmdclass={
+        # Mark wheel as non-pure so it gets a platform tag
+        "bdist_wheel": bdist_wheel_plat,
+    },
     keywords="splunk spl query parser field mapping analysis",
     project_urls={
         "Bug Reports": "https://github.com/delgado-jacob/spl-toolkit/issues",
