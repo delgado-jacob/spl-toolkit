@@ -93,7 +93,7 @@ jobs:
   build-python-wheels:
     name: Build Python wheels on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
-#    needs: [ test-go, test-python ]
+    # needs: [ test-go, test-python ]
     strategy:
       matrix:
         # Must use different OS runners for binary compatibility
@@ -108,6 +108,7 @@ jobs:
         uses: actions/setup-go@v4
         with:
           go-version: ${{ env.GO_VERSION }}
+          cache: true  # Enable Go module caching
 
       - name: Set up Python 3.11
         uses: actions/setup-python@v4
@@ -119,19 +120,44 @@ jobs:
           python -m pip install --upgrade pip
           pip install cibuildwheel==2.18.1
 
-      - name: Download Go dependencies
+      - name: Fix Go dependencies
         run: |
+          # Check if go.sum exists
+          if [ ! -f go.sum ]; then
+            echo "go.sum not found, generating it..."
+            go mod tidy
+            echo "Generated go.sum with $(wc -l < go.sum) lines"
+          else
+            echo "go.sum exists, updating dependencies..."
+            go mod tidy
+          fi
+          
+          # Download all dependencies
           go mod download
           go mod verify
+          
+          # Show summary
+          echo "=== Go module summary ==="
+          go list -m all | head -20
+          echo "..."
+          echo "Total dependencies: $(go list -m all | wc -l)"
 
       # Linux-specific build
       - name: Pre-build Go library (Linux)
         if: runner.os == 'Linux'
         run: |
+          # Ensure python/spl_toolkit directory exists
+          mkdir -p python/spl_toolkit
+
           # Build the Go library on the host before running cibuildwheel
           CGO_ENABLED=1 go build -buildmode=c-shared -o python/spl_toolkit/libspl_toolkit.so ./pkg/bindings
+
+          # Verify the build
           ls -la python/spl_toolkit/
           file python/spl_toolkit/*.so
+
+          # Check that the library exports symbols
+          nm -D python/spl_toolkit/libspl_toolkit.so | head -20
 
       - name: Build wheels (Linux)
         if: runner.os == 'Linux'
@@ -155,13 +181,26 @@ jobs:
       - name: Pre-build Go library (macOS)
         if: runner.os == 'macOS'
         run: |
+          # Ensure python/spl_toolkit directory exists
+          mkdir -p python/spl_toolkit
+
           # Build universal binary for macOS
+          echo "Building x86_64 binary..."
           CGO_ENABLED=1 GOARCH=amd64 go build -buildmode=c-shared -o python/spl_toolkit/libspl_toolkit_amd64.dylib ./pkg/bindings
+
+          echo "Building arm64 binary..."
           CGO_ENABLED=1 GOARCH=arm64 go build -buildmode=c-shared -o python/spl_toolkit/libspl_toolkit_arm64.dylib ./pkg/bindings
+
+          echo "Creating universal binary..."
           lipo -create python/spl_toolkit/libspl_toolkit_amd64.dylib python/spl_toolkit/libspl_toolkit_arm64.dylib -output python/spl_toolkit/libspl_toolkit.dylib
+
+          # Clean up architecture-specific files
           rm python/spl_toolkit/libspl_toolkit_amd64.dylib python/spl_toolkit/libspl_toolkit_arm64.dylib
+
+          # Verify the build
           ls -la python/spl_toolkit/
           file python/spl_toolkit/*.dylib
+          lipo -info python/spl_toolkit/*.dylib
 
       - name: Build wheels (macOS)
         if: runner.os == 'macOS'
@@ -184,11 +223,17 @@ jobs:
       # Windows-specific build
       - name: Pre-build Go library (Windows)
         if: runner.os == 'Windows'
+        shell: pwsh
         run: |
+          # Ensure python/spl_toolkit directory exists
+          New-Item -ItemType Directory -Force -Path python\spl_toolkit
+
           # Build the Go library on the host before running cibuildwheel
           $env:CGO_ENABLED = "1"
-          go build -buildmode=c-shared -o python/spl_toolkit/libspl_toolkit.dll ./pkg/bindings
-          dir python\spl_toolkit\
+          go build -buildmode=c-shared -o python\spl_toolkit\libspl_toolkit.dll .\pkg\bindings
+
+          # Verify the build
+          Get-ChildItem python\spl_toolkit\
 
       - name: Build wheels (Windows)
         if: runner.os == 'Windows'
@@ -212,8 +257,9 @@ jobs:
           path: dist/*.whl
 
       - name: Display built wheels
+        shell: bash
         run: |
-          ls -la dist/ || dir dist\
+          ls -la dist/ 2>/dev/null || dir dist\ 2>/dev/null || echo "No wheels built yet"
 
   build:
     name: Build Artifacts
