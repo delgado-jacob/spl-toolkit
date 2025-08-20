@@ -1,0 +1,95 @@
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "spl-toolkit"
+version = "0.1.0"
+description = "Python bindings for SPL Toolkit - programmatic SPL query analysis and manipulation"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {text = "MIT"}
+authors = [
+    {name = "SPL Toolkit Team", email = "team@example.com"},
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Go",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: System :: Systems Administration",
+    "Topic :: Text Processing :: Linguistic",
+]
+keywords = ["splunk", "spl", "query", "parser", "field", "mapping", "analysis"]
+
+[project.urls]
+Homepage = "https://github.com/delgado-jacob/spl-toolkit"
+Documentation = "https://github.com/delgado-jacob/spl-toolkit/docs"
+Repository = "https://github.com/delgado-jacob/spl-toolkit.git"
+Issues = "https://github.com/delgado-jacob/spl-toolkit/issues"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=6.0",
+    "pytest-cov>=2.0",
+    "black>=22.0",
+    "flake8>=4.0",
+    "mypy>=0.910",
+    "wheel>=0.37.0",
+    "cibuildwheel>=2.16.0",
+]
+
+[tool.cibuildwheel]
+# Skip 32-bit builds and musllinux
+skip = ["*-win32", "*-manylinux_i686", "*-musllinux*", "pp*"]
+
+# Test that the wheel works (basic import test)
+test-command = "python -c 'import spl_toolkit'"
+
+# Don't test on emulated architectures
+test-skip = "*-macosx_arm64 *-macosx_universal2:arm64"
+
+# Build verbosity
+build-verbosity = 3
+
+[tool.cibuildwheel.linux]
+# Use manylinux2014 for better compatibility
+manylinux-x86_64-image = "manylinux2014"
+manylinux-aarch64-image = "manylinux2014"
+
+# Repair wheels with auditwheel
+repair-wheel-command = "auditwheel repair -w {dest_dir} {wheel}"
+
+# Environment variables
+environment = { CGO_ENABLED="1", CIBUILDWHEEL="1" }
+
+[tool.cibuildwheel.macos]
+# Build for both x86_64 and arm64 on macOS
+archs = ["x86_64", "arm64"]
+
+# Use delocate to fix macOS wheels
+repair-wheel-command = "delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel}"
+
+# Environment variables
+environment = { CGO_ENABLED="1", CIBUILDWHEEL="1" }
+
+[tool.cibuildwheel.windows]
+# Only build 64-bit wheels on Windows
+archs = ["AMD64"]
+
+# Environment variables
+environment = { CGO_ENABLED="1", CIBUILDWHEEL="1" }
+
+[tool.setuptools]
+packages = ["spl_toolkit"]
+
+[tool.setuptools.package-data]
+spl_toolkit = ["*.so", "*.dylib", "*.dll", "*.h"]

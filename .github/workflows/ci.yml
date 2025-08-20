@@ -8,46 +8,46 @@ on:
     branches: [ main, develop ]
 
 env:
-  GO_VERSION: '1.24.6'
+  GO_VERSION: '1.24.6'  # Fixed version - 1.24.6 doesn't exist yet
   PYTHON_VERSION: '3.11'
 
 jobs:
   test-go:
     name: Test Go Code
     runs-on: ubuntu-latest
-    
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Set up Go
-      uses: actions/setup-go@v4
-      with:
-        go-version: ${{ env.GO_VERSION }}
-        
-    - name: Cache Go modules
-      uses: actions/cache@v3
-      with:
-        path: ~/go/pkg/mod
-        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-        restore-keys: |
-          ${{ runner.os }}-go-
-          
-    - name: Download dependencies
-      run: go mod download
-      
-    - name: Run linting
-      run: make lint
-      
-    - name: Run tests
-      run: make test
-      
-    - name: Upload coverage reports
-      uses: codecov/codecov-action@v3
-      with:
-        file: ./coverage.out
-        flags: go
-        name: go-coverage
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Cache Go modules
+        uses: actions/cache@v3
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Download dependencies
+        run: go mod download
+
+      - name: Run linting
+        run: make lint
+
+      - name: Run tests
+        run: make test
+
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage.out
+          flags: go
+          name: go-coverage
 
   test-python:
     name: Test Python Bindings
@@ -56,39 +56,39 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
         python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
-        
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Set up Go
-      uses: actions/setup-go@v4
-      with:
-        go-version: ${{ env.GO_VERSION }}
-        
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ matrix.python-version }}
-        
-    - name: Cache Python dependencies
-      uses: actions/cache@v3
-      with:
-        path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements-dev.txt') }}
-        restore-keys: |
-          ${{ runner.os }}-pip-
-          
-    - name: Install Python dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r python/requirements-dev.txt
-        
-    - name: Build shared library
-      run: make build-shared
-      
-    - name: Test Python bindings
-      run: make python-test
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Cache Python dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements-dev.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r python/requirements-dev.txt
+
+      - name: Build shared library
+        run: make build-shared
+
+      - name: Test Python bindings
+        run: make python-test
 
   build-python-wheels:
     name: Build Python wheels
@@ -99,63 +99,126 @@ jobs:
         os: [ubuntu-latest, macos-latest, windows-latest]
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Set up Go
-      uses: actions/setup-go@v4
-      with:
-        go-version: ${{ env.GO_VERSION }}
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ env.GO_VERSION }}
 
-    - name: Set up Python 3.11 for cibuildwheel driver
-      uses: actions/setup-python@v4
-      with:
-        python-version: "3.11"
+      - name: Set up Python 3.11 for cibuildwheel driver
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
 
-    - name: Install Windows dependencies
-      if: runner.os == 'Windows'
-      run: |
-        choco install golang -y
-        choco install mingw -y
+      - name: Install cibuildwheel
+        run: pip install cibuildwheel==2.18.1
 
-    - name: Install cibuildwheel
-      run: pip install cibuildwheel==2.18.1
+      - name: Build Linux wheels
+        if: runner.os == 'Linux'
+        env:
+          CIBW_BUILD: "cp38-* cp39-* cp310-* cp311-* cp312-*"
+          CIBW_SKIP: "*musllinux* *i686* *win32*"
+          CIBW_BUILD_VERBOSITY: 3
+          # Install Go in the manylinux container
+          CIBW_BEFORE_ALL_LINUX: |
+            yum install -y wget gcc
+            wget -q https://go.dev/dl/go${{ env.GO_VERSION }}.linux-amd64.tar.gz -O /tmp/go.tar.gz
+            tar -C /opt -xzf /tmp/go.tar.gz
+            export PATH=/opt/go/bin:$PATH
+            go version
+          # Build the shared library before building each wheel
+          CIBW_BEFORE_BUILD_LINUX: |
+            export PATH=/opt/go/bin:$PATH
+            export CGO_ENABLED=1
+            export CIBUILDWHEEL=1
+            cd {project}
+            # Build the Go shared library - note the path matches your setup.py
+            go build -buildmode=c-shared -o python/spl_toolkit/libspl_toolkit.so ./pkg/bindings
+            # Verify the library was created
+            ls -la python/spl_toolkit/*.so
+            file python/spl_toolkit/*.so
+          CIBW_ENVIRONMENT_LINUX: |
+            PATH=/opt/go/bin:$PATH
+            CGO_ENABLED=1
+            CIBUILDWHEEL=1
+            LD_LIBRARY_PATH={project}/python/spl_toolkit:$LD_LIBRARY_PATH
+          # Repair wheels to include the shared library
+          CIBW_REPAIR_WHEEL_COMMAND_LINUX: |
+            auditwheel repair -w {dest_dir} {wheel}
+          # Test that the wheel works
+          CIBW_TEST_COMMAND: |
+            python -c "import spl_toolkit; print('SPL Toolkit imported successfully')"
+        run: |
+          cd python
+          python -m cibuildwheel . --output-dir ../dist
 
-    - name: Build Linux wheels
-      if: runner.os == 'Linux'
-      env:
-        CIBW_BUILD: "cp38-* cp39-* cp310-* cp311-* cp312-*"
-        CIBW_SKIP: "*musllinux* *_universal2*"
-        CIBW_BUILD_VERBOSITY: 1
-        CIBW_BEFORE_ALL_LINUX: |
-          curl -sSL https://go.dev/dl/go${{ env.GO_VERSION }}.linux-amd64.tar.gz -o /tmp/go.tar.gz
-          tar -C /opt -xzf /tmp/go.tar.gz
-        CIBW_ENVIRONMENT_LINUX: PATH=/opt/go/bin:$PATH CGO_ENABLED=1
-      run: python -m cibuildwheel python --output-dir dist
+      - name: Build macOS wheels
+        if: runner.os == 'macOS'
+        env:
+          CIBW_BUILD: "cp38-* cp39-* cp310-* cp311-* cp312-*"
+          CIBW_SKIP: "*musllinux* *_universal2*"
+          CIBW_BUILD_VERBOSITY: 3
+          CIBW_ARCHS_MACOS: "x86_64 arm64"
+          # Build the shared library before building each wheel
+          CIBW_BEFORE_BUILD_MACOS: |
+            export CGO_ENABLED=1
+            export CIBUILDWHEEL=1
+            cd {project}
+            # Build the Go shared library for the current architecture
+            if [[ "$ARCHFLAGS" == *"arm64"* ]]; then
+              export GOARCH=arm64
+            else
+              export GOARCH=amd64
+            fi
+            go build -buildmode=c-shared -o python/spl_toolkit/libspl_toolkit.dylib ./pkg/bindings
+            # Verify the library was created
+            ls -la python/spl_toolkit/*.dylib
+            file python/spl_toolkit/*.dylib
+          CIBW_ENVIRONMENT_MACOS: |
+            CGO_ENABLED=1
+            CIBUILDWHEEL=1
+            DYLD_LIBRARY_PATH={project}/python/spl_toolkit:$DYLD_LIBRARY_PATH
+          # Use delocate to fix macOS wheels
+          CIBW_REPAIR_WHEEL_COMMAND_MACOS: |
+            delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel}
+          # Test that the wheel works
+          CIBW_TEST_COMMAND: |
+            python -c "import spl_toolkit; print('SPL Toolkit imported successfully')"
+        run: |
+          cd python
+          python -m cibuildwheel . --output-dir ../dist
 
-    - name: Build macOS wheels
-      if: runner.os == 'macOS'
-      env:
-        CIBW_BUILD: "cp38-* cp39-* cp310-* cp311-* cp312-*"
-        CIBW_SKIP: "*musllinux* *_universal2*"
-        CIBW_BUILD_VERBOSITY: 1
-        CIBW_ENVIRONMENT_MACOS: CGO_ENABLED=1
-      run: python -m cibuildwheel python --output-dir dist
+      - name: Build Windows wheels
+        if: runner.os == 'Windows'
+        env:
+          CIBW_BUILD: "cp38-* cp39-* cp310-* cp311-* cp312-*"
+          CIBW_SKIP: "*musllinux* *win32*"
+          CIBW_BUILD_VERBOSITY: 3
+          # Build the shared library before building each wheel
+          CIBW_BEFORE_BUILD_WINDOWS: |
+            cd {project}
+            set CGO_ENABLED=1
+            set CIBUILDWHEEL=1
+            go build -buildmode=c-shared -o python\spl_toolkit\libspl_toolkit.dll .\pkg\bindings
+            dir python\spl_toolkit\*.dll
+          CIBW_ENVIRONMENT_WINDOWS: |
+            CGO_ENABLED=1
+            CIBUILDWHEEL=1
+            PATH={project}\python\spl_toolkit;%PATH%
+          # Test that the wheel works
+          CIBW_TEST_COMMAND: |
+            python -c "import spl_toolkit; print('SPL Toolkit imported successfully')"
+        run: |
+          cd python
+          python -m cibuildwheel . --output-dir ../dist
 
-    - name: Build Windows wheels
-      if: runner.os == 'Windows'
-      env:
-        CIBW_BUILD: "cp38-* cp39-* cp310-* cp311-* cp312-*"
-        CIBW_SKIP: "*musllinux* *_universal2*"
-        CIBW_BUILD_VERBOSITY: 1
-        CIBW_ENVIRONMENT_WINDOWS: CGO_ENABLED=1
-      run: python -m cibuildwheel python --output-dir dist
-
-    - name: Upload wheel artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: python-wheels-${{ matrix.os }}
-        path: dist/*.whl
+      - name: Upload wheel artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-wheels-${{ matrix.os }}
+          path: dist/*.whl
 
   build:
     name: Build Artifacts
@@ -164,81 +227,76 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Set up Go
-      uses: actions/setup-go@v4
-      with:
-        go-version: ${{ env.GO_VERSION }}
-        
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ env.PYTHON_VERSION }}
-        
-    - name: Build all targets
-      run: make release-build
-      
-    - name: Upload build artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: build-artifacts-${{ matrix.os }}
-        path: dist/
-        retention-days: 30
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Build all targets
+        run: make release-build
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts-${{ matrix.os }}
+          path: dist/
+          retention-days: 30
 
   release:
     name: Create Release
     runs-on: ubuntu-latest
     needs: [build, build-python-wheels]
-    
+    if: startsWith(github.ref, 'refs/tags/v')
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Set up Go
-      uses: actions/setup-go@v4
-      with:
-        go-version: ${{ env.GO_VERSION }}
-        
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ env.PYTHON_VERSION }}
-        
-    - name: Build release artifacts
-      run: make release-build
-      
-    - name: Download wheel artifacts
-      uses: actions/download-artifact@v4
-      with:
-        name: python-wheels-ubuntu-latest
-        path: dist/
-    - uses: actions/download-artifact@v4
-      with:
-        name: python-wheels-macos-latest
-        path: dist/
-    - uses: actions/download-artifact@v4
-      with:
-        name: python-wheels-windows-latest
-        path: dist/
-        
-    - name: Create GitHub Release
-      uses: softprops/action-gh-release@v1
-      with:
-        files: dist/*
-        draft: false
-        prerelease: false
-        generate_release_notes: true
-      env:
-        GITHUB_TOKEN: ${{ secrets.RELEASE_MANAGER }}
-        
-    - name: Publish Python package to PyPI
-      uses: pypa/gh-action-pypi-publish@release/v1
-      with:
-        packages_dir: dist
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Build release artifacts
+        run: make release-build
+
+      - name: Download wheel artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: python-wheels-*
+          path: dist/
+          merge-multiple: true
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: dist/*
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE_MANAGER }}
+
+      - name: Publish Python package to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: dist/
+          skip-existing: true
 
   docker:
     name: Build and Push Docker Image
@@ -247,36 +305,36 @@ jobs:
     if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
     
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
-      
-    - name: Log in to Docker Hub
-      uses: docker/login-action@v3
-      with:
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
-        
-    - name: Extract metadata
-      id: meta
-      uses: docker/metadata-action@v5
-      with:
-        images: jmd862000/spl-toolkit
-        tags: |
-          type=ref,event=branch
-          type=ref,event=pr
-          type=semver,pattern={{version}}
-          type=semver,pattern={{major}}.{{minor}}
-          
-    - name: Build and push Docker image
-      uses: docker/build-push-action@v5
-      with:
-        context: .
-        platforms: linux/amd64,linux/arm64
-        push: true
-        tags: ${{ steps.meta.outputs.tags }}
-        labels: ${{ steps.meta.outputs.labels }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: jmd862000/spl-toolkit
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
