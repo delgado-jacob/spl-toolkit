@@ -29,11 +29,11 @@ else:
 def build_go_library():
     """Build the Go shared library"""
     print("Building Go shared library...")
-    
+
     # Change to the project root directory
     project_root = Path(__file__).parent.parent
     os.chdir(project_root)
-    
+
     # Build the shared library
     output_path = f"python/spl_toolkit/libspl_toolkit{SHARED_EXT}"
     cmd = [
@@ -42,10 +42,18 @@ def build_go_library():
         "-o", output_path,
         "./pkg/bindings",
     ]
-    
+
+    env = os.environ.copy()
+    # Ensure CGO is enabled for c-shared builds
+    env.setdefault("CGO_ENABLED", "1")
+
     try:
-        result = subprocess.run(cmd, check=True, capture_output=True, text=True)
-        print("Go library built successfully")
+        result = subprocess.run(cmd, check=True, capture_output=True, text=True, env=env)
+        # Verify output file exists
+        if not Path(output_path).exists():
+            print(f"Go build reported success but output not found: {output_path}")
+            return False
+        print("Go library built successfully:", output_path)
         return True
     except subprocess.CalledProcessError as e:
         print(f"Failed to build Go library: {e}")
@@ -70,6 +78,16 @@ except Exception as e:
     print("You may need to build it manually with: go build -buildmode=c-shared -o python/spl_toolkit/libspl_toolkit.so ./pkg/bindings")
 
 from wheel.bdist_wheel import bdist_wheel
+from setuptools.command.build_py import build_py as _build_py
+
+class build_py_go(_build_py):
+    def run(self):
+        # Build the Go shared library before packaging Python modules
+        require_build = os.environ.get("CIBUILDWHEEL") == "1" or os.environ.get("FORCE_BUILD_GO") == "1"
+        success = build_go_library()
+        if not success and require_build:
+            raise RuntimeError("Failed to build Go shared library during wheel build. See logs above.")
+        super().run()
 
 class bdist_wheel_plat(bdist_wheel):
     def finalize_options(self):
@@ -128,7 +146,8 @@ setup(
     include_package_data=True,
     zip_safe=False,  # Due to shared library
     cmdclass={
-        # Mark wheel as non-pure so it gets a platform tag
+        # Ensure Go library is built and mark wheel as non-pure
+        "build_py": build_py_go,
         "bdist_wheel": bdist_wheel_plat,
     },
     keywords="splunk spl query parser field mapping analysis",
