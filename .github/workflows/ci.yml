@@ -121,7 +121,7 @@ jobs:
         CIBW_SKIP: "*musllinux* *_universal2*"  # skip musl & universal2 (Go native)
         # Install Go inside manylinux container; add it to PATH after extraction
         CIBW_BEFORE_ALL_LINUX: |
-          curl -sSL https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz -o /tmp/go.tar.gz
+          curl -sSL https://go.dev/dl/go${{ env.GO_VERSION }}.linux-amd64.tar.gz -o /tmp/go.tar.gz
           tar -C /opt -xzf /tmp/go.tar.gz
         CIBW_ENVIRONMENT_LINUX: PATH=/opt/go/bin:$PATH
       run: python -m cibuildwheel python --output-dir dist
