@@ -126,7 +126,7 @@ jobs:
         CIBW_ENVIRONMENT_LINUX: PATH=/opt/go/bin:$PATH
         CIBW_ENVIRONMENT_MACOS: PATH=${{ env.PATH }}
         CIBW_ENVIRONMENT_WINDOWS: PATH="${Env:Path}"
-      run: python -m cibuildwheel --output-dir dist
+      run: python -m cibuildwheel python --output-dir dist
 
     - name: Upload wheel artifacts
       uses: actions/upload-artifact@v4

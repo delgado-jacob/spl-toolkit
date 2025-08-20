@@ -77,11 +77,11 @@ build-all: build build-shared ## Build both binary and shared library
 python-deps: ## Install Python development dependencies
 	$(PIP) install -r python/requirements-dev.txt
 
-python-build: build-shared ## Build Python package
+python-build: python-deps build-shared ## Build Python package
 	cd python && $(PYTHON) setup.py build_ext --inplace
 	cp $(BUILD_DIR)/$(SHARED_LIB_NAME)$(SHARED_EXT) python/spl_toolkit/
 
-python-test: python-build ## Run Python tests
+python-test: python-deps python-build ## Run Python tests
 	cd python && $(PYTHON) -m pytest tests/ -v
 
 python-install: python-build ## Install Python package locally
