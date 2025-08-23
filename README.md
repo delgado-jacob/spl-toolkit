@@ -159,7 +159,7 @@ go get github.com/delgado-jacob/spl-toolkit
 make docker-build
 
 # Run with Docker
-docker run --rm -v $(PWD):/workspace -w /workspace spl-toolkit:0.1.0 --help
+docker run --rm -v $(PWD):/workspace -w /workspace spl-toolkit:0.1.1 --help
 ```
 
 ### Requirements
@@ -175,7 +175,7 @@ docker run --rm -v $(PWD):/workspace -w /workspace spl-toolkit:0.1.0 --help
 
 ```json
 {
-  "version": "0.1.0",
+  "version": "0.1.1",
   "name": "Basic Field Mappings",
   "mappings": [
     {"source": "src_ip", "target": "source_ip"},
@@ -189,7 +189,7 @@ docker run --rm -v $(PWD):/workspace -w /workspace spl-toolkit:0.1.0 --help
 
 ```json
 {
-  "version": "0.1.0",
+  "version": "0.1.1",
   "name": "Web Server Logs",
   "mappings": [
     {"source": "ip", "target": "client_ip"}

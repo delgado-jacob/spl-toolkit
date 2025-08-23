@@ -9,7 +9,8 @@ import (
 	"github.com/delgado-jacob/spl-toolkit/pkg/mapper"
 )
 
-const Version = "0.1.0"
+// Version will be set at build time via ldflags
+var Version = "dev"
 
 func main() {
 	if len(os.Args) < 2 {

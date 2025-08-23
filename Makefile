@@ -14,6 +14,7 @@ GOFMT=gofmt
 
 # Binary names
 BINARY_NAME=spl-toolkit
+SERVER_BINARY_NAME=spl-toolkit-server
 SHARED_LIB_NAME=libspl_toolkit
 
 # Build directories
@@ -25,7 +26,7 @@ PYTHON=python3
 PIP=pip3
 
 # Version (can be overridden)
-VERSION?=0.1.0
+VERSION?=0.1.1
 
 # Operating system detection
 UNAME_S := $(shell uname -s)
@@ -66,13 +67,17 @@ test-coverage: test ## Run tests and show coverage
 
 build: deps lint ## Build the main binary
 	mkdir -p $(BUILD_DIR)
-	$(GOBUILD) -o $(BUILD_DIR)/$(BINARY_NAME) ./cmd
+	$(GOBUILD) -ldflags "-X main.Version=$(VERSION)" -o $(BUILD_DIR)/$(BINARY_NAME) ./cmd
+
+build-server: deps lint generate-docs ## Build the REST API server binary
+	mkdir -p $(BUILD_DIR)
+	$(GOBUILD) -ldflags "-X main.Version=$(VERSION)" -o $(BUILD_DIR)/$(SERVER_BINARY_NAME) ./cmd/server
 
 build-shared: deps lint ## Build shared library for Python bindings
 	mkdir -p $(BUILD_DIR)
 	$(GOBUILD) -buildmode=c-shared -o $(BUILD_DIR)/$(SHARED_LIB_NAME)$(SHARED_EXT) ./pkg/bindings
 
-build-all: build build-shared ## Build both binary and shared library
+build-all: build build-server build-shared ## Build CLI, server binary, and shared library
 
 python-deps: ## Install Python development dependencies
 	$(PIP) install -r python/requirements-dev.txt
@@ -95,8 +100,13 @@ python-sdist: ## Build Python source distribution
 
 python-dist: python-wheel python-sdist ## Build Python distribution packages
 
-install: build ## Install binary to /usr/local/bin
+install: build ## Install CLI binary to /usr/local/bin
 	sudo cp $(BUILD_DIR)/$(BINARY_NAME) /usr/local/bin/
+
+install-server: build-server ## Install server binary to /usr/local/bin
+	sudo cp $(BUILD_DIR)/$(SERVER_BINARY_NAME) /usr/local/bin/
+
+install-all: install install-server ## Install both CLI and server binaries
 
 clean: ## Clean build artifacts
 	$(GOCLEAN)
@@ -126,8 +136,9 @@ release-prep: clean deps test python-test ## Prepare for release
 
 release-build: release-prep build-all python-dist ## Build release artifacts
 	mkdir -p $(DIST_DIR)
-	# Copy Go binary
+	# Copy Go binaries
 	cp $(BUILD_DIR)/$(BINARY_NAME) $(DIST_DIR)/
+	cp $(BUILD_DIR)/$(SERVER_BINARY_NAME) $(DIST_DIR)/
 	cp $(BUILD_DIR)/$(SHARED_LIB_NAME)$(SHARED_EXT) $(DIST_DIR)/
 	# Copy Python distributions
 	cp python/dist/* $(DIST_DIR)/ 2>/dev/null || true
@@ -145,12 +156,25 @@ dev-test: test python-test ## Run all tests
 dev-watch: ## Watch for changes and run tests (requires entr)
 	find . -name "*.go" | entr -c make test
 
+# Server targets
+run-server: build-server ## Run the API server
+	$(BUILD_DIR)/$(SERVER_BINARY_NAME)
+
+test-server: build-server ## Test server endpoints
+	$(GOTEST) -v ./pkg/api/...
+
 # Docker targets (optional)
 docker-build: ## Build Docker image
 	docker build -t spl-toolkit:$(VERSION) .
 
+docker-build-server: ## Build Docker image for server
+	docker build -f Dockerfile.server -t spl-toolkit-server:$(VERSION) .
+
 docker-test: ## Test in Docker container
 	docker run --rm -v $(PWD):/workspace -w /workspace spl-toolkit:$(VERSION) make test
+
+docker-run-server: docker-build-server ## Run server in Docker container
+	docker run -p 8080:8080 spl-toolkit-server:$(VERSION)
 
 # Documentation targets
 docs: ## Generate documentation
@@ -167,7 +191,18 @@ bench: ## Run benchmarks
 security: ## Run security analysis
 	gosec ./...
 
+# OpenAPI generation
+generate-docs: ## Generate OpenAPI documentation
+	@if command -v $(HOME)/go/bin/swag >/dev/null 2>&1; then \
+		$(HOME)/go/bin/swag init --v3.1 -g cmd/server/main.go -o docs; \
+	else \
+		echo "swag not found. Installing..."; \
+		go install github.com/swaggo/swag/v2/cmd/swag@latest; \
+		$(HOME)/go/bin/swag init --v3.1 -g cmd/server/main.go -o docs; \
+	fi
+
 # Tools installation
 install-tools: ## Install development tools
 	$(GOCMD) install github.com/securego/gosec/v2/cmd/gosec@latest
 	$(GOCMD) install golang.org/x/tools/cmd/godoc@latest
+	$(GOCMD) install github.com/swaggo/swag/v2/cmd/swag@latest

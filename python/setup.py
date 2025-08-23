@@ -220,7 +220,7 @@ if "sdist" not in sys.argv:
 
 setup(
     name="spl-toolkit",
-    version="0.1.0",
+    version="0.1.1",
     author="SPL Toolkit Team",
     author_email="team@example.com",
     description="Python bindings for SPL Toolkit - programmatic SPL query analysis and manipulation",

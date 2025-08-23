@@ -13,7 +13,7 @@ SPL Toolkit uses JSON-based configuration files to define field mappings and con
 
 ```json
 {
-  "version": "0.1.0",
+  "version": "0.1.1",
   "name": "Configuration Name",
   "description": "Optional description of this configuration",
   "mappings": [...],
@@ -38,7 +38,7 @@ SPL Toolkit uses JSON-based configuration files to define field mappings and con
 
 ```json
 {
-  "version": "0.1.0",
+  "version": "0.1.1",
   "mappings": [
     {"source": "src_ip", "target": "source_ip"},
     {"source": "dst_ip", "target": "destination_ip"},
@@ -52,7 +52,7 @@ SPL Toolkit uses JSON-based configuration files to define field mappings and con
 
 ```json
 {
-  "version": "0.1.0",
+  "version": "0.1.1",
   "name": "Network Traffic Standardization",
   "description": "Standardizes network field names across different log sources",
   "mappings": [
@@ -167,7 +167,7 @@ Rules allow you to apply different mappings based on query context, such as sour
 
 ```json
 {
-  "version": "0.1.0",
+  "version": "0.1.1",
   "name": "Web Server Log Standardization",
   "description": "Normalizes field names across Apache, Nginx, and IIS logs",
   "mappings": [
@@ -387,7 +387,7 @@ The library validates:
 
 ```json
 {
-  "version": "0.1.0",
+  "version": "0.1.1",
   "name": "Network Security Events",
   "mappings": [
     {"source": "src_ip", "target": "source_ip"},
@@ -411,7 +411,7 @@ The library validates:
 
 ```json
 {
-  "version": "0.1.0", 
+  "version": "0.1.1", 
   "name": "Application Logging",
   "mappings": [
     {"source": "level", "target": "log_level"},

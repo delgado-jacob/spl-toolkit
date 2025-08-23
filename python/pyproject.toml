@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "spl-toolkit"
-version = "0.1.0"
+version = "0.1.1"
 description = "Python bindings for SPL Toolkit - programmatic SPL query analysis and manipulation"
 readme = "README.md"
 requires-python = ">=3.8"

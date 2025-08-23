@@ -70,7 +70,7 @@ from spl_toolkit import SPLMapper
 
 # Create mapper with basic configuration
 config = {
-    "version": "0.1.0",
+    "version": "0.1.1",
     "mappings": [
         {"source": "src_ip", "target": "source_ip"},
         {"source": "dst_ip", "target": "destination_ip"},
@@ -131,7 +131,7 @@ Apply different mappings based on conditions:
 
 ```python
 config = {
-    "version": "0.1.0",
+    "version": "0.1.1",
     "mappings": [
         # Default mappings
         {"source": "ip", "target": "client_ip"}
@@ -197,7 +197,7 @@ Use the command-line interface for scripting and automation:
 # Create a mapping configuration file
 cat > mappings.json << EOF
 {
-  "version": "0.1.0",
+  "version": "0.1.1",
   "mappings": [
     {"source": "src_ip", "target": "source_ip"},
     {"source": "dst_ip", "target": "destination_ip"}
@@ -228,7 +228,7 @@ EOF
 ```python
 # Common web server field mappings
 web_config = {
-    "version": "0.1.0",
+    "version": "0.1.1",
     "rules": [
         {
             "id": "web_logs",
@@ -255,7 +255,7 @@ web_config = {
 ```python
 # Network traffic field standardization
 network_config = {
-    "version": "0.1.0",
+    "version": "0.1.1",
     "mappings": [
         {"source": "src_ip", "target": "source_ip"},
         {"source": "srcip", "target": "source_ip"},
@@ -276,7 +276,7 @@ network_config = {
 ```python
 # Security event normalization
 security_config = {
-    "version": "0.1.0",
+    "version": "0.1.1",
     "rules": [
         {
             "id": "windows_security",
