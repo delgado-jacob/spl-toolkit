@@ -193,13 +193,9 @@ security: ## Run security analysis
 
 # OpenAPI generation
 generate-docs: ## Generate OpenAPI documentation
-	@if command -v $(HOME)/go/bin/swag >/dev/null 2>&1; then \
-		$(HOME)/go/bin/swag init --v3.1 -g cmd/server/main.go -o docs; \
-	else \
-		echo "swag not found. Installing..."; \
-		go install github.com/swaggo/swag/v2/cmd/swag@latest; \
-		$(HOME)/go/bin/swag init --v3.1 -g cmd/server/main.go -o docs; \
-	fi
+	@echo "Generating OpenAPI documentation..."
+	@go install github.com/swaggo/swag/v2/cmd/swag@latest
+	@go run github.com/swaggo/swag/v2/cmd/swag@latest init --v3.1 -g cmd/server/main.go -o docs
 
 # Tools installation
 install-tools: ## Install development tools
