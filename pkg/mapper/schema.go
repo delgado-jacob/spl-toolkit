@@ -3,6 +3,9 @@ package mapper
 import (
 	"encoding/json"
 	"fmt"
+	"reflect"
+	"regexp"
+	"sort"
 	"strings"
 )
 
@@ -96,10 +99,10 @@ func (mc *MappingConfig) Validate() ValidationResult {
 
 	// Validate basic mappings
 	for i, mapping := range mc.Mappings {
-		if mapping.Source == "" {
+		if strings.TrimSpace(mapping.Source) == "" {
 			errors = append(errors, fmt.Sprintf("mapping[%d]: source field is required", i))
 		}
-		if mapping.Target == "" {
+		if strings.TrimSpace(mapping.Target) == "" {
 			errors = append(errors, fmt.Sprintf("mapping[%d]: target field is required", i))
 		}
 	}
@@ -115,6 +118,14 @@ func (mc *MappingConfig) Validate() ValidationResult {
 		if len(rule.Mappings) == 0 {
 			errors = append(errors, fmt.Sprintf("rule[%d]: at least one mapping is required", i))
 		}
+		for j, mapping := range rule.Mappings {
+			if strings.TrimSpace(mapping.Source) == "" {
+				errors = append(errors, fmt.Sprintf("rule[%d].mapping[%d]: source field is required", i, j))
+			}
+			if strings.TrimSpace(mapping.Target) == "" {
+				errors = append(errors, fmt.Sprintf("rule[%d].mapping[%d]: target field is required", i, j))
+			}
+		}
 
 		// Validate conditions
 		for j, condition := range rule.Conditions {
@@ -124,14 +135,8 @@ func (mc *MappingConfig) Validate() ValidationResult {
 		}
 	}
 
-	// Validate datamodel mappings
-	for i, dm := range mc.DataModels {
-		if dm.SourceDataModel == "" {
-			errors = append(errors, fmt.Sprintf("datamodel[%d]: source_datamodel is required", i))
-		}
-		if dm.TargetDataModel == "" {
-			errors = append(errors, fmt.Sprintf("datamodel[%d]: target_datamodel is required", i))
-		}
+	if len(mc.DataModels) > 0 {
+		errors = append(errors, "datamodel rewrite mappings are not supported")
 	}
 
 	return ValidationResult{
@@ -141,40 +146,28 @@ func (mc *MappingConfig) Validate() ValidationResult {
 }
 
 func validateCondition(condition Condition) error {
-	validTypes := []string{"field_value", "field_exists", "sourcetype", "source", "combination"}
-	validOperators := []string{"equals", "contains", "regex", "exists", "not_exists", "and", "or"}
-
-	// Check type
-	isValidType := false
-	for _, vt := range validTypes {
-		if condition.Type == vt {
-			isValidType = true
-			break
-		}
-	}
-	if !isValidType {
-		return fmt.Errorf("invalid condition type: %s", condition.Type)
-	}
-
-	// Check operator if present
-	if condition.Operator != "" {
-		isValidOperator := false
-		for _, vo := range validOperators {
-			if condition.Operator == vo {
-				isValidOperator = true
-				break
-			}
-		}
-		if !isValidOperator {
-			return fmt.Errorf("invalid operator: %s", condition.Operator)
-		}
-	}
-
-	// Type-specific validation
 	switch condition.Type {
-	case "field_value", "field_exists":
-		if condition.Field == "" {
-			return fmt.Errorf("field is required for type %s", condition.Type)
+	case "field_exists":
+		if strings.TrimSpace(condition.Field) == "" {
+			return fmt.Errorf("field is required for type field_exists")
+		}
+		if condition.Operator != "exists" && condition.Operator != "not_exists" {
+			return fmt.Errorf("field_exists requires 'exists' or 'not_exists' operator")
+		}
+	case "field_value":
+		if strings.TrimSpace(condition.Field) == "" {
+			return fmt.Errorf("field is required for type field_value")
+		}
+		if err := validateValueOperator(condition.Operator, condition.Value); err != nil {
+			return err
+		}
+	case "source", "sourcetype":
+		expected, ok := condition.Value.(string)
+		if !ok {
+			return fmt.Errorf("%s requires a string value", condition.Type)
+		}
+		if err := validateStringOperator(condition.Operator, expected); err != nil {
+			return err
 		}
 	case "combination":
 		if len(condition.Children) < 2 {
@@ -189,9 +182,59 @@ func validateCondition(condition Condition) error {
 				return fmt.Errorf("child[%d]: %s", i, err.Error())
 			}
 		}
+	default:
+		return fmt.Errorf("invalid condition type: %s", condition.Type)
 	}
 
 	return nil
+}
+
+func validateValueOperator(operator string, value interface{}) error {
+	switch operator {
+	case "equals":
+		if !isScalar(value) {
+			return fmt.Errorf("equals requires a scalar value")
+		}
+		return nil
+	case "contains", "regex":
+		expected, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("%s requires a string value", operator)
+		}
+		return validateStringOperator(operator, expected)
+	default:
+		return fmt.Errorf("field_value requires 'equals', 'contains', or 'regex' operator")
+	}
+}
+
+func validateStringOperator(operator, expected string) error {
+	switch operator {
+	case "equals", "contains":
+		return nil
+	case "regex":
+		if _, err := regexp.Compile(expected); err != nil {
+			return fmt.Errorf("invalid regex: %w", err)
+		}
+		return nil
+	default:
+		return fmt.Errorf("requires 'equals', 'contains', or 'regex' operator")
+	}
+}
+
+func isScalar(value interface{}) bool {
+	if value == nil {
+		return true
+	}
+
+	switch reflect.TypeOf(value).Kind() {
+	case reflect.String, reflect.Bool,
+		reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
+		reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64,
+		reflect.Float32, reflect.Float64:
+		return true
+	default:
+		return false
+	}
 }
 
 // ToJSON serializes the mapping configuration to JSON
@@ -201,23 +244,24 @@ func (mc *MappingConfig) ToJSON() ([]byte, error) {
 
 // GetMappingsForConditions returns mappings that match the given conditions
 func (mc *MappingConfig) GetMappingsForConditions(conditions map[string]interface{}) []FieldMapping {
-	var result []FieldMapping
+	result := append([]FieldMapping(nil), mc.Mappings...)
+	result = append(result, mc.matchingRuleMappings(conditions)...)
+	return result
+}
 
-	// Add basic mappings
-	result = append(result, mc.Mappings...)
+func (mc *MappingConfig) matchingRuleMappings(context map[string]interface{}) []FieldMapping {
+	rules := append([]ConditionalRule(nil), mc.Rules...)
+	sort.SliceStable(rules, func(i, j int) bool {
+		return rules[i].Priority < rules[j].Priority
+	})
 
-	// Check conditional rules
-	for _, rule := range mc.Rules {
-		if !rule.Enabled {
-			continue
-		}
-
-		if mc.evaluateConditions(rule.Conditions, conditions) {
-			result = append(result, rule.Mappings...)
+	for _, rule := range rules {
+		if rule.Enabled && mc.evaluateConditions(rule.Conditions, context) {
+			return rule.Mappings
 		}
 	}
 
-	return result
+	return nil
 }
 
 func (mc *MappingConfig) evaluateConditions(conditions []Condition, context map[string]interface{}) bool {
@@ -243,13 +287,11 @@ func (mc *MappingConfig) evaluateCondition(condition Condition, context map[stri
 
 		switch condition.Operator {
 		case "equals":
-			return value == condition.Value
-		case "contains":
-			if str, ok := value.(string); ok {
-				if condStr, ok := condition.Value.(string); ok {
-					return strings.Contains(str, condStr)
-				}
-			}
+			return scalarEqual(value, condition.Value)
+		case "contains", "regex":
+			actual, actualOK := value.(string)
+			expected, expectedOK := condition.Value.(string)
+			return actualOK && expectedOK && matchString(actual, expected, condition.Operator)
 		}
 
 	case "sourcetype", "source":
@@ -258,37 +300,8 @@ func (mc *MappingConfig) evaluateCondition(condition Condition, context map[stri
 			return false
 		}
 
-		// Handle both single values and arrays (any-match semantics)
-		switch condition.Operator {
-		case "equals":
-			if arr, ok := value.([]string); ok {
-				// Array case - check if any element matches
-				for _, str := range arr {
-					if str == condition.Value {
-						return true
-					}
-				}
-				return false
-			}
-			// Single value case
-			return value == condition.Value
-		case "contains":
-			if condStr, ok := condition.Value.(string); ok {
-				if arr, ok := value.([]string); ok {
-					// Array case - check if any element contains the condition
-					for _, str := range arr {
-						if strings.Contains(str, condStr) {
-							return true
-						}
-					}
-					return false
-				}
-				// Single value case
-				if str, ok := value.(string); ok {
-					return strings.Contains(str, condStr)
-				}
-			}
-		}
+		expected, ok := condition.Value.(string)
+		return ok && matchStringValue(value, expected, condition.Operator)
 
 	case "combination":
 		if condition.Operator == "and" {
@@ -309,4 +322,42 @@ func (mc *MappingConfig) evaluateCondition(condition Condition, context map[stri
 	}
 
 	return false
+}
+
+func scalarEqual(actual, expected interface{}) bool {
+	return isScalar(actual) && isScalar(expected) && reflect.DeepEqual(actual, expected)
+}
+
+func matchStringValue(value interface{}, expected, operator string) bool {
+	switch actual := value.(type) {
+	case string:
+		return matchString(actual, expected, operator)
+	case []string:
+		for _, item := range actual {
+			if matchString(item, expected, operator) {
+				return true
+			}
+		}
+	case []interface{}:
+		for _, item := range actual {
+			if str, ok := item.(string); ok && matchString(str, expected, operator) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func matchString(actual, expected, operator string) bool {
+	switch operator {
+	case "equals":
+		return actual == expected
+	case "contains":
+		return strings.Contains(actual, expected)
+	case "regex":
+		pattern, err := regexp.Compile(expected)
+		return err == nil && pattern.MatchString(actual)
+	default:
+		return false
+	}
 }
