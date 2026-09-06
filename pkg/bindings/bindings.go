@@ -2,7 +2,6 @@ package main
 
 /*
 #include <stdlib.h>
-#include <string.h>
 
 typedef struct {
     char* error;
@@ -27,21 +26,6 @@ typedef struct {
     char* error;
 } SPLQueryInfo;
 
-static char* allocate_string(const char* str) {
-    if (str == NULL) return NULL;
-    size_t len = strlen(str) + 1;
-    char* result = malloc(len);
-    if (result) {
-        strcpy(result, str);
-    }
-    return result;
-}
-
-static char** allocate_string_array(int count) {
-    if (count <= 0) return NULL;
-    return (char**)malloc(count * sizeof(char*));
-}
-
 static void free_string_array(char** arr, int count) {
     if (arr == NULL) return;
     for (int i = 0; i < count; i++) {
@@ -54,21 +38,33 @@ import "C"
 
 import (
 	"encoding/json"
+	"runtime"
 	"unsafe"
 
 	"github.com/delgado-jacob/spl-toolkit/pkg/mapper"
 )
 
-// Global mapper instances (in practice, you'd want better memory management)
-var mappers = make(map[int]*mapper.Mapper)
-var nextMapperID = 1
+var registry = newMapperRegistry()
+
+func cStrings(values []string) **C.char {
+	if len(values) == 0 {
+		return nil
+	}
+	base := (**C.char)(C.malloc(C.size_t(len(values)) * C.size_t(unsafe.Sizeof(uintptr(0)))))
+	items := unsafe.Slice(base, len(values))
+	for i, value := range values {
+		items[i] = C.CString(value)
+	}
+	return base
+}
 
 //export spl_mapper_new
 func spl_mapper_new() C.int {
 	m := mapper.New()
-	id := nextMapperID
-	mappers[id] = m
-	nextMapperID++
+	id, ok := registry.add(m)
+	if !ok {
+		return -1
+	}
 	return C.int(id)
 }
 
@@ -82,23 +78,25 @@ func spl_mapper_new_with_config(configJSON *C.char) C.int {
 	}
 
 	m := mapper.NewWithConfig(config)
-	id := nextMapperID
-	mappers[id] = m
-	nextMapperID++
+	id, ok := registry.add(m)
+	if !ok {
+		return -1
+	}
 	return C.int(id)
 }
 
 //export spl_mapper_free
 func spl_mapper_free(mapperID C.int) {
-	delete(mappers, int(mapperID))
+	registry.remove(int(mapperID))
 }
 
 //export spl_mapper_load_mappings
 func spl_mapper_load_mappings(mapperID C.int, mappingsJSON *C.char) *C.char {
-	m, exists := mappers[int(mapperID)]
+	m, exists := registry.get(int(mapperID))
 	if !exists {
 		return C.CString("Mapper not found")
 	}
+	defer runtime.KeepAlive(m)
 
 	jsonStr := C.GoString(mappingsJSON)
 	err := m.LoadMappings([]byte(jsonStr))
@@ -115,11 +113,12 @@ func spl_mapper_map_query(mapperID C.int, query *C.char) *C.SPLResult {
 	result.error = nil
 	result.result = nil
 
-	m, exists := mappers[int(mapperID)]
+	m, exists := registry.get(int(mapperID))
 	if !exists {
 		result.error = C.CString("Mapper not found")
 		return result
 	}
+	defer runtime.KeepAlive(m)
 
 	queryStr := C.GoString(query)
 	mappedQuery, err := m.MapQuery(queryStr)
@@ -138,11 +137,12 @@ func spl_mapper_map_query_with_context(mapperID C.int, query *C.char, contextJSO
 	result.error = nil
 	result.result = nil
 
-	m, exists := mappers[int(mapperID)]
+	m, exists := registry.get(int(mapperID))
 	if !exists {
 		result.error = C.CString("Mapper not found")
 		return result
 	}
+	defer runtime.KeepAlive(m)
 
 	queryStr := C.GoString(query)
 	contextStr := C.GoString(contextJSON)
@@ -184,11 +184,12 @@ func spl_mapper_discover_query(mapperID C.int, query *C.char) *C.SPLQueryInfo {
 	result.input_fields_count = 0
 	result.error = nil
 
-	m, exists := mappers[int(mapperID)]
+	m, exists := registry.get(int(mapperID))
 	if !exists {
 		result.error = C.CString("Mapper not found")
 		return result
 	}
+	defer runtime.KeepAlive(m)
 
 	queryStr := C.GoString(query)
 	info, err := m.DiscoverQuery(queryStr)
@@ -197,64 +198,27 @@ func spl_mapper_discover_query(mapperID C.int, query *C.char) *C.SPLQueryInfo {
 		return result
 	}
 
-	// Convert Go slices to C arrays
 	result.data_models_count = C.int(len(info.DataModels))
-	if len(info.DataModels) > 0 {
-		result.data_models = C.allocate_string_array(result.data_models_count)
-		for i, dm := range info.DataModels {
-			result.data_models = (**C.char)(unsafe.Pointer(uintptr(unsafe.Pointer(result.data_models)) + uintptr(i)*unsafe.Sizeof(*result.data_models)))
-			*result.data_models = C.allocate_string(C.CString(dm))
-		}
-		// Reset pointer to beginning
-		result.data_models = (**C.char)(unsafe.Pointer(uintptr(unsafe.Pointer(result.data_models)) - uintptr(len(info.DataModels)-1)*unsafe.Sizeof(*result.data_models)))
-	}
-
+	result.data_models = cStrings(info.DataModels)
 	result.datasets_count = C.int(len(info.Datasets))
-	if len(info.Datasets) > 0 {
-		result.datasets = C.allocate_string_array(result.datasets_count)
-		for i, ds := range info.Datasets {
-			dsPtr := (**C.char)(unsafe.Pointer(uintptr(unsafe.Pointer(result.datasets)) + uintptr(i)*unsafe.Sizeof(*result.datasets)))
-			*dsPtr = C.allocate_string(C.CString(ds))
-		}
-	}
-
+	result.datasets = cStrings(info.Datasets)
 	result.lookups_count = C.int(len(info.Lookups))
-	if len(info.Lookups) > 0 {
-		result.lookups = C.allocate_string_array(result.lookups_count)
-		for i, lookup := range info.Lookups {
-			lookupPtr := (**C.char)(unsafe.Pointer(uintptr(unsafe.Pointer(result.lookups)) + uintptr(i)*unsafe.Sizeof(*result.lookups)))
-			*lookupPtr = C.allocate_string(C.CString(lookup))
-		}
-	}
-
-	result.source_types_count = C.int(len(info.SourceTypes))
-	if len(info.SourceTypes) > 0 {
-		result.source_types = C.allocate_string_array(result.source_types_count)
-		for i, st := range info.SourceTypes {
-			stPtr := (**C.char)(unsafe.Pointer(uintptr(unsafe.Pointer(result.source_types)) + uintptr(i)*unsafe.Sizeof(*result.source_types)))
-			*stPtr = C.allocate_string(C.CString(st))
-		}
-	}
-
+	result.lookups = cStrings(info.Lookups)
+	result.macros_count = C.int(len(info.Macros))
+	result.macros = cStrings(info.Macros)
 	result.sources_count = C.int(len(info.Sources))
-	if len(info.Sources) > 0 {
-		result.sources = C.allocate_string_array(result.sources_count)
-		for i, src := range info.Sources {
-			srcPtr := (**C.char)(unsafe.Pointer(uintptr(unsafe.Pointer(result.sources)) + uintptr(i)*unsafe.Sizeof(*result.sources)))
-			*srcPtr = C.allocate_string(C.CString(src))
-		}
-	}
-
+	result.sources = cStrings(info.Sources)
+	result.source_types_count = C.int(len(info.SourceTypes))
+	result.source_types = cStrings(info.SourceTypes)
 	result.input_fields_count = C.int(len(info.InputFields))
-	if len(info.InputFields) > 0 {
-		result.input_fields = C.allocate_string_array(result.input_fields_count)
-		for i, field := range info.InputFields {
-			fieldPtr := (**C.char)(unsafe.Pointer(uintptr(unsafe.Pointer(result.input_fields)) + uintptr(i)*unsafe.Sizeof(*result.input_fields)))
-			*fieldPtr = C.allocate_string(C.CString(field))
-		}
-	}
+	result.input_fields = cStrings(info.InputFields)
 
 	return result
+}
+
+//export spl_string_free
+func spl_string_free(value *C.char) {
+	C.free(unsafe.Pointer(value))
 }
 
 //export spl_result_free

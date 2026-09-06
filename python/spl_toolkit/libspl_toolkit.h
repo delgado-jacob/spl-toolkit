@@ -12,6 +12,8 @@
 
 #ifndef GO_CGO_GOSTRING_TYPEDEF
 typedef struct { const char *p; ptrdiff_t n; } _GoString_;
+extern size_t _GoStringLen(_GoString_ s);
+extern const char *_GoStringPtr(_GoString_ s);
 #endif
 
 #endif
@@ -22,7 +24,6 @@ typedef struct { const char *p; ptrdiff_t n; } _GoString_;
 #line 3 "bindings.go"
 
 #include <stdlib.h>
-#include <string.h>
 
 typedef struct {
     char* error;
@@ -46,21 +47,6 @@ typedef struct {
     int input_fields_count;
     char* error;
 } SPLQueryInfo;
-
-static char* allocate_string(const char* str) {
-    if (str == NULL) return NULL;
-    size_t len = strlen(str) + 1;
-    char* result = malloc(len);
-    if (result) {
-        strcpy(result, str);
-    }
-    return result;
-}
-
-static char** allocate_string_array(int count) {
-    if (count <= 0) return NULL;
-    return (char**)malloc(count * sizeof(char*));
-}
 
 static void free_string_array(char** arr, int count) {
     if (arr == NULL) return;
@@ -96,9 +82,15 @@ typedef size_t GoUintptr;
 typedef float GoFloat32;
 typedef double GoFloat64;
 #ifdef _MSC_VER
+#if !defined(__cplusplus) || _MSVC_LANG <= 201402L
 #include <complex.h>
 typedef _Fcomplex GoComplex64;
 typedef _Dcomplex GoComplex128;
+#else
+#include <complex>
+typedef std::complex<float> GoComplex64;
+typedef std::complex<double> GoComplex128;
+#endif
 #else
 typedef float _Complex GoComplex64;
 typedef double _Complex GoComplex128;
@@ -126,13 +118,14 @@ typedef struct { void *data; GoInt len; GoInt cap; } GoSlice;
 extern "C" {
 #endif
 
-extern int spl_mapper_new();
+extern int spl_mapper_new(void);
 extern int spl_mapper_new_with_config(char* configJSON);
 extern void spl_mapper_free(int mapperID);
 extern char* spl_mapper_load_mappings(int mapperID, char* mappingsJSON);
 extern SPLResult* spl_mapper_map_query(int mapperID, char* query);
 extern SPLResult* spl_mapper_map_query_with_context(int mapperID, char* query, char* contextJSON);
 extern SPLQueryInfo* spl_mapper_discover_query(int mapperID, char* query);
+extern void spl_string_free(char* value);
 extern void spl_result_free(SPLResult* result);
 extern void spl_query_info_free(SPLQueryInfo* info);
 
