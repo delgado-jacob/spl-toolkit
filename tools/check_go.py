@@ -54,8 +54,14 @@ def main() -> int:
     if packages_result.returncode:
         return packages_result.returncode
     packages = packages_result.stdout.splitlines()
-    generated_suffixes = tuple(f"/{name}" for name in sorted(GENERATED_DIRECTORIES | {"docs"}))
-    generated_packages = [name for name in packages if name.endswith(generated_suffixes)]
+    module_result = command(["go", "list", "-mod=readonly", "-m"], capture=True)
+    if module_result.returncode:
+        return module_result.returncode
+    module = module_result.stdout.strip()
+    generated_package_names = {
+        f"{module}/{name}" for name in GENERATED_DIRECTORIES | {"docs"}
+    }
+    generated_packages = [name for name in packages if name in generated_package_names]
     handwritten_packages = [name for name in packages if name not in generated_packages]
 
     if generated_packages:
@@ -67,7 +73,7 @@ def main() -> int:
         )
 
     if handwritten_packages:
-        vet = command(["go", "vet", *handwritten_packages])
+        vet = command(["go", "vet", "-mod=readonly", *handwritten_packages])
         if vet.returncode:
             return vet.returncode
 

@@ -121,6 +121,71 @@ class GoCheckTests(unittest.TestCase):
 
         self.assertEqual(result.returncode, 0, result.stdout)
 
+    def test_lint_does_not_write_missing_test_dependency_checksums(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            init_repository(
+                root,
+                {
+                    "go.mod": (
+                        "module example.invalid/check\n\n"
+                        "go 1.22\n\n"
+                        "require github.com/pkg/errors v0.9.1\n"
+                    ),
+                    "main.go": "package check\n",
+                    "main_test.go": (
+                        "package check\n\n"
+                        "import (\n"
+                        '\t"testing"\n\n'
+                        '\t"github.com/pkg/errors"\n'
+                        ")\n\n"
+                        "func TestDependency(t *testing.T) {\n"
+                        '\tif errors.New("sentinel") == nil {\n'
+                        '\t\tt.Fatal("expected an error")\n'
+                        "\t}\n"
+                        "}\n"
+                    ),
+                },
+            )
+            go_mod_before = (root / "go.mod").read_bytes()
+
+            result = run(
+                sys.executable,
+                str(TOOLS / "check_go.py"),
+                cwd=root,
+                env={**os.environ, "GOFLAGS": "-mod=mod", "GOTOOLCHAIN": "local"},
+            )
+
+            self.assertEqual((root / "go.mod").read_bytes(), go_mod_before)
+            self.assertFalse((root / "go.sum").exists(), result.stdout)
+        self.assertNotEqual(result.returncode, 0, result.stdout)
+
+    def test_vets_nested_handwritten_package_named_parser(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            init_repository(
+                root,
+                {
+                    "go.mod": "module example.invalid/check\n\ngo 1.22\n",
+                    "main.go": "package check\n",
+                    "internal/parser/value.go": (
+                        "package parser\n\n"
+                        "type Value struct {\n"
+                        '\tField string `json:"field`\n'
+                        "}\n"
+                    ),
+                },
+            )
+
+            result = run(
+                sys.executable,
+                str(TOOLS / "check_go.py"),
+                cwd=root,
+                env={**os.environ, "GOTOOLCHAIN": "local"},
+            )
+
+        self.assertNotEqual(result.returncode, 0, result.stdout)
+
 
 if __name__ == "__main__":
     unittest.main()
