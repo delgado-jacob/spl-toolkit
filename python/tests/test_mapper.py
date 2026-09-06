@@ -5,6 +5,7 @@ Tests for SPL Toolkit Python bindings
 import pytest
 import json
 import ctypes
+import threading
 from unittest.mock import patch, MagicMock
 
 # For testing without the actual shared library
@@ -13,7 +14,11 @@ import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
 from spl_toolkit import SPLMapper, QueryInfo, SPLMapperError
-from spl_toolkit.exceptions import ParseError, ConfigurationError
+from spl_toolkit.exceptions import ParseError, ConfigurationError, MapperNotFoundError
+from spl_toolkit.mapper import SPLResult
+
+
+MOCK_LIBRARY = "/mock/libspl_toolkit.dylib"
 
 
 class TestSPLMapper:
@@ -22,8 +27,9 @@ class TestSPLMapper:
     def test_init_without_config(self):
         """Test initializing mapper without configuration"""
         # Since the shared library exists and works, this should succeed
-        mapper = SPLMapper()
+        mapper = SPLMapper(library_path=os.environ["SPL_NATIVE_LIBRARY"])
         assert mapper is not None
+        mapper.close()
     
     def test_init_with_config(self):
         """Test initializing mapper with configuration"""
@@ -35,8 +41,9 @@ class TestSPLMapper:
         }
         
         # Since the shared library exists and works, this should succeed
-        mapper = SPLMapper(config=config)
+        mapper = SPLMapper(config=config, library_path=os.environ["SPL_NATIVE_LIBRARY"])
         assert mapper is not None
+        mapper.close()
     
     def test_load_mappings(self):
         """Test loading field mappings"""
@@ -52,11 +59,27 @@ class TestSPLMapper:
             mock_lib.spl_mapper_new.return_value = 1
             mock_lib.spl_mapper_load_mappings.return_value = None  # Success
             
-            mapper = SPLMapper()
+            mapper = SPLMapper(library_path=MOCK_LIBRARY)
             mapper.load_mappings(mappings)
             
             # Verify the function was called
             mock_lib.spl_mapper_load_mappings.assert_called_once()
+
+    def test_load_mappings_copies_and_frees_native_error(self):
+        with patch("ctypes.CDLL") as mock_cdll:
+            mock_lib = MagicMock()
+            mock_cdll.return_value = mock_lib
+            mock_lib.spl_mapper_new.return_value = 1
+            native_error = ctypes.create_string_buffer(b"invalid source")
+            error_pointer = ctypes.cast(native_error, ctypes.c_void_p).value
+            mock_lib.spl_mapper_load_mappings.return_value = error_pointer
+
+            mapper = SPLMapper(library_path=MOCK_LIBRARY)
+            with pytest.raises(ConfigurationError, match="invalid source"):
+                mapper.load_mappings([{"source": 1, "target": "bad"}])
+
+            mock_lib.spl_string_free.assert_called_once_with(error_pointer)
+            mapper.close()
     
     def test_map_query(self):
         """Test mapping a SPL query"""
@@ -75,7 +98,7 @@ class TestSPLMapper:
             mock_result_ptr.contents = mock_result
             mock_lib.spl_mapper_map_query.return_value = mock_result_ptr
             
-            mapper = SPLMapper()
+            mapper = SPLMapper(library_path=MOCK_LIBRARY)
             result = mapper.map_query("search src_ip=192.168.1.1")
             
             assert result == "search source_ip=192.168.1.1"
@@ -96,7 +119,7 @@ class TestSPLMapper:
             mock_result_ptr.contents = mock_result
             mock_lib.spl_mapper_map_query.return_value = mock_result_ptr
             
-            mapper = SPLMapper()
+            mapper = SPLMapper(library_path=MOCK_LIBRARY)
             
             with pytest.raises(ParseError):
                 mapper.map_query("invalid query")
@@ -130,7 +153,7 @@ class TestSPLMapper:
             mock_result_ptr.contents = mock_result
             mock_lib.spl_mapper_discover_query.return_value = mock_result_ptr
             
-            mapper = SPLMapper()
+            mapper = SPLMapper(library_path=MOCK_LIBRARY)
             info = mapper.discover_query("search sourcetype=access_combined src_ip=192.168.1.1")
             
             assert isinstance(info, QueryInfo)
@@ -138,6 +161,83 @@ class TestSPLMapper:
             assert "access_combined" in info.source_types
             assert "src_ip" in info.input_fields
             assert "dst_port" in info.input_fields
+
+    def test_load_failure_is_configuration_error_and_finalizer_is_safe(self):
+        with patch("ctypes.CDLL", side_effect=OSError("not a native library")):
+            with pytest.raises(ConfigurationError, match="Failed to load library"):
+                SPLMapper(library_path=MOCK_LIBRARY)
+
+    def test_default_lookup_checks_only_package_directory(self):
+        with patch("os.path.exists", return_value=False) as exists:
+            with pytest.raises(ConfigurationError, match="Could not find"):
+                SPLMapper()
+
+        checked = [call.args[0] for call in exists.call_args_list]
+        package_dir = os.path.dirname(os.path.abspath(sys.modules["spl_toolkit.mapper"].__file__))
+        assert checked
+        assert all(os.path.dirname(path) == package_dir for path in checked)
+
+    def test_concurrent_close_waits_and_frees_once(self):
+        entered = threading.Event()
+        release = threading.Event()
+
+        with patch("ctypes.CDLL") as mock_cdll:
+            mock_lib = MagicMock()
+            mock_cdll.return_value = mock_lib
+            mock_lib.spl_mapper_new.return_value = 7
+
+            def blocking_map(_handle, _query):
+                entered.set()
+                assert release.wait(timeout=5)
+                result = SPLResult(error=None, result=b"search source_ip=1")
+                pointer = ctypes.pointer(result)
+                pointer._result_owner = result
+                return pointer
+
+            mock_lib.spl_mapper_map_query.side_effect = blocking_map
+            mapper = SPLMapper(library_path=MOCK_LIBRARY)
+            operation_errors = []
+
+            def run_operation():
+                try:
+                    mapper.map_query("search src_ip=1")
+                except Exception as error:
+                    operation_errors.append(error)
+
+            operation = threading.Thread(target=run_operation)
+            operation.start()
+            assert entered.wait(timeout=5)
+
+            closers = [threading.Thread(target=mapper.close) for _ in range(3)]
+            for closer in closers:
+                closer.start()
+
+            with mapper._condition:
+                assert mapper._condition.wait_for(lambda: mapper._closing, timeout=5)
+
+            with pytest.raises(MapperNotFoundError, match="closed"):
+                mapper.discover_query("search src_ip=1")
+
+            release.set()
+            operation.join(timeout=5)
+            for closer in closers:
+                closer.join(timeout=5)
+
+            assert not operation.is_alive()
+            assert all(not closer.is_alive() for closer in closers)
+            assert operation_errors == []
+            mock_lib.spl_mapper_free.assert_called_once_with(7)
+
+    def test_context_manager_rejects_closed_mapper(self):
+        with patch("ctypes.CDLL") as mock_cdll:
+            mock_lib = MagicMock()
+            mock_cdll.return_value = mock_lib
+            mock_lib.spl_mapper_new.return_value = 3
+            mapper = SPLMapper(library_path=MOCK_LIBRARY)
+            mapper.close()
+
+            with pytest.raises(MapperNotFoundError, match="closed"):
+                mapper.__enter__()
 
 
 class TestQueryInfo:
