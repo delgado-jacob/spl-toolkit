@@ -1,0 +1,139 @@
+{
+  "version": "1",
+  "cases": [
+    {
+      "id": "basic-map",
+      "query": "search src_ip=1",
+      "config": {
+        "version": "1.0",
+        "mappings": [{"source": "src_ip", "target": "source_ip"}]
+      },
+      "mapped": "search source_ip=1"
+    },
+    {
+      "id": "macros",
+      "query": "`get_data` | eval result=`calculate_score(field1, field2)` | where result>10",
+      "discovery": {
+        "datamodels": [],
+        "datasets": [],
+        "lookups": [],
+        "macros": ["get_data", "calculate_score"],
+        "sources": [],
+        "sourcetypes": [],
+        "input_fields": []
+      }
+    },
+    {
+      "id": "three-models",
+      "query": "| tstats count from datamodel=Web by Web.status | tstats count from datamodel=Authentication by Authentication.user | tstats count from datamodel=Network_Traffic by Network_Traffic.src_ip",
+      "discovery": {
+        "datamodels": ["Web", "Authentication", "Network_Traffic"],
+        "datasets": [],
+        "lookups": [],
+        "macros": [],
+        "sources": [],
+        "sourcetypes": [],
+        "input_fields": ["Web.status", "Authentication.user", "Network_Traffic.src_ip"]
+      }
+    },
+    {
+      "id": "source-sourcetype",
+      "query": "search sourcetype=web source=access.log src_ip=1",
+      "discovery": {
+        "datamodels": [],
+        "datasets": [],
+        "lookups": [],
+        "macros": [],
+        "sources": ["access.log"],
+        "sourcetypes": ["web"],
+        "input_fields": ["sourcetype", "source", "src_ip"]
+      }
+    },
+    {
+      "id": "lookup",
+      "query": "| inputlookup ip_geo_lookup.csv | search country=US",
+      "discovery": {
+        "datamodels": [],
+        "datasets": [],
+        "lookups": ["ip_geo_lookup"],
+        "macros": [],
+        "sources": [],
+        "sourcetypes": [],
+        "input_fields": ["country"]
+      }
+    },
+    {
+      "id": "first-match",
+      "query": "search src_ip=1 dst_ip=2",
+      "context": {"source": "web"},
+      "config": {
+        "version": "1.0",
+        "mappings": [
+          {"source": "src_ip", "target": "base_source_ip"},
+          {"source": "dst_ip", "target": "destination_ip"}
+        ],
+        "rules": [
+          {
+            "id": "later",
+            "enabled": true,
+            "priority": 20,
+            "conditions": [{"type": "source", "operator": "equals", "value": "web"}],
+            "mappings": [{"source": "src_ip", "target": "later_ip"}]
+          },
+          {
+            "id": "winner",
+            "enabled": true,
+            "priority": 1,
+            "conditions": [{"type": "source", "operator": "equals", "value": "web"}],
+            "mappings": [{"source": "src_ip", "target": "source_ip"}]
+          },
+          {
+            "id": "stable-tie",
+            "enabled": true,
+            "priority": 1,
+            "conditions": [{"type": "source", "operator": "equals", "value": "web"}],
+            "mappings": [{"source": "src_ip", "target": "tie_ip"}]
+          }
+        ]
+      },
+      "mapped": "search source_ip=1 destination_ip=2"
+    },
+    {
+      "id": "json-array-context",
+      "query": "search src_ip=1",
+      "context": {"sourcetype": ["mail", "web"]},
+      "config": {
+        "version": "1.0",
+        "mappings": [{"source": "src_ip", "target": "base_ip"}],
+        "rules": [
+          {
+            "id": "web",
+            "enabled": true,
+            "priority": 1,
+            "conditions": [{"type": "sourcetype", "operator": "equals", "value": "web"}],
+            "mappings": [{"source": "src_ip", "target": "source_ip"}]
+          }
+        ]
+      },
+      "mapped": "search source_ip=1"
+    },
+    {
+      "id": "automatic-query-context",
+      "query": "search sourcetype=web src_ip=1",
+      "config": {
+        "version": "1.0",
+        "mappings": [{"source": "src_ip", "target": "base_ip"}],
+        "rules": [
+          {
+            "id": "web",
+            "enabled": true,
+            "priority": 1,
+            "conditions": [{"type": "sourcetype", "operator": "equals", "value": "web"}],
+            "mappings": [{"source": "src_ip", "target": "source_ip"}]
+          }
+        ]
+      },
+      "mapped": "search sourcetype=web source_ip=1"
+    }
+  ]
+}

@@ -96,6 +96,10 @@ def install_and_check(
     outside_checkout: Path,
     expected_version: str,
     requirements: Path,
+    cli: Path,
+    server: Path,
+    fixture_source: Path,
+    docs_root: Path,
 ) -> None:
     python = create_test_environment(directory)
     env = clean_env()
@@ -118,6 +122,42 @@ def install_and_check(
     installed_test_dir = outside_checkout / f"tests-{directory.name}"
     shutil.copytree(Path(__file__).resolve().parents[1] / "python" / "tests", installed_test_dir)
     run([str(python), "-I", "-m", "pytest", str(installed_test_dir), "-q"], cwd=outside_checkout, env=install_env)
+
+    acceptance_dir = outside_checkout / f"acceptance-{directory.name}"
+    shutil.copytree(Path(__file__).resolve().parents[1] / "tests" / "acceptance", acceptance_dir)
+    fixture = outside_checkout / f"cases-{directory.name}.json"
+    shutil.copy2(fixture_source, fixture)
+    acceptance_env = install_env | {
+        "SPL_CLI": str(cli.resolve()),
+        "SPL_SERVER": str(server.resolve()),
+        "SPL_FIXTURES": str(fixture.resolve()),
+        "SPL_DOCS_ROOT": str(docs_root.resolve()),
+    }
+    run(
+        [str(python), "-I", "-m", "pytest", str(acceptance_dir), "-q"],
+        cwd=outside_checkout,
+        env=acceptance_env,
+    )
+
+
+def build_surface_binaries(root: Path, output: Path, version: str) -> tuple[Path, Path]:
+    output.mkdir()
+    suffix = ".exe" if os.name == "nt" else ""
+    cli = output / f"spl-toolkit{suffix}"
+    server = output / f"spl-toolkit-server{suffix}"
+    ldflags = f"-X=github.com/delgado-jacob/spl-toolkit/internal/buildinfo.Version={version}"
+    env = clean_env() | {"GOTOOLCHAIN": "local"}
+    run(
+        ["go", "build", "-mod=readonly", "-trimpath", "-ldflags", ldflags, "-o", str(cli), "./cmd"],
+        cwd=root,
+        env=env,
+    )
+    run(
+        ["go", "build", "-mod=readonly", "-trimpath", "-ldflags", ldflags, "-o", str(server), "./cmd/server"],
+        cwd=root,
+        env=env,
+    )
+    return cli, server
 
 
 def inspect_wheel(wheel: Path, expected_version: str) -> None:
@@ -274,14 +314,22 @@ def check_package(sdist: Path, wheel_dir: Path, expected_version: str | None) ->
         outside = temp / "outside"
         outside.mkdir()
         requirements = root / "python" / "requirements-dev.txt"
-        install_and_check(wheel, temp / "wheel-venv", outside, version, requirements)
+        cli, server = build_surface_binaries(root, temp / "surface-binaries", version)
+        fixture = root / "testdata" / "baseline" / "cases.json"
+        install_and_check(
+            wheel, temp / "wheel-venv", outside, version, requirements,
+            cli, server, fixture, root,
+        )
 
         source = unpack_sdist(sdist, temp / "sdist")
         inspect_sdist(source)
         check_metadata_without_compiler(source, temp / "metadata", clean_env())
         source_wheel = build_sdist_wheel(source, temp / "sdist-wheel", clean_env())
         inspect_wheel(source_wheel, version)
-        install_and_check(source_wheel, temp / "sdist-venv", outside, version, source / "requirements-dev.txt")
+        install_and_check(
+            source_wheel, temp / "sdist-venv", outside, version,
+            source / "requirements-dev.txt", cli, server, fixture, root,
+        )
         check_missing_compiler(source, temp / "failed-wheel", clean_env())
 
     after = git_status(root)

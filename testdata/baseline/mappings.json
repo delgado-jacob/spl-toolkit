@@ -1,0 +1,6 @@
+{
+  "version": "1.0",
+  "mappings": [
+    {"source": "src_ip", "target": "source_ip"}
+  ]
+}

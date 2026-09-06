@@ -1,0 +1,56 @@
+{
+  "version": "1",
+  "cases": [
+    {
+      "id": "map-basic",
+      "argv": ["{cli}", "map", "--config", "{tmp}/mappings.json", "--query", "search src_ip=1"],
+      "exit": 0,
+      "stdout": "search source_ip=1\n",
+      "files": [{"path": "{tmp}/mappings.json", "content": "{\"version\":\"1.0\",\"mappings\":[{\"source\":\"src_ip\",\"target\":\"source_ip\"}]}\n"}]
+    },
+    {
+      "id": "discover-json",
+      "argv": ["{cli}", "discover", "--query", "search sourcetype=web src_ip=1", "--format", "json"],
+      "exit": 0,
+      "stdout": "{\"datamodels\":[],\"datasets\":[],\"lookups\":[],\"macros\":[],\"sources\":[],\"sourcetypes\":[\"web\"],\"input_fields\":[\"sourcetype\",\"src_ip\"]}\n"
+    },
+    {
+      "id": "validate-query-text",
+      "argv": ["{cli}", "validate", "--query", "search src_ip=1"],
+      "exit": 0,
+      "stdout": "Valid\n"
+    },
+    {
+      "id": "validate-config-json",
+      "argv": ["{cli}", "validate", "--config", "{tmp}/mappings.json", "--format", "json"],
+      "exit": 0,
+      "stdout": "{\"target\":\"configuration\",\"valid\":true}\n",
+      "files": [{"path": "{tmp}/mappings.json", "content": "{\"version\":\"1.0\",\"mappings\":[{\"source\":\"src_ip\",\"target\":\"source_ip\"}]}\n"}]
+    },
+    {
+      "id": "discover-output-file",
+      "argv": ["{cli}", "discover", "--query", "search src_ip=1", "--format", "json", "--output", "{tmp}/discovery.json"],
+      "exit": 0,
+      "stdout": "",
+      "output_files": [{"path": "{tmp}/discovery.json", "content": "{\"datamodels\":[],\"datasets\":[],\"lookups\":[],\"macros\":[],\"sources\":[],\"sourcetypes\":[],\"input_fields\":[\"src_ip\"]}\n"}]
+    },
+    {
+      "id": "version",
+      "argv": ["{cli}", "version"],
+      "exit": 0,
+      "stdout": "spl-toolkit 0.1.1\n"
+    },
+    {
+      "id": "help",
+      "argv": ["{cli}", "help"],
+      "exit": 0,
+      "stdout": "SPL Toolkit 0.1.1\nUsage: spl-toolkit <command> [options]\n\nCommands:\n  version           Show version information\n  map [query]       Map fields using --config\n  discover [query]  Discover query information\n  validate [query]  Validate query syntax or --config\n  demo              Run demonstration examples\n  help              Show this help message\n\nOptions for map, discover, and validate:\n  --query QUERY     Supply the query as an option\n  --config FILE     Mapping configuration (map and validate only)\n  --format FORMAT   Output format: text or json (default: text)\n  --output FILE     Write a successful result to a file\n  --help            Show this help message\n"
+    },
+    {
+      "id": "demo",
+      "argv": ["{cli}", "demo"],
+      "exit": 0,
+      "stdout": "SPL Toolkit Library - Demo\n================================\n\n1. Basic Field Mapping:\nOriginal query: search src_ip=192.168.1.1 dst_port=80\nMapped query: search source_ip=192.168.1.1 dst_port=80\n\n2. Conditional Field Mapping:\n\nTest case 1:\nOriginal: search sourcetype=access_combined clientip=192.168.1.1\nContext: map[sourcetype:access_combined]\nMapped: search sourcetype=access_combined source_address=192.168.1.1\n\nTest case 2:\nOriginal: search sourcetype=nginx_access remote_addr=10.0.0.1\nContext: map[sourcetype:nginx_access]\nMapped: search sourcetype=nginx_access source_address=10.0.0.1\n\n3. Query Discovery:\n\nQuery 1: search sourcetype=access_combined | stats count by src_ip\n  Data Models: []\n  Datasets: []\n  Lookups: []\n  Macros: []\n  Sources: []\n  Source Types: [access_combined]\n  Input Fields: [sourcetype src_ip]\n\nQuery 2: | inputlookup ip_geo_lookup.csv | search country=US\n  Data Models: []\n  Datasets: []\n  Lookups: [ip_geo_lookup]\n  Macros: []\n  Sources: []\n  Source Types: []\n  Input Fields: [country]\n\nQuery 3: | datamodel Network_Traffic All_Traffic search | stats avg(bytes_in) by src_ip\n  Data Models: [Network_Traffic]\n  Datasets: [Network_Traffic.All_Traffic]\n  Lookups: []\n  Macros: []\n  Sources: []\n  Source Types: []\n  Input Fields: [bytes_in src_ip]\n\nQuery 4: | tstats count from datamodel=Web where Web.status=200 by Web.src_ip\n  Data Models: [Web]\n  Datasets: []\n  Lookups: []\n  Macros: []\n  Sources: []\n  Source Types: []\n  Input Fields: [Web.status Web.src_ip]\n"
+    }
+  ]
+}
