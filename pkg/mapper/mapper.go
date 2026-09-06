@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
+	"sync"
 
 	"github.com/antlr4-go/antlr/v4"
 	"github.com/delgado-jacob/spl-toolkit/parser"
@@ -12,9 +13,11 @@ import (
 
 // Mapper represents the main SPL field mapping engine
 type Mapper struct {
+	mu            sync.RWMutex
 	fieldMappings map[string]string
 	parser        *Parser
 	config        *MappingConfig
+	configErr     error
 }
 
 // FieldMapping represents a source to target field mapping
@@ -55,11 +58,20 @@ func NewWithConfig(config *MappingConfig) *Mapper {
 	mapper := &Mapper{
 		fieldMappings: make(map[string]string),
 		parser:        NewParser(),
-		config:        config,
 	}
 
-	// Load basic mappings from config
-	for _, mapping := range config.Mappings {
+	if config == nil {
+		return mapper
+	}
+
+	ownedConfig, err := cloneAndValidateMappingConfig(config)
+	if err != nil {
+		mapper.configErr = err
+		return mapper
+	}
+	mapper.config = ownedConfig
+
+	for _, mapping := range ownedConfig.Mappings {
 		mapper.fieldMappings[mapping.Source] = mapping.Target
 	}
 
@@ -73,6 +85,17 @@ func (m *Mapper) LoadMappings(jsonData []byte) error {
 		return err
 	}
 
+	for i, mapping := range mappings {
+		if strings.TrimSpace(mapping.Source) == "" {
+			return fmt.Errorf("mapping[%d]: source field is required", i)
+		}
+		if strings.TrimSpace(mapping.Target) == "" {
+			return fmt.Errorf("mapping[%d]: target field is required", i)
+		}
+	}
+
+	m.mu.Lock()
+	defer m.mu.Unlock()
 	for _, mapping := range mappings {
 		m.fieldMappings[mapping.Source] = mapping.Target
 	}
@@ -82,6 +105,10 @@ func (m *Mapper) LoadMappings(jsonData []byte) error {
 
 // MapQuery applies field mappings to a SPL query
 func (m *Mapper) MapQuery(query string) (string, error) {
+	if m.configErr != nil {
+		return "", m.configErr
+	}
+
 	// Get query context for conditional mappings
 	context := m.extractQueryContextFromString(query)
 
@@ -91,6 +118,10 @@ func (m *Mapper) MapQuery(query string) (string, error) {
 
 // MapQueryWithContext applies field mappings with explicit context
 func (m *Mapper) MapQueryWithContext(query string, context map[string]interface{}) (string, error) {
+	if m.configErr != nil {
+		return "", m.configErr
+	}
+
 	// Apply field mappings using token stream rewriting
 	return m.mapQueryWithTokenRewriter(query, context)
 }
@@ -182,15 +213,16 @@ func (m *Mapper) ValidateQuery(query string) error {
 }
 
 func (m *Mapper) getEffectiveMappings(context map[string]interface{}) map[string]string {
-	// Start with basic mappings
-	result := make(map[string]string)
+	m.mu.RLock()
+	result := make(map[string]string, len(m.fieldMappings))
 	for k, v := range m.fieldMappings {
 		result[k] = v
 	}
+	m.mu.RUnlock()
 
 	// Add conditional mappings if config is available
 	if m.config != nil && context != nil {
-		conditionalMappings := m.config.GetMappingsForConditions(context)
+		conditionalMappings := m.config.matchingRuleMappings(context)
 		for _, mapping := range conditionalMappings {
 			result[mapping.Source] = mapping.Target
 		}

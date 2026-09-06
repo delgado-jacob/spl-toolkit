@@ -16,10 +16,8 @@ type ASTNode struct {
 	Context  antlr.ParseTree `json:"-"` // Reference to original ANTLR context
 }
 
-// Parser handles SPL query parsing using ANTLR4
-type Parser struct {
-	errorListener *CustomErrorListener
-}
+// Parser handles SPL query parsing using ANTLR4.
+type Parser struct{}
 
 // CustomErrorListener handles parse errors
 type CustomErrorListener struct {
@@ -33,12 +31,7 @@ func (c *CustomErrorListener) SyntaxError(recognizer antlr.Recognizer, offending
 
 // NewParser creates a new Parser instance
 func NewParser() *Parser {
-	return &Parser{
-		errorListener: &CustomErrorListener{
-			DefaultErrorListener: antlr.NewDefaultErrorListener(),
-			errors:               []string{},
-		},
-	}
+	return &Parser{}
 }
 
 // Parse converts a SPL query string into an AST
@@ -47,8 +40,9 @@ func (p *Parser) Parse(query string) (*ASTNode, error) {
 		return nil, fmt.Errorf("empty query")
 	}
 
-	// Reset errors
-	p.errorListener.errors = []string{}
+	listener := &CustomErrorListener{
+		DefaultErrorListener: antlr.NewDefaultErrorListener(),
+	}
 
 	// Create input stream
 	input := antlr.NewInputStream(query)
@@ -56,7 +50,7 @@ func (p *Parser) Parse(query string) (*ASTNode, error) {
 	// Create lexer
 	lexer := parser.NewSPLLexer(input)
 	lexer.RemoveErrorListeners()
-	lexer.AddErrorListener(p.errorListener)
+	lexer.AddErrorListener(listener)
 
 	// Create token stream
 	stream := antlr.NewCommonTokenStream(lexer, 0)
@@ -64,14 +58,14 @@ func (p *Parser) Parse(query string) (*ASTNode, error) {
 	// Create parser
 	splParser := parser.NewSPLParser(stream)
 	splParser.RemoveErrorListeners()
-	splParser.AddErrorListener(p.errorListener)
+	splParser.AddErrorListener(listener)
 
 	// Parse the query
 	tree := splParser.Query()
 
 	// Check for errors
-	if len(p.errorListener.errors) > 0 {
-		return nil, fmt.Errorf("parse errors: %s", strings.Join(p.errorListener.errors, "; "))
+	if len(listener.errors) > 0 {
+		return nil, fmt.Errorf("parse errors: %s", strings.Join(listener.errors, "; "))
 	}
 
 	// Convert ANTLR tree to our AST

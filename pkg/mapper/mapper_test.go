@@ -56,6 +56,150 @@ func TestLoadMappings(t *testing.T) {
 	}
 }
 
+func TestLoadMappingsOverridesInitialBase(t *testing.T) {
+	m := NewWithConfig(&MappingConfig{
+		Version:  "1.0",
+		Mappings: []FieldMapping{{Source: "src", Target: "old"}},
+	})
+
+	if err := m.LoadMappings([]byte(`[{"source":"src","target":"new"}]`)); err != nil {
+		t.Fatal(err)
+	}
+
+	got, err := m.MapQueryWithContext("search src=1", map[string]interface{}{})
+	if err != nil || got != "search new=1" {
+		t.Fatalf("MapQueryWithContext() = %q, %v; want %q, nil", got, err, "search new=1")
+	}
+}
+
+func TestOwnedConfigurationSurvivesCallerMutation(t *testing.T) {
+	metadataItem := map[string]interface{}{"label": "original"}
+	config := &MappingConfig{
+		Version:  "1.0",
+		Mappings: []FieldMapping{{Source: "src", Target: "base"}},
+		Rules: []ConditionalRule{{
+			ID:      "production",
+			Enabled: true,
+			Conditions: []Condition{{
+				Type:     "combination",
+				Operator: "and",
+				Children: []Condition{
+					{Type: "source", Operator: "equals", Value: "prod"},
+					{Type: "field_exists", Field: "ready", Operator: "exists"},
+				},
+			}},
+			Mappings: []FieldMapping{{Source: "src", Target: "rule"}},
+		}},
+		Metadata: map[string]interface{}{
+			"items": []interface{}{metadataItem},
+		},
+	}
+	m := NewWithConfig(config)
+
+	config.Mappings[0].Target = "mutated-base"
+	config.Rules[0].Mappings[0].Target = "mutated-rule"
+	config.Rules[0].Conditions[0].Children[0].Value = "dev"
+	metadataItem["label"] = "mutated-metadata"
+
+	got, err := m.MapQueryWithContext("search src=1", map[string]interface{}{
+		"source": "prod",
+		"ready":  true,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got != "search rule=1" {
+		t.Fatalf("MapQueryWithContext() = %q; want %q", got, "search rule=1")
+	}
+
+	items := m.config.Metadata["items"].([]interface{})
+	if got := items[0].(map[string]interface{})["label"]; got != "original" {
+		t.Fatalf("owned metadata label = %v; want original", got)
+	}
+}
+
+func TestInvalidConstructorRegexRejectsMappingButAllowsDiscovery(t *testing.T) {
+	m := NewWithConfig(&MappingConfig{
+		Version: "1.0",
+		Rules: []ConditionalRule{{
+			ID:         "invalid-regex",
+			Enabled:    true,
+			Conditions: []Condition{{Type: "source", Operator: "regex", Value: "["}},
+			Mappings:   []FieldMapping{{Source: "src", Target: "dst"}},
+		}},
+	})
+
+	if _, err := m.MapQuery("search src=1"); err == nil {
+		t.Fatal("MapQuery() error = nil; want configuration error")
+	}
+	if _, err := m.DiscoverQuery("search src=1"); err != nil {
+		t.Fatalf("DiscoverQuery() error = %v; want discovery independent of configuration", err)
+	}
+}
+
+func TestInvalidConstructorUnsupportedMetadataRejectsMapping(t *testing.T) {
+	m := NewWithConfig(&MappingConfig{
+		Version:  "1.0",
+		Metadata: map[string]interface{}{"unsupported": make(chan int)},
+	})
+
+	if _, err := m.MapQuery("search src=1"); err == nil {
+		t.Fatal("MapQuery() error = nil; want unsupported configuration error")
+	}
+}
+
+func TestOwnedConfigurationAcceptsExistingScalarDomain(t *testing.T) {
+	m := NewWithConfig(&MappingConfig{
+		Version:  "1.0",
+		Metadata: map[string]interface{}{"number": json.Number("42")},
+	})
+
+	if _, err := m.MapQuery("search src=1"); err != nil {
+		t.Fatalf("MapQuery() error = %v; want named scalar configuration accepted", err)
+	}
+}
+
+func TestInvalidConstructorCyclicMetadataRejectsMapping(t *testing.T) {
+	metadata := map[string]interface{}{}
+	metadata["cycle"] = metadata
+	m := NewWithConfig(&MappingConfig{Version: "1.0", Metadata: metadata})
+
+	if _, err := m.MapQuery("search src=1"); err == nil {
+		t.Fatal("MapQuery() error = nil; want cyclic configuration error")
+	}
+}
+
+func TestNewWithConfigNilCreatesEmptyMapper(t *testing.T) {
+	m := NewWithConfig(nil)
+
+	got, err := m.MapQuery("search src=1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got != "search src=1" {
+		t.Fatalf("MapQuery() = %q; want unchanged query", got)
+	}
+}
+
+func TestLoadMappingsFailedUpdatePreservesPublishedMappings(t *testing.T) {
+	m := New()
+	if err := m.LoadMappings([]byte(`[{"source":"a","target":"x"}]`)); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := m.LoadMappings([]byte(`[{"source":"a","target":"p"},{"source":"","target":"q"}]`)); err == nil {
+		t.Fatal("LoadMappings() error = nil; want invalid mapping error")
+	}
+
+	got, err := m.MapQuery("search a=1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got != "search x=1" {
+		t.Fatalf("MapQuery() = %q; want prior mapping after failed update", got)
+	}
+}
+
 func TestMapQuery(t *testing.T) {
 	m := New()
 
@@ -595,8 +739,11 @@ func TestNewWithConfig(t *testing.T) {
 		t.Fatal("Expected non-nil mapper")
 	}
 
-	if m.config != config {
-		t.Error("Expected config to be set")
+	if m.config == nil {
+		t.Fatal("Expected owned config to be set")
+	}
+	if m.config == config {
+		t.Error("Expected mapper to own a configuration copy")
 	}
 
 	// Test that basic mappings are loaded
