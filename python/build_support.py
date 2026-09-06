@@ -14,11 +14,8 @@ from setuptools.command.build_py import build_py
 from setuptools.command.sdist import sdist
 
 
-NATIVE_SOURCE_PATHS = (
-    "go.mod", "go.sum", "pkg/mapper", "pkg/bindings", "parser", "internal/buildinfo",
-)
 ROOT_FILES = ("README.md", "LICENSE", "VERSION")
-NATIVE_SUFFIXES = (".so", ".dylib", ".dll")
+NATIVE_SOURCE_MANIFEST = "native-source-files.txt"
 
 
 def native_library_name() -> str:
@@ -27,6 +24,21 @@ def native_library_name() -> str:
     if platform.system() == "Darwin":
         return "libspl_toolkit.dylib"
     return "libspl_toolkit.so"
+
+
+def macos_architecture() -> str:
+    architecture = os.environ.get("GOARCH", platform.machine()).lower()
+    if architecture in ("arm64", "aarch64"):
+        return "arm64"
+    if architecture in ("amd64", "x86_64"):
+        return "x86_64"
+    raise RuntimeError(f"unsupported macOS wheel architecture: {architecture}")
+
+
+def required_platform_tag() -> str | None:
+    if platform.system() == "Darwin":
+        return f"macosx_15_0_{macos_architecture()}"
+    return None
 
 
 def source_root(setup_dir: Path) -> Path:
@@ -91,10 +103,29 @@ class BuildPy(build_py):
         build_native(source_root(setup_dir), output, read_version(setup_dir))
 
 
-def _ignore_native_build_products(_directory: str, names: list[str]) -> set[str]:
-    ignored = {name for name in names if name in {"__pycache__", ".pytest_cache", ".git", "_build_plan"}}
-    ignored.update(name for name in names if Path(name).suffix in NATIVE_SUFFIXES)
-    return ignored
+def native_source_files(manifest: Path) -> list[Path]:
+    entries = []
+    for line in manifest.read_text(encoding="utf-8").splitlines():
+        value = line.strip()
+        if not value or value.startswith("#"):
+            continue
+        relative = Path(value)
+        if relative.is_absolute() or ".." in relative.parts:
+            raise ValueError(f"invalid native source path: {value}")
+        entries.append(relative)
+    if len(entries) != len(set(entries)):
+        raise ValueError(f"duplicate native source path in {manifest}")
+    return entries
+
+
+def stage_native_source(source: Path, destination: Path, manifest: Path) -> None:
+    for relative in native_source_files(manifest):
+        source_path = source / relative
+        if not source_path.is_file():
+            raise FileNotFoundError(f"native source manifest entry is missing: {source_path}")
+        target = destination / relative
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source_path, target)
 
 
 class SourceDistribution(sdist):
@@ -105,17 +136,10 @@ class SourceDistribution(sdist):
         destination = Path(base_dir)
         setup_dir = Path(self.distribution.script_name).resolve().parent
         source = source_root(setup_dir)
+        documents = setup_dir if source.name == "_native_src" else source
         for name in ROOT_FILES:
-            shutil.copy2(source / name, destination / name)
-        native = destination / "_native_src"
-        for relative in NATIVE_SOURCE_PATHS:
-            source_path = source / relative
-            target = native / relative
-            target.parent.mkdir(parents=True, exist_ok=True)
-            if source_path.is_dir():
-                shutil.copytree(source_path, target, ignore=_ignore_native_build_products)
-            else:
-                shutil.copy2(source_path, target)
+            shutil.copy2(documents / name, destination / name)
+        stage_native_source(source, destination / "_native_src", setup_dir / NATIVE_SOURCE_MANIFEST)
 
 
 class BinaryWheel(bdist_wheel):
@@ -124,7 +148,11 @@ class BinaryWheel(bdist_wheel):
     def finalize_options(self) -> None:
         super().finalize_options()
         self.root_is_pure = False
+        required = required_platform_tag()
+        if required is not None:
+            self.plat_name = required
+            self.plat_name_supplied = True
 
     def get_tag(self) -> tuple[str, str, str]:
         _python, _abi, platform_tag = super().get_tag()
-        return "py3", "none", platform_tag
+        return "py3", "none", required_platform_tag() or platform_tag

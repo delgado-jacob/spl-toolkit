@@ -1,0 +1,17 @@
+go.mod
+go.sum
+internal/buildinfo/version.go
+parser/spl_lexer.go
+parser/spl_parser.go
+parser/splparser_base_listener.go
+parser/splparser_base_visitor.go
+parser/splparser_listener.go
+parser/splparser_visitor.go
+pkg/bindings/bindings.go
+pkg/bindings/registry.go
+pkg/mapper/config_clone.go
+pkg/mapper/discovery_listener.go
+pkg/mapper/field_mapping_listener.go
+pkg/mapper/mapper.go
+pkg/mapper/parser.go
+pkg/mapper/schema.go

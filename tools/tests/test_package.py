@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import importlib.util
 from pathlib import Path
+import platform
 import subprocess
 import sys
 
@@ -18,6 +19,14 @@ def load_build_support():
     spec = importlib.util.spec_from_file_location(
         "spl_toolkit_build_support", PYTHON_DIR / "build_support.py"
     )
+    assert spec and spec.loader
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def load_package_checker():
+    spec = importlib.util.spec_from_file_location("check_package", ROOT / "tools" / "check_package.py")
     assert spec and spec.loader
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
@@ -120,11 +129,63 @@ def test_release_tree_contains_only_allowed_native_source(tmp_path: Path):
     assert not list(release.rglob("*.dll"))
 
 
+def test_native_source_manifest_excludes_unlisted_files(tmp_path: Path):
+    support = load_build_support()
+    source = tmp_path / "source"
+    destination = tmp_path / "staged"
+    manifest = source / "native-source-files.txt"
+    allowed = ["go.mod", "pkg/mapper/mapper.go", "parser/spl_parser.go"]
+    for relative in allowed:
+        path = source / relative
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(relative, encoding="utf-8")
+    for relative in ("pkg/mapper/private-notes.txt", "parser/.editor.swp", "pkg/mapper/.coverage"):
+        path = source / relative
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("private", encoding="utf-8")
+    manifest.write_text("\n".join(allowed) + "\n", encoding="utf-8")
+
+    support.stage_native_source(source, destination, manifest)
+
+    assert sorted(str(path.relative_to(destination)) for path in destination.rglob("*") if path.is_file()) == sorted(allowed)
+
+
+def test_binary_wheel_forces_macos_15_tag_from_older_interpreter_target():
+    if platform.system() != "Darwin":
+        pytest.skip("macOS tag behavior")
+    support = load_build_support()
+    distribution = support.NativeDistribution({"script_name": str(PYTHON_DIR / "setup.py")})
+    command = support.BinaryWheel(distribution)
+    command.initialize_options()
+    command.plat_name = "macosx_11_0_arm64"
+
+    command.finalize_options()
+
+    assert command.plat_name == "macosx_15_0_arm64"
+    assert command.get_tag() == ("py3", "none", "macosx_15_0_arm64")
+
+
+def test_external_venv_does_not_expose_controller_site_packages(tmp_path: Path):
+    checker = load_package_checker()
+    python = checker.create_test_environment(tmp_path / "venv")
+    controller_site = str(Path(checker.sysconfig.get_paths()["purelib"]).resolve())
+
+    completed = subprocess.run(
+        [str(python), "-I", "-c", "import pathlib,sys; print('\\n'.join(str(pathlib.Path(p).resolve()) for p in sys.path))"],
+        check=True, capture_output=True, text=True,
+    )
+
+    assert controller_site not in completed.stdout.splitlines()
+
+
+def test_unexpected_sdist_member_is_rejected():
+    checker = load_package_checker()
+    with pytest.raises(AssertionError, match="unexpected sdist members"):
+        checker.reject_unexpected_members({"setup.py", "private-notes.txt"}, {"setup.py"})
+
+
 def test_native_architecture_reads_supported_binary_headers():
-    spec = importlib.util.spec_from_file_location("check_package", ROOT / "tools" / "check_package.py")
-    assert spec and spec.loader
-    checker = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(checker)
+    checker = load_package_checker()
 
     elf = bytearray(64)
     elf[:6] = b"\x7fELF\x02\x01"

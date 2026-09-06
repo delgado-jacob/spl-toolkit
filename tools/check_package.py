@@ -23,6 +23,15 @@ from packaging.utils import parse_wheel_filename
 
 
 NATIVE_SUFFIXES = (".so", ".dylib", ".dll")
+SDIST_FIXED_FILES = {
+    "LICENSE", "MANIFEST.in", "PKG-INFO", "README.md", "VERSION", "build_support.py",
+    "native-source-files.txt", "pyproject.toml", "requirements-build.txt",
+    "requirements-dev.txt", "setup.cfg", "setup.py", "spl_toolkit/__init__.py",
+    "spl_toolkit/exceptions.py", "spl_toolkit/libspl_toolkit.h", "spl_toolkit/mapper.py",
+    "spl_toolkit.egg-info/PKG-INFO", "spl_toolkit.egg-info/SOURCES.txt",
+    "spl_toolkit.egg-info/dependency_links.txt", "spl_toolkit.egg-info/top_level.txt",
+    "tests/test_mapper.py", "tests/test_native_abi.py", "tests/test_native_mapper.py",
+}
 INSTALL_SCRIPT = """
 import importlib.metadata, pathlib, sys
 import spl_toolkit
@@ -77,19 +86,17 @@ def venv_python(directory: Path) -> Path:
 
 
 def create_test_environment(directory: Path) -> Path:
-    venv.EnvBuilder(with_pip=False, symlinks=os.name != "nt").create(directory)
-    python = venv_python(directory)
-    purelib = subprocess.run(
-        [str(python), "-I", "-c", "import sysconfig; print(sysconfig.get_paths()['purelib'])"],
-        check=True, capture_output=True, text=True,
-    ).stdout.strip()
-    Path(purelib, "spl_toolkit_test_runner.pth").write_text(
-        sysconfig.get_paths()["purelib"] + "\n", encoding="utf-8"
-    )
-    return python
+    venv.EnvBuilder(with_pip=True, symlinks=os.name != "nt").create(directory)
+    return venv_python(directory)
 
 
-def install_and_check(wheel: Path, directory: Path, outside_checkout: Path, expected_version: str) -> None:
+def install_and_check(
+    wheel: Path,
+    directory: Path,
+    outside_checkout: Path,
+    expected_version: str,
+    requirements: Path,
+) -> None:
     python = create_test_environment(directory)
     env = clean_env()
     path_entries = [str(python.parent)]
@@ -98,11 +105,14 @@ def install_and_check(wheel: Path, directory: Path, outside_checkout: Path, expe
     else:
         path_entries.extend(("/usr/bin", "/bin"))
     install_env = env | {"PATH": os.pathsep.join(path_entries)}
-    run(
-        [sys.executable, "-m", "pip", "--python", str(python), "install", "--no-deps", str(wheel.resolve())],
-        cwd=outside_checkout, env=install_env,
+    run([str(python), "-m", "pip", "install", "--disable-pip-version-check", "-r", str(requirements.resolve())], cwd=outside_checkout, env=install_env)
+    run([str(python), "-m", "pip", "install", "--disable-pip-version-check", "--no-deps", str(wheel.resolve())], cwd=outside_checkout, env=install_env)
+    controller_site = str(Path(sysconfig.get_paths()["purelib"]).resolve())
+    check_script = (
+        f"import importlib.metadata, pathlib, sys\nassert {expected_version!r} == importlib.metadata.version('spl-toolkit')\n"
+        f"assert {controller_site!r} not in [str(pathlib.Path(p).resolve()) for p in sys.path]\n"
+        + INSTALL_SCRIPT
     )
-    check_script = f"import importlib.metadata\nassert {expected_version!r} == importlib.metadata.version('spl-toolkit')\n" + INSTALL_SCRIPT
     run([str(python), "-I", "-c", textwrap.dedent(check_script)], cwd=outside_checkout, env=install_env)
 
     installed_test_dir = outside_checkout / f"tests-{directory.name}"
@@ -144,6 +154,12 @@ def inspect_wheel(wheel: Path, expected_version: str) -> None:
             native_path = Path(temp) / Path(native[0]).name
             native_path.write_bytes(payload)
             if sys.platform == "darwin":
+                required_platform = f"macosx_15_0_{actual}"
+                platforms = {tag.platform for tag in tags}
+                if platforms != {required_platform}:
+                    raise AssertionError(
+                        f"wheel platform {sorted(platforms)} does not match native minimum/architecture {required_platform}"
+                    )
                 load_commands = subprocess.run(
                     ["otool", "-l", str(native_path)], check=True, capture_output=True, text=True
                 ).stdout
@@ -164,23 +180,38 @@ def unpack_sdist(sdist: Path, destination: Path) -> Path:
 
 
 def inspect_sdist(source: Path) -> None:
-    required = ("setup.py", "pyproject.toml", "build_support.py", "requirements-build.txt", "README.md", "LICENSE", "VERSION")
-    for relative in required:
-        if not (source / relative).is_file():
-            raise AssertionError(f"sdist is missing {relative}")
-    for relative in ("go.mod", "go.sum", "pkg/mapper", "pkg/bindings", "parser", "internal/buildinfo"):
-        if not (source / "_native_src" / relative).exists():
-            raise AssertionError(f"sdist is missing _native_src/{relative}")
-    forbidden = {".git", "_build_plan", "_build_cache", "__pycache__", ".pytest_cache"}
-    if any(path.name in forbidden for path in source.rglob("*")):
-        raise AssertionError("sdist contains repository or cache state")
     if any(path.suffix in NATIVE_SUFFIXES for path in source.rglob("*")):
         raise AssertionError("sdist contains a prebuilt native library")
+    native_manifest = source / "native-source-files.txt"
+    native_files = {
+        line.strip() for line in native_manifest.read_text(encoding="utf-8").splitlines()
+        if line.strip() and not line.lstrip().startswith("#")
+    }
+    expected = SDIST_FIXED_FILES | {f"_native_src/{relative}" for relative in native_files}
+    actual = {str(path.relative_to(source)) for path in source.rglob("*") if path.is_file()}
+    reject_unexpected_members(actual, expected)
+
+
+def reject_unexpected_members(actual: set[str], expected: set[str]) -> None:
+    unexpected = sorted(actual - expected)
+    missing = sorted(expected - actual)
+    if unexpected:
+        raise AssertionError(f"unexpected sdist members: {unexpected}")
+    if missing:
+        raise AssertionError(f"missing sdist members: {missing}")
 
 
 def build_sdist_wheel(source: Path, output: Path, env: dict[str, str]) -> Path:
     output.mkdir()
-    run([sys.executable, "-m", "build", "--no-isolation", "--wheel", "--outdir", str(output), "."], cwd=source, env=env)
+    completed = subprocess.run(
+        [sys.executable, "-m", "build", "--no-isolation", "--wheel", "--outdir", str(output), "."],
+        cwd=source, env=env, check=True, capture_output=True, text=True,
+    )
+    print(completed.stdout, end="")
+    print(completed.stderr, end="", file=sys.stderr)
+    warning = "wheel needs a higher macOS version"
+    if warning in completed.stdout or warning in completed.stderr:
+        raise AssertionError("wheel target was repaired after build instead of configured before build")
     wheels = list(output.glob("spl_toolkit-*.whl"))
     if len(wheels) != 1:
         raise AssertionError(f"sdist build produced {len(wheels)} wheels")
@@ -238,14 +269,15 @@ def check_package(sdist: Path, wheel_dir: Path, expected_version: str | None) ->
         temp = Path(temporary)
         outside = temp / "outside"
         outside.mkdir()
-        install_and_check(wheel, temp / "wheel-venv", outside, version)
+        requirements = root / "python" / "requirements-dev.txt"
+        install_and_check(wheel, temp / "wheel-venv", outside, version, requirements)
 
         source = unpack_sdist(sdist, temp / "sdist")
         inspect_sdist(source)
         check_metadata_without_compiler(source, temp / "metadata", clean_env())
         source_wheel = build_sdist_wheel(source, temp / "sdist-wheel", clean_env())
         inspect_wheel(source_wheel, version)
-        install_and_check(source_wheel, temp / "sdist-venv", outside, version)
+        install_and_check(source_wheel, temp / "sdist-venv", outside, version, source / "requirements-dev.txt")
         check_missing_compiler(source, temp / "failed-wheel", clean_env())
 
     after = git_status(root)

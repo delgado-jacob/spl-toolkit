@@ -31,12 +31,14 @@ VERSION_LDFLAGS=-X=github.com/delgado-jacob/spl-toolkit/internal/buildinfo.Versi
 
 # Operating system detection
 UNAME_S := $(shell uname -s)
+UNAME_M := $(shell uname -m)
 ifeq ($(UNAME_S),Linux)
     SHARED_EXT=.so
 endif
 ifeq ($(UNAME_S),Darwin)
     SHARED_EXT=.dylib
     NATIVE_BUILD_ENV=MACOSX_DEPLOYMENT_TARGET=15.0 CGO_CFLAGS="$(CGO_CFLAGS) -mmacosx-version-min=15.0" CGO_LDFLAGS="$(CGO_LDFLAGS) -mmacosx-version-min=15.0"
+    PYTHON_BUILD_ENV=MACOSX_DEPLOYMENT_TARGET=15.0 _PYTHON_HOST_PLATFORM=macosx-15.0-$(UNAME_M)
 endif
 ifeq ($(OS),Windows_NT)
     SHARED_EXT=.dll
@@ -88,7 +90,7 @@ python-deps: ## Install pinned Python development dependencies
 python-build: python-deps ## Build self-contained Python wheel and sdist
 	mkdir -p $(DIST_DIR)
 	rm -f $(DIST_DIR)/spl_toolkit-*.whl $(DIST_DIR)/spl_toolkit-*.tar.gz
-	$(PYTHON) -m build --no-isolation --sdist --wheel --outdir $(DIST_DIR) python
+	$(PYTHON_BUILD_ENV) $(PYTHON) -m build --no-isolation --sdist --wheel --outdir $(DIST_DIR) python
 
 python-test: python-build ## Test installed wheels outside the checkout
 	$(PYTHON) tools/check_package.py --sdist $(DIST_DIR)/spl_toolkit-$(VERSION).tar.gz --wheel-dir $(DIST_DIR)
@@ -99,12 +101,12 @@ python-install: python-wheel ## Install the built native wheel; rebuild after so
 python-wheel: python-deps ## Build a native Python wheel
 	mkdir -p $(DIST_DIR)
 	rm -f $(DIST_DIR)/spl_toolkit-*.whl
-	$(PYTHON) -m build --no-isolation --wheel --outdir $(DIST_DIR) python
+	$(PYTHON_BUILD_ENV) $(PYTHON) -m build --no-isolation --wheel --outdir $(DIST_DIR) python
 
 python-sdist: python-deps ## Build a self-contained Python source distribution
 	mkdir -p $(DIST_DIR)
 	rm -f $(DIST_DIR)/spl_toolkit-*.tar.gz
-	$(PYTHON) -m build --no-isolation --sdist --outdir $(DIST_DIR) python
+	$(PYTHON_BUILD_ENV) $(PYTHON) -m build --no-isolation --sdist --outdir $(DIST_DIR) python
 
 python-dist: python-build ## Build Python distribution packages
 
