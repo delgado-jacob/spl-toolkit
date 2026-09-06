@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import importlib.util
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 import platform
 import subprocess
 import sys
@@ -182,6 +182,14 @@ def test_unexpected_sdist_member_is_rejected():
     checker = load_package_checker()
     with pytest.raises(AssertionError, match="unexpected sdist members"):
         checker.reject_unexpected_members({"setup.py", "private-notes.txt"}, {"setup.py"})
+
+
+def test_sdist_member_name_normalizes_nested_windows_path():
+    checker = load_package_checker()
+    root = PureWindowsPath(r"C:\release\spl_toolkit-0.1.1")
+    member = root / "_native_src" / "pkg" / "mapper" / "mapper.go"
+
+    assert checker.sdist_member_name(member, root) == "_native_src/pkg/mapper/mapper.go"
 
 
 def test_native_architecture_reads_supported_binary_headers():

@@ -6,7 +6,7 @@ from __future__ import annotations
 import argparse
 from email.parser import Parser
 import os
-from pathlib import Path
+from pathlib import Path, PurePath
 import platform
 import shutil
 import struct
@@ -188,8 +188,12 @@ def inspect_sdist(source: Path) -> None:
         if line.strip() and not line.lstrip().startswith("#")
     }
     expected = SDIST_FIXED_FILES | {f"_native_src/{relative}" for relative in native_files}
-    actual = {str(path.relative_to(source)) for path in source.rglob("*") if path.is_file()}
+    actual = {sdist_member_name(path, source) for path in source.rglob("*") if path.is_file()}
     reject_unexpected_members(actual, expected)
+
+
+def sdist_member_name(path: PurePath, root: PurePath) -> str:
+    return path.relative_to(root).as_posix()
 
 
 def reject_unexpected_members(actual: set[str], expected: set[str]) -> None:
