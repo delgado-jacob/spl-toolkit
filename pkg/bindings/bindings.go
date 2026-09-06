@@ -41,6 +41,7 @@ import (
 	"runtime"
 	"unsafe"
 
+	"github.com/delgado-jacob/spl-toolkit/internal/buildinfo"
 	"github.com/delgado-jacob/spl-toolkit/pkg/mapper"
 )
 
@@ -219,6 +220,11 @@ func spl_mapper_discover_query(mapperID C.int, query *C.char) *C.SPLQueryInfo {
 //export spl_string_free
 func spl_string_free(value *C.char) {
 	C.free(unsafe.Pointer(value))
+}
+
+//export spl_toolkit_version
+func spl_toolkit_version() *C.char {
+	return C.CString(buildinfo.Version)
 }
 
 //export spl_result_free

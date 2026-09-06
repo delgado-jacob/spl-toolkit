@@ -1,6 +1,6 @@
 # SPL Toolkit - Build and Release Automation
 
-.PHONY: build build-server build-shared build-all test test-coverage clean install lint fmt deps deps-update python-build python-test python-install release help generate-docs
+.PHONY: build build-server build-shared build-all test test-coverage clean install lint fmt deps deps-update python-deps python-build python-test python-install python-wheel python-sdist python-dist release help generate-docs
 
 # Go variables
 GOCMD=go
@@ -25,8 +25,9 @@ DIST_DIR=dist
 PYTHON=python3
 PIP=pip3
 
-# Version (can be overridden)
-VERSION?=0.1.1
+# Release version is owned by the repository VERSION file.
+VERSION := $(shell cat VERSION)
+VERSION_LDFLAGS=-X=github.com/delgado-jacob/spl-toolkit/internal/buildinfo.Version=$(VERSION)
 
 # Operating system detection
 UNAME_S := $(shell uname -s)
@@ -35,6 +36,7 @@ ifeq ($(UNAME_S),Linux)
 endif
 ifeq ($(UNAME_S),Darwin)
     SHARED_EXT=.dylib
+    NATIVE_BUILD_ENV=MACOSX_DEPLOYMENT_TARGET=15.0 CGO_CFLAGS="$(CGO_CFLAGS) -mmacosx-version-min=15.0" CGO_LDFLAGS="$(CGO_LDFLAGS) -mmacosx-version-min=15.0"
 endif
 ifeq ($(OS),Windows_NT)
     SHARED_EXT=.dll
@@ -68,38 +70,43 @@ test-coverage: ## Run tests and show coverage
 
 build: ## Build the main binary
 	mkdir -p $(BUILD_DIR)
-	$(GOBUILD) -mod=readonly -trimpath -o $(BUILD_DIR)/$(BINARY_NAME) ./cmd
+	$(GOBUILD) -mod=readonly -trimpath -ldflags "$(VERSION_LDFLAGS)" -o $(BUILD_DIR)/$(BINARY_NAME) ./cmd
 
 build-server: ## Build the REST API server binary
 	mkdir -p $(BUILD_DIR)
-	$(GOBUILD) -mod=readonly -trimpath -o $(BUILD_DIR)/$(SERVER_BINARY_NAME) ./cmd/server
+	$(GOBUILD) -mod=readonly -trimpath -ldflags "$(VERSION_LDFLAGS)" -o $(BUILD_DIR)/$(SERVER_BINARY_NAME) ./cmd/server
 
 build-shared: ## Build shared library for Python bindings
 	mkdir -p $(BUILD_DIR)
-	$(GOBUILD) -mod=readonly -trimpath -buildmode=c-shared -o $(BUILD_DIR)/$(SHARED_LIB_NAME)$(SHARED_EXT) ./pkg/bindings
+	$(NATIVE_BUILD_ENV) $(GOBUILD) -mod=readonly -trimpath -buildmode=c-shared -ldflags "$(VERSION_LDFLAGS)" -o $(BUILD_DIR)/$(SHARED_LIB_NAME)$(SHARED_EXT) ./pkg/bindings
 
 build-all: build build-server build-shared ## Build CLI, server binary, and shared library
 
-python-deps: ## Install Python development dependencies
+python-deps: ## Install pinned Python development dependencies
 	$(PIP) install -r python/requirements-dev.txt
 
-python-build: python-deps build-shared ## Build Python package
-	cd python && $(PYTHON) setup.py build_ext --inplace
-	cp $(BUILD_DIR)/$(SHARED_LIB_NAME)$(SHARED_EXT) python/spl_toolkit/
+python-build: python-deps ## Build self-contained Python wheel and sdist
+	mkdir -p $(DIST_DIR)
+	rm -f $(DIST_DIR)/spl_toolkit-*.whl $(DIST_DIR)/spl_toolkit-*.tar.gz
+	$(PYTHON) -m build --no-isolation --sdist --wheel --outdir $(DIST_DIR) python
 
-python-test: python-deps python-build ## Run Python tests
-	cd python && $(PYTHON) -m pytest tests/ -v
+python-test: python-build ## Test installed wheels outside the checkout
+	$(PYTHON) tools/check_package.py --sdist $(DIST_DIR)/spl_toolkit-$(VERSION).tar.gz --wheel-dir $(DIST_DIR)
 
-python-install: python-build ## Install Python package locally
-	cd python && $(PIP) install -e .
+python-install: python-wheel ## Install the built native wheel; rebuild after source changes
+	$(PIP) install --force-reinstall --no-deps $(DIST_DIR)/spl_toolkit-$(VERSION)-*.whl
 
-python-wheel: python-build ## Build Python wheel
-	cd python && $(PYTHON) setup.py bdist_wheel
+python-wheel: python-deps ## Build a native Python wheel
+	mkdir -p $(DIST_DIR)
+	rm -f $(DIST_DIR)/spl_toolkit-*.whl
+	$(PYTHON) -m build --no-isolation --wheel --outdir $(DIST_DIR) python
 
-python-sdist: ## Build Python source distribution
-	cd python && $(PYTHON) setup.py sdist
+python-sdist: python-deps ## Build a self-contained Python source distribution
+	mkdir -p $(DIST_DIR)
+	rm -f $(DIST_DIR)/spl_toolkit-*.tar.gz
+	$(PYTHON) -m build --no-isolation --sdist --outdir $(DIST_DIR) python
 
-python-dist: python-wheel python-sdist ## Build Python distribution packages
+python-dist: python-build ## Build Python distribution packages
 
 install: build ## Install CLI binary to /usr/local/bin
 	sudo cp $(BUILD_DIR)/$(BINARY_NAME) /usr/local/bin/

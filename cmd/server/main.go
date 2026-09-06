@@ -35,11 +35,9 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/delgado-jacob/spl-toolkit/internal/buildinfo"
 	"github.com/delgado-jacob/spl-toolkit/pkg/api"
 )
-
-// Version will be set at build time via ldflags
-var Version = "dev"
 
 func main() {
 	// Get port from environment or use default
@@ -49,7 +47,7 @@ func main() {
 	}
 
 	// Create API server with version
-	server := api.NewServerWithVersion(Version)
+	server := api.NewServerWithVersion(buildinfo.Version)
 
 	// Create HTTP server with hardened settings
 	httpServer := &http.Server{
@@ -64,7 +62,7 @@ func main() {
 
 	// Start server in a goroutine
 	go func() {
-		log.Printf("SPL Toolkit API Server %s starting on port %s", Version, port)
+		log.Printf("SPL Toolkit API Server %s starting on port %s", buildinfo.Version, port)
 		if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("Server failed to start: %v", err)
 		}

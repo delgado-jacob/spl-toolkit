@@ -12,6 +12,7 @@ from typing import Dict, List, Optional, Any
 from dataclasses import dataclass
 
 from .exceptions import SPLMapperError, MapperNotFoundError, ParseError, ConfigurationError
+from . import __version__
 
 
 @dataclass
@@ -92,6 +93,11 @@ class SPLMapper:
         
         # Define function signatures
         self._setup_function_signatures()
+        self._native_version = self._read_native_version()
+        if __version__ != "dev" and self._native_version != __version__:
+            raise ConfigurationError(
+                f"Native library version {self._native_version!r} does not match package version {__version__!r}"
+            )
         
         # Create mapper instance
         if config is None:
@@ -125,6 +131,9 @@ class SPLMapper:
         # spl_string_free
         self._lib.spl_string_free.argtypes = [ctypes.c_void_p]
         self._lib.spl_string_free.restype = None
+
+        self._lib.spl_toolkit_version.argtypes = []
+        self._lib.spl_toolkit_version.restype = ctypes.c_void_p
         
         # spl_mapper_map_query
         self._lib.spl_mapper_map_query.argtypes = [ctypes.c_int, ctypes.c_char_p]
@@ -145,6 +154,20 @@ class SPLMapper:
         # spl_query_info_free
         self._lib.spl_query_info_free.argtypes = [ctypes.POINTER(SPLQueryInfoC)]
         self._lib.spl_query_info_free.restype = None
+
+    def _read_native_version(self) -> str:
+        pointer = self._lib.spl_toolkit_version()
+        if not pointer:
+            raise ConfigurationError("Native library returned no version")
+        try:
+            return ctypes.string_at(pointer).decode("utf-8")
+        finally:
+            self._lib.spl_string_free(pointer)
+
+    @property
+    def native_version(self) -> str:
+        """Version embedded in the loaded native library."""
+        return self._native_version
     
     @contextmanager
     def _operation(self):

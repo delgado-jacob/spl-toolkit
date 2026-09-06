@@ -13,12 +13,25 @@ import sys
 import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
-from spl_toolkit import SPLMapper, QueryInfo, SPLMapperError
+from spl_toolkit import SPLMapper, QueryInfo, SPLMapperError, __version__
 from spl_toolkit.exceptions import ParseError, ConfigurationError, MapperNotFoundError
 from spl_toolkit.mapper import SPLResult
 
 
 MOCK_LIBRARY = "/mock/libspl_toolkit.dylib"
+
+
+def configure_mock_version(mock_lib, version=None):
+    if version is None:
+        version = __version__.encode()
+    native_version = ctypes.create_string_buffer(version)
+    pointer = ctypes.cast(native_version, ctypes.c_void_p).value
+    mock_lib.spl_toolkit_version.return_value = pointer
+    mock_lib._native_version_owner = native_version
+
+
+def mapper_kwargs():
+    return {"library_path": os.environ["SPL_NATIVE_LIBRARY"]} if "SPL_NATIVE_LIBRARY" in os.environ else {}
 
 
 class TestSPLMapper:
@@ -27,7 +40,7 @@ class TestSPLMapper:
     def test_init_without_config(self):
         """Test initializing mapper without configuration"""
         # Since the shared library exists and works, this should succeed
-        mapper = SPLMapper(library_path=os.environ["SPL_NATIVE_LIBRARY"])
+        mapper = SPLMapper(**mapper_kwargs())
         assert mapper is not None
         mapper.close()
     
@@ -41,7 +54,7 @@ class TestSPLMapper:
         }
         
         # Since the shared library exists and works, this should succeed
-        mapper = SPLMapper(config=config, library_path=os.environ["SPL_NATIVE_LIBRARY"])
+        mapper = SPLMapper(config=config, **mapper_kwargs())
         assert mapper is not None
         mapper.close()
     
@@ -56,6 +69,7 @@ class TestSPLMapper:
         with patch('ctypes.CDLL') as mock_cdll:
             mock_lib = MagicMock()
             mock_cdll.return_value = mock_lib
+            configure_mock_version(mock_lib)
             mock_lib.spl_mapper_new.return_value = 1
             mock_lib.spl_mapper_load_mappings.return_value = None  # Success
             
@@ -69,6 +83,7 @@ class TestSPLMapper:
         with patch("ctypes.CDLL") as mock_cdll:
             mock_lib = MagicMock()
             mock_cdll.return_value = mock_lib
+            configure_mock_version(mock_lib)
             mock_lib.spl_mapper_new.return_value = 1
             native_error = ctypes.create_string_buffer(b"invalid source")
             error_pointer = ctypes.cast(native_error, ctypes.c_void_p).value
@@ -78,7 +93,7 @@ class TestSPLMapper:
             with pytest.raises(ConfigurationError, match="invalid source"):
                 mapper.load_mappings([{"source": 1, "target": "bad"}])
 
-            mock_lib.spl_string_free.assert_called_once_with(error_pointer)
+            mock_lib.spl_string_free.assert_any_call(error_pointer)
             mapper.close()
     
     def test_map_query(self):
@@ -87,6 +102,7 @@ class TestSPLMapper:
             # Setup mock library
             mock_lib = MagicMock()
             mock_cdll.return_value = mock_lib
+            configure_mock_version(mock_lib)
             mock_lib.spl_mapper_new.return_value = 1
             
             # Mock result structure
@@ -108,6 +124,7 @@ class TestSPLMapper:
         with patch('ctypes.CDLL') as mock_cdll:
             mock_lib = MagicMock()
             mock_cdll.return_value = mock_lib
+            configure_mock_version(mock_lib)
             mock_lib.spl_mapper_new.return_value = 1
             
             # Mock error result
@@ -129,6 +146,7 @@ class TestSPLMapper:
         with patch('ctypes.CDLL') as mock_cdll:
             mock_lib = MagicMock()
             mock_cdll.return_value = mock_lib
+            configure_mock_version(mock_lib)
             mock_lib.spl_mapper_new.return_value = 1
             
             # Mock discovery result
@@ -184,6 +202,7 @@ class TestSPLMapper:
         with patch("ctypes.CDLL") as mock_cdll:
             mock_lib = MagicMock()
             mock_cdll.return_value = mock_lib
+            configure_mock_version(mock_lib)
             mock_lib.spl_mapper_new.return_value = 7
 
             def blocking_map(_handle, _query):
@@ -232,12 +251,39 @@ class TestSPLMapper:
         with patch("ctypes.CDLL") as mock_cdll:
             mock_lib = MagicMock()
             mock_cdll.return_value = mock_lib
+            configure_mock_version(mock_lib)
             mock_lib.spl_mapper_new.return_value = 3
             mapper = SPLMapper(library_path=MOCK_LIBRARY)
             mapper.close()
 
             with pytest.raises(MapperNotFoundError, match="closed"):
                 mapper.__enter__()
+
+    def test_native_version_is_copied_freed_and_read_only(self):
+        with patch("ctypes.CDLL") as mock_cdll:
+            mock_lib = MagicMock()
+            mock_cdll.return_value = mock_lib
+            configure_mock_version(mock_lib)
+            mock_lib.spl_mapper_new.return_value = 1
+
+            mapper = SPLMapper(library_path=MOCK_LIBRARY)
+
+            assert mapper.native_version == __version__
+            mock_lib.spl_string_free.assert_any_call(mock_lib.spl_toolkit_version.return_value)
+            with pytest.raises(AttributeError):
+                mapper.native_version = "changed"
+            mapper.close()
+
+    def test_released_package_rejects_mismatched_explicit_library(self):
+        if __version__ == "dev":
+            pytest.skip("uninstalled source mode accepts and reports the native version")
+        with patch("ctypes.CDLL") as mock_cdll:
+            mock_lib = MagicMock()
+            mock_cdll.return_value = mock_lib
+            configure_mock_version(mock_lib, b"wrong-version")
+
+            with pytest.raises(ConfigurationError, match="does not match package version"):
+                SPLMapper(library_path=MOCK_LIBRARY)
 
 
 class TestQueryInfo:

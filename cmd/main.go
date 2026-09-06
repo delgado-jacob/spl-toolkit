@@ -6,11 +6,9 @@ import (
 	"io"
 	"os"
 
+	"github.com/delgado-jacob/spl-toolkit/internal/buildinfo"
 	"github.com/delgado-jacob/spl-toolkit/pkg/mapper"
 )
-
-// Version will be set at build time via ldflags.
-var Version = "dev"
 
 func main() {
 	os.Exit(runCLI(os.Args[1:], os.Stdout, os.Stderr))
@@ -34,7 +32,7 @@ Options for map, discover, and validate:
   --format FORMAT   Output format: text or json (default: text)
   --output FILE     Write a successful result to a file
   --help            Show this help message
-`, Version)
+`, buildinfo.Version)
 	return err
 }
 

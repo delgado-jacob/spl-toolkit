@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import ctypes
+import importlib.metadata
 import os
 from pathlib import Path
 import subprocess
@@ -44,7 +45,13 @@ class SPLQueryInfoC(ctypes.Structure):
 
 
 def _library() -> ctypes.CDLL:
-    library_path = Path(os.environ["SPL_NATIVE_LIBRARY"])
+    if "SPL_NATIVE_LIBRARY" in os.environ:
+        library_path = Path(os.environ["SPL_NATIVE_LIBRARY"])
+    else:
+        import spl_toolkit
+
+        suffix = ".dll" if os.name == "nt" else ".dylib" if sys.platform == "darwin" else ".so"
+        library_path = Path(spl_toolkit.__file__).resolve().parent / f"libspl_toolkit{suffix}"
     assert library_path.is_absolute(), "SPL_NATIVE_LIBRARY must be absolute"
     lib = ctypes.CDLL(str(library_path))
     lib.spl_mapper_new.argtypes = []
@@ -61,7 +68,24 @@ def _library() -> ctypes.CDLL:
     lib.spl_mapper_map_query.restype = ctypes.POINTER(SPLResult)
     lib.spl_result_free.argtypes = [ctypes.POINTER(SPLResult)]
     lib.spl_result_free.restype = None
+    lib.spl_toolkit_version.argtypes = []
+    lib.spl_toolkit_version.restype = ctypes.c_void_p
+    lib.spl_string_free.argtypes = [ctypes.c_void_p]
+    lib.spl_string_free.restype = None
     return lib
+
+
+def _version_identity() -> None:
+    lib = _library()
+    pointer = lib.spl_toolkit_version()
+    assert pointer
+    try:
+        expected = os.environ.get("SPL_EXPECTED_VERSION")
+        if expected is None:
+            expected = "dev" if "SPL_NATIVE_LIBRARY" in os.environ else importlib.metadata.version("spl-toolkit")
+        assert ctypes.string_at(pointer).decode() == expected
+    finally:
+        lib.spl_string_free(pointer)
 
 
 def discover(query: str) -> dict[str, list[str]]:
@@ -152,6 +176,7 @@ CASES = {
     "repeated-empty": _repeated_and_empty_arrays,
     "invalid-cleanup": _invalid_handle_and_cleanup,
     "standalone-error": _standalone_error_ownership,
+    "version": _version_identity,
 }
 
 

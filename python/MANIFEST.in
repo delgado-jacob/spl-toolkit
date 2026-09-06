@@ -1,0 +1,7 @@
+include build_support.py
+include requirements-build.txt
+include requirements-dev.txt
+include README.md
+include LICENSE
+recursive-include spl_toolkit *.py *.h
+recursive-include tests *.py

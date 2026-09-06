@@ -40,6 +40,34 @@ func TestHealthEndpoint(t *testing.T) {
 	}
 }
 
+func TestInjectedVersionAppearsInHealthAndOpenAPI(t *testing.T) {
+	server := NewServerWithVersion("0.1.1-test")
+
+	health := httptest.NewRecorder()
+	server.Handler().ServeHTTP(health, httptest.NewRequest("GET", "/api/v1/health", nil))
+	var response HealthResponse
+	if err := json.Unmarshal(health.Body.Bytes(), &response); err != nil {
+		t.Fatal(err)
+	}
+	if response.Version != "0.1.1-test" {
+		t.Fatalf("health version = %q", response.Version)
+	}
+
+	openAPI := httptest.NewRecorder()
+	server.Handler().ServeHTTP(openAPI, httptest.NewRequest("GET", "/api/v1/openapi.json", nil))
+	var spec struct {
+		Info struct {
+			Version string `json:"version"`
+		} `json:"info"`
+	}
+	if err := json.Unmarshal(openAPI.Body.Bytes(), &spec); err != nil {
+		t.Fatal(err)
+	}
+	if spec.Info.Version != "0.1.1-test" {
+		t.Fatalf("OpenAPI version = %q", spec.Info.Version)
+	}
+}
+
 func TestMapQueryEndpoint(t *testing.T) {
 	server := NewServer()
 

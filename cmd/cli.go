@@ -8,6 +8,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/delgado-jacob/spl-toolkit/internal/buildinfo"
 	"github.com/delgado-jacob/spl-toolkit/pkg/mapper"
 )
 
@@ -41,7 +42,7 @@ func runCLI(args []string, stdout, stderr io.Writer) int {
 		if len(args) != 1 {
 			return writeCLIError(stderr, "text", "version does not accept arguments", 2)
 		}
-		return writeGeneratedCLIResult([]byte(fmt.Sprintf("spl-toolkit %s\n", Version)), stdout, stderr)
+		return writeGeneratedCLIResult([]byte(fmt.Sprintf("spl-toolkit %s\n", buildinfo.Version)), stdout, stderr)
 	case "demo":
 		if len(args) != 1 {
 			return writeCLIError(stderr, "text", "demo does not accept arguments", 2)

@@ -126,6 +126,7 @@ extern SPLResult* spl_mapper_map_query(int mapperID, char* query);
 extern SPLResult* spl_mapper_map_query_with_context(int mapperID, char* query, char* contextJSON);
 extern SPLQueryInfo* spl_mapper_discover_query(int mapperID, char* query);
 extern void spl_string_free(char* value);
+extern char* spl_toolkit_version(void);
 extern void spl_result_free(SPLResult* result);
 extern void spl_query_info_free(SPLQueryInfo* info);
 
