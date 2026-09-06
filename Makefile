@@ -1,6 +1,6 @@
 # SPL Toolkit - Build and Release Automation
 
-.PHONY: build test clean install lint fmt deps python-build python-test python-install release help # vet
+.PHONY: build build-server build-shared build-all test test-coverage clean install lint fmt deps deps-update python-build python-test python-install release help generate-docs
 
 # Go variables
 GOCMD=go
@@ -48,34 +48,35 @@ help: ## Show this help message
 
 deps: ## Download Go dependencies
 	$(GOMOD) download
+
+deps-update: ## Intentionally update Go module metadata
 	$(GOMOD) tidy
 
 fmt: ## Format Go code
-	$(GOFMT) -s -w .
+	$(GOCMD) fmt ./...
 
-#vet: ## Run go vet
-#	$(GOVET) ./...
+lint: ## Check handwritten Go formatting, vet, and tests
+	$(PYTHON) tools/check_go.py
 
-lint: fmt # vet ## Run linting tools
+test: ## Run Go tests
+	$(GOTEST) -mod=readonly -race ./...
 
-test: deps ## Run Go tests
-	$(GOTEST) -v -race -coverprofile=coverage.out ./...
-
-test-coverage: test ## Run tests and show coverage
+test-coverage: ## Run tests and show coverage
+	$(GOTEST) -mod=readonly -race -coverprofile=coverage.out ./...
 	$(GOCMD) tool cover -html=coverage.out -o coverage.html
 	@echo "Coverage report generated: coverage.html"
 
-build: deps lint ## Build the main binary
+build: ## Build the main binary
 	mkdir -p $(BUILD_DIR)
-	$(GOBUILD) -ldflags "-X main.Version=$(VERSION)" -o $(BUILD_DIR)/$(BINARY_NAME) ./cmd
+	$(GOBUILD) -mod=readonly -trimpath -o $(BUILD_DIR)/$(BINARY_NAME) ./cmd
 
-build-server: deps lint generate-docs ## Build the REST API server binary
+build-server: ## Build the REST API server binary
 	mkdir -p $(BUILD_DIR)
-	$(GOBUILD) -ldflags "-X main.Version=$(VERSION)" -o $(BUILD_DIR)/$(SERVER_BINARY_NAME) ./cmd/server
+	$(GOBUILD) -mod=readonly -trimpath -o $(BUILD_DIR)/$(SERVER_BINARY_NAME) ./cmd/server
 
-build-shared: deps lint ## Build shared library for Python bindings
+build-shared: ## Build shared library for Python bindings
 	mkdir -p $(BUILD_DIR)
-	$(GOBUILD) -buildmode=c-shared -o $(BUILD_DIR)/$(SHARED_LIB_NAME)$(SHARED_EXT) ./pkg/bindings
+	$(GOBUILD) -mod=readonly -trimpath -buildmode=c-shared -o $(BUILD_DIR)/$(SHARED_LIB_NAME)$(SHARED_EXT) ./pkg/bindings
 
 build-all: build build-server build-shared ## Build CLI, server binary, and shared library
 
@@ -194,8 +195,7 @@ security: ## Run security analysis
 # OpenAPI generation
 generate-docs: ## Generate OpenAPI documentation
 	@echo "Generating OpenAPI documentation..."
-	@go install github.com/swaggo/swag/v2/cmd/swag@latest
-	@go run github.com/swaggo/swag/v2/cmd/swag@latest init --v3.1 -g cmd/server/main.go -o docs
+	@go run github.com/swaggo/swag/v2/cmd/swag@v2.0.0-rc4 init --v3.1 -g cmd/server/main.go -o docs
 
 # Tools installation
 install-tools: ## Install development tools

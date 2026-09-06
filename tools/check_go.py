@@ -1,0 +1,79 @@
+#!/usr/bin/env python3
+"""Run formatting, vet, and test checks for the canonical Go source."""
+
+import os
+from pathlib import Path
+import subprocess
+import sys
+
+
+GENERATED_FILES = {"docs/docs.go"}
+GENERATED_DIRECTORIES = {"gen", "parser"}
+
+
+def command(arguments: list[str], *, capture: bool = False) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        arguments,
+        check=False,
+        text=True,
+        stdout=subprocess.PIPE if capture else None,
+    )
+
+
+def tracked_handwritten_go() -> list[str]:
+    result = subprocess.run(
+        ["git", "ls-files", "-z", "--", "*.go"],
+        check=True,
+        stdout=subprocess.PIPE,
+    )
+    names = [os.fsdecode(name) for name in result.stdout.split(b"\0") if name]
+    return [
+        name for name in names
+        if name not in GENERATED_FILES and Path(name).parts[0] not in GENERATED_DIRECTORIES
+    ]
+
+
+def main() -> int:
+    try:
+        handwritten = tracked_handwritten_go()
+    except subprocess.CalledProcessError as error:
+        return error.returncode or 1
+
+    if handwritten:
+        formatting = command(["gofmt", "-l", *handwritten], capture=True)
+        if formatting.returncode:
+            return formatting.returncode
+        unformatted = formatting.stdout.splitlines()
+        if unformatted:
+            print("handwritten Go files need formatting:", file=sys.stderr)
+            for name in unformatted:
+                print(name, file=sys.stderr)
+            return 1
+
+    packages_result = command(["go", "list", "-mod=readonly", "./..."], capture=True)
+    if packages_result.returncode:
+        return packages_result.returncode
+    packages = packages_result.stdout.splitlines()
+    generated_suffixes = tuple(f"/{name}" for name in sorted(GENERATED_DIRECTORIES | {"docs"}))
+    generated_packages = [name for name in packages if name.endswith(generated_suffixes)]
+    handwritten_packages = [name for name in packages if name not in generated_packages]
+
+    if generated_packages:
+        print(
+            "excluding generated packages from handwritten go vet gate: "
+            + ", ".join(generated_packages)
+            + "; generated ANTLR and OpenAPI sources are committed build inputs",
+            file=sys.stderr,
+        )
+
+    if handwritten_packages:
+        vet = command(["go", "vet", *handwritten_packages])
+        if vet.returncode:
+            return vet.returncode
+
+    tests = command(["go", "test", "-mod=readonly", "-race", "./..."])
+    return tests.returncode
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
