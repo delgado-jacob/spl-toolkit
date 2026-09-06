@@ -107,6 +107,7 @@ docs/swagger.yaml
 
 # Local development
 .local/
+.worktrees/
 local.env
 .env.local
 
