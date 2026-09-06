@@ -77,26 +77,33 @@ def test_native_workload_can_race_with_multiple_close_callers():
     mapper = SPLMapper(**mapper_kwargs())
     mapper.load_mappings([{"source": "src_ip", "target": "source_ip"}])
     start = threading.Event()
+    first_iteration_done = threading.Event()
+    allow_close = threading.Event()
 
-    def operate() -> int:
-        start.wait(timeout=5)
-        completed = 0
+    def operate() -> None:
+        assert start.wait(timeout=5)
         while True:
             try:
                 mapper.map_query("search src_ip=1")
                 mapper.discover_query("search src_ip=1")
-                completed += 1
+                first_iteration_done.set()
             except MapperNotFoundError:
-                return completed
+                return
+
+    def close() -> None:
+        assert allow_close.wait(timeout=5)
+        mapper.close()
 
     with ThreadPoolExecutor(max_workers=16) as pool:
         workers = [pool.submit(operate) for _ in range(12)]
-        closers = [pool.submit(mapper.close) for _ in range(4)]
+        closers = [pool.submit(close) for _ in range(4)]
         start.set()
-        completed = [worker.result(timeout=10) for worker in workers]
+        assert first_iteration_done.wait(timeout=5)
+        allow_close.set()
+        for worker in workers:
+            assert worker.result(timeout=10) is None
         for closer in closers:
             assert closer.result(timeout=10) is None
 
-    assert all(count >= 0 for count in completed)
     with pytest.raises(MapperNotFoundError):
         mapper.discover_query("search src_ip=1")
