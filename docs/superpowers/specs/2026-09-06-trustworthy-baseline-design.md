@@ -2,7 +2,7 @@
 
 Date: 2026-09-06
 
-Status: Approved design sections consolidated for written-spec review. Implementation has not started. The next step after approval of this document is an ExecPlan following `/Users/jacobdelgado/.codex/PLANS.md` and the writing-plans workflow.
+Status: Written spec approved on 2026-09-06; the user requested the implementation plan. Implementation has not started. The ExecPlan follows `/Users/jacobdelgado/.codex/PLANS.md` and the writing-plans workflow and requires plan confirmation before execution.
 
 ## Purpose and scope
 
