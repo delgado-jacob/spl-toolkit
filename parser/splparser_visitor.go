@@ -199,6 +199,12 @@ type SPLParserVisitor interface {
 	// Visit a parse tree produced by SPLParser#analysisSearchValue.
 	VisitAnalysisSearchValue(ctx *AnalysisSearchValueContext) interface{}
 
+	// Visit a parse tree produced by SPLParser#analysisUnquotedValue.
+	VisitAnalysisUnquotedValue(ctx *AnalysisUnquotedValueContext) interface{}
+
+	// Visit a parse tree produced by SPLParser#analysisUnquotedPart.
+	VisitAnalysisUnquotedPart(ctx *AnalysisUnquotedPartContext) interface{}
+
 	// Visit a parse tree produced by SPLParser#analysisExpression.
 	VisitAnalysisExpression(ctx *AnalysisExpressionContext) interface{}
 

@@ -32,6 +32,19 @@ options {
     caseInsensitive = true;
 }
 
+@lexer::members {
+// A dot before a quoted or parenthesized operand belongs to concatenation,
+// while interior dots and trailing dots in ordinary names remain identifiers.
+func (l *SPLLexer) identifierDotBoundary() bool {
+    input := l.GetInputStream()
+    if input.LA(-1) != '.' { return true }
+    lookahead := 1
+    for input.LA(lookahead) == ' ' || input.LA(lookahead) == '\t' || input.LA(lookahead) == '\r' || input.LA(lookahead) == '\n' { lookahead++ }
+    next := input.LA(lookahead)
+    return next != '"' && next != '\'' && next != '('
+}
+}
+
 channels {
     WHITESPACE,
     COMMENTS
@@ -435,7 +448,7 @@ TIME
 NUMBER:     [0-9]+ ('.' [0-9]+)?;
 STRING:     QUOTE ( ~["\\\r\n] | '\\' . )* QUOTE;
 QUOTED_IDENTIFIER: '\'' ( ~['\\\r\n] | '\\' . )* '\'';
-IDENTIFIER: [A-Z_.:\p{L}] [A-Z_.:0-9\p{L}\p{N}]*;
+IDENTIFIER: [A-Z_.:\p{L}] [A-Z_.:0-9\p{L}\p{N}]* {p.identifierDotBoundary()}?;
 
 // Other
 

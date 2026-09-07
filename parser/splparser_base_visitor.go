@@ -263,6 +263,14 @@ func (v *BaseSPLParserVisitor) VisitAnalysisSearchValue(ctx *AnalysisSearchValue
 	return v.VisitChildren(ctx)
 }
 
+func (v *BaseSPLParserVisitor) VisitAnalysisUnquotedValue(ctx *AnalysisUnquotedValueContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisUnquotedPart(ctx *AnalysisUnquotedPartContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
 func (v *BaseSPLParserVisitor) VisitAnalysisExpression(ctx *AnalysisExpressionContext) interface{} {
 	return v.VisitChildren(ctx)
 }

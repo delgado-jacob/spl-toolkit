@@ -404,6 +404,18 @@ func (s *BaseSPLParserListener) EnterAnalysisSearchValue(ctx *AnalysisSearchValu
 // ExitAnalysisSearchValue is called when production analysisSearchValue is exited.
 func (s *BaseSPLParserListener) ExitAnalysisSearchValue(ctx *AnalysisSearchValueContext) {}
 
+// EnterAnalysisUnquotedValue is called when production analysisUnquotedValue is entered.
+func (s *BaseSPLParserListener) EnterAnalysisUnquotedValue(ctx *AnalysisUnquotedValueContext) {}
+
+// ExitAnalysisUnquotedValue is called when production analysisUnquotedValue is exited.
+func (s *BaseSPLParserListener) ExitAnalysisUnquotedValue(ctx *AnalysisUnquotedValueContext) {}
+
+// EnterAnalysisUnquotedPart is called when production analysisUnquotedPart is entered.
+func (s *BaseSPLParserListener) EnterAnalysisUnquotedPart(ctx *AnalysisUnquotedPartContext) {}
+
+// ExitAnalysisUnquotedPart is called when production analysisUnquotedPart is exited.
+func (s *BaseSPLParserListener) ExitAnalysisUnquotedPart(ctx *AnalysisUnquotedPartContext) {}
+
 // EnterAnalysisExpression is called when production analysisExpression is entered.
 func (s *BaseSPLParserListener) EnterAnalysisExpression(ctx *AnalysisExpressionContext) {}
 

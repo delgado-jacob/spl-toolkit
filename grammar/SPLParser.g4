@@ -38,6 +38,11 @@ func (p *SPLParser) analysisCommandIs(names ...string) bool {
     for _, candidate := range names { if strings.EqualFold(name, candidate) { return true } }
     return false
 }
+// Whitespace/comments end unquoted search values even though their tokens are hidden.
+func (p *SPLParser) analysisTokensAdjacent() bool {
+    previous, next := p.GetTokenStream().LT(-1), p.GetTokenStream().LT(1)
+    return previous != nil && next != nil && previous.GetStop()+1 == next.GetStart()
+}
 func (p *SPLParser) analysisIsCommand() bool {
     kind := p.GetTokenStream().LA(1)
     return kind == SPLParserINIT_COMMAND || kind == SPLParserSTD_COMMAND || kind == SPLParserSTD_COMMAND_AND_FUNCTION
@@ -186,12 +191,11 @@ analysisSearchTerm
     | analysisSubquery
     | analysisSearchValue
     ;
-analysisSearchValue
-    : STRING | TIME
-    | (ADD | SUB)? NUMBER analysisIdentifier?
-    | MULT? analysisIdentifier (DIV analysisIdentifier)* MULT?
-    | DIV analysisIdentifier (DIV analysisIdentifier)* MULT?
-    | MULT
+analysisSearchValue : STRING | analysisUnquotedValue;
+analysisUnquotedValue : analysisUnquotedPart ({p.analysisTokensAdjacent()}? analysisUnquotedPart)*;
+analysisUnquotedPart
+    : analysisIdentifier | NUMBER | TIME
+    | ADD | SUB | MULT | DIV | MOD | POW | DOT | COLON | AT
     ;
 analysisExpression : analysisOr;
 analysisOr : analysisAnd (OR analysisAnd)*;

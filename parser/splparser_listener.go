@@ -199,6 +199,12 @@ type SPLParserListener interface {
 	// EnterAnalysisSearchValue is called when entering the analysisSearchValue production.
 	EnterAnalysisSearchValue(c *AnalysisSearchValueContext)
 
+	// EnterAnalysisUnquotedValue is called when entering the analysisUnquotedValue production.
+	EnterAnalysisUnquotedValue(c *AnalysisUnquotedValueContext)
+
+	// EnterAnalysisUnquotedPart is called when entering the analysisUnquotedPart production.
+	EnterAnalysisUnquotedPart(c *AnalysisUnquotedPartContext)
+
 	// EnterAnalysisExpression is called when entering the analysisExpression production.
 	EnterAnalysisExpression(c *AnalysisExpressionContext)
 
@@ -441,6 +447,12 @@ type SPLParserListener interface {
 
 	// ExitAnalysisSearchValue is called when exiting the analysisSearchValue production.
 	ExitAnalysisSearchValue(c *AnalysisSearchValueContext)
+
+	// ExitAnalysisUnquotedValue is called when exiting the analysisUnquotedValue production.
+	ExitAnalysisUnquotedValue(c *AnalysisUnquotedValueContext)
+
+	// ExitAnalysisUnquotedPart is called when exiting the analysisUnquotedPart production.
+	ExitAnalysisUnquotedPart(c *AnalysisUnquotedPartContext)
 
 	// ExitAnalysisExpression is called when exiting the analysisExpression production.
 	ExitAnalysisExpression(c *AnalysisExpressionContext)

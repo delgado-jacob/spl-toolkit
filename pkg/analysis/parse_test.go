@@ -101,6 +101,9 @@ func TestParseLegacyTokenMeaning(t *testing.T) {
 		{"10.2.3.4", []int{parser.SPLLexerNUMBER, parser.SPLLexerIDENTIFIER}},
 		{"/var/log/app.log", []int{parser.SPLLexerDIV, parser.SPLLexerFUNCTION, parser.SPLLexerDIV, parser.SPLLexerFUNCTION, parser.SPLLexerDIV, parser.SPLLexerIDENTIFIER}},
 		{"host*", []int{parser.SPLLexerIDENTIFIER, parser.SPLLexerMULT}},
+		{"host.name", []int{parser.SPLLexerIDENTIFIER}},
+		{"host.", []int{parser.SPLLexerIDENTIFIER}},
+		{".metadata", []int{parser.SPLLexerIDENTIFIER}},
 	} {
 		l := parser.NewSPLLexer(antlr.NewInputStream(tc.q))
 		var got []int
@@ -208,6 +211,60 @@ func TestParseScopePreorderAndSpans(t *testing.T) {
 		stage := r.Stages[i]
 		if stage.Command != want.command || stage.ScopeID != want.scope || stage.Position != want.position || text[stage.Location.Start.Offset:stage.Location.End.Offset] != want.span {
 			t.Fatal(stage)
+		}
+	}
+}
+
+// An adjacent string concatenation operator must not become part of its left identifier.
+func TestParseAdjacentConcatenation(t *testing.T) {
+	for _, q := range []string{`| eval x=host."!"`, `| eval x=host . "!"`, `| eval x=host."!"."?"`, `| eval x=host. "!"`, `| eval x=host.("!")`, `| eval x=host.'other'`} {
+		p := parseDocument(q)
+		if len(p.diagnostics) != 0 {
+			t.Fatalf("%s: %+v", q, p.diagnostics)
+		}
+		stage := p.tree.AnalysisPipeline().AnalysisStage(0).(*parser.AnalysisEvalStageContext)
+		concat := stage.AnalysisAssignment(0).AnalysisExpression().AnalysisOr().AnalysisAnd(0).AnalysisNot(0).AnalysisComparison().AnalysisConcat(0)
+		if len(concat.AllAnalysisAdd()) < 2 {
+			t.Fatalf("%s lost concatenation", q)
+		}
+		left := concat.AnalysisAdd(0).AnalysisMultiply(0).AnalysisPower(0).AnalysisUnary().AnalysisAtom().AnalysisIdentifier()
+		if left == nil || left.GetText() != "host" {
+			t.Fatalf("%s left operand %v", q, left)
+		}
+	}
+}
+
+// A comparison's complete unquoted RHS owns adjacent punctuation; spaces start another search term.
+func TestParseUnquotedSearchValueAdjacency(t *testing.T) {
+	for _, tc := range []struct {
+		q, want string
+		terms   int
+	}{
+		{`search host=web-01`, `web-01`, 1},
+		{`search host=web-01 extra`, `web-01`, 2},
+		{`search host=web -01`, `web`, 2},
+		{`search host=web/* comment */-01`, `web`, 2},
+		{`search host=café-01 status=200`, `café-01`, 2},
+		{`search source=/var/log/web-01.log status=200`, `/var/log/web-01.log`, 2},
+		{`search src_ip=10.2.3.4 status=200`, `10.2.3.4`, 2},
+		{`search host=web* extra`, `web*`, 2},
+	} {
+		p := parseDocument(tc.q)
+		if len(p.diagnostics) != 0 {
+			t.Fatalf("%s: %+v", tc.q, p.diagnostics)
+		}
+		stage := p.tree.AnalysisPipeline().AnalysisInitialStage().AnalysisStage().(*parser.AnalysisSearchStageContext)
+		terms := stage.AnalysisSearch().AnalysisSearchAnd(0).AllAnalysisSearchUnary()
+		if len(terms) != tc.terms {
+			t.Fatalf("%s has %d terms, want %d", tc.q, len(terms), tc.terms)
+		}
+		rhs := terms[0].AnalysisSearchTerm().AnalysisSearchValue(0)
+		if rhs.GetText() != tc.want {
+			t.Fatalf("%s RHS %q want %q", tc.q, rhs.GetText(), tc.want)
+		}
+		loc := p.source.contextLocation(rhs)
+		if tc.q[loc.Start.Offset:loc.End.Offset] != tc.want {
+			t.Fatalf("%s RHS source %+v", tc.q, loc)
 		}
 	}
 }
