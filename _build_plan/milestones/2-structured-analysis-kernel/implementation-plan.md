@@ -32,7 +32,7 @@ Today callers obtain flat field names and parser errors without knowing where a 
 - [x] (2026-09-07) Task 2 complete through b430722 after one scoped fix round and clean independent re-review: references, flow, functions/capabilities; full Go race and covering Go1.22 checks passed.
 - [x] Task 3: scoped dependencies/recovery, role-specific wildcard resolution, invalid-UTF8 rejection, and 24 full-report corpus cases complete through e3c4684 after malformed-child ownership fix passed independent re-review; race and Go1.22 analysis passed.
 - [x] Task 4: CLI/REST analysis and capabilities, strict shared Unicode input validation, generated OpenAPI, and 24-case adapter parity complete at df1bb0b; independent combined review clean.
-- [ ] Follow-up core gate after Task4: wildcard fields exclusions consistently use role=remove; canonical/corpus regression and independent review.
+- [x] Follow-up core gate after Task4: wildcard fields exclusions use role=remove/binding=not_applicable at 829c4c1, with closed/open regressions, 26-case Go/CLI/REST parity, and clean independent scoped review.
 - [ ] Task 5: C/Python analysis ownership and native package source closure; red real-library tests, implementation, green package checks, review, commit.
 - [ ] Task 6: shared full-report parity, installed-wheel acceptance, docs, final review and milestone log.
 
@@ -61,7 +61,7 @@ Decision: Implicit aggregate names are semantic names such as `sum(bytes)`, not 
 ## Outcomes & Retrospective
 
 
-Task 1 foundation is implemented and independently reviewed through c57144b; two grammar-boundary issues were corrected with exact source and legacy mixed-mode regressions. Task 2 semantics is independently reviewed through b430722. Task 3 is independently reviewed through e3c4684 with 24 full-report corpus cases, source-encoding rejection, and malformed-child ownership recovery; Tasks 5–6 and the explicit removal-role follow-up remain. Task 4 CLI/REST is independently reviewed at df1bb0b with 24-case parity and shared Unicode input validation. Open-input fields internal-membership uncertainty and unsupported rename overlaps are explicit conservative limitations. Completion requires every task below, meaningful installed-wheel parity, and a milestone log that distinguishes local checks from unrun platform release acceptance. Do not represent the inherited milestone 1 remote evidence as proof for new source.
+Task 1 foundation is implemented and independently reviewed through c57144b; two grammar-boundary issues were corrected with exact source and legacy mixed-mode regressions. Task 2 semantics is independently reviewed through b430722. Task 3 is independently reviewed through e3c4684 with 24 full-report corpus cases, source-encoding rejection, and malformed-child ownership recovery; Tasks 5–6 remain; the removal-role follow-up is independently reviewed through 829c4c1, with 26 shared cases. Task 4 CLI/REST is independently reviewed at df1bb0b with 24-case parity and shared Unicode input validation. Open-input fields internal-membership uncertainty and unsupported rename overlaps are explicit conservative limitations. Completion requires every task below, meaningful installed-wheel parity, and a milestone log that distinguishes local checks from unrun platform release acceptance. Do not represent the inherited milestone 1 remote evidence as proof for new source.
 
 ## Context and Orientation
 
