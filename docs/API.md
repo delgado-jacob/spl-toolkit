@@ -145,4 +145,106 @@ Stable diagnostic codes are `SPL_SYNTAX_ERROR`, `SPL_UNAVAILABLE_FIELD`, `SPL_UN
 
 ## Migrating from discovery
 
-Legacy Go `DiscoverQuery`, Python `QueryInfo`/`discover_query`, CLI `discover`, REST discovery, and mapping remain available. Flat `InputFields`/`input_fields` cannot describe read timing, derived fields, scopes, source positions, or coverage. Structured consumers should call analysis, inspect each reference's role/binding and scope, and check status/coverage before treating the result as conclusive. Legacy and structured field classification are distinct contracts; do not infer identical flat field lists or replace mapping behavior based on an analysis report. External field-list/schema validation, broad SPL2, and new rewrite semantics are outside this API.
+Legacy Go `DiscoverQuery`, Python `QueryInfo`/`discover_query`, CLI `discover`, REST discovery, and mapping remain available. Flat `InputFields`/`input_fields` cannot describe read timing, derived fields, scopes, source positions, or coverage. Structured consumers should call analysis, inspect each reference's role/binding and scope, and check status/coverage before treating the result as conclusive. Legacy and structured field classification are distinct contracts; do not infer identical flat field lists or replace mapping behavior based on an analysis report. Use field-list validation below for external declarations. JSON Schema validation, broad SPL2, and new rewrite semantics remain outside this API.
+
+## Field-list validation
+
+Use `pkg/validation` to validate source obligations against an offline declaration of concrete fields. It follows the canonical query flow: derived names need no catalog entry, removed fields remain unavailable, and supported selectors expand against the fields available at that stage. Ordinary consumers should call validation rather than reconstructing obligations from flat discovery or replaying field transfers.
+
+```go
+package main
+
+import (
+    "fmt"
+    "log"
+
+    "github.com/delgado-jacob/spl-toolkit/pkg/analysis"
+    "github.com/delgado-jacob/spl-toolkit/pkg/validation"
+)
+
+func main() {
+    catalog := validation.FieldCatalog{
+        Fields: []string{"host"}, OptionalFields: []string{"user"},
+        Identity: "local-fields", Version: "1",
+    }
+    report, err := validation.Validate(analysis.QueryDocument{
+        Text: "eval label=host | table label", SourceID: "example.spl",
+    }, catalog)
+    if err != nil { log.Fatal(err) }
+    fmt.Println(report.Status) // valid
+    batch, err := validation.ValidateBatch([]analysis.QueryDocument{
+        {Text: "table host", SourceID: "good.spl"},
+        {Text: "table missing", SourceID: "missing.spl"},
+        {Text: "| mystery | table host", SourceID: "unknown.spl"},
+    }, catalog)
+    if err != nil { log.Fatal(err) }
+    fmt.Println(batch.Status) // invalid; reports retain input order
+}
+```
+
+`validation.Validate(document, catalog) (*validation.Report, error)` and `validation.ValidateBatch(documents, catalog) (*validation.BatchReport, error)` return content findings in reports and request failures as errors. JSON callers use `DecodeFieldCatalog`, `DecodeRequest`, `DecodeBatchRequest`, or `DecodeDocuments` for strict decoding. A catalog is either a JSON string array such as `["host"]` or an object:
+
+```json
+{"fields":["host","user.name"],"optional_fields":["hostname"],"identity":"local-fields","version":"1"}
+```
+
+Object `fields` is required. `optional_fields` defaults to `[]`; `identity` and `version` default to empty strings. Names are concrete, nonblank, case-sensitive UTF-8 strings; duplicates, ordinary/optional overlap, nulls, unknown properties, duplicate JSON keys, trailing JSON, invalid Unicode, and wrong value types are rejected. Catalog order normalizes deterministically. An empty catalog is useful and valid. Metadata is retained in `target`; it does not resolve a file, URL, or remote schema. A declaration of `user` does not declare `user.name`, and a declaration of `user.name` does not declare `user`.
+
+Optionality is declaration-only: an optional declared source is `optional_equivalent`, which is valid. It does not establish event presence, conditional query availability, or a required property. Structurally removed fields remain unavailable even if declared optional. Created fields are derived and need no catalog declaration. Types, actual events, JSON Schema, and OCSF are outside this feature.
+
+### CLI single and batch inputs
+
+Create local catalog and batch files, then invoke the CLI:
+
+```bash
+printf '%s\n' '["host"]' > fields.json
+spl-toolkit validate-fields --fields fields.json --query 'eval label=host | table label' --source-id example.spl --format json
+printf '%s\n' '[{"text":"table host","source_id":"good.spl"},{"text":"table missing","source_id":"missing.spl"},{"text":"| mystery | table host","source_id":"unknown.spl"}]' > queries.json
+spl-toolkit validate-fields --fields fields.json --batch queries.json --format json --output reports.json
+```
+
+The single example exits 0; the batch exits 1 after writing ordered valid/invalid/incomplete reports. Exactly one positional query, `--query`, `--file path`, `--stdin`, or `--batch path` is required. `--batch -` reads the JSON document array from stdin. `--fields` always names a local file and cannot be `-`. `--format text|json` and `--output path` work for either mode. Reports are emitted even when invalid or incomplete. Exit codes are 0 valid, 1 invalid, 3 incomplete, and 2 request/options/I/O errors.
+
+Single-query options are `--language spl`, `--profile splunkd`, `--compatibility-version current`, and `--source-id ID`. File input preserves all bytes and defaults source identity to the supplied path; stdin defaults to `<stdin>`; inline queries default to an empty source ID. An explicit `--source-id` overrides either default, including an empty value. Align source IDs when comparing file and stdin reports. Batch documents supply their own options and source IDs; global document options are rejected in batch mode. The legacy `validate` command retains its grammar-only behavior.
+
+### Python single and batch calls
+
+```python
+from spl_toolkit import SPLMapper
+
+with SPLMapper() as mapper:
+    report = mapper.validate_fields(
+        "eval label=host | table label", ["host"],
+        language="spl", profile="splunkd", version="current", source_id="example.spl",
+    )
+    batch = mapper.validate_fields_batch(
+        [{"text": "table host", "source_id": "good.spl"},
+         {"text": "table missing", "source_id": "missing.spl"}],
+        {"fields": ["host"], "optional_fields": ["user"]},
+    )
+```
+
+Both return the direct report dictionary. Single-call compatibility options are keyword-only and default as shown; `source_id` defaults to `''`. Batch documents are dictionaries with required string `text` and optional string `language`, `profile`, `version`, and `source_id`. Invalid requests raise `SPLMapperError`; invalid/incomplete content returns a report. Context-manager/close and native-result ownership rules also apply to validation.
+
+### REST single and batch requests
+
+```bash
+curl -sS http://localhost:8080/api/v1/query/validate-fields \
+  -H 'Content-Type: application/json' \
+  -d '{"document":{"text":"eval label=host | table label","source_id":"example.spl"},"catalog":["host"]}'
+curl -sS http://localhost:8080/api/v1/query/validate-fields/batch \
+  -H 'Content-Type: application/json' \
+  -d '{"documents":[{"text":"table host","source_id":"good.spl"},{"text":"table missing","source_id":"missing.spl"}],"catalog":{"fields":["host"],"optional_fields":["user"]}}'
+```
+
+The endpoints return HTTP 200 for all content statuses. Requests require `document` or a nonempty `documents` array plus `catalog`; unknown or malformed properties and unsupported document options return HTTP 400. Invalid batch requests produce no partial reports. Existing content-type and body-size protections apply. Every document preserves its original text and identity; empty compatibility strings normalize to `spl` / `splunkd` / `current`.
+
+### Validation reports and finite-source evidence
+
+A single report has integer `schema_version: 1`, `target` (`kind: "field_list"` plus normalized catalog), embedded `analysis`, overall `status`, `coverage`, `outcomes`, and `diagnostics`. Batch reports have integer `schema_version: 1`, overall `status`, and ordered `reports`. Status precedence is invalid, then incomplete, then valid, both within a query and across a batch. Definite missing, unavailable, or syntax errors take precedence without hiding incomplete coverage.
+
+Each outcome contains `reference_id`, `outcome`, and ordered `matches`. Outcome values are `matching`, `missing`, `unavailable`, `optional_equivalent`, or `indeterminate`. Each match retains concrete `name`, `binding` (`source` or `derived`), and its own `outcome` (`matching` or `optional_equivalent`); preserve every match even when the aggregate outcome is matching. Non-consuming removals do not create catalog obligations. A conclusively empty inclusion is missing; an empty exclusion is harmless. All arrays remain arrays when empty. IDs, messages, source locations, and array order are canonical, using the UTF-8 positions described above.
+
+Coverage separately reports `syntax_complete`, `semantic_complete`, and `schema_complete`, with reasons. Supported projection/removal wildcards refine downstream canonical lineage as well as matches. Unsupported wildcard command forms (including wildcard rename and aggregate/grouping forms), unknown commands/functions, dynamic references, macros, uncertain conditional outputs, and unresolved branch behavior retain incomplete coverage. Optional declarations cannot resolve conditional availability.
+
+Advanced Go integrations can call `analysis.AnalyzeWithSourceFields(document, fields) (*analysis.SourceAnalysis, error)`. This uses a finite universe of concrete source names; nil and empty both mean a known empty universe. It returns `Result` (`analysis` in JSON) and ordered `Expansions` (`expansions`), where each entry contains `reference_id`, `complete`, and `matches` with concrete `name` and `binding`. `complete: true` with no matches is conclusive empty membership; `complete: false` retains uncertainty. Consumers must preserve completeness and all per-match evidence. This hook refines canonical transfer and lineage but does not classify catalog optionality. Plain `analysis.Analyze` and its wire format remain unchanged. Call validation for ordinary field-catalog decisions.

@@ -402,3 +402,25 @@ def test_full_package_cli_retains_both_installation_results(tmp_path: Path, monk
                                      "--wheel-dir", str(tmp_path), "--evidence", str(evidence_path)])
     assert checker.main() == 0
     assert json.loads(evidence_path.read_text(encoding="utf-8")) == result
+
+
+def test_installed_surface_suite_requires_validation_parity(tmp_path: Path):
+    checker = load_package_checker()
+    assert "test_validation_surfaces.py" in checker.ACCEPTANCE_FILES
+    destination = tmp_path / "acceptance"
+    checker._copy_required_files(ROOT / "tests/acceptance", destination, checker.ACCEPTANCE_FILES)
+    assert (destination / "test_validation_surfaces.py").read_bytes() == (ROOT / "tests/acceptance/test_validation_surfaces.py").read_bytes()
+
+
+def test_required_pytest_plugin_rejects_empty_collection(tmp_path: Path):
+    checker = load_package_checker()
+    suite = tmp_path / "empty-suite"
+    suite.mkdir()
+    result = tmp_path / "counts.json"
+    checker.write_required_pytest_plugin(suite)
+    completed = subprocess.run(
+        [sys.executable, "-m", "pytest", str(suite), "-q"],
+        env=checker.clean_env() | {"SPL_TEST_COUNTS": str(result)}, check=False,
+    )
+    assert completed.returncode != 0
+    assert json.loads(result.read_text(encoding="utf-8")) == {"collected": 0, "passed": 0, "failed": 0, "skipped": 0}

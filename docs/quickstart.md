@@ -56,3 +56,14 @@ Conditional rules require `enabled: true`. Lower numeric priorities run first, e
 ```
 
 The CLI extracts source and sourcetype context from the query. Go, Python, and REST can also accept explicit context through their mapping APIs.
+
+## Validate a field catalog
+
+```bash
+printf '%s\n' '["host"]' > fields.json
+spl-toolkit validate-fields --fields fields.json --query 'eval label=host | table label' --format json
+printf '%s\n' '[{"text":"table host","source_id":"good.spl"},{"text":"table missing","source_id":"missing.spl"}]' > queries.json
+spl-toolkit validate-fields --fields fields.json --batch queries.json --format json --output reports.json
+```
+
+The first query is valid because `label` is derived from declared `host`; it needs no separate catalog declaration. The batch emits both reports and exits 1 for the missing field. Valid exits 0, invalid exits 1, incomplete exits 3, and request/I/O errors exit 2. The [field-list API](API.md#field-list-validation) includes Go, Python, and REST single/batch workflows, catalog metadata and optional fields, source identities, and exact report semantics. Validation checks declarations, not event presence or types.

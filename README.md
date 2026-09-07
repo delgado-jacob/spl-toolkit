@@ -5,9 +5,10 @@ SPL Toolkit 0.1.1 is an offline library and command-line tool for bounded operat
 - replace configured field names while preserving the query text around them;
 - discover data models, datasets, lookups, macros, sources, sourcetypes, and input fields;
 - validate queries against the bundled legacy grammar;
-- analyze query flow, located references, lineage, dependencies, and coverage.
+- analyze query flow, located references, lineage, dependencies, and coverage;
+- validate source field obligations against an offline field catalog, singly or in ordered batches.
 
-The Go implementation is canonical. The Python package includes the native Go library, and the REST server calls the same Go APIs. Structured analysis supports the bounded SPL/splunkd/current contract. It does not provide schema validation, raw-to-data-model translation, data-model rewriting, learned mappings, SPL2 modules, or complete Splunk syntax coverage.
+The Go implementation is canonical. The Python package includes the native Go library, and the REST server calls the same Go APIs. Structured analysis supports the bounded SPL/splunkd/current contract. It does not provide JSON Schema or OCSF validation, raw-to-data-model translation, data-model rewriting, learned mappings, SPL2 modules, or complete Splunk syntax coverage.
 
 ## Structured analysis
 
@@ -19,6 +20,15 @@ spl-toolkit capabilities --format json
 Analysis emits report format `1` with original source, located references, scope/stage IDs, lineage, dependencies, diagnostics, and explicit coverage. Exit codes are 0 valid, 1 invalid, 3 incomplete, and 2 usage/options/I/O errors. Structural validity does not prove external schema membership or successful Splunk execution. Go, native Python, CLI, and REST share the canonical report.
 
 See the [structured analysis API](docs/API.md) for Go/Python examples, REST routes, exact UTF-8 byte and Unicode column coordinates, supported forms, and migration from flat discovery. See [compatibility](docs/compatibility.md) for the distinction between local analysis verification and released platform evidence.
+
+## Field-list validation
+
+```bash
+printf '%s\n' '["host"]' > fields.json
+spl-toolkit validate-fields --fields fields.json --query 'eval label=host | table label' --format json
+```
+
+Validation follows derived fields, removals, and supported wildcards through canonical query flow. Nested names match exactly; optional declarations are valid without asserting event presence. Reports distinguish valid, invalid, and incomplete coverage, with exits 0, 1, and 3 (2 for request/I/O errors). Go, CLI, native Python, and REST expose identical single/batch reports. See the [validation API](docs/API.md#field-list-validation) for catalog shapes, options, examples, and limitations.
 
 ## Go
 
@@ -64,7 +74,7 @@ Use a context manager or call `close()`. The package checks that its metadata ve
 
 ## CLI
 
-Mapping requires a configuration file. Discovery and query validation do not. See the executable [CLI usage](docs/cli.md) for commands, output, and exit codes.
+Mapping requires a configuration file; field-list validation requires a catalog file. Discovery and legacy grammar validation do not. See the executable [CLI usage](docs/cli.md) for commands, output, and exit codes.
 
 ```bash
 spl-toolkit map --config testdata/baseline/mappings.json --query 'search src_ip=1'
@@ -92,4 +102,4 @@ The REST service is offline during query processing. Its Swagger page loads asse
 - [REST server](docs/api-server.md)
 - [Performance baseline](docs/performance.md)
 
-Later milestones may expand standalone SPL2 parsing and structured analysis. Those capabilities are outside this Milestone 1 release.
+Structured analysis and field-list validation have local acceptance coverage beyond the historical 0.1.1 release matrix. Standalone SPL2 and schema validation remain future work.

@@ -15,6 +15,14 @@ Go 1.22.12 targeted packages pass locally using `-ldflags=-linkmode=external`. O
 
 These checks establish local analysis acceptance only. The historical release matrix below predates structured analysis and does not establish analysis acceptance on its other platforms or Python versions. No new cross-platform release or external Splunk-runtime conformance is claimed. Analysis deliberately reports incomplete coverage for the unsupported forms documented in the API reference.
 
+## Field-list validation local verification
+
+Field-list validation uses the same `spl` / `splunkd` / `current` compatibility defaults and integer report format `1`. Go, CLI, native Python, and REST compare all 26 shared validation reports exactly, including nested names, optional metadata, derived fields, removal, wildcard matches, conditional uncertainty, Unicode locations, and incomplete/error precedence. Batch reports preserve input order. Declaration optionality is valid equivalence; it does not assert event presence or override structural availability.
+
+Local macOS arm64 verification uses Go 1.25.5 race checks, Go 1.22.12 affected-package tests with external linking, and Python 3.12.6. Each of the built wheel and rebuilt-sdist wheel runs 120 required native tests and 26 surface tests outside the checkout, with zero failures or skips. Surface acceptance includes the 26-case analysis corpus, the 26-case validation corpus, documented CLI commands, complete validation file/stdin/output equivalence, ordered batches, and separate request-error checks. The source Python suite has 137 passing tests; the tooling suite has 79. These are local verification counts, not a new release matrix. Existing Go linker and Python tar-extraction deprecation warnings remain qualified; no product defect is inferred from those warnings.
+
+Unsupported wildcard command forms, dynamic constructs, macros, and conditional or unresolved branch behavior retain incomplete coverage. JSON Schema and OCSF validation have not shipped. The historical release evidence below does not establish acceptance for these new capabilities on other operating systems or Python versions. Final independent milestone review and additional controller-owned runtime checks are separate gates.
+
 ## Historical 0.1.1 release acceptance
 
 SPL Toolkit 0.1.1 was accepted at source commit `6b55f8902ff1a990aea8951cd78934b32c90660a` by [GitHub Actions run 34077738907](https://github.com/delgado-jacob/spl-toolkit/actions/runs/34077738907). All 24 jobs passed, including exact-source aggregation of 28 evidence records.

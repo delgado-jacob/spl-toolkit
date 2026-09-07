@@ -48,7 +48,7 @@ with SPLMapper() as mapper:
     assert mapper.map_query('search src_ip=1') == 'search source_ip=1'
 """
 NATIVE_TESTS = ("test_native_abi.py", "test_native_mapper.py", "test_native_analysis.py", "test_native_validation.py")
-ACCEPTANCE_FILES = ("test_documented_cli.py", "test_surfaces.py", "test_analysis_surfaces.py", "cli_examples.json")
+ACCEPTANCE_FILES = ("test_documented_cli.py", "test_surfaces.py", "test_analysis_surfaces.py", "test_validation_surfaces.py", "cli_examples.json")
 REQUIRED_PYTEST_PLUGIN = r'''\
 import json
 import os
@@ -238,7 +238,10 @@ def install_and_check(
     _copy_required_files(docs_root / "tests" / "acceptance", acceptance_dir, ACCEPTANCE_FILES)
     fixture = outside_checkout / f"cases-{directory.name}.json"
     shutil.copy2(fixture_source, fixture)
+    validation_fixture = outside_checkout / f"validation-cases-{directory.name}.json"
+    shutil.copy2(docs_root / "testdata" / "validation" / "cases.json", validation_fixture)
     acceptance_env = install_env | analysis_env | {
+        "SPL_VALIDATION_FIXTURES": str(validation_fixture.resolve()),
         "SPL_CLI": str(cli.resolve()),
         "SPL_SERVER": str(server.resolve()),
         "SPL_FIXTURES": str(fixture.resolve()),
@@ -250,7 +253,7 @@ def install_and_check(
     )
     return metadata | {
         "wheel_sha256": sha256(wheel),
-        "fixture_hashes": {"baseline": sha256(fixture), "analysis": sha256(analysis_fixture)},
+        "fixture_hashes": {"baseline": sha256(fixture), "analysis": sha256(analysis_fixture), "validation": sha256(validation_fixture)},
         "tests": {"required_native": native_counts, "surface_acceptance": surface_counts},
         "cli_examples": "passed",
         "surface_parity": "passed",
