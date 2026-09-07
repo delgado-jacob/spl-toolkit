@@ -1,19 +1,22 @@
 ## What's new in the app
 
-SPL Toolkit now explains query flow with deterministic structured reports: source locations, stages/scopes, references, field availability/lineage, dependencies, diagnostics, and explicit incomplete coverage. The Go kernel, CLI, owned native Python API, and REST expose the same report format1 under SPL/splunkd/current. Legacy discovery/mapping remain available. This log records completed Task6 local checks; independent Task6/broad milestone review and the root's outer verification remain pending.
+- See which fields a query reads, creates, renames, or removes.
+- Follow fields through query steps and nested searches.
+- Locate findings in the original query and see where analysis is incomplete.
+- Keep using existing mapping and discovery workflows.
 
 ## Built files and contracts
 
-- Public kernel `pkg/analysis`: QueryDocument/Result/CapabilityManifest, source index, typed ANTLR traversal, transfer rules, scope/dependency/recovery handling, and26 independently reviewed full-report fixtures in `testdata/analysis/cases.json`.
+- Public kernel `pkg/analysis`: QueryDocument/Result/CapabilityManifest, source index, typed ANTLR traversal, transfer rules, scope/dependency/recovery handling, and 26 independently reviewed full-report fixtures in `testdata/analysis/cases.json`.
 - CLI `analyze` and `capabilities`, REST `POST /api/v1/query/analyze` / `GET /api/v1/capabilities`, C owned-result exports and guarded Python `analyze_query`/`capabilities` all preserve canonical values.
 - Native source distribution includes the analysis kernel and strict JSON Unicode input validator. Installed suites now require `tests/acceptance/test_analysis_surfaces.py`, copied corpus identity, and zero required skips on both wheel paths.
 - User-facing contracts live in README, `docs/API.md`, `docs/compatibility.md`, and `python/README.md`. Runtime and permanent user documentation do not depend on this build plan.
 
-Additive analysis preserves the old flat API while giving new consumers flow/coverage data. Report `schema_version` is integer 1; fixture wrapper version is string "1"; compatibility version is `current`. Half-open locations use zero-based UTF8 byte offsets, one-based code-point columns/lines, tabs as one column, and CRLF as one newline. Arrays/order/IDs/messages/source text are preserved; only JSON object-key order is irrelevant in parity checks. Invalid options/encoding are request errors; syntax/structural failures are report diagnostics. `invalid` takes precedence over incomplete coverage.
+Additive analysis preserves the old flat API while giving new consumers flow/coverage data. Report `schema_version` is integer 1; fixture wrapper version is string "1"; compatibility version is `current`. Half-open locations use zero-based UTF-8 byte offsets, one-based code-point columns/lines, tabs as one column, and CRLF as one newline. Arrays/order/IDs/messages/source text are preserved; only JSON object-key order is irrelevant in parity checks. Invalid options/encoding are request errors; syntax/structural failures are report diagnostics. `invalid` takes precedence over incomplete coverage.
 
 ## Accepted limitations and next milestones
 
-M3 must refine **open-input fields-inclusion retained-internal membership using a finite field catalog** before treating ordinary projections as conclusive. Do not invent `_raw`/`_time`, lose known internals/tombstones, or turn an unknown into false structural absence. External schema/field-list existence is separate from the current structural availability model. Removal references are non-consuming obligations; exact versus wildcard roles are grammar/context dependent.
+M3 must refine **open-input fields-inclusion retained-internal membership using a finite field catalog** before treating ordinary projections as conclusive. Do not invent `_raw`/`_time`, lose known internals/tombstones, or turn an unknown into false structural absence. External schema/field-list existence is separate from the current structural availability model. Removal references are non-consuming and create no schema obligation; exact versus wildcard roles are grammar/context dependent.
 
 M6 must retain **component and overlapping data-model/dataset source spans**, normalized qualified identities, distinct reference IDs, and synthetic `macro` stages. Separate `datamodel Web All_Traffic` has a dataset component span normalized to `Web.All_Traffic`; qualified operands can expose overlapping root/model and dataset ranges. Future rewriting requires typed eligibility/rendering proof and conflict handling; do not directly replace normalized names at every located span. Macro expansion is unresolved and branch merging is incomplete.
 
@@ -63,9 +66,9 @@ Ruling: Allow post-Task4 correction worker to change CLI/REST corpus-loader guar
 
 ## Scope and source history
 
-No product semantic source changed in Task6. `docs/API.md` did not exist and was created with Jekyll front matter, while unrelated API-server docs remain intact. Package reporting now preserves the existing full-mode `--evidence` output for both installation results and fixture hashes. This is additive acceptance evidence. No corpus expectation changed.
+No product semantic source changed in Task 6. `docs/API.md` did not exist and was created with Jekyll front matter, while unrelated API-server docs remain intact. Package reporting now preserves the existing full-mode `--evidence` output for both installation results and fixture hashes. This is additive acceptance evidence. No corpus expectation changed.
 
-Milestone base 6898cc052eb7109fbcc7495ee826c993aaa93352; design a0b5a03810d44f2464590286f1298dda8cb3080d. Product commits: 3589300 (source-aware entry),1ea90bc/c57144b (lexical boundaries/isolation),d8c2da6/b430722 (flow/projection),0c48604/e3c4684 (scopes/dependencies/recovery),df1bb0b (CLI/REST/Unicode),829c4c1 (non-consuming removal references),7cf9571 (C/Python/package closure). Task6 starts from 8431e537a486bf5f1228b4df3796f88e6967583d. Detailed historical task reviews and correction rounds remain in controller artifacts; no open earlier task product finding was silently dismissed.
+Milestone base 6898cc052eb7109fbcc7495ee826c993aaa93352; design a0b5a03810d44f2464590286f1298dda8cb3080d. Product commits: 3589300 (source-aware entry), 1ea90bc/c57144b (lexical boundaries/isolation), d8c2da6/b430722 (flow/projection), 0c48604/e3c4684 (scopes/dependencies/recovery), df1bb0b (CLI/REST/Unicode), 829c4c1 (non-consuming removal references), 7cf9571 (C/Python/package closure). Task 6 starts from 8431e537a486bf5f1228b4df3796f88e6967583d. Detailed historical task reviews and correction rounds remain in controller artifacts; no open earlier task product finding was silently dismissed.
 
 ## Local verification
 
@@ -98,7 +101,7 @@ make python-build PYTHON=/private/tmp/spl-toolkit-remaining-venv/bin/python PIP=
 - Source native Python suite: **61 passed, zero skips**, actual built dylib and VERSION override, `/private/tmp/task6-python-source.log`.
 - Docs checker: **13 pages pass front-matter validation**, `/private/tmp/task6-docs.log`.
 - Python wheel/sdist build: pass, `/private/tmp/task6-build-python.log`.
-- Final package checker: **44/44 required native +15/15 surface acceptance for each of the checkout-built and rebuilt-sdist wheels, zero failures/skips**; total 118 passing invocations across the two paths. Ten of the 15 surface tests are new analysis checks: full 26-case report parity, capability parity, six malformed-Unicode HTTP rejections, and two valid Unicode controls. Log `/private/tmp/task6-installed-final.log`; full JSON evidence `/private/tmp/task6-package-evidence.json`. Existing tar extraction deprecation warning remains.
+- Final package checker: **44/44 required native + 15/15 surface acceptance for each of the checkout-built and rebuilt-sdist wheels, zero failures/skips**; total 118 passing invocations across the two paths. Ten of the 15 surface tests are new analysis checks: full 26-case report parity, capability parity, six malformed-Unicode HTTP rejections, and two valid Unicode controls. Log `/private/tmp/task6-installed-final.log`; full JSON evidence `/private/tmp/task6-package-evidence.json`. Existing tar extraction deprecation warning remains.
 
 Both installed paths use Python `-I`, isolated environments outside the checkout, copied mandatory tests/corpora, and `SPLMapper()` without a library path. `clean_env()` removes PYTHONPATH, PYTHONHOME, SPL_NATIVE_LIBRARY, and SPL_EXPECTED_VERSION. Required-suite plugin fails on zero collection, any skip/failure, or incomplete pass counts. Metadata verifies installed module under venv, controller site-packages absent, package/native version 0.1.1. The checker also verifies source closure, missing-compiler behavior, metadata without compiler, and native artifact identity. Temporary wheels/venvs are deleted after success; their exact observed paths and hashes remain in the JSON evidence.
 
@@ -110,16 +113,16 @@ Both installed paths use Python `-I`, isolated environments outside the checkout
 - `testdata/baseline/cases.json`: SHA256 `322383ae58a7fead0e013c089f6ae947061207a568bad2ec47b6e8ce3afc8dfb`.
 - Rebuilt-sdist wheel (temporary, removed after verification): SHA256 `e34f5951e3a9f91cee094161178692f22e2e422163eb14b035d4c48dc0a5d3ea`.
 
-Root extra evidence `/private/tmp/spl-toolkit-root-m2-acceptance-py314.json` was produced at `7cf957100e22b75a5dee6a1836ef1c90b7067d93`. `git merge-base --is-ancestor 7cf9571 HEAD` passes. The only committed intervening change at Task6 base 8431e537a486bf5f1228b4df3796f88e6967583d is the living plan. Task6 changes no product executable inputs. `/private/tmp/task6-input-reconciliation.json` records **78 identical executable/build input hashes**, including all tracked Go/grammar sources, module files, VERSION, Makefile, native manifest/build configuration, and Python package sources. All three current `make build-all` artifact hashes exactly match the root evidence:
+Root extra evidence `/private/tmp/spl-toolkit-root-m2-acceptance-py314.json` was produced at `7cf957100e22b75a5dee6a1836ef1c90b7067d93`. `git merge-base --is-ancestor 7cf9571 HEAD` passes. The only committed intervening change at Task 6 base 8431e537a486bf5f1228b4df3796f88e6967583d is the living plan. Task 6 changes no product executable inputs. `/private/tmp/task6-input-reconciliation.json` records **78 identical executable/build input hashes**, including all tracked Go/grammar sources, module files, VERSION, Makefile, native manifest/build configuration, and Python package sources. All three current `make build-all` artifact hashes exactly match the root evidence:
 
 - CLI `64f0f84813fb7844dd0d7f7677da47bd582f3df0f7331bc45a4178c632e61757`.
 - Server `82715ebd783f105eb386dabd2efb20a50a0fcc7dc1ec9ae052d51f20492e8893`.
 - Dylib `bcadea4668bf3b2812a8a4b7ab2ed1411b3b15b0b77fb42a5a70a82e8f1d4cf1`.
 
-Thus the root's **Python 3.14.1 source 61/zero-skip result and four extra Go/CLI/REST/native cases with eight concurrent native repeats per case plus three malformed-Unicode REST rejections** remain applicable without duplicate execution. They are reused evidence, not Task6 reruns or independent external-Splunk conformance. Both pinned installed paths were actually rerun by Task6.
+Thus the root's **Python 3.14.1 source 61/zero-skip result and four extra Go/CLI/REST/native cases with eight concurrent native repeats per case plus three malformed-Unicode REST rejections** remain applicable without duplicate execution. They are reused evidence, not Task 6 reruns or independent external-Splunk conformance. Both local built/rebuilt-sdist installed paths were actually rerun by Task 6.
 
-Task3 ANTLR reproducibility is reconciled against all 10 unchanged current parser output hashes in `.superpowers/sdd/implementation-plan/task-3-antlr-reproducibility.json`. The current ANTLR4.13.2 JAR matches `eae2dfa119a64327444672aff63e9ec35a20180dc5b8090b7a6ab85125df4d76`. No grammar/generated source changed and no needless regeneration was performed. Task3's original second-generation evidence remains the reproducibility proof; Task6 validates its input/output continuity.
+Task 3 ANTLR reproducibility is reconciled against all 10 unchanged current parser output hashes in `.superpowers/sdd/implementation-plan/task-3-antlr-reproducibility.json`. The current ANTLR 4.13.2 JAR matches `eae2dfa119a64327444672aff63e9ec35a20180dc5b8090b7a6ab85125df4d76`. No grammar/generated source changed and no needless regeneration was performed. Task 3's original second-generation evidence remains the reproducibility proof; Task 6 validates its input/output continuity.
 
 ## Open acceptance
 
-These are local macOS arm64 gates, not a new cross-platform release matrix. The historical release evidence predates analysis. Go1.22 default-link API loading and existing linker/tar warnings remain documented environment limits. Independent Task6 review, broad milestone review, and root outer verification remain pending. No push, merge, publish, or unrelated user guidance staging occurred.
+These are local macOS arm64 gates, not a new cross-platform release matrix. The historical release evidence predates analysis. Go 1.22 default-link API loading and existing linker/tar warnings remain documented environment limits. Task 6 independent review passed at `35da878fa35b203a83382829e84f824db5927d19`. Root extra verification has already passed and its evidence is reconciled above. Broad milestone review and root final acceptance remain pending. No push, merge, publish, or unrelated user guidance staging occurred.
