@@ -24,7 +24,7 @@ from packaging.utils import parse_wheel_filename
 
 NATIVE_SUFFIXES = (".so", ".dylib", ".dll")
 SDIST_FIXED_FILES = {
-    "LICENSE", "MANIFEST.in", "PKG-INFO", "README.md", "VERSION", "build_support.py",
+    "LICENSE", "MANIFEST.in", "PARSER-LICENSE", "PKG-INFO", "README.md", "VERSION", "build_support.py",
     "native-source-files.txt", "pyproject.toml", "requirements-build.txt",
     "requirements-dev.txt", "setup.cfg", "setup.py", "spl_toolkit/__init__.py",
     "spl_toolkit/exceptions.py", "spl_toolkit/libspl_toolkit.h", "spl_toolkit/mapper.py",
@@ -172,6 +172,9 @@ def inspect_wheel(wheel: Path, expected_version: str) -> None:
         native = [name for name in names if name.startswith("spl_toolkit/libspl_toolkit") and name.endswith(NATIVE_SUFFIXES)]
         if len(native) != 1:
             raise AssertionError(f"wheel contains {len(native)} native libraries")
+        parser_licenses = [name for name in names if name == "spl_toolkit/PARSER-LICENSE"]
+        if len(parser_licenses) != 1 or b"Copyright (c) 2024 Clemens Sageder" not in archive.read(parser_licenses[0]):
+            raise AssertionError("wheel parser attribution is missing")
         metadata_name = next(name for name in names if name.endswith(".dist-info/METADATA"))
         metadata = Parser().parsestr(archive.read(metadata_name).decode())
         if metadata["Requires-Python"] != ">=3.11":

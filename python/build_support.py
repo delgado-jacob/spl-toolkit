@@ -17,6 +17,7 @@ from setuptools.command.sdist import sdist
 
 ROOT_FILES = ("README.md", "LICENSE", "VERSION")
 NATIVE_SOURCE_MANIFEST = "native-source-files.txt"
+PARSER_LICENSE = "PARSER-LICENSE"
 
 
 def native_library_name() -> str:
@@ -66,6 +67,25 @@ def read_version(setup_dir: Path) -> str:
                 return version
             raise ValueError(f"empty version file: {version_file}")
     raise FileNotFoundError(f"version file not found for {setup_dir}")
+
+
+def parser_attribution(setup_dir: Path) -> str:
+    setup_dir = setup_dir.resolve()
+    grammar = setup_dir.parent / "grammar" / "SPLParser.g4"
+    if grammar.is_file():
+        source = grammar.read_text(encoding="utf-8")
+        if not source.startswith("/*") or "*/" not in source:
+            raise RuntimeError(f"parser grammar has no leading license notice: {grammar}")
+        comment, _remainder = source[2:].split("*/", 1)
+        notice = comment.strip() + "\n"
+    else:
+        license_file = setup_dir / PARSER_LICENSE
+        if not license_file.is_file():
+            raise FileNotFoundError(f"parser license not found: {license_file}")
+        notice = license_file.read_text(encoding="utf-8")
+    if "Copyright" not in notice or "Redistribution" not in notice:
+        raise RuntimeError("parser license notice is incomplete")
+    return notice
 
 
 def native_linker_flag(system_name: str | None = None) -> str:
@@ -146,6 +166,7 @@ class BuildPy(build_py):
         setup_dir = Path(self.distribution.script_name).resolve().parent
         output = Path(self.build_lib) / "spl_toolkit" / native_library_name()
         build_native(source_root(setup_dir), output, read_version(setup_dir))
+        (output.parent / PARSER_LICENSE).write_text(parser_attribution(setup_dir), encoding="utf-8")
 
 
 def native_source_files(manifest: Path) -> list[Path]:
@@ -184,6 +205,7 @@ class SourceDistribution(sdist):
         documents = setup_dir if source.name == "_native_src" else source
         for name in ROOT_FILES:
             shutil.copy2(documents / name, destination / name)
+        (destination / PARSER_LICENSE).write_text(parser_attribution(setup_dir), encoding="utf-8")
         stage_native_source(source, destination / "_native_src", setup_dir / NATIVE_SOURCE_MANIFEST)
 
 

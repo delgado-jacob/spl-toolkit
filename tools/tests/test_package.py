@@ -150,6 +150,7 @@ def test_release_tree_contains_only_allowed_native_source(tmp_path: Path):
     command.make_release_tree(str(release), [])
 
     assert (release / "LICENSE").is_file()
+    assert "Copyright (c) 2024 Clemens Sageder" in (release / "PARSER-LICENSE").read_text(encoding="utf-8")
     assert (release / "README.md").is_file()
     assert (release / "VERSION").read_text(encoding="utf-8").strip() == "0.1.1"
     native = release / "_native_src"
@@ -162,6 +163,17 @@ def test_release_tree_contains_only_allowed_native_source(tmp_path: Path):
     assert not list(release.rglob("*.so"))
     assert not list(release.rglob("*.dylib"))
     assert not list(release.rglob("*.dll"))
+
+
+def test_parser_attribution_is_available_from_checkout_and_staged_sdist(tmp_path: Path):
+    support = load_build_support()
+    notice = support.parser_attribution(PYTHON_DIR)
+    assert "Redistribution and use in source and binary forms" in notice
+
+    staged = tmp_path / "sdist"
+    staged.mkdir()
+    (staged / "PARSER-LICENSE").write_text(notice, encoding="utf-8")
+    assert support.parser_attribution(staged) == notice
 
 
 def test_native_source_manifest_excludes_unlisted_files(tmp_path: Path):

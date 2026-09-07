@@ -37,4 +37,4 @@ packages = ["spl_toolkit"]
 include-package-data = true
 
 [tool.setuptools.package-data]
-spl_toolkit = ["*.so", "*.dylib", "*.dll", "*.h"]
+spl_toolkit = ["*.so", "*.dylib", "*.dll", "*.h", "PARSER-LICENSE"]
