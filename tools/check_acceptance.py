@@ -36,6 +36,13 @@ KIND_FIELDS = {
     "docker-examples": {"cli", "python_native", "server", "make_workflows"},
 }
 SINGLETONS = {"go-floor", "native-memory", "clean-source", "docker-examples"}
+ENVIRONMENT_FIELDS = {
+    "configured_runner", "observed_runner_name", "observed_image_os", "observed_image_version",
+    "evidence_kind", "pinned_environment", "target", "os", "architecture", "go", "python",
+    "packaging", "cc", "cc_version", "xcode", "linker_path", "linker", "sdk", "zlib",
+    "wheel_platform", "source_date_epoch", "goflags", "cgo_enabled_cli_server",
+    "cgo_enabled_native", "native_argv", "cgo_cflags", "cgo_cppflags", "cgo_ldflags", "artifacts",
+}
 
 
 def load_records(directory: Path) -> tuple[list[dict], list[str]]:
@@ -104,6 +111,97 @@ def _validate_counts(record: dict, errors: list[str], label: str) -> None:
             errors.append(f"{label}: {suite} has skipped tests")
 
 
+def _normalized_architecture(value: object) -> str:
+    normalized = str(value).lower()
+    if normalized in ("amd64", "x86_64"):
+        return "x86_64"
+    if normalized in ("arm64", "aarch64"):
+        return "arm64"
+    return normalized
+
+
+def _validate_release_environment(
+    environment: object, target: object, errors: list[str], label: str,
+    artifact_hashes: object | None = None,
+) -> None:
+    if not isinstance(environment, dict):
+        errors.append(f"{label}: environment must be an object")
+        return
+    missing = sorted(ENVIRONMENT_FIELDS - set(environment))
+    extra = sorted(set(environment) - ENVIRONMENT_FIELDS)
+    if missing:
+        errors.append(f"{label}: environment missing fields: {', '.join(missing)}")
+    if extra:
+        errors.append(f"{label}: environment unknown fields: {', '.join(extra)}")
+    if target not in TARGETS:
+        return
+    expected = TARGETS[target]
+    expected_architecture = "arm64" if expected["goarch"] == "arm64" else "x86_64"
+    if environment.get("target") != target:
+        errors.append(f"{label}: environment target does not match record target")
+    if _normalized_architecture(environment.get("architecture")) != expected_architecture:
+        errors.append(f"{label}: environment architecture does not match {target}")
+    if environment.get("configured_runner") != expected["runner"]:
+        errors.append(f"{label}: environment configured_runner does not match {target}")
+    evidence_kind = environment.get("evidence_kind")
+    if environment.get("pinned_environment") is not True:
+        errors.append(f"{label}: environment is not pinned")
+    if evidence_kind not in ("pinned-runner", "pinned-local"):
+        errors.append(f"{label}: diagnostic or unknown environment evidence_kind is not accepted")
+    image_os = environment.get("observed_image_os")
+    image_version = environment.get("observed_image_version")
+    if evidence_kind == "pinned-runner":
+        expected_image = "ubuntu24" if target.startswith("linux-") else "macos15" if target.startswith("darwin-") else "win22"
+        if image_os != expected_image or not isinstance(image_version, str) or image_version == "unavailable":
+            errors.append(f"{label}: observed runner image does not match {target}")
+    elif evidence_kind == "pinned-local" and (image_os, image_version) != ("unavailable", "unavailable"):
+        errors.append(f"{label}: pinned-local runner image identity must be unavailable")
+    if not isinstance(environment.get("observed_runner_name"), str) or not environment["observed_runner_name"]:
+        errors.append(f"{label}: observed_runner_name is missing")
+    if not isinstance(environment.get("os"), str) or not environment["os"]:
+        errors.append(f"{label}: observed OS identity is missing")
+    go = environment.get("go")
+    if not isinstance(go, str) or f"go{CONFIG['go']}" not in go.split():
+        errors.append(f"{label}: environment Go version does not match {CONFIG['go']}")
+    if environment.get("python") != CONFIG["build_python"]:
+        errors.append(f"{label}: environment Python version does not match {CONFIG['build_python']}")
+    packaging = environment.get("packaging")
+    if not isinstance(packaging, dict) or set(packaging) != {"setuptools", "wheel", "build", "packaging"} or not all(isinstance(value, str) and value for value in packaging.values()):
+        errors.append(f"{label}: environment packaging identity is incomplete")
+    for field in ("cc", "cc_version", "linker_path", "linker", "zlib"):
+        if not isinstance(environment.get(field), str) or not environment[field]:
+            errors.append(f"{label}: environment {field} is missing")
+    compiler = str(environment.get("cc_version", "")).lower()
+    if target.startswith("linux-") and ("gcc" not in compiler or "13" not in compiler):
+        errors.append(f"{label}: environment compiler is not Linux GCC 13")
+    if target.startswith("windows-") and ("gcc" not in compiler or expected["gcc_version"] not in compiler):
+        errors.append(f"{label}: environment compiler is not the pinned MinGW GCC")
+    if target.startswith("darwin-"):
+        if "clang" not in compiler or not all(isinstance(environment.get(field), str) and environment[field] for field in ("xcode", "sdk")):
+            errors.append(f"{label}: environment Xcode compiler/SDK identity is incomplete")
+    elif environment.get("xcode") is not None or environment.get("sdk") is not None:
+        errors.append(f"{label}: non-Darwin environment has Xcode/SDK identity")
+    if environment.get("wheel_platform") != expected["wheel_platform"]:
+        errors.append(f"{label}: environment wheel platform does not match {target}")
+    if type(environment.get("source_date_epoch")) is not int or environment["source_date_epoch"] <= 0:
+        errors.append(f"{label}: environment source_date_epoch is invalid")
+    goflags = environment.get("goflags")
+    if not isinstance(goflags, list) or not {"-mod=readonly", "-trimpath", "-buildvcs=false", "-buildid="}.issubset(goflags):
+        errors.append(f"{label}: environment Go flags are incomplete")
+    if environment.get("cgo_enabled_cli_server") != "0" or environment.get("cgo_enabled_native") != "1":
+        errors.append(f"{label}: environment CGO modes are invalid")
+    if not isinstance(environment.get("native_argv"), list) or not environment["native_argv"]:
+        errors.append(f"{label}: environment native build argv is missing")
+    for field in ("cgo_cflags", "cgo_cppflags", "cgo_ldflags"):
+        if not isinstance(environment.get(field), str):
+            errors.append(f"{label}: environment {field} must be a string")
+    hashes = environment.get("artifacts")
+    if not isinstance(hashes, dict) or not hashes or any(not isinstance(value, str) or not HASH_RE.fullmatch(value) for value in hashes.values()):
+        errors.append(f"{label}: environment artifacts contains an invalid SHA-256")
+    if artifact_hashes is not None and hashes != artifact_hashes:
+        errors.append(f"{label}: environment artifacts do not match artifact_hashes")
+
+
 def validate_records(records: list[dict], source_sha: str) -> list[str]:
     errors: list[str] = []
     if not SHA_RE.fullmatch(source_sha):
@@ -149,8 +247,8 @@ def validate_records(records: list[dict], source_sha: str) -> list[str]:
                 if record.get("architecture") != expected_arch:
                     errors.append(f"{label}: architecture does not match {target}")
 
-        if kind == "native" and not isinstance(record.get("environment"), dict):
-            errors.append(f"{label}: environment must be an object")
+        if kind == "native":
+            _validate_release_environment(record.get("environment"), record.get("target"), errors, label)
         elif kind == "reproducibility":
             wheel_hash = record.get("wheel_sha256")
             hashes = record.get("artifact_hashes")
@@ -161,8 +259,7 @@ def validate_records(records: list[dict], source_sha: str) -> list[str]:
                 errors.append(f"{label}: wheel_sha256 does not match the single accepted wheel")
             if not isinstance(hashes, dict) or any(not isinstance(value, str) or not HASH_RE.fullmatch(value) for value in hashes.values()):
                 errors.append(f"{label}: artifact_hashes contains an invalid SHA-256")
-            if not isinstance(record.get("environment"), dict) or record["environment"].get("pinned_environment") is not True:
-                errors.append(f"{label}: reproducibility environment is not pinned")
+            _validate_release_environment(record.get("environment"), record.get("target"), errors, label, hashes)
             checks = record.get("checks")
             if not isinstance(checks, dict) or set(checks) != {"clean_source", "payloads", "package"} or any(value != "passed" for value in checks.values()):
                 errors.append(f"{label}: reproducibility checks are incomplete")
@@ -202,6 +299,9 @@ def validate_records(records: list[dict], source_sha: str) -> list[str]:
 
     for target in TARGETS:
         release = by_key.get(("reproducibility", target))
+        native = by_key.get(("native", target))
+        if release and native and release.get("environment") != native.get("environment"):
+            errors.append(f"native and reproducibility environment evidence differ for {target}")
         if not release:
             continue
         expected_hash = release.get("wheel_sha256")

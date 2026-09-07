@@ -306,3 +306,20 @@ def test_restore_verified_executables_changes_only_named_payloads(tmp_path: Path
     assert cli.stat().st_mode & 0o111
     assert server.stat().st_mode & 0o111
     assert not (plain.stat().st_mode & 0o111)
+
+
+@pytest.mark.parametrize("existing", ["final", "staging"])
+def test_evidence_write_preserves_existing_files(tmp_path: Path, existing: str):
+    checker = load_package_checker()
+    destination = tmp_path / "evidence.json"
+    occupied = destination if existing == "final" else destination.with_suffix(".json.tmp")
+    occupied.write_text("original\n", encoding="utf-8")
+
+    with pytest.raises(FileExistsError, match="evidence"):
+        checker.write_evidence(destination, {"status": "passed"})
+
+    assert occupied.read_text(encoding="utf-8") == "original\n"
+    if existing == "staging":
+        assert not destination.exists()
+    else:
+        assert destination.read_text(encoding="utf-8") == "original\n"

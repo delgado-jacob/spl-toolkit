@@ -96,6 +96,21 @@ def sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
+def write_evidence(destination: Path, record: dict[str, object]) -> None:
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    temporary = destination.with_suffix(destination.suffix + ".tmp")
+    if destination.exists():
+        raise FileExistsError(f"evidence destination already exists: {destination}")
+    if temporary.exists():
+        raise FileExistsError(f"evidence staging file already exists: {temporary}")
+    with temporary.open("x", encoding="utf-8") as output:
+        output.write(json.dumps(record, indent=2, sort_keys=True) + "\n")
+    try:
+        os.link(temporary, destination)
+    finally:
+        temporary.unlink(missing_ok=True)
+
+
 def restore_verified_executables(directory: Path, hashes: dict[str, str], names: tuple[str, ...]) -> None:
     if os.name == "nt":
         return
@@ -521,10 +536,7 @@ def main() -> int:
             "status": "passed", "target": args.target,
             "architecture": "arm64" if args.target.endswith("arm64") else "x86_64",
         } | evidence
-        args.evidence.parent.mkdir(parents=True, exist_ok=True)
-        temporary = args.evidence.with_suffix(args.evidence.suffix + ".tmp")
-        temporary.write_text(json.dumps(record, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-        temporary.replace(args.evidence)
+        write_evidence(args.evidence, record)
     print("package acceptance passed")
     return 0
 
