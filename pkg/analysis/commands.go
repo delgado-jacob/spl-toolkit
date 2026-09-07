@@ -135,11 +135,13 @@ func (s *semanticStage) selector(c parser.IAnalysisSelectorContext, role string)
 }
 func renameCommand(s *semanticStage, node antlr.ParserRuleContext) {
 	ctx := node.(*parser.AnalysisRenameStageContext)
+	original := s.env
 	before := s.env.clone()
 	type rename struct {
 		source, dest string
 		ctx          parser.IAnalysisAliasContext
 		input        string
+		conditional  bool
 	}
 	items := []rename{}
 	sources, dests := map[string]bool{}, map[string]bool{}
@@ -163,12 +165,14 @@ func renameCommand(s *semanticStage, node antlr.ParserRuleContext) {
 		}
 		s.env = before
 		id := s.read(r.AnalysisSelector(), src, "read")
-		if sources[src] || dests[dst] {
+		_, existingDestination := original.fields[dst]
+		if sources[src] || dests[dst] || existingDestination {
 			conflict = true
 		}
 		sources[src] = true
 		dests[dst] = true
-		items = append(items, rename{src, dst, r.AnalysisAlias(), id})
+		binding := s.result.References[len(s.result.References)-1].Binding
+		items = append(items, rename{src, dst, r.AnalysisAlias(), id, binding == "indeterminate" || binding == "unavailable"})
 	}
 	s.env = before // All reads observed the snapshot; no destination was installed while reading.
 	for name := range sources {
@@ -190,7 +194,7 @@ func renameCommand(s *semanticStage, node antlr.ParserRuleContext) {
 		s.env.remove(r.source)
 	}
 	for _, r := range items {
-		s.create(r.ctx.AnalysisIdentifier(), r.dest, "rename", "rename", []string{r.input}, s.env.uncertain)
+		s.create(r.ctx.AnalysisIdentifier(), r.dest, "rename", "rename", []string{r.input}, r.conditional)
 	}
 }
 func fieldsCommand(s *semanticStage, node antlr.ParserRuleContext) {
@@ -224,7 +228,7 @@ func fieldsCommand(s *semanticStage, node antlr.ParserRuleContext) {
 			if exclude {
 				s.env.remove(name)
 				s.transitions = append(s.transitions, Transition{Operation: "remove", Output: name, InputReferenceIDs: copyIDs(ids)})
-			} else if f, ok := s.env.fields[name]; ok {
+			} else if f, ok := s.projectedField(name, ids); ok {
 				selected[name] = f
 				s.transitions = append(s.transitions, Transition{Operation: "project", Output: name, InputReferenceIDs: copyIDs(ids)})
 			}
@@ -233,14 +237,28 @@ func fieldsCommand(s *semanticStage, node antlr.ParserRuleContext) {
 	if !exclude {
 		s.env.fields = selected
 		s.env.open = false
+		if s.result.Stages[s.stage].Command == "table" && s.result.Stages[s.stage].SemanticComplete {
+			s.env.uncertain = false
+		}
 	}
 }
+
+// Exact projection fixes the output names without proving conditional inputs exist.
+func (s *semanticStage) projectedField(name string, ids []string) (trackedField, bool) {
+	if field, known := s.env.fields[name]; known {
+		return field, true
+	}
+	if s.env.uncertain {
+		return trackedField{FieldBinding: FieldBinding{Name: name, OriginReferenceIDs: s.origins(ids), Conditional: true}}, true
+	}
+	return trackedField{}, false
+}
+
 func statsCommand(s *semanticStage, node antlr.ParserRuleContext) {
 	ctx := node.(*parser.AnalysisStatsStageContext)
 	if len(ctx.AllAnalysisOption()) > 0 {
 		s.diagnostic(CodeUnsupportedSemantics, "aggregate command options are unmodeled", ctx)
 	}
-	input := s.env
 	output := newEnvironment()
 	output.open = false
 	type aggregate struct {
@@ -295,7 +313,7 @@ func statsCommand(s *semanticStage, node antlr.ParserRuleContext) {
 		for _, c := range group.AnalysisFieldList().AllAnalysisSelector() {
 			names, ids := s.selector(c, "group")
 			for _, name := range names {
-				if f, ok := input.fields[name]; ok {
+				if f, ok := s.projectedField(name, ids); ok {
 					output.fields[name] = f
 				}
 				s.transitions = append(s.transitions, Transition{Operation: "project", Output: name, InputReferenceIDs: copyIDs(ids)})
@@ -303,7 +321,7 @@ func statsCommand(s *semanticStage, node antlr.ParserRuleContext) {
 		}
 	}
 	if s.result.Stages[s.stage].Command == "stats" {
-		output.uncertain = input.uncertain
+		output.uncertain = !s.result.Stages[s.stage].SemanticComplete
 		s.env = output
 	}
 	for _, o := range outputs {

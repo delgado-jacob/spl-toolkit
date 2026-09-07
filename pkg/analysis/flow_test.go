@@ -134,3 +134,103 @@ func TestFlowFieldsInternalMembership(t *testing.T) {
 		}
 	}
 }
+
+// An existing destination is a collision even when it is not another rename source.
+func TestFlowReviewExistingRenameDestination(t *testing.T) {
+	r, _ := Analyze(QueryDocument{Text: `search a=1 b=2 keep=3 | rename a AS b | where b>0`})
+	last := r.References[len(r.References)-1]
+	if r.Status != Incomplete || last.Binding != "indeterminate" {
+		t.Errorf("status=%s last=%+v", r.Status, last)
+	}
+	rename := r.Lineage[1]
+	if len(rename.Transitions) != 0 {
+		t.Error("collision fabricated transitions", rename.Transitions)
+	}
+	for _, f := range rename.After.Fields {
+		if f.Name == "a" || f.Name == "b" {
+			t.Error("collision retained affected binding", f)
+		}
+	}
+	keep := false
+	for _, f := range rename.After.Fields {
+		keep = keep || f.Name == "keep"
+	}
+	if !keep {
+		t.Error("collision discarded unaffected field")
+	}
+	found := false
+	for _, d := range r.Diagnostics {
+		found = found || d.Code == CodeUnsupportedSemantics
+	}
+	if !found {
+		t.Error("missing collision diagnostic")
+	}
+}
+
+// Renaming a conditional lookup output cannot prove that output exists.
+func TestFlowReviewConditionalRename(t *testing.T) {
+	r, _ := Analyze(QueryDocument{Text: `search key=1 | lookup users key OUTPUTNEW a | rename a AS b | where b>0`})
+	last := r.References[len(r.References)-1]
+	if last.Binding != "indeterminate" {
+		t.Error("conditional source became certain", last)
+	}
+	rename := r.Lineage[2]
+	if len(rename.Transitions) != 1 || !rename.Transitions[0].Conditional {
+		t.Error("rename transition lost conditional state", rename.Transitions)
+	}
+	found := false
+	for _, f := range rename.After.Fields {
+		if f.Name == "b" {
+			found = true
+			if !f.Conditional {
+				t.Error("destination lost conditional state", f)
+			}
+		}
+	}
+	if !found {
+		t.Error("missing conditional destination")
+	}
+}
+
+// Exact membership clears obsolete uncertainty while retaining included conditional values.
+func TestFlowReviewExactProjectionAfterUncertainty(t *testing.T) {
+	for _, tc := range []struct {
+		q         string
+		status    Status
+		binding   string
+		uncertain bool
+	}{
+		{`search a=1 | mystery | stats count AS n | where a>0`, Invalid, "unavailable", false},
+		{`search a=1 b=2 | mystery | table a | where b>0`, Invalid, "unavailable", false},
+		{`search a=1 b=2 | fields a | table a | where b>0`, Invalid, "unavailable", false},
+		{`search a=1 | fields a | stats count AS n | where a>0`, Invalid, "unavailable", false},
+		{`search a=1 | mystery | table unknown | where unknown>0`, Incomplete, "indeterminate", false},
+		{`search a=1 | mystery | stats count BY unknown | where unknown>0`, Incomplete, "indeterminate", false},
+		{`search key=1 | lookup users key OUTPUTNEW a | table a | where a>0`, Valid, "indeterminate", false},
+		{`search key=1 | lookup users key OUTPUTNEW a | stats count BY a | where a>0`, Valid, "indeterminate", false},
+		{`search a=1 | mystery | table a* | where b>0`, Incomplete, "indeterminate", true},
+		{`search a=1 | mystery | stats partitions=2 count AS n | where a>0`, Incomplete, "indeterminate", true},
+	} {
+		t.Run(tc.q, func(t *testing.T) {
+			r, _ := Analyze(QueryDocument{Text: tc.q})
+			last := r.References[len(r.References)-1]
+			if r.Status != tc.status || last.Binding != tc.binding {
+				t.Errorf("status=%s last=%+v", r.Status, last)
+			}
+			projection := r.Lineage[len(r.Lineage)-2]
+			if projection.After.Uncertain != tc.uncertain {
+				t.Errorf("projection uncertainty %+v", projection.After)
+			}
+			if tc.status == Invalid {
+				unsupported, unavailable := false, false
+				for _, d := range r.Diagnostics {
+					unsupported = unsupported || d.Code == CodeUnsupportedCommand || d.Code == CodeUnsupportedSemantics
+					unavailable = unavailable || d.Code == CodeUnavailableField
+				}
+				if !unsupported || !unavailable {
+					t.Error("lost earlier incompleteness or later unavailability", r.Diagnostics)
+				}
+			}
+		})
+	}
+}
