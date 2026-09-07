@@ -11,6 +11,24 @@
       "mapped": "search source_ip=1"
     },
     {
+      "id": "boundary-whitespace-map",
+      "query": " \tsearch src_ip=1\t \n",
+      "config": {
+        "version": "1.0",
+        "mappings": [{"source": "src_ip", "target": "source_ip"}]
+      },
+      "mapped": " \tsearch source_ip=1\t \n"
+    },
+    {
+      "id": "boundary-whitespace-no-op",
+      "query": "\n\tsearch other=1 \t\n",
+      "config": {
+        "version": "1.0",
+        "mappings": [{"source": "src_ip", "target": "source_ip"}]
+      },
+      "mapped": "\n\tsearch other=1 \t\n"
+    },
+    {
       "id": "macros",
       "query": "`get_data` | eval result=`calculate_score(field1, field2)` | where result>10",
       "discovery": {

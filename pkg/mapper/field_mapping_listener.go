@@ -32,7 +32,7 @@ func (l *FieldMappingListener) GetRewrittenText() string {
 	if strings.HasSuffix(result, "<EOF>") {
 		result = strings.TrimSuffix(result, "<EOF>")
 	}
-	return strings.TrimSpace(result)
+	return result
 }
 
 // EnterKEYVALUEOP handles field=value operations for field mapping

@@ -180,12 +180,11 @@ def test_mapping_parity(cases: list[dict], cli_path: Path, tmp_path: Path, serve
                 [str(cli_path), "map", "--config", str(config_path), "--query", case["query"]],
                 check=False,
                 capture_output=True,
-                text=True,
             )
             assert (completed.returncode, completed.stdout, completed.stderr) == (
                 0,
-                case["mapped"] + "\n",
-                "",
+                case["mapped"].encode("utf-8") + b"\n",
+                b"",
             ), case["id"]
 
 
