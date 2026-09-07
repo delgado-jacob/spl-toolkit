@@ -120,11 +120,11 @@ def install_and_check(
     run([str(python), "-I", "-c", textwrap.dedent(check_script)], cwd=outside_checkout, env=install_env)
 
     installed_test_dir = outside_checkout / f"tests-{directory.name}"
-    shutil.copytree(Path(__file__).resolve().parents[1] / "python" / "tests", installed_test_dir)
+    shutil.copytree(docs_root / "python" / "tests", installed_test_dir)
     run([str(python), "-I", "-m", "pytest", str(installed_test_dir), "-q"], cwd=outside_checkout, env=install_env)
 
     acceptance_dir = outside_checkout / f"acceptance-{directory.name}"
-    shutil.copytree(Path(__file__).resolve().parents[1] / "tests" / "acceptance", acceptance_dir)
+    shutil.copytree(docs_root / "tests" / "acceptance", acceptance_dir)
     fixture = outside_checkout / f"cases-{directory.name}.json"
     shutil.copy2(fixture_source, fixture)
     acceptance_env = install_env | {
@@ -301,8 +301,8 @@ def git_status(root: Path) -> str | None:
     return completed.stdout if completed.returncode == 0 else None
 
 
-def check_package(sdist: Path, wheel_dir: Path, expected_version: str | None) -> None:
-    root = Path(__file__).resolve().parents[1]
+def _check_package(sdist: Path, wheel_dir: Path, expected_version: str | None, root: Path) -> None:
+    root = root.resolve()
     before = git_status(root)
     wheels = list(wheel_dir.glob("spl_toolkit-*.whl"))
     if len(wheels) != 1:
@@ -340,13 +340,19 @@ def check_package(sdist: Path, wheel_dir: Path, expected_version: str | None) ->
         raise AssertionError("package check changed tracked or untracked repository files")
 
 
+def check_package(sdist: Path, wheel_dir: Path, expected_version: str | None) -> None:
+    _check_package(sdist, wheel_dir, expected_version, Path(__file__).resolve().parents[1])
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--sdist", type=Path, required=True)
     parser.add_argument("--wheel-dir", type=Path, required=True)
     parser.add_argument("--expected-version")
+    parser.add_argument("--source-root", type=Path)
     args = parser.parse_args()
-    check_package(args.sdist.resolve(), args.wheel_dir.resolve(), args.expected_version)
+    root = args.source_root.resolve() if args.source_root else Path(__file__).resolve().parents[1]
+    _check_package(args.sdist.resolve(), args.wheel_dir.resolve(), args.expected_version, root)
     print("package acceptance passed")
     return 0
 

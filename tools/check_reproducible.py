@@ -20,7 +20,6 @@ if __package__ in (None, ""):
     sys.path.insert(0, str(ROOT))
 
 from tools.check_clean_build import export_ref, hashes as hash_tracked_files, tracked_files
-from tools.check_package import check_package
 from tools.release import _target_name, artifact_hashes
 
 
@@ -33,6 +32,10 @@ def compare_artifacts(first_output: Path, second_output: Path) -> dict[str, str]
     if different:
         raise RuntimeError("non-reproducible artifacts: " + ", ".join(different))
     return left
+
+
+def _result_status(environment: dict[str, object]) -> str:
+    return "passed" if environment.get("pinned_environment") is True else "diagnostic-passed"
 
 
 def _git(root: Path, *args: str) -> str:
@@ -106,23 +109,37 @@ def _run_payloads(output: Path, version: str, fixture: Path) -> dict[str, str]:
     return {"cli": cli.name, "server": server.name, "native": native.name}
 
 
-def check_reproducible(ref: str, output: Path) -> dict[str, object]:
-    root = ROOT
-    output = output.resolve()
-    if output.exists() and any(output.iterdir()):
-        raise RuntimeError(f"reproducibility output must be new or empty: {output}")
-    output.mkdir(parents=True, exist_ok=True)
-    source_sha = _git(root, "rev-parse", "--verify", f"{ref}^{{commit}}")
-    epoch = int(_git(root, "show", "-s", "--format=%ct", source_sha))
-    files = tracked_files(root, source_sha)
-    before = hash_tracked_files(root, files)
+def _run_package_check(source: Path, sdist: Path, wheel_dir: Path, version: str, log: Path) -> None:
+    completed = subprocess.run(
+        [
+            sys.executable,
+            str(source / "tools" / "check_package.py"),
+            "--sdist", str(sdist),
+            "--wheel-dir", str(wheel_dir),
+            "--expected-version", version,
+            "--source-root", str(source),
+        ],
+        cwd=source,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    log.write_text(completed.stdout + completed.stderr, encoding="utf-8")
+    if completed.returncode:
+        raise RuntimeError(f"exported package acceptance failed; see {log}")
+
+
+def _check_reproducible_worker(repository: Path, source_sha: str, epoch: int, output: Path) -> dict[str, object]:
+    files = tracked_files(repository, source_sha)
     result: dict[str, object] = {"source_sha": source_sha, "target": _target_name(), "status": "failed", "artifact_hashes": {}, "environment": {}, "failed_checks": []}
     try:
         environments = []
         for number in (1, 2):
             source = output / f"source-{number}"
             source.mkdir()
-            export_ref(root, source_sha, output / f"source-{number}.tar", source)
+            export_ref(repository, source_sha, output / f"source-{number}.tar", source)
+            if number == 1:
+                before = hash_tracked_files(source, files)
             build_output = output / f"build-{number}"
             cache = output / f"gocache-{number}"
             temporary = output / f"gotmp-{number}"
@@ -144,11 +161,17 @@ def check_reproducible(ref: str, output: Path) -> dict[str, object]:
         accepted = _run_payloads(output / "build-1", version, output / "source-1" / "testdata" / "baseline" / "mappings.json")
         wheel = next((output / "build-1").glob("spl_toolkit-*.whl"))
         sdist = next((output / "build-1").glob("spl_toolkit-*.tar.gz"))
-        check_package(sdist, wheel.parent, version)
-        after = hash_tracked_files(root, files)
+        _run_package_check(output / "source-1", sdist, wheel.parent, version, output / "package-check.log")
+        after = hash_tracked_files(output / "source-1", files)
         if before != after:
-            raise RuntimeError("tracked source files changed during reproducibility check")
-        result.update(status="passed", target=environments[0]["target"], artifact_hashes=hashes, environment=environments[0], accepted_payloads=accepted)
+            raise RuntimeError("exported tracked source files changed during reproducibility check")
+        result.update(
+            status=_result_status(environments[0]),
+            target=environments[0]["target"],
+            artifact_hashes=hashes,
+            environment=environments[0],
+            accepted_payloads=accepted,
+        )
     except Exception as error:
         result["failed_checks"] = [str(error)]
         raise
@@ -157,12 +180,53 @@ def check_reproducible(ref: str, output: Path) -> dict[str, object]:
     return result
 
 
+def check_reproducible(ref: str, output: Path) -> dict[str, object]:
+    root = ROOT
+    output = output.resolve()
+    if output.exists() and any(output.iterdir()):
+        raise RuntimeError(f"reproducibility output must be new or empty: {output}")
+    output.mkdir(parents=True, exist_ok=True)
+    source_sha = _git(root, "rev-parse", "--verify", f"{ref}^{{commit}}")
+    epoch = int(_git(root, "show", "-s", "--format=%ct", source_sha))
+    checker_source = output / "checker-source"
+    checker_source.mkdir()
+    export_ref(root, source_sha, output / "checker-source.tar", checker_source)
+    command = [
+        sys.executable,
+        str(checker_source / "tools" / "check_reproducible.py"),
+        "--output", str(output),
+        "--worker-repository", str(root),
+        "--worker-source-sha", source_sha,
+        "--worker-epoch", str(epoch),
+    ]
+    completed = subprocess.run(command, cwd=checker_source, text=True, capture_output=True, check=False)
+    (output / "checker.log").write_text(completed.stdout + completed.stderr, encoding="utf-8")
+    if completed.returncode:
+        detail = next(
+            (line for line in reversed(completed.stderr.splitlines()) if line.strip()),
+            "exported checker failed without an error message",
+        )
+        raise RuntimeError(f"exported checker failed: {detail}; see {output / 'checker.log'}")
+    return json.loads((output / "result.json").read_text(encoding="utf-8"))
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--ref", default="HEAD")
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--worker-repository", type=Path, help=argparse.SUPPRESS)
+    parser.add_argument("--worker-source-sha", help=argparse.SUPPRESS)
+    parser.add_argument("--worker-epoch", type=int, help=argparse.SUPPRESS)
     args = parser.parse_args()
-    check_reproducible(args.ref, args.output)
+    worker_values = (args.worker_repository, args.worker_source_sha, args.worker_epoch)
+    if any(value is not None for value in worker_values):
+        if any(value is None for value in worker_values):
+            parser.error("all exported-checker worker arguments are required together")
+        _check_reproducible_worker(
+            args.worker_repository.resolve(), args.worker_source_sha, args.worker_epoch, args.output.resolve()
+        )
+    else:
+        check_reproducible(args.ref, args.output)
     return 0
 
 

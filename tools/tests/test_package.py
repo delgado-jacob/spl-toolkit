@@ -197,6 +197,46 @@ def test_native_source_manifest_excludes_unlisted_files(tmp_path: Path):
     assert sorted(str(path.relative_to(destination)) for path in destination.rglob("*") if path.is_file()) == sorted(allowed)
 
 
+def test_installed_checks_copy_tests_from_explicit_source_root(tmp_path: Path, monkeypatch):
+    checker = load_package_checker()
+    source_root = tmp_path / "exported-source"
+    (source_root / "python" / "tests").mkdir(parents=True)
+    (source_root / "tests" / "acceptance").mkdir(parents=True)
+    fixture = source_root / "testdata" / "baseline" / "cases.json"
+    fixture.parent.mkdir(parents=True)
+    fixture.write_text("[]\n", encoding="utf-8")
+    wheel = tmp_path / "artifact.whl"
+    wheel.write_bytes(b"wheel")
+    requirements = tmp_path / "requirements.txt"
+    requirements.write_text("", encoding="utf-8")
+    surface = tmp_path / "surface"
+    surface.write_bytes(b"surface")
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    copied = []
+
+    monkeypatch.setattr(checker, "create_test_environment", lambda directory: tmp_path / "python")
+    monkeypatch.setattr(checker, "run", lambda *args, **kwargs: None)
+
+    def fake_copytree(source, destination):
+        copied.append(Path(source))
+        Path(destination).mkdir()
+
+    monkeypatch.setattr(checker.shutil, "copytree", fake_copytree)
+    monkeypatch.setattr(
+        checker.shutil,
+        "copy2",
+        lambda source, destination: Path(destination).write_bytes(Path(source).read_bytes()),
+    )
+
+    checker.install_and_check(
+        wheel, tmp_path / "venv", outside, "0.1.1", requirements,
+        surface, surface, fixture, source_root,
+    )
+
+    assert copied == [source_root / "python" / "tests", source_root / "tests" / "acceptance"]
+
+
 def test_binary_wheel_forces_macos_15_tag_from_older_interpreter_target():
     if platform.system() != "Darwin":
         pytest.skip("macOS tag behavior")

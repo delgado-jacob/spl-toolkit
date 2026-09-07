@@ -7,11 +7,13 @@ import hashlib
 import io
 from pathlib import Path
 import tarfile
+from types import SimpleNamespace
 import zipfile
 
 import pytest
 
 import tools.release as release
+import tools.check_reproducible as reproducible
 from tools.check_reproducible import compare_artifacts
 from tools.release import artifact_hashes, normalize_archive, parser_attribution, require_python_archives, verify_wheel_native
 
@@ -74,11 +76,26 @@ def test_sdist_metadata_and_input_order_are_reproducible(tmp_path: Path):
         assert all((member.uid, member.gid, member.uname, member.gname) == (0, 0, "", "") for member in archive.getmembers())
 
 
-@pytest.mark.parametrize("name", ["../escape", "/absolute", "pkg/../../escape"])
+@pytest.mark.parametrize(
+    "name",
+    ["../escape", "/absolute", "pkg/../../escape", r"C:\escape", "C:/escape", r"\\server\share\escape"],
+)
 def test_archive_normalization_rejects_unsafe_member_names(tmp_path: Path, name: str):
     archive_path = tmp_path / "unsafe.whl"
     with zipfile.ZipFile(archive_path, "w") as archive:
         archive.writestr(name, b"payload")
+
+    with pytest.raises(ValueError, match="unsafe archive path"):
+        normalize_archive(archive_path, EPOCH)
+
+
+@pytest.mark.parametrize("name", [r"C:\escape", "C:/escape", r"\\server\share\escape"])
+def test_sdist_normalization_rejects_windows_absolute_member_names(tmp_path: Path, name: str):
+    archive_path = tmp_path / "unsafe.tar.gz"
+    with tarfile.open(archive_path, "w:gz") as archive:
+        info = tarfile.TarInfo(name)
+        info.size = 1
+        archive.addfile(info, io.BytesIO(b"x"))
 
     with pytest.raises(ValueError, match="unsafe archive path"):
         normalize_archive(archive_path, EPOCH)
@@ -165,3 +182,185 @@ def test_windows_gcc_resolution_uses_powershell_get_command(monkeypatch):
     assert seen == [[
         "C:/PowerShell/pwsh.exe", "-NoProfile", "-Command", "(Get-Command gcc -ErrorAction Stop).Source",
     ]]
+
+
+def test_production_runner_identity_rejects_mismatching_observed_image(monkeypatch):
+    monkeypatch.delenv("ImageOS", raising=False)
+    monkeypatch.delenv("ImageVersion", raising=False)
+
+    identity = release._runner_identity({"runner": "ubuntu-24.04"})
+    assert identity["evidence_kind"] == "pinned-local"
+    assert identity["observed_image_os"] == "unavailable"
+
+    monkeypatch.setenv("ImageOS", "ubuntu22")
+    monkeypatch.setenv("ImageVersion", "20260901.1")
+    with pytest.raises(RuntimeError, match="runner image mismatch"):
+        release._runner_identity({"runner": "ubuntu-24.04"})
+
+
+def test_diagnostic_runner_identity_is_structurally_non_accepting(monkeypatch):
+    monkeypatch.delenv("ImageOS", raising=False)
+    monkeypatch.delenv("ImageVersion", raising=False)
+
+    identity = release._runner_identity({"runner": "diagnostic-macos-26.2"})
+
+    assert identity["evidence_kind"] == "diagnostic"
+    assert identity["pinned_environment"] is False
+    assert identity["configured_runner"] == "diagnostic-macos-26.2"
+    assert identity["observed_image_os"] == "unavailable"
+    assert reproducible._result_status(identity) == "diagnostic-passed"
+
+
+def test_release_environment_rejects_wrong_effective_go_target(monkeypatch):
+    config = {
+        "go": "1.26.8",
+        "build_python": release.platform.python_version(),
+        "targets": {
+            "linux-amd64": {
+                "runner": "diagnostic-linux-amd64",
+                "goarch": "amd64",
+                "cc": "gcc-13",
+                "wheel_platform": "linux_x86_64",
+            }
+        },
+    }
+    monkeypatch.setattr(release.platform, "system", lambda: "Linux")
+    monkeypatch.setattr(release.platform, "machine", lambda: "x86_64")
+    monkeypatch.setattr(
+        release,
+        "_version_output",
+        lambda command: {
+            ("go", "version"): "go version go1.26.8 linux/amd64",
+            ("go", "env", "GOOS"): "linux",
+            ("go", "env", "GOARCH"): "arm64",
+        }[tuple(command)],
+    )
+
+    with pytest.raises(RuntimeError, match="effective GOARCH mismatch"):
+        release.validate_environment(config, "linux-amd64")
+
+
+def test_release_environment_rejects_non_gcc13_linux_compiler(monkeypatch):
+    config = {
+        "go": "1.26.8",
+        "build_python": release.platform.python_version(),
+        "targets": {
+            "linux-amd64": {
+                "runner": "diagnostic-linux-amd64",
+                "goarch": "amd64",
+                "cc": "gcc-13",
+                "wheel_platform": "linux_x86_64",
+            }
+        },
+    }
+    monkeypatch.setattr(release.platform, "system", lambda: "Linux")
+    monkeypatch.setattr(release.platform, "machine", lambda: "x86_64")
+    monkeypatch.setattr(release.shutil, "which", lambda name: "/usr/bin/gcc-13")
+    monkeypatch.setattr(
+        release,
+        "_version_output",
+        lambda command: {
+            ("go", "version"): "go version go1.26.8 linux/amd64",
+            ("go", "env", "GOOS"): "linux",
+            ("go", "env", "GOARCH"): "amd64",
+            ("/usr/bin/gcc-13", "-dumpmachine"): "x86_64-linux-gnu",
+            ("/usr/bin/gcc-13", "-dumpfullversion"): "12.2.0",
+        }[tuple(command)],
+    )
+    monkeypatch.setattr(
+        release.subprocess,
+        "run",
+        lambda *args, **kwargs: SimpleNamespace(stdout="gcc (Debian) 12.2.0\n"),
+    )
+
+    with pytest.raises(RuntimeError, match="Linux compiler mismatch"):
+        release.validate_environment(config, "linux-amd64")
+
+
+def test_darwin_build_environment_uses_the_validated_sdk(monkeypatch):
+    monkeypatch.setenv("PATH", "/usr/bin:/bin")
+    config = {
+        "targets": {
+            "darwin-arm64": {
+                "goarch": "arm64",
+                "deployment_target": "15.0",
+                "wheel_platform": "macosx_15_0_arm64",
+            }
+        }
+    }
+    environment = {
+        "cc": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang",
+        "sdk": "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk",
+    }
+
+    child = release._release_build_environment(config, "darwin-arm64", environment, 1788652800)
+
+    assert child["SDKROOT"] == environment["sdk"]
+    assert child["MACOSX_DEPLOYMENT_TARGET"] == "15.0"
+    assert child["CC"] == environment["cc"]
+
+
+def test_docker_context_is_an_exact_allowlist():
+    entries = (ROOT / ".dockerignore").read_text(encoding="utf-8").splitlines()
+
+    assert entries[0] == "**"
+    allowed = [entry for entry in entries if entry.startswith("!")]
+    assert allowed
+    assert all("*" not in entry for entry in allowed)
+    assert "!cmd/cli.go" in allowed
+    assert "!python/pyproject.toml" in allowed
+    assert "!docs/docs.go" in allowed
+    assert "!cmd/local.env" not in allowed
+
+
+def test_reproducibility_controller_delegates_to_exported_checker(tmp_path: Path, monkeypatch):
+    output = tmp_path / "result"
+    source_sha = "a" * 40
+    calls = []
+
+    monkeypatch.setattr(
+        reproducible,
+        "_git",
+        lambda root, *args: source_sha if args[0] == "rev-parse" else "1788652800",
+    )
+
+    def fake_export(repository, ref, archive, destination):
+        script = destination / "tools" / "check_reproducible.py"
+        script.parent.mkdir(parents=True)
+        script.write_text("# exported checker\n", encoding="utf-8")
+
+    def fake_run(command, **kwargs):
+        calls.append((command, kwargs))
+        (output / "result.json").write_text('{"status":"passed"}\n', encoding="utf-8")
+        return reproducible.subprocess.CompletedProcess(command, 0, "worker stdout\n", "")
+
+    monkeypatch.setattr(reproducible, "export_ref", fake_export)
+    monkeypatch.setattr(reproducible.subprocess, "run", fake_run)
+
+    assert reproducible.check_reproducible("candidate", output) == {"status": "passed"}
+    command, options = calls[0]
+    assert command[1] == str(output / "checker-source" / "tools" / "check_reproducible.py")
+    assert command[command.index("--worker-source-sha") + 1] == source_sha
+    assert options["cwd"] == output / "checker-source"
+
+
+def test_package_acceptance_executes_exported_checker(tmp_path: Path, monkeypatch):
+    source = tmp_path / "source"
+    (source / "tools").mkdir(parents=True)
+    checker = source / "tools" / "check_package.py"
+    checker.write_text("# exported package checker\n", encoding="utf-8")
+    sdist = tmp_path / "artifact.tar.gz"
+    wheel_dir = tmp_path / "wheel"
+    log = tmp_path / "package.log"
+    seen = {}
+
+    def fake_run(command, **kwargs):
+        seen.update(command=command, kwargs=kwargs)
+        return reproducible.subprocess.CompletedProcess(command, 0, "accepted\n", "")
+
+    monkeypatch.setattr(reproducible.subprocess, "run", fake_run)
+    reproducible._run_package_check(source, sdist, wheel_dir, "0.1.1", log)
+
+    assert seen["command"][1] == str(checker)
+    assert seen["command"][-2:] == ["--source-root", str(source)]
+    assert seen["kwargs"]["cwd"] == source

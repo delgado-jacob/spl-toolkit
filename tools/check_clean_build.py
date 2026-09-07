@@ -13,8 +13,13 @@ import tempfile
 
 def hashes(root, names):
     import hashlib
-    return {name: hashlib.sha256((root / name).read_bytes()).hexdigest()
-            for name in names if (root / name).is_file()}
+    result = {}
+    for name in names:
+        path = root / name
+        if not path.is_file():
+            raise FileNotFoundError(f"tracked file is missing: {name}")
+        result[name] = hashlib.sha256(path.read_bytes()).hexdigest()
+    return result
 
 
 def tracked_files(repository: Path, ref: str) -> list[str]:

@@ -11,9 +11,11 @@ import hashlib
 import importlib.util
 import io
 import json
+import ntpath
 import os
 from pathlib import Path, PurePosixPath
 import platform
+import re
 import shutil
 import subprocess
 import sys
@@ -29,6 +31,9 @@ VERSION_SYMBOL = "github.com/delgado-jacob/spl-toolkit/internal/buildinfo.Versio
 
 
 def _safe_archive_name(name: str) -> None:
+    windows_drive, _tail = ntpath.splitdrive(name)
+    if windows_drive or ntpath.isabs(name):
+        raise ValueError(f"unsafe archive path: {name}")
     path = PurePosixPath(name.replace("\\", "/"))
     if path.is_absolute() or not path.parts or any(part in ("", ".", "..") for part in path.parts):
         raise ValueError(f"unsafe archive path: {name}")
@@ -205,6 +210,66 @@ def _windows_gcc_from_powershell() -> str:
     ])
 
 
+def _normalized_architecture(value: str) -> str:
+    value = value.lower()
+    if value in ("amd64", "x86_64"):
+        return "amd64"
+    if value in ("arm64", "aarch64"):
+        return "arm64"
+    return value
+
+
+def _runner_identity(expected: dict[str, str]) -> dict[str, object]:
+    configured = expected["runner"]
+    image_os = os.environ.get("ImageOS")
+    image_version = os.environ.get("ImageVersion")
+    runner_name = os.environ.get("RUNNER_NAME", "local")
+    diagnostic = configured.startswith("diagnostic-")
+    if bool(image_os) != bool(image_version):
+        raise RuntimeError("runner image identity is incomplete")
+    if not diagnostic and image_os:
+        expected_image_os = (
+            "ubuntu24" if configured == "ubuntu-24.04"
+            else "macos15" if configured in ("macos-15", "macos-15-intel")
+            else "win22" if configured == "windows-2022"
+            else None
+        )
+        if expected_image_os is None or image_os.lower() != expected_image_os:
+            raise RuntimeError(
+                f"runner image mismatch: configured {configured}, observed {image_os} {image_version}"
+            )
+    return {
+        "configured_runner": configured,
+        "observed_runner_name": runner_name,
+        "observed_image_os": image_os or "unavailable",
+        "observed_image_version": image_version or "unavailable",
+        "evidence_kind": "diagnostic" if diagnostic else "pinned-runner" if image_os else "pinned-local",
+        "pinned_environment": not diagnostic,
+    }
+
+
+def _validate_local_os(expected: dict[str, str], target: str, identity: dict[str, object]) -> None:
+    if identity["evidence_kind"] != "pinned-local":
+        return
+    configured = expected["runner"]
+    if target.startswith("linux-"):
+        values = {}
+        for line in Path("/etc/os-release").read_text(encoding="utf-8").splitlines():
+            if "=" in line:
+                key, value = line.split("=", 1)
+                values[key] = value.strip('"')
+        if configured != "ubuntu-24.04" or values.get("ID") != "ubuntu" or values.get("VERSION_ID") != "24.04":
+            raise RuntimeError(f"local OS mismatch: configured {configured}, observed {values.get('PRETTY_NAME', platform.platform())}")
+    elif target.startswith("darwin-"):
+        observed = platform.mac_ver()[0]
+        if not observed.startswith("15."):
+            raise RuntimeError(f"local OS mismatch: configured {configured}, observed macOS {observed}")
+    elif target.startswith("windows-"):
+        observed = platform.platform()
+        if "2022" not in observed:
+            raise RuntimeError(f"local OS mismatch: configured {configured}, observed {observed}")
+
+
 def validate_environment(config: dict, target: str) -> dict[str, object]:
     expected = config["targets"].get(target)
     if expected is None:
@@ -215,16 +280,32 @@ def validate_environment(config: dict, target: str) -> dict[str, object]:
     python_version = platform.python_version()
     if python_version != config["build_python"]:
         raise RuntimeError(f"Python version mismatch: expected {config['build_python']}, got {python_version}")
-    configured_arch = os.environ.get("GOARCH", expected["goarch"])
-    if configured_arch != expected["goarch"]:
-        raise RuntimeError(f"GOARCH mismatch: expected {expected['goarch']}, got {configured_arch}")
-    host_arch = platform.machine().lower()
-    normalized_host_arch = "amd64" if host_arch in ("amd64", "x86_64") else "arm64" if host_arch in ("arm64", "aarch64") else host_arch
+    expected_system = {"linux": "Linux", "darwin": "Darwin", "windows": "Windows"}[target.split("-", 1)[0]]
+    if platform.system() != expected_system:
+        raise RuntimeError(f"host OS mismatch: expected {expected_system}, got {platform.system()}")
+    effective_goos = _version_output(["go", "env", "GOOS"])
+    if effective_goos != target.split("-", 1)[0]:
+        raise RuntimeError(f"effective GOOS mismatch: expected {target.split('-', 1)[0]}, got {effective_goos}")
+    effective_goarch = _version_output(["go", "env", "GOARCH"])
+    if effective_goarch != expected["goarch"]:
+        raise RuntimeError(f"effective GOARCH mismatch: expected {expected['goarch']}, got {effective_goarch}")
+    normalized_host_arch = _normalized_architecture(platform.machine())
     if normalized_host_arch != expected["goarch"]:
         raise RuntimeError(f"host architecture mismatch: expected {expected['goarch']}, got {platform.machine()}")
-    cc = shutil.which(os.environ.get("CC", expected["cc"]))
-    if cc is None:
+    identity = _runner_identity(expected)
+    required_cc = (
+        _version_output(["xcrun", "--find", "clang"])
+        if target.startswith("darwin-")
+        else shutil.which(expected["cc"])
+    )
+    if required_cc is None:
         raise RuntimeError(f"required compiler not found: {expected['cc']}")
+    cc = required_cc
+    configured_cc = os.environ.get("CC")
+    if configured_cc:
+        resolved_configured_cc = shutil.which(configured_cc)
+        if resolved_configured_cc is None or Path(resolved_configured_cc).resolve() != Path(required_cc).resolve():
+            raise RuntimeError(f"CC mismatch: expected {Path(required_cc).resolve()}, got {configured_cc}")
     compiler_version = subprocess.run([cc, "--version"], check=True, text=True, capture_output=True).stdout.strip()
     if target.startswith("windows-"):
         powershell_cc = _windows_gcc_from_powershell()
@@ -234,6 +315,11 @@ def validate_environment(config: dict, target: str) -> dict[str, object]:
         version = _version_output([cc, "-dumpfullversion"])
         if machine != "x86_64-w64-mingw32" or version != expected["gcc_version"]:
             raise RuntimeError(f"MinGW compiler mismatch: expected x86_64-w64-mingw32 {expected['gcc_version']}, got {machine} {version}")
+    elif target.startswith("linux-"):
+        machine = _version_output([cc, "-dumpmachine"])
+        version = _version_output([cc, "-dumpfullversion"])
+        if version.split(".", 1)[0] != "13" or "x86_64" not in machine or "linux" not in machine:
+            raise RuntimeError(f"Linux compiler mismatch: expected GCC 13 x86_64 Linux, got {machine} {version}")
     sdk = None
     linker_path = None
     linker = None
@@ -244,18 +330,26 @@ def validate_environment(config: dict, target: str) -> dict[str, object]:
             raise RuntimeError(f"DEVELOPER_DIR mismatch: expected {expected['developer_dir']}, got {developer_dir!r}")
         if os.environ.get("MACOSX_DEPLOYMENT_TARGET") != expected["deployment_target"]:
             raise RuntimeError(f"MACOSX_DEPLOYMENT_TARGET must be {expected['deployment_target']}")
+        selected_clang = _version_output(["xcrun", "--find", "clang"])
+        if Path(selected_clang).resolve() != Path(cc).resolve():
+            raise RuntimeError(f"selected Xcode compiler mismatch: xcrun found {selected_clang}, CC resolved {cc}")
         sdk = _version_output(["xcrun", "--show-sdk-path"])
         linker_path = _version_output(["xcrun", "--find", "ld"])
+        for label, selected_path in (("compiler", selected_clang), ("linker", linker_path), ("SDK", sdk)):
+            if not Path(selected_path).resolve().is_relative_to(Path(developer_dir).resolve()):
+                raise RuntimeError(f"selected Xcode {label} is outside DEVELOPER_DIR: {selected_path}")
         linker = subprocess.run([linker_path, "-v"], check=True, text=True, capture_output=True).stderr.strip()
         xcode = _version_output(["xcodebuild", "-version"])
+        match = re.search(r"Xcode_(\d+\.\d+)\.app", developer_dir)
+        if match and xcode.splitlines()[0] != f"Xcode {match.group(1)}":
+            raise RuntimeError(f"Xcode version mismatch: expected {match.group(1)}, got {xcode}")
     else:
         linker_path = _version_output([cc, "-print-prog-name=ld"])
         linker = subprocess.run([linker_path, "--version"], check=True, text=True, capture_output=True).stdout.strip()
+    _validate_local_os(expected, target, identity)
     return {
+        **identity,
         "target": target,
-        "runner": expected["runner"],
-        "runner_image_os": os.environ.get("ImageOS", "unavailable"),
-        "runner_image_version": os.environ.get("ImageVersion", "unavailable"),
         "os": platform.platform(),
         "architecture": platform.machine(),
         "go": go_version,
@@ -280,6 +374,25 @@ def _new_directory(path: Path) -> None:
     path.mkdir(parents=True, exist_ok=True)
 
 
+def _release_build_environment(
+    config: dict, target: str, environment: dict[str, object], epoch: int
+) -> dict[str, str]:
+    env = os.environ.copy()
+    env.update({
+        "SOURCE_DATE_EPOCH": str(epoch),
+        "GOTOOLCHAIN": "local",
+        "GOARCH": config["targets"][target]["goarch"],
+        "CC": str(environment["cc"]),
+    })
+    if target.startswith("windows-"):
+        env["PATH"] = str(Path(str(environment["cc"])).parent) + os.pathsep + env.get("PATH", "")
+    if target.startswith("darwin-"):
+        env["_PYTHON_HOST_PLATFORM"] = config["targets"][target]["wheel_platform"].replace("_", "-")
+        env["MACOSX_DEPLOYMENT_TARGET"] = config["targets"][target]["deployment_target"]
+        env["SDKROOT"] = str(environment["sdk"])
+    return env
+
+
 def build_release(source: Path, output: Path, epoch: int) -> dict[str, object]:
     source, output = source.resolve(), output.resolve()
     if not (source / "go.mod").is_file() or not (source / "VERSION").is_file():
@@ -295,17 +408,7 @@ def build_release(source: Path, output: Path, epoch: int) -> dict[str, object]:
     version = (source / "VERSION").read_text(encoding="utf-8").strip()
     if version != support.read_version(source / "python"):
         raise RuntimeError("root and Python package versions differ")
-    env = os.environ.copy()
-    env.update({
-        "SOURCE_DATE_EPOCH": str(epoch),
-        "GOTOOLCHAIN": "local",
-        "GOARCH": config["targets"][target]["goarch"],
-        "CC": str(environment["cc"]),
-    })
-    if target.startswith("windows-"):
-        env["PATH"] = str(Path(str(environment["cc"])).parent) + os.pathsep + env.get("PATH", "")
-    if target.startswith("darwin-"):
-        env["_PYTHON_HOST_PLATFORM"] = config["targets"][target]["wheel_platform"].replace("_", "-")
+    env = _release_build_environment(config, target, environment, epoch)
     executable_suffix = ".exe" if target.startswith("windows-") else ""
     version_flag = f"-X={VERSION_SYMBOL}={version}"
     go_ldflags = f"-buildid= {version_flag}"
