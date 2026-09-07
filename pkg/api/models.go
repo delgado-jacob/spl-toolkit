@@ -77,7 +77,7 @@ type LoadMappingsResponse struct {
 // @Description Health check response
 type HealthResponse struct {
 	Status  string `json:"status" example:"healthy" extensions:"x-order=1"`          // Service health status
-	Version string `json:"version" example:"1.0.0" extensions:"x-order=2"`           // Service version
+	Version string `json:"version" example:"0.1.1" extensions:"x-order=2"`           // Service version
 	Service string `json:"service" example:"spl-toolkit-api" extensions:"x-order=3"` // Service name
 }
 

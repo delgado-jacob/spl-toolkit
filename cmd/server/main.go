@@ -1,7 +1,6 @@
 // @title SPL Toolkit API
 // @version 1.0.0
-// @description REST API for the SPL Toolkit library that provides field mapping, query discovery, and validation capabilities for Splunk SPL queries.
-// @description This API enables programmatic analysis and manipulation of Splunk SPL queries in a robust, language-aware fashion.
+// @description Offline field mapping, flat discovery, and validation for the supported Milestone 1 SPL grammar.
 //
 // @contact.name SPL Toolkit Support
 // @contact.email support@example.com

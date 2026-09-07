@@ -34,6 +34,8 @@ def test_documented_cli_examples(cli_path: Path, tmp_path: Path) -> None:
     manifest_path = Path(__file__).with_name("cli_examples.json")
     cases = json.loads(manifest_path.read_text(encoding="utf-8"))["cases"]
     for case in cases:
+        tokens = set(re.findall(r"\{[a-z]+\}", json.dumps(case)))
+        assert tokens <= {"{cli}", "{tmp}"}, case["id"]
         case_dir = tmp_path / case["id"]
         case_dir.mkdir()
         substitutions = {"{cli}": str(cli_path), "{tmp}": str(case_dir)}
@@ -66,6 +68,17 @@ def test_documentation_example_coverage() -> None:
     cli_doc = (root / "docs/cli.md").read_text(encoding="utf-8")
     referenced = set(re.findall(r"<!--\s*cli-example:\s*([a-z0-9-]+)\s*-->", cli_doc))
     assert referenced == ids
+    documented_cases = re.findall(
+        r"<!--\s*cli-example:\s*([a-z0-9-]+)\s*-->\s*```(?:bash|console|sh)\n.*?\bspl-toolkit\b.*?```",
+        cli_doc,
+        re.DOTALL,
+    )
+    command_blocks = [
+        block for block in re.findall(r"```(?:bash|console|sh)\n(.*?)```", cli_doc, re.DOTALL)
+        if re.search(r"(?:^|\s)(?:\./)?spl-toolkit\b", block)
+    ]
+    assert set(documented_cases) == ids
+    assert len(documented_cases) == len(ids) == len(command_blocks)
 
     current_docs = [root / "README.md"] + [
         path for path in (root / "docs").rglob("*.md") if "superpowers" not in path.parts

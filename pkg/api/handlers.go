@@ -138,7 +138,7 @@ func (s *Server) handleDiscoverQuery(w http.ResponseWriter, r *http.Request) {
 
 // handleValidateQuery handles query validation requests
 // @Summary Validate an SPL query
-// @Description Check if an SPL query has valid syntax and can be parsed correctly
+// @Description Check whether a query is accepted by the bundled Milestone 1 SPL grammar
 // @Tags query
 // @Accept json
 // @Produce json

@@ -2,7 +2,7 @@
 
 # Site settings
 title: "SPL Toolkit"
-description: "A robust, language-aware library for programmatic analysis and manipulation of Splunk SPL queries"
+description: "Offline field mapping, flat discovery, and validation for the supported Milestone 1 SPL grammar"
 baseurl: "/spl-toolkit"
 url: "https://delgado-jacob.github.io"
 
@@ -22,25 +22,16 @@ kramdown:
     block:
       line_numbers: true
 
-# Collections
-collections:
-  api:
-    output: true
-    permalink: /:collection/:name/
-  examples:
-    output: true
-    permalink: /:collection/:name/
-  features:
-    output: true
-    permalink: /:collection/:name/
-
 # Navigation
 header_pages:
   - installation.md
   - quickstart.md
+  - cli.md
   - configuration.md
   - api/index.md
-  - examples/index.md
+  - api-server.md
+  - performance.md
+  - architecture.md
   - contributing.md
 
 # Plugins
@@ -68,21 +59,6 @@ defaults:
   - scope:
       path: ""
       type: "pages"
-    values:
-      layout: "page"
-  - scope:
-      path: ""
-      type: "api"
-    values:
-      layout: "page"
-  - scope:
-      path: ""
-      type: "examples"
-    values:
-      layout: "page"
-  - scope:
-      path: ""
-      type: "features"
     values:
       layout: "page"
 

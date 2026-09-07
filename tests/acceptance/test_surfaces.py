@@ -66,6 +66,17 @@ def get_json(url: str) -> dict:
         return json.load(response)
 
 
+def stop_child(child: subprocess.Popen) -> None:
+    if child.poll() is not None:
+        return
+    child.terminate()
+    try:
+        child.wait(timeout=5)
+    except subprocess.TimeoutExpired:
+        child.kill()
+        child.wait(timeout=5)
+
+
 @pytest.fixture(scope="session")
 def server_url(tmp_path_factory: pytest.TempPathFactory):
     server = required_absolute_path("SPL_SERVER")
@@ -94,19 +105,12 @@ def server_url(tmp_path_factory: pytest.TempPathFactory):
                 try:
                     yield base_url
                 finally:
-                    child.terminate()
-                    try:
-                        child.wait(timeout=5)
-                    except subprocess.TimeoutExpired:
-                        child.kill()
-                        child.wait(timeout=5)
+                    stop_child(child)
                     log.close()
                 return
             except (OSError, URLError, AssertionError):
                 time.sleep(0.05)
-        if child.poll() is None:
-            child.terminate()
-            child.wait(timeout=5)
+        stop_child(child)
         log.seek(0)
         last_error = log.read()
         log.close()
