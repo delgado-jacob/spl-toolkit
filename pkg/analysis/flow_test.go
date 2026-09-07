@@ -234,3 +234,57 @@ func TestFlowReviewExactProjectionAfterUncertainty(t *testing.T) {
 		})
 	}
 }
+
+// Exclusion selects fields to remove; it does not consume their values or
+// require that any matching field exists, even for an unmatched pattern.
+func TestFlowWildcardExclusionsAreNonConsuming(t *testing.T) {
+	for _, tc := range []struct {
+		name, query     string
+		status          Status
+		open, uncertain bool
+		removed         []string
+	}{
+		{"closed", `| eval drop1=1,drop2=2,keep=3 | table drop1 drop2 keep | fields - drop* missing* absent | where keep=3`, Valid, false, false, []string{"absent", "drop1", "drop2"}},
+		{"open", `search drop1=1 keep=3 | fields - 'drop*' missing* absent | where keep=3`, Incomplete, true, true, []string{"absent", "drop1"}},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			r, err := Analyze(QueryDocument{Text: tc.query})
+			if err != nil || r.Status != tc.status {
+				t.Fatal(r, err)
+			}
+			var removalStage string
+			for _, stage := range r.Stages {
+				if stage.Command == "fields" {
+					removalStage = stage.ID
+				}
+			}
+			count := 0
+			for _, ref := range r.References {
+				if ref.StageID == removalStage {
+					count++
+					if ref.Role != "remove" || ref.Binding != "not_applicable" {
+						t.Error("exclusion became consuming field obligation", ref)
+					}
+					if ref.NormalizedName != "absent" && ref.Resolution != "wildcard" {
+						t.Error("lost wildcard resolution", ref)
+					}
+					if tc.query[ref.Location.Start.Offset:ref.Location.End.Offset] != ref.OriginalName {
+						t.Error("changed source span", ref)
+					}
+				}
+			}
+			if count != 3 {
+				t.Fatal("missing exclusion references", r.References)
+			}
+			for _, diag := range r.Diagnostics {
+				if diag.Code == CodeUnavailableField {
+					t.Error("exclusion falsely requires available input", diag)
+				}
+			}
+			last := r.Lineage[len(r.Lineage)-1].After
+			if len(last.Fields) != 1 || last.Fields[0].Name != "keep" || last.Open != tc.open || last.Uncertain != tc.uncertain || !reflect.DeepEqual(last.Removed, tc.removed) {
+				t.Fatal("changed removal transfer", last)
+			}
+		})
+	}
+}

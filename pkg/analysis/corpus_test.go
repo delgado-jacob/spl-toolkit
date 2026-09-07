@@ -30,7 +30,7 @@ func loadCorpus(t *testing.T) []corpusCase {
 	if err := json.Unmarshal(data, &corpus); err != nil {
 		t.Fatal(err)
 	}
-	if corpus.Version != "1" || len(corpus.Cases) != 24 {
+	if corpus.Version != "1" || len(corpus.Cases) != 26 {
 		t.Fatal("missing reviewed corpus", corpus.Version, len(corpus.Cases))
 	}
 	return corpus.Cases
@@ -47,30 +47,32 @@ func TestCorpusSemanticReview(t *testing.T) {
 		open, uncertain bool
 	}
 	want := map[string]oracle{
-		"unicode_repeated":      {Valid, "café,café,café,n,café,café,n", "café,n", 3, 1, false, false},
-		"comparisons":           {Valid, "host,status,host,other,status,limit", "host,limit,other,status", 2, 1, true, false},
-		"functions_assignments": {Valid, "a,src,b,a,other,c,b,src,b", "a,b,c,other,src", 1, 1, true, false},
-		"transfer_family":       {Valid, "a,b,a,c,b,c,c,c", "c", 8, 1, false, false},
-		"aggregate_family":      {Valid, "bytes,user,bytes,total,user,n,total,all,user", "all,user", 4, 1, false, false},
-		"lookup_conditional":    {Valid, "uid,people,uid,display,group,uid,display,group", "display,group,uid", 3, 1, false, false},
-		"inputlookup":           {Valid, "users,id", "id", 2, 1, true, false},
-		"wildcard_closed":       {Valid, "a1,a2,a1,a2,a*", "a1,a2", 3, 1, false, false},
-		"wildcard_open":         {Incomplete, "a1,a*", "a1", 2, 1, false, true},
-		"unknown_function":      {Incomplete, "host,out,host", "host,out", 2, 1, true, true},
-		"macro":                 {Incomplete, "host,expand,count,user", "count,user", 3, 1, false, false},
-		"join_scope":            {Incomplete, "root,child,local,child,local", "root", 5, 2, true, true},
-		"appendpipe_scope":      {Incomplete, "root,local,root,local,local,local", "local,root", 6, 2, true, true},
-		"partial_recovery":      {Invalid, "host,good,host,count,user", "count,user", 3, 1, false, false},
-		"invalid_precedence":    {Invalid, "a,a,a", "", 4, 1, true, true},
-		"dependencies":          {Incomplete, "main,/var/log/a,syslog,Network_Traffic,Network_Traffic.All_Traffic,Web,Web.All_Traffic,Authentication,Authentication.Authentication,users", "", 8, 4, true, false},
-		"saved_dataset":         {Incomplete, "savedsearch:Daily", "", 1, 1, true, true},
-		"quoted_asterisk":       {Valid, "a*,a*", "a*", 2, 1, true, false},
-		"malformed_child_scope": {Invalid, "host,good", "host", 3, 1, true, true},
-		"quoted_projection":     {Incomplete, "a*,ab,a*", "a*,ab", 2, 1, false, true},
-		"implicit_aggregate":    {Valid, "bytes,sum(bytes),bytes", "sum(bytes)", 2, 1, false, false},
-		"exact_after_unknown":   {Invalid, "a,a,missing", "a", 4, 1, false, false},
-		"fields_internal":       {Valid, "_time,a,b,_time,a,b,a,_time", "_time,a", 4, 1, false, false},
-		"fields_open":           {Incomplete, "a,a,b", "a", 3, 1, false, true},
+		"unicode_repeated":          {Valid, "café,café,café,n,café,café,n", "café,n", 3, 1, false, false},
+		"comparisons":               {Valid, "host,status,host,other,status,limit", "host,limit,other,status", 2, 1, true, false},
+		"functions_assignments":     {Valid, "a,src,b,a,other,c,b,src,b", "a,b,c,other,src", 1, 1, true, false},
+		"transfer_family":           {Valid, "a,b,a,c,b,c,c,c", "c", 8, 1, false, false},
+		"aggregate_family":          {Valid, "bytes,user,bytes,total,user,n,total,all,user", "all,user", 4, 1, false, false},
+		"lookup_conditional":        {Valid, "uid,people,uid,display,group,uid,display,group", "display,group,uid", 3, 1, false, false},
+		"inputlookup":               {Valid, "users,id", "id", 2, 1, true, false},
+		"wildcard_closed":           {Valid, "a1,a2,a1,a2,a*", "a1,a2", 3, 1, false, false},
+		"wildcard_open":             {Incomplete, "a1,a*", "a1", 2, 1, false, true},
+		"unknown_function":          {Incomplete, "host,out,host", "host,out", 2, 1, true, true},
+		"macro":                     {Incomplete, "host,expand,count,user", "count,user", 3, 1, false, false},
+		"join_scope":                {Incomplete, "root,child,local,child,local", "root", 5, 2, true, true},
+		"appendpipe_scope":          {Incomplete, "root,local,root,local,local,local", "local,root", 6, 2, true, true},
+		"partial_recovery":          {Invalid, "host,good,host,count,user", "count,user", 3, 1, false, false},
+		"invalid_precedence":        {Invalid, "a,a,a", "", 4, 1, true, true},
+		"dependencies":              {Incomplete, "main,/var/log/a,syslog,Network_Traffic,Network_Traffic.All_Traffic,Web,Web.All_Traffic,Authentication,Authentication.Authentication,users", "", 8, 4, true, false},
+		"saved_dataset":             {Incomplete, "savedsearch:Daily", "", 1, 1, true, true},
+		"quoted_asterisk":           {Valid, "a*,a*", "a*", 2, 1, true, false},
+		"wildcard_exclusion_closed": {Valid, "a1,a2,keep,a1,a2,keep,a*,z*", "keep", 3, 1, false, false},
+		"wildcard_exclusion_open":   {Incomplete, "a1,keep,a*,z*", "keep", 2, 1, true, true},
+		"malformed_child_scope":     {Invalid, "host,good", "host", 3, 1, true, true},
+		"quoted_projection":         {Incomplete, "a*,ab,a*", "a*,ab", 2, 1, false, true},
+		"implicit_aggregate":        {Valid, "bytes,sum(bytes),bytes", "sum(bytes)", 2, 1, false, false},
+		"exact_after_unknown":       {Invalid, "a,a,missing", "a", 4, 1, false, false},
+		"fields_internal":           {Valid, "_time,a,b,_time,a,b,a,_time", "_time,a", 4, 1, false, false},
+		"fields_open":               {Incomplete, "a,a,b", "a", 3, 1, false, true},
 	}
 	for _, c := range loadCorpus(t) {
 		t.Run(c.ID, func(t *testing.T) {
@@ -93,6 +95,18 @@ func TestCorpusSemanticReview(t *testing.T) {
 			}
 			if r.Status != w.status || strings.Join(names, ",") != w.names || strings.Join(fields, ",") != w.fields || len(r.Stages) != w.stages || len(r.Scopes) != w.scopes || last.Open != w.open || last.Uncertain != w.uncertain {
 				t.Fatalf("status=%s refs=%q fields=%q stages=%d scopes=%d open=%v uncertain=%v", r.Status, strings.Join(names, ","), strings.Join(fields, ","), len(r.Stages), len(r.Scopes), last.Open, last.Uncertain)
+			}
+			if c.ID == "wildcard_exclusion_closed" || c.ID == "wildcard_exclusion_open" {
+				for _, ref := range r.References[len(r.References)-2:] {
+					if ref.Role != "remove" || ref.Binding != "not_applicable" || ref.Resolution != "wildcard" {
+						t.Fatal("wildcard exclusion became consuming obligation", ref)
+					}
+				}
+				for _, diag := range r.Diagnostics {
+					if diag.Code == CodeUnavailableField {
+						t.Fatal("exclusion invented unavailable field", diag)
+					}
+				}
 			}
 			if c.ID == "malformed_child_scope" {
 				ref := r.References[len(r.References)-1]

@@ -9907,6 +9907,870 @@
           }
         ]
       }
+    },
+    {
+      "id": "wildcard_exclusion_closed",
+      "document": {
+        "text": "| eval a1=1,a2=2,keep=3 | table a1 a2 keep | fields - a* z*",
+        "language": "",
+        "profile": "",
+        "version": "",
+        "source_id": "corpus:wildcard_exclusion_closed"
+      },
+      "expected": {
+        "schema_version": 1,
+        "document": {
+          "text": "| eval a1=1,a2=2,keep=3 | table a1 a2 keep | fields - a* z*",
+          "language": "spl",
+          "profile": "splunkd",
+          "version": "current",
+          "source_id": "corpus:wildcard_exclusion_closed"
+        },
+        "status": "valid",
+        "coverage": {
+          "syntax_complete": true,
+          "semantic_complete": true,
+          "reasons": []
+        },
+        "stages": [
+          {
+            "id": "stage-0",
+            "command": "eval",
+            "position": 0,
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 2,
+                "line": 1,
+                "column": 3
+              },
+              "end": {
+                "offset": 23,
+                "line": 1,
+                "column": 24
+              }
+            },
+            "semantic_complete": true
+          },
+          {
+            "id": "stage-1",
+            "command": "table",
+            "position": 1,
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 26,
+                "line": 1,
+                "column": 27
+              },
+              "end": {
+                "offset": 42,
+                "line": 1,
+                "column": 43
+              }
+            },
+            "semantic_complete": true
+          },
+          {
+            "id": "stage-2",
+            "command": "fields",
+            "position": 2,
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 45,
+                "line": 1,
+                "column": 46
+              },
+              "end": {
+                "offset": 59,
+                "line": 1,
+                "column": 60
+              }
+            },
+            "semantic_complete": true
+          }
+        ],
+        "scopes": [
+          {
+            "id": "scope-0",
+            "parent_id": "",
+            "kind": "root",
+            "stage_id": "",
+            "location": {
+              "start": {
+                "offset": 0,
+                "line": 1,
+                "column": 1
+              },
+              "end": {
+                "offset": 59,
+                "line": 1,
+                "column": 60
+              }
+            }
+          }
+        ],
+        "references": [
+          {
+            "id": "ref-0",
+            "original_name": "a1",
+            "normalized_name": "a1",
+            "kind": "field",
+            "role": "create",
+            "stage_id": "stage-0",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 7,
+                "line": 1,
+                "column": 8
+              },
+              "end": {
+                "offset": 9,
+                "line": 1,
+                "column": 10
+              }
+            },
+            "resolution": "exact",
+            "binding": "not_applicable",
+            "origin_reference_ids": []
+          },
+          {
+            "id": "ref-1",
+            "original_name": "a2",
+            "normalized_name": "a2",
+            "kind": "field",
+            "role": "create",
+            "stage_id": "stage-0",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 12,
+                "line": 1,
+                "column": 13
+              },
+              "end": {
+                "offset": 14,
+                "line": 1,
+                "column": 15
+              }
+            },
+            "resolution": "exact",
+            "binding": "not_applicable",
+            "origin_reference_ids": []
+          },
+          {
+            "id": "ref-2",
+            "original_name": "keep",
+            "normalized_name": "keep",
+            "kind": "field",
+            "role": "create",
+            "stage_id": "stage-0",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 17,
+                "line": 1,
+                "column": 18
+              },
+              "end": {
+                "offset": 21,
+                "line": 1,
+                "column": 22
+              }
+            },
+            "resolution": "exact",
+            "binding": "not_applicable",
+            "origin_reference_ids": []
+          },
+          {
+            "id": "ref-3",
+            "original_name": "a1",
+            "normalized_name": "a1",
+            "kind": "field",
+            "role": "read",
+            "stage_id": "stage-1",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 32,
+                "line": 1,
+                "column": 33
+              },
+              "end": {
+                "offset": 34,
+                "line": 1,
+                "column": 35
+              }
+            },
+            "resolution": "exact",
+            "binding": "derived",
+            "origin_reference_ids": [
+              "ref-0"
+            ]
+          },
+          {
+            "id": "ref-4",
+            "original_name": "a2",
+            "normalized_name": "a2",
+            "kind": "field",
+            "role": "read",
+            "stage_id": "stage-1",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 35,
+                "line": 1,
+                "column": 36
+              },
+              "end": {
+                "offset": 37,
+                "line": 1,
+                "column": 38
+              }
+            },
+            "resolution": "exact",
+            "binding": "derived",
+            "origin_reference_ids": [
+              "ref-1"
+            ]
+          },
+          {
+            "id": "ref-5",
+            "original_name": "keep",
+            "normalized_name": "keep",
+            "kind": "field",
+            "role": "read",
+            "stage_id": "stage-1",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 38,
+                "line": 1,
+                "column": 39
+              },
+              "end": {
+                "offset": 42,
+                "line": 1,
+                "column": 43
+              }
+            },
+            "resolution": "exact",
+            "binding": "derived",
+            "origin_reference_ids": [
+              "ref-2"
+            ]
+          },
+          {
+            "id": "ref-6",
+            "original_name": "a*",
+            "normalized_name": "a*",
+            "kind": "field",
+            "role": "remove",
+            "stage_id": "stage-2",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 54,
+                "line": 1,
+                "column": 55
+              },
+              "end": {
+                "offset": 56,
+                "line": 1,
+                "column": 57
+              }
+            },
+            "resolution": "wildcard",
+            "binding": "not_applicable",
+            "origin_reference_ids": [
+              "ref-0",
+              "ref-1"
+            ]
+          },
+          {
+            "id": "ref-7",
+            "original_name": "z*",
+            "normalized_name": "z*",
+            "kind": "field",
+            "role": "remove",
+            "stage_id": "stage-2",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 57,
+                "line": 1,
+                "column": 58
+              },
+              "end": {
+                "offset": 59,
+                "line": 1,
+                "column": 60
+              }
+            },
+            "resolution": "wildcard",
+            "binding": "not_applicable",
+            "origin_reference_ids": []
+          }
+        ],
+        "lineage": [
+          {
+            "stage_id": "stage-0",
+            "scope_id": "scope-0",
+            "before": {
+              "fields": [],
+              "removed": [],
+              "open": true,
+              "uncertain": false
+            },
+            "after": {
+              "fields": [
+                {
+                  "name": "a1",
+                  "origin_reference_ids": [
+                    "ref-0"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "a2",
+                  "origin_reference_ids": [
+                    "ref-1"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "keep",
+                  "origin_reference_ids": [
+                    "ref-2"
+                  ],
+                  "conditional": false
+                }
+              ],
+              "removed": [],
+              "open": true,
+              "uncertain": false
+            },
+            "transitions": [
+              {
+                "operation": "create",
+                "output": "a1",
+                "input_reference_ids": [],
+                "output_reference_id": "ref-0",
+                "conditional": false
+              },
+              {
+                "operation": "create",
+                "output": "a2",
+                "input_reference_ids": [],
+                "output_reference_id": "ref-1",
+                "conditional": false
+              },
+              {
+                "operation": "create",
+                "output": "keep",
+                "input_reference_ids": [],
+                "output_reference_id": "ref-2",
+                "conditional": false
+              }
+            ]
+          },
+          {
+            "stage_id": "stage-1",
+            "scope_id": "scope-0",
+            "before": {
+              "fields": [
+                {
+                  "name": "a1",
+                  "origin_reference_ids": [
+                    "ref-0"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "a2",
+                  "origin_reference_ids": [
+                    "ref-1"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "keep",
+                  "origin_reference_ids": [
+                    "ref-2"
+                  ],
+                  "conditional": false
+                }
+              ],
+              "removed": [],
+              "open": true,
+              "uncertain": false
+            },
+            "after": {
+              "fields": [
+                {
+                  "name": "a1",
+                  "origin_reference_ids": [
+                    "ref-0"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "a2",
+                  "origin_reference_ids": [
+                    "ref-1"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "keep",
+                  "origin_reference_ids": [
+                    "ref-2"
+                  ],
+                  "conditional": false
+                }
+              ],
+              "removed": [],
+              "open": false,
+              "uncertain": false
+            },
+            "transitions": [
+              {
+                "operation": "project",
+                "output": "a1",
+                "input_reference_ids": [
+                  "ref-3"
+                ],
+                "output_reference_id": "",
+                "conditional": false
+              },
+              {
+                "operation": "project",
+                "output": "a2",
+                "input_reference_ids": [
+                  "ref-4"
+                ],
+                "output_reference_id": "",
+                "conditional": false
+              },
+              {
+                "operation": "project",
+                "output": "keep",
+                "input_reference_ids": [
+                  "ref-5"
+                ],
+                "output_reference_id": "",
+                "conditional": false
+              }
+            ]
+          },
+          {
+            "stage_id": "stage-2",
+            "scope_id": "scope-0",
+            "before": {
+              "fields": [
+                {
+                  "name": "a1",
+                  "origin_reference_ids": [
+                    "ref-0"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "a2",
+                  "origin_reference_ids": [
+                    "ref-1"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "keep",
+                  "origin_reference_ids": [
+                    "ref-2"
+                  ],
+                  "conditional": false
+                }
+              ],
+              "removed": [],
+              "open": false,
+              "uncertain": false
+            },
+            "after": {
+              "fields": [
+                {
+                  "name": "keep",
+                  "origin_reference_ids": [
+                    "ref-2"
+                  ],
+                  "conditional": false
+                }
+              ],
+              "removed": [
+                "a1",
+                "a2"
+              ],
+              "open": false,
+              "uncertain": false
+            },
+            "transitions": [
+              {
+                "operation": "remove",
+                "output": "a1",
+                "input_reference_ids": [
+                  "ref-6"
+                ],
+                "output_reference_id": "",
+                "conditional": false
+              },
+              {
+                "operation": "remove",
+                "output": "a2",
+                "input_reference_ids": [
+                  "ref-6"
+                ],
+                "output_reference_id": "",
+                "conditional": false
+              }
+            ]
+          }
+        ],
+        "dependencies": {
+          "indexes": [],
+          "sources": [],
+          "source_types": [],
+          "datasets": [],
+          "lookups": [],
+          "data_models": [],
+          "macros": []
+        },
+        "diagnostics": []
+      }
+    },
+    {
+      "id": "wildcard_exclusion_open",
+      "document": {
+        "text": "search a1=1 keep=3 | fields - 'a*' z*",
+        "language": "",
+        "profile": "",
+        "version": "",
+        "source_id": "corpus:wildcard_exclusion_open"
+      },
+      "expected": {
+        "schema_version": 1,
+        "document": {
+          "text": "search a1=1 keep=3 | fields - 'a*' z*",
+          "language": "spl",
+          "profile": "splunkd",
+          "version": "current",
+          "source_id": "corpus:wildcard_exclusion_open"
+        },
+        "status": "incomplete",
+        "coverage": {
+          "syntax_complete": true,
+          "semantic_complete": false,
+          "reasons": [
+            "SPL_UNRESOLVED_WILDCARD"
+          ]
+        },
+        "stages": [
+          {
+            "id": "stage-0",
+            "command": "search",
+            "position": 0,
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 0,
+                "line": 1,
+                "column": 1
+              },
+              "end": {
+                "offset": 18,
+                "line": 1,
+                "column": 19
+              }
+            },
+            "semantic_complete": true
+          },
+          {
+            "id": "stage-1",
+            "command": "fields",
+            "position": 1,
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 21,
+                "line": 1,
+                "column": 22
+              },
+              "end": {
+                "offset": 37,
+                "line": 1,
+                "column": 38
+              }
+            },
+            "semantic_complete": false
+          }
+        ],
+        "scopes": [
+          {
+            "id": "scope-0",
+            "parent_id": "",
+            "kind": "root",
+            "stage_id": "",
+            "location": {
+              "start": {
+                "offset": 0,
+                "line": 1,
+                "column": 1
+              },
+              "end": {
+                "offset": 37,
+                "line": 1,
+                "column": 38
+              }
+            }
+          }
+        ],
+        "references": [
+          {
+            "id": "ref-0",
+            "original_name": "a1",
+            "normalized_name": "a1",
+            "kind": "field",
+            "role": "filter",
+            "stage_id": "stage-0",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 7,
+                "line": 1,
+                "column": 8
+              },
+              "end": {
+                "offset": 9,
+                "line": 1,
+                "column": 10
+              }
+            },
+            "resolution": "exact",
+            "binding": "source",
+            "origin_reference_ids": []
+          },
+          {
+            "id": "ref-1",
+            "original_name": "keep",
+            "normalized_name": "keep",
+            "kind": "field",
+            "role": "filter",
+            "stage_id": "stage-0",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 12,
+                "line": 1,
+                "column": 13
+              },
+              "end": {
+                "offset": 16,
+                "line": 1,
+                "column": 17
+              }
+            },
+            "resolution": "exact",
+            "binding": "source",
+            "origin_reference_ids": []
+          },
+          {
+            "id": "ref-2",
+            "original_name": "'a*'",
+            "normalized_name": "a*",
+            "kind": "field",
+            "role": "remove",
+            "stage_id": "stage-1",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 30,
+                "line": 1,
+                "column": 31
+              },
+              "end": {
+                "offset": 34,
+                "line": 1,
+                "column": 35
+              }
+            },
+            "resolution": "wildcard",
+            "binding": "not_applicable",
+            "origin_reference_ids": [
+              "ref-0"
+            ]
+          },
+          {
+            "id": "ref-3",
+            "original_name": "z*",
+            "normalized_name": "z*",
+            "kind": "field",
+            "role": "remove",
+            "stage_id": "stage-1",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 35,
+                "line": 1,
+                "column": 36
+              },
+              "end": {
+                "offset": 37,
+                "line": 1,
+                "column": 38
+              }
+            },
+            "resolution": "wildcard",
+            "binding": "not_applicable",
+            "origin_reference_ids": []
+          }
+        ],
+        "lineage": [
+          {
+            "stage_id": "stage-0",
+            "scope_id": "scope-0",
+            "before": {
+              "fields": [],
+              "removed": [],
+              "open": true,
+              "uncertain": false
+            },
+            "after": {
+              "fields": [
+                {
+                  "name": "a1",
+                  "origin_reference_ids": [
+                    "ref-0"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "keep",
+                  "origin_reference_ids": [
+                    "ref-1"
+                  ],
+                  "conditional": false
+                }
+              ],
+              "removed": [],
+              "open": true,
+              "uncertain": false
+            },
+            "transitions": []
+          },
+          {
+            "stage_id": "stage-1",
+            "scope_id": "scope-0",
+            "before": {
+              "fields": [
+                {
+                  "name": "a1",
+                  "origin_reference_ids": [
+                    "ref-0"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "keep",
+                  "origin_reference_ids": [
+                    "ref-1"
+                  ],
+                  "conditional": false
+                }
+              ],
+              "removed": [],
+              "open": true,
+              "uncertain": false
+            },
+            "after": {
+              "fields": [
+                {
+                  "name": "keep",
+                  "origin_reference_ids": [
+                    "ref-1"
+                  ],
+                  "conditional": false
+                }
+              ],
+              "removed": [
+                "a1"
+              ],
+              "open": true,
+              "uncertain": true
+            },
+            "transitions": [
+              {
+                "operation": "remove",
+                "output": "a1",
+                "input_reference_ids": [
+                  "ref-2"
+                ],
+                "output_reference_id": "",
+                "conditional": false
+              }
+            ]
+          }
+        ],
+        "dependencies": {
+          "indexes": [],
+          "sources": [],
+          "source_types": [],
+          "datasets": [],
+          "lookups": [],
+          "data_models": [],
+          "macros": []
+        },
+        "diagnostics": [
+          {
+            "code": "SPL_UNRESOLVED_WILDCARD",
+            "severity": "warning",
+            "category": "unsupported_semantics",
+            "message": "wildcard \"a*\" membership is unresolved",
+            "location": {
+              "start": {
+                "offset": 30,
+                "line": 1,
+                "column": 31
+              },
+              "end": {
+                "offset": 34,
+                "line": 1,
+                "column": 35
+              }
+            },
+            "stage_id": "stage-1",
+            "scope_id": "scope-0"
+          },
+          {
+            "code": "SPL_UNRESOLVED_WILDCARD",
+            "severity": "warning",
+            "category": "unsupported_semantics",
+            "message": "wildcard \"z*\" membership is unresolved",
+            "location": {
+              "start": {
+                "offset": 35,
+                "line": 1,
+                "column": 36
+              },
+              "end": {
+                "offset": 37,
+                "line": 1,
+                "column": 38
+              }
+            },
+            "stage_id": "stage-1",
+            "scope_id": "scope-0"
+          }
+        ]
+      }
     }
   ]
 }

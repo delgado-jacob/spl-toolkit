@@ -125,7 +125,9 @@ func (s *semanticStage) selector(c parser.IAnalysisSelectorContext, role string)
 		return []string{}, []string{}
 	}
 	ref := &s.result.References[len(s.result.References)-1]
-	ref.Binding = "indeterminate"
+	if role != "remove" {
+		ref.Binding = "indeterminate"
+	}
 	command := s.result.Stages[s.stage].Command
 	if command != "fields" && command != "table" && command != "rename" {
 		s.diagnostic(CodeUnsupportedSemantics, fmt.Sprintf("wildcard selectors for command %q are unmodeled", command), c)
@@ -237,7 +239,11 @@ func fieldsCommand(s *semanticStage, node antlr.ParserRuleContext) {
 			s.transitions = append(s.transitions, Transition{Operation: "remove", Output: name, InputReferenceIDs: []string{}, OutputReferenceID: id})
 			continue
 		}
-		names, ids := s.selector(c, "read")
+		role := "read"
+		if exclude {
+			role = "remove"
+		}
+		names, ids := s.selector(c, role)
 		for _, name := range names {
 			if exclude {
 				s.env.remove(name)
