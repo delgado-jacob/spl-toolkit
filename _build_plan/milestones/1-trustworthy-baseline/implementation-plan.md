@@ -95,13 +95,13 @@ This is a living ExecPlan maintained according to `/Users/jacobdelgado/.codex/PL
 - [x] Task 9.5: Connect non-publishing Make release targets.
 - [x] Task 9.6: Repair and verify existing container workflows.
 - [x] Task 9.7: Verify artifact equality and commit Task 9.
-- [ ] Task 10.1: Wire four native runner jobs and interpreter matrix.
-- [ ] Task 10.2: Exercise installed wheels across the interpreter matrix.
-- [ ] Task 10.3: Wire minimum-Go, native-memory, Make, and container gates.
-- [ ] Task 10.4: Implement required-evidence aggregation and its failure tests.
-- [ ] Task 10.5: Commit/review the exact candidate and obtain current CI results.
-- [ ] Task 10.6: Write the milestone log with proven results and open gates.
-- [ ] Task 10.7: Commit final documentation and verify evidence ancestry.
+- [x] Task 10.1: Wire four native runner jobs and interpreter matrix.
+- [x] Task 10.2: Exercise installed wheels across the interpreter matrix.
+- [x] Task 10.3: Wire minimum-Go, native-memory, Make, and container gates.
+- [x] Task 10.4: Implement required-evidence aggregation and its failure tests.
+- [x] Task 10.5: Commit/review the exact candidate and obtain current CI results.
+- [x] Task 10.6: Write the milestone log with proven results and open gates.
+- [x] Task 10.7: Commit final documentation and verify evidence ancestry.
 
 ## Surprises & Discoveries
 
@@ -126,6 +126,8 @@ Execution platform diagnostic: Go1.22.12 with cgo/race on macOS26.2 can emit a b
 
 Task 9 independent review closed four release-gate defects: validation now executes from the exported revision, environment identity is observed and checked, Docker inputs use an exact allowlist, and Windows drive/UNC archive paths are rejected. Diagnostic builds carry a separate status and cannot stand in for pinned acceptance. Matching production/diagnostic-base Git tree IDs and the sole environment substitution were verified directly. The original source floor passed on Linux Go 1.22.12; an early Linux Go 1.26.8/GCC 12 ASan diagnostic also passed, with final GCC 13 acceptance still required.
 
+Task 10 acceptance, 2026-09-06: independent review closed incomplete nested environment validation and evidence overwrite behavior. The first full hosted run exposed a missing pinned dependency bootstrap in 15 installed-wheel jobs; its other gates passed and aggregation correctly rejected the incomplete matrix. The reviewed bootstrap correction at `5191206124590f69a18c81fc51e756b6e75c90e8` passed all 24 jobs in run `34075500813`, including four reproducible releases, all 16 installed-wheel combinations, Go 1.22.12, GCC 13 ASan, Linux Docker/Make/clean-source workflows, and final strict aggregation. Controller validation of the 28 downloaded records passed and all 32 release payload checksums matched. Each installed combination passed 11 native and five surface tests with zero skips. Complete logs and payloads are retained under `build/evidence/ci-34075500813/`; the later documentation commits preserve this tested source identity and do not change runtime, test, or build inputs. Final whole-branch review is recorded separately.
+
 ## Decision Log
 
 
@@ -148,7 +150,7 @@ Decision: Replace the planned macOS native -no_uuid flag with -reproducible whil
 ## Outcomes & Retrospective
 
 
-Execution in progress: Tasks 1–9 have passed independent spec and quality review. Their committed results establish clean local builds, deterministic rule selection, owned concurrent Go state, repaired native handles/arrays, explicit Python lifecycle, and the documented CLI contract with real-surface regression coverage. Tasks 7–8 additionally establish isolated native wheel/source-package installation, common surface fixtures, executable documentation, and measured performance. Task 9 adds controlled release artifacts, complete attribution, strict source/environment checks, and working pinned containers. Its real local two-build diagnostic matched all eight payloads, but Task 10 and every final pinned four-platform gate remain open. These local results do not establish milestone completion.
+Tasks 1–10 have passed their independent code reviews, including focused fix reviews. Runtime and release acceptance is established at implementation SHA `5191206124590f69a18c81fc51e756b6e75c90e8` by all 24 successful jobs in [run 34075500813](https://github.com/delgado-jacob/spl-toolkit/actions/runs/34075500813). The controller independently accepted all 28 downloaded records and verified all 32 release payload hashes. This covers actual execution on all four targets and all 16 pinned interpreter combinations, alongside the language floor, real native sanitizer, source preservation, documented workflows, and reproducibility gates. The milestone log and permanent compatibility/evidence records were committed separately after those results, with tested-source ancestry and unchanged runtime/configuration/test inputs verified. Final whole-branch review is recorded separately; no merge, tag, or release publication has occurred.
 
 ## Context and Orientation
 
