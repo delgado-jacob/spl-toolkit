@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func analyzeParsed(result *Result, parsed *parsedDocument) {
+func analyzeParsed(result *Result, parsed *parsedDocument, refinement *sourceRefinement) {
 	root := Scope{ID: "scope-0", Kind: "root", Location: parsed.source.location(0, len(parsed.source.positions)-1)}
 	result.Scopes = append(result.Scopes, root)
 	// Recovery may leave a generic or structurally partial command context. Attribute
@@ -105,7 +105,7 @@ func analyzeParsed(result *Result, parsed *parsedDocument) {
 			stage := Stage{ID: stageID, Command: command, Position: positions[scopeID], ScopeID: scopeID, Location: parsed.source.contextLocation(stageContext), SemanticComplete: true}
 			positions[scopeID]++
 			result.Stages = append(result.Stages, stage)
-			state := &semanticStage{result: result, parsed: parsed, stage: len(result.Stages) - 1, env: environments[scopeID], transitions: []Transition{}}
+			state := &semanticStage{result: result, parsed: parsed, stage: len(result.Stages) - 1, env: environments[scopeID], transitions: []Transition{}, refinement: refinement}
 			before := state.env.snapshot()
 			branchInputs[stageID] = state.env.clone()
 			if _, damaged := stageContext.(*parser.AnalysisStageContext); damaged || damagedStage(stage.Location) || unsafeBoundaries[stageContext.GetStart().GetTokenIndex()] {
@@ -140,5 +140,5 @@ func analyzeParsed(result *Result, parsed *parsedDocument) {
 		}
 	}
 	visit(parsed.tree, root.ID, "")
-	finalizeReferences(result)
+	finalizeReferences(result, refinement)
 }

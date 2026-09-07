@@ -143,6 +143,14 @@ func (s *semanticStage) selector(c parser.IAnalysisSelectorContext, role string)
 		ref.Binding = "indeterminate"
 	}
 	command := s.result.Stages[s.stage].Command
+	if s.refinement != nil {
+		names := s.refinedSelector(c, role, id)
+		if command != "fields" && command != "table" && command != "rename" {
+			s.diagnostic(CodeUnsupportedSemantics, fmt.Sprintf("wildcard selectors for command %q are unmodeled", command), c)
+			return []string{}, []string{id}
+		}
+		return names, []string{id}
+	}
 	if command != "fields" && command != "table" && command != "rename" {
 		s.diagnostic(CodeUnsupportedSemantics, fmt.Sprintf("wildcard selectors for command %q are unmodeled", command), c)
 		return []string{}, []string{id}
@@ -236,12 +244,15 @@ func fieldsCommand(s *semanticStage, node antlr.ParserRuleContext) {
 	}
 	selected := map[string]trackedField{}
 	if !exclude && s.result.Stages[s.stage].Command == "fields" {
+		if s.refinement != nil {
+			s.retainSourceInternals()
+		}
 		for name, field := range s.env.fields {
 			if strings.HasPrefix(name, "_") {
 				selected[name] = field
 			}
 		}
-		if s.env.open {
+		if s.env.open && s.refinement == nil {
 			s.diagnostic(CodeUnsupportedSemantics, "fields inclusion retains internal fields with unresolved open-source membership", ctx)
 		}
 	}

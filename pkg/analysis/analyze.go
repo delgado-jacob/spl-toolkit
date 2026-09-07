@@ -40,6 +40,10 @@ func newResult(document QueryDocument) *Result {
 
 // Analyze retains original source and reports syntax errors as findings. Unsupported document options are API errors.
 func Analyze(document QueryDocument) (*Result, error) {
+	return analyze(document, nil)
+}
+
+func analyze(document QueryDocument, refinement *sourceRefinement) (*Result, error) {
 	normalized, err := normalizeDocument(document)
 	if err != nil {
 		return nil, err
@@ -47,7 +51,7 @@ func Analyze(document QueryDocument) (*Result, error) {
 	result := newResult(normalized)
 	parsed := parseDocument(normalized.Text)
 	result.Diagnostics = append(result.Diagnostics, parsed.diagnostics...)
-	analyzeParsed(result, parsed)
+	analyzeParsed(result, parsed, refinement)
 	finalizeResult(result)
 	return result, nil
 }

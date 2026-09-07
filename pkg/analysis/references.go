@@ -15,6 +15,7 @@ type semanticStage struct {
 	env           *environment
 	transitions   []Transition
 	recoveryLimit int
+	refinement    *sourceRefinement
 }
 
 func normalizedName(text string) string {
@@ -184,7 +185,7 @@ func (s *semanticStage) expression(node antlr.Tree) []string {
 	}
 	return ids
 }
-func finalizeReferences(r *Result) {
+func finalizeReferences(r *Result, refinement *sourceRefinement) {
 	sort.SliceStable(r.References, func(i, j int) bool {
 		a, b := r.References[i], r.References[j]
 		if a.Location.Start.Offset != b.Location.Start.Offset {
@@ -203,6 +204,9 @@ func finalizeReferences(r *Result) {
 		ref := &r.References[i]
 		mapping[ref.ID] = fmt.Sprintf("ref-%d", i)
 		ref.ID = mapping[ref.ID]
+	}
+	if refinement != nil {
+		refinement.finalizeExpansions(r.References, mapping)
 	}
 	remap := func(ids []string) {
 		for i, id := range ids {
