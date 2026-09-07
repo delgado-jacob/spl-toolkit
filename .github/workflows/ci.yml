@@ -145,6 +145,8 @@ jobs:
         with: {python-version: '${{ matrix.python }}'}
       - name: Configure task-owned pip cache
         run: python -c "import os; from pathlib import Path; cache=Path(os.environ['RUNNER_TEMP'])/'pip-cache'; cache.mkdir(); Path(os.environ['GITHUB_ENV']).open('a',encoding='utf-8').write(f'PIP_CACHE_DIR={cache}\n')"
+      - name: Install package checker dependencies
+        run: python -m pip install --disable-pip-version-check -r python/requirements-build.txt
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
         with:
           name: baseline-${{ matrix.target }}

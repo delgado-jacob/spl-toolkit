@@ -16,6 +16,22 @@ ROOT = Path(__file__).resolve().parents[2]
 PYTHON_DIR = ROOT / "python"
 
 
+def test_installed_wheel_job_bootstraps_package_checker_dependencies():
+    workflow = (ROOT / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
+    installed_job = workflow.split("  installed-wheel:\n", 1)[1].split("\n  go-floor:\n", 1)[0]
+    bootstrap = (
+        "python -m pip install --disable-pip-version-check "
+        "-r python/requirements-build.txt"
+    )
+    checker = "python tools/check_package.py --wheel-only"
+
+    assert bootstrap in installed_job
+    assert installed_job.index(bootstrap) < installed_job.index(checker)
+    assert "packaging==25.0" in (PYTHON_DIR / "requirements-build.txt").read_text(
+        encoding="utf-8"
+    ).splitlines()
+
+
 def load_build_support():
     spec = importlib.util.spec_from_file_location(
         "spl_toolkit_build_support", PYTHON_DIR / "build_support.py"
