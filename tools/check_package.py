@@ -48,7 +48,7 @@ with SPLMapper() as mapper:
     assert mapper.map_query('search src_ip=1') == 'search source_ip=1'
 """
 NATIVE_TESTS = ("test_native_abi.py", "test_native_mapper.py", "test_native_analysis.py")
-ACCEPTANCE_FILES = ("test_documented_cli.py", "test_surfaces.py", "cli_examples.json")
+ACCEPTANCE_FILES = ("test_documented_cli.py", "test_surfaces.py", "test_analysis_surfaces.py", "cli_examples.json")
 REQUIRED_PYTEST_PLUGIN = r'''\
 import json
 import os
@@ -250,6 +250,7 @@ def install_and_check(
     )
     return metadata | {
         "wheel_sha256": sha256(wheel),
+        "fixture_hashes": {"baseline": sha256(fixture), "analysis": sha256(analysis_fixture)},
         "tests": {"required_native": native_counts, "surface_acceptance": surface_counts},
         "cli_examples": "passed",
         "surface_parity": "passed",
@@ -461,7 +462,7 @@ def _check_package(
             check_metadata_without_compiler(source, temp / "metadata", clean_env())
             source_wheel = build_sdist_wheel(source, temp / "sdist-wheel", clean_env())
             inspect_wheel(source_wheel, version)
-            install_and_check(
+            evidence["rebuilt_sdist"] = install_and_check(
                 source_wheel, temp / "sdist-venv", outside, version,
                 source / "requirements-dev.txt", cli, server, fixture, root,
             )
@@ -541,6 +542,8 @@ def main() -> int:
             "architecture": "arm64" if args.target.endswith("arm64") else "x86_64",
         } | evidence
         write_evidence(args.evidence, record)
+    elif args.evidence:
+        write_evidence(args.evidence, evidence)
     print("package acceptance passed")
     return 0
 

@@ -5,6 +5,18 @@ layout: page
 
 # Compatibility
 
+## Structured analysis contract and local verification
+
+The additive [structured analysis API](API.md) uses report format integer `1` and compatibility `spl` / `splunkd` / `current`. Package version `0.1.1` and report format are separate identifiers. Empty compatibility values normalize to those defaults; other values are rejected. Go 1.22+ and Python 3.11+ remain the source/API floors.
+
+Analysis is verified locally on macOS arm64 with Go race/regression tests and Python 3.12.6 source/native tests. Both a checkout-built wheel and a wheel rebuilt from the source distribution run mandatory copied analysis and legacy surface tests outside the checkout, with installed native libraries and zero required skips. All 26 reviewed analysis reports are compared as complete JSON values; only object-key order is irrelevant. Capability manifests also match across CLI, native Python, and REST. Go independently asserts the same corpus reports and semantic oracles. Additional local Python 3.14.1 checks are separate from the pinned package acceptance environment.
+
+Go 1.22.12 targeted packages pass locally using `-ldflags=-linkmode=external`. On this host, the default-linked API test previously failed before assertions with a macOS `missing LC_UUID` loader error; external-link success does not establish default-link execution. The current Go bindings race build can emit an `LC_DYSYMTAB` linker warning despite passing tests.
+
+These checks establish local analysis acceptance only. The historical release matrix below predates structured analysis and does not establish analysis acceptance on its other platforms or Python versions. No new cross-platform release or external Splunk-runtime conformance is claimed. Analysis deliberately reports incomplete coverage for the unsupported forms documented in the API reference.
+
+## Historical 0.1.1 release acceptance
+
 SPL Toolkit 0.1.1 was accepted at source commit `6b55f8902ff1a990aea8951cd78934b32c90660a` by [GitHub Actions run 34077738907](https://github.com/delgado-jacob/spl-toolkit/actions/runs/34077738907). All 24 jobs passed, including exact-source aggregation of 28 evidence records.
 
 | Release target | GitHub runner | Observed runner image | Compiler | Wheel tag |

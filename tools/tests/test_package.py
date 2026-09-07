@@ -360,3 +360,36 @@ def test_installed_native_suite_includes_analysis(tmp_path: Path):
     checker._copy_required_files(ROOT / "python/tests", destination, checker.NATIVE_TESTS)
     assert (destination / "test_native_analysis.py").read_bytes() == (ROOT / "python/tests/test_native_analysis.py").read_bytes()
     assert "tests/test_native_analysis.py" in checker.SDIST_FIXED_FILES
+
+
+def test_installed_surface_suite_requires_analysis_parity(tmp_path: Path):
+    checker = load_package_checker()
+    assert "test_analysis_surfaces.py" in checker.ACCEPTANCE_FILES
+    destination = tmp_path / "acceptance"
+    checker._copy_required_files(ROOT / "tests/acceptance", destination, checker.ACCEPTANCE_FILES)
+    assert (destination / "test_analysis_surfaces.py").read_bytes() == (ROOT / "tests/acceptance/test_analysis_surfaces.py").read_bytes()
+
+
+def test_installed_runner_removes_source_injection(monkeypatch):
+    checker = load_package_checker()
+    names = ("PYTHONPATH", "PYTHONHOME", "SPL_NATIVE_LIBRARY", "SPL_EXPECTED_VERSION")
+    for name in names:
+        monkeypatch.setenv(name, "checkout-only")
+    assert not set(names).intersection(checker.clean_env())
+
+
+def test_full_package_cli_retains_both_installation_results(tmp_path: Path, monkeypatch):
+    checker = load_package_checker()
+    evidence_path = tmp_path / "evidence.json"
+    counts = {"collected": 10, "passed": 10, "failed": 0, "skipped": 0}
+    result = {
+        "wheel_sha256": "built-wheel",
+        "fixture_hashes": {"baseline": "baseline-oracle", "analysis": "analysis-oracle"},
+        "tests": {"surface_acceptance": counts},
+        "rebuilt_sdist": {"wheel_sha256": "source-wheel", "tests": {"surface_acceptance": counts}},
+    }
+    monkeypatch.setattr(checker, "_check_package", lambda *args, **kwargs: result)
+    monkeypatch.setattr(sys, "argv", ["check_package.py", "--sdist", str(tmp_path / "source.tar.gz"),
+                                     "--wheel-dir", str(tmp_path), "--evidence", str(evidence_path)])
+    assert checker.main() == 0
+    assert json.loads(evidence_path.read_text(encoding="utf-8")) == result
