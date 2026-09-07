@@ -7,11 +7,16 @@ on:
       - 'docs/**'
       - 'README.md'
       - '.github/workflows/docs.yml'
+      - 'tools/check_docs.py'
+      - 'tools/tests/test_docs.py'
   pull_request:
     branches: [ main ]
     paths:
       - 'docs/**'
       - 'README.md'
+      - '.github/workflows/docs.yml'
+      - 'tools/check_docs.py'
+      - 'tools/tests/test_docs.py'
   # Allow manual triggering
   workflow_dispatch:
 
@@ -97,7 +102,7 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
-    needs: build
+    needs: [build, quality-check]
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
@@ -181,71 +186,13 @@ jobs:
             echo "Info: $file contains relative links - verify they work in GitHub Pages"
           done
 
+      - name: Install front matter validator dependency
+        run: python3 -m pip install --disable-pip-version-check PyYAML==6.0.3
+
       - name: Validate YAML frontmatter
         run: |
-          python3 -c "
-          import yaml
-          import sys
-          import os
-
-          errors = []
-
-          def check_yaml_frontmatter(file_path):
-              try:
-                  with open(file_path, 'r', encoding='utf-8') as f:
-                      content = f.read()
-              except Exception as e:
-                  print(f'✗ {file_path}: Cannot read file - {e}')
-                  errors.append(file_path)
-                  return
-
-              if not content.startswith('---'):
-                  print(f'✗ {file_path}: Missing YAML front matter (must start at first line)')
-                  errors.append(file_path)
-                  return
-
-              lines = content.splitlines()
-              if not lines or lines[0].strip() != '---':
-                  print(f'✗ {file_path}: Missing starting --- delimiter')
-                  errors.append(file_path)
-                  return
-
-              # Find ending delimiter line
-              end_idx = None
-              for i in range(1, len(lines)):
-                  if lines[i].strip() == '---':
-                      end_idx = i
-                      break
-
-              if end_idx is None:
-                  print(f'✗ {file_path}: Incomplete YAML front matter (no closing ---)')
-                  errors.append(file_path)
-                  return
-
-              yaml_content = '\n'.join(lines[1:end_idx])
-              try:
-                  yaml.safe_load(yaml_content) if yaml_content.strip() else {}
-                  print(f'✓ {file_path}: Valid YAML front matter')
-              except yaml.YAMLError as e:
-                  print(f'✗ {file_path}: Invalid YAML front matter - {e}')
-                  errors.append(file_path)
-
-          # Check all markdown files in docs
-          for root, dirs, files in os.walk('docs'):
-              for file in files:
-                  if file.endswith('.md'):
-                      check_yaml_frontmatter(os.path.join(root, file))
-
-          # Also check repository README
-          if os.path.isfile('README.md'):
-              check_yaml_frontmatter('README.md')
-
-          if errors:
-              print('\\nFront matter validation failed for files:')
-              for f in errors:
-                  print(f' - {f}')
-              sys.exit(1)
-          "
+          python3 -m unittest tools.tests.test_docs -v
+          python3 tools/check_docs.py
 
       - name: Check for broken internal references
         run: |

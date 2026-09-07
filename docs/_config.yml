@@ -42,6 +42,7 @@ plugins:
 
 # Exclude from processing
 exclude:
+  - superpowers/
   - vendor/
   - Gemfile
   - Gemfile.lock
