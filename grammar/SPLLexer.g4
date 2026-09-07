@@ -70,6 +70,8 @@ COMMA:      ',';
 COLON:      ':';
 AT:         '@';
 QUOTE:      '"';
+BACKTICK:   '`';
+DOT:        '.';
 
 // Keywords
 
@@ -432,7 +434,8 @@ TIME
 
 NUMBER:     [0-9]+ ('.' [0-9]+)?;
 STRING:     QUOTE ( ~["\\\r\n] | '\\' . )* QUOTE;
-IDENTIFIER: [A-Z_.:] [A-Z_.:0-9]*;
+QUOTED_IDENTIFIER: '\'' ( ~['\\\r\n] | '\\' . )* '\'';
+IDENTIFIER: [A-Z_.:\p{L}] [A-Z_.:0-9\p{L}\p{N}]*;
 
 // Other
 

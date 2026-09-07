@@ -1,7 +1,6 @@
-// Code generated from spl-toolkit/grammar/SPLParser.g4 by ANTLR 4.13.2. DO NOT EDIT.
+// Code generated from grammar/SPLParser.g4 by ANTLR 4.13.2. DO NOT EDIT.
 
 package parser // SPLParser
-
 import "github.com/antlr4-go/antlr/v4"
 
 type BaseSPLParserVisitor struct {
@@ -105,5 +104,229 @@ func (v *BaseSPLParserVisitor) VisitFunction(ctx *FunctionContext) interface{} {
 }
 
 func (v *BaseSPLParserVisitor) VisitCommand(ctx *CommandContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisQuery(ctx *AnalysisQueryContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisPipeline(ctx *AnalysisPipelineContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisInitialStage(ctx *AnalysisInitialStageContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisImplicitSearch(ctx *AnalysisImplicitSearchContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisSearchStage(ctx *AnalysisSearchStageContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisWhereStage(ctx *AnalysisWhereStageContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisEvalStage(ctx *AnalysisEvalStageContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisRenameStage(ctx *AnalysisRenameStageContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisFieldsStage(ctx *AnalysisFieldsStageContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisStatsStage(ctx *AnalysisStatsStageContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisLookupStage(ctx *AnalysisLookupStageContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisSortStage(ctx *AnalysisSortStageContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisDedupStage(ctx *AnalysisDedupStageContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisLimitStage(ctx *AnalysisLimitStageContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisInputlookupStage(ctx *AnalysisInputlookupStageContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisOpaqueStage(ctx *AnalysisOpaqueStageContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisCommandName(ctx *AnalysisCommandNameContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisSortField(ctx *AnalysisSortFieldContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisLimit(ctx *AnalysisLimitContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisOption(ctx *AnalysisOptionContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisCatalogName(ctx *AnalysisCatalogNameContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisAssignment(ctx *AnalysisAssignmentContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisRename(ctx *AnalysisRenameContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisAlias(ctx *AnalysisAliasContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisFieldList(ctx *AnalysisFieldListContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisGroup(ctx *AnalysisGroupContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisAggregate(ctx *AnalysisAggregateContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisLookup(ctx *AnalysisLookupContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisLookupInput(ctx *AnalysisLookupInputContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisOutput(ctx *AnalysisOutputContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisArgument(ctx *AnalysisArgumentContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisSubquery(ctx *AnalysisSubqueryContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisMacro(ctx *AnalysisMacroContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisArgumentList(ctx *AnalysisArgumentListContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisSearch(ctx *AnalysisSearchContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisSearchAnd(ctx *AnalysisSearchAndContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisSearchUnary(ctx *AnalysisSearchUnaryContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisSearchTerm(ctx *AnalysisSearchTermContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisSearchValue(ctx *AnalysisSearchValueContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisExpression(ctx *AnalysisExpressionContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisOr(ctx *AnalysisOrContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisAnd(ctx *AnalysisAndContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisNot(ctx *AnalysisNotContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisComparison(ctx *AnalysisComparisonContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisComparisonOperator(ctx *AnalysisComparisonOperatorContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisConcat(ctx *AnalysisConcatContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisAdd(ctx *AnalysisAddContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisMultiply(ctx *AnalysisMultiplyContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisPower(ctx *AnalysisPowerContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisUnary(ctx *AnalysisUnaryContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisAtom(ctx *AnalysisAtomContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisFunctionCall(ctx *AnalysisFunctionCallContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisFunctionName(ctx *AnalysisFunctionNameContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisLiteral(ctx *AnalysisLiteralContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisSelector(ctx *AnalysisSelectorContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisIdentifier(ctx *AnalysisIdentifierContext) interface{} {
 	return v.VisitChildren(ctx)
 }
