@@ -29,8 +29,8 @@ Today callers obtain flat field names and parser errors without knowing where a 
 - [x] (2026-09-07) Delegated decision maker approved architecture, contract, flow semantics, adapters, written spec, and aggregate-name clarification.
 - [x] (2026-09-07) Controller verified baseline: full Go race suite, build-all, 69 tool tests, Go 1.22.12 targeted tests, documentation checks, and source Python 27 passed/1 intentional installed-version skip.
 - [x] (2026-09-07) Task 1 complete at c57144b after two scoped fix rounds: public model, grammar/source/recovery foundation, combined review and clean re-review; current-Go race and Go1.22 covering checks passed.
-- [ ] Task 2 in progress: expression references, supported command transfers, capabilities; red corpus, implementation, green tests, review, commit.
-- [ ] Task 3: nested scopes, dependency kinds, uncertainty and recovery corpus; red tests, implementation, green race tests, review, commit.
+- [x] (2026-09-07) Task 2 complete through b430722 after one scoped fix round and clean independent re-review: references, flow, functions/capabilities; full Go race and covering Go1.22 checks passed.
+- [ ] Task 3 in progress: nested scopes, dependency kinds, uncertainty/recovery corpus and typed quoted-asterisk resolution; red tests, implementation, green race tests, review, commit.
 - [ ] Task 4: CLI and REST analysis/capability adapters; red tests, implementation, green tests, review, commit.
 - [ ] Task 5: C/Python analysis ownership and native package source closure; red real-library tests, implementation, green package checks, review, commit.
 - [ ] Task 6: shared full-report parity, installed-wheel acceptance, docs, final review and milestone log.
@@ -60,7 +60,7 @@ Decision: Implicit aggregate names are semantic names such as `sum(bytes)`, not 
 ## Outcomes & Retrospective
 
 
-Task 1 foundation is implemented and independently reviewed through c57144b; two grammar-boundary issues were corrected with exact source and legacy mixed-mode regressions. Tasks 2–6 remain. Completion requires every task below, meaningful installed-wheel parity, and a milestone log that distinguishes local checks from unrun platform release acceptance. Do not represent the inherited milestone 1 remote evidence as proof for new source.
+Task 1 foundation is implemented and independently reviewed through c57144b; two grammar-boundary issues were corrected with exact source and legacy mixed-mode regressions. Task 2 semantics is independently reviewed through b430722; Tasks 3–6 remain. Open-input fields internal-membership uncertainty and unsupported rename overlaps are explicit conservative limitations. Completion requires every task below, meaningful installed-wheel parity, and a milestone log that distinguishes local checks from unrun platform release acceptance. Do not represent the inherited milestone 1 remote evidence as proof for new source.
 
 ## Context and Orientation
 
@@ -195,7 +195,7 @@ Files: create `pkg/analysis/references.go`, `flow.go`, `commands.go`, `functions
        } else if removed || !state.Open { binding = "unavailable"; addUnavailableDiagnostic()
        } else { binding = "source" }
 
-   Preserve whether a known input binding originated at the source; being previously observed does not make it derived. Implement eval left-to-right; rename sources from a snapshot; exact fields removal/projection; table projection; stats closed output; eventstats/streamstats additive output; lookup aliased input/output and OUTPUTNEW conditional output; inputlookup open source; sort/dedup reads and numeric head/tail pass-through. Unsupported variants report precise unsupported-semantics diagnostics and mark the environment uncertain. Resolve provable wildcards against known fields but mark unresolved membership incomplete. Ensure provenance graph references remain correct after deterministic reference-ID assignment.
+   Preserve whether a known input binding originated at the source; being previously observed does not make it derived. Implement eval left-to-right; ordinary non-overlapping rename sources from a snapshot; overlapping/colliding forms incomplete with affected binding claims withheld; exact fields removal and projection with known internal retention/open-membership uncertainty; exact table projection; stats closed output; eventstats/streamstats additive output; lookup aliased input/output and OUTPUTNEW conditional output; inputlookup open source; sort/dedup reads and numeric head/tail pass-through. Unsupported variants report precise unsupported-semantics diagnostics and mark the environment uncertain. Resolve provable wildcards against known fields but mark unresolved membership incomplete. Ensure provenance graph references remain correct after deterministic reference-ID assignment.
 
 4. Implement capability entries from the actual dispatch/function registry so advertised support cannot drift from handlers. `Capabilities` returns fresh slices. Unknown functions report `SPL_UNSUPPORTED_FUNCTION`; dynamic functions/macros report the corresponding unresolved reason. Unknown command effects taint the state instead of behaving as identity. Finalization uses the following outcome precedence and must preserve all diagnostics:
 
@@ -397,3 +397,9 @@ Revision note (2026-09-07): Tasks 2 and 3 may narrowly extend grammar for their 
 Revision note (2026-09-07): Root approved an immutable per-input analysis CharStream marker for narrow ANTLR dot-disambiguation predicates. Default legacy tokenization is preserved, with adjacent/spaced concatenation, legacy mapping, both sequential orders and concurrent mixed-mode tests; no global mode or post-lex rewriting.
 
 Revision note (2026-09-07): Task 1 completed after clean scoped re-review; Task 2 begins. Explicit empty CLI query remains a syntax-invalid content result, unlike omitted query usage errors. Reuse GOMODCACHE=/private/tmp/spl-toolkit-remaining-gomodcache with GOPROXY=off for required Go checks.
+
+Revision note (2026-09-07): Root clarified rename overlaps: chains/swaps and collisions remain incomplete; before-state resolution applies only to ordinary distinct non-overlapping pairs. This supersedes an initially permissive controller interpretation and follows the approved honesty-over-coverage boundary.
+
+Revision note (2026-09-07): Official SPL fields behavior retains internal fields. Root approved conservative open-input membership uncertainty with known internals/tombstones preserved and exact closed-input/table/stats behavior; M3 handoff must flag finite-catalog refinement. Unsupported rename overlaps forget affected binding claims while retaining sound reads.
+
+Revision note (2026-09-07): Task 2 completed after three transfer fixes passed scoped re-review. Task 3 owns the carried typed quoted-asterisk resolution finding and must resolve it before milestone acceptance; table/stats restore local exact membership while global previous incomplete coverage remains.
