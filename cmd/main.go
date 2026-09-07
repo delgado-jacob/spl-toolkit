@@ -23,15 +23,26 @@ Commands:
   map [query]       Map fields using --config
   discover [query]  Discover query information
   validate [query]  Validate query syntax or --config
+  analyze [query]   Analyze field availability, lineage, and coverage
+  capabilities      Show supported analysis commands and limitations
   demo              Run demonstration examples
   help              Show this help message
 
-Options for map, discover, and validate:
-  --query QUERY     Supply the query as an option
-  --config FILE     Mapping configuration (map and validate only)
+Options for map, discover, validate, analyze, and capabilities:
   --format FORMAT   Output format: text or json (default: text)
-  --output FILE     Write a successful result to a file
+  --output FILE     Write the result to a file (including analysis diagnostics)
   --help            Show this help message
+  --query QUERY     Supply the query as an option (not capabilities)
+  --config FILE     Mapping configuration (map and validate only)
+
+Additional analyze options:
+  --language LANG                  Query language (default: spl)
+  --profile PROFILE                Execution profile (default: splunkd)
+  --compatibility-version VERSION  Compatibility version (default: current)
+  --source-id ID                   Source identifier preserved in the report
+
+Analyze exit codes: 0 valid, 1 invalid content, 3 incomplete analysis.
+Request or output errors exit 2. Invalid and incomplete reports are still emitted.
 `, buildinfo.Version)
 	return err
 }

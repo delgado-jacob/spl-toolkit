@@ -90,7 +90,7 @@ func wildcardMatches(pattern, name string) bool { // Selectors admit only '*' wi
 	p, n := []rune(pattern), []rune(name)
 	pi, ni, star, mark := 0, 0, -1, 0
 	for ni < len(n) {
-		if pi < len(p) && p[pi] == n[ni] {
+		if pi < len(p) && p[pi] != '*' && p[pi] == n[ni] {
 			pi++
 			ni++
 		} else if pi < len(p) && p[pi] == '*' {
@@ -115,8 +115,22 @@ func wildcardMatches(pattern, name string) bool { // Selectors admit only '*' wi
 func selectorPattern(c parser.IAnalysisSelectorContext) bool {
 	return len(c.AllMULT()) > 0 || (c.AnalysisIdentifier() != nil && strings.Contains(normalizedName(c.AnalysisIdentifier().GetText()), "*"))
 }
+func selectorName(c parser.IAnalysisSelectorContext) string {
+	var name strings.Builder
+	for _, child := range c.GetChildren() {
+		switch part := child.(type) {
+		case parser.IAnalysisIdentifierContext:
+			name.WriteString(normalizedName(part.GetText()))
+		case antlr.TerminalNode:
+			if part.GetSymbol().GetTokenType() == parser.SPLParserMULT {
+				name.WriteByte('*')
+			}
+		}
+	}
+	return name.String()
+}
 func (s *semanticStage) selector(c parser.IAnalysisSelectorContext, role string) ([]string, []string) {
-	name := normalizedName(c.GetText())
+	name := selectorName(c)
 	if !selectorPattern(c) {
 		return []string{name}, []string{s.read(c, name, role)}
 	}

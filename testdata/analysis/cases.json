@@ -10771,6 +10771,2450 @@
           }
         ]
       }
+    },
+    {
+      "id": "literal_star_inclusion",
+      "document": {
+        "text": "| stats count AS 'a*b' | fields a* | where 'a*b'=1",
+        "language": "",
+        "profile": "",
+        "version": "",
+        "source_id": "corpus:literal_star_inclusion"
+      },
+      "expected": {
+        "schema_version": 1,
+        "document": {
+          "text": "| stats count AS 'a*b' | fields a* | where 'a*b'=1",
+          "language": "spl",
+          "profile": "splunkd",
+          "version": "current",
+          "source_id": "corpus:literal_star_inclusion"
+        },
+        "status": "valid",
+        "coverage": {
+          "syntax_complete": true,
+          "semantic_complete": true,
+          "reasons": []
+        },
+        "stages": [
+          {
+            "id": "stage-0",
+            "command": "stats",
+            "position": 0,
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 2,
+                "line": 1,
+                "column": 3
+              },
+              "end": {
+                "offset": 22,
+                "line": 1,
+                "column": 23
+              }
+            },
+            "semantic_complete": true
+          },
+          {
+            "id": "stage-1",
+            "command": "fields",
+            "position": 1,
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 25,
+                "line": 1,
+                "column": 26
+              },
+              "end": {
+                "offset": 34,
+                "line": 1,
+                "column": 35
+              }
+            },
+            "semantic_complete": true
+          },
+          {
+            "id": "stage-2",
+            "command": "where",
+            "position": 2,
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 37,
+                "line": 1,
+                "column": 38
+              },
+              "end": {
+                "offset": 50,
+                "line": 1,
+                "column": 51
+              }
+            },
+            "semantic_complete": true
+          }
+        ],
+        "scopes": [
+          {
+            "id": "scope-0",
+            "parent_id": "",
+            "kind": "root",
+            "stage_id": "",
+            "location": {
+              "start": {
+                "offset": 0,
+                "line": 1,
+                "column": 1
+              },
+              "end": {
+                "offset": 50,
+                "line": 1,
+                "column": 51
+              }
+            }
+          }
+        ],
+        "references": [
+          {
+            "id": "ref-0",
+            "original_name": "'a*b'",
+            "normalized_name": "a*b",
+            "kind": "field",
+            "role": "output",
+            "stage_id": "stage-0",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 17,
+                "line": 1,
+                "column": 18
+              },
+              "end": {
+                "offset": 22,
+                "line": 1,
+                "column": 23
+              }
+            },
+            "resolution": "exact",
+            "binding": "not_applicable",
+            "origin_reference_ids": []
+          },
+          {
+            "id": "ref-1",
+            "original_name": "a*",
+            "normalized_name": "a*",
+            "kind": "field",
+            "role": "read",
+            "stage_id": "stage-1",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 32,
+                "line": 1,
+                "column": 33
+              },
+              "end": {
+                "offset": 34,
+                "line": 1,
+                "column": 35
+              }
+            },
+            "resolution": "wildcard",
+            "binding": "indeterminate",
+            "origin_reference_ids": [
+              "ref-0"
+            ]
+          },
+          {
+            "id": "ref-2",
+            "original_name": "'a*b'",
+            "normalized_name": "a*b",
+            "kind": "field",
+            "role": "read",
+            "stage_id": "stage-2",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 43,
+                "line": 1,
+                "column": 44
+              },
+              "end": {
+                "offset": 48,
+                "line": 1,
+                "column": 49
+              }
+            },
+            "resolution": "exact",
+            "binding": "derived",
+            "origin_reference_ids": [
+              "ref-0"
+            ]
+          }
+        ],
+        "lineage": [
+          {
+            "stage_id": "stage-0",
+            "scope_id": "scope-0",
+            "before": {
+              "fields": [],
+              "removed": [],
+              "open": true,
+              "uncertain": false
+            },
+            "after": {
+              "fields": [
+                {
+                  "name": "a*b",
+                  "origin_reference_ids": [
+                    "ref-0"
+                  ],
+                  "conditional": false
+                }
+              ],
+              "removed": [],
+              "open": false,
+              "uncertain": false
+            },
+            "transitions": [
+              {
+                "operation": "aggregate",
+                "output": "a*b",
+                "input_reference_ids": [],
+                "output_reference_id": "ref-0",
+                "conditional": false
+              }
+            ]
+          },
+          {
+            "stage_id": "stage-1",
+            "scope_id": "scope-0",
+            "before": {
+              "fields": [
+                {
+                  "name": "a*b",
+                  "origin_reference_ids": [
+                    "ref-0"
+                  ],
+                  "conditional": false
+                }
+              ],
+              "removed": [],
+              "open": false,
+              "uncertain": false
+            },
+            "after": {
+              "fields": [
+                {
+                  "name": "a*b",
+                  "origin_reference_ids": [
+                    "ref-0"
+                  ],
+                  "conditional": false
+                }
+              ],
+              "removed": [],
+              "open": false,
+              "uncertain": false
+            },
+            "transitions": [
+              {
+                "operation": "project",
+                "output": "a*b",
+                "input_reference_ids": [
+                  "ref-1"
+                ],
+                "output_reference_id": "",
+                "conditional": false
+              }
+            ]
+          },
+          {
+            "stage_id": "stage-2",
+            "scope_id": "scope-0",
+            "before": {
+              "fields": [
+                {
+                  "name": "a*b",
+                  "origin_reference_ids": [
+                    "ref-0"
+                  ],
+                  "conditional": false
+                }
+              ],
+              "removed": [],
+              "open": false,
+              "uncertain": false
+            },
+            "after": {
+              "fields": [
+                {
+                  "name": "a*b",
+                  "origin_reference_ids": [
+                    "ref-0"
+                  ],
+                  "conditional": false
+                }
+              ],
+              "removed": [],
+              "open": false,
+              "uncertain": false
+            },
+            "transitions": []
+          }
+        ],
+        "dependencies": {
+          "indexes": [],
+          "sources": [],
+          "source_types": [],
+          "datasets": [],
+          "lookups": [],
+          "data_models": [],
+          "macros": []
+        },
+        "diagnostics": []
+      }
+    },
+    {
+      "id": "literal_star_exclusion",
+      "document": {
+        "text": "| stats count AS 'a*b' | fields - a* | where 'a*b'=1",
+        "language": "",
+        "profile": "",
+        "version": "",
+        "source_id": "corpus:literal_star_exclusion"
+      },
+      "expected": {
+        "schema_version": 1,
+        "document": {
+          "text": "| stats count AS 'a*b' | fields - a* | where 'a*b'=1",
+          "language": "spl",
+          "profile": "splunkd",
+          "version": "current",
+          "source_id": "corpus:literal_star_exclusion"
+        },
+        "status": "invalid",
+        "coverage": {
+          "syntax_complete": true,
+          "semantic_complete": true,
+          "reasons": [
+            "SPL_UNAVAILABLE_FIELD"
+          ]
+        },
+        "stages": [
+          {
+            "id": "stage-0",
+            "command": "stats",
+            "position": 0,
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 2,
+                "line": 1,
+                "column": 3
+              },
+              "end": {
+                "offset": 22,
+                "line": 1,
+                "column": 23
+              }
+            },
+            "semantic_complete": true
+          },
+          {
+            "id": "stage-1",
+            "command": "fields",
+            "position": 1,
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 25,
+                "line": 1,
+                "column": 26
+              },
+              "end": {
+                "offset": 36,
+                "line": 1,
+                "column": 37
+              }
+            },
+            "semantic_complete": true
+          },
+          {
+            "id": "stage-2",
+            "command": "where",
+            "position": 2,
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 39,
+                "line": 1,
+                "column": 40
+              },
+              "end": {
+                "offset": 52,
+                "line": 1,
+                "column": 53
+              }
+            },
+            "semantic_complete": true
+          }
+        ],
+        "scopes": [
+          {
+            "id": "scope-0",
+            "parent_id": "",
+            "kind": "root",
+            "stage_id": "",
+            "location": {
+              "start": {
+                "offset": 0,
+                "line": 1,
+                "column": 1
+              },
+              "end": {
+                "offset": 52,
+                "line": 1,
+                "column": 53
+              }
+            }
+          }
+        ],
+        "references": [
+          {
+            "id": "ref-0",
+            "original_name": "'a*b'",
+            "normalized_name": "a*b",
+            "kind": "field",
+            "role": "output",
+            "stage_id": "stage-0",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 17,
+                "line": 1,
+                "column": 18
+              },
+              "end": {
+                "offset": 22,
+                "line": 1,
+                "column": 23
+              }
+            },
+            "resolution": "exact",
+            "binding": "not_applicable",
+            "origin_reference_ids": []
+          },
+          {
+            "id": "ref-1",
+            "original_name": "a*",
+            "normalized_name": "a*",
+            "kind": "field",
+            "role": "remove",
+            "stage_id": "stage-1",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 34,
+                "line": 1,
+                "column": 35
+              },
+              "end": {
+                "offset": 36,
+                "line": 1,
+                "column": 37
+              }
+            },
+            "resolution": "wildcard",
+            "binding": "not_applicable",
+            "origin_reference_ids": [
+              "ref-0"
+            ]
+          },
+          {
+            "id": "ref-2",
+            "original_name": "'a*b'",
+            "normalized_name": "a*b",
+            "kind": "field",
+            "role": "read",
+            "stage_id": "stage-2",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 45,
+                "line": 1,
+                "column": 46
+              },
+              "end": {
+                "offset": 50,
+                "line": 1,
+                "column": 51
+              }
+            },
+            "resolution": "exact",
+            "binding": "unavailable",
+            "origin_reference_ids": []
+          }
+        ],
+        "lineage": [
+          {
+            "stage_id": "stage-0",
+            "scope_id": "scope-0",
+            "before": {
+              "fields": [],
+              "removed": [],
+              "open": true,
+              "uncertain": false
+            },
+            "after": {
+              "fields": [
+                {
+                  "name": "a*b",
+                  "origin_reference_ids": [
+                    "ref-0"
+                  ],
+                  "conditional": false
+                }
+              ],
+              "removed": [],
+              "open": false,
+              "uncertain": false
+            },
+            "transitions": [
+              {
+                "operation": "aggregate",
+                "output": "a*b",
+                "input_reference_ids": [],
+                "output_reference_id": "ref-0",
+                "conditional": false
+              }
+            ]
+          },
+          {
+            "stage_id": "stage-1",
+            "scope_id": "scope-0",
+            "before": {
+              "fields": [
+                {
+                  "name": "a*b",
+                  "origin_reference_ids": [
+                    "ref-0"
+                  ],
+                  "conditional": false
+                }
+              ],
+              "removed": [],
+              "open": false,
+              "uncertain": false
+            },
+            "after": {
+              "fields": [],
+              "removed": [
+                "a*b"
+              ],
+              "open": false,
+              "uncertain": false
+            },
+            "transitions": [
+              {
+                "operation": "remove",
+                "output": "a*b",
+                "input_reference_ids": [
+                  "ref-1"
+                ],
+                "output_reference_id": "",
+                "conditional": false
+              }
+            ]
+          },
+          {
+            "stage_id": "stage-2",
+            "scope_id": "scope-0",
+            "before": {
+              "fields": [],
+              "removed": [
+                "a*b"
+              ],
+              "open": false,
+              "uncertain": false
+            },
+            "after": {
+              "fields": [],
+              "removed": [
+                "a*b"
+              ],
+              "open": false,
+              "uncertain": false
+            },
+            "transitions": []
+          }
+        ],
+        "dependencies": {
+          "indexes": [],
+          "sources": [],
+          "source_types": [],
+          "datasets": [],
+          "lookups": [],
+          "data_models": [],
+          "macros": []
+        },
+        "diagnostics": [
+          {
+            "code": "SPL_UNAVAILABLE_FIELD",
+            "severity": "error",
+            "category": "unavailable_field",
+            "message": "field \"a*b\" is unavailable after an earlier pipeline transfer",
+            "location": {
+              "start": {
+                "offset": 45,
+                "line": 1,
+                "column": 46
+              },
+              "end": {
+                "offset": 50,
+                "line": 1,
+                "column": 51
+              }
+            },
+            "stage_id": "stage-2",
+            "scope_id": "scope-0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "literal_star_suffix_inclusion",
+      "document": {
+        "text": "| stats count AS '*ba' | fields *a | where '*ba'=1",
+        "language": "",
+        "profile": "",
+        "version": "",
+        "source_id": "corpus:literal_star_suffix_inclusion"
+      },
+      "expected": {
+        "schema_version": 1,
+        "document": {
+          "text": "| stats count AS '*ba' | fields *a | where '*ba'=1",
+          "language": "spl",
+          "profile": "splunkd",
+          "version": "current",
+          "source_id": "corpus:literal_star_suffix_inclusion"
+        },
+        "status": "valid",
+        "coverage": {
+          "syntax_complete": true,
+          "semantic_complete": true,
+          "reasons": []
+        },
+        "stages": [
+          {
+            "id": "stage-0",
+            "command": "stats",
+            "position": 0,
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 2,
+                "line": 1,
+                "column": 3
+              },
+              "end": {
+                "offset": 22,
+                "line": 1,
+                "column": 23
+              }
+            },
+            "semantic_complete": true
+          },
+          {
+            "id": "stage-1",
+            "command": "fields",
+            "position": 1,
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 25,
+                "line": 1,
+                "column": 26
+              },
+              "end": {
+                "offset": 34,
+                "line": 1,
+                "column": 35
+              }
+            },
+            "semantic_complete": true
+          },
+          {
+            "id": "stage-2",
+            "command": "where",
+            "position": 2,
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 37,
+                "line": 1,
+                "column": 38
+              },
+              "end": {
+                "offset": 50,
+                "line": 1,
+                "column": 51
+              }
+            },
+            "semantic_complete": true
+          }
+        ],
+        "scopes": [
+          {
+            "id": "scope-0",
+            "parent_id": "",
+            "kind": "root",
+            "stage_id": "",
+            "location": {
+              "start": {
+                "offset": 0,
+                "line": 1,
+                "column": 1
+              },
+              "end": {
+                "offset": 50,
+                "line": 1,
+                "column": 51
+              }
+            }
+          }
+        ],
+        "references": [
+          {
+            "id": "ref-0",
+            "original_name": "'*ba'",
+            "normalized_name": "*ba",
+            "kind": "field",
+            "role": "output",
+            "stage_id": "stage-0",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 17,
+                "line": 1,
+                "column": 18
+              },
+              "end": {
+                "offset": 22,
+                "line": 1,
+                "column": 23
+              }
+            },
+            "resolution": "exact",
+            "binding": "not_applicable",
+            "origin_reference_ids": []
+          },
+          {
+            "id": "ref-1",
+            "original_name": "*a",
+            "normalized_name": "*a",
+            "kind": "field",
+            "role": "read",
+            "stage_id": "stage-1",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 32,
+                "line": 1,
+                "column": 33
+              },
+              "end": {
+                "offset": 34,
+                "line": 1,
+                "column": 35
+              }
+            },
+            "resolution": "wildcard",
+            "binding": "indeterminate",
+            "origin_reference_ids": [
+              "ref-0"
+            ]
+          },
+          {
+            "id": "ref-2",
+            "original_name": "'*ba'",
+            "normalized_name": "*ba",
+            "kind": "field",
+            "role": "read",
+            "stage_id": "stage-2",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 43,
+                "line": 1,
+                "column": 44
+              },
+              "end": {
+                "offset": 48,
+                "line": 1,
+                "column": 49
+              }
+            },
+            "resolution": "exact",
+            "binding": "derived",
+            "origin_reference_ids": [
+              "ref-0"
+            ]
+          }
+        ],
+        "lineage": [
+          {
+            "stage_id": "stage-0",
+            "scope_id": "scope-0",
+            "before": {
+              "fields": [],
+              "removed": [],
+              "open": true,
+              "uncertain": false
+            },
+            "after": {
+              "fields": [
+                {
+                  "name": "*ba",
+                  "origin_reference_ids": [
+                    "ref-0"
+                  ],
+                  "conditional": false
+                }
+              ],
+              "removed": [],
+              "open": false,
+              "uncertain": false
+            },
+            "transitions": [
+              {
+                "operation": "aggregate",
+                "output": "*ba",
+                "input_reference_ids": [],
+                "output_reference_id": "ref-0",
+                "conditional": false
+              }
+            ]
+          },
+          {
+            "stage_id": "stage-1",
+            "scope_id": "scope-0",
+            "before": {
+              "fields": [
+                {
+                  "name": "*ba",
+                  "origin_reference_ids": [
+                    "ref-0"
+                  ],
+                  "conditional": false
+                }
+              ],
+              "removed": [],
+              "open": false,
+              "uncertain": false
+            },
+            "after": {
+              "fields": [
+                {
+                  "name": "*ba",
+                  "origin_reference_ids": [
+                    "ref-0"
+                  ],
+                  "conditional": false
+                }
+              ],
+              "removed": [],
+              "open": false,
+              "uncertain": false
+            },
+            "transitions": [
+              {
+                "operation": "project",
+                "output": "*ba",
+                "input_reference_ids": [
+                  "ref-1"
+                ],
+                "output_reference_id": "",
+                "conditional": false
+              }
+            ]
+          },
+          {
+            "stage_id": "stage-2",
+            "scope_id": "scope-0",
+            "before": {
+              "fields": [
+                {
+                  "name": "*ba",
+                  "origin_reference_ids": [
+                    "ref-0"
+                  ],
+                  "conditional": false
+                }
+              ],
+              "removed": [],
+              "open": false,
+              "uncertain": false
+            },
+            "after": {
+              "fields": [
+                {
+                  "name": "*ba",
+                  "origin_reference_ids": [
+                    "ref-0"
+                  ],
+                  "conditional": false
+                }
+              ],
+              "removed": [],
+              "open": false,
+              "uncertain": false
+            },
+            "transitions": []
+          }
+        ],
+        "dependencies": {
+          "indexes": [],
+          "sources": [],
+          "source_types": [],
+          "datasets": [],
+          "lookups": [],
+          "data_models": [],
+          "macros": []
+        },
+        "diagnostics": []
+      }
+    },
+    {
+      "id": "literal_star_suffix_exclusion",
+      "document": {
+        "text": "| stats count AS '*ba' | fields - *a | where '*ba'=1",
+        "language": "",
+        "profile": "",
+        "version": "",
+        "source_id": "corpus:literal_star_suffix_exclusion"
+      },
+      "expected": {
+        "schema_version": 1,
+        "document": {
+          "text": "| stats count AS '*ba' | fields - *a | where '*ba'=1",
+          "language": "spl",
+          "profile": "splunkd",
+          "version": "current",
+          "source_id": "corpus:literal_star_suffix_exclusion"
+        },
+        "status": "invalid",
+        "coverage": {
+          "syntax_complete": true,
+          "semantic_complete": true,
+          "reasons": [
+            "SPL_UNAVAILABLE_FIELD"
+          ]
+        },
+        "stages": [
+          {
+            "id": "stage-0",
+            "command": "stats",
+            "position": 0,
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 2,
+                "line": 1,
+                "column": 3
+              },
+              "end": {
+                "offset": 22,
+                "line": 1,
+                "column": 23
+              }
+            },
+            "semantic_complete": true
+          },
+          {
+            "id": "stage-1",
+            "command": "fields",
+            "position": 1,
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 25,
+                "line": 1,
+                "column": 26
+              },
+              "end": {
+                "offset": 36,
+                "line": 1,
+                "column": 37
+              }
+            },
+            "semantic_complete": true
+          },
+          {
+            "id": "stage-2",
+            "command": "where",
+            "position": 2,
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 39,
+                "line": 1,
+                "column": 40
+              },
+              "end": {
+                "offset": 52,
+                "line": 1,
+                "column": 53
+              }
+            },
+            "semantic_complete": true
+          }
+        ],
+        "scopes": [
+          {
+            "id": "scope-0",
+            "parent_id": "",
+            "kind": "root",
+            "stage_id": "",
+            "location": {
+              "start": {
+                "offset": 0,
+                "line": 1,
+                "column": 1
+              },
+              "end": {
+                "offset": 52,
+                "line": 1,
+                "column": 53
+              }
+            }
+          }
+        ],
+        "references": [
+          {
+            "id": "ref-0",
+            "original_name": "'*ba'",
+            "normalized_name": "*ba",
+            "kind": "field",
+            "role": "output",
+            "stage_id": "stage-0",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 17,
+                "line": 1,
+                "column": 18
+              },
+              "end": {
+                "offset": 22,
+                "line": 1,
+                "column": 23
+              }
+            },
+            "resolution": "exact",
+            "binding": "not_applicable",
+            "origin_reference_ids": []
+          },
+          {
+            "id": "ref-1",
+            "original_name": "*a",
+            "normalized_name": "*a",
+            "kind": "field",
+            "role": "remove",
+            "stage_id": "stage-1",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 34,
+                "line": 1,
+                "column": 35
+              },
+              "end": {
+                "offset": 36,
+                "line": 1,
+                "column": 37
+              }
+            },
+            "resolution": "wildcard",
+            "binding": "not_applicable",
+            "origin_reference_ids": [
+              "ref-0"
+            ]
+          },
+          {
+            "id": "ref-2",
+            "original_name": "'*ba'",
+            "normalized_name": "*ba",
+            "kind": "field",
+            "role": "read",
+            "stage_id": "stage-2",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 45,
+                "line": 1,
+                "column": 46
+              },
+              "end": {
+                "offset": 50,
+                "line": 1,
+                "column": 51
+              }
+            },
+            "resolution": "exact",
+            "binding": "unavailable",
+            "origin_reference_ids": []
+          }
+        ],
+        "lineage": [
+          {
+            "stage_id": "stage-0",
+            "scope_id": "scope-0",
+            "before": {
+              "fields": [],
+              "removed": [],
+              "open": true,
+              "uncertain": false
+            },
+            "after": {
+              "fields": [
+                {
+                  "name": "*ba",
+                  "origin_reference_ids": [
+                    "ref-0"
+                  ],
+                  "conditional": false
+                }
+              ],
+              "removed": [],
+              "open": false,
+              "uncertain": false
+            },
+            "transitions": [
+              {
+                "operation": "aggregate",
+                "output": "*ba",
+                "input_reference_ids": [],
+                "output_reference_id": "ref-0",
+                "conditional": false
+              }
+            ]
+          },
+          {
+            "stage_id": "stage-1",
+            "scope_id": "scope-0",
+            "before": {
+              "fields": [
+                {
+                  "name": "*ba",
+                  "origin_reference_ids": [
+                    "ref-0"
+                  ],
+                  "conditional": false
+                }
+              ],
+              "removed": [],
+              "open": false,
+              "uncertain": false
+            },
+            "after": {
+              "fields": [],
+              "removed": [
+                "*ba"
+              ],
+              "open": false,
+              "uncertain": false
+            },
+            "transitions": [
+              {
+                "operation": "remove",
+                "output": "*ba",
+                "input_reference_ids": [
+                  "ref-1"
+                ],
+                "output_reference_id": "",
+                "conditional": false
+              }
+            ]
+          },
+          {
+            "stage_id": "stage-2",
+            "scope_id": "scope-0",
+            "before": {
+              "fields": [],
+              "removed": [
+                "*ba"
+              ],
+              "open": false,
+              "uncertain": false
+            },
+            "after": {
+              "fields": [],
+              "removed": [
+                "*ba"
+              ],
+              "open": false,
+              "uncertain": false
+            },
+            "transitions": []
+          }
+        ],
+        "dependencies": {
+          "indexes": [],
+          "sources": [],
+          "source_types": [],
+          "datasets": [],
+          "lookups": [],
+          "data_models": [],
+          "macros": []
+        },
+        "diagnostics": [
+          {
+            "code": "SPL_UNAVAILABLE_FIELD",
+            "severity": "error",
+            "category": "unavailable_field",
+            "message": "field \"*ba\" is unavailable after an earlier pipeline transfer",
+            "location": {
+              "start": {
+                "offset": 45,
+                "line": 1,
+                "column": 46
+              },
+              "end": {
+                "offset": 50,
+                "line": 1,
+                "column": 51
+              }
+            },
+            "stage_id": "stage-2",
+            "scope_id": "scope-0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "quoted_fragment_prefix_inclusion",
+      "document": {
+        "text": "| stats count AS ab | fields 'a'* | where ab=1",
+        "language": "",
+        "profile": "",
+        "version": "",
+        "source_id": "corpus:quoted_fragment_prefix_inclusion"
+      },
+      "expected": {
+        "schema_version": 1,
+        "document": {
+          "text": "| stats count AS ab | fields 'a'* | where ab=1",
+          "language": "spl",
+          "profile": "splunkd",
+          "version": "current",
+          "source_id": "corpus:quoted_fragment_prefix_inclusion"
+        },
+        "status": "valid",
+        "coverage": {
+          "syntax_complete": true,
+          "semantic_complete": true,
+          "reasons": []
+        },
+        "stages": [
+          {
+            "id": "stage-0",
+            "command": "stats",
+            "position": 0,
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 2,
+                "line": 1,
+                "column": 3
+              },
+              "end": {
+                "offset": 19,
+                "line": 1,
+                "column": 20
+              }
+            },
+            "semantic_complete": true
+          },
+          {
+            "id": "stage-1",
+            "command": "fields",
+            "position": 1,
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 22,
+                "line": 1,
+                "column": 23
+              },
+              "end": {
+                "offset": 33,
+                "line": 1,
+                "column": 34
+              }
+            },
+            "semantic_complete": true
+          },
+          {
+            "id": "stage-2",
+            "command": "where",
+            "position": 2,
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 36,
+                "line": 1,
+                "column": 37
+              },
+              "end": {
+                "offset": 46,
+                "line": 1,
+                "column": 47
+              }
+            },
+            "semantic_complete": true
+          }
+        ],
+        "scopes": [
+          {
+            "id": "scope-0",
+            "parent_id": "",
+            "kind": "root",
+            "stage_id": "",
+            "location": {
+              "start": {
+                "offset": 0,
+                "line": 1,
+                "column": 1
+              },
+              "end": {
+                "offset": 46,
+                "line": 1,
+                "column": 47
+              }
+            }
+          }
+        ],
+        "references": [
+          {
+            "id": "ref-0",
+            "original_name": "ab",
+            "normalized_name": "ab",
+            "kind": "field",
+            "role": "output",
+            "stage_id": "stage-0",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 17,
+                "line": 1,
+                "column": 18
+              },
+              "end": {
+                "offset": 19,
+                "line": 1,
+                "column": 20
+              }
+            },
+            "resolution": "exact",
+            "binding": "not_applicable",
+            "origin_reference_ids": []
+          },
+          {
+            "id": "ref-1",
+            "original_name": "'a'*",
+            "normalized_name": "a*",
+            "kind": "field",
+            "role": "read",
+            "stage_id": "stage-1",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 29,
+                "line": 1,
+                "column": 30
+              },
+              "end": {
+                "offset": 33,
+                "line": 1,
+                "column": 34
+              }
+            },
+            "resolution": "wildcard",
+            "binding": "indeterminate",
+            "origin_reference_ids": [
+              "ref-0"
+            ]
+          },
+          {
+            "id": "ref-2",
+            "original_name": "ab",
+            "normalized_name": "ab",
+            "kind": "field",
+            "role": "read",
+            "stage_id": "stage-2",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 42,
+                "line": 1,
+                "column": 43
+              },
+              "end": {
+                "offset": 44,
+                "line": 1,
+                "column": 45
+              }
+            },
+            "resolution": "exact",
+            "binding": "derived",
+            "origin_reference_ids": [
+              "ref-0"
+            ]
+          }
+        ],
+        "lineage": [
+          {
+            "stage_id": "stage-0",
+            "scope_id": "scope-0",
+            "before": {
+              "fields": [],
+              "removed": [],
+              "open": true,
+              "uncertain": false
+            },
+            "after": {
+              "fields": [
+                {
+                  "name": "ab",
+                  "origin_reference_ids": [
+                    "ref-0"
+                  ],
+                  "conditional": false
+                }
+              ],
+              "removed": [],
+              "open": false,
+              "uncertain": false
+            },
+            "transitions": [
+              {
+                "operation": "aggregate",
+                "output": "ab",
+                "input_reference_ids": [],
+                "output_reference_id": "ref-0",
+                "conditional": false
+              }
+            ]
+          },
+          {
+            "stage_id": "stage-1",
+            "scope_id": "scope-0",
+            "before": {
+              "fields": [
+                {
+                  "name": "ab",
+                  "origin_reference_ids": [
+                    "ref-0"
+                  ],
+                  "conditional": false
+                }
+              ],
+              "removed": [],
+              "open": false,
+              "uncertain": false
+            },
+            "after": {
+              "fields": [
+                {
+                  "name": "ab",
+                  "origin_reference_ids": [
+                    "ref-0"
+                  ],
+                  "conditional": false
+                }
+              ],
+              "removed": [],
+              "open": false,
+              "uncertain": false
+            },
+            "transitions": [
+              {
+                "operation": "project",
+                "output": "ab",
+                "input_reference_ids": [
+                  "ref-1"
+                ],
+                "output_reference_id": "",
+                "conditional": false
+              }
+            ]
+          },
+          {
+            "stage_id": "stage-2",
+            "scope_id": "scope-0",
+            "before": {
+              "fields": [
+                {
+                  "name": "ab",
+                  "origin_reference_ids": [
+                    "ref-0"
+                  ],
+                  "conditional": false
+                }
+              ],
+              "removed": [],
+              "open": false,
+              "uncertain": false
+            },
+            "after": {
+              "fields": [
+                {
+                  "name": "ab",
+                  "origin_reference_ids": [
+                    "ref-0"
+                  ],
+                  "conditional": false
+                }
+              ],
+              "removed": [],
+              "open": false,
+              "uncertain": false
+            },
+            "transitions": []
+          }
+        ],
+        "dependencies": {
+          "indexes": [],
+          "sources": [],
+          "source_types": [],
+          "datasets": [],
+          "lookups": [],
+          "data_models": [],
+          "macros": []
+        },
+        "diagnostics": []
+      }
+    },
+    {
+      "id": "quoted_fragment_prefix_exclusion",
+      "document": {
+        "text": "| stats count AS ab | fields - 'a'* | where ab=1",
+        "language": "",
+        "profile": "",
+        "version": "",
+        "source_id": "corpus:quoted_fragment_prefix_exclusion"
+      },
+      "expected": {
+        "schema_version": 1,
+        "document": {
+          "text": "| stats count AS ab | fields - 'a'* | where ab=1",
+          "language": "spl",
+          "profile": "splunkd",
+          "version": "current",
+          "source_id": "corpus:quoted_fragment_prefix_exclusion"
+        },
+        "status": "invalid",
+        "coverage": {
+          "syntax_complete": true,
+          "semantic_complete": true,
+          "reasons": [
+            "SPL_UNAVAILABLE_FIELD"
+          ]
+        },
+        "stages": [
+          {
+            "id": "stage-0",
+            "command": "stats",
+            "position": 0,
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 2,
+                "line": 1,
+                "column": 3
+              },
+              "end": {
+                "offset": 19,
+                "line": 1,
+                "column": 20
+              }
+            },
+            "semantic_complete": true
+          },
+          {
+            "id": "stage-1",
+            "command": "fields",
+            "position": 1,
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 22,
+                "line": 1,
+                "column": 23
+              },
+              "end": {
+                "offset": 35,
+                "line": 1,
+                "column": 36
+              }
+            },
+            "semantic_complete": true
+          },
+          {
+            "id": "stage-2",
+            "command": "where",
+            "position": 2,
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 38,
+                "line": 1,
+                "column": 39
+              },
+              "end": {
+                "offset": 48,
+                "line": 1,
+                "column": 49
+              }
+            },
+            "semantic_complete": true
+          }
+        ],
+        "scopes": [
+          {
+            "id": "scope-0",
+            "parent_id": "",
+            "kind": "root",
+            "stage_id": "",
+            "location": {
+              "start": {
+                "offset": 0,
+                "line": 1,
+                "column": 1
+              },
+              "end": {
+                "offset": 48,
+                "line": 1,
+                "column": 49
+              }
+            }
+          }
+        ],
+        "references": [
+          {
+            "id": "ref-0",
+            "original_name": "ab",
+            "normalized_name": "ab",
+            "kind": "field",
+            "role": "output",
+            "stage_id": "stage-0",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 17,
+                "line": 1,
+                "column": 18
+              },
+              "end": {
+                "offset": 19,
+                "line": 1,
+                "column": 20
+              }
+            },
+            "resolution": "exact",
+            "binding": "not_applicable",
+            "origin_reference_ids": []
+          },
+          {
+            "id": "ref-1",
+            "original_name": "'a'*",
+            "normalized_name": "a*",
+            "kind": "field",
+            "role": "remove",
+            "stage_id": "stage-1",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 31,
+                "line": 1,
+                "column": 32
+              },
+              "end": {
+                "offset": 35,
+                "line": 1,
+                "column": 36
+              }
+            },
+            "resolution": "wildcard",
+            "binding": "not_applicable",
+            "origin_reference_ids": [
+              "ref-0"
+            ]
+          },
+          {
+            "id": "ref-2",
+            "original_name": "ab",
+            "normalized_name": "ab",
+            "kind": "field",
+            "role": "read",
+            "stage_id": "stage-2",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 44,
+                "line": 1,
+                "column": 45
+              },
+              "end": {
+                "offset": 46,
+                "line": 1,
+                "column": 47
+              }
+            },
+            "resolution": "exact",
+            "binding": "unavailable",
+            "origin_reference_ids": []
+          }
+        ],
+        "lineage": [
+          {
+            "stage_id": "stage-0",
+            "scope_id": "scope-0",
+            "before": {
+              "fields": [],
+              "removed": [],
+              "open": true,
+              "uncertain": false
+            },
+            "after": {
+              "fields": [
+                {
+                  "name": "ab",
+                  "origin_reference_ids": [
+                    "ref-0"
+                  ],
+                  "conditional": false
+                }
+              ],
+              "removed": [],
+              "open": false,
+              "uncertain": false
+            },
+            "transitions": [
+              {
+                "operation": "aggregate",
+                "output": "ab",
+                "input_reference_ids": [],
+                "output_reference_id": "ref-0",
+                "conditional": false
+              }
+            ]
+          },
+          {
+            "stage_id": "stage-1",
+            "scope_id": "scope-0",
+            "before": {
+              "fields": [
+                {
+                  "name": "ab",
+                  "origin_reference_ids": [
+                    "ref-0"
+                  ],
+                  "conditional": false
+                }
+              ],
+              "removed": [],
+              "open": false,
+              "uncertain": false
+            },
+            "after": {
+              "fields": [],
+              "removed": [
+                "ab"
+              ],
+              "open": false,
+              "uncertain": false
+            },
+            "transitions": [
+              {
+                "operation": "remove",
+                "output": "ab",
+                "input_reference_ids": [
+                  "ref-1"
+                ],
+                "output_reference_id": "",
+                "conditional": false
+              }
+            ]
+          },
+          {
+            "stage_id": "stage-2",
+            "scope_id": "scope-0",
+            "before": {
+              "fields": [],
+              "removed": [
+                "ab"
+              ],
+              "open": false,
+              "uncertain": false
+            },
+            "after": {
+              "fields": [],
+              "removed": [
+                "ab"
+              ],
+              "open": false,
+              "uncertain": false
+            },
+            "transitions": []
+          }
+        ],
+        "dependencies": {
+          "indexes": [],
+          "sources": [],
+          "source_types": [],
+          "datasets": [],
+          "lookups": [],
+          "data_models": [],
+          "macros": []
+        },
+        "diagnostics": [
+          {
+            "code": "SPL_UNAVAILABLE_FIELD",
+            "severity": "error",
+            "category": "unavailable_field",
+            "message": "field \"ab\" is unavailable after an earlier pipeline transfer",
+            "location": {
+              "start": {
+                "offset": 44,
+                "line": 1,
+                "column": 45
+              },
+              "end": {
+                "offset": 46,
+                "line": 1,
+                "column": 47
+              }
+            },
+            "stage_id": "stage-2",
+            "scope_id": "scope-0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "quoted_fragment_suffix_inclusion",
+      "document": {
+        "text": "| stats count AS 'first name' | fields *'name' | where 'first name'=1",
+        "language": "",
+        "profile": "",
+        "version": "",
+        "source_id": "corpus:quoted_fragment_suffix_inclusion"
+      },
+      "expected": {
+        "schema_version": 1,
+        "document": {
+          "text": "| stats count AS 'first name' | fields *'name' | where 'first name'=1",
+          "language": "spl",
+          "profile": "splunkd",
+          "version": "current",
+          "source_id": "corpus:quoted_fragment_suffix_inclusion"
+        },
+        "status": "valid",
+        "coverage": {
+          "syntax_complete": true,
+          "semantic_complete": true,
+          "reasons": []
+        },
+        "stages": [
+          {
+            "id": "stage-0",
+            "command": "stats",
+            "position": 0,
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 2,
+                "line": 1,
+                "column": 3
+              },
+              "end": {
+                "offset": 29,
+                "line": 1,
+                "column": 30
+              }
+            },
+            "semantic_complete": true
+          },
+          {
+            "id": "stage-1",
+            "command": "fields",
+            "position": 1,
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 32,
+                "line": 1,
+                "column": 33
+              },
+              "end": {
+                "offset": 46,
+                "line": 1,
+                "column": 47
+              }
+            },
+            "semantic_complete": true
+          },
+          {
+            "id": "stage-2",
+            "command": "where",
+            "position": 2,
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 49,
+                "line": 1,
+                "column": 50
+              },
+              "end": {
+                "offset": 69,
+                "line": 1,
+                "column": 70
+              }
+            },
+            "semantic_complete": true
+          }
+        ],
+        "scopes": [
+          {
+            "id": "scope-0",
+            "parent_id": "",
+            "kind": "root",
+            "stage_id": "",
+            "location": {
+              "start": {
+                "offset": 0,
+                "line": 1,
+                "column": 1
+              },
+              "end": {
+                "offset": 69,
+                "line": 1,
+                "column": 70
+              }
+            }
+          }
+        ],
+        "references": [
+          {
+            "id": "ref-0",
+            "original_name": "'first name'",
+            "normalized_name": "first name",
+            "kind": "field",
+            "role": "output",
+            "stage_id": "stage-0",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 17,
+                "line": 1,
+                "column": 18
+              },
+              "end": {
+                "offset": 29,
+                "line": 1,
+                "column": 30
+              }
+            },
+            "resolution": "exact",
+            "binding": "not_applicable",
+            "origin_reference_ids": []
+          },
+          {
+            "id": "ref-1",
+            "original_name": "*'name'",
+            "normalized_name": "*name",
+            "kind": "field",
+            "role": "read",
+            "stage_id": "stage-1",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 39,
+                "line": 1,
+                "column": 40
+              },
+              "end": {
+                "offset": 46,
+                "line": 1,
+                "column": 47
+              }
+            },
+            "resolution": "wildcard",
+            "binding": "indeterminate",
+            "origin_reference_ids": [
+              "ref-0"
+            ]
+          },
+          {
+            "id": "ref-2",
+            "original_name": "'first name'",
+            "normalized_name": "first name",
+            "kind": "field",
+            "role": "read",
+            "stage_id": "stage-2",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 55,
+                "line": 1,
+                "column": 56
+              },
+              "end": {
+                "offset": 67,
+                "line": 1,
+                "column": 68
+              }
+            },
+            "resolution": "exact",
+            "binding": "derived",
+            "origin_reference_ids": [
+              "ref-0"
+            ]
+          }
+        ],
+        "lineage": [
+          {
+            "stage_id": "stage-0",
+            "scope_id": "scope-0",
+            "before": {
+              "fields": [],
+              "removed": [],
+              "open": true,
+              "uncertain": false
+            },
+            "after": {
+              "fields": [
+                {
+                  "name": "first name",
+                  "origin_reference_ids": [
+                    "ref-0"
+                  ],
+                  "conditional": false
+                }
+              ],
+              "removed": [],
+              "open": false,
+              "uncertain": false
+            },
+            "transitions": [
+              {
+                "operation": "aggregate",
+                "output": "first name",
+                "input_reference_ids": [],
+                "output_reference_id": "ref-0",
+                "conditional": false
+              }
+            ]
+          },
+          {
+            "stage_id": "stage-1",
+            "scope_id": "scope-0",
+            "before": {
+              "fields": [
+                {
+                  "name": "first name",
+                  "origin_reference_ids": [
+                    "ref-0"
+                  ],
+                  "conditional": false
+                }
+              ],
+              "removed": [],
+              "open": false,
+              "uncertain": false
+            },
+            "after": {
+              "fields": [
+                {
+                  "name": "first name",
+                  "origin_reference_ids": [
+                    "ref-0"
+                  ],
+                  "conditional": false
+                }
+              ],
+              "removed": [],
+              "open": false,
+              "uncertain": false
+            },
+            "transitions": [
+              {
+                "operation": "project",
+                "output": "first name",
+                "input_reference_ids": [
+                  "ref-1"
+                ],
+                "output_reference_id": "",
+                "conditional": false
+              }
+            ]
+          },
+          {
+            "stage_id": "stage-2",
+            "scope_id": "scope-0",
+            "before": {
+              "fields": [
+                {
+                  "name": "first name",
+                  "origin_reference_ids": [
+                    "ref-0"
+                  ],
+                  "conditional": false
+                }
+              ],
+              "removed": [],
+              "open": false,
+              "uncertain": false
+            },
+            "after": {
+              "fields": [
+                {
+                  "name": "first name",
+                  "origin_reference_ids": [
+                    "ref-0"
+                  ],
+                  "conditional": false
+                }
+              ],
+              "removed": [],
+              "open": false,
+              "uncertain": false
+            },
+            "transitions": []
+          }
+        ],
+        "dependencies": {
+          "indexes": [],
+          "sources": [],
+          "source_types": [],
+          "datasets": [],
+          "lookups": [],
+          "data_models": [],
+          "macros": []
+        },
+        "diagnostics": []
+      }
+    },
+    {
+      "id": "quoted_fragment_suffix_exclusion",
+      "document": {
+        "text": "| stats count AS 'first name' | fields - *'name' | where 'first name'=1",
+        "language": "",
+        "profile": "",
+        "version": "",
+        "source_id": "corpus:quoted_fragment_suffix_exclusion"
+      },
+      "expected": {
+        "schema_version": 1,
+        "document": {
+          "text": "| stats count AS 'first name' | fields - *'name' | where 'first name'=1",
+          "language": "spl",
+          "profile": "splunkd",
+          "version": "current",
+          "source_id": "corpus:quoted_fragment_suffix_exclusion"
+        },
+        "status": "invalid",
+        "coverage": {
+          "syntax_complete": true,
+          "semantic_complete": true,
+          "reasons": [
+            "SPL_UNAVAILABLE_FIELD"
+          ]
+        },
+        "stages": [
+          {
+            "id": "stage-0",
+            "command": "stats",
+            "position": 0,
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 2,
+                "line": 1,
+                "column": 3
+              },
+              "end": {
+                "offset": 29,
+                "line": 1,
+                "column": 30
+              }
+            },
+            "semantic_complete": true
+          },
+          {
+            "id": "stage-1",
+            "command": "fields",
+            "position": 1,
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 32,
+                "line": 1,
+                "column": 33
+              },
+              "end": {
+                "offset": 48,
+                "line": 1,
+                "column": 49
+              }
+            },
+            "semantic_complete": true
+          },
+          {
+            "id": "stage-2",
+            "command": "where",
+            "position": 2,
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 51,
+                "line": 1,
+                "column": 52
+              },
+              "end": {
+                "offset": 71,
+                "line": 1,
+                "column": 72
+              }
+            },
+            "semantic_complete": true
+          }
+        ],
+        "scopes": [
+          {
+            "id": "scope-0",
+            "parent_id": "",
+            "kind": "root",
+            "stage_id": "",
+            "location": {
+              "start": {
+                "offset": 0,
+                "line": 1,
+                "column": 1
+              },
+              "end": {
+                "offset": 71,
+                "line": 1,
+                "column": 72
+              }
+            }
+          }
+        ],
+        "references": [
+          {
+            "id": "ref-0",
+            "original_name": "'first name'",
+            "normalized_name": "first name",
+            "kind": "field",
+            "role": "output",
+            "stage_id": "stage-0",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 17,
+                "line": 1,
+                "column": 18
+              },
+              "end": {
+                "offset": 29,
+                "line": 1,
+                "column": 30
+              }
+            },
+            "resolution": "exact",
+            "binding": "not_applicable",
+            "origin_reference_ids": []
+          },
+          {
+            "id": "ref-1",
+            "original_name": "*'name'",
+            "normalized_name": "*name",
+            "kind": "field",
+            "role": "remove",
+            "stage_id": "stage-1",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 41,
+                "line": 1,
+                "column": 42
+              },
+              "end": {
+                "offset": 48,
+                "line": 1,
+                "column": 49
+              }
+            },
+            "resolution": "wildcard",
+            "binding": "not_applicable",
+            "origin_reference_ids": [
+              "ref-0"
+            ]
+          },
+          {
+            "id": "ref-2",
+            "original_name": "'first name'",
+            "normalized_name": "first name",
+            "kind": "field",
+            "role": "read",
+            "stage_id": "stage-2",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 57,
+                "line": 1,
+                "column": 58
+              },
+              "end": {
+                "offset": 69,
+                "line": 1,
+                "column": 70
+              }
+            },
+            "resolution": "exact",
+            "binding": "unavailable",
+            "origin_reference_ids": []
+          }
+        ],
+        "lineage": [
+          {
+            "stage_id": "stage-0",
+            "scope_id": "scope-0",
+            "before": {
+              "fields": [],
+              "removed": [],
+              "open": true,
+              "uncertain": false
+            },
+            "after": {
+              "fields": [
+                {
+                  "name": "first name",
+                  "origin_reference_ids": [
+                    "ref-0"
+                  ],
+                  "conditional": false
+                }
+              ],
+              "removed": [],
+              "open": false,
+              "uncertain": false
+            },
+            "transitions": [
+              {
+                "operation": "aggregate",
+                "output": "first name",
+                "input_reference_ids": [],
+                "output_reference_id": "ref-0",
+                "conditional": false
+              }
+            ]
+          },
+          {
+            "stage_id": "stage-1",
+            "scope_id": "scope-0",
+            "before": {
+              "fields": [
+                {
+                  "name": "first name",
+                  "origin_reference_ids": [
+                    "ref-0"
+                  ],
+                  "conditional": false
+                }
+              ],
+              "removed": [],
+              "open": false,
+              "uncertain": false
+            },
+            "after": {
+              "fields": [],
+              "removed": [
+                "first name"
+              ],
+              "open": false,
+              "uncertain": false
+            },
+            "transitions": [
+              {
+                "operation": "remove",
+                "output": "first name",
+                "input_reference_ids": [
+                  "ref-1"
+                ],
+                "output_reference_id": "",
+                "conditional": false
+              }
+            ]
+          },
+          {
+            "stage_id": "stage-2",
+            "scope_id": "scope-0",
+            "before": {
+              "fields": [],
+              "removed": [
+                "first name"
+              ],
+              "open": false,
+              "uncertain": false
+            },
+            "after": {
+              "fields": [],
+              "removed": [
+                "first name"
+              ],
+              "open": false,
+              "uncertain": false
+            },
+            "transitions": []
+          }
+        ],
+        "dependencies": {
+          "indexes": [],
+          "sources": [],
+          "source_types": [],
+          "datasets": [],
+          "lookups": [],
+          "data_models": [],
+          "macros": []
+        },
+        "diagnostics": [
+          {
+            "code": "SPL_UNAVAILABLE_FIELD",
+            "severity": "error",
+            "category": "unavailable_field",
+            "message": "field \"first name\" is unavailable after an earlier pipeline transfer",
+            "location": {
+              "start": {
+                "offset": 57,
+                "line": 1,
+                "column": 58
+              },
+              "end": {
+                "offset": 69,
+                "line": 1,
+                "column": 70
+              }
+            },
+            "stage_id": "stage-2",
+            "scope_id": "scope-0"
+          }
+        ]
+      }
     }
   ]
 }

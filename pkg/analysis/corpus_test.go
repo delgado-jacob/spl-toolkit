@@ -30,7 +30,7 @@ func loadCorpus(t *testing.T) []corpusCase {
 	if err := json.Unmarshal(data, &corpus); err != nil {
 		t.Fatal(err)
 	}
-	if corpus.Version != "1" || len(corpus.Cases) != 26 {
+	if corpus.Version != "1" || len(corpus.Cases) != 34 {
 		t.Fatal("missing reviewed corpus", corpus.Version, len(corpus.Cases))
 	}
 	return corpus.Cases
@@ -73,6 +73,15 @@ func TestCorpusSemanticReview(t *testing.T) {
 		"exact_after_unknown":       {Invalid, "a,a,missing", "a", 4, 1, false, false},
 		"fields_internal":           {Valid, "_time,a,b,_time,a,b,a,_time", "_time,a", 4, 1, false, false},
 		"fields_open":               {Incomplete, "a,a,b", "a", 3, 1, false, true},
+
+		"literal_star_inclusion":           {Valid, "a*b,a*,a*b", "a*b", 3, 1, false, false},
+		"literal_star_exclusion":           {Invalid, "a*b,a*,a*b", "", 3, 1, false, false},
+		"literal_star_suffix_inclusion":    {Valid, "*ba,*a,*ba", "*ba", 3, 1, false, false},
+		"literal_star_suffix_exclusion":    {Invalid, "*ba,*a,*ba", "", 3, 1, false, false},
+		"quoted_fragment_prefix_inclusion": {Valid, "ab,a*,ab", "ab", 3, 1, false, false},
+		"quoted_fragment_prefix_exclusion": {Invalid, "ab,a*,ab", "", 3, 1, false, false},
+		"quoted_fragment_suffix_inclusion": {Valid, "first name,*name,first name", "first name", 3, 1, false, false},
+		"quoted_fragment_suffix_exclusion": {Invalid, "first name,*name,first name", "", 3, 1, false, false},
 	}
 	for _, c := range loadCorpus(t) {
 		t.Run(c.ID, func(t *testing.T) {
