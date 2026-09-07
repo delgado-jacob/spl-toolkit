@@ -4,3 +4,4 @@ pytest-mock==3.15.1
 iniconfig==2.1.0
 pluggy==1.6.0
 pygments==2.19.2
+PyYAML==6.0.3
