@@ -30,7 +30,7 @@ Today callers obtain flat field names and parser errors without knowing where a 
 - [x] (2026-09-07) Controller verified baseline: full Go race suite, build-all, 69 tool tests, Go 1.22.12 targeted tests, documentation checks, and source Python 27 passed/1 intentional installed-version skip.
 - [x] (2026-09-07) Task 1 complete at c57144b after two scoped fix rounds: public model, grammar/source/recovery foundation, combined review and clean re-review; current-Go race and Go1.22 covering checks passed.
 - [x] (2026-09-07) Task 2 complete through b430722 after one scoped fix round and clean independent re-review: references, flow, functions/capabilities; full Go race and covering Go1.22 checks passed.
-- [ ] Task 3 in progress: nested scopes, dependency kinds, uncertainty/recovery corpus and typed quoted-asterisk resolution; red tests, implementation, green race tests, review, commit.
+- [x] Task 3: scoped dependencies/recovery, role-specific wildcard resolution, invalid-UTF8 rejection, and 24 full-report corpus cases complete through e3c4684 after malformed-child ownership fix passed independent re-review; race and Go1.22 analysis passed.
 - [ ] Task 4: CLI and REST analysis/capability adapters; red tests, implementation, green tests, review, commit.
 - [ ] Task 5: C/Python analysis ownership and native package source closure; red real-library tests, implementation, green package checks, review, commit.
 - [ ] Task 6: shared full-report parity, installed-wheel acceptance, docs, final review and milestone log.
@@ -60,7 +60,7 @@ Decision: Implicit aggregate names are semantic names such as `sum(bytes)`, not 
 ## Outcomes & Retrospective
 
 
-Task 1 foundation is implemented and independently reviewed through c57144b; two grammar-boundary issues were corrected with exact source and legacy mixed-mode regressions. Task 2 semantics is independently reviewed through b430722; Tasks 3–6 remain. Open-input fields internal-membership uncertainty and unsupported rename overlaps are explicit conservative limitations. Completion requires every task below, meaningful installed-wheel parity, and a milestone log that distinguishes local checks from unrun platform release acceptance. Do not represent the inherited milestone 1 remote evidence as proof for new source.
+Task 1 foundation is implemented and independently reviewed through c57144b; two grammar-boundary issues were corrected with exact source and legacy mixed-mode regressions. Task 2 semantics is independently reviewed through b430722. Task 3 is independently reviewed through e3c4684 with 24 full-report corpus cases, source-encoding rejection, and malformed-child ownership recovery; Tasks 4–6 remain. Open-input fields internal-membership uncertainty and unsupported rename overlaps are explicit conservative limitations. Completion requires every task below, meaningful installed-wheel parity, and a milestone log that distinguishes local checks from unrun platform release acceptance. Do not represent the inherited milestone 1 remote evidence as proof for new source.
 
 ## Context and Orientation
 
@@ -113,7 +113,7 @@ Use report-format integer `1` consistently in Result and CapabilityManifest. JSO
 ## Plan of Work
 
 
-The first three tasks establish and test the kernel. Task 1 publishes types and parsing/source behavior; Task 2 supplies ordinary pipeline semantics; Task 3 completes scope/dependency/partial-result behavior. Tasks 4 and 5 may run in parallel after Task 3 because one owns CLI/REST and the other owns bindings/Python/package infrastructure. Task 6 integrates their results and owns end-to-end fixtures and final docs. Each serial implementer receives an SDD task brief containing the owned paths and required interface/spec excerpts, not the whole plan. One independent reviewer combines specification and code-quality verdicts per task, followed by a broad milestone review. The tool-created `.superpowers/sdd` ledger and this living plan preserve progress. Other workers' edits must be preserved.
+The first three tasks establish and test the kernel. Task 1 publishes types and parsing/source behavior; Task 2 supplies ordinary pipeline semantics; Task 3 completes scope/dependency/partial-result behavior. Tasks 4 and 5 run serially after Task 3: Task 4 owns CLI/REST, then Task 5 owns bindings/Python/package infrastructure, following the approved controller workflow. Task 6 integrates their results and owns end-to-end fixtures and final docs. Each serial implementer receives an SDD task brief containing the owned paths and required interface/spec excerpts, not the whole plan. One independent reviewer combines specification and code-quality verdicts per task, followed by a broad milestone review. The tool-created `.superpowers/sdd` ledger and this living plan preserve progress. Other workers' edits must be preserved.
 
 ### Task 1: Public model and grammar-backed source analysis
 
@@ -403,3 +403,9 @@ Revision note (2026-09-07): Root clarified rename overlaps: chains/swaps and col
 Revision note (2026-09-07): Official SPL fields behavior retains internal fields. Root approved conservative open-input membership uncertainty with known internals/tombstones preserved and exact closed-input/table/stats behavior; M3 handoff must flag finite-catalog refinement. Unsupported rename overlaps forget affected binding claims while retaining sound reads.
 
 Revision note (2026-09-07): Task 2 completed after three transfer fixes passed scoped re-review. Task 3 owns the carried typed quoted-asterisk resolution finding and must resolve it before milestone acceptance; table/stats restore local exact membership while global previous incomplete coverage remains.
+
+Revision note (2026-09-07): Task 3 uses existing tested root-model/qualified-dataset identity conventions with explicit component/overlapping spans; typed macro-only stages use synthetic command macro, while statically named macro dependencies retain exact resolution despite unknown expansion semantics.
+
+Revision note (2026-09-07): Root required narrow invalid-UTF8 document rejection for source preservation, including pre-decode raw REST/C JSON validation. Task3 owns core regressions; Tasks4/5 own transport regressions.
+
+Revision note (2026-09-07): Task3 closed after independent scoped review confirmed original-bracket ownership prevents malformed child recovery leaks. The shared corpus contains 24 cases; quoted resolution follows semantic roles. Tasks4–6 remain serial and must deliver canonical parity and installed acceptance.
