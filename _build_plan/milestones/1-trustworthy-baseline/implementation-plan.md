@@ -102,6 +102,8 @@ This is a living ExecPlan maintained according to `/Users/jacobdelgado/.codex/PL
 - [x] Task 10.5: Commit/review the exact candidate and obtain current CI results.
 - [x] Task 10.6: Write the milestone log with proven results and open gates.
 - [x] Task 10.7: Commit final documentation and verify evidence ancestry.
+- [x] Final review correction: preserve boundary whitespace for mapped and no-op queries with shared exact-output fixtures.
+- [x] Final review acceptance: rerun all hosted gates and the measured baseline on corrected source.
 
 ## Surprises & Discoveries
 
@@ -128,6 +130,8 @@ Task 9 independent review closed four release-gate defects: validation now execu
 
 Task 10 acceptance, 2026-09-06: independent review closed incomplete nested environment validation and evidence overwrite behavior. The first full hosted run exposed a missing pinned dependency bootstrap in 15 installed-wheel jobs; its other gates passed and aggregation correctly rejected the incomplete matrix. The reviewed bootstrap correction at `5191206124590f69a18c81fc51e756b6e75c90e8` passed all 24 jobs in run `34075500813`, including four reproducible releases, all 16 installed-wheel combinations, Go 1.22.12, GCC 13 ASan, Linux Docker/Make/clean-source workflows, and final strict aggregation. Controller validation of the 28 downloaded records passed and all 32 release payload checksums matched. Each installed combination passed 11 native and five surface tests with zero skips. Complete logs and payloads are retained under `build/evidence/ci-34075500813/`; the later documentation commits preserve this tested source identity and do not change runtime, test, or build inputs. Final whole-branch review is recorded separately.
 
+Final whole-branch review found one contract gap: the token rewriter removed caller-owned boundary whitespace after mapping. Commit `6b55f8902ff1a990aea8951cd78934b32c90660a` removes only the blanket trim, retains exact EOF-marker cleanup, and adds mapped/no-op spaces, tabs, and newlines to the shared fixtures. The CLI assertion now compares exact bytes plus its one output newline. Local Go and installed Python/CLI/HTTP tests passed; [run 34077738907](https://github.com/delgado-jacob/spl-toolkit/actions/runs/34077738907) passed all 24 jobs on the corrected source. The controller revalidated all 28 downloaded records and 32 payload hashes. A fresh five-repetition benchmark at the same source is retained in `build/evidence/final-benchmark.txt`; the permanent performance report and acceptance records use this corrected source. The scoped fix-review verdict is recorded separately.
+
 ## Decision Log
 
 
@@ -150,7 +154,7 @@ Decision: Replace the planned macOS native -no_uuid flag with -reproducible whil
 ## Outcomes & Retrospective
 
 
-Tasks 1–10 have passed their independent code reviews, including focused fix reviews. Runtime and release acceptance is established at implementation SHA `5191206124590f69a18c81fc51e756b6e75c90e8` by all 24 successful jobs in [run 34075500813](https://github.com/delgado-jacob/spl-toolkit/actions/runs/34075500813). The controller independently accepted all 28 downloaded records and verified all 32 release payload hashes. This covers actual execution on all four targets and all 16 pinned interpreter combinations, alongside the language floor, real native sanitizer, source preservation, documented workflows, and reproducibility gates. The milestone log and permanent compatibility/evidence records were committed separately after those results, with tested-source ancestry and unchanged runtime/configuration/test inputs verified. Final whole-branch review is recorded separately; no merge, tag, or release publication has occurred.
+Tasks 1–10 have passed their independent code reviews, including focused fix reviews. Runtime and release acceptance is established at implementation SHA `6b55f8902ff1a990aea8951cd78934b32c90660a` by all 24 successful jobs in [run 34077738907](https://github.com/delgado-jacob/spl-toolkit/actions/runs/34077738907). The controller independently accepted all 28 downloaded records and verified all 32 release payload hashes. This covers actual execution on all four targets and all 16 pinned interpreter combinations, alongside the language floor, real native sanitizer, source preservation, documented workflows, and reproducibility gates. The milestone log and permanent compatibility/evidence records were committed separately after those results, with tested-source ancestry and unchanged runtime/configuration/test inputs verified. The final whole-branch review identified and prompted the whitespace correction described above; its scoped fix-review verdict is recorded separately; no merge, tag, or release publication has occurred.
 
 ## Context and Orientation
 
