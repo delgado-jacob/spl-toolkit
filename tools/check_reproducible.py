@@ -21,7 +21,7 @@ if __package__ in (None, ""):
 
 from tools.check_clean_build import export_ref, hashes as hash_tracked_files, tracked_files
 from tools.check_package import check_package
-from tools.release import artifact_hashes
+from tools.release import _target_name, artifact_hashes
 
 
 def compare_artifacts(first_output: Path, second_output: Path) -> dict[str, str]:
@@ -39,13 +39,19 @@ def _git(root: Path, *args: str) -> str:
     return subprocess.run(["git", *args], cwd=root, check=True, text=True, capture_output=True).stdout.strip()
 
 
-def _run_payloads(output: Path, version: str) -> dict[str, str]:
+def _run_payloads(output: Path, version: str, fixture: Path) -> dict[str, str]:
     cli = next(output.glob(f"spl-toolkit-{version}-*"))
     server = next(output.glob(f"spl-toolkit-server-{version}-*"))
     native = next(path for path in output.glob(f"libspl_toolkit-{version}-*") if path.suffix in (".so", ".dylib", ".dll"))
     cli_version = subprocess.run([str(cli), "version"], check=True, text=True, capture_output=True).stdout.strip()
     if version not in cli_version:
         raise RuntimeError("accepted CLI reports the wrong version")
+    mapped = subprocess.run(
+        [str(cli), "map", "--config", str(fixture), "search src_ip=1"],
+        check=True, text=True, capture_output=True,
+    ).stdout.strip()
+    if mapped != "search source_ip=1":
+        raise RuntimeError(f"accepted CLI mapping failed: {mapped}")
     library = ctypes.CDLL(str(native))
     library.spl_toolkit_version.restype = ctypes.c_void_p
     library.spl_string_free.argtypes = [ctypes.c_void_p]
@@ -79,6 +85,17 @@ def _run_payloads(output: Path, version: str) -> dict[str, str]:
             raise RuntimeError("accepted server health check timed out")
         if version not in body:
             raise RuntimeError("accepted server health response omits the version")
+        request = urllib.request.Request(
+            f"http://127.0.0.1:{port}/api/v1/query/map",
+            data=json.dumps({
+                "query": "search src_ip=1",
+                "mappings": [{"source": "src_ip", "target": "source_ip"}],
+            }).encode(),
+            headers={"Content-Type": "application/json"},
+        )
+        response = json.loads(urllib.request.urlopen(request, timeout=2).read())
+        if response.get("mapped_query") != "search source_ip=1":
+            raise RuntimeError("accepted server mapping failed")
     finally:
         process.terminate()
         try:
@@ -99,7 +116,7 @@ def check_reproducible(ref: str, output: Path) -> dict[str, object]:
     epoch = int(_git(root, "show", "-s", "--format=%ct", source_sha))
     files = tracked_files(root, source_sha)
     before = hash_tracked_files(root, files)
-    result: dict[str, object] = {"source_sha": source_sha, "target": None, "status": "failed", "artifact_hashes": {}, "environment": {}, "failed_checks": []}
+    result: dict[str, object] = {"source_sha": source_sha, "target": _target_name(), "status": "failed", "artifact_hashes": {}, "environment": {}, "failed_checks": []}
     try:
         environments = []
         for number in (1, 2):
@@ -119,11 +136,12 @@ def check_reproducible(ref: str, output: Path) -> dict[str, object]:
             )
             (output / f"release-{number}.log").write_text(completed.stdout + completed.stderr, encoding="utf-8")
             if completed.returncode:
-                raise RuntimeError(f"release build {number} failed; see {output / f'release-{number}.log'}")
+                detail = next((line for line in reversed(completed.stderr.splitlines()) if line.strip()), "unknown error")
+                raise RuntimeError(f"release build {number} failed: {detail}; see {output / f'release-{number}.log'}")
             environments.append(json.loads((output / f"build-{number}-evidence" / "environment.json").read_text(encoding="utf-8")))
         hashes = compare_artifacts(output / "build-1", output / "build-2")
         version = (output / "source-1" / "VERSION").read_text(encoding="utf-8").strip()
-        accepted = _run_payloads(output / "build-1", version)
+        accepted = _run_payloads(output / "build-1", version, output / "source-1" / "testdata" / "baseline" / "mappings.json")
         wheel = next((output / "build-1").glob("spl_toolkit-*.whl"))
         sdist = next((output / "build-1").glob("spl_toolkit-*.tar.gz"))
         check_package(sdist, wheel.parent, version)

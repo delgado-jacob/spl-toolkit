@@ -198,6 +198,10 @@ def validate_environment(config: dict, target: str) -> dict[str, object]:
     configured_arch = os.environ.get("GOARCH", expected["goarch"])
     if configured_arch != expected["goarch"]:
         raise RuntimeError(f"GOARCH mismatch: expected {expected['goarch']}, got {configured_arch}")
+    host_arch = platform.machine().lower()
+    normalized_host_arch = "amd64" if host_arch in ("amd64", "x86_64") else "arm64" if host_arch in ("arm64", "aarch64") else host_arch
+    if normalized_host_arch != expected["goarch"]:
+        raise RuntimeError(f"host architecture mismatch: expected {expected['goarch']}, got {platform.machine()}")
     cc = shutil.which(os.environ.get("CC", expected["cc"]))
     if cc is None:
         raise RuntimeError(f"required compiler not found: {expected['cc']}")
@@ -208,7 +212,9 @@ def validate_environment(config: dict, target: str) -> dict[str, object]:
         if machine != "x86_64-w64-mingw32" or version != expected["gcc_version"]:
             raise RuntimeError(f"MinGW compiler mismatch: expected x86_64-w64-mingw32 {expected['gcc_version']}, got {machine} {version}")
     sdk = None
+    linker_path = None
     linker = None
+    xcode = None
     if target.startswith("darwin-"):
         developer_dir = os.environ.get("DEVELOPER_DIR")
         if developer_dir != expected["developer_dir"]:
@@ -216,7 +222,12 @@ def validate_environment(config: dict, target: str) -> dict[str, object]:
         if os.environ.get("MACOSX_DEPLOYMENT_TARGET") != expected["deployment_target"]:
             raise RuntimeError(f"MACOSX_DEPLOYMENT_TARGET must be {expected['deployment_target']}")
         sdk = _version_output(["xcrun", "--show-sdk-path"])
-        linker = _version_output(["xcrun", "ld", "-v"])
+        linker_path = _version_output(["xcrun", "--find", "ld"])
+        linker = subprocess.run([linker_path, "-v"], check=True, text=True, capture_output=True).stderr.strip()
+        xcode = _version_output(["xcodebuild", "-version"])
+    else:
+        linker_path = _version_output([cc, "-print-prog-name=ld"])
+        linker = subprocess.run([linker_path, "--version"], check=True, text=True, capture_output=True).stdout.strip()
     return {
         "target": target,
         "runner": expected["runner"],
@@ -231,6 +242,8 @@ def validate_environment(config: dict, target: str) -> dict[str, object]:
         },
         "cc": str(Path(cc).resolve()),
         "cc_version": compiler_version,
+        "xcode": xcode,
+        "linker_path": linker_path,
         "linker": linker,
         "sdk": sdk,
         "zlib": zlib.ZLIB_VERSION,
