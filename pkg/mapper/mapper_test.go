@@ -1209,3 +1209,18 @@ func TestMapperValidateQuery(t *testing.T) {
 		})
 	}
 }
+
+// Mapping a prefix must never rewrite a distinct legacy trailing-dot field,
+// regardless of the following argument's token shape.
+func TestMapQueryTrailingDotFieldBoundary(t *testing.T) {
+	m := NewWithConfig(&MappingConfig{Version: "1.0", Mappings: []FieldMapping{{Source: "host", Target: "server"}}})
+	for _, q := range []string{`search * | fields host. other`, `search * | fields host. "other"`, `search * | fields host. (other)`} {
+		got, err := m.MapQuery(q)
+		if err != nil {
+			t.Fatalf("%s: %v", q, err)
+		}
+		if got != q {
+			t.Errorf("MapQuery(%q) = %q; trailing-dot field must remain unchanged", q, got)
+		}
+	}
+}

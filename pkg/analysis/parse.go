@@ -5,6 +5,12 @@ import (
 	"github.com/delgado-jacob/spl-toolkit/parser"
 )
 
+// analysisInputStream opts this document into the analysis lexer contract.
+// Embedding preserves the ANTLR stream unchanged; the marker has no mutable state.
+type analysisInputStream struct{ *antlr.InputStream }
+
+func (*analysisInputStream) SPLAnalysisSyntax() bool { return true }
+
 type parsedDocument struct {
 	tokens      *antlr.CommonTokenStream
 	tree        parser.IAnalysisQueryContext
@@ -31,7 +37,7 @@ func (l *syntaxListener) SyntaxError(recognizer antlr.Recognizer, offendingSymbo
 func parseDocument(text string) *parsedDocument {
 	parsed := &parsedDocument{source: newSourceIndex(text), diagnostics: []Diagnostic{}}
 	listener := &syntaxListener{DefaultErrorListener: antlr.NewDefaultErrorListener(), parsed: parsed}
-	lexer := parser.NewSPLLexer(antlr.NewInputStream(text))
+	lexer := parser.NewSPLLexer(&analysisInputStream{InputStream: antlr.NewInputStream(text)})
 	lexer.RemoveErrorListeners()
 	lexer.AddErrorListener(listener)
 	parsed.tokens = antlr.NewCommonTokenStream(lexer, antlr.TokenDefaultChannel)

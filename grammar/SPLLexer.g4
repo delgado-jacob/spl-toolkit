@@ -33,10 +33,12 @@ options {
 }
 
 @lexer::members {
-// A dot before a quoted or parenthesized operand belongs to concatenation,
-// while interior dots and trailing dots in ordinary names remain identifiers.
+// Analysis inputs opt into dot disambiguation; ordinary legacy inputs retain
+// their original identifier boundaries, independently of other lexer instances.
 func (l *SPLLexer) identifierDotBoundary() bool {
     input := l.GetInputStream()
+    analysis, enabled := input.(interface { SPLAnalysisSyntax() bool })
+    if !enabled || !analysis.SPLAnalysisSyntax() { return true }
     if input.LA(-1) != '.' { return true }
     lookahead := 1
     for input.LA(lookahead) == ' ' || input.LA(lookahead) == '\t' || input.LA(lookahead) == '\r' || input.LA(lookahead) == '\n' { lookahead++ }

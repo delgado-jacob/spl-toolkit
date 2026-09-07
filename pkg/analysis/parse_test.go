@@ -3,7 +3,9 @@ package analysis
 import (
 	"github.com/antlr4-go/antlr/v4"
 	"github.com/delgado-jacob/spl-toolkit/parser"
+	"github.com/delgado-jacob/spl-toolkit/pkg/mapper"
 	"strings"
+	"sync"
 	"testing"
 )
 
@@ -267,4 +269,82 @@ func TestParseUnquotedSearchValueAdjacency(t *testing.T) {
 			t.Fatalf("%s RHS source %+v", tc.q, loc)
 		}
 	}
+}
+
+// The same source requires analysis expression boundaries while the legacy entry
+// must retain its original dotted-identifier tokenization.
+func TestParseAnalysisAndLegacyDotBoundaries(t *testing.T) {
+	for _, q := range []string{`| eval x=host."other"`, `| eval x=host. "other"`, `| eval x=host. (other)`} {
+		for _, analysisFirst := range []bool{true, false} {
+			var parsed *parsedDocument
+			var legacy *antlr.CommonTokenStream
+			runAnalysis := func() { parsed = parseDocument(q) }
+			runLegacy := func() {
+				legacy = antlr.NewCommonTokenStream(parser.NewSPLLexer(antlr.NewInputStream(q)), antlr.TokenDefaultChannel)
+				legacy.Fill()
+			}
+			if analysisFirst {
+				runAnalysis()
+				runLegacy()
+			} else {
+				runLegacy()
+				runAnalysis()
+			}
+			if len(parsed.diagnostics) != 0 {
+				t.Fatalf("analysis %q: %+v", q, parsed.diagnostics)
+			}
+			start := strings.Index(q, "host.")
+			for _, tc := range []struct {
+				name   string
+				tokens *antlr.CommonTokenStream
+				want   string
+			}{{"analysis", parsed.tokens, "host"}, {"legacy", legacy, "host."}} {
+				found := false
+				for _, token := range tc.tokens.GetAllTokens() {
+					if token.GetStart() == start {
+						found = true
+						if token.GetText() != tc.want {
+							t.Errorf("%s %q (analysis first=%v) token %q, want %q", tc.name, q, analysisFirst, token.GetText(), tc.want)
+						}
+					}
+				}
+				if !found {
+					t.Fatalf("%s %q: no token at field start", tc.name, q)
+				}
+			}
+		}
+	}
+}
+
+func TestParseAnalysisAndLegacyConcurrent(t *testing.T) {
+	const q = `search * | eval x=host. "other"`
+	const legacyQuery = `search * | fields host. "other"`
+	m := mapper.NewWithConfig(&mapper.MappingConfig{Version: "1.0", Mappings: []mapper.FieldMapping{{Source: "host", Target: "server"}}})
+	var wg sync.WaitGroup
+	for i := 0; i < 12; i++ {
+		wg.Add(2)
+		go func() {
+			defer wg.Done()
+			r, err := Analyze(QueryDocument{Text: q})
+			if err != nil {
+				t.Error(err)
+				return
+			}
+			if !r.Coverage.SyntaxComplete {
+				t.Errorf("analysis: %+v", r.Diagnostics)
+			}
+		}()
+		go func() {
+			defer wg.Done()
+			got, err := m.MapQuery(legacyQuery)
+			if err != nil {
+				t.Error(err)
+				return
+			}
+			if got != legacyQuery {
+				t.Errorf("legacy mapping = %q, want %q", got, legacyQuery)
+			}
+		}()
+	}
+	wg.Wait()
 }
