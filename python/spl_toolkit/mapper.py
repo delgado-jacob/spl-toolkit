@@ -143,6 +143,12 @@ class SPLMapper:
         self._lib.spl_mapper_map_query_with_context.argtypes = [ctypes.c_int, ctypes.c_char_p, ctypes.c_char_p]
         self._lib.spl_mapper_map_query_with_context.restype = ctypes.POINTER(SPLResult)
         
+        # Owned canonical JSON results
+        self._lib.spl_mapper_analyze_query.argtypes = [ctypes.c_int, ctypes.c_char_p]
+        self._lib.spl_mapper_analyze_query.restype = ctypes.POINTER(SPLResult)
+        self._lib.spl_mapper_capabilities.argtypes = [ctypes.c_int]
+        self._lib.spl_mapper_capabilities.restype = ctypes.POINTER(SPLResult)
+
         # spl_mapper_discover_query
         self._lib.spl_mapper_discover_query.argtypes = [ctypes.c_int, ctypes.c_char_p]
         self._lib.spl_mapper_discover_query.restype = ctypes.POINTER(SPLQueryInfoC)
@@ -298,6 +304,38 @@ class SPLMapper:
             finally:
                 self._lib.spl_result_free(result_ptr)
     
+    def analyze_query(self, query: str, *, language: str = "spl", profile: str = "splunkd",
+                      version: str = "current", source_id: str = "") -> dict:
+        """Return the canonical source-aware report, including invalid/incomplete findings.
+
+        Unsupported document options raise SPLMapperError. Source text is preserved.
+        """
+        document = {"text": query, "language": language, "profile": profile,
+                    "version": version, "source_id": source_id}
+        with self._operation() as handle:
+            pointer = self._lib.spl_mapper_analyze_query(handle, json.dumps(document).encode("utf-8"))
+            if not pointer:
+                raise SPLMapperError("Native analysis returned no result")
+            try:
+                if pointer.contents.error:
+                    raise SPLMapperError(pointer.contents.error.decode("utf-8"))
+                return json.loads(pointer.contents.result.decode("utf-8"))
+            finally:
+                self._lib.spl_result_free(pointer)
+
+    def capabilities(self) -> dict:
+        """Return the native analysis capability manifest."""
+        with self._operation() as handle:
+            pointer = self._lib.spl_mapper_capabilities(handle)
+            if not pointer:
+                raise SPLMapperError("Native capabilities returned no result")
+            try:
+                if pointer.contents.error:
+                    raise SPLMapperError(pointer.contents.error.decode("utf-8"))
+                return json.loads(pointer.contents.result.decode("utf-8"))
+            finally:
+                self._lib.spl_result_free(pointer)
+
     def discover_query(self, query: str) -> QueryInfo:
         """
         Analyze a SPL query and discover information about it

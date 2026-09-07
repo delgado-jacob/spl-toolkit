@@ -42,6 +42,8 @@ import (
 	"unsafe"
 
 	"github.com/delgado-jacob/spl-toolkit/internal/buildinfo"
+	"github.com/delgado-jacob/spl-toolkit/internal/jsoninput"
+	"github.com/delgado-jacob/spl-toolkit/pkg/analysis"
 	"github.com/delgado-jacob/spl-toolkit/pkg/mapper"
 )
 
@@ -161,6 +163,65 @@ func spl_mapper_map_query_with_context(mapperID C.int, query *C.char, contextJSO
 	}
 
 	result.result = C.CString(mappedQuery)
+	return result
+}
+
+//export spl_mapper_analyze_query
+func spl_mapper_analyze_query(mapperID C.int, documentJSON *C.char) *C.SPLResult {
+	result := (*C.SPLResult)(C.malloc(C.sizeof_SPLResult))
+	result.error = nil
+	result.result = nil
+
+	m, exists := registry.get(int(mapperID))
+	if !exists {
+		result.error = C.CString("Mapper not found")
+		return result
+	}
+	defer runtime.KeepAlive(m)
+
+	data := []byte(C.GoString(documentJSON))
+	if err := jsoninput.ValidateUnicode(data); err != nil {
+		result.error = C.CString("Invalid document JSON: " + err.Error())
+		return result
+	}
+	var document analysis.QueryDocument
+	if err := json.Unmarshal(data, &document); err != nil {
+		result.error = C.CString("Invalid document JSON: " + err.Error())
+		return result
+	}
+	report, err := analysis.Analyze(document)
+	if err != nil {
+		result.error = C.CString(err.Error())
+		return result
+	}
+	encoded, err := json.Marshal(report)
+	if err != nil {
+		result.error = C.CString(err.Error())
+		return result
+	}
+	result.result = C.CString(string(encoded))
+	return result
+}
+
+//export spl_mapper_capabilities
+func spl_mapper_capabilities(mapperID C.int) *C.SPLResult {
+	result := (*C.SPLResult)(C.malloc(C.sizeof_SPLResult))
+	result.error = nil
+	result.result = nil
+
+	m, exists := registry.get(int(mapperID))
+	if !exists {
+		result.error = C.CString("Mapper not found")
+		return result
+	}
+	defer runtime.KeepAlive(m)
+
+	encoded, err := json.Marshal(analysis.Capabilities())
+	if err != nil {
+		result.error = C.CString(err.Error())
+		return result
+	}
+	result.result = C.CString(string(encoded))
 	return result
 }
 

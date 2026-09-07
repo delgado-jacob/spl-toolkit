@@ -33,6 +33,7 @@ SDIST_FIXED_FILES = {
     "spl_toolkit.egg-info/PKG-INFO", "spl_toolkit.egg-info/SOURCES.txt",
     "spl_toolkit.egg-info/dependency_links.txt", "spl_toolkit.egg-info/top_level.txt",
     "tests/test_mapper.py", "tests/test_native_abi.py", "tests/test_native_mapper.py",
+    "tests/test_native_analysis.py",
 }
 INSTALL_SCRIPT = """
 import importlib.metadata, pathlib, sys
@@ -46,7 +47,7 @@ with SPLMapper() as mapper:
     mapper.load_mappings([{'source':'src_ip','target':'source_ip'}])
     assert mapper.map_query('search src_ip=1') == 'search source_ip=1'
 """
-NATIVE_TESTS = ("test_native_abi.py", "test_native_mapper.py")
+NATIVE_TESTS = ("test_native_abi.py", "test_native_mapper.py", "test_native_analysis.py")
 ACCEPTANCE_FILES = ("test_documented_cli.py", "test_surfaces.py", "cli_examples.json")
 REQUIRED_PYTEST_PLUGIN = r'''\
 import json
@@ -226,15 +227,18 @@ def install_and_check(
 
     installed_test_dir = outside_checkout / f"tests-{directory.name}"
     _copy_required_files(docs_root / "python" / "tests", installed_test_dir, NATIVE_TESTS)
+    analysis_fixture = outside_checkout / f"analysis-cases-{directory.name}.json"
+    shutil.copy2(docs_root / "testdata" / "analysis" / "cases.json", analysis_fixture)
+    analysis_env = {"SPL_ANALYSIS_FIXTURES": str(analysis_fixture.resolve())}
     native_counts = _run_required_suite(
-        python, installed_test_dir, outside_checkout / f"native-counts-{directory.name}.json", outside_checkout, install_env
+        python, installed_test_dir, outside_checkout / f"native-counts-{directory.name}.json", outside_checkout, install_env | analysis_env
     )
 
     acceptance_dir = outside_checkout / f"acceptance-{directory.name}"
     _copy_required_files(docs_root / "tests" / "acceptance", acceptance_dir, ACCEPTANCE_FILES)
     fixture = outside_checkout / f"cases-{directory.name}.json"
     shutil.copy2(fixture_source, fixture)
-    acceptance_env = install_env | {
+    acceptance_env = install_env | analysis_env | {
         "SPL_CLI": str(cli.resolve()),
         "SPL_SERVER": str(server.resolve()),
         "SPL_FIXTURES": str(fixture.resolve()),
