@@ -33,7 +33,7 @@ Today callers obtain flat field names and parser errors without knowing where a 
 - [x] Task 3: scoped dependencies/recovery, role-specific wildcard resolution, invalid-UTF8 rejection, and 24 full-report corpus cases complete through e3c4684 after malformed-child ownership fix passed independent re-review; race and Go1.22 analysis passed.
 - [x] Task 4: CLI/REST analysis and capabilities, strict shared Unicode input validation, generated OpenAPI, and 24-case adapter parity complete at df1bb0b; independent combined review clean.
 - [x] Follow-up core gate after Task4: wildcard fields exclusions use role=remove/binding=not_applicable at 829c4c1, with closed/open regressions, 26-case Go/CLI/REST parity, and clean independent scoped review.
-- [ ] Task 5: C/Python analysis ownership and native package source closure; red real-library tests, implementation, green package checks, review, commit.
+- [x] Task 5: native analysis/capabilities, lifecycle/ownership, Unicode input validation and source closure complete at 7cf9571; independent review clean, 61 source Python tests and both installed wheel paths each 44 native + 5 existing surface tests pass with zero skips.
 - [ ] Task 6: shared full-report parity, installed-wheel acceptance, docs, final review and milestone log.
 
 ## Surprises & Discoveries
@@ -61,7 +61,7 @@ Decision: Implicit aggregate names are semantic names such as `sum(bytes)`, not 
 ## Outcomes & Retrospective
 
 
-Task 1 foundation is implemented and independently reviewed through c57144b; two grammar-boundary issues were corrected with exact source and legacy mixed-mode regressions. Task 2 semantics is independently reviewed through b430722. Task 3 is independently reviewed through e3c4684 with 24 full-report corpus cases, source-encoding rejection, and malformed-child ownership recovery; Tasks 5–6 remain; the removal-role follow-up is independently reviewed through 829c4c1, with 26 shared cases. Task 4 CLI/REST is independently reviewed at df1bb0b with 24-case parity and shared Unicode input validation. Open-input fields internal-membership uncertainty and unsupported rename overlaps are explicit conservative limitations. Completion requires every task below, meaningful installed-wheel parity, and a milestone log that distinguishes local checks from unrun platform release acceptance. Do not represent the inherited milestone 1 remote evidence as proof for new source.
+Task 1 foundation is implemented and independently reviewed through c57144b; two grammar-boundary issues were corrected with exact source and legacy mixed-mode regressions. Task 2 semantics is independently reviewed through b430722. Task 3 is independently reviewed through e3c4684 with 24 full-report corpus cases, source-encoding rejection, and malformed-child ownership recovery; Task 6 remains; Task 5 is independently reviewed at 7cf9571 with installed native parity and complete source closure; the removal-role follow-up is independently reviewed through 829c4c1, with 26 shared cases. Task 4 CLI/REST is independently reviewed at df1bb0b with 24-case parity and shared Unicode input validation. Open-input fields internal-membership uncertainty and unsupported rename overlaps are explicit conservative limitations. Completion requires every task below, meaningful installed-wheel parity, and a milestone log that distinguishes local checks from unrun platform release acceptance. Do not represent the inherited milestone 1 remote evidence as proof for new source.
 
 ## Context and Orientation
 
@@ -295,7 +295,7 @@ Files: modify `pkg/bindings/bindings.go`, `python/spl_toolkit/mapper.py`, `pytho
 
    Reject embedded NUL in text/options before C conversion if using a NUL-terminated JSON transport could otherwise truncate: JSON encoding normally escapes NUL, so test round-trip behavior rather than adding an unnecessary text restriction. Capabilities also uses the operation guard and frees its owned JSON result.
 
-4. Add every new handwritten analysis Go source to `python/native-source-files.txt`; generated parser files retain existing paths. Add `tests/test_native_analysis.py` to `SDIST_FIXED_FILES` and `NATIVE_TESTS` in `tools/check_package.py`. Package manifest tests must fail when an analysis source or native analysis test is absent. Task 6 will add cross-adapter test files and copied fixture paths to `ACCEPTANCE_FILES`/runner environment. Do not satisfy exact-manifest tests by removing new required sources.
+4. Add every new handwritten analysis Go source to `python/native-source-files.txt`; generated parser files retain existing paths. Add `tests/test_native_analysis.py` to `SDIST_FIXED_FILES` and `NATIVE_TESTS` in `tools/check_package.py`. Package manifest tests must fail when an analysis source or native analysis test is absent. Copy the shared corpus and set absolute `SPL_ANALYSIS_FIXTURES` for installed native tests now. Task 6 will reuse that path and add its newly created cross-adapter test file to `ACCEPTANCE_FILES`; do not list absent future files. Do not satisfy exact-manifest tests by removing new required sources.
 
 5. Rebuild `make build-shared`; run new and existing real-library Python tests. Build a wheel and source distribution using the command below, then run checker tests for source closure. After review, coordinate commit `feat: expose owned native analysis reports to Python`.
 
