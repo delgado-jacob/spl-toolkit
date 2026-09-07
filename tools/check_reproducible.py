@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import ctypes
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -21,6 +22,76 @@ if __package__ in (None, ""):
 
 from tools.check_clean_build import export_ref, hashes as hash_tracked_files, tracked_files
 from tools.release import _target_name, artifact_hashes
+
+
+def _sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as source:
+        for chunk in iter(lambda: source.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _promote_accepted(output: Path, result: dict[str, object]) -> None:
+    """Copy only a fully verified build into the CI transport directory."""
+    if result.get("status") != "passed" or result.get("failed_checks") != []:
+        raise RuntimeError("cannot promote a failed or diagnostic reproducibility result")
+    environment = result.get("environment")
+    if not isinstance(environment, dict) or environment.get("pinned_environment") is not True:
+        raise RuntimeError("cannot promote an unpinned reproducibility result")
+    hashes = result.get("artifact_hashes")
+    payloads = result.get("accepted_payloads")
+    if not isinstance(hashes, dict) or not isinstance(payloads, dict):
+        raise RuntimeError("cannot promote incomplete reproducibility evidence")
+    if environment.get("artifacts") != hashes:
+        raise RuntimeError("cannot promote inconsistent environment artifact hashes")
+    source = output / "build-1"
+    if artifact_hashes(source) != hashes:
+        raise RuntimeError("cannot promote payloads whose hashes changed after verification")
+    accepted = output / "accepted"
+    if accepted.exists():
+        raise RuntimeError(f"accepted output already exists: {accepted}")
+    staging = output / "accepted.staging"
+    if staging.exists():
+        raise RuntimeError(f"accepted staging output already exists: {staging}")
+    shutil.copytree(source, staging)
+    if os.name != "nt":
+        for role in ("cli", "server"):
+            name = payloads.get(role)
+            if not isinstance(name, str) or name not in hashes:
+                raise RuntimeError(f"accepted {role} payload is missing from verified hashes")
+            path = staging / name
+            if _sha256(path) != hashes[name]:
+                raise RuntimeError(f"accepted {role} payload hash changed during promotion")
+            path.chmod(path.stat().st_mode | 0o755)
+    wheel_names = [name for name in hashes if name.endswith(".whl")]
+    if len(wheel_names) != 1:
+        raise RuntimeError("accepted payload set must contain exactly one wheel")
+    architecture = "arm64" if str(result["target"]).endswith("arm64") else "x86_64"
+    common = {
+        "schema_version": 1,
+        "source_sha": result["source_sha"],
+        "status": "passed",
+        "target": result["target"],
+        "architecture": architecture,
+    }
+    native_record = common | {
+        "kind": "native",
+        "environment": environment,
+    }
+    reproducibility_record = common | {
+        "kind": "reproducibility",
+        "wheel_sha256": hashes[wheel_names[0]],
+        "artifact_hashes": hashes,
+        "accepted_payloads": payloads,
+        "environment": environment,
+        "checks": {"clean_source": "passed", "payloads": "passed", "package": "passed"},
+    }
+    (staging / "result.json").write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    (staging / "environment.json").write_text(json.dumps(environment, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    (staging / "native.json").write_text(json.dumps(native_record, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    (staging / "reproducibility.json").write_text(json.dumps(reproducibility_record, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    staging.rename(accepted)
 
 
 def compare_artifacts(first_output: Path, second_output: Path) -> dict[str, str]:
@@ -172,7 +243,9 @@ def _check_reproducible_worker(repository: Path, source_sha: str, epoch: int, ou
             environment=environments[0],
             accepted_payloads=accepted,
         )
+        _promote_accepted(output, result)
     except Exception as error:
+        result["status"] = "failed"
         result["failed_checks"] = [str(error)]
         raise
     finally:

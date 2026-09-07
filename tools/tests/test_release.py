@@ -5,6 +5,7 @@ from __future__ import annotations
 import gzip
 import hashlib
 import io
+import json
 from pathlib import Path
 import tarfile
 from types import SimpleNamespace
@@ -364,3 +365,42 @@ def test_package_acceptance_executes_exported_checker(tmp_path: Path, monkeypatc
     assert seen["command"][1] == str(checker)
     assert seen["command"][-2:] == ["--source-root", str(source)]
     assert seen["kwargs"]["cwd"] == source
+
+
+def test_verified_payloads_are_promoted_with_result_and_environment(tmp_path: Path):
+    output = tmp_path / "result"
+    build = output / "build-1"
+    evidence = output / "build-1-evidence"
+    build.mkdir(parents=True)
+    evidence.mkdir()
+    (build / "cli").write_bytes(b"verified")
+    (build / "unix-server").write_bytes(b"server")
+    (build / "mode-case.txt").write_bytes(b"plain")
+    (build / "artifact.whl").write_bytes(b"wheel")
+    (build / "unix-server").chmod(0o644)
+    (build / "mode-case.txt").chmod(0o644)
+    hashes = {name: reproducible._sha256(build / name) for name in ("cli", "unix-server", "mode-case.txt", "artifact.whl")}
+    environment = {"pinned_environment": True, "artifacts": hashes}
+    (evidence / "environment.json").write_text(json.dumps(environment), encoding="utf-8")
+    result = {
+        "source_sha": "a" * 40, "target": "linux-amd64", "status": "passed",
+        "failed_checks": [], "artifact_hashes": hashes,
+        "environment": environment,
+        "accepted_payloads": {"cli": "cli", "server": "unix-server", "native": "mode-case.txt"},
+    }
+
+    reproducible._promote_accepted(output, result)
+
+    accepted = output / "accepted"
+    assert (accepted / "result.json").is_file()
+    assert (accepted / "environment.json").is_file()
+    assert (accepted / "unix-server").stat().st_mode & 0o111
+    assert not ((accepted / "mode-case.txt").stat().st_mode & 0o111)
+
+
+def test_failed_reproducibility_result_is_never_promoted(tmp_path: Path):
+    output = tmp_path / "result"
+    (output / "build-1").mkdir(parents=True)
+    with pytest.raises(RuntimeError, match="cannot promote"):
+        reproducible._promote_accepted(output, {"status": "failed", "failed_checks": ["bad"]})
+    assert not (output / "accepted").exists()

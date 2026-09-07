@@ -2,381 +2,266 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ main, develop ]
-    tags: [ 'v*' ]
+    branches: [main, develop]
+    tags: ['v*']
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 env:
-  GO_VERSION: '1.24.6'  # Fixed version - 1.24.6 doesn't exist yet
-  PYTHON_VERSION: '3.11'
+  GOTOOLCHAIN: local
 
 jobs:
-  test-go:
-    name: Test Go Code
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Go
-        uses: actions/setup-go@v4
-        with:
-          go-version: ${{ env.GO_VERSION }}
-
-      - name: Cache Go modules
-        uses: actions/cache@v3
-        with:
-          path: ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-
-
-      - name: Download dependencies
-        run: go mod download
-
-      - name: Run linting
-        run: make lint
-
-      - name: Run tests
-        run: make test
-
-      - name: Upload coverage reports
-        uses: codecov/codecov-action@v3
-        with:
-          file: ./coverage.out
-          flags: go
-          name: go-coverage
-
-  test-python:
-    name: Test Python Bindings
-    runs-on: ${{ matrix.os }}
+  release-baseline:
+    name: Reproducible baseline (${{ matrix.target }})
     strategy:
+      fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
-
+        include:
+          - {target: linux-amd64, runner: ubuntu-24.04}
+          - {target: darwin-amd64, runner: macos-15-intel}
+          - {target: darwin-arm64, runner: macos-15}
+          - {target: windows-amd64, runner: windows-2022}
+    runs-on: ${{ matrix.runner }}
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Go
-        uses: actions/setup-go@v4
-        with:
-          go-version: ${{ env.GO_VERSION }}
-
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: Cache Python dependencies
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements-dev.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-
-      - name: Install Python dependencies
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with: {fetch-depth: 0}
+      - uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5
+        with: {go-version: '1.26.8', cache: false}
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with: {python-version: '3.11.9'}
+      - name: Configure Unix task-owned directories
+        if: runner.os != 'Windows'
+        shell: bash
         run: |
-          python -m pip install --upgrade pip
-          pip install -r python/requirements-dev.txt
+          mkdir -p "$RUNNER_TEMP/gocache" "$RUNNER_TEMP/gomodcache" "$RUNNER_TEMP/gotmp" "$RUNNER_TEMP/pip-cache" "$RUNNER_TEMP/build-temp"
+          {
+            echo "GOCACHE=$RUNNER_TEMP/gocache"
+            echo "GOMODCACHE=$RUNNER_TEMP/gomodcache"
+            echo "GOTMPDIR=$RUNNER_TEMP/gotmp"
+            echo "PIP_CACHE_DIR=$RUNNER_TEMP/pip-cache"
+            echo "TMPDIR=$RUNNER_TEMP/build-temp"
+          } >> "$GITHUB_ENV"
+      - name: Configure Windows task-owned directories
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $names = @('gocache', 'gomodcache', 'gotmp', 'pip-cache', 'build-temp')
+          foreach ($name in $names) { New-Item -ItemType Directory -Force -Path (Join-Path $env:RUNNER_TEMP $name) | Out-Null }
+          "GOCACHE=$(Join-Path $env:RUNNER_TEMP 'gocache')" | Out-File $env:GITHUB_ENV -Encoding utf8 -Append
+          "GOMODCACHE=$(Join-Path $env:RUNNER_TEMP 'gomodcache')" | Out-File $env:GITHUB_ENV -Encoding utf8 -Append
+          "GOTMPDIR=$(Join-Path $env:RUNNER_TEMP 'gotmp')" | Out-File $env:GITHUB_ENV -Encoding utf8 -Append
+          "PIP_CACHE_DIR=$(Join-Path $env:RUNNER_TEMP 'pip-cache')" | Out-File $env:GITHUB_ENV -Encoding utf8 -Append
+          "TEMP=$(Join-Path $env:RUNNER_TEMP 'build-temp')" | Out-File $env:GITHUB_ENV -Encoding utf8 -Append
+          "TMP=$(Join-Path $env:RUNNER_TEMP 'build-temp')" | Out-File $env:GITHUB_ENV -Encoding utf8 -Append
+      - name: Select Linux GCC 13
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          test "$(gcc-13 -dumpfullversion)" = "13.3.0"
+          echo "CC=$(command -v gcc-13)" >> "$GITHUB_ENV"
+      - name: Select Xcode 16.4 compiler and SDK
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          export DEVELOPER_DIR=/Applications/Xcode_16.4.app/Contents/Developer
+          test -d "$DEVELOPER_DIR"
+          {
+            echo "DEVELOPER_DIR=$DEVELOPER_DIR"
+            echo "CC=$(xcrun --find clang)"
+            echo "SDKROOT=$(xcrun --sdk macosx --show-sdk-path)"
+            echo "MACOSX_DEPLOYMENT_TARGET=15.0"
+          } >> "$GITHUB_ENV"
+      - name: Select Windows MinGW compiler
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $gcc = (Get-Command gcc -ErrorAction Stop).Source
+          if ((& $gcc -dumpfullversion).Trim() -ne '14.2.0') { throw "expected MinGW GCC 14.2.0" }
+          "CC=$gcc" | Out-File $env:GITHUB_ENV -Encoding utf8 -Append
+      - run: python -m pip install --disable-pip-version-check -r python/requirements-dev.txt
+      - name: Run handwritten checks and race suite
+        run: |
+          python tools/check_go.py
+          go test -mod=readonly -race ./...
+      - name: Verify two clean release builds
+        run: python tools/check_reproducible.py --ref HEAD --output build/reproducibility
+      - name: Upload accepted baseline
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: baseline-${{ matrix.target }}
+          path: build/reproducibility/accepted/
+          if-no-files-found: error
+      - name: Upload normalized release evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: evidence-release-${{ matrix.target }}
+          path: |
+            build/reproducibility/accepted/native.json
+            build/reproducibility/accepted/reproducibility.json
+          if-no-files-found: error
+      - name: Upload release diagnostics
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: diagnostics-release-${{ matrix.target }}
+          path: |
+            build/reproducibility/*.json
+            build/reproducibility/*.log
+            build/reproducibility/*-evidence/
+          if-no-files-found: ignore
 
-      - name: Build shared library
-        run: make build-shared
-
-      - name: Test Python bindings
-        run: make python-test
-
-#  build-python-wheels:
-#    name: Build Python wheels on ${{ matrix.os }}
-#    runs-on: ${{ matrix.os }}
-#    # needs: [ test-go, test-python ]
-#    strategy:
-#      matrix:
-#        # Must use different OS runners for binary compatibility
-#        os: [ ubuntu-latest, macos-latest, windows-latest ]
-#      fail-fast: false  # Don't cancel other jobs if one fails
-#
-#    steps:
-#      - name: Checkout code
-#        uses: actions/checkout@v4
-#
-#      - name: Set up Go
-#        uses: actions/setup-go@v4
-#        with:
-#          go-version: ${{ env.GO_VERSION }}
-#          cache: true  # Enable Go module caching
-#
-#      - name: Set up Python 3.11
-#        uses: actions/setup-python@v4
-#        with:
-#          python-version: "3.11"
-#
-#      - name: Install dependencies
-#        run: |
-#          python -m pip install --upgrade pip
-#          pip install cibuildwheel==2.18.1
-#
-#      - name: Fix Go dependencies
-#        shell: bash  # Force bash shell for cross-platform compatibility
-#        run: |
-#          # Check if go.sum exists
-#          if [ ! -f go.sum ]; then
-#            echo "go.sum not found, generating it..."
-#            go mod tidy
-#            echo "Generated go.sum with $(wc -l < go.sum) lines"
-#          else
-#            echo "go.sum exists, updating dependencies..."
-#            go mod tidy
-#          fi
-#
-#          # Download all dependencies
-#          go mod download
-#          go mod verify
-#
-#          # Show summary
-#          echo "=== Go module summary ==="
-#          go list -m all | head -20
-#          echo "..."
-#          echo "Total dependencies: $(go list -m all | wc -l)"
-#
-#      # Linux-specific build
-#      - name: Pre-build Go library (Linux)
-#        if: runner.os == 'Linux'
-#        run: |
-#          # Ensure python/spl_toolkit directory exists
-#          mkdir -p python/spl_toolkit
-#
-#          # Build the Go library on the host before running cibuildwheel
-#          CGO_ENABLED=1 go build -buildmode=c-shared -o python/spl_toolkit/libspl_toolkit.so ./pkg/bindings
-#
-#          # Verify the build
-#          ls -la python/spl_toolkit/
-#          file python/spl_toolkit/*.so
-#
-#          # Check that the library exports symbols
-#          nm -D python/spl_toolkit/libspl_toolkit.so | head -20
-#
-#      - name: Build wheels (Linux)
-#        if: runner.os == 'Linux'
-#        env:
-#          CIBW_BUILD: "cp3{8,9,10,11,12}-*"  # All Python versions at once
-#          CIBW_SKIP: "*-musllinux* *-manylinux_i686"
-#          CIBW_ARCHS_LINUX: "x86_64"  # Add "aarch64" if you need ARM support
-#          CIBW_MANYLINUX_X86_64_IMAGE: "manylinux_2_28"
-#          CIBW_BEFORE_BUILD_LINUX: |
-#            # Library is already built, just verify it exists
-#            ls -la {project}/spl_toolkit/*.so
-#            file {project}/spl_toolkit/*.so
-#          CIBW_REPAIR_WHEEL_COMMAND_LINUX: "auditwheel repair -w {dest_dir} {wheel}"
-#          CIBW_TEST_COMMAND: "python -c 'import spl_toolkit'"
-#          CIBW_ENVIRONMENT_LINUX: "CIBUILDWHEEL=1"
-#        run: |
-#          cd python
-#          python -m cibuildwheel --output-dir ../dist
-#
-#      # macOS-specific build (Universal2 for both Intel and Apple Silicon)
-#      - name: Pre-build Go library (macOS)
-#        if: runner.os == 'macOS'
-#        run: |
-#          # Ensure python/spl_toolkit directory exists
-#          mkdir -p python/spl_toolkit
-#
-#          # Build universal binary for macOS
-#          echo "Building x86_64 binary..."
-#          CGO_ENABLED=1 GOARCH=amd64 go build -buildmode=c-shared -o python/spl_toolkit/libspl_toolkit_amd64.dylib ./pkg/bindings
-#
-#          echo "Building arm64 binary..."
-#          CGO_ENABLED=1 GOARCH=arm64 go build -buildmode=c-shared -o python/spl_toolkit/libspl_toolkit_arm64.dylib ./pkg/bindings
-#
-#          echo "Creating universal binary..."
-#          lipo -create python/spl_toolkit/libspl_toolkit_amd64.dylib python/spl_toolkit/libspl_toolkit_arm64.dylib -output python/spl_toolkit/libspl_toolkit.dylib
-#
-#          # Clean up architecture-specific files
-#          rm python/spl_toolkit/libspl_toolkit_amd64.dylib python/spl_toolkit/libspl_toolkit_arm64.dylib
-#
-#          # Verify the build
-#          ls -la python/spl_toolkit/
-#          file python/spl_toolkit/*.dylib
-#          lipo -info python/spl_toolkit/*.dylib
-#
-#      - name: Build wheels (macOS)
-#        if: runner.os == 'macOS'
-#        env:
-#          CIBW_BUILD: "cp3{8,9,10,11,12}-*"
-#          CIBW_SKIP: "*-musllinux*"
-#          CIBW_ARCHS_MACOS: "x86_64 arm64 universal2"  # Build for all architectures
-#          CIBW_BEFORE_BUILD_MACOS: |
-#            # Library is already built, just verify it exists
-#            ls -la {project}/spl_toolkit/*.dylib
-#            file {project}/spl_toolkit/*.dylib
-#          CIBW_REPAIR_WHEEL_COMMAND_MACOS: "delocate-wheel --require-archs {delocate_archs} -w {dest_dir} {wheel}"
-#          CIBW_TEST_COMMAND: "python -c 'import spl_toolkit'"
-#          CIBW_TEST_SKIP: "*-macosx_arm64 *-macosx_universal2:arm64"  # Skip ARM tests on x86 runners
-#          CIBW_ENVIRONMENT_MACOS: "CIBUILDWHEEL=1"
-#        run: |
-#          cd python
-#          python -m cibuildwheel --output-dir ../dist
-#
-#      # Windows-specific build
-#      - name: Pre-build Go library (Windows)
-#        if: runner.os == 'Windows'
-#        shell: pwsh
-#        run: |
-#          # Ensure python/spl_toolkit directory exists
-#          New-Item -ItemType Directory -Force -Path python\spl_toolkit
-#
-#          # Build the Go library on the host before running cibuildwheel
-#          $env:CGO_ENABLED = "1"
-#          go build -buildmode=c-shared -o python\spl_toolkit\libspl_toolkit.dll .\pkg\bindings
-#
-#          # Verify the build
-#          Get-ChildItem python\spl_toolkit\
-#
-#      - name: Build wheels (Windows)
-#        if: runner.os == 'Windows'
-#        env:
-#          CIBW_BUILD: "cp3{8,9,10,11,12}-*"
-#          CIBW_SKIP: "*-musllinux* *-win32"
-#          CIBW_ARCHS_WINDOWS: "AMD64"
-#          CIBW_BEFORE_BUILD_WINDOWS: |
-#            # Library is already built, just verify it exists
-#            dir {project}\spl_toolkit\*.dll
-#          CIBW_TEST_COMMAND: "python -c \"import spl_toolkit\""
-#          CIBW_ENVIRONMENT_WINDOWS: "CIBUILDWHEEL=1"
-#        run: |
-#          cd python
-#          python -m cibuildwheel --output-dir ../dist
-#
-#      - name: Upload wheels
-#        uses: actions/upload-artifact@v4
-#        with:
-#          name: python-wheels-${{ matrix.os }}
-#          path: dist/*.whl
-#
-#      - name: Display built wheels
-#        shell: bash
-#        run: |
-#          ls -la dist/ 2>/dev/null || dir dist\ 2>/dev/null || echo "No wheels built yet"
-
-  build:
-    name: Build Artifacts
-    runs-on: ${{ matrix.os }}
-    needs: [test-go, test-python]
+  installed-wheel:
+    name: Installed wheel (${{ matrix.target }}, Python ${{ matrix.python }})
+    needs: release-baseline
     strategy:
+      fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-
+        include:
+          - {target: linux-amd64, runner: ubuntu-24.04, python: '3.11.9'}
+          - {target: linux-amd64, runner: ubuntu-24.04, python: '3.12.10'}
+          - {target: linux-amd64, runner: ubuntu-24.04, python: '3.13.7'}
+          - {target: linux-amd64, runner: ubuntu-24.04, python: '3.14.0'}
+          - {target: darwin-amd64, runner: macos-15-intel, python: '3.11.9'}
+          - {target: darwin-amd64, runner: macos-15-intel, python: '3.12.10'}
+          - {target: darwin-amd64, runner: macos-15-intel, python: '3.13.7'}
+          - {target: darwin-amd64, runner: macos-15-intel, python: '3.14.0'}
+          - {target: darwin-arm64, runner: macos-15, python: '3.11.9'}
+          - {target: darwin-arm64, runner: macos-15, python: '3.12.10'}
+          - {target: darwin-arm64, runner: macos-15, python: '3.13.7'}
+          - {target: darwin-arm64, runner: macos-15, python: '3.14.0'}
+          - {target: windows-amd64, runner: windows-2022, python: '3.11.9'}
+          - {target: windows-amd64, runner: windows-2022, python: '3.12.10'}
+          - {target: windows-amd64, runner: windows-2022, python: '3.13.7'}
+          - {target: windows-amd64, runner: windows-2022, python: '3.14.0'}
+    runs-on: ${{ matrix.runner }}
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Go
-        uses: actions/setup-go@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with: {fetch-depth: 0}
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with: {python-version: '${{ matrix.python }}'}
+      - name: Configure task-owned pip cache
+        run: python -c "import os; from pathlib import Path; cache=Path(os.environ['RUNNER_TEMP'])/'pip-cache'; cache.mkdir(); Path(os.environ['GITHUB_ENV']).open('a',encoding='utf-8').write(f'PIP_CACHE_DIR={cache}\n')"
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
         with:
-          go-version: ${{ env.GO_VERSION }}
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
+          name: baseline-${{ matrix.target }}
+          path: build/baseline
+      - name: Run isolated installed-wheel acceptance
+        run: >-
+          python tools/check_package.py --wheel-only --accepted-dir build/baseline
+          --source-sha HEAD --target ${{ matrix.target }}
+          --evidence build/evidence/installed-${{ matrix.target }}-${{ matrix.python }}.json
+          --source-root .
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          python-version: ${{ env.PYTHON_VERSION }}
+          name: evidence-installed-${{ matrix.target }}-${{ matrix.python }}
+          path: build/evidence/*.json
+          if-no-files-found: error
 
-      - name: Build all targets
-        run: make release-build
-
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-artifacts-${{ matrix.os }}
-          path: dist/
-          retention-days: 30
-
-#  release:
-#    name: Create Release
-#    runs-on: ubuntu-latest
-#    needs: [build, build-python-wheels]
-#    if: startsWith(github.ref, 'refs/tags/v')
-#
-#    steps:
-#      - name: Checkout code
-#        uses: actions/checkout@v4
-#
-#      - name: Set up Go
-#        uses: actions/setup-go@v4
-#        with:
-#          go-version: ${{ env.GO_VERSION }}
-#
-#      - name: Set up Python
-#        uses: actions/setup-python@v4
-#        with:
-#          python-version: ${{ env.PYTHON_VERSION }}
-#
-#      - name: Build release artifacts
-#        run: make release-build
-#
-#      - name: Download wheel artifacts
-#        uses: actions/download-artifact@v4
-#        with:
-#          pattern: python-wheels-*
-#          path: dist/
-#          merge-multiple: true
-#
-#      - name: Create GitHub Release
-#        uses: softprops/action-gh-release@v1
-#        with:
-#          files: dist/*
-#          draft: false
-#          prerelease: false
-#          generate_release_notes: true
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.RELEASE_MANAGER }}
-#
-#      - name: Publish Python package to PyPI
-#        uses: pypa/gh-action-pypi-publish@release/v1
-#        with:
-#          packages-dir: dist/
-#          skip-existing: true
-
-  docker:
-    name: Build and Push Docker Image
-    runs-on: ubuntu-latest
-    needs: [test-go, test-python]
-    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
-
+  go-floor:
+    runs-on: ubuntu-24.04
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with: {fetch-depth: 0}
+      - uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5
+        with: {go-version: '1.22.12', cache: false}
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with: {python-version: '3.11.9'}
+      - name: Run Go floor tests and builds
+        shell: bash
+        run: |
+          mkdir -p "$RUNNER_TEMP/gocache" "$RUNNER_TEMP/gomodcache" "$RUNNER_TEMP/gotmp" build/evidence
+          export GOCACHE="$RUNNER_TEMP/gocache" GOMODCACHE="$RUNNER_TEMP/gomodcache" GOTMPDIR="$RUNNER_TEMP/gotmp" CC=gcc-13
+          test "$(go env GOVERSION)" = go1.22.12
+          python tools/check_go.py
+          go test -mod=readonly -race ./...
+          go build -mod=readonly -o "$RUNNER_TEMP/spl-toolkit" ./cmd
+          go build -mod=readonly -o "$RUNNER_TEMP/spl-toolkit-server" ./cmd/server
+          python -c "import json,subprocess; from pathlib import Path; sha=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(); Path('build/evidence/go-floor.json').write_text(json.dumps({'schema_version':1,'kind':'go-floor','source_sha':sha,'status':'passed','go_version':'1.22.12'},sort_keys=True)+'\\n')"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with: {name: evidence-go-floor, path: build/evidence/go-floor.json, if-no-files-found: error}
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+  native-memory:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with: {fetch-depth: 0}
+      - uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5
+        with: {go-version: '1.26.8', cache: false}
+      - name: Build and execute ASan harness
+        shell: bash
+        run: |
+          mkdir -p build/asan build/evidence "$RUNNER_TEMP/gocache" "$RUNNER_TEMP/gomodcache" "$RUNNER_TEMP/gotmp"
+          export GOCACHE="$RUNNER_TEMP/gocache" GOMODCACHE="$RUNNER_TEMP/gomodcache" GOTMPDIR="$RUNNER_TEMP/gotmp"
+          CGO_ENABLED=1 CC=gcc-13 go build -mod=readonly -asan -buildmode=c-shared -o build/asan/libspl_toolkit.so ./pkg/bindings
+          # shellcheck disable=SC2016
+          gcc-13 -fsanitize=address -g -Ibuild/asan tests/native/memory.c -Lbuild/asan -lspl_toolkit -Wl,-rpath,'$ORIGIN' -o build/asan/memory-check
+          ASAN_OPTIONS=detect_leaks=1:halt_on_error=1 build/asan/memory-check
+          python3 -c "import json,subprocess; from pathlib import Path; sha=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(); Path('build/evidence/native-memory.json').write_text(json.dumps({'schema_version':1,'kind':'native-memory','source_sha':sha,'status':'passed','compiler':'gcc-13','sanitizer':'address+leak'},sort_keys=True)+'\\n')"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with: {name: evidence-native-memory, path: build/evidence/native-memory.json, if-no-files-found: error}
 
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+  linux-workflows:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with: {fetch-depth: 0}
+      - uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5
+        with: {go-version: '1.26.8', cache: false}
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with: {python-version: '3.11.9'}
+      - name: Configure task-owned pip cache
+        run: python -c "import os; from pathlib import Path; cache=Path(os.environ['RUNNER_TEMP'])/'pip-cache'; cache.mkdir(); Path(os.environ['GITHUB_ENV']).open('a',encoding='utf-8').write(f'PIP_CACHE_DIR={cache}\n')"
+      - run: python -m pip install --disable-pip-version-check -r python/requirements-dev.txt
+      - name: Verify clean source and Make workflows
+        shell: bash
+        run: |
+          mkdir -p build/evidence "$RUNNER_TEMP/gocache" "$RUNNER_TEMP/gomodcache" "$RUNNER_TEMP/gotmp"
+          export GOCACHE="$RUNNER_TEMP/gocache" GOMODCACHE="$RUNNER_TEMP/gomodcache" GOTMPDIR="$RUNNER_TEMP/gotmp" CC=gcc-13
+          python tools/check_clean_build.py --ref HEAD
+          make build build-server build-shared test
+          python -c "import hashlib,json,subprocess; from pathlib import Path; sha=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(); digest=hashlib.sha256(subprocess.check_output(['git','ls-tree','-r',sha])).hexdigest(); Path('build/evidence/clean-source.json').write_text(json.dumps({'schema_version':1,'kind':'clean-source','source_sha':sha,'status':'passed','tracked_hash_sha256':digest},sort_keys=True)+'\\n')"
+      - name: Build and run Docker examples
+        shell: bash
+        run: |
+          set -euo pipefail
+          version=$(cat VERSION)
+          docker build -t "spl-toolkit-ci:$version" .
+          docker build -f Dockerfile.server -t "spl-toolkit-server-ci:$version" .
+          docker run --rm -v "$PWD/testdata/baseline/mappings.json:/tmp/mappings.json:ro" "spl-toolkit-ci:$version" map --config /tmp/mappings.json 'search src_ip=1' | grep -Fx 'search source_ip=1'
+          docker run --rm --entrypoint python "spl-toolkit-ci:$version" -c "import spl_toolkit; from spl_toolkit import SPLMapper; m=SPLMapper(); assert m.native_version == spl_toolkit.__version__; m.close()"
+          container="spl-toolkit-server-ci-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          docker run -d --rm --name "$container" -p 127.0.0.1:18080:8080 "spl-toolkit-server-ci:$version"
+          trap 'docker stop "$container" >/dev/null 2>&1 || true' EXIT
+          for _ in $(seq 1 30); do curl --fail --silent http://127.0.0.1:18080/api/v1/health && break; sleep 1; done
+          curl --fail --silent http://127.0.0.1:18080/api/v1/health | grep -F "\"version\":\"$version\""
+          docker stop "$container"
+          trap - EXIT
+          python -c "import json,subprocess; from pathlib import Path; sha=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(); Path('build/evidence/docker-examples.json').write_text(json.dumps({'schema_version':1,'kind':'docker-examples','source_sha':sha,'status':'passed','cli':'passed','python_native':'passed','server':'passed','make_workflows':'passed'},sort_keys=True)+'\\n')"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with: {name: evidence-linux-workflows, path: 'build/evidence/*.json', if-no-files-found: error}
 
-      - name: Extract metadata
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: jmd862000/spl-toolkit
-          tags: |
-            type=ref,event=branch
-            type=ref,event=pr
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          platforms: linux/amd64,linux/arm64
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+  acceptance:
+    if: always()
+    needs: [release-baseline, installed-wheel, go-floor, native-memory, linux-workflows]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with: {fetch-depth: 0}
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with: {python-version: '3.11.9'}
+      - name: Download normalized evidence
+        if: always()
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with: {pattern: 'evidence-*', path: build/acceptance}
+      - name: Validate exact-source evidence
+        if: always()
+        run: python tools/check_acceptance.py --evidence build/acceptance --ref HEAD
+      - name: Require every upstream job
+        if: always()
+        env:
+          UPSTREAM_RESULTS: ${{ toJSON(needs) }}
+        run: python -c "import json,os,sys; values={k:v['result'] for k,v in json.loads(os.environ['UPSTREAM_RESULTS']).items()}; print(values); sys.exit(0 if all(v == 'success' for v in values.values()) else 1)"

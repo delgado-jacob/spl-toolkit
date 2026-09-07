@@ -7,6 +7,7 @@ from pathlib import Path, PureWindowsPath
 import platform
 import subprocess
 import sys
+import json
 
 import pytest
 
@@ -202,39 +203,18 @@ def test_installed_checks_copy_tests_from_explicit_source_root(tmp_path: Path, m
     source_root = tmp_path / "exported-source"
     (source_root / "python" / "tests").mkdir(parents=True)
     (source_root / "tests" / "acceptance").mkdir(parents=True)
-    fixture = source_root / "testdata" / "baseline" / "cases.json"
-    fixture.parent.mkdir(parents=True)
-    fixture.write_text("[]\n", encoding="utf-8")
-    wheel = tmp_path / "artifact.whl"
-    wheel.write_bytes(b"wheel")
-    requirements = tmp_path / "requirements.txt"
-    requirements.write_text("", encoding="utf-8")
-    surface = tmp_path / "surface"
-    surface.write_bytes(b"surface")
-    outside = tmp_path / "outside"
-    outside.mkdir()
-    copied = []
+    for name in checker.NATIVE_TESTS:
+        (source_root / "python" / "tests" / name).write_text(name, encoding="utf-8")
+    for name in checker.ACCEPTANCE_FILES:
+        (source_root / "tests" / "acceptance" / name).write_text(name, encoding="utf-8")
 
-    monkeypatch.setattr(checker, "create_test_environment", lambda directory: tmp_path / "python")
-    monkeypatch.setattr(checker, "run", lambda *args, **kwargs: None)
+    native = tmp_path / "native"
+    acceptance = tmp_path / "acceptance"
+    checker._copy_required_files(source_root / "python" / "tests", native, checker.NATIVE_TESTS)
+    checker._copy_required_files(source_root / "tests" / "acceptance", acceptance, checker.ACCEPTANCE_FILES)
 
-    def fake_copytree(source, destination):
-        copied.append(Path(source))
-        Path(destination).mkdir()
-
-    monkeypatch.setattr(checker.shutil, "copytree", fake_copytree)
-    monkeypatch.setattr(
-        checker.shutil,
-        "copy2",
-        lambda source, destination: Path(destination).write_bytes(Path(source).read_bytes()),
-    )
-
-    checker.install_and_check(
-        wheel, tmp_path / "venv", outside, "0.1.1", requirements,
-        surface, surface, fixture, source_root,
-    )
-
-    assert copied == [source_root / "python" / "tests", source_root / "tests" / "acceptance"]
+    assert sorted(path.name for path in native.iterdir()) == sorted(checker.NATIVE_TESTS)
+    assert sorted(path.name for path in acceptance.iterdir()) == sorted(checker.ACCEPTANCE_FILES)
 
 
 def test_binary_wheel_forces_macos_15_tag_from_older_interpreter_target():
@@ -289,3 +269,40 @@ def test_native_architecture_reads_supported_binary_headers():
 
     assert checker.native_architecture(bytes(elf)) == "x86_64"
     assert checker.native_architecture(macho) == "arm64"
+
+
+def test_required_pytest_plugin_rejects_skips_and_writes_counts(tmp_path: Path):
+    checker = load_package_checker()
+    suite = tmp_path / "suite"
+    suite.mkdir()
+    (suite / "test_required.py").write_text(
+        "import pytest\n\ndef test_pass(): pass\n\n@pytest.mark.skip(reason='no')\ndef test_skip(): pass\n",
+        encoding="utf-8",
+    )
+    result = tmp_path / "counts.json"
+    checker.write_required_pytest_plugin(suite)
+    completed = subprocess.run(
+        [sys.executable, "-m", "pytest", str(suite), "-q"],
+        env=checker.clean_env() | {"SPL_TEST_COUNTS": str(result)},
+        check=False,
+    )
+    counts = json.loads(result.read_text(encoding="utf-8"))
+    assert completed.returncode != 0
+    assert counts == {"collected": 2, "passed": 1, "failed": 0, "skipped": 1}
+
+
+def test_restore_verified_executables_changes_only_named_payloads(tmp_path: Path):
+    checker = load_package_checker()
+    cli = tmp_path / "cli"
+    server = tmp_path / "server"
+    plain = tmp_path / "plain.txt"
+    for path in (cli, server, plain):
+        path.write_bytes(path.name.encode())
+        path.chmod(0o644)
+    hashes = {path.name: checker.sha256(path) for path in (cli, server, plain)}
+
+    checker.restore_verified_executables(tmp_path, hashes, ("cli", "server"))
+
+    assert cli.stat().st_mode & 0o111
+    assert server.stat().st_mode & 0o111
+    assert not (plain.stat().st_mode & 0o111)

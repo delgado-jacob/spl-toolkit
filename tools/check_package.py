@@ -5,6 +5,8 @@ from __future__ import annotations
 
 import argparse
 from email.parser import Parser
+import hashlib
+import json
 import os
 from pathlib import Path, PurePath
 import platform
@@ -44,6 +46,70 @@ with SPLMapper() as mapper:
     mapper.load_mappings([{'source':'src_ip','target':'source_ip'}])
     assert mapper.map_query('search src_ip=1') == 'search source_ip=1'
 """
+NATIVE_TESTS = ("test_native_abi.py", "test_native_mapper.py")
+ACCEPTANCE_FILES = ("test_documented_cli.py", "test_surfaces.py", "cli_examples.json")
+REQUIRED_PYTEST_PLUGIN = r'''\
+import json
+import os
+
+collected = 0
+passed = set()
+failed = set()
+skipped = set()
+
+def pytest_collection_finish(session):
+    global collected
+    collected = len(session.items)
+
+def pytest_runtest_logreport(report):
+    if report.skipped:
+        skipped.add(report.nodeid)
+    elif report.failed:
+        failed.add(report.nodeid)
+    elif report.when == "call" and report.passed:
+        passed.add(report.nodeid)
+
+def pytest_sessionfinish(session, exitstatus):
+    counts = {
+        "collected": collected,
+        "passed": len(passed),
+        "failed": len(failed),
+        "skipped": len(skipped),
+    }
+    destination = os.environ.get("SPL_TEST_COUNTS")
+    if destination:
+        temporary = destination + ".tmp"
+        with open(temporary, "w", encoding="utf-8") as output:
+            json.dump(counts, output, sort_keys=True)
+            output.write("\n")
+        os.replace(temporary, destination)
+    if collected == 0 or not passed or failed or skipped or len(passed) != collected:
+        session.exitstatus = 1
+'''
+
+
+def sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as source:
+        for chunk in iter(lambda: source.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def restore_verified_executables(directory: Path, hashes: dict[str, str], names: tuple[str, ...]) -> None:
+    if os.name == "nt":
+        return
+    for name in names:
+        if name not in hashes:
+            raise AssertionError(f"executable {name} is absent from accepted hashes")
+        path = directory / name
+        if not path.is_file() or sha256(path) != hashes[name]:
+            raise AssertionError(f"executable {name} does not match accepted hash")
+        path.chmod(path.stat().st_mode | 0o755)
+
+
+def write_required_pytest_plugin(directory: Path) -> None:
+    (directory / "conftest.py").write_text(REQUIRED_PYTEST_PLUGIN, encoding="utf-8")
 
 
 def run(command: list[str], *, cwd: Path, env: dict[str, str] | None = None) -> subprocess.CompletedProcess[str]:
@@ -90,6 +156,25 @@ def create_test_environment(directory: Path) -> Path:
     return venv_python(directory)
 
 
+def _copy_required_files(source: Path, destination: Path, names: tuple[str, ...]) -> None:
+    destination.mkdir()
+    for name in names:
+        path = source / name
+        if not path.is_file():
+            raise FileNotFoundError(f"required test input is missing: {path}")
+        shutil.copy2(path, destination / name)
+
+
+def _run_required_suite(python: Path, suite: Path, result: Path, outside: Path, env: dict[str, str]) -> dict[str, int]:
+    write_required_pytest_plugin(suite)
+    child_env = env | {"SPL_TEST_COUNTS": str(result)}
+    run([str(python), "-I", "-m", "pytest", str(suite), "-q"], cwd=outside, env=child_env)
+    counts = json.loads(result.read_text(encoding="utf-8"))
+    if set(counts) != {"collected", "passed", "failed", "skipped"}:
+        raise AssertionError(f"required suite returned invalid counts: {counts}")
+    return counts
+
+
 def install_and_check(
     wheel: Path,
     directory: Path,
@@ -100,7 +185,7 @@ def install_and_check(
     server: Path,
     fixture_source: Path,
     docs_root: Path,
-) -> None:
+) -> dict[str, object]:
     python = create_test_environment(directory)
     env = clean_env()
     path_entries = [str(python.parent)]
@@ -117,14 +202,21 @@ def install_and_check(
         f"assert {controller_site!r} not in [str(pathlib.Path(p).resolve()) for p in sys.path]\n"
         + INSTALL_SCRIPT
     )
-    run([str(python), "-I", "-c", textwrap.dedent(check_script)], cwd=outside_checkout, env=install_env)
+    metadata_script = check_script + "\nimport json, platform\nwith SPLMapper() as _metadata_mapper:\n    _native_version = _metadata_mapper.native_version\nprint(json.dumps({'installed_module': str(pathlib.Path(spl_toolkit.__file__).resolve()), 'venv_prefix': str(pathlib.Path(sys.prefix).resolve()), 'python_version': platform.python_version(), 'python_runtime': sys.version, 'package_version': spl_toolkit.__version__, 'native_version': _native_version}, sort_keys=True))\n"
+    completed = subprocess.run(
+        [str(python), "-I", "-c", textwrap.dedent(metadata_script)], cwd=outside_checkout,
+        env=install_env, check=True, text=True, capture_output=True,
+    )
+    metadata = json.loads(completed.stdout.splitlines()[-1])
 
     installed_test_dir = outside_checkout / f"tests-{directory.name}"
-    shutil.copytree(docs_root / "python" / "tests", installed_test_dir)
-    run([str(python), "-I", "-m", "pytest", str(installed_test_dir), "-q"], cwd=outside_checkout, env=install_env)
+    _copy_required_files(docs_root / "python" / "tests", installed_test_dir, NATIVE_TESTS)
+    native_counts = _run_required_suite(
+        python, installed_test_dir, outside_checkout / f"native-counts-{directory.name}.json", outside_checkout, install_env
+    )
 
     acceptance_dir = outside_checkout / f"acceptance-{directory.name}"
-    shutil.copytree(docs_root / "tests" / "acceptance", acceptance_dir)
+    _copy_required_files(docs_root / "tests" / "acceptance", acceptance_dir, ACCEPTANCE_FILES)
     fixture = outside_checkout / f"cases-{directory.name}.json"
     shutil.copy2(fixture_source, fixture)
     acceptance_env = install_env | {
@@ -133,11 +225,17 @@ def install_and_check(
         "SPL_FIXTURES": str(fixture.resolve()),
         "SPL_DOCS_ROOT": str(docs_root.resolve()),
     }
-    run(
-        [str(python), "-I", "-m", "pytest", str(acceptance_dir), "-q"],
-        cwd=outside_checkout,
-        env=acceptance_env,
+    surface_counts = _run_required_suite(
+        python, acceptance_dir, outside_checkout / f"surface-counts-{directory.name}.json",
+        outside_checkout, acceptance_env,
     )
+    return metadata | {
+        "wheel_sha256": sha256(wheel),
+        "tests": {"required_native": native_counts, "surface_acceptance": surface_counts},
+        "cli_examples": "passed",
+        "surface_parity": "passed",
+        "version_agreement": "passed",
+    }
 
 
 def build_surface_binaries(root: Path, output: Path, version: str) -> tuple[Path, Path]:
@@ -301,10 +399,14 @@ def git_status(root: Path) -> str | None:
     return completed.stdout if completed.returncode == 0 else None
 
 
-def _check_package(sdist: Path, wheel_dir: Path, expected_version: str | None, root: Path) -> None:
+def _check_package(
+    sdist: Path | None, wheel_dir: Path, expected_version: str | None, root: Path,
+    *, wheel_only: bool = False, wheel_path: Path | None = None, cli_path: Path | None = None,
+    server_path: Path | None = None,
+) -> dict[str, object]:
     root = root.resolve()
     before = git_status(root)
-    wheels = list(wheel_dir.glob("spl_toolkit-*.whl"))
+    wheels = [wheel_path] if wheel_path else list(wheel_dir.glob("spl_toolkit-*.whl"))
     if len(wheels) != 1:
         raise AssertionError(f"expected exactly one spl-toolkit wheel, found {len(wheels)}")
     wheel = wheels[0]
@@ -317,27 +419,39 @@ def _check_package(sdist: Path, wheel_dir: Path, expected_version: str | None, r
         outside = temp / "outside"
         outside.mkdir()
         requirements = root / "python" / "requirements-dev.txt"
-        cli, server = build_surface_binaries(root, temp / "surface-binaries", version)
+        if cli_path is not None and server_path is not None:
+            cli, server = cli_path.resolve(), server_path.resolve()
+        elif wheel_only:
+            raise AssertionError("wheel-only checks require accepted --cli and --server payloads")
+        else:
+            cli, server = build_surface_binaries(root, temp / "surface-binaries", version)
         fixture = root / "testdata" / "baseline" / "cases.json"
-        install_and_check(
+        evidence = install_and_check(
             wheel, temp / "wheel-venv", outside, version, requirements,
             cli, server, fixture, root,
         )
 
-        source = unpack_sdist(sdist, temp / "sdist")
-        inspect_sdist(source)
-        check_metadata_without_compiler(source, temp / "metadata", clean_env())
-        source_wheel = build_sdist_wheel(source, temp / "sdist-wheel", clean_env())
-        inspect_wheel(source_wheel, version)
-        install_and_check(
-            source_wheel, temp / "sdist-venv", outside, version,
-            source / "requirements-dev.txt", cli, server, fixture, root,
-        )
-        check_missing_compiler(source, temp / "failed-wheel", clean_env())
+        if wheel_only:
+            source = None
+        elif sdist is None:
+            raise AssertionError("source distribution is required unless --wheel-only is used")
+        else:
+            source = unpack_sdist(sdist, temp / "sdist")
+        if source is not None:
+            inspect_sdist(source)
+            check_metadata_without_compiler(source, temp / "metadata", clean_env())
+            source_wheel = build_sdist_wheel(source, temp / "sdist-wheel", clean_env())
+            inspect_wheel(source_wheel, version)
+            install_and_check(
+                source_wheel, temp / "sdist-venv", outside, version,
+                source / "requirements-dev.txt", cli, server, fixture, root,
+            )
+            check_missing_compiler(source, temp / "failed-wheel", clean_env())
 
     after = git_status(root)
     if before is not None and after != before:
         raise AssertionError("package check changed tracked or untracked repository files")
+    return evidence
 
 
 def check_package(sdist: Path, wheel_dir: Path, expected_version: str | None) -> None:
@@ -346,13 +460,71 @@ def check_package(sdist: Path, wheel_dir: Path, expected_version: str | None) ->
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--sdist", type=Path, required=True)
-    parser.add_argument("--wheel-dir", type=Path, required=True)
+    parser.add_argument("--sdist", type=Path)
+    parser.add_argument("--wheel-dir", type=Path)
+    parser.add_argument("--wheel", type=Path)
+    parser.add_argument("--wheel-only", action="store_true")
+    parser.add_argument("--cli", type=Path)
+    parser.add_argument("--server", type=Path)
+    parser.add_argument("--accepted-result", type=Path)
+    parser.add_argument("--accepted-dir", type=Path)
+    parser.add_argument("--source-sha")
+    parser.add_argument("--target")
+    parser.add_argument("--evidence", type=Path)
     parser.add_argument("--expected-version")
     parser.add_argument("--source-root", type=Path)
     args = parser.parse_args()
     root = args.source_root.resolve() if args.source_root else Path(__file__).resolve().parents[1]
-    _check_package(args.sdist.resolve(), args.wheel_dir.resolve(), args.expected_version, root)
+    if args.accepted_dir:
+        accepted_dir = args.accepted_dir.resolve()
+        args.accepted_result = accepted_dir / "result.json"
+        accepted = json.loads(args.accepted_result.read_text(encoding="utf-8"))
+        hashes = accepted.get("artifact_hashes", {})
+        wheel_names = [name for name in hashes if name.endswith(".whl")]
+        if len(wheel_names) != 1:
+            parser.error("accepted result must identify exactly one wheel")
+        payloads = accepted.get("accepted_payloads", {})
+        args.wheel = accepted_dir / wheel_names[0]
+        args.cli = accepted_dir / str(payloads.get("cli", ""))
+        args.server = accepted_dir / str(payloads.get("server", ""))
+    if args.source_sha:
+        args.source_sha = subprocess.run(
+            ["git", "rev-parse", "--verify", f"{args.source_sha}^{{commit}}"], cwd=root,
+            check=True, text=True, capture_output=True,
+        ).stdout.strip()
+    if not args.wheel_dir and not args.wheel:
+        parser.error("one of --wheel-dir or --wheel is required")
+    if not args.wheel_only and not args.sdist:
+        parser.error("--sdist is required unless --wheel-only is used")
+    if args.wheel_only and not all((args.wheel, args.cli, args.server, args.accepted_result, args.source_sha, args.target, args.evidence)):
+        parser.error("--wheel-only requires --wheel, --cli, --server, --accepted-result, --source-sha, --target, and --evidence")
+    wheel_dir = args.wheel_dir.resolve() if args.wheel_dir else args.wheel.resolve().parent
+    if args.wheel_only:
+        accepted = json.loads(args.accepted_result.read_text(encoding="utf-8"))
+        if accepted.get("status") != "passed" or accepted.get("source_sha") != args.source_sha or accepted.get("target") != args.target:
+            raise AssertionError("accepted result identity/status does not match this installed-wheel job")
+        hashes = accepted.get("artifact_hashes", {})
+        names = accepted.get("accepted_payloads", {})
+        if hashes.get(args.wheel.name) != sha256(args.wheel):
+            raise AssertionError("wheel does not match accepted release hash")
+        if names.get("cli") != args.cli.name or names.get("server") != args.server.name:
+            raise AssertionError("CLI/server do not match accepted payload identities")
+        restore_verified_executables(args.cli.parent, hashes, (args.cli.name, args.server.name))
+    evidence = _check_package(
+        args.sdist.resolve() if args.sdist else None, wheel_dir, args.expected_version, root,
+        wheel_only=args.wheel_only, wheel_path=args.wheel.resolve() if args.wheel else None,
+        cli_path=args.cli, server_path=args.server,
+    )
+    if args.wheel_only:
+        record = {
+            "schema_version": 1, "kind": "installed-wheel", "source_sha": args.source_sha,
+            "status": "passed", "target": args.target,
+            "architecture": "arm64" if args.target.endswith("arm64") else "x86_64",
+        } | evidence
+        args.evidence.parent.mkdir(parents=True, exist_ok=True)
+        temporary = args.evidence.with_suffix(args.evidence.suffix + ".tmp")
+        temporary.write_text(json.dumps(record, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        temporary.replace(args.evidence)
     print("package acceptance passed")
     return 0
 
