@@ -50,28 +50,49 @@ func Analyze(document QueryDocument) (*Result, error) {
 func analyzeParsed(result *Result, parsed *parsedDocument) {
 	root := Scope{ID: "scope-0", Kind: "root", Location: parsed.source.location(0, len(parsed.source.positions)-1)}
 	result.Scopes = append(result.Scopes, root)
+	// Recovery may leave a generic or structurally partial command context. Attribute
+	// errors through the next intact stage boundary before invoking typed handlers.
+	stageLocations := []Location{}
+	var collectStages func(antlr.Tree)
+	collectStages = func(n antlr.Tree) {
+		switch c := n.(type) {
+		case parser.IAnalysisStageContext:
+			stageLocations = append(stageLocations, parsed.source.contextLocation(c))
+		case *parser.AnalysisImplicitSearchContext:
+			stageLocations = append(stageLocations, parsed.source.contextLocation(c))
+		}
+		for i := 0; i < n.GetChildCount(); i++ {
+			collectStages(n.GetChild(i))
+		}
+	}
+	collectStages(parsed.tree)
+	damagedStage := func(location Location) bool {
+		end := len(result.Document.Text) + 1
+		for _, loc := range stageLocations {
+			if loc.Start.Offset > location.End.Offset && loc.Start.Offset < end {
+				end = loc.Start.Offset
+			}
+		}
+		for _, d := range parsed.diagnostics {
+			if d.Location.Start.Offset >= location.Start.Offset && d.Location.Start.Offset < end {
+				return true
+			}
+		}
+		return false
+	}
 	positions := map[string]int{}
+	environments := map[string]*environment{root.ID: newEnvironment()}
 	var visit func(antlr.Tree, string, string)
 	visit = func(node antlr.Tree, scopeID, stageID string) {
+		var stageContext antlr.ParserRuleContext
+		command := ""
 		switch ctx := node.(type) {
 		case parser.IAnalysisStageContext:
-			// The typed context owns the command token; no query text is split or reparsed.
-			command := strings.ToLower(ctx.GetStart().GetText())
-			stageID = fmt.Sprintf("stage-%d", len(result.Stages))
-			stage := Stage{ID: stageID, Command: command, Position: positions[scopeID], ScopeID: scopeID, Location: parsed.source.contextLocation(ctx)}
-			positions[scopeID]++
-			result.Stages = append(result.Stages, stage)
-			code := CodeUnsupportedSemantics
-			if ctx.GetStart().GetTokenType() == parser.SPLLexerIDENTIFIER {
-				code = CodeUnsupportedCommand
-			}
-			result.Diagnostics = append(result.Diagnostics, Diagnostic{Code: code, Severity: "warning", Category: "semantic", Message: fmt.Sprintf("command %q has unmodeled field effects", command), Location: stage.Location, StageID: stageID, ScopeID: scopeID})
+			stageContext = ctx
+			command = strings.ToLower(ctx.GetStart().GetText())
 		case *parser.AnalysisImplicitSearchContext:
-			stageID = fmt.Sprintf("stage-%d", len(result.Stages))
-			stage := Stage{ID: stageID, Command: "search", Position: positions[scopeID], ScopeID: scopeID, Location: parsed.source.contextLocation(ctx)}
-			positions[scopeID]++
-			result.Stages = append(result.Stages, stage)
-			result.Diagnostics = append(result.Diagnostics, Diagnostic{Code: CodeUnsupportedSemantics, Severity: "warning", Category: "semantic", Message: "command \"search\" has unmodeled field effects", Location: stage.Location, StageID: stageID, ScopeID: scopeID})
+			stageContext = ctx
+			command = "search"
 		case *parser.AnalysisSubqueryContext:
 			kind := "subsearch"
 			for _, stage := range result.Stages {
@@ -82,13 +103,45 @@ func analyzeParsed(result *Result, parsed *parsedDocument) {
 			}
 			child := Scope{ID: fmt.Sprintf("scope-%d", len(result.Scopes)), ParentID: scopeID, Kind: kind, StageID: stageID, Location: parsed.source.contextLocation(ctx)}
 			result.Scopes = append(result.Scopes, child)
+			env := newEnvironment()
+			if kind == "appendpipe" {
+				env = environments[scopeID].clone()
+			}
 			scopeID = child.ID
+			environments[scopeID] = env
+		}
+		if stageContext != nil {
+			stageID = fmt.Sprintf("stage-%d", len(result.Stages))
+			stage := Stage{ID: stageID, Command: command, Position: positions[scopeID], ScopeID: scopeID, Location: parsed.source.contextLocation(stageContext), SemanticComplete: true}
+			positions[scopeID]++
+			result.Stages = append(result.Stages, stage)
+			state := &semanticStage{result: result, parsed: parsed, stage: len(result.Stages) - 1, env: environments[scopeID], transitions: []Transition{}}
+			before := state.env.snapshot()
+			if _, damaged := stageContext.(*parser.AnalysisStageContext); damaged || damagedStage(stage.Location) {
+				result.Stages[state.stage].SemanticComplete = false
+				state.env.uncertain = true
+			} else if spec, ok := commands[command]; ok && spec.handle != nil {
+				spec.handle(state, stageContext)
+			} else {
+				code := CodeUnsupportedCommand
+				if ok {
+					code = CodeUnsupportedSemantics
+				}
+				state.diagnostic(code, fmt.Sprintf("command %q has unmodeled field effects", command), stageContext)
+			}
+			if !intact(stageContext) {
+				result.Stages[state.stage].SemanticComplete = false
+				state.env.uncertain = true
+			}
+			environments[scopeID] = state.env
+			result.Lineage = append(result.Lineage, Lineage{StageID: stageID, ScopeID: scopeID, Before: before, After: state.env.snapshot(), Transitions: state.transitions})
 		}
 		for i := 0; i < node.GetChildCount(); i++ {
 			visit(node.GetChild(i), scopeID, stageID)
 		}
 	}
 	visit(parsed.tree, root.ID, "")
+	finalizeReferences(result)
 }
 func finalizeResult(result *Result) {
 	sort.SliceStable(result.Diagnostics, func(i, j int) bool {
@@ -124,13 +177,4 @@ func finalizeResult(result *Result) {
 	if result.Status != Invalid && (!result.Coverage.SyntaxComplete || !result.Coverage.SemanticComplete) {
 		result.Status = Incomplete
 	}
-}
-
-// Capabilities describes the analysis contract shipped by this build.
-func Capabilities() CapabilityManifest {
-	manifest := CapabilityManifest{SchemaVersion: 1, Language: "spl", Profile: "splunkd", Version: "current", Commands: []Capability{}, Functions: []Capability{}}
-	for _, name := range []string{"append", "appendpipe", "datamodel", "dedup", "eval", "eventstats", "fields", "from", "head", "inputlookup", "join", "lookup", "rename", "search", "sort", "stats", "streamstats", "table", "tail", "tstats", "where"} {
-		manifest.Commands = append(manifest.Commands, Capability{Name: name, SyntaxSupported: true, SemanticSupported: false, Limitations: []string{"Field effects are not modeled."}})
-	}
-	return manifest
 }

@@ -146,7 +146,7 @@ analysisStage
     | {p.analysisCommandIs("eval")}? analysisCommandName analysisAssignment (COMMA analysisAssignment)* #AnalysisEvalStage
     | {p.analysisCommandIs("rename")}? analysisCommandName analysisRename (COMMA? analysisRename)* #AnalysisRenameStage
     | {p.analysisCommandIs("fields", "table")}? analysisCommandName (ADD | SUB)? analysisFieldList #AnalysisFieldsStage
-    | {p.analysisCommandIs("stats", "eventstats", "streamstats")}? analysisCommandName analysisAggregate (COMMA? analysisAggregate)* analysisGroup? #AnalysisStatsStage
+    | {p.analysisCommandIs("stats", "eventstats", "streamstats")}? analysisCommandName analysisOption* analysisAggregate (COMMA? analysisAggregate)* analysisGroup? #AnalysisStatsStage
     | {p.analysisCommandIs("lookup")}? analysisCommandName analysisLookup #AnalysisLookupStage
     | {p.analysisCommandIs("sort")}? analysisCommandName analysisLimit? analysisSortField (COMMA? analysisSortField)* #AnalysisSortStage
     | {p.analysisCommandIs("dedup")}? analysisCommandName analysisLimit? analysisOption* analysisFieldList #AnalysisDedupStage

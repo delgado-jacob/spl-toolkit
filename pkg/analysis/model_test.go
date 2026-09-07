@@ -23,7 +23,7 @@ func TestDocumentAndUnicodeSource(t *testing.T) {
 	if len(r.Stages) != 2 || r.Stages[1].Command != "eval" {
 		t.Fatal(r.Stages)
 	}
-	if r.Status != Incomplete || !r.Coverage.SyntaxComplete || r.Coverage.SemanticComplete {
+	if r.Status != Valid || !r.Coverage.SyntaxComplete || !r.Coverage.SemanticComplete {
 		t.Fatal(r.Status, r.Coverage)
 	}
 	if r.SchemaVersion != 1 || Capabilities().SchemaVersion != 1 {

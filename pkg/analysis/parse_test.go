@@ -9,9 +9,9 @@ import (
 	"testing"
 )
 
-// Grammar acceptance must cover structured arguments without declaring their semantics complete.
+// Grammar acceptance covers structured arguments; modeled forms can be complete.
 func TestParseStructuredStages(t *testing.T) {
-	for _, q := range []string{
+	for index, q := range []string{
 		`search host=web status IN (200,404) | eval x=if(isnull(user),lower(host),user), y=1+2*3 | where x=host AND NOT (y<2 OR match(x,"a"))`,
 		`index=main | stats count, sum(bytes) AS total BY user, host`,
 		`search source=/var/log/app.log src_ip=10.2.3.4 host=web* | rename user AS person, host AS node | fields + person node* | table person,node*`,
@@ -29,7 +29,11 @@ func TestParseStructuredStages(t *testing.T) {
 			if !r.Coverage.SyntaxComplete {
 				t.Fatalf("syntax: %+v", r.Diagnostics)
 			}
-			if r.Status != Incomplete || r.Coverage.SemanticComplete {
+			want := Valid
+			if index == 2 || index == 5 || index == 6 {
+				want = Incomplete
+			}
+			if r.Status != want || r.Coverage.SemanticComplete != (want == Valid) {
 				t.Fatal(r.Status, r.Coverage)
 			}
 			if len(r.Stages) == 0 {
