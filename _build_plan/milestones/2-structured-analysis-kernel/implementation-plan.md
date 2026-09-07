@@ -31,7 +31,8 @@ Today callers obtain flat field names and parser errors without knowing where a 
 - [x] (2026-09-07) Task 1 complete at c57144b after two scoped fix rounds: public model, grammar/source/recovery foundation, combined review and clean re-review; current-Go race and Go1.22 covering checks passed.
 - [x] (2026-09-07) Task 2 complete through b430722 after one scoped fix round and clean independent re-review: references, flow, functions/capabilities; full Go race and covering Go1.22 checks passed.
 - [x] Task 3: scoped dependencies/recovery, role-specific wildcard resolution, invalid-UTF8 rejection, and 24 full-report corpus cases complete through e3c4684 after malformed-child ownership fix passed independent re-review; race and Go1.22 analysis passed.
-- [ ] Task 4: CLI and REST analysis/capability adapters; red tests, implementation, green tests, review, commit.
+- [x] Task 4: CLI/REST analysis and capabilities, strict shared Unicode input validation, generated OpenAPI, and 24-case adapter parity complete at df1bb0b; independent combined review clean.
+- [ ] Follow-up core gate after Task4: wildcard fields exclusions consistently use role=remove; canonical/corpus regression and independent review.
 - [ ] Task 5: C/Python analysis ownership and native package source closure; red real-library tests, implementation, green package checks, review, commit.
 - [ ] Task 6: shared full-report parity, installed-wheel acceptance, docs, final review and milestone log.
 
@@ -60,7 +61,7 @@ Decision: Implicit aggregate names are semantic names such as `sum(bytes)`, not 
 ## Outcomes & Retrospective
 
 
-Task 1 foundation is implemented and independently reviewed through c57144b; two grammar-boundary issues were corrected with exact source and legacy mixed-mode regressions. Task 2 semantics is independently reviewed through b430722. Task 3 is independently reviewed through e3c4684 with 24 full-report corpus cases, source-encoding rejection, and malformed-child ownership recovery; Tasks 4–6 remain. Open-input fields internal-membership uncertainty and unsupported rename overlaps are explicit conservative limitations. Completion requires every task below, meaningful installed-wheel parity, and a milestone log that distinguishes local checks from unrun platform release acceptance. Do not represent the inherited milestone 1 remote evidence as proof for new source.
+Task 1 foundation is implemented and independently reviewed through c57144b; two grammar-boundary issues were corrected with exact source and legacy mixed-mode regressions. Task 2 semantics is independently reviewed through b430722. Task 3 is independently reviewed through e3c4684 with 24 full-report corpus cases, source-encoding rejection, and malformed-child ownership recovery; Tasks 5–6 and the explicit removal-role follow-up remain. Task 4 CLI/REST is independently reviewed at df1bb0b with 24-case parity and shared Unicode input validation. Open-input fields internal-membership uncertainty and unsupported rename overlaps are explicit conservative limitations. Completion requires every task below, meaningful installed-wheel parity, and a milestone log that distinguishes local checks from unrun platform release acceptance. Do not represent the inherited milestone 1 remote evidence as proof for new source.
 
 ## Context and Orientation
 
@@ -241,7 +242,7 @@ Files: create `pkg/analysis/scopes.go`, `dependencies.go`, `scopes_test.go`, `re
 ### Task 4: CLI and REST report adapters
 
 
-Files: modify `cmd/cli.go`, `pkg/api/server.go`, and API model/annotation integration; create `cmd/analysis.go`, `cmd/analysis_test.go`, `pkg/api/analysis.go`, and `pkg/api/analysis_test.go`; regenerate `docs/docs.go`, `docs/swagger.json`, and `docs/swagger.yaml` when API docs generation produces them (inspect actual generator filenames). Consumes `analysis.Analyze` and `analysis.Capabilities`; produces CLI analyze/capabilities and REST POST `/api/v1/query/analyze`, GET `/api/v1/capabilities`. Own no Python/binding files.
+Files: modify `cmd/cli.go`, `pkg/api/server.go`, and API model/annotation integration; create `cmd/analysis.go`, `cmd/analysis_test.go`, `pkg/api/analysis.go`, `pkg/api/analysis_test.go`, and a narrow shared `internal/jsoninput` Unicode-validation helper with tests; regenerate `docs/docs.go`, `docs/swagger.json`, and `docs/swagger.yaml` when API docs generation produces them (inspect actual generator filenames). Consumes `analysis.Analyze` and `analysis.Capabilities`; produces CLI analyze/capabilities and REST POST `/api/v1/query/analyze`, GET `/api/v1/capabilities`. Own no Python/binding files.
 
 1. Write tests loading `testdata/analysis/cases.json`, invoke `runCLI`, and compare parsed JSON to each expected Result. Assert exits 0/1/3 and report bytes on stdout, empty stderr for successful report delivery, code 2 for unsupported document options, and byte-preserving `--output` without duplicate stdout. REST httptest must compare full response values, 200 for all content statuses, and 400 for malformed JSON/options. Existing discover/map/validate tests stay unchanged.
 
@@ -254,7 +255,7 @@ Files: modify `cmd/cli.go`, `pkg/api/server.go`, and API model/annotation integr
 
 2. Run `go test -mod=readonly ./cmd ./pkg/api -run 'TestAnalysis|TestCapabilities' -v` to prove missing routes/commands fail. Add flags only where permitted; legacy commands reject analysis-only flags. Default option values must come from Go document normalization. `capabilities` requires no query and supports the existing format/output convention.
 
-3. Implement handlers as transport-only delegation. Preserve request body size/content-type protections and existing middleware; avoid requiring nonempty Text in transport validation because empty query text is a reportable syntax error. Return direct canonical report JSON. Modify successful CLI output flow to return the analysis status code after writing the payload; keep legacy successful codes at zero. Text output includes status, separate syntax/semantic coverage, located references, and diagnostics.
+3. Implement handlers as transport-only delegation. Preserve request body size/content-type protections and existing middleware; validate raw UTF-8 and JSON surrogate pairing with the shared helper before decoding; avoid requiring nonempty Text in transport validation because empty query text is a reportable syntax error. Return direct canonical report JSON. Modify successful CLI output flow to return the analysis status code after writing the payload; keep legacy successful codes at zero. Text output includes status, separate syntax/semantic coverage, located references, and diagnostics.
 
        report, err := analysis.Analyze(document)
        if err != nil { s.writeErrorResponse(w, http.StatusBadRequest, err.Error()); return }
@@ -409,3 +410,5 @@ Revision note (2026-09-07): Task 3 uses existing tested root-model/qualified-dat
 Revision note (2026-09-07): Root required narrow invalid-UTF8 document rejection for source preservation, including pre-decode raw REST/C JSON validation. Task3 owns core regressions; Tasks4/5 own transport regressions.
 
 Revision note (2026-09-07): Task3 closed after independent scoped review confirmed original-bracket ownership prevents malformed child recovery leaks. The shared corpus contains 24 cases; quoted resolution follows semantic roles. Tasks4–6 remain serial and must deliver canonical parity and installed acceptance.
+
+Revision note (2026-09-07): Root identified encoding/json replacement of unpaired UTF16 escapes. Task4 now supplies a narrow shared internal transport Unicode validator, consumed/packaged by Task5; test valid pairs and escaped-backslash controls, preserving standard decoder syntax handling.
