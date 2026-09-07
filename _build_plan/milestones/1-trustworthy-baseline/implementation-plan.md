@@ -43,58 +43,58 @@ A user will be able to clone the project, build its CLI/server/native package wi
 
 The principal demonstration is `search src_ip=1` mapped by `{"version":"1.0","mappings":[{"source":"src_ip","target":"source_ip"}]}` to exactly `search source_ip=1`. Equivalent discovery fixtures include two macro names and three distinct data-model references. Successful syntax validation means accepted by the current grammar only.
 
-This is a living ExecPlan maintained according to `/Users/jacobdelgado/.codex/PLANS.md`. Preserve Progress, Surprises & Discoveries, Decision Log, and Outcomes & Retrospective through execution. To reconcile the writing-plans step checklist with ExecPlan prose requirements, maintain the per-step checkboxes only in Progress and use numbered prose plus indented executable examples below. No implementation has started.
+This is a living ExecPlan maintained according to `/Users/jacobdelgado/.codex/PLANS.md`. Preserve Progress, Surprises & Discoveries, Decision Log, and Outcomes & Retrospective through execution. To reconcile the writing-plans step checklist with ExecPlan prose requirements, maintain the per-step checkboxes only in Progress and use numbered prose plus indented executable examples below. Execution status is recorded below.
 
 ## Progress
 
 
 - [x] (2026-09-06) Approved design read; source contracts and public build metadata inspected.
 - [x] (2026-09-06) Plan authored and checked against the approved spec.
-- [ ] User confirms this implementation plan and execution style.
-- [ ] Task 1.1: Establish isolated baseline and dependency failure evidence.
-- [ ] Task 1.2: Add clean-build acceptance check.
-- [ ] Task 1.3: Repair checksum state and non-mutating Make workflows.
-- [ ] Task 1.4: Verify clean builds and commit only Task 1 files.
-- [ ] Task 2.1: Add rule-priority, regex, and validation regression cases.
-- [ ] Task 2.2: Observe failing rule tests.
-- [ ] Task 2.3: Implement ordered first-match evaluation and strict supported settings.
-- [ ] Task 2.4: Verify rule tests and commit Task 2.
-- [ ] Task 3.1: Add configuration-ownership, atomic-update, and parser-race tests.
-- [ ] Task 3.2: Observe baseline failures/races.
-- [ ] Task 3.3: Implement owned configuration and operation-local state.
-- [ ] Task 3.4: Run race tests and commit Task 3.
-- [ ] Task 4.1: Add native handle and array regression tests.
-- [ ] Task 4.2: Observe native failures in child processes.
-- [ ] Task 4.3: Repair registry, allocations, and string cleanup.
-- [ ] Task 4.4: Verify actual native behavior and commit Task 4.
-- [ ] Task 5.1: Add Python lifecycle, ownership, and concurrency tests.
-- [ ] Task 5.2: Observe failing lifecycle tests.
-- [ ] Task 5.3: Implement close/context manager, locking, and pointer release.
-- [ ] Task 5.4: Run wrapper/native tests and commit Task 5.
-- [ ] Task 6.1: Add CLI invocation and output regression tests.
-- [ ] Task 6.2: Observe baseline CLI failures.
-- [ ] Task 6.3: Implement argument parsing, config loading, and output contracts.
-- [ ] Task 6.4: Verify CLI tests and commit Task 6.
-- [ ] Task 7.1: Add version and source-distribution/wheel installation tests.
-- [ ] Task 7.2: Observe packaging/version failures.
-- [ ] Task 7.3: Implement single-source Go/native version reporting.
-- [ ] Task 7.4: Implement Python metadata and fail-closed wheel builds.
-- [ ] Task 7.5: Stage self-contained source distributions and package Make targets.
-- [ ] Task 7.6: Verify installed wheel and extracted sdist and commit Task 7.
-- [ ] Task 8.1: Add common cross-surface fixtures and HTTP parity tests.
-- [ ] Task 8.2: Add Go/HTTP fixture tests and repair demonstrated REST inconsistencies.
-- [ ] Task 8.3: Implement installed-package cross-surface acceptance.
-- [ ] Task 8.4: Turn current CLI examples into executable acceptance cases.
-- [ ] Task 8.5: Align current documentation and examples with implemented behavior.
-- [ ] Task 8.6: Record fixed-fixture performance measurements.
-- [ ] Task 8.7: Verify parity, documentation, and benchmark report; commit Task 8.
-- [ ] Task 9.1: Add artifact normalization and mismatch regression tests.
-- [ ] Task 9.2: Implement deterministic release artifact creation.
-- [ ] Task 9.3: Implement two-clean-build equality and installation verification.
-- [ ] Task 9.4: Record and enforce release toolchain/target inputs.
-- [ ] Task 9.5: Connect non-publishing Make release targets.
-- [ ] Task 9.6: Repair and verify existing container workflows.
-- [ ] Task 9.7: Verify artifact equality and commit Task 9.
+- [x] (2026-09-06) User approved continuous subagent implementation and review; no intermediate user-review stops.
+- [x] Task 1.1: Establish isolated baseline and dependency failure evidence.
+- [x] Task 1.2: Add clean-build acceptance check.
+- [x] Task 1.3: Repair checksum state and non-mutating Make workflows.
+- [x] Task 1.4: Verify clean builds and commit only Task 1 files.
+- [x] Task 2.1: Add rule-priority, regex, and validation regression cases.
+- [x] Task 2.2: Observe failing rule tests.
+- [x] Task 2.3: Implement ordered first-match evaluation and strict supported settings.
+- [x] Task 2.4: Verify rule tests and commit Task 2.
+- [x] Task 3.1: Add configuration-ownership, atomic-update, and parser-race tests.
+- [x] Task 3.2: Observe baseline failures/races.
+- [x] Task 3.3: Implement owned configuration and operation-local state.
+- [x] Task 3.4: Run race tests and commit Task 3.
+- [x] Task 4.1: Add native handle and array regression tests.
+- [x] Task 4.2: Observe native failures in child processes.
+- [x] Task 4.3: Repair registry, allocations, and string cleanup.
+- [x] Task 4.4: Verify actual native behavior and commit Task 4.
+- [x] Task 5.1: Add Python lifecycle, ownership, and concurrency tests.
+- [x] Task 5.2: Observe failing lifecycle tests.
+- [x] Task 5.3: Implement close/context manager, locking, and pointer release.
+- [x] Task 5.4: Run wrapper/native tests and commit Task 5.
+- [x] Task 6.1: Add CLI invocation and output regression tests.
+- [x] Task 6.2: Observe baseline CLI failures.
+- [x] Task 6.3: Implement argument parsing, config loading, and output contracts.
+- [x] Task 6.4: Verify CLI tests and commit Task 6.
+- [x] Task 7.1: Add version and source-distribution/wheel installation tests.
+- [x] Task 7.2: Observe packaging/version failures.
+- [x] Task 7.3: Implement single-source Go/native version reporting.
+- [x] Task 7.4: Implement Python metadata and fail-closed wheel builds.
+- [x] Task 7.5: Stage self-contained source distributions and package Make targets.
+- [x] Task 7.6: Verify installed wheel and extracted sdist and commit Task 7.
+- [x] Task 8.1: Add common cross-surface fixtures and HTTP parity tests.
+- [x] Task 8.2: Add Go/HTTP fixture tests and repair demonstrated REST inconsistencies.
+- [x] Task 8.3: Implement installed-package cross-surface acceptance.
+- [x] Task 8.4: Turn current CLI examples into executable acceptance cases.
+- [x] Task 8.5: Align current documentation and examples with implemented behavior.
+- [x] Task 8.6: Record fixed-fixture performance measurements.
+- [x] Task 8.7: Verify parity, documentation, and benchmark report; commit Task 8.
+- [x] Task 9.1: Add artifact normalization and mismatch regression tests.
+- [x] Task 9.2: Implement deterministic release artifact creation.
+- [x] Task 9.3: Implement two-clean-build equality and installation verification.
+- [x] Task 9.4: Record and enforce release toolchain/target inputs.
+- [x] Task 9.5: Connect non-publishing Make release targets.
+- [x] Task 9.6: Repair and verify existing container workflows.
+- [x] Task 9.7: Verify artifact equality and commit Task 9.
 - [ ] Task 10.1: Wire four native runner jobs and interpreter matrix.
 - [ ] Task 10.2: Exercise installed wheels across the interpreter matrix.
 - [ ] Task 10.3: Wire minimum-Go, native-memory, Make, and container gates.
@@ -118,6 +118,14 @@ Read-only fixture probes confirmed three data models and two macros through the 
 
 The local tooling observed during planning is Go 1.25.5 and Python 3.12.6 on macOS arm64. Those are not the pinned release tools below; do not label their results as pinned release evidence.
 
+Execution evidence, 2026-09-06: the clean-export baseline failed on missing checksums, the native three-model regression crashed its child process with exit -5, and shared parser reuse produced race reports and cross-call errors. Tasks 1–4 now pass independent task reviews. Task 1 review also caught an unguarded vet command; explicit -mod=readonly and a permissive-GOFLAGS regression closed it. Local Go 1.26.8, Go 1.22.12, and all four pinned Python interpreters have been acquired in task-owned locations. Native platform and release gates are still open.
+
+Task 7 review found that apparent isolated-package success still relied on a .pth exposing outer test dependencies, and recursive source-directory staging could include unrelated user files. The fix rounds closed both defects and explicit macOS tag/minimum coupling, then repeated isolated wheel and extracted-source installation checks successfully.
+
+Execution platform diagnostic: Go1.22.12 with cgo/race on macOS26.2 can emit a binary without LC_UUID that the dynamic loader rejects before tests. A minimal net-import probe confirmed old default-link failure and current Go1.26.8 success; the required Go floor gate remains Linux. Separately, a minimal dylib built with the initially proposed -no_uuid failed to load; -reproducible retained UUIDs, loaded, and produced identical bytes across two directories. The actual Go native payload must still pass Task9 equality/load checks. Evidence is in task scratch linker diagnostics and the Go1.24 linker release note (https://go.dev/doc/go1.24#linker).
+
+Task 9 independent review closed four release-gate defects: validation now executes from the exported revision, environment identity is observed and checked, Docker inputs use an exact allowlist, and Windows drive/UNC archive paths are rejected. Diagnostic builds carry a separate status and cannot stand in for pinned acceptance. Matching production/diagnostic-base Git tree IDs and the sole environment substitution were verified directly. The original source floor passed on Linux Go 1.22.12; an early Linux Go 1.26.8/GCC 12 ASan diagnostic also passed, with final GCC 13 acceptance still required.
+
 ## Decision Log
 
 
@@ -133,10 +141,14 @@ Decision: Initially distribute native platform wheels as downloadable release ar
 
 Decision: Build twice in separate source/output/cache directories on the same CI job and record the resolved OS image/compiler. Rationale: a runner label is not an immutable machine image; the approved reproducibility claim is equality within an identical recorded environment. Compare final payload bytes and archives; never hide native mismatches by comparing only unpacked Python sources. Date/Author: 2026-09-06, Codex.
 
+Decision: Keep recursive configuration ownership in focused pkg/mapper/config_clone.go, rejecting unsupported or cyclic input and preserving the existing scalar domain. Rationale: the ownership logic has one responsibility and should not obscure mapping synchronization; independent review accepted the separation. Date/Author: 2026-09-06, Codex.
+
+Decision: Replace the planned macOS native -no_uuid flag with -reproducible while retaining content-derived UUIDs. Rationale: local minimal tests prove macOS26 rejects UUID-less dylibs and prove equal/loadable outputs with reproducible linking; Task9 still verifies actual native artifacts. Date/Author: 2026-09-06, Codex.
+
 ## Outcomes & Retrospective
 
 
-Planning outcome: approved scope has concrete interfaces, task-local tests, package source layout, tool pins, four runner labels, and independent acceptance requirements. Execution and all release gates remain open. Replace this paragraph with measured outcomes as execution progresses, retaining the distinction between local proof and four-platform proof.
+Execution in progress: Tasks 1–9 have passed independent spec and quality review. Their committed results establish clean local builds, deterministic rule selection, owned concurrent Go state, repaired native handles/arrays, explicit Python lifecycle, and the documented CLI contract with real-surface regression coverage. Tasks 7–8 additionally establish isolated native wheel/source-package installation, common surface fixtures, executable documentation, and measured performance. Task 9 adds controlled release artifacts, complete attribution, strict source/environment checks, and working pinned containers. Its real local two-build diagnostic matched all eight payloads, but Task 10 and every final pinned four-platform gate remain open. These local results do not establish milestone completion.
 
 ## Context and Orientation
 
@@ -247,7 +259,7 @@ Use `.so` on Linux and `.dll` on Windows for the shared library. Later Task 7 ad
 
 4. Add `tools/check_go.py`: enumerate tracked `.go` files outside `parser/`, `gen/`, and generated `docs/docs.go`, run `gofmt -l`, and fail if any handwritten file needs formatting. Planning inspection found no existing handwritten formatting differences, so no baseline waiver or mass reformat is needed. Obtain package names with `go list -mod=readonly ./...`, exclude the generated parser/gen/docs packages themselves, and run `go vet` on the remaining explicit package names. Vet on explicit packages does not vet their imported generated dependency packages. Run `go test -mod=readonly -race ./...`; if the test command itself enables a generated-code analyzer that fails on the pinned compiler, explicitly separate test execution with `-vet=off` and retain the positive handwritten `go vet` gate. Record the exact exclusion and reason, not a general static-analysis waiver.
 
-Verify `make build build-server build-shared test`, `git diff --check`, and tracked-file hashes in a clean committed export. Stage just Makefile, go.sum, and the two tools, then commit `build: make baseline Go workflows non-mutating`. Run the export checker against that commit; expected exit 0 and no tracked-file changes.
+Verify `make build build-server build-shared test`, `git diff --check`, and tracked-file hashes in a clean committed export. Stage Makefile, go.sum, the two tools, and their focused behavior regression tests, then commit `build: make baseline Go workflows non-mutating`. Run the export checker against that commit; expected exit 0 and no tracked-file changes.
 
 ### Task 2: Documented rule priority and working regex conditions
 
@@ -577,11 +589,11 @@ Task 9 adds deterministic external-linker flags through the same build_native pa
 
 5. Make SourceDistribution stage a self-contained tree. Its root contains the Python package, setup.py, pyproject.toml, build_support.py, requirements-build.txt, README.md, LICENSE, VERSION, and `_native_src/`. The native source subtree contains go.mod, go.sum, `pkg/mapper/`, `pkg/bindings/`, `parser/`, and `internal/buildinfo/`, with license notices retained. Exclude `.git`, user files, caches, test output, built native libraries, and `_build_plan/`. `source_root` checks the original checkout's parent go.mod first when present, otherwise `_native_src/go.mod`; failure names the missing source rather than packaging anyway. `read_version` uses original root VERSION or the staged sdist VERSION.
 
-Override SourceDistribution.make_release_tree to copy this exact native-source allowlist into its temporary release tree. Include build_support and the required package inputs through MANIFEST.in. Do not permanently duplicate Go source into the repository. When building a wheel from an extracted sdist, every helper comes from the sdist; no absolute original path or Git history is needed.
+Override SourceDistribution.make_release_tree to copy an explicit native source-file allowlist into its temporary release tree. The allowlist must remain available from a Git export and extracted sdist without .git; recursive directory copying must not include unrelated user or editor files. Acceptance rejects unexpected archive members. Include build_support and the required package inputs through MANIFEST.in. Do not permanently duplicate Go source into the repository. When building a wheel from an extracted sdist, every helper comes from the sdist; no absolute original path or Git history is needed.
 
 Use `python -m build --no-isolation --sdist --wheel --outdir dist python` after installing pinned requirements. Change python-build/python-wheel/python-sdist/python-install targets accordingly. `python-install` installs a built wheel, avoiding an editable-install contract that could omit the binary; document that developers rebuild/reinstall after wrapper/native changes. `python-test` builds/installs into a dedicated test venv and runs copied tests outside the tree, not by modifying sys.path. Keep pure mock tests separate from native-required tests; missing libraries fail native-required suites rather than skip.
 
-6. Run `python tools/check_package.py --sdist dist/spl_toolkit-0.1.1.tar.gz --wheel-dir dist` in the actual isolated checkout (normalize the chosen distribution filenames consistently). The tool locates exactly one wheel for the target, creates two dedicated environments for original-wheel and sdist-built-wheel checks, removes PYTHONPATH, invokes `python -I -m pytest` on copied tests, and verifies no tracked files changed. It accepts an optional `--expected-version` value for version-override tests in a temporary source export, without rewriting user VERSION.
+6. Run `python tools/check_package.py --sdist dist/spl_toolkit-0.1.1.tar.gz --wheel-dir dist` in the actual isolated checkout (normalize the chosen distribution filenames consistently). The tool locates exactly one wheel for the target, creates two dedicated environments with their own pinned test dependencies for original-wheel and sdist-built-wheel checks (no outer-site-packages .pth exposure), removes PYTHONPATH, invokes `python -I -m pytest` on copied tests, and verifies no tracked files changed. It accepts an optional `--expected-version` value for version-override tests in a temporary source export, without rewriting user VERSION.
 
 Run `make build build-server build-shared`, native tests, and package acceptance. Commit `build: ship self-contained native Python packages with one version`. Preserve explicit build failures if a platform cannot produce the library; do not generate a pure wheel fallback.
 
@@ -672,7 +684,7 @@ Add an sdist test with differing gzip/tar timestamps, owners, and input ordering
 
 2. Implement tools/release.py as a small CLI orchestrator, not a general build framework. It reads root VERSION and tools/release-env.json, validates expected compiler/interpreter, checks source inputs, creates a new output directory, builds CLI/server/shared library, calls `python -m build` for sdist/wheel, normalizes archive metadata, writes native payloads and C header, and produces a sorted SHA256SUMS. Reuse build_native from python/build_support.py for the native payload so package and standalone libraries use identical compiler/linker options. Keep build logs and environment evidence in a sibling evidence directory, outside the hashed payload set.
 
-Build CLI/server with `CGO_ENABLED=0`, `-trimpath`, `-buildvcs=false`, injected version, and an empty Go build ID. Native builds use `CGO_ENABLED=1`, the same Go settings, and deterministic external-linker flags: Linux `-Wl,--build-id=none`, Windows `-Wl,--no-insert-timestamp`, macOS `-Wl,-no_uuid`. Pass these through Go's `-extldflags` within its ldflags argument using a Python list, not shell interpolation. Map source and temporary native compiler paths using `-ffile-prefix-map=ACTUAL_SOURCE=.` and `-fdebug-prefix-map=ACTUAL_SOURCE=.` (and the dedicated GOTMPDIR equivalent), substituting the actual resolved paths programmatically. Record all flags. If a platform linker rejects a proposed flag, diagnose against its actual compiler and adjust the platform-specific recipe with a regression/evidence note; never strip or alter native payloads after comparison solely to hide nondeterminism.
+Build CLI/server with `CGO_ENABLED=0`, `-trimpath`, `-buildvcs=false`, injected version, and an empty Go build ID. Native builds use `CGO_ENABLED=1`, the same Go settings, and deterministic external-linker flags: Linux `-Wl,--build-id=none`, Windows `-Wl,--no-insert-timestamp`, macOS `-Wl,-reproducible`, retaining its content-derived UUID (do not use `-no_uuid`, which makes native dylibs unloadable on macOS 26). Pass these through Go's `-extldflags` within its ldflags argument using a Python list, not shell interpolation. Map source and temporary native compiler paths using `-ffile-prefix-map=ACTUAL_SOURCE=.` and `-fdebug-prefix-map=ACTUAL_SOURCE=.` (and the dedicated GOTMPDIR equivalent), substituting the actual resolved paths programmatically. Record all flags. If a platform linker rejects a proposed flag, diagnose against its actual compiler and adjust the platform-specific recipe with a regression/evidence note; never strip or alter native payloads after comparison solely to hide nondeterminism.
 
 The Python builder sets `SOURCE_DATE_EPOCH` from the source commit. Wheel normalization sorts entries, sets deterministic timestamps, permissions, create_system, and compression settings without modifying member contents. Since ZIP metadata is outside wheel RECORD hashes, content-preserving normalization does not invalidate RECORD. Sdist normalization sets sorted tar member order, uid/gid 0, empty uname/gname, stable modes and mtime, clears volatile PAX metadata, and writes gzip with `filename=""` and the fixed epoch. Fail on unexpected absolute/traversal archive paths. Keep native library bytes unchanged during normalization.
 
@@ -726,7 +738,7 @@ Verify `docker build -t spl-toolkit-baseline-cli .`, CLI version and map with a 
 ### Task 10: Four-platform CI execution and milestone acceptance
 
 
-Files: `.github/workflows/ci.yml`, `tools/check_acceptance.py`, `tools/tests/test_acceptance.py`, and the final milestone log; relevant compatibility/performance evidence updates. Consumes all previous tasks. Produces mandatory platform/interpreter, reproducibility, and exact-source acceptance results with no silent skips.
+Files: `.github/workflows/ci.yml`, `tools/check_acceptance.py`, `tools/tests/test_acceptance.py`, `tools/check_package.py` for wheel-only and required-test evidence, `tools/check_reproducible.py` for post-verification accepted-artifact promotion, their focused tests, and the final milestone log; relevant compatibility/performance evidence updates. Consumes all previous tasks. Produces mandatory platform/interpreter, reproducibility, and exact-source acceptance results with no silent skips.
 
 1. Replace the current build/native test jobs with an explicit four-target release matrix and 16 installed-wheel compatibility combinations. Use immutable action commits verified during planning:
 
@@ -850,4 +862,6 @@ Build/test package versions and requirements were read from public PyPI JSON met
 
 Self-review coverage: scope and temporary guidance are captured in Global Constraints/Task 10; rule behavior in Task 2; ownership/concurrency in Task 3; C memory and Python lifecycle in Tasks 4–5; CLI in Task 6; versions/packages in Task 7; REST/parity/documentation/performance in Task 8; controlled artifacts/containers in Task 9; four-platform and exact-source acceptance in Task 10. No source implementation was modified while authoring this plan.
 
-Revision note, 2026-09-06: Initial implementation plan based on the approved design. Resolved concrete tool/interpreter/runner choices, source-distribution contents, native error ownership, JSON-array context parity, rule-update precedence, CLI output shapes, and completion evidence. All implementation steps remain pending user plan confirmation.
+Revision note, 2026-09-06: Initial implementation plan based on the approved design. Resolved concrete tool/interpreter/runner choices, source-distribution contents, native error ownership, JSON-array context parity, rule-update precedence, CLI output shapes, and completion evidence. The user subsequently authorized continuous subagent implementation and independent review through all acceptance gates; Progress records the current execution state.
+
+Execution clarification, 2026-09-06: Task 1 includes tools/tests/test_build_checks.py so the authorized focused tool regressions ship with the tools; the staging list was illustrative, not a prohibition on behavior tests.
