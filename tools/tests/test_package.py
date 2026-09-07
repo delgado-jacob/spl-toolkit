@@ -65,6 +65,9 @@ def test_build_native_uses_release_flags_and_requires_output(tmp_path: Path, mon
     source = tmp_path / "source"
     source.mkdir()
     output = tmp_path / "build" / support.native_library_name()
+    gotmp = tmp_path / "go temp with spaces"
+    gotmp.mkdir()
+    monkeypatch.setenv("GOTMPDIR", str(gotmp))
     seen = {}
 
     def fake_run(command, *, cwd, env, check):
@@ -78,17 +81,49 @@ def test_build_native_uses_release_flags_and_requires_output(tmp_path: Path, mon
     assert seen["command"] == [
         "go", "build", "-mod=readonly", "-trimpath", "-buildvcs=false",
         "-buildmode=c-shared", "-ldflags",
-        "-X=github.com/delgado-jacob/spl-toolkit/internal/buildinfo.Version=0.1.1",
+        "-buildid= -X=github.com/delgado-jacob/spl-toolkit/internal/buildinfo.Version=0.1.1 "
+        f"-extldflags={support.native_linker_flag()}",
         "-o", str(output.resolve()), "./pkg/bindings",
     ]
     assert seen["cwd"] == source
     assert seen["env"]["CGO_ENABLED"] == "1"
     assert seen["env"]["GOTOOLCHAIN"] == "local"
+    assert f"-ffile-prefix-map={source.resolve()}=." in seen["env"]["CGO_CFLAGS"]
+    assert f"-fdebug-prefix-map={source.resolve()}=." in seen["env"]["CGO_CFLAGS"]
+    assert f"-ffile-prefix-map={gotmp.resolve()}=." in seen["env"]["CGO_CFLAGS"]
+    assert seen["env"]["CGO_CFLAGS"] == seen["env"]["CGO_CPPFLAGS"]
     if sys.platform == "darwin":
         assert seen["env"]["MACOSX_DEPLOYMENT_TARGET"] == "15.0"
         assert "-mmacosx-version-min=15.0" in seen["env"]["CGO_CFLAGS"]
         assert "-mmacosx-version-min=15.0" in seen["env"]["CGO_LDFLAGS"]
     assert seen["check"] is True
+
+
+def test_build_native_requires_generated_header(tmp_path: Path, monkeypatch):
+    support = load_build_support()
+    source = tmp_path / "source"
+    source.mkdir()
+    gotmp = tmp_path / "gotmp"
+    gotmp.mkdir()
+    output = tmp_path / "build" / support.native_library_name()
+    monkeypatch.setenv("GOTMPDIR", str(gotmp))
+
+    def fake_run(*_args, **_kwargs):
+        output.parent.mkdir(parents=True, exist_ok=True)
+        output.write_bytes(b"native")
+
+    monkeypatch.setattr(subprocess, "run", fake_run)
+
+    with pytest.raises(RuntimeError, match="produced no C header"):
+        support.build_native(source, output, "0.1.1")
+
+
+def test_platform_linker_flags_are_explicit_and_shell_free():
+    support = load_build_support()
+
+    assert support.native_linker_flag("Linux") == "-Wl,--build-id=none"
+    assert support.native_linker_flag("Darwin") == "-Wl,-reproducible"
+    assert support.native_linker_flag("Windows") == "-Wl,--no-insert-timestamp"
 
 
 def test_build_native_propagates_missing_compiler_without_artifact(tmp_path: Path, monkeypatch):

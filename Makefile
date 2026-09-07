@@ -1,6 +1,6 @@
 # SPL Toolkit - Build and Release Automation
 
-.PHONY: build build-server build-shared build-all test test-coverage clean install lint fmt deps deps-update python-deps python-build python-test python-install python-wheel python-sdist python-dist release help generate-docs
+.PHONY: build build-server build-shared build-all test test-coverage clean install lint fmt deps deps-update python-deps python-build python-test python-install python-wheel python-sdist python-dist release-prep release-build release tag help generate-docs
 
 # Go variables
 GOCMD=go
@@ -141,21 +141,16 @@ tag: ## Create and push a new version tag
 	git push origin v$(VERSION)
 	git push origin main
 
-release-prep: clean deps test python-test ## Prepare for release
+release-prep: deps python-deps ## Install the pinned controlled-release dependencies
 	@echo "Release preparation complete"
 
-release-build: release-prep build-all python-dist ## Build release artifacts
-	mkdir -p $(DIST_DIR)
-	# Copy Go binaries
-	cp $(BUILD_DIR)/$(BINARY_NAME) $(DIST_DIR)/
-	cp $(BUILD_DIR)/$(SERVER_BINARY_NAME) $(DIST_DIR)/
-	cp $(BUILD_DIR)/$(SHARED_LIB_NAME)$(SHARED_EXT) $(DIST_DIR)/
-	# Copy Python distributions
-	cp python/dist/* $(DIST_DIR)/ 2>/dev/null || true
+release-build: release-prep ## Build the current source for local inspection
+	$(PYTHON) tools/release.py --source . --output $(DIST_DIR) --epoch $$(git show -s --format=%ct HEAD)
 
 release: release-build ## Create a full release
 	@echo "Release $(VERSION) built successfully"
 	@echo "Artifacts available in $(DIST_DIR)/"
+	@echo "Run '$(PYTHON) tools/check_reproducible.py --ref HEAD --output build/reproducibility' for committed-source acceptance"
 
 # Development targets
 dev-setup: deps python-deps ## Set up development environment

@@ -104,6 +104,7 @@ docs/swagger.yaml
 
 # Docker
 .dockerignore
+!.dockerignore
 
 # Local development
 .local/

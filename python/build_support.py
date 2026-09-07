@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 from pathlib import Path
 import platform
+import shlex
 import shutil
 import subprocess
 
@@ -67,23 +68,67 @@ def read_version(setup_dir: Path) -> str:
     raise FileNotFoundError(f"version file not found for {setup_dir}")
 
 
-def build_native(source: Path, output: Path, version: str) -> None:
-    output.parent.mkdir(parents=True, exist_ok=True)
+def native_linker_flag(system_name: str | None = None) -> str:
+    system_name = system_name or platform.system()
+    if system_name == "Darwin":
+        return "-Wl,-reproducible"
+    if system_name == "Windows":
+        return "-Wl,--no-insert-timestamp"
+    if system_name == "Linux":
+        return "-Wl,--build-id=none"
+    raise RuntimeError(f"unsupported native release platform: {system_name}")
+
+
+def _append_flags(existing: str, flags: list[str]) -> str:
+    values = ([existing] if existing else []) + [shlex.quote(flag) for flag in flags]
+    return " ".join(values)
+
+
+def _native_build_plan(source: Path, output: Path, version: str) -> tuple[list[str], dict[str, str]]:
+    source = source.resolve()
+    output = output.resolve()
+    gotmp = Path(os.environ.get("GOTMPDIR", output.parent / ".go-tmp")).resolve()
+    gotmp.mkdir(parents=True, exist_ok=True)
     env = os.environ.copy()
     env["CGO_ENABLED"] = "1"
     env["GOTOOLCHAIN"] = "local"
+    env["GOTMPDIR"] = str(gotmp)
+    prefix_maps = [
+        f"-ffile-prefix-map={source}=.",
+        f"-fdebug-prefix-map={source}=.",
+        f"-ffile-prefix-map={gotmp}=.",
+        f"-fdebug-prefix-map={gotmp}=.",
+    ]
+    env["CGO_CFLAGS"] = _append_flags(env.get("CGO_CFLAGS", ""), prefix_maps)
+    env["CGO_CPPFLAGS"] = _append_flags(env.get("CGO_CPPFLAGS", ""), prefix_maps)
     if platform.system() == "Darwin":
-        env.setdefault("MACOSX_DEPLOYMENT_TARGET", "15.0")
-        env["CGO_CFLAGS"] = f"{env.get('CGO_CFLAGS', '')} -mmacosx-version-min=15.0".strip()
-        env["CGO_LDFLAGS"] = f"{env.get('CGO_LDFLAGS', '')} -mmacosx-version-min=15.0".strip()
-    subprocess.run([
+        deployment_target = env.setdefault("MACOSX_DEPLOYMENT_TARGET", "15.0")
+        if deployment_target != "15.0":
+            raise RuntimeError(f"MACOSX_DEPLOYMENT_TARGET must be 15.0, got {deployment_target}")
+        minimum = "-mmacosx-version-min=15.0"
+        env["CGO_CFLAGS"] = _append_flags(env["CGO_CFLAGS"], [minimum])
+        env["CGO_CPPFLAGS"] = _append_flags(env["CGO_CPPFLAGS"], [minimum])
+        env["CGO_LDFLAGS"] = _append_flags(env.get("CGO_LDFLAGS", ""), [minimum])
+    ldflags = (
+        f"-buildid= -X=github.com/delgado-jacob/spl-toolkit/internal/buildinfo.Version={version} "
+        f"-extldflags={native_linker_flag()}"
+    )
+    command = [
         "go", "build", "-mod=readonly", "-trimpath", "-buildvcs=false",
-        "-buildmode=c-shared", "-ldflags",
-        f"-X=github.com/delgado-jacob/spl-toolkit/internal/buildinfo.Version={version}",
-        "-o", str(output.resolve()), "./pkg/bindings",
-    ], cwd=source, env=env, check=True)
+        "-buildmode=c-shared", "-ldflags", ldflags,
+        "-o", str(output), "./pkg/bindings",
+    ]
+    return command, env
+
+
+def build_native(source: Path, output: Path, version: str) -> None:
+    output.parent.mkdir(parents=True, exist_ok=True)
+    command, env = _native_build_plan(source, output, version)
+    subprocess.run(command, cwd=source, env=env, check=True)
     if not output.is_file():
         raise RuntimeError("native build produced no shared library")
+    if not output.with_suffix(".h").is_file():
+        raise RuntimeError("native build produced no C header")
 
 
 class NativeDistribution(Distribution):

@@ -1,0 +1,12 @@
+{
+  "go": "1.26.8",
+  "go_language_floor_test": "1.22.12",
+  "build_python": "3.11.9",
+  "test_python": ["3.11.9", "3.12.10", "3.13.7", "3.14.0"],
+  "targets": {
+    "linux-amd64": {"runner": "ubuntu-24.04", "goarch": "amd64", "cc": "gcc-13", "wheel_platform": "linux_x86_64"},
+    "darwin-amd64": {"runner": "macos-15-intel", "goarch": "amd64", "cc": "clang", "deployment_target": "15.0", "developer_dir": "/Applications/Xcode_16.4.app/Contents/Developer", "wheel_platform": "macosx_15_0_x86_64"},
+    "darwin-arm64": {"runner": "macos-15", "goarch": "arm64", "cc": "clang", "deployment_target": "15.0", "developer_dir": "/Applications/Xcode_16.4.app/Contents/Developer", "wheel_platform": "macosx_15_0_arm64"},
+    "windows-amd64": {"runner": "windows-2022", "goarch": "amd64", "cc": "gcc", "gcc_version": "14.2.0", "wheel_platform": "win_amd64"}
+  }
+}

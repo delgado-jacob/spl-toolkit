@@ -1,50 +1,29 @@
-# Multi-stage build for SPL Toolkit Server
-FROM golang:1.22-alpine AS builder
+FROM golang:1.26.8-bookworm@sha256:9fdc884aacc3bec89b20ffc69f4bb369c78210e3e4f600387b5128b12c199f81 AS builder
 
-# Set working directory
-WORKDIR /app
-
-# Install git (needed for some Go modules)
-RUN apk add --no-cache git
-
-# Copy go mod files
+WORKDIR /build
 COPY go.mod go.sum ./
-
-# Download dependencies
 RUN go mod download
+COPY VERSION ./
+COPY cmd ./cmd
+COPY internal ./internal
+COPY parser ./parser
+COPY pkg ./pkg
+RUN VERSION_VALUE="$(cat VERSION)" \
+    && CGO_ENABLED=0 GOTOOLCHAIN=local go build -mod=readonly -trimpath -buildvcs=false \
+       -ldflags="-buildid= -X=github.com/delgado-jacob/spl-toolkit/internal/buildinfo.Version=${VERSION_VALUE}" \
+       -o /out/spl-toolkit-server ./cmd/server
 
-# Copy source code
-COPY . .
+FROM debian:bookworm-slim@sha256:88200866dfff7ea7f5cbcb6ec7c8a701889efe6fe859fe64d6990e4b07ea4171
 
-# Build the server binary
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o spl-toolkit-server ./cmd/server
-
-# Final stage - minimal runtime image
-FROM alpine:latest
-
-# Install ca-certificates for HTTPS requests
-RUN apk --no-cache add ca-certificates
-
-# Create non-root user
-RUN adduser -D -s /bin/sh appuser
-
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends ca-certificates wget \
+    && rm -rf /var/lib/apt/lists/* \
+    && useradd --create-home --uid 1000 appuser
 WORKDIR /app
-
-# Copy binary from builder stage
-COPY --from=builder /app/spl-toolkit-server .
-
-# Change ownership to appuser
+COPY --from=builder /out/spl-toolkit-server ./spl-toolkit-server
 RUN chown appuser:appuser /app/spl-toolkit-server
-
-# Switch to non-root user
 USER appuser
-
-# Expose port
 EXPOSE 8080
-
-# Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD wget --no-verbose --tries=1 --spider http://localhost:8080/api/v1/health || exit 1
-
-# Run the server
+    CMD ["wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:8080/api/v1/health"]
 CMD ["./spl-toolkit-server"]
