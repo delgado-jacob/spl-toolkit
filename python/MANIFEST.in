@@ -4,6 +4,5 @@ include requirements-dev.txt
 include native-source-files.txt
 include README.md
 include LICENSE
-include PARSER-LICENSE
 recursive-include spl_toolkit *.py *.h
 recursive-include tests *.py

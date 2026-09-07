@@ -6,6 +6,7 @@ RUN go mod download
 COPY VERSION LICENSE README.md ./
 COPY cmd ./cmd
 COPY internal ./internal
+COPY grammar ./grammar
 COPY parser ./parser
 COPY pkg ./pkg
 COPY python ./python
