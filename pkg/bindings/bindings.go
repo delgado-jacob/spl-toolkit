@@ -45,6 +45,7 @@ import (
 	"github.com/delgado-jacob/spl-toolkit/internal/jsoninput"
 	"github.com/delgado-jacob/spl-toolkit/pkg/analysis"
 	"github.com/delgado-jacob/spl-toolkit/pkg/mapper"
+	"github.com/delgado-jacob/spl-toolkit/pkg/validation"
 )
 
 var registry = newMapperRegistry()
@@ -201,6 +202,56 @@ func spl_mapper_analyze_query(mapperID C.int, documentJSON *C.char) *C.SPLResult
 	}
 	result.result = C.CString(string(encoded))
 	return result
+}
+
+// ownedMapperJSONResult retains an admitted mapper and returns one owned result,
+// including errors. The caller releases it with spl_result_free.
+func ownedMapperJSONResult(mapperID C.int, operation func() (any, error)) *C.SPLResult {
+	result := (*C.SPLResult)(C.malloc(C.sizeof_SPLResult))
+	result.error = nil
+	result.result = nil
+
+	m, exists := registry.get(int(mapperID))
+	if !exists {
+		result.error = C.CString("Mapper not found")
+		return result
+	}
+	defer runtime.KeepAlive(m)
+
+	report, err := operation()
+	if err != nil {
+		result.error = C.CString(err.Error())
+		return result
+	}
+	encoded, err := json.Marshal(report)
+	if err != nil {
+		result.error = C.CString(err.Error())
+		return result
+	}
+	result.result = C.CString(string(encoded))
+	return result
+}
+
+//export spl_mapper_validate_fields
+func spl_mapper_validate_fields(mapperID C.int, requestJSON *C.char) *C.SPLResult {
+	return ownedMapperJSONResult(mapperID, func() (any, error) {
+		request, err := validation.DecodeRequest([]byte(C.GoString(requestJSON)))
+		if err != nil {
+			return nil, err
+		}
+		return validation.Validate(request.Document, request.Catalog)
+	})
+}
+
+//export spl_mapper_validate_fields_batch
+func spl_mapper_validate_fields_batch(mapperID C.int, requestJSON *C.char) *C.SPLResult {
+	return ownedMapperJSONResult(mapperID, func() (any, error) {
+		request, err := validation.DecodeBatchRequest([]byte(C.GoString(requestJSON)))
+		if err != nil {
+			return nil, err
+		}
+		return validation.ValidateBatch(request.Documents, request.Catalog)
+	})
 }
 
 //export spl_mapper_capabilities

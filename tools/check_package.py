@@ -33,7 +33,7 @@ SDIST_FIXED_FILES = {
     "spl_toolkit.egg-info/PKG-INFO", "spl_toolkit.egg-info/SOURCES.txt",
     "spl_toolkit.egg-info/dependency_links.txt", "spl_toolkit.egg-info/top_level.txt",
     "tests/test_mapper.py", "tests/test_native_abi.py", "tests/test_native_mapper.py",
-    "tests/test_native_analysis.py",
+    "tests/test_native_analysis.py", "tests/test_native_validation.py",
 }
 INSTALL_SCRIPT = """
 import importlib.metadata, pathlib, sys
@@ -47,7 +47,7 @@ with SPLMapper() as mapper:
     mapper.load_mappings([{'source':'src_ip','target':'source_ip'}])
     assert mapper.map_query('search src_ip=1') == 'search source_ip=1'
 """
-NATIVE_TESTS = ("test_native_abi.py", "test_native_mapper.py", "test_native_analysis.py")
+NATIVE_TESTS = ("test_native_abi.py", "test_native_mapper.py", "test_native_analysis.py", "test_native_validation.py")
 ACCEPTANCE_FILES = ("test_documented_cli.py", "test_surfaces.py", "test_analysis_surfaces.py", "cli_examples.json")
 REQUIRED_PYTEST_PLUGIN = r'''\
 import json

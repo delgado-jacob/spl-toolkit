@@ -341,7 +341,7 @@ def test_evidence_write_preserves_existing_files(tmp_path: Path, existing: str):
         assert destination.read_text(encoding="utf-8") == "original\n"
 
 
-def test_release_tree_contains_complete_analysis_source_closure(tmp_path: Path):
+def test_release_tree_contains_complete_analysis_and_validation_source_closure(tmp_path: Path):
     support = load_build_support()
     distribution = support.NativeDistribution({"script_name": str(PYTHON_DIR / "setup.py")})
     command = support.SourceDistribution(distribution)
@@ -349,6 +349,7 @@ def test_release_tree_contains_complete_analysis_source_closure(tmp_path: Path):
     release = tmp_path / "release"
     command.make_release_tree(str(release), [])
     required = [p for p in (ROOT / "pkg/analysis").glob("*.go") if not p.name.endswith("_test.go")]
+    required.extend(p for p in (ROOT / "pkg/validation").glob("*.go") if not p.name.endswith("_test.go"))
     required.append(ROOT / "internal/jsoninput/unicode.go")
     for path in required:
         assert (release / "_native_src" / path.relative_to(ROOT)).read_bytes() == path.read_bytes()
@@ -360,6 +361,14 @@ def test_installed_native_suite_includes_analysis(tmp_path: Path):
     checker._copy_required_files(ROOT / "python/tests", destination, checker.NATIVE_TESTS)
     assert (destination / "test_native_analysis.py").read_bytes() == (ROOT / "python/tests/test_native_analysis.py").read_bytes()
     assert "tests/test_native_analysis.py" in checker.SDIST_FIXED_FILES
+
+
+def test_installed_native_suite_includes_validation(tmp_path: Path):
+    checker = load_package_checker()
+    destination = tmp_path / "tests"
+    checker._copy_required_files(ROOT / "python/tests", destination, checker.NATIVE_TESTS)
+    assert (destination / "test_native_validation.py").read_bytes() == (ROOT / "python/tests/test_native_validation.py").read_bytes()
+    assert "tests/test_native_validation.py" in checker.SDIST_FIXED_FILES
 
 
 def test_installed_surface_suite_requires_analysis_parity(tmp_path: Path):

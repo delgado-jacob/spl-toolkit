@@ -146,6 +146,10 @@ class SPLMapper:
         # Owned canonical JSON results
         self._lib.spl_mapper_analyze_query.argtypes = [ctypes.c_int, ctypes.c_char_p]
         self._lib.spl_mapper_analyze_query.restype = ctypes.POINTER(SPLResult)
+        self._lib.spl_mapper_validate_fields.argtypes = [ctypes.c_int, ctypes.c_char_p]
+        self._lib.spl_mapper_validate_fields.restype = ctypes.POINTER(SPLResult)
+        self._lib.spl_mapper_validate_fields_batch.argtypes = [ctypes.c_int, ctypes.c_char_p]
+        self._lib.spl_mapper_validate_fields_batch.restype = ctypes.POINTER(SPLResult)
         self._lib.spl_mapper_capabilities.argtypes = [ctypes.c_int]
         self._lib.spl_mapper_capabilities.restype = ctypes.POINTER(SPLResult)
 
@@ -316,6 +320,39 @@ class SPLMapper:
             pointer = self._lib.spl_mapper_analyze_query(handle, json.dumps(document).encode("utf-8"))
             if not pointer:
                 raise SPLMapperError("Native analysis returned no result")
+            try:
+                if pointer.contents.error:
+                    raise SPLMapperError(pointer.contents.error.decode("utf-8"))
+                return json.loads(pointer.contents.result.decode("utf-8"))
+            finally:
+                self._lib.spl_result_free(pointer)
+
+    def validate_fields(self, query, catalog, *, language='spl', profile='splunkd',
+                        version='current', source_id='') -> dict:
+        """Validate a query against a field catalog using the canonical Go report.
+
+        Query findings return valid/invalid/incomplete reports. Invalid catalogs
+        and unsupported document options raise SPLMapperError.
+        """
+        document = {"text": query, "language": language, "profile": profile,
+                    "version": version, "source_id": source_id}
+        return self._validate_fields_request(
+            self._lib.spl_mapper_validate_fields, {"document": document, "catalog": catalog})
+
+    def validate_fields_batch(self, documents, catalog) -> dict:
+        """Validate a nonempty list of query document dictionaries in order."""
+        return self._validate_fields_request(
+            self._lib.spl_mapper_validate_fields_batch, {"documents": documents, "catalog": catalog})
+
+    def _validate_fields_request(self, native, request) -> dict:
+        with self._operation() as handle:
+            try:
+                payload = json.dumps(request, allow_nan=False).encode("utf-8")
+            except (TypeError, ValueError) as error:
+                raise SPLMapperError(f"Invalid validation request JSON: {error}") from error
+            pointer = native(handle, payload)
+            if not pointer:
+                raise SPLMapperError("Native validation returned no result")
             try:
                 if pointer.contents.error:
                     raise SPLMapperError(pointer.contents.error.decode("utf-8"))
