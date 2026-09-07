@@ -9,21 +9,30 @@ import (
 	"strings"
 
 	"github.com/delgado-jacob/spl-toolkit/internal/buildinfo"
+	"github.com/delgado-jacob/spl-toolkit/pkg/analysis"
 	"github.com/delgado-jacob/spl-toolkit/pkg/mapper"
 )
 
 type cliOptions struct {
-	config string
-	query  string
-	format string
-	output string
-	help   bool
+	config               string
+	query                string
+	format               string
+	output               string
+	language             string
+	profile              string
+	compatibilityVersion string
+	sourceID             string
+	help                 bool
 
-	hasConfig bool
-	hasQuery  bool
-	hasFormat bool
-	hasOutput bool
-	hasHelp   bool
+	hasConfig               bool
+	hasQuery                bool
+	hasFormat               bool
+	hasOutput               bool
+	hasLanguage             bool
+	hasProfile              bool
+	hasCompatibilityVersion bool
+	hasSourceID             bool
+	hasHelp                 bool
 }
 
 func runCLI(args []string, stdout, stderr io.Writer) int {
@@ -52,7 +61,7 @@ func runCLI(args []string, stdout, stderr io.Writer) int {
 			return writeCLIError(stderr, "text", err.Error(), 1)
 		}
 		return writeGeneratedCLIResult(payload.Bytes(), stdout, stderr)
-	case "map", "discover", "validate":
+	case "map", "discover", "validate", "analyze", "capabilities":
 		return runQueryCommand(command, args[1:], stdout, stderr)
 	default:
 		return writeCLIError(stderr, "text", fmt.Sprintf("unknown command %q", command), 2)
@@ -60,7 +69,7 @@ func runCLI(args []string, stdout, stderr io.Writer) int {
 }
 
 func runQueryCommand(command string, args []string, stdout, stderr io.Writer) int {
-	options, parseFormat, err := parseCLIOptions(args)
+	options, parseFormat, err := parseCLIOptions(command, args)
 	if err != nil {
 		return writeCLIError(stderr, parseFormat, err.Error(), 2)
 	}
@@ -78,10 +87,10 @@ func runQueryCommand(command string, args []string, stdout, stderr io.Writer) in
 	if err := writeCLIResult(payload, options.output, stdout); err != nil {
 		return writeCLIError(stderr, options.format, err.Error(), 2)
 	}
-	return 0
+	return code
 }
 
-func parseCLIOptions(args []string) (cliOptions, string, error) {
+func parseCLIOptions(command string, args []string) (cliOptions, string, error) {
 	options := cliOptions{format: "text"}
 	errorFormat := "text"
 	terminated := false
@@ -104,7 +113,7 @@ func parseCLIOptions(args []string) (cliOptions, string, error) {
 				options.help, options.hasHelp = true, true
 				continue
 			}
-			if name != "config" && name != "query" && name != "format" && name != "output" {
+			if name != "config" && name != "query" && name != "format" && name != "output" && name != "language" && name != "profile" && name != "compatibility-version" && name != "source-id" {
 				return options, errorFormat, fmt.Errorf("unknown option --%s", name)
 			}
 			if !hasEquals {
@@ -114,7 +123,7 @@ func parseCLIOptions(args []string) (cliOptions, string, error) {
 				i++
 				value = args[i]
 			}
-			if value == "" {
+			if value == "" && !analysisOptionMayBeEmpty(command, name) {
 				return options, errorFormat, fmt.Errorf("missing value for --%s", name)
 			}
 			if err := setCLIOption(&options, name, value); err != nil {
@@ -140,6 +149,18 @@ func parseCLIOptions(args []string) (cliOptions, string, error) {
 	return options, errorFormat, nil
 }
 
+func analysisOptionMayBeEmpty(command, name string) bool {
+	if command != "analyze" {
+		return false
+	}
+	switch name {
+	case "query", "language", "profile", "compatibility-version", "source-id":
+		return true
+	default:
+		return false
+	}
+}
+
 func setCLIOption(options *cliOptions, name, value string) error {
 	switch name {
 	case "config":
@@ -162,11 +183,34 @@ func setCLIOption(options *cliOptions, name, value string) error {
 			return fmt.Errorf("duplicate option --output")
 		}
 		options.output, options.hasOutput = value, true
+	case "language":
+		if options.hasLanguage {
+			return fmt.Errorf("duplicate option --language")
+		}
+		options.language, options.hasLanguage = value, true
+	case "profile":
+		if options.hasProfile {
+			return fmt.Errorf("duplicate option --profile")
+		}
+		options.profile, options.hasProfile = value, true
+	case "compatibility-version":
+		if options.hasCompatibilityVersion {
+			return fmt.Errorf("duplicate option --compatibility-version")
+		}
+		options.compatibilityVersion, options.hasCompatibilityVersion = value, true
+	case "source-id":
+		if options.hasSourceID {
+			return fmt.Errorf("duplicate option --source-id")
+		}
+		options.sourceID, options.hasSourceID = value, true
 	}
 	return nil
 }
 
 func validateCLIOptions(command string, options cliOptions) error {
+	if command != "analyze" && (options.hasLanguage || options.hasProfile || options.hasCompatibilityVersion || options.hasSourceID) {
+		return fmt.Errorf("%s does not accept analysis document options", command)
+	}
 	switch command {
 	case "map":
 		if !options.hasConfig {
@@ -185,6 +229,17 @@ func validateCLIOptions(command string, options cliOptions) error {
 	case "validate":
 		if options.hasConfig == options.hasQuery {
 			return fmt.Errorf("validate requires exactly one of a query or --config")
+		}
+	case "analyze":
+		if options.hasConfig {
+			return fmt.Errorf("analyze does not accept --config")
+		}
+		if !options.hasQuery {
+			return fmt.Errorf("analyze requires a query")
+		}
+	case "capabilities":
+		if options.hasConfig || options.hasQuery {
+			return fmt.Errorf("capabilities does not accept a query or --config")
 		}
 	}
 	return nil
@@ -233,6 +288,26 @@ func computeCLIResult(command string, options cliOptions) ([]byte, int, error) {
 			}{Target: target, Valid: true})
 		}
 		return []byte("Valid\n"), 0, nil
+	case "analyze":
+		report, err := analysis.Analyze(analysis.QueryDocument{
+			Text: options.query, Language: options.language, Profile: options.profile,
+			Version: options.compatibilityVersion, SourceID: options.sourceID,
+		})
+		if err != nil {
+			return nil, 2, err
+		}
+		code := analysisStatusExitCode(report.Status)
+		if options.format == "json" {
+			payload, _, err := marshalCLILine(report)
+			return payload, code, err
+		}
+		return formatAnalysisText(report), code, nil
+	case "capabilities":
+		manifest := analysis.Capabilities()
+		if options.format == "json" {
+			return marshalCLILine(manifest)
+		}
+		return formatCapabilitiesText(manifest), 0, nil
 	default:
 		return nil, 2, fmt.Errorf("unknown query command %q", command)
 	}

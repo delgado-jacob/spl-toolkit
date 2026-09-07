@@ -190,6 +190,8 @@ func (s *Server) setupRoutes() {
 	s.mux.HandleFunc("POST /api/v1/query/map", s.handleMapQuery)
 	s.mux.HandleFunc("POST /api/v1/query/discover", s.handleDiscoverQuery)
 	s.mux.HandleFunc("POST /api/v1/query/validate", s.handleValidateQuery)
+	s.mux.HandleFunc("POST /api/v1/query/analyze", s.handleAnalyzeQuery)
+	s.mux.HandleFunc("GET /api/v1/capabilities", s.handleCapabilities)
 
 	// Mapping configuration endpoints
 	s.mux.HandleFunc("POST /api/v1/mappings", s.handleLoadMappings)
