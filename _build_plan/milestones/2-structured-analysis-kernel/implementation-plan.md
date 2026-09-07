@@ -28,8 +28,8 @@ Today callers obtain flat field names and parser errors without knowing where a 
 - [x] (2026-09-07) Read PRD, milestone prompt/log, CLAUDE.md, PLANS.md, grammar, mapper, CLI, REST, C/Python, and packaging paths.
 - [x] (2026-09-07) Delegated decision maker approved architecture, contract, flow semantics, adapters, written spec, and aggregate-name clarification.
 - [x] (2026-09-07) Controller verified baseline: full Go race suite, build-all, 69 tool tests, Go 1.22.12 targeted tests, documentation checks, and source Python 27 passed/1 intentional installed-version skip.
-- [ ] Task 1: public document model, grammar entry point, source ranges, syntax diagnostics/recovery; red test, implementation, green test, review, commit.
-- [ ] Task 2: expression references, supported command transfers, capabilities; red corpus, implementation, green tests, review, commit.
+- [x] (2026-09-07) Task 1 complete at c57144b after two scoped fix rounds: public model, grammar/source/recovery foundation, combined review and clean re-review; current-Go race and Go1.22 covering checks passed.
+- [ ] Task 2 in progress: expression references, supported command transfers, capabilities; red corpus, implementation, green tests, review, commit.
 - [ ] Task 3: nested scopes, dependency kinds, uncertainty and recovery corpus; red tests, implementation, green race tests, review, commit.
 - [ ] Task 4: CLI and REST analysis/capability adapters; red tests, implementation, green tests, review, commit.
 - [ ] Task 5: C/Python analysis ownership and native package source closure; red real-library tests, implementation, green package checks, review, commit.
@@ -60,7 +60,7 @@ Decision: Implicit aggregate names are semantic names such as `sum(bytes)`, not 
 ## Outcomes & Retrospective
 
 
-Design and plan are complete; no milestone 2 implementation has been performed by the design lead. Completion requires every task below, meaningful installed-wheel parity, and a milestone log that distinguishes local checks from unrun platform release acceptance. Do not represent the inherited milestone 1 remote evidence as proof for new source.
+Task 1 foundation is implemented and independently reviewed through c57144b; two grammar-boundary issues were corrected with exact source and legacy mixed-mode regressions. Tasks 2–6 remain. Completion requires every task below, meaningful installed-wheel parity, and a milestone log that distinguishes local checks from unrun platform release acceptance. Do not represent the inherited milestone 1 remote evidence as proof for new source.
 
 ## Context and Orientation
 
@@ -159,7 +159,7 @@ Files: create `pkg/analysis/model.go`, `analyze.go`, `parse.go`, `source.go`, `d
 ### Task 2: Expression references, field transfers, and capabilities
 
 
-Files: create `pkg/analysis/references.go`, `flow.go`, `commands.go`, `functions.go`, `capabilities.go`, `flow_test.go`, `references_test.go`, and `capabilities_test.go`; modify `analyze.go`/`parse.go` only for semantic dispatch. Task 2 owns semantic internals, not adapters. Consumes typed contexts from Task 1 and produces finalized Reference/Lineage/Coverage values through `Analyze`; `Capabilities() CapabilityManifest` becomes complete for the supported subset.
+Files: create `pkg/analysis/references.go`, `flow.go`, `commands.go`, `functions.go`, `capabilities.go`, `flow_test.go`, `references_test.go`, and `capabilities_test.go`; modify `analyze.go`/`parse.go` only for semantic dispatch. Task 2 owns semantic internals, not adapters. It may extend grammar rules and regenerate parser files narrowly when tests show an assigned supported form lacks necessary typed structure; preserve legacy parser regressions. Consumes typed contexts from Task 1 and produces finalized Reference/Lineage/Coverage values through `Analyze`; `Capabilities() CapabilityManifest` becomes complete for the supported subset.
 
 1. Add table-driven tests for these exact representative cases. Assert input reference bindings and final environments, not merely status:
 
@@ -210,7 +210,7 @@ Files: create `pkg/analysis/references.go`, `flow.go`, `commands.go`, `functions
 ### Task 3: Nested scopes, dependencies, and honest partial analysis
 
 
-Files: create `pkg/analysis/scopes.go`, `dependencies.go`, `scopes_test.go`, `recovery_test.go`, `corpus_test.go`, and `testdata/analysis/cases.json`; modify semantic/parser helpers only where needed. Consumes public interfaces/transfer behavior from Tasks 1–2 and produces the finished canonical kernel used by all adapters. Shared fixtures are version `"1"` with `cases`, each containing `id`, `document`, and fully reviewed `expected` Result JSON. During development focused assertions may precede full goldens; checked-in expected documents must be reviewed rather than blindly accepted from current output.
+Files: create `pkg/analysis/scopes.go`, `dependencies.go`, `scopes_test.go`, `recovery_test.go`, `corpus_test.go`, and `testdata/analysis/cases.json`; modify semantic/parser helpers only where needed, including narrowly tested grammar/generated-parser extensions for typed dependency contexts. Consumes public interfaces/transfer behavior from Tasks 1–2 and produces the finished canonical kernel used by all adapters. Shared fixtures are version `"1"` with `cases`, each containing `id`, `document`, and fully reviewed `expected` Result JSON. During development focused assertions may precede full goldens; checked-in expected documents must be reviewed rather than blindly accepted from current output.
 
 1. Write failing tests proving independent versus inherited environments:
 
@@ -391,3 +391,9 @@ Baseline evidence came from the controller on 2026-09-07: Go race passed; build-
 Revision note (2026-09-07): Initial approved plan incorporates canonical implicit aggregate naming and installed-wheel analysis test/corpus closure, because source-only tests and raw function-call spelling would not meet the public contract.
 
 Revision note (2026-09-07): Final controller approval fixes schema_version as integer 1 on both reports, requires tool-created SDD briefs/combined task reviews with serial implementers, and sets SPL_EXPECTED_VERSION for source-mode Make-built native testing.
+
+Revision note (2026-09-07): Tasks 2 and 3 may narrowly extend grammar for their supported forms when necessary, because preserving typed structure is more reliable than recovering it from token text in semantic handlers.
+
+Revision note (2026-09-07): Root approved an immutable per-input analysis CharStream marker for narrow ANTLR dot-disambiguation predicates. Default legacy tokenization is preserved, with adjacent/spaced concatenation, legacy mapping, both sequential orders and concurrent mixed-mode tests; no global mode or post-lex rewriting.
+
+Revision note (2026-09-07): Task 1 completed after clean scoped re-review; Task 2 begins. Explicit empty CLI query remains a syntax-invalid content result, unlike omitted query usage errors. Reuse GOMODCACHE=/private/tmp/spl-toolkit-remaining-gomodcache with GOPROXY=off for required Go checks.
