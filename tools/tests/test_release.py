@@ -11,11 +11,13 @@ import zipfile
 
 import pytest
 
+import tools.release as release
 from tools.check_reproducible import compare_artifacts
-from tools.release import artifact_hashes, normalize_archive, require_python_archives, verify_wheel_native
+from tools.release import artifact_hashes, normalize_archive, parser_attribution, require_python_archives, verify_wheel_native
 
 
 EPOCH = 1788652800
+ROOT = Path(__file__).resolve().parents[2]
 
 
 def _write_wheel(path: Path, stamp: tuple[int, int, int, int, int, int], payload: bytes) -> None:
@@ -138,3 +140,28 @@ def test_wheel_contains_the_unchanged_standalone_native_payload(tmp_path: Path):
     native.write_bytes(b"different-native")
     with pytest.raises(RuntimeError, match="wheel native payload differs"):
         verify_wheel_native(wheel, native)
+
+
+def test_parser_attribution_extracts_the_complete_license_notice():
+    notice = parser_attribution(ROOT / "grammar" / "SPLParser.g4")
+
+    assert "Copyright (c) 2024 Clemens Sageder" in notice
+    assert "Redistribution and use in source and binary forms" in notice
+    assert "THIS SOFTWARE IS PROVIDED BY THE AUTHOR" in notice
+    assert "parser grammar" not in notice
+
+
+def test_windows_gcc_resolution_uses_powershell_get_command(monkeypatch):
+    seen = []
+    monkeypatch.setattr(release.shutil, "which", lambda name: "C:/PowerShell/pwsh.exe" if name == "powershell" else None)
+
+    def fake_version(command):
+        seen.append(command)
+        return "C:/mingw64/bin/gcc.exe"
+
+    monkeypatch.setattr(release, "_version_output", fake_version)
+
+    assert release._windows_gcc_from_powershell() == "C:/mingw64/bin/gcc.exe"
+    assert seen == [[
+        "C:/PowerShell/pwsh.exe", "-NoProfile", "-Command", "(Get-Command gcc -ErrorAction Stop).Source",
+    ]]

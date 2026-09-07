@@ -150,6 +150,17 @@ def verify_wheel_native(wheel: Path, native: Path) -> None:
         raise RuntimeError("wheel native payload differs from standalone native payload")
 
 
+def parser_attribution(grammar: Path) -> str:
+    source = grammar.read_text(encoding="utf-8")
+    if not source.startswith("/*") or "*/" not in source:
+        raise RuntimeError(f"parser grammar has no leading license notice: {grammar}")
+    comment, _remainder = source[2:].split("*/", 1)
+    notice = comment.strip()
+    if "Copyright" not in notice or "Redistribution" not in notice:
+        raise RuntimeError(f"parser grammar license notice is incomplete: {grammar}")
+    return notice + "\n"
+
+
 def _load_build_support(source: Path):
     path = source / "python" / "build_support.py"
     spec = importlib.util.spec_from_file_location("spl_toolkit_release_build_support", path)
@@ -185,6 +196,15 @@ def _version_output(command: list[str]) -> str:
     return subprocess.run(command, check=True, text=True, capture_output=True).stdout.strip()
 
 
+def _windows_gcc_from_powershell() -> str:
+    powershell = shutil.which("powershell") or shutil.which("pwsh")
+    if powershell is None:
+        raise RuntimeError("PowerShell is required to resolve the pinned MinGW GCC")
+    return _version_output([
+        powershell, "-NoProfile", "-Command", "(Get-Command gcc -ErrorAction Stop).Source",
+    ])
+
+
 def validate_environment(config: dict, target: str) -> dict[str, object]:
     expected = config["targets"].get(target)
     if expected is None:
@@ -207,6 +227,9 @@ def validate_environment(config: dict, target: str) -> dict[str, object]:
         raise RuntimeError(f"required compiler not found: {expected['cc']}")
     compiler_version = subprocess.run([cc, "--version"], check=True, text=True, capture_output=True).stdout.strip()
     if target.startswith("windows-"):
+        powershell_cc = _windows_gcc_from_powershell()
+        if os.path.normcase(os.path.abspath(powershell_cc)) != os.path.normcase(os.path.abspath(cc)):
+            raise RuntimeError(f"PowerShell resolved {powershell_cc}, but CC resolved {cc}")
         machine = _version_output([cc, "-dumpmachine"])
         version = _version_output([cc, "-dumpfullversion"])
         if machine != "x86_64-w64-mingw32" or version != expected["gcc_version"]:
@@ -279,6 +302,8 @@ def build_release(source: Path, output: Path, epoch: int) -> dict[str, object]:
         "GOARCH": config["targets"][target]["goarch"],
         "CC": str(environment["cc"]),
     })
+    if target.startswith("windows-"):
+        env["PATH"] = str(Path(str(environment["cc"])).parent) + os.pathsep + env.get("PATH", "")
     if target.startswith("darwin-"):
         env["_PYTHON_HOST_PLATFORM"] = config["targets"][target]["wheel_platform"].replace("_", "-")
     executable_suffix = ".exe" if target.startswith("windows-") else ""
@@ -308,6 +333,9 @@ def build_release(source: Path, output: Path, epoch: int) -> dict[str, object]:
     header = native.with_suffix(".h")
     shutil.copyfile(native_build.with_suffix(".h"), header)
     shutil.copyfile(source / "LICENSE", output / "LICENSE")
+    (output / "PARSER-LICENSE").write_text(
+        parser_attribution(source / "grammar" / "SPLParser.g4"), encoding="utf-8"
+    )
     _run(
         [sys.executable, "-m", "build", "--no-isolation", "--sdist", "--wheel", "--outdir", str(output), "python"],
         cwd=source, env=env, log=evidence / "python-build.log",
