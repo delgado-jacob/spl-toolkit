@@ -16,27 +16,28 @@ type commandSpec struct {
 }
 
 var commands = map[string]commandSpec{
-	"search":      {searchCommand, "Search predicates and typed selectors."},
+	"search":      {searchCommand, "Search predicates and typed selectors. Damaged searches retain sound prefixes; unclosed delimiters can withhold later findings."},
 	"where":       {whereCommand, "Expression predicates; dynamic functions are incomplete."},
-	"eval":        {evalCommand, "Sequential exact-name assignments; registered pure functions only."},
+	"eval":        {evalCommand, "Sequential exact-name assignments; registered pure functions only. Syntax recovery retains the sound assignment prefix and stops at the first damaged assignment."},
 	"rename":      {renameCommand, "Snapshot source bindings; conflicting destinations are incomplete."},
 	"fields":      {fieldsCommand, "Exact exclusion and closed-input inclusion; known internal fields are retained. Open-input inclusion has unresolved retained-internal membership; wildcards require proven membership."},
-	"table":       {fieldsCommand, "Projection; wildcards require proven membership."},
-	"stats":       {statsCommand, "Registered aggregates and exact grouping fields; no options."},
+	"table":       {fieldsCommand, "Projection; quoted and unquoted wildcard selectors require proven membership."},
+	"stats":       {statsCommand, "Registered aggregates and exact grouping fields; options and wildcard grouping are unmodeled."},
 	"eventstats":  {statsCommand, "Additive registered aggregates; no options."},
 	"streamstats": {statsCommand, "Additive registered aggregates; window/options are unmodeled."},
-	"lookup":      {lookupCommand, "Explicit inputs and outputs; OUTPUTNEW preserves known fields; options are unmodeled."},
+	"lookup":      {lookupCommand, "Explicit exact inputs and outputs; OUTPUTNEW preserves known fields; options and wildcard columns are unmodeled."},
 	"inputlookup": {inputlookupCommand, "Open source from catalog; options are unmodeled."},
-	"sort":        {sortCommand, "Numeric limit and signed field selectors."},
-	"dedup":       {dedupCommand, "Numeric limit and exact field lists; options are unmodeled."},
+	"sort":        {sortCommand, "Numeric limit and signed exact field selectors; wildcard selectors are unmodeled."},
+	"dedup":       {dedupCommand, "Numeric limit and exact field lists; options and wildcard selectors are unmodeled."},
 	"head":        {limitCommand, "Optional numeric limit only."},
 	"tail":        {limitCommand, "Optional numeric limit only."},
 	"append":      {nil, "Branch merging is unmodeled."},
 	"appendpipe":  {nil, "Branch merging is unmodeled."},
 	"join":        {nil, "Branch merging is unmodeled."},
-	"datamodel":   {nil, "Field effects are unmodeled."},
-	"from":        {nil, "Field effects are unmodeled."},
-	"tstats":      {nil, "Field effects are unmodeled."},
+	"datamodel":   {nil, "Exact model and optional dataset operands only; field effects are unmodeled. Qualified dataset references can cover the dataset component."},
+	"from":        {nil, "One exact dataset operand; datamodel:model.dataset yields overlapping located root-model and dataset references. Field effects are unmodeled."},
+	"tstats":      {nil, "Aggregate syntax, optional FROM datamodel=model.dataset and WHERE selectors; only dependencies are analyzed. Field effects are unmodeled."},
+	"macro":       {nil, "Synthetic category for a macro-only stage; exact macro name dependencies, unresolved expansion. A literal command named macro remains unmodeled."},
 }
 
 func searchCommand(s *semanticStage, node antlr.ParserRuleContext) {
@@ -45,6 +46,9 @@ func searchCommand(s *semanticStage, node antlr.ParserRuleContext) {
 		switch c := n.(type) {
 		case parser.IAnalysisSearchTermContext:
 			if c.AnalysisIdentifier() != nil {
+				if !s.sound(c) {
+					return
+				}
 				name := normalizedName(c.AnalysisIdentifier().GetText())
 				kind := strings.ToLower(name)
 				values := c.AllAnalysisSearchValue()
@@ -106,9 +110,14 @@ func wildcardMatches(pattern, name string) bool { // Selectors admit only '*' wi
 	}
 	return pi == len(p)
 }
+
+// Selector operands carry pattern semantics independently of identifier quoting.
+func selectorPattern(c parser.IAnalysisSelectorContext) bool {
+	return len(c.AllMULT()) > 0 || (c.AnalysisIdentifier() != nil && strings.Contains(normalizedName(c.AnalysisIdentifier().GetText()), "*"))
+}
 func (s *semanticStage) selector(c parser.IAnalysisSelectorContext, role string) ([]string, []string) {
 	name := normalizedName(c.GetText())
-	if len(c.AllMULT()) == 0 {
+	if !selectorPattern(c) {
 		return []string{name}, []string{s.read(c, name, role)}
 	}
 	id := s.reference(c, name, "field", role)
@@ -117,6 +126,11 @@ func (s *semanticStage) selector(c parser.IAnalysisSelectorContext, role string)
 	}
 	ref := &s.result.References[len(s.result.References)-1]
 	ref.Binding = "indeterminate"
+	command := s.result.Stages[s.stage].Command
+	if command != "fields" && command != "table" && command != "rename" {
+		s.diagnostic(CodeUnsupportedSemantics, fmt.Sprintf("wildcard selectors for command %q are unmodeled", command), c)
+		return []string{}, []string{id}
+	}
 	names := []string{}
 	origins := []string{}
 	for n, f := range s.env.fields {
@@ -152,7 +166,7 @@ func renameCommand(s *semanticStage, node antlr.ParserRuleContext) {
 		}
 		src := normalizedName(r.AnalysisSelector().GetText())
 		dst := normalizedName(r.AnalysisAlias().AnalysisIdentifier().GetText())
-		if len(r.AnalysisSelector().AllMULT()) > 0 {
+		if selectorPattern(r.AnalysisSelector()) || strings.Contains(dst, "*") {
 			s.env = before
 			names, _ := s.selector(r.AnalysisSelector(), "read")
 			for _, name := range names {
@@ -216,7 +230,7 @@ func fieldsCommand(s *semanticStage, node antlr.ParserRuleContext) {
 		}
 	}
 	for _, c := range ctx.AnalysisFieldList().AllAnalysisSelector() {
-		if exclude && len(c.AllMULT()) == 0 {
+		if exclude && !selectorPattern(c) {
 			name := normalizedName(c.GetText())
 			id := s.reference(c, name, "field", "remove")
 			s.env.remove(name)
@@ -340,6 +354,10 @@ func lookupCommand(s *semanticStage, node antlr.ParserRuleContext) {
 		if in.AnalysisAlias() != nil {
 			local = in.AnalysisAlias().AnalysisIdentifier()
 		}
+		if strings.Contains(normalizedName(in.AnalysisIdentifier().GetText()), "*") || strings.Contains(normalizedName(local.GetText()), "*") {
+			s.diagnostic(CodeUnsupportedSemantics, "lookup wildcard input columns are unmodeled", in)
+			continue
+		}
 		ids = append(ids, s.read(local, normalizedName(local.GetText()), "read"))
 	}
 	if len(c.AllAnalysisOutput()) == 0 {
@@ -352,6 +370,10 @@ func lookupCommand(s *semanticStage, node antlr.ParserRuleContext) {
 				local = item.AnalysisAlias().AnalysisIdentifier()
 			}
 			name := normalizedName(local.GetText())
+			if strings.Contains(normalizedName(item.AnalysisIdentifier().GetText()), "*") || strings.Contains(name, "*") {
+				s.diagnostic(CodeUnsupportedSemantics, "lookup wildcard output columns are unmodeled", item)
+				continue
+			}
 			conditional := out.OUTPUTNEW() != nil
 			if conditional {
 				if _, known := s.env.fields[name]; known {

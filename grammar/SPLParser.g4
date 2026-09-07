@@ -152,8 +152,18 @@ analysisStage
     | {p.analysisCommandIs("dedup")}? analysisCommandName analysisLimit? analysisOption* analysisFieldList #AnalysisDedupStage
     | {p.analysisCommandIs("head", "tail")}? analysisCommandName (analysisLimit | analysisExpression)? #AnalysisLimitStage
     | {p.analysisCommandIs("inputlookup")}? analysisCommandName analysisOption* analysisCatalogName #AnalysisInputlookupStage
-    | {!p.analysisCommandIs("search", "where", "eval", "rename", "fields", "table", "stats", "eventstats", "streamstats", "lookup", "sort", "dedup", "head", "tail", "inputlookup")}? analysisCommandName analysisArgument* #AnalysisOpaqueStage
+    | {p.analysisCommandIs("datamodel")}? analysisCommandName analysisDataModelName analysisDataModelDataset? analysisArgument* #AnalysisDatamodelStage
+    | {p.analysisCommandIs("from")}? analysisCommandName analysisFromDataset #AnalysisFromStage
+    | {p.analysisCommandIs("tstats")}? analysisCommandName analysisOption* analysisAggregate (COMMA? analysisAggregate)* analysisTstatsFrom? analysisTstatsWhere? analysisGroup? #AnalysisTstatsStage
+    | analysisMacro #AnalysisMacroStage
+    | {!p.analysisCommandIs("search", "where", "eval", "rename", "fields", "table", "stats", "eventstats", "streamstats", "lookup", "sort", "dedup", "head", "tail", "inputlookup", "datamodel", "from", "tstats")}? analysisCommandName analysisArgument* #AnalysisOpaqueStage
     ;
+// Catalog roles are established here; qualified names remain single lexer tokens.
+analysisDataModelName : analysisCatalogName;
+analysisDataModelDataset : {!p.analysisCommandIs("search", "flat", "acceleration_search", "search_string", "flat_string", "acceleration_search_string")}? analysisCatalogName;
+analysisFromDataset : analysisCatalogName;
+analysisTstatsFrom : {p.analysisCommandIs("from")}? analysisCommandName {p.analysisCommandIs("datamodel")}? analysisIdentifier EQ analysisDataModelName;
+analysisTstatsWhere : {p.analysisCommandIs("where")}? analysisCommandName analysisSearch;
 analysisCommandName : INIT_COMMAND | STD_COMMAND | STD_COMMAND_AND_FUNCTION | IDENTIFIER;
 analysisSortField : (ADD | SUB)? analysisSelector;
 analysisLimit : NUMBER;

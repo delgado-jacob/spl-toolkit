@@ -9,11 +9,12 @@ import (
 )
 
 type semanticStage struct {
-	result      *Result
-	parsed      *parsedDocument
-	stage       int
-	env         *environment
-	transitions []Transition
+	result        *Result
+	parsed        *parsedDocument
+	stage         int
+	env           *environment
+	transitions   []Transition
+	recoveryLimit int
 }
 
 func normalizedName(text string) string {
@@ -61,15 +62,34 @@ func (s *semanticStage) diagnostic(code, message string, ctx antlr.ParserRuleCon
 	s.result.Diagnostics = append(s.result.Diagnostics, Diagnostic{Code: code, Severity: severity, Category: category, Message: message, Location: s.parsed.source.contextLocation(ctx), StageID: st.ID, ScopeID: st.ScopeID})
 }
 func (s *semanticStage) reference(ctx antlr.ParserRuleContext, name, kind, role string) string {
-	if !intact(ctx) {
+	if !s.sound(ctx) {
 		return ""
 	}
-	st := s.result.Stages[s.stage]
 	loc := s.parsed.source.contextLocation(ctx)
 	resolution := "exact"
-	if strings.Contains(name, "*") {
-		resolution = "wildcard"
+	switch c := ctx.(type) {
+	case parser.IAnalysisSelectorContext:
+		if selectorPattern(c) {
+			resolution = "wildcard"
+		}
+	case parser.IAnalysisSearchValueContext:
+		// Search values are patterns even when double-quoted; this rule does not
+		// apply to exact quoted field identifiers in assignment/expression contexts.
+		if c.STRING() != nil && strings.Contains(name, "*") {
+			resolution = "wildcard"
+		}
+		if value := c.AnalysisUnquotedValue(); value != nil {
+			for _, part := range value.AllAnalysisUnquotedPart() {
+				if part.MULT() != nil {
+					resolution = "wildcard"
+				}
+			}
+		}
 	}
+	return s.referenceAt(loc, name, kind, role, resolution)
+}
+func (s *semanticStage) referenceAt(loc Location, name, kind, role, resolution string) string {
+	st := s.result.Stages[s.stage]
 	id := fmt.Sprintf("pending-%d", len(s.result.References))
 	s.result.References = append(s.result.References, Reference{ID: id, OriginalName: s.result.Document.Text[loc.Start.Offset:loc.End.Offset], NormalizedName: name, Kind: kind, Role: role, StageID: st.ID, ScopeID: st.ScopeID, Location: loc, Resolution: resolution, Binding: "not_applicable", OriginReferenceIDs: []string{}})
 	return id
@@ -163,19 +183,6 @@ func (s *semanticStage) expression(node antlr.Tree) []string {
 		ids = append(ids, s.expression(node.GetChild(i))...)
 	}
 	return ids
-}
-func (s *semanticStage) dependency(ctx antlr.ParserRuleContext, name, kind string) {
-	s.reference(ctx, name, kind, "read")
-	switch kind {
-	case "index":
-		s.result.Dependencies.Indexes = append(s.result.Dependencies.Indexes, name)
-	case "source":
-		s.result.Dependencies.Sources = append(s.result.Dependencies.Sources, name)
-	case "sourcetype":
-		s.result.Dependencies.SourceTypes = append(s.result.Dependencies.SourceTypes, name)
-	case "lookup":
-		s.result.Dependencies.Lookups = append(s.result.Dependencies.Lookups, name)
-	}
 }
 func finalizeReferences(r *Result) {
 	sort.SliceStable(r.References, func(i, j int) bool {

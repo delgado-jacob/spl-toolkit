@@ -127,8 +127,35 @@ type SPLParserVisitor interface {
 	// Visit a parse tree produced by SPLParser#AnalysisInputlookupStage.
 	VisitAnalysisInputlookupStage(ctx *AnalysisInputlookupStageContext) interface{}
 
+	// Visit a parse tree produced by SPLParser#AnalysisDatamodelStage.
+	VisitAnalysisDatamodelStage(ctx *AnalysisDatamodelStageContext) interface{}
+
+	// Visit a parse tree produced by SPLParser#AnalysisFromStage.
+	VisitAnalysisFromStage(ctx *AnalysisFromStageContext) interface{}
+
+	// Visit a parse tree produced by SPLParser#AnalysisTstatsStage.
+	VisitAnalysisTstatsStage(ctx *AnalysisTstatsStageContext) interface{}
+
+	// Visit a parse tree produced by SPLParser#AnalysisMacroStage.
+	VisitAnalysisMacroStage(ctx *AnalysisMacroStageContext) interface{}
+
 	// Visit a parse tree produced by SPLParser#AnalysisOpaqueStage.
 	VisitAnalysisOpaqueStage(ctx *AnalysisOpaqueStageContext) interface{}
+
+	// Visit a parse tree produced by SPLParser#analysisDataModelName.
+	VisitAnalysisDataModelName(ctx *AnalysisDataModelNameContext) interface{}
+
+	// Visit a parse tree produced by SPLParser#analysisDataModelDataset.
+	VisitAnalysisDataModelDataset(ctx *AnalysisDataModelDatasetContext) interface{}
+
+	// Visit a parse tree produced by SPLParser#analysisFromDataset.
+	VisitAnalysisFromDataset(ctx *AnalysisFromDatasetContext) interface{}
+
+	// Visit a parse tree produced by SPLParser#analysisTstatsFrom.
+	VisitAnalysisTstatsFrom(ctx *AnalysisTstatsFromContext) interface{}
+
+	// Visit a parse tree produced by SPLParser#analysisTstatsWhere.
+	VisitAnalysisTstatsWhere(ctx *AnalysisTstatsWhereContext) interface{}
 
 	// Visit a parse tree produced by SPLParser#analysisCommandName.
 	VisitAnalysisCommandName(ctx *AnalysisCommandNameContext) interface{}

@@ -167,7 +167,43 @@ func (v *BaseSPLParserVisitor) VisitAnalysisInputlookupStage(ctx *AnalysisInputl
 	return v.VisitChildren(ctx)
 }
 
+func (v *BaseSPLParserVisitor) VisitAnalysisDatamodelStage(ctx *AnalysisDatamodelStageContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisFromStage(ctx *AnalysisFromStageContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisTstatsStage(ctx *AnalysisTstatsStageContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisMacroStage(ctx *AnalysisMacroStageContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
 func (v *BaseSPLParserVisitor) VisitAnalysisOpaqueStage(ctx *AnalysisOpaqueStageContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisDataModelName(ctx *AnalysisDataModelNameContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisDataModelDataset(ctx *AnalysisDataModelDatasetContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisFromDataset(ctx *AnalysisFromDatasetContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisTstatsFrom(ctx *AnalysisTstatsFromContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisTstatsWhere(ctx *AnalysisTstatsWhereContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 

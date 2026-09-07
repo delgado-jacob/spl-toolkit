@@ -260,11 +260,65 @@ func (s *BaseSPLParserListener) EnterAnalysisInputlookupStage(ctx *AnalysisInput
 // ExitAnalysisInputlookupStage is called when production AnalysisInputlookupStage is exited.
 func (s *BaseSPLParserListener) ExitAnalysisInputlookupStage(ctx *AnalysisInputlookupStageContext) {}
 
+// EnterAnalysisDatamodelStage is called when production AnalysisDatamodelStage is entered.
+func (s *BaseSPLParserListener) EnterAnalysisDatamodelStage(ctx *AnalysisDatamodelStageContext) {}
+
+// ExitAnalysisDatamodelStage is called when production AnalysisDatamodelStage is exited.
+func (s *BaseSPLParserListener) ExitAnalysisDatamodelStage(ctx *AnalysisDatamodelStageContext) {}
+
+// EnterAnalysisFromStage is called when production AnalysisFromStage is entered.
+func (s *BaseSPLParserListener) EnterAnalysisFromStage(ctx *AnalysisFromStageContext) {}
+
+// ExitAnalysisFromStage is called when production AnalysisFromStage is exited.
+func (s *BaseSPLParserListener) ExitAnalysisFromStage(ctx *AnalysisFromStageContext) {}
+
+// EnterAnalysisTstatsStage is called when production AnalysisTstatsStage is entered.
+func (s *BaseSPLParserListener) EnterAnalysisTstatsStage(ctx *AnalysisTstatsStageContext) {}
+
+// ExitAnalysisTstatsStage is called when production AnalysisTstatsStage is exited.
+func (s *BaseSPLParserListener) ExitAnalysisTstatsStage(ctx *AnalysisTstatsStageContext) {}
+
+// EnterAnalysisMacroStage is called when production AnalysisMacroStage is entered.
+func (s *BaseSPLParserListener) EnterAnalysisMacroStage(ctx *AnalysisMacroStageContext) {}
+
+// ExitAnalysisMacroStage is called when production AnalysisMacroStage is exited.
+func (s *BaseSPLParserListener) ExitAnalysisMacroStage(ctx *AnalysisMacroStageContext) {}
+
 // EnterAnalysisOpaqueStage is called when production AnalysisOpaqueStage is entered.
 func (s *BaseSPLParserListener) EnterAnalysisOpaqueStage(ctx *AnalysisOpaqueStageContext) {}
 
 // ExitAnalysisOpaqueStage is called when production AnalysisOpaqueStage is exited.
 func (s *BaseSPLParserListener) ExitAnalysisOpaqueStage(ctx *AnalysisOpaqueStageContext) {}
+
+// EnterAnalysisDataModelName is called when production analysisDataModelName is entered.
+func (s *BaseSPLParserListener) EnterAnalysisDataModelName(ctx *AnalysisDataModelNameContext) {}
+
+// ExitAnalysisDataModelName is called when production analysisDataModelName is exited.
+func (s *BaseSPLParserListener) ExitAnalysisDataModelName(ctx *AnalysisDataModelNameContext) {}
+
+// EnterAnalysisDataModelDataset is called when production analysisDataModelDataset is entered.
+func (s *BaseSPLParserListener) EnterAnalysisDataModelDataset(ctx *AnalysisDataModelDatasetContext) {}
+
+// ExitAnalysisDataModelDataset is called when production analysisDataModelDataset is exited.
+func (s *BaseSPLParserListener) ExitAnalysisDataModelDataset(ctx *AnalysisDataModelDatasetContext) {}
+
+// EnterAnalysisFromDataset is called when production analysisFromDataset is entered.
+func (s *BaseSPLParserListener) EnterAnalysisFromDataset(ctx *AnalysisFromDatasetContext) {}
+
+// ExitAnalysisFromDataset is called when production analysisFromDataset is exited.
+func (s *BaseSPLParserListener) ExitAnalysisFromDataset(ctx *AnalysisFromDatasetContext) {}
+
+// EnterAnalysisTstatsFrom is called when production analysisTstatsFrom is entered.
+func (s *BaseSPLParserListener) EnterAnalysisTstatsFrom(ctx *AnalysisTstatsFromContext) {}
+
+// ExitAnalysisTstatsFrom is called when production analysisTstatsFrom is exited.
+func (s *BaseSPLParserListener) ExitAnalysisTstatsFrom(ctx *AnalysisTstatsFromContext) {}
+
+// EnterAnalysisTstatsWhere is called when production analysisTstatsWhere is entered.
+func (s *BaseSPLParserListener) EnterAnalysisTstatsWhere(ctx *AnalysisTstatsWhereContext) {}
+
+// ExitAnalysisTstatsWhere is called when production analysisTstatsWhere is exited.
+func (s *BaseSPLParserListener) ExitAnalysisTstatsWhere(ctx *AnalysisTstatsWhereContext) {}
 
 // EnterAnalysisCommandName is called when production analysisCommandName is entered.
 func (s *BaseSPLParserListener) EnterAnalysisCommandName(ctx *AnalysisCommandNameContext) {}

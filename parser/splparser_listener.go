@@ -127,8 +127,35 @@ type SPLParserListener interface {
 	// EnterAnalysisInputlookupStage is called when entering the AnalysisInputlookupStage production.
 	EnterAnalysisInputlookupStage(c *AnalysisInputlookupStageContext)
 
+	// EnterAnalysisDatamodelStage is called when entering the AnalysisDatamodelStage production.
+	EnterAnalysisDatamodelStage(c *AnalysisDatamodelStageContext)
+
+	// EnterAnalysisFromStage is called when entering the AnalysisFromStage production.
+	EnterAnalysisFromStage(c *AnalysisFromStageContext)
+
+	// EnterAnalysisTstatsStage is called when entering the AnalysisTstatsStage production.
+	EnterAnalysisTstatsStage(c *AnalysisTstatsStageContext)
+
+	// EnterAnalysisMacroStage is called when entering the AnalysisMacroStage production.
+	EnterAnalysisMacroStage(c *AnalysisMacroStageContext)
+
 	// EnterAnalysisOpaqueStage is called when entering the AnalysisOpaqueStage production.
 	EnterAnalysisOpaqueStage(c *AnalysisOpaqueStageContext)
+
+	// EnterAnalysisDataModelName is called when entering the analysisDataModelName production.
+	EnterAnalysisDataModelName(c *AnalysisDataModelNameContext)
+
+	// EnterAnalysisDataModelDataset is called when entering the analysisDataModelDataset production.
+	EnterAnalysisDataModelDataset(c *AnalysisDataModelDatasetContext)
+
+	// EnterAnalysisFromDataset is called when entering the analysisFromDataset production.
+	EnterAnalysisFromDataset(c *AnalysisFromDatasetContext)
+
+	// EnterAnalysisTstatsFrom is called when entering the analysisTstatsFrom production.
+	EnterAnalysisTstatsFrom(c *AnalysisTstatsFromContext)
+
+	// EnterAnalysisTstatsWhere is called when entering the analysisTstatsWhere production.
+	EnterAnalysisTstatsWhere(c *AnalysisTstatsWhereContext)
 
 	// EnterAnalysisCommandName is called when entering the analysisCommandName production.
 	EnterAnalysisCommandName(c *AnalysisCommandNameContext)
@@ -376,8 +403,35 @@ type SPLParserListener interface {
 	// ExitAnalysisInputlookupStage is called when exiting the AnalysisInputlookupStage production.
 	ExitAnalysisInputlookupStage(c *AnalysisInputlookupStageContext)
 
+	// ExitAnalysisDatamodelStage is called when exiting the AnalysisDatamodelStage production.
+	ExitAnalysisDatamodelStage(c *AnalysisDatamodelStageContext)
+
+	// ExitAnalysisFromStage is called when exiting the AnalysisFromStage production.
+	ExitAnalysisFromStage(c *AnalysisFromStageContext)
+
+	// ExitAnalysisTstatsStage is called when exiting the AnalysisTstatsStage production.
+	ExitAnalysisTstatsStage(c *AnalysisTstatsStageContext)
+
+	// ExitAnalysisMacroStage is called when exiting the AnalysisMacroStage production.
+	ExitAnalysisMacroStage(c *AnalysisMacroStageContext)
+
 	// ExitAnalysisOpaqueStage is called when exiting the AnalysisOpaqueStage production.
 	ExitAnalysisOpaqueStage(c *AnalysisOpaqueStageContext)
+
+	// ExitAnalysisDataModelName is called when exiting the analysisDataModelName production.
+	ExitAnalysisDataModelName(c *AnalysisDataModelNameContext)
+
+	// ExitAnalysisDataModelDataset is called when exiting the analysisDataModelDataset production.
+	ExitAnalysisDataModelDataset(c *AnalysisDataModelDatasetContext)
+
+	// ExitAnalysisFromDataset is called when exiting the analysisFromDataset production.
+	ExitAnalysisFromDataset(c *AnalysisFromDatasetContext)
+
+	// ExitAnalysisTstatsFrom is called when exiting the analysisTstatsFrom production.
+	ExitAnalysisTstatsFrom(c *AnalysisTstatsFromContext)
+
+	// ExitAnalysisTstatsWhere is called when exiting the analysisTstatsWhere production.
+	ExitAnalysisTstatsWhere(c *AnalysisTstatsWhereContext)
 
 	// ExitAnalysisCommandName is called when exiting the analysisCommandName production.
 	ExitAnalysisCommandName(c *AnalysisCommandNameContext)
