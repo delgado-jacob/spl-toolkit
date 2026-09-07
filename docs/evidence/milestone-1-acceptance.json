@@ -1,0 +1,471 @@
+{
+  "additional_gates": {
+    "clean_source": {
+      "kind": "clean-source",
+      "schema_version": 1,
+      "source_sha": "5191206124590f69a18c81fc51e756b6e75c90e8",
+      "status": "passed",
+      "tracked_hash_sha256": "3bc770b767fd91ff52625fba1facc0ce31d8a0ac43576dfb7bed617cf6d37b7d"
+    },
+    "docker_examples": {
+      "cli": "passed",
+      "kind": "docker-examples",
+      "make_workflows": "passed",
+      "python_native": "passed",
+      "schema_version": 1,
+      "server": "passed",
+      "source_sha": "5191206124590f69a18c81fc51e756b6e75c90e8",
+      "status": "passed"
+    },
+    "go_floor": {
+      "go_version": "1.22.12",
+      "kind": "go-floor",
+      "schema_version": 1,
+      "source_sha": "5191206124590f69a18c81fc51e756b6e75c90e8",
+      "status": "passed"
+    },
+    "native_memory": {
+      "compiler": "gcc-13",
+      "kind": "native-memory",
+      "sanitizer": "address+leak",
+      "schema_version": 1,
+      "source_sha": "5191206124590f69a18c81fc51e756b6e75c90e8",
+      "status": "passed"
+    }
+  },
+  "github_actions": {
+    "conclusion": "success",
+    "jobs_successful": 24,
+    "jobs_total": 24,
+    "run_id": 34075500813,
+    "url": "https://github.com/delgado-jacob/spl-toolkit/actions/runs/34075500813"
+  },
+  "installed_wheel_combinations": [
+    {
+      "python": "3.11.9",
+      "required_native": {
+        "collected": 11,
+        "failed": 0,
+        "passed": 11,
+        "skipped": 0
+      },
+      "status": "passed",
+      "surface_acceptance": {
+        "collected": 5,
+        "failed": 0,
+        "passed": 5,
+        "skipped": 0
+      },
+      "target": "darwin-amd64",
+      "wheel_sha256": "1946cc38654f5dee36b436d3e95e0b89a081b9d23e49fbb3de4f4b34d5de0886"
+    },
+    {
+      "python": "3.12.10",
+      "required_native": {
+        "collected": 11,
+        "failed": 0,
+        "passed": 11,
+        "skipped": 0
+      },
+      "status": "passed",
+      "surface_acceptance": {
+        "collected": 5,
+        "failed": 0,
+        "passed": 5,
+        "skipped": 0
+      },
+      "target": "darwin-amd64",
+      "wheel_sha256": "1946cc38654f5dee36b436d3e95e0b89a081b9d23e49fbb3de4f4b34d5de0886"
+    },
+    {
+      "python": "3.13.7",
+      "required_native": {
+        "collected": 11,
+        "failed": 0,
+        "passed": 11,
+        "skipped": 0
+      },
+      "status": "passed",
+      "surface_acceptance": {
+        "collected": 5,
+        "failed": 0,
+        "passed": 5,
+        "skipped": 0
+      },
+      "target": "darwin-amd64",
+      "wheel_sha256": "1946cc38654f5dee36b436d3e95e0b89a081b9d23e49fbb3de4f4b34d5de0886"
+    },
+    {
+      "python": "3.14.0",
+      "required_native": {
+        "collected": 11,
+        "failed": 0,
+        "passed": 11,
+        "skipped": 0
+      },
+      "status": "passed",
+      "surface_acceptance": {
+        "collected": 5,
+        "failed": 0,
+        "passed": 5,
+        "skipped": 0
+      },
+      "target": "darwin-amd64",
+      "wheel_sha256": "1946cc38654f5dee36b436d3e95e0b89a081b9d23e49fbb3de4f4b34d5de0886"
+    },
+    {
+      "python": "3.11.9",
+      "required_native": {
+        "collected": 11,
+        "failed": 0,
+        "passed": 11,
+        "skipped": 0
+      },
+      "status": "passed",
+      "surface_acceptance": {
+        "collected": 5,
+        "failed": 0,
+        "passed": 5,
+        "skipped": 0
+      },
+      "target": "darwin-arm64",
+      "wheel_sha256": "830799b2f9dceb54ff956ac2c23f2e3582cac43feb67c9ab1269fe9ad2fafb25"
+    },
+    {
+      "python": "3.12.10",
+      "required_native": {
+        "collected": 11,
+        "failed": 0,
+        "passed": 11,
+        "skipped": 0
+      },
+      "status": "passed",
+      "surface_acceptance": {
+        "collected": 5,
+        "failed": 0,
+        "passed": 5,
+        "skipped": 0
+      },
+      "target": "darwin-arm64",
+      "wheel_sha256": "830799b2f9dceb54ff956ac2c23f2e3582cac43feb67c9ab1269fe9ad2fafb25"
+    },
+    {
+      "python": "3.13.7",
+      "required_native": {
+        "collected": 11,
+        "failed": 0,
+        "passed": 11,
+        "skipped": 0
+      },
+      "status": "passed",
+      "surface_acceptance": {
+        "collected": 5,
+        "failed": 0,
+        "passed": 5,
+        "skipped": 0
+      },
+      "target": "darwin-arm64",
+      "wheel_sha256": "830799b2f9dceb54ff956ac2c23f2e3582cac43feb67c9ab1269fe9ad2fafb25"
+    },
+    {
+      "python": "3.14.0",
+      "required_native": {
+        "collected": 11,
+        "failed": 0,
+        "passed": 11,
+        "skipped": 0
+      },
+      "status": "passed",
+      "surface_acceptance": {
+        "collected": 5,
+        "failed": 0,
+        "passed": 5,
+        "skipped": 0
+      },
+      "target": "darwin-arm64",
+      "wheel_sha256": "830799b2f9dceb54ff956ac2c23f2e3582cac43feb67c9ab1269fe9ad2fafb25"
+    },
+    {
+      "python": "3.11.9",
+      "required_native": {
+        "collected": 11,
+        "failed": 0,
+        "passed": 11,
+        "skipped": 0
+      },
+      "status": "passed",
+      "surface_acceptance": {
+        "collected": 5,
+        "failed": 0,
+        "passed": 5,
+        "skipped": 0
+      },
+      "target": "linux-amd64",
+      "wheel_sha256": "376ff8d5fbfbf9fa947ebaaa48f8a59d37a52e0e0cfaa8434a527bd2cc89d274"
+    },
+    {
+      "python": "3.12.10",
+      "required_native": {
+        "collected": 11,
+        "failed": 0,
+        "passed": 11,
+        "skipped": 0
+      },
+      "status": "passed",
+      "surface_acceptance": {
+        "collected": 5,
+        "failed": 0,
+        "passed": 5,
+        "skipped": 0
+      },
+      "target": "linux-amd64",
+      "wheel_sha256": "376ff8d5fbfbf9fa947ebaaa48f8a59d37a52e0e0cfaa8434a527bd2cc89d274"
+    },
+    {
+      "python": "3.13.7",
+      "required_native": {
+        "collected": 11,
+        "failed": 0,
+        "passed": 11,
+        "skipped": 0
+      },
+      "status": "passed",
+      "surface_acceptance": {
+        "collected": 5,
+        "failed": 0,
+        "passed": 5,
+        "skipped": 0
+      },
+      "target": "linux-amd64",
+      "wheel_sha256": "376ff8d5fbfbf9fa947ebaaa48f8a59d37a52e0e0cfaa8434a527bd2cc89d274"
+    },
+    {
+      "python": "3.14.0",
+      "required_native": {
+        "collected": 11,
+        "failed": 0,
+        "passed": 11,
+        "skipped": 0
+      },
+      "status": "passed",
+      "surface_acceptance": {
+        "collected": 5,
+        "failed": 0,
+        "passed": 5,
+        "skipped": 0
+      },
+      "target": "linux-amd64",
+      "wheel_sha256": "376ff8d5fbfbf9fa947ebaaa48f8a59d37a52e0e0cfaa8434a527bd2cc89d274"
+    },
+    {
+      "python": "3.11.9",
+      "required_native": {
+        "collected": 11,
+        "failed": 0,
+        "passed": 11,
+        "skipped": 0
+      },
+      "status": "passed",
+      "surface_acceptance": {
+        "collected": 5,
+        "failed": 0,
+        "passed": 5,
+        "skipped": 0
+      },
+      "target": "windows-amd64",
+      "wheel_sha256": "d7ecd5e983ef461111afcd7727abd8200f4d840db921578e4e3c85a2c9abd249"
+    },
+    {
+      "python": "3.12.10",
+      "required_native": {
+        "collected": 11,
+        "failed": 0,
+        "passed": 11,
+        "skipped": 0
+      },
+      "status": "passed",
+      "surface_acceptance": {
+        "collected": 5,
+        "failed": 0,
+        "passed": 5,
+        "skipped": 0
+      },
+      "target": "windows-amd64",
+      "wheel_sha256": "d7ecd5e983ef461111afcd7727abd8200f4d840db921578e4e3c85a2c9abd249"
+    },
+    {
+      "python": "3.13.7",
+      "required_native": {
+        "collected": 11,
+        "failed": 0,
+        "passed": 11,
+        "skipped": 0
+      },
+      "status": "passed",
+      "surface_acceptance": {
+        "collected": 5,
+        "failed": 0,
+        "passed": 5,
+        "skipped": 0
+      },
+      "target": "windows-amd64",
+      "wheel_sha256": "d7ecd5e983ef461111afcd7727abd8200f4d840db921578e4e3c85a2c9abd249"
+    },
+    {
+      "python": "3.14.0",
+      "required_native": {
+        "collected": 11,
+        "failed": 0,
+        "passed": 11,
+        "skipped": 0
+      },
+      "status": "passed",
+      "surface_acceptance": {
+        "collected": 5,
+        "failed": 0,
+        "passed": 5,
+        "skipped": 0
+      },
+      "target": "windows-amd64",
+      "wheel_sha256": "d7ecd5e983ef461111afcd7727abd8200f4d840db921578e4e3c85a2c9abd249"
+    }
+  ],
+  "milestone": "1-trustworthy-baseline",
+  "performance": {
+    "repetitions": 5,
+    "report": "../performance.md",
+    "source_sha": "18ec33c2cd27e61d6295ce0a82e2aef56e88ef2e"
+  },
+  "release_targets": {
+    "darwin-amd64": {
+      "architecture": "x86_64",
+      "artifact_hashes": {
+        "LICENSE": "0a9088d28233f456ea2875a609f4306820fd5a656bb05b18caf8ee7b6209fe08",
+        "PARSER-LICENSE": "33b01d5da7617fb96661764cce8f93bbbb544e470aba9641642689aa8a5ef5cb",
+        "libspl_toolkit-0.1.1-darwin-amd64.dylib": "d68dc3500418e4c3ef69fbaa9f5b90c4e44b683e1df0df4dc02744ecbf36d2ce",
+        "libspl_toolkit-0.1.1-darwin-amd64.h": "1f88c5139b2e03690126b451203258d6f2002e86b51aeedff055f5186d2a7db7",
+        "spl-toolkit-0.1.1-darwin-amd64": "df10b4de199475317b02826655afef1068ca3c33ff221548d1cd4a3ce5936433",
+        "spl-toolkit-server-0.1.1-darwin-amd64": "34bb9d98611ffbf3ef385c29c7dc60e7330c441f4ad548ec547121387e29bab5",
+        "spl_toolkit-0.1.1-py3-none-macosx_15_0_x86_64.whl": "1946cc38654f5dee36b436d3e95e0b89a081b9d23e49fbb3de4f4b34d5de0886",
+        "spl_toolkit-0.1.1.tar.gz": "f2171f7bf7205d5d780dd826c3a6c829d441ec24588fa9a3630fb0ac560e366c"
+      },
+      "cc": "/Applications/Xcode_16.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang",
+      "cc_version": "Apple clang version 17.0.0 (clang-1700.0.13.5)",
+      "configured_runner": "macos-15-intel",
+      "go": "go version go1.26.8 darwin/amd64",
+      "linker": "@(#)PROGRAM:ld PROJECT:ld-1167.5",
+      "observed_image_os": "macos15",
+      "observed_image_version": "20260824.0482.1",
+      "os": "macOS-15.7.9-x86_64-i386-64bit",
+      "packaging": {
+        "build": "1.3.0",
+        "packaging": "25.0",
+        "setuptools": "80.9.0",
+        "wheel": "0.45.1"
+      },
+      "python": "3.11.9",
+      "sdk": "/Applications/Xcode_16.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk",
+      "wheel_platform": "macosx_15_0_x86_64",
+      "xcode": "Xcode 16.4\nBuild version 16F6"
+    },
+    "darwin-arm64": {
+      "architecture": "arm64",
+      "artifact_hashes": {
+        "LICENSE": "0a9088d28233f456ea2875a609f4306820fd5a656bb05b18caf8ee7b6209fe08",
+        "PARSER-LICENSE": "33b01d5da7617fb96661764cce8f93bbbb544e470aba9641642689aa8a5ef5cb",
+        "libspl_toolkit-0.1.1-darwin-arm64.dylib": "22999ec7d48e061087fd9016f73f689283ba8f99eebe075ab56307081c64bf43",
+        "libspl_toolkit-0.1.1-darwin-arm64.h": "1f88c5139b2e03690126b451203258d6f2002e86b51aeedff055f5186d2a7db7",
+        "spl-toolkit-0.1.1-darwin-arm64": "571f5bdcd58271de6f9176de69236ecaad7fb5434b88a8b5d0c24390a6e8b8ba",
+        "spl-toolkit-server-0.1.1-darwin-arm64": "5d1cca72afbb0d3d6a27278ba307a27a04220699f2bab2c6cbbace37461d8d46",
+        "spl_toolkit-0.1.1-py3-none-macosx_15_0_arm64.whl": "830799b2f9dceb54ff956ac2c23f2e3582cac43feb67c9ab1269fe9ad2fafb25",
+        "spl_toolkit-0.1.1.tar.gz": "f2171f7bf7205d5d780dd826c3a6c829d441ec24588fa9a3630fb0ac560e366c"
+      },
+      "cc": "/Applications/Xcode_16.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang",
+      "cc_version": "Apple clang version 17.0.0 (clang-1700.0.13.5)",
+      "configured_runner": "macos-15",
+      "go": "go version go1.26.8 darwin/arm64",
+      "linker": "@(#)PROGRAM:ld PROJECT:ld-1167.5",
+      "observed_image_os": "macos15",
+      "observed_image_version": "20260829.0321.1",
+      "os": "macOS-15.7.9-arm64-arm-64bit",
+      "packaging": {
+        "build": "1.3.0",
+        "packaging": "25.0",
+        "setuptools": "80.9.0",
+        "wheel": "0.45.1"
+      },
+      "python": "3.11.9",
+      "sdk": "/Applications/Xcode_16.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk",
+      "wheel_platform": "macosx_15_0_arm64",
+      "xcode": "Xcode 16.4\nBuild version 16F6"
+    },
+    "linux-amd64": {
+      "architecture": "x86_64",
+      "artifact_hashes": {
+        "LICENSE": "0a9088d28233f456ea2875a609f4306820fd5a656bb05b18caf8ee7b6209fe08",
+        "PARSER-LICENSE": "33b01d5da7617fb96661764cce8f93bbbb544e470aba9641642689aa8a5ef5cb",
+        "libspl_toolkit-0.1.1-linux-amd64.h": "1f88c5139b2e03690126b451203258d6f2002e86b51aeedff055f5186d2a7db7",
+        "libspl_toolkit-0.1.1-linux-amd64.so": "83872f03eb8059eade6bca2bbafc4ecb621840a330999a842082cf7b7596d48c",
+        "spl-toolkit-0.1.1-linux-amd64": "ac05657ee9f6626c81ca0f47127040db07978de9faa1c8684149908512103a35",
+        "spl-toolkit-server-0.1.1-linux-amd64": "4cbe732ce18b3ee8e486f74b35cd82c86464904d13e50300e780a06db201bb7e",
+        "spl_toolkit-0.1.1-py3-none-linux_x86_64.whl": "376ff8d5fbfbf9fa947ebaaa48f8a59d37a52e0e0cfaa8434a527bd2cc89d274",
+        "spl_toolkit-0.1.1.tar.gz": "f2171f7bf7205d5d780dd826c3a6c829d441ec24588fa9a3630fb0ac560e366c"
+      },
+      "cc": "/usr/bin/x86_64-linux-gnu-gcc-13",
+      "cc_version": "gcc-13 (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+      "configured_runner": "ubuntu-24.04",
+      "go": "go version go1.26.8 linux/amd64",
+      "linker": "GNU ld (GNU Binutils for Ubuntu) 2.42",
+      "observed_image_os": "ubuntu24",
+      "observed_image_version": "20260831.293.1",
+      "os": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39",
+      "packaging": {
+        "build": "1.3.0",
+        "packaging": "25.0",
+        "setuptools": "80.9.0",
+        "wheel": "0.45.1"
+      },
+      "python": "3.11.9",
+      "sdk": null,
+      "wheel_platform": "linux_x86_64",
+      "xcode": null
+    },
+    "windows-amd64": {
+      "architecture": "AMD64",
+      "artifact_hashes": {
+        "LICENSE": "b1c3097d43bc77c8796b4c59db64bbb0dee8b5e201f6f1e0b1c35ac1f9bb5832",
+        "PARSER-LICENSE": "7674186d2cd529b95474b20ba631c66ec461fd1930c42b2f8f2d1270f586f833",
+        "libspl_toolkit-0.1.1-windows-amd64.dll": "ded16c7b57044d229ca3e926aa53bf21d6deaf0de297c1e075ea014eaba9d96a",
+        "libspl_toolkit-0.1.1-windows-amd64.h": "1f88c5139b2e03690126b451203258d6f2002e86b51aeedff055f5186d2a7db7",
+        "spl-toolkit-0.1.1-windows-amd64.exe": "56e0238d827bb9eedbe6a6001f4026b8f672a006ae01c9d706c4b13e8fcd3ab5",
+        "spl-toolkit-server-0.1.1-windows-amd64.exe": "a062a7ac757aa3c0e3c135c02850298e281826caa17f9c1788aefa8c85334314",
+        "spl_toolkit-0.1.1-py3-none-win_amd64.whl": "d7ecd5e983ef461111afcd7727abd8200f4d840db921578e4e3c85a2c9abd249",
+        "spl_toolkit-0.1.1.tar.gz": "cbdff881be342bffb72da9b1b04e9469601a48ee1b9a576fa039f209effdfdb1"
+      },
+      "cc": "C:\\mingw64\\bin\\gcc.exe",
+      "cc_version": "gcc.EXE (x86_64-posix-seh-rev2, Built by MinGW-Builds project) 14.2.0",
+      "configured_runner": "windows-2022",
+      "go": "go version go1.26.8 windows/amd64",
+      "linker": "GNU ld (GNU Binutils) 2.44",
+      "observed_image_os": "win22",
+      "observed_image_version": "20260830.290.1",
+      "os": "Windows-10-10.0.20348-SP0",
+      "packaging": {
+        "build": "1.3.0",
+        "packaging": "25.0",
+        "setuptools": "80.9.0",
+        "wheel": "0.45.1"
+      },
+      "python": "3.11.9",
+      "sdk": null,
+      "wheel_platform": "win_amd64",
+      "xcode": null
+    }
+  },
+  "schema_version": 1,
+  "strict_acceptance": {
+    "records": 28,
+    "status": "passed"
+  },
+  "tested_source_sha": "5191206124590f69a18c81fc51e756b6e75c90e8"
+}
