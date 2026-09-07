@@ -46,6 +46,7 @@ def test_documented_cli_examples(cli_path: Path, tmp_path: Path) -> None:
         completed = subprocess.run(
             render(case["argv"], substitutions),
             cwd=case_dir,
+            input=case.get("stdin"),
             check=False,
             capture_output=True,
             text=True,

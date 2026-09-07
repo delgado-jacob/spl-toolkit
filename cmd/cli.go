@@ -14,6 +14,13 @@ import (
 )
 
 type cliOptions struct {
+	fields               string
+	file                 string
+	batch                string
+	hasFields            bool
+	hasFile              bool
+	hasBatch             bool
+	hasStdin             bool
 	config               string
 	query                string
 	format               string
@@ -36,6 +43,10 @@ type cliOptions struct {
 }
 
 func runCLI(args []string, stdout, stderr io.Writer) int {
+	return runCLIWithInput(args, os.Stdin, stdout, stderr)
+}
+
+func runCLIWithInput(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 	if len(args) == 0 {
 		return writeGeneratedCLIResult(helpPayload(), stdout, stderr)
 	}
@@ -61,6 +72,8 @@ func runCLI(args []string, stdout, stderr io.Writer) int {
 			return writeCLIError(stderr, "text", err.Error(), 1)
 		}
 		return writeGeneratedCLIResult(payload.Bytes(), stdout, stderr)
+	case "validate-fields":
+		return runValidationCLI(args[1:], stdin, stdout, stderr)
 	case "map", "discover", "validate", "analyze", "capabilities":
 		return runQueryCommand(command, args[1:], stdout, stderr)
 	default:
@@ -103,6 +116,16 @@ func parseCLIOptions(command string, args []string) (cliOptions, string, error) 
 		}
 		if !terminated && strings.HasPrefix(argument, "--") {
 			name, value, hasEquals := strings.Cut(strings.TrimPrefix(argument, "--"), "=")
+			if command == "validate-fields" && name == "stdin" {
+				if hasEquals {
+					return options, errorFormat, fmt.Errorf("option --stdin does not accept a value")
+				}
+				if options.hasStdin {
+					return options, errorFormat, fmt.Errorf("duplicate option --stdin")
+				}
+				options.hasStdin = true
+				continue
+			}
 			if name == "help" {
 				if hasEquals {
 					return options, errorFormat, fmt.Errorf("option --help does not accept a value")
@@ -113,7 +136,7 @@ func parseCLIOptions(command string, args []string) (cliOptions, string, error) 
 				options.help, options.hasHelp = true, true
 				continue
 			}
-			if name != "config" && name != "query" && name != "format" && name != "output" && name != "language" && name != "profile" && name != "compatibility-version" && name != "source-id" {
+			if !(command == "validate-fields" && (name == "fields" || name == "file" || name == "batch")) && name != "config" && name != "query" && name != "format" && name != "output" && name != "language" && name != "profile" && name != "compatibility-version" && name != "source-id" {
 				return options, errorFormat, fmt.Errorf("unknown option --%s", name)
 			}
 			if !hasEquals {
@@ -150,7 +173,7 @@ func parseCLIOptions(command string, args []string) (cliOptions, string, error) 
 }
 
 func analysisOptionMayBeEmpty(command, name string) bool {
-	if command != "analyze" {
+	if command != "analyze" && command != "validate-fields" {
 		return false
 	}
 	switch name {
@@ -163,6 +186,21 @@ func analysisOptionMayBeEmpty(command, name string) bool {
 
 func setCLIOption(options *cliOptions, name, value string) error {
 	switch name {
+	case "fields":
+		if options.hasFields {
+			return fmt.Errorf("duplicate option --fields")
+		}
+		options.fields, options.hasFields = value, true
+	case "file":
+		if options.hasFile {
+			return fmt.Errorf("duplicate option --file")
+		}
+		options.file, options.hasFile = value, true
+	case "batch":
+		if options.hasBatch {
+			return fmt.Errorf("duplicate option --batch")
+		}
+		options.batch, options.hasBatch = value, true
 	case "config":
 		if options.hasConfig {
 			return fmt.Errorf("duplicate option --config")

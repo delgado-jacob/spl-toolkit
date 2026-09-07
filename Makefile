@@ -200,6 +200,7 @@ security: ## Run security analysis
 generate-docs: ## Generate OpenAPI documentation
 	@echo "Generating OpenAPI documentation..."
 	@go run github.com/swaggo/swag/v2/cmd/swag@v2.0.0-rc4 init --v3.1 -g cmd/server/main.go -o docs
+	@$(PYTHON) tools/update_validation_openapi.py docs
 
 # Tools installation
 install-tools: ## Install development tools

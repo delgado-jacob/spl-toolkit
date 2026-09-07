@@ -24,24 +24,33 @@ Commands:
   discover [query]  Discover query information
   validate [query]  Validate query syntax or --config
   analyze [query]   Analyze field availability, lineage, and coverage
+  validate-fields   Validate fields against a local catalog
   capabilities      Show supported analysis commands and limitations
   demo              Run demonstration examples
   help              Show this help message
 
-Options for map, discover, validate, analyze, and capabilities:
+Options for map, discover, validate, analyze, validate-fields, and capabilities:
   --format FORMAT   Output format: text or json (default: text)
   --output FILE     Write the result to a file (including analysis diagnostics)
   --help            Show this help message
   --query QUERY     Supply the query as an option (not capabilities)
   --config FILE     Mapping configuration (map and validate only)
 
-Additional analyze options:
+Additional analyze and single-query validate-fields options:
   --language LANG                  Query language (default: spl)
   --profile PROFILE                Execution profile (default: splunkd)
   --compatibility-version VERSION  Compatibility version (default: current)
   --source-id ID                   Source identifier preserved in the report
 
-Analyze exit codes: 0 valid, 1 invalid content, 3 incomplete analysis.
+Additional validate-fields options:
+  --fields FILE     Required local JSON field catalog (array or object; not -)
+  --file FILE       Read one query verbatim; default source ID is FILE
+  --stdin           Read one query verbatim; default source ID is <stdin>
+  --batch FILE      Read a nonempty JSON document array (- reads stdin)
+Choose exactly one positional/--query, --file, --stdin, or --batch source.
+Batch documents carry their own options; global document options are rejected.
+
+Analyze and validate-fields exit codes: 0 valid, 1 invalid content, 3 incomplete analysis.
 Request or output errors exit 2. Invalid and incomplete reports are still emitted.
 `, buildinfo.Version)
 	return err
