@@ -93,3 +93,42 @@ func TestScopesNestedOwnership(t *testing.T) {
 	}
 	scopedReference(t, r, "scope-2", "a", "read")
 }
+
+// ANTLR can recover child stages as root siblings when it loses a bracketed
+// subtree. Such stages must not publish parent outputs, references, or lineage.
+func TestScopesMalformedChildCannotBecomeParent(t *testing.T) {
+	for _, tc := range []struct{ name, query string }{
+		{"append", `search host=web | append [ search child=1 | eval good=child, broken= ] | where good=2`},
+		{"join", `search host=web | join id [ search child=1 | eval good=child, broken= ] | where good=2`},
+		{"subsearch", `search host=web [ search child=1 | eval good=child, broken= ] | where good=2`},
+		{"appendpipe", `search host=web | appendpipe [ search child=1 | eval good=child, broken= ] | where good=2`},
+		{"nested", `search host=web | append [ search outer=1 | append [ search child=1 | eval good=child, broken= ] ] | where good=2`},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			r, err := Analyze(QueryDocument{Text: tc.query})
+			if err != nil || r.Status != Invalid {
+				t.Fatal(r, err)
+			}
+			for _, ref := range r.References {
+				if ref.ScopeID == "scope-0" && (ref.NormalizedName == "child" || (ref.NormalizedName == "good" && ref.Role != "read")) {
+					t.Error("misowned child reference", ref)
+				}
+			}
+			for _, line := range r.Lineage {
+				if line.ScopeID == "scope-0" {
+					for _, state := range []FieldState{line.Before, line.After} {
+						for _, field := range state.Fields {
+							if field.Name == "good" || field.Name == "child" {
+								t.Error("child output leaked to parent state", line)
+							}
+						}
+					}
+				}
+			}
+			last := scopedReference(t, r, "scope-0", "good", "read")
+			if last.Binding != "indeterminate" || len(last.OriginReferenceIDs) != 0 {
+				t.Error("parent acquired child provenance", last)
+			}
+		})
+	}
+}

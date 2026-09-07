@@ -75,15 +75,23 @@ func (s *semanticStage) recoverStage(ctx antlr.ParserRuleContext) {
 
 // A pipeline separator is trustworthy only at its scope's parenthesis depth.
 // Bracket entry saves the outer depth, so a valid child pipeline in an outer
-// expression still has its own independent command boundaries.
-func unsafeStageBoundaries(parsed *parsedDocument) map[int]bool {
+// expression still has its own independent command boundaries. Each token also
+// retains the identity of its original opening bracket (-1 for the root). A
+// depth alone cannot distinguish sibling scopes after parser recovery.
+func originalTokenBoundaries(parsed *parsedDocument) (map[int]bool, map[int]int) {
 	unsafe := map[int]bool{}
+	owners := map[int]int{}
 	depth := 0
-	stack := []int{}
+	type bracket struct{ depth, token int }
+	stack := []bracket{}
 	badNext := false
 	for _, token := range parsed.tokens.GetAllTokens() {
 		if token.GetChannel() != antlr.TokenDefaultChannel {
 			continue
+		}
+		owners[token.GetTokenIndex()] = -1
+		if len(stack) > 0 {
+			owners[token.GetTokenIndex()] = stack[len(stack)-1].token
 		}
 		if badNext {
 			unsafe[token.GetTokenIndex()] = true
@@ -97,16 +105,16 @@ func unsafeStageBoundaries(parsed *parsedDocument) map[int]bool {
 				depth--
 			}
 		case parser.SPLLexerLBRACK:
-			stack = append(stack, depth)
+			stack = append(stack, bracket{depth, token.GetTokenIndex()})
 			depth = 0
 		case parser.SPLLexerRBRACK:
 			if len(stack) > 0 {
-				depth = stack[len(stack)-1]
+				depth = stack[len(stack)-1].depth
 				stack = stack[:len(stack)-1]
 			}
 		case parser.SPLLexerPIPE:
 			badNext = depth != 0
 		}
 	}
-	return unsafe
+	return unsafe, owners
 }

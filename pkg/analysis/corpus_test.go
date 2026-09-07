@@ -30,7 +30,7 @@ func loadCorpus(t *testing.T) []corpusCase {
 	if err := json.Unmarshal(data, &corpus); err != nil {
 		t.Fatal(err)
 	}
-	if corpus.Version != "1" || len(corpus.Cases) != 23 {
+	if corpus.Version != "1" || len(corpus.Cases) != 24 {
 		t.Fatal("missing reviewed corpus", corpus.Version, len(corpus.Cases))
 	}
 	return corpus.Cases
@@ -65,6 +65,7 @@ func TestCorpusSemanticReview(t *testing.T) {
 		"dependencies":          {Incomplete, "main,/var/log/a,syslog,Network_Traffic,Network_Traffic.All_Traffic,Web,Web.All_Traffic,Authentication,Authentication.Authentication,users", "", 8, 4, true, false},
 		"saved_dataset":         {Incomplete, "savedsearch:Daily", "", 1, 1, true, true},
 		"quoted_asterisk":       {Valid, "a*,a*", "a*", 2, 1, true, false},
+		"malformed_child_scope": {Invalid, "host,good", "host", 3, 1, true, true},
 		"quoted_projection":     {Incomplete, "a*,ab,a*", "a*,ab", 2, 1, false, true},
 		"implicit_aggregate":    {Valid, "bytes,sum(bytes),bytes", "sum(bytes)", 2, 1, false, false},
 		"exact_after_unknown":   {Invalid, "a,a,missing", "a", 4, 1, false, false},
@@ -92,6 +93,12 @@ func TestCorpusSemanticReview(t *testing.T) {
 			}
 			if r.Status != w.status || strings.Join(names, ",") != w.names || strings.Join(fields, ",") != w.fields || len(r.Stages) != w.stages || len(r.Scopes) != w.scopes || last.Open != w.open || last.Uncertain != w.uncertain {
 				t.Fatalf("status=%s refs=%q fields=%q stages=%d scopes=%d open=%v uncertain=%v", r.Status, strings.Join(names, ","), strings.Join(fields, ","), len(r.Stages), len(r.Scopes), last.Open, last.Uncertain)
+			}
+			if c.ID == "malformed_child_scope" {
+				ref := r.References[len(r.References)-1]
+				if ref.Binding != "indeterminate" || len(ref.OriginReferenceIDs) != 0 {
+					t.Fatal("malformed child became parent provenance", ref)
+				}
 			}
 			if c.ID == "unicode_repeated" {
 				ref := r.References[1]

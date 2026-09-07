@@ -9606,6 +9606,307 @@
           }
         ]
       }
+    },
+    {
+      "id": "malformed_child_scope",
+      "document": {
+        "text": "search host=web | append [ search child=1 | eval good=child, broken= ] | where good=2",
+        "language": "",
+        "profile": "",
+        "version": "",
+        "source_id": "corpus:malformed_child_scope"
+      },
+      "expected": {
+        "schema_version": 1,
+        "document": {
+          "text": "search host=web | append [ search child=1 | eval good=child, broken= ] | where good=2",
+          "language": "spl",
+          "profile": "splunkd",
+          "version": "current",
+          "source_id": "corpus:malformed_child_scope"
+        },
+        "status": "invalid",
+        "coverage": {
+          "syntax_complete": false,
+          "semantic_complete": false,
+          "reasons": [
+            "SPL_SYNTAX_ERROR"
+          ]
+        },
+        "stages": [
+          {
+            "id": "stage-0",
+            "command": "search",
+            "position": 0,
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 0,
+                "line": 1,
+                "column": 1
+              },
+              "end": {
+                "offset": 15,
+                "line": 1,
+                "column": 16
+              }
+            },
+            "semantic_complete": true
+          },
+          {
+            "id": "stage-1",
+            "command": "append",
+            "position": 1,
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 18,
+                "line": 1,
+                "column": 19
+              },
+              "end": {
+                "offset": 41,
+                "line": 1,
+                "column": 42
+              }
+            },
+            "semantic_complete": false
+          },
+          {
+            "id": "stage-2",
+            "command": "where",
+            "position": 2,
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 73,
+                "line": 1,
+                "column": 74
+              },
+              "end": {
+                "offset": 85,
+                "line": 1,
+                "column": 86
+              }
+            },
+            "semantic_complete": true
+          }
+        ],
+        "scopes": [
+          {
+            "id": "scope-0",
+            "parent_id": "",
+            "kind": "root",
+            "stage_id": "",
+            "location": {
+              "start": {
+                "offset": 0,
+                "line": 1,
+                "column": 1
+              },
+              "end": {
+                "offset": 85,
+                "line": 1,
+                "column": 86
+              }
+            }
+          }
+        ],
+        "references": [
+          {
+            "id": "ref-0",
+            "original_name": "host",
+            "normalized_name": "host",
+            "kind": "field",
+            "role": "filter",
+            "stage_id": "stage-0",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 7,
+                "line": 1,
+                "column": 8
+              },
+              "end": {
+                "offset": 11,
+                "line": 1,
+                "column": 12
+              }
+            },
+            "resolution": "exact",
+            "binding": "source",
+            "origin_reference_ids": []
+          },
+          {
+            "id": "ref-1",
+            "original_name": "good",
+            "normalized_name": "good",
+            "kind": "field",
+            "role": "read",
+            "stage_id": "stage-2",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 79,
+                "line": 1,
+                "column": 80
+              },
+              "end": {
+                "offset": 83,
+                "line": 1,
+                "column": 84
+              }
+            },
+            "resolution": "exact",
+            "binding": "indeterminate",
+            "origin_reference_ids": []
+          }
+        ],
+        "lineage": [
+          {
+            "stage_id": "stage-0",
+            "scope_id": "scope-0",
+            "before": {
+              "fields": [],
+              "removed": [],
+              "open": true,
+              "uncertain": false
+            },
+            "after": {
+              "fields": [
+                {
+                  "name": "host",
+                  "origin_reference_ids": [
+                    "ref-0"
+                  ],
+                  "conditional": false
+                }
+              ],
+              "removed": [],
+              "open": true,
+              "uncertain": false
+            },
+            "transitions": []
+          },
+          {
+            "stage_id": "stage-1",
+            "scope_id": "scope-0",
+            "before": {
+              "fields": [
+                {
+                  "name": "host",
+                  "origin_reference_ids": [
+                    "ref-0"
+                  ],
+                  "conditional": false
+                }
+              ],
+              "removed": [],
+              "open": true,
+              "uncertain": false
+            },
+            "after": {
+              "fields": [
+                {
+                  "name": "host",
+                  "origin_reference_ids": [
+                    "ref-0"
+                  ],
+                  "conditional": false
+                }
+              ],
+              "removed": [],
+              "open": true,
+              "uncertain": true
+            },
+            "transitions": []
+          },
+          {
+            "stage_id": "stage-2",
+            "scope_id": "scope-0",
+            "before": {
+              "fields": [
+                {
+                  "name": "host",
+                  "origin_reference_ids": [
+                    "ref-0"
+                  ],
+                  "conditional": false
+                }
+              ],
+              "removed": [],
+              "open": true,
+              "uncertain": true
+            },
+            "after": {
+              "fields": [
+                {
+                  "name": "host",
+                  "origin_reference_ids": [
+                    "ref-0"
+                  ],
+                  "conditional": false
+                }
+              ],
+              "removed": [],
+              "open": true,
+              "uncertain": true
+            },
+            "transitions": []
+          }
+        ],
+        "dependencies": {
+          "indexes": [],
+          "sources": [],
+          "source_types": [],
+          "datasets": [],
+          "lookups": [],
+          "data_models": [],
+          "macros": []
+        },
+        "diagnostics": [
+          {
+            "code": "SPL_SYNTAX_ERROR",
+            "severity": "error",
+            "category": "syntax",
+            "message": "no viable alternative at input 'append [ search child=1 | eval good=child, broken= ]'",
+            "location": {
+              "start": {
+                "offset": 69,
+                "line": 1,
+                "column": 70
+              },
+              "end": {
+                "offset": 70,
+                "line": 1,
+                "column": 71
+              }
+            },
+            "stage_id": "",
+            "scope_id": ""
+          },
+          {
+            "code": "SPL_SYNTAX_ERROR",
+            "severity": "error",
+            "category": "syntax",
+            "message": "no viable alternative at input 'eval good=child, broken= ]'",
+            "location": {
+              "start": {
+                "offset": 69,
+                "line": 1,
+                "column": 70
+              },
+              "end": {
+                "offset": 70,
+                "line": 1,
+                "column": 71
+              }
+            },
+            "stage_id": "",
+            "scope_id": ""
+          }
+        ]
+      }
     }
   ]
 }

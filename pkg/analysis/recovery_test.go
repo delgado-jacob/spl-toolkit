@@ -224,3 +224,20 @@ func TestRecoveryInvalidDocumentEncoding(t *testing.T) {
 		t.Fatal("valid replacement rune was rejected", r, err)
 	}
 }
+
+func TestRecoveryMisownedChildDependencyWithheld(t *testing.T) {
+	r, err := Analyze(QueryDocument{Text: `search host=web | append [ search child=1 | eval good=child, broken= | from datamodel:Private.Child ] | where good=2`})
+	if err != nil || r.Status != Invalid {
+		t.Fatal(r, err)
+	}
+	for _, ref := range r.References {
+		if ref.ScopeID == "scope-0" && (ref.Kind == "data_model" || ref.Kind == "dataset" || ref.Role == "create") {
+			t.Error("misowned child finding", ref)
+		}
+	}
+	for _, stage := range r.Stages {
+		if stage.ScopeID == "scope-0" && (stage.Command == "eval" || stage.Command == "from") {
+			t.Error("published child stage in parent", stage)
+		}
+	}
+}

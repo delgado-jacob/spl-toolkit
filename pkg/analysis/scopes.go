@@ -40,7 +40,8 @@ func analyzeParsed(result *Result, parsed *parsedDocument) {
 		}
 		return false
 	}
-	unsafeBoundaries := unsafeStageBoundaries(parsed)
+	unsafeBoundaries, tokenOwners := originalTokenBoundaries(parsed)
+	scopeOwners := map[string]int{root.ID: -1}
 	positions := map[string]int{}
 	environments := map[string]*environment{root.ID: newEnvironment()}
 	branchInputs := map[string]*environment{}
@@ -68,6 +69,13 @@ func analyzeParsed(result *Result, parsed *parsedDocument) {
 			stageContext = ctx
 			command = "search"
 		case *parser.AnalysisSubqueryContext:
+			// A recovered subtree can lose or synthesize its opening bracket. Never
+			// assign it a scope unless the original token's owner matches its parent.
+			start := ctx.GetStart()
+			if owner, ok := tokenOwners[start.GetTokenIndex()]; !ok || owner != scopeOwners[scopeID] || start.GetTokenType() != parser.SPLLexerLBRACK {
+				environments[scopeID].uncertain = true
+				return
+			}
 			kind := "subsearch"
 			for _, stage := range result.Stages {
 				if stage.ID == stageID && (stage.Command == "join" || stage.Command == "append" || stage.Command == "appendpipe") {
@@ -77,6 +85,7 @@ func analyzeParsed(result *Result, parsed *parsedDocument) {
 			}
 			child := Scope{ID: fmt.Sprintf("scope-%d", len(result.Scopes)), ParentID: scopeID, Kind: kind, StageID: stageID, Location: parsed.source.contextLocation(ctx)}
 			result.Scopes = append(result.Scopes, child)
+			scopeOwners[child.ID] = start.GetTokenIndex()
 			env := newEnvironment()
 			if kind == "appendpipe" {
 				env = branchInputs[stageID].clone()
@@ -85,6 +94,13 @@ func analyzeParsed(result *Result, parsed *parsedDocument) {
 			environments[scopeID] = env
 		}
 		if stageContext != nil {
+			// ANTLR recovery may flatten a damaged child stage into the parent's
+			// pipeline. Withhold its entire subtree before publishing a stage or
+			// running transfers/dependency collection against the wrong environment.
+			if owner, ok := tokenOwners[stageContext.GetStart().GetTokenIndex()]; !ok || owner != scopeOwners[scopeID] {
+				environments[scopeID].uncertain = true
+				return
+			}
 			stageID = fmt.Sprintf("stage-%d", len(result.Stages))
 			stage := Stage{ID: stageID, Command: command, Position: positions[scopeID], ScopeID: scopeID, Location: parsed.source.contextLocation(stageContext), SemanticComplete: true}
 			positions[scopeID]++
