@@ -148,6 +148,56 @@ func TestSPL2UnmodeledOperandsCannotProveOutputs(t *testing.T) {
 		}
 	}
 }
+
+func TestSPL2StringTemplatePresence(t *testing.T) {
+	for _, expression := range []string{`"${null}"`, `"delta=${abs(high-low)}"`, `"value=${tonumber(value)}"`, `"owner=${account}"`} {
+		t.Run(expression, func(t *testing.T) {
+			r := spl2AnalyzeTest(t, "FROM main | eval label="+expression+" | table label")
+			if r.Status != Valid || spl2Ref(t, r, "label", "read").Binding != "derived" || r.Lineage[1].Transitions[0].Conditional {
+				t.Fatalf("intact template must produce a present string: %+v", r)
+			}
+			assertCorpusIntegrity(t, r)
+		})
+	}
+	r := spl2AnalyzeTest(t, `FROM main | eval gone=null | eval label="value=${gone}" | table label`)
+	if r.Status != Invalid || !spl2HasCode(r, CodeUnavailableField) || spl2Ref(t, r, "gone", "read").Binding != "unavailable" || spl2Ref(t, r, "label", "read").Binding != "derived" {
+		t.Fatalf("template must retain unavailable input finding and string output: %+v", r)
+	}
+	for _, expression := range []string{`"${mystery(value)}"`, `"${value.`} {
+		r := spl2AnalyzeTest(t, "FROM main | eval label="+expression)
+		if r.Status == Valid || r.Coverage.SemanticComplete {
+			t.Fatalf("unknown/damaged interpolation promoted: %+v", r)
+		}
+		for _, tr := range r.Lineage[len(r.Lineage)-1].Transitions {
+			if tr.Output == "label" && !tr.Conditional {
+				t.Fatalf("unproved template output presence: %+v", r)
+			}
+		}
+	}
+}
+
+func TestSPL2HeldPrefixDoesNotProvePresence(t *testing.T) {
+	r := spl2AnalyzeTest(t, `FROM main | eval x=nOt enabled`)
+	if r.Status != Incomplete || r.Coverage.SyntaxComplete || r.Coverage.SemanticComplete {
+		t.Fatalf("held prefix promoted: %+v", r)
+	}
+	spl2Ref(t, r, "enabled", "read")
+	spl2Ref(t, r, "x", "create")
+	for _, f := range r.Lineage[len(r.Lineage)-1].After.Fields {
+		if f.Name == "x" && !f.Conditional {
+			t.Fatalf("held operator proved output: %+v", r)
+		}
+	}
+	for _, q := range []string{`FROM main | eval x=NOT enabled`, `FROM main | eval x=not[0]`} {
+		control := spl2AnalyzeTest(t, q)
+		if q == `FROM main | eval x=NOT enabled` && control.Status != Valid {
+			t.Fatalf("documented prefix changed: %+v", control)
+		}
+		if q == `FROM main | eval x=not[0]` {
+			spl2Ref(t, control, "not", "read")
+		}
+	}
+}
 func TestSPL2AggregateWildcardOperandsRemainIncomplete(t *testing.T) {
 	for _, name := range []string{"sum", "count"} {
 		r := spl2AnalyzeTest(t, "FROM main | stats "+name+"('bytes*') AS n")

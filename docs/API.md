@@ -56,7 +56,7 @@ These analysis examples return `valid`/0, `invalid`/1, and `incomplete`/3 respec
 | 3 | Incomplete syntax/semantic coverage without a proven error |
 | 2 | Usage, options, or I/O error |
 
-The report is written before returning its content status. `--output report.json` writes to a file. `--format text` presents status, coverage, located references, and diagnostics; `--format json` emits the direct canonical report. A positional query is also supported. `--language spl`, `--profile splunkd`, and `--compatibility-version current` select the only delivered contract. `capabilities` supports text/JSON and `--output`, with exit 0 on success and 2 on usage/I/O errors. Existing commands retain their exit behavior.
+The report is written before returning its content status. `--output report.json` writes to a file. `--format text` presents status, coverage, located references, and diagnostics; `--format json` emits the direct canonical report. A positional query is also supported. `--language spl` (the default) or `--language spl2`, `--profile splunkd`, and `--compatibility-version current` select the delivered standalone contracts. `capabilities` supports text/JSON and `--output`, with exit 0 on success and 2 on usage/I/O errors. Existing commands retain their exit behavior.
 
 ## Python
 
@@ -122,15 +122,32 @@ Locations use half-open `[start, end)` ranges into the original text. `offset` i
 | `diagnostics` | Stable code, severity, category, message, location, stage ID, and scope ID |
 | `coverage` | Separate syntax/semantic completeness and reason codes |
 
-Collections are arrays, including empty arrays, never null. Names preserve field case; command/function matching is case-insensitive. IDs and collection order are deterministic for the same document. Reference binding distinguishes source requirements, derived values, indeterminate origins, and non-consuming operands. Removal references describe operations, not required source inputs.
+Collections are arrays, including empty arrays, never null. Names preserve field case; default SPL command/function matching is case-insensitive. SPL2 case and held spelling boundaries follow its selected capability/forms contract. IDs and collection order are deterministic for the same document. Reference binding distinguishes source requirements, derived values, indeterminate origins, and non-consuming operands. Removal references describe operations, not required source inputs.
 
 Implicit search stages use command `search`; a macro-only stage uses synthetic command `macro`. Macro identity is a located dependency, with unexpanded effects incomplete. Data-model and dataset references may overlap: `datamodel:Web.All_Traffic` identifies both the root model and qualified dataset. In `datamodel Web All_Traffic`, the dataset's source range covers `All_Traffic` while its normalized name is `Web.All_Traffic`. Consumers must retain the distinct reference identities and component spans.
 
 ## Coverage and limitations
 
+Select SPL2 in `QueryDocument.Language`, CLI `--language spl2`, Python
+`language="spl2"`, or the HTTP document's `language` field. Go
+`CapabilitiesFor(CapabilityOptions{Language: "spl2"})`, Python
+`capabilities(language="spl2")`, CLI `capabilities --language spl2`, and
+`GET /api/v1/capabilities?language=spl2` expose the same selected manifest. It adds
+an optional `documentation_snapshot`; the [SPL2 guide](spl2.md) defines its durable
+provenance meaning. Defaults remain SPL. `current` is a build capability snapshot.
+
+SPL2 SQL stages stay in lexical order, while scope-local `position` and lineage
+`phase` / `execution_order` describe actual evaluation. Exact direct null
+inspections have role `null_test` and retain binding/location/origins without an
+existence outcome; ordinary reads still require presence. Complete modeled effects
+may produce conditional fields, whose later consumers remain indeterminate.
+SPL2 independent rename violations are invalid; named/dynamic/held forms and
+ambiguous dotted identity remain incomplete. See the dedicated contract for
+source-first validation, all-null removal, phase ownership and exclusions.
+
 `valid` means no proven structural error and complete analysis for the supported forms. It does not assert that fields exist in an external schema, that a dependency exists on a Splunk instance, or that Splunk will execute a query successfully. `invalid` takes precedence over incomplete coverage when syntax errors or provably unavailable fields occur. Partial trustworthy findings survive neighboring unsupported or damaged stages; later supported stages cannot erase earlier coverage gaps. Read both `status` and `coverage`.
 
-The capability manifest has integer `schema_version: 1`, `language`, `profile`, `version`, `commands`, and `functions`. Each entry has `name`, `syntax_supported`, `semantic_supported`, and `limitations`. Semantic support applies to the listed forms, not every option of that command. Use the runtime manifest for exact function arities and supported contexts.
+The capability manifest has integer `schema_version: 1`, `language`, `profile`, `version`, `commands`, and `functions`. Each entry has `name`, `syntax_supported`, `semantic_supported`, and `limitations`. Semantic support applies to the listed forms, not every option of that command. Use the runtime manifest for exact function arities and supported contexts. The following bullets describe the default SPL contract; the [standalone SPL2 contract](spl2.md) defines its separate grammar, positional core, SQL phases, null inspection and held boundaries.
 
 - Search predicates treat bare right-hand values as literals; `where`/`eval` expression identifiers are reads. Index/source/sourcetype selectors are dependencies.
 - Eval assignments resolve left-to-right, with self-assignment reading the prior binding. Ordinary non-overlapping rename sources resolve before the stage. Chains, swaps, duplicate claims, and collisions remain incomplete.
@@ -145,7 +162,7 @@ Stable diagnostic codes are `SPL_SYNTAX_ERROR`, `SPL_UNAVAILABLE_FIELD`, `SPL_UN
 
 ## Migrating from discovery
 
-Legacy Go `DiscoverQuery`, Python `QueryInfo`/`discover_query`, CLI `discover`, REST discovery, and mapping remain available. Flat `InputFields`/`input_fields` cannot describe read timing, derived fields, scopes, source positions, or coverage. Structured consumers should call analysis, inspect each reference's role/binding and scope, and check status/coverage before treating the result as conclusive. Legacy and structured field classification are distinct contracts; do not infer identical flat field lists or replace mapping behavior based on an analysis report. Use field-list validation below for external declarations. JSON Schema validation, broad SPL2, and new rewrite semantics remain outside this API.
+Legacy Go `DiscoverQuery`, Python `QueryInfo`/`discover_query`, CLI `discover`, REST discovery, and mapping remain available. Flat `InputFields`/`input_fields` cannot describe read timing, derived fields, scopes, source positions, or coverage. Structured consumers should call analysis, inspect each reference's role/binding and scope, and check status/coverage before treating the result as conclusive. Legacy and structured field classification are distinct contracts; do not infer identical flat field lists or replace mapping behavior based on an analysis report. Use field-list validation below for external declarations. Field-list and JSON Schema/OCSF validation accept both dialects. Select standalone SPL2 explicitly; new rewrite semantics and SPL2 modules remain outside this API.
 
 ## Field-list validation
 

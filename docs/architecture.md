@@ -19,7 +19,7 @@ REST mapping configurations are request-scoped and may be cached by configuratio
 
 Discovery is intentionally flat. It does not model stages, structured references, lineage, schemas, or read/write roles. Macro recovery is deliberately limited: when unsupported macro syntax causes parse errors, the result contains recovered macros and empty arrays for other categories.
 
-Generated parser sources are committed build inputs. Runtime code and build configuration do not depend on temporary planning artifacts. Expanding the grammar and adding SPL2 modules remain later work.
+Generated parser sources are committed build inputs. Runtime code and build configuration do not depend on temporary planning artifacts. Standalone SPL2 has its own generated ANTLR lexer/parser and typed syntax ownership. SPL2 modules remain excluded.
 
 ## Canonical analysis and validation
 
@@ -32,6 +32,22 @@ CLI and REST validate transport inputs and serialize reports. The C exports `spl
 Shared full reports in `testdata/validation/cases.json` are asserted directly in Go and in copied installed CLI/Python/HTTP acceptance tests. The package checker copies fixtures outside the checkout, supplies absolute environment paths, records hashes, and requires nonempty collection with zero failures or skips for both the built wheel and the wheel rebuilt from the source distribution.
 
 ## Local schema projection
+
+SPL2 lowering consumes its typed syntax and original token locations, then shares
+the field-transfer kernel and canonical validators with SPL. The shared kernel
+receives located operands and prepared projections; it does not inspect SPL2
+grammar objects. SQL scheduling separates source/filter/group/evaluation from
+final projection, preserving lexical references while recording actual lineage
+phases. Independent children start with source environments; inherited subpipes
+receive copies. Unproved parent merges never install guessed child outputs.
+
+The corpus retains separate raw syntax and canonical-result expectations. Its
+auditor checks immutable provenance, assembly rules, original obligations, held
+boundaries and deduplicated floors without parsing queries. CLI, HTTP and Python
+serialize the canonical results. Installed acceptance copies the SPL2 corpus and
+maintained documentation outside the checkout and requires every registered
+native/surface suite to collect tests with no required skips. The
+[SPL2 guide](spl2.md) describes the public boundaries.
 
 `AnalyzeWithSourceUniverse` accepts copied candidate names, an exhaustive-universe promise, and a per-name admission resolver. An exact initial source read remains structurally available even when the external target prohibits it. Schema absence is classified by validation, preserving the original binding. The engine owns transfers, nested scopes, structural availability, partial selectors, and final reference IDs. Legacy finite field-list behavior and plain `Analyze` remain unchanged.
 

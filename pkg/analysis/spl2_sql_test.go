@@ -5,6 +5,9 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+
+	"github.com/antlr4-go/antlr/v4"
+	"github.com/delgado-jacob/spl-toolkit/parser/spl2"
 )
 
 // This witnesses lexical evidence independently of the SQL execution schedule.
@@ -134,6 +137,57 @@ func TestSPL2SQLAliasPreparationAndVisibility(t *testing.T) {
 	hidden := spl2AnalyzeTest(t, "SELECT host FROM main ORDER BY bytes")
 	if spl2Ref(t, hidden, "bytes", "read").Binding != "indeterminate" {
 		t.Fatalf("hidden source promoted: %+v", hidden.References)
+	}
+}
+
+func TestSPL2SQLAggregateOnlyHaving(t *testing.T) {
+	for _, text := range []string{"SELECT count() AS n FROM main HAVING n>2", "FROM main SELECT count() AS n HAVING n>2"} {
+		t.Run(text, func(t *testing.T) {
+			r := spl2AnalyzeTest(t, text)
+			if r.Status != Valid || !r.Coverage.SyntaxComplete || !r.Coverage.SemanticComplete || len(r.Diagnostics) != 0 {
+				t.Fatalf("whole-input aggregate HAVING: %+v", r)
+			}
+			selectID, sourceID := "stage-0", "stage-1"
+			createID := "ref-0"
+			if strings.HasPrefix(text, "FROM") {
+				selectID, sourceID, createID = "stage-1", "stage-0", "ref-1"
+			}
+			assertSQLPhases(t, r, []string{"source", "aggregate", "having", "project"}, []string{sourceID, selectID, "stage-2", selectID})
+			if len(r.References) != 3 || len(r.Scopes) != 1 || len(r.Stages) != 3 {
+				t.Fatalf("extra lexical evidence %+v", r)
+			}
+			created, read := spl2Ref(t, r, "n", "output"), spl2Ref(t, r, "n", "read")
+			if created.ID != createID || created.StageID != selectID || read.StageID != "stage-2" || read.Binding != "derived" || !reflect.DeepEqual(read.OriginReferenceIDs, []string{createID}) {
+				t.Fatalf("HAVING did not consume selected aggregate: %+v", r.References)
+			}
+			field := FieldBinding{Name: "n", OriginReferenceIDs: []string{createID}}
+			closed := FieldState{Fields: []FieldBinding{field}, Removed: []string{}}
+			for _, phase := range r.Lineage[1:] {
+				if !reflect.DeepEqual(phase.After, closed) {
+					t.Fatalf("aggregate presence/projection: %+v", phase)
+				}
+			}
+			if !reflect.DeepEqual(r.Lineage[1].Transitions, []Transition{{Operation: "aggregate", Output: "n", InputReferenceIDs: []string{}, OutputReferenceID: createID}}) || !reflect.DeepEqual(r.Lineage[3].Transitions, []Transition{{Operation: "project", Output: "n", InputReferenceIDs: []string{createID}}}) {
+				t.Fatalf("phase transition ownership %+v", r.Lineage)
+			}
+			assertCorpusIntegrity(t, r)
+		})
+	}
+	for _, text := range []string{
+		"FROM main SELECT host HAVING host>2",
+		"FROM main SELECT count() AS n HAVING hidden>2",
+		"FROM main SELECT count() AS n,host HAVING n>2",
+		"FROM main SELECT count() AS n,count() AS n HAVING n>2",
+		"FROM main SELECT mystery() AS n HAVING n>2",
+	} {
+		r := spl2AnalyzeTest(t, text)
+		if r.Status != Incomplete || r.Coverage.SemanticComplete {
+			t.Fatalf("unproved HAVING promoted: %s %+v", text, r)
+		}
+	}
+	r := spl2AnalyzeTest(t, "FROM main SELECT sum(bytes) AS total HAVING total>2")
+	if r.Status != Valid || !r.Coverage.SemanticComplete || spl2Ref(t, r, "total", "read").Binding != "indeterminate" || !r.Lineage[len(r.Lineage)-1].After.Fields[0].Conditional {
+		t.Fatalf("conditional aggregate presence promoted: %+v", r)
 	}
 }
 
@@ -388,6 +442,33 @@ func TestSPL2SQLAggregateWildcardKeepsSourceGuards(t *testing.T) {
 	assertCorpusIntegrity(t, r.Result)
 }
 
+func TestSPL2SQLFiniteProjectionKeepsPartialExpansionUncertainty(t *testing.T) {
+	for _, complete := range []bool{false, true} {
+		u := SourceUniverse{Fields: []string{"actor"}, Complete: complete, Resolve: func(string) SourceFieldAdmission { return SourceFieldAdmitted }}
+		r, err := AnalyzeWithSourceUniverse(QueryDocument{Text: `SELECT count('actor*') AS n FROM main`, Language: "spl2"}, u)
+		if err != nil || len(r.Expansions) != 1 || r.Expansions[0].Complete != complete {
+			t.Fatalf("source expansion changed: %+v %v", r, err)
+		}
+		last := r.Result.Lineage[len(r.Result.Lineage)-1].After
+		if last.Open || last.Uncertain != !complete || len(last.Fields) != 1 || last.Fields[0].Name != "n" || !last.Fields[0].Conditional {
+			t.Fatalf("partial=%v expansion final guard: %+v", !complete, last)
+		}
+		assertCorpusIntegrity(t, r.Result)
+	}
+
+	// An earlier expansion is not a dependency of the later SELECT's fresh input.
+	u := SourceUniverse{Fields: []string{"actor"}, Complete: false, Resolve: func(string) SourceFieldAdmission { return SourceFieldAdmitted }}
+	r, err := AnalyzeWithSourceUniverse(QueryDocument{Text: `FROM main | stats count('actor*') AS previous | SELECT mystery(host) AS output FROM other`, Language: "spl2"}, u)
+	if err != nil || len(r.Expansions) != 1 || r.Expansions[0].Complete {
+		t.Fatalf("expected earlier partial expansion: %+v %v", r, err)
+	}
+	last := r.Result.Lineage[len(r.Result.Lineage)-1].After
+	if last.Open || last.Uncertain || len(last.Fields) != 1 || last.Fields[0].Name != "output" || !last.Fields[0].Conditional {
+		t.Fatalf("unrelated expansion tainted exact later destination: %+v", last)
+	}
+	assertCorpusIntegrity(t, r.Result)
+}
+
 func TestSPL2SQLCompoundAggregateCallContracts(t *testing.T) {
 	for _, c := range []struct {
 		name, expression, code, diagnosticText string
@@ -451,5 +532,556 @@ func TestSPL2SQLCompoundAggregateCallContracts(t *testing.T) {
 			}
 			assertCorpusIntegrity(t, r)
 		})
+	}
+}
+
+func TestSPL2SQLRecoveredClauseEvidence(t *testing.T) {
+	for _, q := range []string{
+		`SELECT L.id FROM main AS L JOIN users AS R ON L.id=R.id`,
+		`SELECT host FROM main AS L JOIN users AS R ON`,
+		`FROM main AS L JOIN users AS R ON`,
+	} {
+		t.Run(q, func(t *testing.T) {
+			r := spl2AnalyzeTest(t, q)
+			if !reflect.DeepEqual(r.Dependencies.Datasets, []string{"main", "users"}) {
+				t.Fatalf("intact datasets lost: %+v", r)
+			}
+			assertCorpusIntegrity(t, r)
+		})
+	}
+	for _, q := range []string{
+		`FROM main GROUP BY SELECT host,count() AS n`,
+		`FROM main GROUP BY host, SELECT host,count() AS n`,
+		`FROM main | eval 'é'=1 | FROM main GROUP BY SELECT host,count() AS n | table n`,
+	} {
+		t.Run(q, func(t *testing.T) {
+			r := spl2AnalyzeTest(t, q)
+			if r.Status != Invalid || r.Coverage.SyntaxComplete {
+				t.Fatalf("damage promoted: %+v", r)
+			}
+			spl2Ref(t, r, "n", "output")
+			selectStart := strings.Index(q, "SELECT")
+			found := false
+			for _, stage := range r.Stages {
+				if stage.Command == "select" && stage.Location.Start.Offset == selectStart {
+					found = true
+				}
+			}
+			if !found {
+				t.Fatalf("real SELECT boundary lost: %+v", r)
+			}
+			assertCorpusIntegrity(t, r)
+		})
+	}
+}
+
+func TestSPL2SQLEmptyHavingRetainsGroupEvidence(t *testing.T) {
+	q := `SELECT sum(size) AS total FROM main GROUP BY server HAVING`
+	r := spl2AnalyzeTest(t, q)
+	if r.Status != Invalid || r.Coverage.SyntaxComplete {
+		t.Fatalf("empty HAVING promoted: %+v", r)
+	}
+	if spl2Ref(t, r, "size", "read").Binding != "source" || spl2Ref(t, r, "server", "group").Binding != "source" {
+		t.Fatalf("intact pregroup inputs lost: %+v", r)
+	}
+	for _, stage := range r.Stages {
+		if stage.Command == "group" && !stage.SemanticComplete {
+			t.Fatalf("intact GROUP damaged: %+v", r)
+		}
+	}
+}
+
+func TestSPL2SQLRecoveryPreservesOriginalDiagnostics(t *testing.T) {
+	for _, q := range []string{`FROM main GROUP BY SELECT host,count() AS n`, `SELECT sum(size) AS total FROM main GROUP BY server HAVING`} {
+		p := parseSPL2Document(q)
+		r := spl2AnalyzeTest(t, q)
+		for _, original := range p.diagnostics {
+			found := false
+			for _, actual := range r.Diagnostics {
+				if actual.Code == original.Code && actual.Message == original.Message && actual.Location == original.Location {
+					found = true
+				}
+			}
+			if !found {
+				t.Fatalf("original error removed: %+v", original)
+			}
+		}
+	}
+}
+func TestSPL2SQLGroupRecoveryNearMisses(t *testing.T) {
+	for _, q := range []string{`FROM main GROUP BY coalesce(SELECT host) SELECT count() AS n`, `FROM main GROUP BY [SELECT host] SELECT count() AS n`} {
+		r := spl2AnalyzeTest(t, q)
+		first := strings.Index(q, "SELECT")
+		for _, stage := range r.Stages {
+			if stage.Command == "select" && stage.Location.Start.Offset == first {
+				t.Fatalf("nested SELECT promoted: %+v", r)
+			}
+		}
+		if r.Status != Invalid {
+			t.Fatalf("nested damage promoted: %+v", r)
+		}
+	}
+	for _, key := range []string{`server+`, `lower(server)`, `server@`} {
+		r := spl2AnalyzeTest(t, `SELECT sum(size) AS total FROM main GROUP BY `+key+` HAVING`)
+		if r.Status != Invalid {
+			t.Fatalf("key near miss promoted: %+v", r)
+		}
+		for _, stage := range r.Stages {
+			if stage.Command == "group" && stage.SemanticComplete {
+				t.Fatalf("unproved key promoted: %+v", r)
+			}
+		}
+	}
+}
+
+func TestSPL2GroupKeyProofRequiresExactPredictionProvenance(t *testing.T) {
+	query := `SELECT sum(size) AS total FROM main GROUP BY server HAVING`
+	p := parseSPL2Document(query)
+	command := spl2PipelineContexts(p.tree.Pipeline())[0].(spl2SQLCommand)
+	proof := p.proveGroupKeyBeforeEmptyHaving(command)
+	if proof == nil || proof.identifier.GetText() != "server" {
+		t.Fatal("real single-key proof absent")
+	}
+	original := append([]Diagnostic{}, p.diagnostics...)
+	p.diagnostics = append(p.diagnostics, Diagnostic{Code: CodeSyntaxError, Severity: "error", Category: "syntax", Message: "independent earlier key damage", Location: proof.diagnostic.Location})
+	if p.proveGroupKeyBeforeEmptyHaving(command) != nil {
+		t.Fatal("prior error was waived")
+	}
+	p.diagnostics = original
+	p.predictionErrors = nil
+	if p.proveGroupKeyBeforeEmptyHaving(command) != nil {
+		t.Fatal("message/location alone authorized a waiver")
+	}
+	for _, key := range []string{`'server'`, `lower(server)`, `server+`, `server@`} {
+		p := parseSPL2Document(`SELECT sum(size) AS total FROM main GROUP BY ` + key + ` HAVING`)
+		command := spl2PipelineContexts(p.tree.Pipeline())[0].(spl2SQLCommand)
+		if p.proveGroupKeyBeforeEmptyHaving(command) != nil {
+			t.Fatalf("non-bare key gained special proof: %s", key)
+		}
+	}
+	q := `FROM main | eval 'é'=1 | SELECT sum(size) AS total FROM main GROUP BY server HAVING`
+	r := spl2AnalyzeTest(t, q)
+	ref := spl2Ref(t, r, "server", "group")
+	if ref.Binding != "source" || ref.Location.Start.Offset != strings.Index(q, "server") || r.Status != Invalid {
+		t.Fatalf("nonzero Unicode ownership: %+v", r)
+	}
+	assertCorpusIntegrity(t, r)
+}
+
+func TestSPL2SQLRecoveredTypedInputsDoNotInstallOutputs(t *testing.T) {
+	for _, tc := range []struct{ query, name string }{
+		{`FROM main SELECT lower(account) AS ORDER BY normalized`, `account`},
+		{`SELECT lower(user) AS FROM main`, `user`},
+		{`SELECT count() FROM main GROUP BY _time span=()`, `_time`},
+	} {
+		t.Run(tc.query, func(t *testing.T) {
+			r := spl2AnalyzeTest(t, tc.query)
+			if r.Status != Invalid {
+				t.Fatalf("damaged clause promoted: %+v", r)
+			}
+			count := 0
+			for _, ref := range r.References {
+				if ref.NormalizedName == tc.name && ref.Role == "read" {
+					count++
+				}
+			}
+			if count != 1 {
+				t.Fatalf("want one original input read, got %d: %+v", count, r)
+			}
+			for _, ref := range r.References {
+				if ref.Role == "create" && (ref.NormalizedName == "main" || ref.NormalizedName == "normalized") {
+					t.Fatalf("damaged alias installed: %+v", r)
+				}
+			}
+			assertCorpusIntegrity(t, r)
+		})
+	}
+}
+
+func TestSPL2SQLMissingSelectEOFReadsOriginalGroup(t *testing.T) {
+	for _, query := range []string{
+		`FROM charges GROUP BY region`,
+		`FROM main GROUP BY host`,
+		`FROM main | FROM 'café' GROUP BY host`,
+	} {
+		t.Run(query, func(t *testing.T) {
+			r := spl2AnalyzeTest(t, query)
+			name := "host"
+			if strings.HasSuffix(query, "region") {
+				name = "region"
+			}
+			if r.Status != Invalid || r.Coverage.SyntaxComplete || r.Coverage.SemanticComplete {
+				t.Fatalf("missing SELECT promoted: %+v", r)
+			}
+			found := false
+			for _, ref := range r.References {
+				if ref.NormalizedName == name && ref.Role == "group" && ref.OriginalName == name {
+					found = true
+					if query[ref.Location.Start.Offset:ref.Location.End.Offset] != name {
+						t.Fatalf("wrong original span: %+v", ref)
+					}
+				}
+			}
+			if !found {
+				t.Fatalf("intact original GROUP input lost: %+v", r)
+			}
+			for _, stage := range r.Stages {
+				if stage.Command == "select" {
+					t.Fatalf("invented SELECT: %+v", r)
+				}
+			}
+			assertCorpusIntegrity(t, r)
+		})
+	}
+}
+
+func TestSPL2SQLMissingSelectEOFAttributionGuards(t *testing.T) {
+	for _, tc := range []struct {
+		query   string
+		allowed bool
+	}{
+		{`FROM main GROUP BY host`, true},
+		{`FROM main GROUP BY host SELECT host`, false},
+		{`FROM main GROUP BY host+`, false},
+		{`FROM main GROUP BY span(_time,)`, false},
+		{`FROM main GROUP BY @host`, false},
+		{`FROM main GROUP BY host | where x=1`, false},
+		{`FROM main GROUP BY host;`, false},
+		{`FROM main WHERE EXISTS (FROM main GROUP BY host) SELECT host`, false},
+		{`FROM main WHERE EXISTS (FROM main GROUP BY host`, false},
+	} {
+		t.Run(tc.query, func(t *testing.T) {
+			p := parseSPL2Document(tc.query)
+			var from *spl2.FromCommandContext
+			var walk func(antlr.Tree)
+			walk = func(tree antlr.Tree) {
+				if f, ok := tree.(*spl2.FromCommandContext); ok && f.SqlGroupClause() != nil {
+					from = f
+				}
+				for _, child := range tree.GetChildren() {
+					walk(child)
+				}
+			}
+			walk(p.tree)
+			var diagnostic *Diagnostic
+			if from != nil {
+				diagnostic = p.groupMissingSelectDiagnostic(from)
+			}
+			if (diagnostic != nil) != tc.allowed {
+				t.Fatalf("EOF attribution=%+v, want %v", diagnostic, tc.allowed)
+			}
+			if tc.allowed {
+				before := append([]Diagnostic{}, p.diagnostics...)
+				local := *p
+				local.source = newSourceIndex(tc.query + " original tail")
+				if local.groupMissingSelectDiagnostic(from) != nil {
+					t.Fatal("substream EOF treated as original document end")
+				}
+				local = *p
+				local.tokens = antlr.NewCommonTokenStream(spl2.NewSPL2Lexer(antlr.NewInputStream(tc.query)), antlr.TokenDefaultChannel)
+				local.tokens.Fill()
+				if local.groupMissingSelectDiagnostic(from) != nil {
+					t.Fatal("non-original EOF identity admitted")
+				}
+				if !reflect.DeepEqual(before, p.diagnostics) {
+					t.Fatal("raw diagnostics mutated")
+				}
+			}
+		})
+	}
+}
+
+func TestSPL2SQLDamagedSpanDoesNotInventSiblingKeys(t *testing.T) {
+	r := spl2AnalyzeTest(t, `SELECT count() FROM main GROUP BY span(_time,hour,day)`)
+	for _, ref := range r.References {
+		if ref.Kind == "field" && (ref.NormalizedName == "hour" || ref.NormalizedName == "day" || ref.NormalizedName == "_time") {
+			t.Fatalf("damaged SPAN tokens inferred as inputs: %+v", ref)
+		}
+	}
+	if r.Status != Invalid {
+		t.Fatalf("malformed SPAN promoted: %+v", r)
+	}
+}
+
+func TestSPL2SQLIndependentCountProofSurvivesSiblingLimitation(t *testing.T) {
+	for _, tc := range []struct{ query, name string }{
+		{`SELECT region,count() AS n FROM main Group By region`, "n"},
+		{`SELECT host,count() FROM main HAVING count>1 GROUP BY host`, "count"},
+		{`FROM main GROUPBY lower(user) SELECT lower(user) AS normalized,count()`, "count"},
+		{`FROM orders AS o LEFT OUTER JOIN inventory AS i ON o.item=i.id WHERE active=true GROUP BY o.item SELECT o.item,count() AS n HAVING EXISTS (SELECT id FROM stock WHERE id=o.item) ORDERBY n DESC LIMIT 4 OFFSET 1 | where n>0`, "n"},
+	} {
+		t.Run(tc.query, func(t *testing.T) {
+			r := spl2AnalyzeTest(t, tc.query)
+			if r.Status == Valid || r.Coverage.SemanticComplete {
+				t.Fatalf("surrounding limitation promoted: %+v", r)
+			}
+			found := false
+			for _, lineage := range r.Lineage {
+				for _, tr := range lineage.Transitions {
+					if tr.Operation == "aggregate" && tr.Output == tc.name {
+						found = true
+						if tr.Conditional {
+							t.Fatalf("independent count proof contaminated: %+v", tr)
+						}
+					}
+				}
+			}
+			if !found {
+				t.Fatalf("count output missing: %+v", r)
+			}
+			assertCorpusIntegrity(t, r)
+		})
+	}
+}
+
+func TestSPL2SQLCountProofDoesNotOverrideLocalDamage(t *testing.T) {
+	for _, query := range []string{
+		`SELECT sum(bytes) AS n,other FROM main`,
+		`SELECT mystery() AS n FROM main`,
+		`SELECT count()+1 AS n FROM main`,
+		`SELECT count(host) AS n,other FROM main`,
+		`SELECT count(host,other) AS n FROM main`,
+		`SELECT count() AS n,count() AS n FROM main`,
+		`SELECT count() AS n FROM main WHERE n>0`,
+		`SELECT count() AS n,1 AS 'field_${x}' FROM main`,
+		`SELECT count() AS FROM main`,
+		`FROM main GROUP BY SELECT count(,) AS n`,
+	} {
+		t.Run(query, func(t *testing.T) {
+			r := spl2AnalyzeTest(t, query)
+			for _, lineage := range r.Lineage {
+				for _, tr := range lineage.Transitions {
+					if tr.Output == "n" && (tr.Operation == "aggregate" || tr.Operation == "create") && !tr.Conditional {
+						t.Fatalf("unproved output made definite: %+v", tr)
+					}
+				}
+			}
+			for _, field := range r.Lineage[len(r.Lineage)-1].After.Fields {
+				if field.Name == "n" && !field.Conditional {
+					t.Fatalf("unproved final presence: %+v", field)
+				}
+			}
+		})
+	}
+	for _, query := range []string{`SELECT count() FROM main GROUP BY _time span=()`, `SELECT count() FROM main GROUP BY timestamp span=()`} {
+		r := spl2AnalyzeTest(t, query)
+		name := "_time"
+		if strings.Contains(query, "timestamp") {
+			name = "timestamp"
+		}
+		if r.Status != Invalid || spl2Ref(t, r, name, "read").OriginalName != name {
+			t.Fatalf("intact assignment-form field lost: %+v", r)
+		}
+	}
+}
+
+func TestSPL2SQLCountCollisionIncludesUninstalledProjection(t *testing.T) {
+	for _, query := range []string{
+		`SELECT o.n,count() AS n FROM main AS o`,
+		`SELECT n,count() AS n FROM main`,
+		`FROM main GROUPBY lower(user) SELECT n,count() AS n`,
+		`SELECT o[field],count() AS n FROM main AS o`,
+		`SELECT o.n.deep,count() AS n FROM main AS o`,
+	} {
+		t.Run(query, func(t *testing.T) {
+			r := spl2AnalyzeTest(t, query)
+			for _, lineage := range r.Lineage {
+				for _, tr := range lineage.Transitions {
+					if tr.Operation == "aggregate" && tr.Output == "n" && !tr.Conditional {
+						t.Fatalf("uninstalled competing projection ignored: %+v", tr)
+					}
+				}
+			}
+		})
+	}
+}
+
+func TestSPL2SQLFiniteProjectionMembershipPreservesConditionality(t *testing.T) {
+	for _, tc := range []struct{ query, field string }{
+		{`FROM main GROUPBY lower(user) SELECT lower(user) AS normalized,count()`, "normalized"},
+		{`FROM main SELECT mystery(host) AS output`, "output"},
+	} {
+		t.Run(tc.query, func(t *testing.T) {
+			r := spl2AnalyzeTest(t, tc.query)
+			last := r.Lineage[len(r.Lineage)-1]
+			if r.Coverage.SemanticComplete || r.Status != Incomplete || last.Phase != "project" || last.After.Open || last.After.Uncertain {
+				t.Fatalf("fixed projected membership lost: %+v", r)
+			}
+			found := false
+			for _, f := range last.After.Fields {
+				if f.Name == tc.field {
+					found = true
+					if !f.Conditional {
+						t.Fatalf("conditional output promoted: %+v", f)
+					}
+				}
+			}
+			if !found {
+				t.Fatalf("missing prepared output: %+v", last)
+			}
+			if tc.field == "normalized" && (len(last.After.Fields) != 2 || last.After.Fields[0].Name != "count" || last.After.Fields[0].Conditional) {
+				t.Fatalf("exact selected set drifted: %+v", last.After)
+			}
+			assertCorpusIntegrity(t, r)
+		})
+	}
+	for _, query := range []string{
+		`FROM main SELECT lower(host)`,
+		`SELECT count() AS 'out_${host}' FROM main`,
+		`SELECT count() AS n,count() AS n FROM main`,
+		`SELECT lower(host) AS FROM main`,
+		`SELECT o.item,count() AS n FROM main AS o`,
+	} {
+		r := spl2AnalyzeTest(t, query)
+		if r.Coverage.SemanticComplete || !r.Lineage[len(r.Lineage)-1].After.Uncertain {
+			t.Fatalf("unproved output universe closed: %s %+v", query, r)
+		}
+	}
+}
+
+func TestSPL2SQLRecoveredCountKeepsOriginalGroupDamage(t *testing.T) {
+	queries := []string{
+		`FROM main GROUP BY SELECT count()`,
+		`FROM main | FROM 'café' GROUP BY SELECT count()`,
+	}
+	for _, group := range []string{"GROUP BY", "GROUPBY", "group by", "groupby"} {
+		queries = append(queries, "FROM main "+group+" SELECT host,count()", "FROM main "+group+" host, SELECT host,count()")
+	}
+	for _, query := range queries {
+		t.Run(query, func(t *testing.T) {
+			r := spl2AnalyzeTest(t, query)
+			if r.Status != Invalid || r.Coverage.SyntaxComplete || r.Coverage.SemanticComplete {
+				t.Fatalf("recovered SELECT erased original invalidity: %+v", r)
+			}
+			name := "count"
+			if strings.HasSuffix(query, "AS n") {
+				name = "n"
+			}
+			found := false
+			for _, lineage := range r.Lineage {
+				for _, tr := range lineage.Transitions {
+					if tr.Operation == "aggregate" && tr.Output == name {
+						found = true
+						if tr.Conditional {
+							t.Fatalf("pre-retry missing SELECT tainted intact recovered count: %+v", tr)
+						}
+					}
+				}
+			}
+			if !found {
+				t.Fatalf("intact count output absent: %+v", r)
+			}
+			originalEOF, groupDamage := false, false
+			for _, d := range r.Diagnostics {
+				originalEOF = originalEOF || (d.Code == CodeSyntaxError && d.Location.Start.Offset == len(query) && d.Location.End.Offset == len(query))
+				groupDamage = groupDamage || (d.Code == CodeSyntaxError && d.Location.Start.Offset == strings.Index(query, "SELECT"))
+			}
+			if !originalEOF || !groupDamage {
+				t.Fatalf("original EOF/GROUP diagnostics were removed: %+v", r.Diagnostics)
+			}
+			for _, stage := range r.Stages {
+				if stage.Command == "group" && stage.SemanticComplete {
+					t.Fatal("damaged GROUP effects promoted")
+				}
+			}
+			assertCorpusIntegrity(t, r)
+		})
+	}
+}
+
+func TestSPL2SQLRecoveredCountStillRequiresSoundDestination(t *testing.T) {
+	for _, query := range []string{
+		`FROM main GROUP BY SELECT count() AS n`,
+		`FROM main | FROM 'café' GROUP BY SELECT count() AS n`,
+		`FROM main GROUP BY SELECT count(,) AS n`,
+		`FROM main GROUP BY SELECT count(host) AS n`,
+		`FROM main GROUP BY SELECT count()+1 AS n`,
+		`FROM main GROUP BY SELECT count() AS`,
+		`FROM main GROUP BY SELECT count() AS 'n_${host}'`,
+		`FROM main GROUP BY SELECT count() AS n,count() AS n`,
+		`FROM main GROUP BY SELECT n,count() AS n`,
+		`FROM main GROUP BY SELECT mystery(host),count() AS n`,
+		`FROM main GROUP BY SELECT count() AS n@`,
+		`FROM main WHERE EXISTS (FROM main GROUP BY SELECT count() AS n`,
+	} {
+		t.Run(query, func(t *testing.T) {
+			r := spl2AnalyzeTest(t, query)
+			if r.Status != Invalid {
+				t.Fatalf("damaged SQL promoted: %+v", r)
+			}
+			for _, lineage := range r.Lineage {
+				for _, tr := range lineage.Transitions {
+					if tr.Output == "n" && (tr.Operation == "aggregate" || tr.Operation == "create") && !tr.Conditional {
+						t.Fatalf("unproved recovered output made definite: %+v", tr)
+					}
+				}
+			}
+		})
+	}
+}
+
+func TestSPL2SQLRecoveredCountRequiresPairedOriginalEOF(t *testing.T) {
+	query := `FROM main GROUP BY SELECT count()`
+	p := parseSPL2Document(query)
+	result := &Result{Diagnostics: append([]Diagnostic{}, p.diagnostics...)}
+	sites := spl2RecoverySites(p, result)
+	command := sites[0].context.(spl2SQLCommand)
+	projection := command.SqlSelectClause().Projection(0)
+	stage := &spl2SemanticStage{semanticStage: &semanticStage{result: result}, parsed2: p}
+	before := append([]Diagnostic{}, p.diagnostics...)
+	if !stage.sqlProjectionEffectSound(projection) {
+		t.Fatal("recorded original EOF did not admit intact count")
+	}
+	for _, change := range []struct {
+		name  string
+		apply func(*spl2ParsedDocument)
+	}{
+		{"no exception provenance", func(q *spl2ParsedDocument) { q.missingSelectEOF = nil }},
+		{"no paired retry", func(q *spl2ParsedDocument) { q.recoveredSelects = nil }},
+		{"not original document end", func(q *spl2ParsedDocument) { q.source = newSourceIndex(query + " tail") }},
+		{"different original tokens", func(q *spl2ParsedDocument) {
+			q.tokens = antlr.NewCommonTokenStream(spl2.NewSPL2Lexer(antlr.NewInputStream(query)), antlr.TokenDefaultChannel)
+			q.tokens.Fill()
+		}},
+		{"independent overlapping syntax error", func(q *spl2ParsedDocument) {
+			q.diagnostics = append(append([]Diagnostic{}, q.diagnostics...), Diagnostic{Code: CodeSyntaxError, Severity: "error", Category: "syntax", Message: "separate projection damage", Location: p.source.contextLocation(projection)})
+		}},
+	} {
+		t.Run(change.name, func(t *testing.T) {
+			local := *p
+			change.apply(&local)
+			stage.parsed2 = &local
+			if stage.sqlProjectionEffectSound(projection) {
+				t.Fatal("unproved recovered count admitted")
+			}
+		})
+	}
+	stage.parsed2 = p
+	result.Diagnostics = append(result.Diagnostics, Diagnostic{Code: CodeSyntaxError, Severity: "error", Category: "contract", Message: "independent projection contract", Location: p.source.contextLocation(projection)})
+	if stage.sqlProjectionEffectSound(projection) {
+		t.Fatal("contract error waived with EOF")
+	}
+	if !reflect.DeepEqual(before, p.diagnostics) {
+		t.Fatal("original diagnostics changed")
+	}
+	for _, query := range []string{
+		`FROM main GROUP BY SELECT count() | table count`,
+		`FROM main GROUP BY SELECT count();`,
+		`FROM main WHERE EXISTS (FROM main GROUP BY SELECT count()) SELECT count()`,
+		`FROM main WHERE EXISTS (FROM main GROUP BY SELECT count()`,
+	} {
+		p := parseSPL2Document(query)
+		result := &Result{Diagnostics: append([]Diagnostic{}, p.diagnostics...)}
+		for _, site := range spl2RecoverySites(p, result) {
+			command, ok := site.context.(spl2SQLCommand)
+			if !ok || command.SqlSelectClause() == nil {
+				continue
+			}
+			for _, projection := range command.SqlSelectClause().AllProjection() {
+				if _, diagnostic := p.recoveredCountView(projection); diagnostic != nil {
+					t.Fatalf("neighbor/nested boundary gained EOF waiver: %s", query)
+				}
+			}
+		}
 	}
 }

@@ -17,6 +17,375 @@ func spl2AnalyzeTest(t *testing.T, text string) *Result {
 	}
 	return r
 }
+
+func TestSPL2LookupImplicitOutputUncertainty(t *testing.T) {
+	for _, pair := range []struct{ match, local string }{{"uid AS user", "user"}, {"id AS account", "account"}} {
+		r := spl2AnalyzeTest(t, "FROM main | lookup users "+pair.match+" | table "+pair.local)
+		var reads []Reference
+		for _, ref := range r.References {
+			if ref.Kind == "field" && ref.NormalizedName == pair.local {
+				reads = append(reads, ref)
+			}
+		}
+		if r.Status != Incomplete || len(reads) != 2 || reads[0].Binding != "source" || reads[1].Binding != "indeterminate" || !reflect.DeepEqual(reads[1].OriginReferenceIDs, []string{reads[0].ID}) {
+			t.Fatalf("unknown lookup outputs may overwrite local alias: %+v", r)
+		}
+		if f := r.Lineage[1].After.Fields; len(f) != 1 || f[0].Name != pair.local || !f[0].Conditional || !reflect.DeepEqual(f[0].OriginReferenceIDs, []string{reads[0].ID}) {
+			t.Fatalf("post-lookup field evidence: %+v", r)
+		}
+	}
+	for _, suffix := range []string{"uid | table uid", "uid AS user OUTPUT name | table user", "uid AS user OUTPUTNEW name | table user"} {
+		r := spl2AnalyzeTest(t, "FROM main | lookup users "+suffix)
+		if r.References[len(r.References)-1].Binding != "source" {
+			t.Fatalf("protected key/explicit output changed: %+v", r)
+		}
+	}
+	r := spl2AnalyzeTest(t, "FROM main | eval gone=null | lookup users uid AS user | table gone")
+	if r.Status != Incomplete || spl2Ref(t, r, "gone", "read").Binding != "indeterminate" || spl2HasCode(r, CodeUnavailableField) {
+		t.Fatalf("unknown output cannot prove absence: %+v", r)
+	}
+}
+
+func TestSPL2ConflictingAllnumOptions(t *testing.T) {
+	for _, command := range []string{"stats", "eventstats"} {
+		for _, values := range []string{"true allnum=false", "false allnum=true"} {
+			r := spl2AnalyzeTest(t, "FROM main | "+command+" allnum="+values+" count()")
+			if r.Status != Incomplete || !r.Coverage.SyntaxComplete || r.Coverage.SemanticComplete || !spl2HasCode(r, CodeUnsupportedSemantics) {
+				t.Fatalf("conflicting option precedence is unproved: %+v", r)
+			}
+			located := false
+			for _, d := range r.Diagnostics {
+				if d.Code == CodeUnsupportedSemantics && strings.HasPrefix(r.Document.Text[d.Location.Start.Offset:d.Location.End.Offset], "allnum=") {
+					located = true
+				}
+			}
+			if !located {
+				t.Fatalf("missing located conflicting option diagnostic: %+v", r)
+			}
+		}
+		for _, value := range []string{"true", "false"} {
+			r := spl2AnalyzeTest(t, "FROM main | "+command+" allnum="+value+" allnum="+value+" count()")
+			if r.Status != Valid || !r.Coverage.SemanticComplete {
+				t.Fatalf("identical repeated value changed: %+v", r)
+			}
+		}
+	}
+}
+
+func TestSPL2RejectedAssignmentEffects(t *testing.T) {
+	for _, tc := range []struct {
+		expression string
+		intact     bool
+	}{
+		{`@"She said ""yes""`, false},
+		{`coalesce(values:primary,backup)`, false},
+		{`[[1,2],bytes+1`, false},
+		{`map(items,($x) ->)`, false},
+		{`round(precision:2,bytes)`, false},
+		{`coalesce(values:a,b)`, false},
+		{`{a:1,a:2}`, true},
+		{`{name:user,"name":host}`, true},
+		{`{'display name':user,"display name":role}`, true},
+		{`{a:1,a:2}`, true},
+		{`{name:user,"name":host}`, true},
+	} {
+		t.Run(tc.expression, func(t *testing.T) {
+			r := spl2AnalyzeTest(t, `FROM main | eval rejected=`+tc.expression)
+			if r.Status != Invalid || r.Coverage.SyntaxComplete != tc.intact || r.Coverage.SemanticComplete || !spl2HasCode(r, CodeSyntaxError) {
+				t.Fatalf("rejected assignment coverage: %+v", r)
+			}
+			for _, ref := range r.References {
+				if ref.NormalizedName == "rejected" {
+					t.Fatalf("damaged target reference: %+v", ref)
+				}
+			}
+			for _, field := range r.Lineage[len(r.Lineage)-1].After.Fields {
+				if field.Name == "rejected" {
+					t.Fatalf("damaged target state: %+v", field)
+				}
+			}
+			assertCorpusIntegrity(t, r)
+		})
+	}
+	for _, expression := range []string{`{a:user,b:host}`, `[[1,2],bytes+1]`, `mystery(bytes)`} {
+		r := spl2AnalyzeTest(t, `FROM main | eval kept=`+expression)
+		spl2Ref(t, r, "kept", "create")
+		if expression == `mystery(bytes)` && !r.Lineage[len(r.Lineage)-1].After.Fields[len(r.Lineage[len(r.Lineage)-1].After.Fields)-1].Conditional {
+			t.Fatalf("unknown intact output promoted: %+v", r)
+		}
+	}
+	r := spl2AnalyzeTest(t, `FROM main | eval first=1, rejected={a:user,"a":host}, last=2`)
+	spl2Ref(t, r, "first", "create")
+	spl2Ref(t, r, "last", "create")
+	spl2Ref(t, r, "user", "read")
+	spl2Ref(t, r, "host", "read")
+	for _, ref := range r.References {
+		if ref.NormalizedName == "rejected" {
+			t.Fatalf("invalid constructor target survived: %+v", r)
+		}
+	}
+}
+
+func TestSPL2DeferredCommandOriginalRoles(t *testing.T) {
+	for _, tc := range []struct {
+		query                  string
+		reads, groups, outputs []string
+	}{
+		{`FROM main | bin span=15m _time AS slot`, []string{"_time"}, nil, []string{"slot"}},
+		{`FROM main | rex field=message offset_field=offsets @"(?<digits>\d+)"`, []string{"message"}, nil, []string{"offsets"}},
+		{`FROM main | spath input=payload output=user_name path="actor.name"`, []string{"payload"}, nil, []string{"user_name"}},
+		{`tstats aggregates=[sum(bytes)] datamodel_name='Traffic.All' predicate=(port=443) byfields=[host,source]`, []string{"bytes", "port"}, []string{"host", "source"}, nil},
+		{`mstats aggregates=[avg('cpu.load')] predicate=(index="metrics") byfields=[host]`, []string{"cpu.load"}, []string{"host"}, nil},
+		{`FROM main | timechart agg=(sum(bytes)) avg(size) BY host`, []string{"bytes", "size"}, []string{"host"}, nil},
+		{`FROM main | timechart agg=(max(bytes) AS peak) count() BY host`, []string{"bytes"}, []string{"host"}, []string{"peak"}},
+		{`FROM main | makemv delim=":" labels`, []string{"labels"}, nil, nil},
+		{`FROM main | mvexpand limit=2 tokens`, []string{"tokens"}, nil, nil},
+		{`FROM main | mvcombine delim=";" account`, []string{"account"}, nil, nil},
+	} {
+		t.Run(tc.query, func(t *testing.T) {
+			r := spl2AnalyzeTest(t, tc.query)
+			if r.Status != Incomplete || !r.Coverage.SyntaxComplete || r.Coverage.SemanticComplete {
+				t.Fatalf("deferred effects changed: %+v", r)
+			}
+			for _, names := range []struct {
+				role  string
+				names []string
+			}{{"read", tc.reads}, {"group", tc.groups}, {"output", tc.outputs}} {
+				for _, name := range names.names {
+					ref := spl2Ref(t, r, name, names.role)
+					if names.role == "output" && ref.Binding != "not_applicable" {
+						t.Fatalf("candidate binding: %+v", ref)
+					}
+				}
+			}
+			if strings.HasPrefix(tc.query, "tstats") {
+				found := false
+				for _, ref := range r.References {
+					if ref.Kind == "data_model" && ref.NormalizedName == "Traffic.All" && ref.OriginalName == "'Traffic.All'" {
+						found = true
+					}
+				}
+				if !found || !reflect.DeepEqual(r.Dependencies.DataModels, []string{"Traffic.All"}) || len(r.Dependencies.Datasets) != 0 {
+					t.Fatalf("atomic model dependency: %+v", r)
+				}
+			}
+			if strings.HasPrefix(tc.query, "mstats") && !reflect.DeepEqual(r.Dependencies.Indexes, []string{"metrics"}) {
+				t.Fatalf("typed metrics index selector: %+v", r)
+			}
+			allowed := map[string]bool{}
+			for _, name := range append(append(append([]string{}, tc.reads...), tc.groups...), tc.outputs...) {
+				allowed[name] = true
+			}
+			for _, ref := range r.References {
+				if ref.Kind == "field" && !allowed[ref.NormalizedName] {
+					t.Fatalf("invented field role %+v", ref)
+				}
+			}
+			for _, name := range tc.outputs {
+				for _, field := range r.Lineage[len(r.Lineage)-1].After.Fields {
+					if field.Name == name {
+						t.Fatalf("candidate proved output %+v", r)
+					}
+				}
+			}
+			for _, lineage := range r.Lineage {
+				if len(lineage.Transitions) != 0 {
+					t.Fatalf("deferred effect invented transition: %+v", r)
+				}
+			}
+			assertCorpusIntegrity(t, r)
+		})
+	}
+}
+
+func TestSPL2DeferredGeneratingInputsDoNotProveOutput(t *testing.T) {
+	for _, query := range []string{`tstats aggregates=[sum(bytes)] | table bytes`, `mstats aggregates=[avg(bytes)] | table bytes`, `FROM main | timechart sum(bytes) | table bytes`} {
+		r := spl2AnalyzeTest(t, query)
+		var refs []Reference
+		for _, ref := range r.References {
+			if ref.Kind == "field" && ref.NormalizedName == "bytes" {
+				refs = append(refs, ref)
+			}
+		}
+		if len(refs) != 2 || refs[0].Binding != "source" || refs[1].Binding != "indeterminate" {
+			t.Fatalf("input presence leaked through generator: %+v", r)
+		}
+		if !r.Lineage[len(r.Lineage)-2].After.Open || !r.Lineage[len(r.Lineage)-2].After.Uncertain {
+			t.Fatalf("unproved generating output closed: %+v", r)
+		}
+	}
+}
+
+func TestSPL2DeferredOverwriteBoundaries(t *testing.T) {
+	for _, tc := range []struct {
+		command                             string
+		firstConditional, secondConditional bool
+	}{
+		{`rex mode=sed field=first "s/x/y/g"`, true, false},
+		{`rex field=first "(?<unknown>.*)"`, true, true},
+		{`spath input=first output=second path="name"`, false, true},
+		{`spath input=first`, true, true},
+		{`bin span=1 first AS second`, false, true},
+		{`makemv delim=":" first`, true, false},
+	} {
+		r := spl2AnalyzeTest(t, `FROM main | eval first="x", second="y" | `+tc.command)
+		if r.Status != Incomplete {
+			t.Fatalf("deferred control: %+v", r)
+		}
+		last := r.Lineage[len(r.Lineage)-1]
+		if len(last.After.Fields) != 2 || last.After.Fields[0].Name != "first" || last.After.Fields[0].Conditional != tc.firstConditional || last.After.Fields[1].Name != "second" || last.After.Fields[1].Conditional != tc.secondConditional || len(last.Transitions) != 0 {
+			t.Fatalf("overwrite boundary: %+v", r)
+		}
+		for i, f := range last.Before.Fields {
+			if !reflect.DeepEqual(f.OriginReferenceIDs, last.After.Fields[i].OriginReferenceIDs) {
+				t.Fatalf("origin changed: %+v", r)
+			}
+		}
+	}
+}
+
+func TestSPL2ExternalJobAndJoinIntentions(t *testing.T) {
+	for _, sid := range []string{`1780123000.5`, `"1780123000.5"`, `'saved_job'`} {
+		t.Run(sid, func(t *testing.T) {
+			r := spl2AnalyzeTest(t, "loadjob "+sid)
+			if r.Status != Incomplete || len(r.References) != 1 || r.References[0].Kind != "search_job" || r.References[0].Role != "read" || r.References[0].Binding != "not_applicable" || r.References[0].OriginalName != sid || r.References[0].Location.Start.Offset != len("loadjob ") || len(r.Dependencies.Indexes) != 0 || len(r.Lineage[0].After.Fields) != 0 {
+				t.Fatalf("static job intention: %+v", r)
+			}
+			assertCorpusIntegrity(t, r)
+		})
+	}
+	for _, q := range []string{`loadjob "${job}"`, `loadjob "broken`, `loadjob`} {
+		r := spl2AnalyzeTest(t, q)
+		for _, ref := range r.References {
+			if ref.Kind == "search_job" {
+				t.Fatalf("unproved job identity: %+v", r)
+			}
+		}
+	}
+	r := spl2AnalyzeTest(t, `FROM main | join left=L right=R where L.id=R.uid [FROM other | table uid]`)
+	if r.Status != Incomplete || len(r.Scopes) != 2 {
+		t.Fatalf("join scope: %+v", r)
+	}
+	for _, name := range []string{"L.id", "R.uid"} {
+		ref := spl2Ref(t, r, name, "read")
+		if ref.Binding != "indeterminate" || ref.ScopeID != "scope-0" || len(ref.OriginReferenceIDs) != 0 {
+			t.Fatalf("qualified join input: %+v", ref)
+		}
+	}
+	for _, line := range r.Lineage {
+		if line.ScopeID == "scope-0" && len(line.After.Fields) != 0 {
+			t.Fatalf("join installed qualified inputs: %+v", r)
+		}
+	}
+	if spl2Ref(t, r, "uid", "read").ScopeID != "scope-1" {
+		t.Fatalf("child scope lost: %+v", r)
+	}
+	assertCorpusIntegrity(t, r)
+}
+
+func TestSPL2MetricsSelectorTypedPosition(t *testing.T) {
+	for _, predicate := range []string{`index="metrics"`, `index=metrics`, `index="metrics" AND port=443`} {
+		r := spl2AnalyzeTest(t, `mstats aggregates=[count()] predicate=(`+predicate+`) byfields=[index]`)
+		if !reflect.DeepEqual(r.Dependencies.Indexes, []string{"metrics"}) {
+			t.Fatalf("selector lost: %+v", r)
+		}
+		for _, ref := range r.References {
+			if ref.Kind == "field" && (ref.NormalizedName == "metrics" || (ref.NormalizedName == "index" && ref.Role != "group")) {
+				t.Fatalf("selector became input: %+v", ref)
+			}
+		}
+		spl2Ref(t, r, "index", "group")
+	}
+	for _, predicate := range []string{`'index'="metrics"`, `index=lower("metrics")`, `index="metrics*"`, `index=actor.name`, `index="${catalog}"`} {
+		r := spl2AnalyzeTest(t, `mstats aggregates=[count()] predicate=(`+predicate+`)`)
+		if len(r.Dependencies.Indexes) != 0 || r.Status != Incomplete {
+			t.Fatalf("unproved exact source membership: %+v", r)
+		}
+	}
+	for _, query := range []string{`FROM main | rex "plain"`, `FROM main | spath`} {
+		r := spl2AnalyzeTest(t, query)
+		for _, ref := range r.References {
+			if ref.NormalizedName == "_raw" {
+				t.Fatalf("implicit span fabricated: %+v", r)
+			}
+		}
+	}
+}
+
+func TestSPL2UnresolvedMetricsSelectorKeepsItsRole(t *testing.T) {
+	for _, rhs := range []string{`"${catalog}"`, `lower(catalog)`, `catalog.name`} {
+		r := spl2AnalyzeTest(t, `mstats aggregates=[count()] predicate=(index=`+rhs+`)`)
+		if r.Status != Incomplete || len(r.Dependencies.Indexes) != 0 {
+			t.Fatalf("unresolved selector promoted: %+v", r)
+		}
+		for _, ref := range r.References {
+			if ref.Kind == "field" && ref.NormalizedName == "index" {
+				t.Fatalf("selector label became field: %+v", r)
+			}
+		}
+		spl2Ref(t, r, "catalog", "read")
+	}
+}
+
+func TestSPL2RecoveredInputAndSelectorSoundness(t *testing.T) {
+	for _, tail := range []string{`severity=`, `status IN (401,,403)`, `"unterminated`, `a=1 AND`, `earliest=`, `_index_latest=-`} {
+		t.Run(tail, func(t *testing.T) {
+			r := spl2AnalyzeTest(t, `search index=app `+tail)
+			if r.Status != Invalid || !reflect.DeepEqual(r.Dependencies.Indexes, []string{"app"}) {
+				t.Fatalf("intact index lost: %+v", r)
+			}
+			for _, ref := range r.References {
+				if ref.Kind == "field" && (ref.NormalizedName == "index" || ref.NormalizedName == "_index_latest" || ref.NormalizedName == "earliest") {
+					t.Fatalf("modifier label became field: %+v", r)
+				}
+			}
+		})
+	}
+	for _, command := range []string{`table server account`, `eval x=1 y=2`, `reverse a`, `head null=true`, `stats count() sum(bytes) AS total`, `sort -host +num(bytes)`} {
+		t.Run(command, func(t *testing.T) {
+			r := spl2AnalyzeTest(t, `FROM main | `+command)
+			if r.Status != Invalid || r.Stages[1].SemanticComplete {
+				t.Fatalf("malformed owner promoted: %+v", r)
+			}
+		})
+	}
+	for _, command := range []string{`stats`, `eventstats`, `streamstats`} {
+		t.Run(command+" alias", func(t *testing.T) {
+			r := spl2AnalyzeTest(t, `FROM main | `+command+` count() as`)
+			for _, ref := range r.References {
+				if ref.Kind == "field" && ref.NormalizedName == "count" {
+					t.Fatalf("damaged alias fell back: %+v", r)
+				}
+			}
+		})
+	}
+	for _, command := range []string{`table "host"`, `table "host${suffix}"`, `table "${if(flag,"*","host")}"`, `fields host*`} {
+		t.Run(command, func(t *testing.T) {
+			r := spl2AnalyzeTest(t, `FROM main | `+command)
+			for _, ref := range r.References {
+				if ref.NormalizedName == "host${suffix}" || ref.OriginalName == `"host"` {
+					t.Fatalf("unproved static selector: %+v", r)
+				}
+			}
+			for _, l := range r.Lineage {
+				for _, f := range l.After.Fields {
+					if f.Name == "" {
+						t.Fatalf("empty field: %+v", r)
+					}
+				}
+			}
+			assertCorpusIntegrity(t, r)
+		})
+	}
+	for _, q := range []string{`search index=app earliest=unproved`, `search index=app _index_latest=-`} {
+		r := spl2AnalyzeTest(t, q)
+		for _, ref := range r.References {
+			if ref.Kind == "field" && (ref.NormalizedName == "earliest" || ref.NormalizedName == "_index_latest") {
+				t.Fatalf("time modifier is not field: %+v", r)
+			}
+		}
+	}
+}
 func spl2HasCode(r *Result, code string) bool {
 	for _, d := range r.Diagnostics {
 		if d.Code == code {
@@ -429,4 +798,128 @@ func TestSPL2ResolverWildcardCandidateIdentity(t *testing.T) {
 			t.Fatalf("%+v", r)
 		}
 	})
+}
+
+func TestSPL2DeferredDestinationAndPrerequisiteBoundaries(t *testing.T) {
+	t.Run("fillnull intentions", func(t *testing.T) {
+		r := spl2AnalyzeTest(t, `FROM main | fillnull value="0" host,user`)
+		for _, name := range []string{"host", "user"} {
+			ref := spl2Ref(t, r, name, "output")
+			if ref.Binding != "not_applicable" {
+				t.Fatalf("destination binding: %+v", ref)
+			}
+		}
+		if len(r.Lineage[len(r.Lineage)-1].After.Fields) != 0 {
+			t.Fatalf("destination invented state: %+v", r)
+		}
+	})
+	t.Run("dynamic SID", func(t *testing.T) {
+		r := spl2AnalyzeTest(t, `loadjob 'job_${sid}'`)
+		for _, ref := range r.References {
+			if ref.Kind == "search_job" {
+				t.Fatalf("dynamic SID promoted: %+v", r)
+			}
+		}
+	})
+	t.Run("timewrap predecessor", func(t *testing.T) {
+		r := spl2AnalyzeTest(t, `FROM main | timewrap fortnight`)
+		if r.Status != Invalid || !spl2HasCode(r, CodeSyntaxError) || !spl2HasCode(r, CodeUnsupportedSemantics) {
+			t.Fatalf("missing prerequisite: %+v", r)
+		}
+		for _, q := range []string{`FROM main | timechart count() | timewrap fortnight`, `unknown | timewrap fortnight`} {
+			r = spl2AnalyzeTest(t, q)
+			if r.Status != Incomplete || spl2HasCode(r, CodeSyntaxError) {
+				t.Fatalf("unproved/available predecessor: %+v", r)
+			}
+		}
+	})
+}
+
+func TestSPL2DeferredRecoveredInputsAndUnionIntentions(t *testing.T) {
+	for _, tc := range []struct{ query, name, role string }{
+		{`tstats aggregates=[sum(bytes)] byfields=[host source]`, `bytes`, `read`},
+		{`FROM main | timechart count() BY host usenull=1`, `host`, `group`},
+		{`FROM main | timechart eval(avg(bytes)*avg(duration))`, `bytes`, `read`},
+		{`FROM main | timechart eval(avg(bytes)*avg(duration))`, `duration`, `read`},
+		{`FROM main | timechart bins= avg(bytes)`, `bytes`, `read`},
+	} {
+		t.Run(tc.query+tc.name, func(t *testing.T) {
+			r := spl2AnalyzeTest(t, tc.query)
+			if r.Status != Invalid {
+				t.Fatalf("damage promoted: %+v", r)
+			}
+			spl2Ref(t, r, tc.name, tc.role)
+			assertCorpusIntegrity(t, r)
+		})
+	}
+	for _, q := range []string{`mstats aggregates=[avg('cpu.load')] byfields=['host*']`} {
+		t.Run(q, func(t *testing.T) {
+			r := spl2AnalyzeTest(t, q)
+			ref := spl2Ref(t, r, "host*", "group")
+			if ref.Binding != "indeterminate" || ref.Resolution != "wildcard" {
+				t.Fatalf("wildcard membership invented: %+v", r)
+			}
+			for _, l := range r.Lineage {
+				for _, f := range l.After.Fields {
+					if f.Name == "host*" {
+						t.Fatalf("pattern installed as field: %+v", r)
+					}
+				}
+			}
+		})
+	}
+	for _, q := range []string{`union main, archive`, `union main`, `FROM main | union other, [FROM archive]`} {
+		t.Run(q, func(t *testing.T) {
+			r := spl2AnalyzeTest(t, q)
+			if len(r.Dependencies.Datasets) == 0 {
+				t.Fatalf("named union inputs lost: %+v", r)
+			}
+			spl2Ref(t, r, "main", "read")
+			assertCorpusIntegrity(t, r)
+		})
+	}
+	for _, q := range []string{`FROM main | append [search index=audit | stats count()`, `FROM main | appendcols [FROM other | eval x=1`} {
+		t.Run(q, func(t *testing.T) {
+			r := spl2AnalyzeTest(t, q)
+			if r.Status != Invalid || len(r.Scopes) != 1 {
+				t.Fatalf("unclosed original child promoted: %+v", r)
+			}
+			spl2Ref(t, r, "main", "read")
+			assertCorpusIntegrity(t, r)
+		})
+	}
+	control := spl2AnalyzeTest(t, `FROM main | append [FROM child | eval x=1]`)
+	if len(control.Scopes) != 2 {
+		t.Fatalf("intact child lost: %+v", control)
+	}
+	spl2Ref(t, control, "x", "create")
+}
+
+func TestSPL2DeferredPatternNeverExpandsAndUnionDoesNotInstallRows(t *testing.T) {
+	source, err := AnalyzeWithSourceUniverse(QueryDocument{Text: `mstats aggregates=[avg('cpu.load')] byfields=['host*']`, Language: "spl2"}, SourceUniverse{Fields: []string{"cpu.load", "host1"}, Complete: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	ref := spl2Ref(t, source.Result, "host*", "group")
+	if ref.Binding != "indeterminate" || ref.Resolution != "wildcard" {
+		t.Fatalf("forbidden group expanded: %+v", source)
+	}
+	for _, lineage := range source.Result.Lineage {
+		for _, field := range lineage.After.Fields {
+			if field.Name == "host*" || field.Name == "host1" {
+				t.Fatalf("forbidden group membership: %+v", source)
+			}
+		}
+	}
+	for _, q := range []string{`union [{a:1}],[{b:2}]`, `FROM main | union [{a:1}],[{b:2}]`} {
+		r := spl2AnalyzeTest(t, q)
+		for _, ref := range r.References {
+			if ref.Kind == "field" {
+				t.Fatalf("union row shape leaked: %+v", r)
+			}
+		}
+		if len(r.Scopes) != 1 || len(r.Lineage[len(r.Lineage)-1].After.Fields) != 0 {
+			t.Fatalf("union row ownership invented: %+v", r)
+		}
+	}
 }

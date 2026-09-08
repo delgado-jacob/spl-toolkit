@@ -37,9 +37,29 @@ Reports preserve source text and source ID and expose ordered stages/scopes, ref
 
 Capabilities separate syntax from semantic support and list limitations and function arities. Unknown commands/functions, unexpanded macros, branch merges, unresolved wildcard membership, and unsupported options remain incomplete. Open-input `fields` inclusion also remains incomplete when retained internal membership is unknown. A later stage cannot erase an earlier coverage gap.
 
-Legacy discovery and mapping retain their own contracts. Flat `input_fields` does not encode flow, scope, or completeness and is not guaranteed to match structured classifications. New consumers should use reference roles/bindings and status/coverage. The [API reference](https://github.com/delgado-jacob/spl-toolkit/blob/main/docs/API.md) describes every surface and the supported forms; this package does not perform event instance validation, broad SPL2 analysis, or new rewriting.
+Legacy discovery and mapping retain their own contracts. Flat `input_fields` does not encode flow, scope, or completeness and is not guaranteed to match structured classifications. New consumers should use reference roles/bindings and status/coverage. The [API reference](https://github.com/delgado-jacob/spl-toolkit/blob/main/docs/API.md) describes every surface and the supported forms; this package does not perform event instance validation, SPL2 modules, or new rewriting.
 
 ## Field-list validation
+
+Standalone SPL2 uses explicit keyword-only `language="spl2"` on `analyze_query`,
+`validate_fields`, `validate_schema` and `capabilities`. Batch documents carry
+their own dialects and preserve order. For example:
+
+```python
+with SPLMapper() as mapper:
+    report = mapper.analyze_query("SELECT host FROM main WHERE bytes>0", language="spl2")
+    manifest = mapper.capabilities(language="spl2")
+```
+
+SPL, `splunkd`, and `current` remain the defaults. `current` is the build's bounded
+capability snapshot. SQL stages retain lexical order, while positions and lineage
+phases describe evaluation. Direct `null_test` inspections retain their source
+evidence without an existence outcome; ordinary reads remain obligations.
+Conditional presence can be fully modeled while later consumers are indeterminate.
+Named arguments, dynamic paths and held forms remain incomplete. Legacy mapping,
+context mapping, discovery and input-field methods reject explicit SPL2 selectors
+with canonical-operation guidance. See the
+[SPL2 contract](https://github.com/delgado-jacob/spl-toolkit/blob/main/docs/spl2.md).
 
 ```python
 from spl_toolkit import SPLMapper

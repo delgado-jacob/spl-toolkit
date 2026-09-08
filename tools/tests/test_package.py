@@ -500,6 +500,8 @@ def test_installed_schema_fixtures_exist_before_both_suites(tmp_path: Path, monk
     monkeypatch.setattr(checker.subprocess, "run", lambda *args, **kwargs: subprocess.CompletedProcess(
         args, 0, stdout=json.dumps({"installed_module": str(directory / "module.py"),
                                    "loaded_library": str(library), "native_sha256": checker.sha256(library)}) + "\n"))
+    go_transport = tmp_path / "go-transport.json"
+    go_transport.write_text("{\"kind\":\"spl2-go-transport\"}")
     monkeypatch.setenv("SPL_SPL2_FIXTURES", "checkout-only")
     seen = []
     counts = {"collected": 1, "passed": 1, "failed": 0, "skipped": 0}
@@ -516,12 +518,19 @@ def test_installed_schema_fixtures_exist_before_both_suites(tmp_path: Path, monk
             assert (spl2 / original.name).read_bytes() == original.read_bytes()
         if "SPL_SCHEMA_EVIDENCE" in env:
             Path(env["SPL_SCHEMA_EVIDENCE"]).write_text("{}")
+            Path(env["SPL_SPL2_EVIDENCE"]).write_text("{}")
+            copied_go = Path(env["SPL_SPL2_GO_REPORTS"])
+            assert copied_go.is_relative_to(outside) and copied_go.read_bytes() == go_transport.read_bytes()
+            assert env["SPL_SPL2_GO_SHA256"] == checker.sha256(go_transport)
+            documentation = Path(env["SPL_DOCS_ROOT"])
+            assert documentation.is_relative_to(outside) and not documentation.is_relative_to(ROOT)
+            assert (documentation / "docs/spl2.md").read_bytes() == (ROOT / "docs/spl2.md").read_bytes()
         seen.append(fixtures)
         return counts
 
     monkeypatch.setattr(checker, "_run_required_suite", suite)
     result = checker.install_and_check(wheel, directory, outside, "0.1.1", PYTHON_DIR / "requirements-dev.txt",
-                                       tmp_path / "cli", tmp_path / "server", ROOT / "testdata/baseline/cases.json", ROOT)
+                                       tmp_path / "cli", tmp_path / "server", ROOT / "testdata/baseline/cases.json", ROOT, go_transport)
     assert len(seen) == 2 and seen[0] == seen[1]
     assert result["fixture_hashes"]["schema"] == {name: checker.sha256(ROOT / "testdata/schemas" / name) for name in SCHEMA_FIXTURES}
     assert result["wheel_payload_hashes"] == payload_hashes
@@ -581,6 +590,23 @@ def test_package_copies_required_schema_surface_acceptance(tmp_path: Path):
     destination = tmp_path / "acceptance"
     checker._copy_required_files(ROOT / "tests/acceptance", destination, checker.ACCEPTANCE_FILES)
     assert (destination / "test_schema_surfaces.py").read_bytes() == (ROOT / "tests/acceptance/test_schema_surfaces.py").read_bytes()
+
+
+def test_package_copies_required_spl2_surface_acceptance(tmp_path: Path):
+    checker = load_package_checker()
+    destination = tmp_path / "acceptance"
+    checker._copy_required_files(ROOT / "tests/acceptance", destination, checker.ACCEPTANCE_FILES)
+    assert (destination / "test_spl2_surfaces.py").is_file(), "installed acceptance omitted SPL2"
+
+
+def test_package_copies_documentation_closure_outside_checkout(tmp_path: Path):
+    checker = load_package_checker()
+    destination = tmp_path / "docs-root"
+    hashes = checker.copy_documentation(ROOT, destination)
+    expected = {"README.md", "docs/cli.md", "docs/spl2.md"}
+    assert expected <= hashes.keys()
+    assert all((destination / name).read_bytes() == (ROOT / name).read_bytes() for name in hashes)
+    assert not (destination / "python").exists()
 
 
 @pytest.mark.parametrize("compiler", ["1.22", "1.25"])

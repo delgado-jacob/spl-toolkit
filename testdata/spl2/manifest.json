@@ -93,10 +93,10 @@
     "definite_negative": 80,
     "sql_mixed": 40
   },
-  "enforce_final_floors": false,
+  "enforce_final_floors": true,
   "evidence_layers": {
     "syntax": "Existing top-level status, coverage and grammar-context assertions remain parser-only evidence.",
-    "canonical": "Explicit canonical Result expectations on the same deduplicated documents; conditional output is modeled separately from later membership validation.",
+    "canonical": "Independently exact full canonical objects or explicitly labelled deterministic regression snapshots with independently frozen, executable semantic assertions; original syntax and provenance remain separate.",
     "assemblies": {
       "eval-rhs": "FROM main | eval result= followed by the exact scalar F candidate; command candidates retain pipeline-tail."
     },

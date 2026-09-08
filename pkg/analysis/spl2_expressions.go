@@ -24,6 +24,12 @@ func (s *spl2SemanticStage) expression(node antlr.Tree) spl2ExpressionEvidence {
 		return out
 	}
 	switch c := node.(type) {
+	case spl2.INotExpressionContext:
+		if operator := c.LogicalNot(); operator != nil && operator.GetText() != "NOT" {
+			value := s.expression(c.NotExpression())
+			value.modeled, value.nonnull, value.exactNull, value.truth, value.domain = false, false, false, false, ""
+			return value
+		}
 	case spl2.IUnaryContext:
 		if c.Unary() != nil {
 			value := s.expression(c.Unary())
@@ -115,8 +121,10 @@ func (s *spl2SemanticStage) expression(node antlr.Tree) spl2ExpressionEvidence {
 			value := s.expression(e)
 			out.ids = append(out.ids, value.ids...)
 			out.modeled = out.modeled && value.modeled
-			out.nonnull = out.nonnull && value.nonnull
 		}
+		// Intact interpolation renders a string even when an operand is null.
+		// Unmodeled children still prevent a proven assignment effect.
+		out.nonnull = out.modeled && spl2IntactSyntax(c)
 		return out
 	case spl2.IFieldTemplateContext:
 		for _, e := range c.AllExpression() {

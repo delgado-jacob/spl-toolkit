@@ -15,6 +15,12 @@ make build-all
 
 The CLI commands are maintained as executable cases in the [CLI guide](cli.md).
 
+For standalone SPL2, add `--language spl2` to analysis or single-query validation.
+For example, `build/spl-toolkit analyze --language spl2 --query 'SELECT host FROM main WHERE bytes>0' --format json`
+preserves SELECT/FROM/WHERE source order while reporting their evaluation phases.
+SPL remains the default. Use the [SPL2 guide](spl2.md) for Python/Go/HTTP starts,
+mixed batches, complete positional effects and incomplete/held boundaries.
+
 ```bash
 spl-toolkit map --config testdata/baseline/mappings.json --query 'search src_ip=1'
 ```

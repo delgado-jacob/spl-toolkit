@@ -93,7 +93,13 @@ def passing_records() -> list[dict]:
                 "package_version": "0.1.1", "native_version": "0.1.1",
                 "tests": {
                     "required_native": {"collected": 11, "passed": 11, "failed": 0, "skipped": 0},
-                    "surface_acceptance": {"collected": 5, "passed": 5, "failed": 0, "skipped": 0},
+                    "surface_acceptance": {"collected": 6, "passed": 6, "failed": 0, "skipped": 0},
+                },
+                "required_test_files": {
+                    "native": ["test_native_abi.py", "test_native_mapper.py", "test_native_analysis.py",
+                               "test_native_validation.py", "test_native_schema_validation.py", "test_native_spl2.py"],
+                    "acceptance": ["test_documented_cli.py", "test_surfaces.py", "test_analysis_surfaces.py",
+                                   "test_validation_surfaces.py", "test_schema_surfaces.py", "test_spl2_surfaces.py"],
                 },
                 "cli_examples": "passed", "surface_parity": "passed", "version_agreement": "passed",
             })
@@ -108,6 +114,18 @@ def passing_records() -> list[dict]:
 
 def test_complete_current_evidence_passes():
     assert validate_records(passing_records(), SHA) == []
+
+
+def test_installed_evidence_cannot_omit_spl2_surface_suite():
+    records = passing_records()
+    installed = next(record for record in records if record["kind"] == "installed-wheel")
+    installed["required_test_files"] = {
+        "native": ["test_native_abi.py", "test_native_mapper.py", "test_native_analysis.py",
+                   "test_native_validation.py", "test_native_schema_validation.py", "test_native_spl2.py"],
+        "acceptance": ["test_documented_cli.py", "test_surfaces.py", "test_analysis_surfaces.py",
+                       "test_validation_surfaces.py", "test_schema_surfaces.py"],
+    }
+    assert any("missing required suite test_spl2_surfaces.py" in error for error in validate_records(records, SHA))
 
 
 def test_missing_arm64_is_not_complete():

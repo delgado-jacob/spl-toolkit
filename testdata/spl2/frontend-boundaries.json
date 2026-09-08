@@ -34,7 +34,92 @@
         "(multiplicative IDENTIFIER:\"a\" SLASH:\"/\" IDENTIFIER:\"b\" SLASH:\"/\" IDENTIFIER:\"c\")"
       ],
       "excerpts": []
-    }
+    },
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "valid",
+      "syntax_complete": true,
+      "semantic_complete": true,
+      "expected_codes": [],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        },
+        {
+          "original_name": "x",
+          "normalized_name": "x",
+          "kind": "field",
+          "role": "create",
+          "binding": "not_applicable",
+          "start": 17,
+          "end": 18
+        },
+        {
+          "original_name": "a",
+          "normalized_name": "a",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 19,
+          "end": 20
+        },
+        {
+          "original_name": "b",
+          "normalized_name": "b",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 21,
+          "end": 22
+        },
+        {
+          "original_name": "c",
+          "normalized_name": "c",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 23,
+          "end": 24
+        }
+      ],
+      "fields": [
+        {
+          "name": "a",
+          "conditional": false
+        },
+        {
+          "name": "b",
+          "conditional": false
+        },
+        {
+          "name": "c",
+          "conditional": false
+        },
+        {
+          "name": "x",
+          "conditional": false
+        }
+      ],
+      "removed": [],
+      "open": true,
+      "uncertain": false,
+      "stage_commands": [
+        "from",
+        "eval"
+      ],
+      "stage_complete": [
+        true,
+        true
+      ]
+    },
+    "canonical_basis": "EVAL-K"
   },
   {
     "id": "T2.precedence.expression",
@@ -68,7 +153,79 @@
         "(orExpression (predicate IDENTIFIER:\"a\" ASSIGN:\"=\" NUMBER:\"1\") OR:\"OR\" (andExpression (predicate IDENTIFIER:\"b\" ASSIGN:\"=\" NUMBER:\"2\") AND:\"AND\" (predicate IDENTIFIER:\"c\" ASSIGN:\"=\" NUMBER:\"3\")))"
       ],
       "excerpts": []
-    }
+    },
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "valid",
+      "syntax_complete": true,
+      "semantic_complete": true,
+      "expected_codes": [],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        },
+        {
+          "original_name": "a",
+          "normalized_name": "a",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 18,
+          "end": 19
+        },
+        {
+          "original_name": "b",
+          "normalized_name": "b",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 25,
+          "end": 26
+        },
+        {
+          "original_name": "c",
+          "normalized_name": "c",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 33,
+          "end": 34
+        }
+      ],
+      "fields": [
+        {
+          "name": "a",
+          "conditional": false
+        },
+        {
+          "name": "b",
+          "conditional": false
+        },
+        {
+          "name": "c",
+          "conditional": false
+        }
+      ],
+      "removed": [],
+      "open": true,
+      "uncertain": false,
+      "stage_commands": [
+        "from",
+        "where"
+      ],
+      "stage_complete": [
+        true,
+        true
+      ]
+    },
+    "canonical_basis": "WHERE-K"
   },
   {
     "id": "T2.precedence.search",
@@ -102,7 +259,68 @@
         "(searchAnd (searchOr (searchAtom IDENTIFIER:\"a\" ASSIGN:\"=\" NUMBER:\"1\") OR:\"OR\" (searchAtom IDENTIFIER:\"b\" ASSIGN:\"=\" NUMBER:\"2\")) AND:\"AND\" (searchAtom IDENTIFIER:\"c\" ASSIGN:\"=\" NUMBER:\"3\"))"
       ],
       "excerpts": []
-    }
+    },
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "valid",
+      "syntax_complete": true,
+      "semantic_complete": true,
+      "expected_codes": [],
+      "references": [
+        {
+          "original_name": "a",
+          "normalized_name": "a",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 7,
+          "end": 8
+        },
+        {
+          "original_name": "b",
+          "normalized_name": "b",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 14,
+          "end": 15
+        },
+        {
+          "original_name": "c",
+          "normalized_name": "c",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 22,
+          "end": 23
+        }
+      ],
+      "fields": [
+        {
+          "name": "a",
+          "conditional": false
+        },
+        {
+          "name": "b",
+          "conditional": false
+        },
+        {
+          "name": "c",
+          "conditional": false
+        }
+      ],
+      "removed": [],
+      "open": true,
+      "uncertain": false,
+      "stage_commands": [
+        "search"
+      ],
+      "stage_complete": [
+        true
+      ]
+    },
+    "canonical_basis": "SEARCH-K"
   },
   {
     "id": "T2.calls.positional_comparison",
@@ -138,7 +356,66 @@
       },
       "shape_contains": [],
       "excerpts": []
-    }
+    },
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "valid",
+      "syntax_complete": true,
+      "semantic_complete": true,
+      "expected_codes": [],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        },
+        {
+          "original_name": "x",
+          "normalized_name": "x",
+          "kind": "field",
+          "role": "create",
+          "binding": "not_applicable",
+          "start": 17,
+          "end": 18
+        },
+        {
+          "original_name": "code",
+          "normalized_name": "code",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 22,
+          "end": 26
+        }
+      ],
+      "fields": [
+        {
+          "name": "code",
+          "conditional": false
+        },
+        {
+          "name": "x",
+          "conditional": false
+        }
+      ],
+      "removed": [],
+      "open": true,
+      "uncertain": false,
+      "stage_commands": [
+        "from",
+        "eval"
+      ],
+      "stage_complete": [
+        true,
+        true
+      ]
+    },
+    "canonical_basis": "IF-K"
   },
   {
     "id": "T2.template.nested_ownership",
@@ -180,7 +457,79 @@
           "text": "|"
         }
       ]
-    }
+    },
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "valid",
+      "syntax_complete": true,
+      "semantic_complete": true,
+      "expected_codes": [],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        },
+        {
+          "original_name": "x",
+          "normalized_name": "x",
+          "kind": "field",
+          "role": "create",
+          "binding": "not_applicable",
+          "start": 17,
+          "end": 18
+        },
+        {
+          "original_name": "a",
+          "normalized_name": "a",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 25,
+          "end": 26
+        },
+        {
+          "original_name": "b",
+          "normalized_name": "b",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 37,
+          "end": 38
+        }
+      ],
+      "fields": [
+        {
+          "name": "a",
+          "conditional": false
+        },
+        {
+          "name": "b",
+          "conditional": false
+        },
+        {
+          "name": "x",
+          "conditional": false
+        }
+      ],
+      "removed": [],
+      "open": true,
+      "uncertain": false,
+      "stage_commands": [
+        "from",
+        "eval"
+      ],
+      "stage_complete": [
+        true,
+        true
+      ]
+    },
+    "canonical_basis": "Controller primary-source ruling: an intact supported string template produces a present string even when its supported interpolation is nullable (missing values render Null); ordinary input errors/reads and unmodeled-child uncertainty remain. Compose this with the accepted finite positional function and sequential eval contracts, without a value evaluator. The if predicate reads a, the static object value reads b, key is not a read, and the quoted internal pipe is an inert string value; no child stages arise from nested literal delimiters."
   },
   {
     "id": "T2.string.dollar",
@@ -216,7 +565,66 @@
       },
       "shape_contains": [],
       "excerpts": []
-    }
+    },
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "valid",
+      "syntax_complete": true,
+      "semantic_complete": true,
+      "expected_codes": [],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        },
+        {
+          "original_name": "x",
+          "normalized_name": "x",
+          "kind": "field",
+          "role": "create",
+          "binding": "not_applicable",
+          "start": 17,
+          "end": 18
+        },
+        {
+          "original_name": "y",
+          "normalized_name": "y",
+          "kind": "field",
+          "role": "create",
+          "binding": "not_applicable",
+          "start": 24,
+          "end": 25
+        }
+      ],
+      "fields": [
+        {
+          "name": "x",
+          "conditional": false
+        },
+        {
+          "name": "y",
+          "conditional": false
+        }
+      ],
+      "removed": [],
+      "open": true,
+      "uncertain": false,
+      "stage_commands": [
+        "from",
+        "eval"
+      ],
+      "stage_complete": [
+        true,
+        true
+      ]
+    },
+    "canonical_basis": "EVAL-K"
   },
   {
     "id": "T2.search_literal.expression",
@@ -253,6 +661,129 @@
       },
       "shape_contains": [],
       "excerpts": []
+    },
+    "canonical_evidence": "regression_snapshot",
+    "canonical_assertions": {
+      "category": "representation",
+      "basis": "The backtick body is an expression-position search literal with unmodeled inner syntax/semantics, not a macro or ordinary eval field expression. Its body token must not become an outer event read. The outer finite if cannot prove a value through an unmodeled predicate; its exact target is retained conditionally and eval stays incomplete. No nested query scope is fabricated.",
+      "status": "incomplete",
+      "syntax_complete": false,
+      "semantic_complete": false,
+      "required_codes": [
+        "SPL_UNSUPPORTED_SEMANTICS"
+      ],
+      "forbidden_codes": [
+        "SPL_SYNTAX_ERROR",
+        "SPL_PROFILE_MISMATCH",
+        "SPL_UNSUPPORTED_MODULE"
+      ],
+      "required_references": [
+        {
+          "original_name": "main",
+          "start": 5,
+          "end": 9,
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable"
+        },
+        {
+          "original_name": "x",
+          "start": 17,
+          "end": 18,
+          "normalized_name": "x",
+          "kind": "field",
+          "role": "create",
+          "binding": "not_applicable"
+        }
+      ],
+      "forbidden_references": [
+        {
+          "original_name": "status",
+          "start": 23,
+          "end": 29
+        }
+      ],
+      "required_fields": [
+        {
+          "name": "x",
+          "conditional": true
+        }
+      ],
+      "forbidden_field_names": [
+        "status"
+      ],
+      "required_stages": [
+        {
+          "command": "from",
+          "start": 0,
+          "semantic_complete": true
+        },
+        {
+          "command": "eval",
+          "start": 12,
+          "semantic_complete": false
+        }
+      ],
+      "max_scopes": 1,
+      "final_state": {
+        "fields": [
+          {
+            "name": "x",
+            "conditional": true
+          }
+        ],
+        "removed": [],
+        "open": true,
+        "uncertain": true
+      }
+    },
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "incomplete",
+      "syntax_complete": false,
+      "semantic_complete": false,
+      "expected_codes": [
+        "SPL_UNSUPPORTED_SEMANTICS"
+      ],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        },
+        {
+          "original_name": "x",
+          "normalized_name": "x",
+          "kind": "field",
+          "role": "create",
+          "binding": "not_applicable",
+          "start": 17,
+          "end": 18
+        }
+      ],
+      "fields": [
+        {
+          "name": "x",
+          "conditional": true
+        }
+      ],
+      "removed": [],
+      "open": true,
+      "uncertain": true,
+      "stage_commands": [
+        "from",
+        "eval"
+      ],
+      "stage_complete": [
+        true,
+        false
+      ]
     }
   },
   {
@@ -289,6 +820,193 @@
       },
       "shape_contains": [],
       "excerpts": []
+    },
+    "canonical_evidence": "regression_snapshot",
+    "canonical_assertions": {
+      "category": "representation",
+      "basis": "The admitted rex slash-character-class/quoted-alternation form retains the payload read but deliberately leaves extraction effects incomplete. Regex capture-name text is not an exact event-field create/read and cannot be promoted to a proved extracted field. The later eval, when present, is an intact supported stage whose reads after unknown effects stay indeterminate and whose source-dependent output remains conditional.",
+      "status": "incomplete",
+      "syntax_complete": true,
+      "semantic_complete": false,
+      "required_codes": [
+        "SPL_UNSUPPORTED_SEMANTICS"
+      ],
+      "forbidden_codes": [
+        "SPL_SYNTAX_ERROR",
+        "SPL_PROFILE_MISMATCH",
+        "SPL_UNSUPPORTED_MODULE"
+      ],
+      "required_references": [
+        {
+          "original_name": "main",
+          "start": 5,
+          "end": 9,
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable"
+        },
+        {
+          "original_name": "payload",
+          "start": 22,
+          "end": 29,
+          "normalized_name": "payload",
+          "kind": "field",
+          "role": "read",
+          "binding": "source"
+        },
+        {
+          "original_name": "a",
+          "start": 59,
+          "end": 60,
+          "normalized_name": "a",
+          "kind": "field",
+          "role": "read",
+          "binding": "indeterminate"
+        },
+        {
+          "original_name": "b",
+          "start": 61,
+          "end": 62,
+          "normalized_name": "b",
+          "kind": "field",
+          "role": "read",
+          "binding": "indeterminate"
+        },
+        {
+          "original_name": "c",
+          "start": 63,
+          "end": 64,
+          "normalized_name": "c",
+          "kind": "field",
+          "role": "read",
+          "binding": "indeterminate"
+        }
+      ],
+      "forbidden_references": [
+        {
+          "original_name": "digits",
+          "start": 34,
+          "end": 40
+        }
+      ],
+      "required_fields": [
+        {
+          "name": "x",
+          "conditional": true
+        }
+      ],
+      "forbidden_field_names": [
+        "digits"
+      ],
+      "required_stages": [
+        {
+          "command": "from",
+          "start": 0,
+          "semantic_complete": true
+        },
+        {
+          "command": "rex",
+          "start": 12,
+          "semantic_complete": false
+        },
+        {
+          "command": "eval",
+          "start": 52,
+          "semantic_complete": true
+        }
+      ],
+      "max_scopes": 1,
+      "final_state": null
+    },
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "incomplete",
+      "syntax_complete": true,
+      "semantic_complete": false,
+      "expected_codes": [
+        "SPL_UNSUPPORTED_SEMANTICS"
+      ],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        },
+        {
+          "original_name": "payload",
+          "normalized_name": "payload",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 22,
+          "end": 29
+        },
+        {
+          "original_name": "x",
+          "normalized_name": "x",
+          "kind": "field",
+          "role": "create",
+          "binding": "not_applicable",
+          "start": 57,
+          "end": 58
+        },
+        {
+          "original_name": "a",
+          "normalized_name": "a",
+          "kind": "field",
+          "role": "read",
+          "binding": "indeterminate",
+          "start": 59,
+          "end": 60
+        },
+        {
+          "original_name": "b",
+          "normalized_name": "b",
+          "kind": "field",
+          "role": "read",
+          "binding": "indeterminate",
+          "start": 61,
+          "end": 62
+        },
+        {
+          "original_name": "c",
+          "normalized_name": "c",
+          "kind": "field",
+          "role": "read",
+          "binding": "indeterminate",
+          "start": 63,
+          "end": 64
+        }
+      ],
+      "fields": [
+        {
+          "name": "payload",
+          "conditional": true
+        },
+        {
+          "name": "x",
+          "conditional": true
+        }
+      ],
+      "removed": [],
+      "open": true,
+      "uncertain": true,
+      "stage_commands": [
+        "from",
+        "rex",
+        "eval"
+      ],
+      "stage_complete": [
+        true,
+        false,
+        true
+      ]
     }
   },
   {
@@ -327,6 +1045,114 @@
       },
       "shape_contains": [],
       "excerpts": []
+    },
+    "canonical_evidence": "regression_snapshot",
+    "canonical_assertions": {
+      "category": "representation",
+      "basis": "The admitted rex slash-character-class/quoted-alternation form retains the payload read but deliberately leaves extraction effects incomplete. Regex capture-name text is not an exact event-field create/read and cannot be promoted to a proved extracted field. The later eval, when present, is an intact supported stage whose reads after unknown effects stay indeterminate and whose source-dependent output remains conditional.",
+      "status": "incomplete",
+      "syntax_complete": true,
+      "semantic_complete": false,
+      "required_codes": [
+        "SPL_UNSUPPORTED_SEMANTICS"
+      ],
+      "forbidden_codes": [
+        "SPL_SYNTAX_ERROR",
+        "SPL_PROFILE_MISMATCH",
+        "SPL_UNSUPPORTED_MODULE"
+      ],
+      "required_references": [
+        {
+          "original_name": "main",
+          "start": 5,
+          "end": 9,
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable"
+        },
+        {
+          "original_name": "payload",
+          "start": 22,
+          "end": 29,
+          "normalized_name": "payload",
+          "kind": "field",
+          "role": "read",
+          "binding": "source"
+        }
+      ],
+      "forbidden_references": [
+        {
+          "original_name": "tag",
+          "start": 34,
+          "end": 37
+        }
+      ],
+      "required_fields": [],
+      "forbidden_field_names": [
+        "tag"
+      ],
+      "required_stages": [
+        {
+          "command": "from",
+          "start": 0,
+          "semantic_complete": true
+        },
+        {
+          "command": "rex",
+          "start": 12,
+          "semantic_complete": false
+        }
+      ],
+      "max_scopes": 1,
+      "final_state": null
+    },
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "incomplete",
+      "syntax_complete": true,
+      "semantic_complete": false,
+      "expected_codes": [
+        "SPL_UNSUPPORTED_SEMANTICS"
+      ],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        },
+        {
+          "original_name": "payload",
+          "normalized_name": "payload",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 22,
+          "end": 29
+        }
+      ],
+      "fields": [
+        {
+          "name": "payload",
+          "conditional": true
+        }
+      ],
+      "removed": [],
+      "open": true,
+      "uncertain": true,
+      "stage_commands": [
+        "from",
+        "rex"
+      ],
+      "stage_complete": [
+        true,
+        false
+      ]
     }
   },
   {
@@ -361,6 +1187,109 @@
       },
       "shape_contains": [],
       "excerpts": []
+    },
+    "canonical_evidence": "regression_snapshot",
+    "canonical_assertions": {
+      "category": "recovery",
+      "basis": "Block comments remain prohibited in a search-command portion, including the trailing boundary here, and their body cannot supply event reads. Root-approved ownership ruling: the typed search stage is the intact original search index=main prefix0:17, while the forbidden comment occupies18:33 outside that stage; its input effects therefore remain complete. The independently intact eval x=2 at36:44 is complete and creates the original assignment target x41:42. Overall query remains invalid with syntax/semantic coverage false and a located comment syntax error. The corrected target span uses the explicit eval assignment, not x11:12 inside INDEX. This combines separate root stage-ownership and independently proved occurrence corrections; no source rewriting or product behavior is used as authority.",
+      "status": "invalid",
+      "syntax_complete": false,
+      "semantic_complete": false,
+      "required_codes": [
+        "SPL_SYNTAX_ERROR"
+      ],
+      "forbidden_codes": [
+        "SPL_PROFILE_MISMATCH",
+        "SPL_UNSUPPORTED_MODULE"
+      ],
+      "required_references": [
+        {
+          "original_name": "x",
+          "start": 41,
+          "end": 42,
+          "normalized_name": "x",
+          "kind": "field",
+          "role": "create",
+          "binding": "not_applicable"
+        }
+      ],
+      "forbidden_references": [
+        {
+          "original_name": "forbidden",
+          "start": 21,
+          "end": 30
+        }
+      ],
+      "required_fields": [
+        {
+          "name": "x",
+          "conditional": false
+        }
+      ],
+      "forbidden_field_names": [
+        "forbidden"
+      ],
+      "required_stages": [
+        {
+          "command": "search",
+          "start": 0,
+          "semantic_complete": true
+        },
+        {
+          "command": "eval",
+          "start": 36,
+          "semantic_complete": true
+        }
+      ],
+      "max_scopes": 1,
+      "final_state": null
+    },
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "invalid",
+      "syntax_complete": false,
+      "semantic_complete": false,
+      "expected_codes": [
+        "SPL_SYNTAX_ERROR"
+      ],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "index",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 13,
+          "end": 17
+        },
+        {
+          "original_name": "x",
+          "normalized_name": "x",
+          "kind": "field",
+          "role": "create",
+          "binding": "not_applicable",
+          "start": 41,
+          "end": 42
+        }
+      ],
+      "fields": [
+        {
+          "name": "x",
+          "conditional": false
+        }
+      ],
+      "removed": [],
+      "open": true,
+      "uncertain": false,
+      "stage_commands": [
+        "search",
+        "eval"
+      ],
+      "stage_complete": [
+        true,
+        true
+      ]
     }
   },
   {
@@ -395,6 +1324,100 @@
       },
       "shape_contains": [],
       "excerpts": []
+    },
+    "canonical_evidence": "regression_snapshot",
+    "canonical_assertions": {
+      "category": "recovery",
+      "basis": "Approved form-expansion line 13 preserves complete grammar coverage for semantic contract violations; E.L08/I.object explicitly reject duplicate decoded keys in each object scope. This exact constructor is invalid with SPL_SYNTAX_ERROR, syntax complete and unsafe effects incomplete. Duplicate keys are not field reads, and the erroneous constructor cannot create its target. Intact value-subtree reads may survive only as recovery representation.",
+      "status": "invalid",
+      "syntax_complete": true,
+      "semantic_complete": false,
+      "required_codes": [
+        "SPL_SYNTAX_ERROR"
+      ],
+      "forbidden_codes": [
+        "SPL_PROFILE_MISMATCH",
+        "SPL_UNSUPPORTED_MODULE"
+      ],
+      "required_references": [
+        {
+          "original_name": "main",
+          "start": 5,
+          "end": 9,
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable"
+        }
+      ],
+      "forbidden_references": [
+        {
+          "original_name": "x",
+          "start": 17,
+          "end": 18
+        },
+        {
+          "original_name": "'a'",
+          "start": 20,
+          "end": 23
+        },
+        {
+          "original_name": "\"\\u0061\"",
+          "start": 26,
+          "end": 34
+        }
+      ],
+      "required_fields": [],
+      "forbidden_field_names": [
+        "x"
+      ],
+      "required_stages": [
+        {
+          "command": "from",
+          "start": 0,
+          "semantic_complete": true
+        },
+        {
+          "command": "eval",
+          "start": 12,
+          "semantic_complete": false
+        }
+      ],
+      "max_scopes": 1,
+      "final_state": null
+    },
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "invalid",
+      "syntax_complete": true,
+      "semantic_complete": false,
+      "expected_codes": [
+        "SPL_SYNTAX_ERROR"
+      ],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        }
+      ],
+      "fields": [],
+      "removed": [],
+      "open": true,
+      "uncertain": true,
+      "stage_commands": [
+        "from",
+        "eval"
+      ],
+      "stage_complete": [
+        true,
+        false
+      ]
     }
   },
   {
@@ -439,7 +1462,66 @@
           "text": "'café'"
         }
       ]
-    }
+    },
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "valid",
+      "syntax_complete": true,
+      "semantic_complete": true,
+      "expected_codes": [],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        },
+        {
+          "original_name": "'résumé'",
+          "normalized_name": "résumé",
+          "kind": "field",
+          "role": "create",
+          "binding": "not_applicable",
+          "start": 31,
+          "end": 41
+        },
+        {
+          "original_name": "'café'",
+          "normalized_name": "café",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 42,
+          "end": 49
+        }
+      ],
+      "fields": [
+        {
+          "name": "café",
+          "conditional": false
+        },
+        {
+          "name": "résumé",
+          "conditional": false
+        }
+      ],
+      "removed": [],
+      "open": true,
+      "uncertain": false,
+      "stage_commands": [
+        "from",
+        "eval"
+      ],
+      "stage_complete": [
+        true,
+        true
+      ]
+    },
+    "canonical_basis": "EVAL-K"
   },
   {
     "id": "T2.fix1.implicit.and",
@@ -486,7 +1568,51 @@
         }
       ],
       "diagnostic_excerpts": []
-    }
+    },
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "valid",
+      "syntax_complete": true,
+      "semantic_complete": true,
+      "expected_codes": [],
+      "references": [
+        {
+          "original_name": "app",
+          "normalized_name": "app",
+          "kind": "index",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 6,
+          "end": 9
+        },
+        {
+          "original_name": "host",
+          "normalized_name": "host",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 14,
+          "end": 18
+        }
+      ],
+      "fields": [
+        {
+          "name": "host",
+          "conditional": false
+        }
+      ],
+      "removed": [],
+      "open": true,
+      "uncertain": false,
+      "stage_commands": [
+        "search"
+      ],
+      "stage_complete": [
+        true
+      ]
+    },
+    "canonical_basis": "SEARCH-K"
   },
   {
     "id": "T2.fix1.implicit.or",
@@ -533,7 +1659,51 @@
         }
       ],
       "diagnostic_excerpts": []
-    }
+    },
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "valid",
+      "syntax_complete": true,
+      "semantic_complete": true,
+      "expected_codes": [],
+      "references": [
+        {
+          "original_name": "app",
+          "normalized_name": "app",
+          "kind": "index",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 6,
+          "end": 9
+        },
+        {
+          "original_name": "host",
+          "normalized_name": "host",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 13,
+          "end": 17
+        }
+      ],
+      "fields": [
+        {
+          "name": "host",
+          "conditional": false
+        }
+      ],
+      "removed": [],
+      "open": true,
+      "uncertain": false,
+      "stage_commands": [
+        "search"
+      ],
+      "stage_complete": [
+        true
+      ]
+    },
+    "canonical_basis": "SEARCH-K"
   },
   {
     "id": "T2.fix1.implicit.xor",
@@ -580,7 +1750,51 @@
         }
       ],
       "diagnostic_excerpts": []
-    }
+    },
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "valid",
+      "syntax_complete": true,
+      "semantic_complete": true,
+      "expected_codes": [],
+      "references": [
+        {
+          "original_name": "app",
+          "normalized_name": "app",
+          "kind": "index",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 6,
+          "end": 9
+        },
+        {
+          "original_name": "host",
+          "normalized_name": "host",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 14,
+          "end": 18
+        }
+      ],
+      "fields": [
+        {
+          "name": "host",
+          "conditional": false
+        }
+      ],
+      "removed": [],
+      "open": true,
+      "uncertain": false,
+      "stage_commands": [
+        "search"
+      ],
+      "stage_complete": [
+        true
+      ]
+    },
+    "canonical_basis": "SEARCH-K"
   },
   {
     "id": "T2.fix1.implicit.precedence",
@@ -627,7 +1841,77 @@
         }
       ],
       "diagnostic_excerpts": []
-    }
+    },
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "valid",
+      "syntax_complete": true,
+      "semantic_complete": true,
+      "expected_codes": [],
+      "references": [
+        {
+          "original_name": "app",
+          "normalized_name": "app",
+          "kind": "index",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 6,
+          "end": 9
+        },
+        {
+          "original_name": "host",
+          "normalized_name": "host",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 13,
+          "end": 17
+        },
+        {
+          "original_name": "status",
+          "normalized_name": "status",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 26,
+          "end": 32
+        },
+        {
+          "original_name": "kind",
+          "normalized_name": "kind",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 41,
+          "end": 45
+        }
+      ],
+      "fields": [
+        {
+          "name": "host",
+          "conditional": false
+        },
+        {
+          "name": "kind",
+          "conditional": false
+        },
+        {
+          "name": "status",
+          "conditional": false
+        }
+      ],
+      "removed": [],
+      "open": true,
+      "uncertain": false,
+      "stage_commands": [
+        "search"
+      ],
+      "stage_complete": [
+        true
+      ]
+    },
+    "canonical_basis": "SEARCH-K"
   },
   {
     "id": "T2.fix1.implicit.missing_rhs",
@@ -661,6 +1945,74 @@
       "excerpts": [],
       "shapes": [],
       "diagnostic_excerpts": []
+    },
+    "canonical_evidence": "regression_snapshot",
+    "canonical_assertions": {
+      "category": "recovery",
+      "basis": "The supported index-first search has a dangling OR and remains syntax-invalid. OR cannot be treated as a literal event field or a complete search operand. A parser may retain the original selector as partial recovery evidence, but the malformed search stage is incomplete.",
+      "status": "invalid",
+      "syntax_complete": false,
+      "semantic_complete": false,
+      "required_codes": [
+        "SPL_SYNTAX_ERROR"
+      ],
+      "forbidden_codes": [
+        "SPL_PROFILE_MISMATCH",
+        "SPL_UNSUPPORTED_MODULE"
+      ],
+      "required_references": [],
+      "forbidden_references": [
+        {
+          "original_name": "OR",
+          "start": 10,
+          "end": 12
+        }
+      ],
+      "required_fields": [],
+      "forbidden_field_names": [
+        "OR"
+      ],
+      "required_stages": [
+        {
+          "command": "search",
+          "start": 0,
+          "semantic_complete": false
+        }
+      ],
+      "max_scopes": 1,
+      "final_state": null
+    },
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "invalid",
+      "syntax_complete": false,
+      "semantic_complete": false,
+      "expected_codes": [
+        "SPL_SYNTAX_ERROR",
+        "SPL_UNSUPPORTED_SEMANTICS"
+      ],
+      "references": [
+        {
+          "original_name": "app",
+          "normalized_name": "app",
+          "kind": "index",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 6,
+          "end": 9
+        }
+      ],
+      "fields": [],
+      "removed": [],
+      "open": true,
+      "uncertain": true,
+      "stage_commands": [
+        "search"
+      ],
+      "stage_complete": [
+        false
+      ]
     }
   },
   {
@@ -700,6 +2052,124 @@
       "diagnostic_excerpts": [
         "\"${fallback}\""
       ]
+    },
+    "canonical_evidence": "regression_snapshot",
+    "canonical_assertions": {
+      "category": "recovery",
+      "basis": "The typed/default lambda grammar is structurally complete, but a default containing interpolation is not the permitted constant string value. This is a definite contract-invalid default, not a reusable module declaration. A malformed callback cannot prove result; its parameter stays local and fallback inside the forbidden default must not become an event read. Complete grammar coverage is retained separately from incomplete unsafe effects.",
+      "status": "invalid",
+      "syntax_complete": true,
+      "semantic_complete": false,
+      "required_codes": [
+        "SPL_SYNTAX_ERROR"
+      ],
+      "forbidden_codes": [
+        "SPL_PROFILE_MISMATCH",
+        "SPL_UNSUPPORTED_MODULE"
+      ],
+      "required_references": [
+        {
+          "original_name": "main",
+          "start": 5,
+          "end": 9,
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable"
+        }
+      ],
+      "forbidden_references": [
+        {
+          "original_name": "result",
+          "start": 17,
+          "end": 23
+        },
+        {
+          "original_name": "fallback",
+          "start": 48,
+          "end": 56
+        },
+        {
+          "original_name": "$x",
+          "start": 35,
+          "end": 37
+        },
+        {
+          "original_name": "$x",
+          "start": 63,
+          "end": 65
+        }
+      ],
+      "required_fields": [],
+      "forbidden_field_names": [
+        "result",
+        "fallback",
+        "$x",
+        "x"
+      ],
+      "required_stages": [
+        {
+          "command": "from",
+          "start": 0,
+          "semantic_complete": true
+        },
+        {
+          "command": "eval",
+          "start": 12,
+          "semantic_complete": false
+        }
+      ],
+      "max_scopes": 1,
+      "final_state": null
+    },
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "invalid",
+      "syntax_complete": true,
+      "semantic_complete": false,
+      "expected_codes": [
+        "SPL_SYNTAX_ERROR",
+        "SPL_UNSUPPORTED_FUNCTION",
+        "SPL_UNSUPPORTED_SEMANTICS"
+      ],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        },
+        {
+          "original_name": "items",
+          "normalized_name": "items",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 28,
+          "end": 33
+        }
+      ],
+      "fields": [
+        {
+          "name": "items",
+          "conditional": false
+        }
+      ],
+      "removed": [],
+      "open": true,
+      "uncertain": true,
+      "stage_commands": [
+        "from",
+        "eval"
+      ],
+      "stage_complete": [
+        true,
+        false
+      ]
     }
   },
   {
@@ -737,6 +2207,151 @@
       "excerpts": [],
       "shapes": [],
       "diagnostic_excerpts": []
+    },
+    "canonical_evidence": "regression_snapshot",
+    "canonical_assertions": {
+      "category": "representation",
+      "basis": "The approved lambda form is syntax-complete but callback effects are unmodeled. Its direct items argument and genuine free body names remain event reads; dollar parameters/local variables never become event fields or child query scopes. The assigned result remains conditional because an unknown callback/call cannot prove output availability. Exact local bookkeeping and diagnostic combination are representation details, not authority for promotion.",
+      "status": "incomplete",
+      "syntax_complete": true,
+      "semantic_complete": false,
+      "required_codes": [],
+      "forbidden_codes": [
+        "SPL_SYNTAX_ERROR",
+        "SPL_PROFILE_MISMATCH",
+        "SPL_UNSUPPORTED_MODULE"
+      ],
+      "required_references": [
+        {
+          "original_name": "main",
+          "start": 5,
+          "end": 9,
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable"
+        },
+        {
+          "original_name": "items",
+          "start": 28,
+          "end": 33,
+          "normalized_name": "items",
+          "kind": "field",
+          "role": "read",
+          "binding": "source"
+        }
+      ],
+      "forbidden_references": [
+        {
+          "original_name": "$x",
+          "start": 35,
+          "end": 37
+        },
+        {
+          "original_name": "$x",
+          "start": 57,
+          "end": 59
+        }
+      ],
+      "required_fields": [
+        {
+          "name": "result",
+          "conditional": true
+        }
+      ],
+      "forbidden_field_names": [
+        "$x",
+        "x"
+      ],
+      "required_stages": [
+        {
+          "command": "from",
+          "start": 0,
+          "semantic_complete": true
+        },
+        {
+          "command": "eval",
+          "start": 12,
+          "semantic_complete": false
+        }
+      ],
+      "max_scopes": 1,
+      "final_state": {
+        "fields": [
+          {
+            "name": "items",
+            "conditional": false
+          },
+          {
+            "name": "result",
+            "conditional": true
+          }
+        ],
+        "removed": [],
+        "open": true,
+        "uncertain": true
+      }
+    },
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "incomplete",
+      "syntax_complete": true,
+      "semantic_complete": false,
+      "expected_codes": [
+        "SPL_UNSUPPORTED_FUNCTION",
+        "SPL_UNSUPPORTED_SEMANTICS"
+      ],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        },
+        {
+          "original_name": "result",
+          "normalized_name": "result",
+          "kind": "field",
+          "role": "create",
+          "binding": "not_applicable",
+          "start": 17,
+          "end": 23
+        },
+        {
+          "original_name": "items",
+          "normalized_name": "items",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 28,
+          "end": 33
+        }
+      ],
+      "fields": [
+        {
+          "name": "items",
+          "conditional": false
+        },
+        {
+          "name": "result",
+          "conditional": true
+        }
+      ],
+      "removed": [],
+      "open": true,
+      "uncertain": true,
+      "stage_commands": [
+        "from",
+        "eval"
+      ],
+      "stage_complete": [
+        true,
+        false
+      ]
     }
   },
   {
@@ -774,6 +2389,158 @@
       "excerpts": [],
       "shapes": [],
       "diagnostic_excerpts": []
+    },
+    "canonical_evidence": "regression_snapshot",
+    "canonical_assertions": {
+      "category": "representation",
+      "basis": "The approved lambda form is syntax-complete but callback effects are unmodeled. Its direct items argument and genuine free body names remain event reads; dollar parameters/local variables never become event fields or child query scopes. The assigned result remains conditional because an unknown callback/call cannot prove output availability. Exact local bookkeeping and diagnostic combination are representation details, not authority for promotion. Independent correction before capture: accepted SQL compound-expression tests show earlier unmodeled/invalid expression uncertainty can affect a later operand binding. The approved lambda/path contract proves this exact genuine free/index read but does not uniquely prove its binding at this point. Under the controller-approved assertion-only optional-binding rule, retain all six exact identity/role/span fields and leave binding unset; do not manufacture source or indeterminate certainty, and do not force an exact final field state.",
+      "status": "incomplete",
+      "syntax_complete": true,
+      "semantic_complete": false,
+      "required_codes": [],
+      "forbidden_codes": [
+        "SPL_SYNTAX_ERROR",
+        "SPL_PROFILE_MISMATCH",
+        "SPL_UNSUPPORTED_MODULE"
+      ],
+      "required_references": [
+        {
+          "original_name": "main",
+          "start": 5,
+          "end": 9,
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable"
+        },
+        {
+          "original_name": "items",
+          "start": 28,
+          "end": 33,
+          "normalized_name": "items",
+          "kind": "field",
+          "role": "read",
+          "binding": "source"
+        },
+        {
+          "original_name": "factor",
+          "start": 52,
+          "end": 58,
+          "normalized_name": "factor",
+          "kind": "field",
+          "role": "read"
+        }
+      ],
+      "forbidden_references": [
+        {
+          "original_name": "$x",
+          "start": 35,
+          "end": 37
+        },
+        {
+          "original_name": "$x",
+          "start": 49,
+          "end": 51
+        }
+      ],
+      "required_fields": [
+        {
+          "name": "result",
+          "conditional": true
+        }
+      ],
+      "forbidden_field_names": [
+        "$x",
+        "x"
+      ],
+      "required_stages": [
+        {
+          "command": "from",
+          "start": 0,
+          "semantic_complete": true
+        },
+        {
+          "command": "eval",
+          "start": 12,
+          "semantic_complete": false
+        }
+      ],
+      "max_scopes": 1,
+      "final_state": null
+    },
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "incomplete",
+      "syntax_complete": true,
+      "semantic_complete": false,
+      "expected_codes": [
+        "SPL_UNSUPPORTED_FUNCTION",
+        "SPL_UNSUPPORTED_SEMANTICS"
+      ],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        },
+        {
+          "original_name": "result",
+          "normalized_name": "result",
+          "kind": "field",
+          "role": "create",
+          "binding": "not_applicable",
+          "start": 17,
+          "end": 23
+        },
+        {
+          "original_name": "items",
+          "normalized_name": "items",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 28,
+          "end": 33
+        },
+        {
+          "original_name": "factor",
+          "normalized_name": "factor",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 52,
+          "end": 58
+        }
+      ],
+      "fields": [
+        {
+          "name": "factor",
+          "conditional": false
+        },
+        {
+          "name": "items",
+          "conditional": false
+        },
+        {
+          "name": "result",
+          "conditional": true
+        }
+      ],
+      "removed": [],
+      "open": true,
+      "uncertain": true,
+      "stage_commands": [
+        "from",
+        "eval"
+      ],
+      "stage_complete": [
+        true,
+        false
+      ]
     }
   },
   {
@@ -817,7 +2584,53 @@
         }
       ],
       "diagnostic_excerpts": []
-    }
+    },
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "valid",
+      "syntax_complete": true,
+      "semantic_complete": true,
+      "expected_codes": [],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        },
+        {
+          "original_name": "amount",
+          "normalized_name": "amount",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 18,
+          "end": 24
+        }
+      ],
+      "fields": [
+        {
+          "name": "amount",
+          "conditional": false
+        }
+      ],
+      "removed": [],
+      "open": true,
+      "uncertain": false,
+      "stage_commands": [
+        "from",
+        "where"
+      ],
+      "stage_complete": [
+        true,
+        true
+      ]
+    },
+    "canonical_basis": "WHERE-K"
   },
   {
     "id": "T2.fix1.between.mixed_pair",
@@ -860,7 +2673,112 @@
     "hold_ids": [
       "H11"
     ],
-    "floor_credit": false
+    "floor_credit": false,
+    "canonical_evidence": "regression_snapshot",
+    "canonical_assertions": {
+      "category": "representation",
+      "basis": "H11 retains the recognized disputed operator layout as incomplete with both coverage dimensions false. The listed operator-position spellings cannot become source field reads or implicit output names merely because they lex as identifier words. Retention/binding of original ordinary operands is separately labelled representation evidence; this does not approve the held operator semantics.",
+      "status": "incomplete",
+      "syntax_complete": false,
+      "semantic_complete": false,
+      "required_codes": [
+        "SPL_UNSUPPORTED_SEMANTICS"
+      ],
+      "forbidden_codes": [
+        "SPL_SYNTAX_ERROR",
+        "SPL_PROFILE_MISMATCH",
+        "SPL_UNSUPPORTED_MODULE"
+      ],
+      "required_references": [
+        {
+          "original_name": "main",
+          "start": 5,
+          "end": 9,
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable"
+        }
+      ],
+      "forbidden_references": [
+        {
+          "original_name": "BETWEEN",
+          "start": 25,
+          "end": 32
+        },
+        {
+          "original_name": "and",
+          "start": 35,
+          "end": 38
+        }
+      ],
+      "required_fields": [],
+      "forbidden_field_names": [
+        "BETWEEN",
+        "and"
+      ],
+      "required_stages": [
+        {
+          "command": "from",
+          "start": 0,
+          "semantic_complete": true
+        },
+        {
+          "command": "where",
+          "start": 12,
+          "semantic_complete": false
+        }
+      ],
+      "max_scopes": 1,
+      "final_state": null
+    },
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "incomplete",
+      "syntax_complete": false,
+      "semantic_complete": false,
+      "expected_codes": [
+        "SPL_UNSUPPORTED_SEMANTICS"
+      ],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        },
+        {
+          "original_name": "amount",
+          "normalized_name": "amount",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 18,
+          "end": 24
+        }
+      ],
+      "fields": [
+        {
+          "name": "amount",
+          "conditional": false
+        }
+      ],
+      "removed": [],
+      "open": true,
+      "uncertain": true,
+      "stage_commands": [
+        "from",
+        "where"
+      ],
+      "stage_complete": [
+        true,
+        false
+      ]
+    }
   },
   {
     "id": "T2.fix1.between.reverse_pair",
@@ -903,7 +2821,112 @@
     "hold_ids": [
       "H11"
     ],
-    "floor_credit": false
+    "floor_credit": false,
+    "canonical_evidence": "regression_snapshot",
+    "canonical_assertions": {
+      "category": "representation",
+      "basis": "H11 retains the recognized disputed operator layout as incomplete with both coverage dimensions false. The listed operator-position spellings cannot become source field reads or implicit output names merely because they lex as identifier words. Retention/binding of original ordinary operands is separately labelled representation evidence; this does not approve the held operator semantics.",
+      "status": "incomplete",
+      "syntax_complete": false,
+      "semantic_complete": false,
+      "required_codes": [
+        "SPL_UNSUPPORTED_SEMANTICS"
+      ],
+      "forbidden_codes": [
+        "SPL_SYNTAX_ERROR",
+        "SPL_PROFILE_MISMATCH",
+        "SPL_UNSUPPORTED_MODULE"
+      ],
+      "required_references": [
+        {
+          "original_name": "main",
+          "start": 5,
+          "end": 9,
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable"
+        }
+      ],
+      "forbidden_references": [
+        {
+          "original_name": "between",
+          "start": 25,
+          "end": 32
+        },
+        {
+          "original_name": "AND",
+          "start": 35,
+          "end": 38
+        }
+      ],
+      "required_fields": [],
+      "forbidden_field_names": [
+        "between",
+        "AND"
+      ],
+      "required_stages": [
+        {
+          "command": "from",
+          "start": 0,
+          "semantic_complete": true
+        },
+        {
+          "command": "where",
+          "start": 12,
+          "semantic_complete": false
+        }
+      ],
+      "max_scopes": 1,
+      "final_state": null
+    },
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "incomplete",
+      "syntax_complete": false,
+      "semantic_complete": false,
+      "expected_codes": [
+        "SPL_UNSUPPORTED_SEMANTICS"
+      ],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        },
+        {
+          "original_name": "amount",
+          "normalized_name": "amount",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 18,
+          "end": 24
+        }
+      ],
+      "fields": [
+        {
+          "name": "amount",
+          "conditional": false
+        }
+      ],
+      "removed": [],
+      "open": true,
+      "uncertain": true,
+      "stage_commands": [
+        "from",
+        "where"
+      ],
+      "stage_complete": [
+        true,
+        false
+      ]
+    }
   },
   {
     "id": "T2.fix1.between.mixed_word",
@@ -946,7 +2969,112 @@
     "hold_ids": [
       "H11"
     ],
-    "floor_credit": false
+    "floor_credit": false,
+    "canonical_evidence": "regression_snapshot",
+    "canonical_assertions": {
+      "category": "representation",
+      "basis": "H11 retains the recognized disputed operator layout as incomplete with both coverage dimensions false. The listed operator-position spellings cannot become source field reads or implicit output names merely because they lex as identifier words. Retention/binding of original ordinary operands is separately labelled representation evidence; this does not approve the held operator semantics.",
+      "status": "incomplete",
+      "syntax_complete": false,
+      "semantic_complete": false,
+      "required_codes": [
+        "SPL_UNSUPPORTED_SEMANTICS"
+      ],
+      "forbidden_codes": [
+        "SPL_SYNTAX_ERROR",
+        "SPL_PROFILE_MISMATCH",
+        "SPL_UNSUPPORTED_MODULE"
+      ],
+      "required_references": [
+        {
+          "original_name": "main",
+          "start": 5,
+          "end": 9,
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable"
+        }
+      ],
+      "forbidden_references": [
+        {
+          "original_name": "BeTwEeN",
+          "start": 25,
+          "end": 32
+        },
+        {
+          "original_name": "AnD",
+          "start": 35,
+          "end": 38
+        }
+      ],
+      "required_fields": [],
+      "forbidden_field_names": [
+        "BeTwEeN",
+        "AnD"
+      ],
+      "required_stages": [
+        {
+          "command": "from",
+          "start": 0,
+          "semantic_complete": true
+        },
+        {
+          "command": "where",
+          "start": 12,
+          "semantic_complete": false
+        }
+      ],
+      "max_scopes": 1,
+      "final_state": null
+    },
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "incomplete",
+      "syntax_complete": false,
+      "semantic_complete": false,
+      "expected_codes": [
+        "SPL_UNSUPPORTED_SEMANTICS"
+      ],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        },
+        {
+          "original_name": "amount",
+          "normalized_name": "amount",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 18,
+          "end": 24
+        }
+      ],
+      "fields": [
+        {
+          "name": "amount",
+          "conditional": false
+        }
+      ],
+      "removed": [],
+      "open": true,
+      "uncertain": true,
+      "stage_commands": [
+        "from",
+        "where"
+      ],
+      "stage_complete": [
+        true,
+        false
+      ]
+    }
   },
   {
     "id": "T2.fix1.logical.held_and",
@@ -988,7 +3116,119 @@
     "hold_ids": [
       "H11"
     ],
-    "floor_credit": false
+    "floor_credit": false,
+    "canonical_evidence": "regression_snapshot",
+    "canonical_assertions": {
+      "category": "representation",
+      "basis": "H11 retains the recognized disputed operator layout as incomplete with both coverage dimensions false. The listed operator-position spellings cannot become source field reads or implicit output names merely because they lex as identifier words. Retention/binding of original ordinary operands is separately labelled representation evidence; this does not approve the held operator semantics.",
+      "status": "incomplete",
+      "syntax_complete": false,
+      "semantic_complete": false,
+      "required_codes": [
+        "SPL_UNSUPPORTED_SEMANTICS"
+      ],
+      "forbidden_codes": [
+        "SPL_SYNTAX_ERROR",
+        "SPL_PROFILE_MISMATCH",
+        "SPL_UNSUPPORTED_MODULE"
+      ],
+      "required_references": [
+        {
+          "original_name": "main",
+          "start": 5,
+          "end": 9,
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable"
+        }
+      ],
+      "forbidden_references": [
+        {
+          "original_name": "and",
+          "start": 22,
+          "end": 25
+        }
+      ],
+      "required_fields": [],
+      "forbidden_field_names": [
+        "and"
+      ],
+      "required_stages": [
+        {
+          "command": "from",
+          "start": 0,
+          "semantic_complete": true
+        },
+        {
+          "command": "where",
+          "start": 12,
+          "semantic_complete": false
+        }
+      ],
+      "max_scopes": 1,
+      "final_state": null
+    },
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "incomplete",
+      "syntax_complete": false,
+      "semantic_complete": false,
+      "expected_codes": [
+        "SPL_UNSUPPORTED_SEMANTICS"
+      ],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        },
+        {
+          "original_name": "a",
+          "normalized_name": "a",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 18,
+          "end": 19
+        },
+        {
+          "original_name": "b",
+          "normalized_name": "b",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 26,
+          "end": 27
+        }
+      ],
+      "fields": [
+        {
+          "name": "a",
+          "conditional": false
+        },
+        {
+          "name": "b",
+          "conditional": false
+        }
+      ],
+      "removed": [],
+      "open": true,
+      "uncertain": true,
+      "stage_commands": [
+        "from",
+        "where"
+      ],
+      "stage_complete": [
+        true,
+        false
+      ]
+    }
   },
   {
     "id": "T2.fix1.logical.held_not",
@@ -1030,7 +3270,106 @@
     "hold_ids": [
       "H11"
     ],
-    "floor_credit": false
+    "floor_credit": false,
+    "canonical_evidence": "regression_snapshot",
+    "canonical_assertions": {
+      "category": "representation",
+      "basis": "H11 retains the recognized disputed operator layout as incomplete with both coverage dimensions false. The listed operator-position spellings cannot become source field reads or implicit output names merely because they lex as identifier words. Retention/binding of original ordinary operands is separately labelled representation evidence; this does not approve the held operator semantics.",
+      "status": "incomplete",
+      "syntax_complete": false,
+      "semantic_complete": false,
+      "required_codes": [
+        "SPL_UNSUPPORTED_SEMANTICS"
+      ],
+      "forbidden_codes": [
+        "SPL_SYNTAX_ERROR",
+        "SPL_PROFILE_MISMATCH",
+        "SPL_UNSUPPORTED_MODULE"
+      ],
+      "required_references": [
+        {
+          "original_name": "main",
+          "start": 5,
+          "end": 9,
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable"
+        }
+      ],
+      "forbidden_references": [
+        {
+          "original_name": "nOt",
+          "start": 18,
+          "end": 21
+        }
+      ],
+      "required_fields": [],
+      "forbidden_field_names": [
+        "nOt"
+      ],
+      "required_stages": [
+        {
+          "command": "from",
+          "start": 0,
+          "semantic_complete": true
+        },
+        {
+          "command": "where",
+          "start": 12,
+          "semantic_complete": false
+        }
+      ],
+      "max_scopes": 1,
+      "final_state": null
+    },
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "incomplete",
+      "syntax_complete": false,
+      "semantic_complete": false,
+      "expected_codes": [
+        "SPL_UNSUPPORTED_SEMANTICS"
+      ],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        },
+        {
+          "original_name": "enabled",
+          "normalized_name": "enabled",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 22,
+          "end": 29
+        }
+      ],
+      "fields": [
+        {
+          "name": "enabled",
+          "conditional": false
+        }
+      ],
+      "removed": [],
+      "open": true,
+      "uncertain": true,
+      "stage_commands": [
+        "from",
+        "where"
+      ],
+      "stage_complete": [
+        true,
+        false
+      ]
+    }
   },
   {
     "id": "T2.fix1.logical.words_as_names",
@@ -1072,7 +3411,129 @@
       "excerpts": [],
       "shapes": [],
       "diagnostic_excerpts": []
-    }
+    },
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "incomplete",
+      "syntax_complete": true,
+      "semantic_complete": false,
+      "expected_codes": [
+        "SPL_UNSUPPORTED_SEMANTICS"
+      ],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        },
+        {
+          "original_name": "between",
+          "normalized_name": "between",
+          "kind": "field",
+          "role": "create",
+          "binding": "not_applicable",
+          "start": 17,
+          "end": 24
+        },
+        {
+          "original_name": "and",
+          "normalized_name": "and",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 25,
+          "end": 28
+        },
+        {
+          "original_name": "x",
+          "normalized_name": "x",
+          "kind": "field",
+          "role": "create",
+          "binding": "not_applicable",
+          "start": 30,
+          "end": 31
+        },
+        {
+          "original_name": "or",
+          "normalized_name": "or",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 37,
+          "end": 39
+        },
+        {
+          "original_name": "xor",
+          "normalized_name": "xor",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 44,
+          "end": 47
+        },
+        {
+          "original_name": "y",
+          "normalized_name": "y",
+          "kind": "field",
+          "role": "create",
+          "binding": "not_applicable",
+          "start": 50,
+          "end": 51
+        },
+        {
+          "original_name": "or",
+          "normalized_name": "or",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 62,
+          "end": 64
+        }
+      ],
+      "fields": [
+        {
+          "name": "and",
+          "conditional": false
+        },
+        {
+          "name": "between",
+          "conditional": false
+        },
+        {
+          "name": "or",
+          "conditional": false
+        },
+        {
+          "name": "x",
+          "conditional": false
+        },
+        {
+          "name": "xor",
+          "conditional": false
+        },
+        {
+          "name": "y",
+          "conditional": true
+        }
+      ],
+      "removed": [],
+      "open": true,
+      "uncertain": true,
+      "stage_commands": [
+        "from",
+        "eval"
+      ],
+      "stage_complete": [
+        true,
+        false
+      ]
+    },
+    "canonical_basis": "Exact left-to-right eval + static object construction + existing E.L06.named_arguments.P1 incomplete-call template. Object keys and the named label are not reads. The earlier ordinary reads establish and/or/xor before named-call uncertainty; x and between retain their definite known bindings; y stays conditional."
   },
   {
     "id": "T2.fix1.logical.word_as_search_literal",
@@ -1114,7 +3575,51 @@
       ],
       "shapes": [],
       "diagnostic_excerpts": []
-    }
+    },
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "valid",
+      "syntax_complete": true,
+      "semantic_complete": true,
+      "expected_codes": [],
+      "references": [
+        {
+          "original_name": "app",
+          "normalized_name": "app",
+          "kind": "index",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 13,
+          "end": 16
+        },
+        {
+          "original_name": "host",
+          "normalized_name": "host",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 21,
+          "end": 25
+        }
+      ],
+      "fields": [
+        {
+          "name": "host",
+          "conditional": false
+        }
+      ],
+      "removed": [],
+      "open": true,
+      "uncertain": false,
+      "stage_commands": [
+        "search"
+      ],
+      "stage_complete": [
+        true
+      ]
+    },
+    "canonical_basis": "SEARCH-K"
   },
   {
     "id": "T2.fix2.not-addition",
@@ -1163,7 +3668,66 @@
         }
       ],
       "diagnostic_excerpts": []
-    }
+    },
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "valid",
+      "syntax_complete": true,
+      "semantic_complete": true,
+      "expected_codes": [],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        },
+        {
+          "original_name": "x",
+          "normalized_name": "x",
+          "kind": "field",
+          "role": "create",
+          "binding": "not_applicable",
+          "start": 17,
+          "end": 18
+        },
+        {
+          "original_name": "not",
+          "normalized_name": "not",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 19,
+          "end": 22
+        }
+      ],
+      "fields": [
+        {
+          "name": "not",
+          "conditional": false
+        },
+        {
+          "name": "x",
+          "conditional": false
+        }
+      ],
+      "removed": [],
+      "open": true,
+      "uncertain": false,
+      "stage_commands": [
+        "from",
+        "eval"
+      ],
+      "stage_complete": [
+        true,
+        true
+      ]
+    },
+    "canonical_basis": "EVAL-K"
   },
   {
     "id": "T2.fix2.not-access",
@@ -1213,6 +3777,153 @@
         }
       ],
       "diagnostic_excerpts": []
+    },
+    "canonical_evidence": "regression_snapshot",
+    "canonical_assertions": {
+      "category": "representation",
+      "basis": "Approved L09/E.L09 and the accepted M4/SPL2 schema-boundary tests distinguish object navigation, constant keys, and dynamic index expressions from literal dotted fields. Preserve the genuine base and index reads. Member/key/operator slices cannot become separate event reads, and an unresolved traversed value cannot prove an unconditional assignment. No flattened root path or invented child query scope is authorized; the precise composite path reference representation may vary.",
+      "status": "incomplete",
+      "syntax_complete": true,
+      "semantic_complete": false,
+      "required_codes": [
+        "SPL_UNSUPPORTED_SEMANTICS"
+      ],
+      "forbidden_codes": [
+        "SPL_SYNTAX_ERROR",
+        "SPL_PROFILE_MISMATCH",
+        "SPL_UNSUPPORTED_MODULE"
+      ],
+      "required_references": [
+        {
+          "original_name": "main",
+          "start": 5,
+          "end": 9,
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable"
+        },
+        {
+          "original_name": "not",
+          "start": 19,
+          "end": 22,
+          "normalized_name": "not",
+          "kind": "field",
+          "role": "read",
+          "binding": "source"
+        }
+      ],
+      "forbidden_references": [
+        {
+          "original_name": "0",
+          "start": 23,
+          "end": 24
+        }
+      ],
+      "required_fields": [
+        {
+          "name": "x",
+          "conditional": true
+        }
+      ],
+      "forbidden_field_names": [],
+      "required_stages": [
+        {
+          "command": "from",
+          "start": 0,
+          "semantic_complete": true
+        },
+        {
+          "command": "eval",
+          "start": 12,
+          "semantic_complete": false
+        }
+      ],
+      "max_scopes": 1,
+      "final_state": {
+        "fields": [
+          {
+            "name": "not",
+            "conditional": false
+          },
+          {
+            "name": "x",
+            "conditional": true
+          }
+        ],
+        "removed": [],
+        "open": true,
+        "uncertain": true
+      }
+    },
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "incomplete",
+      "syntax_complete": true,
+      "semantic_complete": false,
+      "expected_codes": [
+        "SPL_UNSUPPORTED_SEMANTICS"
+      ],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        },
+        {
+          "original_name": "x",
+          "normalized_name": "x",
+          "kind": "field",
+          "role": "create",
+          "binding": "not_applicable",
+          "start": 17,
+          "end": 18
+        },
+        {
+          "original_name": "not",
+          "normalized_name": "not",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 19,
+          "end": 22
+        },
+        {
+          "original_name": "not[0]",
+          "normalized_name": "not[]",
+          "kind": "field",
+          "role": "read",
+          "binding": "indeterminate",
+          "start": 19,
+          "end": 25
+        }
+      ],
+      "fields": [
+        {
+          "name": "not",
+          "conditional": false
+        },
+        {
+          "name": "x",
+          "conditional": true
+        }
+      ],
+      "removed": [],
+      "open": true,
+      "uncertain": true,
+      "stage_commands": [
+        "from",
+        "eval"
+      ],
+      "stage_complete": [
+        true,
+        false
+      ]
     }
   },
   {
@@ -1262,7 +3973,55 @@
         }
       ],
       "diagnostic_excerpts": []
-    }
+    },
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "incomplete",
+      "syntax_complete": true,
+      "semantic_complete": false,
+      "expected_codes": [
+        "SPL_UNSUPPORTED_FUNCTION"
+      ],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        },
+        {
+          "original_name": "x",
+          "normalized_name": "x",
+          "kind": "field",
+          "role": "create",
+          "binding": "not_applicable",
+          "start": 17,
+          "end": 18
+        }
+      ],
+      "fields": [
+        {
+          "name": "x",
+          "conditional": true
+        }
+      ],
+      "removed": [],
+      "open": true,
+      "uncertain": true,
+      "stage_commands": [
+        "from",
+        "eval"
+      ],
+      "stage_complete": [
+        true,
+        false
+      ]
+    },
+    "canonical_basis": "UNKNOWN-CALL-U"
   },
   {
     "id": "T2.fix2.mixed-not-call",
@@ -1311,7 +4070,55 @@
         }
       ],
       "diagnostic_excerpts": []
-    }
+    },
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "incomplete",
+      "syntax_complete": true,
+      "semantic_complete": false,
+      "expected_codes": [
+        "SPL_UNSUPPORTED_FUNCTION"
+      ],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        },
+        {
+          "original_name": "x",
+          "normalized_name": "x",
+          "kind": "field",
+          "role": "create",
+          "binding": "not_applicable",
+          "start": 17,
+          "end": 18
+        }
+      ],
+      "fields": [
+        {
+          "name": "x",
+          "conditional": true
+        }
+      ],
+      "removed": [],
+      "open": true,
+      "uncertain": true,
+      "stage_commands": [
+        "from",
+        "eval"
+      ],
+      "stage_complete": [
+        true,
+        false
+      ]
+    },
+    "canonical_basis": "UNKNOWN-CALL-U"
   },
   {
     "id": "T2.fix2.held-prefix",
@@ -1366,7 +4173,147 @@
     "hold_ids": [
       "H11"
     ],
-    "floor_credit": false
+    "floor_credit": false,
+    "canonical_evidence": "regression_snapshot",
+    "canonical_assertions": {
+      "category": "representation",
+      "basis": "Root-approved held-prefix composition ruling for this exact query: preserve the original eval target and ordinary enabled input, but x is conditional because nOt remains an H11 unproved operator/casing form. The ruling does not admit the spelling, model the operator, establish an all-null removal, or promote syntax/semantic coverage. Pinned grammar and accepted spl2_parse_test.go:329-355 establish the held notExpression context; design-spec:21,49,59 preserves sound inputs and forbids stronger availability than supported semantics establish. Original operator token cannot become an event field. Required input binding remains omitted because this strengthening resolves target conditionality only, not a new binding-order contract.",
+      "status": "incomplete",
+      "syntax_complete": false,
+      "semantic_complete": false,
+      "required_codes": [
+        "SPL_UNSUPPORTED_SEMANTICS"
+      ],
+      "forbidden_codes": [
+        "SPL_SYNTAX_ERROR",
+        "SPL_PROFILE_MISMATCH",
+        "SPL_UNSUPPORTED_MODULE"
+      ],
+      "required_references": [
+        {
+          "original_name": "main",
+          "start": 5,
+          "end": 9,
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable"
+        },
+        {
+          "original_name": "x",
+          "normalized_name": "x",
+          "kind": "field",
+          "role": "create",
+          "binding": "not_applicable",
+          "start": 17,
+          "end": 18
+        },
+        {
+          "original_name": "enabled",
+          "normalized_name": "enabled",
+          "kind": "field",
+          "role": "read",
+          "start": 23,
+          "end": 30
+        }
+      ],
+      "forbidden_references": [
+        {
+          "original_name": "nOt",
+          "start": 19,
+          "end": 22
+        },
+        {
+          "original_name": "x",
+          "start": 17,
+          "end": 18,
+          "role": "read"
+        }
+      ],
+      "required_fields": [
+        {
+          "name": "x",
+          "conditional": true
+        }
+      ],
+      "forbidden_field_names": [
+        "nOt"
+      ],
+      "required_stages": [
+        {
+          "command": "from",
+          "start": 0,
+          "semantic_complete": true
+        },
+        {
+          "command": "eval",
+          "start": 12,
+          "semantic_complete": false
+        }
+      ],
+      "max_scopes": 1,
+      "final_state": null
+    },
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "incomplete",
+      "syntax_complete": false,
+      "semantic_complete": false,
+      "expected_codes": [
+        "SPL_UNSUPPORTED_SEMANTICS"
+      ],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        },
+        {
+          "original_name": "x",
+          "normalized_name": "x",
+          "kind": "field",
+          "role": "create",
+          "binding": "not_applicable",
+          "start": 17,
+          "end": 18
+        },
+        {
+          "original_name": "enabled",
+          "normalized_name": "enabled",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 23,
+          "end": 30
+        }
+      ],
+      "fields": [
+        {
+          "name": "enabled",
+          "conditional": false
+        },
+        {
+          "name": "x",
+          "conditional": true
+        }
+      ],
+      "removed": [],
+      "open": true,
+      "uncertain": true,
+      "stage_commands": [
+        "from",
+        "eval"
+      ],
+      "stage_complete": [
+        true,
+        false
+      ]
+    }
   },
   {
     "id": "T2.fix2.uppercase-precedence",
@@ -1415,7 +4362,79 @@
         }
       ],
       "diagnostic_excerpts": []
-    }
+    },
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "valid",
+      "syntax_complete": true,
+      "semantic_complete": true,
+      "expected_codes": [],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        },
+        {
+          "original_name": "x",
+          "normalized_name": "x",
+          "kind": "field",
+          "role": "create",
+          "binding": "not_applicable",
+          "start": 17,
+          "end": 18
+        },
+        {
+          "original_name": "a",
+          "normalized_name": "a",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 23,
+          "end": 24
+        },
+        {
+          "original_name": "b",
+          "normalized_name": "b",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 31,
+          "end": 32
+        }
+      ],
+      "fields": [
+        {
+          "name": "a",
+          "conditional": false
+        },
+        {
+          "name": "b",
+          "conditional": false
+        },
+        {
+          "name": "x",
+          "conditional": false
+        }
+      ],
+      "removed": [],
+      "open": true,
+      "uncertain": false,
+      "stage_commands": [
+        "from",
+        "eval"
+      ],
+      "stage_complete": [
+        true,
+        true
+      ]
+    },
+    "canonical_basis": "EVAL-K"
   },
   {
     "id": "T2.fix2.uppercase-over-access",
@@ -1465,6 +4484,158 @@
         }
       ],
       "diagnostic_excerpts": []
+    },
+    "canonical_evidence": "regression_snapshot",
+    "canonical_assertions": {
+      "category": "representation",
+      "basis": "Approved L09/E.L09 and the accepted M4/SPL2 schema-boundary tests distinguish object navigation, constant keys, and dynamic index expressions from literal dotted fields. Preserve the genuine base and index reads. Member/key/operator slices cannot become separate event reads, and an unresolved traversed value cannot prove an unconditional assignment. No flattened root path or invented child query scope is authorized; the precise composite path reference representation may vary.",
+      "status": "incomplete",
+      "syntax_complete": true,
+      "semantic_complete": false,
+      "required_codes": [
+        "SPL_UNSUPPORTED_SEMANTICS"
+      ],
+      "forbidden_codes": [
+        "SPL_SYNTAX_ERROR",
+        "SPL_PROFILE_MISMATCH",
+        "SPL_UNSUPPORTED_MODULE"
+      ],
+      "required_references": [
+        {
+          "original_name": "main",
+          "start": 5,
+          "end": 9,
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable"
+        },
+        {
+          "original_name": "not",
+          "start": 23,
+          "end": 26,
+          "normalized_name": "not",
+          "kind": "field",
+          "role": "read",
+          "binding": "source"
+        }
+      ],
+      "forbidden_references": [
+        {
+          "original_name": "0",
+          "start": 27,
+          "end": 28
+        },
+        {
+          "original_name": "NOT",
+          "start": 19,
+          "end": 22
+        }
+      ],
+      "required_fields": [
+        {
+          "name": "x",
+          "conditional": true
+        }
+      ],
+      "forbidden_field_names": [],
+      "required_stages": [
+        {
+          "command": "from",
+          "start": 0,
+          "semantic_complete": true
+        },
+        {
+          "command": "eval",
+          "start": 12,
+          "semantic_complete": false
+        }
+      ],
+      "max_scopes": 1,
+      "final_state": {
+        "fields": [
+          {
+            "name": "not",
+            "conditional": false
+          },
+          {
+            "name": "x",
+            "conditional": true
+          }
+        ],
+        "removed": [],
+        "open": true,
+        "uncertain": true
+      }
+    },
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "incomplete",
+      "syntax_complete": true,
+      "semantic_complete": false,
+      "expected_codes": [
+        "SPL_UNSUPPORTED_SEMANTICS"
+      ],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        },
+        {
+          "original_name": "x",
+          "normalized_name": "x",
+          "kind": "field",
+          "role": "create",
+          "binding": "not_applicable",
+          "start": 17,
+          "end": 18
+        },
+        {
+          "original_name": "not",
+          "normalized_name": "not",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 23,
+          "end": 26
+        },
+        {
+          "original_name": "not[0]",
+          "normalized_name": "not[]",
+          "kind": "field",
+          "role": "read",
+          "binding": "indeterminate",
+          "start": 23,
+          "end": 29
+        }
+      ],
+      "fields": [
+        {
+          "name": "not",
+          "conditional": false
+        },
+        {
+          "name": "x",
+          "conditional": true
+        }
+      ],
+      "removed": [],
+      "open": true,
+      "uncertain": true,
+      "stage_commands": [
+        "from",
+        "eval"
+      ],
+      "stage_complete": [
+        true,
+        false
+      ]
     }
   }
 ]

@@ -9,7 +9,7 @@ SPL Toolkit 0.1.1 is an offline library and command-line tool for bounded operat
 - validate source field obligations against an offline field catalog, singly or in ordered batches;
 - check nested declarations against local JSON Schema resources and exact compiled OCSF versions, keeping optional and category-dependent findings visible.
 
-The Go implementation is canonical. The Python package includes the native Go library, and the REST server calls the same Go APIs. Structured analysis supports the bounded SPL/splunkd/current contract. It does not provide event instance validation, expression typechecking, raw-to-data-model translation, data-model rewriting, learned mappings, SPL2 modules, or complete Splunk syntax coverage.
+The Go implementation is canonical. The Python package includes the native Go library, and the REST server calls the same Go APIs. Structured analysis supports bounded SPL and standalone SPL2 contracts under splunkd/current; SPL2 requires explicit selection. It does not provide event instance validation, expression typechecking, raw-to-data-model translation, data-model rewriting, learned mappings, SPL2 modules, or complete Splunk syntax coverage.
 
 ## Structured analysis
 
@@ -107,4 +107,4 @@ The REST service is offline during query processing. Its Swagger page loads asse
 - [REST server](docs/api-server.md)
 - [Performance baseline](docs/performance.md)
 
-Structured analysis and field-list validation have local acceptance coverage beyond the historical 0.1.1 release matrix. Standalone SPL2 and schema validation remain future work.
+Structured analysis, field-list validation and JSON Schema/OCSF validation support explicitly selected standalone SPL2. See the [SPL2 contract](docs/spl2.md) for syntax, effects and held boundaries, and [compatibility](docs/compatibility.md) for the exact local evidence and remaining platform gates.

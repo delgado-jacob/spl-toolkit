@@ -63,7 +63,7 @@ SPL2_FIXTURE_FILES = (
     "extended-commands.json", "extended-boundaries.json", "functions.json", "canonical-core.json",
     "recovery-core.json",
 )
-ACCEPTANCE_FILES = ("test_documented_cli.py", "test_surfaces.py", "test_analysis_surfaces.py", "test_validation_surfaces.py", "test_schema_surfaces.py", "cli_examples.json")
+ACCEPTANCE_FILES = ("test_documented_cli.py", "test_surfaces.py", "test_analysis_surfaces.py", "test_validation_surfaces.py", "test_schema_surfaces.py", "test_spl2_surfaces.py", "spl2_transport.py", "cli_examples.json")
 REQUIRED_PYTEST_PLUGIN = r'''\
 import json
 import os
@@ -152,7 +152,7 @@ def run(command: list[str], *, cwd: Path, env: dict[str, str] | None = None) -> 
 
 def clean_env() -> dict[str, str]:
     env = os.environ.copy()
-    for name in ("PYTHONPATH", "PYTHONHOME", "SPL_NATIVE_LIBRARY", "SPL_EXPECTED_VERSION", "SPL_SCHEMA_FIXTURES", "SPL_SPL2_FIXTURES"):
+    for name in ("PYTHONPATH", "PYTHONHOME", "SPL_NATIVE_LIBRARY", "SPL_EXPECTED_VERSION", "SPL_SCHEMA_FIXTURES", "SPL_SPL2_FIXTURES", "SPL_SPL2_GO_REPORTS", "SPL_SPL2_GO_SHA256"):
         env.pop(name, None)
     return env
 
@@ -225,6 +225,28 @@ def copy_spl2_fixtures(source: Path, destination: Path) -> dict[str, str]:
         shutil.copy2(original, copied)
         if sha256(copied) != expected:
             raise AssertionError(f"SPL2 fixture hash mismatch: {relative}")
+        hashes[relative] = expected
+    return hashes
+
+
+def copy_documentation(source: Path, destination: Path) -> dict[str, str]:
+    """Bind the maintained docs that the installed CLI example harness reads."""
+    paths = [source / "README.md"] + sorted(
+        path for path in (source / "docs").rglob("*.md") if "superpowers" not in path.parts
+    )
+    required = {"README.md", "docs/cli.md", "docs/spl2.md"}
+    names = {path.relative_to(source).as_posix() for path in paths}
+    if not required <= names:
+        raise FileNotFoundError(f"missing maintained documentation: {sorted(required - names)}")
+    hashes = {}
+    for original in paths:
+        relative = original.relative_to(source).as_posix()
+        copied = destination / relative
+        copied.parent.mkdir(parents=True, exist_ok=True)
+        expected = sha256(original)
+        shutil.copy2(original, copied)
+        if sha256(copied) != expected:
+            raise AssertionError(f"documentation hash mismatch: {relative}")
         hashes[relative] = expected
     return hashes
 
@@ -346,6 +368,7 @@ def install_and_check(
     server: Path,
     fixture_source: Path,
     docs_root: Path,
+    go_transport: Path,
 ) -> dict[str, object]:
     wheel_payload_hashes = verify_wheel_sources(wheel, docs_root)
     python = create_test_environment(directory)
@@ -381,6 +404,11 @@ def install_and_check(
     schema_hashes = copy_schema_fixtures(docs_root / "testdata/schemas", schema_fixtures)
     spl2_fixtures = outside_checkout / f"spl2-fixtures-{directory.name}"
     spl2_hashes = copy_spl2_fixtures(docs_root / "testdata/spl2", spl2_fixtures)
+    copied_go_transport = outside_checkout / f"spl2-go-transport-{directory.name}.json"
+    shutil.copy2(go_transport, copied_go_transport)
+    go_transport_hash = sha256(go_transport)
+    if sha256(copied_go_transport) != go_transport_hash:
+        raise AssertionError("Go transport copy hash mismatch")
     runtime_env = {key: "http://127.0.0.1:9" for key in ("HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY", "http_proxy", "https_proxy", "all_proxy")}
     runtime_env.update(NO_PROXY="127.0.0.1,localhost", no_proxy="127.0.0.1,localhost")
     analysis_env = runtime_env | {
@@ -399,13 +427,19 @@ def install_and_check(
     validation_fixture = outside_checkout / f"validation-cases-{directory.name}.json"
     shutil.copy2(docs_root / "testdata" / "validation" / "cases.json", validation_fixture)
     schema_evidence = outside_checkout / f"schema-surface-evidence-{directory.name}.json"
+    spl2_evidence = outside_checkout / f"spl2-surface-evidence-{directory.name}.json"
+    documentation = outside_checkout / f"docs-{directory.name}"
+    documentation_hashes = copy_documentation(docs_root, documentation)
     acceptance_env = install_env | analysis_env | {
         "SPL_SCHEMA_EVIDENCE": str(schema_evidence),
+        "SPL_SPL2_EVIDENCE": str(spl2_evidence),
+        "SPL_SPL2_GO_REPORTS": str(copied_go_transport.resolve()),
+        "SPL_SPL2_GO_SHA256": go_transport_hash,
         "SPL_VALIDATION_FIXTURES": str(validation_fixture.resolve()),
         "SPL_CLI": str(cli.resolve()),
         "SPL_SERVER": str(server.resolve()),
         "SPL_FIXTURES": str(fixture.resolve()),
-        "SPL_DOCS_ROOT": str(docs_root.resolve()),
+        "SPL_DOCS_ROOT": str(documentation.resolve()),
     }
     surface_counts = _run_required_suite(
         python, acceptance_dir, outside_checkout / f"surface-counts-{directory.name}.json",
@@ -413,13 +447,15 @@ def install_and_check(
     )
     return metadata | {
         "schema_surface_evidence": json.loads(schema_evidence.read_text(encoding="utf-8")),
+        "spl2_surface_evidence": json.loads(spl2_evidence.read_text(encoding="utf-8")),
+        "documentation_hashes": documentation_hashes,
         "wheel_sha256": sha256(wheel),
         "wheel_payload_hashes": wheel_payload_hashes,
         "source_header_sha256": sha256(docs_root / "python/spl_toolkit/libspl_toolkit.h"),
-        "fixture_hashes": {"baseline": sha256(fixture), "analysis": sha256(analysis_fixture), "validation": sha256(validation_fixture), "schema": schema_hashes, "spl2": spl2_hashes},
+        "fixture_hashes": {"baseline": sha256(fixture), "analysis": sha256(analysis_fixture), "validation": sha256(validation_fixture), "schema": schema_hashes, "spl2": spl2_hashes, "spl2_go_transport": go_transport_hash},
         "tests": {"required_native": native_counts, "surface_acceptance": surface_counts},
         "required_test_files": {"native": list(NATIVE_TESTS),
-                                "acceptance": [name for name in ACCEPTANCE_FILES if name.endswith(".py")]},
+                                "acceptance": [name for name in ACCEPTANCE_FILES if name.startswith("test_") and name.endswith(".py")]},
         "cli_examples": "passed",
         "surface_parity": "passed",
         "version_agreement": "passed",
@@ -613,10 +649,12 @@ def _check_package(
             raise AssertionError("wheel-only checks require accepted --cli and --server payloads")
         else:
             cli, server = build_surface_binaries(root, temp / "surface-binaries", version)
+        go_transport = outside / "spl2-go-transport.json"
+        run([sys.executable, str(root / "tests/acceptance/spl2_transport.py"), "--root", str(root), "--output", str(go_transport)], cwd=root, env=clean_env())
         fixture = root / "testdata" / "baseline" / "cases.json"
         evidence = install_and_check(
             wheel, temp / "wheel-venv", outside, version, requirements,
-            cli, server, fixture, root,
+            cli, server, fixture, root, go_transport,
         )
 
         if wheel_only:
@@ -633,7 +671,7 @@ def _check_package(
             inspect_wheel(source_wheel, version)
             evidence["rebuilt_sdist"] = install_and_check(
                 source_wheel, temp / "sdist-venv", outside, version,
-                source / "requirements-dev.txt", cli, server, fixture, root,
+                source / "requirements-dev.txt", cli, server, fixture, root, go_transport,
             )
             evidence["rebuilt_sdist"]["sdist_source_hashes"] = source_hashes
             check_missing_compiler(source, temp / "failed-wheel", clean_env())

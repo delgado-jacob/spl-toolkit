@@ -113,6 +113,7 @@ def audit_recovery_classification(case, expected, inventory):
 
 def audit_canonical(case, inventory=()):
     if "canonical" not in case:
+        require(not (case.get("canonical_evidence", "independent") == "independent" and "canonical_assertions" in case), "independent assertions require full exact canonical object")
         require("recovery_classification" not in case, "recovery classification needs canonical evidence")
         return False
     expected = case["canonical"]
@@ -132,9 +133,94 @@ def audit_canonical(case, inventory=()):
     require(len(expected["stage_commands"]) == len(expected["stage_complete"]), "canonical stage assertions disagree")
     require(all(isinstance(expected[key], list) for key in ("expected_codes", "references", "fields", "removed", "stage_commands", "stage_complete")), "canonical arrays required")
     for ref in expected["references"]:
-        require({"original_name", "normalized_name", "kind", "role", "binding", "start", "end"} <= ref.keys(), "incomplete canonical reference")
-        require(case["document"]["text"].encode("utf-8")[ref["start"]:ref["end"]].decode("utf-8") == ref["original_name"], "canonical reference source changed")
+        require(isinstance(ref, dict) and {"original_name", "normalized_name", "kind", "role", "binding", "start", "end"} <= ref.keys(), "incomplete canonical reference")
+        raw, start, end = case["document"]["text"].encode("utf-8"), ref["start"], ref["end"]
+        require(type(start) is int and type(end) is int and 0 <= start < end <= len(raw), "canonical reference requires nonempty original bounds")
+        require(isinstance(ref["original_name"], str) and raw[start:end] == ref["original_name"].encode("utf-8"), "canonical reference source changed")
+    audit_canonical_assertions(case)
     return True
+
+
+def audit_canonical_assertions(case):
+    """Separate independent soundness obligations from representation snapshots."""
+    evidence = case.get("canonical_evidence", "independent")
+    require(evidence in {"independent", "regression_snapshot"}, "unknown canonical evidence kind")
+    if evidence == "independent":
+        if "canonical_assertions" not in case:
+            return
+        require(isinstance(case.get("canonical"), dict), "independent assertions require full exact canonical object")
+    a = case.get("canonical_assertions")
+    require(isinstance(a, dict), "regression snapshot requires independent assertions")
+    arrays = {"required_codes", "forbidden_codes", "required_references", "forbidden_references",
+              "required_fields", "forbidden_field_names", "required_stages"}
+    keys = arrays | {"category", "basis", "status", "syntax_complete", "semantic_complete", "max_scopes", "final_state"}
+    require(keys <= set(a) <= keys | {"required_scopes"}, "invalid independent assertion keys")
+    require(a["category"] in {"recovery", "representation"} and isinstance(a["basis"], str) and a["basis"].strip(), "snapshot needs independent eligibility basis")
+    require(a["status"] in {"valid", "invalid", "incomplete"}, "invalid independent status")
+    require(type(a["syntax_complete"]) is bool and type(a["semantic_complete"]) is bool, "independent coverage must be boolean")
+    require(not a["semantic_complete"] or a["syntax_complete"], "independent semantics cannot promote unproved syntax")
+    require(a["status"] != "valid" or a["syntax_complete"] and a["semantic_complete"], "independent valid requires complete coverage")
+    require(type(a["max_scopes"]) is int and a["max_scopes"] > 0, "independent scope bound required")
+    require(all(isinstance(a[k], list) for k in arrays), "independent assertion arrays required")
+    require(any(a[k] for k in ("required_references", "forbidden_references", "required_fields", "forbidden_field_names", "required_stages")), "snapshot needs nonvacuous soundness assertions")
+    for key in ("required_codes", "forbidden_codes", "forbidden_field_names"):
+        require(all(isinstance(v, str) and v for v in a[key]), "independent names/codes must be nonempty strings")
+    require(not set(a["required_codes"]) & set(a["forbidden_codes"]), "contradictory independent codes")
+    expected, raw = case["canonical"], case["document"]["text"].encode("utf-8")
+    for key in ("status", "syntax_complete", "semantic_complete"):
+        require(expected[key] == a[key], "snapshot differs from independent status/coverage")
+    require(set(a["required_codes"]) <= set(expected["expected_codes"]), "snapshot lacks required code")
+    require(not set(a["forbidden_codes"]) & set(expected["expected_codes"]), "snapshot includes forbidden code")
+    ref_keys = {"original_name", "normalized_name", "kind", "role", "binding", "start", "end"}
+    scope_keys = {"scope_start", "scope_end"}
+    def scope_bounds(record):
+        if not scope_keys & set(record):
+            return
+        require(scope_keys <= set(record), "independent scope bounds require a pair")
+        start, end = record["scope_start"], record["scope_end"]
+        require(type(start) is int and type(end) is int and 0 <= start < end <= len(raw), "invalid independent scope bounds")
+    def located(record, keys):
+        require(isinstance(record, dict) and set(record) == keys, "invalid independent located assertion")
+        start, end = record["start"], record["end"]
+        require(type(start) is int and type(end) is int and 0 <= start < end <= len(raw), "independent source bounds changed")
+        require(isinstance(record["original_name"], str) and raw[start:end].decode("utf-8") == record["original_name"], "independent source slice changed")
+    for ref in a["required_references"]:
+        require(isinstance(ref, dict) and ref_keys - {"binding"} <= set(ref) <= ref_keys | scope_keys, "invalid independent required reference")
+        located(ref, set(ref))
+        scope_bounds(ref)
+        require("binding" not in ref or ref["binding"] in {"source", "derived", "indeterminate", "unavailable", "not_applicable"}, "invalid required reference binding")
+        require(any(all(actual[k] == v for k, v in ref.items() if k not in scope_keys) for actual in expected["references"]), "snapshot lacks required reference")
+    for ref in a["forbidden_references"]:
+        require(isinstance(ref, dict) and {"original_name", "start", "end"} <= set(ref) <= {"original_name", "start", "end", "role", "binding"}, "invalid forbidden reference selector")
+        located(ref, set(ref))
+        require("role" not in ref or ref["role"] in {"read", "create", "output", "remove", "rename", "group", "null_test"}, "invalid forbidden reference role")
+        require("binding" not in ref or ref["binding"] in {"source", "derived", "indeterminate", "unavailable", "not_applicable"}, "invalid forbidden reference binding")
+        require(not any(all(actual[k] == v for k,v in ref.items()) for actual in expected["references"]), "snapshot includes forbidden reference")
+    for field in a["required_fields"]:
+        require(isinstance(field, dict) and set(field) == {"name", "conditional"} and isinstance(field["name"], str) and field["name"] and type(field["conditional"]) is bool, "invalid independent field assertion")
+        require(field in expected["fields"], "snapshot lacks required field")
+    require(not set(a["forbidden_field_names"]) & {f["name"] for f in expected["fields"]}, "snapshot includes forbidden field")
+    final = a["final_state"]
+    if final is not None:
+        require(isinstance(final, dict) and set(final) == {"fields", "removed", "open", "uncertain"}, "invalid independent exact final state")
+        require(type(final["open"]) is bool and type(final["uncertain"]) is bool and isinstance(final["fields"], list) and isinstance(final["removed"], list), "invalid independent exact final state types")
+        require(all(isinstance(f, dict) and set(f) == {"name", "conditional"} and isinstance(f["name"], str) and f["name"] and type(f["conditional"]) is bool for f in final["fields"]) and all(isinstance(n, str) and n for n in final["removed"]), "invalid independent exact final state fields")
+        require(all(expected[key] == final[key] for key in final), "snapshot differs from independent exact final state")
+    for stage in a["required_stages"]:
+        require(isinstance(stage, dict) and {"command", "start", "semantic_complete"} <= set(stage) <= {"command", "start", "semantic_complete"} | scope_keys, "invalid independent stage assertion")
+        scope_bounds(stage)
+        command, start = stage["command"], stage["start"]
+        require(isinstance(command, str) and command and command.isascii() and command == command.lower() and type(start) is int and start >= 0 and type(stage["semantic_complete"]) is bool, "invalid independent stage identity")
+        implicit_search = command == "search" and start == 0 and raw.startswith(b"index=")
+        require(raw[start:start+len(command)].lower() == command.encode() or implicit_search, "independent stage source changed")
+        require((command, stage["semantic_complete"]) in zip(expected["stage_commands"], expected["stage_complete"]), "snapshot lacks required stage")
+    scopes = a.get("required_scopes", [])
+    require(isinstance(scopes, list), "independent required scopes must be an array")
+    for scope in scopes:
+        require(isinstance(scope, dict) and set(scope) == {"kind", "start", "end", "owner_start", "parent_start", "parent_end"}, "invalid independent scope descriptor")
+        require(scope["kind"] in {"search", "subpipe", "exists"}, "invalid independent scope kind")
+        require(all(type(scope[k]) is int for k in ("start", "end", "owner_start", "parent_start", "parent_end")), "invalid independent scope coordinate")
+        require(0 <= scope["parent_start"] <= scope["owner_start"] <= scope["start"] < scope["end"] <= scope["parent_end"] <= len(raw), "invalid independent scope containment")
 
 
 def audit(manifest, provenance, cases):
@@ -231,7 +317,8 @@ def audit(manifest, provenance, cases):
         require(pending == 0, "pending mandatory obligations remain")
         for key, actual in {"meaningful":len(meaningful), "definite_negative":len(negative), "sql_mixed":len(sql)}.items():
             require(actual >= manifest["final_floors"][key], f"unmet {key} floor")
-    return {"active_queries":len(cases), "active_obligations":len(aliases), "pending_obligations":pending, "meaningful":len(meaningful), "definite_negative":len(negative), "sql_mixed":len(sql), "held":len(holds), "canonical_queries":len(canonical_ids)}
+    snapshots = sum(c.get("canonical_evidence") == "regression_snapshot" for c in cases if c["id"] in canonical_ids)
+    return {"active_queries":len(cases), "active_obligations":len(aliases), "pending_obligations":pending, "meaningful":len(meaningful), "definite_negative":len(negative), "sql_mixed":len(sql), "held":len(holds), "canonical_queries":len(canonical_ids), "independent_canonical_queries":len(canonical_ids)-snapshots, "regression_snapshots":snapshots}
 
 
 def main():

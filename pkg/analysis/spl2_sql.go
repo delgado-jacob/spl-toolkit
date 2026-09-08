@@ -22,6 +22,9 @@ func spl2ScheduledSQL(c spl2SQLCommand) bool {
 // Stages retain lexical clause order. Each phase uses its real owning clause;
 // preparation and final restriction can therefore share the one SELECT stage.
 func executeSPL2SQL(result *Result, parsed *spl2ParsedDocument, refinement *sourceRefinement, c spl2SQLCommand, env *environment, aliases map[string]bool, scheduler *spl2ScopeScheduler, scopeID string, parent, position int) *environment {
+	provedKey := parsed.proveGroupKeyBeforeEmptyHaving(c)
+	missingSelect := parsed.groupMissingSelectDiagnostic(c)
+	selectedShape := false
 	logical := []antlr.ParserRuleContext{}
 	for _, ctx := range []antlr.ParserRuleContext{c.SqlFromClause(), c.SqlWhereClause(), c.SqlGroupClause(), c.SqlSelectClause(), c.SqlHavingClause(), c.SqlOrderClause(), c.SqlLimitClause(), c.SqlOffsetClause()} {
 		if ctx != nil {
@@ -38,6 +41,23 @@ func executeSPL2SQL(result *Result, parsed *spl2ParsedDocument, refinement *sour
 	for _, ctx := range lexical {
 		stages[ctx] = registerSPL2Stage(result, parsed.source.contextLocation(ctx), strings.ToLower(ctx.GetStart().GetText()), positions[ctx], scopeID)
 	}
+	if provedKey != nil {
+		index := stages[c.SqlGroupClause()]
+		result.Stages[index].SemanticComplete = true
+		for i := range result.Diagnostics {
+			d := &result.Diagnostics[i]
+			original := *d
+			original.StageID = ""
+			original.ScopeID = ""
+			if original == provedKey.diagnostic {
+				// This original parser finding remains document recovery evidence.
+				d.StageID = ""
+				d.ScopeID = ""
+			} else if d.StageID == result.Stages[index].ID {
+				result.Stages[index].SemanticComplete = false
+			}
+		}
+	}
 	s := &spl2SemanticStage{semanticStage: &semanticStage{result: result, env: env, refinement: refinement}, parsed2: parsed, aliases: aliases}
 	phase := func(ctx antlr.ParserRuleContext, name string, run func()) {
 		if ctx == nil {
@@ -47,12 +67,28 @@ func executeSPL2SQL(result *Result, parsed *spl2ParsedDocument, refinement *sour
 		s.transitions = []Transition{}
 		before := s.env.snapshot()
 		scheduler.runChildren(ctx, s.env, aliases, scopeID, parent)
-		if spl2IntactSyntax(ctx) {
+		if spl2IntactSyntax(ctx) || (provedKey != nil && ctx == c.SqlGroupClause()) {
+			if (provedKey != nil || missingSelect != nil) && ctx == c.SqlGroupClause() {
+				local := *parsed
+				local.diagnostics = []Diagnostic{}
+				for _, d := range parsed.diagnostics {
+					if (provedKey == nil || d != provedKey.diagnostic) && (missingSelect == nil || d != *missingSelect) {
+						local.diagnostics = append(local.diagnostics, d)
+					}
+				}
+				s.parsed2 = &local
+			}
 			run()
+			s.parsed2 = parsed
 		} else {
+			if from, ok := ctx.(spl2.ISqlFromClauseContext); ok {
+				s.sourceIntentions(from)
+			} else if name != "project" {
+				s.recoveredSQLInputs(ctx)
+			}
 			s.unsupported(ctx, "Recovered SQL clause effects are not yet modeled")
 		}
-		if !result.Stages[s.stage].SemanticComplete {
+		if !result.Stages[s.stage].SemanticComplete && !(name == "project" && selectedShape) {
 			s.env.uncertain = true
 		}
 		order := len(result.Lineage)
@@ -66,6 +102,7 @@ func executeSPL2SQL(result *Result, parsed *spl2ParsedDocument, refinement *sour
 		}
 		from := c.SqlFromClause()
 		s.dataset(from.Dataset())
+		s.joinDatasetIntentions(from)
 		if a := from.SourceAlias(); a != nil {
 			o := s.operand(a.Identifier())
 			if o.Sound {
@@ -82,6 +119,9 @@ func executeSPL2SQL(result *Result, parsed *spl2ParsedDocument, refinement *sour
 		groups := []locatedOperand{}
 		for _, key := range c.SqlGroupClause().AllSqlGroupKey() {
 			field := spl2SQLDirectField(key.Expression())
+			if provedKey != nil && key == provedKey.key {
+				field = provedKey.identifier
+			}
 			if field != nil && key.SqlSpanAssignment() == nil {
 				groups = append(groups, s.selector(field))
 			} else {
@@ -99,10 +139,10 @@ func executeSPL2SQL(result *Result, parsed *spl2ParsedDocument, refinement *sour
 	selected := []preparedSelection{}
 	visible := map[string]bool{}
 	phase(c.SqlSelectClause(), selectPhase, func() {
-		selected, visible = s.prepareSQLSelection(c.SqlSelectClause(), pregroup, aggregate, c.SqlGroupClause() != nil)
+		selected, visible, selectedShape = s.prepareSQLSelection(c.SqlSelectClause(), pregroup, aggregate, c.SqlGroupClause() != nil)
 	})
 	phase(c.SqlHavingClause(), "having", func() {
-		if c.SqlGroupClause() == nil {
+		if c.SqlGroupClause() == nil && !aggregate {
 			s.unsupported(c.SqlHavingClause(), "SQL HAVING without grouping is unproved")
 		}
 		s.sqlRestrictedExpression(c.SqlHavingClause().SqlPredicate(), visible)
@@ -114,7 +154,12 @@ func executeSPL2SQL(result *Result, parsed *spl2ParsedDocument, refinement *sour
 			s.sqlRestrictedExpression(c.SqlOrderClause(), visible)
 		}
 	})
-	phase(c.SqlSelectClause(), "project", func() { s.applyPreparedProjection(selected, "table") })
+	phase(c.SqlSelectClause(), "project", func() {
+		s.applyPreparedProjection(selected, "table")
+		if selectedShape {
+			s.env.open, s.env.uncertain = false, false
+		}
+	})
 	phase(c.SqlLimitClause(), "limit", func() {})
 	phase(c.SqlOffsetClause(), "offset", func() {})
 	return s.env
@@ -169,13 +214,14 @@ func (s *spl2SemanticStage) sqlUnprovedAggregateExpression(tree antlr.Tree) spl2
 	return out
 }
 
-func (s *spl2SemanticStage) prepareSQLSelection(clause spl2.ISqlSelectClauseContext, pregroup *environment, aggregate, grouped bool) ([]preparedSelection, map[string]bool) {
+func (s *spl2SemanticStage) prepareSQLSelection(clause spl2.ISqlSelectClauseContext, pregroup *environment, aggregate, grouped bool) ([]preparedSelection, map[string]bool, bool) {
 	type projection struct {
-		ctx       spl2.IProjectionContext
-		target    locatedOperand
-		value     spl2ExpressionEvidence
-		field     *trackedField
-		aggregate bool
+		ctx          spl2.IProjectionContext
+		target       locatedOperand
+		value        spl2ExpressionEvidence
+		field        *trackedField
+		aggregate    bool
+		countCertain bool
 	}
 	items := []projection{}
 	input := s.env
@@ -199,6 +245,7 @@ func (s *spl2SemanticStage) prepareSQLSelection(clause spl2.ISqlSelectClauseCont
 		if item.aggregate {
 			s.env = pregroup
 			item.value = s.call(call, true)
+			item.countCertain = s.sqlCountOutputSound(p, call, item.value)
 			s.env = input
 		} else if spl2SQLHasAggregate(p.Expression()) {
 			s.env = pregroup
@@ -244,12 +291,12 @@ func (s *spl2SemanticStage) prepareSQLSelection(clause spl2.ISqlSelectClauseCont
 	// All expressions see input, never a sibling SELECT alias. Ambiguous output
 	// names remain conditional and cannot authorize later alias visibility.
 	counts := map[string]int{}
+	ambiguousDestination := false
 	for _, item := range items {
-		if item.target.Sound {
-			counts[item.target.Name]++
-		}
-		if item.field != nil {
-			counts[item.field.Name]++
+		if name, known := s.sqlProjectionCollisionName(item.ctx, item.target); known {
+			counts[name]++
+		} else {
+			ambiguousDestination = true
 		}
 	}
 	collisions := map[string]bool{}
@@ -265,17 +312,41 @@ func (s *spl2SemanticStage) prepareSQLSelection(clause spl2.ISqlSelectClauseCont
 	}
 	selected := []preparedSelection{}
 	visible := map[string]bool{}
+	finiteShape := !ambiguousDestination && len(collisions) == 0 && s.sqlProjectionEffectSound(clause)
+	incompleteInputs := map[string]bool{}
+	if s.refinement != nil {
+		for _, expansion := range s.refinement.expansions {
+			if !expansion.Complete {
+				incompleteInputs[expansion.ReferenceID] = true
+			}
+		}
+	}
 	for _, item := range items {
+		for _, id := range s.origins(item.value.ids) {
+			if incompleteInputs[id] {
+				finiteShape = false
+			}
+		}
 		if item.field != nil {
 			item.field.Conditional = item.field.Conditional || collisions[item.field.Name]
 			selected = append(selected, preparedSelection{Field: *item.field, InputReferenceIDs: item.value.ids, EmitProjectTransition: true})
 			visible[item.field.Name] = true
 		}
 		if !item.target.Sound {
+			if item.field == nil {
+				finiteShape = false
+			}
 			continue
 		}
+		if item.target.Name == "" || item.target.Resolution != "exact" {
+			finiteShape = false
+		}
 		before := len(s.result.References)
-		if item.aggregate {
+		if item.aggregate && item.countCertain && !collisions[item.target.Name] && !ambiguousDestination && item.target.Resolution == "exact" {
+			// This one intact output has its own non-null proof; sibling/owner
+			// limitations still govern coverage, visibility and all other outputs.
+			s.createAt(item.target, "output", "aggregate", item.value.ids, false)
+		} else if item.aggregate {
 			s.applyAggregation([]aggregateOutput{{Target: item.target, InputReferenceIDs: item.value.ids, Conditional: !item.value.nonnull}}, nil, true)
 		} else {
 			s.applyAssignment(item.target, item.value.ids, !item.value.nonnull || collisions[item.target.Name], item.value.exactNull)
@@ -285,10 +356,69 @@ func (s *spl2SemanticStage) prepareSQLSelection(clause spl2.ISqlSelectClauseCont
 			ids := []string{s.result.References[before].ID}
 			if f, ok := s.projectedField(item.target.Name, ids); ok {
 				selected = append(selected, preparedSelection{Field: f, InputReferenceIDs: ids, EmitProjectTransition: true})
+			} else {
+				finiteShape = false
 			}
 		}
 	}
-	return selected, visible
+	return selected, visible, finiteShape
+}
+
+// A potential SQL destination participates in collision checks even when its
+// field state is unproved. L19's static alias-qualified suffix policy is used
+// only here: it cannot install a suffix field or authorize a source binding.
+func (s *spl2SemanticStage) sqlProjectionCollisionName(p spl2.IProjectionContext, target locatedOperand) (string, bool) {
+	local, _ := s.parsed2.recoveredCountView(p)
+	if !local.soundOperand(p) {
+		return "", false
+	}
+	if target.Sound && target.Resolution == "exact" {
+		return target.Name, true
+	}
+	if p.ProjectionAlias() != nil {
+		return "", false
+	}
+	access := spl2SQLFieldAccess(p.Expression())
+	if access == nil || access.Primary().FieldName() == nil {
+		return "", false
+	}
+	base := s.operand(access.Primary().FieldName().Identifier())
+	if !base.Sound || base.Resolution != "exact" {
+		return "", false
+	}
+	parts := access.AllAccessPart()
+	if len(parts) == 0 {
+		return base.Name, true
+	}
+	if len(parts) != 1 || !s.aliases[base.Name] || parts[0].DOT() == nil || parts[0].Identifier() == nil {
+		return "", false
+	}
+	suffix := s.operand(parts[0].Identifier())
+	return suffix.Name, suffix.Sound && suffix.Resolution == "exact"
+}
+
+// Per-output count proof is deliberately narrower than SELECT owner coverage.
+func (s *spl2SemanticStage) sqlCountOutputSound(projection spl2.IProjectionContext, call spl2.ICallContext, value spl2ExpressionEvidence) bool {
+	return value.modeled && value.nonnull && call.Identifier().GetText() == "count" && call.Arguments() == nil && s.sqlProjectionEffectSound(projection)
+}
+
+func (s *spl2SemanticStage) sqlProjectionEffectSound(ctx antlr.ParserRuleContext) bool {
+	local, missingSelect := s.parsed2.recoveredCountView(ctx)
+	if !local.soundOperand(ctx) {
+		return false
+	}
+	location := s.parsed2.source.contextLocation(ctx)
+	for _, d := range s.result.Diagnostics {
+		original := d
+		original.StageID, original.ScopeID = "", ""
+		if missingSelect != nil && original == *missingSelect {
+			continue
+		}
+		if d.Severity == "error" && d.Location.End.Offset >= location.Start.Offset && d.Location.Start.Offset <= location.End.Offset {
+			return false
+		}
+	}
+	return true
 }
 
 // A temporary visibility view keeps hidden source/group origins without
@@ -329,4 +459,29 @@ func (s *spl2SemanticStage) sqlRestrictedExpression(tree antlr.Tree, visible map
 	}
 	s.env = actual
 	return value
+}
+
+// Preserve real expression inputs of damaged clauses once, without preparing
+// any projection alias, group output, or final output shape.
+func (s *spl2SemanticStage) recoveredSQLInputs(ctx antlr.ParserRuleContext) {
+	switch c := ctx.(type) {
+	case spl2.ISqlSelectClauseContext:
+		for _, projection := range c.AllProjection() {
+			if projection.Expression() != nil {
+				s.sqlUnprovedAggregateExpression(projection.Expression())
+			}
+		}
+	case spl2.ISqlGroupClauseContext:
+		for _, key := range c.AllSqlGroupKey() {
+			if span := key.SqlSpanCall(); span != nil {
+				if field := span.FieldName(); field != nil {
+					s.readIdentifier(field.Identifier(), "read")
+				}
+			} else if key.SqlSpanAssignment() != nil {
+				if field := spl2SQLDirectField(key.Expression()); field != nil {
+					s.readIdentifier(field, "read")
+				}
+			}
+		}
+	}
 }

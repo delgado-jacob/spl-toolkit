@@ -31,10 +31,19 @@ func spl2ChildScopesIn(p *spl2ParsedDocument, trees []antlr.Tree) []spl2ChildSco
 		kind, input := "", ""
 		switch ctx := tree.(type) {
 		case *spl2.IndependentSearchContext:
+			if !spl2OriginalScopeDelimiters(ctx.LBRACKET(), ctx.RBRACKET()) {
+				return
+			}
 			owner, body, kind, input = ctx, ctx.Pipeline(), "search", "independent"
 		case *spl2.InheritedSubpipeContext:
+			if !spl2OriginalScopeDelimiters(ctx.LBRACKET(), ctx.RBRACKET()) {
+				return
+			}
 			owner, body, kind, input = ctx, ctx, "subpipe", "inherited"
 		case *spl2.ExistsPredicateContext:
+			if !spl2OriginalScopeDelimiters(ctx.LPAREN(), ctx.RPAREN()) {
+				return
+			}
 			owner, kind, input = ctx, "exists", "correlated"
 			if ctx.FromCommand() != nil {
 				body = ctx.FromCommand()
@@ -95,7 +104,7 @@ func spl2PipelineContexts(tree antlr.Tree) []antlr.ParserRuleContext {
 
 func (q *spl2ScopeScheduler) pipeline(sites []spl2CommandSite, env *environment, aliases map[string]bool, scopeID string, parent int) *environment {
 	position := 0
-	for _, site := range sites {
+	for siteIndex, site := range sites {
 		ctx := site.context
 		if sql, ok := ctx.(spl2SQLCommand); ok && spl2ScheduledSQL(sql) {
 			before := len(q.result.Stages)
@@ -112,12 +121,35 @@ func (q *spl2ScopeScheduler) pipeline(sites []spl2CommandSite, env *environment,
 		position++
 		s := &spl2SemanticStage{semanticStage: &semanticStage{result: q.result, stage: index, env: env, transitions: []Transition{}, refinement: q.refinement}, parsed2: q.parsed, aliases: aliases}
 		before := env.snapshot()
+		if _, ok := ctx.(*spl2.TimewrapCommandContext); ok && spl2IntactSyntax(ctx) && siteIndex > 0 {
+			_, fromStart := sites[0].context.(*spl2.FromCommandContext)
+			proved, noTimechart := fromStart, true
+			for _, prior := range sites[:siteIndex] {
+				if prior.context == nil || !spl2IntactSyntax(prior.context) {
+					proved = false
+					break
+				}
+				if _, ok := prior.context.(*spl2.EmbeddedCommandContext); ok {
+					proved = false
+				}
+				if _, ok := prior.context.(*spl2.TimechartCommandContext); ok {
+					noTimechart = false
+				}
+			}
+			if proved && noTimechart {
+				token := ctx.GetStart()
+				s.diagnosticAt(CodeSyntaxError, "error", "contract", "Timewrap requires a preceding timechart command", q.parsed.source.location(token.GetStart(), token.GetStop()+1), true)
+			}
+		}
 		if ctx != nil {
 			q.runChildren(ctx, env, aliases, scopeID, parent)
 		}
 		if ctx != nil && spl2IntactSyntax(ctx) {
 			s.command(ctx)
 		} else {
+			if ctx != nil {
+				s.recoveredInputs(ctx)
+			}
 			message := "Recovered SPL2 command effects are not yet modeled"
 			if ctx == nil {
 				message = "Standalone command effects are unproved"
@@ -262,4 +294,14 @@ func (s *spl2SemanticStage) dataset(dataset spl2.IDatasetContext) {
 		v := values[name]
 		s.applyAssignment(v.target, v.ids, !v.nonnull || v.rows != len(rows.AllExpression()), v.allnull)
 	}
+}
+
+func spl2OriginalScopeDelimiters(open, close antlr.TerminalNode) bool {
+	if open == nil || close == nil {
+		return false
+	}
+	a, b := open.GetSymbol(), close.GetSymbol()
+	return a.GetTokenIndex() >= 0 && b.GetTokenIndex() > a.GetTokenIndex() &&
+		((a.GetTokenType() == spl2.SPL2ParserLBRACKET && b.GetTokenType() == spl2.SPL2ParserRBRACKET) ||
+			(a.GetTokenType() == spl2.SPL2ParserLPAREN && b.GetTokenType() == spl2.SPL2ParserRPAREN))
 }

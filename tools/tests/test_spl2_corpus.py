@@ -56,12 +56,20 @@ class SPL2CorpusTests(unittest.TestCase):
     def test_invalid_start_is_exact(self):
         case = next(c for c in self.cases if "E.L01.start.N1" in c["obligation_ids"])
         case["document"]["text"] = "FROM main | failure index=app"
-        with self.assertRaisesRegex(ValueError, "exact invalid start"):
+        with self.assertRaisesRegex(ValueError, "exact invalid start|original nonempty token slice"):
             self.audit()
 
     def test_pending_is_not_complete_or_floor_credit(self):
+        self.manifest["enforce_final_floors"] = False
+        form = {"id": "T11.audit.pending-form", "source_keys": ["start"], "disposition": "pending"}
+        self.provenance["forms"].append(form)
+        self.provenance["obligations"].append({"id": "T11.audit.pending", "form_id": form["id"],
+            "source_keys": ["start"], "candidate": "FROM additional", "disposition": "pending"})
+        pending = self.audit()
+        self.assertEqual(pending["pending_obligations"], 1)
+        self.assertEqual(pending["active_queries"], len(self.cases))
         self.manifest["enforce_final_floors"] = True
-        with self.assertRaisesRegex(ValueError, "pending|floor|canonical"):
+        with self.assertRaisesRegex(ValueError, "pending mandatory"):
             self.audit()
 
     def test_assertions_are_required(self):
@@ -109,7 +117,9 @@ class SPL2CorpusTests(unittest.TestCase):
             self.audit()
 
     def test_supplemental_boundary_case_can_be_added(self):
+        self.manifest["enforce_final_floors"] = False
         case = copy.deepcopy(self.cases[0])
+        case.pop("canonical")
         case.update(id="T2.audit.new-boundary", meaningful_id="T2.audit.new-boundary", obligation_ids=["T2.audit.new-boundary"], form_ids=["T2.audit.new-form"])
         case["document"]["text"] = "index=additional host=proof"
         self.cases.append(case)
@@ -118,6 +128,7 @@ class SPL2CorpusTests(unittest.TestCase):
         self.audit()
 
     def test_legitimate_original_obligation_activation_is_allowed(self):
+        self.manifest["enforce_final_floors"] = False
         obligation = next(o for o in self.provenance["obligations"] if o["id"] == "E.C01.literal.P1")
         # Establish the pending state in this isolated fixture even after later
         # tasks activate the original obligation, preserving any exact aliases.
@@ -142,6 +153,7 @@ class SPL2CorpusTests(unittest.TestCase):
         case = next((c for c in self.cases if c["document"]["text"] == obligation["candidate"]), None)
         if case is None:
             case = copy.deepcopy(self.cases[0])
+            case.pop("canonical")
             case.update(id=obligation["id"], meaningful_id=obligation["id"], obligation_ids=[], form_ids=[form["id"]], source_keys=obligation["source_keys"])
             case["document"]["text"] = obligation["candidate"]
             self.cases.append(case)
@@ -151,8 +163,10 @@ class SPL2CorpusTests(unittest.TestCase):
         self.assertEqual(self.audit()["active_obligations"], before + 1)
 
     def test_held_boundary_is_excluded_from_meaningful_credit(self):
+        self.manifest["enforce_final_floors"] = False
         before = self.audit()["meaningful"]
         case = copy.deepcopy(self.cases[0])
+        case.pop("canonical")
         case.update(id="T2.audit.held", meaningful_id="T2.audit.held", obligation_ids=["T2.audit.held"], form_ids=["T2.audit.held-form"], hold_ids=["H11"], floor_credit=False, syntax_complete=False, expected_codes=["SPL_UNSUPPORTED_SEMANTICS"])
         case["document"]["text"] = "FROM main | where amount BETWEEN 13 and 17"
         self.cases.append(case)
@@ -166,6 +180,155 @@ class SPL2CorpusTests(unittest.TestCase):
 class SPL2CanonicalLayerTests(unittest.TestCase):
     setUp = SPL2CorpusTests.setUp
     audit = SPL2CorpusTests.audit
+
+    def snapshot_case(self):
+        case = next(c for c in self.cases if c['id'] == 'T6.sequential')
+        case['canonical_evidence'] = 'regression_snapshot'
+        case['canonical_assertions'] = {
+            'category': 'representation', 'basis': 'Controlled audit witness with independently exact field flow.',
+            'status': 'valid', 'syntax_complete': True, 'semantic_complete': True,
+            'required_codes': [], 'forbidden_codes': ['SPL_SYNTAX_ERROR'],
+            'required_references': [{'original_name':'bytes', 'normalized_name':'bytes', 'kind':'field',
+                                     'role':'read', 'binding':'source', 'start':19, 'end':24}],
+            'forbidden_references': [{'original_name':'eval', 'start':12, 'end':16}],
+            'required_fields': [{'name':'y', 'conditional':False}], 'forbidden_field_names':['x'],
+            'required_stages': [{'command':'eval', 'start':12, 'semantic_complete':True}], 'max_scopes':1,
+            'final_state': {'fields':[{'name':'y', 'conditional':False}], 'removed':[], 'open':False, 'uncertain':False},
+        }
+        return case
+
+    def test_snapshot_without_independent_assertions_cannot_close(self):
+        case = self.snapshot_case()
+        del case['canonical_assertions']
+        with self.assertRaisesRegex(ValueError, 'independent assertions'):
+            self.audit()
+
+    def test_snapshot_cannot_invent_forbidden_reference(self):
+        case = self.snapshot_case()
+        case['canonical']['references'].append({'original_name':'eval', 'normalized_name':'eval', 'kind':'field',
+                                               'role':'read', 'binding':'source', 'start':12, 'end':16})
+        with self.assertRaisesRegex(ValueError, 'forbidden reference'):
+            self.audit()
+
+    def test_snapshot_cannot_erase_required_reference_or_field(self):
+        for key in ('references', 'fields'):
+            self.setUp()
+            case = self.snapshot_case()
+            case['canonical'][key] = []
+            with self.assertRaisesRegex(ValueError, 'required reference|required field'):
+                self.audit()
+
+    def test_snapshot_cannot_promote_independently_incomplete_effects(self):
+        case = self.snapshot_case()
+        case['canonical_assertions'].update(status='incomplete', semantic_complete=False)
+        with self.assertRaisesRegex(ValueError, 'independent.*status|independent.*coverage'):
+            self.audit()
+
+    def test_snapshot_cannot_invent_forbidden_field(self):
+        case = self.snapshot_case()
+        case['canonical']['fields'].append({'name':'x', 'conditional':False})
+        with self.assertRaisesRegex(ValueError, 'forbidden field'):
+            self.audit()
+
+    def test_snapshot_requires_nonvacuous_soundness_assertions(self):
+        case = self.snapshot_case()
+        for key in ('required_references', 'forbidden_references', 'required_fields', 'forbidden_field_names', 'required_stages'):
+            case['canonical_assertions'][key] = []
+        with self.assertRaisesRegex(ValueError, 'nonvacuous'):
+            self.audit()
+
+    def test_independently_proved_valid_representation_snapshot_is_allowed(self):
+        self.snapshot_case()
+        self.audit()
+
+    def test_all_canonical_references_require_nonempty_original_bounds(self):
+        case = next(c for c in self.cases if c['id'] == 'T6.sequential')
+        original = copy.deepcopy(case['canonical']['references'][0])
+        for start, end, name in ((0, 0, ''), (-1, -1, ''), (999, 999, '')):
+            with self.subTest(start=start, end=end):
+                case['canonical']['references'][0] = dict(original, start=start, end=end, original_name=name)
+                with self.assertRaisesRegex(ValueError, 'canonical reference'):
+                    self.audit()
+
+    def test_snapshot_exact_state_boolean_cannot_use_integer(self):
+        case = self.snapshot_case()
+        case['canonical_assertions']['final_state']['open'] = 0
+        with self.assertRaisesRegex(ValueError, 'exact final state'):
+            self.audit()
+
+    def test_required_reference_allows_only_independently_undetermined_binding(self):
+        case = self.snapshot_case()
+        case['canonical_assertions']['required_references'][0].pop('binding')
+        self.audit()
+        next(r for r in case['canonical']['references'] if r['original_name'] == 'bytes')['role'] = 'null_test'
+        with self.assertRaisesRegex(ValueError, 'required reference'):
+            self.audit()
+
+    def test_implicit_search_stage_requires_original_index_start(self):
+        case = self.snapshot_case()
+        case['document']['text'] = 'index=app OR'
+        case['syntax_complete'] = False
+        case['canonical'].update(status='invalid', syntax_complete=False, semantic_complete=False,
+                                 references=[], fields=[], removed=[], stage_commands=['search'], stage_complete=[False])
+        case['canonical_assertions'].update(status='invalid', syntax_complete=False, semantic_complete=False,
+            required_references=[], forbidden_references=[], required_fields=[], forbidden_field_names=[],
+            required_stages=[{'command':'search','start':0,'semantic_complete':False}], final_state=None)
+        CHECK.audit_canonical(case)
+        for text, start in [('index=app OR', 1), ('xxxxx=app OR', 0)]:
+            case['document']['text'] = text
+            case['canonical_assertions']['required_stages'][0]['start'] = start
+            with self.assertRaisesRegex(ValueError, 'stage source'):
+                CHECK.audit_canonical(case)
+
+    def test_snapshot_cannot_add_unasserted_field_to_exact_final_state(self):
+        case = self.snapshot_case()
+        case['canonical']['fields'].append({'name':'invented', 'conditional':False})
+        with self.assertRaisesRegex(ValueError, 'exact final state'):
+            self.audit()
+
+    def test_snapshot_cannot_change_exact_final_closedness(self):
+        case = self.snapshot_case()
+        case['canonical']['open'] = True
+        with self.assertRaisesRegex(ValueError, 'exact final state'):
+            self.audit()
+
+    def test_snapshot_forbidden_role_preserves_ordinary_read(self):
+        case = self.snapshot_case()
+        case['canonical_assertions']['forbidden_references'] = [{'original_name':'bytes', 'start':19, 'end':24, 'role':'create'}]
+        self.audit()
+        case['canonical']['references'].append({'original_name':'bytes', 'normalized_name':'bytes', 'kind':'field', 'role':'create', 'binding':'not_applicable', 'start':19, 'end':24})
+        with self.assertRaisesRegex(ValueError, 'forbidden reference'):
+            self.audit()
+
+    def test_snapshot_forbidden_binding_preserves_other_binding(self):
+        case = self.snapshot_case()
+        case['canonical_assertions']['required_references'] = []
+        case['canonical_assertions']['forbidden_references'] = [{'original_name':'bytes', 'start':19, 'end':24, 'role':'read', 'binding':'derived'}]
+        self.audit()
+        next(r for r in case['canonical']['references'] if r['original_name']=='bytes')['binding']='derived'
+        with self.assertRaisesRegex(ValueError, 'forbidden reference'):
+            self.audit()
+
+    def test_snapshot_optional_scope_descriptors(self):
+        case = self.snapshot_case()
+        a = case['canonical_assertions']
+        a['required_scopes'] = []
+        for item in [a['required_references'][0], a['required_stages'][0]]:
+            item.update(scope_start=0, scope_end=len(case['document']['text'].encode()))
+        CHECK.audit_canonical_assertions(case)
+        del a['required_references'][0]['scope_end']
+        with self.assertRaisesRegex(ValueError, 'scope'):
+            CHECK.audit_canonical_assertions(case)
+
+    def test_snapshot_child_scope_shape_and_bounds(self):
+        case = self.snapshot_case()
+        case['canonical_assertions']['required_scopes'] = [
+            {'kind':'search', 'start':12, 'end':16, 'owner_start':0,
+             'parent_start':0, 'parent_end':len(case['document']['text'].encode())}]
+        CHECK.audit_canonical_assertions(case)
+        case['canonical_assertions']['required_scopes'][0]['parent_end'] = 1
+        with self.assertRaisesRegex(ValueError, 'scope'):
+            CHECK.audit_canonical_assertions(case)
     def test_syntax_layer_cannot_be_promoted(self):
         self.cases[0]['semantic_complete'] = True
         with self.assertRaisesRegex(ValueError, 'frontend'):
@@ -221,15 +384,14 @@ class SPL2CanonicalLayerTests(unittest.TestCase):
 
     def test_final_closure_cannot_use_null_canonical(self):
         self.manifest['enforce_final_floors'] = True
-        for case in self.cases:
-            case.setdefault('canonical', None)
+        self.cases[0]['canonical'] = None
         # Null layers must fail before the independent pending-obligation gate.
         with self.assertRaisesRegex(ValueError, 'canonical.*object'):
             self.audit()
 
     def test_optional_canonical_must_be_an_object_when_present(self):
-        case = next(c for c in self.cases if 'canonical' not in c and
-                    not any(oid.startswith('F.') for oid in c['obligation_ids']))
+        self.manifest['enforce_final_floors'] = False
+        case = next(c for c in self.cases if not any(oid.startswith('F.') for oid in c['obligation_ids']))
         for malformed in (None, [], False, 'canonical'):
             with self.subTest(canonical=malformed):
                 case['canonical'] = malformed
@@ -237,6 +399,7 @@ class SPL2CanonicalLayerTests(unittest.TestCase):
                     self.audit()
 
     def test_absent_optional_canonical_receives_no_evidence_credit(self):
+        self.manifest['enforce_final_floors'] = False
         case = next(c for c in self.cases if 'canonical' in c and
                     not any(oid.startswith('F.') for oid in c['obligation_ids']))
         before = self.audit()['canonical_queries']
@@ -248,6 +411,21 @@ class SPL2CanonicalLayerTests(unittest.TestCase):
         case['canonical']={'phase':'analysis','scope':'canonical-result','status':'incomplete','syntax_complete':False,'semantic_complete':True,'expected_codes':[],'references':[],'fields':[],'removed':[],'open':True,'uncertain':True,'stage_commands':[],'stage_complete':[]}
         with self.assertRaisesRegex(ValueError, 'canonical'):
             self.audit()
+
+    def test_independent_exact_can_execute_supplemental_assertions(self):
+        case = self.snapshot_case()
+        case['canonical_evidence'] = 'independent'
+        CHECK.audit_canonical_assertions(case)
+        case['canonical_assertions']['required_fields'].append({'name':'invented','conditional':False})
+        with self.assertRaisesRegex(ValueError, 'required field'):
+            CHECK.audit_canonical_assertions(case)
+
+    def test_independent_assertions_require_full_exact_object(self):
+        case = self.snapshot_case()
+        case['canonical_evidence'] = 'independent'
+        del case['canonical']
+        with self.assertRaisesRegex(ValueError, 'full exact'):
+            CHECK.audit_canonical(case)
 
 class SPL2RecoveryClassificationTests(unittest.TestCase):
     def setUp(self):

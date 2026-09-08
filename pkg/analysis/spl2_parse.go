@@ -13,9 +13,39 @@ type spl2ParsedDocument struct {
 	source           *sourceIndex
 	diagnostics      []Diagnostic
 	lexicalErrors    []Diagnostic
+	predictionErrors []spl2PredictionError
+	missingSelectEOF []spl2MissingSelectEOF
+	recoveredSelects []spl2RecoveredSelect
 	syntax           *spl2SyntaxNode
 	syntaxComplete   bool
 	semanticComplete bool
+}
+
+// Private prediction provenance permits a narrowly proved recovery site to
+// distinguish its ANTLR prediction error without inspecting message text.
+type spl2PredictionError struct {
+	diagnostic Diagnostic
+	context    antlr.ParserRuleContext
+}
+
+// This is diagnostic attribution, never a replacement parse or syntax waiver.
+type spl2MissingSelectEOF struct {
+	diagnostic Diagnostic
+	owner      *spl2.FromCommandContext
+	token      antlr.Token
+}
+
+func spl2ExpectsSelectOrNewline(expected *antlr.IntervalSet) bool {
+	count := 0
+	for _, interval := range expected.GetIntervals() {
+		for token := interval.Start; token < interval.Stop; token++ {
+			if token != spl2.SPL2ParserSELECT && token != spl2.SPL2ParserNL {
+				return false
+			}
+			count++
+		}
+	}
+	return count == 2
 }
 
 type spl2SyntaxListener struct {
@@ -37,6 +67,20 @@ func (l *spl2SyntaxListener) SyntaxError(recognizer antlr.Recognizer, offending 
 	}
 	diagnostic := Diagnostic{Code: CodeSyntaxError, Severity: "error", Category: "syntax", Message: msg, Location: s.location(start, end)}
 	l.parsed.diagnostics = append(l.parsed.diagnostics, diagnostic)
+	if _, ok := e.(*antlr.NoViableAltException); ok {
+		if parser, ok := recognizer.(antlr.Parser); ok {
+			l.parsed.predictionErrors = append(l.parsed.predictionErrors, spl2PredictionError{diagnostic, parser.GetParserRuleContext()})
+		}
+	}
+	if _, ok := e.(*antlr.InputMisMatchException); ok {
+		if parser, ok := recognizer.(antlr.Parser); ok {
+			if owner, ok := parser.GetParserRuleContext().(*spl2.FromCommandContext); ok && spl2ExpectsSelectOrNewline(parser.GetExpectedTokens()) {
+				if token, ok := offending.(antlr.Token); ok && token == parser.GetCurrentToken() && token.GetTokenType() == antlr.TokenEOF {
+					l.parsed.missingSelectEOF = append(l.parsed.missingSelectEOF, spl2MissingSelectEOF{diagnostic, owner, token})
+				}
+			}
+		}
+	}
 	if lexical {
 		l.parsed.lexicalErrors = append(l.parsed.lexicalErrors, diagnostic)
 	}

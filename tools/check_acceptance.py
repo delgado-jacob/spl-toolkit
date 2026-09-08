@@ -15,7 +15,13 @@ ROOT = Path(__file__).resolve().parents[1]
 CONFIG = json.loads((ROOT / "tools" / "release-env.json").read_text(encoding="utf-8"))
 TARGETS = CONFIG["targets"]
 PYTHON_VERSIONS = tuple(CONFIG["test_python"])
-EXPECTED_COUNTS = {"required_native": 11, "surface_acceptance": 5}
+EXPECTED_COUNTS = {"required_native": 11, "surface_acceptance": 6}
+REQUIRED_TEST_FILES = {
+    "native": {"test_native_abi.py", "test_native_mapper.py", "test_native_analysis.py",
+               "test_native_validation.py", "test_native_schema_validation.py", "test_native_spl2.py"},
+    "acceptance": {"test_documented_cli.py", "test_surfaces.py", "test_analysis_surfaces.py",
+                   "test_validation_surfaces.py", "test_schema_surfaces.py", "test_spl2_surfaces.py"},
+}
 HASH_RE = re.compile(r"^[0-9a-f]{64}$")
 SHA_RE = re.compile(r"^[0-9a-f]{40}$")
 COMMON_FIELDS = {"schema_version", "kind", "source_sha", "status"}
@@ -28,12 +34,16 @@ KIND_FIELDS = {
     "installed-wheel": {
         "target", "architecture", "python_version", "python_runtime", "wheel_sha256", "venv_prefix",
         "installed_module", "package_version", "native_version", "tests",
-        "cli_examples", "surface_parity", "version_agreement",
+        "cli_examples", "surface_parity", "version_agreement", "required_test_files",
     },
     "go-floor": {"go_version"},
     "native-memory": {"compiler", "sanitizer"},
     "clean-source": {"tracked_hash_sha256"},
     "docker-examples": {"cli", "python_native", "server", "make_workflows"},
+}
+OPTIONAL_KIND_FIELDS = {
+    "installed-wheel": {"loaded_library", "native_sha256", "wheel_payload_hashes", "source_header_sha256",
+                        "fixture_hashes", "schema_surface_evidence", "spl2_surface_evidence", "documentation_hashes"},
 }
 SINGLETONS = {"go-floor", "native-memory", "clean-source", "docker-examples"}
 ENVIRONMENT_FIELDS = {
@@ -220,7 +230,7 @@ def validate_records(records: list[dict], source_sha: str) -> list[str]:
             continue
         required = COMMON_FIELDS | KIND_FIELDS[kind]
         missing = sorted(required - set(record))
-        extra = sorted(set(record) - required)
+        extra = sorted(set(record) - required - OPTIONAL_KIND_FIELDS.get(kind, set()))
         if missing:
             errors.append(f"{label}: missing fields: {', '.join(missing)}")
         if extra:
@@ -279,6 +289,17 @@ def validate_records(records: list[dict], source_sha: str) -> list[str]:
                 if record.get(gate) != "passed":
                     errors.append(f"{label}: {gate} must be passed")
             _validate_counts(record, errors, label)
+            registered = record.get("required_test_files")
+            if not isinstance(registered, dict) or set(registered) != set(REQUIRED_TEST_FILES):
+                errors.append(f"{label}: required_test_files must contain native and acceptance")
+            else:
+                for suite, required_files in REQUIRED_TEST_FILES.items():
+                    names = registered[suite]
+                    if not isinstance(names, list) or not all(isinstance(name, str) for name in names) or len(names) != len(set(names)):
+                        errors.append(f"{label}: {suite} required_test_files must be distinct filenames")
+                        continue
+                    for missing in sorted(required_files - set(names)):
+                        errors.append(f"{label}: {suite} missing required suite {missing}")
         elif kind == "go-floor" and record.get("go_version") != CONFIG["go_language_floor_test"]:
             errors.append(f"{label}: go-floor must use {CONFIG['go_language_floor_test']}")
         elif kind == "native-memory":
