@@ -178,12 +178,11 @@ func parseCLIOptions(command string, args []string) (cliOptions, string, error) 
 }
 
 func analysisOptionMayBeEmpty(command, name string) bool {
-	if command != "analyze" && command != "validate-fields" && command != "validate-schema" {
-		return false
-	}
 	switch name {
-	case "query", "language", "profile", "compatibility-version", "source-id":
+	case "language", "profile", "compatibility-version":
 		return true
+	case "query", "source-id":
+		return command == "analyze" || command == "validate-fields" || command == "validate-schema"
 	default:
 		return false
 	}
@@ -254,8 +253,17 @@ func setCLIOption(options *cliOptions, name, value string) error {
 }
 
 func validateCLIOptions(command string, options cliOptions) error {
-	if command != "analyze" && (options.hasLanguage || options.hasProfile || options.hasCompatibilityVersion || options.hasSourceID) {
-		return fmt.Errorf("%s does not accept analysis document options", command)
+	if command != "analyze" && options.hasSourceID {
+		return fmt.Errorf("%s does not accept --source-id", command)
+	}
+	if command == "map" || command == "discover" || command == "validate" {
+		manifest, err := analysis.CapabilitiesFor(analysis.CapabilityOptions{Language: options.language, Profile: options.profile, Version: options.compatibilityVersion})
+		if err != nil {
+			return err
+		}
+		if manifest.Language == "spl2" {
+			return fmt.Errorf("unsupported_dialect_for_operation: %s supports SPL only; use analyze, validate-fields, or validate-schema for SPL2; SPL2 rewriting is not available", command)
+		}
 	}
 	switch command {
 	case "map":
@@ -349,7 +357,10 @@ func computeCLIResult(command string, options cliOptions) ([]byte, int, error) {
 		}
 		return formatAnalysisText(report), code, nil
 	case "capabilities":
-		manifest := analysis.Capabilities()
+		manifest, err := analysis.CapabilitiesFor(analysis.CapabilityOptions{Language: options.language, Profile: options.profile, Version: options.compatibilityVersion})
+		if err != nil {
+			return nil, 2, err
+		}
 		if options.format == "json" {
 			return marshalCLILine(manifest)
 		}

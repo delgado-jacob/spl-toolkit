@@ -125,7 +125,7 @@ func TestValidateFieldsRejectsInputs(t *testing.T) {
 	cases := [][]string{
 		{}, {"--stdin", "--query=x"}, {"--stdin", "--stdin"}, {"--file=x", "--file=x"}, {"--batch=-", "--batch=-"}, {"--file=x", "x"}, {"--batch=-", "--stdin"}, {"--fields", fields, "x"},
 		{"--batch=-", "--language=spl"}, {"--batch=-", "--profile="}, {"--batch=-", "--compatibility-version=current"}, {"--batch=-", "--source-id="},
-		{"--language=spl2", "x"}, {"--profile=cloud", "x"}, {"--compatibility-version=9", "x"}, {"--source-id", string([]byte{255}), "x"},
+		{"--language=unknown", "x"}, {"--profile=cloud", "x"}, {"--compatibility-version=9", "x"}, {"--source-id", string([]byte{255}), "x"},
 		{"--query", string([]byte{255})}, {"--file=/nonexistent/spl-query"}, {"--batch=/nonexistent/spl-batch"}, {"--config=x", "x"}, {"--format=yaml", "x"}, {"--wat", "x"}, {"--stdin=true"},
 	}
 	for _, args := range cases {

@@ -69,6 +69,9 @@ func formatCapabilitiesText(manifest analysis.CapabilityManifest) []byte {
 	fmt.Fprintf(&payload, "Language: %s\n", manifest.Language)
 	fmt.Fprintf(&payload, "Profile: %s\n", manifest.Profile)
 	fmt.Fprintf(&payload, "Compatibility version: %s\n", manifest.Version)
+	if manifest.DocumentationSnapshot != "" {
+		fmt.Fprintf(&payload, "Documentation snapshot: %s\n", manifest.DocumentationSnapshot)
+	}
 	payload.WriteString("Commands:\n")
 	for _, capability := range manifest.Commands {
 		fmt.Fprintf(&payload, "  - %s: syntax=%t semantic=%t", capability.Name, capability.SyntaxSupported, capability.SemanticSupported)

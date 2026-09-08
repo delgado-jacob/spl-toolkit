@@ -21,6 +21,8 @@ components:
             $ref: '#/components/schemas/analysis.Capability'
           type: array
           uniqueItems: false
+        documentation_snapshot:
+          type: string
         functions:
           items:
             $ref: '#/components/schemas/analysis.Capability'
@@ -137,6 +139,10 @@ components:
           $ref: '#/components/schemas/analysis.FieldState'
         before:
           $ref: '#/components/schemas/analysis.FieldState'
+        execution_order:
+          type: integer
+        phase:
+          type: string
         scope_id:
           type: string
         stage_id:
@@ -292,12 +298,56 @@ components:
         output_reference_id:
           type: string
       type: object
+    api.AnalysisRequest:
+      additionalProperties: false
+      properties:
+        language:
+          default: spl
+          description: Omitted or empty selects the default; other values are input
+            errors.
+          enum:
+          - ''
+          - spl
+          - spl2
+          type: string
+        profile:
+          default: splunkd
+          description: Omitted or empty selects the default; other values are input
+            errors.
+          enum:
+          - ''
+          - splunkd
+          type: string
+        source_id:
+          type: string
+        text:
+          type: string
+        version:
+          default: current
+          description: Omitted or empty selects the default; other values are input
+            errors.
+          enum:
+          - ''
+          - current
+          type: string
+      required:
+      - text
+      type: object
     api.DiscoverQueryRequest:
       description: Request to discover information about an SPL query
       properties:
+        language:
+          description: spl (default); spl2 is rejected for this legacy operation
+          type: string
+        profile:
+          description: splunkd (default)
+          type: string
         query:
           description: SPL query to analyze
           example: search sourcetype=access_combined | stats count by src_ip
+          type: string
+        version:
+          description: current (default)
           type: string
       required:
       - query
@@ -400,6 +450,9 @@ components:
           description: Optional context for mapping
           type: object
           x-order: '2'
+        language:
+          description: spl (default); spl2 is rejected for this legacy operation
+          type: string
         mappings:
           description: Simple field mappings (for stateless operation)
           items:
@@ -407,11 +460,17 @@ components:
           type: array
           uniqueItems: false
           x-order: '3'
+        profile:
+          description: splunkd (default)
+          type: string
         query:
           description: SPL query to map
           example: search src_ip=192.168.1.1
           type: string
           x-order: '1'
+        version:
+          description: current (default)
+          type: string
       required:
       - query
       type: object
@@ -572,9 +631,18 @@ components:
     api.ValidateQueryRequest:
       description: Request to validate an SPL query
       properties:
+        language:
+          description: spl (default); spl2 is rejected for this legacy operation
+          type: string
+        profile:
+          description: splunkd (default)
+          type: string
         query:
           description: SPL query to validate
           example: search index=web | stats count
+          type: string
+        version:
+          description: current (default)
           type: string
       required:
       - query
@@ -899,14 +967,33 @@ components:
       additionalProperties: false
       properties:
         language:
+          default: spl
+          description: Omitted or empty selects the default; other values are input
+            errors.
+          enum:
+          - ''
+          - spl
+          - spl2
           type: string
         profile:
+          default: splunkd
+          description: Omitted or empty selects the default; other values are input
+            errors.
+          enum:
+          - ''
+          - splunkd
           type: string
         source_id:
           type: string
         text:
           type: string
         version:
+          default: current
+          description: Omitted or empty selects the default; other values are input
+            errors.
+          enum:
+          - ''
+          - current
           type: string
       required:
       - text
@@ -1171,8 +1258,36 @@ openapi: 3.1.0
 paths:
   /capabilities:
     get:
-      description: Return the supported analysis language, profile, compatibility
-        version, commands, functions, and limitations.
+      description: Select the canonical capability manifest including language, profile,
+        compatibility version, commands, functions, limitations, and optional pinned
+        documentation_snapshot. Only language/profile/version query parameters are
+        accepted; duplicate keys are rejected even when equal.
+      parameters:
+      - description: 'Query language: spl (default) or spl2; empty uses default'
+        in: query
+        name: language
+        schema:
+          enum:
+          - ''
+          - spl
+          - spl2
+          type: string
+      - description: 'Execution profile: splunkd (default); empty uses default'
+        in: query
+        name: profile
+        schema:
+          enum:
+          - ''
+          - splunkd
+          type: string
+      - description: 'Compatibility version: current (default); empty uses default'
+        in: query
+        name: version
+        schema:
+          enum:
+          - ''
+          - current
+          type: string
       responses:
         '200':
           content:
@@ -1180,6 +1295,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/analysis.CapabilityManifest'
           description: Analysis capability manifest
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api.ErrorResponse'
+          description: Unknown, duplicate, conflicting, malformed, or unsupported
+            selectors
       summary: Get analysis capabilities
       tags:
       - query
@@ -1271,13 +1393,18 @@ paths:
       - docs
   /query/analyze:
     post:
-      description: Return structured syntax and semantic coverage, located references,
-        lineage, dependencies, and diagnostics for an SPL query.
+      description: Strict query document requiring text, with optional language (spl
+        or spl2), profile (splunkd), version (current), and source_id strings. Empty
+        selectors use defaults spl/splunkd/current. Preserve text and identity exactly.
+        Reject null, duplicate or unknown members, malformed Unicode, and trailing
+        JSON. Body limit is 1 MiB. Return canonical coverage, located references,
+        SQL execution phases, lineage, dependencies and diagnostics; all content statuses
+        use 200.
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/analysis.QueryDocument'
+              $ref: '#/components/schemas/api.AnalysisRequest'
         description: Query document
         required: true
       responses:
@@ -1294,7 +1421,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/api.ErrorResponse'
           description: Malformed JSON or unsupported document options
-      summary: Analyze an SPL query
+      summary: Analyze an SPL or standalone SPL2 query
       tags:
       - query
   /query/discover:

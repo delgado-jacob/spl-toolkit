@@ -1,24 +1,21 @@
 package api
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
-	"io"
-	"mime"
 	"net/http"
+	"net/url"
 
-	"github.com/delgado-jacob/spl-toolkit/internal/jsoninput"
 	"github.com/delgado-jacob/spl-toolkit/pkg/analysis"
+	"github.com/delgado-jacob/spl-toolkit/pkg/validation"
 )
 
 // handleAnalyzeQuery returns the canonical structured analysis report.
-// @Summary Analyze an SPL query
-// @Description Return structured syntax and semantic coverage, located references, lineage, dependencies, and diagnostics for an SPL query.
+// @Summary Analyze an SPL or standalone SPL2 query
+// @Description Strict query document requiring text, with optional language (spl or spl2), profile (splunkd), version (current), and source_id strings. Empty selectors use defaults spl/splunkd/current. Preserve text and identity exactly. Reject null, duplicate or unknown members, malformed Unicode, and trailing JSON. Body limit is 1 MiB. Return canonical coverage, located references, SQL execution phases, lineage, dependencies and diagnostics; all content statuses use 200.
 // @Tags query
 // @Accept json
 // @Produce json
-// @Param request body analysis.QueryDocument true "Query document"
+// @Param request body AnalysisRequest true "Query document"
 // @Success 200 {object} analysis.Result "Canonical analysis report for valid, invalid, and incomplete queries"
 // @Failure 400 {object} ErrorResponse "Malformed JSON or unsupported document options"
 // @Router /query/analyze [post]
@@ -38,46 +35,56 @@ func (s *Server) handleAnalyzeQuery(w http.ResponseWriter, r *http.Request) {
 
 // handleCapabilities returns the canonical analysis capability manifest.
 // @Summary Get analysis capabilities
-// @Description Return the supported analysis language, profile, compatibility version, commands, functions, and limitations.
+// @Description Select the canonical capability manifest including language, profile, compatibility version, commands, functions, limitations, and optional pinned documentation_snapshot. Only language/profile/version query parameters are accepted; duplicate keys are rejected even when equal.
 // @Tags query
 // @Produce json
+// @Param language query string false "Query language: spl (default) or spl2; empty uses default" Enums(,spl,spl2)
+// @Param profile query string false "Execution profile: splunkd (default); empty uses default" Enums(,splunkd)
+// @Param version query string false "Compatibility version: current (default); empty uses default" Enums(,current)
+// @Failure 400 {object} ErrorResponse "Unknown, duplicate, conflicting, malformed, or unsupported selectors"
 // @Success 200 {object} analysis.CapabilityManifest "Analysis capability manifest"
 // @Router /capabilities [get]
 func (s *Server) handleCapabilities(w http.ResponseWriter, r *http.Request) {
-	s.writeJSONResponse(w, http.StatusOK, analysis.Capabilities())
+	selectors, err := url.ParseQuery(r.URL.RawQuery)
+	if err != nil {
+		s.writeErrorResponse(w, http.StatusBadRequest, "invalid capability selectors: "+err.Error())
+		return
+	}
+	for key, values := range selectors {
+		if key != "language" && key != "profile" && key != "version" {
+			s.writeErrorResponse(w, http.StatusBadRequest, "unknown capability selector: "+key)
+			return
+		}
+		if len(values) != 1 {
+			s.writeErrorResponse(w, http.StatusBadRequest, "duplicate capability selector: "+key)
+			return
+		}
+	}
+	manifest, err := analysis.CapabilitiesFor(analysis.CapabilityOptions{Language: selectors.Get("language"), Profile: selectors.Get("profile"), Version: selectors.Get("version")})
+	if err != nil {
+		s.writeErrorResponse(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	s.writeJSONResponse(w, http.StatusOK, manifest)
 }
 
 func parseAnalysisDocument(w http.ResponseWriter, r *http.Request) (analysis.QueryDocument, error) {
-	var document analysis.QueryDocument
-	mediaType, _, _ := mime.ParseMediaType(r.Header.Get("Content-Type"))
-	if mediaType != "application/json" {
-		return document, fmt.Errorf("content-type must be application/json")
-	}
-
-	r.Body = http.MaxBytesReader(w, r.Body, 1<<20)
-	body, err := io.ReadAll(r.Body)
+	body, err := readValidationBody(w, r)
 	if err != nil {
-		return document, fmt.Errorf("invalid JSON: %w", err)
+		return analysis.QueryDocument{}, err
 	}
-	if err := jsoninput.ValidateUnicode(body); err != nil {
-		return document, fmt.Errorf("invalid JSON: %w", err)
+	// Reuse the canonical document decoder, retaining its strict member and
+	// Unicode policy. The HTTP route still accepts exactly one object.
+	documents, err := validation.DecodeDocuments(append(append([]byte{'['}, body...), ']'))
+	if err != nil {
+		return analysis.QueryDocument{}, err
 	}
-
-	decoder := json.NewDecoder(bytes.NewReader(body))
-	decoder.DisallowUnknownFields()
-	var decoded *analysis.QueryDocument
-	if err := decoder.Decode(&decoded); err != nil {
-		return document, fmt.Errorf("invalid JSON: %w", err)
+	if len(documents) != 1 {
+		return analysis.QueryDocument{}, fmt.Errorf("expected exactly one query document")
 	}
-	if decoded == nil {
-		return document, fmt.Errorf("invalid JSON: expected a query document")
-	}
-	var trailing any
-	if err := decoder.Decode(&trailing); err != io.EOF {
-		if err == nil {
-			return document, fmt.Errorf("invalid JSON: request body must contain a single JSON document")
-		}
-		return document, fmt.Errorf("invalid JSON: %w", err)
-	}
-	return *decoded, nil
+	return documents[0], nil
 }
+
+// AnalysisRequest is documentation-only. Runtime decoding uses the strict
+// canonical document decoder; the reconciler supplies selector constraints.
+type AnalysisRequest analysis.QueryDocument

@@ -184,28 +184,34 @@ func TestSchemaCLIOCSFSelectors(t *testing.T) {
 	}
 	catalog := validationFile(t, string(raw))
 	uid := int64(3002)
-	for _, selector := range []string{"authentication", "003002"} {
-		args := []string{"validate-schema", "--ocsf-catalog", catalog, "--ocsf-version=1.6.0", "--ocsf-class", selector, "--ocsf-profile=host", "--ocsf-profile=datetime", "--profile=splunkd", "--compatibility-version=current", "--format=json", "table time"}
-		var out, stderr bytes.Buffer
-		code := runCLIWithInput(args, strings.NewReader(""), &out, &stderr)
-		if code != 0 || stderr.Len() != 0 {
-			t.Fatalf("%s %d %s", selector, code, &stderr)
+	for _, language := range []string{"spl", "spl2"} {
+		query := "table time"
+		if language == "spl2" {
+			query = "FROM main SELECT time"
 		}
-		selection := &validation.OCSFSelection{Version: "1.6.0", Class: "authentication", Profiles: []string{"host", "datetime"}, Extensions: []string{}}
-		if selector != "authentication" {
-			selection.Class = ""
-			selection.ClassUID = &uid
-		}
-		want, err := validation.ValidateSchema(analysis.QueryDocument{Text: "table time", Profile: "splunkd", Version: "current"}, validation.SchemaTarget{Kind: "ocsf", Catalog: raw, Selection: selection})
-		if err != nil {
-			t.Fatal(err)
-		}
-		var got validation.SchemaReport
-		if err = json.Unmarshal(out.Bytes(), &got); err != nil {
-			t.Fatal(err)
-		}
-		if !reflect.DeepEqual(&got, want) {
-			t.Fatalf("parity: %s", &out)
+		for _, selector := range []string{"authentication", "003002"} {
+			args := []string{"validate-schema", "--ocsf-catalog", catalog, "--ocsf-version=1.6.0", "--ocsf-class", selector, "--ocsf-profile=host", "--ocsf-profile=datetime", "--profile=splunkd", "--compatibility-version=current", "--format=json", "--language=" + language, "--source-id=ocsf-query", query}
+			var out, stderr bytes.Buffer
+			code := runCLIWithInput(args, strings.NewReader(""), &out, &stderr)
+			if code != 0 || stderr.Len() != 0 {
+				t.Fatalf("%s %s %d %s %s", language, selector, code, &out, &stderr)
+			}
+			selection := &validation.OCSFSelection{Version: "1.6.0", Class: "authentication", Profiles: []string{"host", "datetime"}, Extensions: []string{}}
+			if selector != "authentication" {
+				selection.Class = ""
+				selection.ClassUID = &uid
+			}
+			want, err := validation.ValidateSchema(analysis.QueryDocument{Text: query, Language: language, Profile: "splunkd", Version: "current", SourceID: "ocsf-query"}, validation.SchemaTarget{Kind: "ocsf", Catalog: raw, Selection: selection})
+			if err != nil {
+				t.Fatal(err)
+			}
+			var got validation.SchemaReport
+			if err = json.Unmarshal(out.Bytes(), &got); err != nil {
+				t.Fatal(err)
+			}
+			if !reflect.DeepEqual(&got, want) {
+				t.Fatalf("parity: %s", &out)
+			}
 		}
 	}
 	// Target construction preserves category keys versus numeric UIDs and repeated extension arguments.

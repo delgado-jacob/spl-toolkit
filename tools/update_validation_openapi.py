@@ -2,7 +2,7 @@
 """Reconcile pinned Swag output with the strict canonical validation decoders.
 
 Swag cannot express strict M3/M4 inputs or inline JSON unions through Go
-DTOs. Keep generated report schemas and the M2 document schema unchanged.
+DTOs. Constrain request-only document copies; keep generated report schemas unchanged.
 Requires the repository's pinned development PyYAML dependency.
 """
 import copy
@@ -39,6 +39,12 @@ def update(directory: Path) -> None:
     if any(value != {"type": "string"} for value in document["properties"].values()):
         raise ValueError("unexpected pinned query document property shape")
     document.update(required=["text"], additionalProperties=False)
+    for key, values, default in (("language", ["", "spl", "spl2"], "spl"), ("profile", ["", "splunkd"], "splunkd"), ("version", ["", "current"], "current")):
+        document["properties"][key].update(enum=values, default=default, description="Omitted or empty selects the default; other values are input errors.")
+    analysis_request = shape("api.AnalysisRequest", ("text", "language", "profile", "version", "source_id"))
+    if analysis_request not in (schemas["analysis.QueryDocument"], document):
+        raise ValueError("unexpected pinned analysis request shape")
+    schemas["api.AnalysisRequest"] = copy.deepcopy(document)
     schemas["validation.QueryDocument"] = document
     catalog = shape("validation.FieldCatalog", ("fields", "optional_fields", "identity", "version"))
     for key in ("identity", "version"):

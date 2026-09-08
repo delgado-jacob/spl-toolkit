@@ -43,6 +43,11 @@ func (s *Server) handleMapQuery(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if err := validateLegacyDialect(req.Language, req.Profile, req.Version); err != nil {
+		s.writeErrorResponse(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
 	// Validate request
 	if validationErrors := validateMapQueryRequest(&req); len(validationErrors) > 0 {
 		response := ValidationErrorResponse{
@@ -108,6 +113,11 @@ func (s *Server) handleDiscoverQuery(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if err := validateLegacyDialect(req.Language, req.Profile, req.Version); err != nil {
+		s.writeErrorResponse(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
 	// Validate request
 	if validationErrors := validateDiscoverQueryRequest(&req); len(validationErrors) > 0 {
 		response := ValidationErrorResponse{
@@ -151,6 +161,11 @@ func (s *Server) handleDiscoverQuery(w http.ResponseWriter, r *http.Request) {
 func (s *Server) handleValidateQuery(w http.ResponseWriter, r *http.Request) {
 	var req ValidateQueryRequest
 	if err := parseJSONRequest(w, r, &req); err != nil {
+		s.writeErrorResponse(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	if err := validateLegacyDialect(req.Language, req.Profile, req.Version); err != nil {
 		s.writeErrorResponse(w, http.StatusBadRequest, err.Error())
 		return
 	}

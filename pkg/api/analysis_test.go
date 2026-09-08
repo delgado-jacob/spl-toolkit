@@ -112,7 +112,7 @@ func TestAnalysisRESTRejectsDocumentAndJSONErrors(t *testing.T) {
 		{name: "null document", body: []byte(`null`), contentType: "application/json"},
 		{name: "trailing document", body: []byte(`{"text":"search a=1"} {}`), contentType: "application/json"},
 		{name: "unknown field", body: []byte(`{"text":"search a=1","extra":true}`), contentType: "application/json"},
-		{name: "unsupported language", body: []byte(`{"text":"search a=1","language":"spl2"}`), contentType: "application/json"},
+		{name: "unsupported language", body: []byte(`{"text":"search a=1","language":"unknown"}`), contentType: "application/json"},
 		{name: "unsupported profile", body: []byte(`{"text":"search a=1","profile":"cloud"}`), contentType: "application/json"},
 		{name: "unsupported version", body: []byte(`{"text":"search a=1","version":"9.4"}`), contentType: "application/json"},
 		{name: "invalid text UTF-8", body: invalidText, contentType: "application/json"},

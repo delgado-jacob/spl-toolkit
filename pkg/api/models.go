@@ -1,13 +1,18 @@
 package api
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"mime"
 	"net/http"
 	"strings"
 
+	"github.com/delgado-jacob/spl-toolkit/internal/jsoninput"
+	"github.com/delgado-jacob/spl-toolkit/pkg/analysis"
 	"github.com/delgado-jacob/spl-toolkit/pkg/mapper"
+	"github.com/delgado-jacob/spl-toolkit/pkg/validation"
 )
 
 // Request/Response models for API endpoints
@@ -15,6 +20,9 @@ import (
 // MapQueryRequest represents a request to map fields in a query
 // @Description Request to map fields in an SPL query. For stateless operation, provide either 'mappings' for simple field mappings or 'config' for advanced mapping configuration with conditional rules.
 type MapQueryRequest struct {
+	Language string                 `json:"language,omitempty"`                                                                   // spl (default); spl2 is rejected for this legacy operation
+	Profile  string                 `json:"profile,omitempty"`                                                                    // splunkd (default)
+	Version  string                 `json:"version,omitempty"`                                                                    // current (default)
 	Query    string                 `json:"query" validate:"required" example:"search src_ip=192.168.1.1" extensions:"x-order=1"` // SPL query to map
 	Context  map[string]interface{} `json:"context,omitempty" extensions:"x-order=2"`                                             // Optional context for mapping
 	Mappings []mapper.FieldMapping  `json:"mappings,omitempty" extensions:"x-order=3"`                                            // Simple field mappings (for stateless operation)
@@ -32,7 +40,10 @@ type MapQueryResponse struct {
 // DiscoverQueryRequest represents a request to discover query information
 // @Description Request to discover information about an SPL query
 type DiscoverQueryRequest struct {
-	Query string `json:"query" validate:"required" example:"search sourcetype=access_combined | stats count by src_ip"` // SPL query to analyze
+	Language string `json:"language,omitempty"`                                                                            // spl (default); spl2 is rejected for this legacy operation
+	Profile  string `json:"profile,omitempty"`                                                                             // splunkd (default)
+	Version  string `json:"version,omitempty"`                                                                             // current (default)
+	Query    string `json:"query" validate:"required" example:"search sourcetype=access_combined | stats count by src_ip"` // SPL query to analyze
 }
 
 // DiscoverQueryResponse represents the response from query discovery
@@ -46,7 +57,10 @@ type DiscoverQueryResponse struct {
 // ValidateQueryRequest represents a request to validate a query
 // @Description Request to validate an SPL query
 type ValidateQueryRequest struct {
-	Query string `json:"query" validate:"required" example:"search index=web | stats count"` // SPL query to validate
+	Language string `json:"language,omitempty"`                                                 // spl (default); spl2 is rejected for this legacy operation
+	Profile  string `json:"profile,omitempty"`                                                  // splunkd (default)
+	Version  string `json:"version,omitempty"`                                                  // current (default)
+	Query    string `json:"query" validate:"required" example:"search index=web | stats count"` // SPL query to validate
 }
 
 // ValidateQueryResponse represents the response from query validation
@@ -117,13 +131,25 @@ func parseJSONRequest(w http.ResponseWriter, r *http.Request, target interface{}
 	r.Body = http.MaxBytesReader(w, r.Body, 1<<20) // 1MB limit
 
 	// Parse JSON with strict validation
-	decoder := json.NewDecoder(r.Body)
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		return fmt.Errorf("invalid JSON: %w", err)
+	}
+	if err := jsoninput.ValidateUnicode(body); err != nil {
+		return fmt.Errorf("invalid JSON: %w", err)
+	}
+	decoder := json.NewDecoder(bytes.NewReader(body))
 	decoder.DisallowUnknownFields()
 
 	if err := decoder.Decode(target); err != nil {
 		return fmt.Errorf("invalid JSON: %w", err)
 	}
-
+	// Keep the legacy payload models, but do not let encoding/json turn null
+	// selectors into defaults or overwrite a conflicting duplicate selector.
+	switch target.(type) {
+	case *MapQueryRequest, *DiscoverQueryRequest, *ValidateQueryRequest:
+		return validateLegacySelectorMembers(body)
+	}
 	return nil
 }
 
@@ -268,4 +294,49 @@ func validateLoadMappingsRequest(req *LoadMappingsRequest) []ValidationError {
 	}
 
 	return errors
+}
+
+// validateLegacyDialect selects the canonical compatibility contract before any
+// fixed-SPL mapper runs. Legacy response models remain unchanged.
+func validateLegacyDialect(language, profile, version string) error {
+	manifest, err := analysis.CapabilitiesFor(analysis.CapabilityOptions{Language: language, Profile: profile, Version: version})
+	if err != nil {
+		return err
+	}
+	if manifest.Language == "spl2" {
+		return fmt.Errorf("unsupported_dialect_for_operation: legacy operations support SPL only; use /query/analyze, /query/validate-fields, or /query/validate-schema for SPL2; SPL2 rewriting is not available")
+	}
+	return nil
+}
+
+func validateLegacySelectorMembers(body []byte) error {
+	decoder := json.NewDecoder(bytes.NewReader(body))
+	start, err := decoder.Token()
+	if err != nil || start != json.Delim('{') {
+		// The existing legacy decoder and query validation handle non-objects.
+		return err
+	}
+	var document bytes.Buffer
+	document.WriteString(`[{"text":""`)
+	for decoder.More() {
+		token, err := decoder.Token()
+		if err != nil {
+			return err
+		}
+		var value json.RawMessage
+		if err := decoder.Decode(&value); err != nil {
+			return err
+		}
+		key := strings.ToLower(token.(string))
+		switch key {
+		case "language", "profile", "version":
+			// Retain every occurrence and its raw JSON type. Canonical decoding
+			// owns duplicate/null/selector validation, just as for documents.
+			fmt.Fprintf(&document, ",%q:", key)
+			document.Write(value)
+		}
+	}
+	document.WriteString("}]")
+	_, err = validation.DecodeDocuments(document.Bytes())
+	return err
 }

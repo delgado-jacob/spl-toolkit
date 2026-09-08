@@ -16,7 +16,7 @@ class ValidationOpenAPITests(unittest.TestCase):
     def fixture(self, root):
         document = {"type": "object", "properties": {key: {"type": "string"} for key in ("text", "language", "profile", "version", "source_id")}}
         catalog = {"type": "object", "properties": {"fields": {"type": "array", "items": {"type": "string"}}, "optional_fields": {"type": "array", "items": {"type": "string"}}, "identity": {"type": "string"}, "version": {"type": "string"}}}
-        schemas = {"analysis.QueryDocument": document, "validation.FieldCatalog": catalog, "unrelated": {"type": "string", "description": "retain me"}}
+        schemas = {"api.AnalysisRequest": copy.deepcopy(document), "analysis.QueryDocument": document, "validation.FieldCatalog": catalog, "unrelated": {"type": "string", "description": "retain me"}}
         for name, key in (("Request", "document"), ("BatchRequest", "documents")):
             value = {"$ref": "#/components/schemas/analysis.QueryDocument"}
             if key == "documents":
@@ -59,6 +59,15 @@ class ValidationOpenAPITests(unittest.TestCase):
             for name, keys in (("validation.Request", ["document", "catalog"]), ("validation.BatchRequest", ["documents", "catalog"]), ("validation.QueryDocument", ["text"]), ("validation.FieldCatalog", ["fields"])):
                 self.assertEqual(schemas[name]["required"], keys)
                 self.assertIs(schemas[name]["additionalProperties"], False)
+            for name in ("api.AnalysisRequest", "validation.QueryDocument"):
+                request = schemas[name]
+                self.assertEqual(request["required"], ["text"])
+                self.assertIs(request["additionalProperties"], False)
+                for key, values, default in (("language", ["", "spl", "spl2"], "spl"), ("profile", ["", "splunkd"], "splunkd"), ("version", ["", "current"], "current")):
+                    self.assertEqual(request["properties"][key]["enum"], values)
+                    self.assertEqual(request["properties"][key]["default"], default)
+                self.assertEqual(request["properties"]["text"], {"type": "string"})
+                self.assertEqual(request["properties"]["source_id"], {"type": "string"})
             union = schemas["validation.Request"]["properties"]["catalog"]["oneOf"]
             self.assertEqual(union[0], {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": True})
             self.assertEqual(union[1], {"$ref": "#/components/schemas/validation.FieldCatalog"})

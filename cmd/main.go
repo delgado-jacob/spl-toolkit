@@ -37,11 +37,14 @@ Options for map, discover, validate, analyze, validate-fields, validate-schema, 
   --query QUERY     Supply the query as an option (not capabilities)
   --config FILE     Mapping configuration (map and validate only)
 
-Additional analyze and single-query validate-fields/validate-schema options:
-  --language LANG                  Query language (default: spl)
+Compatibility selectors (analyze, capabilities, and single-query validation):
+  --language LANG                  spl or spl2 (default: spl)
   --profile PROFILE                Execution profile (default: splunkd)
   --compatibility-version VERSION  Compatibility version (default: current)
-  --source-id ID                   Source identifier preserved in the report
+  --source-id ID                   Source identifier (document operations only)
+analyze and capabilities accept language/profile/version selectors.
+Legacy map/discover/validate reject spl2; use analyze or structured validation.
+Empty compatibility selectors use defaults; unknown selectors are input errors.
 
 Additional validate-fields options:
   --fields FILE     Required local JSON field catalog (array or object; not -)

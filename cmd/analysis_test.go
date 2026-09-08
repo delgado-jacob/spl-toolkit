@@ -88,13 +88,13 @@ func TestAnalysisCLIInputAndExitContracts(t *testing.T) {
 		code int
 	}{
 		{name: "omitted query", args: []string{"analyze", "--format", "json"}, code: 2},
-		{name: "unsupported language", args: []string{"analyze", "--query", "search a=1", "--language", "spl2"}, code: 2},
+		{name: "unsupported language", args: []string{"analyze", "--query", "search a=1", "--language", "unknown"}, code: 2},
 		{name: "unsupported profile", args: []string{"analyze", "--query", "search a=1", "--profile", "cloud"}, code: 2},
 		{name: "unsupported version", args: []string{"analyze", "--query", "search a=1", "--compatibility-version", "9.4"}, code: 2},
 		{name: "invalid query UTF-8", args: []string{"analyze", "--query", string([]byte{0xff})}, code: 2},
 		{name: "invalid source UTF-8", args: []string{"analyze", "--query", "search a=1", "--source-id", string([]byte{0xff})}, code: 2},
 		{name: "capabilities rejects query", args: []string{"capabilities", "--query", "search a=1"}, code: 2},
-		{name: "capabilities rejects language", args: []string{"capabilities", "--language", "spl"}, code: 2},
+		{name: "capabilities rejects source identity", args: []string{"capabilities", "--source-id", "x"}, code: 2},
 		{name: "legacy rejects analysis option", args: []string{"discover", "--query", "search a=1", "--source-id", "x"}, code: 2},
 	} {
 		t.Run(test.name, func(t *testing.T) {
