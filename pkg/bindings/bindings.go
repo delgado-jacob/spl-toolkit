@@ -254,6 +254,28 @@ func spl_mapper_validate_fields_batch(mapperID C.int, requestJSON *C.char) *C.SP
 	})
 }
 
+//export spl_mapper_validate_schema
+func spl_mapper_validate_schema(mapperID C.int, requestJSON *C.char) *C.SPLResult {
+	return ownedMapperJSONResult(mapperID, func() (any, error) {
+		request, err := validation.DecodeSchemaRequest([]byte(C.GoString(requestJSON)))
+		if err != nil {
+			return nil, err
+		}
+		return validation.ValidateSchema(request.Document, request.Target)
+	})
+}
+
+//export spl_mapper_validate_schema_batch
+func spl_mapper_validate_schema_batch(mapperID C.int, requestJSON *C.char) *C.SPLResult {
+	return ownedMapperJSONResult(mapperID, func() (any, error) {
+		request, err := validation.DecodeSchemaBatchRequest([]byte(C.GoString(requestJSON)))
+		if err != nil {
+			return nil, err
+		}
+		return validation.ValidateSchemaBatch(request.Documents, request.Target)
+	})
+}
+
 //export spl_mapper_capabilities
 func spl_mapper_capabilities(mapperID C.int) *C.SPLResult {
 	result := (*C.SPLResult)(C.malloc(C.sizeof_SPLResult))

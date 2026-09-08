@@ -127,6 +127,8 @@ extern SPLResult* spl_mapper_map_query_with_context(int mapperID, char* query, c
 extern SPLResult* spl_mapper_analyze_query(int mapperID, char* documentJSON);
 extern SPLResult* spl_mapper_validate_fields(int mapperID, char* requestJSON);
 extern SPLResult* spl_mapper_validate_fields_batch(int mapperID, char* requestJSON);
+extern SPLResult* spl_mapper_validate_schema(int mapperID, char* requestJSON);
+extern SPLResult* spl_mapper_validate_schema_batch(int mapperID, char* requestJSON);
 extern SPLResult* spl_mapper_capabilities(int mapperID);
 extern SPLQueryInfo* spl_mapper_discover_query(int mapperID, char* query);
 extern void spl_string_free(char* value);

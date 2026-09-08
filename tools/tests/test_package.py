@@ -424,3 +424,144 @@ def test_required_pytest_plugin_rejects_empty_collection(tmp_path: Path):
     )
     assert completed.returncode != 0
     assert json.loads(result.read_text(encoding="utf-8")) == {"collected": 0, "passed": 0, "failed": 0, "skipped": 0}
+
+
+SCHEMA_FIXTURES = (
+    "cases.json", "requests.json", "ocsf/edge-cases.json",
+    "ocsf/1.6.0/base.json.gz", "ocsf/1.6.0/windows.json.gz",
+    "ocsf/1.6.0/provenance.json", "ocsf/1.6.0/README.md",
+    "ocsf/1.6.0/SCHEMA-NOTICE", "ocsf/1.6.0/SCHEMA-LICENSE",
+    "ocsf/1.6.0/COMPILER-NOTICE", "ocsf/1.6.0/COMPILER-LICENSE",
+)
+
+
+def test_installed_native_suite_requires_schema_validation(tmp_path: Path):
+    checker = load_package_checker()
+    destination = tmp_path / "tests"
+    checker._copy_required_files(ROOT / "python/tests", destination, checker.NATIVE_TESTS)
+    assert (destination / "test_native_schema_validation.py").read_bytes() == (ROOT / "python/tests/test_native_schema_validation.py").read_bytes()
+    assert "tests/test_native_schema_validation.py" in checker.SDIST_FIXED_FILES
+
+
+def test_schema_fixture_copy_preserves_exact_closure_and_hashes(tmp_path: Path):
+    checker = load_package_checker()
+    destination = tmp_path / "schemas"
+    hashes = checker.copy_schema_fixtures(ROOT / "testdata/schemas", destination)
+    assert set(hashes) == set(SCHEMA_FIXTURES)
+    assert set(hashes) == {p.relative_to(destination).as_posix() for p in destination.rglob("*") if p.is_file()}
+    for relative in SCHEMA_FIXTURES:
+        assert hashes[relative] == checker.sha256(ROOT / "testdata/schemas" / relative)
+        assert (destination / relative).read_bytes() == (ROOT / "testdata/schemas" / relative).read_bytes()
+
+
+@pytest.mark.parametrize("missing", SCHEMA_FIXTURES)
+def test_schema_fixture_copy_rejects_missing_required_input(tmp_path: Path, missing):
+    checker = load_package_checker()
+    source = tmp_path / "source"
+    for relative in SCHEMA_FIXTURES:
+        if relative != missing:
+            path = source / relative
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(relative)
+    with pytest.raises(FileNotFoundError):
+        checker.copy_schema_fixtures(source, tmp_path / "copy")
+
+
+def test_schema_fixture_copy_rejects_changed_copy(tmp_path: Path, monkeypatch):
+    checker = load_package_checker()
+    real_copy = checker.shutil.copy2
+
+    def corrupt(source, destination):
+        result = real_copy(source, destination)
+        Path(destination).write_bytes(b"changed")
+        return result
+
+    monkeypatch.setattr(checker.shutil, "copy2", corrupt)
+    with pytest.raises(AssertionError, match="hash"):
+        checker.copy_schema_fixtures(ROOT / "testdata/schemas", tmp_path / "copy")
+
+
+def test_installed_schema_fixtures_exist_before_both_suites(tmp_path: Path, monkeypatch):
+    checker = load_package_checker()
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    wheel = tmp_path / "wheel.whl"
+    wheel.write_bytes(b"wheel")
+    directory = tmp_path / "venv"
+    library = directory / "lib" / checker.native_library_name()
+    library.parent.mkdir(parents=True)
+    library.write_bytes(b"native")
+    payload_hashes = {"spl_toolkit/" + library.name: checker.sha256(library)}
+    monkeypatch.setenv("SPL_SCHEMA_FIXTURES", "checkout-only")
+    monkeypatch.setattr(checker, "create_test_environment", lambda _: directory / "bin/python")
+    monkeypatch.setattr(checker, "run", lambda *args, **kwargs: None)
+    monkeypatch.setattr(checker, "verify_wheel_sources", lambda *args: payload_hashes)
+    monkeypatch.setattr(checker.subprocess, "run", lambda *args, **kwargs: subprocess.CompletedProcess(
+        args, 0, stdout=json.dumps({"installed_module": str(directory / "module.py"),
+                                   "loaded_library": str(library), "native_sha256": checker.sha256(library)}) + "\n"))
+    seen = []
+    counts = {"collected": 1, "passed": 1, "failed": 0, "skipped": 0}
+
+    def suite(python, tests, result, cwd, env):
+        fixtures = Path(env["SPL_SCHEMA_FIXTURES"])
+        assert fixtures.is_absolute() and fixtures.is_relative_to(outside)
+        assert not fixtures.is_relative_to(ROOT)
+        for relative in SCHEMA_FIXTURES:
+            assert (fixtures / relative).read_bytes() == (ROOT / "testdata/schemas" / relative).read_bytes()
+        seen.append(fixtures)
+        return counts
+
+    monkeypatch.setattr(checker, "_run_required_suite", suite)
+    result = checker.install_and_check(wheel, directory, outside, "0.1.1", PYTHON_DIR / "requirements-dev.txt",
+                                       tmp_path / "cli", tmp_path / "server", ROOT / "testdata/baseline/cases.json", ROOT)
+    assert len(seen) == 2 and seen[0] == seen[1]
+    assert result["fixture_hashes"]["schema"] == {name: checker.sha256(ROOT / "testdata/schemas" / name) for name in SCHEMA_FIXTURES}
+    assert result["wheel_payload_hashes"] == payload_hashes
+
+
+def test_schema_source_override_is_removed(monkeypatch):
+    checker = load_package_checker()
+    monkeypatch.setenv("SPL_SCHEMA_FIXTURES", "checkout-only")
+    assert "SPL_SCHEMA_FIXTURES" not in checker.clean_env()
+
+
+def test_sdist_source_verification_requires_exact_handwritten_sources_and_native_test(tmp_path: Path):
+    checker = load_package_checker()
+    support = load_build_support()
+    distribution = support.NativeDistribution({"script_name": str(PYTHON_DIR / "setup.py")})
+    command = support.SourceDistribution(distribution)
+    command.ensure_finalized()
+    release = tmp_path / "release"
+    command.make_release_tree(str(release), [])
+    for relative in ("native-source-files.txt", "spl_toolkit/mapper.py", "spl_toolkit/libspl_toolkit.h", "tests/test_native_schema_validation.py"):
+        destination = release / relative
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        destination.write_bytes((PYTHON_DIR / relative).read_bytes())
+    hashes = checker.verify_sdist_sources(release, ROOT)
+    assert hashes["native-source-files.txt"] == checker.sha256(PYTHON_DIR / "native-source-files.txt")
+    for path in (ROOT / "pkg/validation").glob("*.go"):
+        if not path.name.endswith("_test.go"):
+            assert hashes["_native_src/" + path.relative_to(ROOT).as_posix()] == checker.sha256(path)
+    changed = release / "_native_src/pkg/validation/schema_validate.go"
+    changed.write_bytes(b"changed")
+    with pytest.raises(AssertionError, match="hash"):
+        checker.verify_sdist_sources(release, ROOT)
+
+
+def test_wheel_source_verification_rejects_stale_wrapper_or_header(tmp_path: Path):
+    import zipfile
+    checker = load_package_checker()
+    wheel = tmp_path / "wheel.whl"
+    entries = {"spl_toolkit/mapper.py": (PYTHON_DIR / "spl_toolkit/mapper.py").read_bytes(),
+               "spl_toolkit/libspl_toolkit.h": (PYTHON_DIR / "spl_toolkit/libspl_toolkit.h").read_bytes(),
+               "spl_toolkit/" + checker.native_library_name(): b"native"}
+    with zipfile.ZipFile(wheel, "w") as archive:
+        for name, payload in entries.items():
+            archive.writestr(name, payload)
+    assert set(checker.verify_wheel_sources(wheel, ROOT)) == set(entries)
+    for changed in ("spl_toolkit/mapper.py", "spl_toolkit/libspl_toolkit.h"):
+        with zipfile.ZipFile(wheel, "w") as archive:
+            for name, payload in entries.items():
+                archive.writestr(name, b"stale" if name == changed else payload)
+        with pytest.raises(AssertionError, match="hash"):
+            checker.verify_wheel_sources(wheel, ROOT)

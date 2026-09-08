@@ -33,7 +33,7 @@ SDIST_FIXED_FILES = {
     "spl_toolkit.egg-info/PKG-INFO", "spl_toolkit.egg-info/SOURCES.txt",
     "spl_toolkit.egg-info/dependency_links.txt", "spl_toolkit.egg-info/top_level.txt",
     "tests/test_mapper.py", "tests/test_native_abi.py", "tests/test_native_mapper.py",
-    "tests/test_native_analysis.py", "tests/test_native_validation.py",
+    "tests/test_native_analysis.py", "tests/test_native_validation.py", "tests/test_native_schema_validation.py",
 }
 INSTALL_SCRIPT = """
 import importlib.metadata, pathlib, sys
@@ -47,7 +47,14 @@ with SPLMapper() as mapper:
     mapper.load_mappings([{'source':'src_ip','target':'source_ip'}])
     assert mapper.map_query('search src_ip=1') == 'search source_ip=1'
 """
-NATIVE_TESTS = ("test_native_abi.py", "test_native_mapper.py", "test_native_analysis.py", "test_native_validation.py")
+NATIVE_TESTS = ("test_native_abi.py", "test_native_mapper.py", "test_native_analysis.py", "test_native_validation.py", "test_native_schema_validation.py")
+SCHEMA_FIXTURE_FILES = (
+    "cases.json", "requests.json", "ocsf/edge-cases.json",
+    "ocsf/1.6.0/base.json.gz", "ocsf/1.6.0/windows.json.gz",
+    "ocsf/1.6.0/provenance.json", "ocsf/1.6.0/README.md",
+    "ocsf/1.6.0/SCHEMA-NOTICE", "ocsf/1.6.0/SCHEMA-LICENSE",
+    "ocsf/1.6.0/COMPILER-NOTICE", "ocsf/1.6.0/COMPILER-LICENSE",
+)
 ACCEPTANCE_FILES = ("test_documented_cli.py", "test_surfaces.py", "test_analysis_surfaces.py", "test_validation_surfaces.py", "cli_examples.json")
 REQUIRED_PYTEST_PLUGIN = r'''\
 import json
@@ -134,7 +141,7 @@ def run(command: list[str], *, cwd: Path, env: dict[str, str] | None = None) -> 
 
 def clean_env() -> dict[str, str]:
     env = os.environ.copy()
-    for name in ("PYTHONPATH", "PYTHONHOME", "SPL_NATIVE_LIBRARY", "SPL_EXPECTED_VERSION"):
+    for name in ("PYTHONPATH", "PYTHONHOME", "SPL_NATIVE_LIBRARY", "SPL_EXPECTED_VERSION", "SPL_SCHEMA_FIXTURES"):
         env.pop(name, None)
     return env
 
@@ -181,6 +188,57 @@ def _copy_required_files(source: Path, destination: Path, names: tuple[str, ...]
         shutil.copy2(path, destination / name)
 
 
+def copy_schema_fixtures(source: Path, destination: Path) -> dict[str, str]:
+    """Copy only the explicit acceptance inputs, checking each copied byte hash."""
+    destination.mkdir()
+    hashes = {}
+    for relative in SCHEMA_FIXTURE_FILES:
+        original = source / relative
+        copied = destination / relative
+        copied.parent.mkdir(parents=True, exist_ok=True)
+        expected = sha256(original)
+        shutil.copy2(original, copied)
+        if sha256(copied) != expected:
+            raise AssertionError(f"schema fixture hash mismatch: {relative}")
+        hashes[relative] = expected
+    return hashes
+
+
+def verify_wheel_sources(wheel: Path, root: Path) -> dict[str, str]:
+    """Bind the installed wrapper/header and native payload to this wheel."""
+    hashes = {}
+    with zipfile.ZipFile(wheel) as archive:
+        for relative in ("spl_toolkit/mapper.py", "spl_toolkit/libspl_toolkit.h"):
+            digest = hashlib.sha256(archive.read(relative)).hexdigest()
+            if digest != sha256(root / "python" / relative):
+                raise AssertionError(f"wheel source hash mismatch: {relative}")
+            hashes[relative] = digest
+        native = "spl_toolkit/" + native_library_name()
+        hashes[native] = hashlib.sha256(archive.read(native)).hexdigest()
+    return hashes
+
+
+def verify_sdist_sources(source: Path, root: Path) -> dict[str, str]:
+    """Reject stale or incomplete native sources before an sdist wheel rebuild."""
+    manifest = root / "python/native-source-files.txt"
+    originals = {
+        relative: root / "python" / relative for relative in (
+            "native-source-files.txt", "spl_toolkit/mapper.py", "spl_toolkit/libspl_toolkit.h",
+            "tests/test_native_schema_validation.py",
+        )
+    }
+    for relative in manifest.read_text(encoding="utf-8").splitlines():
+        if relative.strip() and not relative.lstrip().startswith("#"):
+            originals["_native_src/" + relative.strip()] = root / relative.strip()
+    hashes = {}
+    for relative, original in originals.items():
+        expected = sha256(original)
+        if sha256(source / relative) != expected:
+            raise AssertionError(f"sdist source hash mismatch: {relative}")
+        hashes[relative] = expected
+    return hashes
+
+
 def _run_required_suite(python: Path, suite: Path, result: Path, outside: Path, env: dict[str, str]) -> dict[str, int]:
     write_required_pytest_plugin(suite)
     child_env = env | {"SPL_TEST_COUNTS": str(result)}
@@ -202,6 +260,7 @@ def install_and_check(
     fixture_source: Path,
     docs_root: Path,
 ) -> dict[str, object]:
+    wheel_payload_hashes = verify_wheel_sources(wheel, docs_root)
     python = create_test_environment(directory)
     env = clean_env()
     path_entries = [str(python.parent)]
@@ -218,18 +277,25 @@ def install_and_check(
         f"assert {controller_site!r} not in [str(pathlib.Path(p).resolve()) for p in sys.path]\n"
         + INSTALL_SCRIPT
     )
-    metadata_script = check_script + "\nimport json, platform\nwith SPLMapper() as _metadata_mapper:\n    _native_version = _metadata_mapper.native_version\nprint(json.dumps({'installed_module': str(pathlib.Path(spl_toolkit.__file__).resolve()), 'venv_prefix': str(pathlib.Path(sys.prefix).resolve()), 'python_version': platform.python_version(), 'python_runtime': sys.version, 'package_version': spl_toolkit.__version__, 'native_version': _native_version}, sort_keys=True))\n"
+    metadata_script = check_script + "\nimport hashlib, json, platform\nwith SPLMapper() as _metadata_mapper:\n    _native_version = _metadata_mapper.native_version\n    _loaded_library = pathlib.Path(_metadata_mapper._lib._name).resolve()\n    assert _loaded_library.is_relative_to(pathlib.Path(sys.prefix).resolve())\n    assert _loaded_library.parent == pathlib.Path(spl_toolkit.__file__).resolve().parent\n    _native_sha256 = hashlib.sha256(_loaded_library.read_bytes()).hexdigest()\nprint(json.dumps({'installed_module': str(pathlib.Path(spl_toolkit.__file__).resolve()), 'venv_prefix': str(pathlib.Path(sys.prefix).resolve()), 'python_version': platform.python_version(), 'python_runtime': sys.version, 'package_version': spl_toolkit.__version__, 'native_version': _native_version, 'loaded_library': str(_loaded_library), 'native_sha256': _native_sha256}, sort_keys=True))\n"
     completed = subprocess.run(
         [str(python), "-I", "-c", textwrap.dedent(metadata_script)], cwd=outside_checkout,
         env=install_env, check=True, text=True, capture_output=True,
     )
     metadata = json.loads(completed.stdout.splitlines()[-1])
+    if metadata["native_sha256"] != wheel_payload_hashes["spl_toolkit/" + native_library_name()]:
+        raise AssertionError("loaded native library hash differs from wheel payload")
 
     installed_test_dir = outside_checkout / f"tests-{directory.name}"
     _copy_required_files(docs_root / "python" / "tests", installed_test_dir, NATIVE_TESTS)
     analysis_fixture = outside_checkout / f"analysis-cases-{directory.name}.json"
     shutil.copy2(docs_root / "testdata" / "analysis" / "cases.json", analysis_fixture)
-    analysis_env = {"SPL_ANALYSIS_FIXTURES": str(analysis_fixture.resolve())}
+    schema_fixtures = outside_checkout / f"schema-fixtures-{directory.name}"
+    schema_hashes = copy_schema_fixtures(docs_root / "testdata/schemas", schema_fixtures)
+    analysis_env = {
+        "SPL_ANALYSIS_FIXTURES": str(analysis_fixture.resolve()),
+        "SPL_SCHEMA_FIXTURES": str(schema_fixtures.resolve()),
+    }
     native_counts = _run_required_suite(
         python, installed_test_dir, outside_checkout / f"native-counts-{directory.name}.json", outside_checkout, install_env | analysis_env
     )
@@ -253,7 +319,8 @@ def install_and_check(
     )
     return metadata | {
         "wheel_sha256": sha256(wheel),
-        "fixture_hashes": {"baseline": sha256(fixture), "analysis": sha256(analysis_fixture), "validation": sha256(validation_fixture)},
+        "wheel_payload_hashes": wheel_payload_hashes,
+        "fixture_hashes": {"baseline": sha256(fixture), "analysis": sha256(analysis_fixture), "validation": sha256(validation_fixture), "schema": schema_hashes},
         "tests": {"required_native": native_counts, "surface_acceptance": surface_counts},
         "cli_examples": "passed",
         "surface_parity": "passed",
@@ -462,6 +529,7 @@ def _check_package(
             source = unpack_sdist(sdist, temp / "sdist")
         if source is not None:
             inspect_sdist(source)
+            source_hashes = verify_sdist_sources(source, root)
             check_metadata_without_compiler(source, temp / "metadata", clean_env())
             source_wheel = build_sdist_wheel(source, temp / "sdist-wheel", clean_env())
             inspect_wheel(source_wheel, version)
@@ -469,6 +537,7 @@ def _check_package(
                 source_wheel, temp / "sdist-venv", outside, version,
                 source / "requirements-dev.txt", cli, server, fixture, root,
             )
+            evidence["rebuilt_sdist"]["sdist_source_hashes"] = source_hashes
             check_missing_compiler(source, temp / "failed-wheel", clean_env())
 
     after = git_status(root)

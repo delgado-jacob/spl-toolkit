@@ -32,6 +32,16 @@ pkg/mapper/parser.go
 pkg/mapper/schema.go
 pkg/validation/batch.go
 pkg/validation/catalog.go
+pkg/validation/json_schema.go
+pkg/validation/json_schema_patterns.go
+pkg/validation/json_schema_resources.go
 pkg/validation/model.go
+pkg/validation/ocsf.go
+pkg/validation/ocsf_projection.go
 pkg/validation/request.go
+pkg/validation/schema_batch.go
+pkg/validation/schema_model.go
+pkg/validation/schema_request.go
+pkg/validation/schema_target.go
+pkg/validation/schema_validate.go
 pkg/validation/validate.go
