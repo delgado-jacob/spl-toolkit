@@ -49,7 +49,9 @@ expression: lambdaExpression | xorExpression;
 xorExpression: orExpression (logicalXor orExpression)*;
 orExpression: andExpression (logicalOr andExpression)*;
 andExpression: notExpression (logicalAnd notExpression)*;
-notExpression: logicalNot notExpression | predicate;
+// Prefer a complete ordinary identifier expression when a contextual spelling
+// also permits prefix NOT. The reserved uppercase token remains unambiguous.
+notExpression: predicate | logicalNot notExpression;
 predicate: additive (comparison additive | logicalNot? betweenOperator additive betweenConjunction additive | logicalNot? IN LPAREN expression (COMMA expression)* RPAREN | logicalNot? LIKE additive | IS (logicalNot? (NULL | NULL_TEST) | logicalNot? TYPE))?;
 logicalAnd: AND | {p.contextualKeyword("and")}? IDENTIFIER;
 logicalOr: OR | {p.contextualKeyword("or")}? IDENTIFIER;

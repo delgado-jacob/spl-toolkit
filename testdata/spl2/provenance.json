@@ -14824,6 +14824,97 @@
       "case_id": "T2.fix1.logical.word_as_search_literal",
       "assembly": "standalone",
       "evidence": "independent-task2-review-boundary-witness"
+    },
+    {
+      "id": "T2.fix2.not-addition",
+      "form_id": "L06",
+      "source_keys": [
+        "predicate",
+        "syntax"
+      ],
+      "candidate": "FROM main | eval x=not+1",
+      "disposition": "active",
+      "case_id": "T2.fix2.not-addition",
+      "assembly": "standalone",
+      "evidence": "independent-task2-prefix-ownership-review-witness"
+    },
+    {
+      "id": "T2.fix2.not-access",
+      "form_id": "L06",
+      "source_keys": [
+        "predicate",
+        "syntax"
+      ],
+      "candidate": "FROM main | eval x=not[0]",
+      "disposition": "active",
+      "case_id": "T2.fix2.not-access",
+      "assembly": "standalone",
+      "evidence": "independent-task2-prefix-ownership-review-witness"
+    },
+    {
+      "id": "T2.fix2.not-call",
+      "form_id": "L06",
+      "source_keys": [
+        "predicate",
+        "syntax"
+      ],
+      "candidate": "FROM main | eval x=not(1)",
+      "disposition": "active",
+      "case_id": "T2.fix2.not-call",
+      "assembly": "standalone",
+      "evidence": "independent-task2-prefix-ownership-review-witness"
+    },
+    {
+      "id": "T2.fix2.mixed-not-call",
+      "form_id": "L06",
+      "source_keys": [
+        "predicate",
+        "syntax"
+      ],
+      "candidate": "FROM main | eval x=nOt(1)",
+      "disposition": "active",
+      "case_id": "T2.fix2.mixed-not-call",
+      "assembly": "standalone",
+      "evidence": "independent-task2-prefix-ownership-review-witness"
+    },
+    {
+      "id": "T2.fix2.held-prefix",
+      "form_id": "L06",
+      "source_keys": [
+        "predicate",
+        "syntax"
+      ],
+      "candidate": "FROM main | eval x=nOt enabled",
+      "disposition": "active",
+      "case_id": "T2.fix2.held-prefix",
+      "assembly": "standalone",
+      "evidence": "independent-task2-prefix-ownership-review-witness"
+    },
+    {
+      "id": "T2.fix2.uppercase-precedence",
+      "form_id": "L06",
+      "source_keys": [
+        "predicate",
+        "syntax"
+      ],
+      "candidate": "FROM main | eval x=NOT a=1 AND b=2",
+      "disposition": "active",
+      "case_id": "T2.fix2.uppercase-precedence",
+      "assembly": "standalone",
+      "evidence": "independent-task2-prefix-ownership-review-witness"
+    },
+    {
+      "id": "T2.fix2.uppercase-over-access",
+      "form_id": "L06",
+      "source_keys": [
+        "predicate",
+        "syntax"
+      ],
+      "candidate": "FROM main | eval x=NOT not[0]",
+      "disposition": "active",
+      "case_id": "T2.fix2.uppercase-over-access",
+      "assembly": "standalone",
+      "evidence": "independent-task2-prefix-ownership-review-witness"
     }
   ],
   "holds": [

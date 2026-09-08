@@ -1113,5 +1113,356 @@
       "shapes": [],
       "diagnostic_excerpts": []
     }
+  },
+  {
+    "id": "T2.fix2.not-addition",
+    "meaningful_id": "T2.fix2.identifier-ownership",
+    "obligation_ids": [
+      "T2.fix2.not-addition"
+    ],
+    "source_keys": [
+      "predicate",
+      "syntax"
+    ],
+    "document": {
+      "text": "FROM main | eval x=not+1",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "L06"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR",
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "logicalNot": 0,
+        "additive": 1
+      },
+      "shape_contains": [],
+      "excerpts": [
+        {
+          "kind": "expression",
+          "text": "not+1"
+        }
+      ],
+      "shapes": [
+        {
+          "kind": "expression",
+          "shape": "(additive IDENTIFIER:\"not\" PLUS:\"+\" NUMBER:\"1\")"
+        }
+      ],
+      "diagnostic_excerpts": []
+    }
+  },
+  {
+    "id": "T2.fix2.not-access",
+    "meaningful_id": "T2.fix2.identifier-ownership",
+    "obligation_ids": [
+      "T2.fix2.not-access"
+    ],
+    "source_keys": [
+      "predicate",
+      "syntax"
+    ],
+    "document": {
+      "text": "FROM main | eval x=not[0]",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "L06"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR",
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "logicalNot": 0,
+        "array": 0,
+        "accessPart": 1
+      },
+      "shape_contains": [],
+      "excerpts": [
+        {
+          "kind": "expression",
+          "text": "not[0]"
+        }
+      ],
+      "shapes": [
+        {
+          "kind": "expression",
+          "shape": "(access IDENTIFIER:\"not\" (accessPart LBRACKET:\"[\" NUMBER:\"0\" RBRACKET:\"]\"))"
+        }
+      ],
+      "diagnostic_excerpts": []
+    }
+  },
+  {
+    "id": "T2.fix2.not-call",
+    "meaningful_id": "T2.fix2.identifier-ownership",
+    "obligation_ids": [
+      "T2.fix2.not-call"
+    ],
+    "source_keys": [
+      "predicate",
+      "syntax"
+    ],
+    "document": {
+      "text": "FROM main | eval x=not(1)",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "L06"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR",
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "logicalNot": 0,
+        "call": 1
+      },
+      "shape_contains": [],
+      "excerpts": [
+        {
+          "kind": "expression",
+          "text": "not(1)"
+        }
+      ],
+      "shapes": [
+        {
+          "kind": "expression",
+          "shape": "(call IDENTIFIER:\"not\" LPAREN:\"(\" NUMBER:\"1\" RPAREN:\")\")"
+        }
+      ],
+      "diagnostic_excerpts": []
+    }
+  },
+  {
+    "id": "T2.fix2.mixed-not-call",
+    "meaningful_id": "T2.fix2.identifier-ownership",
+    "obligation_ids": [
+      "T2.fix2.mixed-not-call"
+    ],
+    "source_keys": [
+      "predicate",
+      "syntax"
+    ],
+    "document": {
+      "text": "FROM main | eval x=nOt(1)",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "L06"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR",
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "logicalNot": 0,
+        "call": 1
+      },
+      "shape_contains": [],
+      "excerpts": [
+        {
+          "kind": "expression",
+          "text": "nOt(1)"
+        }
+      ],
+      "shapes": [
+        {
+          "kind": "expression",
+          "shape": "(call IDENTIFIER:\"nOt\" LPAREN:\"(\" NUMBER:\"1\" RPAREN:\")\")"
+        }
+      ],
+      "diagnostic_excerpts": []
+    }
+  },
+  {
+    "id": "T2.fix2.held-prefix",
+    "meaningful_id": "T2.fix2.held-prefix",
+    "obligation_ids": [
+      "T2.fix2.held-prefix"
+    ],
+    "source_keys": [
+      "predicate",
+      "syntax"
+    ],
+    "document": {
+      "text": "FROM main | eval x=nOt enabled",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "L06"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "logicalNot": 1
+      },
+      "shape_contains": [],
+      "excerpts": [
+        {
+          "kind": "expression",
+          "text": "nOt enabled"
+        }
+      ],
+      "shapes": [
+        {
+          "kind": "expression",
+          "shape": "(notExpression IDENTIFIER:\"nOt\" IDENTIFIER:\"enabled\")"
+        }
+      ],
+      "diagnostic_excerpts": [
+        "nOt"
+      ]
+    },
+    "hold_ids": [
+      "H11"
+    ],
+    "floor_credit": false
+  },
+  {
+    "id": "T2.fix2.uppercase-precedence",
+    "meaningful_id": "T2.fix2.identifier-ownership",
+    "obligation_ids": [
+      "T2.fix2.uppercase-precedence"
+    ],
+    "source_keys": [
+      "predicate",
+      "syntax"
+    ],
+    "document": {
+      "text": "FROM main | eval x=NOT a=1 AND b=2",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "L06"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR",
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "logicalNot": 1,
+        "logicalAnd": 1
+      },
+      "shape_contains": [],
+      "excerpts": [
+        {
+          "kind": "expression",
+          "text": "NOT a=1 AND b=2"
+        }
+      ],
+      "shapes": [
+        {
+          "kind": "expression",
+          "shape": "(andExpression (notExpression NOT:\"NOT\" (predicate IDENTIFIER:\"a\" ASSIGN:\"=\" NUMBER:\"1\")) AND:\"AND\" (predicate IDENTIFIER:\"b\" ASSIGN:\"=\" NUMBER:\"2\"))"
+        }
+      ],
+      "diagnostic_excerpts": []
+    }
+  },
+  {
+    "id": "T2.fix2.uppercase-over-access",
+    "meaningful_id": "T2.fix2.identifier-ownership",
+    "obligation_ids": [
+      "T2.fix2.uppercase-over-access"
+    ],
+    "source_keys": [
+      "predicate",
+      "syntax"
+    ],
+    "document": {
+      "text": "FROM main | eval x=NOT not[0]",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "L06"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR",
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "logicalNot": 1,
+        "accessPart": 1,
+        "array": 0
+      },
+      "shape_contains": [],
+      "excerpts": [
+        {
+          "kind": "expression",
+          "text": "NOT not[0]"
+        }
+      ],
+      "shapes": [
+        {
+          "kind": "expression",
+          "shape": "(notExpression NOT:\"NOT\" (access IDENTIFIER:\"not\" (accessPart LBRACKET:\"[\" NUMBER:\"0\" RBRACKET:\"]\")))"
+        }
+      ],
+      "diagnostic_excerpts": []
+    }
   }
 ]

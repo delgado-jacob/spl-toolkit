@@ -277,9 +277,9 @@ func spl2parserParserInit() {
 		382, 380, 1, 0, 0, 0, 383, 389, 3, 64, 32, 0, 384, 385, 3, 68, 34, 0, 385,
 		386, 3, 64, 32, 0, 386, 388, 1, 0, 0, 0, 387, 384, 1, 0, 0, 0, 388, 391,
 		1, 0, 0, 0, 389, 387, 1, 0, 0, 0, 389, 390, 1, 0, 0, 0, 390, 63, 1, 0,
-		0, 0, 391, 389, 1, 0, 0, 0, 392, 393, 3, 74, 37, 0, 393, 394, 3, 64, 32,
-		0, 394, 397, 1, 0, 0, 0, 395, 397, 3, 66, 33, 0, 396, 392, 1, 0, 0, 0,
-		396, 395, 1, 0, 0, 0, 397, 65, 1, 0, 0, 0, 398, 441, 3, 82, 41, 0, 399,
+		0, 0, 391, 389, 1, 0, 0, 0, 392, 397, 3, 66, 33, 0, 393, 394, 3, 74, 37,
+		0, 394, 395, 3, 64, 32, 0, 395, 397, 1, 0, 0, 0, 396, 392, 1, 0, 0, 0,
+		396, 393, 1, 0, 0, 0, 397, 65, 1, 0, 0, 0, 398, 441, 3, 82, 41, 0, 399,
 		400, 3, 80, 40, 0, 400, 401, 3, 82, 41, 0, 401, 442, 1, 0, 0, 0, 402, 404,
 		3, 74, 37, 0, 403, 402, 1, 0, 0, 0, 403, 404, 1, 0, 0, 0, 404, 405, 1,
 		0, 0, 0, 405, 406, 3, 76, 38, 0, 406, 407, 3, 82, 41, 0, 407, 408, 3, 78,
@@ -6605,9 +6605,9 @@ type INotExpressionContext interface {
 	GetParser() antlr.Parser
 
 	// Getter signatures
+	Predicate() IPredicateContext
 	LogicalNot() ILogicalNotContext
 	NotExpression() INotExpressionContext
-	Predicate() IPredicateContext
 
 	// IsNotExpressionContext differentiates from other interfaces.
 	IsNotExpressionContext()
@@ -6645,6 +6645,22 @@ func NewNotExpressionContext(parser antlr.Parser, parent antlr.ParserRuleContext
 
 func (s *NotExpressionContext) GetParser() antlr.Parser { return s.parser }
 
+func (s *NotExpressionContext) Predicate() IPredicateContext {
+	var t antlr.RuleContext
+	for _, ctx := range s.GetChildren() {
+		if _, ok := ctx.(IPredicateContext); ok {
+			t = ctx.(antlr.RuleContext)
+			break
+		}
+	}
+
+	if t == nil {
+		return nil
+	}
+
+	return t.(IPredicateContext)
+}
+
 func (s *NotExpressionContext) LogicalNot() ILogicalNotContext {
 	var t antlr.RuleContext
 	for _, ctx := range s.GetChildren() {
@@ -6675,22 +6691,6 @@ func (s *NotExpressionContext) NotExpression() INotExpressionContext {
 	}
 
 	return t.(INotExpressionContext)
-}
-
-func (s *NotExpressionContext) Predicate() IPredicateContext {
-	var t antlr.RuleContext
-	for _, ctx := range s.GetChildren() {
-		if _, ok := ctx.(IPredicateContext); ok {
-			t = ctx.(antlr.RuleContext)
-			break
-		}
-	}
-
-	if t == nil {
-		return nil
-	}
-
-	return t.(IPredicateContext)
 }
 
 func (s *NotExpressionContext) GetRuleContext() antlr.RuleContext {
@@ -6737,18 +6737,18 @@ func (p *SPL2Parser) NotExpression() (localctx INotExpressionContext) {
 		p.EnterOuterAlt(localctx, 1)
 		{
 			p.SetState(392)
-			p.LogicalNot()
-		}
-		{
-			p.SetState(393)
-			p.NotExpression()
+			p.Predicate()
 		}
 
 	case 2:
 		p.EnterOuterAlt(localctx, 2)
 		{
-			p.SetState(395)
-			p.Predicate()
+			p.SetState(393)
+			p.LogicalNot()
+		}
+		{
+			p.SetState(394)
+			p.NotExpression()
 		}
 
 	case antlr.ATNInvalidAltNumber:

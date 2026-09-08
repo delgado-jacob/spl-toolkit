@@ -297,3 +297,71 @@ func TestSPL2ExpressionContextualCasing(t *testing.T) {
 		}
 	}
 }
+
+func TestSPL2ExpressionPrefixNotOwnership(t *testing.T) {
+	cases := []struct{ expression, shape string }{
+		{"not+1", `(additive IDENTIFIER:"not" PLUS:"+" NUMBER:"1")`},
+		{"not[0]", `(access IDENTIFIER:"not" (accessPart LBRACKET:"[" NUMBER:"0" RBRACKET:"]"))`},
+		{"not(1)", `(call IDENTIFIER:"not" LPAREN:"(" NUMBER:"1" RPAREN:")")`},
+		{"not-1", `(additive IDENTIFIER:"not" MINUS:"-" NUMBER:"1")`},
+		{"not.member", `(access IDENTIFIER:"not" (accessPart DOT:"." IDENTIFIER:"member"))`},
+		{"nOt(1)", `(call IDENTIFIER:"nOt" LPAREN:"(" NUMBER:"1" RPAREN:")")`},
+		{"not", `IDENTIFIER:"not"`},
+	}
+	for _, tc := range cases {
+		t.Run(tc.expression, func(t *testing.T) {
+			text := "FROM main | eval x=" + tc.expression
+			p := parseSPL2Document(text)
+			if !p.syntaxComplete || len(p.diagnostics) > 0 {
+				t.Fatalf("ordinary identifier became held operator: %+v", p.diagnostics)
+			}
+			expressions := spl2Nodes(p.syntax, "expression")
+			if len(expressions) == 0 || expressions[0].shape() != tc.shape {
+				t.Fatalf("got %s want %s", p.syntax.shape(), tc.shape)
+			}
+			location := expressions[0].Location
+			if text[location.Start.Offset:location.End.Offset] != tc.expression {
+				t.Fatalf("expression source ownership %+v", location)
+			}
+			if len(spl2Nodes(p.syntax, "logicalNot")) != 0 || len(spl2Nodes(p.syntax, "array")) != 0 {
+				t.Fatal("identifier stolen by prefix or array-literal context")
+			}
+		})
+	}
+	controls := []struct {
+		expression, shape string
+		held              bool
+	}{
+		{"nOt enabled", `(notExpression IDENTIFIER:"nOt" IDENTIFIER:"enabled")`, true},
+		{"NOT enabled", `(notExpression NOT:"NOT" IDENTIFIER:"enabled")`, false},
+		{"NOT a=1 AND b=2", `(andExpression (notExpression NOT:"NOT" (predicate IDENTIFIER:"a" ASSIGN:"=" NUMBER:"1")) AND:"AND" (predicate IDENTIFIER:"b" ASSIGN:"=" NUMBER:"2"))`, false},
+		{"NOT not[0]", `(notExpression NOT:"NOT" (access IDENTIFIER:"not" (accessPart LBRACKET:"[" NUMBER:"0" RBRACKET:"]")))`, false},
+	}
+	for _, tc := range controls {
+		t.Run(tc.expression, func(t *testing.T) {
+			text := "FROM main | where " + tc.expression
+			p := parseSPL2Document(text)
+			if p.syntaxComplete == tc.held {
+				t.Fatalf("prefix coverage changed %+v", p.diagnostics)
+			}
+			if tc.held {
+				if len(p.diagnostics) != 1 || p.diagnostics[0].Code != CodeUnsupportedSemantics || p.diagnostics[0].Severity != "warning" {
+					t.Fatalf("held prefix outcome %+v", p.diagnostics)
+				}
+			} else if len(p.diagnostics) != 0 {
+				t.Fatalf("documented uppercase prefix changed %+v", p.diagnostics)
+			}
+			expression := spl2Nodes(p.syntax, "expression")[0]
+			if expression.shape() != tc.shape {
+				t.Fatalf("got %s want %s", expression.shape(), tc.shape)
+			}
+			location := expression.Location
+			if text[location.Start.Offset:location.End.Offset] != tc.expression {
+				t.Fatal("prefix source changed")
+			}
+			if len(spl2Nodes(p.syntax, "logicalNot")) != 1 {
+				t.Fatalf("prefix operator ownership %s", p.syntax.shape())
+			}
+		})
+	}
+}
