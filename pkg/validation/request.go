@@ -200,3 +200,55 @@ func DecodeBatchRequest(data []byte) (BatchRequest, error) {
 	}
 	return BatchRequest{Documents: docs, Catalog: catalog}, nil
 }
+
+// decodeUniqueJSON keeps numbers exact and rejects duplicate keys throughout,
+// including annotation data. Schema-bearing positions are identified separately.
+func decodeUniqueJSON(data []byte) (any, error) {
+	if err := checkJSON(data); err != nil {
+		return nil, err
+	}
+	d := json.NewDecoder(bytes.NewReader(data))
+	d.UseNumber()
+	var read func() (any, error)
+	read = func() (any, error) {
+		token, err := d.Token()
+		if err != nil {
+			return nil, inputError("invalid JSON: %v", err)
+		}
+		switch token {
+		case json.Delim('{'):
+			m := map[string]any{}
+			for d.More() {
+				key, err := d.Token()
+				if err != nil {
+					return nil, inputError("invalid JSON key")
+				}
+				k := key.(string)
+				if _, ok := m[k]; ok {
+					return nil, inputError("duplicate property %q", k)
+				}
+				v, err := read()
+				if err != nil {
+					return nil, err
+				}
+				m[k] = v
+			}
+			_, err = d.Token()
+			return m, err
+		case json.Delim('['):
+			a := []any{}
+			for d.More() {
+				v, err := read()
+				if err != nil {
+					return nil, err
+				}
+				a = append(a, v)
+			}
+			_, err = d.Token()
+			return a, err
+		default:
+			return token, nil
+		}
+	}
+	return read()
+}
