@@ -6,8 +6,12 @@ import (
 	"strings"
 )
 
+// This is the auditor-pinned V1 source/design, original ID/candidate/source-link,
+// inventory and hold projection, not downloaded pages or the mutable corpus.
+const spl2DocumentationSnapshot = "spl2-provenance-v1:sha256:3345cf5712b1bdbf467d1651784fdb8bccc596805038da0d54e7a123384e3a4e"
+
 func spl2Capabilities() CapabilityManifest {
-	m := CapabilityManifest{SchemaVersion: 1, Language: "spl2", Profile: "splunkd", Version: "current", Commands: []Capability{}, Functions: []Capability{}}
+	m := CapabilityManifest{SchemaVersion: 1, Language: "spl2", Profile: "splunkd", Version: "current", DocumentationSnapshot: spl2DocumentationSnapshot, Commands: []Capability{}, Functions: []Capability{}}
 	for _, entry := range spl2CommandInventory {
 		limits := []string{entry.limitation}
 		limits = append(limits, spl2FormLimitations(entry.name)...)

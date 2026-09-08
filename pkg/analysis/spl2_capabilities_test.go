@@ -135,3 +135,47 @@ func TestSPL2CapabilitiesDeferredAndProfileOutcomes(t *testing.T) {
 		})
 	}
 }
+
+func TestSPL2CapabilitiesDocumentationSnapshot(t *testing.T) {
+	const snapshot = "spl2-provenance-v1:sha256:3345cf5712b1bdbf467d1651784fdb8bccc596805038da0d54e7a123384e3a4e"
+	defaultWire, err := json.Marshal(Capabilities())
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, options := range []CapabilityOptions{{}, {Language: "spl"}, {Language: "spl", Profile: "splunkd", Version: "current"}, {Language: "spl2"}, {Language: "spl2", Profile: "splunkd", Version: "current"}} {
+		manifest, err := CapabilitiesFor(options)
+		if err != nil {
+			t.Fatal(err)
+		}
+		wire, err := json.Marshal(manifest)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var decoded map[string]json.RawMessage
+		if err := json.Unmarshal(wire, &decoded); err != nil {
+			t.Fatal(err)
+		}
+		value, present := decoded["documentation_snapshot"]
+		if options.Language != "spl2" {
+			if present || string(wire) != string(defaultWire) {
+				t.Fatalf("default/SPL manifest wire changed: %s", wire)
+			}
+			continue
+		}
+		var got string
+		if !present || json.Unmarshal(value, &got) != nil || got != snapshot {
+			t.Fatalf("SPL2 snapshot = %s, want %q", value, snapshot)
+		}
+		if err := json.Unmarshal([]byte(`{"documentation_snapshot":"mutated"}`), &manifest); err != nil {
+			t.Fatal(err)
+		}
+		after, err := CapabilitiesFor(options)
+		if err != nil {
+			t.Fatal(err)
+		}
+		afterWire, err := json.Marshal(after)
+		if err != nil || string(afterWire) != string(wire) {
+			t.Fatal("snapshot mutation escaped returned manifest")
+		}
+	}
+}

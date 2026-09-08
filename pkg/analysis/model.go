@@ -125,12 +125,13 @@ type Capability struct {
 	Limitations       []string `json:"limitations"`
 }
 type CapabilityManifest struct {
-	SchemaVersion int          `json:"schema_version"`
-	Language      string       `json:"language"`
-	Profile       string       `json:"profile"`
-	Version       string       `json:"version"`
-	Commands      []Capability `json:"commands"`
-	Functions     []Capability `json:"functions"`
+	SchemaVersion         int          `json:"schema_version"`
+	Language              string       `json:"language"`
+	Profile               string       `json:"profile"`
+	Version               string       `json:"version"`
+	DocumentationSnapshot string       `json:"documentation_snapshot,omitempty"`
+	Commands              []Capability `json:"commands"`
+	Functions             []Capability `json:"functions"`
 }
 
 // CapabilityOptions selects an available language compatibility contract.

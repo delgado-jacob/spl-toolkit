@@ -316,3 +316,55 @@ func TestSPL2CanonicalEmptyDatasetRetainsH09(t *testing.T) {
 		}
 	}
 }
+
+func TestSPL2CanonicalUnknownPreservesLiteralClosure(t *testing.T) {
+	for _, tt := range []struct {
+		name, query string
+		closed      bool
+	}{
+		{"string", `FROM main | mystery_op "unterminated`, false},
+		{"name", `FROM main | mystery_op 'unterminated`, false},
+		{"embedded", "FROM main | mystery_op `unterminated", false},
+		{"escaped_final_quote", `FROM main | mystery_op "unterminated\"`, false},
+		{"string_interpolation", `FROM main | mystery_op "${host`, false},
+		{"name_interpolation", `FROM main | mystery_op '${host`, false},
+		{"nested_template", `FROM main | mystery_op "${{host:"x"}`, false},
+		{"deferred_owner", `FROM main | branch [where host="unterminated`, false},
+		{"closed_escaped_string", `FROM main | mystery_op "a\"b | [ ]" | where tail>0`, true},
+		{"closed_raw_string", `FROM main | mystery_op @"literal ""quote"" | [ ] ${host}" | where tail>0`, true},
+		{"closed_string_template", `FROM main | mystery_op "${{host:"x"}}" | where tail>0`, true},
+		{"closed_name_template", `FROM main | mystery_op '${{host:"x"}}' | where tail>0`, true},
+		{"closed_embedded", "FROM main | mystery_op `\" ' ${host} | [ ]` | where tail>0", true},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			r := spl2AnalyzeTest(t, tt.query)
+			want := Invalid
+			if tt.closed {
+				want = Incomplete
+			}
+			if r.Status != want || spl2HasCode(r, CodeSyntaxError) == tt.closed || r.Coverage.SyntaxComplete || r.Coverage.SemanticComplete {
+				t.Fatalf("literal closure closed=%v: status=%s coverage=%+v diagnostics=%+v", tt.closed, r.Status, r.Coverage, r.Diagnostics)
+			}
+			if len(r.Scopes) != 1 {
+				t.Fatal("unknown/deferred literal content invented child ownership")
+			}
+			if tt.closed {
+				spl2Ref(t, r, "tail", "read")
+			} else if len(r.References) != 1 || r.References[0].OriginalName != "main" {
+				t.Fatalf("unclosed literal authorized reads: %+v", r.References)
+			}
+			if !tt.closed {
+				opener := strings.IndexAny(tt.query, "\"'`")
+				located := false
+				for _, diagnostic := range r.Diagnostics {
+					if diagnostic.Code == CodeSyntaxError && diagnostic.Location.Start.Offset == opener && diagnostic.Location.End.Offset == opener+1 && diagnostic.StageID == "stage-1" && diagnostic.ScopeID == "scope-0" {
+						located = true
+					}
+				}
+				if !located {
+					t.Fatalf("literal error lost original opener/owner: %+v", r.Diagnostics)
+				}
+			}
+		})
+	}
+}

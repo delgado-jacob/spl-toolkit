@@ -52,8 +52,43 @@ func parseSPL2Document(text string) *spl2ParsedDocument {
 	parser.RemoveErrorListeners()
 	parser.AddErrorListener(listener)
 	parsed.tree = parser.Query()
+	parsed.inspectLiteralClosure()
 	parsed.syntaxComplete = len(parsed.diagnostics) == 0
 	parsed.syntax = spl2TreeFacts(parsed.tree, parsed.source, parser.RuleNames, parser.SymbolicNames)
 	parsed.inspectSyntax(parsed.tree, 0)
 	return parsed
+}
+
+// EOF does not necessarily emit a lexer error from an open literal mode. Replay
+// only its original opener/end tokens; text, escapes and raw strings are opaque,
+// and literals inside interpolation nest without closing their owning literal.
+func (p *spl2ParsedDocument) inspectLiteralClosure() {
+	p.tokens.Fill()
+	type literal struct {
+		opener antlr.Token
+		end    int
+	}
+	stack := []literal{}
+	for _, token := range p.tokens.GetAllTokens() {
+		kind := token.GetTokenType()
+		switch kind {
+		case spl2.SPL2LexerDQUOTE:
+			stack = append(stack, literal{token, spl2.SPL2LexerSTRING_END})
+		case spl2.SPL2LexerSQUOTE:
+			stack = append(stack, literal{token, spl2.SPL2LexerNAME_END})
+		case spl2.SPL2LexerBACKTICK:
+			stack = append(stack, literal{token, spl2.SPL2LexerEMBEDDED_END})
+		case spl2.SPL2LexerSTRING_END, spl2.SPL2LexerNAME_END, spl2.SPL2LexerEMBEDDED_END:
+			if len(stack) > 0 && stack[len(stack)-1].end == kind {
+				stack = stack[:len(stack)-1]
+			}
+		}
+	}
+	if len(stack) == 0 {
+		return
+	}
+	opener := stack[0].opener
+	diagnostic := Diagnostic{Code: CodeSyntaxError, Severity: "error", Category: "syntax", Message: "Unterminated literal", Location: p.source.location(opener.GetStart(), opener.GetStop()+1)}
+	p.diagnostics = append(p.diagnostics, diagnostic)
+	p.lexicalErrors = append(p.lexicalErrors, diagnostic)
 }
