@@ -219,6 +219,11 @@ func spl2FinalizeStages(r *Result) {
 		r.Stages[i].ID = fmt.Sprintf("stage-%d", i)
 		mapping[old] = r.Stages[i].ID
 	}
+	if r.rewrite != nil {
+		for _, site := range r.rewrite.sites {
+			site.public.Point.StageID = mapping[site.public.Point.StageID]
+		}
+	}
 	for i := range r.References {
 		r.References[i].StageID = mapping[r.References[i].StageID]
 	}

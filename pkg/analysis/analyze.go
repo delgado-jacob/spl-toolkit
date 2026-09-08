@@ -31,11 +31,19 @@ func Analyze(document QueryDocument) (*Result, error) {
 }
 
 func analyze(document QueryDocument, refinement *sourceRefinement) (*Result, error) {
+	return analyzeRewrite(document, refinement, nil)
+}
+
+func analyzeRewrite(document QueryDocument, refinement *sourceRefinement, rewrite *RewriteSession) (*Result, error) {
 	normalized, err := normalizeDocument(document)
 	if err != nil {
 		return nil, err
 	}
 	result := newResult(normalized)
+	result.rewrite = rewrite
+	if rewrite != nil {
+		rewrite.source = newSourceIndex(normalized.Text)
+	}
 	if normalized.Language == "spl2" {
 		if refinement != nil {
 			refinement.literalSourceNames = true

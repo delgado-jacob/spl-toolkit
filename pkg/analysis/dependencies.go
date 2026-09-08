@@ -106,10 +106,12 @@ func (s *semanticStage) qualifiedCatalog(ctx antlr.ParserRuleContext, from bool)
 		start++
 	}
 	rootEnd := start + len([]rune(parts[0]))
-	s.referenceAt(s.parsed.source.location(start, rootEnd), parts[0], "data_model", "read", "exact")
+	rootID := s.referenceAt(s.parsed.source.location(start, rootEnd), parts[0], "data_model", "read", "exact")
+	s.rewriteReference(rootID, locatedOperand{Name: parts[0], Location: s.parsed.source.location(start, rootEnd), Resolution: "exact", Sound: true, rewrite: rewriteOwner{role: "catalog_component", location: s.parsed.source.contextLocation(ctx), component: true}}, "data_model", "read")
 	s.addDependency(parts[0], "data_model")
 	if len(parts) == 2 {
-		s.referenceAt(s.parsed.source.location(start, start+len([]rune(content))), content, "dataset", "read", "exact")
+		datasetID := s.referenceAt(s.parsed.source.location(start, start+len([]rune(content))), content, "dataset", "read", "exact")
+		s.rewriteReference(datasetID, locatedOperand{Name: content, Location: s.parsed.source.location(start, start+len([]rune(content))), Resolution: "exact", Sound: true, rewrite: rewriteOwner{role: "qualified_dataset", location: s.parsed.source.contextLocation(ctx), component: true}}, "dataset", "read")
 		s.addDependency(content, "dataset")
 	}
 }

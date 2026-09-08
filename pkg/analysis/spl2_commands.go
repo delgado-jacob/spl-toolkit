@@ -24,10 +24,13 @@ func (s *spl2SemanticStage) command(ctx antlr.ParserRuleContext) {
 			s.unsupported(c, "SQL clause field scheduling is not yet modeled")
 		}
 	case *spl2.SearchCommandContext:
+		s.rewritePredicate(c.SearchExpression(), "spl2", true, false)
 		s.search(c.SearchExpression())
 	case *spl2.ImplicitSearchContext:
+		s.rewritePredicate(c.SearchExpression(), "spl2", true, false)
 		s.search(c.SearchExpression())
 	case *spl2.WhereCommandContext:
+		s.rewritePredicate(c.Expression(), "spl2", false, false)
 		s.expression(c.Expression())
 	case *spl2.EvalCommandContext:
 		for _, a := range c.AllAssignment() {
@@ -318,6 +321,7 @@ func (s *spl2SemanticStage) metricsPredicate(tree antlr.Tree) {
 					o := s.operand(value)
 					if o.Sound && plainCatalogComponent(o.Name) {
 						s.dependency(value, "index")
+						s.rewriteDependencyRole("metric_value")
 						return
 					}
 					if o.Sound && strings.Contains(o.Name, "*") {
@@ -396,7 +400,7 @@ func (s *spl2SemanticStage) aggregates(calls []spl2.IAggregateContext, keys []sp
 				}
 			}
 			if label != "" {
-				target = locatedOperand{Name: label, Location: s.parsed2.source.contextLocation(call), Resolution: "exact", Sound: true}
+				target = locatedOperand{Name: label, Location: s.parsed2.source.contextLocation(call), Resolution: "exact", Sound: true, rewrite: rewriteOwner{role: "implicit_output", location: s.parsed2.source.contextLocation(call), implicit: name}}
 			} else {
 				s.unsupported(call, "Implicit aggregate output label is unproved; use AS")
 			}
@@ -539,10 +543,12 @@ func (s *spl2SemanticStage) recoveredInputs(ctx antlr.ParserRuleContext) {
 		s.unionDatasetIntentions(c)
 	case *spl2.SearchCommandContext:
 		if c.SearchExpression() != nil {
+			s.rewritePredicate(c.SearchExpression(), "spl2", true, false)
 			s.search(c.SearchExpression())
 		}
 	case *spl2.ImplicitSearchContext:
 		if c.SearchExpression() != nil {
+			s.rewritePredicate(c.SearchExpression(), "spl2", true, false)
 			s.search(c.SearchExpression())
 		}
 	case *spl2.FromCommandContext:
@@ -566,6 +572,7 @@ func (s *spl2SemanticStage) metricsInputs(c *spl2.MetricsCommandContext) {
 	}
 	for _, option := range c.AllMetricsOption() {
 		if option.Expression() != nil {
+			s.rewritePredicate(option.Expression(), "spl2", false, true)
 			s.metricsPredicate(option.Expression())
 		}
 		for _, group := range option.AllGroupField() {
@@ -582,6 +589,8 @@ func (s *spl2SemanticStage) metricsInputs(c *spl2.MetricsCommandContext) {
 			o := s.operand(option.QuotedName())
 			if o.Sound && o.Name != "" && !strings.ContainsAny(o.Name, "*\\:") {
 				s.dependency(option.QuotedName(), "data_model")
+			} else if o.Sound {
+				s.rewriteUnprovedOperand(o, "data_model", "quoted_catalog_atom", "dynamic_identity")
 			}
 		}
 	}

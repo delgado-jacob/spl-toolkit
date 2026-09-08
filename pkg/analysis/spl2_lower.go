@@ -60,10 +60,13 @@ func (s *spl2SemanticStage) operand(ctx antlr.ParserRuleContext) locatedOperand 
 		s.unsupported(ctx, "Identifier decoding is unproved")
 		return locatedOperand{}
 	}
-	return locatedOperand{Name: name, Location: s.parsed2.source.contextLocation(ctx), Resolution: "exact", Sound: true, UnresolvedSource: strings.Contains(name, ".")}
+	return locatedOperand{Name: name, Location: s.parsed2.source.contextLocation(ctx), Resolution: "exact", Sound: true, UnresolvedSource: strings.Contains(name, "."), rewrite: s.rewriteSPL2Owner(ctx)}
 }
 func (s *spl2SemanticStage) selector(ctx antlr.ParserRuleContext) locatedOperand {
 	o := s.operand(ctx)
+	if o.rewrite.role != "rename_input" {
+		o.rewrite.role = "selector_atom"
+	}
 	if strings.Contains(o.Name, "*") {
 		o.Resolution = "wildcard"
 	}

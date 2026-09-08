@@ -9,13 +9,15 @@ import (
 )
 
 type semanticStage struct {
-	result        *Result
-	parsed        *parsedDocument
-	stage         int
-	env           *environment
-	transitions   []Transition
-	recoveryLimit int
-	refinement    *sourceRefinement
+	rewritePhase   string
+	rewriteOrdinal int
+	result         *Result
+	parsed         *parsedDocument
+	stage          int
+	env            *environment
+	transitions    []Transition
+	recoveryLimit  int
+	refinement     *sourceRefinement
 }
 
 func normalizedName(text string) string {
@@ -83,7 +85,7 @@ func (s *semanticStage) operand(ctx antlr.ParserRuleContext, name string) locate
 			}
 		}
 	}
-	return locatedOperand{Name: name, Location: loc, Resolution: resolution, Sound: true}
+	return locatedOperand{Name: name, Location: loc, Resolution: resolution, Sound: true, rewrite: s.rewriteSPLOwner(ctx)}
 }
 func (s *semanticStage) reference(ctx antlr.ParserRuleContext, name, kind, role string) string {
 	return s.operandReference(s.operand(ctx, name), kind, role)
@@ -170,6 +172,9 @@ func finalizeReferences(r *Result, refinement *sourceRefinement) {
 		ref := &r.References[i]
 		mapping[ref.ID] = fmt.Sprintf("ref-%d", i)
 		ref.ID = mapping[ref.ID]
+	}
+	if r.rewrite != nil {
+		r.rewrite.finalizeReferences(mapping)
 	}
 	if refinement != nil {
 		refinement.finalizeExpansions(r.References, mapping)

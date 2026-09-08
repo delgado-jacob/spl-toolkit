@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "forms": [
+    {"id":"spl-expression-atom","language":"spl","query":"search index=main | where user=1","kind":"field","name":"user","role":"expression_atom","eligible":true,"target":"account","candidate":"search index=main | where account=1"},
+    {"id":"spl-search-field","language":"spl","query":"search user=1","kind":"field","name":"user","role":"search_field","eligible":true,"target":"account","candidate":"search account=1"},
+    {"id":"spl-search-value","language":"spl","query":"search index=main source=app sourcetype=json","kind":"index","name":"main","role":"search_value","eligible":true,"target":"archive","candidate":"search index=archive source=app sourcetype=json"},
+    {"id":"spl-source-value","language":"spl","query":"search source=app","kind":"source","name":"app","role":"search_value","eligible":true,"target":"logs","candidate":"search source=logs"},
+    {"id":"spl-sourcetype-value","language":"spl","query":"search sourcetype=json","kind":"sourcetype","name":"json","role":"search_value","eligible":true,"target":"syslog","candidate":"search sourcetype=syslog"},
+    {"id":"spl-lookup-catalog","language":"spl","query":"inputlookup people","kind":"lookup","name":"people","role":"catalog_atom","eligible":true,"target":"accounts","candidate":"inputlookup accounts"},
+    {"id":"spl-datamodel","language":"spl","query":"datamodel Traffic All","kind":"data_model","name":"Traffic","role":"catalog_atom","eligible":true,"target":"Network","candidate":"datamodel Network All"},
+    {"id":"spl-dataset-component","language":"spl","query":"datamodel Traffic 'All'","kind":"dataset","name":"Traffic.All","role":"catalog_component","eligible":true,"target":"Traffic.Flows","candidate":"datamodel Traffic 'Flows'"},
+    {"id":"spl-qualified-dataset","language":"spl","query":"from datamodel:Traffic.All","kind":"dataset","name":"Traffic.All","role":"qualified_dataset","eligible":true,"target":"Traffic.Flows","candidate":"from datamodel:Traffic.Flows"},
+    {"id":"spl-selector-atom","language":"spl","query":"search index=main | table user","kind":"field","name":"user","role":"selector_atom","eligible":true,"target":"account","candidate":"search index=main | table account"},
+    {"id":"spl-wildcard-refused","language":"spl","query":"search index=main | table user*","kind":"field","name":"user*","role":"selector_atom","eligible":false},
+    {"id":"spl2-expression-atom","language":"spl2","query":"FROM main | where 'actor.name'=1","kind":"field","name":"actor.name","role":"expression_atom","eligible":true,"target":"account.name","candidate":"FROM main | where 'account.name'=1"},
+    {"id":"spl2-source-dataset","language":"spl2","query":"FROM main","kind":"dataset","name":"main","role":"catalog_atom","eligible":true,"target":"archive","candidate":"FROM archive"},
+    {"id":"spl2-search-value","language":"spl2","query":"search index=main source=app sourcetype=json","kind":"index","name":"main","role":"search_value","eligible":true,"target":"archive","candidate":"search index=archive source=app sourcetype=json"},
+    {"id":"spl2-rename-input","language":"spl2","query":"FROM main | rename user AS actor","kind":"field","name":"user","role":"rename_input","eligible":true,"target":"account","candidate":"FROM main | rename account AS actor"},
+    {"id":"spl2-metric-index","language":"spl2","query":"tstats aggregates=[count()] predicate=(index=main)","kind":"index","name":"main","role":"metric_value","eligible":true,"target":"archive","candidate":"tstats aggregates=[count()] predicate=(index=\"archive\")"},
+    {"id":"spl2-tstats-atomic-model","language":"spl2","query":"tstats aggregates=[count()] datamodel_name='Traffic.All'","kind":"data_model","name":"Traffic.All","role":"quoted_catalog_atom","eligible":true,"target":"Network.Flow","candidate":"tstats aggregates=[count()] datamodel_name='Network.Flow'"},
+    {"id":"spl2-tstats-dynamic-model-refused","language":"spl2","query":"tstats aggregates=[count()] datamodel_name='Traffic.*'","kind":"data_model","name":"Traffic.*","role":"quoted_catalog_atom","eligible":false},
+    {"id":"spl2-quoted-wildcard-refused","language":"spl2","query":"FROM main | table 'user*'","kind":"field","name":"user*","role":"selector_atom","eligible":false}
+  ]
+}

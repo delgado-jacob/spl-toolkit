@@ -7,6 +7,7 @@ type trackedField struct {
 	source bool
 }
 type environment struct {
+	rewrite         *rewriteFlow
 	fields          map[string]trackedField
 	removed         map[string]bool
 	open, uncertain bool
@@ -31,6 +32,7 @@ func (e *environment) snapshot() FieldState {
 }
 func (e *environment) clone() *environment {
 	n := newEnvironment()
+	n.rewrite = e.rewrite.clone()
 	n.open = e.open
 	n.uncertain = e.uncertain
 	for k, v := range e.fields {
@@ -42,8 +44,13 @@ func (e *environment) clone() *environment {
 	}
 	return n
 }
-func (e *environment) remove(name string) { delete(e.fields, name); e.removed[name] = true }
+func (e *environment) remove(name string) {
+	e.rewriteInvalidate(name)
+	delete(e.fields, name)
+	e.removed[name] = true
+}
 func (e *environment) install(name string, ids []string, conditional bool) {
+	e.rewriteInvalidate(name)
 	e.fields[name] = trackedField{FieldBinding: FieldBinding{Name: name, OriginReferenceIDs: copyIDs(ids), Conditional: conditional}}
 	delete(e.removed, name)
 }

@@ -71,7 +71,7 @@ func (s *spl2SemanticStage) expression(node antlr.Tree) spl2ExpressionEvidence {
 					name += "[]"
 				}
 			}
-			id := s.operandReference(locatedOperand{Name: name, Location: s.parsed2.source.contextLocation(c), Resolution: "exact", Sound: spl2IntactSyntax(c)}, "field", "read")
+			id := s.operandReference(locatedOperand{Name: name, Location: s.parsed2.source.contextLocation(c), Resolution: "exact", Sound: spl2IntactSyntax(c), rewrite: s.rewriteNavigation(c)}, "field", "read")
 			if id != "" {
 				s.result.References[len(s.result.References)-1].Binding = "indeterminate"
 				out.ids = append(out.ids, id)
@@ -127,6 +127,7 @@ func (s *spl2SemanticStage) expression(node antlr.Tree) spl2ExpressionEvidence {
 		out.nonnull = out.modeled && spl2IntactSyntax(c)
 		return out
 	case spl2.IFieldTemplateContext:
+		s.rewriteUnprovedOperand(locatedOperand{Location: s.parsed2.source.contextLocation(c)}, "field", "dynamic_name", "dynamic_identity")
 		for _, e := range c.AllExpression() {
 			value := s.expression(e)
 			out.ids = append(out.ids, value.ids...)

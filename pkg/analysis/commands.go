@@ -39,6 +39,7 @@ var commands = map[string]commandSpec{
 }
 
 func searchCommand(s *semanticStage, node antlr.ParserRuleContext) {
+	s.rewritePredicate(node, "spl", true, false)
 	var visit func(antlr.Tree)
 	visit = func(n antlr.Tree) {
 		switch c := n.(type) {
@@ -73,6 +74,7 @@ func searchCommand(s *semanticStage, node antlr.ParserRuleContext) {
 	visit(node)
 }
 func whereCommand(s *semanticStage, node antlr.ParserRuleContext) {
+	s.rewritePredicate(node, "spl", false, false)
 	s.expression(node.(*parser.AnalysisWhereStageContext).AnalysisExpression())
 }
 func evalCommand(s *semanticStage, node antlr.ParserRuleContext) {
@@ -265,8 +267,8 @@ func lookupCommand(s *semanticStage, node antlr.ParserRuleContext) {
 }
 func inputlookupCommand(s *semanticStage, node antlr.ParserRuleContext) {
 	c := node.(*parser.AnalysisInputlookupStageContext)
+	s.applySource()
 	s.dependency(c.AnalysisCatalogName(), normalizedName(c.AnalysisCatalogName().GetText()), "lookup")
-	s.env = newEnvironment()
 	if len(c.AllAnalysisOption()) > 0 {
 		s.diagnostic(CodeUnsupportedSemantics, "inputlookup options are unmodeled", c)
 	}

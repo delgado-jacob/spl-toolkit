@@ -64,6 +64,7 @@ func executeSPL2SQL(result *Result, parsed *spl2ParsedDocument, refinement *sour
 			return
 		}
 		s.stage = stages[ctx]
+		s.rewritePhase, s.rewriteOrdinal = name, 0
 		s.transitions = []Transition{}
 		before := s.env.snapshot()
 		scheduler.runChildren(ctx, s.env, aliases, scopeID, parent)
@@ -113,7 +114,10 @@ func executeSPL2SQL(result *Result, parsed *spl2ParsedDocument, refinement *sour
 			s.unsupported(from, "SQL join field effects are not yet modeled")
 		}
 	})
-	phase(c.SqlWhereClause(), "filter", func() { s.expression(c.SqlWhereClause().SqlPredicate()) })
+	phase(c.SqlWhereClause(), "filter", func() {
+		s.rewritePredicate(c.SqlWhereClause().SqlPredicate(), "spl2", false, false)
+		s.expression(c.SqlWhereClause().SqlPredicate())
+	})
 	pregroup := s.env
 	phase(c.SqlGroupClause(), "group", func() {
 		groups := []locatedOperand{}
@@ -275,7 +279,7 @@ func (s *spl2SemanticStage) prepareSQLSelection(clause spl2.ISqlSelectClauseCont
 				}
 			}
 			if label != "" {
-				item.target = locatedOperand{Name: label, Location: s.parsed2.source.contextLocation(call), Resolution: "exact", Sound: true}
+				item.target = locatedOperand{Name: label, Location: s.parsed2.source.contextLocation(call), Resolution: "exact", Sound: true, rewrite: rewriteOwner{role: "implicit_output", location: s.parsed2.source.contextLocation(call), implicit: name}}
 			} else {
 				s.unsupported(p, "Implicit aggregate output label is unproved; use AS")
 			}

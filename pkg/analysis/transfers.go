@@ -8,6 +8,7 @@ import (
 
 // locatedOperand is decoded and checked for soundness by its language frontend.
 type locatedOperand struct {
+	rewrite    rewriteOwner
 	Name       string
 	Location   Location
 	Resolution string
@@ -37,6 +38,7 @@ func (s *semanticStage) diagnosticAt(code, severity, category, message string, l
 	if incomplete {
 		st.SemanticComplete = false
 		s.env.uncertain = true
+		s.rewriteUncertain()
 	}
 	s.result.Diagnostics = append(s.result.Diagnostics, Diagnostic{Code: code, Severity: severity, Category: category, Message: message, Location: location, StageID: st.ID, ScopeID: st.ScopeID})
 }
@@ -44,7 +46,9 @@ func (s *semanticStage) operandReference(operand locatedOperand, kind, role stri
 	if !operand.Sound {
 		return ""
 	}
-	return s.referenceAt(operand.Location, operand.Name, kind, role, operand.Resolution)
+	id := s.referenceAt(operand.Location, operand.Name, kind, role, operand.Resolution)
+	s.rewriteReference(id, operand, kind, role)
+	return id
 }
 func (s *semanticStage) readAt(operand locatedOperand, role string) string {
 	name := operand.Name
@@ -87,6 +91,7 @@ func (s *semanticStage) readAt(operand locatedOperand, role string) string {
 		s.diagnosticAt(CodeUnsupportedSemantics, "warning", "unsupported_semantics", "Source-name identity is not represented by the string-only source universe", operand.Location, false)
 		s.result.Stages[s.stage].SemanticComplete = false
 	}
+	s.rewriteBinding(id, ref.Binding, nil)
 	return id
 }
 func (s *semanticStage) createAt(operand locatedOperand, role, operation string, inputs []string, conditional bool) string {
@@ -95,6 +100,7 @@ func (s *semanticStage) createAt(operand locatedOperand, role, operation string,
 	if id == "" {
 		return id
 	}
+	s.rewriteBinding(id, "definition", inputs)
 	origins := s.origins(inputs)
 	s.result.References[len(s.result.References)-1].OriginReferenceIDs = copyIDs(origins)
 	s.env.install(name, uniqueIDs([]string{id}, origins), conditional)
@@ -199,6 +205,7 @@ func (s *semanticStage) applyPreparedProjection(selected []preparedSelection, mo
 			s.transitions = append(s.transitions, Transition{Operation: "project", Output: field.Name, InputReferenceIDs: copyIDs(selection.InputReferenceIDs)})
 		}
 	}
+	s.env.rewriteProject(fields)
 	s.env.fields = fields
 	// Partial selectors retain an unknown remainder; finite compatibility keeps
 	// its historical closed-output wire shape. Existing tombstones are retained.
@@ -284,6 +291,7 @@ func (s *semanticStage) applyRename(pairs []renameOperands) {
 }
 func (s *semanticStage) applyAggregation(outputs []aggregateOutput, groups []locatedOperand, preserveInput bool) {
 	output := newEnvironment()
+	output.rewrite = s.env.rewrite.clone()
 	output.open = false
 	for _, operand := range groups {
 		names, ids := s.selectorAt(operand, "group", false)
@@ -295,6 +303,7 @@ func (s *semanticStage) applyAggregation(outputs []aggregateOutput, groups []loc
 		}
 	}
 	if !preserveInput {
+		output.rewriteProject(output.fields)
 		output.uncertain = !s.result.Stages[s.stage].SemanticComplete
 		s.env = output
 	}
@@ -330,6 +339,7 @@ func (s *semanticStage) applyAssignment(target locatedOperand, inputs []string, 
 // Exact-null assignments and exact exclusions share non-consuming removal evidence.
 func (s *semanticStage) removeAt(operand locatedOperand) {
 	id := s.operandReference(operand, "field", "remove")
+	s.rewriteRemoval(id, operand)
 	s.env.remove(operand.Name)
 	s.transitions = append(s.transitions, Transition{Operation: "remove", Output: operand.Name, InputReferenceIDs: []string{}, OutputReferenceID: id})
 }

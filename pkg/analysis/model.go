@@ -107,6 +107,7 @@ type Diagnostic struct {
 	ScopeID  string   `json:"scope_id"`
 }
 type Result struct {
+	rewrite       *RewriteSession
 	SchemaVersion int           `json:"schema_version"`
 	Document      QueryDocument `json:"document"`
 	Status        Status        `json:"status"`
@@ -124,14 +125,26 @@ type Capability struct {
 	SemanticSupported bool     `json:"semantic_supported"`
 	Limitations       []string `json:"limitations"`
 }
+type RewriteCapabilityManifest struct {
+	SchemaVersion int                     `json:"schema_version"`
+	Forms         []RewriteCapabilityForm `json:"forms"`
+}
+type RewriteCapabilityForm struct {
+	Kind          string   `json:"kind"`
+	Role          string   `json:"role"`
+	IdentityForms []string `json:"identity_forms"`
+	Supported     bool     `json:"supported"`
+	Limitations   []string `json:"limitations"`
+}
 type CapabilityManifest struct {
-	SchemaVersion         int          `json:"schema_version"`
-	Language              string       `json:"language"`
-	Profile               string       `json:"profile"`
-	Version               string       `json:"version"`
-	DocumentationSnapshot string       `json:"documentation_snapshot,omitempty"`
-	Commands              []Capability `json:"commands"`
-	Functions             []Capability `json:"functions"`
+	Rewrite               *RewriteCapabilityManifest `json:"rewrite,omitempty"`
+	SchemaVersion         int                        `json:"schema_version"`
+	Language              string                     `json:"language"`
+	Profile               string                     `json:"profile"`
+	Version               string                     `json:"version"`
+	DocumentationSnapshot string                     `json:"documentation_snapshot,omitempty"`
+	Commands              []Capability               `json:"commands"`
+	Functions             []Capability               `json:"functions"`
 }
 
 // CapabilityOptions selects an available language compatibility contract.
