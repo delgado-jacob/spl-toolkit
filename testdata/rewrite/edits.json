@@ -1,0 +1,467 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "id": "explicit-rename",
+      "category": "linked",
+      "query": "search src=x | rename src AS owner | table owner",
+      "rules": [
+        [
+          "src",
+          "user"
+        ],
+        [
+          "owner",
+          "other"
+        ]
+      ],
+      "candidate": "search user=x | rename user AS owner | table owner"
+    },
+    {
+      "id": "explicit-eval",
+      "category": "linked",
+      "query": "search src=x | eval owner=src | table owner",
+      "rules": [
+        [
+          "src",
+          "user"
+        ],
+        [
+          "owner",
+          "other"
+        ]
+      ],
+      "candidate": "search user=x | eval owner=user | table owner"
+    },
+    {
+      "id": "implicit-sum",
+      "category": "linked",
+      "query": "search src=x | stats sum(src) | table 'sum(src)'",
+      "rules": [
+        [
+          "src",
+          "user"
+        ]
+      ],
+      "candidate": "search user=x | stats sum(user) | table 'sum(user)'"
+    },
+    {
+      "id": "explicit-sum",
+      "category": "linked",
+      "query": "search src=x | stats sum(src) AS total | table total",
+      "rules": [
+        [
+          "src",
+          "user"
+        ],
+        [
+          "total",
+          "other"
+        ]
+      ],
+      "candidate": "search user=x | stats sum(user) AS total | table total"
+    },
+    {
+      "id": "spl2-implicit-refusal",
+      "category": "linked",
+      "language": "spl2",
+      "query": "FROM main | stats sum(src) | table 'sum(src)'",
+      "rules": [
+        [
+          "src",
+          "user"
+        ]
+      ],
+      "reason": "linked_edit_unproven"
+    },
+    {
+      "id": "linked-earlier-false",
+      "category": "linked",
+      "query": "search src=x | search EventCode=1 | table src",
+      "rules": [
+        [
+          "src",
+          "user"
+        ]
+      ],
+      "condition": {
+        "fact": "literal",
+        "kind": "field",
+        "identity": {
+          "name": "EventCode"
+        },
+        "operator": "equals",
+        "value": 1
+      },
+      "reason": "linked_edit_unproven"
+    },
+    {
+      "id": "implicit-condition-lost",
+      "category": "linked",
+      "query": "search EventCode=1 | stats sum(src) | table 'sum(src)'",
+      "rules": [
+        [
+          "src",
+          "user"
+        ]
+      ],
+      "condition": {
+        "fact": "literal",
+        "kind": "field",
+        "identity": {
+          "name": "EventCode"
+        },
+        "operator": "equals",
+        "value": 1
+      },
+      "reason": "linked_edit_unproven"
+    },
+    {
+      "id": "wildcard-consumer",
+      "category": "linked",
+      "query": "search src=x | table *",
+      "rules": [
+        [
+          "src",
+          "user"
+        ]
+      ],
+      "reason": "linked_edit_unproven"
+    },
+    {
+      "id": "unknown-consumer",
+      "category": "linked",
+      "query": "search src=x | mystery | table src",
+      "rules": [
+        [
+          "src",
+          "user"
+        ]
+      ],
+      "reason": "linked_edit_unproven"
+    },
+    {
+      "id": "independent-scope",
+      "category": "linked",
+      "query": "search other=x | mystery | append [ search src=x | table src ]",
+      "rules": [
+        [
+          "src",
+          "user"
+        ]
+      ],
+      "candidate": "search other=x | mystery | append [ search user=x | table user ]"
+    },
+    {
+      "id": "two-targets",
+      "category": "conflicts",
+      "query": "search src=x | table src",
+      "rules": [
+        [
+          "src",
+          "user"
+        ],
+        [
+          "src",
+          "account"
+        ]
+      ],
+      "reason": "conflicting_targets"
+    },
+    {
+      "id": "identical-targets",
+      "category": "conflicts",
+      "query": "search src=x | table src",
+      "rules": [
+        [
+          "src",
+          "user"
+        ],
+        [
+          "src",
+          "user"
+        ]
+      ],
+      "candidate": "search user=x | table user"
+    },
+    {
+      "id": "alias-capture",
+      "category": "conflicts",
+      "query": "search index=main | eval user=1 | table src",
+      "rules": [
+        [
+          "src",
+          "user"
+        ]
+      ],
+      "reason": "binding_collision"
+    },
+    {
+      "id": "live-collapse",
+      "category": "conflicts",
+      "query": "search a=x b=y | table a b",
+      "rules": [
+        [
+          "a",
+          "c"
+        ],
+        [
+          "b",
+          "c"
+        ]
+      ],
+      "reason": "binding_collision"
+    },
+    {
+      "id": "swap",
+      "category": "conflicts",
+      "query": "search a=x b=y | table a b",
+      "rules": [
+        [
+          "a",
+          "b"
+        ],
+        [
+          "b",
+          "a"
+        ]
+      ],
+      "candidate": "search b=x a=y | table b a"
+    },
+    {
+      "id": "chain",
+      "category": "conflicts",
+      "query": "search a=x b=y | table a b",
+      "rules": [
+        [
+          "a",
+          "b"
+        ],
+        [
+          "b",
+          "c"
+        ]
+      ],
+      "candidate": "search b=x c=y | table b c"
+    },
+    {
+      "id": "skipped-safety-dependency",
+      "category": "conflicts",
+      "query": "search a=x b=y d=z | table a b d",
+      "rules": [
+        [
+          "a",
+          "b"
+        ],
+        [
+          "b",
+          "c"
+        ],
+        [
+          "b",
+          "e"
+        ],
+        [
+          "d",
+          "f"
+        ]
+      ],
+      "candidate": "search a=x b=y f=z | table a b f",
+      "reason": "conflicting_targets"
+    },
+    {
+      "id": "unobserved-target-allowed",
+      "category": "conflicts",
+      "query": "search src=x",
+      "rules": [
+        [
+          "src",
+          "user"
+        ]
+      ],
+      "candidate": "search user=x"
+    },
+    {
+      "id": "overlapping-catalog",
+      "category": "conflicts",
+      "query": "from datamodel:Traffic.All",
+      "rules": [
+        [
+          "Traffic.All",
+          "Network.Flow",
+          "dataset"
+        ],
+        [
+          "Traffic",
+          "Different",
+          "data_model"
+        ]
+      ],
+      "reason": "overlapping_edits"
+    },
+    {
+      "id": "compatible-catalog",
+      "category": "conflicts",
+      "query": "from datamodel:Traffic.All",
+      "rules": [
+        [
+          "Traffic.All",
+          "Network.Flow",
+          "dataset"
+        ],
+        [
+          "Traffic",
+          "Network",
+          "data_model"
+        ]
+      ],
+      "candidate": "from datamodel:Network.Flow"
+    },
+    {
+      "id": "explicit-catalog-link",
+      "category": "linked",
+      "query": "datamodel Traffic All",
+      "rules": [
+        [
+          "Traffic.All",
+          "Network.Flow",
+          "dataset"
+        ],
+        [
+          "Traffic",
+          "Network",
+          "data_model"
+        ]
+      ],
+      "candidate": "datamodel Network Flow"
+    },
+    {
+      "id": "missing-catalog-link",
+      "category": "linked",
+      "query": "datamodel Traffic All",
+      "rules": [
+        [
+          "Traffic.All",
+          "Network.Flow",
+          "dataset"
+        ]
+      ],
+      "reason": "linked_edit_unproven"
+    },
+    {
+      "id": "dynamic-consumer",
+      "category": "linked",
+      "language": "spl2",
+      "query": "FROM main | where src=1 | eval '${field}'=1",
+      "rules": [
+        [
+          "src",
+          "user"
+        ]
+      ],
+      "reason": "linked_edit_unproven"
+    },
+    {
+      "id": "relevant-unknown-merge",
+      "category": "linked",
+      "query": "search src=x | append [ search other=x ] | table src",
+      "rules": [
+        [
+          "src",
+          "user"
+        ]
+      ],
+      "reason": "linked_edit_unproven"
+    },
+    {
+      "id": "removed-before-unknown",
+      "category": "linked",
+      "query": "search src=x | fields - src | mystery",
+      "rules": [
+        [
+          "src",
+          "user"
+        ]
+      ],
+      "candidate": "search user=x | fields - user | mystery"
+    },
+    {
+      "id": "parent-derived-child-source",
+      "category": "linked",
+      "query": "search other=x | eval src=1 | append [ search src=x | table src ]",
+      "rules": [
+        [
+          "src",
+          "user"
+        ]
+      ],
+      "candidate": "search other=x | eval src=1 | append [ search user=x | table user ]"
+    },
+    {
+      "id": "lookup-insertion",
+      "category": "byte",
+      "query": "search index=main | lookup people src OUTPUT label AS display | table src",
+      "rules": [
+        [
+          "src",
+          "user"
+        ]
+      ],
+      "candidate": "search index=main | lookup people src AS user OUTPUT label AS display | table user"
+    },
+    {
+      "id": "spl2-quoted-multibyte-newline",
+      "category": "byte",
+      "language": "spl2",
+      "query": "FROM main\r\n| where 'pré'=1 /* é|src */\r\n| table 'pré'",
+      "rules": [
+        [
+          "pré",
+          "用\n户"
+        ]
+      ],
+      "candidate": "FROM main\r\n| where '用\\n户'=1 /* é|src */\r\n| table '用\\n户'"
+    },
+    {
+      "id": "spl-newline-refused",
+      "category": "byte",
+      "query": "search index=main | where 'pré'=1",
+      "rules": [
+        [
+          "pré",
+          "用\n户"
+        ]
+      ],
+      "reason": "target_not_renderable"
+    },
+    {
+      "id": "comment-and-quote-preserved",
+      "category": "byte",
+      "query": "search index=main\r\n| where 'src'=1 /* α | 'src' */\r\n| table\t'src'",
+      "rules": [
+        [
+          "src",
+          "user"
+        ]
+      ],
+      "candidate": "search index=main\r\n| where 'user'=1 /* α | 'src' */\r\n| table\t'user'"
+    },
+    {
+      "id": "independent-source-epochs",
+      "category": "conflicts",
+      "query": "search a=x | inputlookup people | search b=y | eval c=1 | table b",
+      "rules": [
+        [
+          "a",
+          "c"
+        ],
+        [
+          "b",
+          "c"
+        ]
+      ],
+      "candidate": "search c=x | inputlookup people | search b=y | eval c=1 | table b",
+      "reason": "binding_collision"
+    }
+  ]
+}
