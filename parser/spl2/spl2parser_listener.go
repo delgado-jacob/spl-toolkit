@@ -46,6 +46,159 @@ type SPL2ParserListener interface {
 	// EnterFieldsCommand is called when entering the fieldsCommand production.
 	EnterFieldsCommand(c *FieldsCommandContext)
 
+	// EnterFieldSelection is called when entering the fieldSelection production.
+	EnterFieldSelection(c *FieldSelectionContext)
+
+	// EnterFieldSelector is called when entering the fieldSelector production.
+	EnterFieldSelector(c *FieldSelectorContext)
+
+	// EnterTableCommand is called when entering the tableCommand production.
+	EnterTableCommand(c *TableCommandContext)
+
+	// EnterTableField is called when entering the tableField production.
+	EnterTableField(c *TableFieldContext)
+
+	// EnterRenameCommand is called when entering the renameCommand production.
+	EnterRenameCommand(c *RenameCommandContext)
+
+	// EnterRenamePair is called when entering the renamePair production.
+	EnterRenamePair(c *RenamePairContext)
+
+	// EnterRenameSource is called when entering the renameSource production.
+	EnterRenameSource(c *RenameSourceContext)
+
+	// EnterRenameTarget is called when entering the renameTarget production.
+	EnterRenameTarget(c *RenameTargetContext)
+
+	// EnterAliasKeyword is called when entering the aliasKeyword production.
+	EnterAliasKeyword(c *AliasKeywordContext)
+
+	// EnterStatsCommand is called when entering the statsCommand production.
+	EnterStatsCommand(c *StatsCommandContext)
+
+	// EnterStatsOption is called when entering the statsOption production.
+	EnterStatsOption(c *StatsOptionContext)
+
+	// EnterAllnumOption is called when entering the allnumOption production.
+	EnterAllnumOption(c *AllnumOptionContext)
+
+	// EnterDelimOption is called when entering the delimOption production.
+	EnterDelimOption(c *DelimOptionContext)
+
+	// EnterPartitionsOption is called when entering the partitionsOption production.
+	EnterPartitionsOption(c *PartitionsOptionContext)
+
+	// EnterAggregate is called when entering the aggregate production.
+	EnterAggregate(c *AggregateContext)
+
+	// EnterAggregateAlias is called when entering the aggregateAlias production.
+	EnterAggregateAlias(c *AggregateAliasContext)
+
+	// EnterAggregateGroup is called when entering the aggregateGroup production.
+	EnterAggregateGroup(c *AggregateGroupContext)
+
+	// EnterGroupField is called when entering the groupField production.
+	EnterGroupField(c *GroupFieldContext)
+
+	// EnterGroupSpan is called when entering the groupSpan production.
+	EnterGroupSpan(c *GroupSpanContext)
+
+	// EnterTimeSpan is called when entering the timeSpan production.
+	EnterTimeSpan(c *TimeSpanContext)
+
+	// EnterEventstatsCommand is called when entering the eventstatsCommand production.
+	EnterEventstatsCommand(c *EventstatsCommandContext)
+
+	// EnterStreamstatsCommand is called when entering the streamstatsCommand production.
+	EnterStreamstatsCommand(c *StreamstatsCommandContext)
+
+	// EnterStreamGroup is called when entering the streamGroup production.
+	EnterStreamGroup(c *StreamGroupContext)
+
+	// EnterCurrentOption is called when entering the currentOption production.
+	EnterCurrentOption(c *CurrentOptionContext)
+
+	// EnterWindowOption is called when entering the windowOption production.
+	EnterWindowOption(c *WindowOptionContext)
+
+	// EnterResetClause is called when entering the resetClause production.
+	EnterResetClause(c *ResetClauseContext)
+
+	// EnterResetBefore is called when entering the resetBefore production.
+	EnterResetBefore(c *ResetBeforeContext)
+
+	// EnterResetAfter is called when entering the resetAfter production.
+	EnterResetAfter(c *ResetAfterContext)
+
+	// EnterResetOnchange is called when entering the resetOnchange production.
+	EnterResetOnchange(c *ResetOnchangeContext)
+
+	// EnterStreamPostLayout is called when entering the streamPostLayout production.
+	EnterStreamPostLayout(c *StreamPostLayoutContext)
+
+	// EnterLookupCommand is called when entering the lookupCommand production.
+	EnterLookupCommand(c *LookupCommandContext)
+
+	// EnterLookupDataset is called when entering the lookupDataset production.
+	EnterLookupDataset(c *LookupDatasetContext)
+
+	// EnterLookupMatch is called when entering the lookupMatch production.
+	EnterLookupMatch(c *LookupMatchContext)
+
+	// EnterLookupOutputClause is called when entering the lookupOutputClause production.
+	EnterLookupOutputClause(c *LookupOutputClauseContext)
+
+	// EnterLookupOutput is called when entering the lookupOutput production.
+	EnterLookupOutput(c *LookupOutputContext)
+
+	// EnterLookupColumn is called when entering the lookupColumn production.
+	EnterLookupColumn(c *LookupColumnContext)
+
+	// EnterLookupEventField is called when entering the lookupEventField production.
+	EnterLookupEventField(c *LookupEventFieldContext)
+
+	// EnterSortCommand is called when entering the sortCommand production.
+	EnterSortCommand(c *SortCommandContext)
+
+	// EnterSortTerm is called when entering the sortTerm production.
+	EnterSortTerm(c *SortTermContext)
+
+	// EnterSortWrapper is called when entering the sortWrapper production.
+	EnterSortWrapper(c *SortWrapperContext)
+
+	// EnterIntegerValue is called when entering the integerValue production.
+	EnterIntegerValue(c *IntegerValueContext)
+
+	// EnterDedupCommand is called when entering the dedupCommand production.
+	EnterDedupCommand(c *DedupCommandContext)
+
+	// EnterKeepemptyOption is called when entering the keepemptyOption production.
+	EnterKeepemptyOption(c *KeepemptyOptionContext)
+
+	// EnterConsecutiveOption is called when entering the consecutiveOption production.
+	EnterConsecutiveOption(c *ConsecutiveOptionContext)
+
+	// EnterDedupField is called when entering the dedupField production.
+	EnterDedupField(c *DedupFieldContext)
+
+	// EnterHeadCommand is called when entering the headCommand production.
+	EnterHeadCommand(c *HeadCommandContext)
+
+	// EnterKeeplastOption is called when entering the keeplastOption production.
+	EnterKeeplastOption(c *KeeplastOptionContext)
+
+	// EnterHeadWhile is called when entering the headWhile production.
+	EnterHeadWhile(c *HeadWhileContext)
+
+	// EnterHeadPostLayout is called when entering the headPostLayout production.
+	EnterHeadPostLayout(c *HeadPostLayoutContext)
+
+	// EnterReverseCommand is called when entering the reverseCommand production.
+	EnterReverseCommand(c *ReverseCommandContext)
+
+	// EnterUnknownOption is called when entering the unknownOption production.
+	EnterUnknownOption(c *UnknownOptionContext)
+
 	// EnterRexCommand is called when entering the rexCommand production.
 	EnterRexCommand(c *RexCommandContext)
 
@@ -90,6 +243,24 @@ type SPL2ParserListener interface {
 
 	// EnterSearchValue is called when entering the searchValue production.
 	EnterSearchValue(c *SearchValueContext)
+
+	// EnterSearchBareValue is called when entering the searchBareValue production.
+	EnterSearchBareValue(c *SearchBareValueContext)
+
+	// EnterSearchDirective is called when entering the searchDirective production.
+	EnterSearchDirective(c *SearchDirectiveContext)
+
+	// EnterSearchTimeModifier is called when entering the searchTimeModifier production.
+	EnterSearchTimeModifier(c *SearchTimeModifierContext)
+
+	// EnterTimeModifierKey is called when entering the timeModifierKey production.
+	EnterTimeModifierKey(c *TimeModifierKeyContext)
+
+	// EnterTimeModifierValue is called when entering the timeModifierValue production.
+	EnterTimeModifierValue(c *TimeModifierValueContext)
+
+	// EnterRelativeTime is called when entering the relativeTime production.
+	EnterRelativeTime(c *RelativeTimeContext)
 
 	// EnterExpression is called when entering the expression production.
 	EnterExpression(c *ExpressionContext)
@@ -175,6 +346,9 @@ type SPL2ParserListener interface {
 	// EnterIdentifier is called when entering the identifier production.
 	EnterIdentifier(c *IdentifierContext)
 
+	// EnterPipelineKeyword is called when entering the pipelineKeyword production.
+	EnterPipelineKeyword(c *PipelineKeywordContext)
+
 	// EnterArray is called when entering the array production.
 	EnterArray(c *ArrayContext)
 
@@ -238,6 +412,159 @@ type SPL2ParserListener interface {
 	// ExitFieldsCommand is called when exiting the fieldsCommand production.
 	ExitFieldsCommand(c *FieldsCommandContext)
 
+	// ExitFieldSelection is called when exiting the fieldSelection production.
+	ExitFieldSelection(c *FieldSelectionContext)
+
+	// ExitFieldSelector is called when exiting the fieldSelector production.
+	ExitFieldSelector(c *FieldSelectorContext)
+
+	// ExitTableCommand is called when exiting the tableCommand production.
+	ExitTableCommand(c *TableCommandContext)
+
+	// ExitTableField is called when exiting the tableField production.
+	ExitTableField(c *TableFieldContext)
+
+	// ExitRenameCommand is called when exiting the renameCommand production.
+	ExitRenameCommand(c *RenameCommandContext)
+
+	// ExitRenamePair is called when exiting the renamePair production.
+	ExitRenamePair(c *RenamePairContext)
+
+	// ExitRenameSource is called when exiting the renameSource production.
+	ExitRenameSource(c *RenameSourceContext)
+
+	// ExitRenameTarget is called when exiting the renameTarget production.
+	ExitRenameTarget(c *RenameTargetContext)
+
+	// ExitAliasKeyword is called when exiting the aliasKeyword production.
+	ExitAliasKeyword(c *AliasKeywordContext)
+
+	// ExitStatsCommand is called when exiting the statsCommand production.
+	ExitStatsCommand(c *StatsCommandContext)
+
+	// ExitStatsOption is called when exiting the statsOption production.
+	ExitStatsOption(c *StatsOptionContext)
+
+	// ExitAllnumOption is called when exiting the allnumOption production.
+	ExitAllnumOption(c *AllnumOptionContext)
+
+	// ExitDelimOption is called when exiting the delimOption production.
+	ExitDelimOption(c *DelimOptionContext)
+
+	// ExitPartitionsOption is called when exiting the partitionsOption production.
+	ExitPartitionsOption(c *PartitionsOptionContext)
+
+	// ExitAggregate is called when exiting the aggregate production.
+	ExitAggregate(c *AggregateContext)
+
+	// ExitAggregateAlias is called when exiting the aggregateAlias production.
+	ExitAggregateAlias(c *AggregateAliasContext)
+
+	// ExitAggregateGroup is called when exiting the aggregateGroup production.
+	ExitAggregateGroup(c *AggregateGroupContext)
+
+	// ExitGroupField is called when exiting the groupField production.
+	ExitGroupField(c *GroupFieldContext)
+
+	// ExitGroupSpan is called when exiting the groupSpan production.
+	ExitGroupSpan(c *GroupSpanContext)
+
+	// ExitTimeSpan is called when exiting the timeSpan production.
+	ExitTimeSpan(c *TimeSpanContext)
+
+	// ExitEventstatsCommand is called when exiting the eventstatsCommand production.
+	ExitEventstatsCommand(c *EventstatsCommandContext)
+
+	// ExitStreamstatsCommand is called when exiting the streamstatsCommand production.
+	ExitStreamstatsCommand(c *StreamstatsCommandContext)
+
+	// ExitStreamGroup is called when exiting the streamGroup production.
+	ExitStreamGroup(c *StreamGroupContext)
+
+	// ExitCurrentOption is called when exiting the currentOption production.
+	ExitCurrentOption(c *CurrentOptionContext)
+
+	// ExitWindowOption is called when exiting the windowOption production.
+	ExitWindowOption(c *WindowOptionContext)
+
+	// ExitResetClause is called when exiting the resetClause production.
+	ExitResetClause(c *ResetClauseContext)
+
+	// ExitResetBefore is called when exiting the resetBefore production.
+	ExitResetBefore(c *ResetBeforeContext)
+
+	// ExitResetAfter is called when exiting the resetAfter production.
+	ExitResetAfter(c *ResetAfterContext)
+
+	// ExitResetOnchange is called when exiting the resetOnchange production.
+	ExitResetOnchange(c *ResetOnchangeContext)
+
+	// ExitStreamPostLayout is called when exiting the streamPostLayout production.
+	ExitStreamPostLayout(c *StreamPostLayoutContext)
+
+	// ExitLookupCommand is called when exiting the lookupCommand production.
+	ExitLookupCommand(c *LookupCommandContext)
+
+	// ExitLookupDataset is called when exiting the lookupDataset production.
+	ExitLookupDataset(c *LookupDatasetContext)
+
+	// ExitLookupMatch is called when exiting the lookupMatch production.
+	ExitLookupMatch(c *LookupMatchContext)
+
+	// ExitLookupOutputClause is called when exiting the lookupOutputClause production.
+	ExitLookupOutputClause(c *LookupOutputClauseContext)
+
+	// ExitLookupOutput is called when exiting the lookupOutput production.
+	ExitLookupOutput(c *LookupOutputContext)
+
+	// ExitLookupColumn is called when exiting the lookupColumn production.
+	ExitLookupColumn(c *LookupColumnContext)
+
+	// ExitLookupEventField is called when exiting the lookupEventField production.
+	ExitLookupEventField(c *LookupEventFieldContext)
+
+	// ExitSortCommand is called when exiting the sortCommand production.
+	ExitSortCommand(c *SortCommandContext)
+
+	// ExitSortTerm is called when exiting the sortTerm production.
+	ExitSortTerm(c *SortTermContext)
+
+	// ExitSortWrapper is called when exiting the sortWrapper production.
+	ExitSortWrapper(c *SortWrapperContext)
+
+	// ExitIntegerValue is called when exiting the integerValue production.
+	ExitIntegerValue(c *IntegerValueContext)
+
+	// ExitDedupCommand is called when exiting the dedupCommand production.
+	ExitDedupCommand(c *DedupCommandContext)
+
+	// ExitKeepemptyOption is called when exiting the keepemptyOption production.
+	ExitKeepemptyOption(c *KeepemptyOptionContext)
+
+	// ExitConsecutiveOption is called when exiting the consecutiveOption production.
+	ExitConsecutiveOption(c *ConsecutiveOptionContext)
+
+	// ExitDedupField is called when exiting the dedupField production.
+	ExitDedupField(c *DedupFieldContext)
+
+	// ExitHeadCommand is called when exiting the headCommand production.
+	ExitHeadCommand(c *HeadCommandContext)
+
+	// ExitKeeplastOption is called when exiting the keeplastOption production.
+	ExitKeeplastOption(c *KeeplastOptionContext)
+
+	// ExitHeadWhile is called when exiting the headWhile production.
+	ExitHeadWhile(c *HeadWhileContext)
+
+	// ExitHeadPostLayout is called when exiting the headPostLayout production.
+	ExitHeadPostLayout(c *HeadPostLayoutContext)
+
+	// ExitReverseCommand is called when exiting the reverseCommand production.
+	ExitReverseCommand(c *ReverseCommandContext)
+
+	// ExitUnknownOption is called when exiting the unknownOption production.
+	ExitUnknownOption(c *UnknownOptionContext)
+
 	// ExitRexCommand is called when exiting the rexCommand production.
 	ExitRexCommand(c *RexCommandContext)
 
@@ -282,6 +609,24 @@ type SPL2ParserListener interface {
 
 	// ExitSearchValue is called when exiting the searchValue production.
 	ExitSearchValue(c *SearchValueContext)
+
+	// ExitSearchBareValue is called when exiting the searchBareValue production.
+	ExitSearchBareValue(c *SearchBareValueContext)
+
+	// ExitSearchDirective is called when exiting the searchDirective production.
+	ExitSearchDirective(c *SearchDirectiveContext)
+
+	// ExitSearchTimeModifier is called when exiting the searchTimeModifier production.
+	ExitSearchTimeModifier(c *SearchTimeModifierContext)
+
+	// ExitTimeModifierKey is called when exiting the timeModifierKey production.
+	ExitTimeModifierKey(c *TimeModifierKeyContext)
+
+	// ExitTimeModifierValue is called when exiting the timeModifierValue production.
+	ExitTimeModifierValue(c *TimeModifierValueContext)
+
+	// ExitRelativeTime is called when exiting the relativeTime production.
+	ExitRelativeTime(c *RelativeTimeContext)
 
 	// ExitExpression is called when exiting the expression production.
 	ExitExpression(c *ExpressionContext)
@@ -366,6 +711,9 @@ type SPL2ParserListener interface {
 
 	// ExitIdentifier is called when exiting the identifier production.
 	ExitIdentifier(c *IdentifierContext)
+
+	// ExitPipelineKeyword is called when exiting the pipelineKeyword production.
+	ExitPipelineKeyword(c *PipelineKeywordContext)
 
 	// ExitArray is called when exiting the array production.
 	ExitArray(c *ArrayContext)

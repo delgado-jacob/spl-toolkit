@@ -59,6 +59,62 @@ func (p *spl2ParsedDocument) syntaxFinding(ctx antlr.ParserRuleContext, code, ca
 }
 func (p *spl2ParsedDocument) inspectSyntax(tree antlr.Tree, lambdaDepth int) {
 	switch ctx := tree.(type) {
+	case *spl2.RenameCommandContext:
+		p.inspectRename(ctx)
+	case *spl2.TableFieldContext:
+		if strings.Contains(ctx.GetText(), "*") {
+			p.heldSyntax(ctx, "H01 table wildcard quoting remains held")
+		} else if ctx.StringLiteral() != nil {
+			p.syntaxFinding(ctx, CodeSyntaxError, "contract", "Exact table fields require identifiers")
+		}
+	case *spl2.GroupFieldContext:
+		if span := ctx.GroupSpan(); span != nil {
+			if _, streaming := ctx.GetParent().(*spl2.StreamGroupContext); streaming {
+				p.heldSyntax(span, "Grouping span in streamstats remains unproved")
+			}
+		}
+		if name := ctx.Identifier(); name != nil && strings.Contains(name.GetText(), "*") {
+			p.syntaxFinding(name, CodeSyntaxError, "contract", "Grouping fields cannot contain wildcards")
+		}
+	case *spl2.StreamPostLayoutContext:
+		p.heldSyntax(ctx, "H02 postaggregate streamstats layout remains held")
+	case *spl2.HeadPostLayoutContext:
+		p.heldSyntax(ctx, "H03 head count before while remains held")
+	case *spl2.SearchTimeModifierContext:
+		if op := ctx.Comparison(); op != nil && op.GetText() != "=" && op.GetText() != "!=" {
+			p.heldSyntax(ctx, "EH03 time modifier comparison remains held")
+		}
+	case *spl2.SearchAtomContext:
+		if name := ctx.Identifier(); name != nil && ctx.Comparison() != nil {
+			switch name.GetStart().GetTokenType() {
+			case spl2.SPL2ParserEARLIEST, spl2.SPL2ParserLATEST, spl2.SPL2ParserINDEX_EARLIEST, spl2.SPL2ParserINDEX_LATEST, spl2.SPL2ParserSTARTTIME, spl2.SPL2ParserENDTIME, spl2.SPL2ParserTIMEFORMAT:
+				p.heldSyntax(ctx, "Unproved time modifier value retains incomplete syntax coverage")
+			}
+		}
+		if ctx.IN() != nil && len(ctx.AllSearchValue()) == 1 {
+			p.heldSyntax(ctx, "Single-element search IN remains unproved")
+		}
+	case *spl2.IntegerValueContext:
+		positive := false
+		_, positive = ctx.GetParent().(*spl2.DedupCommandContext)
+		p.inspectInteger(ctx, positive)
+	case *spl2.WindowOptionContext:
+		if ctx.NUMBER() != nil {
+			p.inspectInteger(ctx, false)
+		}
+	case *spl2.UnknownOptionContext:
+		p.inspectUnknownOption(ctx)
+	case *spl2.AggregateContext:
+		p.inspectAggregate(ctx)
+	case *spl2.CallContext:
+		if name := ctx.Identifier(); name != nil && spl2IntactSyntax(ctx) && spl2StatisticalFunction(name.GetText()) && name.GetText() != "min" && name.GetText() != "max" {
+			for parent := ctx.GetParent(); parent != nil; parent = parent.GetParent() {
+				if _, ok := parent.(*spl2.HeadWhileContext); ok {
+					p.syntaxFinding(ctx, CodeSyntaxError, "contract", "Statistical functions are forbidden in head while")
+					break
+				}
+			}
+		}
 	case *spl2.ModuleSuffixContext:
 		p.syntaxComplete = false
 		p.syntaxFinding(ctx, "SPL_UNSUPPORTED_MODULE", "unsupported", "Top-level statement terminators are outside the standalone contract")
@@ -177,4 +233,123 @@ func (p *spl2ParsedDocument) inspectOperatorCase(ctx antlr.ParserRuleContext, do
 	if ctx.GetText() != documented {
 		p.heldSyntax(ctx, "H11 unproved logical operator casing remains held")
 	}
+}
+
+// Contract validation reads typed operands; it never infers command boundaries
+// or rewrites the caller's query. Recovery-damaged operands are skipped.
+func (p *spl2ParsedDocument) inspectRename(ctx *spl2.RenameCommandContext) {
+	sources, targets := map[string]bool{}, map[string]bool{}
+	for _, pair := range ctx.AllRenamePair() {
+		if pair.RenameSource() == nil || pair.RenameTarget() == nil || !spl2IntactSyntax(pair) {
+			continue
+		}
+		source, sourceOK := spl2DecodeKey(pair.RenameSource().GetText())
+		target, targetOK := spl2DecodeKey(pair.RenameTarget().GetText())
+		if !sourceOK || !targetOK || strings.Contains(source+target, "*") {
+			continue
+		}
+		if sources[source] || targets[target] || targets[source] || sources[target] {
+			p.syntaxFinding(pair, CodeSyntaxError, "contract", "Rename pairs must have independent sources and targets")
+		}
+		sources[source], targets[target] = true, true
+	}
+}
+
+func (p *spl2ParsedDocument) inspectInteger(ctx antlr.ParserRuleContext, positive bool) {
+	if !spl2IntactSyntax(ctx) {
+		return
+	}
+	value := ctx.GetText()
+	if window, ok := ctx.(*spl2.WindowOptionContext); ok {
+		value = window.NUMBER().GetText()
+	}
+	unsigned := strings.TrimPrefix(strings.TrimPrefix(value, "+"), "-")
+	integer, nonzero := unsigned != "", false
+	for _, digit := range unsigned {
+		integer = integer && digit >= '0' && digit <= '9'
+		nonzero = nonzero || digit != '0'
+	}
+	if !integer || positive && (!nonzero || strings.HasPrefix(value, "-")) {
+		p.syntaxFinding(ctx, CodeSyntaxError, "contract", "Option requires an integer in its documented domain")
+	}
+}
+
+func (p *spl2ParsedDocument) inspectUnknownOption(ctx *spl2.UnknownOptionContext) {
+	if ctx.IDENTIFIER() == nil {
+		return
+	}
+	name := ctx.IDENTIFIER().GetText()
+	removed, profile := false, false
+	for parent := ctx.GetParent(); parent != nil; parent = parent.GetParent() {
+		switch parent.(type) {
+		case *spl2.HeadCommandContext:
+			removed = name == "limit" || name == "null"
+		case *spl2.SortCommandContext:
+			removed = name == "count"
+		case *spl2.DedupCommandContext:
+			removed = name == "keepevents" || name == "sortby"
+		case *spl2.LookupCommandContext:
+			removed = name == "local" || name == "update"
+		case *spl2.StatsCommandContext:
+			profile = name == "mode" || name == "prestats" || name == "annotations"
+		}
+	}
+	if profile {
+		p.syntaxComplete = false
+		p.syntaxFinding(ctx, "SPL_PROFILE_MISMATCH", "compatibility", "This stats option is unavailable in the splunkd profile")
+	} else if removed {
+		p.syntaxComplete = false
+		p.syntaxFinding(ctx, CodeSyntaxError, "syntax", "Removed SPL option is not accepted by this SPL2 command")
+	} else {
+		p.heldSyntax(ctx, "Unproved command option retains incomplete syntax coverage")
+	}
+}
+
+func spl2StatisticalFunction(name string) bool {
+	switch name {
+	case "count", "sum", "avg", "min", "max", "dc", "distinct_count", "values", "list", "first", "last":
+		return true
+	}
+	return false
+}
+
+func (p *spl2ParsedDocument) inspectAggregate(ctx *spl2.AggregateContext) {
+	call := ctx.Call()
+	if call == nil || call.Identifier() == nil || call.RPAREN() == nil || !spl2IntactSyntax(call) {
+		return
+	}
+	name := call.Identifier().GetText()
+	if !spl2StatisticalFunction(name) {
+		return
+	}
+	count := 0
+	if args := call.Arguments(); args != nil {
+		// Named signatures remain semantically unproved, not positional errors.
+		if len(args.AllNamedArgument()) > 0 {
+			return
+		}
+		count = len(args.AllExpression())
+	}
+	if count > 1 || name != "count" && count != 1 {
+		p.syntaxFinding(call, CodeSyntaxError, "contract", "Statistical call has an invalid positional arity")
+	}
+}
+
+func spl2IntactSyntax(tree antlr.Tree) bool {
+	switch node := tree.(type) {
+	case antlr.ErrorNode:
+		return false
+	case antlr.TerminalNode:
+		return node.GetSymbol().GetTokenIndex() >= 0
+	case antlr.ParserRuleContext:
+		if len(node.GetChildren()) == 0 {
+			return false
+		}
+	}
+	for _, child := range tree.GetChildren() {
+		if !spl2IntactSyntax(child) {
+			return false
+		}
+	}
+	return true
 }

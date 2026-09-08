@@ -119,13 +119,36 @@ class SPL2CorpusTests(unittest.TestCase):
 
     def test_legitimate_original_obligation_activation_is_allowed(self):
         obligation = next(o for o in self.provenance["obligations"] if o["id"] == "E.C01.literal.P1")
-        case = copy.deepcopy(self.cases[0])
-        case.update(id=obligation["id"], meaningful_id=obligation["id"], obligation_ids=[obligation["id"]], form_ids=[obligation["form_id"]], source_keys=obligation["source_keys"])
-        case["document"]["text"] = obligation["candidate"]
+        # Establish the pending state in this isolated fixture even after later
+        # tasks activate the original obligation, preserving any exact aliases.
+        for case in list(self.cases):
+            if obligation["id"] not in case["obligation_ids"]:
+                continue
+            case["obligation_ids"].remove(obligation["id"])
+            if not case["obligation_ids"]:
+                self.cases.remove(case)
+            elif case["id"] == obligation["id"]:
+                case["id"] = case["obligation_ids"][0]
+                for alias in self.provenance["obligations"]:
+                    if alias["id"] in case["obligation_ids"]:
+                        alias["case_id"] = case["id"]
+        obligation.update(disposition="pending")
+        obligation.pop("case_id", None)
+        obligation.pop("assembly", None)
+        form = next(f for f in self.provenance["forms"] if f["id"] == obligation["form_id"])
+        siblings = [o for o in self.provenance["obligations"] if o["form_id"] == form["id"]]
+        form["disposition"] = "partial" if any(o["disposition"] == "active" for o in siblings) else "pending"
+        before = self.audit()["active_obligations"]
+        case = next((c for c in self.cases if c["document"]["text"] == obligation["candidate"]), None)
+        if case is None:
+            case = copy.deepcopy(self.cases[0])
+            case.update(id=obligation["id"], meaningful_id=obligation["id"], obligation_ids=[], form_ids=[form["id"]], source_keys=obligation["source_keys"])
+            case["document"]["text"] = obligation["candidate"]
+            self.cases.append(case)
+        case["obligation_ids"].append(obligation["id"])
         obligation.update(disposition="active", case_id=case["id"], assembly="standalone")
-        next(f for f in self.provenance["forms"] if f["id"] == obligation["form_id"]).update(disposition="partial", owner="later-task")
-        self.cases.append(case)
-        self.audit()
+        form["disposition"] = "active" if all(o["disposition"] == "active" for o in siblings) else "partial"
+        self.assertEqual(self.audit()["active_obligations"], before + 1)
 
     def test_held_boundary_is_excluded_from_meaningful_credit(self):
         before = self.audit()["meaningful"]

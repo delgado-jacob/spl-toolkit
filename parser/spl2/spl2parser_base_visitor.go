@@ -59,6 +59,210 @@ func (v *BaseSPL2ParserVisitor) VisitFieldsCommand(ctx *FieldsCommandContext) in
 	return v.VisitChildren(ctx)
 }
 
+func (v *BaseSPL2ParserVisitor) VisitFieldSelection(ctx *FieldSelectionContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitFieldSelector(ctx *FieldSelectorContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitTableCommand(ctx *TableCommandContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitTableField(ctx *TableFieldContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitRenameCommand(ctx *RenameCommandContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitRenamePair(ctx *RenamePairContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitRenameSource(ctx *RenameSourceContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitRenameTarget(ctx *RenameTargetContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitAliasKeyword(ctx *AliasKeywordContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitStatsCommand(ctx *StatsCommandContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitStatsOption(ctx *StatsOptionContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitAllnumOption(ctx *AllnumOptionContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitDelimOption(ctx *DelimOptionContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitPartitionsOption(ctx *PartitionsOptionContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitAggregate(ctx *AggregateContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitAggregateAlias(ctx *AggregateAliasContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitAggregateGroup(ctx *AggregateGroupContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitGroupField(ctx *GroupFieldContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitGroupSpan(ctx *GroupSpanContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitTimeSpan(ctx *TimeSpanContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitEventstatsCommand(ctx *EventstatsCommandContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitStreamstatsCommand(ctx *StreamstatsCommandContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitStreamGroup(ctx *StreamGroupContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitCurrentOption(ctx *CurrentOptionContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitWindowOption(ctx *WindowOptionContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitResetClause(ctx *ResetClauseContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitResetBefore(ctx *ResetBeforeContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitResetAfter(ctx *ResetAfterContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitResetOnchange(ctx *ResetOnchangeContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitStreamPostLayout(ctx *StreamPostLayoutContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitLookupCommand(ctx *LookupCommandContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitLookupDataset(ctx *LookupDatasetContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitLookupMatch(ctx *LookupMatchContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitLookupOutputClause(ctx *LookupOutputClauseContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitLookupOutput(ctx *LookupOutputContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitLookupColumn(ctx *LookupColumnContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitLookupEventField(ctx *LookupEventFieldContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitSortCommand(ctx *SortCommandContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitSortTerm(ctx *SortTermContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitSortWrapper(ctx *SortWrapperContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitIntegerValue(ctx *IntegerValueContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitDedupCommand(ctx *DedupCommandContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitKeepemptyOption(ctx *KeepemptyOptionContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitConsecutiveOption(ctx *ConsecutiveOptionContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitDedupField(ctx *DedupFieldContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitHeadCommand(ctx *HeadCommandContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitKeeplastOption(ctx *KeeplastOptionContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitHeadWhile(ctx *HeadWhileContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitHeadPostLayout(ctx *HeadPostLayoutContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitReverseCommand(ctx *ReverseCommandContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitUnknownOption(ctx *UnknownOptionContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
 func (v *BaseSPL2ParserVisitor) VisitRexCommand(ctx *RexCommandContext) interface{} {
 	return v.VisitChildren(ctx)
 }
@@ -116,6 +320,30 @@ func (v *BaseSPL2ParserVisitor) VisitSearchAtom(ctx *SearchAtomContext) interfac
 }
 
 func (v *BaseSPL2ParserVisitor) VisitSearchValue(ctx *SearchValueContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitSearchBareValue(ctx *SearchBareValueContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitSearchDirective(ctx *SearchDirectiveContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitSearchTimeModifier(ctx *SearchTimeModifierContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitTimeModifierKey(ctx *TimeModifierKeyContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitTimeModifierValue(ctx *TimeModifierValueContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitRelativeTime(ctx *RelativeTimeContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
@@ -228,6 +456,10 @@ func (v *BaseSPL2ParserVisitor) VisitFieldName(ctx *FieldNameContext) interface{
 }
 
 func (v *BaseSPL2ParserVisitor) VisitIdentifier(ctx *IdentifierContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitPipelineKeyword(ctx *PipelineKeywordContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 

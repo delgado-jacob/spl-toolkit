@@ -992,8 +992,8 @@
       "source_keys": [
         "doc163"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task3-pipeline",
       "description": "C01 — search"
     },
     {
@@ -1010,8 +1010,8 @@
       "source_keys": [
         "doc136"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task3-pipeline",
       "description": "C03 — eval"
     },
     {
@@ -1019,8 +1019,8 @@
       "source_keys": [
         "doc178"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task3-pipeline",
       "description": "C04 — where"
     },
     {
@@ -1028,8 +1028,8 @@
       "source_keys": [
         "doc139"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task3-pipeline",
       "description": "C05 — fields"
     },
     {
@@ -1037,8 +1037,8 @@
       "source_keys": [
         "doc169"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task3-pipeline",
       "description": "C06 — table"
     },
     {
@@ -1046,8 +1046,8 @@
       "source_keys": [
         "doc158"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task3-pipeline",
       "description": "C07 — rename"
     },
     {
@@ -1055,8 +1055,8 @@
       "source_keys": [
         "doc167"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task3-pipeline",
       "description": "C08 — stats"
     },
     {
@@ -1064,8 +1064,8 @@
       "source_keys": [
         "doc137"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task3-pipeline",
       "description": "C09 — eventstats"
     },
     {
@@ -1073,8 +1073,8 @@
       "source_keys": [
         "doc168"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task3-pipeline",
       "description": "C10 — streamstats"
     },
     {
@@ -1082,8 +1082,8 @@
       "source_keys": [
         "doc150"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task3-pipeline",
       "description": "C11 — lookup"
     },
     {
@@ -1091,8 +1091,8 @@
       "source_keys": [
         "doc164"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task3-pipeline",
       "description": "C12 — sort"
     },
     {
@@ -1100,8 +1100,8 @@
       "source_keys": [
         "doc135"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task3-pipeline",
       "description": "C13 — dedup"
     },
     {
@@ -1109,8 +1109,8 @@
       "source_keys": [
         "doc144"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task3-pipeline",
       "description": "C14 — head"
     },
     {
@@ -1118,8 +1118,8 @@
       "source_keys": [
         "doc160"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task3-pipeline",
       "description": "C15 — reverse"
     },
     {
@@ -1343,8 +1343,8 @@
       "source_keys": [
         "doc163"
       ],
-      "disposition": "partial",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task3-pipeline",
       "description": "L05 — search predicates"
     },
     {
@@ -1406,8 +1406,8 @@
       "source_keys": [
         "doc139"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task3-pipeline",
       "description": "L12 — projection/rename lists"
     },
     {
@@ -1415,8 +1415,8 @@
       "source_keys": [
         "doc168"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task3-pipeline",
       "description": "L13 — aggregation/window forms"
     },
     {
@@ -1424,8 +1424,8 @@
       "source_keys": [
         "doc150"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task3-pipeline",
       "description": "L14 — lookup lists"
     },
     {
@@ -1633,8 +1633,8 @@
       "source_keys": [
         "doc163"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task3-pipeline",
       "description": "E.C01.literal"
     },
     {
@@ -1642,8 +1642,8 @@
       "source_keys": [
         "doc163"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task3-pipeline",
       "description": "E.C01.comparison"
     },
     {
@@ -1651,8 +1651,8 @@
       "source_keys": [
         "doc163"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task3-pipeline",
       "description": "E.C01.in"
     },
     {
@@ -1660,8 +1660,8 @@
       "source_keys": [
         "doc163"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task3-pipeline",
       "description": "E.C01.term"
     },
     {
@@ -1669,8 +1669,8 @@
       "source_keys": [
         "doc163"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task3-pipeline",
       "description": "E.C01.case"
     },
     {
@@ -1678,8 +1678,8 @@
       "source_keys": [
         "predicate"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task3-pipeline",
       "description": "E.C01.boolean"
     },
     {
@@ -1687,8 +1687,8 @@
       "source_keys": [
         "doc163"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task3-pipeline",
       "description": "E.C01.selector"
     },
     {
@@ -1696,8 +1696,8 @@
       "source_keys": [
         "relativetime"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task3-pipeline",
       "description": "E.C01.relative_time"
     },
     {
@@ -1705,8 +1705,8 @@
       "source_keys": [
         "timemodifiers"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task3-pipeline",
       "description": "E.C01.absolute_time"
     },
     {
@@ -1714,8 +1714,8 @@
       "source_keys": [
         "timemodifiers"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task3-pipeline",
       "description": "E.C01.index_time"
     },
     {
@@ -1723,8 +1723,8 @@
       "source_keys": [
         "doc136"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task3-pipeline",
       "description": "E.C03.assign"
     },
     {
@@ -1732,8 +1732,8 @@
       "source_keys": [
         "doc178"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task3-pipeline",
       "description": "E.C04.predicate"
     },
     {
@@ -1741,8 +1741,8 @@
       "source_keys": [
         "doc139"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task3-pipeline",
       "description": "E.C05.include"
     },
     {
@@ -1750,8 +1750,8 @@
       "source_keys": [
         "doc139"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task3-pipeline",
       "description": "E.C05.exclude"
     },
     {
@@ -1759,8 +1759,8 @@
       "source_keys": [
         "doc169"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task3-pipeline",
       "description": "E.C06.exact"
     },
     {
@@ -1768,8 +1768,8 @@
       "source_keys": [
         "doc158"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task3-pipeline",
       "description": "E.C07.exact"
     },
     {
@@ -1777,8 +1777,8 @@
       "source_keys": [
         "renameexamples"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task3-pipeline",
       "description": "E.C07.wildcard"
     },
     {
@@ -1786,8 +1786,8 @@
       "source_keys": [
         "doc167"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task3-pipeline",
       "description": "E.C08.calls"
     },
     {
@@ -1795,8 +1795,8 @@
       "source_keys": [
         "doc167"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task3-pipeline",
       "description": "E.C08.by_span"
     },
     {
@@ -1804,8 +1804,8 @@
       "source_keys": [
         "eventtail"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task3-pipeline",
       "description": "E.C09.calls"
     },
     {
@@ -1813,8 +1813,8 @@
       "source_keys": [
         "eventtail"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task3-pipeline",
       "description": "E.C09.by_span"
     },
     {
@@ -1822,8 +1822,8 @@
       "source_keys": [
         "doc168"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task3-pipeline",
       "description": "E.C10.calls"
     },
     {
@@ -1831,8 +1831,8 @@
       "source_keys": [
         "doc168"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task3-pipeline",
       "description": "E.C10.reset_before"
     },
     {
@@ -1840,8 +1840,8 @@
       "source_keys": [
         "doc168"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task3-pipeline",
       "description": "E.C10.reset_after"
     },
     {
@@ -1849,8 +1849,8 @@
       "source_keys": [
         "doc168"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task3-pipeline",
       "description": "E.C10.reset_onchange"
     },
     {
@@ -1858,8 +1858,8 @@
       "source_keys": [
         "doc150"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task3-pipeline",
       "description": "E.C11.matches"
     },
     {
@@ -1867,8 +1867,8 @@
       "source_keys": [
         "doc150"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task3-pipeline",
       "description": "E.C11.output"
     },
     {
@@ -1876,8 +1876,8 @@
       "source_keys": [
         "doc150"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task3-pipeline",
       "description": "E.C11.outputnew"
     },
     {
@@ -1885,8 +1885,8 @@
       "source_keys": [
         "sortexamples"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task3-pipeline",
       "description": "E.C12.order_terms"
     },
     {
@@ -1894,8 +1894,8 @@
       "source_keys": [
         "doc164"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task3-pipeline",
       "description": "E.C12.count"
     },
     {
@@ -1903,8 +1903,8 @@
       "source_keys": [
         "doc135"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task3-pipeline",
       "description": "E.C13.count"
     },
     {
@@ -1912,8 +1912,8 @@
       "source_keys": [
         "doc144"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task3-pipeline",
       "description": "E.C14.while"
     },
     {
@@ -1921,8 +1921,8 @@
       "source_keys": [
         "doc144"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task3-pipeline",
       "description": "E.C14.count"
     },
     {
@@ -1930,8 +1930,8 @@
       "source_keys": [
         "doc167"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task3-pipeline",
       "description": "E.C08.allnum"
     },
     {
@@ -1939,8 +1939,8 @@
       "source_keys": [
         "eventtail"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task3-pipeline",
       "description": "E.C09.allnum"
     },
     {
@@ -1948,8 +1948,8 @@
       "source_keys": [
         "doc168"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task3-pipeline",
       "description": "E.C10.current"
     },
     {
@@ -1957,8 +1957,8 @@
       "source_keys": [
         "doc135"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task3-pipeline",
       "description": "E.C13.keepempty"
     },
     {
@@ -1966,8 +1966,8 @@
       "source_keys": [
         "doc135"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task3-pipeline",
       "description": "E.C13.consecutive"
     },
     {
@@ -1975,8 +1975,8 @@
       "source_keys": [
         "doc144"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task3-pipeline",
       "description": "E.C14.keeplast"
     },
     {
@@ -2038,8 +2038,8 @@
       "source_keys": [
         "doc167"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task3-pipeline",
       "description": "E.C08.delim"
     },
     {
@@ -2083,8 +2083,8 @@
       "source_keys": [
         "doc167"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task3-pipeline",
       "description": "E.C08.partitions"
     },
     {
@@ -2092,8 +2092,8 @@
       "source_keys": [
         "doc168"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task3-pipeline",
       "description": "E.C10.window"
     },
     {
@@ -3358,8 +3358,10 @@
         "doc163"
       ],
       "candidate": "search index=main severity=warn",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "C01-P1"
     },
     {
       "id": "C01-P2",
@@ -3368,8 +3370,10 @@
         "doc163"
       ],
       "candidate": "search index=audit status IN (401,403)",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "C01-P2"
     },
     {
       "id": "C01-N1",
@@ -3378,8 +3382,10 @@
         "doc163"
       ],
       "candidate": "search index=main severity=",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "C01-N1"
     },
     {
       "id": "C01-N2",
@@ -3388,8 +3394,10 @@
         "doc163"
       ],
       "candidate": "search index=audit status IN (401,,403)",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "C01-N2"
     },
     {
       "id": "C02-P1",
@@ -3438,8 +3446,10 @@
         "doc136"
       ],
       "candidate": "eval size_kb=size/1024, rounded=round(size_kb,1)",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "pipeline-tail",
+      "case_id": "C03-P1"
     },
     {
       "id": "C03-P2",
@@ -3448,8 +3458,10 @@
         "doc136"
       ],
       "candidate": "eval enabled=false, retired=null",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "pipeline-tail",
+      "case_id": "C03-P2"
     },
     {
       "id": "C03-N1",
@@ -3458,8 +3470,10 @@
         "doc136"
       ],
       "candidate": "eval size_kb=size/1024 rounded=round(size_kb,1)",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "pipeline-tail",
+      "case_id": "C03-N1"
     },
     {
       "id": "C03-N2",
@@ -3468,8 +3482,10 @@
         "doc136"
       ],
       "candidate": "eval enabled=, retired=null",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "pipeline-tail",
+      "case_id": "C03-N2"
     },
     {
       "id": "C04-P1",
@@ -3478,8 +3494,10 @@
         "doc178"
       ],
       "candidate": "where inbound=outbound AND size>0",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "pipeline-tail",
+      "case_id": "C04-P1"
     },
     {
       "id": "C04-P2",
@@ -3488,8 +3506,10 @@
         "doc178"
       ],
       "candidate": "where isnotnull(account) OR severity=\"warn\"",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "pipeline-tail",
+      "case_id": "C04-P2"
     },
     {
       "id": "C04-N1",
@@ -3498,8 +3518,10 @@
         "doc178"
       ],
       "candidate": "where inbound=outbound size>0",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "pipeline-tail",
+      "case_id": "C04-N1"
     },
     {
       "id": "C04-N2",
@@ -3508,8 +3530,10 @@
         "doc178"
       ],
       "candidate": "where isnotnull(account) OR",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "pipeline-tail",
+      "case_id": "C04-N2"
     },
     {
       "id": "C05-P1",
@@ -3518,8 +3542,10 @@
         "doc139"
       ],
       "candidate": "fields + server, account",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "pipeline-tail",
+      "case_id": "C05-P1"
     },
     {
       "id": "C05-P2",
@@ -3528,8 +3554,10 @@
         "doc139"
       ],
       "candidate": "fields - 'scratch*', debug",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "pipeline-tail",
+      "case_id": "C05-P2"
     },
     {
       "id": "C05-N1",
@@ -3538,8 +3566,10 @@
         "doc139"
       ],
       "candidate": "fields + server account",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "pipeline-tail",
+      "case_id": "C05-N1"
     },
     {
       "id": "C05-N2",
@@ -3548,8 +3578,10 @@
         "doc139"
       ],
       "candidate": "fields -",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "pipeline-tail",
+      "case_id": "C05-N2"
     },
     {
       "id": "C06-P1",
@@ -3558,8 +3590,10 @@
         "doc169"
       ],
       "candidate": "table server, account",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "pipeline-tail",
+      "case_id": "C06-P1"
     },
     {
       "id": "C06-P2",
@@ -3568,8 +3602,10 @@
         "doc169"
       ],
       "candidate": "table 'remote-address'",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "pipeline-tail",
+      "case_id": "C06-P2"
     },
     {
       "id": "C06-N1",
@@ -3578,8 +3614,10 @@
         "doc169"
       ],
       "candidate": "table server account",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "pipeline-tail",
+      "case_id": "C06-N1"
     },
     {
       "id": "C06-N2",
@@ -3588,8 +3626,10 @@
         "doc169"
       ],
       "candidate": "table server AS machine",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "pipeline-tail",
+      "case_id": "C06-N2"
     },
     {
       "id": "C07-P1",
@@ -3598,8 +3638,10 @@
         "doc158"
       ],
       "candidate": "rename server AS machine, account AS actor",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "pipeline-tail",
+      "case_id": "C07-P1"
     },
     {
       "id": "C07-P2",
@@ -3608,8 +3650,10 @@
         "doc158"
       ],
       "candidate": "rename 'remote-address' AS remote_addr",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "pipeline-tail",
+      "case_id": "C07-P2"
     },
     {
       "id": "C07-N1",
@@ -3618,8 +3662,10 @@
         "doc158"
       ],
       "candidate": "rename server AS machine account AS actor",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "pipeline-tail",
+      "case_id": "C07-N1"
     },
     {
       "id": "C07-N2",
@@ -3628,8 +3674,10 @@
         "doc158"
       ],
       "candidate": "rename server AS",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "pipeline-tail",
+      "case_id": "C07-N2"
     },
     {
       "id": "C08-P1",
@@ -3638,8 +3686,10 @@
         "doc167"
       ],
       "candidate": "stats count(), sum(size) AS total BY server, account",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "pipeline-tail",
+      "case_id": "C08-P1"
     },
     {
       "id": "C08-P2",
@@ -3648,8 +3698,10 @@
         "doc167"
       ],
       "candidate": "stats delim=\";\" values(account) AS actors",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "pipeline-tail",
+      "case_id": "C08-P2"
     },
     {
       "id": "C08-N1",
@@ -3658,8 +3710,10 @@
         "doc167"
       ],
       "candidate": "stats count, sum(size) AS total BY server, account",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "pipeline-tail",
+      "case_id": "C08-N1"
     },
     {
       "id": "C08-N2",
@@ -3668,8 +3722,10 @@
         "doc167"
       ],
       "candidate": "stats count() sum(size) AS total",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "pipeline-tail",
+      "case_id": "C08-N2"
     },
     {
       "id": "C09-P1",
@@ -3678,8 +3734,10 @@
         "doc137"
       ],
       "candidate": "eventstats avg(size) AS typical BY server",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "pipeline-tail",
+      "case_id": "C09-P1"
     },
     {
       "id": "C09-P2",
@@ -3688,8 +3746,10 @@
         "doc137"
       ],
       "candidate": "eventstats count() AS rows, dc(account) AS actors",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "pipeline-tail",
+      "case_id": "C09-P2"
     },
     {
       "id": "C09-N1",
@@ -3698,8 +3758,10 @@
         "doc137"
       ],
       "candidate": "eventstats avg(size) AS typical BY",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "pipeline-tail",
+      "case_id": "C09-N1"
     },
     {
       "id": "C09-N2",
@@ -3708,8 +3770,10 @@
         "doc137"
       ],
       "candidate": "eventstats count() AS rows dc(account) AS actors",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "pipeline-tail",
+      "case_id": "C09-N2"
     },
     {
       "id": "C10-P1",
@@ -3718,8 +3782,10 @@
         "doc168"
       ],
       "candidate": "streamstats window=4 avg(size) AS moving",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "pipeline-tail",
+      "case_id": "C10-P1"
     },
     {
       "id": "C10-P2",
@@ -3728,8 +3794,10 @@
         "doc168"
       ],
       "candidate": "streamstats BY server current=true count() AS seen",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "pipeline-tail",
+      "case_id": "C10-P2"
     },
     {
       "id": "C10-N1",
@@ -3738,8 +3806,10 @@
         "doc168"
       ],
       "candidate": "streamstats window=4",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "pipeline-tail",
+      "case_id": "C10-N1"
     },
     {
       "id": "C10-N2",
@@ -3748,8 +3818,10 @@
         "doc168"
       ],
       "candidate": "streamstats window=-1 avg(size)",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "pipeline-tail",
+      "case_id": "C10-N2"
     },
     {
       "id": "C11-P1",
@@ -3758,8 +3830,10 @@
         "doc150"
       ],
       "candidate": "lookup identities uid AS account OUTPUT display AS person, team",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "pipeline-tail",
+      "case_id": "C11-P1"
     },
     {
       "id": "C11-P2",
@@ -3768,8 +3842,10 @@
         "doc150"
       ],
       "candidate": "lookup regions code OUTPUTNEW country",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "pipeline-tail",
+      "case_id": "C11-P2"
     },
     {
       "id": "C11-N1",
@@ -3778,8 +3854,10 @@
         "doc150"
       ],
       "candidate": "lookup identities uid AS account output display AS person",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "pipeline-tail",
+      "case_id": "C11-N1"
     },
     {
       "id": "C11-N2",
@@ -3788,8 +3866,10 @@
         "doc150"
       ],
       "candidate": "lookup regions code OUTPUTNEW",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "pipeline-tail",
+      "case_id": "C11-N2"
     },
     {
       "id": "C12-P1",
@@ -3798,8 +3878,10 @@
         "doc164"
       ],
       "candidate": "sort 0 -num(size), +server",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "pipeline-tail",
+      "case_id": "C12-P1"
     },
     {
       "id": "C12-P2",
@@ -3808,8 +3890,10 @@
         "doc164"
       ],
       "candidate": "sort ip(remote_addr), str(account)",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "pipeline-tail",
+      "case_id": "C12-P2"
     },
     {
       "id": "C12-N1",
@@ -3818,8 +3902,10 @@
         "doc164"
       ],
       "candidate": "sort 0 -num(size) +server",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "pipeline-tail",
+      "case_id": "C12-N1"
     },
     {
       "id": "C12-N2",
@@ -3828,8 +3914,10 @@
         "doc164"
       ],
       "candidate": "sort ip(), str(account)",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "pipeline-tail",
+      "case_id": "C12-N2"
     },
     {
       "id": "C13-P1",
@@ -3838,8 +3926,10 @@
         "doc135"
       ],
       "candidate": "dedup 2 keepempty=true server, account",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "pipeline-tail",
+      "case_id": "C13-P1"
     },
     {
       "id": "C13-P2",
@@ -3848,8 +3938,10 @@
         "doc135"
       ],
       "candidate": "dedup consecutive=true request_id",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "pipeline-tail",
+      "case_id": "C13-P2"
     },
     {
       "id": "C13-N1",
@@ -3858,8 +3950,10 @@
         "doc135"
       ],
       "candidate": "dedup 2 keepempty=true server account",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "pipeline-tail",
+      "case_id": "C13-N1"
     },
     {
       "id": "C13-N2",
@@ -3868,8 +3962,10 @@
         "doc135"
       ],
       "candidate": "dedup 0 request_id",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "pipeline-tail",
+      "case_id": "C13-N2"
     },
     {
       "id": "C14-P1",
@@ -3878,8 +3974,10 @@
         "doc144"
       ],
       "candidate": "head 7",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "pipeline-tail",
+      "case_id": "C14-P1"
     },
     {
       "id": "C14-P2",
@@ -3888,8 +3986,10 @@
         "doc144"
       ],
       "candidate": "head keeplast=false while (size<100) 9",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "pipeline-tail",
+      "case_id": "C14-P2"
     },
     {
       "id": "C14-N1",
@@ -3898,8 +3998,10 @@
         "doc144"
       ],
       "candidate": "head limit=7",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "pipeline-tail",
+      "case_id": "C14-N1"
     },
     {
       "id": "C14-N2",
@@ -3908,8 +4010,10 @@
         "doc144"
       ],
       "candidate": "head keeplast=false while size<100",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "pipeline-tail",
+      "case_id": "C14-N2"
     },
     {
       "id": "C15-P1",
@@ -3918,8 +4022,10 @@
         "doc160"
       ],
       "candidate": "FROM main | reverse",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "C15-P1"
     },
     {
       "id": "C15-P2",
@@ -3928,8 +4034,10 @@
         "doc160"
       ],
       "candidate": "FROM [{a:1},{a:2}] | reverse | head 1",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "C15-P2"
     },
     {
       "id": "C15-N1",
@@ -3938,8 +4046,10 @@
         "doc160"
       ],
       "candidate": "FROM main | reverse a",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "C15-N1"
     },
     {
       "id": "C15-N2",
@@ -3948,8 +4058,10 @@
         "doc160"
       ],
       "candidate": "FROM main | reverse limit=2",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "C15-N2"
     },
     {
       "id": "C16-P1",
@@ -4948,8 +5060,10 @@
         "doc163"
       ],
       "candidate": "search index=web user=guest OR action=read status=200",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "L05-P1"
     },
     {
       "id": "L05-P2",
@@ -4958,8 +5072,10 @@
         "doc163"
       ],
       "candidate": "search index=logs TERM(192.0.2.9) earliest=-2h@h latest=@h",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "L05-P2"
     },
     {
       "id": "L05-N1",
@@ -4968,8 +5084,10 @@
         "doc163"
       ],
       "candidate": "search index=web status IN (200 204)",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "L05-N1"
     },
     {
       "id": "L05-N2",
@@ -4978,8 +5096,10 @@
         "doc163"
       ],
       "candidate": "search index=logs TERM()",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "L05-N2"
     },
     {
       "id": "L06-P1",
@@ -5276,8 +5396,10 @@
         "doc139"
       ],
       "candidate": "FROM main | fields server, size | rename server AS machine",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "L12-P1"
     },
     {
       "id": "L12-P2",
@@ -5286,8 +5408,10 @@
         "doc139"
       ],
       "candidate": "FROM [{a:1,b:2}] | rename a AS x, b AS y | table x,y",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "L12-P2"
     },
     {
       "id": "L12-N1",
@@ -5296,8 +5420,10 @@
         "doc139"
       ],
       "candidate": "FROM main | rename server AS machine, server AS node",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "L12-N1"
     },
     {
       "id": "L12-N2",
@@ -5306,8 +5432,10 @@
         "doc139"
       ],
       "candidate": "FROM main | rename a AS b, b AS c",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "L12-N2"
     },
     {
       "id": "L13-P1",
@@ -5316,8 +5444,10 @@
         "doc168"
       ],
       "candidate": "FROM main | stats dc(account), count() BY server",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "L13-P1"
     },
     {
       "id": "L13-P2",
@@ -5326,8 +5456,10 @@
         "doc168"
       ],
       "candidate": "FROM main | streamstats BY server reset before code=500 window=3 sum(size) AS total",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "L13-P2"
     },
     {
       "id": "L13-N1",
@@ -5336,8 +5468,10 @@
         "doc168"
       ],
       "candidate": "FROM main | stats sum(size), BY server",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "L13-N1"
     },
     {
       "id": "L13-N2",
@@ -5346,8 +5480,10 @@
         "doc168"
       ],
       "candidate": "FROM main | streamstats window=3 sum()",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "L13-N2"
     },
     {
       "id": "L14-P1",
@@ -5356,8 +5492,10 @@
         "doc150"
       ],
       "candidate": "FROM main | lookup people key AS account, realm AS domain OUTPUT title AS role",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "L14-P1"
     },
     {
       "id": "L14-P2",
@@ -5366,8 +5504,10 @@
         "doc150"
       ],
       "candidate": "FROM main | lookup codes id AS status OUTPUTNEW label, category",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "L14-P2"
     },
     {
       "id": "L14-N1",
@@ -5376,8 +5516,10 @@
         "doc150"
       ],
       "candidate": "FROM main | lookup people key AS account realm AS domain OUTPUT title",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "L14-N1"
     },
     {
       "id": "L14-N2",
@@ -5386,8 +5528,10 @@
         "doc150"
       ],
       "candidate": "FROM main | lookup codes id AS status OUTPUT label category",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "L14-N2"
     },
     {
       "id": "L15-P1",
@@ -6272,8 +6416,10 @@
         "doc163"
       ],
       "candidate": "search index=app failure",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.C01.literal.P1"
     },
     {
       "id": "E.C01.literal.P2",
@@ -6282,8 +6428,10 @@
         "doc163"
       ],
       "candidate": "search index=app \"disk nearly full\"",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.C01.literal.P2"
     },
     {
       "id": "E.C01.literal.N1",
@@ -6292,8 +6440,10 @@
         "doc163"
       ],
       "candidate": "search index=app \"disk nearly full",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.C01.literal.N1"
     },
     {
       "id": "E.C01.literal.N2",
@@ -6302,8 +6452,10 @@
         "doc163"
       ],
       "candidate": "search index=app severity=",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.C01.literal.N2"
     },
     {
       "id": "E.C01.comparison.P1",
@@ -6312,8 +6464,10 @@
         "doc163"
       ],
       "candidate": "search index=app retries!=0",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.C01.comparison.P1"
     },
     {
       "id": "E.C01.comparison.P2",
@@ -6322,8 +6476,10 @@
         "doc163"
       ],
       "candidate": "search index=app duration>=2.5",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.C01.comparison.P2"
     },
     {
       "id": "E.C01.comparison.N1",
@@ -6332,8 +6488,10 @@
         "doc163"
       ],
       "candidate": "search index=app retries!=",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.C01.comparison.N1"
     },
     {
       "id": "E.C01.comparison.N2",
@@ -6342,8 +6500,10 @@
         "doc163"
       ],
       "candidate": "search index=app duration>=",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.C01.comparison.N2"
     },
     {
       "id": "E.C01.in.P1",
@@ -6352,8 +6512,10 @@
         "doc163"
       ],
       "candidate": "search index=app code IN (401,403)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.C01.in.P1"
     },
     {
       "id": "E.C01.in.P2",
@@ -6362,8 +6524,10 @@
         "doc163"
       ],
       "candidate": "search index=app code IN (50*,404)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.C01.in.P2"
     },
     {
       "id": "E.C01.in.N1",
@@ -6372,8 +6536,10 @@
         "doc163"
       ],
       "candidate": "search index=app code IN (401 403)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.C01.in.N1"
     },
     {
       "id": "E.C01.in.N2",
@@ -6382,8 +6548,10 @@
         "doc163"
       ],
       "candidate": "search index=app code IN (50*,)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.C01.in.N2"
     },
     {
       "id": "E.C01.term.P1",
@@ -6392,8 +6560,10 @@
         "doc163"
       ],
       "candidate": "search index=app TERM(192.0.2.19)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.C01.term.P1"
     },
     {
       "id": "E.C01.term.P2",
@@ -6402,8 +6572,10 @@
         "doc163"
       ],
       "candidate": "search index=app marker=TERM(error_code)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.C01.term.P2"
     },
     {
       "id": "E.C01.term.N1",
@@ -6412,8 +6584,10 @@
         "doc163"
       ],
       "candidate": "search index=app TERM()",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.C01.term.N1"
     },
     {
       "id": "E.C01.term.N2",
@@ -6422,8 +6596,10 @@
         "doc163"
       ],
       "candidate": "search index=app TERM(192.0.2.19",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.C01.term.N2"
     },
     {
       "id": "E.C01.case.P1",
@@ -6432,8 +6608,10 @@
         "doc163"
       ],
       "candidate": "search index=app CASE(Failure)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.C01.case.P1"
     },
     {
       "id": "E.C01.case.P2",
@@ -6442,8 +6620,10 @@
         "doc163"
       ],
       "candidate": "search index=app marker=CASE(WARN)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.C01.case.P2"
     },
     {
       "id": "E.C01.case.N1",
@@ -6452,8 +6632,10 @@
         "doc163"
       ],
       "candidate": "search index=app CASE()",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.C01.case.N1"
     },
     {
       "id": "E.C01.case.N2",
@@ -6462,8 +6644,10 @@
         "doc163"
       ],
       "candidate": "search index=app marker=CASE(WARN",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.C01.case.N2"
     },
     {
       "id": "E.C01.boolean.P1",
@@ -6472,8 +6656,10 @@
         "predicate"
       ],
       "candidate": "search index=app NOT severity=debug OR code=503 AND retry=1",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.C01.boolean.P1"
     },
     {
       "id": "E.C01.boolean.P2",
@@ -6482,8 +6668,10 @@
         "predicate"
       ],
       "candidate": "search index=app (code=400 OR code=404) XOR severity=error",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.C01.boolean.P2"
     },
     {
       "id": "E.C01.boolean.N1",
@@ -6492,8 +6680,10 @@
         "predicate"
       ],
       "candidate": "search index=app NOT",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.C01.boolean.N1"
     },
     {
       "id": "E.C01.boolean.N2",
@@ -6502,8 +6692,10 @@
         "predicate"
       ],
       "candidate": "search index=app (code=400 OR)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.C01.boolean.N2"
     },
     {
       "id": "E.C01.selector.P1",
@@ -6512,8 +6704,10 @@
         "doc163"
       ],
       "candidate": "search index=app sourcetype=access source=\"gateway.log\"",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.C01.selector.P1"
     },
     {
       "id": "E.C01.selector.P2",
@@ -6522,8 +6716,10 @@
         "doc163"
       ],
       "candidate": "search index=audit host=\"api-2\"",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.C01.selector.P2"
     },
     {
       "id": "E.C01.selector.N1",
@@ -6532,8 +6728,10 @@
         "doc163"
       ],
       "candidate": "search index=app sourcetype=",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.C01.selector.N1"
     },
     {
       "id": "E.C01.selector.N2",
@@ -6542,8 +6740,10 @@
         "doc163"
       ],
       "candidate": "search index=audit host=\"api-2",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.C01.selector.N2"
     },
     {
       "id": "E.C01.relative_time.P1",
@@ -6552,8 +6752,10 @@
         "relativetime"
       ],
       "candidate": "search index=app earliest=-2h@h latest=@h",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.C01.relative_time.P1"
     },
     {
       "id": "E.C01.relative_time.P2",
@@ -6562,8 +6764,10 @@
         "relativetime"
       ],
       "candidate": "search index=app earliest=@d+3h latest=now()",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.C01.relative_time.P2"
     },
     {
       "id": "E.C01.relative_time.N1",
@@ -6572,8 +6776,10 @@
         "relativetime"
       ],
       "candidate": "search index=app earliest=-2h@",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.C01.relative_time.N1"
     },
     {
       "id": "E.C01.relative_time.N2",
@@ -6582,8 +6788,10 @@
         "relativetime"
       ],
       "candidate": "search index=app earliest=@d+",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.C01.relative_time.N2"
     },
     {
       "id": "E.C01.absolute_time.P1",
@@ -6592,8 +6800,10 @@
         "timemodifiers"
       ],
       "candidate": "search index=app earliest=1 latest=now()",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.C01.absolute_time.P1"
     },
     {
       "id": "E.C01.absolute_time.P2",
@@ -6602,8 +6812,10 @@
         "timemodifiers"
       ],
       "candidate": "search index=app timeformat=\"%Y-%m-%d\" starttime=\"2026-01-02\" endtime=\"2026-01-03\"",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.C01.absolute_time.P2"
     },
     {
       "id": "E.C01.absolute_time.N1",
@@ -6612,8 +6824,10 @@
         "timemodifiers"
       ],
       "candidate": "search index=app earliest=",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.C01.absolute_time.N1"
     },
     {
       "id": "E.C01.absolute_time.N2",
@@ -6622,8 +6836,10 @@
         "timemodifiers"
       ],
       "candidate": "search index=app timeformat=\"%Y-%m-%d starttime=\"2026-01-02\"",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.C01.absolute_time.N2"
     },
     {
       "id": "E.C01.index_time.P1",
@@ -6632,8 +6848,10 @@
         "timemodifiers"
       ],
       "candidate": "search index=app earliest=-1d _index_earliest=-h@h",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.C01.index_time.P1"
     },
     {
       "id": "E.C01.index_time.P2",
@@ -6642,8 +6860,10 @@
         "timemodifiers"
       ],
       "candidate": "search index=app earliest=1 _index_latest=@h",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.C01.index_time.P2"
     },
     {
       "id": "E.C01.index_time.N1",
@@ -6652,8 +6872,10 @@
         "timemodifiers"
       ],
       "candidate": "search index=app _index_earliest=@",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.C01.index_time.N1"
     },
     {
       "id": "E.C01.index_time.N2",
@@ -6662,8 +6884,10 @@
         "timemodifiers"
       ],
       "candidate": "search index=app _index_latest=-",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.C01.index_time.N2"
     },
     {
       "id": "E.C03.assign.P1",
@@ -6672,8 +6896,10 @@
         "doc136"
       ],
       "candidate": "eval initial=bytes, total=initial+5",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C03.assign.P1"
     },
     {
       "id": "E.C03.assign.P2",
@@ -6682,8 +6908,10 @@
         "doc136"
       ],
       "candidate": "eval 'display name'=user, gone=null",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C03.assign.P2"
     },
     {
       "id": "E.C03.assign.N1",
@@ -6692,8 +6920,10 @@
         "doc136"
       ],
       "candidate": "eval initial=bytes total=initial+5",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C03.assign.N1"
     },
     {
       "id": "E.C03.assign.N2",
@@ -6702,8 +6932,10 @@
         "doc136"
       ],
       "candidate": "eval 'display name'=",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C03.assign.N2"
     },
     {
       "id": "E.C04.predicate.P1",
@@ -6712,8 +6944,10 @@
         "doc178"
       ],
       "candidate": "where left_value=right_value AND amount>0",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C04.predicate.P1"
     },
     {
       "id": "E.C04.predicate.P2",
@@ -6722,8 +6956,10 @@
         "doc178"
       ],
       "candidate": "where NOT active=true OR isnull(owner)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C04.predicate.P2"
     },
     {
       "id": "E.C04.predicate.N1",
@@ -6732,8 +6968,10 @@
         "doc178"
       ],
       "candidate": "where left_value=right_value amount>0",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C04.predicate.N1"
     },
     {
       "id": "E.C04.predicate.N2",
@@ -6742,8 +6980,10 @@
         "doc178"
       ],
       "candidate": "where NOT",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C04.predicate.N2"
     },
     {
       "id": "E.C05.include.P1",
@@ -6752,8 +6992,10 @@
         "doc139"
       ],
       "candidate": "fields user, bytes",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C05.include.P1"
     },
     {
       "id": "E.C05.include.P2",
@@ -6762,8 +7004,10 @@
         "doc139"
       ],
       "candidate": "fields + 'user*', host",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C05.include.P2"
     },
     {
       "id": "E.C05.include.N1",
@@ -6772,8 +7016,10 @@
         "doc139"
       ],
       "candidate": "fields user bytes",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C05.include.N1"
     },
     {
       "id": "E.C05.include.N2",
@@ -6782,8 +7028,10 @@
         "doc139"
       ],
       "candidate": "fields +",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C05.include.N2"
     },
     {
       "id": "E.C05.exclude.P1",
@@ -6792,8 +7040,10 @@
         "doc139"
       ],
       "candidate": "fields - debug, trace",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C05.exclude.P1"
     },
     {
       "id": "E.C05.exclude.P2",
@@ -6802,8 +7052,10 @@
         "doc139"
       ],
       "candidate": "fields - 'temp*', 'private.*'",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C05.exclude.P2"
     },
     {
       "id": "E.C05.exclude.N1",
@@ -6812,8 +7064,10 @@
         "doc139"
       ],
       "candidate": "fields - debug trace",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C05.exclude.N1"
     },
     {
       "id": "E.C05.exclude.N2",
@@ -6822,8 +7076,10 @@
         "doc139"
       ],
       "candidate": "fields -",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "C05-N2"
     },
     {
       "id": "E.C06.exact.P1",
@@ -6832,8 +7088,10 @@
         "doc169"
       ],
       "candidate": "table user, bytes",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C06.exact.P1"
     },
     {
       "id": "E.C06.exact.P2",
@@ -6842,8 +7100,10 @@
         "doc169"
       ],
       "candidate": "table 'display name', 'literal.path'",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C06.exact.P2"
     },
     {
       "id": "E.C06.exact.N1",
@@ -6852,8 +7112,10 @@
         "doc169"
       ],
       "candidate": "table user bytes",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C06.exact.N1"
     },
     {
       "id": "E.C06.exact.N2",
@@ -6862,8 +7124,10 @@
         "doc169"
       ],
       "candidate": "table user AS name",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C06.exact.N2"
     },
     {
       "id": "E.C07.exact.P1",
@@ -6872,8 +7136,10 @@
         "doc158"
       ],
       "candidate": "rename user AS owner",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C07.exact.P1"
     },
     {
       "id": "E.C07.exact.P2",
@@ -6882,8 +7148,10 @@
         "doc158"
       ],
       "candidate": "rename 'request.id' AS request_id, host AS machine",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C07.exact.P2"
     },
     {
       "id": "E.C07.exact.N1",
@@ -6892,8 +7160,10 @@
         "doc158"
       ],
       "candidate": "rename user AS",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C07.exact.N1"
     },
     {
       "id": "E.C07.exact.N2",
@@ -6902,8 +7172,10 @@
         "doc158"
       ],
       "candidate": "rename user AS owner host AS machine",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C07.exact.N2"
     },
     {
       "id": "E.C07.wildcard.P1",
@@ -6912,8 +7184,10 @@
         "renameexamples"
       ],
       "candidate": "rename 'old_*' AS 'new_*'",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C07.wildcard.P1"
     },
     {
       "id": "E.C07.wildcard.P2",
@@ -6922,8 +7196,10 @@
         "renameexamples"
       ],
       "candidate": "rename 'event.*' AS '*'",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C07.wildcard.P2"
     },
     {
       "id": "E.C07.wildcard.N1",
@@ -6932,8 +7208,10 @@
         "renameexamples"
       ],
       "candidate": "rename 'old_*' AS",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C07.wildcard.N1"
     },
     {
       "id": "E.C07.wildcard.N2",
@@ -6942,8 +7220,10 @@
         "renameexamples"
       ],
       "candidate": "rename 'event.*' AS '*",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C07.wildcard.N2"
     },
     {
       "id": "E.C08.calls.P1",
@@ -6952,8 +7232,10 @@
         "doc167"
       ],
       "candidate": "stats count(),sum(bytes) AS total",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C08.calls.P1"
     },
     {
       "id": "E.C08.calls.P2",
@@ -6962,8 +7244,10 @@
         "doc167"
       ],
       "candidate": "stats avg(duration) AS mean BY host,service",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C08.calls.P2"
     },
     {
       "id": "E.C08.calls.N1",
@@ -6972,8 +7256,10 @@
         "doc167"
       ],
       "candidate": "stats count() sum(bytes) AS total",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C08.calls.N1"
     },
     {
       "id": "E.C08.calls.N2",
@@ -6982,8 +7268,10 @@
         "doc167"
       ],
       "candidate": "stats avg(duration) AS mean BY host service",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C08.calls.N2"
     },
     {
       "id": "E.C08.by_span.P1",
@@ -6992,8 +7280,10 @@
         "doc167"
       ],
       "candidate": "stats count() BY _time span=10min",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C08.by_span.P1"
     },
     {
       "id": "E.C08.by_span.P2",
@@ -7002,8 +7292,10 @@
         "doc167"
       ],
       "candidate": "stats sum(bytes) BY event_time span=hour,host",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C08.by_span.P2"
     },
     {
       "id": "E.C08.by_span.N1",
@@ -7012,8 +7304,10 @@
         "doc167"
       ],
       "candidate": "stats count() BY _time span=",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C08.by_span.N1"
     },
     {
       "id": "E.C08.by_span.N2",
@@ -7022,8 +7316,10 @@
         "doc167"
       ],
       "candidate": "stats sum(bytes) BY 'host*'",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C08.by_span.N2"
     },
     {
       "id": "E.C09.calls.P1",
@@ -7032,8 +7328,10 @@
         "eventtail"
       ],
       "candidate": "eventstats count() AS rows BY host",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C09.calls.P1"
     },
     {
       "id": "E.C09.calls.P2",
@@ -7042,8 +7340,10 @@
         "eventtail"
       ],
       "candidate": "eventstats values(user) AS users,sum(bytes) AS total",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C09.calls.P2"
     },
     {
       "id": "E.C09.calls.N1",
@@ -7052,8 +7352,10 @@
         "eventtail"
       ],
       "candidate": "eventstats count() AS rows BY",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C09.calls.N1"
     },
     {
       "id": "E.C09.calls.N2",
@@ -7062,8 +7364,10 @@
         "eventtail"
       ],
       "candidate": "eventstats values(user) AS users sum(bytes) AS total",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C09.calls.N2"
     },
     {
       "id": "E.C09.by_span.P1",
@@ -7072,8 +7376,10 @@
         "eventtail"
       ],
       "candidate": "eventstats count() BY _time span=5min",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C09.by_span.P1"
     },
     {
       "id": "E.C09.by_span.P2",
@@ -7082,8 +7388,10 @@
         "eventtail"
       ],
       "candidate": "eventstats sum(bytes) AS total BY event_time span=2hr,host",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C09.by_span.P2"
     },
     {
       "id": "E.C09.by_span.N1",
@@ -7092,8 +7400,10 @@
         "eventtail"
       ],
       "candidate": "eventstats count() BY _time span=",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C09.by_span.N1"
     },
     {
       "id": "E.C09.by_span.N2",
@@ -7102,8 +7412,10 @@
         "eventtail"
       ],
       "candidate": "eventstats sum(bytes) BY host service",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C09.by_span.N2"
     },
     {
       "id": "E.C10.calls.P1",
@@ -7112,8 +7424,10 @@
         "doc168"
       ],
       "candidate": "streamstats count() AS seen",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C10.calls.P1"
     },
     {
       "id": "E.C10.calls.P2",
@@ -7122,8 +7436,10 @@
         "doc168"
       ],
       "candidate": "streamstats BY host sum(bytes) AS total,avg(bytes) AS mean",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C10.calls.P2"
     },
     {
       "id": "E.C10.calls.N1",
@@ -7132,8 +7448,10 @@
         "doc168"
       ],
       "candidate": "streamstats count() AS",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C10.calls.N1"
     },
     {
       "id": "E.C10.calls.N2",
@@ -7142,8 +7460,10 @@
         "doc168"
       ],
       "candidate": "streamstats BY host sum(bytes) AS total avg(bytes) AS mean",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C10.calls.N2"
     },
     {
       "id": "E.C10.reset_before.P1",
@@ -7152,8 +7472,10 @@
         "doc168"
       ],
       "candidate": "streamstats reset before action=\"START\" count() AS n",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C10.reset_before.P1"
     },
     {
       "id": "E.C10.reset_before.P2",
@@ -7162,8 +7484,10 @@
         "doc168"
       ],
       "candidate": "streamstats BY host reset before code>=500 sum(bytes) AS total",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C10.reset_before.P2"
     },
     {
       "id": "E.C10.reset_before.N1",
@@ -7172,8 +7496,10 @@
         "doc168"
       ],
       "candidate": "streamstats reset before",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C10.reset_before.N1"
     },
     {
       "id": "E.C10.reset_before.N2",
@@ -7182,8 +7508,10 @@
         "doc168"
       ],
       "candidate": "streamstats reset before action= count()",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C10.reset_before.N2"
     },
     {
       "id": "E.C10.reset_after.P1",
@@ -7192,8 +7520,10 @@
         "doc168"
       ],
       "candidate": "streamstats reset after action=\"STOP\" count() AS n",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C10.reset_after.P1"
     },
     {
       "id": "E.C10.reset_after.P2",
@@ -7202,8 +7532,10 @@
         "doc168"
       ],
       "candidate": "streamstats reset after amount>10 window=4 sum(amount) AS running",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C10.reset_after.P2"
     },
     {
       "id": "E.C10.reset_after.N1",
@@ -7212,8 +7544,10 @@
         "doc168"
       ],
       "candidate": "streamstats reset after",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C10.reset_after.N1"
     },
     {
       "id": "E.C10.reset_after.N2",
@@ -7222,8 +7556,10 @@
         "doc168"
       ],
       "candidate": "streamstats reset after amount> window=4 sum(amount)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C10.reset_after.N2"
     },
     {
       "id": "E.C10.reset_onchange.P1",
@@ -7232,8 +7568,10 @@
         "doc168"
       ],
       "candidate": "streamstats BY host reset onchange count() AS n",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C10.reset_onchange.P1"
     },
     {
       "id": "E.C10.reset_onchange.P2",
@@ -7242,8 +7580,10 @@
         "doc168"
       ],
       "candidate": "streamstats BY host reset before code=500 after action=\"STOP\" onchange sum(bytes)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C10.reset_onchange.P2"
     },
     {
       "id": "E.C10.reset_onchange.N1",
@@ -7252,8 +7592,10 @@
         "doc168"
       ],
       "candidate": "streamstats BY host reset",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C10.reset_onchange.N1"
     },
     {
       "id": "E.C10.reset_onchange.N2",
@@ -7262,8 +7604,10 @@
         "doc168"
       ],
       "candidate": "streamstats BY host reset before after action=\"STOP\" sum(bytes)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C10.reset_onchange.N2"
     },
     {
       "id": "E.C11.matches.P1",
@@ -7272,8 +7616,10 @@
         "doc150"
       ],
       "candidate": "lookup users uid AS user",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C11.matches.P1"
     },
     {
       "id": "E.C11.matches.P2",
@@ -7282,8 +7628,10 @@
         "doc150"
       ],
       "candidate": "lookup accounts id AS account, realm AS domain",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C11.matches.P2"
     },
     {
       "id": "E.C11.matches.N1",
@@ -7292,8 +7640,10 @@
         "doc150"
       ],
       "candidate": "lookup users",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C11.matches.N1"
     },
     {
       "id": "E.C11.matches.N2",
@@ -7302,8 +7652,10 @@
         "doc150"
       ],
       "candidate": "lookup accounts id AS account realm AS domain",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C11.matches.N2"
     },
     {
       "id": "E.C11.output.P1",
@@ -7312,8 +7664,10 @@
         "doc150"
       ],
       "candidate": "lookup users uid AS user OUTPUT display AS name",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C11.output.P1"
     },
     {
       "id": "E.C11.output.P2",
@@ -7322,8 +7676,10 @@
         "doc150"
       ],
       "candidate": "lookup accounts id OUTPUT email, team AS group_name",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C11.output.P2"
     },
     {
       "id": "E.C11.output.N1",
@@ -7332,8 +7688,10 @@
         "doc150"
       ],
       "candidate": "lookup users uid AS user OUTPUT",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C11.output.N1"
     },
     {
       "id": "E.C11.output.N2",
@@ -7342,8 +7700,10 @@
         "doc150"
       ],
       "candidate": "lookup accounts id OUTPUT email team",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C11.output.N2"
     },
     {
       "id": "E.C11.outputnew.P1",
@@ -7352,8 +7712,10 @@
         "doc150"
       ],
       "candidate": "lookup users uid OUTPUTNEW display AS name",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C11.outputnew.P1"
     },
     {
       "id": "E.C11.outputnew.P2",
@@ -7362,8 +7724,10 @@
         "doc150"
       ],
       "candidate": "lookup accounts id OUTPUTNEW email, team",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C11.outputnew.P2"
     },
     {
       "id": "E.C11.outputnew.N1",
@@ -7372,8 +7736,10 @@
         "doc150"
       ],
       "candidate": "lookup users uid OUTPUTNEW",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C11.outputnew.N1"
     },
     {
       "id": "E.C11.outputnew.N2",
@@ -7382,8 +7748,10 @@
         "doc150"
       ],
       "candidate": "lookup accounts id OUTPUTNEW email team",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C11.outputnew.N2"
     },
     {
       "id": "E.C12.order_terms.P1",
@@ -7392,8 +7760,10 @@
         "sortexamples"
       ],
       "candidate": "sort -host,+num(bytes)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C12.order_terms.P1"
     },
     {
       "id": "E.C12.order_terms.P2",
@@ -7402,8 +7772,10 @@
         "sortexamples"
       ],
       "candidate": "sort auto(status),-ip(client),str(user)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C12.order_terms.P2"
     },
     {
       "id": "E.C12.order_terms.N1",
@@ -7412,8 +7784,10 @@
         "sortexamples"
       ],
       "candidate": "sort -host +num(bytes)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C12.order_terms.N1"
     },
     {
       "id": "E.C12.order_terms.N2",
@@ -7422,8 +7796,10 @@
         "sortexamples"
       ],
       "candidate": "sort auto(),-ip(client)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C12.order_terms.N2"
     },
     {
       "id": "E.C12.count.P1",
@@ -7432,8 +7808,10 @@
         "doc164"
       ],
       "candidate": "sort 0 bytes",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C12.count.P1"
     },
     {
       "id": "E.C12.count.P2",
@@ -7442,8 +7820,10 @@
         "doc164"
       ],
       "candidate": "sort 5 -bytes,user",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C12.count.P2"
     },
     {
       "id": "E.C12.count.N1",
@@ -7452,8 +7832,10 @@
         "doc164"
       ],
       "candidate": "sort 0",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C12.count.N1"
     },
     {
       "id": "E.C12.count.N2",
@@ -7462,8 +7844,10 @@
         "doc164"
       ],
       "candidate": "sort 5.5 -bytes",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C12.count.N2"
     },
     {
       "id": "E.C13.count.P1",
@@ -7472,8 +7856,10 @@
         "doc135"
       ],
       "candidate": "dedup 1 user",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C13.count.P1"
     },
     {
       "id": "E.C13.count.P2",
@@ -7482,8 +7868,10 @@
         "doc135"
       ],
       "candidate": "dedup 3 user,host",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C13.count.P2"
     },
     {
       "id": "E.C13.count.N1",
@@ -7492,8 +7880,10 @@
         "doc135"
       ],
       "candidate": "dedup 0 user",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C13.count.N1"
     },
     {
       "id": "E.C13.count.N2",
@@ -7502,8 +7892,10 @@
         "doc135"
       ],
       "candidate": "dedup 2.5 user",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C13.count.N2"
     },
     {
       "id": "E.C14.while.P1",
@@ -7512,8 +7904,10 @@
         "doc144"
       ],
       "candidate": "head while (amount>0)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C14.while.P1"
     },
     {
       "id": "E.C14.while.P2",
@@ -7522,8 +7916,10 @@
         "doc144"
       ],
       "candidate": "head keeplast=false while (isnotnull(user)) 5",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C14.while.P2"
     },
     {
       "id": "E.C14.while.N1",
@@ -7532,8 +7928,10 @@
         "doc144"
       ],
       "candidate": "head while amount>0",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C14.while.N1"
     },
     {
       "id": "E.C14.while.N2",
@@ -7542,8 +7940,10 @@
         "doc144"
       ],
       "candidate": "head while (amount>)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C14.while.N2"
     },
     {
       "id": "E.C14.count.P1",
@@ -7552,8 +7952,10 @@
         "doc144"
       ],
       "candidate": "head",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C14.count.P1"
     },
     {
       "id": "E.C14.count.P2",
@@ -7562,8 +7964,10 @@
         "doc144"
       ],
       "candidate": "head 4",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C14.count.P2"
     },
     {
       "id": "E.C14.count.N1",
@@ -7572,8 +7976,10 @@
         "doc144"
       ],
       "candidate": "head limit=4",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C14.count.N1"
     },
     {
       "id": "E.C14.count.N2",
@@ -7582,8 +7988,10 @@
         "doc144"
       ],
       "candidate": "head 4.5",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C14.count.N2"
     },
     {
       "id": "E.C08.allnum.P1",
@@ -7592,8 +8000,10 @@
         "doc167"
       ],
       "candidate": "stats allnum=true count()",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C08.allnum.P1"
     },
     {
       "id": "E.C08.allnum.P2",
@@ -7602,8 +8012,10 @@
         "doc167"
       ],
       "candidate": "stats allnum=false sum(bytes) AS total BY host",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C08.allnum.P2"
     },
     {
       "id": "E.C08.allnum.N1",
@@ -7612,8 +8024,10 @@
         "doc167"
       ],
       "candidate": "stats allnum=1 count()",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C08.allnum.N1"
     },
     {
       "id": "E.C08.allnum.N2",
@@ -7622,8 +8036,10 @@
         "doc167"
       ],
       "candidate": "stats allnum=TRUE count()",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C08.allnum.N2"
     },
     {
       "id": "E.C09.allnum.P1",
@@ -7632,8 +8048,10 @@
         "eventtail"
       ],
       "candidate": "eventstats allnum=true count() AS n",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C09.allnum.P1"
     },
     {
       "id": "E.C09.allnum.P2",
@@ -7642,8 +8060,10 @@
         "eventtail"
       ],
       "candidate": "eventstats allnum=false avg(bytes) AS average BY host",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C09.allnum.P2"
     },
     {
       "id": "E.C09.allnum.N1",
@@ -7652,8 +8072,10 @@
         "eventtail"
       ],
       "candidate": "eventstats allnum=1 count() AS n",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C09.allnum.N1"
     },
     {
       "id": "E.C09.allnum.N2",
@@ -7662,8 +8084,10 @@
         "eventtail"
       ],
       "candidate": "eventstats allnum=TRUE count() AS n",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C09.allnum.N2"
     },
     {
       "id": "E.C10.current.P1",
@@ -7672,8 +8096,10 @@
         "doc168"
       ],
       "candidate": "streamstats current=true count() AS n",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C10.current.P1"
     },
     {
       "id": "E.C10.current.P2",
@@ -7682,8 +8108,10 @@
         "doc168"
       ],
       "candidate": "streamstats current=false window=3 avg(bytes) AS moving",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C10.current.P2"
     },
     {
       "id": "E.C10.current.N1",
@@ -7692,8 +8120,10 @@
         "doc168"
       ],
       "candidate": "streamstats current=1 count() AS n",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C10.current.N1"
     },
     {
       "id": "E.C10.current.N2",
@@ -7702,8 +8132,10 @@
         "doc168"
       ],
       "candidate": "streamstats current=TRUE count() AS n",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C10.current.N2"
     },
     {
       "id": "E.C13.keepempty.P1",
@@ -7712,8 +8144,10 @@
         "doc135"
       ],
       "candidate": "dedup keepempty=true user",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C13.keepempty.P1"
     },
     {
       "id": "E.C13.keepempty.P2",
@@ -7722,8 +8156,10 @@
         "doc135"
       ],
       "candidate": "dedup keepempty=false user,host",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C13.keepempty.P2"
     },
     {
       "id": "E.C13.keepempty.N1",
@@ -7732,8 +8168,10 @@
         "doc135"
       ],
       "candidate": "dedup keepempty=1 user",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C13.keepempty.N1"
     },
     {
       "id": "E.C13.keepempty.N2",
@@ -7742,8 +8180,10 @@
         "doc135"
       ],
       "candidate": "dedup keepempty=TRUE user",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C13.keepempty.N2"
     },
     {
       "id": "E.C13.consecutive.P1",
@@ -7752,8 +8192,10 @@
         "doc135"
       ],
       "candidate": "dedup consecutive=true user",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C13.consecutive.P1"
     },
     {
       "id": "E.C13.consecutive.P2",
@@ -7762,8 +8204,10 @@
         "doc135"
       ],
       "candidate": "dedup consecutive=false user,host",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C13.consecutive.P2"
     },
     {
       "id": "E.C13.consecutive.N1",
@@ -7772,8 +8216,10 @@
         "doc135"
       ],
       "candidate": "dedup consecutive=1 user",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C13.consecutive.N1"
     },
     {
       "id": "E.C13.consecutive.N2",
@@ -7782,8 +8228,10 @@
         "doc135"
       ],
       "candidate": "dedup consecutive=TRUE user",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C13.consecutive.N2"
     },
     {
       "id": "E.C14.keeplast.P1",
@@ -7792,8 +8240,10 @@
         "doc144"
       ],
       "candidate": "head keeplast=true while (bytes>0) 3",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C14.keeplast.P1"
     },
     {
       "id": "E.C14.keeplast.P2",
@@ -7802,8 +8252,10 @@
         "doc144"
       ],
       "candidate": "head keeplast=false while (isnotnull(user)) 4",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C14.keeplast.P2"
     },
     {
       "id": "E.C14.keeplast.N1",
@@ -7812,8 +8264,10 @@
         "doc144"
       ],
       "candidate": "head keeplast=1 while (bytes>0) 3",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C14.keeplast.N1"
     },
     {
       "id": "E.C14.keeplast.N2",
@@ -7822,8 +8276,10 @@
         "doc144"
       ],
       "candidate": "head keeplast=TRUE while (bytes>0) 3",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C14.keeplast.N2"
     },
     {
       "id": "E.C18.run_in_preview.P1",
@@ -8072,8 +8528,10 @@
         "doc167"
       ],
       "candidate": "stats delim=\"::\" values(user) AS users",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C08.delim.P1"
     },
     {
       "id": "E.C08.delim.P2",
@@ -8082,8 +8540,10 @@
         "doc167"
       ],
       "candidate": "stats delim=\"($AGG$)-$VAL$\" list(host) AS hosts",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C08.delim.P2"
     },
     {
       "id": "E.C08.delim.N1",
@@ -8092,8 +8552,10 @@
         "doc167"
       ],
       "candidate": "stats delim= values(user) AS users",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C08.delim.N1"
     },
     {
       "id": "E.C08.delim.N2",
@@ -8102,8 +8564,10 @@
         "doc167"
       ],
       "candidate": "stats delim=\"unterminated values(user) AS users",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C08.delim.N2"
     },
     {
       "id": "E.C30.sep.P1",
@@ -8272,8 +8736,10 @@
         "doc167"
       ],
       "candidate": "stats partitions=1 count()",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C08.partitions.P1"
     },
     {
       "id": "E.C08.partitions.P2",
@@ -8282,8 +8748,10 @@
         "doc167"
       ],
       "candidate": "stats partitions=3 sum(bytes) BY host",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C08.partitions.P2"
     },
     {
       "id": "E.C08.partitions.N1",
@@ -8292,8 +8760,10 @@
         "doc167"
       ],
       "candidate": "stats partitions= count()",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C08.partitions.N1"
     },
     {
       "id": "E.C08.partitions.N2",
@@ -8302,8 +8772,10 @@
         "doc167"
       ],
       "candidate": "stats partitions=\"many\" count()",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C08.partitions.N2"
     },
     {
       "id": "E.C10.window.P1",
@@ -8312,8 +8784,10 @@
         "doc168"
       ],
       "candidate": "streamstats window=0 count()",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C10.window.P1"
     },
     {
       "id": "E.C10.window.P2",
@@ -8322,8 +8796,10 @@
         "doc168"
       ],
       "candidate": "streamstats current=false window=3 avg(bytes)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C10.window.P2"
     },
     {
       "id": "E.C10.window.N1",
@@ -8332,8 +8808,10 @@
         "doc168"
       ],
       "candidate": "streamstats window=-1 count()",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C10.window.N1"
     },
     {
       "id": "E.C10.window.N2",
@@ -8342,8 +8820,10 @@
         "doc168"
       ],
       "candidate": "streamstats window=2.5 count()",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "pipeline-tail",
+      "case_id": "E.C10.window.N2"
     },
     {
       "id": "E.C16.type.P1",
@@ -14915,6 +15395,2574 @@
       "case_id": "T2.fix2.uppercase-over-access",
       "assembly": "standalone",
       "evidence": "independent-task2-prefix-ownership-review-witness"
+    },
+    {
+      "id": "T3.sort.wrapper.auto.0",
+      "form_id": "C12",
+      "source_keys": [
+        "doc164"
+      ],
+      "candidate": "FROM main | sort auto(user)",
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.sort.wrapper.auto.0"
+    },
+    {
+      "id": "T3.sort.wrapper.auto.1",
+      "form_id": "C12",
+      "source_keys": [
+        "doc164"
+      ],
+      "candidate": "FROM main | sort -auto(user),host",
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.sort.wrapper.auto.1"
+    },
+    {
+      "id": "T3.sort.wrapper.auto.2",
+      "form_id": "C12",
+      "source_keys": [
+        "doc164"
+      ],
+      "candidate": "FROM main | sort auto()",
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.sort.wrapper.auto.2"
+    },
+    {
+      "id": "T3.sort.wrapper.auto.3",
+      "form_id": "C12",
+      "source_keys": [
+        "doc164"
+      ],
+      "candidate": "FROM main | sort auto(user",
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.sort.wrapper.auto.3"
+    },
+    {
+      "id": "T3.sort.wrapper.ip.0",
+      "form_id": "C12",
+      "source_keys": [
+        "doc164"
+      ],
+      "candidate": "FROM main | sort ip(user)",
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.sort.wrapper.ip.0"
+    },
+    {
+      "id": "T3.sort.wrapper.ip.1",
+      "form_id": "C12",
+      "source_keys": [
+        "doc164"
+      ],
+      "candidate": "FROM main | sort -ip(user),host",
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.sort.wrapper.ip.1"
+    },
+    {
+      "id": "T3.sort.wrapper.ip.2",
+      "form_id": "C12",
+      "source_keys": [
+        "doc164"
+      ],
+      "candidate": "FROM main | sort ip()",
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.sort.wrapper.ip.2"
+    },
+    {
+      "id": "T3.sort.wrapper.ip.3",
+      "form_id": "C12",
+      "source_keys": [
+        "doc164"
+      ],
+      "candidate": "FROM main | sort ip(user",
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.sort.wrapper.ip.3"
+    },
+    {
+      "id": "T3.sort.wrapper.num.0",
+      "form_id": "C12",
+      "source_keys": [
+        "doc164"
+      ],
+      "candidate": "FROM main | sort num(user)",
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.sort.wrapper.num.0"
+    },
+    {
+      "id": "T3.sort.wrapper.num.1",
+      "form_id": "C12",
+      "source_keys": [
+        "doc164"
+      ],
+      "candidate": "FROM main | sort -num(user),host",
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.sort.wrapper.num.1"
+    },
+    {
+      "id": "T3.sort.wrapper.num.2",
+      "form_id": "C12",
+      "source_keys": [
+        "doc164"
+      ],
+      "candidate": "FROM main | sort num()",
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.sort.wrapper.num.2"
+    },
+    {
+      "id": "T3.sort.wrapper.num.3",
+      "form_id": "C12",
+      "source_keys": [
+        "doc164"
+      ],
+      "candidate": "FROM main | sort num(user",
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.sort.wrapper.num.3"
+    },
+    {
+      "id": "T3.sort.wrapper.str.0",
+      "form_id": "C12",
+      "source_keys": [
+        "doc164"
+      ],
+      "candidate": "FROM main | sort str(user)",
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.sort.wrapper.str.0"
+    },
+    {
+      "id": "T3.sort.wrapper.str.1",
+      "form_id": "C12",
+      "source_keys": [
+        "doc164"
+      ],
+      "candidate": "FROM main | sort -str(user),host",
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.sort.wrapper.str.1"
+    },
+    {
+      "id": "T3.sort.wrapper.str.2",
+      "form_id": "C12",
+      "source_keys": [
+        "doc164"
+      ],
+      "candidate": "FROM main | sort str()",
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.sort.wrapper.str.2"
+    },
+    {
+      "id": "T3.sort.wrapper.str.3",
+      "form_id": "C12",
+      "source_keys": [
+        "doc164"
+      ],
+      "candidate": "FROM main | sort str(user",
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.sort.wrapper.str.3"
+    },
+    {
+      "id": "T3.sort.sign.none.0",
+      "form_id": "C12",
+      "source_keys": [
+        "doc164"
+      ],
+      "candidate": "FROM main | sort bytes",
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.sort.sign.none.0"
+    },
+    {
+      "id": "T3.sort.sign.none.1",
+      "form_id": "C12",
+      "source_keys": [
+        "doc164"
+      ],
+      "candidate": "FROM main | sort host,bytes",
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.sort.sign.none.1"
+    },
+    {
+      "id": "T3.sort.sign.none.2",
+      "form_id": "C12",
+      "source_keys": [
+        "doc164"
+      ],
+      "candidate": "FROM main | sort host,",
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.sort.sign.none.2"
+    },
+    {
+      "id": "T3.sort.sign.+.0",
+      "form_id": "C12",
+      "source_keys": [
+        "doc164"
+      ],
+      "candidate": "FROM main | sort +bytes",
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.sort.sign.+.0"
+    },
+    {
+      "id": "T3.sort.sign.+.1",
+      "form_id": "C12",
+      "source_keys": [
+        "doc164"
+      ],
+      "candidate": "FROM main | sort host,+bytes",
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.sort.sign.+.1"
+    },
+    {
+      "id": "T3.sort.sign.+.2",
+      "form_id": "C12",
+      "source_keys": [
+        "doc164"
+      ],
+      "candidate": "FROM main | sort host,+",
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.sort.sign.+.2"
+    },
+    {
+      "id": "T3.sort.sign.-.0",
+      "form_id": "C12",
+      "source_keys": [
+        "doc164"
+      ],
+      "candidate": "FROM main | sort -bytes",
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.sort.sign.-.0"
+    },
+    {
+      "id": "T3.sort.sign.-.1",
+      "form_id": "C12",
+      "source_keys": [
+        "doc164"
+      ],
+      "candidate": "FROM main | sort host,-bytes",
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.sort.sign.-.1"
+    },
+    {
+      "id": "T3.sort.sign.-.2",
+      "form_id": "C12",
+      "source_keys": [
+        "doc164"
+      ],
+      "candidate": "FROM main | sort host,-",
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.sort.sign.-.2"
+    },
+    {
+      "id": "T3.held.table.0",
+      "form_id": "C06",
+      "source_keys": [
+        "doc169"
+      ],
+      "candidate": "FROM main | table \"host*\"",
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.held.table.0"
+    },
+    {
+      "id": "T3.held.table.1",
+      "form_id": "C06",
+      "source_keys": [
+        "doc169"
+      ],
+      "candidate": "FROM main | table 'host*'",
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.held.table.1"
+    },
+    {
+      "id": "T3.held.stream.0",
+      "form_id": "C10",
+      "source_keys": [
+        "doc168"
+      ],
+      "candidate": "FROM main | streamstats sum(size) BY server",
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.held.stream.0"
+    },
+    {
+      "id": "T3.held.stream.1",
+      "form_id": "C10",
+      "source_keys": [
+        "doc168"
+      ],
+      "candidate": "FROM main | streamstats count() reset after code=500",
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.held.stream.1"
+    },
+    {
+      "id": "T3.held.head.0",
+      "form_id": "C14",
+      "source_keys": [
+        "doc144"
+      ],
+      "candidate": "FROM main | head 4 while (size>0)",
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.held.head.0"
+    },
+    {
+      "id": "T3.held.head.1",
+      "form_id": "C14",
+      "source_keys": [
+        "doc144"
+      ],
+      "candidate": "FROM main | head 6 keeplast=false while (size>0)",
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.held.head.1"
+    },
+    {
+      "id": "T3.held.time.0",
+      "form_id": "C01",
+      "source_keys": [
+        "doc163"
+      ],
+      "candidate": "search index=app latest<@d",
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.held.time.0"
+    },
+    {
+      "id": "T3.held.time.1",
+      "form_id": "C01",
+      "source_keys": [
+        "doc163"
+      ],
+      "candidate": "search index=app earliest>=@d+1h",
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.held.time.1"
+    },
+    {
+      "id": "T3.rename.duplicate_source",
+      "form_id": "C07",
+      "source_keys": [
+        "doc158"
+      ],
+      "candidate": "FROM main | rename a AS x, a AS y",
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.rename.duplicate_source"
+    },
+    {
+      "id": "T3.rename.duplicate_target",
+      "form_id": "C07",
+      "source_keys": [
+        "doc158"
+      ],
+      "candidate": "FROM main | rename a AS x, b AS x",
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.rename.duplicate_target"
+    },
+    {
+      "id": "T3.rename.chain",
+      "form_id": "C07",
+      "source_keys": [
+        "doc158"
+      ],
+      "candidate": "FROM main | rename alpha AS beta, beta AS gamma",
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.rename.chain"
+    },
+    {
+      "id": "T3.rename.overlap",
+      "form_id": "C07",
+      "source_keys": [
+        "doc158"
+      ],
+      "candidate": "FROM main | rename a AS b, c AS a",
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.rename.overlap"
+    },
+    {
+      "id": "T3.rename.quoted_duplicate",
+      "form_id": "C07",
+      "source_keys": [
+        "doc158"
+      ],
+      "candidate": "FROM main | rename 'a' AS x, a AS y",
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.rename.quoted_duplicate"
+    },
+    {
+      "id": "T3.head.statistical",
+      "form_id": "C14",
+      "source_keys": [
+        "doc144"
+      ],
+      "candidate": "FROM main | head while (sum(bytes)>0)",
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.head.statistical"
+    },
+    {
+      "id": "T3.stats.arity",
+      "form_id": "C08",
+      "source_keys": [
+        "doc167"
+      ],
+      "candidate": "FROM main | stats count(a,b)",
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.stats.arity"
+    },
+    {
+      "id": "T3.fields.per_item",
+      "form_id": "C05",
+      "source_keys": [
+        "doc139"
+      ],
+      "candidate": "FROM main | fields a,-b",
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.fields.per_item"
+    },
+    {
+      "id": "T3.fields.bare_wildcard",
+      "form_id": "C05",
+      "source_keys": [
+        "doc139"
+      ],
+      "candidate": "FROM main | fields host*",
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.fields.bare_wildcard"
+    },
+    {
+      "id": "T3.table.sign",
+      "form_id": "C06",
+      "source_keys": [
+        "doc169"
+      ],
+      "candidate": "FROM main | table +host",
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.table.sign"
+    },
+    {
+      "id": "T3.sort.count_option",
+      "form_id": "C12",
+      "source_keys": [
+        "doc164"
+      ],
+      "candidate": "FROM main | sort count=1 host",
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.sort.count_option"
+    },
+    {
+      "id": "T3.dedup.removed",
+      "form_id": "C13",
+      "source_keys": [
+        "doc135"
+      ],
+      "candidate": "FROM main | dedup keepevents=true host",
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.dedup.removed"
+    },
+    {
+      "id": "T3.head.removed",
+      "form_id": "C14",
+      "source_keys": [
+        "doc144"
+      ],
+      "candidate": "FROM main | head null=true",
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.head.removed"
+    },
+    {
+      "id": "T3.stream.order",
+      "form_id": "C10",
+      "source_keys": [
+        "doc168"
+      ],
+      "candidate": "FROM main | streamstats window=3 current=true count()",
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.stream.order"
+    },
+    {
+      "id": "T3.rename.as",
+      "form_id": "C07",
+      "source_keys": [
+        "doc158"
+      ],
+      "candidate": "FROM main | rename user as owner, host AS machine",
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.rename.as"
+    },
+    {
+      "id": "T3.lookup.as",
+      "form_id": "C11",
+      "source_keys": [
+        "doc150"
+      ],
+      "candidate": "FROM main | lookup users uid as user OUTPUT display as name",
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.lookup.as"
+    },
+    {
+      "id": "T3.stats.omission",
+      "form_id": "C08",
+      "source_keys": [
+        "doc167"
+      ],
+      "candidate": "FROM main | stats count()",
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.stats.omission"
+    },
+    {
+      "id": "T3.stats.options",
+      "form_id": "C08",
+      "source_keys": [
+        "doc167"
+      ],
+      "candidate": "FROM main | stats allnum=false delim=\":\" partitions=2.5 count() AS n BY host",
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.stats.options"
+    },
+    {
+      "id": "T3.event.omission",
+      "form_id": "C09",
+      "source_keys": [
+        "doc137"
+      ],
+      "candidate": "FROM main | eventstats count()",
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.event.omission"
+    },
+    {
+      "id": "T3.stream.omission",
+      "form_id": "C10",
+      "source_keys": [
+        "doc168"
+      ],
+      "candidate": "FROM main | streamstats count()",
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.stream.omission"
+    },
+    {
+      "id": "T3.dedup.omission",
+      "form_id": "C13",
+      "source_keys": [
+        "doc135"
+      ],
+      "candidate": "FROM main | dedup user",
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.dedup.omission"
+    },
+    {
+      "id": "T3.dedup.options",
+      "form_id": "C13",
+      "source_keys": [
+        "doc135"
+      ],
+      "candidate": "FROM main | dedup 2 keepempty=false consecutive=true user,host",
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.dedup.options"
+    },
+    {
+      "id": "T3.head.omission",
+      "form_id": "C14",
+      "source_keys": [
+        "doc144"
+      ],
+      "candidate": "FROM main | head",
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "E.C14.count.P1"
+    },
+    {
+      "id": "T3.stats.unknown",
+      "form_id": "C08",
+      "source_keys": [
+        "doc167"
+      ],
+      "candidate": "FROM main | stats unproved=true count()",
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.stats.unknown"
+    },
+    {
+      "id": "T3.event.unknown",
+      "form_id": "C09",
+      "source_keys": [
+        "doc137"
+      ],
+      "candidate": "FROM main | eventstats unproved=true count()",
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.event.unknown"
+    },
+    {
+      "id": "T3.stream.unknown",
+      "form_id": "C10",
+      "source_keys": [
+        "doc168"
+      ],
+      "candidate": "FROM main | streamstats unproved=true count()",
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.stream.unknown"
+    },
+    {
+      "id": "T3.dedup.unknown",
+      "form_id": "C13",
+      "source_keys": [
+        "doc135"
+      ],
+      "candidate": "FROM main | dedup unproved=true host",
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.dedup.unknown"
+    },
+    {
+      "id": "T3.head.unknown",
+      "form_id": "C14",
+      "source_keys": [
+        "doc144"
+      ],
+      "candidate": "FROM main | head unproved=true",
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.head.unknown"
+    },
+    {
+      "id": "T3.search.single_in",
+      "form_id": "C01",
+      "source_keys": [
+        "doc163"
+      ],
+      "candidate": "search index=app code IN (401)",
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.search.single_in"
+    },
+    {
+      "id": "T3.typed.lookup",
+      "form_id": "C11",
+      "source_keys": [
+        "doc150"
+      ],
+      "candidate": "FROM main\r\n| lookup people key AS 'café', realm AS domain OUTPUT title AS role, team",
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.typed.lookup"
+    },
+    {
+      "id": "T3.typed.assign",
+      "form_id": "C03",
+      "source_keys": [
+        "doc136"
+      ],
+      "candidate": "FROM main | eval x=bytes, y=x+1",
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.typed.assign"
+    },
+    {
+      "id": "T3.typed.stream",
+      "form_id": "C10",
+      "source_keys": [
+        "doc168"
+      ],
+      "candidate": "FROM main | streamstats BY host current=false reset before code=500 after action=\"STOP\" onchange window=3 sum(bytes) AS total",
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.typed.stream"
+    },
+    {
+      "id": "T3.search.comparison.=.positive0",
+      "form_id": "C01",
+      "candidate": "search index=app bytes=2",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.search.comparison.=.positive0"
+    },
+    {
+      "id": "T3.search.comparison.=.missing0",
+      "form_id": "C01",
+      "candidate": "search index=app bytes=",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.search.comparison.=.missing0"
+    },
+    {
+      "id": "T3.search.comparison.=.unclosed0",
+      "form_id": "C01",
+      "candidate": "search index=app bytes=\"oops",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.search.comparison.=.unclosed0"
+    },
+    {
+      "id": "T3.search.comparison.=.positive1",
+      "form_id": "C01",
+      "candidate": "search index=app rate=2.5",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.search.comparison.=.positive1"
+    },
+    {
+      "id": "T3.search.comparison.=.missing1",
+      "form_id": "C01",
+      "candidate": "search index=app rate=",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.search.comparison.=.missing1"
+    },
+    {
+      "id": "T3.search.comparison.=.unclosed1",
+      "form_id": "C01",
+      "candidate": "search index=app rate=\"oops",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.search.comparison.=.unclosed1"
+    },
+    {
+      "id": "T3.search.comparison.!=.positive0",
+      "form_id": "C01",
+      "candidate": "search index=app bytes!=2",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.search.comparison.!=.positive0"
+    },
+    {
+      "id": "T3.search.comparison.!=.missing0",
+      "form_id": "C01",
+      "candidate": "search index=app bytes!=",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.search.comparison.!=.missing0"
+    },
+    {
+      "id": "T3.search.comparison.!=.unclosed0",
+      "form_id": "C01",
+      "candidate": "search index=app bytes!=\"oops",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.search.comparison.!=.unclosed0"
+    },
+    {
+      "id": "T3.search.comparison.!=.positive1",
+      "form_id": "C01",
+      "candidate": "search index=app rate!=2.5",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.search.comparison.!=.positive1"
+    },
+    {
+      "id": "T3.search.comparison.!=.missing1",
+      "form_id": "C01",
+      "candidate": "search index=app rate!=",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.search.comparison.!=.missing1"
+    },
+    {
+      "id": "T3.search.comparison.!=.unclosed1",
+      "form_id": "C01",
+      "candidate": "search index=app rate!=\"oops",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.search.comparison.!=.unclosed1"
+    },
+    {
+      "id": "T3.search.comparison.<.positive0",
+      "form_id": "C01",
+      "candidate": "search index=app bytes<2",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.search.comparison.<.positive0"
+    },
+    {
+      "id": "T3.search.comparison.<.missing0",
+      "form_id": "C01",
+      "candidate": "search index=app bytes<",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.search.comparison.<.missing0"
+    },
+    {
+      "id": "T3.search.comparison.<.unclosed0",
+      "form_id": "C01",
+      "candidate": "search index=app bytes<\"oops",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.search.comparison.<.unclosed0"
+    },
+    {
+      "id": "T3.search.comparison.<.positive1",
+      "form_id": "C01",
+      "candidate": "search index=app rate<2.5",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.search.comparison.<.positive1"
+    },
+    {
+      "id": "T3.search.comparison.<.missing1",
+      "form_id": "C01",
+      "candidate": "search index=app rate<",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.search.comparison.<.missing1"
+    },
+    {
+      "id": "T3.search.comparison.<.unclosed1",
+      "form_id": "C01",
+      "candidate": "search index=app rate<\"oops",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.search.comparison.<.unclosed1"
+    },
+    {
+      "id": "T3.search.comparison.<=.positive0",
+      "form_id": "C01",
+      "candidate": "search index=app bytes<=2",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.search.comparison.<=.positive0"
+    },
+    {
+      "id": "T3.search.comparison.<=.missing0",
+      "form_id": "C01",
+      "candidate": "search index=app bytes<=",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.search.comparison.<=.missing0"
+    },
+    {
+      "id": "T3.search.comparison.<=.unclosed0",
+      "form_id": "C01",
+      "candidate": "search index=app bytes<=\"oops",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.search.comparison.<=.unclosed0"
+    },
+    {
+      "id": "T3.search.comparison.<=.positive1",
+      "form_id": "C01",
+      "candidate": "search index=app rate<=2.5",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.search.comparison.<=.positive1"
+    },
+    {
+      "id": "T3.search.comparison.<=.missing1",
+      "form_id": "C01",
+      "candidate": "search index=app rate<=",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.search.comparison.<=.missing1"
+    },
+    {
+      "id": "T3.search.comparison.<=.unclosed1",
+      "form_id": "C01",
+      "candidate": "search index=app rate<=\"oops",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.search.comparison.<=.unclosed1"
+    },
+    {
+      "id": "T3.search.comparison.>.positive0",
+      "form_id": "C01",
+      "candidate": "search index=app bytes>2",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.search.comparison.>.positive0"
+    },
+    {
+      "id": "T3.search.comparison.>.missing0",
+      "form_id": "C01",
+      "candidate": "search index=app bytes>",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.search.comparison.>.missing0"
+    },
+    {
+      "id": "T3.search.comparison.>.unclosed0",
+      "form_id": "C01",
+      "candidate": "search index=app bytes>\"oops",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.search.comparison.>.unclosed0"
+    },
+    {
+      "id": "T3.search.comparison.>.positive1",
+      "form_id": "C01",
+      "candidate": "search index=app rate>2.5",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.search.comparison.>.positive1"
+    },
+    {
+      "id": "T3.search.comparison.>.missing1",
+      "form_id": "C01",
+      "candidate": "search index=app rate>",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.search.comparison.>.missing1"
+    },
+    {
+      "id": "T3.search.comparison.>.unclosed1",
+      "form_id": "C01",
+      "candidate": "search index=app rate>\"oops",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.search.comparison.>.unclosed1"
+    },
+    {
+      "id": "T3.search.comparison.>=.positive0",
+      "form_id": "C01",
+      "candidate": "search index=app bytes>=2",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.search.comparison.>=.positive0"
+    },
+    {
+      "id": "T3.search.comparison.>=.missing0",
+      "form_id": "C01",
+      "candidate": "search index=app bytes>=",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.search.comparison.>=.missing0"
+    },
+    {
+      "id": "T3.search.comparison.>=.unclosed0",
+      "form_id": "C01",
+      "candidate": "search index=app bytes>=\"oops",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.search.comparison.>=.unclosed0"
+    },
+    {
+      "id": "T3.search.comparison.>=.positive1",
+      "form_id": "C01",
+      "candidate": "search index=app rate>=2.5",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.search.comparison.>=.positive1"
+    },
+    {
+      "id": "T3.search.comparison.>=.missing1",
+      "form_id": "C01",
+      "candidate": "search index=app rate>=",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.search.comparison.>=.missing1"
+    },
+    {
+      "id": "T3.search.comparison.>=.unclosed1",
+      "form_id": "C01",
+      "candidate": "search index=app rate>=\"oops",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.search.comparison.>=.unclosed1"
+    },
+    {
+      "id": "T3.search.selector.index.positive0",
+      "form_id": "C01",
+      "candidate": "search index=\"app\"",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.search.selector.index.positive0"
+    },
+    {
+      "id": "T3.search.selector.index.positive1",
+      "form_id": "C01",
+      "candidate": "search index=\"app\" failure",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.search.selector.index.positive1"
+    },
+    {
+      "id": "T3.search.selector.index.negative0",
+      "form_id": "C01",
+      "candidate": "search index=",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.search.selector.index.negative0"
+    },
+    {
+      "id": "T3.search.selector.index.negative1",
+      "form_id": "C01",
+      "candidate": "search index=\"app",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.search.selector.index.negative1"
+    },
+    {
+      "id": "T3.search.selector.source.positive0",
+      "form_id": "C01",
+      "candidate": "search source=\"app\"",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.search.selector.source.positive0"
+    },
+    {
+      "id": "T3.search.selector.source.positive1",
+      "form_id": "C01",
+      "candidate": "search source=\"app\" failure",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.search.selector.source.positive1"
+    },
+    {
+      "id": "T3.search.selector.source.negative0",
+      "form_id": "C01",
+      "candidate": "search source=",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.search.selector.source.negative0"
+    },
+    {
+      "id": "T3.search.selector.source.negative1",
+      "form_id": "C01",
+      "candidate": "search source=\"app",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.search.selector.source.negative1"
+    },
+    {
+      "id": "T3.search.selector.sourcetype.positive0",
+      "form_id": "C01",
+      "candidate": "search sourcetype=\"app\"",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.search.selector.sourcetype.positive0"
+    },
+    {
+      "id": "T3.search.selector.sourcetype.positive1",
+      "form_id": "C01",
+      "candidate": "search sourcetype=\"app\" failure",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.search.selector.sourcetype.positive1"
+    },
+    {
+      "id": "T3.search.selector.sourcetype.negative0",
+      "form_id": "C01",
+      "candidate": "search sourcetype=",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.search.selector.sourcetype.negative0"
+    },
+    {
+      "id": "T3.search.selector.sourcetype.negative1",
+      "form_id": "C01",
+      "candidate": "search sourcetype=\"app",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.search.selector.sourcetype.negative1"
+    },
+    {
+      "id": "T3.search.selector.host.positive0",
+      "form_id": "C01",
+      "candidate": "search host=\"app\"",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.search.selector.host.positive0"
+    },
+    {
+      "id": "T3.search.selector.host.positive1",
+      "form_id": "C01",
+      "candidate": "search host=\"app\" failure",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.search.selector.host.positive1"
+    },
+    {
+      "id": "T3.search.selector.host.negative0",
+      "form_id": "C01",
+      "candidate": "search host=",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.search.selector.host.negative0"
+    },
+    {
+      "id": "T3.search.selector.host.negative1",
+      "form_id": "C01",
+      "candidate": "search host=\"app",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.search.selector.host.negative1"
+    },
+    {
+      "id": "T3.boolean.search.AND.0",
+      "form_id": "C01",
+      "candidate": "search index=app a=1 AND b=2",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.boolean.search.AND.0"
+    },
+    {
+      "id": "T3.boolean.search.AND.1",
+      "form_id": "C01",
+      "candidate": "search index=app (a=1 AND b=2)",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.boolean.search.AND.1"
+    },
+    {
+      "id": "T3.boolean.search.AND.2",
+      "form_id": "C01",
+      "candidate": "search index=app a=1 AND",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.boolean.search.AND.2"
+    },
+    {
+      "id": "T3.boolean.search.AND.3",
+      "form_id": "C01",
+      "candidate": "search index=app a=1 AND AND b=2",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.boolean.search.AND.3"
+    },
+    {
+      "id": "T3.boolean.where.AND.0",
+      "form_id": "C04",
+      "candidate": "FROM main | where a=1 AND b=2",
+      "source_keys": [
+        "doc178"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.boolean.where.AND.0"
+    },
+    {
+      "id": "T3.boolean.where.AND.1",
+      "form_id": "C04",
+      "candidate": "FROM main | where (a=1 AND b=2)",
+      "source_keys": [
+        "doc178"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.boolean.where.AND.1"
+    },
+    {
+      "id": "T3.boolean.where.AND.2",
+      "form_id": "C04",
+      "candidate": "FROM main | where a=1 AND",
+      "source_keys": [
+        "doc178"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.boolean.where.AND.2"
+    },
+    {
+      "id": "T3.boolean.where.AND.3",
+      "form_id": "C04",
+      "candidate": "FROM main | where a=1 AND AND b=2",
+      "source_keys": [
+        "doc178"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.boolean.where.AND.3"
+    },
+    {
+      "id": "T3.boolean.search.OR.0",
+      "form_id": "C01",
+      "candidate": "search index=app a=1 OR b=2",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.boolean.search.OR.0"
+    },
+    {
+      "id": "T3.boolean.search.OR.1",
+      "form_id": "C01",
+      "candidate": "search index=app (a=1 OR b=2)",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.boolean.search.OR.1"
+    },
+    {
+      "id": "T3.boolean.search.OR.2",
+      "form_id": "C01",
+      "candidate": "search index=app a=1 OR",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.boolean.search.OR.2"
+    },
+    {
+      "id": "T3.boolean.search.OR.3",
+      "form_id": "C01",
+      "candidate": "search index=app a=1 OR OR b=2",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.boolean.search.OR.3"
+    },
+    {
+      "id": "T3.boolean.where.OR.0",
+      "form_id": "C04",
+      "candidate": "FROM main | where a=1 OR b=2",
+      "source_keys": [
+        "doc178"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.boolean.where.OR.0"
+    },
+    {
+      "id": "T3.boolean.where.OR.1",
+      "form_id": "C04",
+      "candidate": "FROM main | where (a=1 OR b=2)",
+      "source_keys": [
+        "doc178"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.boolean.where.OR.1"
+    },
+    {
+      "id": "T3.boolean.where.OR.2",
+      "form_id": "C04",
+      "candidate": "FROM main | where a=1 OR",
+      "source_keys": [
+        "doc178"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.boolean.where.OR.2"
+    },
+    {
+      "id": "T3.boolean.where.OR.3",
+      "form_id": "C04",
+      "candidate": "FROM main | where a=1 OR OR b=2",
+      "source_keys": [
+        "doc178"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.boolean.where.OR.3"
+    },
+    {
+      "id": "T3.boolean.search.XOR.0",
+      "form_id": "C01",
+      "candidate": "search index=app a=1 XOR b=2",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.boolean.search.XOR.0"
+    },
+    {
+      "id": "T3.boolean.search.XOR.1",
+      "form_id": "C01",
+      "candidate": "search index=app (a=1 XOR b=2)",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.boolean.search.XOR.1"
+    },
+    {
+      "id": "T3.boolean.search.XOR.2",
+      "form_id": "C01",
+      "candidate": "search index=app a=1 XOR",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.boolean.search.XOR.2"
+    },
+    {
+      "id": "T3.boolean.search.XOR.3",
+      "form_id": "C01",
+      "candidate": "search index=app a=1 XOR XOR b=2",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.boolean.search.XOR.3"
+    },
+    {
+      "id": "T3.boolean.where.XOR.0",
+      "form_id": "C04",
+      "candidate": "FROM main | where a=1 XOR b=2",
+      "source_keys": [
+        "doc178"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.boolean.where.XOR.0"
+    },
+    {
+      "id": "T3.boolean.where.XOR.1",
+      "form_id": "C04",
+      "candidate": "FROM main | where (a=1 XOR b=2)",
+      "source_keys": [
+        "doc178"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.boolean.where.XOR.1"
+    },
+    {
+      "id": "T3.boolean.where.XOR.2",
+      "form_id": "C04",
+      "candidate": "FROM main | where a=1 XOR",
+      "source_keys": [
+        "doc178"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.boolean.where.XOR.2"
+    },
+    {
+      "id": "T3.boolean.where.XOR.3",
+      "form_id": "C04",
+      "candidate": "FROM main | where a=1 XOR XOR b=2",
+      "source_keys": [
+        "doc178"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.boolean.where.XOR.3"
+    },
+    {
+      "id": "T3.aggregate.arity.sum.0",
+      "form_id": "C08",
+      "candidate": "FROM main | stats sum(bytes) AS result",
+      "source_keys": [
+        "doc167"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.aggregate.arity.sum.0"
+    },
+    {
+      "id": "T3.aggregate.arity.sum.1",
+      "form_id": "C08",
+      "candidate": "FROM main | stats sum(duration) AS result",
+      "source_keys": [
+        "doc167"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.aggregate.arity.sum.1"
+    },
+    {
+      "id": "T3.aggregate.arity.sum.2",
+      "form_id": "C08",
+      "candidate": "FROM main | stats sum() AS result",
+      "source_keys": [
+        "doc167"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.aggregate.arity.sum.2"
+    },
+    {
+      "id": "T3.aggregate.arity.sum.3",
+      "form_id": "C08",
+      "candidate": "FROM main | stats sum(bytes,duration) AS result",
+      "source_keys": [
+        "doc167"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.aggregate.arity.sum.3"
+    },
+    {
+      "id": "T3.aggregate.arity.avg.0",
+      "form_id": "C08",
+      "candidate": "FROM main | stats avg(bytes) AS result",
+      "source_keys": [
+        "doc167"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.aggregate.arity.avg.0"
+    },
+    {
+      "id": "T3.aggregate.arity.avg.1",
+      "form_id": "C08",
+      "candidate": "FROM main | stats avg(duration) AS result",
+      "source_keys": [
+        "doc167"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.aggregate.arity.avg.1"
+    },
+    {
+      "id": "T3.aggregate.arity.avg.2",
+      "form_id": "C08",
+      "candidate": "FROM main | stats avg() AS result",
+      "source_keys": [
+        "doc167"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.aggregate.arity.avg.2"
+    },
+    {
+      "id": "T3.aggregate.arity.avg.3",
+      "form_id": "C08",
+      "candidate": "FROM main | stats avg(bytes,duration) AS result",
+      "source_keys": [
+        "doc167"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.aggregate.arity.avg.3"
+    },
+    {
+      "id": "T3.aggregate.arity.min.0",
+      "form_id": "C08",
+      "candidate": "FROM main | stats min(bytes) AS result",
+      "source_keys": [
+        "doc167"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.aggregate.arity.min.0"
+    },
+    {
+      "id": "T3.aggregate.arity.min.1",
+      "form_id": "C08",
+      "candidate": "FROM main | stats min(duration) AS result",
+      "source_keys": [
+        "doc167"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.aggregate.arity.min.1"
+    },
+    {
+      "id": "T3.aggregate.arity.min.2",
+      "form_id": "C08",
+      "candidate": "FROM main | stats min() AS result",
+      "source_keys": [
+        "doc167"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.aggregate.arity.min.2"
+    },
+    {
+      "id": "T3.aggregate.arity.min.3",
+      "form_id": "C08",
+      "candidate": "FROM main | stats min(bytes,duration) AS result",
+      "source_keys": [
+        "doc167"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.aggregate.arity.min.3"
+    },
+    {
+      "id": "T3.aggregate.arity.max.0",
+      "form_id": "C08",
+      "candidate": "FROM main | stats max(bytes) AS result",
+      "source_keys": [
+        "doc167"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.aggregate.arity.max.0"
+    },
+    {
+      "id": "T3.aggregate.arity.max.1",
+      "form_id": "C08",
+      "candidate": "FROM main | stats max(duration) AS result",
+      "source_keys": [
+        "doc167"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.aggregate.arity.max.1"
+    },
+    {
+      "id": "T3.aggregate.arity.max.2",
+      "form_id": "C08",
+      "candidate": "FROM main | stats max() AS result",
+      "source_keys": [
+        "doc167"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.aggregate.arity.max.2"
+    },
+    {
+      "id": "T3.aggregate.arity.max.3",
+      "form_id": "C08",
+      "candidate": "FROM main | stats max(bytes,duration) AS result",
+      "source_keys": [
+        "doc167"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.aggregate.arity.max.3"
+    },
+    {
+      "id": "T3.aggregate.arity.dc.0",
+      "form_id": "C08",
+      "candidate": "FROM main | stats dc(bytes) AS result",
+      "source_keys": [
+        "doc167"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.aggregate.arity.dc.0"
+    },
+    {
+      "id": "T3.aggregate.arity.dc.1",
+      "form_id": "C08",
+      "candidate": "FROM main | stats dc(duration) AS result",
+      "source_keys": [
+        "doc167"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.aggregate.arity.dc.1"
+    },
+    {
+      "id": "T3.aggregate.arity.dc.2",
+      "form_id": "C08",
+      "candidate": "FROM main | stats dc() AS result",
+      "source_keys": [
+        "doc167"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.aggregate.arity.dc.2"
+    },
+    {
+      "id": "T3.aggregate.arity.dc.3",
+      "form_id": "C08",
+      "candidate": "FROM main | stats dc(bytes,duration) AS result",
+      "source_keys": [
+        "doc167"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.aggregate.arity.dc.3"
+    },
+    {
+      "id": "T3.aggregate.arity.distinct_count.0",
+      "form_id": "C08",
+      "candidate": "FROM main | stats distinct_count(bytes) AS result",
+      "source_keys": [
+        "doc167"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.aggregate.arity.distinct_count.0"
+    },
+    {
+      "id": "T3.aggregate.arity.distinct_count.1",
+      "form_id": "C08",
+      "candidate": "FROM main | stats distinct_count(duration) AS result",
+      "source_keys": [
+        "doc167"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.aggregate.arity.distinct_count.1"
+    },
+    {
+      "id": "T3.aggregate.arity.distinct_count.2",
+      "form_id": "C08",
+      "candidate": "FROM main | stats distinct_count() AS result",
+      "source_keys": [
+        "doc167"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.aggregate.arity.distinct_count.2"
+    },
+    {
+      "id": "T3.aggregate.arity.distinct_count.3",
+      "form_id": "C08",
+      "candidate": "FROM main | stats distinct_count(bytes,duration) AS result",
+      "source_keys": [
+        "doc167"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.aggregate.arity.distinct_count.3"
+    },
+    {
+      "id": "T3.aggregate.arity.values.0",
+      "form_id": "C08",
+      "candidate": "FROM main | stats values(bytes) AS result",
+      "source_keys": [
+        "doc167"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.aggregate.arity.values.0"
+    },
+    {
+      "id": "T3.aggregate.arity.values.1",
+      "form_id": "C08",
+      "candidate": "FROM main | stats values(duration) AS result",
+      "source_keys": [
+        "doc167"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.aggregate.arity.values.1"
+    },
+    {
+      "id": "T3.aggregate.arity.values.2",
+      "form_id": "C08",
+      "candidate": "FROM main | stats values() AS result",
+      "source_keys": [
+        "doc167"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.aggregate.arity.values.2"
+    },
+    {
+      "id": "T3.aggregate.arity.values.3",
+      "form_id": "C08",
+      "candidate": "FROM main | stats values(bytes,duration) AS result",
+      "source_keys": [
+        "doc167"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.aggregate.arity.values.3"
+    },
+    {
+      "id": "T3.aggregate.arity.list.0",
+      "form_id": "C08",
+      "candidate": "FROM main | stats list(bytes) AS result",
+      "source_keys": [
+        "doc167"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.aggregate.arity.list.0"
+    },
+    {
+      "id": "T3.aggregate.arity.list.1",
+      "form_id": "C08",
+      "candidate": "FROM main | stats list(duration) AS result",
+      "source_keys": [
+        "doc167"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.aggregate.arity.list.1"
+    },
+    {
+      "id": "T3.aggregate.arity.list.2",
+      "form_id": "C08",
+      "candidate": "FROM main | stats list() AS result",
+      "source_keys": [
+        "doc167"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.aggregate.arity.list.2"
+    },
+    {
+      "id": "T3.aggregate.arity.list.3",
+      "form_id": "C08",
+      "candidate": "FROM main | stats list(bytes,duration) AS result",
+      "source_keys": [
+        "doc167"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.aggregate.arity.list.3"
+    },
+    {
+      "id": "T3.aggregate.arity.first.0",
+      "form_id": "C08",
+      "candidate": "FROM main | stats first(bytes) AS result",
+      "source_keys": [
+        "doc167"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.aggregate.arity.first.0"
+    },
+    {
+      "id": "T3.aggregate.arity.first.1",
+      "form_id": "C08",
+      "candidate": "FROM main | stats first(duration) AS result",
+      "source_keys": [
+        "doc167"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.aggregate.arity.first.1"
+    },
+    {
+      "id": "T3.aggregate.arity.first.2",
+      "form_id": "C08",
+      "candidate": "FROM main | stats first() AS result",
+      "source_keys": [
+        "doc167"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.aggregate.arity.first.2"
+    },
+    {
+      "id": "T3.aggregate.arity.first.3",
+      "form_id": "C08",
+      "candidate": "FROM main | stats first(bytes,duration) AS result",
+      "source_keys": [
+        "doc167"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.aggregate.arity.first.3"
+    },
+    {
+      "id": "T3.aggregate.arity.last.0",
+      "form_id": "C08",
+      "candidate": "FROM main | stats last(bytes) AS result",
+      "source_keys": [
+        "doc167"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.aggregate.arity.last.0"
+    },
+    {
+      "id": "T3.aggregate.arity.last.1",
+      "form_id": "C08",
+      "candidate": "FROM main | stats last(duration) AS result",
+      "source_keys": [
+        "doc167"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.aggregate.arity.last.1"
+    },
+    {
+      "id": "T3.aggregate.arity.last.2",
+      "form_id": "C08",
+      "candidate": "FROM main | stats last() AS result",
+      "source_keys": [
+        "doc167"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.aggregate.arity.last.2"
+    },
+    {
+      "id": "T3.aggregate.arity.last.3",
+      "form_id": "C08",
+      "candidate": "FROM main | stats last(bytes,duration) AS result",
+      "source_keys": [
+        "doc167"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.aggregate.arity.last.3"
+    },
+    {
+      "id": "T3.aggregate.arity.count.0",
+      "form_id": "C08",
+      "candidate": "FROM main | stats count() AS n",
+      "source_keys": [
+        "doc167"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.aggregate.arity.count.0"
+    },
+    {
+      "id": "T3.aggregate.arity.count.1",
+      "form_id": "C08",
+      "candidate": "FROM main | stats count(user) AS n",
+      "source_keys": [
+        "doc167"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.aggregate.arity.count.1"
+    },
+    {
+      "id": "T3.aggregate.arity.count.2",
+      "form_id": "C08",
+      "candidate": "FROM main | stats count(code=201) AS n",
+      "source_keys": [
+        "doc167"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.aggregate.arity.count.2"
+    },
+    {
+      "id": "T3.aggregate.arity.count.3",
+      "form_id": "C08",
+      "candidate": "FROM main | stats count(user,code) AS n",
+      "source_keys": [
+        "doc167"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.aggregate.arity.count.3"
+    },
+    {
+      "id": "T3.stats.profile.option.0",
+      "form_id": "C08",
+      "candidate": "FROM main | stats mode=summary count()",
+      "source_keys": [
+        "doc167"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.stats.profile.option.0"
+    },
+    {
+      "id": "T3.stats.profile.option.1",
+      "form_id": "C08",
+      "candidate": "FROM main | stats prestats=raw count()",
+      "source_keys": [
+        "doc167"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.stats.profile.option.1"
+    },
+    {
+      "id": "T3.stats.profile.option.2",
+      "form_id": "C08",
+      "candidate": "FROM main | stats annotations=true count()",
+      "source_keys": [
+        "doc167"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.stats.profile.option.2"
+    },
+    {
+      "id": "T3.lookup.removed.option.0",
+      "form_id": "C11",
+      "candidate": "FROM main | lookup local=true users uid OUTPUT name",
+      "source_keys": [
+        "doc150"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.lookup.removed.option.0"
+    },
+    {
+      "id": "T3.lookup.removed.option.1",
+      "form_id": "C11",
+      "candidate": "FROM main | lookup update=true users uid OUTPUT name",
+      "source_keys": [
+        "doc150"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.lookup.removed.option.1"
+    },
+    {
+      "id": "T3.table.quote.exact.0",
+      "form_id": "C06",
+      "candidate": "FROM main | table \"host\"",
+      "source_keys": [
+        "doc169"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.table.quote.exact.0"
+    },
+    {
+      "id": "T3.search.time.unknown.0",
+      "form_id": "C01",
+      "candidate": "search index=app earliest=unproved",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.search.time.unknown.0"
+    },
+    {
+      "id": "T3.stream.group.span.0",
+      "form_id": "C10",
+      "candidate": "FROM main | streamstats BY _time span=1h count()",
+      "source_keys": [
+        "doc168"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.stream.group.span.0"
+    },
+    {
+      "id": "T3.stats.repeated.option.0",
+      "form_id": "C08",
+      "candidate": "FROM main | stats allnum=true allnum=false count()",
+      "source_keys": [
+        "doc167"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.stats.repeated.option.0"
+    },
+    {
+      "id": "T3.named.aggregate.boundary.0",
+      "form_id": "C08",
+      "candidate": "FROM main | stats sum(values:bytes) AS total",
+      "source_keys": [
+        "doc167"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.named.aggregate.boundary.0"
+    },
+    {
+      "id": "T3.scalar.min.boundary.0",
+      "form_id": "C14",
+      "candidate": "FROM main | head while (min(a,b)>0)",
+      "source_keys": [
+        "doc144"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.scalar.min.boundary.0"
+    },
+    {
+      "id": "T3.recovery.invalid.hold.0",
+      "form_id": "C03",
+      "candidate": "FROM main | eval x= | table 'host*'",
+      "source_keys": [
+        "doc136"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.recovery.invalid.hold.0"
+    },
+    {
+      "id": "T3.rename.decoded.duplicate.0",
+      "form_id": "C07",
+      "candidate": "FROM main | rename '\\u0061' AS x, a AS y",
+      "source_keys": [
+        "doc158"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.rename.decoded.duplicate.0"
+    },
+    {
+      "id": "T3.rename.scope.independent.0",
+      "form_id": "C07",
+      "candidate": "FROM main | rename a AS b | rename b AS c",
+      "source_keys": [
+        "doc158"
+      ],
+      "evidence": "task3-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.rename.scope.independent.0"
+    },
+    {
+      "id": "T3.alias.stats.0",
+      "form_id": "C08",
+      "candidate": "FROM main | stats avg(bytes) as 'avg of bytes'",
+      "source_keys": [
+        "doc167"
+      ],
+      "evidence": "task3-source-specific-alias-2026-09-08-controller-verification",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.alias.stats.0"
+    },
+    {
+      "id": "T3.alias.stats.1",
+      "form_id": "C08",
+      "candidate": "FROM main | stats count() as n, sum(bytes) AS total",
+      "source_keys": [
+        "doc167"
+      ],
+      "evidence": "task3-source-specific-alias-2026-09-08-controller-verification",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.alias.stats.1"
+    },
+    {
+      "id": "T3.alias.stats.2",
+      "form_id": "C08",
+      "candidate": "FROM main | stats count() as",
+      "source_keys": [
+        "doc167"
+      ],
+      "evidence": "task3-source-specific-alias-2026-09-08-controller-verification",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.alias.stats.2"
+    },
+    {
+      "id": "T3.alias.stats.3",
+      "form_id": "C08",
+      "candidate": "FROM main | stats count() as n sum(bytes) AS total",
+      "source_keys": [
+        "doc167"
+      ],
+      "evidence": "task3-source-specific-alias-2026-09-08-controller-verification",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.alias.stats.3"
+    },
+    {
+      "id": "T3.alias.eventstats.0",
+      "form_id": "C09",
+      "candidate": "FROM main | eventstats avg(bytes) as 'avg of bytes'",
+      "source_keys": [
+        "doc137"
+      ],
+      "evidence": "task3-source-specific-alias-2026-09-08-controller-verification",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.alias.eventstats.0"
+    },
+    {
+      "id": "T3.alias.eventstats.1",
+      "form_id": "C09",
+      "candidate": "FROM main | eventstats count() as n, sum(bytes) AS total",
+      "source_keys": [
+        "doc137"
+      ],
+      "evidence": "task3-source-specific-alias-2026-09-08-controller-verification",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.alias.eventstats.1"
+    },
+    {
+      "id": "T3.alias.eventstats.2",
+      "form_id": "C09",
+      "candidate": "FROM main | eventstats count() as",
+      "source_keys": [
+        "doc137"
+      ],
+      "evidence": "task3-source-specific-alias-2026-09-08-controller-verification",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.alias.eventstats.2"
+    },
+    {
+      "id": "T3.alias.eventstats.3",
+      "form_id": "C09",
+      "candidate": "FROM main | eventstats count() as n sum(bytes) AS total",
+      "source_keys": [
+        "doc137"
+      ],
+      "evidence": "task3-source-specific-alias-2026-09-08-controller-verification",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.alias.eventstats.3"
+    },
+    {
+      "id": "T3.alias.streamstats.0",
+      "form_id": "C10",
+      "candidate": "FROM main | streamstats avg(bytes) as 'avg of bytes'",
+      "source_keys": [
+        "doc168"
+      ],
+      "evidence": "task3-source-specific-alias-2026-09-08-controller-verification",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.alias.streamstats.0"
+    },
+    {
+      "id": "T3.alias.streamstats.1",
+      "form_id": "C10",
+      "candidate": "FROM main | streamstats count() as n, sum(bytes) AS total",
+      "source_keys": [
+        "doc168"
+      ],
+      "evidence": "task3-source-specific-alias-2026-09-08-controller-verification",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.alias.streamstats.1"
+    },
+    {
+      "id": "T3.alias.streamstats.2",
+      "form_id": "C10",
+      "candidate": "FROM main | streamstats count() as",
+      "source_keys": [
+        "doc168"
+      ],
+      "evidence": "task3-source-specific-alias-2026-09-08-controller-verification",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.alias.streamstats.2"
+    },
+    {
+      "id": "T3.alias.streamstats.3",
+      "form_id": "C10",
+      "candidate": "FROM main | streamstats count() as n sum(bytes) AS total",
+      "source_keys": [
+        "doc168"
+      ],
+      "evidence": "task3-source-specific-alias-2026-09-08-controller-verification",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.alias.streamstats.3"
+    },
+    {
+      "id": "T3.recovery.contract.0",
+      "form_id": "C08",
+      "candidate": "FROM main | stats sum(",
+      "source_keys": [
+        "doc167"
+      ],
+      "evidence": "task3-recovery-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.recovery.contract.0"
+    },
+    {
+      "id": "T3.recovery.contract.1",
+      "form_id": "C08",
+      "candidate": "FROM main | stats sum(bytes,)",
+      "source_keys": [
+        "doc167"
+      ],
+      "evidence": "task3-recovery-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.recovery.contract.1"
+    },
+    {
+      "id": "T3.recovery.contract.2",
+      "form_id": "C07",
+      "candidate": "FROM main | rename a AS x, a AS",
+      "source_keys": [
+        "doc158"
+      ],
+      "evidence": "task3-recovery-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.recovery.contract.2"
     }
   ],
   "holds": [

@@ -1,9 +1,11 @@
 {
   "schema_version": 1,
-  "stage": "task2-frontend",
+  "stage": "task3-pipeline",
   "case_files": [
     "lexical-expressions.json",
-    "frontend-boundaries.json"
+    "frontend-boundaries.json",
+    "pipeline-commands.json",
+    "pipeline-boundaries.json"
   ],
   "provenance_file": "provenance.json",
   "mandatory_command_families": [

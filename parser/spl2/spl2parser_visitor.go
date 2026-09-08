@@ -51,6 +51,159 @@ type SPL2ParserVisitor interface {
 	// Visit a parse tree produced by SPL2Parser#fieldsCommand.
 	VisitFieldsCommand(ctx *FieldsCommandContext) interface{}
 
+	// Visit a parse tree produced by SPL2Parser#fieldSelection.
+	VisitFieldSelection(ctx *FieldSelectionContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#fieldSelector.
+	VisitFieldSelector(ctx *FieldSelectorContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#tableCommand.
+	VisitTableCommand(ctx *TableCommandContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#tableField.
+	VisitTableField(ctx *TableFieldContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#renameCommand.
+	VisitRenameCommand(ctx *RenameCommandContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#renamePair.
+	VisitRenamePair(ctx *RenamePairContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#renameSource.
+	VisitRenameSource(ctx *RenameSourceContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#renameTarget.
+	VisitRenameTarget(ctx *RenameTargetContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#aliasKeyword.
+	VisitAliasKeyword(ctx *AliasKeywordContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#statsCommand.
+	VisitStatsCommand(ctx *StatsCommandContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#statsOption.
+	VisitStatsOption(ctx *StatsOptionContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#allnumOption.
+	VisitAllnumOption(ctx *AllnumOptionContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#delimOption.
+	VisitDelimOption(ctx *DelimOptionContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#partitionsOption.
+	VisitPartitionsOption(ctx *PartitionsOptionContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#aggregate.
+	VisitAggregate(ctx *AggregateContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#aggregateAlias.
+	VisitAggregateAlias(ctx *AggregateAliasContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#aggregateGroup.
+	VisitAggregateGroup(ctx *AggregateGroupContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#groupField.
+	VisitGroupField(ctx *GroupFieldContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#groupSpan.
+	VisitGroupSpan(ctx *GroupSpanContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#timeSpan.
+	VisitTimeSpan(ctx *TimeSpanContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#eventstatsCommand.
+	VisitEventstatsCommand(ctx *EventstatsCommandContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#streamstatsCommand.
+	VisitStreamstatsCommand(ctx *StreamstatsCommandContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#streamGroup.
+	VisitStreamGroup(ctx *StreamGroupContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#currentOption.
+	VisitCurrentOption(ctx *CurrentOptionContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#windowOption.
+	VisitWindowOption(ctx *WindowOptionContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#resetClause.
+	VisitResetClause(ctx *ResetClauseContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#resetBefore.
+	VisitResetBefore(ctx *ResetBeforeContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#resetAfter.
+	VisitResetAfter(ctx *ResetAfterContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#resetOnchange.
+	VisitResetOnchange(ctx *ResetOnchangeContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#streamPostLayout.
+	VisitStreamPostLayout(ctx *StreamPostLayoutContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#lookupCommand.
+	VisitLookupCommand(ctx *LookupCommandContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#lookupDataset.
+	VisitLookupDataset(ctx *LookupDatasetContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#lookupMatch.
+	VisitLookupMatch(ctx *LookupMatchContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#lookupOutputClause.
+	VisitLookupOutputClause(ctx *LookupOutputClauseContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#lookupOutput.
+	VisitLookupOutput(ctx *LookupOutputContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#lookupColumn.
+	VisitLookupColumn(ctx *LookupColumnContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#lookupEventField.
+	VisitLookupEventField(ctx *LookupEventFieldContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#sortCommand.
+	VisitSortCommand(ctx *SortCommandContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#sortTerm.
+	VisitSortTerm(ctx *SortTermContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#sortWrapper.
+	VisitSortWrapper(ctx *SortWrapperContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#integerValue.
+	VisitIntegerValue(ctx *IntegerValueContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#dedupCommand.
+	VisitDedupCommand(ctx *DedupCommandContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#keepemptyOption.
+	VisitKeepemptyOption(ctx *KeepemptyOptionContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#consecutiveOption.
+	VisitConsecutiveOption(ctx *ConsecutiveOptionContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#dedupField.
+	VisitDedupField(ctx *DedupFieldContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#headCommand.
+	VisitHeadCommand(ctx *HeadCommandContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#keeplastOption.
+	VisitKeeplastOption(ctx *KeeplastOptionContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#headWhile.
+	VisitHeadWhile(ctx *HeadWhileContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#headPostLayout.
+	VisitHeadPostLayout(ctx *HeadPostLayoutContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#reverseCommand.
+	VisitReverseCommand(ctx *ReverseCommandContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#unknownOption.
+	VisitUnknownOption(ctx *UnknownOptionContext) interface{}
+
 	// Visit a parse tree produced by SPL2Parser#rexCommand.
 	VisitRexCommand(ctx *RexCommandContext) interface{}
 
@@ -95,6 +248,24 @@ type SPL2ParserVisitor interface {
 
 	// Visit a parse tree produced by SPL2Parser#searchValue.
 	VisitSearchValue(ctx *SearchValueContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#searchBareValue.
+	VisitSearchBareValue(ctx *SearchBareValueContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#searchDirective.
+	VisitSearchDirective(ctx *SearchDirectiveContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#searchTimeModifier.
+	VisitSearchTimeModifier(ctx *SearchTimeModifierContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#timeModifierKey.
+	VisitTimeModifierKey(ctx *TimeModifierKeyContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#timeModifierValue.
+	VisitTimeModifierValue(ctx *TimeModifierValueContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#relativeTime.
+	VisitRelativeTime(ctx *RelativeTimeContext) interface{}
 
 	// Visit a parse tree produced by SPL2Parser#expression.
 	VisitExpression(ctx *ExpressionContext) interface{}
@@ -179,6 +350,9 @@ type SPL2ParserVisitor interface {
 
 	// Visit a parse tree produced by SPL2Parser#identifier.
 	VisitIdentifier(ctx *IdentifierContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#pipelineKeyword.
+	VisitPipelineKeyword(ctx *PipelineKeywordContext) interface{}
 
 	// Visit a parse tree produced by SPL2Parser#array.
 	VisitArray(ctx *ArrayContext) interface{}

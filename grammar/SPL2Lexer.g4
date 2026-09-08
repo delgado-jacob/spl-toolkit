@@ -10,7 +10,17 @@ func (l *SPL2Lexer) closeBrace() { if l.braceDepth > 0 { l.braceDepth--; l.PopMo
 
 FROM: 'FROM' | 'from'; SELECT: 'SELECT' | 'select';
 SEARCH: 'search'; INDEX: 'index'; EVAL: 'eval'; WHERE: 'where' | 'WHERE';
-FIELDS: 'fields'; TABLE: 'table'; AS: 'AS'; GROUP: 'GROUP' | 'group';
+FIELDS: 'fields'; TABLE: 'table'; AS: 'AS'; AS_LOWER: 'as'; GROUP: 'GROUP' | 'group';
+RENAME: 'rename'; STATS: 'stats'; EVENTSTATS: 'eventstats'; STREAMSTATS: 'streamstats';
+LOOKUP: 'lookup'; SORT: 'sort'; DEDUP: 'dedup'; HEAD: 'head'; REVERSE: 'reverse';
+BY: 'BY'; OUTPUT: 'OUTPUT'; OUTPUTNEW: 'OUTPUTNEW';
+ALLNUM: 'allnum'; DELIM: 'delim'; PARTITIONS: 'partitions'; SPAN: 'span';
+CURRENT: 'current'; RESET: 'reset'; BEFORE: 'before'; AFTER: 'after'; ONCHANGE: 'onchange'; WINDOW: 'window';
+KEEPEMPTY: 'keepempty'; CONSECUTIVE: 'consecutive'; KEEPLAST: 'keeplast'; WHILE: 'while';
+AUTO: 'auto'; IP: 'ip'; NUM: 'num'; STR: 'str';
+TERM: 'TERM'; CASE: 'CASE'; EARLIEST: 'earliest'; LATEST: 'latest';
+INDEX_EARLIEST: '_index_earliest'; INDEX_LATEST: '_index_latest';
+TIMEFORMAT: 'timeformat'; STARTTIME: 'starttime'; ENDTIME: 'endtime'; NOW: 'now'; AT: '@';
 REX: 'rex' -> pushMode(REGEX_INPUT);
 MAKERESULTS: 'makeresults'; SPL1: 'spl1';
 IMPORT: 'import'; EXPORT: 'export'; FUNCTION: 'function'; RETURN: 'return';
