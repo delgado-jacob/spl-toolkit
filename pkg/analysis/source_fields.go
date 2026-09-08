@@ -292,10 +292,16 @@ func (s *semanticStage) refinedSelector(c parser.IAnalysisSelectorContext, role,
 }
 
 func (s *semanticStage) retainSourceInternals() bool {
-	if !s.env.open {
-		return true
+	complete := !s.env.open || s.refinement.complete
+	// Earlier exact reads track structural obligations without proving admission.
+	for name, field := range s.env.fields {
+		if field.source && strings.HasPrefix(name, "_") && s.refinement.admission(name) == SourceFieldIndeterminate {
+			complete = false
+		}
 	}
-	complete := s.refinement.complete
+	if !s.env.open {
+		return complete
+	}
 	for _, name := range s.refinement.names {
 		if _, known := s.env.fields[name]; known || s.env.removed[name] || !strings.HasPrefix(name, "_") {
 			continue

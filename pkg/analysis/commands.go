@@ -253,7 +253,7 @@ func fieldsCommand(s *semanticStage, node antlr.ParserRuleContext) {
 				selected[name] = field
 			}
 		}
-		if s.env.open && (s.refinement == nil || !internalsComplete) {
+		if (s.env.open && s.refinement == nil) || !internalsComplete {
 			s.diagnostic(CodeUnsupportedSemantics, "fields inclusion retains internal fields with unresolved open-source membership", ctx)
 		}
 	}

@@ -164,17 +164,32 @@ func TestPartialSourceNamesAndDeterminism(t *testing.T) {
 }
 
 func TestPartialSourceUnresolvedRetainedInternal(t *testing.T) {
-	got, err := analysis.AnalyzeWithSourceUniverse(analysis.QueryDocument{Text: "fields host"}, analysis.SourceUniverse{Fields: []string{"host", "_custom"}, Complete: true, Resolve: func(name string) analysis.SourceFieldAdmission {
-		if name == "host" {
-			return analysis.SourceFieldAdmitted
-		}
-		return analysis.SourceFieldIndeterminate
-	}})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if got.Result.Status != analysis.Incomplete || got.Result.Coverage.SemanticComplete {
-		t.Fatalf("unresolved retained internal reported complete: %+v", got.Result)
+	for _, tc := range []struct {
+		query  string
+		status analysis.Status
+	}{
+		{"fields host", analysis.Incomplete},
+		{"search _custom=x | fields host", analysis.Incomplete},
+		{"table _custom host | fields host", analysis.Incomplete},
+		{"eval _custom=1 | fields host", analysis.Valid},
+	} {
+		t.Run(tc.query, func(t *testing.T) {
+			got, err := analysis.AnalyzeWithSourceUniverse(analysis.QueryDocument{Text: tc.query}, analysis.SourceUniverse{Fields: []string{"host", "_custom"}, Complete: true, Resolve: func(name string) analysis.SourceFieldAdmission {
+				if name == "host" {
+					return analysis.SourceFieldAdmitted
+				}
+				return analysis.SourceFieldIndeterminate
+			}})
+			if err != nil {
+				t.Fatal(err)
+			}
+			if got.Result.Status != tc.status || got.Result.Coverage.SemanticComplete != (tc.status == analysis.Valid) {
+				t.Fatalf("retained internal completeness: %+v", got.Result)
+			}
+			if tc.query == "search _custom=x | fields host" && got.Result.References[0].Binding != "source" {
+				t.Errorf("initial binding changed: %+v", got.Result.References[0])
+			}
+		})
 	}
 }
 
