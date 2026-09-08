@@ -244,15 +244,16 @@ func fieldsCommand(s *semanticStage, node antlr.ParserRuleContext) {
 	}
 	selected := map[string]trackedField{}
 	if !exclude && s.result.Stages[s.stage].Command == "fields" {
+		internalsComplete := true
 		if s.refinement != nil {
-			s.retainSourceInternals()
+			internalsComplete = s.retainSourceInternals()
 		}
 		for name, field := range s.env.fields {
 			if strings.HasPrefix(name, "_") {
 				selected[name] = field
 			}
 		}
-		if s.env.open && s.refinement == nil {
+		if s.env.open && (s.refinement == nil || !internalsComplete) {
 			s.diagnostic(CodeUnsupportedSemantics, "fields inclusion retains internal fields with unresolved open-source membership", ctx)
 		}
 	}
@@ -281,7 +282,9 @@ func fieldsCommand(s *semanticStage, node antlr.ParserRuleContext) {
 	}
 	if !exclude {
 		s.env.fields = selected
-		s.env.open = false
+		// Partial selectors retain an unknown remainder; finite compatibility keeps
+		// its historical closed-output wire shape.
+		s.env.open = s.refinement != nil && !s.refinement.finiteCompatibility && s.env.open && !s.result.Stages[s.stage].SemanticComplete
 		if s.result.Stages[s.stage].Command == "table" && s.result.Stages[s.stage].SemanticComplete {
 			s.env.uncertain = false
 		}

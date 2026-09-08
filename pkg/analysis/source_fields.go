@@ -28,16 +28,54 @@ type SourceAnalysis struct {
 	Expansions []FieldExpansion `json:"expansions"`
 }
 
+// SourceFieldAdmission describes external source-name membership, not event presence.
+type SourceFieldAdmission uint8
+
+const (
+	SourceFieldIndeterminate SourceFieldAdmission = iota
+	SourceFieldAdmitted
+	SourceFieldProhibited
+)
+
+// SourceUniverse supplies candidate concrete names and optional admission rules.
+// Complete promises every potentially admitted name is listed in Fields. Names
+// are copied, sorted, case-sensitive, and must be unique nonblank UTF-8 strings.
+// Resolve must be pure, deterministic, concurrency-safe, and independent of query
+// text, pipeline state, and event presence. It may be called repeatedly. Callers
+// must not mutate captured target data during analysis; callback state is not
+// copied and callback panics are not recovered. With nil Resolve, listed names
+// are admitted; unlisted names are prohibited when complete and indeterminate
+// otherwise. A complete universe never calls Resolve for unlisted names.
+// Unknown admission values are treated as indeterminate.
+type SourceUniverse struct {
+	Fields   []string
+	Complete bool
+	Resolve  func(name string) SourceFieldAdmission
+}
+
 type sourceRefinement struct {
-	names      []string
-	members    map[string]bool
-	expansions []FieldExpansion
+	complete            bool
+	resolve             func(string) SourceFieldAdmission
+	finiteCompatibility bool
+	names               []string
+	members             map[string]bool
+	expansions          []FieldExpansion
 }
 
 // AnalyzeWithSourceFields analyzes with a known finite source universe. Names are
 // concrete and case-sensitive; nil and empty both denote a known empty universe.
 func AnalyzeWithSourceFields(document QueryDocument, fields []string) (*SourceAnalysis, error) {
-	r := &sourceRefinement{names: append([]string{}, fields...), members: map[string]bool{}, expansions: []FieldExpansion{}}
+	return analyzeSourceUniverse(document, SourceUniverse{Fields: fields, Complete: true}, true)
+}
+
+// AnalyzeWithSourceUniverse retains proven partial selector evidence while
+// distinguishing unresolved source membership from structural field availability.
+func AnalyzeWithSourceUniverse(document QueryDocument, universe SourceUniverse) (*SourceAnalysis, error) {
+	return analyzeSourceUniverse(document, universe, false)
+}
+
+func analyzeSourceUniverse(document QueryDocument, universe SourceUniverse, finiteCompatibility bool) (*SourceAnalysis, error) {
+	r := &sourceRefinement{names: append([]string{}, universe.Fields...), members: map[string]bool{}, expansions: []FieldExpansion{}, complete: universe.Complete, resolve: universe.Resolve, finiteCompatibility: finiteCompatibility}
 	for _, name := range r.names {
 		if !utf8.ValidString(name) || strings.TrimSpace(name) == "" {
 			return nil, fmt.Errorf("source field name must be nonempty, non-whitespace UTF-8")
@@ -55,21 +93,56 @@ func AnalyzeWithSourceFields(document QueryDocument, fields []string) (*SourceAn
 	return &SourceAnalysis{Result: result, Expansions: r.expansions}, nil
 }
 
-// Known conditional bindings shadow catalog declarations, just as derived ones
-// do. An exact source obligation absent from the catalog is not a proven member.
+func (r *sourceRefinement) admission(name string) SourceFieldAdmission {
+	listed := r.members[name]
+	if !listed && r.complete {
+		return SourceFieldProhibited
+	}
+	if r.resolve != nil {
+		result := r.resolve(name)
+		if result == SourceFieldAdmitted || result == SourceFieldProhibited {
+			return result
+		}
+		return SourceFieldIndeterminate
+	}
+	if listed {
+		return SourceFieldAdmitted
+	}
+	return SourceFieldIndeterminate
+}
+
+// Tracked obligations control local exhaustiveness even when admission is
+// unresolved. Conditional provenance shadows declarations and is never promoted.
 func (s *semanticStage) refinedSelectorCandidates(pattern string) ([]string, map[string]trackedField, bool) {
 	bindings := map[string]trackedField{}
-	for name, field := range s.env.fields {
-		if wildcardMatches(pattern, name) && (field.Conditional || !field.source || s.refinement.members[name]) {
-			bindings[name] = field
+	exhaustive := !s.env.open || s.refinement.complete
+	add := func(name string, field trackedField) {
+		if !wildcardMatches(pattern, name) {
+			return
 		}
+		if field.source && !field.Conditional {
+			switch s.refinement.admission(name) {
+			case SourceFieldProhibited:
+				return
+			case SourceFieldIndeterminate:
+				exhaustive = false
+			}
+		}
+		bindings[name] = field
+	}
+	for name, field := range s.env.fields {
+		add(name, field)
 	}
 	if s.env.open {
 		for _, name := range s.refinement.names {
-			if _, known := s.env.fields[name]; known || s.env.removed[name] || !wildcardMatches(pattern, name) {
+			if _, known := s.env.fields[name]; known || s.env.removed[name] {
 				continue
 			}
-			bindings[name] = trackedField{FieldBinding: FieldBinding{Name: name, OriginReferenceIDs: []string{}, Conditional: s.env.uncertain}, source: true}
+			// Prohibited declarations do not become fields, including after unknown stages.
+			if s.refinement.admission(name) == SourceFieldProhibited {
+				continue
+			}
+			add(name, trackedField{FieldBinding: FieldBinding{Name: name, OriginReferenceIDs: []string{}, Conditional: s.env.uncertain}, source: true})
 		}
 	}
 	names := make([]string, 0, len(bindings))
@@ -77,7 +150,18 @@ func (s *semanticStage) refinedSelectorCandidates(pattern string) ([]string, map
 		names = append(names, name)
 	}
 	sort.Strings(names)
-	return names, bindings, true
+	return names, bindings, exhaustive
+}
+
+func (s *semanticStage) provenExpandedFields(names []string, bindings map[string]trackedField) []ExpandedField {
+	proven := []string{}
+	for _, name := range names {
+		field := bindings[name]
+		if !field.Conditional && (!field.source || s.refinement.admission(name) == SourceFieldAdmitted) {
+			proven = append(proven, name)
+		}
+	}
+	return sortedExpandedFields(proven, bindings)
 }
 
 func allBindingsProven(bindings map[string]trackedField) bool {
@@ -102,7 +186,7 @@ func sortedExpandedFields(names []string, bindings map[string]trackedField) []Ex
 }
 
 func (s *semanticStage) recordExpansion(id string, complete bool, matches []ExpandedField) {
-	if !complete {
+	if !complete && s.refinement.finiteCompatibility {
 		matches = nil
 	}
 	s.refinement.expansions = append(s.refinement.expansions, FieldExpansion{ReferenceID: id, Complete: complete, Matches: append([]ExpandedField{}, matches...)})
@@ -120,9 +204,19 @@ func (s *semanticStage) selectorStructurallyAbsent(pattern string) bool {
 	if !s.env.open {
 		return true
 	}
+	if !s.refinement.complete {
+		return false
+	}
 	removedMatch := false
 	for _, name := range s.refinement.names {
 		if !wildcardMatches(pattern, name) {
+			continue
+		}
+		admission := s.refinement.admission(name)
+		if admission == SourceFieldIndeterminate {
+			return false
+		}
+		if admission == SourceFieldProhibited {
 			continue
 		}
 		if !s.env.removed[name] {
@@ -148,11 +242,11 @@ func (s *semanticStage) refinedSelector(c parser.IAnalysisSelectorContext, role,
 	names, bindings, exhaustive := s.refinedSelectorCandidates(pattern)
 	complete := exhaustive && !s.env.uncertain && allBindingsProven(bindings)
 	ref := &s.result.References[len(s.result.References)-1]
+	matches := s.provenExpandedFields(names, bindings)
 	if !complete {
-		s.recordExpansion(id, false, nil)
+		s.recordExpansion(id, false, matches)
 		s.diagnostic(CodeUnresolvedWildcard, fmt.Sprintf("wildcard %q membership is unresolved", pattern), c)
 	} else {
-		matches := sortedExpandedFields(names, bindings)
 		s.recordExpansion(id, true, matches)
 		if role != "remove" {
 			ref.Binding = "source"
@@ -197,16 +291,25 @@ func (s *semanticStage) refinedSelector(c parser.IAnalysisSelectorContext, role,
 	return names
 }
 
-func (s *semanticStage) retainSourceInternals() {
+func (s *semanticStage) retainSourceInternals() bool {
 	if !s.env.open {
-		return
+		return true
 	}
+	complete := s.refinement.complete
 	for _, name := range s.refinement.names {
 		if _, known := s.env.fields[name]; known || s.env.removed[name] || !strings.HasPrefix(name, "_") {
 			continue
 		}
+		admission := s.refinement.admission(name)
+		if admission == SourceFieldProhibited {
+			continue
+		}
+		if admission == SourceFieldIndeterminate {
+			complete = false
+		}
 		s.env.fields[name] = trackedField{FieldBinding: FieldBinding{Name: name, OriginReferenceIDs: []string{}, Conditional: s.env.uncertain}, source: true}
 	}
+	return complete
 }
 
 func (r *sourceRefinement) finalizeExpansions(references []Reference, mapping map[string]string) {
