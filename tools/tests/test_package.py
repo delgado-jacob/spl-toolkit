@@ -617,3 +617,27 @@ def test_wheel_header_contract_rejects_layout_exports_and_boundary_changes(tmp_p
         archive.writestr("spl_toolkit/" + checker.native_library_name(), b"native")
     with pytest.raises(AssertionError, match="header"):
         checker.verify_wheel_sources(wheel, ROOT)
+
+
+@pytest.mark.parametrize("before,after", [
+    ('/* Start of boilerplate cgo prologue.  */', '/* Start of boilerplate cgo prologue.  */\nextern void unexpected(void);'),
+    ('/* Start of boilerplate cgo prologue.  */', '/* Start of boilerplate cgo prologue.  */\n#define int long'),
+    ('#include <stddef.h>', '#include <stddef.h>\nextern void unexpected(void);'),
+    ('#include <stddef.h>', '#include <stddef.h>\n#define int long'),
+    ('typedef unsigned int GoUint32;', 'typedef unsigned long GoUint32;'),
+    ('typedef struct { const char *p; ptrdiff_t n; } _GoString_;', 'typedef struct { const char *p; int n; } _GoString_;'),
+    ('extern const char *_GoStringPtr(_GoString_ s);', 'extern const char *_GoStringPtr(_GoString_ s);\nextern size_t _GoStringLen(_GoString_ s);\nextern const char *_GoStringPtr(_GoString_ s);'),
+    ('typedef std::complex<float> GoComplex64;', 'typedef std::complex<double> GoComplex64;'),
+])
+def test_wheel_header_rejects_compiler_region_changes(tmp_path: Path, before, after):
+    import zipfile
+    checker = load_package_checker()
+    original = (ROOT / "tools/tests/fixtures/cgo-go1.25.h").read_text()
+    assert before in original
+    wheel = tmp_path / "wheel.whl"
+    with zipfile.ZipFile(wheel, "w") as archive:
+        archive.writestr("spl_toolkit/mapper.py", (PYTHON_DIR / "spl_toolkit/mapper.py").read_bytes())
+        archive.writestr("spl_toolkit/libspl_toolkit.h", original.replace(before, after))
+        archive.writestr("spl_toolkit/" + checker.native_library_name(), b"native")
+    with pytest.raises(AssertionError, match="header"):
+        checker.verify_wheel_sources(wheel, ROOT)

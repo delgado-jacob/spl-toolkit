@@ -1,0 +1,259 @@
+FFFFFFFF                                                                 [100%]
+=================================== FAILURES ===================================
+_ test_wheel_header_rejects_compiler_region_changes[/* Start of boilerplate cgo prologue.  */-/* Start of boilerplate cgo prologue.  */\nextern void unexpected(void);] _
+
+tmp_path = PosixPath('/private/var/folders/6d/zc3z9vpd1gg2tjsrl0c30gf40000gn/T/pytest-of-jacobdelgado/pytest-616/test_wheel_header_rejects_comp0')
+before = '/* Start of boilerplate cgo prologue.  */'
+after = '/* Start of boilerplate cgo prologue.  */\nextern void unexpected(void);'
+
+    @pytest.mark.parametrize("before,after", [
+        ('/* Start of boilerplate cgo prologue.  */', '/* Start of boilerplate cgo prologue.  */\nextern void unexpected(void);'),
+        ('/* Start of boilerplate cgo prologue.  */', '/* Start of boilerplate cgo prologue.  */\n#define int long'),
+        ('#include <stddef.h>', '#include <stddef.h>\nextern void unexpected(void);'),
+        ('#include <stddef.h>', '#include <stddef.h>\n#define int long'),
+        ('typedef unsigned int GoUint32;', 'typedef unsigned long GoUint32;'),
+        ('typedef struct { const char *p; ptrdiff_t n; } _GoString_;', 'typedef struct { const char *p; int n; } _GoString_;'),
+        ('extern const char *_GoStringPtr(_GoString_ s);', 'extern const char *_GoStringPtr(_GoString_ s);\nextern size_t _GoStringLen(_GoString_ s);\nextern const char *_GoStringPtr(_GoString_ s);'),
+        ('typedef std::complex<float> GoComplex64;', 'typedef std::complex<double> GoComplex64;'),
+    ])
+    def test_wheel_header_rejects_compiler_region_changes(tmp_path: Path, before, after):
+        import zipfile
+        checker = load_package_checker()
+        original = (ROOT / "tools/tests/fixtures/cgo-go1.25.h").read_text()
+        assert before in original
+        wheel = tmp_path / "wheel.whl"
+        with zipfile.ZipFile(wheel, "w") as archive:
+            archive.writestr("spl_toolkit/mapper.py", (PYTHON_DIR / "spl_toolkit/mapper.py").read_bytes())
+            archive.writestr("spl_toolkit/libspl_toolkit.h", original.replace(before, after))
+            archive.writestr("spl_toolkit/" + checker.native_library_name(), b"native")
+>       with pytest.raises(AssertionError, match="header"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE <class 'AssertionError'>
+
+tools/tests/test_package.py:642: Failed
+_ test_wheel_header_rejects_compiler_region_changes[/* Start of boilerplate cgo prologue.  */-/* Start of boilerplate cgo prologue.  */\n#define int long] _
+
+tmp_path = PosixPath('/private/var/folders/6d/zc3z9vpd1gg2tjsrl0c30gf40000gn/T/pytest-of-jacobdelgado/pytest-616/test_wheel_header_rejects_comp1')
+before = '/* Start of boilerplate cgo prologue.  */'
+after = '/* Start of boilerplate cgo prologue.  */\n#define int long'
+
+    @pytest.mark.parametrize("before,after", [
+        ('/* Start of boilerplate cgo prologue.  */', '/* Start of boilerplate cgo prologue.  */\nextern void unexpected(void);'),
+        ('/* Start of boilerplate cgo prologue.  */', '/* Start of boilerplate cgo prologue.  */\n#define int long'),
+        ('#include <stddef.h>', '#include <stddef.h>\nextern void unexpected(void);'),
+        ('#include <stddef.h>', '#include <stddef.h>\n#define int long'),
+        ('typedef unsigned int GoUint32;', 'typedef unsigned long GoUint32;'),
+        ('typedef struct { const char *p; ptrdiff_t n; } _GoString_;', 'typedef struct { const char *p; int n; } _GoString_;'),
+        ('extern const char *_GoStringPtr(_GoString_ s);', 'extern const char *_GoStringPtr(_GoString_ s);\nextern size_t _GoStringLen(_GoString_ s);\nextern const char *_GoStringPtr(_GoString_ s);'),
+        ('typedef std::complex<float> GoComplex64;', 'typedef std::complex<double> GoComplex64;'),
+    ])
+    def test_wheel_header_rejects_compiler_region_changes(tmp_path: Path, before, after):
+        import zipfile
+        checker = load_package_checker()
+        original = (ROOT / "tools/tests/fixtures/cgo-go1.25.h").read_text()
+        assert before in original
+        wheel = tmp_path / "wheel.whl"
+        with zipfile.ZipFile(wheel, "w") as archive:
+            archive.writestr("spl_toolkit/mapper.py", (PYTHON_DIR / "spl_toolkit/mapper.py").read_bytes())
+            archive.writestr("spl_toolkit/libspl_toolkit.h", original.replace(before, after))
+            archive.writestr("spl_toolkit/" + checker.native_library_name(), b"native")
+>       with pytest.raises(AssertionError, match="header"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE <class 'AssertionError'>
+
+tools/tests/test_package.py:642: Failed
+_ test_wheel_header_rejects_compiler_region_changes[#include <stddef.h>-#include <stddef.h>\nextern void unexpected(void);] _
+
+tmp_path = PosixPath('/private/var/folders/6d/zc3z9vpd1gg2tjsrl0c30gf40000gn/T/pytest-of-jacobdelgado/pytest-616/test_wheel_header_rejects_comp2')
+before = '#include <stddef.h>'
+after = '#include <stddef.h>\nextern void unexpected(void);'
+
+    @pytest.mark.parametrize("before,after", [
+        ('/* Start of boilerplate cgo prologue.  */', '/* Start of boilerplate cgo prologue.  */\nextern void unexpected(void);'),
+        ('/* Start of boilerplate cgo prologue.  */', '/* Start of boilerplate cgo prologue.  */\n#define int long'),
+        ('#include <stddef.h>', '#include <stddef.h>\nextern void unexpected(void);'),
+        ('#include <stddef.h>', '#include <stddef.h>\n#define int long'),
+        ('typedef unsigned int GoUint32;', 'typedef unsigned long GoUint32;'),
+        ('typedef struct { const char *p; ptrdiff_t n; } _GoString_;', 'typedef struct { const char *p; int n; } _GoString_;'),
+        ('extern const char *_GoStringPtr(_GoString_ s);', 'extern const char *_GoStringPtr(_GoString_ s);\nextern size_t _GoStringLen(_GoString_ s);\nextern const char *_GoStringPtr(_GoString_ s);'),
+        ('typedef std::complex<float> GoComplex64;', 'typedef std::complex<double> GoComplex64;'),
+    ])
+    def test_wheel_header_rejects_compiler_region_changes(tmp_path: Path, before, after):
+        import zipfile
+        checker = load_package_checker()
+        original = (ROOT / "tools/tests/fixtures/cgo-go1.25.h").read_text()
+        assert before in original
+        wheel = tmp_path / "wheel.whl"
+        with zipfile.ZipFile(wheel, "w") as archive:
+            archive.writestr("spl_toolkit/mapper.py", (PYTHON_DIR / "spl_toolkit/mapper.py").read_bytes())
+            archive.writestr("spl_toolkit/libspl_toolkit.h", original.replace(before, after))
+            archive.writestr("spl_toolkit/" + checker.native_library_name(), b"native")
+>       with pytest.raises(AssertionError, match="header"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE <class 'AssertionError'>
+
+tools/tests/test_package.py:642: Failed
+_ test_wheel_header_rejects_compiler_region_changes[#include <stddef.h>-#include <stddef.h>\n#define int long] _
+
+tmp_path = PosixPath('/private/var/folders/6d/zc3z9vpd1gg2tjsrl0c30gf40000gn/T/pytest-of-jacobdelgado/pytest-616/test_wheel_header_rejects_comp3')
+before = '#include <stddef.h>', after = '#include <stddef.h>\n#define int long'
+
+    @pytest.mark.parametrize("before,after", [
+        ('/* Start of boilerplate cgo prologue.  */', '/* Start of boilerplate cgo prologue.  */\nextern void unexpected(void);'),
+        ('/* Start of boilerplate cgo prologue.  */', '/* Start of boilerplate cgo prologue.  */\n#define int long'),
+        ('#include <stddef.h>', '#include <stddef.h>\nextern void unexpected(void);'),
+        ('#include <stddef.h>', '#include <stddef.h>\n#define int long'),
+        ('typedef unsigned int GoUint32;', 'typedef unsigned long GoUint32;'),
+        ('typedef struct { const char *p; ptrdiff_t n; } _GoString_;', 'typedef struct { const char *p; int n; } _GoString_;'),
+        ('extern const char *_GoStringPtr(_GoString_ s);', 'extern const char *_GoStringPtr(_GoString_ s);\nextern size_t _GoStringLen(_GoString_ s);\nextern const char *_GoStringPtr(_GoString_ s);'),
+        ('typedef std::complex<float> GoComplex64;', 'typedef std::complex<double> GoComplex64;'),
+    ])
+    def test_wheel_header_rejects_compiler_region_changes(tmp_path: Path, before, after):
+        import zipfile
+        checker = load_package_checker()
+        original = (ROOT / "tools/tests/fixtures/cgo-go1.25.h").read_text()
+        assert before in original
+        wheel = tmp_path / "wheel.whl"
+        with zipfile.ZipFile(wheel, "w") as archive:
+            archive.writestr("spl_toolkit/mapper.py", (PYTHON_DIR / "spl_toolkit/mapper.py").read_bytes())
+            archive.writestr("spl_toolkit/libspl_toolkit.h", original.replace(before, after))
+            archive.writestr("spl_toolkit/" + checker.native_library_name(), b"native")
+>       with pytest.raises(AssertionError, match="header"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE <class 'AssertionError'>
+
+tools/tests/test_package.py:642: Failed
+_ test_wheel_header_rejects_compiler_region_changes[typedef unsigned int GoUint32;-typedef unsigned long GoUint32;] _
+
+tmp_path = PosixPath('/private/var/folders/6d/zc3z9vpd1gg2tjsrl0c30gf40000gn/T/pytest-of-jacobdelgado/pytest-616/test_wheel_header_rejects_comp4')
+before = 'typedef unsigned int GoUint32;'
+after = 'typedef unsigned long GoUint32;'
+
+    @pytest.mark.parametrize("before,after", [
+        ('/* Start of boilerplate cgo prologue.  */', '/* Start of boilerplate cgo prologue.  */\nextern void unexpected(void);'),
+        ('/* Start of boilerplate cgo prologue.  */', '/* Start of boilerplate cgo prologue.  */\n#define int long'),
+        ('#include <stddef.h>', '#include <stddef.h>\nextern void unexpected(void);'),
+        ('#include <stddef.h>', '#include <stddef.h>\n#define int long'),
+        ('typedef unsigned int GoUint32;', 'typedef unsigned long GoUint32;'),
+        ('typedef struct { const char *p; ptrdiff_t n; } _GoString_;', 'typedef struct { const char *p; int n; } _GoString_;'),
+        ('extern const char *_GoStringPtr(_GoString_ s);', 'extern const char *_GoStringPtr(_GoString_ s);\nextern size_t _GoStringLen(_GoString_ s);\nextern const char *_GoStringPtr(_GoString_ s);'),
+        ('typedef std::complex<float> GoComplex64;', 'typedef std::complex<double> GoComplex64;'),
+    ])
+    def test_wheel_header_rejects_compiler_region_changes(tmp_path: Path, before, after):
+        import zipfile
+        checker = load_package_checker()
+        original = (ROOT / "tools/tests/fixtures/cgo-go1.25.h").read_text()
+        assert before in original
+        wheel = tmp_path / "wheel.whl"
+        with zipfile.ZipFile(wheel, "w") as archive:
+            archive.writestr("spl_toolkit/mapper.py", (PYTHON_DIR / "spl_toolkit/mapper.py").read_bytes())
+            archive.writestr("spl_toolkit/libspl_toolkit.h", original.replace(before, after))
+            archive.writestr("spl_toolkit/" + checker.native_library_name(), b"native")
+>       with pytest.raises(AssertionError, match="header"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE <class 'AssertionError'>
+
+tools/tests/test_package.py:642: Failed
+_ test_wheel_header_rejects_compiler_region_changes[typedef struct { const char *p; ptrdiff_t n; } _GoString_;-typedef struct { const char *p; int n; } _GoString_;] _
+
+tmp_path = PosixPath('/private/var/folders/6d/zc3z9vpd1gg2tjsrl0c30gf40000gn/T/pytest-of-jacobdelgado/pytest-616/test_wheel_header_rejects_comp5')
+before = 'typedef struct { const char *p; ptrdiff_t n; } _GoString_;'
+after = 'typedef struct { const char *p; int n; } _GoString_;'
+
+    @pytest.mark.parametrize("before,after", [
+        ('/* Start of boilerplate cgo prologue.  */', '/* Start of boilerplate cgo prologue.  */\nextern void unexpected(void);'),
+        ('/* Start of boilerplate cgo prologue.  */', '/* Start of boilerplate cgo prologue.  */\n#define int long'),
+        ('#include <stddef.h>', '#include <stddef.h>\nextern void unexpected(void);'),
+        ('#include <stddef.h>', '#include <stddef.h>\n#define int long'),
+        ('typedef unsigned int GoUint32;', 'typedef unsigned long GoUint32;'),
+        ('typedef struct { const char *p; ptrdiff_t n; } _GoString_;', 'typedef struct { const char *p; int n; } _GoString_;'),
+        ('extern const char *_GoStringPtr(_GoString_ s);', 'extern const char *_GoStringPtr(_GoString_ s);\nextern size_t _GoStringLen(_GoString_ s);\nextern const char *_GoStringPtr(_GoString_ s);'),
+        ('typedef std::complex<float> GoComplex64;', 'typedef std::complex<double> GoComplex64;'),
+    ])
+    def test_wheel_header_rejects_compiler_region_changes(tmp_path: Path, before, after):
+        import zipfile
+        checker = load_package_checker()
+        original = (ROOT / "tools/tests/fixtures/cgo-go1.25.h").read_text()
+        assert before in original
+        wheel = tmp_path / "wheel.whl"
+        with zipfile.ZipFile(wheel, "w") as archive:
+            archive.writestr("spl_toolkit/mapper.py", (PYTHON_DIR / "spl_toolkit/mapper.py").read_bytes())
+            archive.writestr("spl_toolkit/libspl_toolkit.h", original.replace(before, after))
+            archive.writestr("spl_toolkit/" + checker.native_library_name(), b"native")
+>       with pytest.raises(AssertionError, match="header"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE <class 'AssertionError'>
+
+tools/tests/test_package.py:642: Failed
+_ test_wheel_header_rejects_compiler_region_changes[extern const char *_GoStringPtr(_GoString_ s);-extern const char *_GoStringPtr(_GoString_ s);\nextern size_t _GoStringLen(_GoString_ s);\nextern const char *_GoStringPtr(_GoString_ s);] _
+
+tmp_path = PosixPath('/private/var/folders/6d/zc3z9vpd1gg2tjsrl0c30gf40000gn/T/pytest-of-jacobdelgado/pytest-616/test_wheel_header_rejects_comp6')
+before = 'extern const char *_GoStringPtr(_GoString_ s);'
+after = 'extern const char *_GoStringPtr(_GoString_ s);\nextern size_t _GoStringLen(_GoString_ s);\nextern const char *_GoStringPtr(_GoString_ s);'
+
+    @pytest.mark.parametrize("before,after", [
+        ('/* Start of boilerplate cgo prologue.  */', '/* Start of boilerplate cgo prologue.  */\nextern void unexpected(void);'),
+        ('/* Start of boilerplate cgo prologue.  */', '/* Start of boilerplate cgo prologue.  */\n#define int long'),
+        ('#include <stddef.h>', '#include <stddef.h>\nextern void unexpected(void);'),
+        ('#include <stddef.h>', '#include <stddef.h>\n#define int long'),
+        ('typedef unsigned int GoUint32;', 'typedef unsigned long GoUint32;'),
+        ('typedef struct { const char *p; ptrdiff_t n; } _GoString_;', 'typedef struct { const char *p; int n; } _GoString_;'),
+        ('extern const char *_GoStringPtr(_GoString_ s);', 'extern const char *_GoStringPtr(_GoString_ s);\nextern size_t _GoStringLen(_GoString_ s);\nextern const char *_GoStringPtr(_GoString_ s);'),
+        ('typedef std::complex<float> GoComplex64;', 'typedef std::complex<double> GoComplex64;'),
+    ])
+    def test_wheel_header_rejects_compiler_region_changes(tmp_path: Path, before, after):
+        import zipfile
+        checker = load_package_checker()
+        original = (ROOT / "tools/tests/fixtures/cgo-go1.25.h").read_text()
+        assert before in original
+        wheel = tmp_path / "wheel.whl"
+        with zipfile.ZipFile(wheel, "w") as archive:
+            archive.writestr("spl_toolkit/mapper.py", (PYTHON_DIR / "spl_toolkit/mapper.py").read_bytes())
+            archive.writestr("spl_toolkit/libspl_toolkit.h", original.replace(before, after))
+            archive.writestr("spl_toolkit/" + checker.native_library_name(), b"native")
+>       with pytest.raises(AssertionError, match="header"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE <class 'AssertionError'>
+
+tools/tests/test_package.py:642: Failed
+_ test_wheel_header_rejects_compiler_region_changes[typedef std::complex<float> GoComplex64;-typedef std::complex<double> GoComplex64;] _
+
+tmp_path = PosixPath('/private/var/folders/6d/zc3z9vpd1gg2tjsrl0c30gf40000gn/T/pytest-of-jacobdelgado/pytest-616/test_wheel_header_rejects_comp7')
+before = 'typedef std::complex<float> GoComplex64;'
+after = 'typedef std::complex<double> GoComplex64;'
+
+    @pytest.mark.parametrize("before,after", [
+        ('/* Start of boilerplate cgo prologue.  */', '/* Start of boilerplate cgo prologue.  */\nextern void unexpected(void);'),
+        ('/* Start of boilerplate cgo prologue.  */', '/* Start of boilerplate cgo prologue.  */\n#define int long'),
+        ('#include <stddef.h>', '#include <stddef.h>\nextern void unexpected(void);'),
+        ('#include <stddef.h>', '#include <stddef.h>\n#define int long'),
+        ('typedef unsigned int GoUint32;', 'typedef unsigned long GoUint32;'),
+        ('typedef struct { const char *p; ptrdiff_t n; } _GoString_;', 'typedef struct { const char *p; int n; } _GoString_;'),
+        ('extern const char *_GoStringPtr(_GoString_ s);', 'extern const char *_GoStringPtr(_GoString_ s);\nextern size_t _GoStringLen(_GoString_ s);\nextern const char *_GoStringPtr(_GoString_ s);'),
+        ('typedef std::complex<float> GoComplex64;', 'typedef std::complex<double> GoComplex64;'),
+    ])
+    def test_wheel_header_rejects_compiler_region_changes(tmp_path: Path, before, after):
+        import zipfile
+        checker = load_package_checker()
+        original = (ROOT / "tools/tests/fixtures/cgo-go1.25.h").read_text()
+        assert before in original
+        wheel = tmp_path / "wheel.whl"
+        with zipfile.ZipFile(wheel, "w") as archive:
+            archive.writestr("spl_toolkit/mapper.py", (PYTHON_DIR / "spl_toolkit/mapper.py").read_bytes())
+            archive.writestr("spl_toolkit/libspl_toolkit.h", original.replace(before, after))
+            archive.writestr("spl_toolkit/" + checker.native_library_name(), b"native")
+>       with pytest.raises(AssertionError, match="header"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE <class 'AssertionError'>
+
+tools/tests/test_package.py:642: Failed
+=========================== short test summary info ============================
+FAILED tools/tests/test_package.py::test_wheel_header_rejects_compiler_region_changes[/* Start of boilerplate cgo prologue.  */-/* Start of boilerplate cgo prologue.  */\nextern void unexpected(void);]
+FAILED tools/tests/test_package.py::test_wheel_header_rejects_compiler_region_changes[/* Start of boilerplate cgo prologue.  */-/* Start of boilerplate cgo prologue.  */\n#define int long]
+FAILED tools/tests/test_package.py::test_wheel_header_rejects_compiler_region_changes[#include <stddef.h>-#include <stddef.h>\nextern void unexpected(void);]
+FAILED tools/tests/test_package.py::test_wheel_header_rejects_compiler_region_changes[#include <stddef.h>-#include <stddef.h>\n#define int long]
+FAILED tools/tests/test_package.py::test_wheel_header_rejects_compiler_region_changes[typedef unsigned int GoUint32;-typedef unsigned long GoUint32;]
+FAILED tools/tests/test_package.py::test_wheel_header_rejects_compiler_region_changes[typedef struct { const char *p; ptrdiff_t n; } _GoString_;-typedef struct { const char *p; int n; } _GoString_;]
+FAILED tools/tests/test_package.py::test_wheel_header_rejects_compiler_region_changes[extern const char *_GoStringPtr(_GoString_ s);-extern const char *_GoStringPtr(_GoString_ s);\nextern size_t _GoStringLen(_GoString_ s);\nextern const char *_GoStringPtr(_GoString_ s);]
+FAILED tools/tests/test_package.py::test_wheel_header_rejects_compiler_region_changes[typedef std::complex<float> GoComplex64;-typedef std::complex<double> GoComplex64;]
+8 failed, 62 deselected in 0.15s

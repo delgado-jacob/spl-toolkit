@@ -1,0 +1,17 @@
+{
+  "command": [
+    "/private/tmp/spl-toolkit-remaining-venv/bin/python",
+    "-m",
+    "pytest",
+    "tools/tests/test_package.py",
+    "-q",
+    "-k",
+    "compiler_region_changes"
+  ],
+  "base_sha": "db7c05ea9f6059e3fba4e0ddc37ff1ebf9f014f7",
+  "input_manifest": "/private/tmp/m4-task7/i1-red-inputs.json",
+  "input_manifest_sha256": "bfec6198c856ee8d3fa079bd8f8f52324be1dc52c7dfb790e42630ed7ca1807b",
+  "exit": 1,
+  "elapsed_seconds": 0.6005239486694336,
+  "log": "/private/tmp/m4-task7/i1-red.log"
+}

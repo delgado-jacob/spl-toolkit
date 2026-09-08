@@ -10,7 +10,7 @@
   "base_sha": "7b6580fff46917045230668141d23f17489891df",
   "changed_go_build_inputs": [],
   "explanation": "Executable Go inputs match pre-build hashes. Later acceptance harness and human documentation edits do not change these compiled inputs. Final commit binding is recorded in the Task7 report after commit.",
-  "final_checker_sha256": "9dba4b8ffb782c78466a9d6f97b76f1adeb48f87a337421a8f2234b512125712",
+  "final_checker_sha256": "6baf6db778421cbbf5aa57f2146de69425bab9148cb58182f5c6d013e73414cf",
   "go_build_input_count": 64,
   "go_build_input_hashes": {
     "Makefile": "e909d8e0853573f948e58569ba9c16489dd1bbe255511d0988b843d090ca826a",
@@ -81,6 +81,13 @@
   "header_fixture_provenance": {
     "tools/tests/fixtures/cgo-go1.22.h": "Actual header extracted from preserved floor wheel 9455b36b7bf09e02b497dac146245cc4b8e775ff1575d92da0d113b1f3e14ac2; Go1.22.12",
     "tools/tests/fixtures/cgo-go1.25.h": "Exact committed python/spl_toolkit/libspl_toolkit.h at base7b6580f; Go1.25.5-generated header"
+  },
+  "installed_run_checker_sha256": "9dba4b8ffb782c78466a9d6f97b76f1adeb48f87a337421a8f2234b512125712",
+  "review_i1_correction": {
+    "base_sha": "db7c05ea9f6059e3fba4e0ddc37ff1ebf9f014f7",
+    "evidence": "review-i1/verification.json",
+    "explanation": "The final checker was corrected after the original installed runs. Those runs remain historical proof with unchanged source/artifact identities. Fresh full wheel-source verification covers the retained original archive only; rebuilt-sdist header revalidation is bound by its previously recorded exact payload hash. No rebuilt archive was retained or reconstructed, and no build/native/installed suite was repeated.",
+    "installed_run_checker_sha256": "9dba4b8ffb782c78466a9d6f97b76f1adeb48f87a337421a8f2234b512125712"
   },
   "source_python_input_hashes": {
     "python/spl_toolkit/__init__.py": "c37ee4bed7aa235fa347eaa7ad917cca54b131c993ddfca3f925d41b1aa321aa",

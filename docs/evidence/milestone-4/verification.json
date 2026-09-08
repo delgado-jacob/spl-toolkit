@@ -425,7 +425,21 @@
     "logs/tooling-result.json": "408b223ef3152be936a9e80c91e76f02ae79af259cc78fda1ec487b47c4e43e0",
     "logs/tooling.log": "33adf7c954a1e43b0e351441df9d1c45a00ab5b5f3ab298eb9723d583b5ad981",
     "package.json": "71a35cc7daa3890394457c306940f4e933962f2f19a62b4f8a05129dfb9a7227",
-    "source-identity.json": "955cb2ad793b3743564d6f0ceabfcc2d8d014b1fb3fcd6b45126fc37db61600d",
+    "review-i1/executed-artifact-verifier.py.txt": "d2c25a2d595696ca15b28d9a905aea5707ff7f5d13cea05f755925df7432d732",
+    "review-i1/i1-artifacts-inputs.json": "c4027d0fdbf27f25e28649d66384ec7ff95173412a8eb7c0cfb4bf616ce8284a",
+    "review-i1/i1-artifacts-result.json": "c99e9c9d2700379a900a58c9e2a41408ab0081fe1d6f707be7c74ee9c4f42fe7",
+    "review-i1/i1-artifacts.log": "da309dbb171b9e849835e57fde3588f21a04f7b16c60c47141c65cf2f70be772",
+    "review-i1/i1-artifacts.log.raw.json": "f4b7543a39efbf3cafe7706b9a9ef0f8d4f4d2408dd4b56c130461c3fe5ba1c7",
+    "review-i1/i1-green-inputs.json": "c4027d0fdbf27f25e28649d66384ec7ff95173412a8eb7c0cfb4bf616ce8284a",
+    "review-i1/i1-green-result.json": "8fd5523e9e6d2f2dbefe0d10fe645a9fd7bf799124cef6d3721ffea7f66d9cf2",
+    "review-i1/i1-green.log": "631a25a8c17efadf72d177b07be971537186d7f4c304e8316e7703c1c8daa982",
+    "review-i1/i1-green.log.raw.json": "25b10dc0beec29f6d09d1b95bbd3b58f9b4ddd3b1cbba25f8ae97d22d61cee94",
+    "review-i1/i1-red-inputs.json": "bfec6198c856ee8d3fa079bd8f8f52324be1dc52c7dfb790e42630ed7ca1807b",
+    "review-i1/i1-red-result.json": "6c7475f970ad5072a759a6201290b4a0dc7fb762709e2ff3a17d524578878cb8",
+    "review-i1/i1-red.log": "1b01c4a21608f5e0aec0b289ee6cedd1aa0cfc5b85ee7a149a2fa2b82e01008d",
+    "review-i1/i1-red.log.raw.json": "8f5e8e13ff627338dab39002eda3254f1d47959006048e78f6093b385486af73",
+    "review-i1/verification.json": "da309dbb171b9e849835e57fde3588f21a04f7b16c60c47141c65cf2f70be772",
+    "source-identity.json": "ab33f57e7033c69d74da8e138a08d80d26d473823a2ffe3fc2a6c8b4f6b021b2",
     "source-surfaces.json": "07231e8b0211227c87c06a1f25c010827fdd9287028fd4bc4cdb026ea0be4dc8",
     "tools-and-builds.json": "731bd0fdca877932ec117124439cda73f187691da1c5426d298295ff4a1ed8e1"
   },
@@ -468,6 +482,75 @@
     "controller acceptance"
   ],
   "retained_floor_artifacts": "/private/tmp/m4-task7/floor-distribution",
+  "review_i1_correction": {
+    "artifact_boundary": "The final checker was corrected after the original installed runs. Those runs remain historical proof with unchanged source/artifact identities. Fresh full wheel-source verification covers the retained original archive only; rebuilt-sdist header revalidation is bound by its previously recorded exact payload hash. No rebuilt archive was retained or reconstructed, and no build/native/installed suite was repeated.",
+    "base_sha": "db7c05ea9f6059e3fba4e0ddc37ff1ebf9f014f7",
+    "commands": {
+      "i1-artifacts": {
+        "base_sha": "db7c05ea9f6059e3fba4e0ddc37ff1ebf9f014f7",
+        "command": [
+          "/private/tmp/spl-toolkit-remaining-venv/bin/python",
+          "/private/tmp/m4-task7/i1-verify.py"
+        ],
+        "elapsed_seconds": 0.16610503196716309,
+        "exit": 0,
+        "input_manifest": "/private/tmp/m4-task7/i1-artifacts-inputs.json",
+        "input_manifest_sha256": "c4027d0fdbf27f25e28649d66384ec7ff95173412a8eb7c0cfb4bf616ce8284a",
+        "log": "/private/tmp/m4-task7/i1-artifacts.log",
+        "permanent_input_manifest": "review-i1/i1-artifacts-inputs.json",
+        "permanent_log": "review-i1/i1-artifacts.log",
+        "permanent_raw_log": "review-i1/i1-artifacts.log.raw.json"
+      },
+      "i1-green": {
+        "base_sha": "db7c05ea9f6059e3fba4e0ddc37ff1ebf9f014f7",
+        "command": [
+          "/private/tmp/spl-toolkit-remaining-venv/bin/python",
+          "-m",
+          "pytest",
+          "tools/tests/test_package.py",
+          "tools/tests/test_schema_docs.py",
+          "-q"
+        ],
+        "elapsed_seconds": 2.8279871940612793,
+        "exit": 0,
+        "input_manifest": "/private/tmp/m4-task7/i1-green-inputs.json",
+        "input_manifest_sha256": "c4027d0fdbf27f25e28649d66384ec7ff95173412a8eb7c0cfb4bf616ce8284a",
+        "log": "/private/tmp/m4-task7/i1-green.log",
+        "permanent_input_manifest": "review-i1/i1-green-inputs.json",
+        "permanent_log": "review-i1/i1-green.log",
+        "permanent_raw_log": "review-i1/i1-green.log.raw.json"
+      },
+      "i1-red": {
+        "base_sha": "db7c05ea9f6059e3fba4e0ddc37ff1ebf9f014f7",
+        "command": [
+          "/private/tmp/spl-toolkit-remaining-venv/bin/python",
+          "-m",
+          "pytest",
+          "tools/tests/test_package.py",
+          "-q",
+          "-k",
+          "compiler_region_changes"
+        ],
+        "elapsed_seconds": 0.6005239486694336,
+        "exit": 1,
+        "input_manifest": "/private/tmp/m4-task7/i1-red-inputs.json",
+        "input_manifest_sha256": "bfec6198c856ee8d3fa079bd8f8f52324be1dc52c7dfb790e42630ed7ca1807b",
+        "log": "/private/tmp/m4-task7/i1-red.log",
+        "permanent_input_manifest": "review-i1/i1-red-inputs.json",
+        "permanent_log": "review-i1/i1-red.log",
+        "permanent_raw_log": "review-i1/i1-red.log.raw.json"
+      }
+    },
+    "corrected_checker_sha256": "6baf6db778421cbbf5aa57f2146de69425bab9148cb58182f5c6d013e73414cf",
+    "corrected_test_sha256": "d65fc46c2885c398ed9acefc97237eb295676a103df1c396e42d803bc098499e",
+    "evidence": "review-i1/verification.json",
+    "executed_artifact_verifier": "review-i1/executed-artifact-verifier.py.txt",
+    "green": "71 passed (70 package tests plus 1 schema documentation registry test), zero failures/skips",
+    "log_encoding": "Display logs strip trailing whitespace only; .log.raw.json companions preserve exact transcripts and their raw SHA256.",
+    "prior_installed_checker_sha256": "9dba4b8ffb782c78466a9d6f97b76f1adeb48f87a337421a8f2234b512125712",
+    "red": "8 expected failures, 62 deselected: all new mutations escaped the prior checker",
+    "review_status": "I1 implementation and self-review complete; scoped independent rereview and milestone/root/controller gates remain open."
+  },
   "runtime_inspection": {
     "files": [
       "pkg/validation/schema_target.go",

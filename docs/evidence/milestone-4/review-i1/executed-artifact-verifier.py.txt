@@ -1,0 +1,27 @@
+import hashlib,importlib.util,json
+from pathlib import Path
+root=Path('/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones')
+spec=importlib.util.spec_from_file_location('corrected_package_checker',root/'tools/check_package.py');checker=importlib.util.module_from_spec(spec);spec.loader.exec_module(checker)
+sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
+prior=json.loads((root/'docs/evidence/milestone-4/package.json').read_text())
+wheel=Path('/private/tmp/m4-task7/floor-distribution/spl_toolkit-0.1.1-py3-none-macosx_15_0_arm64.whl')
+assert sha(wheel)==prior['wheel_sha256']
+payloads=checker.verify_wheel_sources(wheel,root)
+assert payloads==prior['wheel_payload_hashes']
+headers={v:root/f'tools/tests/fixtures/cgo-go{v}.h' for v in ('1.22','1.25')}
+contracts={v:checker.toolkit_header_contract(p.read_bytes()) for v,p in headers.items()}
+assert contracts['1.22']==contracts['1.25']==checker.toolkit_header_contract((root/'python/spl_toolkit/libspl_toolkit.h').read_bytes())
+assert sha(headers['1.22'])==prior['wheel_payload_hashes']['spl_toolkit/libspl_toolkit.h']
+assert sha(headers['1.25'])==prior['rebuilt_sdist']['wheel_payload_hashes']['spl_toolkit/libspl_toolkit.h']==prior['source_header_sha256']
+marker='/* Start of boilerplate cgo prologue.  */'
+for injection in ('extern void unexpected(void);','#define int long'):
+ altered=headers['1.25'].read_text().replace(marker,marker+'\n'+injection)
+ assert checker.toolkit_header_contract(altered.encode())!=contracts['1.25']
+identity=json.loads((root/'docs/evidence/milestone-4/source-identity.json').read_text())
+for key in ('go_build_input_hashes','source_python_input_hashes','acceptance_input_hashes','tooling_header_fixtures'):
+ for p,h in identity[key].items():assert sha(root/p)==h,p
+artifacts=json.loads((root/'docs/evidence/milestone-4/verification.json').read_text())['artifacts']
+for p,h in artifacts.items():assert sha(root/p)==h,p
+record={'schema_version':1,'finding':'I1','base_sha':'db7c05ea9f6059e3fba4e0ddc37ff1ebf9f014f7','corrected_checker_sha256':sha(root/'tools/check_package.py'),'corrected_test_sha256':sha(root/'tools/tests/test_package.py'),'prior_installed_checker_sha256':identity['final_checker_sha256'],'prior_package_evidence_sha256':sha(root/'docs/evidence/milestone-4/package.json'),'fresh_original_wheel_verification':{'wheel':str(wheel),'wheel_sha256':sha(wheel),'wheel_payload_hashes':payloads,'result':'passed'},'retained_header_revalidation':{v:{'sha256':sha(p),'normalized_complete_header_sha256':hashlib.sha256(contracts[v].encode()).hexdigest(),'result':'passed'} for v,p in headers.items()},'rebuilt_sdist_evidence_boundary':{'fresh_full_archive_verification':False,'reason':'The historical checker removed its TemporaryDirectory including the rebuilt archive. Root approved exact retained-header revalidation by the previously recorded payload hash, without rebuilding or reconstructing the archive.','historical_wheel_sha256':prior['rebuilt_sdist']['wheel_sha256'],'historical_native_sha256':prior['rebuilt_sdist']['native_sha256'],'historical_header_payload_sha256':prior['rebuilt_sdist']['wheel_payload_hashes']['spl_toolkit/libspl_toolkit.h'],'retained_header_matches_historical_payload':True,'historical_installed_tests':prior['rebuilt_sdist']['tests']},'original_and_source_artifact_hashes_unchanged':True,'go_source_python_and_acceptance_input_hashes_unchanged':True,'demonstrated_attacks_rejected':['extern void unexpected(void);','#define int long'],'no_build_or_installed_suite_rerun':True}
+Path('/private/tmp/m4-task7/i1-verification.json').write_text(json.dumps(record,indent=2,sort_keys=True)+'\n')
+print(json.dumps(record,indent=2,sort_keys=True))

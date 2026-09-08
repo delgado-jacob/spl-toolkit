@@ -1,0 +1,60 @@
+{
+  "base_sha": "db7c05ea9f6059e3fba4e0ddc37ff1ebf9f014f7",
+  "corrected_checker_sha256": "6baf6db778421cbbf5aa57f2146de69425bab9148cb58182f5c6d013e73414cf",
+  "corrected_test_sha256": "d65fc46c2885c398ed9acefc97237eb295676a103df1c396e42d803bc098499e",
+  "demonstrated_attacks_rejected": [
+    "extern void unexpected(void);",
+    "#define int long"
+  ],
+  "finding": "I1",
+  "fresh_original_wheel_verification": {
+    "result": "passed",
+    "wheel": "/private/tmp/m4-task7/floor-distribution/spl_toolkit-0.1.1-py3-none-macosx_15_0_arm64.whl",
+    "wheel_payload_hashes": {
+      "spl_toolkit/libspl_toolkit.dylib": "3f05e96cdd8391edfd00537f546a0a8efceaf12221de3cbb3115923f04f6423c",
+      "spl_toolkit/libspl_toolkit.h": "09082cb9e247065b3eb2973943e7fdb65072e564ff9511a4b81352a26a9fa526",
+      "spl_toolkit/mapper.py": "5313c61f71fbcf8cefbe73b8b126d8b7bc75c0af67c14571bded9e2c628e4bef"
+    },
+    "wheel_sha256": "9455b36b7bf09e02b497dac146245cc4b8e775ff1575d92da0d113b1f3e14ac2"
+  },
+  "go_source_python_and_acceptance_input_hashes_unchanged": true,
+  "no_build_or_installed_suite_rerun": true,
+  "original_and_source_artifact_hashes_unchanged": true,
+  "prior_installed_checker_sha256": "9dba4b8ffb782c78466a9d6f97b76f1adeb48f87a337421a8f2234b512125712",
+  "prior_package_evidence_sha256": "71a35cc7daa3890394457c306940f4e933962f2f19a62b4f8a05129dfb9a7227",
+  "rebuilt_sdist_evidence_boundary": {
+    "fresh_full_archive_verification": false,
+    "historical_header_payload_sha256": "b800c47a3f7b1de0dfd0b78c45eb767c4ac54c4016441d6ca1a431d6e639fda1",
+    "historical_installed_tests": {
+      "required_native": {
+        "collected": 213,
+        "failed": 0,
+        "passed": 213,
+        "skipped": 0
+      },
+      "surface_acceptance": {
+        "collected": 81,
+        "failed": 0,
+        "passed": 81,
+        "skipped": 0
+      }
+    },
+    "historical_native_sha256": "1da3f04bacb48ebdc29856d1afac6f1564676c80d9c923aa43560f8bf108c3b9",
+    "historical_wheel_sha256": "c1b96a0da2d811b0e53f798728b44bb3a96173a0ee975ae135693e9b5ec90211",
+    "reason": "The historical checker removed its TemporaryDirectory including the rebuilt archive. Root approved exact retained-header revalidation by the previously recorded payload hash, without rebuilding or reconstructing the archive.",
+    "retained_header_matches_historical_payload": true
+  },
+  "retained_header_revalidation": {
+    "1.22": {
+      "normalized_complete_header_sha256": "688ed7aabdef575fb833a46ce73e8a6b9df9f2648c70412f0c114a6a86051470",
+      "result": "passed",
+      "sha256": "09082cb9e247065b3eb2973943e7fdb65072e564ff9511a4b81352a26a9fa526"
+    },
+    "1.25": {
+      "normalized_complete_header_sha256": "688ed7aabdef575fb833a46ce73e8a6b9df9f2648c70412f0c114a6a86051470",
+      "result": "passed",
+      "sha256": "b800c47a3f7b1de0dfd0b78c45eb767c4ac54c4016441d6ca1a431d6e639fda1"
+    }
+  },
+  "schema_version": 1
+}
