@@ -321,6 +321,9 @@ type SPL2ParserVisitor interface {
 	// Visit a parse tree produced by SPL2Parser#binSpan.
 	VisitBinSpan(ctx *BinSpanContext) interface{}
 
+	// Visit a parse tree produced by SPL2Parser#signedWeeklySpan.
+	VisitSignedWeeklySpan(ctx *SignedWeeklySpanContext) interface{}
+
 	// Visit a parse tree produced by SPL2Parser#logarithmicSpan.
 	VisitLogarithmicSpan(ctx *LogarithmicSpanContext) interface{}
 

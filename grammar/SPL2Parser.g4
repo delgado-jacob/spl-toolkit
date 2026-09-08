@@ -182,7 +182,12 @@ binCommand: BIN (binOption | extendedOption)* identifier (aliasKeyword identifie
 binOption: BINS ASSIGN integerValue | MINSPAN ASSIGN binSpan | SPAN ASSIGN binSpan
     | (START | END) ASSIGN signedNumber | alignmentOption;
 alignmentOption: ALIGNTIME ASSIGN (EARLIEST | LATEST | relativeTime);
-binSpan: logarithmicSpan | (signedNumber ({p.adjacentPrevious()}? IDENTIFIER | {!p.adjacentPrevious()}?) | IDENTIFIER) (AT IDENTIFIER)?;
+binSpan: logarithmicSpan | signedWeeklySpan | (signedNumber ({p.adjacentPrevious()}? IDENTIFIER | {!p.adjacentPrevious()}?) | IDENTIFIER) (AT IDENTIFIER)?;
+// A signed weekly snap may omit its magnitude; other signed unit-only forms
+// do not acquire this alternative or a synthetic numeric operand.
+signedWeeklySpan: (PLUS | MINUS)
+    {p.GetTokenStream().LT(1).GetText() == "w" || p.GetTokenStream().LT(1).GetText() == "week" || p.GetTokenStream().LT(1).GetText() == "weeks"}?
+    IDENTIFIER AT IDENTIFIER;
 logarithmicSpan: signedNumber? LOG_SPAN;
 extendedOption: {p.extendedUnknownOption()}? unknownOption;
 signedNumber: (PLUS | MINUS)? NUMBER;

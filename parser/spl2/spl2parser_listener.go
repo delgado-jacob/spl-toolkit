@@ -316,6 +316,9 @@ type SPL2ParserListener interface {
 	// EnterBinSpan is called when entering the binSpan production.
 	EnterBinSpan(c *BinSpanContext)
 
+	// EnterSignedWeeklySpan is called when entering the signedWeeklySpan production.
+	EnterSignedWeeklySpan(c *SignedWeeklySpanContext)
+
 	// EnterLogarithmicSpan is called when entering the logarithmicSpan production.
 	EnterLogarithmicSpan(c *LogarithmicSpanContext)
 
@@ -867,6 +870,9 @@ type SPL2ParserListener interface {
 
 	// ExitBinSpan is called when exiting the binSpan production.
 	ExitBinSpan(c *BinSpanContext)
+
+	// ExitSignedWeeklySpan is called when exiting the signedWeeklySpan production.
+	ExitSignedWeeklySpan(c *SignedWeeklySpanContext)
 
 	// ExitLogarithmicSpan is called when exiting the logarithmicSpan production.
 	ExitLogarithmicSpan(c *LogarithmicSpanContext)

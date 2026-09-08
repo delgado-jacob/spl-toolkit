@@ -419,6 +419,10 @@ func (v *BaseSPL2ParserVisitor) VisitBinSpan(ctx *BinSpanContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
+func (v *BaseSPL2ParserVisitor) VisitSignedWeeklySpan(ctx *SignedWeeklySpanContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
 func (v *BaseSPL2ParserVisitor) VisitLogarithmicSpan(ctx *LogarithmicSpanContext) interface{} {
 	return v.VisitChildren(ctx)
 }

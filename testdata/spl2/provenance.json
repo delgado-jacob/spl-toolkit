@@ -23843,6 +23843,1122 @@
       "disposition": "active",
       "assembly": "standalone",
       "case_id": "T5.minspan.2"
+    },
+    {
+      "id": "T5.fix1.weekly.plus.omitted.axis.P",
+      "form_id": "E.C30.weekly_snap",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart span=+w@w1 count()",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.weekly.plus.omitted.axis.P"
+    },
+    {
+      "id": "T5.fix1.weekly.plus.omitted.axis.N",
+      "form_id": "E.C30.weekly_snap",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart span=+w@ count()",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.weekly.plus.omitted.axis.N"
+    },
+    {
+      "id": "T5.fix1.weekly.plus.omitted.split.P",
+      "form_id": "E.C30.weekly_snap",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart count() BY host span=+w@w1",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.weekly.plus.omitted.split.P"
+    },
+    {
+      "id": "T5.fix1.weekly.plus.omitted.split.N",
+      "form_id": "E.C30.weekly_snap",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart count() BY host span=+w@",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.weekly.plus.omitted.split.N"
+    },
+    {
+      "id": "T5.fix1.bin.plus.omitted",
+      "form_id": "E.C23.span_length",
+      "source_keys": [
+        "doc131"
+      ],
+      "candidate": "FROM main | bin span=+w@w1 _time",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.bin.plus.omitted"
+    },
+    {
+      "id": "T5.fix1.minspan.plus.omitted.False",
+      "form_id": "E.C30.minspan",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart minspan=+w@w1 count()",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.minspan.plus.omitted.False"
+    },
+    {
+      "id": "T5.fix1.minspan.plus.omitted.True",
+      "form_id": "E.C30.minspan",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart count() BY host minspan=+w@w1",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.minspan.plus.omitted.True"
+    },
+    {
+      "id": "T5.fix1.weekly.plus.2.axis.P",
+      "form_id": "E.C30.weekly_snap",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart span=+2w@w1 count()",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.weekly.plus.2.axis.P"
+    },
+    {
+      "id": "T5.fix1.weekly.plus.2.axis.N",
+      "form_id": "E.C30.weekly_snap",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart span=+2w@ count()",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.weekly.plus.2.axis.N"
+    },
+    {
+      "id": "T5.fix1.weekly.plus.2.split.P",
+      "form_id": "E.C30.weekly_snap",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart count() BY host span=+2w@w1",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.weekly.plus.2.split.P"
+    },
+    {
+      "id": "T5.fix1.weekly.plus.2.split.N",
+      "form_id": "E.C30.weekly_snap",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart count() BY host span=+2w@",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.weekly.plus.2.split.N"
+    },
+    {
+      "id": "T5.fix1.bin.plus.2",
+      "form_id": "E.C23.span_length",
+      "source_keys": [
+        "doc131"
+      ],
+      "candidate": "FROM main | bin span=+2w@w1 _time",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.bin.plus.2"
+    },
+    {
+      "id": "T5.fix1.minspan.plus.2.False",
+      "form_id": "E.C30.minspan",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart minspan=+2w@w1 count()",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.minspan.plus.2.False"
+    },
+    {
+      "id": "T5.fix1.minspan.plus.2.True",
+      "form_id": "E.C30.minspan",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart count() BY host minspan=+2w@w1",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.minspan.plus.2.True"
+    },
+    {
+      "id": "T5.fix1.weekly.minus.omitted.axis.P",
+      "form_id": "E.C30.weekly_snap",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart span=-w@w1 count()",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.weekly.minus.omitted.axis.P"
+    },
+    {
+      "id": "T5.fix1.weekly.minus.omitted.axis.N",
+      "form_id": "E.C30.weekly_snap",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart span=-w@ count()",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.weekly.minus.omitted.axis.N"
+    },
+    {
+      "id": "T5.fix1.weekly.minus.omitted.split.P",
+      "form_id": "E.C30.weekly_snap",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart count() BY host span=-w@w1",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.weekly.minus.omitted.split.P"
+    },
+    {
+      "id": "T5.fix1.weekly.minus.omitted.split.N",
+      "form_id": "E.C30.weekly_snap",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart count() BY host span=-w@",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.weekly.minus.omitted.split.N"
+    },
+    {
+      "id": "T5.fix1.bin.minus.omitted",
+      "form_id": "E.C23.span_length",
+      "source_keys": [
+        "doc131"
+      ],
+      "candidate": "FROM main | bin span=-w@w1 _time",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.bin.minus.omitted"
+    },
+    {
+      "id": "T5.fix1.minspan.minus.omitted.False",
+      "form_id": "E.C30.minspan",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart minspan=-w@w1 count()",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.minspan.minus.omitted.False"
+    },
+    {
+      "id": "T5.fix1.minspan.minus.omitted.True",
+      "form_id": "E.C30.minspan",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart count() BY host minspan=-w@w1",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.minspan.minus.omitted.True"
+    },
+    {
+      "id": "T5.fix1.weekly.minus.2.axis.P",
+      "form_id": "E.C30.weekly_snap",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart span=-2w@w1 count()",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.weekly.minus.2.axis.P"
+    },
+    {
+      "id": "T5.fix1.weekly.minus.2.axis.N",
+      "form_id": "E.C30.weekly_snap",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart span=-2w@ count()",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.weekly.minus.2.axis.N"
+    },
+    {
+      "id": "T5.fix1.weekly.minus.2.split.P",
+      "form_id": "E.C30.weekly_snap",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart count() BY host span=-2w@w1",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.weekly.minus.2.split.P"
+    },
+    {
+      "id": "T5.fix1.weekly.minus.2.split.N",
+      "form_id": "E.C30.weekly_snap",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart count() BY host span=-2w@",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.weekly.minus.2.split.N"
+    },
+    {
+      "id": "T5.fix1.bin.minus.2",
+      "form_id": "E.C23.span_length",
+      "source_keys": [
+        "doc131"
+      ],
+      "candidate": "FROM main | bin span=-2w@w1 _time",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.bin.minus.2"
+    },
+    {
+      "id": "T5.fix1.minspan.minus.2.False",
+      "form_id": "E.C30.minspan",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart minspan=-2w@w1 count()",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.minspan.minus.2.False"
+    },
+    {
+      "id": "T5.fix1.minspan.minus.2.True",
+      "form_id": "E.C30.minspan",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart count() BY host minspan=-2w@w1",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.minspan.minus.2.True"
+    },
+    {
+      "id": "T5.fix1.unit.q.span.False",
+      "form_id": "E.C30.span",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart span=1q count()",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.unit.q.span.False"
+    },
+    {
+      "id": "T5.fix1.unit.q.span.True",
+      "form_id": "E.C30.span",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart count() BY host span=1q",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.unit.q.span.True"
+    },
+    {
+      "id": "T5.fix1.unit.q.minspan.False",
+      "form_id": "E.C30.minspan",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart minspan=1q count()",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.unit.q.minspan.False"
+    },
+    {
+      "id": "T5.fix1.unit.q.minspan.True",
+      "form_id": "E.C30.minspan",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart count() BY host minspan=1q",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.unit.q.minspan.True"
+    },
+    {
+      "id": "T5.fix1.timewrap.q",
+      "form_id": "E.C31.span",
+      "source_keys": [
+        "doc173"
+      ],
+      "candidate": "FROM main | timechart count() | timewrap 2q align=end",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.timewrap.q"
+    },
+    {
+      "id": "T5.fix1.unit.qtr.span.False",
+      "form_id": "E.C30.span",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart span=1qtr count()",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.unit.qtr.span.False"
+    },
+    {
+      "id": "T5.fix1.unit.qtr.span.True",
+      "form_id": "E.C30.span",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart count() BY host span=1qtr",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.unit.qtr.span.True"
+    },
+    {
+      "id": "T5.fix1.unit.qtr.minspan.False",
+      "form_id": "E.C30.minspan",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart minspan=1qtr count()",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.unit.qtr.minspan.False"
+    },
+    {
+      "id": "T5.fix1.unit.qtr.minspan.True",
+      "form_id": "E.C30.minspan",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart count() BY host minspan=1qtr",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.unit.qtr.minspan.True"
+    },
+    {
+      "id": "T5.fix1.timewrap.qtr",
+      "form_id": "E.C31.span",
+      "source_keys": [
+        "doc173"
+      ],
+      "candidate": "FROM main | timechart count() | timewrap 2qtr align=end",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.timewrap.qtr"
+    },
+    {
+      "id": "T5.fix1.unit.quarter.span.False",
+      "form_id": "E.C30.span",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart span=1quarter count()",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.unit.quarter.span.False"
+    },
+    {
+      "id": "T5.fix1.unit.quarter.span.True",
+      "form_id": "E.C30.span",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart count() BY host span=1quarter",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.unit.quarter.span.True"
+    },
+    {
+      "id": "T5.fix1.unit.quarter.minspan.False",
+      "form_id": "E.C30.minspan",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart minspan=1quarter count()",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.unit.quarter.minspan.False"
+    },
+    {
+      "id": "T5.fix1.unit.quarter.minspan.True",
+      "form_id": "E.C30.minspan",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart count() BY host minspan=1quarter",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.unit.quarter.minspan.True"
+    },
+    {
+      "id": "T5.fix1.timewrap.quarter",
+      "form_id": "E.C31.span",
+      "source_keys": [
+        "doc173"
+      ],
+      "candidate": "FROM main | timechart count() | timewrap 2quarter align=end",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.timewrap.quarter.1.P"
+    },
+    {
+      "id": "T5.fix1.unit.quarters.span.False",
+      "form_id": "E.C30.span",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart span=1quarters count()",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.unit.quarters.span.False"
+    },
+    {
+      "id": "T5.fix1.unit.quarters.span.True",
+      "form_id": "E.C30.span",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart count() BY host span=1quarters",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.unit.quarters.span.True"
+    },
+    {
+      "id": "T5.fix1.unit.quarters.minspan.False",
+      "form_id": "E.C30.minspan",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart minspan=1quarters count()",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.unit.quarters.minspan.False"
+    },
+    {
+      "id": "T5.fix1.unit.quarters.minspan.True",
+      "form_id": "E.C30.minspan",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart count() BY host minspan=1quarters",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.unit.quarters.minspan.True"
+    },
+    {
+      "id": "T5.fix1.timewrap.quarters",
+      "form_id": "E.C31.span",
+      "source_keys": [
+        "doc173"
+      ],
+      "candidate": "FROM main | timechart count() | timewrap 2quarters align=end",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.timewrap.quarters"
+    },
+    {
+      "id": "T5.fix1.unit.y.span.False",
+      "form_id": "E.C30.span",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart span=1y count()",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.unit.y.span.False"
+    },
+    {
+      "id": "T5.fix1.unit.y.span.True",
+      "form_id": "E.C30.span",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart count() BY host span=1y",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.unit.y.span.True"
+    },
+    {
+      "id": "T5.fix1.unit.y.minspan.False",
+      "form_id": "E.C30.minspan",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart minspan=1y count()",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.unit.y.minspan.False"
+    },
+    {
+      "id": "T5.fix1.unit.y.minspan.True",
+      "form_id": "E.C30.minspan",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart count() BY host minspan=1y",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.unit.y.minspan.True"
+    },
+    {
+      "id": "T5.fix1.timewrap.y",
+      "form_id": "E.C31.span",
+      "source_keys": [
+        "doc173"
+      ],
+      "candidate": "FROM main | timechart count() | timewrap 2y align=end",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.timewrap.y"
+    },
+    {
+      "id": "T5.fix1.unit.yr.span.False",
+      "form_id": "E.C30.span",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart span=1yr count()",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.unit.yr.span.False"
+    },
+    {
+      "id": "T5.fix1.unit.yr.span.True",
+      "form_id": "E.C30.span",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart count() BY host span=1yr",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.unit.yr.span.True"
+    },
+    {
+      "id": "T5.fix1.unit.yr.minspan.False",
+      "form_id": "E.C30.minspan",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart minspan=1yr count()",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.unit.yr.minspan.False"
+    },
+    {
+      "id": "T5.fix1.unit.yr.minspan.True",
+      "form_id": "E.C30.minspan",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart count() BY host minspan=1yr",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.unit.yr.minspan.True"
+    },
+    {
+      "id": "T5.fix1.timewrap.yr",
+      "form_id": "E.C31.span",
+      "source_keys": [
+        "doc173"
+      ],
+      "candidate": "FROM main | timechart count() | timewrap 2yr align=end",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.timewrap.yr"
+    },
+    {
+      "id": "T5.fix1.unit.yrs.span.False",
+      "form_id": "E.C30.span",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart span=1yrs count()",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.unit.yrs.span.False"
+    },
+    {
+      "id": "T5.fix1.unit.yrs.span.True",
+      "form_id": "E.C30.span",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart count() BY host span=1yrs",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.unit.yrs.span.True"
+    },
+    {
+      "id": "T5.fix1.unit.yrs.minspan.False",
+      "form_id": "E.C30.minspan",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart minspan=1yrs count()",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.unit.yrs.minspan.False"
+    },
+    {
+      "id": "T5.fix1.unit.yrs.minspan.True",
+      "form_id": "E.C30.minspan",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart count() BY host minspan=1yrs",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.unit.yrs.minspan.True"
+    },
+    {
+      "id": "T5.fix1.timewrap.yrs",
+      "form_id": "E.C31.span",
+      "source_keys": [
+        "doc173"
+      ],
+      "candidate": "FROM main | timechart count() | timewrap 2yrs align=end",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.timewrap.yrs"
+    },
+    {
+      "id": "T5.fix1.unit.year.span.False",
+      "form_id": "E.C30.span",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart span=1year count()",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.unit.year.span.False"
+    },
+    {
+      "id": "T5.fix1.unit.year.span.True",
+      "form_id": "E.C30.span",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart count() BY host span=1year",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.unit.year.span.True"
+    },
+    {
+      "id": "T5.fix1.unit.year.minspan.False",
+      "form_id": "E.C30.minspan",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart minspan=1year count()",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.unit.year.minspan.False"
+    },
+    {
+      "id": "T5.fix1.unit.year.minspan.True",
+      "form_id": "E.C30.minspan",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart count() BY host minspan=1year",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.unit.year.minspan.True"
+    },
+    {
+      "id": "T5.fix1.timewrap.year",
+      "form_id": "E.C31.span",
+      "source_keys": [
+        "doc173"
+      ],
+      "candidate": "FROM main | timechart count() | timewrap 2year align=end",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.timewrap.year.1.P"
+    },
+    {
+      "id": "T5.fix1.unit.years.span.False",
+      "form_id": "E.C30.span",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart span=1years count()",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.unit.years.span.False"
+    },
+    {
+      "id": "T5.fix1.unit.years.span.True",
+      "form_id": "E.C30.span",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart count() BY host span=1years",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.unit.years.span.True"
+    },
+    {
+      "id": "T5.fix1.unit.years.minspan.False",
+      "form_id": "E.C30.minspan",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart minspan=1years count()",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.unit.years.minspan.False"
+    },
+    {
+      "id": "T5.fix1.unit.years.minspan.True",
+      "form_id": "E.C30.minspan",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart count() BY host minspan=1years",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.unit.years.minspan.True"
+    },
+    {
+      "id": "T5.fix1.timewrap.years",
+      "form_id": "E.C31.span",
+      "source_keys": [
+        "doc173"
+      ],
+      "candidate": "FROM main | timechart count() | timewrap 2years align=end",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.timewrap.years"
+    },
+    {
+      "id": "T5.fix1.evidenced.s.span",
+      "form_id": "E.C30.span",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart span=2s count()",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.evidenced.s.span"
+    },
+    {
+      "id": "T5.fix1.evidenced.s.minspan",
+      "form_id": "E.C30.minspan",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart minspan=2s count()",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.evidenced.s.minspan"
+    },
+    {
+      "id": "T5.fix1.evidenced.m.span",
+      "form_id": "E.C30.span",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart span=2m count()",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.evidenced.m.span"
+    },
+    {
+      "id": "T5.fix1.evidenced.m.minspan",
+      "form_id": "E.C30.minspan",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart minspan=2m count()",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.evidenced.m.minspan"
+    },
+    {
+      "id": "T5.fix1.evidenced.h.span",
+      "form_id": "E.C30.span",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart span=2h count()",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.evidenced.h.span"
+    },
+    {
+      "id": "T5.fix1.evidenced.h.minspan",
+      "form_id": "E.C30.minspan",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart minspan=2h count()",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.evidenced.h.minspan"
+    },
+    {
+      "id": "T5.fix1.evidenced.d.span",
+      "form_id": "E.C30.span",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart span=2d count()",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.evidenced.d.span"
+    },
+    {
+      "id": "T5.fix1.evidenced.d.minspan",
+      "form_id": "E.C30.minspan",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart minspan=2d count()",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.evidenced.d.minspan"
+    },
+    {
+      "id": "T5.fix1.evidenced.w.span",
+      "form_id": "E.C30.span",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart span=2w count()",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.evidenced.w.span"
+    },
+    {
+      "id": "T5.fix1.evidenced.w.minspan",
+      "form_id": "E.C30.minspan",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart minspan=2w count()",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.evidenced.w.minspan"
+    },
+    {
+      "id": "T5.fix1.evidenced.mon.span",
+      "form_id": "E.C30.span",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart span=2mon count()",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.evidenced.mon.span"
+    },
+    {
+      "id": "T5.fix1.evidenced.mon.minspan",
+      "form_id": "E.C30.minspan",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart minspan=2mon count()",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.evidenced.mon.minspan"
+    },
+    {
+      "id": "T5.fix1.evidenced.us.span",
+      "form_id": "E.C30.span",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart span=2us count()",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.evidenced.us.span"
+    },
+    {
+      "id": "T5.fix1.evidenced.us.minspan",
+      "form_id": "E.C30.minspan",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart minspan=2us count()",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.evidenced.us.minspan"
+    },
+    {
+      "id": "T5.fix1.evidenced.ms.span",
+      "form_id": "E.C30.span",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart span=2ms count()",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.evidenced.ms.span"
+    },
+    {
+      "id": "T5.fix1.evidenced.ms.minspan",
+      "form_id": "E.C30.minspan",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart minspan=2ms count()",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.evidenced.ms.minspan"
+    },
+    {
+      "id": "T5.fix1.evidenced.cs.span",
+      "form_id": "E.C30.span",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart span=2cs count()",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.evidenced.cs.span"
+    },
+    {
+      "id": "T5.fix1.evidenced.cs.minspan",
+      "form_id": "E.C30.minspan",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart minspan=2cs count()",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.evidenced.cs.minspan"
+    },
+    {
+      "id": "T5.fix1.evidenced.ds.span",
+      "form_id": "E.C30.span",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart span=2ds count()",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.evidenced.ds.span"
+    },
+    {
+      "id": "T5.fix1.evidenced.ds.minspan",
+      "form_id": "E.C30.minspan",
+      "source_keys": [
+        "doc172"
+      ],
+      "candidate": "FROM main | timechart minspan=2ds count()",
+      "evidence": "supplemental",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T5.fix1.evidenced.ds.minspan"
     }
   ],
   "holds": [

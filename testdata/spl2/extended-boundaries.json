@@ -3073,7 +3073,8 @@
   {
     "id": "T5.timewrap.quarter.1.P",
     "obligation_ids": [
-      "T5.timewrap.quarter.1.P"
+      "T5.timewrap.quarter.1.P",
+      "T5.fix1.timewrap.quarter"
     ],
     "source_keys": [
       "doc173"
@@ -3139,7 +3140,8 @@
   {
     "id": "T5.timewrap.year.1.P",
     "obligation_ids": [
-      "T5.timewrap.year.1.P"
+      "T5.timewrap.year.1.P",
+      "T5.fix1.timewrap.year"
     ],
     "source_keys": [
       "doc173"
@@ -5154,6 +5156,3645 @@
       }
     },
     "meaningful_id": "T5.minspan.2",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.weekly.plus.omitted.axis.P",
+    "obligation_ids": [
+      "T5.fix1.weekly.plus.omitted.axis.P"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart span=+w@w1 count()",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.weekly_snap"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1,
+        "NUMBER": 0,
+        "signedWeeklySpan": 1
+      },
+      "excerpts": [
+        {
+          "kind": "binSpan",
+          "text": "+w@w1"
+        }
+      ]
+    },
+    "meaningful_id": "T5.fix1.weekly.plus.omitted.axis.P",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.weekly.plus.omitted.axis.N",
+    "obligation_ids": [
+      "T5.fix1.weekly.plus.omitted.axis.N"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart span=+w@ count()",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.weekly_snap"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1
+      }
+    },
+    "meaningful_id": "T5.fix1.weekly.plus.omitted.axis.N",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.weekly.plus.omitted.split.P",
+    "obligation_ids": [
+      "T5.fix1.weekly.plus.omitted.split.P"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart count() BY host span=+w@w1",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.weekly_snap"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1,
+        "NUMBER": 0,
+        "signedWeeklySpan": 1
+      },
+      "excerpts": [
+        {
+          "kind": "binSpan",
+          "text": "+w@w1"
+        }
+      ]
+    },
+    "meaningful_id": "T5.fix1.weekly.plus.omitted.split.P",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.weekly.plus.omitted.split.N",
+    "obligation_ids": [
+      "T5.fix1.weekly.plus.omitted.split.N"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart count() BY host span=+w@",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.weekly_snap"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1
+      }
+    },
+    "meaningful_id": "T5.fix1.weekly.plus.omitted.split.N",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.bin.plus.omitted",
+    "obligation_ids": [
+      "T5.fix1.bin.plus.omitted"
+    ],
+    "source_keys": [
+      "doc131"
+    ],
+    "document": {
+      "text": "FROM main | bin span=+w@w1 _time",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C23.span_length"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "binCommand": 1,
+        "NUMBER": 0
+      },
+      "excerpts": [
+        {
+          "kind": "binSpan",
+          "text": "+w@w1"
+        }
+      ]
+    },
+    "meaningful_id": "T5.fix1.bin.plus.omitted",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.minspan.plus.omitted.False",
+    "obligation_ids": [
+      "T5.fix1.minspan.plus.omitted.False"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart minspan=+w@w1 count()",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.minspan"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1,
+        "NUMBER": 0
+      },
+      "excerpts": [
+        {
+          "kind": "binSpan",
+          "text": "+w@w1"
+        }
+      ]
+    },
+    "meaningful_id": "T5.fix1.minspan.plus.omitted.False",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.minspan.plus.omitted.True",
+    "obligation_ids": [
+      "T5.fix1.minspan.plus.omitted.True"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart count() BY host minspan=+w@w1",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.minspan"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1,
+        "NUMBER": 0
+      },
+      "excerpts": [
+        {
+          "kind": "binSpan",
+          "text": "+w@w1"
+        }
+      ]
+    },
+    "meaningful_id": "T5.fix1.minspan.plus.omitted.True",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.weekly.plus.2.axis.P",
+    "obligation_ids": [
+      "T5.fix1.weekly.plus.2.axis.P"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart span=+2w@w1 count()",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.weekly_snap"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1,
+        "NUMBER": 1,
+        "signedWeeklySpan": 0
+      },
+      "excerpts": [
+        {
+          "kind": "binSpan",
+          "text": "+2w@w1"
+        }
+      ]
+    },
+    "meaningful_id": "T5.fix1.weekly.plus.2.axis.P",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.weekly.plus.2.axis.N",
+    "obligation_ids": [
+      "T5.fix1.weekly.plus.2.axis.N"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart span=+2w@ count()",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.weekly_snap"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1
+      }
+    },
+    "meaningful_id": "T5.fix1.weekly.plus.2.axis.N",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.weekly.plus.2.split.P",
+    "obligation_ids": [
+      "T5.fix1.weekly.plus.2.split.P"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart count() BY host span=+2w@w1",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.weekly_snap"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1,
+        "NUMBER": 1,
+        "signedWeeklySpan": 0
+      },
+      "excerpts": [
+        {
+          "kind": "binSpan",
+          "text": "+2w@w1"
+        }
+      ]
+    },
+    "meaningful_id": "T5.fix1.weekly.plus.2.split.P",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.weekly.plus.2.split.N",
+    "obligation_ids": [
+      "T5.fix1.weekly.plus.2.split.N"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart count() BY host span=+2w@",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.weekly_snap"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1
+      }
+    },
+    "meaningful_id": "T5.fix1.weekly.plus.2.split.N",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.bin.plus.2",
+    "obligation_ids": [
+      "T5.fix1.bin.plus.2"
+    ],
+    "source_keys": [
+      "doc131"
+    ],
+    "document": {
+      "text": "FROM main | bin span=+2w@w1 _time",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C23.span_length"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "binCommand": 1,
+        "NUMBER": 1
+      },
+      "excerpts": [
+        {
+          "kind": "binSpan",
+          "text": "+2w@w1"
+        }
+      ]
+    },
+    "meaningful_id": "T5.fix1.bin.plus.2",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.minspan.plus.2.False",
+    "obligation_ids": [
+      "T5.fix1.minspan.plus.2.False"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart minspan=+2w@w1 count()",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.minspan"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1,
+        "NUMBER": 1
+      },
+      "excerpts": [
+        {
+          "kind": "binSpan",
+          "text": "+2w@w1"
+        }
+      ]
+    },
+    "meaningful_id": "T5.fix1.minspan.plus.2.False",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.minspan.plus.2.True",
+    "obligation_ids": [
+      "T5.fix1.minspan.plus.2.True"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart count() BY host minspan=+2w@w1",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.minspan"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1,
+        "NUMBER": 1
+      },
+      "excerpts": [
+        {
+          "kind": "binSpan",
+          "text": "+2w@w1"
+        }
+      ]
+    },
+    "meaningful_id": "T5.fix1.minspan.plus.2.True",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.weekly.minus.omitted.axis.P",
+    "obligation_ids": [
+      "T5.fix1.weekly.minus.omitted.axis.P"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart span=-w@w1 count()",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.weekly_snap"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1,
+        "NUMBER": 0,
+        "signedWeeklySpan": 1
+      },
+      "excerpts": [
+        {
+          "kind": "binSpan",
+          "text": "-w@w1"
+        }
+      ]
+    },
+    "meaningful_id": "T5.fix1.weekly.minus.omitted.axis.P",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.weekly.minus.omitted.axis.N",
+    "obligation_ids": [
+      "T5.fix1.weekly.minus.omitted.axis.N"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart span=-w@ count()",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.weekly_snap"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1
+      }
+    },
+    "meaningful_id": "T5.fix1.weekly.minus.omitted.axis.N",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.weekly.minus.omitted.split.P",
+    "obligation_ids": [
+      "T5.fix1.weekly.minus.omitted.split.P"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart count() BY host span=-w@w1",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.weekly_snap"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1,
+        "NUMBER": 0,
+        "signedWeeklySpan": 1
+      },
+      "excerpts": [
+        {
+          "kind": "binSpan",
+          "text": "-w@w1"
+        }
+      ]
+    },
+    "meaningful_id": "T5.fix1.weekly.minus.omitted.split.P",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.weekly.minus.omitted.split.N",
+    "obligation_ids": [
+      "T5.fix1.weekly.minus.omitted.split.N"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart count() BY host span=-w@",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.weekly_snap"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1
+      }
+    },
+    "meaningful_id": "T5.fix1.weekly.minus.omitted.split.N",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.bin.minus.omitted",
+    "obligation_ids": [
+      "T5.fix1.bin.minus.omitted"
+    ],
+    "source_keys": [
+      "doc131"
+    ],
+    "document": {
+      "text": "FROM main | bin span=-w@w1 _time",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C23.span_length"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "binCommand": 1,
+        "NUMBER": 0
+      },
+      "excerpts": [
+        {
+          "kind": "binSpan",
+          "text": "-w@w1"
+        }
+      ]
+    },
+    "meaningful_id": "T5.fix1.bin.minus.omitted",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.minspan.minus.omitted.False",
+    "obligation_ids": [
+      "T5.fix1.minspan.minus.omitted.False"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart minspan=-w@w1 count()",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.minspan"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1,
+        "NUMBER": 0
+      },
+      "excerpts": [
+        {
+          "kind": "binSpan",
+          "text": "-w@w1"
+        }
+      ]
+    },
+    "meaningful_id": "T5.fix1.minspan.minus.omitted.False",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.minspan.minus.omitted.True",
+    "obligation_ids": [
+      "T5.fix1.minspan.minus.omitted.True"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart count() BY host minspan=-w@w1",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.minspan"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1,
+        "NUMBER": 0
+      },
+      "excerpts": [
+        {
+          "kind": "binSpan",
+          "text": "-w@w1"
+        }
+      ]
+    },
+    "meaningful_id": "T5.fix1.minspan.minus.omitted.True",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.weekly.minus.2.axis.P",
+    "obligation_ids": [
+      "T5.fix1.weekly.minus.2.axis.P"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart span=-2w@w1 count()",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.weekly_snap"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1,
+        "NUMBER": 1,
+        "signedWeeklySpan": 0
+      },
+      "excerpts": [
+        {
+          "kind": "binSpan",
+          "text": "-2w@w1"
+        }
+      ]
+    },
+    "meaningful_id": "T5.fix1.weekly.minus.2.axis.P",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.weekly.minus.2.axis.N",
+    "obligation_ids": [
+      "T5.fix1.weekly.minus.2.axis.N"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart span=-2w@ count()",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.weekly_snap"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1
+      }
+    },
+    "meaningful_id": "T5.fix1.weekly.minus.2.axis.N",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.weekly.minus.2.split.P",
+    "obligation_ids": [
+      "T5.fix1.weekly.minus.2.split.P"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart count() BY host span=-2w@w1",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.weekly_snap"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1,
+        "NUMBER": 1,
+        "signedWeeklySpan": 0
+      },
+      "excerpts": [
+        {
+          "kind": "binSpan",
+          "text": "-2w@w1"
+        }
+      ]
+    },
+    "meaningful_id": "T5.fix1.weekly.minus.2.split.P",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.weekly.minus.2.split.N",
+    "obligation_ids": [
+      "T5.fix1.weekly.minus.2.split.N"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart count() BY host span=-2w@",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.weekly_snap"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1
+      }
+    },
+    "meaningful_id": "T5.fix1.weekly.minus.2.split.N",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.bin.minus.2",
+    "obligation_ids": [
+      "T5.fix1.bin.minus.2"
+    ],
+    "source_keys": [
+      "doc131"
+    ],
+    "document": {
+      "text": "FROM main | bin span=-2w@w1 _time",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C23.span_length"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "binCommand": 1,
+        "NUMBER": 1
+      },
+      "excerpts": [
+        {
+          "kind": "binSpan",
+          "text": "-2w@w1"
+        }
+      ]
+    },
+    "meaningful_id": "T5.fix1.bin.minus.2",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.minspan.minus.2.False",
+    "obligation_ids": [
+      "T5.fix1.minspan.minus.2.False"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart minspan=-2w@w1 count()",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.minspan"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1,
+        "NUMBER": 1
+      },
+      "excerpts": [
+        {
+          "kind": "binSpan",
+          "text": "-2w@w1"
+        }
+      ]
+    },
+    "meaningful_id": "T5.fix1.minspan.minus.2.False",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.minspan.minus.2.True",
+    "obligation_ids": [
+      "T5.fix1.minspan.minus.2.True"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart count() BY host minspan=-2w@w1",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.minspan"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1,
+        "NUMBER": 1
+      },
+      "excerpts": [
+        {
+          "kind": "binSpan",
+          "text": "-2w@w1"
+        }
+      ]
+    },
+    "meaningful_id": "T5.fix1.minspan.minus.2.True",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.unit.q.span.False",
+    "obligation_ids": [
+      "T5.fix1.unit.q.span.False"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart span=1q count()",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.span"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1,
+        "NUMBER": 1
+      },
+      "excerpts": [
+        {
+          "kind": "binSpan",
+          "text": "1q"
+        }
+      ]
+    },
+    "meaningful_id": "T5.fix1.unit.q.span.False",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.unit.q.span.True",
+    "obligation_ids": [
+      "T5.fix1.unit.q.span.True"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart count() BY host span=1q",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.span"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1,
+        "NUMBER": 1
+      },
+      "excerpts": [
+        {
+          "kind": "binSpan",
+          "text": "1q"
+        }
+      ]
+    },
+    "meaningful_id": "T5.fix1.unit.q.span.True",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.unit.q.minspan.False",
+    "obligation_ids": [
+      "T5.fix1.unit.q.minspan.False"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart minspan=1q count()",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.minspan"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1,
+        "NUMBER": 1
+      },
+      "excerpts": [
+        {
+          "kind": "binSpan",
+          "text": "1q"
+        }
+      ]
+    },
+    "meaningful_id": "T5.fix1.unit.q.minspan.False",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.unit.q.minspan.True",
+    "obligation_ids": [
+      "T5.fix1.unit.q.minspan.True"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart count() BY host minspan=1q",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.minspan"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1,
+        "NUMBER": 1
+      },
+      "excerpts": [
+        {
+          "kind": "binSpan",
+          "text": "1q"
+        }
+      ]
+    },
+    "meaningful_id": "T5.fix1.unit.q.minspan.True",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.timewrap.q",
+    "obligation_ids": [
+      "T5.fix1.timewrap.q"
+    ],
+    "source_keys": [
+      "doc173"
+    ],
+    "document": {
+      "text": "FROM main | timechart count() | timewrap 2q align=end",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C31.span"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timewrapCommand": 1
+      }
+    },
+    "meaningful_id": "T5.fix1.timewrap.q",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.unit.qtr.span.False",
+    "obligation_ids": [
+      "T5.fix1.unit.qtr.span.False"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart span=1qtr count()",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.span"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1,
+        "NUMBER": 1
+      },
+      "excerpts": [
+        {
+          "kind": "binSpan",
+          "text": "1qtr"
+        }
+      ]
+    },
+    "meaningful_id": "T5.fix1.unit.qtr.span.False",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.unit.qtr.span.True",
+    "obligation_ids": [
+      "T5.fix1.unit.qtr.span.True"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart count() BY host span=1qtr",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.span"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1,
+        "NUMBER": 1
+      },
+      "excerpts": [
+        {
+          "kind": "binSpan",
+          "text": "1qtr"
+        }
+      ]
+    },
+    "meaningful_id": "T5.fix1.unit.qtr.span.True",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.unit.qtr.minspan.False",
+    "obligation_ids": [
+      "T5.fix1.unit.qtr.minspan.False"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart minspan=1qtr count()",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.minspan"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1,
+        "NUMBER": 1
+      },
+      "excerpts": [
+        {
+          "kind": "binSpan",
+          "text": "1qtr"
+        }
+      ]
+    },
+    "meaningful_id": "T5.fix1.unit.qtr.minspan.False",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.unit.qtr.minspan.True",
+    "obligation_ids": [
+      "T5.fix1.unit.qtr.minspan.True"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart count() BY host minspan=1qtr",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.minspan"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1,
+        "NUMBER": 1
+      },
+      "excerpts": [
+        {
+          "kind": "binSpan",
+          "text": "1qtr"
+        }
+      ]
+    },
+    "meaningful_id": "T5.fix1.unit.qtr.minspan.True",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.timewrap.qtr",
+    "obligation_ids": [
+      "T5.fix1.timewrap.qtr"
+    ],
+    "source_keys": [
+      "doc173"
+    ],
+    "document": {
+      "text": "FROM main | timechart count() | timewrap 2qtr align=end",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C31.span"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timewrapCommand": 1
+      }
+    },
+    "meaningful_id": "T5.fix1.timewrap.qtr",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.unit.quarter.span.False",
+    "obligation_ids": [
+      "T5.fix1.unit.quarter.span.False"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart span=1quarter count()",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.span"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1,
+        "NUMBER": 1
+      },
+      "excerpts": [
+        {
+          "kind": "binSpan",
+          "text": "1quarter"
+        }
+      ]
+    },
+    "meaningful_id": "T5.fix1.unit.quarter.span.False",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.unit.quarter.span.True",
+    "obligation_ids": [
+      "T5.fix1.unit.quarter.span.True"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart count() BY host span=1quarter",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.span"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1,
+        "NUMBER": 1
+      },
+      "excerpts": [
+        {
+          "kind": "binSpan",
+          "text": "1quarter"
+        }
+      ]
+    },
+    "meaningful_id": "T5.fix1.unit.quarter.span.True",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.unit.quarter.minspan.False",
+    "obligation_ids": [
+      "T5.fix1.unit.quarter.minspan.False"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart minspan=1quarter count()",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.minspan"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1,
+        "NUMBER": 1
+      },
+      "excerpts": [
+        {
+          "kind": "binSpan",
+          "text": "1quarter"
+        }
+      ]
+    },
+    "meaningful_id": "T5.fix1.unit.quarter.minspan.False",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.unit.quarter.minspan.True",
+    "obligation_ids": [
+      "T5.fix1.unit.quarter.minspan.True"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart count() BY host minspan=1quarter",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.minspan"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1,
+        "NUMBER": 1
+      },
+      "excerpts": [
+        {
+          "kind": "binSpan",
+          "text": "1quarter"
+        }
+      ]
+    },
+    "meaningful_id": "T5.fix1.unit.quarter.minspan.True",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.unit.quarters.span.False",
+    "obligation_ids": [
+      "T5.fix1.unit.quarters.span.False"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart span=1quarters count()",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.span"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1,
+        "NUMBER": 1
+      },
+      "excerpts": [
+        {
+          "kind": "binSpan",
+          "text": "1quarters"
+        }
+      ]
+    },
+    "meaningful_id": "T5.fix1.unit.quarters.span.False",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.unit.quarters.span.True",
+    "obligation_ids": [
+      "T5.fix1.unit.quarters.span.True"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart count() BY host span=1quarters",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.span"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1,
+        "NUMBER": 1
+      },
+      "excerpts": [
+        {
+          "kind": "binSpan",
+          "text": "1quarters"
+        }
+      ]
+    },
+    "meaningful_id": "T5.fix1.unit.quarters.span.True",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.unit.quarters.minspan.False",
+    "obligation_ids": [
+      "T5.fix1.unit.quarters.minspan.False"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart minspan=1quarters count()",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.minspan"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1,
+        "NUMBER": 1
+      },
+      "excerpts": [
+        {
+          "kind": "binSpan",
+          "text": "1quarters"
+        }
+      ]
+    },
+    "meaningful_id": "T5.fix1.unit.quarters.minspan.False",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.unit.quarters.minspan.True",
+    "obligation_ids": [
+      "T5.fix1.unit.quarters.minspan.True"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart count() BY host minspan=1quarters",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.minspan"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1,
+        "NUMBER": 1
+      },
+      "excerpts": [
+        {
+          "kind": "binSpan",
+          "text": "1quarters"
+        }
+      ]
+    },
+    "meaningful_id": "T5.fix1.unit.quarters.minspan.True",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.timewrap.quarters",
+    "obligation_ids": [
+      "T5.fix1.timewrap.quarters"
+    ],
+    "source_keys": [
+      "doc173"
+    ],
+    "document": {
+      "text": "FROM main | timechart count() | timewrap 2quarters align=end",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C31.span"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timewrapCommand": 1
+      }
+    },
+    "meaningful_id": "T5.fix1.timewrap.quarters",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.unit.y.span.False",
+    "obligation_ids": [
+      "T5.fix1.unit.y.span.False"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart span=1y count()",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.span"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1,
+        "NUMBER": 1
+      },
+      "excerpts": [
+        {
+          "kind": "binSpan",
+          "text": "1y"
+        }
+      ]
+    },
+    "meaningful_id": "T5.fix1.unit.y.span.False",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.unit.y.span.True",
+    "obligation_ids": [
+      "T5.fix1.unit.y.span.True"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart count() BY host span=1y",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.span"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1,
+        "NUMBER": 1
+      },
+      "excerpts": [
+        {
+          "kind": "binSpan",
+          "text": "1y"
+        }
+      ]
+    },
+    "meaningful_id": "T5.fix1.unit.y.span.True",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.unit.y.minspan.False",
+    "obligation_ids": [
+      "T5.fix1.unit.y.minspan.False"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart minspan=1y count()",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.minspan"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1,
+        "NUMBER": 1
+      },
+      "excerpts": [
+        {
+          "kind": "binSpan",
+          "text": "1y"
+        }
+      ]
+    },
+    "meaningful_id": "T5.fix1.unit.y.minspan.False",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.unit.y.minspan.True",
+    "obligation_ids": [
+      "T5.fix1.unit.y.minspan.True"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart count() BY host minspan=1y",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.minspan"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1,
+        "NUMBER": 1
+      },
+      "excerpts": [
+        {
+          "kind": "binSpan",
+          "text": "1y"
+        }
+      ]
+    },
+    "meaningful_id": "T5.fix1.unit.y.minspan.True",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.timewrap.y",
+    "obligation_ids": [
+      "T5.fix1.timewrap.y"
+    ],
+    "source_keys": [
+      "doc173"
+    ],
+    "document": {
+      "text": "FROM main | timechart count() | timewrap 2y align=end",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C31.span"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timewrapCommand": 1
+      }
+    },
+    "meaningful_id": "T5.fix1.timewrap.y",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.unit.yr.span.False",
+    "obligation_ids": [
+      "T5.fix1.unit.yr.span.False"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart span=1yr count()",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.span"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1,
+        "NUMBER": 1
+      },
+      "excerpts": [
+        {
+          "kind": "binSpan",
+          "text": "1yr"
+        }
+      ]
+    },
+    "meaningful_id": "T5.fix1.unit.yr.span.False",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.unit.yr.span.True",
+    "obligation_ids": [
+      "T5.fix1.unit.yr.span.True"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart count() BY host span=1yr",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.span"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1,
+        "NUMBER": 1
+      },
+      "excerpts": [
+        {
+          "kind": "binSpan",
+          "text": "1yr"
+        }
+      ]
+    },
+    "meaningful_id": "T5.fix1.unit.yr.span.True",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.unit.yr.minspan.False",
+    "obligation_ids": [
+      "T5.fix1.unit.yr.minspan.False"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart minspan=1yr count()",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.minspan"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1,
+        "NUMBER": 1
+      },
+      "excerpts": [
+        {
+          "kind": "binSpan",
+          "text": "1yr"
+        }
+      ]
+    },
+    "meaningful_id": "T5.fix1.unit.yr.minspan.False",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.unit.yr.minspan.True",
+    "obligation_ids": [
+      "T5.fix1.unit.yr.minspan.True"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart count() BY host minspan=1yr",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.minspan"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1,
+        "NUMBER": 1
+      },
+      "excerpts": [
+        {
+          "kind": "binSpan",
+          "text": "1yr"
+        }
+      ]
+    },
+    "meaningful_id": "T5.fix1.unit.yr.minspan.True",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.timewrap.yr",
+    "obligation_ids": [
+      "T5.fix1.timewrap.yr"
+    ],
+    "source_keys": [
+      "doc173"
+    ],
+    "document": {
+      "text": "FROM main | timechart count() | timewrap 2yr align=end",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C31.span"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timewrapCommand": 1
+      }
+    },
+    "meaningful_id": "T5.fix1.timewrap.yr",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.unit.yrs.span.False",
+    "obligation_ids": [
+      "T5.fix1.unit.yrs.span.False"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart span=1yrs count()",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.span"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1,
+        "NUMBER": 1
+      },
+      "excerpts": [
+        {
+          "kind": "binSpan",
+          "text": "1yrs"
+        }
+      ]
+    },
+    "meaningful_id": "T5.fix1.unit.yrs.span.False",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.unit.yrs.span.True",
+    "obligation_ids": [
+      "T5.fix1.unit.yrs.span.True"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart count() BY host span=1yrs",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.span"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1,
+        "NUMBER": 1
+      },
+      "excerpts": [
+        {
+          "kind": "binSpan",
+          "text": "1yrs"
+        }
+      ]
+    },
+    "meaningful_id": "T5.fix1.unit.yrs.span.True",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.unit.yrs.minspan.False",
+    "obligation_ids": [
+      "T5.fix1.unit.yrs.minspan.False"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart minspan=1yrs count()",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.minspan"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1,
+        "NUMBER": 1
+      },
+      "excerpts": [
+        {
+          "kind": "binSpan",
+          "text": "1yrs"
+        }
+      ]
+    },
+    "meaningful_id": "T5.fix1.unit.yrs.minspan.False",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.unit.yrs.minspan.True",
+    "obligation_ids": [
+      "T5.fix1.unit.yrs.minspan.True"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart count() BY host minspan=1yrs",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.minspan"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1,
+        "NUMBER": 1
+      },
+      "excerpts": [
+        {
+          "kind": "binSpan",
+          "text": "1yrs"
+        }
+      ]
+    },
+    "meaningful_id": "T5.fix1.unit.yrs.minspan.True",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.timewrap.yrs",
+    "obligation_ids": [
+      "T5.fix1.timewrap.yrs"
+    ],
+    "source_keys": [
+      "doc173"
+    ],
+    "document": {
+      "text": "FROM main | timechart count() | timewrap 2yrs align=end",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C31.span"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timewrapCommand": 1
+      }
+    },
+    "meaningful_id": "T5.fix1.timewrap.yrs",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.unit.year.span.False",
+    "obligation_ids": [
+      "T5.fix1.unit.year.span.False"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart span=1year count()",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.span"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1,
+        "NUMBER": 1
+      },
+      "excerpts": [
+        {
+          "kind": "binSpan",
+          "text": "1year"
+        }
+      ]
+    },
+    "meaningful_id": "T5.fix1.unit.year.span.False",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.unit.year.span.True",
+    "obligation_ids": [
+      "T5.fix1.unit.year.span.True"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart count() BY host span=1year",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.span"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1,
+        "NUMBER": 1
+      },
+      "excerpts": [
+        {
+          "kind": "binSpan",
+          "text": "1year"
+        }
+      ]
+    },
+    "meaningful_id": "T5.fix1.unit.year.span.True",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.unit.year.minspan.False",
+    "obligation_ids": [
+      "T5.fix1.unit.year.minspan.False"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart minspan=1year count()",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.minspan"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1,
+        "NUMBER": 1
+      },
+      "excerpts": [
+        {
+          "kind": "binSpan",
+          "text": "1year"
+        }
+      ]
+    },
+    "meaningful_id": "T5.fix1.unit.year.minspan.False",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.unit.year.minspan.True",
+    "obligation_ids": [
+      "T5.fix1.unit.year.minspan.True"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart count() BY host minspan=1year",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.minspan"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1,
+        "NUMBER": 1
+      },
+      "excerpts": [
+        {
+          "kind": "binSpan",
+          "text": "1year"
+        }
+      ]
+    },
+    "meaningful_id": "T5.fix1.unit.year.minspan.True",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.unit.years.span.False",
+    "obligation_ids": [
+      "T5.fix1.unit.years.span.False"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart span=1years count()",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.span"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1,
+        "NUMBER": 1
+      },
+      "excerpts": [
+        {
+          "kind": "binSpan",
+          "text": "1years"
+        }
+      ]
+    },
+    "meaningful_id": "T5.fix1.unit.years.span.False",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.unit.years.span.True",
+    "obligation_ids": [
+      "T5.fix1.unit.years.span.True"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart count() BY host span=1years",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.span"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1,
+        "NUMBER": 1
+      },
+      "excerpts": [
+        {
+          "kind": "binSpan",
+          "text": "1years"
+        }
+      ]
+    },
+    "meaningful_id": "T5.fix1.unit.years.span.True",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.unit.years.minspan.False",
+    "obligation_ids": [
+      "T5.fix1.unit.years.minspan.False"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart minspan=1years count()",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.minspan"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1,
+        "NUMBER": 1
+      },
+      "excerpts": [
+        {
+          "kind": "binSpan",
+          "text": "1years"
+        }
+      ]
+    },
+    "meaningful_id": "T5.fix1.unit.years.minspan.False",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.unit.years.minspan.True",
+    "obligation_ids": [
+      "T5.fix1.unit.years.minspan.True"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart count() BY host minspan=1years",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.minspan"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1,
+        "NUMBER": 1
+      },
+      "excerpts": [
+        {
+          "kind": "binSpan",
+          "text": "1years"
+        }
+      ]
+    },
+    "meaningful_id": "T5.fix1.unit.years.minspan.True",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.timewrap.years",
+    "obligation_ids": [
+      "T5.fix1.timewrap.years"
+    ],
+    "source_keys": [
+      "doc173"
+    ],
+    "document": {
+      "text": "FROM main | timechart count() | timewrap 2years align=end",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C31.span"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timewrapCommand": 1
+      }
+    },
+    "meaningful_id": "T5.fix1.timewrap.years",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.evidenced.s.span",
+    "obligation_ids": [
+      "T5.fix1.evidenced.s.span"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart span=2s count()",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.span"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1,
+        "NUMBER": 1
+      },
+      "excerpts": [
+        {
+          "kind": "binSpan",
+          "text": "2s"
+        }
+      ]
+    },
+    "meaningful_id": "T5.fix1.evidenced.s.span",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.evidenced.s.minspan",
+    "obligation_ids": [
+      "T5.fix1.evidenced.s.minspan"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart minspan=2s count()",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.minspan"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1,
+        "NUMBER": 1
+      },
+      "excerpts": [
+        {
+          "kind": "binSpan",
+          "text": "2s"
+        }
+      ]
+    },
+    "meaningful_id": "T5.fix1.evidenced.s.minspan",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.evidenced.m.span",
+    "obligation_ids": [
+      "T5.fix1.evidenced.m.span"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart span=2m count()",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.span"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1,
+        "NUMBER": 1
+      },
+      "excerpts": [
+        {
+          "kind": "binSpan",
+          "text": "2m"
+        }
+      ]
+    },
+    "meaningful_id": "T5.fix1.evidenced.m.span",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.evidenced.m.minspan",
+    "obligation_ids": [
+      "T5.fix1.evidenced.m.minspan"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart minspan=2m count()",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.minspan"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1,
+        "NUMBER": 1
+      },
+      "excerpts": [
+        {
+          "kind": "binSpan",
+          "text": "2m"
+        }
+      ]
+    },
+    "meaningful_id": "T5.fix1.evidenced.m.minspan",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.evidenced.h.span",
+    "obligation_ids": [
+      "T5.fix1.evidenced.h.span"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart span=2h count()",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.span"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1,
+        "NUMBER": 1
+      },
+      "excerpts": [
+        {
+          "kind": "binSpan",
+          "text": "2h"
+        }
+      ]
+    },
+    "meaningful_id": "T5.fix1.evidenced.h.span",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.evidenced.h.minspan",
+    "obligation_ids": [
+      "T5.fix1.evidenced.h.minspan"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart minspan=2h count()",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.minspan"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1,
+        "NUMBER": 1
+      },
+      "excerpts": [
+        {
+          "kind": "binSpan",
+          "text": "2h"
+        }
+      ]
+    },
+    "meaningful_id": "T5.fix1.evidenced.h.minspan",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.evidenced.d.span",
+    "obligation_ids": [
+      "T5.fix1.evidenced.d.span"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart span=2d count()",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.span"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1,
+        "NUMBER": 1
+      },
+      "excerpts": [
+        {
+          "kind": "binSpan",
+          "text": "2d"
+        }
+      ]
+    },
+    "meaningful_id": "T5.fix1.evidenced.d.span",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.evidenced.d.minspan",
+    "obligation_ids": [
+      "T5.fix1.evidenced.d.minspan"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart minspan=2d count()",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.minspan"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1,
+        "NUMBER": 1
+      },
+      "excerpts": [
+        {
+          "kind": "binSpan",
+          "text": "2d"
+        }
+      ]
+    },
+    "meaningful_id": "T5.fix1.evidenced.d.minspan",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.evidenced.w.span",
+    "obligation_ids": [
+      "T5.fix1.evidenced.w.span"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart span=2w count()",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.span"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1,
+        "NUMBER": 1
+      },
+      "excerpts": [
+        {
+          "kind": "binSpan",
+          "text": "2w"
+        }
+      ]
+    },
+    "meaningful_id": "T5.fix1.evidenced.w.span",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.evidenced.w.minspan",
+    "obligation_ids": [
+      "T5.fix1.evidenced.w.minspan"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart minspan=2w count()",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.minspan"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1,
+        "NUMBER": 1
+      },
+      "excerpts": [
+        {
+          "kind": "binSpan",
+          "text": "2w"
+        }
+      ]
+    },
+    "meaningful_id": "T5.fix1.evidenced.w.minspan",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.evidenced.mon.span",
+    "obligation_ids": [
+      "T5.fix1.evidenced.mon.span"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart span=2mon count()",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.span"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1,
+        "NUMBER": 1
+      },
+      "excerpts": [
+        {
+          "kind": "binSpan",
+          "text": "2mon"
+        }
+      ]
+    },
+    "meaningful_id": "T5.fix1.evidenced.mon.span",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.evidenced.mon.minspan",
+    "obligation_ids": [
+      "T5.fix1.evidenced.mon.minspan"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart minspan=2mon count()",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.minspan"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1,
+        "NUMBER": 1
+      },
+      "excerpts": [
+        {
+          "kind": "binSpan",
+          "text": "2mon"
+        }
+      ]
+    },
+    "meaningful_id": "T5.fix1.evidenced.mon.minspan",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.evidenced.us.span",
+    "obligation_ids": [
+      "T5.fix1.evidenced.us.span"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart span=2us count()",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.span"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1,
+        "NUMBER": 1
+      },
+      "excerpts": [
+        {
+          "kind": "binSpan",
+          "text": "2us"
+        }
+      ]
+    },
+    "meaningful_id": "T5.fix1.evidenced.us.span",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.evidenced.us.minspan",
+    "obligation_ids": [
+      "T5.fix1.evidenced.us.minspan"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart minspan=2us count()",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.minspan"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1,
+        "NUMBER": 1
+      },
+      "excerpts": [
+        {
+          "kind": "binSpan",
+          "text": "2us"
+        }
+      ]
+    },
+    "meaningful_id": "T5.fix1.evidenced.us.minspan",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.evidenced.ms.span",
+    "obligation_ids": [
+      "T5.fix1.evidenced.ms.span"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart span=2ms count()",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.span"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1,
+        "NUMBER": 1
+      },
+      "excerpts": [
+        {
+          "kind": "binSpan",
+          "text": "2ms"
+        }
+      ]
+    },
+    "meaningful_id": "T5.fix1.evidenced.ms.span",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.evidenced.ms.minspan",
+    "obligation_ids": [
+      "T5.fix1.evidenced.ms.minspan"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart minspan=2ms count()",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.minspan"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1,
+        "NUMBER": 1
+      },
+      "excerpts": [
+        {
+          "kind": "binSpan",
+          "text": "2ms"
+        }
+      ]
+    },
+    "meaningful_id": "T5.fix1.evidenced.ms.minspan",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.evidenced.cs.span",
+    "obligation_ids": [
+      "T5.fix1.evidenced.cs.span"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart span=2cs count()",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.span"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1,
+        "NUMBER": 1
+      },
+      "excerpts": [
+        {
+          "kind": "binSpan",
+          "text": "2cs"
+        }
+      ]
+    },
+    "meaningful_id": "T5.fix1.evidenced.cs.span",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.evidenced.cs.minspan",
+    "obligation_ids": [
+      "T5.fix1.evidenced.cs.minspan"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart minspan=2cs count()",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.minspan"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1,
+        "NUMBER": 1
+      },
+      "excerpts": [
+        {
+          "kind": "binSpan",
+          "text": "2cs"
+        }
+      ]
+    },
+    "meaningful_id": "T5.fix1.evidenced.cs.minspan",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.evidenced.ds.span",
+    "obligation_ids": [
+      "T5.fix1.evidenced.ds.span"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart span=2ds count()",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.span"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1,
+        "NUMBER": 1
+      },
+      "excerpts": [
+        {
+          "kind": "binSpan",
+          "text": "2ds"
+        }
+      ]
+    },
+    "meaningful_id": "T5.fix1.evidenced.ds.span",
+    "floor_credit": false
+  },
+  {
+    "id": "T5.fix1.evidenced.ds.minspan",
+    "obligation_ids": [
+      "T5.fix1.evidenced.ds.minspan"
+    ],
+    "source_keys": [
+      "doc172"
+    ],
+    "document": {
+      "text": "FROM main | timechart minspan=2ds count()",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.C30.minspan"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "timechartCommand": 1,
+        "NUMBER": 1
+      },
+      "excerpts": [
+        {
+          "kind": "binSpan",
+          "text": "2ds"
+        }
+      ]
+    },
+    "meaningful_id": "T5.fix1.evidenced.ds.minspan",
     "floor_credit": false
   }
 ]

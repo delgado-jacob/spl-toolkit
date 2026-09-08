@@ -206,3 +206,137 @@ func TestSPL2ExtendedSyntaxMinimumSpanForms(t *testing.T) {
 		})
 	}
 }
+
+func TestSPL2ExtendedSyntaxSignedWeeklySpans(t *testing.T) {
+	for _, sign := range []string{"+", "-"} {
+		for _, magnitude := range []string{"", "2"} {
+			for _, split := range []bool{false, true} {
+				span := sign + magnitude + "w@w1"
+				query := "FROM main | timechart span=" + span + " count()"
+				if split {
+					query = "FROM main | timechart count() BY host span=" + span
+				}
+				t.Run(query, func(t *testing.T) {
+					p := parseSPL2Document(query)
+					if !p.syntaxComplete || len(p.diagnostics) != 0 {
+						t.Fatalf("admitted weekly span: %+v", p.diagnostics)
+					}
+					wantNumbers := 0
+					if magnitude != "" {
+						wantNumbers = 1
+					}
+					if got := len(spl2Nodes(p.syntax, "NUMBER")); got != wantNumbers {
+						t.Fatalf("numeric tokens %d want %d", got, wantNumbers)
+					}
+					if got := len(spl2Nodes(p.syntax, "signedWeeklySpan")); got != 1-wantNumbers {
+						t.Fatalf("omitted-magnitude typed contexts %d want %d", got, 1-wantNumbers)
+					}
+					spans := spl2Nodes(p.syntax, "binSpan")
+					if len(spans) != 1 {
+						t.Fatalf("span ownership: %+v", spans)
+					}
+					loc := spans[0].Location
+					if query[loc.Start.Offset:loc.End.Offset] != span {
+						t.Fatal("span source ownership changed")
+					}
+					if p.semanticComplete {
+						t.Fatal("unmodeled effect became complete")
+					}
+				})
+				malformed := "FROM main | timechart span=" + sign + magnitude + "w@ count()"
+				if split {
+					malformed = "FROM main | timechart count() BY host span=" + sign + magnitude + "w@"
+				}
+				t.Run(malformed, func(t *testing.T) {
+					p := parseSPL2Document(malformed)
+					found := false
+					for _, d := range p.diagnostics {
+						if d.Code == CodeSyntaxError && d.Severity == "error" {
+							found = true
+							if d.Location.Start.Offset < 0 || d.Location.End.Offset > len(malformed) {
+								t.Fatal("unlocated malformed snap")
+							}
+						}
+					}
+					if !found || p.syntaxComplete {
+						t.Fatalf("missing malformed snap diagnostic: %+v", p.diagnostics)
+					}
+				})
+			}
+		}
+	}
+	for _, span := range []string{"+w@w1", "-w@w1", "+2w@w1", "-2w@w1"} {
+		for _, query := range []string{"FROM main | bin span=" + span + " _time", "FROM main | timechart minspan=" + span + " count()", "FROM main | timechart count() BY host minspan=" + span} {
+			t.Run(query, func(t *testing.T) {
+				p := parseSPL2Document(query)
+				if p.syntaxComplete {
+					t.Fatal("bin/minspan hold was promoted")
+				}
+				for _, d := range p.diagnostics {
+					if d.Severity == "error" {
+						t.Fatalf("held form became invalid: %+v", d)
+					}
+				}
+			})
+		}
+	}
+	for _, query := range []string{`FROM main | timechart span=+h count()`, `FROM main | timechart span=-h@d count()`} {
+		t.Run(query, func(t *testing.T) {
+			if parseSPL2Document(query).syntaxComplete {
+				t.Fatal("broad signed unit promotion")
+			}
+		})
+	}
+}
+
+func TestSPL2ExtendedSyntaxCommandSpecificSpanUnits(t *testing.T) {
+	for _, unit := range []string{"q", "qtr", "quarter", "quarters", "y", "yr", "yrs", "year", "years"} {
+		for _, option := range []string{"span", "minspan"} {
+			for _, split := range []bool{false, true} {
+				query := "FROM main | timechart " + option + "=1" + unit + " count()"
+				if split {
+					query = "FROM main | timechart count() BY host " + option + "=1" + unit
+				}
+				t.Run(query, func(t *testing.T) {
+					p := parseSPL2Document(query)
+					held := false
+					for _, d := range p.diagnostics {
+						if d.Severity == "error" {
+							t.Fatalf("unproved unit became invalid: %+v", d)
+						}
+						if d.Code == CodeUnsupportedSemantics {
+							held = true
+							loc := d.Location
+							if query[loc.Start.Offset:loc.End.Offset] != "1"+unit {
+								t.Fatal("unit hold source location changed")
+							}
+						}
+					}
+					if p.syntaxComplete || !held || p.semanticComplete {
+						t.Fatalf("unproved timechart unit promoted: %+v", p.diagnostics)
+					}
+				})
+			}
+		}
+	}
+	for _, unit := range []string{"q", "qtr", "quarter", "quarters", "y", "yr", "yrs", "year", "years"} {
+		query := "FROM main | timechart count() | timewrap 2" + unit + " align=end"
+		t.Run(query, func(t *testing.T) {
+			p := parseSPL2Document(query)
+			if !p.syntaxComplete || len(p.diagnostics) != 0 {
+				t.Fatalf("timewrap own unit regressed: %+v", p.diagnostics)
+			}
+		})
+	}
+	for _, unit := range []string{"s", "m", "h", "d", "w", "mon", "us", "ms", "cs", "ds"} {
+		for _, option := range []string{"span", "minspan"} {
+			query := "FROM main | timechart " + option + "=2" + unit + " count()"
+			t.Run(query, func(t *testing.T) {
+				p := parseSPL2Document(query)
+				if !p.syntaxComplete || len(p.diagnostics) != 0 {
+					t.Fatalf("evidenced timechart unit regressed: %+v", p.diagnostics)
+				}
+			})
+		}
+	}
+}

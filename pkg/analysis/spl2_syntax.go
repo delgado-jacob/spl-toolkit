@@ -753,7 +753,8 @@ func (p *spl2ParsedDocument) inspectBinSpan(ctx *spl2.BinSpanContext) {
 	if !spl2IntactSyntax(ctx) {
 		return
 	}
-	if option, ok := ctx.GetParent().(*spl2.BinOptionContext); ok && option.MINSPAN() != nil && (ctx.LogarithmicSpan() != nil || ctx.AT() != nil) {
+	snapped := ctx.AT() != nil || ctx.SignedWeeklySpan() != nil
+	if option, ok := ctx.GetParent().(*spl2.BinOptionContext); ok && option.MINSPAN() != nil && (ctx.LogarithmicSpan() != nil || snapped) {
 		p.heldSyntax(ctx, "Logarithmic or snapped minspan remains unproved")
 	}
 	number := ctx.SignedNumber()
@@ -761,6 +762,9 @@ func (p *spl2ParsedDocument) inspectBinSpan(ctx *spl2.BinSpanContext) {
 		p.syntaxFinding(number, CodeSyntaxError, "contract", "Span count requires an integer")
 	}
 	units := ctx.AllIDENTIFIER()
+	if weekly := ctx.SignedWeeklySpan(); weekly != nil {
+		units = weekly.AllIDENTIFIER()
+	}
 	if len(units) == 0 {
 		return
 	}
@@ -778,12 +782,12 @@ func (p *spl2ParsedDocument) inspectBinSpan(ctx *spl2.BinSpanContext) {
 		case "us", "ms", "cs", "ds", "s", "sec", "secs", "second", "seconds", "m", "min", "mins", "minute", "minutes", "h", "hr", "hrs", "hour", "hours", "d", "day", "days", "mon", "month", "months", "y", "yr", "year", "years":
 			admitted = true
 		}
-		if number == nil || !admitted || ctx.AT() != nil {
+		if number == nil || !admitted || snapped {
 			p.heldSyntax(ctx, "EH01 additional bin unit or span layout remains unproved")
 		}
-	} else if ctx.AT() == nil && !spl2TimewrapUnit(unit) && unit != "us" && unit != "ms" && unit != "cs" && unit != "ds" {
+	} else if !snapped && !spl2TimechartUnit(unit) {
 		p.heldSyntax(ctx, "Unproved timechart unit")
-	} else if ctx.AT() != nil && unit != "w" && unit != "week" && unit != "weeks" {
+	} else if snapped && unit != "w" && unit != "week" && unit != "weeks" {
 		p.heldSyntax(ctx, "Nonweekly snapped timechart spans remain unproved")
 	}
 }
@@ -814,6 +818,17 @@ func (p *spl2ParsedDocument) inspectLogSpan(ctx *spl2.LogarithmicSpanContext) {
 		p.syntaxFinding(ctx, CodeSyntaxError, "contract", "Logarithmic span requires base > 1 and 1 <= coefficient < base")
 	}
 }
+
+// Timechart's evidenced unit classes are independent of timewrap's quarter
+// and year vocabulary. Unknown units retain incomplete coverage.
+func spl2TimechartUnit(unit string) bool {
+	switch unit {
+	case "us", "ms", "cs", "ds", "s", "sec", "secs", "second", "seconds", "m", "min", "mins", "minute", "minutes", "h", "hr", "hrs", "hour", "hours", "d", "day", "days", "w", "week", "weeks", "mon", "month", "months":
+		return true
+	}
+	return false
+}
+
 func spl2TimewrapUnit(unit string) bool {
 	switch unit {
 	case "s", "sec", "secs", "second", "seconds", "min", "mins", "minute", "minutes", "h", "hr", "hrs", "hour", "hours", "d", "day", "days", "w", "week", "weeks", "m", "mon", "month", "months", "q", "qtr", "quarter", "quarters", "y", "yr", "yrs", "year", "years":

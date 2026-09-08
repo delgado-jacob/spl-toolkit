@@ -638,6 +638,12 @@ func (s *BaseSPL2ParserListener) EnterBinSpan(ctx *BinSpanContext) {}
 // ExitBinSpan is called when production binSpan is exited.
 func (s *BaseSPL2ParserListener) ExitBinSpan(ctx *BinSpanContext) {}
 
+// EnterSignedWeeklySpan is called when production signedWeeklySpan is entered.
+func (s *BaseSPL2ParserListener) EnterSignedWeeklySpan(ctx *SignedWeeklySpanContext) {}
+
+// ExitSignedWeeklySpan is called when production signedWeeklySpan is exited.
+func (s *BaseSPL2ParserListener) ExitSignedWeeklySpan(ctx *SignedWeeklySpanContext) {}
+
 // EnterLogarithmicSpan is called when production logarithmicSpan is entered.
 func (s *BaseSPL2ParserListener) EnterLogarithmicSpan(ctx *LogarithmicSpanContext) {}
 
