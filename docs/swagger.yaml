@@ -434,6 +434,141 @@ components:
           type: boolean
           x-order: '3'
       type: object
+    api.SchemaValidationBatchRequest:
+      additionalProperties: false
+      properties:
+        documents:
+          items:
+            $ref: '#/components/schemas/validation.QueryDocument'
+          minItems: 1
+          type: array
+        target:
+          $ref: '#/components/schemas/api.SchemaValidationTarget'
+      required:
+      - documents
+      - target
+      type: object
+    api.SchemaValidationRequest:
+      additionalProperties: false
+      properties:
+        document:
+          $ref: '#/components/schemas/validation.QueryDocument'
+        target:
+          $ref: '#/components/schemas/api.SchemaValidationTarget'
+      required:
+      - document
+      - target
+      type: object
+    api.SchemaValidationSelection:
+      additionalProperties: false
+      description: Exact version and exactly one selector. Omitted profiles/extensions
+        normalize to empty arrays; null is invalid. Names are nonblank UTF-8, unique
+        and case-sensitive.
+      oneOf:
+      - required:
+        - class
+      - required:
+        - class_uid
+      - required:
+        - category
+      - required:
+        - category_uid
+      properties:
+        category:
+          minLength: 1
+          pattern: \S
+          type: string
+        category_uid:
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          type: integer
+        class:
+          minLength: 1
+          pattern: \S
+          type: string
+        class_uid:
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          type: integer
+        extensions:
+          items:
+            minLength: 1
+            pattern: \S
+            type: string
+          type: array
+          uniqueItems: true
+        profiles:
+          items:
+            minLength: 1
+            pattern: \S
+            type: string
+          type: array
+          uniqueItems: true
+        version:
+          minLength: 1
+          pattern: \S
+          type: string
+      required:
+      - version
+      type: object
+    api.SchemaValidationTarget:
+      description: 'Strict tagged target: reject unknown or mixed members, nulls,
+        duplicate JSON keys throughout and malformed Unicode. Schema defaults to Draft
+        2020-12; unsupported explicit dialects are input errors. Schema/catalog payloads
+        retain their own vocabulary; unsupported field semantics produce incomplete
+        results. Offline only.'
+      oneOf:
+      - additionalProperties: false
+        properties:
+          base_uri:
+            minLength: 1
+            pattern: \S
+            type: string
+          identity:
+            minLength: 1
+            pattern: \S
+            type: string
+          kind:
+            const: json_schema
+          resources:
+            additionalProperties:
+              oneOf:
+              - type: object
+              - type: boolean
+            description: URI-keyed local inline JSON Schema resources. No URI is fetched.
+            propertyNames:
+              minLength: 1
+              pattern: \S
+              type: string
+            type: object
+          schema:
+            oneOf:
+            - type: object
+            - type: boolean
+        required:
+        - kind
+        - schema
+        type: object
+      - additionalProperties: false
+        properties:
+          catalog:
+            description: Official compiled OCSF catalog with compile_version 1, exact
+              version and full extension set. Catalog vocabulary and annotation members
+              are allowed.
+            type: object
+          identity:
+            minLength: 1
+            pattern: \S
+            type: string
+          kind:
+            const: ocsf
+          selection:
+            $ref: '#/components/schemas/api.SchemaValidationSelection'
+        required:
+        - kind
+        - catalog
+        - selection
+        type: object
     api.ValidateQueryRequest:
       description: Request to validate an SPL query
       properties:
@@ -737,6 +872,29 @@ components:
         outcome:
           type: string
       type: object
+    validation.OCSFSelection:
+      properties:
+        category:
+          type: string
+        category_uid:
+          type: integer
+        class:
+          type: string
+        class_uid:
+          type: integer
+        extensions:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        profiles:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        version:
+          type: string
+      type: object
     validation.QueryDocument:
       additionalProperties: false
       properties:
@@ -808,6 +966,173 @@ components:
       required:
       - document
       - catalog
+      type: object
+    validation.SchemaBatchReport:
+      properties:
+        reports:
+          items:
+            $ref: '#/components/schemas/validation.SchemaReport'
+          type: array
+          uniqueItems: false
+        schema_version:
+          type: integer
+        status:
+          type: string
+          x-enum-varnames:
+          - Valid
+          - Invalid
+          - Incomplete
+      type: object
+    validation.SchemaClass:
+      properties:
+        key:
+          type: string
+        uid:
+          type: integer
+      type: object
+    validation.SchemaEvidence:
+      properties:
+        branch:
+          type: string
+        class_key:
+          type: string
+        class_uid:
+          type: integer
+        declaration_basis:
+          type: string
+        keyword:
+          type: string
+        operator:
+          type: string
+        pointer:
+          type: string
+        reason:
+          type: string
+        requirement:
+          type: string
+        resource_uri:
+          type: string
+      type: object
+    validation.SchemaExtension:
+      properties:
+        key:
+          type: string
+        uid:
+          type: integer
+        version:
+          type: string
+      type: object
+    validation.SchemaMatch:
+      properties:
+        binding:
+          type: string
+        evidence:
+          items:
+            $ref: '#/components/schemas/validation.SchemaEvidence'
+          type: array
+          uniqueItems: false
+        name:
+          type: string
+        outcome:
+          type: string
+      type: object
+    validation.SchemaReferenceOutcome:
+      properties:
+        evidence:
+          items:
+            $ref: '#/components/schemas/validation.SchemaEvidence'
+          type: array
+          uniqueItems: false
+        indeterminate_classes:
+          items:
+            $ref: '#/components/schemas/validation.SchemaClass'
+          type: array
+          uniqueItems: false
+        matches:
+          items:
+            $ref: '#/components/schemas/validation.SchemaMatch'
+          type: array
+          uniqueItems: false
+        matches_complete:
+          type: boolean
+        missing_classes:
+          items:
+            $ref: '#/components/schemas/validation.SchemaClass'
+          type: array
+          uniqueItems: false
+        outcome:
+          type: string
+        reference_id:
+          type: string
+        supporting_classes:
+          items:
+            $ref: '#/components/schemas/validation.SchemaClass'
+          type: array
+          uniqueItems: false
+      type: object
+    validation.SchemaReport:
+      properties:
+        analysis:
+          $ref: '#/components/schemas/analysis.Result'
+        coverage:
+          $ref: '#/components/schemas/validation.Coverage'
+        diagnostics:
+          items:
+            $ref: '#/components/schemas/analysis.Diagnostic'
+          type: array
+          uniqueItems: false
+        outcomes:
+          items:
+            $ref: '#/components/schemas/validation.SchemaReferenceOutcome'
+          type: array
+          uniqueItems: false
+        schema_version:
+          type: integer
+        status:
+          type: string
+          x-enum-varnames:
+          - Valid
+          - Invalid
+          - Incomplete
+        target:
+          $ref: '#/components/schemas/validation.SchemaTargetInfo'
+      type: object
+    validation.SchemaTargetInfo:
+      properties:
+        base_uri:
+          type: string
+        compile_version:
+          type: integer
+        dialect:
+          type: string
+        extensions:
+          items:
+            $ref: '#/components/schemas/validation.SchemaExtension'
+          type: array
+          uniqueItems: false
+        identity:
+          type: string
+        kind:
+          type: string
+        limitations:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        members:
+          items:
+            $ref: '#/components/schemas/validation.SchemaClass'
+          type: array
+          uniqueItems: false
+        resource_uris:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        selection:
+          $ref: '#/components/schemas/validation.OCSFSelection'
+        version:
+          type: string
       type: object
     validation.Target:
       properties:
@@ -1154,6 +1479,89 @@ paths:
                 $ref: '#/components/schemas/api.ErrorResponse'
           description: Unexpected internal error
       summary: Validate a batch of query documents against a local catalog
+      tags:
+      - query
+  /query/validate-schema:
+    post:
+      description: 'Strict wrapper requiring document (or nonempty documents for batch)
+        and target. Query documents require text. Reject unknown/duplicate wrapper
+        members, nulls and malformed Unicode. Target is a tagged json_schema or ocsf
+        union: JSON Schema accepts object-or-boolean schema, optional base_uri and
+        URI-keyed inline resources; OCSF requires an official compiled catalog object
+        and exact selection version with one of class/class_uid/category/category_uid,
+        optional unique profiles/extensions arrays (not null). Schema/catalog payloads
+        allow their own vocabulary. No filesystem lookup, downloading or URL dereference.
+        Body limit is 8 MiB. Valid, invalid and incomplete content all return 200
+        with the full canonical report; input errors return 400.'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/api.SchemaValidationRequest'
+        description: Query document and explicitly supplied schema target
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/validation.SchemaReport'
+          description: Canonical report, including invalid or incomplete content
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api.ErrorResponse'
+          description: Input error, content type, or body limit
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api.ErrorResponse'
+          description: Unexpected internal error
+      summary: Validate query fields against an offline JSON Schema or OCSF target
+      tags:
+      - query
+  /query/validate-schema/batch:
+    post:
+      description: 'Strict wrapper requiring document (or nonempty documents for batch)
+        and target. Query documents require text. Reject unknown/duplicate wrapper
+        members, nulls and malformed Unicode. Target is a tagged json_schema or ocsf
+        union: JSON Schema accepts object-or-boolean schema, optional base_uri and
+        URI-keyed inline resources; OCSF requires an official compiled catalog object
+        and exact selection version with one of class/class_uid/category/category_uid,
+        optional unique profiles/extensions arrays (not null). Schema/catalog payloads
+        allow their own vocabulary. No filesystem lookup, downloading or URL dereference.
+        Body limit is 8 MiB. Valid, invalid and incomplete content all return 200
+        with the full canonical report; input errors return 400.'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/api.SchemaValidationBatchRequest'
+        description: Nonempty query document array and explicitly supplied schema
+          target
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/validation.SchemaBatchReport'
+          description: Canonical ordered batch report
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api.ErrorResponse'
+          description: Input error, content type, or body limit
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api.ErrorResponse'
+          description: Unexpected internal error
+      summary: Validate an ordered batch against an offline JSON Schema or OCSF target
       tags:
       - query
 servers:

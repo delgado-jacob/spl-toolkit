@@ -25,18 +25,19 @@ Commands:
   validate [query]  Validate query syntax or --config
   analyze [query]   Analyze field availability, lineage, and coverage
   validate-fields   Validate fields against a local catalog
+  validate-schema   Validate fields against local JSON Schema or OCSF
   capabilities      Show supported analysis commands and limitations
   demo              Run demonstration examples
   help              Show this help message
 
-Options for map, discover, validate, analyze, validate-fields, and capabilities:
+Options for map, discover, validate, analyze, validate-fields, validate-schema, and capabilities:
   --format FORMAT   Output format: text or json (default: text)
   --output FILE     Write the result to a file (including analysis diagnostics)
   --help            Show this help message
   --query QUERY     Supply the query as an option (not capabilities)
   --config FILE     Mapping configuration (map and validate only)
 
-Additional analyze and single-query validate-fields options:
+Additional analyze and single-query validate-fields/validate-schema options:
   --language LANG                  Query language (default: spl)
   --profile PROFILE                Execution profile (default: splunkd)
   --compatibility-version VERSION  Compatibility version (default: current)
@@ -44,13 +45,28 @@ Additional analyze and single-query validate-fields options:
 
 Additional validate-fields options:
   --fields FILE     Required local JSON field catalog (array or object; not -)
+
+Shared validate-fields and validate-schema query inputs:
   --file FILE       Read one query verbatim; default source ID is FILE
   --stdin           Read one query verbatim; default source ID is <stdin>
   --batch FILE      Read a nonempty JSON document array (- reads stdin)
 Choose exactly one positional/--query, --file, --stdin, or --batch source.
 Batch documents carry their own options; global document options are rejected.
 
-Analyze and validate-fields exit codes: 0 valid, 1 invalid content, 3 incomplete analysis.
+Additional validate-schema options:
+  --schema FILE             Local inline JSON Schema (object or boolean; not -)
+  --schema-base-uri URI     Explicit root identity; never fetched
+  --schema-resources FILE   Local URI-to-inline-schema JSON object (not -)
+  --ocsf-catalog FILE       Local official compiled OCSF catalog (not -)
+  --ocsf-version VERSION    Exact catalog version (required for OCSF)
+  --ocsf-class KEY_OR_UID   Concrete class key or nonnegative decimal UID
+  --ocsf-category KEY_OR_UID  Concrete category key or nonnegative decimal UID
+  --ocsf-profile NAME       Selected OCSF profile (repeatable)
+  --ocsf-extension NAME     Full compiled extension set (repeatable)
+Choose exactly one --schema or --ocsf-catalog; target options cannot be mixed.
+OCSF requires exactly one --ocsf-class or --ocsf-category selector.
+
+Analyze, validate-fields, and validate-schema exit codes: 0 valid, 1 invalid content, 3 incomplete analysis.
 Request or output errors exit 2. Invalid and incomplete reports are still emitted.
 `, buildinfo.Version)
 	return err

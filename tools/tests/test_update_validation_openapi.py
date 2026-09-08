@@ -22,6 +22,19 @@ class ValidationOpenAPITests(unittest.TestCase):
             if key == "documents":
                 value = {"type": "array", "items": value}
             schemas["validation." + name] = {"type": "object", "properties": {key: value, "catalog": {"$ref": "#/components/schemas/validation.FieldCatalog"}}}
+        schemas["api.SchemaValidationTarget"] = {"type": "object", "properties": {
+            **{key: {"type": "string"} for key in ("kind", "identity", "base_uri")},
+            **{key: {"type": "object"} for key in ("schema", "resources", "catalog")},
+            "selection": {"$ref": "#/components/schemas/validation.OCSFSelection"}}}
+        schemas["validation.OCSFSelection"] = {"type": "object", "properties": {
+            **{key: {"type": "string"} for key in ("version", "class", "category")},
+            **{key: {"type": "integer"} for key in ("class_uid", "category_uid")},
+            **{key: {"type": "array", "items": {"type": "string"}, "uniqueItems": False} for key in ("profiles", "extensions")}}}
+        for name, key in (("SchemaValidationRequest", "document"), ("SchemaValidationBatchRequest", "documents")):
+            value = {"$ref": "#/components/schemas/analysis.QueryDocument"}
+            if key == "documents":
+                value = {"type": "array", "items": value, "uniqueItems": False}
+            schemas["api." + name] = {"type": "object", "properties": {key: value, "target": {"$ref": "#/components/schemas/api.SchemaValidationTarget"}}}
         spec = {"openapi": "3.1.0", "components": {"schemas": schemas}, "paths": {"/unrelated": {}}}
         (root / "swagger.json").write_text(json.dumps(spec), encoding="utf-8")
         (root / "swagger.yaml").write_text(yaml.safe_dump(spec), encoding="utf-8")
@@ -40,6 +53,7 @@ class ValidationOpenAPITests(unittest.TestCase):
             spec = json.loads((root / "swagger.json").read_text())
             schemas = spec["components"]["schemas"]
             self.assertEqual(schemas["analysis.QueryDocument"], original["components"]["schemas"]["analysis.QueryDocument"])
+            self.assertEqual(schemas["validation.OCSFSelection"], original["components"]["schemas"]["validation.OCSFSelection"])
             self.assertEqual(schemas["unrelated"], original["components"]["schemas"]["unrelated"])
             self.assertEqual(spec["paths"], original["paths"])
             for name, keys in (("validation.Request", ["document", "catalog"]), ("validation.BatchRequest", ["documents", "catalog"]), ("validation.QueryDocument", ["text"]), ("validation.FieldCatalog", ["fields"])):
@@ -52,6 +66,44 @@ class ValidationOpenAPITests(unittest.TestCase):
             self.assertEqual(yaml.safe_load((root / "swagger.yaml").read_text()), spec)
             line = next(line for line in (root / "docs.go").read_text().splitlines() if line.startswith('    "components": '))
             self.assertEqual(json.loads(line.removeprefix('    "components": ').removesuffix(',')), spec["components"])
+            before = {p.name: p.read_bytes() for p in root.iterdir()}
+            self.assertEqual(self.run_script(root).returncode, 0)
+            self.assertEqual(before, {p.name: p.read_bytes() for p in root.iterdir()})
+
+    def test_schema_targets_and_selection_are_strict_inline_unions(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self.fixture(root)
+            result = self.run_script(root)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            schemas = json.loads((root / "swagger.json").read_text())["components"]["schemas"]
+            union = schemas["api.SchemaValidationTarget"]["oneOf"]
+            self.assertEqual(len(union), 2)
+            by_kind = {branch["properties"]["kind"]["const"]: branch for branch in union}
+            js, ocsf = by_kind["json_schema"], by_kind["ocsf"]
+            self.assertEqual(js["required"], ["kind", "schema"])
+            self.assertEqual(ocsf["required"], ["kind", "catalog", "selection"])
+            for branch in union:
+                self.assertIs(branch["additionalProperties"], False)
+            self.assertEqual(set(js["properties"]), {"kind", "identity", "schema", "base_uri", "resources"})
+            self.assertEqual(set(ocsf["properties"]), {"kind", "identity", "catalog", "selection"})
+            self.assertEqual(js["properties"]["schema"]["oneOf"], [{"type": "object"}, {"type": "boolean"}])
+            self.assertEqual(js["properties"]["resources"]["additionalProperties"], js["properties"]["schema"])
+            self.assertEqual(ocsf["properties"]["catalog"]["type"], "object")
+            self.assertNotIn("additionalProperties", ocsf["properties"]["catalog"])
+            selection = schemas["api.SchemaValidationSelection"]
+            self.assertEqual(selection["required"], ["version"])
+            self.assertEqual(selection["oneOf"], [{"required": [key]} for key in ("class", "class_uid", "category", "category_uid")])
+            self.assertIs(selection["additionalProperties"], False)
+            for key in ("class_uid", "category_uid"):
+                self.assertEqual(selection["properties"][key], {"type": "integer", "minimum": -9223372036854775808, "maximum": 9223372036854775807})
+            for key in ("profiles", "extensions"):
+                self.assertEqual(selection["properties"][key]["type"], "array")
+                self.assertIs(selection["properties"][key]["uniqueItems"], True)
+            for name, key in (("SchemaValidationRequest", "document"), ("SchemaValidationBatchRequest", "documents")):
+                wrapper = schemas["api." + name]
+                self.assertEqual(wrapper["required"], [key, "target"])
+                self.assertIs(wrapper["additionalProperties"], False)
             before = {p.name: p.read_bytes() for p in root.iterdir()}
             self.assertEqual(self.run_script(root).returncode, 0)
             self.assertEqual(before, {p.name: p.read_bytes() for p in root.iterdir()})

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Reconcile pinned Swag output with the strict canonical validation decoders.
 
-Swag cannot express the complete M3 input contract through the canonical Go
-DTOs. Keep the generated report schemas and M2 document schema unchanged.
+Swag cannot express strict M3/M4 inputs or inline JSON unions through Go
+DTOs. Keep generated report schemas and the M2 document schema unchanged.
 Requires the repository's pinned development PyYAML dependency.
 """
 import copy
@@ -69,6 +69,60 @@ def update(directory: Path) -> None:
             raise ValueError(f"unexpected pinned document reference: {name}")
         request.update(required=[key, "catalog"], additionalProperties=False)
         request["properties"].update({key: value, "catalog": copy.deepcopy(union)})
+
+    # M4 request-only schemas: do not constrain the report's normalized selection.
+    nonblank = {"type": "string", "minLength": 1, "pattern": r"\S"}
+    selection = copy.deepcopy(shape("validation.OCSFSelection", ("version", "class", "class_uid", "category", "category_uid", "profiles", "extensions")))
+    for key in ("version", "class", "category"):
+        if selection["properties"][key] != {"type": "string"}:
+            raise ValueError(f"unexpected pinned selection string: {key}")
+        selection["properties"][key] = copy.deepcopy(nonblank)
+    for key in ("class_uid", "category_uid"):
+        if selection["properties"][key] != {"type": "integer"}:
+            raise ValueError(f"unexpected pinned selection UID: {key}")
+        selection["properties"][key] = {"type": "integer", "minimum": -(2**63), "maximum": 2**63 - 1}
+    for key in ("profiles", "extensions"):
+        current = {k: v for k, v in selection["properties"][key].items() if k != "uniqueItems"}
+        if current != {"type": "array", "items": {"type": "string"}}:
+            raise ValueError(f"unexpected pinned selection names: {key}")
+        selection["properties"][key] = {"type": "array", "items": copy.deepcopy(nonblank), "uniqueItems": True}
+    selection.update(required=["version"], additionalProperties=False,
+                     oneOf=[{"required": [key]} for key in ("class", "class_uid", "category", "category_uid")],
+                     description="Exact version and exactly one selector. Omitted profiles/extensions normalize to empty arrays; null is invalid. Names are nonblank UTF-8, unique and case-sensitive.")
+    schemas["api.SchemaValidationSelection"] = selection
+    inline = {"oneOf": [{"type": "object"}, {"type": "boolean"}]}
+    target_union = {"oneOf": [
+        {"type": "object", "required": ["kind", "schema"], "additionalProperties": False,
+         "properties": {"kind": {"const": "json_schema"}, "identity": copy.deepcopy(nonblank),
+                        "schema": copy.deepcopy(inline), "base_uri": copy.deepcopy(nonblank),
+                        "resources": {"type": "object", "propertyNames": copy.deepcopy(nonblank), "additionalProperties": copy.deepcopy(inline),
+                                      "description": "URI-keyed local inline JSON Schema resources. No URI is fetched."}}},
+        {"type": "object", "required": ["kind", "catalog", "selection"], "additionalProperties": False,
+         "properties": {"kind": {"const": "ocsf"}, "identity": copy.deepcopy(nonblank),
+                        "catalog": {"type": "object", "description": "Official compiled OCSF catalog with compile_version 1, exact version and full extension set. Catalog vocabulary and annotation members are allowed."},
+                        "selection": {"$ref": PREFIX + "api.SchemaValidationSelection"}}}],
+        "description": "Strict tagged target: reject unknown or mixed members, nulls, duplicate JSON keys throughout and malformed Unicode. Schema defaults to Draft 2020-12; unsupported explicit dialects are input errors. Schema/catalog payloads retain their own vocabulary; unsupported field semantics produce incomplete results. Offline only."}
+    target = schemas["api.SchemaValidationTarget"]
+    unpatched_target = {"type": "object", "properties": {
+        **{key: {"type": "string"} for key in ("kind", "identity", "base_uri")},
+        **{key: {"type": "object"} for key in ("schema", "resources", "catalog")},
+        "selection": {"$ref": PREFIX + "validation.OCSFSelection"}}}
+    if target not in (unpatched_target, target_union):
+        raise ValueError("unexpected pinned schema target shape")
+    schemas["api.SchemaValidationTarget"] = target_union
+    for name, key in (("api.SchemaValidationRequest", "document"), ("api.SchemaValidationBatchRequest", "documents")):
+        request = shape(name, (key, "target"))
+        if request["properties"]["target"] != {"$ref": PREFIX + "api.SchemaValidationTarget"}:
+            raise ValueError(f"unexpected pinned schema target reference: {name}")
+        doc_ref = {"$ref": PREFIX + "validation.QueryDocument"}
+        old_doc_ref = {"$ref": PREFIX + "analysis.QueryDocument"}
+        value = doc_ref if key == "document" else {"type": "array", "items": doc_ref, "minItems": 1}
+        current = {k: v for k, v in request["properties"][key].items() if k != "uniqueItems"}
+        unpatched = old_doc_ref if key == "document" else {"type": "array", "items": old_doc_ref}
+        if current not in (unpatched, value):
+            raise ValueError(f"unexpected pinned schema document reference: {name}")
+        request.update(required=[key, "target"], additionalProperties=False)
+        request["properties"][key] = value
 
     components = json.dumps(spec["components"], ensure_ascii=True, separators=(",", ":"))
     match = matches[0]

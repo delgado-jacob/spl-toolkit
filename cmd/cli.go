@@ -14,6 +14,9 @@ import (
 )
 
 type cliOptions struct {
+	schemaOptions        map[string]string
+	ocsfProfiles         []string
+	ocsfExtensions       []string
 	fields               string
 	file                 string
 	batch                string
@@ -72,6 +75,8 @@ func runCLIWithInput(args []string, stdin io.Reader, stdout, stderr io.Writer) i
 			return writeCLIError(stderr, "text", err.Error(), 1)
 		}
 		return writeGeneratedCLIResult(payload.Bytes(), stdout, stderr)
+	case "validate-schema":
+		return runSchemaValidationCLI(args[1:], stdin, stdout, stderr)
 	case "validate-fields":
 		return runValidationCLI(args[1:], stdin, stdout, stderr)
 	case "map", "discover", "validate", "analyze", "capabilities":
@@ -116,7 +121,7 @@ func parseCLIOptions(command string, args []string) (cliOptions, string, error) 
 		}
 		if !terminated && strings.HasPrefix(argument, "--") {
 			name, value, hasEquals := strings.Cut(strings.TrimPrefix(argument, "--"), "=")
-			if command == "validate-fields" && name == "stdin" {
+			if (command == "validate-fields" || command == "validate-schema") && name == "stdin" {
 				if hasEquals {
 					return options, errorFormat, fmt.Errorf("option --stdin does not accept a value")
 				}
@@ -136,7 +141,7 @@ func parseCLIOptions(command string, args []string) (cliOptions, string, error) 
 				options.help, options.hasHelp = true, true
 				continue
 			}
-			if !(command == "validate-fields" && (name == "fields" || name == "file" || name == "batch")) && name != "config" && name != "query" && name != "format" && name != "output" && name != "language" && name != "profile" && name != "compatibility-version" && name != "source-id" {
+			if !(command == "validate-schema" && (isSchemaCLIOption(name) || name == "file" || name == "batch")) && !(command == "validate-fields" && (name == "fields" || name == "file" || name == "batch")) && name != "config" && name != "query" && name != "format" && name != "output" && name != "language" && name != "profile" && name != "compatibility-version" && name != "source-id" {
 				return options, errorFormat, fmt.Errorf("unknown option --%s", name)
 			}
 			if !hasEquals {
@@ -173,7 +178,7 @@ func parseCLIOptions(command string, args []string) (cliOptions, string, error) 
 }
 
 func analysisOptionMayBeEmpty(command, name string) bool {
-	if command != "analyze" && command != "validate-fields" {
+	if command != "analyze" && command != "validate-fields" && command != "validate-schema" {
 		return false
 	}
 	switch name {
@@ -185,6 +190,9 @@ func analysisOptionMayBeEmpty(command, name string) bool {
 }
 
 func setCLIOption(options *cliOptions, name, value string) error {
+	if isSchemaCLIOption(name) {
+		return setSchemaCLIOption(options, name, value)
+	}
 	switch name {
 	case "fields":
 		if options.hasFields {
