@@ -1,0 +1,546 @@
+[
+  {
+    "name": "same predicate establishes source type",
+    "document": {
+      "text": "search sourcetype=a src=x | table src",
+      "language": "spl"
+    },
+    "candidate": {
+      "name": "src"
+    },
+    "occurrence": 0,
+    "condition": {
+      "fact": "literal",
+      "kind": "sourcetype",
+      "identity": {
+        "name": "a"
+      },
+      "operator": "equals",
+      "value": "a"
+    },
+    "want": "true"
+  },
+  {
+    "name": "supported OR has no common source type",
+    "document": {
+      "text": "search (sourcetype=a OR sourcetype=b) src=x | table src",
+      "language": "spl"
+    },
+    "candidate": {
+      "name": "src"
+    },
+    "occurrence": 0,
+    "condition": {
+      "fact": "literal",
+      "kind": "sourcetype",
+      "identity": {
+        "name": "a"
+      },
+      "operator": "equals",
+      "value": "a"
+    },
+    "want": "false"
+  },
+  {
+    "name": "OR common source type survives",
+    "document": {
+      "text": "search ((sourcetype=a tag=x) OR (sourcetype=a tag=y)) src=x | table src",
+      "language": "spl"
+    },
+    "candidate": {
+      "name": "src"
+    },
+    "occurrence": 0,
+    "condition": {
+      "fact": "literal",
+      "kind": "sourcetype",
+      "identity": {
+        "name": "a"
+      },
+      "operator": "equals",
+      "value": "a"
+    },
+    "want": "true"
+  },
+  {
+    "name": "query NOT establishes no equality",
+    "document": {
+      "text": "search NOT sourcetype=a src=x | table src",
+      "language": "spl"
+    },
+    "candidate": {
+      "name": "src"
+    },
+    "occurrence": 0,
+    "condition": {
+      "fact": "literal",
+      "kind": "sourcetype",
+      "identity": {
+        "name": "a"
+      },
+      "operator": "equals",
+      "value": "a"
+    },
+    "want": "false"
+  },
+  {
+    "name": "later equality cannot authorize earlier source",
+    "document": {
+      "text": "search src=x | where EventCode=1 | table src",
+      "language": "spl"
+    },
+    "candidate": {
+      "name": "src"
+    },
+    "occurrence": 0,
+    "condition": {
+      "fact": "literal",
+      "kind": "field",
+      "identity": {
+        "name": "EventCode"
+      },
+      "operator": "equals",
+      "value": 1
+    },
+    "want": "false"
+  },
+  {
+    "name": "later equality authorizes later source",
+    "document": {
+      "text": "search src=x | where EventCode=1 | table src",
+      "language": "spl"
+    },
+    "candidate": {
+      "name": "src"
+    },
+    "occurrence": 1,
+    "condition": {
+      "fact": "literal",
+      "kind": "field",
+      "identity": {
+        "name": "EventCode"
+      },
+      "operator": "equals",
+      "value": 1
+    },
+    "want": "true"
+  },
+  {
+    "name": "independent child receives no parent equality",
+    "document": {
+      "text": "search EventCode=1 | append [ search src=x | table src ]",
+      "language": "spl"
+    },
+    "candidate": {
+      "name": "src"
+    },
+    "occurrence": 0,
+    "condition": {
+      "fact": "literal",
+      "kind": "field",
+      "identity": {
+        "name": "EventCode"
+      },
+      "operator": "equals",
+      "value": 1
+    },
+    "want": "false"
+  },
+  {
+    "name": "independent child cannot authorize parent",
+    "document": {
+      "text": "search src=x | append [ search EventCode=1 src=y | table src ] | table src",
+      "language": "spl"
+    },
+    "candidate": {
+      "name": "src"
+    },
+    "occurrence": 3,
+    "condition": {
+      "fact": "literal",
+      "kind": "field",
+      "identity": {
+        "name": "EventCode"
+      },
+      "operator": "equals",
+      "value": 1
+    },
+    "want": "unknown"
+  },
+  {
+    "name": "inherited subpipe receives original equality",
+    "document": {
+      "text": "search EventCode=1 | appendpipe [ table src ]",
+      "language": "spl"
+    },
+    "candidate": {
+      "name": "src"
+    },
+    "occurrence": 0,
+    "condition": {
+      "fact": "literal",
+      "kind": "field",
+      "identity": {
+        "name": "EventCode"
+      },
+      "operator": "equals",
+      "value": 1
+    },
+    "want": "true"
+  },
+  {
+    "name": "redefinition invalidates affected equality",
+    "document": {
+      "text": "search EventCode=1 src=x | eval EventCode=other | table src",
+      "language": "spl"
+    },
+    "candidate": {
+      "name": "src"
+    },
+    "occurrence": 1,
+    "condition": {
+      "fact": "literal",
+      "kind": "field",
+      "identity": {
+        "name": "EventCode"
+      },
+      "operator": "equals",
+      "value": 1
+    },
+    "want": "unknown"
+  },
+  {
+    "name": "unrelated redefinition retains equality",
+    "document": {
+      "text": "search EventCode=1 src=x | eval other=2 | table src",
+      "language": "spl"
+    },
+    "candidate": {
+      "name": "src"
+    },
+    "occurrence": 1,
+    "condition": {
+      "fact": "literal",
+      "kind": "field",
+      "identity": {
+        "name": "EventCode"
+      },
+      "operator": "equals",
+      "value": 1
+    },
+    "want": "true"
+  },
+  {
+    "name": "removal invalidates affected equality",
+    "document": {
+      "text": "search EventCode=1 src=x | fields - EventCode | table src",
+      "language": "spl"
+    },
+    "candidate": {
+      "name": "src"
+    },
+    "occurrence": 1,
+    "condition": {
+      "fact": "literal",
+      "kind": "field",
+      "identity": {
+        "name": "EventCode"
+      },
+      "operator": "equals",
+      "value": 1
+    },
+    "want": "unknown"
+  },
+  {
+    "name": "unknown barrier invalidates equality",
+    "document": {
+      "text": "search EventCode=1 src=x | mystery | table src",
+      "language": "spl"
+    },
+    "candidate": {
+      "name": "src"
+    },
+    "occurrence": 1,
+    "condition": {
+      "fact": "literal",
+      "kind": "field",
+      "identity": {
+        "name": "EventCode"
+      },
+      "operator": "equals",
+      "value": 1
+    },
+    "want": "unknown"
+  },
+  {
+    "name": "source reset removes previous equality",
+    "document": {
+      "text": "search EventCode=1 | inputlookup people | table src",
+      "language": "spl"
+    },
+    "candidate": {
+      "name": "src"
+    },
+    "occurrence": 0,
+    "condition": {
+      "fact": "literal",
+      "kind": "field",
+      "identity": {
+        "name": "EventCode"
+      },
+      "operator": "equals",
+      "value": 1
+    },
+    "want": "false"
+  },
+  {
+    "name": "supported OR has no common field equality",
+    "document": {
+      "text": "search index=main | where EventCode=1 OR EventCode=2 | table src",
+      "language": "spl"
+    },
+    "candidate": {
+      "name": "src"
+    },
+    "occurrence": 0,
+    "condition": {
+      "fact": "literal",
+      "kind": "field",
+      "identity": {
+        "name": "EventCode"
+      },
+      "operator": "equals",
+      "value": 1
+    },
+    "want": "false"
+  },
+  {
+    "name": "known equality survives independent unsupported predicate",
+    "document": {
+      "text": "FROM main | where EventCode=1 AND unknown(other)=2 | table src",
+      "language": "spl2"
+    },
+    "candidate": {
+      "name": "src"
+    },
+    "occurrence": 0,
+    "condition": {
+      "fact": "literal",
+      "kind": "field",
+      "identity": {
+        "name": "EventCode"
+      },
+      "operator": "equals",
+      "value": 1
+    },
+    "want": "true"
+  },
+  {
+    "name": "unsupported relevant predicate stays unknown",
+    "document": {
+      "text": "FROM main | where EventCode=1 OR unknown(other)=2 | table src",
+      "language": "spl2"
+    },
+    "candidate": {
+      "name": "src"
+    },
+    "occurrence": 0,
+    "condition": {
+      "fact": "literal",
+      "kind": "field",
+      "identity": {
+        "name": "EventCode"
+      },
+      "operator": "equals",
+      "value": 1
+    },
+    "want": "unknown"
+  },
+  {
+    "name": "SQL uses logical filter phase",
+    "document": {
+      "text": "SELECT src FROM main WHERE EventCode=1 ORDER BY src",
+      "language": "spl2"
+    },
+    "candidate": {
+      "name": "src"
+    },
+    "occurrence": 0,
+    "condition": {
+      "fact": "literal",
+      "kind": "field",
+      "identity": {
+        "name": "EventCode"
+      },
+      "operator": "equals",
+      "value": 1
+    },
+    "want": "true"
+  },
+  {
+    "name": "string contains established value",
+    "document": {
+      "text": "search tag=Alice src=x | table src",
+      "language": "spl"
+    },
+    "candidate": {
+      "name": "src"
+    },
+    "occurrence": 0,
+    "condition": {
+      "fact": "literal",
+      "kind": "field",
+      "identity": {
+        "name": "tag"
+      },
+      "operator": "contains",
+      "value": "lic"
+    },
+    "want": "true"
+  },
+  {
+    "name": "string contains ignores unrelated query text",
+    "document": {
+      "text": "search tag=Bob src=Alice | table src",
+      "language": "spl"
+    },
+    "candidate": {
+      "name": "src"
+    },
+    "occurrence": 0,
+    "condition": {
+      "fact": "literal",
+      "kind": "field",
+      "identity": {
+        "name": "tag"
+      },
+      "operator": "contains",
+      "value": "Alice"
+    },
+    "want": "false"
+  },
+  {
+    "name": "source reference is present without literal equality",
+    "document": {
+      "text": "search tag=* src=x | table src",
+      "language": "spl"
+    },
+    "candidate": {
+      "name": "src"
+    },
+    "occurrence": 0,
+    "condition": {
+      "fact": "source_reference_present",
+      "kind": "field",
+      "identity": {
+        "name": "tag"
+      }
+    },
+    "want": "true"
+  },
+  {
+    "name": "wildcard pattern never becomes exact literal",
+    "document": {
+      "text": "search tag=Ali* src=x | table src",
+      "language": "spl"
+    },
+    "candidate": {
+      "name": "src"
+    },
+    "occurrence": 0,
+    "condition": {
+      "fact": "literal",
+      "kind": "field",
+      "identity": {
+        "name": "tag"
+      },
+      "operator": "equals",
+      "value": "Ali*"
+    },
+    "want": "unknown"
+  },
+  {
+    "name": "expression asterisk remains exact string",
+    "document": {
+      "text": "FROM main | where tag=\"Ali*\" | table src",
+      "language": "spl2"
+    },
+    "candidate": {
+      "name": "src"
+    },
+    "occurrence": 0,
+    "condition": {
+      "fact": "literal",
+      "kind": "field",
+      "identity": {
+        "name": "tag"
+      },
+      "operator": "contains",
+      "value": "*"
+    },
+    "want": "true"
+  },
+  {
+    "name": "number stays distinct from string",
+    "document": {
+      "text": "search index=main | where EventCode=1 | table src",
+      "language": "spl"
+    },
+    "candidate": {
+      "name": "src"
+    },
+    "occurrence": 0,
+    "condition": {
+      "fact": "literal",
+      "kind": "field",
+      "identity": {
+        "name": "EventCode"
+      },
+      "operator": "equals",
+      "value": "1"
+    },
+    "want": "false"
+  },
+  {
+    "name": "expression boolean stays boolean",
+    "document": {
+      "text": "FROM main | where flag=true | table src",
+      "language": "spl2"
+    },
+    "candidate": {
+      "name": "src"
+    },
+    "occurrence": 0,
+    "condition": {
+      "fact": "literal",
+      "kind": "field",
+      "identity": {
+        "name": "flag"
+      },
+      "operator": "equals",
+      "value": true
+    },
+    "want": "true"
+  },
+  {
+    "name": "expression null remains explicit null",
+    "document": {
+      "text": "FROM main | where value=null | table src",
+      "language": "spl2"
+    },
+    "candidate": {
+      "name": "src"
+    },
+    "occurrence": 0,
+    "condition": {
+      "fact": "literal",
+      "kind": "field",
+      "identity": {
+        "name": "value"
+      },
+      "operator": "equals",
+      "value": null
+    },
+    "want": "true"
+  }
+]
