@@ -1,0 +1,16 @@
+[
+  {"name":"empty rules are a no-op request","operation":"request","valid":true,"request":{"schema_version":1,"document":{"text":""},"rules":[]}},
+  {"name":"path and dotted atom differ","operation":"request","valid":true,"request":{"schema_version":1,"document":{"text":"from main | select actor.name","language":"spl2"},"rules":[{"id":"actor","kind":"field","source":{"path":["actor","name"]},"target":{"name":"actor.name"}}]}},
+  {"name":"null is a present literal","operation":"request","valid":true,"request":{"schema_version":1,"document":{"text":"search src=null"},"rules":[{"id":"null","kind":"field","source":{"name":"src"},"target":{"name":"user"},"when":{"fact":"literal","kind":"field","identity":{"name":"src"},"operator":"equals","value":null}}]}},
+  {"name":"exact integers retain distinct data","operation":"rules","valid":true,"request":{"schema_version":1,"rules":[{"id":"a","kind":"field","source":{"name":"src"},"target":{"name":"user"},"when":{"fact":"literal","kind":"field","identity":{"name":"src"},"operator":"equals","value":9007199254740992}},{"id":"b","kind":"field","source":{"name":"src"},"target":{"name":"user"},"when":{"fact":"literal","kind":"field","identity":{"name":"src"},"operator":"equals","value":9007199254740993}}]}},
+  {"name":"field list destination","operation":"request","valid":true,"request":{"schema_version":1,"document":{"text":"search src=alice"},"rules":[],"validation_target":{"kind":"field_list","catalog":{"fields":["user"]}}}},
+  {"name":"ordered dialect batch","operation":"batch","valid":true,"request":{"schema_version":1,"documents":[{"text":"search src=alice"},{"text":"from main | select src","language":"spl2"}],"rules":[]}},
+  {"name":"version required","operation":"request","valid":false,"request":{"document":{"text":""},"rules":[]}},
+  {"name":"duplicate key rejected","operation":"request","valid":false,"request":{"schema_version":1,"schema_version":1,"document":{"text":""},"rules":[]}},
+  {"name":"null mode rejected","operation":"request","valid":false,"request":{"schema_version":1,"mode":null,"document":{"text":""},"rules":[]}},
+  {"name":"missing literal differs from null","operation":"request","valid":false,"request":{"schema_version":1,"document":{"text":""},"rules":[{"id":"x","kind":"field","source":{"name":"a"},"target":{"name":"b"},"when":{"fact":"literal","kind":"field","identity":{"name":"a"},"operator":"equals"}}]}},
+  {"name":"dependency paths rejected","operation":"rules","valid":false,"request":{"schema_version":1,"rules":[{"id":"x","kind":"index","source":{"path":["a"]},"target":{"name":"b"}}]}},
+  {"name":"rules do not select apply","operation":"rules","valid":false,"request":{"schema_version":1,"mode":"apply","rules":[]}},
+  {"name":"empty batch rejected","operation":"batch","valid":false,"request":{"schema_version":1,"documents":[],"rules":[]}},
+  {"name":"null target rejected","operation":"request","valid":false,"request":{"schema_version":1,"document":{"text":""},"rules":[],"validation_target":null}}
+]
