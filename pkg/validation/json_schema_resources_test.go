@@ -102,3 +102,16 @@ func TestJSONSchemaRelativeIDDoesNotResolveAgainstAncestor(t *testing.T) {
 		t.Fatalf("relative resource inherited unrelated root: %+v", got)
 	}
 }
+func TestJSONSchemaResourceEmptyFragmentIdentity(t *testing.T) {
+	target, e := DecodeSchemaTarget([]byte(`{"kind":"json_schema","schema":{"$ref":"https://s.test/external"},"resources":{"https://s.test/external#":{"properties":{"x":{"type":"string"}},"additionalProperties":false}}}`))
+	if e != nil {
+		t.Fatal(e)
+	}
+	p, e := prepareJSONSchema(target)
+	if e != nil {
+		t.Fatal(e)
+	}
+	if got := p.project("x"); got.Admission != analysis.SourceFieldAdmitted {
+		t.Fatal(got)
+	}
+}

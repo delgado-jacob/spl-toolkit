@@ -144,11 +144,12 @@ func newSchemaIndex(t SchemaTarget) (*schemaIndex, *schemaNode, error) {
 		if !u.IsAbs() || u.Fragment != "" {
 			return nil, nil, inputError("resource key must be absolute without fragment")
 		}
-		node, e := build(t.Resources[uri], uri)
+		identity := u.String()
+		node, e := build(t.Resources[uri], identity)
 		if e != nil {
 			return nil, nil, e
 		}
-		if e = idx.register(uri, node); e != nil {
+		if e = idx.register(identity, node); e != nil {
 			return nil, nil, e
 		}
 	}
