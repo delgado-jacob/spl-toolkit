@@ -224,6 +224,42 @@ func (s *BaseSPL2ParserListener) EnterPredicate(ctx *PredicateContext) {}
 // ExitPredicate is called when production predicate is exited.
 func (s *BaseSPL2ParserListener) ExitPredicate(ctx *PredicateContext) {}
 
+// EnterLogicalAnd is called when production logicalAnd is entered.
+func (s *BaseSPL2ParserListener) EnterLogicalAnd(ctx *LogicalAndContext) {}
+
+// ExitLogicalAnd is called when production logicalAnd is exited.
+func (s *BaseSPL2ParserListener) ExitLogicalAnd(ctx *LogicalAndContext) {}
+
+// EnterLogicalOr is called when production logicalOr is entered.
+func (s *BaseSPL2ParserListener) EnterLogicalOr(ctx *LogicalOrContext) {}
+
+// ExitLogicalOr is called when production logicalOr is exited.
+func (s *BaseSPL2ParserListener) ExitLogicalOr(ctx *LogicalOrContext) {}
+
+// EnterLogicalXor is called when production logicalXor is entered.
+func (s *BaseSPL2ParserListener) EnterLogicalXor(ctx *LogicalXorContext) {}
+
+// ExitLogicalXor is called when production logicalXor is exited.
+func (s *BaseSPL2ParserListener) ExitLogicalXor(ctx *LogicalXorContext) {}
+
+// EnterLogicalNot is called when production logicalNot is entered.
+func (s *BaseSPL2ParserListener) EnterLogicalNot(ctx *LogicalNotContext) {}
+
+// ExitLogicalNot is called when production logicalNot is exited.
+func (s *BaseSPL2ParserListener) ExitLogicalNot(ctx *LogicalNotContext) {}
+
+// EnterBetweenOperator is called when production betweenOperator is entered.
+func (s *BaseSPL2ParserListener) EnterBetweenOperator(ctx *BetweenOperatorContext) {}
+
+// ExitBetweenOperator is called when production betweenOperator is exited.
+func (s *BaseSPL2ParserListener) ExitBetweenOperator(ctx *BetweenOperatorContext) {}
+
+// EnterBetweenConjunction is called when production betweenConjunction is entered.
+func (s *BaseSPL2ParserListener) EnterBetweenConjunction(ctx *BetweenConjunctionContext) {}
+
+// ExitBetweenConjunction is called when production betweenConjunction is exited.
+func (s *BaseSPL2ParserListener) ExitBetweenConjunction(ctx *BetweenConjunctionContext) {}
+
 // EnterComparison is called when production comparison is entered.
 func (s *BaseSPL2ParserListener) EnterComparison(ctx *ComparisonContext) {}
 

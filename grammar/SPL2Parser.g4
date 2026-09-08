@@ -1,6 +1,19 @@
 parser grammar SPL2Parser;
 options { tokenVocab=SPL2Lexer; }
 
+@header {
+import "strings"
+// ANTLR also emits the header into the visitor interface file.
+var _ = strings.EqualFold
+}
+@members {
+// Casing is recognized only in an operator grammar position. The same lower-
+// case token remains an ordinary identifier or search literal elsewhere.
+func (p *SPL2Parser) contextualKeyword(word string) bool {
+    return strings.EqualFold(p.GetTokenStream().LT(1).GetText(), word)
+}
+}
+
 query: NL* (pipeline moduleSuffix? | moduleDeclaration) NL* EOF;
 pipeline: start (NL* PIPE NL* command)*;
 start: fromCommand | selectCommand | searchCommand | implicitSearch | generator | embeddedCommand;
@@ -22,7 +35,8 @@ moduleSuffix: SEMI .*?;
 moduleDeclaration: (IMPORT | EXPORT | FUNCTION | LOCAL ASSIGN) .*?;
 
 searchCommand: SEARCH searchExpression;
-implicitSearch: INDEX ASSIGN searchValue searchExpression?;
+// The token guard restricts entry, while the entire search owns precedence.
+implicitSearch: {p.GetTokenStream().LA(1) == SPL2ParserINDEX && p.GetTokenStream().LA(2) == SPL2ParserASSIGN}? searchExpression;
 searchExpression: searchXor;
 searchXor: searchAnd (XOR searchAnd)*;
 searchAnd: searchOr (AND? searchOr)*;
@@ -32,11 +46,17 @@ searchAtom: LPAREN searchExpression RPAREN | identifier comparison searchValue |
 searchValue: identifier | NUMBER | stringLiteral | RAW_STRING | STAR;
 
 expression: lambdaExpression | xorExpression;
-xorExpression: orExpression (XOR orExpression)*;
-orExpression: andExpression (OR andExpression)*;
-andExpression: notExpression (AND notExpression)*;
-notExpression: NOT notExpression | predicate;
-predicate: additive (comparison additive | NOT? BETWEEN additive AND additive | NOT? IN LPAREN expression (COMMA expression)* RPAREN | NOT? LIKE additive | IS (NOT? (NULL | NULL_TEST) | NOT? TYPE))?;
+xorExpression: orExpression (logicalXor orExpression)*;
+orExpression: andExpression (logicalOr andExpression)*;
+andExpression: notExpression (logicalAnd notExpression)*;
+notExpression: logicalNot notExpression | predicate;
+predicate: additive (comparison additive | logicalNot? betweenOperator additive betweenConjunction additive | logicalNot? IN LPAREN expression (COMMA expression)* RPAREN | logicalNot? LIKE additive | IS (logicalNot? (NULL | NULL_TEST) | logicalNot? TYPE))?;
+logicalAnd: AND | {p.contextualKeyword("and")}? IDENTIFIER;
+logicalOr: OR | {p.contextualKeyword("or")}? IDENTIFIER;
+logicalXor: XOR | {p.contextualKeyword("xor")}? IDENTIFIER;
+logicalNot: NOT | {p.contextualKeyword("not")}? IDENTIFIER;
+betweenOperator: BETWEEN | {p.contextualKeyword("between")}? IDENTIFIER;
+betweenConjunction: AND | {p.contextualKeyword("and")}? IDENTIFIER;
 comparison: ASSIGN | EQ | NE | LT | LE | GT | GE;
 additive: multiplicative ((PLUS | MINUS) multiplicative)*;
 multiplicative: unary ((STAR | SLASH | MOD) unary)*;

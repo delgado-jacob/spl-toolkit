@@ -91,6 +91,7 @@ RX_WS=76
 'OR'=19
 'XOR'=20
 'NOT'=21
+'BETWEEN'=22
 'IN'=23
 'LIKE'=24
 'IS'=25

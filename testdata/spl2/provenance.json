@@ -14632,6 +14632,198 @@
       "case_id": "T2.source.unicode_crlf",
       "evidence": "independent-task2-boundary-witness",
       "assembly": "standalone"
+    },
+    {
+      "id": "T2.fix1.implicit.and",
+      "form_id": "L01",
+      "source_keys": [
+        "doc163"
+      ],
+      "candidate": "index=app AND host=api",
+      "disposition": "active",
+      "case_id": "T2.fix1.implicit.and",
+      "assembly": "standalone",
+      "evidence": "independent-task2-review-boundary-witness"
+    },
+    {
+      "id": "T2.fix1.implicit.or",
+      "form_id": "L01",
+      "source_keys": [
+        "doc163"
+      ],
+      "candidate": "index=app OR host=api",
+      "disposition": "active",
+      "case_id": "T2.fix1.implicit.or",
+      "assembly": "standalone",
+      "evidence": "independent-task2-review-boundary-witness"
+    },
+    {
+      "id": "T2.fix1.implicit.xor",
+      "form_id": "L01",
+      "source_keys": [
+        "doc163"
+      ],
+      "candidate": "index=app XOR host=api",
+      "disposition": "active",
+      "case_id": "T2.fix1.implicit.xor",
+      "assembly": "standalone",
+      "evidence": "independent-task2-review-boundary-witness"
+    },
+    {
+      "id": "T2.fix1.implicit.precedence",
+      "form_id": "L01",
+      "source_keys": [
+        "doc163"
+      ],
+      "candidate": "index=app OR host=api AND status=200 XOR kind=other",
+      "disposition": "active",
+      "case_id": "T2.fix1.implicit.precedence",
+      "assembly": "standalone",
+      "evidence": "independent-task2-review-boundary-witness"
+    },
+    {
+      "id": "T2.fix1.implicit.missing_rhs",
+      "form_id": "L01",
+      "source_keys": [
+        "doc163"
+      ],
+      "candidate": "index=app OR",
+      "disposition": "active",
+      "case_id": "T2.fix1.implicit.missing_rhs",
+      "assembly": "standalone",
+      "evidence": "independent-task2-review-boundary-witness"
+    },
+    {
+      "id": "T2.fix1.lambda.interpolated_default",
+      "form_id": "L11",
+      "source_keys": [
+        "lambda"
+      ],
+      "candidate": "FROM main | eval result=map(items,($x:string=\"${fallback}\") -> $x)",
+      "disposition": "active",
+      "case_id": "T2.fix1.lambda.interpolated_default",
+      "assembly": "standalone",
+      "evidence": "independent-task2-review-boundary-witness"
+    },
+    {
+      "id": "T2.fix1.lambda.constant_string",
+      "form_id": "L11",
+      "source_keys": [
+        "lambda"
+      ],
+      "candidate": "FROM main | eval result=map(items,($x:string=\"plain\") -> $x)",
+      "disposition": "active",
+      "case_id": "T2.fix1.lambda.constant_string",
+      "assembly": "standalone",
+      "evidence": "independent-task2-review-boundary-witness"
+    },
+    {
+      "id": "T2.fix1.lambda.signed_constant",
+      "form_id": "L11",
+      "source_keys": [
+        "lambda"
+      ],
+      "candidate": "FROM main | eval result=map(items,($x:int=-2) -> $x+factor)",
+      "disposition": "active",
+      "case_id": "T2.fix1.lambda.signed_constant",
+      "assembly": "standalone",
+      "evidence": "independent-task2-review-boundary-witness"
+    },
+    {
+      "id": "T2.fix1.between.lowercase",
+      "form_id": "L07",
+      "source_keys": [
+        "predicate"
+      ],
+      "candidate": "FROM main | where amount between 0 and 5",
+      "disposition": "active",
+      "case_id": "T2.fix1.between.lowercase",
+      "assembly": "standalone",
+      "evidence": "independent-task2-review-boundary-witness"
+    },
+    {
+      "id": "T2.fix1.between.mixed_pair",
+      "form_id": "L07",
+      "source_keys": [
+        "predicate"
+      ],
+      "candidate": "FROM main | where amount BETWEEN 0 and 5",
+      "disposition": "active",
+      "case_id": "T2.fix1.between.mixed_pair",
+      "assembly": "standalone",
+      "evidence": "independent-task2-review-boundary-witness"
+    },
+    {
+      "id": "T2.fix1.between.reverse_pair",
+      "form_id": "L07",
+      "source_keys": [
+        "predicate"
+      ],
+      "candidate": "FROM main | where amount between 0 AND 5",
+      "disposition": "active",
+      "case_id": "T2.fix1.between.reverse_pair",
+      "assembly": "standalone",
+      "evidence": "independent-task2-review-boundary-witness"
+    },
+    {
+      "id": "T2.fix1.between.mixed_word",
+      "form_id": "L07",
+      "source_keys": [
+        "predicate"
+      ],
+      "candidate": "FROM main | where amount BeTwEeN 0 AnD 5",
+      "disposition": "active",
+      "case_id": "T2.fix1.between.mixed_word",
+      "assembly": "standalone",
+      "evidence": "independent-task2-review-boundary-witness"
+    },
+    {
+      "id": "T2.fix1.logical.held_and",
+      "form_id": "L06",
+      "source_keys": [
+        "predicate"
+      ],
+      "candidate": "FROM main | where a=1 and b=2",
+      "disposition": "active",
+      "case_id": "T2.fix1.logical.held_and",
+      "assembly": "standalone",
+      "evidence": "independent-task2-review-boundary-witness"
+    },
+    {
+      "id": "T2.fix1.logical.held_not",
+      "form_id": "L06",
+      "source_keys": [
+        "predicate"
+      ],
+      "candidate": "FROM main | where nOt enabled",
+      "disposition": "active",
+      "case_id": "T2.fix1.logical.held_not",
+      "assembly": "standalone",
+      "evidence": "independent-task2-review-boundary-witness"
+    },
+    {
+      "id": "T2.fix1.logical.words_as_names",
+      "form_id": "L06",
+      "source_keys": [
+        "syntax"
+      ],
+      "candidate": "FROM main | eval between=and, x={and:or,not:xor}, y=round(and:or)",
+      "disposition": "active",
+      "case_id": "T2.fix1.logical.words_as_names",
+      "assembly": "standalone",
+      "evidence": "independent-task2-review-boundary-witness"
+    },
+    {
+      "id": "T2.fix1.logical.word_as_search_literal",
+      "form_id": "L05",
+      "source_keys": [
+        "doc163"
+      ],
+      "candidate": "search index=app aNd host=api",
+      "disposition": "active",
+      "case_id": "T2.fix1.logical.word_as_search_literal",
+      "assembly": "standalone",
+      "evidence": "independent-task2-review-boundary-witness"
     }
   ],
   "holds": [

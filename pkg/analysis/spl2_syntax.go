@@ -65,6 +65,18 @@ func (p *spl2ParsedDocument) inspectSyntax(tree antlr.Tree, lambdaDepth int) {
 	case *spl2.ModuleDeclarationContext:
 		p.syntaxComplete = false
 		p.syntaxFinding(ctx, "SPL_UNSUPPORTED_MODULE", "unsupported", "Module declarations are outside the standalone contract")
+	case *spl2.LambdaParameterContext:
+		if value := ctx.StringLiteral(); value != nil && len(value.AllSTRING_INTERPOLATION()) > 0 {
+			p.syntaxFinding(value, CodeSyntaxError, "contract", "Lambda default strings must be constant")
+		}
+	case *spl2.LogicalAndContext:
+		p.inspectOperatorCase(ctx, "AND")
+	case *spl2.LogicalOrContext:
+		p.inspectOperatorCase(ctx, "OR")
+	case *spl2.LogicalXorContext:
+		p.inspectOperatorCase(ctx, "XOR")
+	case *spl2.LogicalNotContext:
+		p.inspectOperatorCase(ctx, "NOT")
 	case *spl2.LambdaExpressionContext:
 		if lambdaDepth > 0 {
 			p.syntaxFinding(ctx, CodeSyntaxError, "contract", "Nested lambdas are not supported by the language contract")
@@ -92,7 +104,15 @@ func (p *spl2ParsedDocument) inspectSyntax(tree antlr.Tree, lambdaDepth int) {
 			p.heldSyntax(ctx, "H05 array trailing comma remains held")
 		}
 	case *spl2.PredicateContext:
-		if ctx.IS() != nil && ctx.NOT() != nil && ctx.TYPE() != nil {
+		if operator := ctx.BetweenOperator(); operator != nil && ctx.BetweenConjunction() != nil {
+			between, conjunction := operator.GetText(), ctx.BetweenConjunction().GetText()
+			// The lowercase pair does not authorize additional NOT casing combinations.
+			complete := between == "BETWEEN" && conjunction == "AND" || between == "between" && conjunction == "and" && ctx.LogicalNot() == nil
+			if !complete {
+				p.heldSyntax(ctx, "H11 unproved BETWEEN/AND casing remains held")
+			}
+		}
+		if ctx.IS() != nil && ctx.LogicalNot() != nil && ctx.TYPE() != nil {
 			p.heldSyntax(ctx, "EH04 IS NOT type remains held")
 		}
 	case *spl2.SearchLiteralContext:
@@ -151,4 +171,10 @@ func spl2DecodeKey(text string) (string, bool) {
 func (p *spl2ParsedDocument) heldSyntax(ctx antlr.ParserRuleContext, message string) {
 	p.syntaxComplete = false
 	p.diagnostics = append(p.diagnostics, Diagnostic{Code: CodeUnsupportedSemantics, Severity: "warning", Category: "unsupported", Message: message, Location: p.source.contextLocation(ctx)})
+}
+
+func (p *spl2ParsedDocument) inspectOperatorCase(ctx antlr.ParserRuleContext, documented string) {
+	if ctx.GetText() != documented {
+		p.heldSyntax(ctx, "H11 unproved logical operator casing remains held")
+	}
 }

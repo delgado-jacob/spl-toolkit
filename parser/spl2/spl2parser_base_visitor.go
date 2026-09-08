@@ -143,6 +143,30 @@ func (v *BaseSPL2ParserVisitor) VisitPredicate(ctx *PredicateContext) interface{
 	return v.VisitChildren(ctx)
 }
 
+func (v *BaseSPL2ParserVisitor) VisitLogicalAnd(ctx *LogicalAndContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitLogicalOr(ctx *LogicalOrContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitLogicalXor(ctx *LogicalXorContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitLogicalNot(ctx *LogicalNotContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitBetweenOperator(ctx *BetweenOperatorContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitBetweenConjunction(ctx *BetweenConjunctionContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
 func (v *BaseSPL2ParserVisitor) VisitComparison(ctx *ComparisonContext) interface{} {
 	return v.VisitChildren(ctx)
 }

@@ -5,9 +5,46 @@ Pending obligations are visible intermediate work, never success or floor credit
 Meaningful IDs conservatively coalesce related witnesses; exact query aliases
 share one case and retain every original obligation identity.
 """
+import hashlib
 import json
 from pathlib import Path
 import sys
+
+
+# Version 1 pins the complete immutable projection independently reviewed at
+# 762b97e: original IDs/candidates, source links/metadata, inventory and holds.
+# Activations, case aliases, assembly and owner/disposition state are excluded.
+# New supplemental task witnesses live outside the original C/L/Q/B/E/F/I IDs.
+CANONICAL_PROVENANCE_SHA256_V1 = "3345cf5712b1bdbf467d1651784fdb8bccc596805038da0d54e7a123384e3a4e"
+
+
+def original_id(identity):
+    return identity == "exclusions" or identity.startswith(("E.", "F.", "I.")) or (
+        len(identity) >= 3 and identity[0] in "CLQB" and identity[1:3].isdigit()
+    )
+
+
+def canonical_provenance_digest(provenance):
+    def records(name, fields):
+        return sorted(
+            ({key: record[key] for key in fields if key in record}
+             for record in provenance[name] if original_id(record["id"])),
+            key=lambda record: record["id"],
+        )
+
+    projection = {
+        "projection_version": 1,
+        "schema_version": provenance["schema_version"],
+        "design_snapshots": provenance["design_snapshots"],
+        "seed_ids": sorted(provenance["seed_ids"]),
+        "sources": provenance["sources"],
+        "inventory": sorted(provenance["inventory"], key=lambda record: record["entry"]),
+        "holds": sorted(provenance["holds"], key=lambda record: record["id"]),
+        "forms": records("forms", ("id", "description", "source_keys")),
+        "obligations": records("obligations", ("id", "form_id", "candidate", "source_keys", "evidence")),
+    }
+    encoded = json.dumps(projection, sort_keys=True, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
 
 
 def load(root: Path):
@@ -66,9 +103,16 @@ def audit(manifest, provenance, cases):
         require(record["source_keys"] and set(record["source_keys"]) <= sources.keys(), f"unresolved source provenance: {record.get('id')}")
     for form in forms.values():
         require(form["disposition"] in {"active", "partial", "pending"}, "missing form disposition")
+    require(canonical_provenance_digest(provenance) == CANONICAL_PROVENANCE_SHA256_V1,
+            "canonical provenance identities or immutable values changed")
     aliases = set()
     for case in cases:
         require(case["id"] not in holds and not set(case["obligation_ids"]) & holds.keys(), "held case cannot receive floor credit")
+        if case.get("hold_ids"):
+            require(set(case["hold_ids"]) <= holds.keys() and case.get("floor_credit") is False,
+                    "held boundary cannot receive floor credit")
+            require(case["status"] == "incomplete" and not case["syntax_complete"] and not case["semantic_complete"],
+                    "held boundary cannot claim complete or invalid support")
         require(case["meaningful_id"], "missing meaningful-query alias")
         require(case["document"].get("language") == "spl2", "case dialect must be explicit")
         require(case["obligation_ids"] and case["id"] in case["obligation_ids"], "original identity not preserved")
@@ -104,9 +148,10 @@ def audit(manifest, provenance, cases):
         require(form["disposition"] == expected, "form disposition disagrees with obligations")
     start = by_id[obligations["E.L01.start.N1"]["case_id"]]
     require(start["document"]["text"] == "failure index=app", "exact invalid start changed")
-    meaningful = {c["meaningful_id"] for c in cases}
-    negative = {c["meaningful_id"] for c in cases if c["status"] == "invalid"}
-    sql = {c["meaningful_id"] for c in cases if any(f.startswith(("Q", "E.L15", "E.L16", "E.L17")) for f in c["form_ids"])}
+    credited = [c for c in cases if not c.get("hold_ids") and c.get("floor_credit", True)]
+    meaningful = {c["meaningful_id"] for c in credited}
+    negative = {c["meaningful_id"] for c in credited if c["status"] == "invalid"}
+    sql = {c["meaningful_id"] for c in credited if any(f.startswith(("Q", "E.L15", "E.L16", "E.L17")) for f in c["form_ids"])}
     pending = sum(o["disposition"] == "pending" for o in obligations.values())
     if manifest["enforce_final_floors"]:
         require(pending == 0, "pending mandatory obligations remain")

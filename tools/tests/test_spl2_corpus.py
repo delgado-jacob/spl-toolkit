@@ -68,3 +68,74 @@ class SPL2CorpusTests(unittest.TestCase):
         self.cases[0]["assertions"] = {}
         with self.assertRaisesRegex(ValueError, "assertions"):
             self.audit()
+
+    def test_same_count_form_and_obligation_rename_is_rejected(self):
+        old, new = "E.C01.literal", "E.C01.invented_replacement"
+        for form in self.provenance["forms"]:
+            if form["id"] == old:
+                form["id"] = new
+        for obligation in self.provenance["obligations"]:
+            if obligation["form_id"] == old:
+                obligation["form_id"] = new
+                obligation["id"] = obligation["id"].replace(old, new)
+        with self.assertRaisesRegex(ValueError, "canonical provenance"):
+            self.audit()
+
+    def test_same_count_canonical_value_changes_are_rejected(self):
+        changes = {
+            "candidate": lambda p: next(o for o in p["obligations"] if o["id"] == "E.C01.literal.P1").update(candidate="search replacement"),
+            "base_candidate": lambda p: next(o for o in p["obligations"] if o["id"] == "C01-P1").update(candidate="search replacement"),
+            "source_url": lambda p: p["sources"]["start"].update(url="https://example.invalid/replacement"),
+            "source_metadata": lambda p: p["sources"]["start"].update(retrieved="2000-01-01"),
+            "form_source": lambda p: next(f for f in p["forms"] if f["id"] == "E.C01.literal").update(source_keys=["start"]),
+            "obligation_source": lambda p: next(o for o in p["obligations"] if o["id"] == "E.C01.literal.P1").update(source_keys=["start"]),
+            "inventory": lambda p: p["inventory"][0].update(context="replacement"),
+            "held_evidence": lambda p: p["holds"][0].update(evidence="replacement"),
+            "design_snapshot": lambda p: p["design_snapshots"].update(matrix_sha256="0" * 64),
+        }
+        original = copy.deepcopy(self.provenance)
+        for name, change in changes.items():
+            with self.subTest(name=name):
+                self.provenance = copy.deepcopy(original)
+                change(self.provenance)
+                with self.assertRaisesRegex(ValueError, "canonical provenance"):
+                    self.audit()
+
+    def test_same_count_seed_rename_is_rejected(self):
+        old, new = "C01-P1", "C01-replacement"
+        self.provenance["seed_ids"] = [new if item == old else item for item in self.provenance["seed_ids"]]
+        next(o for o in self.provenance["obligations"] if o["id"] == old)["id"] = new
+        with self.assertRaisesRegex(ValueError, "canonical provenance"):
+            self.audit()
+
+    def test_supplemental_boundary_case_can_be_added(self):
+        case = copy.deepcopy(self.cases[0])
+        case.update(id="T2.audit.new-boundary", meaningful_id="T2.audit.new-boundary", obligation_ids=["T2.audit.new-boundary"], form_ids=["T2.audit.new-form"])
+        case["document"]["text"] = "index=additional host=proof"
+        self.cases.append(case)
+        self.provenance["forms"].append({"id":"T2.audit.new-form", "source_keys":case["source_keys"], "disposition":"active", "owner":"test"})
+        self.provenance["obligations"].append({"id":case["id"], "form_id":"T2.audit.new-form", "source_keys":case["source_keys"], "candidate":case["document"]["text"], "disposition":"active", "case_id":case["id"], "assembly":"standalone", "evidence":"supplemental-boundary"})
+        self.audit()
+
+    def test_legitimate_original_obligation_activation_is_allowed(self):
+        obligation = next(o for o in self.provenance["obligations"] if o["id"] == "E.C01.literal.P1")
+        case = copy.deepcopy(self.cases[0])
+        case.update(id=obligation["id"], meaningful_id=obligation["id"], obligation_ids=[obligation["id"]], form_ids=[obligation["form_id"]], source_keys=obligation["source_keys"])
+        case["document"]["text"] = obligation["candidate"]
+        obligation.update(disposition="active", case_id=case["id"], assembly="standalone")
+        next(f for f in self.provenance["forms"] if f["id"] == obligation["form_id"]).update(disposition="partial", owner="later-task")
+        self.cases.append(case)
+        self.audit()
+
+    def test_held_boundary_is_excluded_from_meaningful_credit(self):
+        before = self.audit()["meaningful"]
+        case = copy.deepcopy(self.cases[0])
+        case.update(id="T2.audit.held", meaningful_id="T2.audit.held", obligation_ids=["T2.audit.held"], form_ids=["T2.audit.held-form"], hold_ids=["H11"], floor_credit=False, syntax_complete=False, expected_codes=["SPL_UNSUPPORTED_SEMANTICS"])
+        case["document"]["text"] = "FROM main | where amount BETWEEN 13 and 17"
+        self.cases.append(case)
+        self.provenance["forms"].append({"id":"T2.audit.held-form", "source_keys":case["source_keys"], "disposition":"active", "owner":"test"})
+        self.provenance["obligations"].append({"id":case["id"], "form_id":"T2.audit.held-form", "source_keys":case["source_keys"], "candidate":case["document"]["text"], "disposition":"active", "case_id":case["id"], "assembly":"standalone", "evidence":"supplemental-boundary"})
+        self.assertEqual(self.audit()["meaningful"], before)
+        case["floor_credit"] = True
+        with self.assertRaisesRegex(ValueError, "held"):
+            self.audit()

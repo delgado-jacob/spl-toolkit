@@ -438,5 +438,680 @@
         }
       ]
     }
+  },
+  {
+    "id": "T2.fix1.implicit.and",
+    "meaningful_id": "T2.fix1.implicit-boolean",
+    "obligation_ids": [
+      "T2.fix1.implicit.and"
+    ],
+    "source_keys": [
+      "doc163"
+    ],
+    "document": {
+      "text": "index=app AND host=api",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "L01"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "searchExpression": 1,
+        "searchAtom": 2
+      },
+      "shape_contains": [],
+      "excerpts": [
+        {
+          "kind": "searchExpression",
+          "text": "index=app AND host=api"
+        }
+      ],
+      "shapes": [
+        {
+          "kind": "searchExpression",
+          "shape": "(searchAnd (searchAtom INDEX:\"index\" ASSIGN:\"=\" IDENTIFIER:\"app\") AND:\"AND\" (searchAtom IDENTIFIER:\"host\" ASSIGN:\"=\" IDENTIFIER:\"api\"))"
+        }
+      ],
+      "diagnostic_excerpts": []
+    }
+  },
+  {
+    "id": "T2.fix1.implicit.or",
+    "meaningful_id": "T2.fix1.implicit-boolean",
+    "obligation_ids": [
+      "T2.fix1.implicit.or"
+    ],
+    "source_keys": [
+      "doc163"
+    ],
+    "document": {
+      "text": "index=app OR host=api",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "L01"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "searchExpression": 1,
+        "searchAtom": 2
+      },
+      "shape_contains": [],
+      "excerpts": [
+        {
+          "kind": "searchExpression",
+          "text": "index=app OR host=api"
+        }
+      ],
+      "shapes": [
+        {
+          "kind": "searchExpression",
+          "shape": "(searchOr (searchAtom INDEX:\"index\" ASSIGN:\"=\" IDENTIFIER:\"app\") OR:\"OR\" (searchAtom IDENTIFIER:\"host\" ASSIGN:\"=\" IDENTIFIER:\"api\"))"
+        }
+      ],
+      "diagnostic_excerpts": []
+    }
+  },
+  {
+    "id": "T2.fix1.implicit.xor",
+    "meaningful_id": "T2.fix1.implicit-boolean",
+    "obligation_ids": [
+      "T2.fix1.implicit.xor"
+    ],
+    "source_keys": [
+      "doc163"
+    ],
+    "document": {
+      "text": "index=app XOR host=api",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "L01"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "searchExpression": 1,
+        "searchAtom": 2
+      },
+      "shape_contains": [],
+      "excerpts": [
+        {
+          "kind": "searchExpression",
+          "text": "index=app XOR host=api"
+        }
+      ],
+      "shapes": [
+        {
+          "kind": "searchExpression",
+          "shape": "(searchXor (searchAtom INDEX:\"index\" ASSIGN:\"=\" IDENTIFIER:\"app\") XOR:\"XOR\" (searchAtom IDENTIFIER:\"host\" ASSIGN:\"=\" IDENTIFIER:\"api\"))"
+        }
+      ],
+      "diagnostic_excerpts": []
+    }
+  },
+  {
+    "id": "T2.fix1.implicit.precedence",
+    "meaningful_id": "T2.fix1.implicit-boolean",
+    "obligation_ids": [
+      "T2.fix1.implicit.precedence"
+    ],
+    "source_keys": [
+      "doc163"
+    ],
+    "document": {
+      "text": "index=app OR host=api AND status=200 XOR kind=other",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "L01"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "searchExpression": 1,
+        "searchAtom": 4
+      },
+      "shape_contains": [],
+      "excerpts": [
+        {
+          "kind": "searchExpression",
+          "text": "index=app OR host=api AND status=200 XOR kind=other"
+        }
+      ],
+      "shapes": [
+        {
+          "kind": "searchExpression",
+          "shape": "(searchXor (searchAnd (searchOr (searchAtom INDEX:\"index\" ASSIGN:\"=\" IDENTIFIER:\"app\") OR:\"OR\" (searchAtom IDENTIFIER:\"host\" ASSIGN:\"=\" IDENTIFIER:\"api\")) AND:\"AND\" (searchAtom IDENTIFIER:\"status\" ASSIGN:\"=\" NUMBER:\"200\")) XOR:\"XOR\" (searchAtom IDENTIFIER:\"kind\" ASSIGN:\"=\" IDENTIFIER:\"other\"))"
+        }
+      ],
+      "diagnostic_excerpts": []
+    }
+  },
+  {
+    "id": "T2.fix1.implicit.missing_rhs",
+    "meaningful_id": "L01.invalid",
+    "obligation_ids": [
+      "T2.fix1.implicit.missing_rhs"
+    ],
+    "source_keys": [
+      "doc163"
+    ],
+    "document": {
+      "text": "index=app OR",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "L01"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {},
+      "shape_contains": [],
+      "excerpts": [],
+      "shapes": [],
+      "diagnostic_excerpts": []
+    }
+  },
+  {
+    "id": "T2.fix1.lambda.interpolated_default",
+    "meaningful_id": "T2.fix1.constant-default-invalid",
+    "obligation_ids": [
+      "T2.fix1.lambda.interpolated_default"
+    ],
+    "source_keys": [
+      "lambda"
+    ],
+    "document": {
+      "text": "FROM main | eval result=map(items,($x:string=\"${fallback}\") -> $x)",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "L11"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "lambdaParameter": 1,
+        "STRING_INTERPOLATION": 1
+      },
+      "shape_contains": [],
+      "excerpts": [],
+      "shapes": [],
+      "diagnostic_excerpts": [
+        "\"${fallback}\""
+      ]
+    }
+  },
+  {
+    "id": "T2.fix1.lambda.constant_string",
+    "meaningful_id": "L11.incomplete",
+    "obligation_ids": [
+      "T2.fix1.lambda.constant_string"
+    ],
+    "source_keys": [
+      "lambda"
+    ],
+    "document": {
+      "text": "FROM main | eval result=map(items,($x:string=\"plain\") -> $x)",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "L11"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "lambdaParameter": 1,
+        "STRING_INTERPOLATION": 0
+      },
+      "shape_contains": [],
+      "excerpts": [],
+      "shapes": [],
+      "diagnostic_excerpts": []
+    }
+  },
+  {
+    "id": "T2.fix1.lambda.signed_constant",
+    "meaningful_id": "L11.incomplete",
+    "obligation_ids": [
+      "T2.fix1.lambda.signed_constant"
+    ],
+    "source_keys": [
+      "lambda"
+    ],
+    "document": {
+      "text": "FROM main | eval result=map(items,($x:int=-2) -> $x+factor)",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "L11"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "lambdaParameter": 1,
+        "MINUS": 1
+      },
+      "shape_contains": [],
+      "excerpts": [],
+      "shapes": [],
+      "diagnostic_excerpts": []
+    }
+  },
+  {
+    "id": "T2.fix1.between.lowercase",
+    "meaningful_id": "L07.incomplete",
+    "obligation_ids": [
+      "T2.fix1.between.lowercase"
+    ],
+    "source_keys": [
+      "predicate"
+    ],
+    "document": {
+      "text": "FROM main | where amount between 0 and 5",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "L07"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "betweenOperator": 1,
+        "betweenConjunction": 1,
+        "logicalAnd": 0
+      },
+      "shape_contains": [],
+      "excerpts": [],
+      "shapes": [
+        {
+          "kind": "predicate",
+          "shape": "(predicate IDENTIFIER:\"amount\" IDENTIFIER:\"between\" NUMBER:\"0\" IDENTIFIER:\"and\" NUMBER:\"5\")"
+        }
+      ],
+      "diagnostic_excerpts": []
+    }
+  },
+  {
+    "id": "T2.fix1.between.mixed_pair",
+    "meaningful_id": "T2.fix1.between.mixed_pair",
+    "obligation_ids": [
+      "T2.fix1.between.mixed_pair"
+    ],
+    "source_keys": [
+      "predicate"
+    ],
+    "document": {
+      "text": "FROM main | where amount BETWEEN 0 and 5",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "L07"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "betweenOperator": 1,
+        "betweenConjunction": 1
+      },
+      "shape_contains": [],
+      "excerpts": [],
+      "shapes": [],
+      "diagnostic_excerpts": []
+    },
+    "hold_ids": [
+      "H11"
+    ],
+    "floor_credit": false
+  },
+  {
+    "id": "T2.fix1.between.reverse_pair",
+    "meaningful_id": "T2.fix1.between.reverse_pair",
+    "obligation_ids": [
+      "T2.fix1.between.reverse_pair"
+    ],
+    "source_keys": [
+      "predicate"
+    ],
+    "document": {
+      "text": "FROM main | where amount between 0 AND 5",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "L07"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "betweenOperator": 1,
+        "betweenConjunction": 1
+      },
+      "shape_contains": [],
+      "excerpts": [],
+      "shapes": [],
+      "diagnostic_excerpts": []
+    },
+    "hold_ids": [
+      "H11"
+    ],
+    "floor_credit": false
+  },
+  {
+    "id": "T2.fix1.between.mixed_word",
+    "meaningful_id": "T2.fix1.between.mixed_word",
+    "obligation_ids": [
+      "T2.fix1.between.mixed_word"
+    ],
+    "source_keys": [
+      "predicate"
+    ],
+    "document": {
+      "text": "FROM main | where amount BeTwEeN 0 AnD 5",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "L07"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "betweenOperator": 1,
+        "betweenConjunction": 1
+      },
+      "shape_contains": [],
+      "excerpts": [],
+      "shapes": [],
+      "diagnostic_excerpts": []
+    },
+    "hold_ids": [
+      "H11"
+    ],
+    "floor_credit": false
+  },
+  {
+    "id": "T2.fix1.logical.held_and",
+    "meaningful_id": "T2.fix1.logical.held_and",
+    "obligation_ids": [
+      "T2.fix1.logical.held_and"
+    ],
+    "source_keys": [
+      "predicate"
+    ],
+    "document": {
+      "text": "FROM main | where a=1 and b=2",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "L06"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "logicalAnd": 1
+      },
+      "shape_contains": [],
+      "excerpts": [],
+      "shapes": [],
+      "diagnostic_excerpts": []
+    },
+    "hold_ids": [
+      "H11"
+    ],
+    "floor_credit": false
+  },
+  {
+    "id": "T2.fix1.logical.held_not",
+    "meaningful_id": "T2.fix1.logical.held_not",
+    "obligation_ids": [
+      "T2.fix1.logical.held_not"
+    ],
+    "source_keys": [
+      "predicate"
+    ],
+    "document": {
+      "text": "FROM main | where nOt enabled",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "L06"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "logicalNot": 1
+      },
+      "shape_contains": [],
+      "excerpts": [],
+      "shapes": [],
+      "diagnostic_excerpts": []
+    },
+    "hold_ids": [
+      "H11"
+    ],
+    "floor_credit": false
+  },
+  {
+    "id": "T2.fix1.logical.words_as_names",
+    "meaningful_id": "T2.fix1.operator-words-as-data",
+    "obligation_ids": [
+      "T2.fix1.logical.words_as_names"
+    ],
+    "source_keys": [
+      "syntax"
+    ],
+    "document": {
+      "text": "FROM main | eval between=and, x={and:or,not:xor}, y=round(and:or)",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "L06"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "logicalAnd": 0,
+        "logicalOr": 0,
+        "logicalXor": 0,
+        "logicalNot": 0,
+        "betweenOperator": 0,
+        "namedArgument": 1,
+        "objectEntry": 2
+      },
+      "shape_contains": [],
+      "excerpts": [],
+      "shapes": [],
+      "diagnostic_excerpts": []
+    }
+  },
+  {
+    "id": "T2.fix1.logical.word_as_search_literal",
+    "meaningful_id": "T2.fix1.operator-words-as-data",
+    "obligation_ids": [
+      "T2.fix1.logical.word_as_search_literal"
+    ],
+    "source_keys": [
+      "doc163"
+    ],
+    "document": {
+      "text": "search index=app aNd host=api",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "L05"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "logicalAnd": 0,
+        "searchValue": 3
+      },
+      "shape_contains": [],
+      "excerpts": [
+        {
+          "kind": "searchValue",
+          "text": "aNd"
+        }
+      ],
+      "shapes": [],
+      "diagnostic_excerpts": []
+    }
   }
 ]

@@ -172,3 +172,128 @@ func TestSPL2ExpressionLambdaSignedDefault(t *testing.T) {
 		t.Fatalf("signed constant/default ownership %+v", p.diagnostics)
 	}
 }
+
+func TestSPL2StartImplicitBooleanTree(t *testing.T) {
+	cases := []struct{ text, shape string }{
+		{"index=app AND host=api", `(searchAnd (searchAtom INDEX:"index" ASSIGN:"=" IDENTIFIER:"app") AND:"AND" (searchAtom IDENTIFIER:"host" ASSIGN:"=" IDENTIFIER:"api"))`},
+		{"index=app OR host=api", `(searchOr (searchAtom INDEX:"index" ASSIGN:"=" IDENTIFIER:"app") OR:"OR" (searchAtom IDENTIFIER:"host" ASSIGN:"=" IDENTIFIER:"api"))`},
+		{"index=app XOR host=api", `(searchXor (searchAtom INDEX:"index" ASSIGN:"=" IDENTIFIER:"app") XOR:"XOR" (searchAtom IDENTIFIER:"host" ASSIGN:"=" IDENTIFIER:"api"))`},
+		{"index=app host=api", `(searchAnd (searchAtom INDEX:"index" ASSIGN:"=" IDENTIFIER:"app") (searchAtom IDENTIFIER:"host" ASSIGN:"=" IDENTIFIER:"api"))`},
+		{"index=app OR host=api AND status=200 XOR kind=other", `(searchXor (searchAnd (searchOr (searchAtom INDEX:"index" ASSIGN:"=" IDENTIFIER:"app") OR:"OR" (searchAtom IDENTIFIER:"host" ASSIGN:"=" IDENTIFIER:"api")) AND:"AND" (searchAtom IDENTIFIER:"status" ASSIGN:"=" NUMBER:"200")) XOR:"XOR" (searchAtom IDENTIFIER:"kind" ASSIGN:"=" IDENTIFIER:"other"))`},
+	}
+	for _, tc := range cases {
+		t.Run(tc.text, func(t *testing.T) {
+			p := parseSPL2Document(tc.text)
+			if !p.syntaxComplete || len(p.diagnostics) > 0 {
+				t.Fatalf("%+v", p.diagnostics)
+			}
+			expressions := spl2Nodes(p.syntax, "searchExpression")
+			if len(expressions) != 1 || expressions[0].shape() != tc.shape {
+				t.Fatalf("initial index escaped Boolean tree: %s", p.syntax.shape())
+			}
+			loc := expressions[0].Location
+			if p.source.text[loc.Start.Offset:loc.End.Offset] != tc.text {
+				t.Fatal("initial constraint excluded from expression source span")
+			}
+		})
+	}
+	for _, text := range []string{"host=api AND index=app", "failure index=app", "index=app OR", "index=app AND AND host=api"} {
+		p := parseSPL2Document(text)
+		if len(p.diagnostics) == 0 || p.syntaxComplete {
+			t.Errorf("accepted invalid start or continuation %q", text)
+		}
+	}
+}
+func TestSPL2ExpressionLambdaConstantDefault(t *testing.T) {
+	for _, value := range []string{`"${fallback}"`, `"prefix ${fallback} suffix"`} {
+		p := parseSPL2Document("FROM main | eval result=map(items,($x:string=" + value + ") -> $x)")
+		if !p.syntaxComplete || len(p.diagnostics) != 1 {
+			t.Fatalf("expected parsed but contract-invalid default: %+v", p.diagnostics)
+		}
+		d := p.diagnostics[0]
+		if d.Code != CodeSyntaxError || d.Severity != "error" || d.Category != "contract" {
+			t.Fatalf("%+v", d)
+		}
+		if p.source.text[d.Location.Start.Offset:d.Location.End.Offset] != value {
+			t.Fatalf("default finding misplaced: %+v", d.Location)
+		}
+	}
+	for _, text := range []string{`FROM main | eval x=map(items,($v:string="none") -> $v)`, `FROM main | eval x=map(items,($v:int=-2) -> $v+factor)`} {
+		p := parseSPL2Document(text)
+		if !p.syntaxComplete || len(p.diagnostics) > 0 {
+			t.Fatalf("constant default rejected: %+v", p.diagnostics)
+		}
+	}
+}
+func TestSPL2ExpressionLowercaseBetween(t *testing.T) {
+	p := parseSPL2Document("FROM main | where amount between 0 and 5")
+	if !p.syntaxComplete || len(p.diagnostics) > 0 {
+		t.Fatalf("evidenced lowercase predicate rejected: %+v", p.diagnostics)
+	}
+	nodes := spl2Nodes(p.syntax, "predicate")
+	if len(nodes) != 1 {
+		t.Fatalf("predicate ownership %s", p.syntax.shape())
+	}
+	if text := p.source.text[nodes[0].Location.Start.Offset:nodes[0].Location.End.Offset]; text != "amount between 0 and 5" {
+		t.Fatalf("predicate source %q", text)
+	}
+}
+
+func TestSPL2ExpressionContextualCasing(t *testing.T) {
+	for _, text := range []string{
+		"FROM main | where amount BETWEEN 0 and 5",
+		"FROM main | where amount between 0 AND 5",
+		"FROM main | where amount BeTwEeN 0 AnD 5",
+		"FROM main | where amount NOT between 0 and 5",
+		"FROM main | where amount not BETWEEN 0 AND 5",
+		"FROM main | where a=1 and b=2",
+		"FROM main | where a=1 AnD b=2",
+		"FROM main | where a=1 or b=2",
+		"FROM main | where a=1 xOr b=2",
+		"FROM main | where nOt enabled",
+	} {
+		t.Run(text, func(t *testing.T) {
+			p := parseSPL2Document(text)
+			if p.syntaxComplete || len(p.diagnostics) == 0 {
+				t.Fatal("unproved operator casing claimed complete")
+			}
+			for _, d := range p.diagnostics {
+				if d.Severity == "error" || d.Code != CodeUnsupportedSemantics {
+					t.Fatalf("held spelling became invalid: %+v", p.diagnostics)
+				}
+			}
+		})
+	}
+	for _, text := range []string{
+		"FROM main | eval and=or, x={and:or,not:xor}, y=round(and:or), z=and",
+		"FROM main | where and=or",
+		"FROM main | eval between=and, x={between:or}",
+		"search and OR host=api",
+		"search index=app and",
+		"search index=app aNd host=api",
+	} {
+		t.Run(text, func(t *testing.T) {
+			p := parseSPL2Document(text)
+			if !p.syntaxComplete || len(p.diagnostics) > 0 {
+				t.Fatalf("ordinary same-spelled name/literal changed meaning: %+v", p.diagnostics)
+			}
+			for _, kind := range []string{"logicalAnd", "logicalOr", "logicalXor", "logicalNot", "betweenOperator"} {
+				if len(spl2Nodes(p.syntax, kind)) != 0 {
+					t.Fatalf("name/literal became operator %s", kind)
+				}
+			}
+		})
+	}
+	for _, text := range []string{"FROM main | where amount between 0 and", "FROM main | where amount between and 5"} {
+		p := parseSPL2Document(text)
+		found := false
+		for _, d := range p.diagnostics {
+			if d.Severity == "error" && d.Code == CodeSyntaxError {
+				found = true
+			}
+		}
+		if !found {
+			t.Fatalf("malformed lowercase predicate was hidden by hold: %+v", p.diagnostics)
+		}
+	}
+}

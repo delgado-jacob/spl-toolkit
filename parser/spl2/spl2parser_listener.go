@@ -109,6 +109,24 @@ type SPL2ParserListener interface {
 	// EnterPredicate is called when entering the predicate production.
 	EnterPredicate(c *PredicateContext)
 
+	// EnterLogicalAnd is called when entering the logicalAnd production.
+	EnterLogicalAnd(c *LogicalAndContext)
+
+	// EnterLogicalOr is called when entering the logicalOr production.
+	EnterLogicalOr(c *LogicalOrContext)
+
+	// EnterLogicalXor is called when entering the logicalXor production.
+	EnterLogicalXor(c *LogicalXorContext)
+
+	// EnterLogicalNot is called when entering the logicalNot production.
+	EnterLogicalNot(c *LogicalNotContext)
+
+	// EnterBetweenOperator is called when entering the betweenOperator production.
+	EnterBetweenOperator(c *BetweenOperatorContext)
+
+	// EnterBetweenConjunction is called when entering the betweenConjunction production.
+	EnterBetweenConjunction(c *BetweenConjunctionContext)
+
 	// EnterComparison is called when entering the comparison production.
 	EnterComparison(c *ComparisonContext)
 
@@ -282,6 +300,24 @@ type SPL2ParserListener interface {
 
 	// ExitPredicate is called when exiting the predicate production.
 	ExitPredicate(c *PredicateContext)
+
+	// ExitLogicalAnd is called when exiting the logicalAnd production.
+	ExitLogicalAnd(c *LogicalAndContext)
+
+	// ExitLogicalOr is called when exiting the logicalOr production.
+	ExitLogicalOr(c *LogicalOrContext)
+
+	// ExitLogicalXor is called when exiting the logicalXor production.
+	ExitLogicalXor(c *LogicalXorContext)
+
+	// ExitLogicalNot is called when exiting the logicalNot production.
+	ExitLogicalNot(c *LogicalNotContext)
+
+	// ExitBetweenOperator is called when exiting the betweenOperator production.
+	ExitBetweenOperator(c *BetweenOperatorContext)
+
+	// ExitBetweenConjunction is called when exiting the betweenConjunction production.
+	ExitBetweenConjunction(c *BetweenConjunctionContext)
 
 	// ExitComparison is called when exiting the comparison production.
 	ExitComparison(c *ComparisonContext)

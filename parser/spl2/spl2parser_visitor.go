@@ -3,6 +3,11 @@
 package spl2 // SPL2Parser
 import "github.com/antlr4-go/antlr/v4"
 
+import "strings"
+
+// ANTLR also emits the header into the visitor interface file.
+var _ = strings.EqualFold
+
 // A complete Visitor for a parse tree produced by SPL2Parser.
 type SPL2ParserVisitor interface {
 	antlr.ParseTreeVisitor
@@ -108,6 +113,24 @@ type SPL2ParserVisitor interface {
 
 	// Visit a parse tree produced by SPL2Parser#predicate.
 	VisitPredicate(ctx *PredicateContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#logicalAnd.
+	VisitLogicalAnd(ctx *LogicalAndContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#logicalOr.
+	VisitLogicalOr(ctx *LogicalOrContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#logicalXor.
+	VisitLogicalXor(ctx *LogicalXorContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#logicalNot.
+	VisitLogicalNot(ctx *LogicalNotContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#betweenOperator.
+	VisitBetweenOperator(ctx *BetweenOperatorContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#betweenConjunction.
+	VisitBetweenConjunction(ctx *BetweenConjunctionContext) interface{}
 
 	// Visit a parse tree produced by SPL2Parser#comparison.
 	VisitComparison(ctx *ComparisonContext) interface{}

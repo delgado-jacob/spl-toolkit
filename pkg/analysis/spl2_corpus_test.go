@@ -22,7 +22,12 @@ type spl2CorpusCase struct {
 	Assertions       struct {
 		Kinds         map[string]int `json:"kinds"`
 		ShapeContains []string       `json:"shape_contains"`
-		Excerpts      []struct {
+		Shapes        []struct {
+			Kind  string `json:"kind"`
+			Shape string `json:"shape"`
+		} `json:"shapes"`
+		DiagnosticExcerpts []string `json:"diagnostic_excerpts"`
+		Excerpts           []struct {
 			Kind string `json:"kind"`
 			Text string `json:"text"`
 		} `json:"excerpts"`
@@ -99,6 +104,29 @@ func TestSPL2CorpusSyntax(t *testing.T) {
 				for _, want := range c.Assertions.ShapeContains {
 					if !strings.Contains(p.syntax.shape(), want) {
 						t.Errorf("missing shape %s in %s", want, p.syntax.shape())
+					}
+				}
+				for _, expected := range c.Assertions.Shapes {
+					found := false
+					for _, node := range spl2Nodes(p.syntax, expected.Kind) {
+						if node.shape() == expected.Shape {
+							found = true
+						}
+					}
+					if !found {
+						t.Errorf("missing exact %s shape %s", expected.Kind, expected.Shape)
+					}
+				}
+				for _, expected := range c.Assertions.DiagnosticExcerpts {
+					found := false
+					for _, diagnostic := range p.diagnostics {
+						location := diagnostic.Location
+						if c.Document.Text[location.Start.Offset:location.End.Offset] == expected {
+							found = true
+						}
+					}
+					if !found {
+						t.Errorf("missing diagnostic source excerpt %q", expected)
 					}
 				}
 				for _, assert := range c.Assertions.Excerpts {

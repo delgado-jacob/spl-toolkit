@@ -15,7 +15,7 @@ REX: 'rex' -> pushMode(REGEX_INPUT);
 MAKERESULTS: 'makeresults'; SPL1: 'spl1';
 IMPORT: 'import'; EXPORT: 'export'; FUNCTION: 'function'; RETURN: 'return';
 AND: 'AND'; OR: 'OR'; XOR: 'XOR'; NOT: 'NOT';
-BETWEEN: 'BETWEEN' | 'between'; IN: 'IN'; LIKE: 'LIKE'; IS: 'IS';
+BETWEEN: 'BETWEEN'; IN: 'IN'; LIKE: 'LIKE'; IS: 'IS';
 NULL: 'null'; NULL_TEST: 'NULL'; BOOLEAN: 'true' | 'false';
 TYPE: 'int' | 'long' | 'float' | 'double' | 'string' | 'boolean';
 ARROW: '->'; LE: '<='; GE: '>='; NE: '!='; EQ: '==';
