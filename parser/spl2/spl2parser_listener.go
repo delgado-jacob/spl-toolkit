@@ -253,6 +253,9 @@ type SPL2ParserListener interface {
 	// EnterSearchSignedNumber is called when entering the searchSignedNumber production.
 	EnterSearchSignedNumber(c *SearchSignedNumberContext)
 
+	// EnterSearchUnprovedLiteral is called when entering the searchUnprovedLiteral production.
+	EnterSearchUnprovedLiteral(c *SearchUnprovedLiteralContext)
+
 	// EnterSearchBareValue is called when entering the searchBareValue production.
 	EnterSearchBareValue(c *SearchBareValueContext)
 
@@ -627,6 +630,9 @@ type SPL2ParserListener interface {
 
 	// ExitSearchSignedNumber is called when exiting the searchSignedNumber production.
 	ExitSearchSignedNumber(c *SearchSignedNumberContext)
+
+	// ExitSearchUnprovedLiteral is called when exiting the searchUnprovedLiteral production.
+	ExitSearchUnprovedLiteral(c *SearchUnprovedLiteralContext)
 
 	// ExitSearchBareValue is called when exiting the searchBareValue production.
 	ExitSearchBareValue(c *SearchBareValueContext)

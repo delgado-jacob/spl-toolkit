@@ -18,11 +18,11 @@ func (p *SPL2Parser) unreviewedOption(command int) bool {
     token := p.GetTokenStream().LA(1)
     switch command {
     case SPL2ParserSTATS:
-        return token != SPL2ParserALLNUM && token != SPL2ParserDELIM && token != SPL2ParserPARTITIONS
+        return token != SPL2ParserBY && token != SPL2ParserALLNUM && token != SPL2ParserDELIM && token != SPL2ParserPARTITIONS
     case SPL2ParserEVENTSTATS:
-        return token != SPL2ParserALLNUM
+        return token != SPL2ParserBY && token != SPL2ParserALLNUM
     case SPL2ParserSTREAMSTATS:
-        return token != SPL2ParserCURRENT && token != SPL2ParserRESET && token != SPL2ParserWINDOW
+        return token != SPL2ParserBY && token != SPL2ParserCURRENT && token != SPL2ParserRESET && token != SPL2ParserWINDOW
     case SPL2ParserDEDUP:
         return token != SPL2ParserKEEPEMPTY && token != SPL2ParserCONSECUTIVE
     case SPL2ParserHEAD:
@@ -119,11 +119,15 @@ searchAnd: searchOr (AND? searchOr)*;
 searchOr: searchNot (OR searchNot)*;
 searchNot: NOT searchNot | searchAtom;
 searchAtom: LPAREN searchExpression RPAREN | searchTimeModifier | identifier comparison searchValue | identifier IN LPAREN searchValue (COMMA searchValue)* RPAREN | searchValue;
-searchValue: searchDirective | searchBareValue | searchWordLiteral | searchSignedNumber | stringLiteral | RAW_STRING;
+searchValue: searchDirective | searchBareValue | searchWordLiteral | searchUnprovedLiteral | searchSignedNumber | stringLiteral | RAW_STRING;
 // Boolean spellings here are literal search words, not expression evaluation.
 searchWordLiteral: BOOLEAN;
 // Signed values have narrow literal ownership and remain explicitly unproved.
 searchSignedNumber: (PLUS | MINUS) NUMBER;
+// These bounded punctuation-bearing literal shapes have no field/arithmetic
+// interpretation. Recognition retains incomplete syntax coverage.
+searchUnprovedLiteral: (PLUS | MINUS) (identifier | NUMBER (PLUS | MINUS) identifier)
+    | {p.GetTokenStream().LA(2) != SPL2ParserNUMBER}? MINUS;
 searchBareValue: (identifier | NUMBER) ((DOT | MINUS | SLASH | COLON) (identifier | NUMBER) | STAR)* | STAR;
 searchDirective: (TERM | CASE) LPAREN searchBareValue RPAREN;
 searchTimeModifier: timeModifierKey comparison timeModifierValue | TIMEFORMAT ASSIGN stringLiteral;

@@ -18259,7 +18259,7 @@
       "source_keys": [
         "doc163"
       ],
-      "evidence": "root-2026-09-08-search-literal-ruling-signed-incomplete",
+      "evidence": "root-2026-09-08-unproved-literal-rhs-correction-no-negative-credit",
       "disposition": "active",
       "assembly": "standalone",
       "case_id": "T3.fix1.search.fieldminus"
@@ -18271,7 +18271,7 @@
       "source_keys": [
         "doc163"
       ],
-      "evidence": "root-2026-09-08-search-literal-ruling-signed-incomplete",
+      "evidence": "root-2026-09-08-unproved-literal-rhs-correction-no-negative-credit",
       "disposition": "active",
       "assembly": "standalone",
       "case_id": "T3.fix1.search.fieldplus"
@@ -18283,7 +18283,7 @@
       "source_keys": [
         "doc163"
       ],
-      "evidence": "root-2026-09-08-search-literal-ruling-signed-incomplete",
+      "evidence": "root-2026-09-08-literal-plus-group-unproved-no-negative-credit",
       "disposition": "active",
       "assembly": "standalone",
       "case_id": "T3.fix1.search.expression"
@@ -18295,7 +18295,7 @@
       "source_keys": [
         "doc163"
       ],
-      "evidence": "root-2026-09-08-search-literal-ruling-signed-incomplete",
+      "evidence": "root-2026-09-08-unproved-literal-rhs-correction-no-negative-credit",
       "disposition": "active",
       "assembly": "standalone",
       "case_id": "T3.fix1.search.arithmetic"
@@ -18307,10 +18307,46 @@
       "source_keys": [
         "doc163"
       ],
-      "evidence": "root-2026-09-08-search-literal-ruling-signed-incomplete",
+      "evidence": "root-2026-09-08-unproved-literal-rhs-correction-no-negative-credit",
       "disposition": "active",
       "assembly": "standalone",
       "case_id": "T3.fix1.search.incomplete"
+    },
+    {
+      "id": "T3.fix2.stream.by_assignment",
+      "form_id": "C10",
+      "candidate": "FROM main | streamstats BY=host count()",
+      "source_keys": [
+        "doc168"
+      ],
+      "evidence": "task3-rereview-known-grouping-regression",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.fix2.stream.by_assignment"
+    },
+    {
+      "id": "T3.fix2.stats.by_assignment",
+      "form_id": "C08",
+      "candidate": "FROM main | stats BY=host count()",
+      "source_keys": [
+        "doc167"
+      ],
+      "evidence": "task3-rereview-known-grouping-regression",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.fix2.stats.by_assignment"
+    },
+    {
+      "id": "T3.fix2.eventstats.by_assignment",
+      "form_id": "C09",
+      "candidate": "FROM main | eventstats BY=host count()",
+      "source_keys": [
+        "doc137"
+      ],
+      "evidence": "task3-rereview-known-grouping-regression",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.fix2.eventstats.by_assignment"
     }
   ],
   "holds": [

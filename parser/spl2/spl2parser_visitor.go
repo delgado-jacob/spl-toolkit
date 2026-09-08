@@ -258,6 +258,9 @@ type SPL2ParserVisitor interface {
 	// Visit a parse tree produced by SPL2Parser#searchSignedNumber.
 	VisitSearchSignedNumber(ctx *SearchSignedNumberContext) interface{}
 
+	// Visit a parse tree produced by SPL2Parser#searchUnprovedLiteral.
+	VisitSearchUnprovedLiteral(ctx *SearchUnprovedLiteralContext) interface{}
+
 	// Visit a parse tree produced by SPL2Parser#searchBareValue.
 	VisitSearchBareValue(ctx *SearchBareValueContext) interface{}
 

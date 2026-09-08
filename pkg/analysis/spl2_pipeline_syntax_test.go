@@ -284,3 +284,22 @@ func TestSPL2PipelineForeignKeywordOptionOwnership(t *testing.T) {
 		t.Fatal("foreign option acquired complete coverage")
 	}
 }
+
+func TestSPL2PipelineUnprovedLiteralOwnership(t *testing.T) {
+	for _, c := range []struct{ id, value string }{
+		{"T3.fix1.search.fieldminus", "-bytes"}, {"T3.fix1.search.fieldplus", "+bytes"},
+		{"T3.fix1.search.arithmetic", "-1+rate"}, {"T3.fix1.search.incomplete", "-"},
+		{"T3.fix1.search.expression", "-"},
+	} {
+		p := spl2PipelineFixture(t, c.id)
+		atoms := p.tree.Pipeline().Start_().SearchCommand().SearchExpression().SearchXor().SearchAnd(0).AllSearchOr()
+		literal := atoms[1].SearchNot(0).SearchAtom().SearchValue(0).SearchUnprovedLiteral()
+		spl2PipelineText(t, p, literal, c.value)
+		if p.syntaxComplete || p.semanticComplete || len(p.diagnostics) == 0 {
+			t.Fatal("unproved literal lost its limitation", c.id)
+		}
+		if len(spl2Nodes(p.syntax, "expression")) != 0 || len(spl2Nodes(p.syntax, "access")) != 0 {
+			t.Fatal("unproved search literal interpreted as field/arithmetic", c.id)
+		}
+	}
+}

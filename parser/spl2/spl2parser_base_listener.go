@@ -512,6 +512,12 @@ func (s *BaseSPL2ParserListener) EnterSearchSignedNumber(ctx *SearchSignedNumber
 // ExitSearchSignedNumber is called when production searchSignedNumber is exited.
 func (s *BaseSPL2ParserListener) ExitSearchSignedNumber(ctx *SearchSignedNumberContext) {}
 
+// EnterSearchUnprovedLiteral is called when production searchUnprovedLiteral is entered.
+func (s *BaseSPL2ParserListener) EnterSearchUnprovedLiteral(ctx *SearchUnprovedLiteralContext) {}
+
+// ExitSearchUnprovedLiteral is called when production searchUnprovedLiteral is exited.
+func (s *BaseSPL2ParserListener) ExitSearchUnprovedLiteral(ctx *SearchUnprovedLiteralContext) {}
+
 // EnterSearchBareValue is called when production searchBareValue is entered.
 func (s *BaseSPL2ParserListener) EnterSearchBareValue(ctx *SearchBareValueContext) {}
 

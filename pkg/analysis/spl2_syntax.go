@@ -94,6 +94,10 @@ func (p *spl2ParsedDocument) inspectSyntax(tree antlr.Tree, lambdaDepth int) {
 		if op := ctx.Comparison(); op != nil && op.GetText() != "=" && op.GetText() != "!=" {
 			p.heldSyntax(ctx, "EH03 time modifier comparison remains held")
 		}
+	case *spl2.SearchUnprovedLiteralContext:
+		if spl2IntactSyntax(ctx) {
+			p.heldSyntax(ctx, "Punctuation-bearing search literal remains unproved")
+		}
 	case *spl2.SearchSignedNumberContext:
 		if spl2IntactSyntax(ctx) {
 			p.heldSyntax(ctx, "Unquoted signed search number remains unproved")
@@ -102,7 +106,19 @@ func (p *spl2ParsedDocument) inspectSyntax(tree antlr.Tree, lambdaDepth int) {
 		if name := ctx.Identifier(); name != nil && ctx.Comparison() != nil {
 			switch name.GetStart().GetTokenType() {
 			case spl2.SPL2ParserEARLIEST, spl2.SPL2ParserLATEST, spl2.SPL2ParserINDEX_EARLIEST, spl2.SPL2ParserINDEX_LATEST, spl2.SPL2ParserSTARTTIME, spl2.SPL2ParserENDTIME, spl2.SPL2ParserTIMEFORMAT:
-				p.heldSyntax(ctx, "Unproved time modifier value retains incomplete syntax coverage")
+				// A lone relative-time sign is an evidenced malformed modifier
+				// (E.C01.index_time.N2), independently of ordinary literal RHSs.
+				values := ctx.AllSearchValue()
+				var unproved spl2.ISearchUnprovedLiteralContext
+				if len(values) == 1 {
+					unproved = values[0].SearchUnprovedLiteral()
+				}
+				if unproved != nil && spl2IntactSyntax(unproved) && unproved.Identifier() == nil && unproved.NUMBER() == nil {
+					p.syntaxComplete = false
+					p.syntaxFinding(unproved, CodeSyntaxError, "syntax", "Time modifier requires an operand after its sign")
+				} else {
+					p.heldSyntax(ctx, "Unproved time modifier value retains incomplete syntax coverage")
+				}
 			}
 		}
 		if ctx.IN() != nil && len(ctx.AllSearchValue()) == 1 {

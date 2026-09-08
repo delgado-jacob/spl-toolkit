@@ -335,6 +335,10 @@ func (v *BaseSPL2ParserVisitor) VisitSearchSignedNumber(ctx *SearchSignedNumberC
 	return v.VisitChildren(ctx)
 }
 
+func (v *BaseSPL2ParserVisitor) VisitSearchUnprovedLiteral(ctx *SearchUnprovedLiteralContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
 func (v *BaseSPL2ParserVisitor) VisitSearchBareValue(ctx *SearchBareValueContext) interface{} {
 	return v.VisitChildren(ctx)
 }

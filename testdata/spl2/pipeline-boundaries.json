@@ -7818,17 +7818,29 @@
     },
     "syntax_complete": false,
     "semantic_complete": false,
-    "status": "invalid",
+    "status": "incomplete",
     "expected_codes": [
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "forbidden_codes": [
       "SPL_SYNTAX_ERROR"
     ],
-    "forbidden_codes": [],
     "assertions": {
       "phase": "syntax",
       "scope": "grammar-contexts-only",
-      "source_exact": true
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "searchUnprovedLiteral",
+          "text": "-bytes"
+        }
+      ],
+      "diagnostic_excerpts": [
+        "-bytes"
+      ]
     },
-    "meaningful_id": "T3.fix1.search.negative"
+    "meaningful_id": "T3.fix2.search.unproved",
+    "floor_credit": false
   },
   {
     "id": "T3.fix1.search.fieldplus",
@@ -7847,17 +7859,29 @@
     },
     "syntax_complete": false,
     "semantic_complete": false,
-    "status": "invalid",
+    "status": "incomplete",
     "expected_codes": [
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "forbidden_codes": [
       "SPL_SYNTAX_ERROR"
     ],
-    "forbidden_codes": [],
     "assertions": {
       "phase": "syntax",
       "scope": "grammar-contexts-only",
-      "source_exact": true
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "searchUnprovedLiteral",
+          "text": "+bytes"
+        }
+      ],
+      "diagnostic_excerpts": [
+        "+bytes"
+      ]
     },
-    "meaningful_id": "T3.fix1.search.negative"
+    "meaningful_id": "T3.fix2.search.unproved",
+    "floor_credit": false
   },
   {
     "id": "T3.fix1.search.expression",
@@ -7876,17 +7900,33 @@
     },
     "syntax_complete": false,
     "semantic_complete": false,
-    "status": "invalid",
+    "status": "incomplete",
     "expected_codes": [
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "forbidden_codes": [
       "SPL_SYNTAX_ERROR"
     ],
-    "forbidden_codes": [],
     "assertions": {
       "phase": "syntax",
       "scope": "grammar-contexts-only",
-      "source_exact": true
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "searchUnprovedLiteral",
+          "text": "-"
+        },
+        {
+          "kind": "searchAtom",
+          "text": "(1+2)"
+        }
+      ],
+      "diagnostic_excerpts": [
+        "-"
+      ]
     },
-    "meaningful_id": "T3.fix1.search.negative"
+    "meaningful_id": "T3.fix2.search.unproved",
+    "floor_credit": false
   },
   {
     "id": "T3.fix1.search.arithmetic",
@@ -7905,17 +7945,29 @@
     },
     "syntax_complete": false,
     "semantic_complete": false,
-    "status": "invalid",
+    "status": "incomplete",
     "expected_codes": [
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "forbidden_codes": [
       "SPL_SYNTAX_ERROR"
     ],
-    "forbidden_codes": [],
     "assertions": {
       "phase": "syntax",
       "scope": "grammar-contexts-only",
-      "source_exact": true
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "searchUnprovedLiteral",
+          "text": "-1+rate"
+        }
+      ],
+      "diagnostic_excerpts": [
+        "-1+rate"
+      ]
     },
-    "meaningful_id": "T3.fix1.search.negative"
+    "meaningful_id": "T3.fix2.search.unproved",
+    "floor_credit": false
   },
   {
     "id": "T3.fix1.search.incomplete",
@@ -7934,6 +7986,47 @@
     },
     "syntax_complete": false,
     "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "searchUnprovedLiteral",
+          "text": "-"
+        }
+      ],
+      "diagnostic_excerpts": [
+        "-"
+      ]
+    },
+    "meaningful_id": "T3.fix2.search.unproved",
+    "floor_credit": false
+  },
+  {
+    "id": "T3.fix2.stream.by_assignment",
+    "obligation_ids": [
+      "T3.fix2.stream.by_assignment"
+    ],
+    "form_ids": [
+      "C10"
+    ],
+    "source_keys": [
+      "doc168"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main | streamstats BY=host count()"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
     "status": "invalid",
     "expected_codes": [
       "SPL_SYNTAX_ERROR"
@@ -7944,6 +8037,64 @@
       "scope": "grammar-contexts-only",
       "source_exact": true
     },
-    "meaningful_id": "T3.fix1.search.negative"
+    "meaningful_id": "T3.fix2.stream.by_assignment.invalid"
+  },
+  {
+    "id": "T3.fix2.stats.by_assignment",
+    "obligation_ids": [
+      "T3.fix2.stats.by_assignment"
+    ],
+    "form_ids": [
+      "C08"
+    ],
+    "source_keys": [
+      "doc167"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main | stats BY=host count()"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "T3.fix2.group.by_assignment.invalid"
+  },
+  {
+    "id": "T3.fix2.eventstats.by_assignment",
+    "obligation_ids": [
+      "T3.fix2.eventstats.by_assignment"
+    ],
+    "form_ids": [
+      "C09"
+    ],
+    "source_keys": [
+      "doc137"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main | eventstats BY=host count()"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "T3.fix2.group.by_assignment.invalid"
   }
 ]
