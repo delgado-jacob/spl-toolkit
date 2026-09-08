@@ -1,0 +1,84 @@
+{
+  "accepted_predecessor": "e401402e5d8cd80f469884b2c3ad80245266ad66",
+  "artifacts_verified": 5,
+  "broad_review": {
+    "changed_files_accounted": 147,
+    "commits_reviewed": 13,
+    "critical": 0,
+    "important": 0,
+    "minor_actionable": 0,
+    "path": ".superpowers/sdd/milestone-4-implementation-plan/milestone-review.md",
+    "sha256": "870ada483c983ac2d51ca0904a84d337255e44489eaec936dc025c00bd129250",
+    "source_sha": "92879052b0454db12aead045188ce4b15fa9d83a",
+    "status": "approved"
+  },
+  "canonical_and_surface_cases": 17,
+  "closure_owned_paths": [
+    "_build_plan/milestones/4-json-schema-ocsf-validation/design-spec.md",
+    "_build_plan/milestones/4-json-schema-ocsf-validation/research-notes.md",
+    "_build_plan/milestones/4-json-schema-ocsf-validation/milestone-4-implementation-plan.md",
+    "_build_plan/milestones/4-json-schema-ocsf-validation/milestone-log.md",
+    "docs/evidence/milestone-4/closure.json"
+  ],
+  "documentation_checks": {
+    "api_anchor": "passed",
+    "exact_go_signatures": "passed",
+    "external_evidence_hashes": "passed",
+    "front_matter_pages_passed": 13,
+    "initial_guidance_hashes_match_root": "passed",
+    "nontechnical_first_section": "passed",
+    "protected_prompt_hash_unchanged": "6265d913f2f52524761428bebb40d271aa65babca8d5ca90df4270993b84dfa6",
+    "scope": "Documentation-only checks; no product test/build repeated.",
+    "unchanged_artifacts": 5,
+    "unchanged_prior_tracked_files_excluding_owned_log": 289
+  },
+  "evidence_sha256": {
+    "/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/.superpowers/sdd/milestone-4-implementation-plan/task-7-rereview-1.md": "8b85f28a25515babbc2089bbba13a86a3276796582a533a396677d318ed24aa4",
+    "/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/.superpowers/sdd/milestone-4-implementation-plan/task-7-review.md": "a53defc5b025feb8590510203a7170ad1a01e9433195eda3fd6f20eb8cef09bd",
+    "/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/docs/evidence/milestone-4/package.json": "71a35cc7daa3890394457c306940f4e933962f2f19a62b4f8a05129dfb9a7227",
+    "/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/docs/evidence/milestone-4/source-identity.json": "ab33f57e7033c69d74da8e138a08d80d26d473823a2ffe3fc2a6c8b4f6b021b2",
+    "/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/docs/evidence/milestone-4/verification.json": "b0e86a798acecbd210706d11411863833e632ba8c442a30f0889d96dc94e8529",
+    "/private/tmp/spl-toolkit-m4-final-lock.json": "4976afeeb9c53b3a030f99b1190749699617f5dfda1771bc77fc31264ce9ff0c",
+    "/private/tmp/spl-toolkit-root-m4-acceptance-py314.json": "eb8ffd0bcd80e0d3de57cba061513246446a2d557cdb4f22132e463eb6f6cb16",
+    "/private/tmp/spl-toolkit-root-m4-go-acceptance.json": "2a29bad6dabc1b89744ed49929926a45b437ddc00eb4996c87e31e4c797d392f",
+    "/private/tmp/spl-toolkit-root-m4-surface-acceptance.json": "026f6020a09e2e938e7a517f819b1d6693555d7b33872fc7bb836fd1db882912"
+  },
+  "initial_guidance_sha256": {
+    "_build_plan/milestones/4-json-schema-ocsf-validation/design-spec.md": "746dc770a4fe4b8aa9904b24e1b58ba960cb30f00e5062e66d70829276f6c34f",
+    "_build_plan/milestones/4-json-schema-ocsf-validation/milestone-4-implementation-plan.md": "87a8e698fa923d405d6b0ac815d635dbc0ffd7553e213d97d33c62e4337d3092",
+    "_build_plan/milestones/4-json-schema-ocsf-validation/milestone-log.md": "4a63b17688fee189a3ffbff6036d9754b5214347f781c7a2488f4ff977faef3a",
+    "_build_plan/milestones/4-json-schema-ocsf-validation/research-notes.md": "a1a0caf847fcf770cd106ed351e379c1cb1c8dab0f5a78146d28f9e2b09fdda1"
+  },
+  "installed_counts_each": {
+    "native": 213,
+    "skipped": 0,
+    "surfaces": 81
+  },
+  "native_calls_per_case": 9,
+  "native_sources_verified": 47,
+  "ordered_batch_documents": 4,
+  "raw_http_input_rejections": 13,
+  "retained_limits": [
+    "Local macOS arm64 verification, not an unrun OS/runtime release matrix.",
+    "Go1.22 floor used external linking; default linking is not verified.",
+    "Current corrected checker freshly verifies the retained original wheel; rebuilt-header comparison uses exact retained bytes matching its prior payload hash. The rebuilt archive is unavailable; historical installed/source/native evidence is retained without relabeling.",
+    "Known linker, Swag generator and Python tar warnings remain qualified in original logs.",
+    "No event-instance validation, query execution, external Splunk conformance, merge, push or cleanup."
+  ],
+  "root_final_result": {
+    "path": "/private/tmp/spl-toolkit-root-m4-final-verification.json",
+    "sha256": "c2df09ab81fc4e18934d701be76de04a734781307e9ab34538afb6723da40658"
+  },
+  "scope": "Root final local M4 acceptance and clean broad review; documentation-only closure preserves accepted executable inputs. Root reviews the final documentation commit separately.",
+  "source_python314_tests": {
+    "errors": 0,
+    "failures": 0,
+    "skipped": 0,
+    "tests": 230
+  },
+  "source_sha": "92879052b0454db12aead045188ce4b15fa9d83a",
+  "status": "passed",
+  "task4_full_report_parity": "passed",
+  "tracked_source_hashes_verified": 290,
+  "tracked_tree_and_index": "clean"
+}
