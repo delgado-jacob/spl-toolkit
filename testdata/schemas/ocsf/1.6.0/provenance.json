@@ -1,0 +1,68 @@
+{
+  "archives": [
+    {
+      "bytes": 368543,
+      "file": "schema.tar.gz",
+      "sha256": "21764ef959a501dd3a8b2fc68ec2eadb6500208b9b14b35cc763592deb44b3a1"
+    },
+    {
+      "bytes": 2466637,
+      "file": "compiler.tar.gz",
+      "sha256": "83c0dd9f0bb342766c28617d831c7a438e9a5e756695dc25310c276345a2c23e"
+    }
+  ],
+  "catalogs": {
+    "base": {
+      "command": "python3.14 -m ocsf_schema_compiler \"$SCHEMA\" --ignore-platform-extensions > base-catalog.json",
+      "compile_version": 1,
+      "extensions": {},
+      "gzip_sha256": "749b45b5d34e3eeb9053ce589e05c2de00f68350238d80e973149f7f23508c70",
+      "raw_bytes": 3122505,
+      "raw_sha256": "9b609f8fb670772f04191c1c276b46d34d6e9110d2417c71fa89c4f54c585137",
+      "version": "1.6.0",
+      "working_directory": "ocsf-schema-compiler/src"
+    },
+    "windows": {
+      "command": "python3.14 -m ocsf_schema_compiler \"$SCHEMA\" --ignore-platform-extensions --extensions-path \"$SCHEMA/extensions/windows\" > windows-catalog.json",
+      "compile_version": 1,
+      "extensions": {
+        "win": {
+          "caption": "Windows",
+          "description": "The Windows extension defines Windows specific attributes, objects and classes.",
+          "name": "win",
+          "platform_extension?": false,
+          "uid": 2,
+          "version": "1.6.0"
+        }
+      },
+      "gzip_sha256": "fb486079e2424ea2c6336abe28d7bdb177a6b4606655625de9f9f53ce3fd6759",
+      "raw_bytes": 3344790,
+      "raw_sha256": "19af77ce259f3ff57debc33e52da51b8220a1af59399d06553f29629678595e9",
+      "version": "1.6.0",
+      "working_directory": "ocsf-schema-compiler/src"
+    }
+  },
+  "compiler": {
+    "archive_url": "https://codeload.github.com/ocsf/ocsf-schema-compiler/tar.gz/d6b0b781d51a6b9682ea99396636ae01437b41b4",
+    "reported_version": "0.0.0-dev",
+    "repository": "https://github.com/ocsf/ocsf-schema-compiler",
+    "revision": "d6b0b781d51a6b9682ea99396636ae01437b41b4"
+  },
+  "compression_python": "3.12.6",
+  "notices": {
+    "COMPILER-LICENSE": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+    "COMPILER-NOTICE": "7802b59a285af4406b6a371208ace5c327df44ed44c2fcf2fbce484691ef6a4c",
+    "SCHEMA-LICENSE": "0cec06e0e55fbc3dc5cee4fca9b607f66cb8f4e4dbcf3b3c013594dd156732e9",
+    "SCHEMA-NOTICE": "990c6fa8d244c2334708b526d923cee8b4853a26fdd2c4f310e39d7c51fc4347"
+  },
+  "preparation_environment": {
+    "PYTHONDONTWRITEBYTECODE": "1"
+  },
+  "preparation_python": "3.14.1",
+  "schema": {
+    "archive_url": "https://codeload.github.com/ocsf/ocsf-schema/tar.gz/d0cd8a0fef198bf93086044e33fda6d80c74b9ef",
+    "release": "v1.6.0",
+    "repository": "https://github.com/ocsf/ocsf-schema",
+    "revision": "d0cd8a0fef198bf93086044e33fda6d80c74b9ef"
+  }
+}

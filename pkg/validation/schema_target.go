@@ -203,3 +203,14 @@ func normalizeSchemaTarget(t SchemaTarget) (SchemaTarget, error) {
 	}
 	return DecodeSchemaTarget(raw)
 }
+
+func prepareSchemaTarget(target SchemaTarget) (preparedSchemaTarget, error) {
+	switch target.Kind {
+	case "json_schema":
+		return prepareJSONSchema(target)
+	case "ocsf":
+		return prepareOCSF(target)
+	default:
+		return nil, inputError("unsupported target kind %q", target.Kind)
+	}
+}

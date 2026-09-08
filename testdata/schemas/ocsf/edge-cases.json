@@ -1,0 +1,220 @@
+{
+  "compile_version": 1,
+  "version": "1.6.0",
+  "categories": {
+    "attributes": {
+      "test": {
+        "uid": 1
+      },
+      "empty": {
+        "uid": 2
+      }
+    }
+  },
+  "extensions": {},
+  "profiles": {
+    "p": {
+      "name": "p"
+    },
+    "q": {
+      "name": "q"
+    },
+    "child": {
+      "name": "child",
+      "extends": "p"
+    }
+  },
+  "classes": {
+    "base_event": {
+      "name": "base_event",
+      "uid": 0,
+      "category": "other",
+      "category_uid": 0,
+      "attributes": {}
+    },
+    "a": {
+      "name": "a",
+      "uid": 1001,
+      "category": "test",
+      "category_uid": 1,
+      "profiles": [
+        "p",
+        "q",
+        "child"
+      ],
+      "attributes": {
+        "time": {
+          "type": "string_t",
+          "requirement": "required"
+        },
+        "recommended": {
+          "type": "string_t",
+          "requirement": "recommended"
+        },
+        "profiled": {
+          "type": "string_t",
+          "requirement": "required",
+          "profiles": [
+            "p",
+            "q"
+          ]
+        },
+        "p_only": {
+          "type": "string_t",
+          "requirement": "optional",
+          "profiles": [
+            "p"
+          ]
+        },
+        "unconditional_null": {
+          "type": "string_t",
+          "requirement": "optional",
+          "profiles": null
+        },
+        "unconditional_empty": {
+          "type": "string_t",
+          "requirement": "optional",
+          "profiles": []
+        },
+        "empty": {
+          "type": "object_t",
+          "requirement": "optional",
+          "object_type": "empty"
+        },
+        "subclass": {
+          "type": "object_t",
+          "requirement": "optional",
+          "object_type": "subclass"
+        },
+        "cycle": {
+          "type": "object_t",
+          "requirement": "optional",
+          "object_type": "cycle"
+        },
+        "generic": {
+          "type": "object_t",
+          "requirement": "optional",
+          "object_type": "object"
+        },
+        "json": {
+          "type": "json_t",
+          "requirement": "optional"
+        },
+        "array": {
+          "type": "object_t",
+          "requirement": "optional",
+          "object_type": "empty",
+          "is_array": true
+        },
+        "single": {
+          "type": "object_t",
+          "requirement": "required",
+          "object_type": "single"
+        },
+        "multi": {
+          "type": "object_t",
+          "requirement": "required",
+          "object_type": "multi"
+        },
+        "unknown": {
+          "type": "object_t",
+          "requirement": "required",
+          "object_type": "unknown"
+        }
+      }
+    },
+    "b": {
+      "name": "b",
+      "uid": 1002,
+      "category": "test",
+      "category_uid": 1,
+      "profiles": [],
+      "attributes": {
+        "time": {
+          "type": "string_t",
+          "requirement": "required"
+        }
+      }
+    }
+  },
+  "objects": {
+    "object": {
+      "name": "object",
+      "attributes": {}
+    },
+    "empty": {
+      "name": "empty",
+      "attributes": {}
+    },
+    "subclass": {
+      "name": "subclass",
+      "extends": "object",
+      "attributes": {}
+    },
+    "cycle": {
+      "name": "cycle",
+      "attributes": {
+        "next": {
+          "type": "object_t",
+          "requirement": "optional",
+          "object_type": "cycle"
+        },
+        "value": {
+          "type": "string_t",
+          "requirement": "optional"
+        }
+      }
+    },
+    "single": {
+      "name": "single",
+      "attributes": {
+        "x": {
+          "type": "string_t",
+          "requirement": "optional"
+        }
+      },
+      "constraints": {
+        "at_least_one": [
+          "x"
+        ]
+      }
+    },
+    "multi": {
+      "name": "multi",
+      "attributes": {
+        "x": {
+          "type": "string_t",
+          "requirement": "optional"
+        },
+        "y": {
+          "type": "string_t",
+          "requirement": "optional"
+        }
+      },
+      "constraints": {
+        "just_one": [
+          "x",
+          "y"
+        ]
+      }
+    },
+    "unknown": {
+      "name": "unknown",
+      "attributes": {
+        "x": {
+          "type": "string_t",
+          "requirement": "optional"
+        },
+        "y": {
+          "type": "string_t",
+          "requirement": "optional"
+        }
+      },
+      "constraints": {
+        "future": [
+          "x"
+        ]
+      }
+    }
+  }
+}
