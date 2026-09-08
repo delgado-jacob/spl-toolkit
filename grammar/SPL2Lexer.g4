@@ -9,6 +9,12 @@ func (l *SPL2Lexer) closeBrace() { if l.braceDepth > 0 { l.braceDepth--; l.PopMo
 }
 
 FROM: 'FROM' | 'from'; SELECT: 'SELECT' | 'select';
+DISTINCT: 'DISTINCT' | 'distinct'; HAVING: 'HAVING' | 'having';
+GROUPBY: 'GROUPBY' | 'groupby'; ORDER: 'ORDER' | 'order'; ORDERBY: 'ORDERBY' | 'orderby';
+LIMIT: 'LIMIT' | 'limit'; OFFSET: 'OFFSET' | 'offset';
+ASC: 'ASC' | 'asc'; DESC: 'DESC' | 'desc'; BY_LOWER: 'by';
+JOIN: 'JOIN' | 'join'; INNER: 'INNER' | 'inner'; LEFT: 'LEFT' | 'left'; OUTER: 'OUTER' | 'outer';
+ON: 'ON' | 'on'; EXISTS: 'EXISTS' | 'exists';
 SEARCH: 'search'; INDEX: 'index'; EVAL: 'eval'; WHERE: 'where' | 'WHERE';
 FIELDS: 'fields'; TABLE: 'table'; AS: 'AS'; AS_LOWER: 'as'; GROUP: 'GROUP' | 'group';
 RENAME: 'rename'; STATS: 'stats'; EVENTSTATS: 'eventstats'; STREAMSTATS: 'streamstats';

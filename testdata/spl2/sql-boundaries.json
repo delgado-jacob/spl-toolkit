@@ -1,0 +1,5148 @@
+[
+  {
+    "id": "T4.boundary.join_inequality",
+    "obligation_ids": [
+      "T4.boundary.join_inequality"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main AS m JOIN users AS u ON m.id>u.id"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM main AS m JOIN users AS u ON m.id>u.id"
+        }
+      ]
+    },
+    "meaningful_id": "T4.boundary.join_inequality",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.boundary.join_literal",
+    "obligation_ids": [
+      "T4.boundary.join_literal"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main AS m JOIN users AS u ON true"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM main AS m JOIN users AS u ON true"
+        }
+      ]
+    },
+    "meaningful_id": "T4.boundary.join_literal",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.boundary.join_or",
+    "obligation_ids": [
+      "T4.boundary.join_or"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main AS m JOIN users AS u ON m.id=u.id OR m.realm=u.realm"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM main AS m JOIN users AS u ON m.id=u.id OR m.realm=u.realm"
+        }
+      ]
+    },
+    "meaningful_id": "T4.boundary.join_or",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.boundary.join_unqualified",
+    "obligation_ids": [
+      "T4.boundary.join_unqualified"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main AS m JOIN users AS u ON id=u.id"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM main AS m JOIN users AS u ON id=u.id"
+        }
+      ]
+    },
+    "meaningful_id": "T4.boundary.join_unqualified",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.boundary.join_deep_path",
+    "obligation_ids": [
+      "T4.boundary.join_deep_path"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main AS m JOIN users AS u ON m.user.id=u.id"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM main AS m JOIN users AS u ON m.user.id=u.id"
+        }
+      ]
+    },
+    "meaningful_id": "T4.boundary.join_deep_path",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.boundary.join_reversed",
+    "obligation_ids": [
+      "T4.boundary.join_reversed"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main AS m JOIN users AS u ON u.id=m.id"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM main AS m JOIN users AS u ON u.id=m.id"
+        }
+      ]
+    },
+    "meaningful_id": "T4.boundary.join_reversed",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.boundary.foreign_sql_option",
+    "obligation_ids": [
+      "T4.boundary.foreign_sql_option"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main | stats limit=3 count()"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM main | stats limit=3 count()"
+        }
+      ]
+    },
+    "meaningful_id": "T4.boundary.foreign_sql_option",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.boundary.negative_huge",
+    "obligation_ids": [
+      "T4.boundary.negative_huge"
+    ],
+    "form_ids": [
+      "Q03"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main LIMIT -9999999999999999999999999999999"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM main LIMIT -9999999999999999999999999999999"
+        }
+      ]
+    },
+    "meaningful_id": "T4.boundary.negative_huge",
+    "floor_credit": false,
+    "hold_ids": [
+      "H06"
+    ]
+  },
+  {
+    "id": "T4.boundary.span_fraction",
+    "obligation_ids": [
+      "T4.boundary.span_fraction"
+    ],
+    "form_ids": [
+      "Q05"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main GROUP BY span(_time,1.5h) SELECT count()"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM main GROUP BY span(_time,1.5h) SELECT count()"
+        }
+      ]
+    },
+    "meaningful_id": "T4.boundary.span_fraction",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.boundary.span_assignment_fraction",
+    "obligation_ids": [
+      "T4.boundary.span_assignment_fraction"
+    ],
+    "form_ids": [
+      "Q05"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main GROUP BY _time span=(1.5h) SELECT count()"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM main GROUP BY _time span=(1.5h) SELECT count()"
+        }
+      ]
+    },
+    "meaningful_id": "T4.boundary.span_assignment_fraction",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.boundary.exists_parenthesized_fields",
+    "obligation_ids": [
+      "T4.boundary.exists_parenthesized_fields"
+    ],
+    "form_ids": [
+      "Q07"
+    ],
+    "source_keys": [
+      "predicate"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM orders AS o WHERE EXISTS (SELECT id FROM inventory WHERE (id)=(o.item))"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM orders AS o WHERE EXISTS (SELECT id FROM inventory WHERE (id)=(o.item))"
+        }
+      ]
+    },
+    "meaningful_id": "T4.boundary.exists_parenthesized_fields",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.boundary.exists_child_from",
+    "obligation_ids": [
+      "T4.boundary.exists_child_from"
+    ],
+    "form_ids": [
+      "Q07"
+    ],
+    "source_keys": [
+      "predicate"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM orders AS o WHERE EXISTS (FROM inventory WHERE id=o.item SELECT id)"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM orders AS o WHERE EXISTS (FROM inventory WHERE id=o.item SELECT id)"
+        }
+      ]
+    },
+    "meaningful_id": "T4.boundary.exists_child_from",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.boundary.exists_shadowed_alias",
+    "obligation_ids": [
+      "T4.boundary.exists_shadowed_alias"
+    ],
+    "form_ids": [
+      "Q07"
+    ],
+    "source_keys": [
+      "predicate"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM orders AS o WHERE EXISTS (SELECT id FROM inventory AS o WHERE id=o.item)"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM orders AS o WHERE EXISTS (SELECT id FROM inventory AS o WHERE id=o.item)"
+        }
+      ]
+    },
+    "meaningful_id": "T4.boundary.exists_shadowed_alias",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.boundary.select_where",
+    "obligation_ids": [
+      "T4.boundary.select_where"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT host FROM main WHERE bytes>0"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "SELECT host FROM main WHERE bytes>0"
+        }
+      ]
+    },
+    "meaningful_id": "T4.boundary.select_where",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.boundary.wrong_order",
+    "obligation_ids": [
+      "T4.boundary.wrong_order"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT host WHERE bytes>0 FROM main"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "SELECT host WHERE bytes>0 FROM main"
+        }
+      ]
+    },
+    "meaningful_id": "T4.boundary.wrong_order",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.boundary.lowercase",
+    "obligation_ids": [
+      "T4.boundary.lowercase"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "select distinct host from main where bytes>0 group by host having host=\"a\" order by host desc limit 3 offset 1"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "select distinct host from main where bytes>0 group by host having host=\"a\" order by host desc limit 3 offset 1"
+        }
+      ]
+    },
+    "meaningful_id": "T4.boundary.lowercase",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.boundary.adjacency",
+    "obligation_ids": [
+      "T4.boundary.adjacency"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main WHERE x=1 y=2"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM main WHERE x=1 y=2"
+        }
+      ]
+    },
+    "meaningful_id": "T4.boundary.adjacency",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.boundary.integer",
+    "obligation_ids": [
+      "T4.boundary.integer"
+    ],
+    "form_ids": [
+      "Q03"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main LIMIT 1.5"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM main LIMIT 1.5"
+        }
+      ]
+    },
+    "meaningful_id": "T4.boundary.integer",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.boundary.negative_limit",
+    "obligation_ids": [
+      "T4.boundary.negative_limit"
+    ],
+    "form_ids": [
+      "Q03"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main LIMIT -1"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM main LIMIT -1"
+        }
+      ]
+    },
+    "meaningful_id": "T4.boundary.negative_limit",
+    "floor_credit": false,
+    "hold_ids": [
+      "H06"
+    ]
+  },
+  {
+    "id": "T4.boundary.negative_offset",
+    "obligation_ids": [
+      "T4.boundary.negative_offset"
+    ],
+    "form_ids": [
+      "Q03"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main OFFSET -2"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM main OFFSET -2"
+        }
+      ]
+    },
+    "meaningful_id": "T4.boundary.negative_offset",
+    "floor_credit": false,
+    "hold_ids": [
+      "H06"
+    ]
+  },
+  {
+    "id": "T4.boundary.term_direction",
+    "obligation_ids": [
+      "T4.boundary.term_direction"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main ORDER BY account ASC,size DESC"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM main ORDER BY account ASC,size DESC"
+        }
+      ]
+    },
+    "meaningful_id": "T4.boundary.term_direction",
+    "floor_credit": false,
+    "hold_ids": [
+      "H07"
+    ]
+  },
+  {
+    "id": "T4.boundary.span_unparenthesized",
+    "obligation_ids": [
+      "T4.boundary.span_unparenthesized"
+    ],
+    "form_ids": [
+      "Q05"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main GROUP BY _time span=3h SELECT count()"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM main GROUP BY _time span=3h SELECT count()"
+        }
+      ]
+    },
+    "meaningful_id": "T4.boundary.span_unparenthesized",
+    "floor_credit": false,
+    "hold_ids": [
+      "EH05"
+    ]
+  },
+  {
+    "id": "T4.boundary.span_unit",
+    "obligation_ids": [
+      "T4.boundary.span_unit",
+      "T4.span.2.True"
+    ],
+    "form_ids": [
+      "Q05"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT count() FROM main GROUP BY span(_time,hour)"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "SELECT count() FROM main GROUP BY span(_time,hour)"
+        }
+      ]
+    },
+    "meaningful_id": "T4.boundary.span_unit",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.boundary.span_extra",
+    "obligation_ids": [
+      "T4.boundary.span_extra"
+    ],
+    "form_ids": [
+      "Q05"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT count() FROM main GROUP BY span(_time,hour,day)"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "SELECT count() FROM main GROUP BY span(_time,hour,day)"
+        }
+      ]
+    },
+    "meaningful_id": "T4.boundary.span_extra",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.boundary.exists_offset",
+    "obligation_ids": [
+      "T4.boundary.exists_offset"
+    ],
+    "form_ids": [
+      "Q07"
+    ],
+    "source_keys": [
+      "predicate"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM orders AS o WHERE EXISTS (SELECT id FROM inventory WHERE id=o.item OFFSET 1)"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM orders AS o WHERE EXISTS (SELECT id FROM inventory WHERE id=o.item OFFSET 1)"
+        }
+      ]
+    },
+    "meaningful_id": "T4.boundary.exists_offset",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.boundary.exists_having",
+    "obligation_ids": [
+      "T4.boundary.exists_having"
+    ],
+    "form_ids": [
+      "Q07"
+    ],
+    "source_keys": [
+      "predicate"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM orders AS o WHERE active=true SELECT item HAVING EXISTS (SELECT id FROM inventory WHERE id=o.item)"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM orders AS o WHERE active=true SELECT item HAVING EXISTS (SELECT id FROM inventory WHERE id=o.item)"
+        }
+      ]
+    },
+    "meaningful_id": "T4.boundary.exists_having",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.boundary.exists_wrong_where",
+    "obligation_ids": [
+      "T4.boundary.exists_wrong_where"
+    ],
+    "form_ids": [
+      "Q07"
+    ],
+    "source_keys": [
+      "predicate"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM orders AS o WHERE EXISTS (SELECT id FROM inventory WHERE id=o.item) SELECT item HAVING item>0"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM orders AS o WHERE EXISTS (SELECT id FROM inventory WHERE id=o.item) SELECT item HAVING item>0"
+        }
+      ]
+    },
+    "meaningful_id": "T4.boundary.exists_wrong_where",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.boundary.exists_no_correlation",
+    "obligation_ids": [
+      "T4.boundary.exists_no_correlation"
+    ],
+    "form_ids": [
+      "Q07"
+    ],
+    "source_keys": [
+      "predicate"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM orders AS o WHERE EXISTS (SELECT id FROM inventory WHERE id=1)"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM orders AS o WHERE EXISTS (SELECT id FROM inventory WHERE id=1)"
+        }
+      ]
+    },
+    "meaningful_id": "T4.boundary.exists_no_correlation",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.boundary.exists_wrong_alias",
+    "obligation_ids": [
+      "T4.boundary.exists_wrong_alias"
+    ],
+    "form_ids": [
+      "Q07"
+    ],
+    "source_keys": [
+      "predicate"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM orders AS o WHERE EXISTS (SELECT id FROM inventory WHERE id=z.item)"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM orders AS o WHERE EXISTS (SELECT id FROM inventory WHERE id=z.item)"
+        }
+      ]
+    },
+    "meaningful_id": "T4.boundary.exists_wrong_alias",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.boundary.exists_inequality",
+    "obligation_ids": [
+      "T4.boundary.exists_inequality"
+    ],
+    "form_ids": [
+      "Q07"
+    ],
+    "source_keys": [
+      "predicate"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM orders AS o WHERE EXISTS (SELECT id FROM inventory WHERE id>o.item)"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM orders AS o WHERE EXISTS (SELECT id FROM inventory WHERE id>o.item)"
+        }
+      ]
+    },
+    "meaningful_id": "T4.boundary.exists_inequality",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.boundary.exists_literal_dot",
+    "obligation_ids": [
+      "T4.boundary.exists_literal_dot"
+    ],
+    "form_ids": [
+      "Q07"
+    ],
+    "source_keys": [
+      "predicate"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM orders AS o WHERE EXISTS (SELECT id FROM inventory WHERE id='o.item')"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM orders AS o WHERE EXISTS (SELECT id FROM inventory WHERE id='o.item')"
+        }
+      ]
+    },
+    "meaningful_id": "T4.boundary.exists_literal_dot",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.boundary.exists_projection",
+    "obligation_ids": [
+      "T4.boundary.exists_projection"
+    ],
+    "form_ids": [
+      "Q07"
+    ],
+    "source_keys": [
+      "predicate"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT EXISTS (SELECT id FROM inventory WHERE id=o.item) FROM orders AS o"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "SELECT EXISTS (SELECT id FROM inventory WHERE id=o.item) FROM orders AS o"
+        }
+      ]
+    },
+    "meaningful_id": "T4.boundary.exists_projection",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.boundary.exists_nested_projection",
+    "obligation_ids": [
+      "T4.boundary.exists_nested_projection"
+    ],
+    "form_ids": [
+      "Q07"
+    ],
+    "source_keys": [
+      "predicate"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM orders AS o WHERE EXISTS (SELECT EXISTS (SELECT id FROM child WHERE id=o.item) FROM inventory WHERE id=o.item)"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM orders AS o WHERE EXISTS (SELECT EXISTS (SELECT id FROM child WHERE id=o.item) FROM inventory WHERE id=o.item)"
+        }
+      ]
+    },
+    "meaningful_id": "T4.boundary.exists_nested_projection",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.boundary.exists_lambda",
+    "obligation_ids": [
+      "T4.boundary.exists_lambda"
+    ],
+    "form_ids": [
+      "Q07"
+    ],
+    "source_keys": [
+      "predicate"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM orders AS o WHERE map(a, ($v)->EXISTS (SELECT id FROM inventory WHERE id=o.item))"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM orders AS o WHERE map(a, ($v)->EXISTS (SELECT id FROM inventory WHERE id=o.item))"
+        }
+      ]
+    },
+    "meaningful_id": "T4.boundary.exists_lambda",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.boundary.missing_group_key",
+    "obligation_ids": [
+      "T4.boundary.missing_group_key"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main GROUP BY SELECT count()"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM main GROUP BY SELECT count()"
+        }
+      ]
+    },
+    "meaningful_id": "T4.boundary.missing_group_key",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.boundary.group_wildcard_escape",
+    "obligation_ids": [
+      "T4.boundary.group_wildcard_escape"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main GROUP BY 'host\\u002a' SELECT count()"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM main GROUP BY 'host\\u002a' SELECT count()"
+        }
+      ]
+    },
+    "meaningful_id": "T4.boundary.group_wildcard_escape",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.group.GROUP_BY.False.one",
+    "obligation_ids": [
+      "T4.group.GROUP_BY.False.one"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main GROUP BY host SELECT host,count()"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM main GROUP BY host SELECT host,count()"
+        }
+      ]
+    },
+    "meaningful_id": "T4.group.False.one",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.group.GROUP_BY.False.many",
+    "obligation_ids": [
+      "T4.group.GROUP_BY.False.many"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main GROUP BY host,realm SELECT host,count()"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM main GROUP BY host,realm SELECT host,count()"
+        }
+      ]
+    },
+    "meaningful_id": "T4.group.False.many",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.group.GROUP_BY.False.missing",
+    "obligation_ids": [
+      "T4.group.GROUP_BY.False.missing"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main GROUP BY SELECT host,count()"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM main GROUP BY SELECT host,count()"
+        }
+      ]
+    },
+    "meaningful_id": "T4.group.False.missing",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.group.GROUP_BY.False.comma",
+    "obligation_ids": [
+      "T4.group.GROUP_BY.False.comma"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main GROUP BY host, SELECT host,count()"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM main GROUP BY host, SELECT host,count()"
+        }
+      ]
+    },
+    "meaningful_id": "T4.group.False.comma",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.group.GROUP_BY.True.one",
+    "obligation_ids": [
+      "T4.group.GROUP_BY.True.one"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT host,count() FROM main GROUP BY host"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "SELECT host,count() FROM main GROUP BY host"
+        }
+      ]
+    },
+    "meaningful_id": "T4.group.True.one",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.group.GROUP_BY.True.many",
+    "obligation_ids": [
+      "T4.group.GROUP_BY.True.many"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT host,count() FROM main GROUP BY host,realm"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "SELECT host,count() FROM main GROUP BY host,realm"
+        }
+      ]
+    },
+    "meaningful_id": "T4.group.True.many",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.group.GROUP_BY.True.missing",
+    "obligation_ids": [
+      "T4.group.GROUP_BY.True.missing"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT host,count() FROM main GROUP BY"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "SELECT host,count() FROM main GROUP BY"
+        }
+      ]
+    },
+    "meaningful_id": "T4.group.True.missing",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.group.GROUP_BY.True.comma",
+    "obligation_ids": [
+      "T4.group.GROUP_BY.True.comma"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT host,count() FROM main GROUP BY host,"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "SELECT host,count() FROM main GROUP BY host,"
+        }
+      ]
+    },
+    "meaningful_id": "T4.group.True.comma",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.group.GROUPBY.False.one",
+    "obligation_ids": [
+      "T4.group.GROUPBY.False.one"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main GROUPBY host SELECT host,count()"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM main GROUPBY host SELECT host,count()"
+        }
+      ]
+    },
+    "meaningful_id": "T4.group.False.one",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.group.GROUPBY.False.many",
+    "obligation_ids": [
+      "T4.group.GROUPBY.False.many"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main GROUPBY host,realm SELECT host,count()"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM main GROUPBY host,realm SELECT host,count()"
+        }
+      ]
+    },
+    "meaningful_id": "T4.group.False.many",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.group.GROUPBY.False.missing",
+    "obligation_ids": [
+      "T4.group.GROUPBY.False.missing"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main GROUPBY SELECT host,count()"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM main GROUPBY SELECT host,count()"
+        }
+      ]
+    },
+    "meaningful_id": "T4.group.False.missing",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.group.GROUPBY.False.comma",
+    "obligation_ids": [
+      "T4.group.GROUPBY.False.comma"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main GROUPBY host, SELECT host,count()"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM main GROUPBY host, SELECT host,count()"
+        }
+      ]
+    },
+    "meaningful_id": "T4.group.False.comma",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.group.GROUPBY.True.one",
+    "obligation_ids": [
+      "T4.group.GROUPBY.True.one"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT host,count() FROM main GROUPBY host"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "SELECT host,count() FROM main GROUPBY host"
+        }
+      ]
+    },
+    "meaningful_id": "T4.group.True.one",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.group.GROUPBY.True.many",
+    "obligation_ids": [
+      "T4.group.GROUPBY.True.many"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT host,count() FROM main GROUPBY host,realm"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "SELECT host,count() FROM main GROUPBY host,realm"
+        }
+      ]
+    },
+    "meaningful_id": "T4.group.True.many",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.group.GROUPBY.True.missing",
+    "obligation_ids": [
+      "T4.group.GROUPBY.True.missing"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT host,count() FROM main GROUPBY"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "SELECT host,count() FROM main GROUPBY"
+        }
+      ]
+    },
+    "meaningful_id": "T4.group.True.missing",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.group.GROUPBY.True.comma",
+    "obligation_ids": [
+      "T4.group.GROUPBY.True.comma"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT host,count() FROM main GROUPBY host,"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "SELECT host,count() FROM main GROUPBY host,"
+        }
+      ]
+    },
+    "meaningful_id": "T4.group.True.comma",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.group.group_by.False.one",
+    "obligation_ids": [
+      "T4.group.group_by.False.one"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main group by host SELECT host,count()"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM main group by host SELECT host,count()"
+        }
+      ]
+    },
+    "meaningful_id": "T4.group.False.one",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.group.group_by.False.many",
+    "obligation_ids": [
+      "T4.group.group_by.False.many"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main group by host,realm SELECT host,count()"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM main group by host,realm SELECT host,count()"
+        }
+      ]
+    },
+    "meaningful_id": "T4.group.False.many",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.group.group_by.False.missing",
+    "obligation_ids": [
+      "T4.group.group_by.False.missing"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main group by SELECT host,count()"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM main group by SELECT host,count()"
+        }
+      ]
+    },
+    "meaningful_id": "T4.group.False.missing",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.group.group_by.False.comma",
+    "obligation_ids": [
+      "T4.group.group_by.False.comma"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main group by host, SELECT host,count()"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM main group by host, SELECT host,count()"
+        }
+      ]
+    },
+    "meaningful_id": "T4.group.False.comma",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.group.group_by.True.one",
+    "obligation_ids": [
+      "T4.group.group_by.True.one"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT host,count() FROM main group by host"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "SELECT host,count() FROM main group by host"
+        }
+      ]
+    },
+    "meaningful_id": "T4.group.True.one",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.group.group_by.True.many",
+    "obligation_ids": [
+      "T4.group.group_by.True.many"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT host,count() FROM main group by host,realm"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "SELECT host,count() FROM main group by host,realm"
+        }
+      ]
+    },
+    "meaningful_id": "T4.group.True.many",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.group.group_by.True.missing",
+    "obligation_ids": [
+      "T4.group.group_by.True.missing"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT host,count() FROM main group by"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "SELECT host,count() FROM main group by"
+        }
+      ]
+    },
+    "meaningful_id": "T4.group.True.missing",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.group.group_by.True.comma",
+    "obligation_ids": [
+      "T4.group.group_by.True.comma"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT host,count() FROM main group by host,"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "SELECT host,count() FROM main group by host,"
+        }
+      ]
+    },
+    "meaningful_id": "T4.group.True.comma",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.group.groupby.False.one",
+    "obligation_ids": [
+      "T4.group.groupby.False.one"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main groupby host SELECT host,count()"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM main groupby host SELECT host,count()"
+        }
+      ]
+    },
+    "meaningful_id": "T4.group.False.one",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.group.groupby.False.many",
+    "obligation_ids": [
+      "T4.group.groupby.False.many"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main groupby host,realm SELECT host,count()"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM main groupby host,realm SELECT host,count()"
+        }
+      ]
+    },
+    "meaningful_id": "T4.group.False.many",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.group.groupby.False.missing",
+    "obligation_ids": [
+      "T4.group.groupby.False.missing"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main groupby SELECT host,count()"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM main groupby SELECT host,count()"
+        }
+      ]
+    },
+    "meaningful_id": "T4.group.False.missing",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.group.groupby.False.comma",
+    "obligation_ids": [
+      "T4.group.groupby.False.comma"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main groupby host, SELECT host,count()"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM main groupby host, SELECT host,count()"
+        }
+      ]
+    },
+    "meaningful_id": "T4.group.False.comma",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.group.groupby.True.one",
+    "obligation_ids": [
+      "T4.group.groupby.True.one"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT host,count() FROM main groupby host"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "SELECT host,count() FROM main groupby host"
+        }
+      ]
+    },
+    "meaningful_id": "T4.group.True.one",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.group.groupby.True.many",
+    "obligation_ids": [
+      "T4.group.groupby.True.many"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT host,count() FROM main groupby host,realm"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "SELECT host,count() FROM main groupby host,realm"
+        }
+      ]
+    },
+    "meaningful_id": "T4.group.True.many",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.group.groupby.True.missing",
+    "obligation_ids": [
+      "T4.group.groupby.True.missing"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT host,count() FROM main groupby"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "SELECT host,count() FROM main groupby"
+        }
+      ]
+    },
+    "meaningful_id": "T4.group.True.missing",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.group.groupby.True.comma",
+    "obligation_ids": [
+      "T4.group.groupby.True.comma"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT host,count() FROM main groupby host,"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "SELECT host,count() FROM main groupby host,"
+        }
+      ]
+    },
+    "meaningful_id": "T4.group.True.comma",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.order.ORDER_BY.False.plain",
+    "obligation_ids": [
+      "T4.order.ORDER_BY.False.plain"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main ORDER BY host"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM main ORDER BY host"
+        }
+      ]
+    },
+    "meaningful_id": "T4.order.False.plain",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.order.ORDER_BY.False.ascending",
+    "obligation_ids": [
+      "T4.order.ORDER_BY.False.ascending"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main ORDER BY host ASC"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM main ORDER BY host ASC"
+        }
+      ]
+    },
+    "meaningful_id": "T4.order.False.ascending",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.order.ORDER_BY.False.descending",
+    "obligation_ids": [
+      "T4.order.ORDER_BY.False.descending"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main ORDER BY host DESC"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM main ORDER BY host DESC"
+        }
+      ]
+    },
+    "meaningful_id": "T4.order.False.descending",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.order.ORDER_BY.False.many",
+    "obligation_ids": [
+      "T4.order.ORDER_BY.False.many"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main ORDER BY host,realm DESC"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM main ORDER BY host,realm DESC"
+        }
+      ]
+    },
+    "meaningful_id": "T4.order.False.many",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.order.ORDER_BY.False.missing",
+    "obligation_ids": [
+      "T4.order.ORDER_BY.False.missing"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main ORDER BY"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM main ORDER BY"
+        }
+      ]
+    },
+    "meaningful_id": "T4.order.False.missing",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.order.ORDER_BY.False.comma",
+    "obligation_ids": [
+      "T4.order.ORDER_BY.False.comma"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main ORDER BY host,"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM main ORDER BY host,"
+        }
+      ]
+    },
+    "meaningful_id": "T4.order.False.comma",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.order.ORDER_BY.True.plain",
+    "obligation_ids": [
+      "T4.order.ORDER_BY.True.plain"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT host FROM main ORDER BY host"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "SELECT host FROM main ORDER BY host"
+        }
+      ]
+    },
+    "meaningful_id": "T4.order.True.plain",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.order.ORDER_BY.True.ascending",
+    "obligation_ids": [
+      "T4.order.ORDER_BY.True.ascending"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT host FROM main ORDER BY host ASC"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "SELECT host FROM main ORDER BY host ASC"
+        }
+      ]
+    },
+    "meaningful_id": "T4.order.True.ascending",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.order.ORDER_BY.True.descending",
+    "obligation_ids": [
+      "T4.order.ORDER_BY.True.descending"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT host FROM main ORDER BY host DESC"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "SELECT host FROM main ORDER BY host DESC"
+        }
+      ]
+    },
+    "meaningful_id": "T4.order.True.descending",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.order.ORDER_BY.True.many",
+    "obligation_ids": [
+      "T4.order.ORDER_BY.True.many"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT host FROM main ORDER BY host,realm DESC"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "SELECT host FROM main ORDER BY host,realm DESC"
+        }
+      ]
+    },
+    "meaningful_id": "T4.order.True.many",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.order.ORDER_BY.True.missing",
+    "obligation_ids": [
+      "T4.order.ORDER_BY.True.missing"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT host FROM main ORDER BY"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "SELECT host FROM main ORDER BY"
+        }
+      ]
+    },
+    "meaningful_id": "T4.order.True.missing",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.order.ORDER_BY.True.comma",
+    "obligation_ids": [
+      "T4.order.ORDER_BY.True.comma"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT host FROM main ORDER BY host,"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "SELECT host FROM main ORDER BY host,"
+        }
+      ]
+    },
+    "meaningful_id": "T4.order.True.comma",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.order.ORDERBY.False.plain",
+    "obligation_ids": [
+      "T4.order.ORDERBY.False.plain"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main ORDERBY host"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM main ORDERBY host"
+        }
+      ]
+    },
+    "meaningful_id": "T4.order.False.plain",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.order.ORDERBY.False.ascending",
+    "obligation_ids": [
+      "T4.order.ORDERBY.False.ascending"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main ORDERBY host ASC"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM main ORDERBY host ASC"
+        }
+      ]
+    },
+    "meaningful_id": "T4.order.False.ascending",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.order.ORDERBY.False.descending",
+    "obligation_ids": [
+      "T4.order.ORDERBY.False.descending"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main ORDERBY host DESC"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM main ORDERBY host DESC"
+        }
+      ]
+    },
+    "meaningful_id": "T4.order.False.descending",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.order.ORDERBY.False.many",
+    "obligation_ids": [
+      "T4.order.ORDERBY.False.many"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main ORDERBY host,realm DESC"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM main ORDERBY host,realm DESC"
+        }
+      ]
+    },
+    "meaningful_id": "T4.order.False.many",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.order.ORDERBY.False.comma",
+    "obligation_ids": [
+      "T4.order.ORDERBY.False.comma"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main ORDERBY host,"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM main ORDERBY host,"
+        }
+      ]
+    },
+    "meaningful_id": "T4.order.False.comma",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.order.ORDERBY.True.plain",
+    "obligation_ids": [
+      "T4.order.ORDERBY.True.plain"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT host FROM main ORDERBY host"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "SELECT host FROM main ORDERBY host"
+        }
+      ]
+    },
+    "meaningful_id": "T4.order.True.plain",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.order.ORDERBY.True.ascending",
+    "obligation_ids": [
+      "T4.order.ORDERBY.True.ascending"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT host FROM main ORDERBY host ASC"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "SELECT host FROM main ORDERBY host ASC"
+        }
+      ]
+    },
+    "meaningful_id": "T4.order.True.ascending",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.order.ORDERBY.True.descending",
+    "obligation_ids": [
+      "T4.order.ORDERBY.True.descending"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT host FROM main ORDERBY host DESC"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "SELECT host FROM main ORDERBY host DESC"
+        }
+      ]
+    },
+    "meaningful_id": "T4.order.True.descending",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.order.ORDERBY.True.many",
+    "obligation_ids": [
+      "T4.order.ORDERBY.True.many"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT host FROM main ORDERBY host,realm DESC"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "SELECT host FROM main ORDERBY host,realm DESC"
+        }
+      ]
+    },
+    "meaningful_id": "T4.order.True.many",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.order.ORDERBY.True.missing",
+    "obligation_ids": [
+      "T4.order.ORDERBY.True.missing"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT host FROM main ORDERBY"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "SELECT host FROM main ORDERBY"
+        }
+      ]
+    },
+    "meaningful_id": "T4.order.True.missing",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.order.ORDERBY.True.comma",
+    "obligation_ids": [
+      "T4.order.ORDERBY.True.comma"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT host FROM main ORDERBY host,"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "SELECT host FROM main ORDERBY host,"
+        }
+      ]
+    },
+    "meaningful_id": "T4.order.True.comma",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.order.order_by.False.plain",
+    "obligation_ids": [
+      "T4.order.order_by.False.plain"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main order by host"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM main order by host"
+        }
+      ]
+    },
+    "meaningful_id": "T4.order.False.plain",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.order.order_by.False.ascending",
+    "obligation_ids": [
+      "T4.order.order_by.False.ascending"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main order by host ASC"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM main order by host ASC"
+        }
+      ]
+    },
+    "meaningful_id": "T4.order.False.ascending",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.order.order_by.False.descending",
+    "obligation_ids": [
+      "T4.order.order_by.False.descending"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main order by host DESC"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM main order by host DESC"
+        }
+      ]
+    },
+    "meaningful_id": "T4.order.False.descending",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.order.order_by.False.many",
+    "obligation_ids": [
+      "T4.order.order_by.False.many"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main order by host,realm DESC"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM main order by host,realm DESC"
+        }
+      ]
+    },
+    "meaningful_id": "T4.order.False.many",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.order.order_by.False.missing",
+    "obligation_ids": [
+      "T4.order.order_by.False.missing"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main order by"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM main order by"
+        }
+      ]
+    },
+    "meaningful_id": "T4.order.False.missing",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.order.order_by.False.comma",
+    "obligation_ids": [
+      "T4.order.order_by.False.comma"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main order by host,"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM main order by host,"
+        }
+      ]
+    },
+    "meaningful_id": "T4.order.False.comma",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.order.order_by.True.plain",
+    "obligation_ids": [
+      "T4.order.order_by.True.plain"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT host FROM main order by host"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "SELECT host FROM main order by host"
+        }
+      ]
+    },
+    "meaningful_id": "T4.order.True.plain",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.order.order_by.True.ascending",
+    "obligation_ids": [
+      "T4.order.order_by.True.ascending"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT host FROM main order by host ASC"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "SELECT host FROM main order by host ASC"
+        }
+      ]
+    },
+    "meaningful_id": "T4.order.True.ascending",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.order.order_by.True.descending",
+    "obligation_ids": [
+      "T4.order.order_by.True.descending"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT host FROM main order by host DESC"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "SELECT host FROM main order by host DESC"
+        }
+      ]
+    },
+    "meaningful_id": "T4.order.True.descending",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.order.order_by.True.many",
+    "obligation_ids": [
+      "T4.order.order_by.True.many"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT host FROM main order by host,realm DESC"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "SELECT host FROM main order by host,realm DESC"
+        }
+      ]
+    },
+    "meaningful_id": "T4.order.True.many",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.order.order_by.True.missing",
+    "obligation_ids": [
+      "T4.order.order_by.True.missing"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT host FROM main order by"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "SELECT host FROM main order by"
+        }
+      ]
+    },
+    "meaningful_id": "T4.order.True.missing",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.order.order_by.True.comma",
+    "obligation_ids": [
+      "T4.order.order_by.True.comma"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT host FROM main order by host,"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "SELECT host FROM main order by host,"
+        }
+      ]
+    },
+    "meaningful_id": "T4.order.True.comma",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.order.orderby.False.plain",
+    "obligation_ids": [
+      "T4.order.orderby.False.plain"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main orderby host"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM main orderby host"
+        }
+      ]
+    },
+    "meaningful_id": "T4.order.False.plain",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.order.orderby.False.ascending",
+    "obligation_ids": [
+      "T4.order.orderby.False.ascending"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main orderby host ASC"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM main orderby host ASC"
+        }
+      ]
+    },
+    "meaningful_id": "T4.order.False.ascending",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.order.orderby.False.descending",
+    "obligation_ids": [
+      "T4.order.orderby.False.descending"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main orderby host DESC"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM main orderby host DESC"
+        }
+      ]
+    },
+    "meaningful_id": "T4.order.False.descending",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.order.orderby.False.many",
+    "obligation_ids": [
+      "T4.order.orderby.False.many"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main orderby host,realm DESC"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM main orderby host,realm DESC"
+        }
+      ]
+    },
+    "meaningful_id": "T4.order.False.many",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.order.orderby.False.missing",
+    "obligation_ids": [
+      "T4.order.orderby.False.missing"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main orderby"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM main orderby"
+        }
+      ]
+    },
+    "meaningful_id": "T4.order.False.missing",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.order.orderby.False.comma",
+    "obligation_ids": [
+      "T4.order.orderby.False.comma"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main orderby host,"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM main orderby host,"
+        }
+      ]
+    },
+    "meaningful_id": "T4.order.False.comma",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.order.orderby.True.plain",
+    "obligation_ids": [
+      "T4.order.orderby.True.plain"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT host FROM main orderby host"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "SELECT host FROM main orderby host"
+        }
+      ]
+    },
+    "meaningful_id": "T4.order.True.plain",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.order.orderby.True.ascending",
+    "obligation_ids": [
+      "T4.order.orderby.True.ascending"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT host FROM main orderby host ASC"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "SELECT host FROM main orderby host ASC"
+        }
+      ]
+    },
+    "meaningful_id": "T4.order.True.ascending",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.order.orderby.True.descending",
+    "obligation_ids": [
+      "T4.order.orderby.True.descending"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT host FROM main orderby host DESC"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "SELECT host FROM main orderby host DESC"
+        }
+      ]
+    },
+    "meaningful_id": "T4.order.True.descending",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.order.orderby.True.many",
+    "obligation_ids": [
+      "T4.order.orderby.True.many"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT host FROM main orderby host,realm DESC"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "SELECT host FROM main orderby host,realm DESC"
+        }
+      ]
+    },
+    "meaningful_id": "T4.order.True.many",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.order.orderby.True.missing",
+    "obligation_ids": [
+      "T4.order.orderby.True.missing"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT host FROM main orderby"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "SELECT host FROM main orderby"
+        }
+      ]
+    },
+    "meaningful_id": "T4.order.True.missing",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.order.orderby.True.comma",
+    "obligation_ids": [
+      "T4.order.orderby.True.comma"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT host FROM main orderby host,"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "SELECT host FROM main orderby host,"
+        }
+      ]
+    },
+    "meaningful_id": "T4.order.True.comma",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.span.0.False",
+    "obligation_ids": [
+      "T4.span.0.False"
+    ],
+    "form_ids": [
+      "Q05"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main GROUP BY span(_time) SELECT count()"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM main GROUP BY span(_time) SELECT count()"
+        }
+      ]
+    },
+    "meaningful_id": "T4.span.0.False",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.span.1.True",
+    "obligation_ids": [
+      "T4.span.1.True"
+    ],
+    "form_ids": [
+      "Q05"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT count() FROM main GROUP BY span(_time,5min)"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "SELECT count() FROM main GROUP BY span(_time,5min)"
+        }
+      ]
+    },
+    "meaningful_id": "T4.span.1.True",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.span.2.False",
+    "obligation_ids": [
+      "T4.span.2.False"
+    ],
+    "form_ids": [
+      "Q05"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main GROUP BY span(_time,hour) SELECT count()"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM main GROUP BY span(_time,hour) SELECT count()"
+        }
+      ]
+    },
+    "meaningful_id": "T4.span.2.False",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.span.3.True",
+    "obligation_ids": [
+      "T4.span.3.True"
+    ],
+    "form_ids": [
+      "Q05"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT count() FROM main GROUP BY _time span=(5min)"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "SELECT count() FROM main GROUP BY _time span=(5min)"
+        }
+      ]
+    },
+    "meaningful_id": "T4.span.3.True",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.span.4.False",
+    "obligation_ids": [
+      "T4.span.4.False"
+    ],
+    "form_ids": [
+      "Q05"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main GROUP BY _time span=(hour) SELECT count()"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM main GROUP BY _time span=(hour) SELECT count()"
+        }
+      ]
+    },
+    "meaningful_id": "T4.span.4.False",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.join.0.False",
+    "obligation_ids": [
+      "T4.join.0.False"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main AS m JOIN users AS u ON m.id=u.id AND m.realm=u.realm SELECT m.id"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM main AS m JOIN users AS u ON m.id=u.id AND m.realm=u.realm SELECT m.id"
+        }
+      ]
+    },
+    "meaningful_id": "T4.join.kind.0",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.join.0.True",
+    "obligation_ids": [
+      "T4.join.0.True"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "from main as m join users as u on m.id=u.id AND m.realm=u.realm select m.id"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "from main as m join users as u on m.id=u.id AND m.realm=u.realm select m.id"
+        }
+      ]
+    },
+    "meaningful_id": "T4.join.kind.0",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.join.1.False",
+    "obligation_ids": [
+      "T4.join.1.False"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main AS m INNER JOIN users AS u ON m.id=u.id AND m.realm=u.realm SELECT m.id"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM main AS m INNER JOIN users AS u ON m.id=u.id AND m.realm=u.realm SELECT m.id"
+        }
+      ]
+    },
+    "meaningful_id": "T4.join.kind.1",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.join.1.True",
+    "obligation_ids": [
+      "T4.join.1.True"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "from main as m inner join users as u on m.id=u.id AND m.realm=u.realm select m.id"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "from main as m inner join users as u on m.id=u.id AND m.realm=u.realm select m.id"
+        }
+      ]
+    },
+    "meaningful_id": "T4.join.kind.1",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.join.2.False",
+    "obligation_ids": [
+      "T4.join.2.False"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main AS m LEFT JOIN users AS u ON m.id=u.id AND m.realm=u.realm SELECT m.id"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM main AS m LEFT JOIN users AS u ON m.id=u.id AND m.realm=u.realm SELECT m.id"
+        }
+      ]
+    },
+    "meaningful_id": "T4.join.kind.2",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.join.2.True",
+    "obligation_ids": [
+      "T4.join.2.True"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "from main as m left join users as u on m.id=u.id AND m.realm=u.realm select m.id"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "from main as m left join users as u on m.id=u.id AND m.realm=u.realm select m.id"
+        }
+      ]
+    },
+    "meaningful_id": "T4.join.kind.2",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.join.3.False",
+    "obligation_ids": [
+      "T4.join.3.False"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main AS m LEFT OUTER JOIN users AS u ON m.id=u.id AND m.realm=u.realm SELECT m.id"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM main AS m LEFT OUTER JOIN users AS u ON m.id=u.id AND m.realm=u.realm SELECT m.id"
+        }
+      ]
+    },
+    "meaningful_id": "T4.join.kind.3",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.join.3.True",
+    "obligation_ids": [
+      "T4.join.3.True"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "from main as m left outer join users as u on m.id=u.id AND m.realm=u.realm select m.id"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "from main as m left outer join users as u on m.id=u.id AND m.realm=u.realm select m.id"
+        }
+      ]
+    },
+    "meaningful_id": "T4.join.kind.3",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.duplicate_limit",
+    "obligation_ids": [
+      "T4.duplicate_limit"
+    ],
+    "form_ids": [
+      "Q03"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main LIMIT 1 LIMIT 2"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM main LIMIT 1 LIMIT 2"
+        }
+      ]
+    },
+    "meaningful_id": "T4.duplicate_limit",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.duplicate_offset",
+    "obligation_ids": [
+      "T4.duplicate_offset"
+    ],
+    "form_ids": [
+      "Q03"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main OFFSET 1 OFFSET 2"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM main OFFSET 1 OFFSET 2"
+        }
+      ]
+    },
+    "meaningful_id": "T4.duplicate_offset",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.limit_suffix",
+    "obligation_ids": [
+      "T4.limit_suffix"
+    ],
+    "form_ids": [
+      "Q03"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main LIMIT 2L"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM main LIMIT 2L"
+        }
+      ]
+    },
+    "meaningful_id": "T4.limit_suffix",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.offset_decimal",
+    "obligation_ids": [
+      "T4.offset_decimal"
+    ],
+    "form_ids": [
+      "Q03"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main OFFSET 1.5"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM main OFFSET 1.5"
+        }
+      ]
+    },
+    "meaningful_id": "T4.offset_decimal",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.typed.select",
+    "obligation_ids": [
+      "T4.typed.select"
+    ],
+    "form_ids": [
+      "Q08"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT a.'café' AS label,'a.café',payload.user.name\r\nFROM main AS a\r\nWHERE a.bytes>0\r\nGROUP BY a.'café','a.café',payload.user.name\r\nHAVING label!=\"\"\r\nORDER BY label DESC\r\nLIMIT 2\r\nOFFSET 1 | table label"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "SELECT a.'café' AS label,'a.café',payload.user.name\r\nFROM main AS a\r\nWHERE a.bytes>0\r\nGROUP BY a.'café','a.café',payload.user.name\r\nHAVING label!=\"\"\r\nORDER BY label DESC\r\nLIMIT 2\r\nOFFSET 1 | table label"
+        }
+      ]
+    },
+    "meaningful_id": "T4.typed.select",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.typed.from",
+    "obligation_ids": [
+      "T4.typed.from"
+    ],
+    "form_ids": [
+      "Q08"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM orders AS o LEFT OUTER JOIN inventory AS i ON o.item=i.id WHERE active=true GROUP BY o.item SELECT o.item,count() AS n HAVING EXISTS (SELECT id FROM stock WHERE id=o.item) ORDERBY n DESC LIMIT 4 OFFSET 1 | where n>0"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "query",
+          "text": "FROM orders AS o LEFT OUTER JOIN inventory AS i ON o.item=i.id WHERE active=true GROUP BY o.item SELECT o.item,count() AS n HAVING EXISTS (SELECT id FROM stock WHERE id=o.item) ORDERBY n DESC LIMIT 4 OFFSET 1 | where n>0"
+        }
+      ]
+    },
+    "meaningful_id": "T4.typed.from",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.boundary.span_target_number",
+    "obligation_ids": [
+      "T4.boundary.span_target_number"
+    ],
+    "form_ids": [
+      "Q05"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main GROUP BY 1 span=(h) SELECT count()"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "sqlGroupKey",
+          "text": "1 span=(h)"
+        }
+      ]
+    },
+    "meaningful_id": "T4.boundary.span_target_number",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.boundary.span_target_call",
+    "obligation_ids": [
+      "T4.boundary.span_target_call"
+    ],
+    "form_ids": [
+      "Q05"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main GROUP BY lower(x) span=(h) SELECT count()"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "sqlGroupKey",
+          "text": "lower(x) span=(h)"
+        }
+      ]
+    },
+    "meaningful_id": "T4.boundary.span_target_call",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.boundary.span_target_computation",
+    "obligation_ids": [
+      "T4.boundary.span_target_computation"
+    ],
+    "form_ids": [
+      "Q05"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main GROUP BY x+1 span=(h) SELECT count()"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "sqlGroupKey",
+          "text": "x+1 span=(h)"
+        }
+      ]
+    },
+    "meaningful_id": "T4.boundary.span_target_computation",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.boundary.span_target_qualified",
+    "obligation_ids": [
+      "T4.boundary.span_target_qualified"
+    ],
+    "form_ids": [
+      "Q05"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main AS m GROUP BY m._time span=(h) SELECT count()"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "sqlGroupKey",
+          "text": "m._time span=(h)"
+        }
+      ]
+    },
+    "meaningful_id": "T4.boundary.span_target_qualified",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.boundary.span_target_deep",
+    "obligation_ids": [
+      "T4.boundary.span_target_deep"
+    ],
+    "form_ids": [
+      "Q05"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main GROUP BY payload.time.value span=(h) SELECT count()"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "sqlGroupKey",
+          "text": "payload.time.value span=(h)"
+        }
+      ]
+    },
+    "meaningful_id": "T4.boundary.span_target_deep",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.boundary.span_target_literal_dot",
+    "obligation_ids": [
+      "T4.boundary.span_target_literal_dot"
+    ],
+    "form_ids": [
+      "Q05"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main GROUP BY 'payload.time' span=(h) SELECT count()"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "sqlGroupKey",
+          "text": "'payload.time' span=(h)"
+        }
+      ]
+    },
+    "meaningful_id": "T4.boundary.span_target_literal_dot",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.boundary.group_expression_number",
+    "obligation_ids": [
+      "T4.boundary.group_expression_number"
+    ],
+    "form_ids": [
+      "Q05"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main GROUP BY 1 SELECT count()"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "sqlGroupKey",
+          "text": "1"
+        }
+      ]
+    },
+    "meaningful_id": "T4.boundary.group_expression_number",
+    "floor_credit": false
+  },
+  {
+    "id": "T4.boundary.group_expression_call",
+    "obligation_ids": [
+      "T4.boundary.group_expression_call"
+    ],
+    "form_ids": [
+      "Q05"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main GROUP BY lower(x) SELECT count()"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "sqlGroupKey",
+          "text": "lower(x)"
+        }
+      ]
+    },
+    "meaningful_id": "T4.boundary.group_expression_call",
+    "floor_credit": false
+  }
+]

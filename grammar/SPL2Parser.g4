@@ -12,6 +12,16 @@ var _ = strings.EqualFold
 func (p *SPL2Parser) contextualKeyword(word string) bool {
     return strings.EqualFold(p.GetTokenStream().LT(1).GetText(), word)
 }
+// SQL clause words remain ordinary identifiers in previously supported pipeline
+// expressions. Within SQL they are boundaries, not missing operand fallbacks.
+func (p *SPL2Parser) outsideSQL() bool {
+    for ctx := p.GetParserRuleContext(); ctx != nil; {
+        switch ctx.(type) { case *FromCommandContext, *SelectCommandContext: return false }
+        parent, _ := ctx.GetParent().(antlr.ParserRuleContext)
+        ctx = parent
+    }
+    return true
+}
 // Supported options must use their owning command's strict production. Tokens
 // documented for other commands remain typed, unproved options here.
 func (p *SPL2Parser) unreviewedOption(command int) bool {
@@ -39,9 +49,36 @@ command: evalCommand | whereCommand | fieldsCommand | tableCommand | renameComma
     | statsCommand | eventstatsCommand | streamstatsCommand | lookupCommand
     | sortCommand | dedupCommand | headCommand | reverseCommand
     | fromCommand | selectCommand | searchCommand | rexCommand | embeddedCommand;
-fromCommand: FROM dataset;
-selectCommand: SELECT projection (COMMA projection)* FROM dataset;
-projection: expression (AS identifier)?;
+// Clause contexts own only their original lexical spans. Logical SQL scheduling
+// is deliberately deferred to lowering, not represented by reordered source.
+fromCommand: sqlFromClause (NL* sqlWhereClause)? (NL* sqlGroupClause NL* sqlSelectClause | NL* sqlSelectClause)?
+    (NL* sqlHavingClause)? (NL* sqlOrderClause)? (NL* sqlLimitClause)? (NL* sqlOffsetClause)?;
+selectCommand: sqlSelectClause NL* sqlFromClause (NL* sqlWhereClause)? (NL* sqlGroupClause)?
+    (NL* sqlHavingClause)? (NL* sqlOrderClause)? (NL* sqlLimitClause)? (NL* sqlOffsetClause)?;
+sqlFromClause: FROM dataset sourceAlias? (NL* sqlJoinClause)*;
+sourceAlias: aliasKeyword identifier;
+sqlJoinClause: (INNER | LEFT OUTER?)? JOIN dataset sourceAlias ON sqlJoinPredicate;
+sqlJoinPredicate: sqlJoinEquality (AND sqlJoinEquality)*;
+sqlJoinEquality: sqlJoinField ASSIGN sqlJoinField;
+sqlJoinField: identifier DOT identifier accessPart*;
+sqlSelectClause: SELECT DISTINCT? projection (COMMA projection)*;
+projection: expression (aliasKeyword projectionAlias)?;
+projectionAlias: identifier;
+sqlWhereClause: WHERE sqlPredicate;
+sqlHavingClause: HAVING sqlPredicate;
+sqlPredicate: expression;
+sqlGroupClause: (GROUP sqlBy | GROUPBY) sqlGroupKey (COMMA sqlGroupKey)*;
+sqlBy: BY | BY_LOWER;
+sqlGroupKey: sqlSpanCall | {p.GetTokenStream().LA(1) != SPL2ParserSPAN}? expression sqlSpanAssignment?;
+sqlSpanCall: SPAN LPAREN fieldName (COMMA timeSpan)? RPAREN;
+sqlSpanAssignment: SPAN ASSIGN (LPAREN timeSpan RPAREN | sqlUnparenthesizedSpan);
+sqlUnparenthesizedSpan: timeSpan;
+sqlOrderClause: (ORDER sqlBy | ORDERBY) sqlOrderTerm (COMMA sqlOrderTerm)*;
+sqlOrderTerm: expression sqlDirection?;
+sqlDirection: ASC | DESC;
+sqlLimitClause: LIMIT integerValue;
+sqlOffsetClause: OFFSET integerValue;
+existsPredicate: EXISTS LPAREN (fromCommand | selectCommand) RPAREN;
 dataset: identifier | array;
 generator: MAKERESULTS NUMBER?;
 evalCommand: EVAL assignment (COMMA assignment)*;
@@ -102,7 +139,7 @@ reverseCommand: REVERSE;
 // Unknown option literals are retained as bounded typed nodes, never an opaque
 // command body. Known options of this command cannot fall through here.
 unknownOption: unknownOptionName ASSIGN (literal | identifier);
-unknownOptionName: IDENTIFIER | INDEX | pipelineKeyword;
+unknownOptionName: IDENTIFIER | INDEX | pipelineKeyword | sqlKeyword;
 rexCommand: REX rexOption* (REGEX | stringLiteral | RAW_STRING);
 rexOption: IDENTIFIER ASSIGN (identifier | NUMBER);
 embeddedCommand: SPL1? embeddedText;
@@ -155,7 +192,7 @@ multiplicative: unary ((STAR | SLASH | MOD) unary)*;
 unary: (PLUS | MINUS) unary | access;
 access: primary accessPart*;
 accessPart: DOT identifier | LBRACKET expression RBRACKET;
-primary: call | fieldName | LOCAL | literal | array | object | LPAREN expression RPAREN | searchLiteral;
+primary: existsPredicate | call | fieldName | LOCAL | literal | array | object | LPAREN expression RPAREN | searchLiteral;
 call: identifier LPAREN arguments? RPAREN;
 arguments: namedArgument (COMMA namedArgument)* | expression (COMMA expression)* (COMMA namedArgument)*;
 namedArgument: identifier COLON expression;
@@ -164,7 +201,9 @@ stringLiteral: DQUOTE (STRING_TEXT | STRING_DOLLAR | STRING_INTERPOLATION expres
 quotedName: SQUOTE (NAME_TEXT | NAME_DOLLAR)+ NAME_END;
 fieldTemplate: SQUOTE (NAME_TEXT | NAME_DOLLAR)* NAME_INTERPOLATION expression RBRACE (NAME_TEXT | NAME_DOLLAR | NAME_INTERPOLATION expression RBRACE)* NAME_END;
 fieldName: identifier | fieldTemplate;
-identifier: IDENTIFIER | INDEX | quotedName | pipelineKeyword;
+identifier: IDENTIFIER | INDEX | quotedName | pipelineKeyword | {p.outsideSQL()}? sqlKeyword;
+sqlKeyword: DISTINCT | HAVING | GROUPBY | ORDER | ORDERBY | LIMIT | OFFSET | ASC | DESC | BY_LOWER
+    | JOIN | INNER | LEFT | OUTER | ON | EXISTS;
 // New command/option tokens remain ordinary names in expression/name positions.
 pipelineKeyword: AS_LOWER | RENAME | STATS | EVENTSTATS | STREAMSTATS | LOOKUP | SORT | DEDUP | HEAD | REVERSE
     | BY | OUTPUT | OUTPUTNEW | ALLNUM | DELIM | PARTITIONS | SPAN | CURRENT | RESET | BEFORE | AFTER | ONCHANGE | WINDOW

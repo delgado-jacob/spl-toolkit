@@ -1001,8 +1001,8 @@
       "source_keys": [
         "doc143"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task4-sql-syntax",
       "description": "C02 — from/select"
     },
     {
@@ -1433,8 +1433,8 @@
       "source_keys": [
         "fromusage"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task4-sql-syntax",
       "description": "L15 — FROM-first SQL"
     },
     {
@@ -1442,8 +1442,8 @@
       "source_keys": [
         "fromsyntax"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task4-sql-syntax",
       "description": "L16 — SELECT-first SQL"
     },
     {
@@ -1451,8 +1451,8 @@
       "source_keys": [
         "process"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task4-sql-syntax",
       "description": "L17 — SQL followed by pipes"
     },
     {
@@ -1460,8 +1460,8 @@
       "source_keys": [
         "fromusage"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task4-sql-syntax",
       "description": "L18 — dataset literals"
     },
     {
@@ -1469,8 +1469,8 @@
       "source_keys": [
         "fromsyntax"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task4-sql-syntax",
       "description": "L19 — SQL joins"
     },
     {
@@ -1532,8 +1532,8 @@
       "source_keys": [
         "fromsyntax"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task4-sql-syntax",
       "description": "Q01 — group keys and aggregate phases"
     },
     {
@@ -1541,8 +1541,8 @@
       "source_keys": [
         "fromsyntax"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task4-sql-syntax",
       "description": "Q02 — DISTINCT and projected aliases"
     },
     {
@@ -1550,8 +1550,8 @@
       "source_keys": [
         "fromsyntax"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task4-sql-syntax",
       "description": "Q03 — integer LIMIT/OFFSET and ordering"
     },
     {
@@ -1559,8 +1559,8 @@
       "source_keys": [
         "fromsyntax"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task4-sql-syntax",
       "description": "Q04 — clause aliases and comma lists"
     },
     {
@@ -1568,8 +1568,8 @@
       "source_keys": [
         "fromsyntax"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task4-sql-syntax",
       "description": "Q05 — group span forms"
     },
     {
@@ -1577,8 +1577,8 @@
       "source_keys": [
         "fromsyntax"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task4-sql-syntax",
       "description": "Q06 — hidden visibility remains incomplete"
     },
     {
@@ -1586,8 +1586,8 @@
       "source_keys": [
         "predicate"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task4-sql-syntax",
       "description": "Q07 — correlated EXISTS restricted SQL contexts"
     },
     {
@@ -1624,8 +1624,8 @@
         "doc161",
         "comments"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task4-sql-syntax",
       "description": "Q08 — source scopes and mixed Unicode slices"
     },
     {
@@ -2821,8 +2821,8 @@
       "source_keys": [
         "fromusage"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task4-sql-syntax",
       "description": "E.L15.from_clauses"
     },
     {
@@ -2830,8 +2830,8 @@
       "source_keys": [
         "fromusage"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task4-sql-syntax",
       "description": "E.L16.select_clauses"
     },
     {
@@ -2839,8 +2839,8 @@
       "source_keys": [
         "fromsyntax"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task4-sql-syntax",
       "description": "E.L16.distinct"
     },
     {
@@ -2848,8 +2848,8 @@
       "source_keys": [
         "fromsyntax"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task4-sql-syntax",
       "description": "E.L16.alias"
     },
     {
@@ -2857,8 +2857,8 @@
       "source_keys": [
         "fromsyntax"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task4-sql-syntax",
       "description": "E.L16.group_keys"
     },
     {
@@ -2866,8 +2866,8 @@
       "source_keys": [
         "fromsyntax"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task4-sql-syntax",
       "description": "E.L16.group_span"
     },
     {
@@ -2875,8 +2875,8 @@
       "source_keys": [
         "fromsyntax"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task4-sql-syntax",
       "description": "E.L16.having"
     },
     {
@@ -2884,8 +2884,8 @@
       "source_keys": [
         "fromsyntax"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task4-sql-syntax",
       "description": "E.L16.order"
     },
     {
@@ -2893,8 +2893,8 @@
       "source_keys": [
         "fromsyntax"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task4-sql-syntax",
       "description": "E.L16.limit_offset"
     },
     {
@@ -2902,8 +2902,8 @@
       "source_keys": [
         "process"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task4-sql-syntax",
       "description": "E.L17.pipe"
     },
     {
@@ -2911,8 +2911,8 @@
       "source_keys": [
         "fromusage"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task4-sql-syntax",
       "description": "E.L18.rows"
     },
     {
@@ -2920,8 +2920,8 @@
       "source_keys": [
         "fromsyntax"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task4-sql-syntax",
       "description": "E.L19.inner"
     },
     {
@@ -2929,8 +2929,8 @@
       "source_keys": [
         "fromsyntax"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task4-sql-syntax",
       "description": "E.L19.left"
     },
     {
@@ -2938,8 +2938,8 @@
       "source_keys": [
         "fromsyntax"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task4-sql-syntax",
       "description": "E.L19.multiple_join"
     },
     {
@@ -2947,8 +2947,8 @@
       "source_keys": [
         "predicate"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task4-sql-syntax",
       "description": "E.L07.exists"
     },
     {
@@ -3406,8 +3406,10 @@
         "doc143"
       ],
       "candidate": "FROM requests WHERE size>1 SELECT server",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "C02-P1"
     },
     {
       "id": "C02-P2",
@@ -3416,8 +3418,10 @@
         "doc143"
       ],
       "candidate": "SELECT sum(size) AS total FROM requests GROUP BY server",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "C02-P2"
     },
     {
       "id": "C02-N1",
@@ -3426,8 +3430,10 @@
         "doc143"
       ],
       "candidate": "FROM WHERE size>1 SELECT server",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "C02-N1"
     },
     {
       "id": "C02-N2",
@@ -3436,8 +3442,10 @@
         "doc143"
       ],
       "candidate": "SELECT sum(size) AS total GROUP BY server",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "C02-N2"
     },
     {
       "id": "C03-P1",
@@ -5540,8 +5548,10 @@
         "fromusage"
       ],
       "candidate": "FROM sales WHERE price>0 GROUP BY region SELECT region,sum(price) AS total",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "L15-P1"
     },
     {
       "id": "L15-P2",
@@ -5550,8 +5560,10 @@
         "fromusage"
       ],
       "candidate": "FROM events ORDER BY size DESC LIMIT 12 OFFSET 3",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "L15-P2"
     },
     {
       "id": "L15-N1",
@@ -5560,8 +5572,10 @@
         "fromusage"
       ],
       "candidate": "FROM sales SELECT region GROUP BY region",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "L15-N1"
     },
     {
       "id": "L15-N2",
@@ -5570,8 +5584,10 @@
         "fromusage"
       ],
       "candidate": "FROM events ORDER BY size DESC WHERE size>0",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "L15-N2"
     },
     {
       "id": "L16-P1",
@@ -5580,8 +5596,10 @@
         "fromsyntax"
       ],
       "candidate": "SELECT DISTINCT region FROM sales",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "L16-P1"
     },
     {
       "id": "L16-P2",
@@ -5590,8 +5608,10 @@
         "fromsyntax"
       ],
       "candidate": "SELECT region,max(price) AS peak FROM sales GROUP BY region HAVING peak>9",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "L16-P2"
     },
     {
       "id": "L16-N1",
@@ -5600,8 +5620,10 @@
         "fromsyntax"
       ],
       "candidate": "SELECT DISTINCT FROM sales",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "L16-N1"
     },
     {
       "id": "L16-N2",
@@ -5610,8 +5632,10 @@
         "fromsyntax"
       ],
       "candidate": "SELECT region,max(price) AS peak FROM sales HAVING peak>9 GROUP BY region",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "L16-N2"
     },
     {
       "id": "L17-P1",
@@ -5620,8 +5644,10 @@
         "process"
       ],
       "candidate": "SELECT account FROM main WHERE size>0 | eval actor=account | table actor",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "L17-P1"
     },
     {
       "id": "L17-P2",
@@ -5630,8 +5656,10 @@
         "process"
       ],
       "candidate": "FROM main GROUP BY server SELECT server,count() AS n | where n>2",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "L17-P2"
     },
     {
       "id": "L17-N1",
@@ -5640,8 +5668,10 @@
         "process"
       ],
       "candidate": "SELECT account FROM main | eval actor=account WHERE size>0",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "L17-N1"
     },
     {
       "id": "L17-N2",
@@ -5650,8 +5680,10 @@
         "process"
       ],
       "candidate": "FROM main SELECT server | LIMIT 2",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "L17-N2"
     },
     {
       "id": "L18-P1",
@@ -5660,8 +5692,10 @@
         "fromusage"
       ],
       "candidate": "FROM [{region:\"east\",n:1},{region:\"west\",n:2}] SELECT region",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "L18-P1"
     },
     {
       "id": "L18-P2",
@@ -5670,8 +5704,10 @@
         "fromusage"
       ],
       "candidate": "SELECT item FROM [{item:\"a\"},{other:2}]",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "L18-P2"
     },
     {
       "id": "L18-N1",
@@ -5680,8 +5716,10 @@
         "fromusage"
       ],
       "candidate": "FROM [1,2] SELECT item",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "L18-N1"
     },
     {
       "id": "L18-N2",
@@ -5690,8 +5728,10 @@
         "fromusage"
       ],
       "candidate": "FROM [{item:\"a\"} {item:\"b\"}] SELECT item",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "L18-N2"
     },
     {
       "id": "L19-P1",
@@ -5700,8 +5740,10 @@
         "fromsyntax"
       ],
       "candidate": "FROM purchases AS p JOIN inventory AS i ON p.item=i.id SELECT p.item",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "L19-P1"
     },
     {
       "id": "L19-P2",
@@ -5710,8 +5752,10 @@
         "fromsyntax"
       ],
       "candidate": "SELECT p.item FROM purchases AS p LEFT OUTER JOIN inventory AS i ON p.item=i.id AND p.site=i.site",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "L19-P2"
     },
     {
       "id": "L19-N1",
@@ -5720,8 +5764,10 @@
         "fromsyntax"
       ],
       "candidate": "FROM purchases JOIN inventory AS i ON p.item=i.id SELECT p.item",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "L19-N1"
     },
     {
       "id": "L19-N2",
@@ -5730,8 +5776,10 @@
         "fromsyntax"
       ],
       "candidate": "SELECT p.item FROM purchases AS p RIGHT JOIN inventory AS i ON p.item=i.id",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "L19-N2"
     },
     {
       "id": "L20-P1",
@@ -5980,8 +6028,10 @@
         "fromsyntax"
       ],
       "candidate": "SELECT region,sum(cost) AS total FROM charges GROUP BY region HAVING total>3",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "Q01-P1"
     },
     {
       "id": "Q01-P2",
@@ -5990,8 +6040,10 @@
         "fromsyntax"
       ],
       "candidate": "FROM charges GROUP BY region SELECT region,count() HAVING count>2",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "Q01-P2"
     },
     {
       "id": "Q01-N1",
@@ -6000,8 +6052,10 @@
         "fromsyntax"
       ],
       "candidate": "FROM charges GROUP BY region",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "Q01-N1"
     },
     {
       "id": "Q01-N2",
@@ -6010,8 +6064,10 @@
         "fromsyntax"
       ],
       "candidate": "FROM charges GROUP BY region SELECT",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "Q01-N2"
     },
     {
       "id": "Q02-P1",
@@ -6020,8 +6076,10 @@
         "fromsyntax"
       ],
       "candidate": "SELECT DISTINCT account,region FROM main",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "Q02-P1"
     },
     {
       "id": "Q02-P2",
@@ -6030,8 +6088,10 @@
         "fromsyntax"
       ],
       "candidate": "FROM main SELECT lower(account) AS normalized ORDER BY normalized",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "Q02-P2"
     },
     {
       "id": "Q02-N1",
@@ -6040,8 +6100,10 @@
         "fromsyntax"
       ],
       "candidate": "SELECT account DISTINCT FROM main",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "Q02-N1"
     },
     {
       "id": "Q02-N2",
@@ -6050,8 +6112,10 @@
         "fromsyntax"
       ],
       "candidate": "FROM main SELECT lower(account) AS ORDER BY normalized",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "Q02-N2"
     },
     {
       "id": "Q03-P1",
@@ -6060,8 +6124,10 @@
         "fromsyntax"
       ],
       "candidate": "SELECT account FROM main LIMIT 5 OFFSET 2",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "Q03-P1"
     },
     {
       "id": "Q03-P2",
@@ -6070,8 +6136,10 @@
         "fromsyntax"
       ],
       "candidate": "FROM main OFFSET 4",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "Q03-P2"
     },
     {
       "id": "Q03-N1",
@@ -6080,8 +6148,10 @@
         "fromsyntax"
       ],
       "candidate": "SELECT account FROM main LIMIT 5 OFFSET",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "Q03-N1"
     },
     {
       "id": "Q03-N2",
@@ -6090,8 +6160,10 @@
         "fromsyntax"
       ],
       "candidate": "FROM main OFFSET 4 LIMIT 5",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "Q03-N2"
     },
     {
       "id": "Q04-P1",
@@ -6100,8 +6172,10 @@
         "fromsyntax"
       ],
       "candidate": "SELECT region,count() AS n FROM main GROUPBY region ORDERBY n DESC",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "Q04-P1"
     },
     {
       "id": "Q04-P2",
@@ -6110,8 +6184,10 @@
         "fromsyntax"
       ],
       "candidate": "FROM main GROUP BY region,account SELECT region,account,sum(size) AS total",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "Q04-P2"
     },
     {
       "id": "Q04-N1",
@@ -6120,8 +6196,10 @@
         "fromsyntax"
       ],
       "candidate": "SELECT region,count() AS n FROM main Group By region",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "Q04-N1"
     },
     {
       "id": "Q04-N2",
@@ -6130,8 +6208,10 @@
         "fromsyntax"
       ],
       "candidate": "FROM main GROUP BY region account SELECT region,account,sum(size) AS total",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "Q04-N2"
     },
     {
       "id": "Q05-P1",
@@ -6140,8 +6220,10 @@
         "fromsyntax"
       ],
       "candidate": "FROM main GROUP BY span(_time,5min) SELECT count()",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "Q05-P1"
     },
     {
       "id": "Q05-P2",
@@ -6150,8 +6232,10 @@
         "fromsyntax"
       ],
       "candidate": "SELECT count() FROM main GROUP BY _time span=(hour)",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "Q05-P2"
     },
     {
       "id": "Q05-N1",
@@ -6160,8 +6244,10 @@
         "fromsyntax"
       ],
       "candidate": "FROM main GROUP BY span(_time,) SELECT count()",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "Q05-N1"
     },
     {
       "id": "Q05-N2",
@@ -6170,8 +6256,10 @@
         "fromsyntax"
       ],
       "candidate": "SELECT count() FROM main GROUP BY _time span=()",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "Q05-N2"
     },
     {
       "id": "Q06-P1",
@@ -6180,8 +6268,10 @@
         "fromsyntax"
       ],
       "candidate": "SELECT sum(size) AS total FROM main GROUP BY server HAVING server=\"api\"",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "Q06-P1"
     },
     {
       "id": "Q06-P2",
@@ -6190,8 +6280,10 @@
         "fromsyntax"
       ],
       "candidate": "FROM main GROUP BY server SELECT sum(size) AS total ORDER BY server",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "Q06-P2"
     },
     {
       "id": "Q06-N1",
@@ -6200,8 +6292,10 @@
         "fromsyntax"
       ],
       "candidate": "SELECT sum(size) AS total FROM main GROUP BY server HAVING",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "Q06-N1"
     },
     {
       "id": "Q06-N2",
@@ -6210,8 +6304,10 @@
         "fromsyntax"
       ],
       "candidate": "FROM main GROUP BY server SELECT sum(size) AS total ORDER BY",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "Q06-N2"
     },
     {
       "id": "Q07-P1",
@@ -6220,8 +6316,10 @@
         "predicate"
       ],
       "candidate": "FROM orders AS o WHERE EXISTS (SELECT id FROM inventory WHERE id=o.item) SELECT item",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "Q07-P1"
     },
     {
       "id": "Q07-P2",
@@ -6230,8 +6328,10 @@
         "predicate"
       ],
       "candidate": "SELECT item FROM orders AS o WHERE NOT EXISTS (SELECT id FROM inventory WHERE id=o.item AND active=true)",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "Q07-P2"
     },
     {
       "id": "Q07-N1",
@@ -6240,8 +6340,10 @@
         "predicate"
       ],
       "candidate": "FROM orders AS o WHERE EXISTS (SELECT id FROM inventory WHERE id=o.item LIMIT 1) SELECT item",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "Q07-N1"
     },
     {
       "id": "Q07-N2",
@@ -6250,8 +6352,10 @@
         "predicate"
       ],
       "candidate": "FROM orders AS o | where EXISTS (SELECT id FROM inventory WHERE id=o.item)",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "Q07-N2"
     },
     {
       "id": "Q08-P1",
@@ -6289,8 +6393,10 @@
         "comments"
       ],
       "candidate": "SELECT 'café' AS label FROM [{'café':\"yes\"}] | table label",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "Q08-P1"
     },
     {
       "id": "Q08-P2",
@@ -6328,8 +6434,10 @@
         "comments"
       ],
       "candidate": "FROM [{n:1},{n:2}] SELECT n+1 AS next_n | where next_n>1",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "Q08-P2"
     },
     {
       "id": "Q08-N1",
@@ -6367,8 +6475,10 @@
         "comments"
       ],
       "candidate": "SELECT 'café' AS label FROM [{'café':\"yes\"}] | table",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "Q08-N1"
     },
     {
       "id": "Q08-N2",
@@ -6406,8 +6516,10 @@
         "comments"
       ],
       "candidate": "FROM [{n:1},{n:2}] SELECT n+1 AS next_n | where next_n>",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "assembly": "standalone",
+      "case_id": "Q08-N2"
     },
     {
       "id": "E.C01.literal.P1",
@@ -12220,8 +12332,10 @@
         "fromusage"
       ],
       "candidate": "FROM main WHERE bytes>0 SELECT user ORDER BY user LIMIT 3 OFFSET 1",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.L15.from_clauses.P1"
     },
     {
       "id": "E.L15.from_clauses.P2",
@@ -12230,8 +12344,10 @@
         "fromusage"
       ],
       "candidate": "FROM main GROUP BY host SELECT host,count() HAVING count>1",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.L15.from_clauses.P2"
     },
     {
       "id": "E.L15.from_clauses.N1",
@@ -12240,8 +12356,10 @@
         "fromusage"
       ],
       "candidate": "FROM main SELECT user WHERE bytes>0",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.L15.from_clauses.N1"
     },
     {
       "id": "E.L15.from_clauses.N2",
@@ -12250,8 +12368,10 @@
         "fromusage"
       ],
       "candidate": "FROM main GROUP BY host",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.L15.from_clauses.N2"
     },
     {
       "id": "E.L16.select_clauses.P1",
@@ -12260,8 +12380,10 @@
         "fromusage"
       ],
       "candidate": "SELECT user FROM main WHERE bytes>0 ORDER BY user",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.L16.select_clauses.P1"
     },
     {
       "id": "E.L16.select_clauses.P2",
@@ -12270,8 +12392,10 @@
         "fromusage"
       ],
       "candidate": "SELECT host,count() FROM main GROUP BY host HAVING count>1 LIMIT 5",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.L16.select_clauses.P2"
     },
     {
       "id": "E.L16.select_clauses.N1",
@@ -12280,8 +12404,10 @@
         "fromusage"
       ],
       "candidate": "SELECT user WHERE bytes>0 FROM main",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.L16.select_clauses.N1"
     },
     {
       "id": "E.L16.select_clauses.N2",
@@ -12290,8 +12416,10 @@
         "fromusage"
       ],
       "candidate": "SELECT host,count() FROM main HAVING count>1 GROUP BY host",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.L16.select_clauses.N2"
     },
     {
       "id": "E.L16.distinct.P1",
@@ -12300,8 +12428,10 @@
         "fromsyntax"
       ],
       "candidate": "SELECT DISTINCT host FROM main",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.L16.distinct.P1"
     },
     {
       "id": "E.L16.distinct.P2",
@@ -12310,8 +12440,10 @@
         "fromsyntax"
       ],
       "candidate": "FROM main SELECT DISTINCT host,user",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.L16.distinct.P2"
     },
     {
       "id": "E.L16.distinct.N1",
@@ -12320,8 +12452,10 @@
         "fromsyntax"
       ],
       "candidate": "SELECT DISTINCT FROM main",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.L16.distinct.N1"
     },
     {
       "id": "E.L16.distinct.N2",
@@ -12330,8 +12464,10 @@
         "fromsyntax"
       ],
       "candidate": "FROM main SELECT host DISTINCT",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.L16.distinct.N2"
     },
     {
       "id": "E.L16.alias.P1",
@@ -12340,8 +12476,10 @@
         "fromsyntax"
       ],
       "candidate": "SELECT lower(user) AS normalized FROM main",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.L16.alias.P1"
     },
     {
       "id": "E.L16.alias.P2",
@@ -12350,8 +12488,10 @@
         "fromsyntax"
       ],
       "candidate": "FROM main AS events SELECT events.user AS owner",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.L16.alias.P2"
     },
     {
       "id": "E.L16.alias.N1",
@@ -12360,8 +12500,10 @@
         "fromsyntax"
       ],
       "candidate": "SELECT lower(user) AS FROM main",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.L16.alias.N1"
     },
     {
       "id": "E.L16.alias.N2",
@@ -12370,8 +12512,10 @@
         "fromsyntax"
       ],
       "candidate": "FROM main AS SELECT user",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.L16.alias.N2"
     },
     {
       "id": "E.L16.group_keys.P1",
@@ -12380,8 +12524,10 @@
         "fromsyntax"
       ],
       "candidate": "SELECT host,user,count() FROM main GROUP BY host,user",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.L16.group_keys.P1"
     },
     {
       "id": "E.L16.group_keys.P2",
@@ -12390,8 +12536,10 @@
         "fromsyntax"
       ],
       "candidate": "FROM main GROUPBY lower(user) SELECT lower(user) AS normalized,count()",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.L16.group_keys.P2"
     },
     {
       "id": "E.L16.group_keys.N1",
@@ -12400,8 +12548,10 @@
         "fromsyntax"
       ],
       "candidate": "SELECT count() FROM main GROUP BY 'host*'",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.L16.group_keys.N1"
     },
     {
       "id": "E.L16.group_keys.N2",
@@ -12410,8 +12560,10 @@
         "fromsyntax"
       ],
       "candidate": "FROM main GROUP BY host user SELECT count()",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.L16.group_keys.N2"
     },
     {
       "id": "E.L16.group_span.P1",
@@ -12420,8 +12572,10 @@
         "fromsyntax"
       ],
       "candidate": "SELECT count() FROM main GROUP BY span(_time)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.L16.group_span.P1"
     },
     {
       "id": "E.L16.group_span.P2",
@@ -12430,8 +12584,10 @@
         "fromsyntax"
       ],
       "candidate": "FROM main GROUP BY _time span=(5min) SELECT count()",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.L16.group_span.P2"
     },
     {
       "id": "E.L16.group_span.N1",
@@ -12440,8 +12596,10 @@
         "fromsyntax"
       ],
       "candidate": "SELECT count() FROM main GROUP BY span()",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.L16.group_span.N1"
     },
     {
       "id": "E.L16.group_span.N2",
@@ -12450,8 +12608,10 @@
         "fromsyntax"
       ],
       "candidate": "FROM main GROUP BY _time span=() SELECT count()",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.L16.group_span.N2"
     },
     {
       "id": "E.L16.having.P1",
@@ -12460,8 +12620,10 @@
         "fromsyntax"
       ],
       "candidate": "SELECT count() AS n FROM main HAVING n>2",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.L16.having.P1"
     },
     {
       "id": "E.L16.having.P2",
@@ -12470,8 +12632,10 @@
         "fromsyntax"
       ],
       "candidate": "FROM main GROUP BY host SELECT host,sum(bytes) AS total HAVING total>0",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.L16.having.P2"
     },
     {
       "id": "E.L16.having.N1",
@@ -12480,8 +12644,10 @@
         "fromsyntax"
       ],
       "candidate": "SELECT count() AS n FROM main HAVING",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.L16.having.N1"
     },
     {
       "id": "E.L16.having.N2",
@@ -12490,8 +12656,10 @@
         "fromsyntax"
       ],
       "candidate": "FROM main GROUP BY host SELECT host,sum(bytes) AS total HAVING total>",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.L16.having.N2"
     },
     {
       "id": "E.L16.order.P1",
@@ -12500,8 +12668,10 @@
         "fromsyntax"
       ],
       "candidate": "SELECT host,user FROM main ORDER BY host,user DESC",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.L16.order.P1"
     },
     {
       "id": "E.L16.order.P2",
@@ -12510,8 +12680,10 @@
         "fromsyntax"
       ],
       "candidate": "FROM main ORDERBY bytes ASC",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.L16.order.P2"
     },
     {
       "id": "E.L16.order.N1",
@@ -12520,8 +12692,10 @@
         "fromsyntax"
       ],
       "candidate": "SELECT host,user FROM main ORDER BY host,",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.L16.order.N1"
     },
     {
       "id": "E.L16.order.N2",
@@ -12530,8 +12704,10 @@
         "fromsyntax"
       ],
       "candidate": "FROM main ORDERBY",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.L16.order.N2"
     },
     {
       "id": "E.L16.limit_offset.P1",
@@ -12540,8 +12716,10 @@
         "fromsyntax"
       ],
       "candidate": "SELECT host FROM main LIMIT 4",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.L16.limit_offset.P1"
     },
     {
       "id": "E.L16.limit_offset.P2",
@@ -12550,8 +12728,10 @@
         "fromsyntax"
       ],
       "candidate": "FROM main OFFSET 2",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.L16.limit_offset.P2"
     },
     {
       "id": "E.L16.limit_offset.N1",
@@ -12560,8 +12740,10 @@
         "fromsyntax"
       ],
       "candidate": "SELECT host FROM main LIMIT",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.L16.limit_offset.N1"
     },
     {
       "id": "E.L16.limit_offset.N2",
@@ -12570,8 +12752,10 @@
         "fromsyntax"
       ],
       "candidate": "FROM main LIMIT 4 OFFSET",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.L16.limit_offset.N2"
     },
     {
       "id": "E.L17.pipe.P1",
@@ -12580,8 +12764,10 @@
         "process"
       ],
       "candidate": "SELECT user FROM main | eval owner=user",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.L17.pipe.P1"
     },
     {
       "id": "E.L17.pipe.P2",
@@ -12590,8 +12776,10 @@
         "process"
       ],
       "candidate": "FROM main GROUP BY host SELECT host,count() | where count>2",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.L17.pipe.P2"
     },
     {
       "id": "E.L17.pipe.N1",
@@ -12600,8 +12788,10 @@
         "process"
       ],
       "candidate": "SELECT user FROM main | eval owner=user GROUP BY host",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.L17.pipe.N1"
     },
     {
       "id": "E.L17.pipe.N2",
@@ -12610,8 +12800,10 @@
         "process"
       ],
       "candidate": "FROM main SELECT user | ORDER BY user",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.L17.pipe.N2"
     },
     {
       "id": "E.L18.rows.P1",
@@ -12620,8 +12812,10 @@
         "fromusage"
       ],
       "candidate": "FROM [{a:1},{a:2}] SELECT a",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.L18.rows.P1"
     },
     {
       "id": "E.L18.rows.P2",
@@ -12630,8 +12824,10 @@
         "fromusage"
       ],
       "candidate": "SELECT a FROM [{a:1},{b:2}]",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.L18.rows.P2"
     },
     {
       "id": "E.L18.rows.N1",
@@ -12640,8 +12836,10 @@
         "fromusage"
       ],
       "candidate": "FROM [{a:1}{a:2}] SELECT a",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.L18.rows.N1"
     },
     {
       "id": "E.L18.rows.N2",
@@ -12650,8 +12848,10 @@
         "fromusage"
       ],
       "candidate": "SELECT a FROM [{a:1],{a:2}]",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.L18.rows.N2"
     },
     {
       "id": "E.L19.inner.P1",
@@ -12660,8 +12860,10 @@
         "fromsyntax"
       ],
       "candidate": "FROM main AS m JOIN users AS u ON m.uid=u.id SELECT m.uid",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.L19.inner.P1"
     },
     {
       "id": "E.L19.inner.P2",
@@ -12670,8 +12872,10 @@
         "fromsyntax"
       ],
       "candidate": "SELECT m.uid FROM main AS m INNER JOIN users AS u ON m.uid=u.id AND m.realm=u.realm",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.L19.inner.P2"
     },
     {
       "id": "E.L19.inner.N1",
@@ -12680,8 +12884,10 @@
         "fromsyntax"
       ],
       "candidate": "FROM main JOIN users AS u ON m.uid=u.id SELECT m.uid",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.L19.inner.N1"
     },
     {
       "id": "E.L19.inner.N2",
@@ -12690,8 +12896,10 @@
         "fromsyntax"
       ],
       "candidate": "SELECT m.uid FROM main AS m JOIN users AS u m.uid=u.id",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.L19.inner.N2"
     },
     {
       "id": "E.L19.left.P1",
@@ -12700,8 +12908,10 @@
         "fromsyntax"
       ],
       "candidate": "FROM main AS m LEFT JOIN users AS u ON m.uid=u.id SELECT m.uid",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.L19.left.P1"
     },
     {
       "id": "E.L19.left.P2",
@@ -12710,8 +12920,10 @@
         "fromsyntax"
       ],
       "candidate": "SELECT m.uid FROM main AS m LEFT OUTER JOIN users AS u ON m.uid=u.id",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.L19.left.P2"
     },
     {
       "id": "E.L19.left.N1",
@@ -12720,8 +12932,10 @@
         "fromsyntax"
       ],
       "candidate": "FROM main AS m LEFT JOIN users ON m.uid=u.id SELECT m.uid",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.L19.left.N1"
     },
     {
       "id": "E.L19.left.N2",
@@ -12730,8 +12944,10 @@
         "fromsyntax"
       ],
       "candidate": "SELECT m.uid FROM main AS m FULL JOIN users AS u ON m.uid=u.id",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.L19.left.N2"
     },
     {
       "id": "E.L19.multiple_join.P1",
@@ -12740,8 +12956,10 @@
         "fromsyntax"
       ],
       "candidate": "FROM main AS m JOIN users AS u ON m.uid=u.id JOIN teams AS t ON u.team=t.id SELECT m.uid",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.L19.multiple_join.P1"
     },
     {
       "id": "E.L19.multiple_join.P2",
@@ -12750,8 +12968,10 @@
         "fromsyntax"
       ],
       "candidate": "SELECT m.uid FROM main AS m LEFT JOIN users AS u ON m.uid=u.id LEFT JOIN teams AS t ON u.team=t.id",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.L19.multiple_join.P2"
     },
     {
       "id": "E.L19.multiple_join.N1",
@@ -12760,8 +12980,10 @@
         "fromsyntax"
       ],
       "candidate": "FROM main AS m JOIN users AS u ON m.uid=u.id JOIN SELECT m.uid",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.L19.multiple_join.N1"
     },
     {
       "id": "E.L19.multiple_join.N2",
@@ -12770,8 +12992,10 @@
         "fromsyntax"
       ],
       "candidate": "SELECT m.uid FROM main AS m JOIN users AS u ON m.uid=u.id WHERE m.uid>0 JOIN teams AS t ON u.team=t.id",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.L19.multiple_join.N2"
     },
     {
       "id": "E.L07.exists.P1",
@@ -12780,8 +13004,10 @@
         "predicate"
       ],
       "candidate": "FROM main AS m WHERE EXISTS (SELECT id FROM users WHERE id=m.uid) SELECT uid",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.L07.exists.P1"
     },
     {
       "id": "E.L07.exists.P2",
@@ -12790,8 +13016,10 @@
         "predicate"
       ],
       "candidate": "SELECT uid FROM main AS m WHERE NOT EXISTS (SELECT id FROM users WHERE id=m.uid)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.L07.exists.P2"
     },
     {
       "id": "E.L07.exists.N1",
@@ -12800,8 +13028,10 @@
         "predicate"
       ],
       "candidate": "FROM main WHERE EXISTS (SELECT id FROM users WHERE id=m.uid) SELECT uid",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.L07.exists.N1"
     },
     {
       "id": "E.L07.exists.N2",
@@ -12810,8 +13040,10 @@
         "predicate"
       ],
       "candidate": "SELECT uid FROM main AS m WHERE EXISTS (SELECT id FROM users WHERE id=m.uid LIMIT 1)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "assembly": "standalone",
+      "case_id": "E.L07.exists.N2"
     },
     {
       "id": "E.L24.search_literal.P1",
@@ -18347,6 +18579,1782 @@
       "disposition": "active",
       "assembly": "standalone",
       "case_id": "T3.fix2.eventstats.by_assignment"
+    },
+    {
+      "id": "T4.boundary.join_inequality",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main AS m JOIN users AS u ON m.id>u.id",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.boundary.join_inequality"
+    },
+    {
+      "id": "T4.boundary.join_literal",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main AS m JOIN users AS u ON true",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.boundary.join_literal"
+    },
+    {
+      "id": "T4.boundary.join_or",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main AS m JOIN users AS u ON m.id=u.id OR m.realm=u.realm",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.boundary.join_or"
+    },
+    {
+      "id": "T4.boundary.join_unqualified",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main AS m JOIN users AS u ON id=u.id",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.boundary.join_unqualified"
+    },
+    {
+      "id": "T4.boundary.join_deep_path",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main AS m JOIN users AS u ON m.user.id=u.id",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.boundary.join_deep_path"
+    },
+    {
+      "id": "T4.boundary.join_reversed",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main AS m JOIN users AS u ON u.id=m.id",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.boundary.join_reversed"
+    },
+    {
+      "id": "T4.boundary.foreign_sql_option",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main | stats limit=3 count()",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.boundary.foreign_sql_option"
+    },
+    {
+      "id": "T4.boundary.negative_huge",
+      "form_id": "Q03",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main LIMIT -9999999999999999999999999999999",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.boundary.negative_huge"
+    },
+    {
+      "id": "T4.boundary.span_fraction",
+      "form_id": "Q05",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main GROUP BY span(_time,1.5h) SELECT count()",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.boundary.span_fraction"
+    },
+    {
+      "id": "T4.boundary.span_assignment_fraction",
+      "form_id": "Q05",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main GROUP BY _time span=(1.5h) SELECT count()",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.boundary.span_assignment_fraction"
+    },
+    {
+      "id": "T4.boundary.exists_parenthesized_fields",
+      "form_id": "Q07",
+      "source_keys": [
+        "predicate"
+      ],
+      "candidate": "FROM orders AS o WHERE EXISTS (SELECT id FROM inventory WHERE (id)=(o.item))",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.boundary.exists_parenthesized_fields"
+    },
+    {
+      "id": "T4.boundary.exists_child_from",
+      "form_id": "Q07",
+      "source_keys": [
+        "predicate"
+      ],
+      "candidate": "FROM orders AS o WHERE EXISTS (FROM inventory WHERE id=o.item SELECT id)",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.boundary.exists_child_from"
+    },
+    {
+      "id": "T4.boundary.exists_shadowed_alias",
+      "form_id": "Q07",
+      "source_keys": [
+        "predicate"
+      ],
+      "candidate": "FROM orders AS o WHERE EXISTS (SELECT id FROM inventory AS o WHERE id=o.item)",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.boundary.exists_shadowed_alias"
+    },
+    {
+      "id": "T4.boundary.select_where",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "SELECT host FROM main WHERE bytes>0",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.boundary.select_where"
+    },
+    {
+      "id": "T4.boundary.wrong_order",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "SELECT host WHERE bytes>0 FROM main",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.boundary.wrong_order"
+    },
+    {
+      "id": "T4.boundary.lowercase",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "select distinct host from main where bytes>0 group by host having host=\"a\" order by host desc limit 3 offset 1",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.boundary.lowercase"
+    },
+    {
+      "id": "T4.boundary.adjacency",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main WHERE x=1 y=2",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.boundary.adjacency"
+    },
+    {
+      "id": "T4.boundary.integer",
+      "form_id": "Q03",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main LIMIT 1.5",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.boundary.integer"
+    },
+    {
+      "id": "T4.boundary.negative_limit",
+      "form_id": "Q03",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main LIMIT -1",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.boundary.negative_limit"
+    },
+    {
+      "id": "T4.boundary.negative_offset",
+      "form_id": "Q03",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main OFFSET -2",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.boundary.negative_offset"
+    },
+    {
+      "id": "T4.boundary.term_direction",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main ORDER BY account ASC,size DESC",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.boundary.term_direction"
+    },
+    {
+      "id": "T4.boundary.span_unparenthesized",
+      "form_id": "Q05",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main GROUP BY _time span=3h SELECT count()",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.boundary.span_unparenthesized"
+    },
+    {
+      "id": "T4.boundary.span_unit",
+      "form_id": "Q05",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "SELECT count() FROM main GROUP BY span(_time,hour)",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.boundary.span_unit"
+    },
+    {
+      "id": "T4.boundary.span_extra",
+      "form_id": "Q05",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "SELECT count() FROM main GROUP BY span(_time,hour,day)",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.boundary.span_extra"
+    },
+    {
+      "id": "T4.boundary.exists_offset",
+      "form_id": "Q07",
+      "source_keys": [
+        "predicate"
+      ],
+      "candidate": "FROM orders AS o WHERE EXISTS (SELECT id FROM inventory WHERE id=o.item OFFSET 1)",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.boundary.exists_offset"
+    },
+    {
+      "id": "T4.boundary.exists_having",
+      "form_id": "Q07",
+      "source_keys": [
+        "predicate"
+      ],
+      "candidate": "FROM orders AS o WHERE active=true SELECT item HAVING EXISTS (SELECT id FROM inventory WHERE id=o.item)",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.boundary.exists_having"
+    },
+    {
+      "id": "T4.boundary.exists_wrong_where",
+      "form_id": "Q07",
+      "source_keys": [
+        "predicate"
+      ],
+      "candidate": "FROM orders AS o WHERE EXISTS (SELECT id FROM inventory WHERE id=o.item) SELECT item HAVING item>0",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.boundary.exists_wrong_where"
+    },
+    {
+      "id": "T4.boundary.exists_no_correlation",
+      "form_id": "Q07",
+      "source_keys": [
+        "predicate"
+      ],
+      "candidate": "FROM orders AS o WHERE EXISTS (SELECT id FROM inventory WHERE id=1)",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.boundary.exists_no_correlation"
+    },
+    {
+      "id": "T4.boundary.exists_wrong_alias",
+      "form_id": "Q07",
+      "source_keys": [
+        "predicate"
+      ],
+      "candidate": "FROM orders AS o WHERE EXISTS (SELECT id FROM inventory WHERE id=z.item)",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.boundary.exists_wrong_alias"
+    },
+    {
+      "id": "T4.boundary.exists_inequality",
+      "form_id": "Q07",
+      "source_keys": [
+        "predicate"
+      ],
+      "candidate": "FROM orders AS o WHERE EXISTS (SELECT id FROM inventory WHERE id>o.item)",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.boundary.exists_inequality"
+    },
+    {
+      "id": "T4.boundary.exists_literal_dot",
+      "form_id": "Q07",
+      "source_keys": [
+        "predicate"
+      ],
+      "candidate": "FROM orders AS o WHERE EXISTS (SELECT id FROM inventory WHERE id='o.item')",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.boundary.exists_literal_dot"
+    },
+    {
+      "id": "T4.boundary.exists_projection",
+      "form_id": "Q07",
+      "source_keys": [
+        "predicate"
+      ],
+      "candidate": "SELECT EXISTS (SELECT id FROM inventory WHERE id=o.item) FROM orders AS o",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.boundary.exists_projection"
+    },
+    {
+      "id": "T4.boundary.exists_nested_projection",
+      "form_id": "Q07",
+      "source_keys": [
+        "predicate"
+      ],
+      "candidate": "FROM orders AS o WHERE EXISTS (SELECT EXISTS (SELECT id FROM child WHERE id=o.item) FROM inventory WHERE id=o.item)",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.boundary.exists_nested_projection"
+    },
+    {
+      "id": "T4.boundary.exists_lambda",
+      "form_id": "Q07",
+      "source_keys": [
+        "predicate"
+      ],
+      "candidate": "FROM orders AS o WHERE map(a, ($v)->EXISTS (SELECT id FROM inventory WHERE id=o.item))",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.boundary.exists_lambda"
+    },
+    {
+      "id": "T4.boundary.missing_group_key",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main GROUP BY SELECT count()",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.boundary.missing_group_key"
+    },
+    {
+      "id": "T4.boundary.group_wildcard_escape",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main GROUP BY 'host\\u002a' SELECT count()",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.boundary.group_wildcard_escape"
+    },
+    {
+      "id": "T4.group.GROUP_BY.False.one",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main GROUP BY host SELECT host,count()",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.group.GROUP_BY.False.one"
+    },
+    {
+      "id": "T4.group.GROUP_BY.False.many",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main GROUP BY host,realm SELECT host,count()",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.group.GROUP_BY.False.many"
+    },
+    {
+      "id": "T4.group.GROUP_BY.False.missing",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main GROUP BY SELECT host,count()",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.group.GROUP_BY.False.missing"
+    },
+    {
+      "id": "T4.group.GROUP_BY.False.comma",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main GROUP BY host, SELECT host,count()",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.group.GROUP_BY.False.comma"
+    },
+    {
+      "id": "T4.group.GROUP_BY.True.one",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "SELECT host,count() FROM main GROUP BY host",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.group.GROUP_BY.True.one"
+    },
+    {
+      "id": "T4.group.GROUP_BY.True.many",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "SELECT host,count() FROM main GROUP BY host,realm",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.group.GROUP_BY.True.many"
+    },
+    {
+      "id": "T4.group.GROUP_BY.True.missing",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "SELECT host,count() FROM main GROUP BY",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.group.GROUP_BY.True.missing"
+    },
+    {
+      "id": "T4.group.GROUP_BY.True.comma",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "SELECT host,count() FROM main GROUP BY host,",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.group.GROUP_BY.True.comma"
+    },
+    {
+      "id": "T4.group.GROUPBY.False.one",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main GROUPBY host SELECT host,count()",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.group.GROUPBY.False.one"
+    },
+    {
+      "id": "T4.group.GROUPBY.False.many",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main GROUPBY host,realm SELECT host,count()",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.group.GROUPBY.False.many"
+    },
+    {
+      "id": "T4.group.GROUPBY.False.missing",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main GROUPBY SELECT host,count()",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.group.GROUPBY.False.missing"
+    },
+    {
+      "id": "T4.group.GROUPBY.False.comma",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main GROUPBY host, SELECT host,count()",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.group.GROUPBY.False.comma"
+    },
+    {
+      "id": "T4.group.GROUPBY.True.one",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "SELECT host,count() FROM main GROUPBY host",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.group.GROUPBY.True.one"
+    },
+    {
+      "id": "T4.group.GROUPBY.True.many",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "SELECT host,count() FROM main GROUPBY host,realm",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.group.GROUPBY.True.many"
+    },
+    {
+      "id": "T4.group.GROUPBY.True.missing",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "SELECT host,count() FROM main GROUPBY",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.group.GROUPBY.True.missing"
+    },
+    {
+      "id": "T4.group.GROUPBY.True.comma",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "SELECT host,count() FROM main GROUPBY host,",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.group.GROUPBY.True.comma"
+    },
+    {
+      "id": "T4.group.group_by.False.one",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main group by host SELECT host,count()",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.group.group_by.False.one"
+    },
+    {
+      "id": "T4.group.group_by.False.many",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main group by host,realm SELECT host,count()",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.group.group_by.False.many"
+    },
+    {
+      "id": "T4.group.group_by.False.missing",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main group by SELECT host,count()",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.group.group_by.False.missing"
+    },
+    {
+      "id": "T4.group.group_by.False.comma",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main group by host, SELECT host,count()",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.group.group_by.False.comma"
+    },
+    {
+      "id": "T4.group.group_by.True.one",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "SELECT host,count() FROM main group by host",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.group.group_by.True.one"
+    },
+    {
+      "id": "T4.group.group_by.True.many",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "SELECT host,count() FROM main group by host,realm",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.group.group_by.True.many"
+    },
+    {
+      "id": "T4.group.group_by.True.missing",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "SELECT host,count() FROM main group by",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.group.group_by.True.missing"
+    },
+    {
+      "id": "T4.group.group_by.True.comma",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "SELECT host,count() FROM main group by host,",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.group.group_by.True.comma"
+    },
+    {
+      "id": "T4.group.groupby.False.one",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main groupby host SELECT host,count()",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.group.groupby.False.one"
+    },
+    {
+      "id": "T4.group.groupby.False.many",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main groupby host,realm SELECT host,count()",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.group.groupby.False.many"
+    },
+    {
+      "id": "T4.group.groupby.False.missing",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main groupby SELECT host,count()",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.group.groupby.False.missing"
+    },
+    {
+      "id": "T4.group.groupby.False.comma",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main groupby host, SELECT host,count()",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.group.groupby.False.comma"
+    },
+    {
+      "id": "T4.group.groupby.True.one",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "SELECT host,count() FROM main groupby host",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.group.groupby.True.one"
+    },
+    {
+      "id": "T4.group.groupby.True.many",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "SELECT host,count() FROM main groupby host,realm",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.group.groupby.True.many"
+    },
+    {
+      "id": "T4.group.groupby.True.missing",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "SELECT host,count() FROM main groupby",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.group.groupby.True.missing"
+    },
+    {
+      "id": "T4.group.groupby.True.comma",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "SELECT host,count() FROM main groupby host,",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.group.groupby.True.comma"
+    },
+    {
+      "id": "T4.order.ORDER_BY.False.plain",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main ORDER BY host",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.order.ORDER_BY.False.plain"
+    },
+    {
+      "id": "T4.order.ORDER_BY.False.ascending",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main ORDER BY host ASC",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.order.ORDER_BY.False.ascending"
+    },
+    {
+      "id": "T4.order.ORDER_BY.False.descending",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main ORDER BY host DESC",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.order.ORDER_BY.False.descending"
+    },
+    {
+      "id": "T4.order.ORDER_BY.False.many",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main ORDER BY host,realm DESC",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.order.ORDER_BY.False.many"
+    },
+    {
+      "id": "T4.order.ORDER_BY.False.missing",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main ORDER BY",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.order.ORDER_BY.False.missing"
+    },
+    {
+      "id": "T4.order.ORDER_BY.False.comma",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main ORDER BY host,",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.order.ORDER_BY.False.comma"
+    },
+    {
+      "id": "T4.order.ORDER_BY.True.plain",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "SELECT host FROM main ORDER BY host",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.order.ORDER_BY.True.plain"
+    },
+    {
+      "id": "T4.order.ORDER_BY.True.ascending",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "SELECT host FROM main ORDER BY host ASC",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.order.ORDER_BY.True.ascending"
+    },
+    {
+      "id": "T4.order.ORDER_BY.True.descending",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "SELECT host FROM main ORDER BY host DESC",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.order.ORDER_BY.True.descending"
+    },
+    {
+      "id": "T4.order.ORDER_BY.True.many",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "SELECT host FROM main ORDER BY host,realm DESC",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.order.ORDER_BY.True.many"
+    },
+    {
+      "id": "T4.order.ORDER_BY.True.missing",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "SELECT host FROM main ORDER BY",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.order.ORDER_BY.True.missing"
+    },
+    {
+      "id": "T4.order.ORDER_BY.True.comma",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "SELECT host FROM main ORDER BY host,",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.order.ORDER_BY.True.comma"
+    },
+    {
+      "id": "T4.order.ORDERBY.False.plain",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main ORDERBY host",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.order.ORDERBY.False.plain"
+    },
+    {
+      "id": "T4.order.ORDERBY.False.ascending",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main ORDERBY host ASC",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.order.ORDERBY.False.ascending"
+    },
+    {
+      "id": "T4.order.ORDERBY.False.descending",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main ORDERBY host DESC",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.order.ORDERBY.False.descending"
+    },
+    {
+      "id": "T4.order.ORDERBY.False.many",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main ORDERBY host,realm DESC",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.order.ORDERBY.False.many"
+    },
+    {
+      "id": "T4.order.ORDERBY.False.missing",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main ORDERBY",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "E.L16.order.N2"
+    },
+    {
+      "id": "T4.order.ORDERBY.False.comma",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main ORDERBY host,",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.order.ORDERBY.False.comma"
+    },
+    {
+      "id": "T4.order.ORDERBY.True.plain",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "SELECT host FROM main ORDERBY host",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.order.ORDERBY.True.plain"
+    },
+    {
+      "id": "T4.order.ORDERBY.True.ascending",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "SELECT host FROM main ORDERBY host ASC",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.order.ORDERBY.True.ascending"
+    },
+    {
+      "id": "T4.order.ORDERBY.True.descending",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "SELECT host FROM main ORDERBY host DESC",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.order.ORDERBY.True.descending"
+    },
+    {
+      "id": "T4.order.ORDERBY.True.many",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "SELECT host FROM main ORDERBY host,realm DESC",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.order.ORDERBY.True.many"
+    },
+    {
+      "id": "T4.order.ORDERBY.True.missing",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "SELECT host FROM main ORDERBY",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.order.ORDERBY.True.missing"
+    },
+    {
+      "id": "T4.order.ORDERBY.True.comma",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "SELECT host FROM main ORDERBY host,",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.order.ORDERBY.True.comma"
+    },
+    {
+      "id": "T4.order.order_by.False.plain",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main order by host",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.order.order_by.False.plain"
+    },
+    {
+      "id": "T4.order.order_by.False.ascending",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main order by host ASC",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.order.order_by.False.ascending"
+    },
+    {
+      "id": "T4.order.order_by.False.descending",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main order by host DESC",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.order.order_by.False.descending"
+    },
+    {
+      "id": "T4.order.order_by.False.many",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main order by host,realm DESC",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.order.order_by.False.many"
+    },
+    {
+      "id": "T4.order.order_by.False.missing",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main order by",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.order.order_by.False.missing"
+    },
+    {
+      "id": "T4.order.order_by.False.comma",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main order by host,",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.order.order_by.False.comma"
+    },
+    {
+      "id": "T4.order.order_by.True.plain",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "SELECT host FROM main order by host",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.order.order_by.True.plain"
+    },
+    {
+      "id": "T4.order.order_by.True.ascending",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "SELECT host FROM main order by host ASC",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.order.order_by.True.ascending"
+    },
+    {
+      "id": "T4.order.order_by.True.descending",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "SELECT host FROM main order by host DESC",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.order.order_by.True.descending"
+    },
+    {
+      "id": "T4.order.order_by.True.many",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "SELECT host FROM main order by host,realm DESC",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.order.order_by.True.many"
+    },
+    {
+      "id": "T4.order.order_by.True.missing",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "SELECT host FROM main order by",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.order.order_by.True.missing"
+    },
+    {
+      "id": "T4.order.order_by.True.comma",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "SELECT host FROM main order by host,",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.order.order_by.True.comma"
+    },
+    {
+      "id": "T4.order.orderby.False.plain",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main orderby host",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.order.orderby.False.plain"
+    },
+    {
+      "id": "T4.order.orderby.False.ascending",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main orderby host ASC",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.order.orderby.False.ascending"
+    },
+    {
+      "id": "T4.order.orderby.False.descending",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main orderby host DESC",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.order.orderby.False.descending"
+    },
+    {
+      "id": "T4.order.orderby.False.many",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main orderby host,realm DESC",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.order.orderby.False.many"
+    },
+    {
+      "id": "T4.order.orderby.False.missing",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main orderby",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.order.orderby.False.missing"
+    },
+    {
+      "id": "T4.order.orderby.False.comma",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main orderby host,",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.order.orderby.False.comma"
+    },
+    {
+      "id": "T4.order.orderby.True.plain",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "SELECT host FROM main orderby host",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.order.orderby.True.plain"
+    },
+    {
+      "id": "T4.order.orderby.True.ascending",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "SELECT host FROM main orderby host ASC",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.order.orderby.True.ascending"
+    },
+    {
+      "id": "T4.order.orderby.True.descending",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "SELECT host FROM main orderby host DESC",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.order.orderby.True.descending"
+    },
+    {
+      "id": "T4.order.orderby.True.many",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "SELECT host FROM main orderby host,realm DESC",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.order.orderby.True.many"
+    },
+    {
+      "id": "T4.order.orderby.True.missing",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "SELECT host FROM main orderby",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.order.orderby.True.missing"
+    },
+    {
+      "id": "T4.order.orderby.True.comma",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "SELECT host FROM main orderby host,",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.order.orderby.True.comma"
+    },
+    {
+      "id": "T4.span.0.False",
+      "form_id": "Q05",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main GROUP BY span(_time) SELECT count()",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.span.0.False"
+    },
+    {
+      "id": "T4.span.0.True",
+      "form_id": "Q05",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "SELECT count() FROM main GROUP BY span(_time)",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "E.L16.group_span.P1"
+    },
+    {
+      "id": "T4.span.1.False",
+      "form_id": "Q05",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main GROUP BY span(_time,5min) SELECT count()",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "Q05-P1"
+    },
+    {
+      "id": "T4.span.1.True",
+      "form_id": "Q05",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "SELECT count() FROM main GROUP BY span(_time,5min)",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.span.1.True"
+    },
+    {
+      "id": "T4.span.2.False",
+      "form_id": "Q05",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main GROUP BY span(_time,hour) SELECT count()",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.span.2.False"
+    },
+    {
+      "id": "T4.span.2.True",
+      "form_id": "Q05",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "SELECT count() FROM main GROUP BY span(_time,hour)",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.boundary.span_unit"
+    },
+    {
+      "id": "T4.span.3.False",
+      "form_id": "Q05",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main GROUP BY _time span=(5min) SELECT count()",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "E.L16.group_span.P2"
+    },
+    {
+      "id": "T4.span.3.True",
+      "form_id": "Q05",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "SELECT count() FROM main GROUP BY _time span=(5min)",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.span.3.True"
+    },
+    {
+      "id": "T4.span.4.False",
+      "form_id": "Q05",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main GROUP BY _time span=(hour) SELECT count()",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.span.4.False"
+    },
+    {
+      "id": "T4.span.4.True",
+      "form_id": "Q05",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "SELECT count() FROM main GROUP BY _time span=(hour)",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "Q05-P2"
+    },
+    {
+      "id": "T4.join.0.False",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main AS m JOIN users AS u ON m.id=u.id AND m.realm=u.realm SELECT m.id",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.join.0.False"
+    },
+    {
+      "id": "T4.join.0.True",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "from main as m join users as u on m.id=u.id AND m.realm=u.realm select m.id",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.join.0.True"
+    },
+    {
+      "id": "T4.join.1.False",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main AS m INNER JOIN users AS u ON m.id=u.id AND m.realm=u.realm SELECT m.id",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.join.1.False"
+    },
+    {
+      "id": "T4.join.1.True",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "from main as m inner join users as u on m.id=u.id AND m.realm=u.realm select m.id",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.join.1.True"
+    },
+    {
+      "id": "T4.join.2.False",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main AS m LEFT JOIN users AS u ON m.id=u.id AND m.realm=u.realm SELECT m.id",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.join.2.False"
+    },
+    {
+      "id": "T4.join.2.True",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "from main as m left join users as u on m.id=u.id AND m.realm=u.realm select m.id",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.join.2.True"
+    },
+    {
+      "id": "T4.join.3.False",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main AS m LEFT OUTER JOIN users AS u ON m.id=u.id AND m.realm=u.realm SELECT m.id",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.join.3.False"
+    },
+    {
+      "id": "T4.join.3.True",
+      "form_id": "Q04",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "from main as m left outer join users as u on m.id=u.id AND m.realm=u.realm select m.id",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.join.3.True"
+    },
+    {
+      "id": "T4.duplicate_limit",
+      "form_id": "Q03",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main LIMIT 1 LIMIT 2",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.duplicate_limit"
+    },
+    {
+      "id": "T4.duplicate_offset",
+      "form_id": "Q03",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main OFFSET 1 OFFSET 2",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.duplicate_offset"
+    },
+    {
+      "id": "T4.limit_suffix",
+      "form_id": "Q03",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main LIMIT 2L",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.limit_suffix"
+    },
+    {
+      "id": "T4.offset_decimal",
+      "form_id": "Q03",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main OFFSET 1.5",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.offset_decimal"
+    },
+    {
+      "id": "T4.typed.select",
+      "form_id": "Q08",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "SELECT a.'café' AS label,'a.café',payload.user.name\r\nFROM main AS a\r\nWHERE a.bytes>0\r\nGROUP BY a.'café','a.café',payload.user.name\r\nHAVING label!=\"\"\r\nORDER BY label DESC\r\nLIMIT 2\r\nOFFSET 1 | table label",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.typed.select"
+    },
+    {
+      "id": "T4.typed.from",
+      "form_id": "Q08",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM orders AS o LEFT OUTER JOIN inventory AS i ON o.item=i.id WHERE active=true GROUP BY o.item SELECT o.item,count() AS n HAVING EXISTS (SELECT id FROM stock WHERE id=o.item) ORDERBY n DESC LIMIT 4 OFFSET 1 | where n>0",
+      "evidence": "task4-approved-form-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.typed.from"
+    },
+    {
+      "id": "T4.boundary.span_target_number",
+      "form_id": "Q05",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main GROUP BY 1 span=(h) SELECT count()",
+      "evidence": "task4-controller-confirmed-field-span-operand",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.boundary.span_target_number"
+    },
+    {
+      "id": "T4.boundary.span_target_call",
+      "form_id": "Q05",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main GROUP BY lower(x) span=(h) SELECT count()",
+      "evidence": "task4-controller-confirmed-field-span-operand",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.boundary.span_target_call"
+    },
+    {
+      "id": "T4.boundary.span_target_computation",
+      "form_id": "Q05",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main GROUP BY x+1 span=(h) SELECT count()",
+      "evidence": "task4-controller-confirmed-field-span-operand",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.boundary.span_target_computation"
+    },
+    {
+      "id": "T4.boundary.span_target_qualified",
+      "form_id": "Q05",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main AS m GROUP BY m._time span=(h) SELECT count()",
+      "evidence": "task4-controller-confirmed-field-span-operand",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.boundary.span_target_qualified"
+    },
+    {
+      "id": "T4.boundary.span_target_deep",
+      "form_id": "Q05",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main GROUP BY payload.time.value span=(h) SELECT count()",
+      "evidence": "task4-controller-confirmed-field-span-operand",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.boundary.span_target_deep"
+    },
+    {
+      "id": "T4.boundary.span_target_literal_dot",
+      "form_id": "Q05",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main GROUP BY 'payload.time' span=(h) SELECT count()",
+      "evidence": "task4-controller-confirmed-field-span-operand",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.boundary.span_target_literal_dot"
+    },
+    {
+      "id": "T4.boundary.group_expression_number",
+      "form_id": "Q05",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main GROUP BY 1 SELECT count()",
+      "evidence": "task4-controller-confirmed-field-span-operand",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.boundary.group_expression_number"
+    },
+    {
+      "id": "T4.boundary.group_expression_call",
+      "form_id": "Q05",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main GROUP BY lower(x) SELECT count()",
+      "evidence": "task4-controller-confirmed-field-span-operand",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.boundary.group_expression_call"
     }
   ],
   "holds": [

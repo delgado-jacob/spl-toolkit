@@ -30,8 +30,77 @@ type SPL2ParserVisitor interface {
 	// Visit a parse tree produced by SPL2Parser#selectCommand.
 	VisitSelectCommand(ctx *SelectCommandContext) interface{}
 
+	// Visit a parse tree produced by SPL2Parser#sqlFromClause.
+	VisitSqlFromClause(ctx *SqlFromClauseContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#sourceAlias.
+	VisitSourceAlias(ctx *SourceAliasContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#sqlJoinClause.
+	VisitSqlJoinClause(ctx *SqlJoinClauseContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#sqlJoinPredicate.
+	VisitSqlJoinPredicate(ctx *SqlJoinPredicateContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#sqlJoinEquality.
+	VisitSqlJoinEquality(ctx *SqlJoinEqualityContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#sqlJoinField.
+	VisitSqlJoinField(ctx *SqlJoinFieldContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#sqlSelectClause.
+	VisitSqlSelectClause(ctx *SqlSelectClauseContext) interface{}
+
 	// Visit a parse tree produced by SPL2Parser#projection.
 	VisitProjection(ctx *ProjectionContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#projectionAlias.
+	VisitProjectionAlias(ctx *ProjectionAliasContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#sqlWhereClause.
+	VisitSqlWhereClause(ctx *SqlWhereClauseContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#sqlHavingClause.
+	VisitSqlHavingClause(ctx *SqlHavingClauseContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#sqlPredicate.
+	VisitSqlPredicate(ctx *SqlPredicateContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#sqlGroupClause.
+	VisitSqlGroupClause(ctx *SqlGroupClauseContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#sqlBy.
+	VisitSqlBy(ctx *SqlByContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#sqlGroupKey.
+	VisitSqlGroupKey(ctx *SqlGroupKeyContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#sqlSpanCall.
+	VisitSqlSpanCall(ctx *SqlSpanCallContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#sqlSpanAssignment.
+	VisitSqlSpanAssignment(ctx *SqlSpanAssignmentContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#sqlUnparenthesizedSpan.
+	VisitSqlUnparenthesizedSpan(ctx *SqlUnparenthesizedSpanContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#sqlOrderClause.
+	VisitSqlOrderClause(ctx *SqlOrderClauseContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#sqlOrderTerm.
+	VisitSqlOrderTerm(ctx *SqlOrderTermContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#sqlDirection.
+	VisitSqlDirection(ctx *SqlDirectionContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#sqlLimitClause.
+	VisitSqlLimitClause(ctx *SqlLimitClauseContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#sqlOffsetClause.
+	VisitSqlOffsetClause(ctx *SqlOffsetClauseContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#existsPredicate.
+	VisitExistsPredicate(ctx *ExistsPredicateContext) interface{}
 
 	// Visit a parse tree produced by SPL2Parser#dataset.
 	VisitDataset(ctx *DatasetContext) interface{}
@@ -362,6 +431,9 @@ type SPL2ParserVisitor interface {
 
 	// Visit a parse tree produced by SPL2Parser#identifier.
 	VisitIdentifier(ctx *IdentifierContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#sqlKeyword.
+	VisitSqlKeyword(ctx *SqlKeywordContext) interface{}
 
 	// Visit a parse tree produced by SPL2Parser#pipelineKeyword.
 	VisitPipelineKeyword(ctx *PipelineKeywordContext) interface{}

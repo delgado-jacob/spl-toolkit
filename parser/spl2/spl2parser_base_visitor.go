@@ -31,7 +31,99 @@ func (v *BaseSPL2ParserVisitor) VisitSelectCommand(ctx *SelectCommandContext) in
 	return v.VisitChildren(ctx)
 }
 
+func (v *BaseSPL2ParserVisitor) VisitSqlFromClause(ctx *SqlFromClauseContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitSourceAlias(ctx *SourceAliasContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitSqlJoinClause(ctx *SqlJoinClauseContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitSqlJoinPredicate(ctx *SqlJoinPredicateContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitSqlJoinEquality(ctx *SqlJoinEqualityContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitSqlJoinField(ctx *SqlJoinFieldContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitSqlSelectClause(ctx *SqlSelectClauseContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
 func (v *BaseSPL2ParserVisitor) VisitProjection(ctx *ProjectionContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitProjectionAlias(ctx *ProjectionAliasContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitSqlWhereClause(ctx *SqlWhereClauseContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitSqlHavingClause(ctx *SqlHavingClauseContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitSqlPredicate(ctx *SqlPredicateContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitSqlGroupClause(ctx *SqlGroupClauseContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitSqlBy(ctx *SqlByContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitSqlGroupKey(ctx *SqlGroupKeyContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitSqlSpanCall(ctx *SqlSpanCallContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitSqlSpanAssignment(ctx *SqlSpanAssignmentContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitSqlUnparenthesizedSpan(ctx *SqlUnparenthesizedSpanContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitSqlOrderClause(ctx *SqlOrderClauseContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitSqlOrderTerm(ctx *SqlOrderTermContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitSqlDirection(ctx *SqlDirectionContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitSqlLimitClause(ctx *SqlLimitClauseContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitSqlOffsetClause(ctx *SqlOffsetClauseContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitExistsPredicate(ctx *ExistsPredicateContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
@@ -472,6 +564,10 @@ func (v *BaseSPL2ParserVisitor) VisitFieldName(ctx *FieldNameContext) interface{
 }
 
 func (v *BaseSPL2ParserVisitor) VisitIdentifier(ctx *IdentifierContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitSqlKeyword(ctx *SqlKeywordContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 

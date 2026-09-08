@@ -56,11 +56,149 @@ func (s *BaseSPL2ParserListener) EnterSelectCommand(ctx *SelectCommandContext) {
 // ExitSelectCommand is called when production selectCommand is exited.
 func (s *BaseSPL2ParserListener) ExitSelectCommand(ctx *SelectCommandContext) {}
 
+// EnterSqlFromClause is called when production sqlFromClause is entered.
+func (s *BaseSPL2ParserListener) EnterSqlFromClause(ctx *SqlFromClauseContext) {}
+
+// ExitSqlFromClause is called when production sqlFromClause is exited.
+func (s *BaseSPL2ParserListener) ExitSqlFromClause(ctx *SqlFromClauseContext) {}
+
+// EnterSourceAlias is called when production sourceAlias is entered.
+func (s *BaseSPL2ParserListener) EnterSourceAlias(ctx *SourceAliasContext) {}
+
+// ExitSourceAlias is called when production sourceAlias is exited.
+func (s *BaseSPL2ParserListener) ExitSourceAlias(ctx *SourceAliasContext) {}
+
+// EnterSqlJoinClause is called when production sqlJoinClause is entered.
+func (s *BaseSPL2ParserListener) EnterSqlJoinClause(ctx *SqlJoinClauseContext) {}
+
+// ExitSqlJoinClause is called when production sqlJoinClause is exited.
+func (s *BaseSPL2ParserListener) ExitSqlJoinClause(ctx *SqlJoinClauseContext) {}
+
+// EnterSqlJoinPredicate is called when production sqlJoinPredicate is entered.
+func (s *BaseSPL2ParserListener) EnterSqlJoinPredicate(ctx *SqlJoinPredicateContext) {}
+
+// ExitSqlJoinPredicate is called when production sqlJoinPredicate is exited.
+func (s *BaseSPL2ParserListener) ExitSqlJoinPredicate(ctx *SqlJoinPredicateContext) {}
+
+// EnterSqlJoinEquality is called when production sqlJoinEquality is entered.
+func (s *BaseSPL2ParserListener) EnterSqlJoinEquality(ctx *SqlJoinEqualityContext) {}
+
+// ExitSqlJoinEquality is called when production sqlJoinEquality is exited.
+func (s *BaseSPL2ParserListener) ExitSqlJoinEquality(ctx *SqlJoinEqualityContext) {}
+
+// EnterSqlJoinField is called when production sqlJoinField is entered.
+func (s *BaseSPL2ParserListener) EnterSqlJoinField(ctx *SqlJoinFieldContext) {}
+
+// ExitSqlJoinField is called when production sqlJoinField is exited.
+func (s *BaseSPL2ParserListener) ExitSqlJoinField(ctx *SqlJoinFieldContext) {}
+
+// EnterSqlSelectClause is called when production sqlSelectClause is entered.
+func (s *BaseSPL2ParserListener) EnterSqlSelectClause(ctx *SqlSelectClauseContext) {}
+
+// ExitSqlSelectClause is called when production sqlSelectClause is exited.
+func (s *BaseSPL2ParserListener) ExitSqlSelectClause(ctx *SqlSelectClauseContext) {}
+
 // EnterProjection is called when production projection is entered.
 func (s *BaseSPL2ParserListener) EnterProjection(ctx *ProjectionContext) {}
 
 // ExitProjection is called when production projection is exited.
 func (s *BaseSPL2ParserListener) ExitProjection(ctx *ProjectionContext) {}
+
+// EnterProjectionAlias is called when production projectionAlias is entered.
+func (s *BaseSPL2ParserListener) EnterProjectionAlias(ctx *ProjectionAliasContext) {}
+
+// ExitProjectionAlias is called when production projectionAlias is exited.
+func (s *BaseSPL2ParserListener) ExitProjectionAlias(ctx *ProjectionAliasContext) {}
+
+// EnterSqlWhereClause is called when production sqlWhereClause is entered.
+func (s *BaseSPL2ParserListener) EnterSqlWhereClause(ctx *SqlWhereClauseContext) {}
+
+// ExitSqlWhereClause is called when production sqlWhereClause is exited.
+func (s *BaseSPL2ParserListener) ExitSqlWhereClause(ctx *SqlWhereClauseContext) {}
+
+// EnterSqlHavingClause is called when production sqlHavingClause is entered.
+func (s *BaseSPL2ParserListener) EnterSqlHavingClause(ctx *SqlHavingClauseContext) {}
+
+// ExitSqlHavingClause is called when production sqlHavingClause is exited.
+func (s *BaseSPL2ParserListener) ExitSqlHavingClause(ctx *SqlHavingClauseContext) {}
+
+// EnterSqlPredicate is called when production sqlPredicate is entered.
+func (s *BaseSPL2ParserListener) EnterSqlPredicate(ctx *SqlPredicateContext) {}
+
+// ExitSqlPredicate is called when production sqlPredicate is exited.
+func (s *BaseSPL2ParserListener) ExitSqlPredicate(ctx *SqlPredicateContext) {}
+
+// EnterSqlGroupClause is called when production sqlGroupClause is entered.
+func (s *BaseSPL2ParserListener) EnterSqlGroupClause(ctx *SqlGroupClauseContext) {}
+
+// ExitSqlGroupClause is called when production sqlGroupClause is exited.
+func (s *BaseSPL2ParserListener) ExitSqlGroupClause(ctx *SqlGroupClauseContext) {}
+
+// EnterSqlBy is called when production sqlBy is entered.
+func (s *BaseSPL2ParserListener) EnterSqlBy(ctx *SqlByContext) {}
+
+// ExitSqlBy is called when production sqlBy is exited.
+func (s *BaseSPL2ParserListener) ExitSqlBy(ctx *SqlByContext) {}
+
+// EnterSqlGroupKey is called when production sqlGroupKey is entered.
+func (s *BaseSPL2ParserListener) EnterSqlGroupKey(ctx *SqlGroupKeyContext) {}
+
+// ExitSqlGroupKey is called when production sqlGroupKey is exited.
+func (s *BaseSPL2ParserListener) ExitSqlGroupKey(ctx *SqlGroupKeyContext) {}
+
+// EnterSqlSpanCall is called when production sqlSpanCall is entered.
+func (s *BaseSPL2ParserListener) EnterSqlSpanCall(ctx *SqlSpanCallContext) {}
+
+// ExitSqlSpanCall is called when production sqlSpanCall is exited.
+func (s *BaseSPL2ParserListener) ExitSqlSpanCall(ctx *SqlSpanCallContext) {}
+
+// EnterSqlSpanAssignment is called when production sqlSpanAssignment is entered.
+func (s *BaseSPL2ParserListener) EnterSqlSpanAssignment(ctx *SqlSpanAssignmentContext) {}
+
+// ExitSqlSpanAssignment is called when production sqlSpanAssignment is exited.
+func (s *BaseSPL2ParserListener) ExitSqlSpanAssignment(ctx *SqlSpanAssignmentContext) {}
+
+// EnterSqlUnparenthesizedSpan is called when production sqlUnparenthesizedSpan is entered.
+func (s *BaseSPL2ParserListener) EnterSqlUnparenthesizedSpan(ctx *SqlUnparenthesizedSpanContext) {}
+
+// ExitSqlUnparenthesizedSpan is called when production sqlUnparenthesizedSpan is exited.
+func (s *BaseSPL2ParserListener) ExitSqlUnparenthesizedSpan(ctx *SqlUnparenthesizedSpanContext) {}
+
+// EnterSqlOrderClause is called when production sqlOrderClause is entered.
+func (s *BaseSPL2ParserListener) EnterSqlOrderClause(ctx *SqlOrderClauseContext) {}
+
+// ExitSqlOrderClause is called when production sqlOrderClause is exited.
+func (s *BaseSPL2ParserListener) ExitSqlOrderClause(ctx *SqlOrderClauseContext) {}
+
+// EnterSqlOrderTerm is called when production sqlOrderTerm is entered.
+func (s *BaseSPL2ParserListener) EnterSqlOrderTerm(ctx *SqlOrderTermContext) {}
+
+// ExitSqlOrderTerm is called when production sqlOrderTerm is exited.
+func (s *BaseSPL2ParserListener) ExitSqlOrderTerm(ctx *SqlOrderTermContext) {}
+
+// EnterSqlDirection is called when production sqlDirection is entered.
+func (s *BaseSPL2ParserListener) EnterSqlDirection(ctx *SqlDirectionContext) {}
+
+// ExitSqlDirection is called when production sqlDirection is exited.
+func (s *BaseSPL2ParserListener) ExitSqlDirection(ctx *SqlDirectionContext) {}
+
+// EnterSqlLimitClause is called when production sqlLimitClause is entered.
+func (s *BaseSPL2ParserListener) EnterSqlLimitClause(ctx *SqlLimitClauseContext) {}
+
+// ExitSqlLimitClause is called when production sqlLimitClause is exited.
+func (s *BaseSPL2ParserListener) ExitSqlLimitClause(ctx *SqlLimitClauseContext) {}
+
+// EnterSqlOffsetClause is called when production sqlOffsetClause is entered.
+func (s *BaseSPL2ParserListener) EnterSqlOffsetClause(ctx *SqlOffsetClauseContext) {}
+
+// ExitSqlOffsetClause is called when production sqlOffsetClause is exited.
+func (s *BaseSPL2ParserListener) ExitSqlOffsetClause(ctx *SqlOffsetClauseContext) {}
+
+// EnterExistsPredicate is called when production existsPredicate is entered.
+func (s *BaseSPL2ParserListener) EnterExistsPredicate(ctx *ExistsPredicateContext) {}
+
+// ExitExistsPredicate is called when production existsPredicate is exited.
+func (s *BaseSPL2ParserListener) ExitExistsPredicate(ctx *ExistsPredicateContext) {}
 
 // EnterDataset is called when production dataset is entered.
 func (s *BaseSPL2ParserListener) EnterDataset(ctx *DatasetContext) {}
@@ -721,6 +859,12 @@ func (s *BaseSPL2ParserListener) EnterIdentifier(ctx *IdentifierContext) {}
 
 // ExitIdentifier is called when production identifier is exited.
 func (s *BaseSPL2ParserListener) ExitIdentifier(ctx *IdentifierContext) {}
+
+// EnterSqlKeyword is called when production sqlKeyword is entered.
+func (s *BaseSPL2ParserListener) EnterSqlKeyword(ctx *SqlKeywordContext) {}
+
+// ExitSqlKeyword is called when production sqlKeyword is exited.
+func (s *BaseSPL2ParserListener) ExitSqlKeyword(ctx *SqlKeywordContext) {}
 
 // EnterPipelineKeyword is called when production pipelineKeyword is entered.
 func (s *BaseSPL2ParserListener) EnterPipelineKeyword(ctx *PipelineKeywordContext) {}

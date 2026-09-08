@@ -25,8 +25,77 @@ type SPL2ParserListener interface {
 	// EnterSelectCommand is called when entering the selectCommand production.
 	EnterSelectCommand(c *SelectCommandContext)
 
+	// EnterSqlFromClause is called when entering the sqlFromClause production.
+	EnterSqlFromClause(c *SqlFromClauseContext)
+
+	// EnterSourceAlias is called when entering the sourceAlias production.
+	EnterSourceAlias(c *SourceAliasContext)
+
+	// EnterSqlJoinClause is called when entering the sqlJoinClause production.
+	EnterSqlJoinClause(c *SqlJoinClauseContext)
+
+	// EnterSqlJoinPredicate is called when entering the sqlJoinPredicate production.
+	EnterSqlJoinPredicate(c *SqlJoinPredicateContext)
+
+	// EnterSqlJoinEquality is called when entering the sqlJoinEquality production.
+	EnterSqlJoinEquality(c *SqlJoinEqualityContext)
+
+	// EnterSqlJoinField is called when entering the sqlJoinField production.
+	EnterSqlJoinField(c *SqlJoinFieldContext)
+
+	// EnterSqlSelectClause is called when entering the sqlSelectClause production.
+	EnterSqlSelectClause(c *SqlSelectClauseContext)
+
 	// EnterProjection is called when entering the projection production.
 	EnterProjection(c *ProjectionContext)
+
+	// EnterProjectionAlias is called when entering the projectionAlias production.
+	EnterProjectionAlias(c *ProjectionAliasContext)
+
+	// EnterSqlWhereClause is called when entering the sqlWhereClause production.
+	EnterSqlWhereClause(c *SqlWhereClauseContext)
+
+	// EnterSqlHavingClause is called when entering the sqlHavingClause production.
+	EnterSqlHavingClause(c *SqlHavingClauseContext)
+
+	// EnterSqlPredicate is called when entering the sqlPredicate production.
+	EnterSqlPredicate(c *SqlPredicateContext)
+
+	// EnterSqlGroupClause is called when entering the sqlGroupClause production.
+	EnterSqlGroupClause(c *SqlGroupClauseContext)
+
+	// EnterSqlBy is called when entering the sqlBy production.
+	EnterSqlBy(c *SqlByContext)
+
+	// EnterSqlGroupKey is called when entering the sqlGroupKey production.
+	EnterSqlGroupKey(c *SqlGroupKeyContext)
+
+	// EnterSqlSpanCall is called when entering the sqlSpanCall production.
+	EnterSqlSpanCall(c *SqlSpanCallContext)
+
+	// EnterSqlSpanAssignment is called when entering the sqlSpanAssignment production.
+	EnterSqlSpanAssignment(c *SqlSpanAssignmentContext)
+
+	// EnterSqlUnparenthesizedSpan is called when entering the sqlUnparenthesizedSpan production.
+	EnterSqlUnparenthesizedSpan(c *SqlUnparenthesizedSpanContext)
+
+	// EnterSqlOrderClause is called when entering the sqlOrderClause production.
+	EnterSqlOrderClause(c *SqlOrderClauseContext)
+
+	// EnterSqlOrderTerm is called when entering the sqlOrderTerm production.
+	EnterSqlOrderTerm(c *SqlOrderTermContext)
+
+	// EnterSqlDirection is called when entering the sqlDirection production.
+	EnterSqlDirection(c *SqlDirectionContext)
+
+	// EnterSqlLimitClause is called when entering the sqlLimitClause production.
+	EnterSqlLimitClause(c *SqlLimitClauseContext)
+
+	// EnterSqlOffsetClause is called when entering the sqlOffsetClause production.
+	EnterSqlOffsetClause(c *SqlOffsetClauseContext)
+
+	// EnterExistsPredicate is called when entering the existsPredicate production.
+	EnterExistsPredicate(c *ExistsPredicateContext)
 
 	// EnterDataset is called when entering the dataset production.
 	EnterDataset(c *DatasetContext)
@@ -358,6 +427,9 @@ type SPL2ParserListener interface {
 	// EnterIdentifier is called when entering the identifier production.
 	EnterIdentifier(c *IdentifierContext)
 
+	// EnterSqlKeyword is called when entering the sqlKeyword production.
+	EnterSqlKeyword(c *SqlKeywordContext)
+
 	// EnterPipelineKeyword is called when entering the pipelineKeyword production.
 	EnterPipelineKeyword(c *PipelineKeywordContext)
 
@@ -403,8 +475,77 @@ type SPL2ParserListener interface {
 	// ExitSelectCommand is called when exiting the selectCommand production.
 	ExitSelectCommand(c *SelectCommandContext)
 
+	// ExitSqlFromClause is called when exiting the sqlFromClause production.
+	ExitSqlFromClause(c *SqlFromClauseContext)
+
+	// ExitSourceAlias is called when exiting the sourceAlias production.
+	ExitSourceAlias(c *SourceAliasContext)
+
+	// ExitSqlJoinClause is called when exiting the sqlJoinClause production.
+	ExitSqlJoinClause(c *SqlJoinClauseContext)
+
+	// ExitSqlJoinPredicate is called when exiting the sqlJoinPredicate production.
+	ExitSqlJoinPredicate(c *SqlJoinPredicateContext)
+
+	// ExitSqlJoinEquality is called when exiting the sqlJoinEquality production.
+	ExitSqlJoinEquality(c *SqlJoinEqualityContext)
+
+	// ExitSqlJoinField is called when exiting the sqlJoinField production.
+	ExitSqlJoinField(c *SqlJoinFieldContext)
+
+	// ExitSqlSelectClause is called when exiting the sqlSelectClause production.
+	ExitSqlSelectClause(c *SqlSelectClauseContext)
+
 	// ExitProjection is called when exiting the projection production.
 	ExitProjection(c *ProjectionContext)
+
+	// ExitProjectionAlias is called when exiting the projectionAlias production.
+	ExitProjectionAlias(c *ProjectionAliasContext)
+
+	// ExitSqlWhereClause is called when exiting the sqlWhereClause production.
+	ExitSqlWhereClause(c *SqlWhereClauseContext)
+
+	// ExitSqlHavingClause is called when exiting the sqlHavingClause production.
+	ExitSqlHavingClause(c *SqlHavingClauseContext)
+
+	// ExitSqlPredicate is called when exiting the sqlPredicate production.
+	ExitSqlPredicate(c *SqlPredicateContext)
+
+	// ExitSqlGroupClause is called when exiting the sqlGroupClause production.
+	ExitSqlGroupClause(c *SqlGroupClauseContext)
+
+	// ExitSqlBy is called when exiting the sqlBy production.
+	ExitSqlBy(c *SqlByContext)
+
+	// ExitSqlGroupKey is called when exiting the sqlGroupKey production.
+	ExitSqlGroupKey(c *SqlGroupKeyContext)
+
+	// ExitSqlSpanCall is called when exiting the sqlSpanCall production.
+	ExitSqlSpanCall(c *SqlSpanCallContext)
+
+	// ExitSqlSpanAssignment is called when exiting the sqlSpanAssignment production.
+	ExitSqlSpanAssignment(c *SqlSpanAssignmentContext)
+
+	// ExitSqlUnparenthesizedSpan is called when exiting the sqlUnparenthesizedSpan production.
+	ExitSqlUnparenthesizedSpan(c *SqlUnparenthesizedSpanContext)
+
+	// ExitSqlOrderClause is called when exiting the sqlOrderClause production.
+	ExitSqlOrderClause(c *SqlOrderClauseContext)
+
+	// ExitSqlOrderTerm is called when exiting the sqlOrderTerm production.
+	ExitSqlOrderTerm(c *SqlOrderTermContext)
+
+	// ExitSqlDirection is called when exiting the sqlDirection production.
+	ExitSqlDirection(c *SqlDirectionContext)
+
+	// ExitSqlLimitClause is called when exiting the sqlLimitClause production.
+	ExitSqlLimitClause(c *SqlLimitClauseContext)
+
+	// ExitSqlOffsetClause is called when exiting the sqlOffsetClause production.
+	ExitSqlOffsetClause(c *SqlOffsetClauseContext)
+
+	// ExitExistsPredicate is called when exiting the existsPredicate production.
+	ExitExistsPredicate(c *ExistsPredicateContext)
 
 	// ExitDataset is called when exiting the dataset production.
 	ExitDataset(c *DatasetContext)
@@ -735,6 +876,9 @@ type SPL2ParserListener interface {
 
 	// ExitIdentifier is called when exiting the identifier production.
 	ExitIdentifier(c *IdentifierContext)
+
+	// ExitSqlKeyword is called when exiting the sqlKeyword production.
+	ExitSqlKeyword(c *SqlKeywordContext)
 
 	// ExitPipelineKeyword is called when exiting the pipelineKeyword production.
 	ExitPipelineKeyword(c *PipelineKeywordContext)

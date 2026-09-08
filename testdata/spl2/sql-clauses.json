@@ -1,0 +1,3664 @@
+[
+  {
+    "id": "C02-P1",
+    "obligation_ids": [
+      "C02-P1"
+    ],
+    "form_ids": [
+      "C02"
+    ],
+    "source_keys": [
+      "doc143"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM requests WHERE size>1 SELECT server"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "fromCommand": 1
+      }
+    },
+    "meaningful_id": "C02.positive"
+  },
+  {
+    "id": "C02-P2",
+    "obligation_ids": [
+      "C02-P2"
+    ],
+    "form_ids": [
+      "C02"
+    ],
+    "source_keys": [
+      "doc143"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT sum(size) AS total FROM requests GROUP BY server"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "selectCommand": 1
+      }
+    },
+    "meaningful_id": "C02.positive"
+  },
+  {
+    "id": "C02-N1",
+    "obligation_ids": [
+      "C02-N1"
+    ],
+    "form_ids": [
+      "C02"
+    ],
+    "source_keys": [
+      "doc143"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM WHERE size>1 SELECT server"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "C02.negative"
+  },
+  {
+    "id": "C02-N2",
+    "obligation_ids": [
+      "C02-N2"
+    ],
+    "form_ids": [
+      "C02"
+    ],
+    "source_keys": [
+      "doc143"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT sum(size) AS total GROUP BY server"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "C02.negative"
+  },
+  {
+    "id": "L15-P1",
+    "obligation_ids": [
+      "L15-P1"
+    ],
+    "form_ids": [
+      "L15"
+    ],
+    "source_keys": [
+      "fromusage"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM sales WHERE price>0 GROUP BY region SELECT region,sum(price) AS total"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "fromCommand": 1
+      }
+    },
+    "meaningful_id": "L15.positive"
+  },
+  {
+    "id": "L15-P2",
+    "obligation_ids": [
+      "L15-P2"
+    ],
+    "form_ids": [
+      "L15"
+    ],
+    "source_keys": [
+      "fromusage"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM events ORDER BY size DESC LIMIT 12 OFFSET 3"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "fromCommand": 1
+      }
+    },
+    "meaningful_id": "L15.positive"
+  },
+  {
+    "id": "L15-N1",
+    "obligation_ids": [
+      "L15-N1"
+    ],
+    "form_ids": [
+      "L15"
+    ],
+    "source_keys": [
+      "fromusage"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM sales SELECT region GROUP BY region"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L15.negative"
+  },
+  {
+    "id": "L15-N2",
+    "obligation_ids": [
+      "L15-N2"
+    ],
+    "form_ids": [
+      "L15"
+    ],
+    "source_keys": [
+      "fromusage"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM events ORDER BY size DESC WHERE size>0"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L15.negative"
+  },
+  {
+    "id": "L16-P1",
+    "obligation_ids": [
+      "L16-P1"
+    ],
+    "form_ids": [
+      "L16"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT DISTINCT region FROM sales"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "selectCommand": 1
+      }
+    },
+    "meaningful_id": "E.L16.distinct.positive"
+  },
+  {
+    "id": "L16-P2",
+    "obligation_ids": [
+      "L16-P2"
+    ],
+    "form_ids": [
+      "L16"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT region,max(price) AS peak FROM sales GROUP BY region HAVING peak>9"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "selectCommand": 1
+      }
+    },
+    "meaningful_id": "L16.positive"
+  },
+  {
+    "id": "L16-N1",
+    "obligation_ids": [
+      "L16-N1"
+    ],
+    "form_ids": [
+      "L16"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT DISTINCT FROM sales"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L16.negative"
+  },
+  {
+    "id": "L16-N2",
+    "obligation_ids": [
+      "L16-N2"
+    ],
+    "form_ids": [
+      "L16"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT region,max(price) AS peak FROM sales HAVING peak>9 GROUP BY region"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L16.negative"
+  },
+  {
+    "id": "L17-P1",
+    "obligation_ids": [
+      "L17-P1"
+    ],
+    "form_ids": [
+      "L17"
+    ],
+    "source_keys": [
+      "process"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT account FROM main WHERE size>0 | eval actor=account | table actor"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "selectCommand": 1
+      }
+    },
+    "meaningful_id": "L17.positive"
+  },
+  {
+    "id": "L17-P2",
+    "obligation_ids": [
+      "L17-P2"
+    ],
+    "form_ids": [
+      "L17"
+    ],
+    "source_keys": [
+      "process"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main GROUP BY server SELECT server,count() AS n | where n>2"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "fromCommand": 1
+      }
+    },
+    "meaningful_id": "L17.positive"
+  },
+  {
+    "id": "L17-N1",
+    "obligation_ids": [
+      "L17-N1"
+    ],
+    "form_ids": [
+      "L17"
+    ],
+    "source_keys": [
+      "process"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT account FROM main | eval actor=account WHERE size>0"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L17.negative"
+  },
+  {
+    "id": "L17-N2",
+    "obligation_ids": [
+      "L17-N2"
+    ],
+    "form_ids": [
+      "L17"
+    ],
+    "source_keys": [
+      "process"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main SELECT server | LIMIT 2"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L17.negative"
+  },
+  {
+    "id": "L18-P1",
+    "obligation_ids": [
+      "L18-P1"
+    ],
+    "form_ids": [
+      "L18"
+    ],
+    "source_keys": [
+      "fromusage"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM [{region:\"east\",n:1},{region:\"west\",n:2}] SELECT region"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "fromCommand": 1
+      }
+    },
+    "meaningful_id": "L18.positive"
+  },
+  {
+    "id": "L18-P2",
+    "obligation_ids": [
+      "L18-P2"
+    ],
+    "form_ids": [
+      "L18"
+    ],
+    "source_keys": [
+      "fromusage"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT item FROM [{item:\"a\"},{other:2}]"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "selectCommand": 1
+      }
+    },
+    "meaningful_id": "L18.positive"
+  },
+  {
+    "id": "L18-N1",
+    "obligation_ids": [
+      "L18-N1"
+    ],
+    "form_ids": [
+      "L18"
+    ],
+    "source_keys": [
+      "fromusage"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM [1,2] SELECT item"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L18.negative"
+  },
+  {
+    "id": "L18-N2",
+    "obligation_ids": [
+      "L18-N2"
+    ],
+    "form_ids": [
+      "L18"
+    ],
+    "source_keys": [
+      "fromusage"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM [{item:\"a\"} {item:\"b\"}] SELECT item"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L18.negative"
+  },
+  {
+    "id": "L19-P1",
+    "obligation_ids": [
+      "L19-P1"
+    ],
+    "form_ids": [
+      "L19"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM purchases AS p JOIN inventory AS i ON p.item=i.id SELECT p.item"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "fromCommand": 1
+      }
+    },
+    "meaningful_id": "L19.positive"
+  },
+  {
+    "id": "L19-P2",
+    "obligation_ids": [
+      "L19-P2"
+    ],
+    "form_ids": [
+      "L19"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT p.item FROM purchases AS p LEFT OUTER JOIN inventory AS i ON p.item=i.id AND p.site=i.site"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "selectCommand": 1
+      }
+    },
+    "meaningful_id": "L19.positive"
+  },
+  {
+    "id": "L19-N1",
+    "obligation_ids": [
+      "L19-N1"
+    ],
+    "form_ids": [
+      "L19"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM purchases JOIN inventory AS i ON p.item=i.id SELECT p.item"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L19.negative"
+  },
+  {
+    "id": "L19-N2",
+    "obligation_ids": [
+      "L19-N2"
+    ],
+    "form_ids": [
+      "L19"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT p.item FROM purchases AS p RIGHT JOIN inventory AS i ON p.item=i.id"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L19.negative"
+  },
+  {
+    "id": "Q01-P1",
+    "obligation_ids": [
+      "Q01-P1"
+    ],
+    "form_ids": [
+      "Q01"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT region,sum(cost) AS total FROM charges GROUP BY region HAVING total>3"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "selectCommand": 1
+      }
+    },
+    "meaningful_id": "Q01-P1"
+  },
+  {
+    "id": "Q01-P2",
+    "obligation_ids": [
+      "Q01-P2"
+    ],
+    "form_ids": [
+      "Q01"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM charges GROUP BY region SELECT region,count() HAVING count>2"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "fromCommand": 1
+      }
+    },
+    "meaningful_id": "Q01-P2"
+  },
+  {
+    "id": "Q01-N1",
+    "obligation_ids": [
+      "Q01-N1"
+    ],
+    "form_ids": [
+      "Q01"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM charges GROUP BY region"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "E.L15.from_clauses.negative"
+  },
+  {
+    "id": "Q01-N2",
+    "obligation_ids": [
+      "Q01-N2"
+    ],
+    "form_ids": [
+      "Q01"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM charges GROUP BY region SELECT"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "Q01-N2"
+  },
+  {
+    "id": "Q02-P1",
+    "obligation_ids": [
+      "Q02-P1"
+    ],
+    "form_ids": [
+      "Q02"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT DISTINCT account,region FROM main"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "selectCommand": 1
+      }
+    },
+    "meaningful_id": "Q02-P1"
+  },
+  {
+    "id": "Q02-P2",
+    "obligation_ids": [
+      "Q02-P2"
+    ],
+    "form_ids": [
+      "Q02"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main SELECT lower(account) AS normalized ORDER BY normalized"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "fromCommand": 1
+      }
+    },
+    "meaningful_id": "Q02-P2"
+  },
+  {
+    "id": "Q02-N1",
+    "obligation_ids": [
+      "Q02-N1"
+    ],
+    "form_ids": [
+      "Q02"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT account DISTINCT FROM main"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "Q02-N1"
+  },
+  {
+    "id": "Q02-N2",
+    "obligation_ids": [
+      "Q02-N2"
+    ],
+    "form_ids": [
+      "Q02"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main SELECT lower(account) AS ORDER BY normalized"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "Q02-N2"
+  },
+  {
+    "id": "Q03-P1",
+    "obligation_ids": [
+      "Q03-P1"
+    ],
+    "form_ids": [
+      "Q03"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT account FROM main LIMIT 5 OFFSET 2"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "selectCommand": 1
+      }
+    },
+    "meaningful_id": "Q03-P1"
+  },
+  {
+    "id": "Q03-P2",
+    "obligation_ids": [
+      "Q03-P2"
+    ],
+    "form_ids": [
+      "Q03"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main OFFSET 4"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "fromCommand": 1
+      }
+    },
+    "meaningful_id": "E.L16.limit_offset.positive"
+  },
+  {
+    "id": "Q03-N1",
+    "obligation_ids": [
+      "Q03-N1"
+    ],
+    "form_ids": [
+      "Q03"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT account FROM main LIMIT 5 OFFSET"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "Q03-N1"
+  },
+  {
+    "id": "Q03-N2",
+    "obligation_ids": [
+      "Q03-N2"
+    ],
+    "form_ids": [
+      "Q03"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main OFFSET 4 LIMIT 5"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "Q03-N2"
+  },
+  {
+    "id": "Q04-P1",
+    "obligation_ids": [
+      "Q04-P1"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT region,count() AS n FROM main GROUPBY region ORDERBY n DESC"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "selectCommand": 1
+      }
+    },
+    "meaningful_id": "Q04-P1"
+  },
+  {
+    "id": "Q04-P2",
+    "obligation_ids": [
+      "Q04-P2"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main GROUP BY region,account SELECT region,account,sum(size) AS total"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "fromCommand": 1
+      }
+    },
+    "meaningful_id": "Q04-P2"
+  },
+  {
+    "id": "Q04-N1",
+    "obligation_ids": [
+      "Q04-N1"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT region,count() AS n FROM main Group By region"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "Q04-N1"
+  },
+  {
+    "id": "Q04-N2",
+    "obligation_ids": [
+      "Q04-N2"
+    ],
+    "form_ids": [
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main GROUP BY region account SELECT region,account,sum(size) AS total"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "Q04-N2"
+  },
+  {
+    "id": "Q05-P1",
+    "obligation_ids": [
+      "Q05-P1",
+      "T4.span.1.False"
+    ],
+    "form_ids": [
+      "Q05"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main GROUP BY span(_time,5min) SELECT count()"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "fromCommand": 1
+      }
+    },
+    "meaningful_id": "E.L16.group_span.positive"
+  },
+  {
+    "id": "Q05-P2",
+    "obligation_ids": [
+      "Q05-P2",
+      "T4.span.4.True"
+    ],
+    "form_ids": [
+      "Q05"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT count() FROM main GROUP BY _time span=(hour)"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "selectCommand": 1
+      }
+    },
+    "meaningful_id": "E.L16.group_span.positive"
+  },
+  {
+    "id": "Q05-N1",
+    "obligation_ids": [
+      "Q05-N1"
+    ],
+    "form_ids": [
+      "Q05"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main GROUP BY span(_time,) SELECT count()"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "Q05-N1"
+  },
+  {
+    "id": "Q05-N2",
+    "obligation_ids": [
+      "Q05-N2"
+    ],
+    "form_ids": [
+      "Q05"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT count() FROM main GROUP BY _time span=()"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "Q05-N2"
+  },
+  {
+    "id": "Q06-P1",
+    "obligation_ids": [
+      "Q06-P1"
+    ],
+    "form_ids": [
+      "Q06"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT sum(size) AS total FROM main GROUP BY server HAVING server=\"api\""
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "selectCommand": 1
+      }
+    },
+    "meaningful_id": "Q06-P1"
+  },
+  {
+    "id": "Q06-P2",
+    "obligation_ids": [
+      "Q06-P2"
+    ],
+    "form_ids": [
+      "Q06"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main GROUP BY server SELECT sum(size) AS total ORDER BY server"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "fromCommand": 1
+      }
+    },
+    "meaningful_id": "Q06-P2"
+  },
+  {
+    "id": "Q06-N1",
+    "obligation_ids": [
+      "Q06-N1"
+    ],
+    "form_ids": [
+      "Q06"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT sum(size) AS total FROM main GROUP BY server HAVING"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "E.L16.having.negative"
+  },
+  {
+    "id": "Q06-N2",
+    "obligation_ids": [
+      "Q06-N2"
+    ],
+    "form_ids": [
+      "Q06"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main GROUP BY server SELECT sum(size) AS total ORDER BY"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "E.L16.order.negative"
+  },
+  {
+    "id": "Q07-P1",
+    "obligation_ids": [
+      "Q07-P1"
+    ],
+    "form_ids": [
+      "Q07"
+    ],
+    "source_keys": [
+      "predicate"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM orders AS o WHERE EXISTS (SELECT id FROM inventory WHERE id=o.item) SELECT item"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "fromCommand": 1
+      }
+    },
+    "meaningful_id": "E.L07.exists.positive"
+  },
+  {
+    "id": "Q07-P2",
+    "obligation_ids": [
+      "Q07-P2"
+    ],
+    "form_ids": [
+      "Q07"
+    ],
+    "source_keys": [
+      "predicate"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT item FROM orders AS o WHERE NOT EXISTS (SELECT id FROM inventory WHERE id=o.item AND active=true)"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "selectCommand": 2
+      }
+    },
+    "meaningful_id": "E.L07.exists.positive"
+  },
+  {
+    "id": "Q07-N1",
+    "obligation_ids": [
+      "Q07-N1"
+    ],
+    "form_ids": [
+      "Q07"
+    ],
+    "source_keys": [
+      "predicate"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM orders AS o WHERE EXISTS (SELECT id FROM inventory WHERE id=o.item LIMIT 1) SELECT item"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "E.L07.exists.negative"
+  },
+  {
+    "id": "Q07-N2",
+    "obligation_ids": [
+      "Q07-N2"
+    ],
+    "form_ids": [
+      "Q07"
+    ],
+    "source_keys": [
+      "predicate"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM orders AS o | where EXISTS (SELECT id FROM inventory WHERE id=o.item)"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "Q07-N2"
+  },
+  {
+    "id": "Q08-P1",
+    "obligation_ids": [
+      "Q08-P1"
+    ],
+    "form_ids": [
+      "Q08"
+    ],
+    "source_keys": [
+      "fromusage",
+      "doc131",
+      "doc172",
+      "doc173",
+      "evalcompat",
+      "aggcompat",
+      "mathfunc",
+      "textfunc",
+      "comparefunc",
+      "convertfunc",
+      "mvfunc",
+      "aggregatefunc",
+      "doc145",
+      "doc136",
+      "types",
+      "doc158",
+      "renameexamples",
+      "doc169",
+      "doc139",
+      "doc168",
+      "doc144",
+      "syntax",
+      "objects",
+      "fromsyntax",
+      "process",
+      "predicate",
+      "lambda",
+      "doc166",
+      "doc161",
+      "comments"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT 'café' AS label FROM [{'café':\"yes\"}] | table label"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "selectCommand": 1
+      }
+    },
+    "meaningful_id": "Q08-P1"
+  },
+  {
+    "id": "Q08-P2",
+    "obligation_ids": [
+      "Q08-P2"
+    ],
+    "form_ids": [
+      "Q08"
+    ],
+    "source_keys": [
+      "fromusage",
+      "doc131",
+      "doc172",
+      "doc173",
+      "evalcompat",
+      "aggcompat",
+      "mathfunc",
+      "textfunc",
+      "comparefunc",
+      "convertfunc",
+      "mvfunc",
+      "aggregatefunc",
+      "doc145",
+      "doc136",
+      "types",
+      "doc158",
+      "renameexamples",
+      "doc169",
+      "doc139",
+      "doc168",
+      "doc144",
+      "syntax",
+      "objects",
+      "fromsyntax",
+      "process",
+      "predicate",
+      "lambda",
+      "doc166",
+      "doc161",
+      "comments"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM [{n:1},{n:2}] SELECT n+1 AS next_n | where next_n>1"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "fromCommand": 1
+      }
+    },
+    "meaningful_id": "Q08-P2"
+  },
+  {
+    "id": "Q08-N1",
+    "obligation_ids": [
+      "Q08-N1"
+    ],
+    "form_ids": [
+      "Q08"
+    ],
+    "source_keys": [
+      "fromusage",
+      "doc131",
+      "doc172",
+      "doc173",
+      "evalcompat",
+      "aggcompat",
+      "mathfunc",
+      "textfunc",
+      "comparefunc",
+      "convertfunc",
+      "mvfunc",
+      "aggregatefunc",
+      "doc145",
+      "doc136",
+      "types",
+      "doc158",
+      "renameexamples",
+      "doc169",
+      "doc139",
+      "doc168",
+      "doc144",
+      "syntax",
+      "objects",
+      "fromsyntax",
+      "process",
+      "predicate",
+      "lambda",
+      "doc166",
+      "doc161",
+      "comments"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT 'café' AS label FROM [{'café':\"yes\"}] | table"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "Q08-N1"
+  },
+  {
+    "id": "Q08-N2",
+    "obligation_ids": [
+      "Q08-N2"
+    ],
+    "form_ids": [
+      "Q08"
+    ],
+    "source_keys": [
+      "fromusage",
+      "doc131",
+      "doc172",
+      "doc173",
+      "evalcompat",
+      "aggcompat",
+      "mathfunc",
+      "textfunc",
+      "comparefunc",
+      "convertfunc",
+      "mvfunc",
+      "aggregatefunc",
+      "doc145",
+      "doc136",
+      "types",
+      "doc158",
+      "renameexamples",
+      "doc169",
+      "doc139",
+      "doc168",
+      "doc144",
+      "syntax",
+      "objects",
+      "fromsyntax",
+      "process",
+      "predicate",
+      "lambda",
+      "doc166",
+      "doc161",
+      "comments"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM [{n:1},{n:2}] SELECT n+1 AS next_n | where next_n>"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "Q08-N2"
+  },
+  {
+    "id": "E.L15.from_clauses.P1",
+    "obligation_ids": [
+      "E.L15.from_clauses.P1"
+    ],
+    "form_ids": [
+      "E.L15.from_clauses"
+    ],
+    "source_keys": [
+      "fromusage"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main WHERE bytes>0 SELECT user ORDER BY user LIMIT 3 OFFSET 1"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "fromCommand": 1
+      }
+    },
+    "meaningful_id": "E.L15.from_clauses.positive"
+  },
+  {
+    "id": "E.L15.from_clauses.P2",
+    "obligation_ids": [
+      "E.L15.from_clauses.P2"
+    ],
+    "form_ids": [
+      "E.L15.from_clauses"
+    ],
+    "source_keys": [
+      "fromusage"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main GROUP BY host SELECT host,count() HAVING count>1"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "fromCommand": 1
+      }
+    },
+    "meaningful_id": "E.L15.from_clauses.positive"
+  },
+  {
+    "id": "E.L15.from_clauses.N1",
+    "obligation_ids": [
+      "E.L15.from_clauses.N1"
+    ],
+    "form_ids": [
+      "E.L15.from_clauses"
+    ],
+    "source_keys": [
+      "fromusage"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main SELECT user WHERE bytes>0"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "E.L15.from_clauses.negative"
+  },
+  {
+    "id": "E.L15.from_clauses.N2",
+    "obligation_ids": [
+      "E.L15.from_clauses.N2"
+    ],
+    "form_ids": [
+      "E.L15.from_clauses"
+    ],
+    "source_keys": [
+      "fromusage"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main GROUP BY host"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "E.L15.from_clauses.negative"
+  },
+  {
+    "id": "E.L16.select_clauses.P1",
+    "obligation_ids": [
+      "E.L16.select_clauses.P1"
+    ],
+    "form_ids": [
+      "E.L16.select_clauses"
+    ],
+    "source_keys": [
+      "fromusage"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT user FROM main WHERE bytes>0 ORDER BY user"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "selectCommand": 1
+      }
+    },
+    "meaningful_id": "E.L16.select_clauses.positive"
+  },
+  {
+    "id": "E.L16.select_clauses.P2",
+    "obligation_ids": [
+      "E.L16.select_clauses.P2"
+    ],
+    "form_ids": [
+      "E.L16.select_clauses"
+    ],
+    "source_keys": [
+      "fromusage"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT host,count() FROM main GROUP BY host HAVING count>1 LIMIT 5"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "selectCommand": 1
+      }
+    },
+    "meaningful_id": "E.L16.select_clauses.positive"
+  },
+  {
+    "id": "E.L16.select_clauses.N1",
+    "obligation_ids": [
+      "E.L16.select_clauses.N1"
+    ],
+    "form_ids": [
+      "E.L16.select_clauses"
+    ],
+    "source_keys": [
+      "fromusage"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT user WHERE bytes>0 FROM main"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "E.L16.select_clauses.negative"
+  },
+  {
+    "id": "E.L16.select_clauses.N2",
+    "obligation_ids": [
+      "E.L16.select_clauses.N2"
+    ],
+    "form_ids": [
+      "E.L16.select_clauses"
+    ],
+    "source_keys": [
+      "fromusage"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT host,count() FROM main HAVING count>1 GROUP BY host"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "E.L16.select_clauses.negative"
+  },
+  {
+    "id": "E.L16.distinct.P1",
+    "obligation_ids": [
+      "E.L16.distinct.P1"
+    ],
+    "form_ids": [
+      "E.L16.distinct"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT DISTINCT host FROM main"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "selectCommand": 1
+      }
+    },
+    "meaningful_id": "E.L16.distinct.positive"
+  },
+  {
+    "id": "E.L16.distinct.P2",
+    "obligation_ids": [
+      "E.L16.distinct.P2"
+    ],
+    "form_ids": [
+      "E.L16.distinct"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main SELECT DISTINCT host,user"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "fromCommand": 1
+      }
+    },
+    "meaningful_id": "E.L16.distinct.positive"
+  },
+  {
+    "id": "E.L16.distinct.N1",
+    "obligation_ids": [
+      "E.L16.distinct.N1"
+    ],
+    "form_ids": [
+      "E.L16.distinct"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT DISTINCT FROM main"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "E.L16.distinct.negative"
+  },
+  {
+    "id": "E.L16.distinct.N2",
+    "obligation_ids": [
+      "E.L16.distinct.N2"
+    ],
+    "form_ids": [
+      "E.L16.distinct"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main SELECT host DISTINCT"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "E.L16.distinct.negative"
+  },
+  {
+    "id": "E.L16.alias.P1",
+    "obligation_ids": [
+      "E.L16.alias.P1"
+    ],
+    "form_ids": [
+      "E.L16.alias"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT lower(user) AS normalized FROM main"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "selectCommand": 1
+      }
+    },
+    "meaningful_id": "E.L16.alias.positive"
+  },
+  {
+    "id": "E.L16.alias.P2",
+    "obligation_ids": [
+      "E.L16.alias.P2"
+    ],
+    "form_ids": [
+      "E.L16.alias"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main AS events SELECT events.user AS owner"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "fromCommand": 1
+      }
+    },
+    "meaningful_id": "E.L16.alias.positive"
+  },
+  {
+    "id": "E.L16.alias.N1",
+    "obligation_ids": [
+      "E.L16.alias.N1"
+    ],
+    "form_ids": [
+      "E.L16.alias"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT lower(user) AS FROM main"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "E.L16.alias.negative"
+  },
+  {
+    "id": "E.L16.alias.N2",
+    "obligation_ids": [
+      "E.L16.alias.N2"
+    ],
+    "form_ids": [
+      "E.L16.alias"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main AS SELECT user"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "E.L16.alias.negative"
+  },
+  {
+    "id": "E.L16.group_keys.P1",
+    "obligation_ids": [
+      "E.L16.group_keys.P1"
+    ],
+    "form_ids": [
+      "E.L16.group_keys"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT host,user,count() FROM main GROUP BY host,user"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "selectCommand": 1
+      }
+    },
+    "meaningful_id": "E.L16.group_keys.positive"
+  },
+  {
+    "id": "E.L16.group_keys.P2",
+    "obligation_ids": [
+      "E.L16.group_keys.P2"
+    ],
+    "form_ids": [
+      "E.L16.group_keys"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main GROUPBY lower(user) SELECT lower(user) AS normalized,count()"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "fromCommand": 1
+      }
+    },
+    "meaningful_id": "E.L16.group_keys.positive"
+  },
+  {
+    "id": "E.L16.group_keys.N1",
+    "obligation_ids": [
+      "E.L16.group_keys.N1"
+    ],
+    "form_ids": [
+      "E.L16.group_keys"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT count() FROM main GROUP BY 'host*'"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "E.L16.group_keys.negative"
+  },
+  {
+    "id": "E.L16.group_keys.N2",
+    "obligation_ids": [
+      "E.L16.group_keys.N2"
+    ],
+    "form_ids": [
+      "E.L16.group_keys"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main GROUP BY host user SELECT count()"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "E.L16.group_keys.negative"
+  },
+  {
+    "id": "E.L16.group_span.P1",
+    "obligation_ids": [
+      "E.L16.group_span.P1",
+      "T4.span.0.True"
+    ],
+    "form_ids": [
+      "E.L16.group_span",
+      "Q05"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT count() FROM main GROUP BY span(_time)"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "selectCommand": 1
+      }
+    },
+    "meaningful_id": "E.L16.group_span.positive"
+  },
+  {
+    "id": "E.L16.group_span.P2",
+    "obligation_ids": [
+      "E.L16.group_span.P2",
+      "T4.span.3.False"
+    ],
+    "form_ids": [
+      "E.L16.group_span",
+      "Q05"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main GROUP BY _time span=(5min) SELECT count()"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "fromCommand": 1
+      }
+    },
+    "meaningful_id": "E.L16.group_span.positive"
+  },
+  {
+    "id": "E.L16.group_span.N1",
+    "obligation_ids": [
+      "E.L16.group_span.N1"
+    ],
+    "form_ids": [
+      "E.L16.group_span"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT count() FROM main GROUP BY span()"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "E.L16.group_span.negative"
+  },
+  {
+    "id": "E.L16.group_span.N2",
+    "obligation_ids": [
+      "E.L16.group_span.N2"
+    ],
+    "form_ids": [
+      "E.L16.group_span"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main GROUP BY _time span=() SELECT count()"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "E.L16.group_span.negative"
+  },
+  {
+    "id": "E.L16.having.P1",
+    "obligation_ids": [
+      "E.L16.having.P1"
+    ],
+    "form_ids": [
+      "E.L16.having"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT count() AS n FROM main HAVING n>2"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "selectCommand": 1
+      }
+    },
+    "meaningful_id": "E.L16.having.positive"
+  },
+  {
+    "id": "E.L16.having.P2",
+    "obligation_ids": [
+      "E.L16.having.P2"
+    ],
+    "form_ids": [
+      "E.L16.having"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main GROUP BY host SELECT host,sum(bytes) AS total HAVING total>0"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "fromCommand": 1
+      }
+    },
+    "meaningful_id": "E.L16.having.positive"
+  },
+  {
+    "id": "E.L16.having.N1",
+    "obligation_ids": [
+      "E.L16.having.N1"
+    ],
+    "form_ids": [
+      "E.L16.having"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT count() AS n FROM main HAVING"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "E.L16.having.negative"
+  },
+  {
+    "id": "E.L16.having.N2",
+    "obligation_ids": [
+      "E.L16.having.N2"
+    ],
+    "form_ids": [
+      "E.L16.having"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main GROUP BY host SELECT host,sum(bytes) AS total HAVING total>"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "E.L16.having.negative"
+  },
+  {
+    "id": "E.L16.order.P1",
+    "obligation_ids": [
+      "E.L16.order.P1"
+    ],
+    "form_ids": [
+      "E.L16.order"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT host,user FROM main ORDER BY host,user DESC"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "selectCommand": 1
+      }
+    },
+    "meaningful_id": "E.L16.order.positive"
+  },
+  {
+    "id": "E.L16.order.P2",
+    "obligation_ids": [
+      "E.L16.order.P2"
+    ],
+    "form_ids": [
+      "E.L16.order"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main ORDERBY bytes ASC"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "fromCommand": 1
+      }
+    },
+    "meaningful_id": "E.L16.order.positive"
+  },
+  {
+    "id": "E.L16.order.N1",
+    "obligation_ids": [
+      "E.L16.order.N1"
+    ],
+    "form_ids": [
+      "E.L16.order"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT host,user FROM main ORDER BY host,"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "E.L16.order.negative"
+  },
+  {
+    "id": "E.L16.order.N2",
+    "obligation_ids": [
+      "E.L16.order.N2",
+      "T4.order.ORDERBY.False.missing"
+    ],
+    "form_ids": [
+      "E.L16.order",
+      "Q04"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main ORDERBY"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "E.L16.order.negative"
+  },
+  {
+    "id": "E.L16.limit_offset.P1",
+    "obligation_ids": [
+      "E.L16.limit_offset.P1"
+    ],
+    "form_ids": [
+      "E.L16.limit_offset"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT host FROM main LIMIT 4"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "selectCommand": 1
+      }
+    },
+    "meaningful_id": "E.L16.limit_offset.positive"
+  },
+  {
+    "id": "E.L16.limit_offset.P2",
+    "obligation_ids": [
+      "E.L16.limit_offset.P2"
+    ],
+    "form_ids": [
+      "E.L16.limit_offset"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main OFFSET 2"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "fromCommand": 1
+      }
+    },
+    "meaningful_id": "E.L16.limit_offset.positive"
+  },
+  {
+    "id": "E.L16.limit_offset.N1",
+    "obligation_ids": [
+      "E.L16.limit_offset.N1"
+    ],
+    "form_ids": [
+      "E.L16.limit_offset"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT host FROM main LIMIT"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "E.L16.limit_offset.negative"
+  },
+  {
+    "id": "E.L16.limit_offset.N2",
+    "obligation_ids": [
+      "E.L16.limit_offset.N2"
+    ],
+    "form_ids": [
+      "E.L16.limit_offset"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main LIMIT 4 OFFSET"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "E.L16.limit_offset.negative"
+  },
+  {
+    "id": "E.L17.pipe.P1",
+    "obligation_ids": [
+      "E.L17.pipe.P1"
+    ],
+    "form_ids": [
+      "E.L17.pipe"
+    ],
+    "source_keys": [
+      "process"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT user FROM main | eval owner=user"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "selectCommand": 1
+      }
+    },
+    "meaningful_id": "E.L17.pipe.positive"
+  },
+  {
+    "id": "E.L17.pipe.P2",
+    "obligation_ids": [
+      "E.L17.pipe.P2"
+    ],
+    "form_ids": [
+      "E.L17.pipe"
+    ],
+    "source_keys": [
+      "process"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main GROUP BY host SELECT host,count() | where count>2"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "fromCommand": 1
+      }
+    },
+    "meaningful_id": "E.L17.pipe.positive"
+  },
+  {
+    "id": "E.L17.pipe.N1",
+    "obligation_ids": [
+      "E.L17.pipe.N1"
+    ],
+    "form_ids": [
+      "E.L17.pipe"
+    ],
+    "source_keys": [
+      "process"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT user FROM main | eval owner=user GROUP BY host"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "E.L17.pipe.negative"
+  },
+  {
+    "id": "E.L17.pipe.N2",
+    "obligation_ids": [
+      "E.L17.pipe.N2"
+    ],
+    "form_ids": [
+      "E.L17.pipe"
+    ],
+    "source_keys": [
+      "process"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main SELECT user | ORDER BY user"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "E.L17.pipe.negative"
+  },
+  {
+    "id": "E.L18.rows.P1",
+    "obligation_ids": [
+      "E.L18.rows.P1"
+    ],
+    "form_ids": [
+      "E.L18.rows"
+    ],
+    "source_keys": [
+      "fromusage"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM [{a:1},{a:2}] SELECT a"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "fromCommand": 1
+      }
+    },
+    "meaningful_id": "E.L18.rows.positive"
+  },
+  {
+    "id": "E.L18.rows.P2",
+    "obligation_ids": [
+      "E.L18.rows.P2"
+    ],
+    "form_ids": [
+      "E.L18.rows"
+    ],
+    "source_keys": [
+      "fromusage"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT a FROM [{a:1},{b:2}]"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "selectCommand": 1
+      }
+    },
+    "meaningful_id": "E.L18.rows.positive"
+  },
+  {
+    "id": "E.L18.rows.N1",
+    "obligation_ids": [
+      "E.L18.rows.N1"
+    ],
+    "form_ids": [
+      "E.L18.rows"
+    ],
+    "source_keys": [
+      "fromusage"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM [{a:1}{a:2}] SELECT a"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "E.L18.rows.negative"
+  },
+  {
+    "id": "E.L18.rows.N2",
+    "obligation_ids": [
+      "E.L18.rows.N2"
+    ],
+    "form_ids": [
+      "E.L18.rows"
+    ],
+    "source_keys": [
+      "fromusage"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT a FROM [{a:1],{a:2}]"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "E.L18.rows.negative"
+  },
+  {
+    "id": "E.L19.inner.P1",
+    "obligation_ids": [
+      "E.L19.inner.P1"
+    ],
+    "form_ids": [
+      "E.L19.inner"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main AS m JOIN users AS u ON m.uid=u.id SELECT m.uid"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "fromCommand": 1
+      }
+    },
+    "meaningful_id": "E.L19.inner.positive"
+  },
+  {
+    "id": "E.L19.inner.P2",
+    "obligation_ids": [
+      "E.L19.inner.P2"
+    ],
+    "form_ids": [
+      "E.L19.inner"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT m.uid FROM main AS m INNER JOIN users AS u ON m.uid=u.id AND m.realm=u.realm"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "selectCommand": 1
+      }
+    },
+    "meaningful_id": "E.L19.inner.positive"
+  },
+  {
+    "id": "E.L19.inner.N1",
+    "obligation_ids": [
+      "E.L19.inner.N1"
+    ],
+    "form_ids": [
+      "E.L19.inner"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main JOIN users AS u ON m.uid=u.id SELECT m.uid"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "E.L19.inner.negative"
+  },
+  {
+    "id": "E.L19.inner.N2",
+    "obligation_ids": [
+      "E.L19.inner.N2"
+    ],
+    "form_ids": [
+      "E.L19.inner"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT m.uid FROM main AS m JOIN users AS u m.uid=u.id"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "E.L19.inner.negative"
+  },
+  {
+    "id": "E.L19.left.P1",
+    "obligation_ids": [
+      "E.L19.left.P1"
+    ],
+    "form_ids": [
+      "E.L19.left"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main AS m LEFT JOIN users AS u ON m.uid=u.id SELECT m.uid"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "fromCommand": 1
+      }
+    },
+    "meaningful_id": "E.L19.left.positive"
+  },
+  {
+    "id": "E.L19.left.P2",
+    "obligation_ids": [
+      "E.L19.left.P2"
+    ],
+    "form_ids": [
+      "E.L19.left"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT m.uid FROM main AS m LEFT OUTER JOIN users AS u ON m.uid=u.id"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "selectCommand": 1
+      }
+    },
+    "meaningful_id": "E.L19.left.positive"
+  },
+  {
+    "id": "E.L19.left.N1",
+    "obligation_ids": [
+      "E.L19.left.N1"
+    ],
+    "form_ids": [
+      "E.L19.left"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main AS m LEFT JOIN users ON m.uid=u.id SELECT m.uid"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "E.L19.left.negative"
+  },
+  {
+    "id": "E.L19.left.N2",
+    "obligation_ids": [
+      "E.L19.left.N2"
+    ],
+    "form_ids": [
+      "E.L19.left"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT m.uid FROM main AS m FULL JOIN users AS u ON m.uid=u.id"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "E.L19.left.negative"
+  },
+  {
+    "id": "E.L19.multiple_join.P1",
+    "obligation_ids": [
+      "E.L19.multiple_join.P1"
+    ],
+    "form_ids": [
+      "E.L19.multiple_join"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main AS m JOIN users AS u ON m.uid=u.id JOIN teams AS t ON u.team=t.id SELECT m.uid"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "fromCommand": 1
+      }
+    },
+    "meaningful_id": "E.L19.multiple_join.positive"
+  },
+  {
+    "id": "E.L19.multiple_join.P2",
+    "obligation_ids": [
+      "E.L19.multiple_join.P2"
+    ],
+    "form_ids": [
+      "E.L19.multiple_join"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT m.uid FROM main AS m LEFT JOIN users AS u ON m.uid=u.id LEFT JOIN teams AS t ON u.team=t.id"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "selectCommand": 1
+      }
+    },
+    "meaningful_id": "E.L19.multiple_join.positive"
+  },
+  {
+    "id": "E.L19.multiple_join.N1",
+    "obligation_ids": [
+      "E.L19.multiple_join.N1"
+    ],
+    "form_ids": [
+      "E.L19.multiple_join"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main AS m JOIN users AS u ON m.uid=u.id JOIN SELECT m.uid"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "E.L19.multiple_join.negative"
+  },
+  {
+    "id": "E.L19.multiple_join.N2",
+    "obligation_ids": [
+      "E.L19.multiple_join.N2"
+    ],
+    "form_ids": [
+      "E.L19.multiple_join"
+    ],
+    "source_keys": [
+      "fromsyntax"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT m.uid FROM main AS m JOIN users AS u ON m.uid=u.id WHERE m.uid>0 JOIN teams AS t ON u.team=t.id"
+    },
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "E.L19.multiple_join.negative"
+  },
+  {
+    "id": "E.L07.exists.P1",
+    "obligation_ids": [
+      "E.L07.exists.P1"
+    ],
+    "form_ids": [
+      "E.L07.exists"
+    ],
+    "source_keys": [
+      "predicate"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main AS m WHERE EXISTS (SELECT id FROM users WHERE id=m.uid) SELECT uid"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "fromCommand": 1
+      }
+    },
+    "meaningful_id": "E.L07.exists.positive"
+  },
+  {
+    "id": "E.L07.exists.P2",
+    "obligation_ids": [
+      "E.L07.exists.P2"
+    ],
+    "form_ids": [
+      "E.L07.exists"
+    ],
+    "source_keys": [
+      "predicate"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT uid FROM main AS m WHERE NOT EXISTS (SELECT id FROM users WHERE id=m.uid)"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "selectCommand": 2
+      }
+    },
+    "meaningful_id": "E.L07.exists.positive"
+  },
+  {
+    "id": "E.L07.exists.N1",
+    "obligation_ids": [
+      "E.L07.exists.N1"
+    ],
+    "form_ids": [
+      "E.L07.exists"
+    ],
+    "source_keys": [
+      "predicate"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "FROM main WHERE EXISTS (SELECT id FROM users WHERE id=m.uid) SELECT uid"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "E.L07.exists.negative"
+  },
+  {
+    "id": "E.L07.exists.N2",
+    "obligation_ids": [
+      "E.L07.exists.N2"
+    ],
+    "form_ids": [
+      "E.L07.exists"
+    ],
+    "source_keys": [
+      "predicate"
+    ],
+    "document": {
+      "language": "spl2",
+      "text": "SELECT uid FROM main AS m WHERE EXISTS (SELECT id FROM users WHERE id=m.uid LIMIT 1)"
+    },
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "E.L07.exists.negative"
+  }
+]

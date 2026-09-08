@@ -59,6 +59,45 @@ func (p *spl2ParsedDocument) syntaxFinding(ctx antlr.ParserRuleContext, code, ca
 }
 func (p *spl2ParsedDocument) inspectSyntax(tree antlr.Tree, lambdaDepth int) {
 	switch ctx := tree.(type) {
+	case *spl2.TimeSpanContext:
+		switch ctx.GetParent().(type) {
+		case *spl2.SqlSpanCallContext, *spl2.SqlSpanAssignmentContext, *spl2.SqlUnparenthesizedSpanContext:
+			if ctx.NUMBER() != nil && spl2IntactSyntax(ctx) && !spl2SQLInteger(ctx.NUMBER().GetText()) {
+				p.syntaxFinding(ctx, CodeSyntaxError, "contract", "SQL span count requires an integer")
+			}
+		}
+	case *spl2.SqlJoinFieldContext:
+		if len(ctx.AllAccessPart()) > 0 && spl2IntactSyntax(ctx) {
+			p.heldSyntax(ctx, "Deeper SQL join field paths remain unproved")
+		}
+	case *spl2.SqlFromClauseContext:
+		if len(ctx.AllSqlJoinClause()) > 0 && ctx.SourceAlias() == nil && spl2IntactSyntax(ctx) {
+			p.syntaxFinding(ctx.Dataset(), CodeSyntaxError, "contract", "Joined sources require explicit aliases")
+		}
+	case *spl2.DatasetContext:
+		if rows := ctx.Array(); rows != nil && spl2IntactSyntax(rows) {
+			for _, row := range rows.AllExpression() {
+				access := spl2SingleAccess(row)
+				if access == nil || len(access.AllAccessPart()) != 0 || access.Primary().Object() == nil {
+					p.syntaxFinding(row, CodeSyntaxError, "contract", "Dataset literal rows must be objects")
+				}
+			}
+		}
+	case *spl2.SqlGroupKeyContext:
+		p.inspectSQLGroup(ctx)
+	case *spl2.SqlOrderClauseContext:
+		terms := ctx.AllSqlOrderTerm()
+		for _, term := range terms[:max(0, len(terms)-1)] {
+			if direction := term.SqlDirection(); direction != nil && spl2IntactSyntax(direction) {
+				p.heldSyntax(direction, "H07 independent ORDER BY term directions remain held")
+			}
+		}
+	case *spl2.SqlUnparenthesizedSpanContext:
+		if spl2IntactSyntax(ctx) {
+			p.heldSyntax(ctx, "EH05 unparenthesized SQL span assignment remains held")
+		}
+	case *spl2.ExistsPredicateContext:
+		p.inspectSQLExists(ctx)
 	case *spl2.RenameCommandContext:
 		p.inspectRename(ctx)
 	case *spl2.TableFieldContext:
@@ -128,6 +167,15 @@ func (p *spl2ParsedDocument) inspectSyntax(tree antlr.Tree, lambdaDepth int) {
 		positive := false
 		_, positive = ctx.GetParent().(*spl2.DedupCommandContext)
 		p.inspectInteger(ctx, positive)
+		switch ctx.GetParent().(type) {
+		case *spl2.SqlLimitClauseContext, *spl2.SqlOffsetClauseContext:
+			if spl2IntactSyntax(ctx) {
+				value := strings.TrimPrefix(ctx.GetText(), "+")
+				if spl2SQLInteger(strings.TrimPrefix(value, "-")) && strings.HasPrefix(value, "-") {
+					p.heldSyntax(ctx, "H06 negative SQL integer range remains held")
+				}
+			}
+		}
 	case *spl2.WindowOptionContext:
 		if ctx.NUMBER() != nil {
 			p.inspectInteger(ctx, false)
@@ -382,4 +430,196 @@ func spl2IntactSyntax(tree antlr.Tree) bool {
 		}
 	}
 	return true
+}
+
+// A single access is derived solely from typed expression routing. Operators,
+// lambdas and compound values never become correlation fields or object rows.
+func spl2SingleAccess(expression antlr.Tree) spl2.IAccessContext {
+	var descend func(antlr.Tree) spl2.IAccessContext
+	descend = func(tree antlr.Tree) spl2.IAccessContext {
+		if access, ok := tree.(spl2.IAccessContext); ok {
+			return access
+		}
+		if len(tree.GetChildren()) != 1 {
+			return nil
+		}
+		return descend(tree.GetChildren()[0])
+	}
+	if expression == nil {
+		return nil
+	}
+	return descend(expression)
+}
+
+func (p *spl2ParsedDocument) inspectSQLGroup(ctx *spl2.SqlGroupKeyContext) {
+	if !spl2IntactSyntax(ctx) {
+		return
+	}
+	if span := ctx.SqlSpanAssignment(); span != nil {
+		field := spl2SQLFieldAccess(ctx.Expression())
+		if field == nil || field.Primary().FieldName() == nil {
+			p.syntaxFinding(ctx.Expression(), CodeSyntaxError, "contract", "SQL span assignment requires a field operand")
+		} else if len(field.AllAccessPart()) > 0 {
+			p.heldSyntax(ctx.Expression(), "Qualified or deeper SQL span targets remain unproved")
+		}
+	}
+	var visit func(antlr.Tree)
+	visit = func(tree antlr.Tree) {
+		if field, ok := tree.(*spl2.FieldNameContext); ok && field.Identifier() != nil {
+			if name, known := spl2DecodeKey(field.Identifier().GetText()); known && strings.Contains(name, "*") {
+				p.syntaxFinding(field, CodeSyntaxError, "contract", "SQL grouping keys cannot contain field wildcards")
+			}
+		}
+		for _, child := range tree.GetChildren() {
+			visit(child)
+		}
+	}
+	visit(ctx)
+}
+
+// Both hierarchies expose the same lexical clauses without reordering them.
+type spl2SQLClauses interface {
+	antlr.ParserRuleContext
+	SqlFromClause() spl2.ISqlFromClauseContext
+	SqlWhereClause() spl2.ISqlWhereClauseContext
+	SqlHavingClause() spl2.ISqlHavingClauseContext
+	SqlLimitClause() spl2.ISqlLimitClauseContext
+	SqlOffsetClause() spl2.ISqlOffsetClauseContext
+}
+
+func (p *spl2ParsedDocument) inspectSQLExists(ctx *spl2.ExistsPredicateContext) {
+	if !spl2IntactSyntax(ctx) {
+		return
+	}
+	var owner spl2SQLClauses
+	var clause antlr.Tree
+	for parent := ctx.GetParent(); parent != nil; parent = parent.GetParent() {
+		switch parent.(type) {
+		case *spl2.LambdaExpressionContext:
+			p.syntaxFinding(ctx, CodeSyntaxError, "contract", "EXISTS is restricted to SQL WHERE or HAVING predicates")
+			return
+		case *spl2.SqlWhereClauseContext, *spl2.SqlHavingClauseContext, *spl2.SqlSelectClauseContext,
+			*spl2.SqlGroupClauseContext, *spl2.SqlOrderClauseContext, *spl2.SqlJoinClauseContext:
+			if clause == nil {
+				clause = parent
+			}
+		}
+		if sql, ok := parent.(spl2SQLClauses); ok {
+			owner = sql
+			break
+		}
+	}
+	allowed := false
+	switch clause.(type) {
+	case *spl2.SqlWhereClauseContext:
+		allowed = owner != nil && owner.SqlHavingClause() == nil
+	case *spl2.SqlHavingClauseContext:
+		allowed = owner != nil
+	}
+	if !allowed {
+		p.syntaxFinding(ctx, CodeSyntaxError, "contract", "EXISTS is restricted to SQL WHERE, or HAVING when both clauses occur")
+		return
+	}
+	from := owner.SqlFromClause()
+	if from == nil || !spl2IntactSyntax(from) {
+		return
+	}
+	if from.SourceAlias() == nil {
+		p.syntaxFinding(ctx, CodeSyntaxError, "contract", "EXISTS requires an explicit outer source alias")
+		return
+	}
+	alias, known := spl2DecodeKey(from.SourceAlias().Identifier().GetText())
+	if !known {
+		p.heldSyntax(ctx, "Unproved EXISTS source alias")
+		return
+	}
+	var child spl2SQLClauses
+	if sql := ctx.SelectCommand(); sql != nil {
+		child = sql
+	} else if sql := ctx.FromCommand(); sql != nil {
+		child = sql
+	}
+	if child == nil {
+		return
+	}
+	if limit := child.SqlLimitClause(); limit != nil {
+		p.syntaxFinding(limit, CodeSyntaxError, "contract", "EXISTS child cannot contain LIMIT")
+	}
+	if offset := child.SqlOffsetClause(); offset != nil {
+		p.syntaxFinding(offset, CodeSyntaxError, "contract", "EXISTS child cannot contain OFFSET")
+	}
+	shadowed := false
+	if source := child.SqlFromClause(); source != nil {
+		aliases := []spl2.ISourceAliasContext{source.SourceAlias()}
+		for _, join := range source.AllSqlJoinClause() {
+			aliases = append(aliases, join.SourceAlias())
+		}
+		for _, local := range aliases {
+			if local != nil {
+				name, ok := spl2DecodeKey(local.Identifier().GetText())
+				shadowed = shadowed || ok && name == alias
+			}
+		}
+	}
+	if shadowed || child.SqlWhereClause() == nil || !spl2SQLCorrelation(child.SqlWhereClause(), alias) {
+		p.syntaxFinding(ctx, CodeSyntaxError, "contract", "EXISTS child WHERE requires equality correlation to the outer source alias")
+	}
+}
+
+func spl2SQLCorrelation(where spl2.ISqlWhereClauseContext, alias string) bool {
+	// A qualified outer reference has a field base plus a real DOT access part;
+	// quoted literal dots cannot acquire qualification through string splitting.
+	outer := func(access spl2.IAccessContext) bool {
+		if access == nil || access.Primary().FieldName() == nil || access.Primary().FieldName().Identifier() == nil {
+			return false
+		}
+		name, ok := spl2DecodeKey(access.Primary().FieldName().Identifier().GetText())
+		parts := access.AllAccessPart()
+		return ok && name == alias && len(parts) > 0 && parts[0].DOT() != nil
+	}
+	field := func(access spl2.IAccessContext) bool { return access != nil && access.Primary().FieldName() != nil }
+	var visit func(antlr.Tree) bool
+	visit = func(tree antlr.Tree) bool {
+		switch tree.(type) {
+		case *spl2.ExistsPredicateContext, *spl2.LambdaExpressionContext:
+			return false
+		}
+		if predicate, ok := tree.(*spl2.PredicateContext); ok && predicate.Comparison() != nil {
+			op := predicate.Comparison().GetText()
+			operands := predicate.AllAdditive()
+			if (op == "=" || op == "==") && len(operands) == 2 {
+				left, right := spl2SQLFieldAccess(operands[0]), spl2SQLFieldAccess(operands[1])
+				if field(left) && field(right) && outer(left) != outer(right) {
+					return true
+				}
+			}
+		}
+		for _, child := range tree.GetChildren() {
+			if visit(child) {
+				return true
+			}
+		}
+		return false
+	}
+	return visit(where)
+}
+
+func spl2SQLInteger(value string) bool {
+	if value == "" {
+		return false
+	}
+	for _, digit := range value {
+		if digit < '0' || digit > '9' {
+			return false
+		}
+	}
+	return true
+}
+
+func spl2SQLFieldAccess(tree antlr.Tree) spl2.IAccessContext {
+	access := spl2SingleAccess(tree)
+	for access != nil && len(access.AllAccessPart()) == 0 && access.Primary().LPAREN() != nil {
+		access = spl2SingleAccess(access.Primary().Expression())
+	}
+	return access
 }
