@@ -2,6 +2,7 @@ package analysis
 
 import (
 	"fmt"
+	"github.com/antlr4-go/antlr/v4"
 	"github.com/delgado-jacob/spl-toolkit/parser/spl2"
 	"strings"
 )
@@ -20,6 +21,12 @@ var spl2Functions = map[string]spl2FunctionSpec{
 }
 
 func (s *spl2SemanticStage) call(c spl2.ICallContext, aggregate bool) spl2ExpressionEvidence {
+	return s.callWithExpression(c, aggregate, s.expression)
+}
+
+// SQL compound preparation supplies aggregate-aware operands; all call contracts
+// and direct null-test/wildcard handling still use this single shared policy.
+func (s *spl2SemanticStage) callWithExpression(c spl2.ICallContext, aggregate bool, expression func(antlr.Tree) spl2ExpressionEvidence) spl2ExpressionEvidence {
 	out := spl2ExpressionEvidence{ids: []string{}}
 	name := c.Identifier().GetText()
 	values := []spl2ExpressionEvidence{}
@@ -35,14 +42,14 @@ func (s *spl2SemanticStage) call(c spl2.ICallContext, aggregate bool) spl2Expres
 				_, ids := s.selectorAt(s.selector(access.Primary().FieldName().Identifier()), "read", false)
 				v = spl2ExpressionEvidence{ids: ids}
 			} else {
-				v = s.expression(expr)
+				v = expression(expr)
 			}
 			values = append(values, v)
 			out.ids = append(out.ids, v.ids...)
 		}
 		for _, arg := range args.AllNamedArgument() {
 			named = true
-			v := s.expression(arg.Expression())
+			v := expression(arg.Expression())
 			out.ids = append(out.ids, v.ids...)
 		}
 	}

@@ -387,3 +387,69 @@ func TestSPL2SQLAggregateWildcardKeepsSourceGuards(t *testing.T) {
 	}
 	assertCorpusIntegrity(t, r.Result)
 }
+
+func TestSPL2SQLCompoundAggregateCallContracts(t *testing.T) {
+	for _, c := range []struct {
+		name, expression, code, diagnosticText string
+		status                                 Status
+		fields                                 []string
+	}{
+		{"invalid if", `if(count(),1)`, CodeSyntaxError, `if(count(),1)`, Invalid, nil},
+		{"valid if", `if(count(),1,2)`, "", "", Incomplete, nil},
+		{"invalid if with reads", `if(sum(bytes),backup)`, CodeSyntaxError, `if(sum(bytes),backup)`, Invalid, []string{"bytes", "backup"}},
+		{"valid if with reads", `if(sum(bytes),backup,fallback)`, "", "", Incomplete, []string{"bytes", "backup", "fallback"}},
+		{"nested invalid wrapper", `coalesce(if(sum(bytes),backup),fallback)`, CodeSyntaxError, `if(sum(bytes),backup)`, Invalid, []string{"bytes", "backup", "fallback"}},
+		{"valid numeric wrapper", `round(sum(bytes),2)`, "", "", Incomplete, []string{"bytes"}},
+		{"invalid numeric wrapper", `round(sum(bytes),precision,extra)`, CodeSyntaxError, `round(sum(bytes),precision,extra)`, Invalid, []string{"bytes", "precision", "extra"}},
+		{"unknown wrapper", `mystery(sum(bytes),backup)`, CodeUnsupportedFunction, `mystery(sum(bytes),backup)`, Incomplete, []string{"bytes", "backup"}},
+		{"named wrapper", `if(sum(bytes),then:backup)`, CodeUnsupportedSemantics, `if(sum(bytes),then:backup)`, Incomplete, []string{"bytes", "backup"}},
+		{"wrong profile wrapper", `batch_id(sum(bytes))`, "SPL_PROFILE_MISMATCH", `batch_id(sum(bytes))`, Invalid, []string{"bytes"}},
+		{"null inspection wrapper", `isnull(count())`, "", "", Incomplete, nil},
+		{"all-null wrapper stays unproved", `if(count(),null,null)`, "", "", Incomplete, nil},
+	} {
+		t.Run(c.name, func(t *testing.T) {
+			text := "SELECT " + c.expression + " AS total FROM main"
+			r := spl2AnalyzeTest(t, text)
+			if r.Status != c.status || r.Coverage.SemanticComplete || !spl2HasCode(r, CodeUnsupportedSemantics) {
+				t.Fatalf("status/coverage: %+v", r)
+			}
+			if c.code != "" && !spl2HasCode(r, c.code) {
+				t.Fatalf("missing wrapper contract %s: %+v", c.code, r.Diagnostics)
+			}
+			if c.status != Invalid && spl2HasCode(r, CodeSyntaxError) {
+				t.Fatalf("false scalar-context error: %+v", r.Diagnostics)
+			}
+			if c.diagnosticText != "" {
+				found := false
+				for _, d := range r.Diagnostics {
+					if d.Code == c.code && text[d.Location.Start.Offset:d.Location.End.Offset] == c.diagnosticText && d.StageID == "stage-0" {
+						found = true
+					}
+				}
+				if !found {
+					t.Fatalf("missing located wrapper diagnostic %+v", r.Diagnostics)
+				}
+			}
+			if len(r.References) != len(c.fields)+2 {
+				t.Fatalf("duplicated or fabricated operands: %+v", r.References)
+			}
+			for i, name := range c.fields {
+				ref := r.References[i]
+				binding := "source"
+				// The inner invalid call marks the environment uncertain before
+				// the outer coalesce's later fallback operand is inspected.
+				if c.name == "nested invalid wrapper" && name == "fallback" {
+					binding = "indeterminate"
+				}
+				if ref.NormalizedName != name || ref.Role != "read" || ref.Binding != binding || ref.StageID != "stage-0" {
+					t.Fatalf("original operand %d: %+v", i, ref)
+				}
+			}
+			last := r.Lineage[len(r.Lineage)-1].After
+			if len(last.Fields) != 1 || last.Fields[0].Name != "total" || !last.Fields[0].Conditional {
+				t.Fatalf("unproved compound acquired certainty: %+v", last)
+			}
+			assertCorpusIntegrity(t, r)
+		})
+	}
+}

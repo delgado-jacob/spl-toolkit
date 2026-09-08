@@ -155,8 +155,13 @@ func (s *spl2SemanticStage) sqlUnprovedAggregateExpression(tree antlr.Tree) spl2
 	if !spl2SQLHasAggregate(tree) {
 		return s.expression(tree)
 	}
-	if c, ok := tree.(spl2.ICallContext); ok && spl2Functions[c.Identifier().GetText()].aggregate {
-		return s.call(c, true)
+	if c, ok := tree.(spl2.ICallContext); ok {
+		aggregate := spl2Functions[c.Identifier().GetText()].aggregate
+		out := s.callWithExpression(c, aggregate, s.sqlUnprovedAggregateExpression)
+		if !aggregate {
+			out.modeled, out.nonnull, out.exactNull, out.truth, out.domain = false, false, false, false, ""
+		}
+		return out
 	}
 	out := spl2ExpressionEvidence{ids: []string{}}
 	for _, child := range tree.GetChildren() {
