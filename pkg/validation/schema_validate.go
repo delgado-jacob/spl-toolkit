@@ -39,7 +39,7 @@ func validatePreparedSchema(document analysis.QueryDocument, prepared preparedSc
 		expansions[expansion.ReferenceID] = expansion
 	}
 	for _, ref := range result.References {
-		if ref.Role == "remove" || ref.Binding == "not_applicable" || ref.Kind != "field" {
+		if ref.Role == "remove" || ref.Role == "null_test" || ref.Binding == "not_applicable" || ref.Kind != "field" {
 			continue
 		}
 		item := SchemaReferenceOutcome{ReferenceID: ref.ID, Matches: []SchemaMatch{}, Evidence: []SchemaEvidence{}, SupportingClasses: []SchemaClass{}, MissingClasses: []SchemaClass{}, IndeterminateClasses: []SchemaClass{}}

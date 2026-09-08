@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "stage": "task5-extended",
+  "stage": "task6-ordinary-canonical",
   "case_files": [
     "lexical-expressions.json",
     "frontend-boundaries.json",
@@ -9,7 +9,9 @@
     "sql-clauses.json",
     "sql-boundaries.json",
     "extended-commands.json",
-    "extended-boundaries.json"
+    "extended-boundaries.json",
+    "functions.json",
+    "canonical-core.json"
   ],
   "provenance_file": "provenance.json",
   "mandatory_command_families": [
@@ -90,5 +92,12 @@
     "definite_negative": 80,
     "sql_mixed": 40
   },
-  "enforce_final_floors": false
+  "enforce_final_floors": false,
+  "evidence_layers": {
+    "syntax": "Existing top-level status, coverage and grammar-context assertions remain parser-only evidence.",
+    "canonical": "Explicit canonical Result expectations on the same deduplicated documents; conditional output is modeled separately from later membership validation.",
+    "assemblies": {
+      "eval-rhs": "FROM main | eval result= followed by the exact scalar F candidate; command candidates retain pipeline-tail."
+    }
+  }
 }

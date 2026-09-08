@@ -14,7 +14,7 @@ func TestSelectorsDefaultsAndInvalidProfile(t *testing.T) {
 	if err != nil || !reflect.DeepEqual(manifest, Capabilities()) {
 		t.Fatalf("default manifest changed: %#v %v", manifest, err)
 	}
-	for _, options := range []CapabilityOptions{{Language: "spl2"}, {Language: "SPL"}, {Profile: "edge"}, {Version: "next"}, {Language: "\xff"}, {Profile: "\xff"}, {Version: "\xff"}} {
+	for _, options := range []CapabilityOptions{{Language: "SPL"}, {Profile: "edge"}, {Version: "next"}, {Language: "\xff"}, {Profile: "\xff"}, {Version: "\xff"}} {
 		if _, err := normalizeSelectors(options); err == nil {
 			t.Errorf("accepted %#v", options)
 		}
@@ -24,6 +24,10 @@ func TestSelectorsDefaultsAndInvalidProfile(t *testing.T) {
 		if _, err := Analyze(QueryDocument{Text: "search *", Language: options.Language, Profile: options.Profile, Version: options.Version}); err == nil {
 			t.Errorf("Analyze accepted %#v", options)
 		}
+	}
+	selected, err := normalizeSelectors(CapabilityOptions{Language: "spl2"})
+	if err != nil || selected.Language != "spl2" || selected.Profile != "splunkd" || selected.Version != "current" {
+		t.Fatalf("SPL2 selector: %+v %v", selected, err)
 	}
 	doc := QueryDocument{Text: "search café=*\r\n", SourceID: " exact\r\n "}
 	normalized, err := normalizeDocument(doc)

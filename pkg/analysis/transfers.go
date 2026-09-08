@@ -12,6 +12,9 @@ type locatedOperand struct {
 	Location   Location
 	Resolution string
 	Sound      bool
+	// UnresolvedSource preserves frontend distinctions absent from string universes.
+	// Derived bindings and structurally proven absence remain independently sound.
+	UnresolvedSource bool
 }
 type renameOperands struct{ Source, Target locatedOperand }
 type aggregateOutput struct {
@@ -65,10 +68,24 @@ func (s *semanticStage) readAt(operand locatedOperand, role string) string {
 		}
 	case s.env.removed[name] || !s.env.open:
 		ref.Binding = "unavailable"
-		s.diagnosticAt(CodeUnavailableField, "error", "unavailable_field", fmt.Sprintf("field %q is unavailable after an earlier pipeline transfer", name), operand.Location, false)
+		if role != "null_test" {
+			s.diagnosticAt(CodeUnavailableField, "error", "unavailable_field", fmt.Sprintf("field %q is unavailable after an earlier pipeline transfer", name), operand.Location, false)
+		}
 	default:
 		ref.Binding = "source"
-		s.env.fields[name] = trackedField{FieldBinding: FieldBinding{Name: name, OriginReferenceIDs: []string{id}}, source: true}
+		if role != "null_test" {
+			s.env.fields[name] = trackedField{FieldBinding: FieldBinding{Name: name, OriginReferenceIDs: []string{id}}, source: true}
+		}
+	}
+	if operand.UnresolvedSource && s.refinement != nil && s.refinement.resolve != nil && ref.Binding == "source" {
+		ref.Binding = "indeterminate"
+		if role != "null_test" {
+			field := s.env.fields[name]
+			field.Conditional = true
+			s.env.fields[name] = field
+		}
+		s.diagnosticAt(CodeUnsupportedSemantics, "warning", "unsupported_semantics", "Source-name identity is not represented by the string-only source universe", operand.Location, false)
+		s.result.Stages[s.stage].SemanticComplete = false
 	}
 	return id
 }
@@ -316,3 +333,6 @@ func (s *semanticStage) removeAt(operand locatedOperand) {
 	s.env.remove(operand.Name)
 	s.transitions = append(s.transitions, Transition{Operation: "remove", Output: operand.Name, InputReferenceIDs: []string{}, OutputReferenceID: id})
 }
+
+// applySource starts an independent external dataset without carrying prior fields.
+func (s *semanticStage) applySource() { s.env = newEnvironment() }

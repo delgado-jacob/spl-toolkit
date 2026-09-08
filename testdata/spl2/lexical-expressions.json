@@ -4376,7 +4376,8 @@
   {
     "id": "E.L06.named_arguments.P1",
     "obligation_ids": [
-      "E.L06.named_arguments.P1"
+      "E.L06.named_arguments.P1",
+      "T6.named-values"
     ],
     "source_keys": [
       "namingargs",
@@ -4390,7 +4391,8 @@
       "language": "spl2"
     },
     "form_ids": [
-      "E.L06.named_arguments"
+      "E.L06.named_arguments",
+      "T6.canonical"
     ],
     "syntax_complete": true,
     "semantic_complete": false,
@@ -4409,7 +4411,67 @@
       "scope": "grammar-contexts-only",
       "source_exact": true
     },
-    "meaningful_id": "L06.incomplete"
+    "meaningful_id": "L06.incomplete",
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "incomplete",
+      "syntax_complete": true,
+      "semantic_complete": false,
+      "expected_codes": [
+        "SPL_UNSUPPORTED_SEMANTICS"
+      ],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        },
+        {
+          "original_name": "x",
+          "normalized_name": "x",
+          "kind": "field",
+          "role": "create",
+          "binding": "not_applicable",
+          "start": 17,
+          "end": 18
+        },
+        {
+          "original_name": "bytes",
+          "normalized_name": "bytes",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 41,
+          "end": 46
+        }
+      ],
+      "fields": [
+        {
+          "name": "bytes",
+          "conditional": false
+        },
+        {
+          "name": "x",
+          "conditional": true
+        }
+      ],
+      "removed": [],
+      "open": true,
+      "uncertain": true,
+      "stage_commands": [
+        "from",
+        "eval"
+      ],
+      "stage_complete": [
+        true,
+        false
+      ]
+    }
   },
   {
     "id": "E.L06.named_arguments.P2",

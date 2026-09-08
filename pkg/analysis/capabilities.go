@@ -36,8 +36,12 @@ func Capabilities() CapabilityManifest {
 
 // CapabilitiesFor validates selectors and returns a fresh available manifest.
 func CapabilitiesFor(options CapabilityOptions) (CapabilityManifest, error) {
-	if _, err := normalizeSelectors(options); err != nil {
+	normalized, err := normalizeSelectors(options)
+	if err != nil {
 		return CapabilityManifest{}, err
+	}
+	if normalized.Language == "spl2" {
+		return spl2Capabilities(), nil
 	}
 	return Capabilities(), nil
 }

@@ -4588,13 +4588,16 @@
   {
     "id": "T3.aggregate.arity.sum.0",
     "obligation_ids": [
-      "T3.aggregate.arity.sum.0"
+      "T3.aggregate.arity.sum.0",
+      "F.sum.arity-1.P1"
     ],
     "source_keys": [
-      "doc167"
+      "doc167",
+      "aggregatefunc"
     ],
     "form_ids": [
-      "C08"
+      "C08",
+      "F.sum"
     ],
     "document": {
       "text": "FROM main | stats sum(bytes) AS result",
@@ -4618,18 +4621,75 @@
         }
       ]
     },
-    "meaningful_id": "T3.aggregate.arity.incomplete"
+    "meaningful_id": "T3.aggregate.arity.incomplete",
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "valid",
+      "syntax_complete": true,
+      "semantic_complete": true,
+      "expected_codes": [],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        },
+        {
+          "original_name": "bytes",
+          "normalized_name": "bytes",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 22,
+          "end": 27
+        },
+        {
+          "original_name": "result",
+          "normalized_name": "result",
+          "kind": "field",
+          "role": "output",
+          "binding": "not_applicable",
+          "start": 32,
+          "end": 38
+        }
+      ],
+      "fields": [
+        {
+          "name": "result",
+          "conditional": true
+        }
+      ],
+      "removed": [],
+      "open": false,
+      "uncertain": false,
+      "stage_commands": [
+        "from",
+        "stats"
+      ],
+      "stage_complete": [
+        true,
+        true
+      ]
+    }
   },
   {
     "id": "T3.aggregate.arity.sum.1",
     "obligation_ids": [
-      "T3.aggregate.arity.sum.1"
+      "T3.aggregate.arity.sum.1",
+      "F.sum.arity-1.P2"
     ],
     "source_keys": [
-      "doc167"
+      "doc167",
+      "aggregatefunc"
     ],
     "form_ids": [
-      "C08"
+      "C08",
+      "F.sum"
     ],
     "document": {
       "text": "FROM main | stats sum(duration) AS result",
@@ -4653,18 +4713,75 @@
         }
       ]
     },
-    "meaningful_id": "T3.aggregate.arity.incomplete"
+    "meaningful_id": "T3.aggregate.arity.incomplete",
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "valid",
+      "syntax_complete": true,
+      "semantic_complete": true,
+      "expected_codes": [],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        },
+        {
+          "original_name": "duration",
+          "normalized_name": "duration",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 22,
+          "end": 30
+        },
+        {
+          "original_name": "result",
+          "normalized_name": "result",
+          "kind": "field",
+          "role": "output",
+          "binding": "not_applicable",
+          "start": 35,
+          "end": 41
+        }
+      ],
+      "fields": [
+        {
+          "name": "result",
+          "conditional": true
+        }
+      ],
+      "removed": [],
+      "open": false,
+      "uncertain": false,
+      "stage_commands": [
+        "from",
+        "stats"
+      ],
+      "stage_complete": [
+        true,
+        true
+      ]
+    }
   },
   {
     "id": "T3.aggregate.arity.sum.2",
     "obligation_ids": [
-      "T3.aggregate.arity.sum.2"
+      "T3.aggregate.arity.sum.2",
+      "F.sum.N1"
     ],
     "source_keys": [
-      "doc167"
+      "doc167",
+      "aggregatefunc"
     ],
     "form_ids": [
-      "C08"
+      "C08",
+      "F.sum"
     ],
     "document": {
       "text": "FROM main | stats sum() AS result",
@@ -4682,18 +4799,68 @@
       "scope": "grammar-contexts-only",
       "source_exact": true
     },
-    "meaningful_id": "T3.aggregate.arity.invalid"
+    "meaningful_id": "T3.aggregate.arity.invalid",
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "invalid",
+      "syntax_complete": true,
+      "semantic_complete": false,
+      "expected_codes": [
+        "SPL_SYNTAX_ERROR"
+      ],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        },
+        {
+          "original_name": "result",
+          "normalized_name": "result",
+          "kind": "field",
+          "role": "output",
+          "binding": "not_applicable",
+          "start": 27,
+          "end": 33
+        }
+      ],
+      "fields": [
+        {
+          "name": "result",
+          "conditional": true
+        }
+      ],
+      "removed": [],
+      "open": false,
+      "uncertain": true,
+      "stage_commands": [
+        "from",
+        "stats"
+      ],
+      "stage_complete": [
+        true,
+        false
+      ]
+    }
   },
   {
     "id": "T3.aggregate.arity.sum.3",
     "obligation_ids": [
-      "T3.aggregate.arity.sum.3"
+      "T3.aggregate.arity.sum.3",
+      "F.sum.N2"
     ],
     "source_keys": [
-      "doc167"
+      "doc167",
+      "aggregatefunc"
     ],
     "form_ids": [
-      "C08"
+      "C08",
+      "F.sum"
     ],
     "document": {
       "text": "FROM main | stats sum(bytes,duration) AS result",
@@ -4711,18 +4878,86 @@
       "scope": "grammar-contexts-only",
       "source_exact": true
     },
-    "meaningful_id": "T3.aggregate.arity.invalid"
+    "meaningful_id": "T3.aggregate.arity.invalid",
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "invalid",
+      "syntax_complete": true,
+      "semantic_complete": false,
+      "expected_codes": [
+        "SPL_SYNTAX_ERROR"
+      ],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        },
+        {
+          "original_name": "bytes",
+          "normalized_name": "bytes",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 22,
+          "end": 27
+        },
+        {
+          "original_name": "duration",
+          "normalized_name": "duration",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 28,
+          "end": 36
+        },
+        {
+          "original_name": "result",
+          "normalized_name": "result",
+          "kind": "field",
+          "role": "output",
+          "binding": "not_applicable",
+          "start": 41,
+          "end": 47
+        }
+      ],
+      "fields": [
+        {
+          "name": "result",
+          "conditional": true
+        }
+      ],
+      "removed": [],
+      "open": false,
+      "uncertain": true,
+      "stage_commands": [
+        "from",
+        "stats"
+      ],
+      "stage_complete": [
+        true,
+        false
+      ]
+    }
   },
   {
     "id": "T3.aggregate.arity.avg.0",
     "obligation_ids": [
-      "T3.aggregate.arity.avg.0"
+      "T3.aggregate.arity.avg.0",
+      "F.avg.arity-1.P1"
     ],
     "source_keys": [
-      "doc167"
+      "doc167",
+      "aggregatefunc"
     ],
     "form_ids": [
-      "C08"
+      "C08",
+      "F.avg"
     ],
     "document": {
       "text": "FROM main | stats avg(bytes) AS result",
@@ -4746,18 +4981,75 @@
         }
       ]
     },
-    "meaningful_id": "T3.aggregate.arity.incomplete"
+    "meaningful_id": "T3.aggregate.arity.incomplete",
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "valid",
+      "syntax_complete": true,
+      "semantic_complete": true,
+      "expected_codes": [],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        },
+        {
+          "original_name": "bytes",
+          "normalized_name": "bytes",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 22,
+          "end": 27
+        },
+        {
+          "original_name": "result",
+          "normalized_name": "result",
+          "kind": "field",
+          "role": "output",
+          "binding": "not_applicable",
+          "start": 32,
+          "end": 38
+        }
+      ],
+      "fields": [
+        {
+          "name": "result",
+          "conditional": true
+        }
+      ],
+      "removed": [],
+      "open": false,
+      "uncertain": false,
+      "stage_commands": [
+        "from",
+        "stats"
+      ],
+      "stage_complete": [
+        true,
+        true
+      ]
+    }
   },
   {
     "id": "T3.aggregate.arity.avg.1",
     "obligation_ids": [
-      "T3.aggregate.arity.avg.1"
+      "T3.aggregate.arity.avg.1",
+      "F.avg.arity-1.P2"
     ],
     "source_keys": [
-      "doc167"
+      "doc167",
+      "aggregatefunc"
     ],
     "form_ids": [
-      "C08"
+      "C08",
+      "F.avg"
     ],
     "document": {
       "text": "FROM main | stats avg(duration) AS result",
@@ -4781,18 +5073,75 @@
         }
       ]
     },
-    "meaningful_id": "T3.aggregate.arity.incomplete"
+    "meaningful_id": "T3.aggregate.arity.incomplete",
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "valid",
+      "syntax_complete": true,
+      "semantic_complete": true,
+      "expected_codes": [],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        },
+        {
+          "original_name": "duration",
+          "normalized_name": "duration",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 22,
+          "end": 30
+        },
+        {
+          "original_name": "result",
+          "normalized_name": "result",
+          "kind": "field",
+          "role": "output",
+          "binding": "not_applicable",
+          "start": 35,
+          "end": 41
+        }
+      ],
+      "fields": [
+        {
+          "name": "result",
+          "conditional": true
+        }
+      ],
+      "removed": [],
+      "open": false,
+      "uncertain": false,
+      "stage_commands": [
+        "from",
+        "stats"
+      ],
+      "stage_complete": [
+        true,
+        true
+      ]
+    }
   },
   {
     "id": "T3.aggregate.arity.avg.2",
     "obligation_ids": [
-      "T3.aggregate.arity.avg.2"
+      "T3.aggregate.arity.avg.2",
+      "F.avg.N1"
     ],
     "source_keys": [
-      "doc167"
+      "doc167",
+      "aggregatefunc"
     ],
     "form_ids": [
-      "C08"
+      "C08",
+      "F.avg"
     ],
     "document": {
       "text": "FROM main | stats avg() AS result",
@@ -4810,18 +5159,68 @@
       "scope": "grammar-contexts-only",
       "source_exact": true
     },
-    "meaningful_id": "T3.aggregate.arity.invalid"
+    "meaningful_id": "T3.aggregate.arity.invalid",
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "invalid",
+      "syntax_complete": true,
+      "semantic_complete": false,
+      "expected_codes": [
+        "SPL_SYNTAX_ERROR"
+      ],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        },
+        {
+          "original_name": "result",
+          "normalized_name": "result",
+          "kind": "field",
+          "role": "output",
+          "binding": "not_applicable",
+          "start": 27,
+          "end": 33
+        }
+      ],
+      "fields": [
+        {
+          "name": "result",
+          "conditional": true
+        }
+      ],
+      "removed": [],
+      "open": false,
+      "uncertain": true,
+      "stage_commands": [
+        "from",
+        "stats"
+      ],
+      "stage_complete": [
+        true,
+        false
+      ]
+    }
   },
   {
     "id": "T3.aggregate.arity.avg.3",
     "obligation_ids": [
-      "T3.aggregate.arity.avg.3"
+      "T3.aggregate.arity.avg.3",
+      "F.avg.N2"
     ],
     "source_keys": [
-      "doc167"
+      "doc167",
+      "aggregatefunc"
     ],
     "form_ids": [
-      "C08"
+      "C08",
+      "F.avg"
     ],
     "document": {
       "text": "FROM main | stats avg(bytes,duration) AS result",
@@ -4839,18 +5238,86 @@
       "scope": "grammar-contexts-only",
       "source_exact": true
     },
-    "meaningful_id": "T3.aggregate.arity.invalid"
+    "meaningful_id": "T3.aggregate.arity.invalid",
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "invalid",
+      "syntax_complete": true,
+      "semantic_complete": false,
+      "expected_codes": [
+        "SPL_SYNTAX_ERROR"
+      ],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        },
+        {
+          "original_name": "bytes",
+          "normalized_name": "bytes",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 22,
+          "end": 27
+        },
+        {
+          "original_name": "duration",
+          "normalized_name": "duration",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 28,
+          "end": 36
+        },
+        {
+          "original_name": "result",
+          "normalized_name": "result",
+          "kind": "field",
+          "role": "output",
+          "binding": "not_applicable",
+          "start": 41,
+          "end": 47
+        }
+      ],
+      "fields": [
+        {
+          "name": "result",
+          "conditional": true
+        }
+      ],
+      "removed": [],
+      "open": false,
+      "uncertain": true,
+      "stage_commands": [
+        "from",
+        "stats"
+      ],
+      "stage_complete": [
+        true,
+        false
+      ]
+    }
   },
   {
     "id": "T3.aggregate.arity.min.0",
     "obligation_ids": [
-      "T3.aggregate.arity.min.0"
+      "T3.aggregate.arity.min.0",
+      "F.min.arity-1.P1"
     ],
     "source_keys": [
-      "doc167"
+      "doc167",
+      "aggregatefunc"
     ],
     "form_ids": [
-      "C08"
+      "C08",
+      "F.min"
     ],
     "document": {
       "text": "FROM main | stats min(bytes) AS result",
@@ -4874,18 +5341,75 @@
         }
       ]
     },
-    "meaningful_id": "T3.aggregate.arity.incomplete"
+    "meaningful_id": "T3.aggregate.arity.incomplete",
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "valid",
+      "syntax_complete": true,
+      "semantic_complete": true,
+      "expected_codes": [],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        },
+        {
+          "original_name": "bytes",
+          "normalized_name": "bytes",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 22,
+          "end": 27
+        },
+        {
+          "original_name": "result",
+          "normalized_name": "result",
+          "kind": "field",
+          "role": "output",
+          "binding": "not_applicable",
+          "start": 32,
+          "end": 38
+        }
+      ],
+      "fields": [
+        {
+          "name": "result",
+          "conditional": true
+        }
+      ],
+      "removed": [],
+      "open": false,
+      "uncertain": false,
+      "stage_commands": [
+        "from",
+        "stats"
+      ],
+      "stage_complete": [
+        true,
+        true
+      ]
+    }
   },
   {
     "id": "T3.aggregate.arity.min.1",
     "obligation_ids": [
-      "T3.aggregate.arity.min.1"
+      "T3.aggregate.arity.min.1",
+      "F.min.arity-1.P2"
     ],
     "source_keys": [
-      "doc167"
+      "doc167",
+      "aggregatefunc"
     ],
     "form_ids": [
-      "C08"
+      "C08",
+      "F.min"
     ],
     "document": {
       "text": "FROM main | stats min(duration) AS result",
@@ -4909,18 +5433,75 @@
         }
       ]
     },
-    "meaningful_id": "T3.aggregate.arity.incomplete"
+    "meaningful_id": "T3.aggregate.arity.incomplete",
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "valid",
+      "syntax_complete": true,
+      "semantic_complete": true,
+      "expected_codes": [],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        },
+        {
+          "original_name": "duration",
+          "normalized_name": "duration",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 22,
+          "end": 30
+        },
+        {
+          "original_name": "result",
+          "normalized_name": "result",
+          "kind": "field",
+          "role": "output",
+          "binding": "not_applicable",
+          "start": 35,
+          "end": 41
+        }
+      ],
+      "fields": [
+        {
+          "name": "result",
+          "conditional": true
+        }
+      ],
+      "removed": [],
+      "open": false,
+      "uncertain": false,
+      "stage_commands": [
+        "from",
+        "stats"
+      ],
+      "stage_complete": [
+        true,
+        true
+      ]
+    }
   },
   {
     "id": "T3.aggregate.arity.min.2",
     "obligation_ids": [
-      "T3.aggregate.arity.min.2"
+      "T3.aggregate.arity.min.2",
+      "F.min.N1"
     ],
     "source_keys": [
-      "doc167"
+      "doc167",
+      "aggregatefunc"
     ],
     "form_ids": [
-      "C08"
+      "C08",
+      "F.min"
     ],
     "document": {
       "text": "FROM main | stats min() AS result",
@@ -4938,18 +5519,68 @@
       "scope": "grammar-contexts-only",
       "source_exact": true
     },
-    "meaningful_id": "T3.aggregate.arity.invalid"
+    "meaningful_id": "T3.aggregate.arity.invalid",
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "invalid",
+      "syntax_complete": true,
+      "semantic_complete": false,
+      "expected_codes": [
+        "SPL_SYNTAX_ERROR"
+      ],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        },
+        {
+          "original_name": "result",
+          "normalized_name": "result",
+          "kind": "field",
+          "role": "output",
+          "binding": "not_applicable",
+          "start": 27,
+          "end": 33
+        }
+      ],
+      "fields": [
+        {
+          "name": "result",
+          "conditional": true
+        }
+      ],
+      "removed": [],
+      "open": false,
+      "uncertain": true,
+      "stage_commands": [
+        "from",
+        "stats"
+      ],
+      "stage_complete": [
+        true,
+        false
+      ]
+    }
   },
   {
     "id": "T3.aggregate.arity.min.3",
     "obligation_ids": [
-      "T3.aggregate.arity.min.3"
+      "T3.aggregate.arity.min.3",
+      "F.min.N2"
     ],
     "source_keys": [
-      "doc167"
+      "doc167",
+      "aggregatefunc"
     ],
     "form_ids": [
-      "C08"
+      "C08",
+      "F.min"
     ],
     "document": {
       "text": "FROM main | stats min(bytes,duration) AS result",
@@ -4967,18 +5598,86 @@
       "scope": "grammar-contexts-only",
       "source_exact": true
     },
-    "meaningful_id": "T3.aggregate.arity.invalid"
+    "meaningful_id": "T3.aggregate.arity.invalid",
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "invalid",
+      "syntax_complete": true,
+      "semantic_complete": false,
+      "expected_codes": [
+        "SPL_SYNTAX_ERROR"
+      ],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        },
+        {
+          "original_name": "bytes",
+          "normalized_name": "bytes",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 22,
+          "end": 27
+        },
+        {
+          "original_name": "duration",
+          "normalized_name": "duration",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 28,
+          "end": 36
+        },
+        {
+          "original_name": "result",
+          "normalized_name": "result",
+          "kind": "field",
+          "role": "output",
+          "binding": "not_applicable",
+          "start": 41,
+          "end": 47
+        }
+      ],
+      "fields": [
+        {
+          "name": "result",
+          "conditional": true
+        }
+      ],
+      "removed": [],
+      "open": false,
+      "uncertain": true,
+      "stage_commands": [
+        "from",
+        "stats"
+      ],
+      "stage_complete": [
+        true,
+        false
+      ]
+    }
   },
   {
     "id": "T3.aggregate.arity.max.0",
     "obligation_ids": [
-      "T3.aggregate.arity.max.0"
+      "T3.aggregate.arity.max.0",
+      "F.max.arity-1.P1"
     ],
     "source_keys": [
-      "doc167"
+      "doc167",
+      "aggregatefunc"
     ],
     "form_ids": [
-      "C08"
+      "C08",
+      "F.max"
     ],
     "document": {
       "text": "FROM main | stats max(bytes) AS result",
@@ -5002,18 +5701,75 @@
         }
       ]
     },
-    "meaningful_id": "T3.aggregate.arity.incomplete"
+    "meaningful_id": "T3.aggregate.arity.incomplete",
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "valid",
+      "syntax_complete": true,
+      "semantic_complete": true,
+      "expected_codes": [],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        },
+        {
+          "original_name": "bytes",
+          "normalized_name": "bytes",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 22,
+          "end": 27
+        },
+        {
+          "original_name": "result",
+          "normalized_name": "result",
+          "kind": "field",
+          "role": "output",
+          "binding": "not_applicable",
+          "start": 32,
+          "end": 38
+        }
+      ],
+      "fields": [
+        {
+          "name": "result",
+          "conditional": true
+        }
+      ],
+      "removed": [],
+      "open": false,
+      "uncertain": false,
+      "stage_commands": [
+        "from",
+        "stats"
+      ],
+      "stage_complete": [
+        true,
+        true
+      ]
+    }
   },
   {
     "id": "T3.aggregate.arity.max.1",
     "obligation_ids": [
-      "T3.aggregate.arity.max.1"
+      "T3.aggregate.arity.max.1",
+      "F.max.arity-1.P2"
     ],
     "source_keys": [
-      "doc167"
+      "doc167",
+      "aggregatefunc"
     ],
     "form_ids": [
-      "C08"
+      "C08",
+      "F.max"
     ],
     "document": {
       "text": "FROM main | stats max(duration) AS result",
@@ -5037,18 +5793,75 @@
         }
       ]
     },
-    "meaningful_id": "T3.aggregate.arity.incomplete"
+    "meaningful_id": "T3.aggregate.arity.incomplete",
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "valid",
+      "syntax_complete": true,
+      "semantic_complete": true,
+      "expected_codes": [],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        },
+        {
+          "original_name": "duration",
+          "normalized_name": "duration",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 22,
+          "end": 30
+        },
+        {
+          "original_name": "result",
+          "normalized_name": "result",
+          "kind": "field",
+          "role": "output",
+          "binding": "not_applicable",
+          "start": 35,
+          "end": 41
+        }
+      ],
+      "fields": [
+        {
+          "name": "result",
+          "conditional": true
+        }
+      ],
+      "removed": [],
+      "open": false,
+      "uncertain": false,
+      "stage_commands": [
+        "from",
+        "stats"
+      ],
+      "stage_complete": [
+        true,
+        true
+      ]
+    }
   },
   {
     "id": "T3.aggregate.arity.max.2",
     "obligation_ids": [
-      "T3.aggregate.arity.max.2"
+      "T3.aggregate.arity.max.2",
+      "F.max.N1"
     ],
     "source_keys": [
-      "doc167"
+      "doc167",
+      "aggregatefunc"
     ],
     "form_ids": [
-      "C08"
+      "C08",
+      "F.max"
     ],
     "document": {
       "text": "FROM main | stats max() AS result",
@@ -5066,18 +5879,68 @@
       "scope": "grammar-contexts-only",
       "source_exact": true
     },
-    "meaningful_id": "T3.aggregate.arity.invalid"
+    "meaningful_id": "T3.aggregate.arity.invalid",
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "invalid",
+      "syntax_complete": true,
+      "semantic_complete": false,
+      "expected_codes": [
+        "SPL_SYNTAX_ERROR"
+      ],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        },
+        {
+          "original_name": "result",
+          "normalized_name": "result",
+          "kind": "field",
+          "role": "output",
+          "binding": "not_applicable",
+          "start": 27,
+          "end": 33
+        }
+      ],
+      "fields": [
+        {
+          "name": "result",
+          "conditional": true
+        }
+      ],
+      "removed": [],
+      "open": false,
+      "uncertain": true,
+      "stage_commands": [
+        "from",
+        "stats"
+      ],
+      "stage_complete": [
+        true,
+        false
+      ]
+    }
   },
   {
     "id": "T3.aggregate.arity.max.3",
     "obligation_ids": [
-      "T3.aggregate.arity.max.3"
+      "T3.aggregate.arity.max.3",
+      "F.max.N2"
     ],
     "source_keys": [
-      "doc167"
+      "doc167",
+      "aggregatefunc"
     ],
     "form_ids": [
-      "C08"
+      "C08",
+      "F.max"
     ],
     "document": {
       "text": "FROM main | stats max(bytes,duration) AS result",
@@ -5095,18 +5958,86 @@
       "scope": "grammar-contexts-only",
       "source_exact": true
     },
-    "meaningful_id": "T3.aggregate.arity.invalid"
+    "meaningful_id": "T3.aggregate.arity.invalid",
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "invalid",
+      "syntax_complete": true,
+      "semantic_complete": false,
+      "expected_codes": [
+        "SPL_SYNTAX_ERROR"
+      ],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        },
+        {
+          "original_name": "bytes",
+          "normalized_name": "bytes",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 22,
+          "end": 27
+        },
+        {
+          "original_name": "duration",
+          "normalized_name": "duration",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 28,
+          "end": 36
+        },
+        {
+          "original_name": "result",
+          "normalized_name": "result",
+          "kind": "field",
+          "role": "output",
+          "binding": "not_applicable",
+          "start": 41,
+          "end": 47
+        }
+      ],
+      "fields": [
+        {
+          "name": "result",
+          "conditional": true
+        }
+      ],
+      "removed": [],
+      "open": false,
+      "uncertain": true,
+      "stage_commands": [
+        "from",
+        "stats"
+      ],
+      "stage_complete": [
+        true,
+        false
+      ]
+    }
   },
   {
     "id": "T3.aggregate.arity.dc.0",
     "obligation_ids": [
-      "T3.aggregate.arity.dc.0"
+      "T3.aggregate.arity.dc.0",
+      "F.dc.arity-1.P1"
     ],
     "source_keys": [
-      "doc167"
+      "doc167",
+      "aggregatefunc"
     ],
     "form_ids": [
-      "C08"
+      "C08",
+      "F.dc"
     ],
     "document": {
       "text": "FROM main | stats dc(bytes) AS result",
@@ -5130,18 +6061,75 @@
         }
       ]
     },
-    "meaningful_id": "T3.aggregate.arity.incomplete"
+    "meaningful_id": "T3.aggregate.arity.incomplete",
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "valid",
+      "syntax_complete": true,
+      "semantic_complete": true,
+      "expected_codes": [],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        },
+        {
+          "original_name": "bytes",
+          "normalized_name": "bytes",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 21,
+          "end": 26
+        },
+        {
+          "original_name": "result",
+          "normalized_name": "result",
+          "kind": "field",
+          "role": "output",
+          "binding": "not_applicable",
+          "start": 31,
+          "end": 37
+        }
+      ],
+      "fields": [
+        {
+          "name": "result",
+          "conditional": false
+        }
+      ],
+      "removed": [],
+      "open": false,
+      "uncertain": false,
+      "stage_commands": [
+        "from",
+        "stats"
+      ],
+      "stage_complete": [
+        true,
+        true
+      ]
+    }
   },
   {
     "id": "T3.aggregate.arity.dc.1",
     "obligation_ids": [
-      "T3.aggregate.arity.dc.1"
+      "T3.aggregate.arity.dc.1",
+      "F.dc.arity-1.P2"
     ],
     "source_keys": [
-      "doc167"
+      "doc167",
+      "aggregatefunc"
     ],
     "form_ids": [
-      "C08"
+      "C08",
+      "F.dc"
     ],
     "document": {
       "text": "FROM main | stats dc(duration) AS result",
@@ -5165,18 +6153,75 @@
         }
       ]
     },
-    "meaningful_id": "T3.aggregate.arity.incomplete"
+    "meaningful_id": "T3.aggregate.arity.incomplete",
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "valid",
+      "syntax_complete": true,
+      "semantic_complete": true,
+      "expected_codes": [],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        },
+        {
+          "original_name": "duration",
+          "normalized_name": "duration",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 21,
+          "end": 29
+        },
+        {
+          "original_name": "result",
+          "normalized_name": "result",
+          "kind": "field",
+          "role": "output",
+          "binding": "not_applicable",
+          "start": 34,
+          "end": 40
+        }
+      ],
+      "fields": [
+        {
+          "name": "result",
+          "conditional": false
+        }
+      ],
+      "removed": [],
+      "open": false,
+      "uncertain": false,
+      "stage_commands": [
+        "from",
+        "stats"
+      ],
+      "stage_complete": [
+        true,
+        true
+      ]
+    }
   },
   {
     "id": "T3.aggregate.arity.dc.2",
     "obligation_ids": [
-      "T3.aggregate.arity.dc.2"
+      "T3.aggregate.arity.dc.2",
+      "F.dc.N1"
     ],
     "source_keys": [
-      "doc167"
+      "doc167",
+      "aggregatefunc"
     ],
     "form_ids": [
-      "C08"
+      "C08",
+      "F.dc"
     ],
     "document": {
       "text": "FROM main | stats dc() AS result",
@@ -5194,18 +6239,68 @@
       "scope": "grammar-contexts-only",
       "source_exact": true
     },
-    "meaningful_id": "T3.aggregate.arity.invalid"
+    "meaningful_id": "T3.aggregate.arity.invalid",
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "invalid",
+      "syntax_complete": true,
+      "semantic_complete": false,
+      "expected_codes": [
+        "SPL_SYNTAX_ERROR"
+      ],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        },
+        {
+          "original_name": "result",
+          "normalized_name": "result",
+          "kind": "field",
+          "role": "output",
+          "binding": "not_applicable",
+          "start": 26,
+          "end": 32
+        }
+      ],
+      "fields": [
+        {
+          "name": "result",
+          "conditional": true
+        }
+      ],
+      "removed": [],
+      "open": false,
+      "uncertain": true,
+      "stage_commands": [
+        "from",
+        "stats"
+      ],
+      "stage_complete": [
+        true,
+        false
+      ]
+    }
   },
   {
     "id": "T3.aggregate.arity.dc.3",
     "obligation_ids": [
-      "T3.aggregate.arity.dc.3"
+      "T3.aggregate.arity.dc.3",
+      "F.dc.N2"
     ],
     "source_keys": [
-      "doc167"
+      "doc167",
+      "aggregatefunc"
     ],
     "form_ids": [
-      "C08"
+      "C08",
+      "F.dc"
     ],
     "document": {
       "text": "FROM main | stats dc(bytes,duration) AS result",
@@ -5223,18 +6318,86 @@
       "scope": "grammar-contexts-only",
       "source_exact": true
     },
-    "meaningful_id": "T3.aggregate.arity.invalid"
+    "meaningful_id": "T3.aggregate.arity.invalid",
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "invalid",
+      "syntax_complete": true,
+      "semantic_complete": false,
+      "expected_codes": [
+        "SPL_SYNTAX_ERROR"
+      ],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        },
+        {
+          "original_name": "bytes",
+          "normalized_name": "bytes",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 21,
+          "end": 26
+        },
+        {
+          "original_name": "duration",
+          "normalized_name": "duration",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 27,
+          "end": 35
+        },
+        {
+          "original_name": "result",
+          "normalized_name": "result",
+          "kind": "field",
+          "role": "output",
+          "binding": "not_applicable",
+          "start": 40,
+          "end": 46
+        }
+      ],
+      "fields": [
+        {
+          "name": "result",
+          "conditional": true
+        }
+      ],
+      "removed": [],
+      "open": false,
+      "uncertain": true,
+      "stage_commands": [
+        "from",
+        "stats"
+      ],
+      "stage_complete": [
+        true,
+        false
+      ]
+    }
   },
   {
     "id": "T3.aggregate.arity.distinct_count.0",
     "obligation_ids": [
-      "T3.aggregate.arity.distinct_count.0"
+      "T3.aggregate.arity.distinct_count.0",
+      "F.distinct_count.arity-1.P1"
     ],
     "source_keys": [
-      "doc167"
+      "doc167",
+      "aggregatefunc"
     ],
     "form_ids": [
-      "C08"
+      "C08",
+      "F.distinct_count"
     ],
     "document": {
       "text": "FROM main | stats distinct_count(bytes) AS result",
@@ -5258,18 +6421,75 @@
         }
       ]
     },
-    "meaningful_id": "T3.aggregate.arity.incomplete"
+    "meaningful_id": "T3.aggregate.arity.incomplete",
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "valid",
+      "syntax_complete": true,
+      "semantic_complete": true,
+      "expected_codes": [],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        },
+        {
+          "original_name": "bytes",
+          "normalized_name": "bytes",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 33,
+          "end": 38
+        },
+        {
+          "original_name": "result",
+          "normalized_name": "result",
+          "kind": "field",
+          "role": "output",
+          "binding": "not_applicable",
+          "start": 43,
+          "end": 49
+        }
+      ],
+      "fields": [
+        {
+          "name": "result",
+          "conditional": false
+        }
+      ],
+      "removed": [],
+      "open": false,
+      "uncertain": false,
+      "stage_commands": [
+        "from",
+        "stats"
+      ],
+      "stage_complete": [
+        true,
+        true
+      ]
+    }
   },
   {
     "id": "T3.aggregate.arity.distinct_count.1",
     "obligation_ids": [
-      "T3.aggregate.arity.distinct_count.1"
+      "T3.aggregate.arity.distinct_count.1",
+      "F.distinct_count.arity-1.P2"
     ],
     "source_keys": [
-      "doc167"
+      "doc167",
+      "aggregatefunc"
     ],
     "form_ids": [
-      "C08"
+      "C08",
+      "F.distinct_count"
     ],
     "document": {
       "text": "FROM main | stats distinct_count(duration) AS result",
@@ -5293,18 +6513,75 @@
         }
       ]
     },
-    "meaningful_id": "T3.aggregate.arity.incomplete"
+    "meaningful_id": "T3.aggregate.arity.incomplete",
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "valid",
+      "syntax_complete": true,
+      "semantic_complete": true,
+      "expected_codes": [],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        },
+        {
+          "original_name": "duration",
+          "normalized_name": "duration",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 33,
+          "end": 41
+        },
+        {
+          "original_name": "result",
+          "normalized_name": "result",
+          "kind": "field",
+          "role": "output",
+          "binding": "not_applicable",
+          "start": 46,
+          "end": 52
+        }
+      ],
+      "fields": [
+        {
+          "name": "result",
+          "conditional": false
+        }
+      ],
+      "removed": [],
+      "open": false,
+      "uncertain": false,
+      "stage_commands": [
+        "from",
+        "stats"
+      ],
+      "stage_complete": [
+        true,
+        true
+      ]
+    }
   },
   {
     "id": "T3.aggregate.arity.distinct_count.2",
     "obligation_ids": [
-      "T3.aggregate.arity.distinct_count.2"
+      "T3.aggregate.arity.distinct_count.2",
+      "F.distinct_count.N1"
     ],
     "source_keys": [
-      "doc167"
+      "doc167",
+      "aggregatefunc"
     ],
     "form_ids": [
-      "C08"
+      "C08",
+      "F.distinct_count"
     ],
     "document": {
       "text": "FROM main | stats distinct_count() AS result",
@@ -5322,18 +6599,68 @@
       "scope": "grammar-contexts-only",
       "source_exact": true
     },
-    "meaningful_id": "T3.aggregate.arity.invalid"
+    "meaningful_id": "T3.aggregate.arity.invalid",
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "invalid",
+      "syntax_complete": true,
+      "semantic_complete": false,
+      "expected_codes": [
+        "SPL_SYNTAX_ERROR"
+      ],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        },
+        {
+          "original_name": "result",
+          "normalized_name": "result",
+          "kind": "field",
+          "role": "output",
+          "binding": "not_applicable",
+          "start": 38,
+          "end": 44
+        }
+      ],
+      "fields": [
+        {
+          "name": "result",
+          "conditional": true
+        }
+      ],
+      "removed": [],
+      "open": false,
+      "uncertain": true,
+      "stage_commands": [
+        "from",
+        "stats"
+      ],
+      "stage_complete": [
+        true,
+        false
+      ]
+    }
   },
   {
     "id": "T3.aggregate.arity.distinct_count.3",
     "obligation_ids": [
-      "T3.aggregate.arity.distinct_count.3"
+      "T3.aggregate.arity.distinct_count.3",
+      "F.distinct_count.N2"
     ],
     "source_keys": [
-      "doc167"
+      "doc167",
+      "aggregatefunc"
     ],
     "form_ids": [
-      "C08"
+      "C08",
+      "F.distinct_count"
     ],
     "document": {
       "text": "FROM main | stats distinct_count(bytes,duration) AS result",
@@ -5351,7 +6678,72 @@
       "scope": "grammar-contexts-only",
       "source_exact": true
     },
-    "meaningful_id": "T3.aggregate.arity.invalid"
+    "meaningful_id": "T3.aggregate.arity.invalid",
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "invalid",
+      "syntax_complete": true,
+      "semantic_complete": false,
+      "expected_codes": [
+        "SPL_SYNTAX_ERROR"
+      ],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        },
+        {
+          "original_name": "bytes",
+          "normalized_name": "bytes",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 33,
+          "end": 38
+        },
+        {
+          "original_name": "duration",
+          "normalized_name": "duration",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 39,
+          "end": 47
+        },
+        {
+          "original_name": "result",
+          "normalized_name": "result",
+          "kind": "field",
+          "role": "output",
+          "binding": "not_applicable",
+          "start": 52,
+          "end": 58
+        }
+      ],
+      "fields": [
+        {
+          "name": "result",
+          "conditional": true
+        }
+      ],
+      "removed": [],
+      "open": false,
+      "uncertain": true,
+      "stage_commands": [
+        "from",
+        "stats"
+      ],
+      "stage_complete": [
+        true,
+        false
+      ]
+    }
   },
   {
     "id": "T3.aggregate.arity.values.0",
@@ -5426,13 +6818,16 @@
   {
     "id": "T3.aggregate.arity.values.2",
     "obligation_ids": [
-      "T3.aggregate.arity.values.2"
+      "T3.aggregate.arity.values.2",
+      "F.values.N1"
     ],
     "source_keys": [
-      "doc167"
+      "doc167",
+      "multiagg"
     ],
     "form_ids": [
-      "C08"
+      "C08",
+      "F.values"
     ],
     "document": {
       "text": "FROM main | stats values() AS result",
@@ -5450,7 +6845,54 @@
       "scope": "grammar-contexts-only",
       "source_exact": true
     },
-    "meaningful_id": "T3.aggregate.arity.invalid"
+    "meaningful_id": "T3.aggregate.arity.invalid",
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "invalid",
+      "syntax_complete": true,
+      "semantic_complete": false,
+      "expected_codes": [
+        "SPL_SYNTAX_ERROR"
+      ],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        },
+        {
+          "original_name": "result",
+          "normalized_name": "result",
+          "kind": "field",
+          "role": "output",
+          "binding": "not_applicable",
+          "start": 30,
+          "end": 36
+        }
+      ],
+      "fields": [
+        {
+          "name": "result",
+          "conditional": true
+        }
+      ],
+      "removed": [],
+      "open": false,
+      "uncertain": true,
+      "stage_commands": [
+        "from",
+        "stats"
+      ],
+      "stage_complete": [
+        true,
+        false
+      ]
+    }
   },
   {
     "id": "T3.aggregate.arity.values.3",
@@ -5554,13 +6996,16 @@
   {
     "id": "T3.aggregate.arity.list.2",
     "obligation_ids": [
-      "T3.aggregate.arity.list.2"
+      "T3.aggregate.arity.list.2",
+      "F.list.N1"
     ],
     "source_keys": [
-      "doc167"
+      "doc167",
+      "multiagg"
     ],
     "form_ids": [
-      "C08"
+      "C08",
+      "F.list"
     ],
     "document": {
       "text": "FROM main | stats list() AS result",
@@ -5578,7 +7023,54 @@
       "scope": "grammar-contexts-only",
       "source_exact": true
     },
-    "meaningful_id": "T3.aggregate.arity.invalid"
+    "meaningful_id": "T3.aggregate.arity.invalid",
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "invalid",
+      "syntax_complete": true,
+      "semantic_complete": false,
+      "expected_codes": [
+        "SPL_SYNTAX_ERROR"
+      ],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        },
+        {
+          "original_name": "result",
+          "normalized_name": "result",
+          "kind": "field",
+          "role": "output",
+          "binding": "not_applicable",
+          "start": 28,
+          "end": 34
+        }
+      ],
+      "fields": [
+        {
+          "name": "result",
+          "conditional": true
+        }
+      ],
+      "removed": [],
+      "open": false,
+      "uncertain": true,
+      "stage_commands": [
+        "from",
+        "stats"
+      ],
+      "stage_complete": [
+        true,
+        false
+      ]
+    }
   },
   {
     "id": "T3.aggregate.arity.list.3",
@@ -5682,13 +7174,16 @@
   {
     "id": "T3.aggregate.arity.first.2",
     "obligation_ids": [
-      "T3.aggregate.arity.first.2"
+      "T3.aggregate.arity.first.2",
+      "F.first.N1"
     ],
     "source_keys": [
-      "doc167"
+      "doc167",
+      "eventorder"
     ],
     "form_ids": [
-      "C08"
+      "C08",
+      "F.first"
     ],
     "document": {
       "text": "FROM main | stats first() AS result",
@@ -5706,7 +7201,54 @@
       "scope": "grammar-contexts-only",
       "source_exact": true
     },
-    "meaningful_id": "T3.aggregate.arity.invalid"
+    "meaningful_id": "T3.aggregate.arity.invalid",
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "invalid",
+      "syntax_complete": true,
+      "semantic_complete": false,
+      "expected_codes": [
+        "SPL_SYNTAX_ERROR"
+      ],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        },
+        {
+          "original_name": "result",
+          "normalized_name": "result",
+          "kind": "field",
+          "role": "output",
+          "binding": "not_applicable",
+          "start": 29,
+          "end": 35
+        }
+      ],
+      "fields": [
+        {
+          "name": "result",
+          "conditional": true
+        }
+      ],
+      "removed": [],
+      "open": false,
+      "uncertain": true,
+      "stage_commands": [
+        "from",
+        "stats"
+      ],
+      "stage_complete": [
+        true,
+        false
+      ]
+    }
   },
   {
     "id": "T3.aggregate.arity.first.3",
@@ -5810,13 +7352,30 @@
   {
     "id": "T3.aggregate.arity.last.2",
     "obligation_ids": [
-      "T3.aggregate.arity.last.2"
+      "T3.aggregate.arity.last.2",
+      "F.last.N1"
     ],
     "source_keys": [
-      "doc167"
+      "doc167",
+      "eventorder",
+      "doc163",
+      "predicate",
+      "doc164",
+      "doc148",
+      "doc131",
+      "doc172",
+      "doc173",
+      "fromsyntax",
+      "timechartusage",
+      "objects",
+      "searchliterals",
+      "binexamples",
+      "timespans",
+      "timemodifiers"
     ],
     "form_ids": [
-      "C08"
+      "C08",
+      "F.last"
     ],
     "document": {
       "text": "FROM main | stats last() AS result",
@@ -5834,7 +7393,54 @@
       "scope": "grammar-contexts-only",
       "source_exact": true
     },
-    "meaningful_id": "T3.aggregate.arity.invalid"
+    "meaningful_id": "T3.aggregate.arity.invalid",
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "invalid",
+      "syntax_complete": true,
+      "semantic_complete": false,
+      "expected_codes": [
+        "SPL_SYNTAX_ERROR"
+      ],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        },
+        {
+          "original_name": "result",
+          "normalized_name": "result",
+          "kind": "field",
+          "role": "output",
+          "binding": "not_applicable",
+          "start": 28,
+          "end": 34
+        }
+      ],
+      "fields": [
+        {
+          "name": "result",
+          "conditional": true
+        }
+      ],
+      "removed": [],
+      "open": false,
+      "uncertain": true,
+      "stage_commands": [
+        "from",
+        "stats"
+      ],
+      "stage_complete": [
+        true,
+        false
+      ]
+    }
   },
   {
     "id": "T3.aggregate.arity.last.3",
@@ -5868,13 +7474,16 @@
   {
     "id": "T3.aggregate.arity.count.0",
     "obligation_ids": [
-      "T3.aggregate.arity.count.0"
+      "T3.aggregate.arity.count.0",
+      "F.count.arity-0.P1"
     ],
     "source_keys": [
-      "doc167"
+      "doc167",
+      "aggregatefunc"
     ],
     "form_ids": [
-      "C08"
+      "C08",
+      "F.count"
     ],
     "document": {
       "text": "FROM main | stats count() AS n",
@@ -5898,18 +7507,66 @@
         }
       ]
     },
-    "meaningful_id": "T3.aggregate.arity.incomplete"
+    "meaningful_id": "T3.aggregate.arity.incomplete",
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "valid",
+      "syntax_complete": true,
+      "semantic_complete": true,
+      "expected_codes": [],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        },
+        {
+          "original_name": "n",
+          "normalized_name": "n",
+          "kind": "field",
+          "role": "output",
+          "binding": "not_applicable",
+          "start": 29,
+          "end": 30
+        }
+      ],
+      "fields": [
+        {
+          "name": "n",
+          "conditional": false
+        }
+      ],
+      "removed": [],
+      "open": false,
+      "uncertain": false,
+      "stage_commands": [
+        "from",
+        "stats"
+      ],
+      "stage_complete": [
+        true,
+        true
+      ]
+    }
   },
   {
     "id": "T3.aggregate.arity.count.1",
     "obligation_ids": [
-      "T3.aggregate.arity.count.1"
+      "T3.aggregate.arity.count.1",
+      "F.count.arity-1.P1"
     ],
     "source_keys": [
-      "doc167"
+      "doc167",
+      "aggregatefunc"
     ],
     "form_ids": [
-      "C08"
+      "C08",
+      "F.count"
     ],
     "document": {
       "text": "FROM main | stats count(user) AS n",
@@ -5933,18 +7590,75 @@
         }
       ]
     },
-    "meaningful_id": "T3.aggregate.arity.incomplete"
+    "meaningful_id": "T3.aggregate.arity.incomplete",
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "valid",
+      "syntax_complete": true,
+      "semantic_complete": true,
+      "expected_codes": [],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        },
+        {
+          "original_name": "user",
+          "normalized_name": "user",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 24,
+          "end": 28
+        },
+        {
+          "original_name": "n",
+          "normalized_name": "n",
+          "kind": "field",
+          "role": "output",
+          "binding": "not_applicable",
+          "start": 33,
+          "end": 34
+        }
+      ],
+      "fields": [
+        {
+          "name": "n",
+          "conditional": false
+        }
+      ],
+      "removed": [],
+      "open": false,
+      "uncertain": false,
+      "stage_commands": [
+        "from",
+        "stats"
+      ],
+      "stage_complete": [
+        true,
+        true
+      ]
+    }
   },
   {
     "id": "T3.aggregate.arity.count.2",
     "obligation_ids": [
-      "T3.aggregate.arity.count.2"
+      "T3.aggregate.arity.count.2",
+      "F.count.arity-1.P2"
     ],
     "source_keys": [
-      "doc167"
+      "doc167",
+      "aggregatefunc"
     ],
     "form_ids": [
-      "C08"
+      "C08",
+      "F.count"
     ],
     "document": {
       "text": "FROM main | stats count(code=201) AS n",
@@ -5968,18 +7682,75 @@
         }
       ]
     },
-    "meaningful_id": "T3.aggregate.arity.incomplete"
+    "meaningful_id": "T3.aggregate.arity.incomplete",
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "valid",
+      "syntax_complete": true,
+      "semantic_complete": true,
+      "expected_codes": [],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        },
+        {
+          "original_name": "code",
+          "normalized_name": "code",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 24,
+          "end": 28
+        },
+        {
+          "original_name": "n",
+          "normalized_name": "n",
+          "kind": "field",
+          "role": "output",
+          "binding": "not_applicable",
+          "start": 37,
+          "end": 38
+        }
+      ],
+      "fields": [
+        {
+          "name": "n",
+          "conditional": false
+        }
+      ],
+      "removed": [],
+      "open": false,
+      "uncertain": false,
+      "stage_commands": [
+        "from",
+        "stats"
+      ],
+      "stage_complete": [
+        true,
+        true
+      ]
+    }
   },
   {
     "id": "T3.aggregate.arity.count.3",
     "obligation_ids": [
-      "T3.aggregate.arity.count.3"
+      "T3.aggregate.arity.count.3",
+      "F.count.N1"
     ],
     "source_keys": [
-      "doc167"
+      "doc167",
+      "aggregatefunc"
     ],
     "form_ids": [
-      "C08"
+      "C08",
+      "F.count"
     ],
     "document": {
       "text": "FROM main | stats count(user,code) AS n",
@@ -5997,7 +7768,72 @@
       "scope": "grammar-contexts-only",
       "source_exact": true
     },
-    "meaningful_id": "T3.aggregate.arity.invalid"
+    "meaningful_id": "T3.aggregate.arity.invalid",
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "invalid",
+      "syntax_complete": true,
+      "semantic_complete": false,
+      "expected_codes": [
+        "SPL_SYNTAX_ERROR"
+      ],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        },
+        {
+          "original_name": "user",
+          "normalized_name": "user",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 24,
+          "end": 28
+        },
+        {
+          "original_name": "code",
+          "normalized_name": "code",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 29,
+          "end": 33
+        },
+        {
+          "original_name": "n",
+          "normalized_name": "n",
+          "kind": "field",
+          "role": "output",
+          "binding": "not_applicable",
+          "start": 38,
+          "end": 39
+        }
+      ],
+      "fields": [
+        {
+          "name": "n",
+          "conditional": true
+        }
+      ],
+      "removed": [],
+      "open": false,
+      "uncertain": true,
+      "stage_commands": [
+        "from",
+        "stats"
+      ],
+      "stage_complete": [
+        true,
+        false
+      ]
+    }
   },
   {
     "id": "T3.stats.profile.option.0",

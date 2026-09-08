@@ -55,9 +55,11 @@ type sourceRefinement struct {
 	complete            bool
 	resolve             func(string) SourceFieldAdmission
 	finiteCompatibility bool
-	names               []string
-	members             map[string]bool
-	expansions          []FieldExpansion
+	// SPL2 literal names cannot inherit path identity from a string-only resolver.
+	literalSourceNames bool
+	names              []string
+	members            map[string]bool
+	expansions         []FieldExpansion
 }
 
 // AnalyzeWithSourceFields analyzes with a known finite source universe. Names are
@@ -109,6 +111,10 @@ func (r *sourceRefinement) admission(name string) SourceFieldAdmission {
 	return SourceFieldIndeterminate
 }
 
+func (r *sourceRefinement) ambiguousSourceName(name string) bool {
+	return r.literalSourceNames && r.resolve != nil && strings.Contains(name, ".")
+}
+
 // Tracked obligations control local exhaustiveness even when admission is
 // unresolved. Conditional provenance shadows declarations and is never promoted.
 func (s *semanticStage) refinedSelectorCandidates(pattern string) ([]string, map[string]trackedField, bool) {
@@ -116,6 +122,10 @@ func (s *semanticStage) refinedSelectorCandidates(pattern string) ([]string, map
 	exhaustive := !s.env.open || s.refinement.complete
 	add := func(name string, field trackedField) {
 		if !wildcardMatches(pattern, name) {
+			return
+		}
+		if field.source && s.refinement.ambiguousSourceName(name) {
+			exhaustive = false
 			return
 		}
 		if field.source && !field.Conditional {
@@ -134,6 +144,12 @@ func (s *semanticStage) refinedSelectorCandidates(pattern string) ([]string, map
 	if s.env.open {
 		for _, name := range s.refinement.names {
 			if _, known := s.env.fields[name]; known || s.env.removed[name] {
+				continue
+			}
+			// Identity is checked per matching candidate, even for patterns like
+			// '*'. A withheld source member never becomes a proven flat field.
+			if wildcardMatches(pattern, name) && s.refinement.ambiguousSourceName(name) {
+				exhaustive = false
 				continue
 			}
 			// Prohibited declarations do not become fields, including after unknown stages.
@@ -293,7 +309,7 @@ func (s *semanticStage) retainSourceInternals() bool {
 	complete := !s.env.open || s.refinement.complete
 	// Earlier exact reads track structural obligations without proving admission.
 	for name, field := range s.env.fields {
-		if field.source && strings.HasPrefix(name, "_") && s.refinement.admission(name) == SourceFieldIndeterminate {
+		if field.source && strings.HasPrefix(name, "_") && (s.refinement.admission(name) == SourceFieldIndeterminate || s.refinement.ambiguousSourceName(name)) {
 			complete = false
 		}
 	}
@@ -302,6 +318,10 @@ func (s *semanticStage) retainSourceInternals() bool {
 	}
 	for _, name := range s.refinement.names {
 		if _, known := s.env.fields[name]; known || s.env.removed[name] || !strings.HasPrefix(name, "_") {
+			continue
+		}
+		if s.refinement.ambiguousSourceName(name) {
+			complete = false
 			continue
 		}
 		admission := s.refinement.admission(name)

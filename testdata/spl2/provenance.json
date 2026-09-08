@@ -2978,8 +2978,8 @@
       "source_keys": [
         "mathfunc"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task6",
       "description": "F.abs"
     },
     {
@@ -2987,8 +2987,8 @@
       "source_keys": [
         "mathfunc"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task6",
       "description": "F.ceil"
     },
     {
@@ -2996,8 +2996,8 @@
       "source_keys": [
         "mathfunc"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task6",
       "description": "F.ceiling"
     },
     {
@@ -3005,8 +3005,8 @@
       "source_keys": [
         "mathfunc"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task6",
       "description": "F.floor"
     },
     {
@@ -3014,8 +3014,8 @@
       "source_keys": [
         "mathfunc"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task6",
       "description": "F.round"
     },
     {
@@ -3023,8 +3023,8 @@
       "source_keys": [
         "textfunc"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task6",
       "description": "F.len"
     },
     {
@@ -3032,8 +3032,8 @@
       "source_keys": [
         "textfunc"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task6",
       "description": "F.lower"
     },
     {
@@ -3041,8 +3041,8 @@
       "source_keys": [
         "textfunc"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task6",
       "description": "F.upper"
     },
     {
@@ -3050,8 +3050,8 @@
       "source_keys": [
         "textfunc"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task6",
       "description": "F.trim"
     },
     {
@@ -3059,8 +3059,8 @@
       "source_keys": [
         "textfunc"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task6",
       "description": "F.ltrim"
     },
     {
@@ -3068,8 +3068,8 @@
       "source_keys": [
         "textfunc"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task6",
       "description": "F.rtrim"
     },
     {
@@ -3077,8 +3077,8 @@
       "source_keys": [
         "textfunc"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task6",
       "description": "F.substr"
     },
     {
@@ -3086,8 +3086,8 @@
       "source_keys": [
         "textfunc"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task6",
       "description": "F.replace"
     },
     {
@@ -3095,8 +3095,8 @@
       "source_keys": [
         "comparefunc"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task6",
       "description": "F.coalesce"
     },
     {
@@ -3104,8 +3104,8 @@
       "source_keys": [
         "comparefunc"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task6",
       "description": "F.if"
     },
     {
@@ -3113,8 +3113,8 @@
       "source_keys": [
         "comparefunc"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task6",
       "description": "F.case"
     },
     {
@@ -3122,8 +3122,8 @@
       "source_keys": [
         "comparefunc"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task6",
       "description": "F.match"
     },
     {
@@ -3131,8 +3131,8 @@
       "source_keys": [
         "infofunc"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task6",
       "description": "F.isnull"
     },
     {
@@ -3140,8 +3140,8 @@
       "source_keys": [
         "infofunc"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task6",
       "description": "F.isnotnull"
     },
     {
@@ -3149,8 +3149,8 @@
       "source_keys": [
         "convertfunc"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task6",
       "description": "F.tonumber"
     },
     {
@@ -3158,8 +3158,8 @@
       "source_keys": [
         "convertfunc"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task6",
       "description": "F.tostring"
     },
     {
@@ -3167,8 +3167,8 @@
       "source_keys": [
         "mvfunc"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task6",
       "description": "F.mvcount"
     },
     {
@@ -3176,8 +3176,8 @@
       "source_keys": [
         "mvfunc"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task6",
       "description": "F.split"
     },
     {
@@ -3185,8 +3185,8 @@
       "source_keys": [
         "aggregatefunc"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task6",
       "description": "F.count"
     },
     {
@@ -3194,8 +3194,8 @@
       "source_keys": [
         "aggregatefunc"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task6",
       "description": "F.sum"
     },
     {
@@ -3203,8 +3203,8 @@
       "source_keys": [
         "aggregatefunc"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task6",
       "description": "F.avg"
     },
     {
@@ -3212,8 +3212,8 @@
       "source_keys": [
         "aggregatefunc"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task6",
       "description": "F.min"
     },
     {
@@ -3221,8 +3221,8 @@
       "source_keys": [
         "aggregatefunc"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task6",
       "description": "F.max"
     },
     {
@@ -3230,8 +3230,8 @@
       "source_keys": [
         "aggregatefunc"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task6",
       "description": "F.dc"
     },
     {
@@ -3239,8 +3239,8 @@
       "source_keys": [
         "aggregatefunc"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task6",
       "description": "F.distinct_count"
     },
     {
@@ -3248,8 +3248,8 @@
       "source_keys": [
         "multiagg"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task6",
       "description": "F.values"
     },
     {
@@ -3257,8 +3257,8 @@
       "source_keys": [
         "multiagg"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task6",
       "description": "F.list"
     },
     {
@@ -3266,8 +3266,8 @@
       "source_keys": [
         "eventorder"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task6",
       "description": "F.first"
     },
     {
@@ -3289,8 +3289,8 @@
         "timespans",
         "timemodifiers"
       ],
-      "disposition": "pending",
-      "owner": "later-m5-tasks",
+      "disposition": "active",
+      "owner": "task6",
       "description": "F.last"
     },
     {
@@ -3348,6 +3348,20 @@
       ],
       "disposition": "pending",
       "owner": "later-m5-tasks"
+    },
+    {
+      "id": "T6.canonical",
+      "source_keys": [
+        "doc136",
+        "doc169",
+        "doc167",
+        "doc163",
+        "doc158",
+        "evalcompat"
+      ],
+      "description": "Canonical ordinary transfers, nullability, function and profile boundaries with separate syntax evidence.",
+      "disposition": "active",
+      "owner": "task6"
     }
   ],
   "obligations": [
@@ -13892,8 +13906,11 @@
         "mathfunc"
       ],
       "candidate": "abs(-7)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.abs.arity-1.P1",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.abs.arity-1.P2",
@@ -13902,8 +13919,11 @@
         "mathfunc"
       ],
       "candidate": "abs(delta)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.abs.arity-1.P2",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.abs.N1",
@@ -13912,8 +13932,11 @@
         "mathfunc"
       ],
       "candidate": "abs()",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.abs.N1",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.abs.N2",
@@ -13922,8 +13945,11 @@
         "mathfunc"
       ],
       "candidate": "abs(delta,2)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.abs.N2",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.ceil.arity-1.P1",
@@ -13932,8 +13958,11 @@
         "mathfunc"
       ],
       "candidate": "ceil(2.4)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.ceil.arity-1.P1",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.ceil.arity-1.P2",
@@ -13942,8 +13971,11 @@
         "mathfunc"
       ],
       "candidate": "ceil(cost)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.ceil.arity-1.P2",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.ceil.N1",
@@ -13952,8 +13984,11 @@
         "mathfunc"
       ],
       "candidate": "ceil()",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.ceil.N1",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.ceil.N2",
@@ -13962,8 +13997,11 @@
         "mathfunc"
       ],
       "candidate": "ceil(cost,2)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.ceil.N2",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.ceiling.arity-1.P1",
@@ -13972,8 +14010,11 @@
         "mathfunc"
       ],
       "candidate": "ceiling(2.4)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.ceiling.arity-1.P1",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.ceiling.arity-1.P2",
@@ -13982,8 +14023,11 @@
         "mathfunc"
       ],
       "candidate": "ceiling(cost)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.ceiling.arity-1.P2",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.ceiling.N1",
@@ -13992,8 +14036,11 @@
         "mathfunc"
       ],
       "candidate": "ceiling()",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.ceiling.N1",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.ceiling.N2",
@@ -14002,8 +14049,11 @@
         "mathfunc"
       ],
       "candidate": "ceiling(cost,2)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.ceiling.N2",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.floor.arity-1.P1",
@@ -14012,8 +14062,11 @@
         "mathfunc"
       ],
       "candidate": "floor(2.4)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.floor.arity-1.P1",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.floor.arity-1.P2",
@@ -14022,8 +14075,11 @@
         "mathfunc"
       ],
       "candidate": "floor(cost)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.floor.arity-1.P2",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.floor.N1",
@@ -14032,8 +14088,11 @@
         "mathfunc"
       ],
       "candidate": "floor()",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.floor.N1",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.floor.N2",
@@ -14042,8 +14101,11 @@
         "mathfunc"
       ],
       "candidate": "floor(cost,2)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.floor.N2",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.round.arity-1.P1",
@@ -14052,8 +14114,11 @@
         "mathfunc"
       ],
       "candidate": "round(4.6)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.round.arity-1.P1",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.round.arity-1.P2",
@@ -14062,8 +14127,11 @@
         "mathfunc"
       ],
       "candidate": "round(cost)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.round.arity-1.P2",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.round.arity-2.P1",
@@ -14072,8 +14140,11 @@
         "mathfunc"
       ],
       "candidate": "round(4.6,0)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.round.arity-2.P1",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.round.arity-2.P2",
@@ -14082,8 +14153,11 @@
         "mathfunc"
       ],
       "candidate": "round(cost,2)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.round.arity-2.P2",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.round.N1",
@@ -14092,8 +14166,11 @@
         "mathfunc"
       ],
       "candidate": "round()",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.round.N1",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.round.N2",
@@ -14102,8 +14179,11 @@
         "mathfunc"
       ],
       "candidate": "round(cost,2,3)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.round.N2",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.len.arity-1.P1",
@@ -14112,8 +14192,11 @@
         "textfunc"
       ],
       "candidate": "len(\"Abc\")",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.len.arity-1.P1",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.len.arity-1.P2",
@@ -14122,8 +14205,11 @@
         "textfunc"
       ],
       "candidate": "len(name)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.len.arity-1.P2",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.len.N1",
@@ -14132,8 +14218,11 @@
         "textfunc"
       ],
       "candidate": "len()",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.len.N1",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.len.N2",
@@ -14142,8 +14231,11 @@
         "textfunc"
       ],
       "candidate": "len(name,2)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.len.N2",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.lower.arity-1.P1",
@@ -14152,8 +14244,11 @@
         "textfunc"
       ],
       "candidate": "lower(\"Abc\")",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.lower.arity-1.P1",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.lower.arity-1.P2",
@@ -14162,8 +14257,11 @@
         "textfunc"
       ],
       "candidate": "lower(name)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.lower.arity-1.P2",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.lower.N1",
@@ -14172,8 +14270,11 @@
         "textfunc"
       ],
       "candidate": "lower()",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.lower.N1",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.lower.N2",
@@ -14182,8 +14283,11 @@
         "textfunc"
       ],
       "candidate": "lower(name,2)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.lower.N2",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.upper.arity-1.P1",
@@ -14192,8 +14296,11 @@
         "textfunc"
       ],
       "candidate": "upper(\"Abc\")",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.upper.arity-1.P1",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.upper.arity-1.P2",
@@ -14202,8 +14309,11 @@
         "textfunc"
       ],
       "candidate": "upper(name)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.upper.arity-1.P2",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.upper.N1",
@@ -14212,8 +14322,11 @@
         "textfunc"
       ],
       "candidate": "upper()",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.upper.N1",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.upper.N2",
@@ -14222,8 +14335,11 @@
         "textfunc"
       ],
       "candidate": "upper(name,2)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.upper.N2",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.trim.arity-1.P1",
@@ -14232,8 +14348,11 @@
         "textfunc"
       ],
       "candidate": "trim(\" abc \")",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.trim.arity-1.P1",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.trim.arity-1.P2",
@@ -14242,8 +14361,11 @@
         "textfunc"
       ],
       "candidate": "trim(name)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.trim.arity-1.P2",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.trim.arity-2.P1",
@@ -14252,8 +14374,11 @@
         "textfunc"
       ],
       "candidate": "trim(\"__abc__\",\"_\")",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.trim.arity-2.P1",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.trim.arity-2.P2",
@@ -14262,8 +14387,11 @@
         "textfunc"
       ],
       "candidate": "trim(name,\"./\")",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.trim.arity-2.P2",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.trim.N1",
@@ -14272,8 +14400,11 @@
         "textfunc"
       ],
       "candidate": "trim()",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.trim.N1",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.trim.N2",
@@ -14282,8 +14413,11 @@
         "textfunc"
       ],
       "candidate": "trim(name,\"_\",2)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.trim.N2",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.ltrim.arity-1.P1",
@@ -14292,8 +14426,11 @@
         "textfunc"
       ],
       "candidate": "ltrim(\" abc \")",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.ltrim.arity-1.P1",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.ltrim.arity-1.P2",
@@ -14302,8 +14439,11 @@
         "textfunc"
       ],
       "candidate": "ltrim(name)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.ltrim.arity-1.P2",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.ltrim.arity-2.P1",
@@ -14312,8 +14452,11 @@
         "textfunc"
       ],
       "candidate": "ltrim(\"__abc__\",\"_\")",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.ltrim.arity-2.P1",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.ltrim.arity-2.P2",
@@ -14322,8 +14465,11 @@
         "textfunc"
       ],
       "candidate": "ltrim(name,\"./\")",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.ltrim.arity-2.P2",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.ltrim.N1",
@@ -14332,8 +14478,11 @@
         "textfunc"
       ],
       "candidate": "ltrim()",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.ltrim.N1",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.ltrim.N2",
@@ -14342,8 +14491,11 @@
         "textfunc"
       ],
       "candidate": "ltrim(name,\"_\",2)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.ltrim.N2",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.rtrim.arity-1.P1",
@@ -14352,8 +14504,11 @@
         "textfunc"
       ],
       "candidate": "rtrim(\" abc \")",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.rtrim.arity-1.P1",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.rtrim.arity-1.P2",
@@ -14362,8 +14517,11 @@
         "textfunc"
       ],
       "candidate": "rtrim(name)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.rtrim.arity-1.P2",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.rtrim.arity-2.P1",
@@ -14372,8 +14530,11 @@
         "textfunc"
       ],
       "candidate": "rtrim(\"__abc__\",\"_\")",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.rtrim.arity-2.P1",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.rtrim.arity-2.P2",
@@ -14382,8 +14543,11 @@
         "textfunc"
       ],
       "candidate": "rtrim(name,\"./\")",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.rtrim.arity-2.P2",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.rtrim.N1",
@@ -14392,8 +14556,11 @@
         "textfunc"
       ],
       "candidate": "rtrim()",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.rtrim.N1",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.rtrim.N2",
@@ -14402,8 +14569,11 @@
         "textfunc"
       ],
       "candidate": "rtrim(name,\"_\",2)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.rtrim.N2",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.substr.arity-2.P1",
@@ -14412,8 +14582,11 @@
         "textfunc"
       ],
       "candidate": "substr(name,2)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.substr.arity-2.P1",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.substr.arity-2.P2",
@@ -14422,8 +14595,11 @@
         "textfunc"
       ],
       "candidate": "substr(\"abcd\",-2)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.substr.arity-2.P2",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.substr.arity-3.P1",
@@ -14432,8 +14608,11 @@
         "textfunc"
       ],
       "candidate": "substr(name,2,3)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.substr.arity-3.P1",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.substr.arity-3.P2",
@@ -14442,8 +14621,11 @@
         "textfunc"
       ],
       "candidate": "substr(\"abcd\",1,2)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.substr.arity-3.P2",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.substr.N1",
@@ -14452,8 +14634,11 @@
         "textfunc"
       ],
       "candidate": "substr(name)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.substr.N1",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.substr.N2",
@@ -14462,8 +14647,11 @@
         "textfunc"
       ],
       "candidate": "substr(name,1,2,3)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.substr.N2",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.replace.arity-3.P1",
@@ -14472,8 +14660,11 @@
         "textfunc"
       ],
       "candidate": "replace(name,\"^a\",\"b\")",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.replace.arity-3.P1",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.replace.arity-3.P2",
@@ -14482,8 +14673,11 @@
         "textfunc"
       ],
       "candidate": "replace(path,\"/\",\"_\")",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.replace.arity-3.P2",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.replace.N1",
@@ -14492,8 +14686,11 @@
         "textfunc"
       ],
       "candidate": "replace(name,\"a\")",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.replace.N1",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.replace.N2",
@@ -14502,8 +14699,11 @@
         "textfunc"
       ],
       "candidate": "replace(name,\"a\",\"b\",\"c\")",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.replace.N2",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.coalesce.arity-1.P1",
@@ -14512,8 +14712,11 @@
         "comparefunc"
       ],
       "candidate": "coalesce(primary)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.coalesce.arity-1.P1",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.coalesce.arity-1.P2",
@@ -14522,8 +14725,11 @@
         "comparefunc"
       ],
       "candidate": "coalesce(\"fallback\")",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.coalesce.arity-1.P2",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.coalesce.arity-2+.P1",
@@ -14532,8 +14738,11 @@
         "comparefunc"
       ],
       "candidate": "coalesce(primary,backup)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.coalesce.arity-2+.P1",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.coalesce.arity-2+.P2",
@@ -14542,8 +14751,11 @@
         "comparefunc"
       ],
       "candidate": "coalesce(primary,backup,\"unknown\")",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.coalesce.arity-2+.P2",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.coalesce.N1",
@@ -14552,8 +14764,11 @@
         "comparefunc"
       ],
       "candidate": "coalesce()",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.coalesce.N1",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.coalesce.N2",
@@ -14562,8 +14777,11 @@
         "comparefunc"
       ],
       "candidate": "coalesce(primary,)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.coalesce.N2",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.if.arity-3.P1",
@@ -14572,8 +14790,11 @@
         "comparefunc"
       ],
       "candidate": "if(code=201,\"created\",\"other\")",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.if.arity-3.P1",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.if.arity-3.P2",
@@ -14582,8 +14803,11 @@
         "comparefunc"
       ],
       "candidate": "if(isnull(name),\"unknown\",name)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.if.arity-3.P2",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.if.N1",
@@ -14592,8 +14816,11 @@
         "comparefunc"
       ],
       "candidate": "if(code=201,\"created\")",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.if.N1",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.if.N2",
@@ -14602,8 +14829,11 @@
         "comparefunc"
       ],
       "candidate": "if(code=201,\"created\",\"other\",0)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.if.N2",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.case.arity-2.P1",
@@ -14612,8 +14842,11 @@
         "comparefunc"
       ],
       "candidate": "case(code=201,\"created\")",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.case.arity-2.P1",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.case.arity-2.P2",
@@ -14622,8 +14855,11 @@
         "comparefunc"
       ],
       "candidate": "case(true,\"fallback\")",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.case.arity-2.P2",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.case.arity-4+.P1",
@@ -14632,8 +14868,11 @@
         "comparefunc"
       ],
       "candidate": "case(code=201,\"created\",true,\"other\")",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.case.arity-4+.P1",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.case.arity-4+.P2",
@@ -14642,8 +14881,11 @@
         "comparefunc"
       ],
       "candidate": "case(n<0,-1,n>=0,1)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.case.arity-4+.P2",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.case.N1",
@@ -14652,8 +14894,11 @@
         "comparefunc"
       ],
       "candidate": "case()",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.case.N1",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.case.N2",
@@ -14662,8 +14907,11 @@
         "comparefunc"
       ],
       "candidate": "case(code=201)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.case.N2",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.case.N3",
@@ -14672,8 +14920,11 @@
         "comparefunc"
       ],
       "candidate": "case(code=201,\"created\",true)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.case.N3",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.match.arity-2.P1",
@@ -14682,8 +14933,11 @@
         "comparefunc"
       ],
       "candidate": "match(name,\"^a\")",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.match.arity-2.P1",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.match.arity-2.P2",
@@ -14692,8 +14946,11 @@
         "comparefunc"
       ],
       "candidate": "match(path,\"/tmp/\")",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.match.arity-2.P2",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.match.N1",
@@ -14702,8 +14959,11 @@
         "comparefunc"
       ],
       "candidate": "match(name)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.match.N1",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.match.N2",
@@ -14712,8 +14972,11 @@
         "comparefunc"
       ],
       "candidate": "match(name,\"a\",\"b\")",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.match.N2",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.isnull.arity-1.P1",
@@ -14722,8 +14985,11 @@
         "infofunc"
       ],
       "candidate": "isnull(name)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.isnull.arity-1.P1",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.isnull.arity-1.P2",
@@ -14732,8 +14998,11 @@
         "infofunc"
       ],
       "candidate": "isnull(null)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.isnull.arity-1.P2",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.isnull.N1",
@@ -14742,8 +15011,11 @@
         "infofunc"
       ],
       "candidate": "isnull()",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.isnull.N1",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.isnull.N2",
@@ -14752,8 +15024,11 @@
         "infofunc"
       ],
       "candidate": "isnull(name,backup)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.isnull.N2",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.isnotnull.arity-1.P1",
@@ -14762,8 +15037,11 @@
         "infofunc"
       ],
       "candidate": "isnotnull(name)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.isnotnull.arity-1.P1",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.isnotnull.arity-1.P2",
@@ -14772,8 +15050,11 @@
         "infofunc"
       ],
       "candidate": "isnotnull(null)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.isnotnull.arity-1.P2",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.isnotnull.N1",
@@ -14782,8 +15063,11 @@
         "infofunc"
       ],
       "candidate": "isnotnull()",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.isnotnull.N1",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.isnotnull.N2",
@@ -14792,8 +15076,11 @@
         "infofunc"
       ],
       "candidate": "isnotnull(name,backup)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.isnotnull.N2",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.tonumber.arity-1.P1",
@@ -14802,8 +15089,11 @@
         "convertfunc"
       ],
       "candidate": "tonumber(\"17\")",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.tonumber.arity-1.P1",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.tonumber.arity-1.P2",
@@ -14812,8 +15102,11 @@
         "convertfunc"
       ],
       "candidate": "tonumber(amount)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.tonumber.arity-1.P2",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.tonumber.arity-2.P1",
@@ -14822,8 +15115,11 @@
         "convertfunc"
       ],
       "candidate": "tonumber(\"1f\",16)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.tonumber.arity-2.P1",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.tonumber.arity-2.P2",
@@ -14832,8 +15128,11 @@
         "convertfunc"
       ],
       "candidate": "tonumber(binary,2)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.tonumber.arity-2.P2",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.tonumber.N1",
@@ -14842,8 +15141,11 @@
         "convertfunc"
       ],
       "candidate": "tonumber()",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.tonumber.N1",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.tonumber.N2",
@@ -14852,8 +15154,11 @@
         "convertfunc"
       ],
       "candidate": "tonumber(amount,10,2)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.tonumber.N2",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.tostring.arity-1.P1",
@@ -14862,8 +15167,11 @@
         "convertfunc"
       ],
       "candidate": "tostring(17)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.tostring.arity-1.P1",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.tostring.arity-1.P2",
@@ -14872,8 +15180,11 @@
         "convertfunc"
       ],
       "candidate": "tostring(amount)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.tostring.arity-1.P2",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.tostring.arity-2.P1",
@@ -14882,8 +15193,11 @@
         "convertfunc"
       ],
       "candidate": "tostring(31,\"hex\")",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.tostring.arity-2.P1",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.tostring.arity-2.P2",
@@ -14892,8 +15206,11 @@
         "convertfunc"
       ],
       "candidate": "tostring(seconds,\"duration\")",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.tostring.arity-2.P2",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.tostring.arity-2.P3",
@@ -14902,8 +15219,11 @@
         "convertfunc"
       ],
       "candidate": "tostring(amount,\"commas\")",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.tostring.arity-2.P3",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.tostring.N1",
@@ -14912,8 +15232,11 @@
         "convertfunc"
       ],
       "candidate": "tostring()",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.tostring.N1",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.tostring.N2",
@@ -14922,8 +15245,11 @@
         "convertfunc"
       ],
       "candidate": "tostring(amount,\"hex\",2)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.tostring.N2",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.mvcount.arity-1.P1",
@@ -14932,8 +15258,11 @@
         "mvfunc"
       ],
       "candidate": "mvcount(tags)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.mvcount.arity-1.P1",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.mvcount.arity-1.P2",
@@ -14942,8 +15271,11 @@
         "mvfunc"
       ],
       "candidate": "mvcount(split(name,\":\"))",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.mvcount.arity-1.P2",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.mvcount.N1",
@@ -14952,8 +15284,11 @@
         "mvfunc"
       ],
       "candidate": "mvcount()",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.mvcount.N1",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.mvcount.N2",
@@ -14962,8 +15297,11 @@
         "mvfunc"
       ],
       "candidate": "mvcount(tags,2)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.mvcount.N2",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.split.arity-2.P1",
@@ -14972,8 +15310,11 @@
         "mvfunc"
       ],
       "candidate": "split(name,\":\")",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.split.arity-2.P1",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.split.arity-2.P2",
@@ -14982,8 +15323,11 @@
         "mvfunc"
       ],
       "candidate": "split(\"a/b\",\"/\")",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.split.arity-2.P2",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.split.N1",
@@ -14992,8 +15336,11 @@
         "mvfunc"
       ],
       "candidate": "split(name)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.split.N1",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.split.N2",
@@ -15002,8 +15349,11 @@
         "mvfunc"
       ],
       "candidate": "split(name,\":\",2)",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.split.N2",
+      "assembly": "eval-rhs",
+      "owner": "task6"
     },
     {
       "id": "F.count.arity-0.P1",
@@ -15012,8 +15362,11 @@
         "aggregatefunc"
       ],
       "candidate": "stats count() AS n",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "T3.aggregate.arity.count.0",
+      "assembly": "pipeline-tail",
+      "owner": "task6"
     },
     {
       "id": "F.count.arity-0.P2",
@@ -15022,8 +15375,11 @@
         "aggregatefunc"
       ],
       "candidate": "stats count() AS n BY host",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.count.arity-0.P2",
+      "assembly": "pipeline-tail",
+      "owner": "task6"
     },
     {
       "id": "F.count.arity-1.P1",
@@ -15032,8 +15388,11 @@
         "aggregatefunc"
       ],
       "candidate": "stats count(user) AS n",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "T3.aggregate.arity.count.1",
+      "assembly": "pipeline-tail",
+      "owner": "task6"
     },
     {
       "id": "F.count.arity-1.P2",
@@ -15042,8 +15401,11 @@
         "aggregatefunc"
       ],
       "candidate": "stats count(code=201) AS n",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "T3.aggregate.arity.count.2",
+      "assembly": "pipeline-tail",
+      "owner": "task6"
     },
     {
       "id": "F.count.N1",
@@ -15052,8 +15414,11 @@
         "aggregatefunc"
       ],
       "candidate": "stats count(user,code) AS n",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "T3.aggregate.arity.count.3",
+      "assembly": "pipeline-tail",
+      "owner": "task6"
     },
     {
       "id": "F.count.N2",
@@ -15062,8 +15427,11 @@
         "aggregatefunc"
       ],
       "candidate": "stats count AS n",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.count.N2",
+      "assembly": "pipeline-tail",
+      "owner": "task6"
     },
     {
       "id": "F.sum.arity-1.P1",
@@ -15072,8 +15440,11 @@
         "aggregatefunc"
       ],
       "candidate": "stats sum(bytes) AS result",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "T3.aggregate.arity.sum.0",
+      "assembly": "pipeline-tail",
+      "owner": "task6"
     },
     {
       "id": "F.sum.arity-1.P2",
@@ -15082,8 +15453,11 @@
         "aggregatefunc"
       ],
       "candidate": "stats sum(duration) AS result",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "T3.aggregate.arity.sum.1",
+      "assembly": "pipeline-tail",
+      "owner": "task6"
     },
     {
       "id": "F.sum.N1",
@@ -15092,8 +15466,11 @@
         "aggregatefunc"
       ],
       "candidate": "stats sum() AS result",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "T3.aggregate.arity.sum.2",
+      "assembly": "pipeline-tail",
+      "owner": "task6"
     },
     {
       "id": "F.sum.N2",
@@ -15102,8 +15479,11 @@
         "aggregatefunc"
       ],
       "candidate": "stats sum(bytes,duration) AS result",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "T3.aggregate.arity.sum.3",
+      "assembly": "pipeline-tail",
+      "owner": "task6"
     },
     {
       "id": "F.avg.arity-1.P1",
@@ -15112,8 +15492,11 @@
         "aggregatefunc"
       ],
       "candidate": "stats avg(bytes) AS result",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "T3.aggregate.arity.avg.0",
+      "assembly": "pipeline-tail",
+      "owner": "task6"
     },
     {
       "id": "F.avg.arity-1.P2",
@@ -15122,8 +15505,11 @@
         "aggregatefunc"
       ],
       "candidate": "stats avg(duration) AS result",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "T3.aggregate.arity.avg.1",
+      "assembly": "pipeline-tail",
+      "owner": "task6"
     },
     {
       "id": "F.avg.N1",
@@ -15132,8 +15518,11 @@
         "aggregatefunc"
       ],
       "candidate": "stats avg() AS result",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "T3.aggregate.arity.avg.2",
+      "assembly": "pipeline-tail",
+      "owner": "task6"
     },
     {
       "id": "F.avg.N2",
@@ -15142,8 +15531,11 @@
         "aggregatefunc"
       ],
       "candidate": "stats avg(bytes,duration) AS result",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "T3.aggregate.arity.avg.3",
+      "assembly": "pipeline-tail",
+      "owner": "task6"
     },
     {
       "id": "F.min.arity-1.P1",
@@ -15152,8 +15544,11 @@
         "aggregatefunc"
       ],
       "candidate": "stats min(bytes) AS result",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "T3.aggregate.arity.min.0",
+      "assembly": "pipeline-tail",
+      "owner": "task6"
     },
     {
       "id": "F.min.arity-1.P2",
@@ -15162,8 +15557,11 @@
         "aggregatefunc"
       ],
       "candidate": "stats min(duration) AS result",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "T3.aggregate.arity.min.1",
+      "assembly": "pipeline-tail",
+      "owner": "task6"
     },
     {
       "id": "F.min.N1",
@@ -15172,8 +15570,11 @@
         "aggregatefunc"
       ],
       "candidate": "stats min() AS result",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "T3.aggregate.arity.min.2",
+      "assembly": "pipeline-tail",
+      "owner": "task6"
     },
     {
       "id": "F.min.N2",
@@ -15182,8 +15583,11 @@
         "aggregatefunc"
       ],
       "candidate": "stats min(bytes,duration) AS result",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "T3.aggregate.arity.min.3",
+      "assembly": "pipeline-tail",
+      "owner": "task6"
     },
     {
       "id": "F.max.arity-1.P1",
@@ -15192,8 +15596,11 @@
         "aggregatefunc"
       ],
       "candidate": "stats max(bytes) AS result",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "T3.aggregate.arity.max.0",
+      "assembly": "pipeline-tail",
+      "owner": "task6"
     },
     {
       "id": "F.max.arity-1.P2",
@@ -15202,8 +15609,11 @@
         "aggregatefunc"
       ],
       "candidate": "stats max(duration) AS result",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "T3.aggregate.arity.max.1",
+      "assembly": "pipeline-tail",
+      "owner": "task6"
     },
     {
       "id": "F.max.N1",
@@ -15212,8 +15622,11 @@
         "aggregatefunc"
       ],
       "candidate": "stats max() AS result",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "T3.aggregate.arity.max.2",
+      "assembly": "pipeline-tail",
+      "owner": "task6"
     },
     {
       "id": "F.max.N2",
@@ -15222,8 +15635,11 @@
         "aggregatefunc"
       ],
       "candidate": "stats max(bytes,duration) AS result",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "T3.aggregate.arity.max.3",
+      "assembly": "pipeline-tail",
+      "owner": "task6"
     },
     {
       "id": "F.dc.arity-1.P1",
@@ -15232,8 +15648,11 @@
         "aggregatefunc"
       ],
       "candidate": "stats dc(bytes) AS result",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "T3.aggregate.arity.dc.0",
+      "assembly": "pipeline-tail",
+      "owner": "task6"
     },
     {
       "id": "F.dc.arity-1.P2",
@@ -15242,8 +15661,11 @@
         "aggregatefunc"
       ],
       "candidate": "stats dc(duration) AS result",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "T3.aggregate.arity.dc.1",
+      "assembly": "pipeline-tail",
+      "owner": "task6"
     },
     {
       "id": "F.dc.N1",
@@ -15252,8 +15674,11 @@
         "aggregatefunc"
       ],
       "candidate": "stats dc() AS result",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "T3.aggregate.arity.dc.2",
+      "assembly": "pipeline-tail",
+      "owner": "task6"
     },
     {
       "id": "F.dc.N2",
@@ -15262,8 +15687,11 @@
         "aggregatefunc"
       ],
       "candidate": "stats dc(bytes,duration) AS result",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "T3.aggregate.arity.dc.3",
+      "assembly": "pipeline-tail",
+      "owner": "task6"
     },
     {
       "id": "F.distinct_count.arity-1.P1",
@@ -15272,8 +15700,11 @@
         "aggregatefunc"
       ],
       "candidate": "stats distinct_count(bytes) AS result",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "T3.aggregate.arity.distinct_count.0",
+      "assembly": "pipeline-tail",
+      "owner": "task6"
     },
     {
       "id": "F.distinct_count.arity-1.P2",
@@ -15282,8 +15713,11 @@
         "aggregatefunc"
       ],
       "candidate": "stats distinct_count(duration) AS result",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "T3.aggregate.arity.distinct_count.1",
+      "assembly": "pipeline-tail",
+      "owner": "task6"
     },
     {
       "id": "F.distinct_count.N1",
@@ -15292,8 +15726,11 @@
         "aggregatefunc"
       ],
       "candidate": "stats distinct_count() AS result",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "T3.aggregate.arity.distinct_count.2",
+      "assembly": "pipeline-tail",
+      "owner": "task6"
     },
     {
       "id": "F.distinct_count.N2",
@@ -15302,8 +15739,11 @@
         "aggregatefunc"
       ],
       "candidate": "stats distinct_count(bytes,duration) AS result",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "T3.aggregate.arity.distinct_count.3",
+      "assembly": "pipeline-tail",
+      "owner": "task6"
     },
     {
       "id": "F.values.arity-1.P1",
@@ -15312,8 +15752,11 @@
         "multiagg"
       ],
       "candidate": "stats values(user) AS result",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.values.arity-1.P1",
+      "assembly": "pipeline-tail",
+      "owner": "task6"
     },
     {
       "id": "F.values.arity-1.P2",
@@ -15322,8 +15765,11 @@
         "multiagg"
       ],
       "candidate": "stats values(code) AS result",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.values.arity-1.P2",
+      "assembly": "pipeline-tail",
+      "owner": "task6"
     },
     {
       "id": "F.values.N1",
@@ -15332,8 +15778,11 @@
         "multiagg"
       ],
       "candidate": "stats values() AS result",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "T3.aggregate.arity.values.2",
+      "assembly": "pipeline-tail",
+      "owner": "task6"
     },
     {
       "id": "F.values.N2",
@@ -15342,8 +15791,11 @@
         "multiagg"
       ],
       "candidate": "stats values(user,code) AS result",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.values.N2",
+      "assembly": "pipeline-tail",
+      "owner": "task6"
     },
     {
       "id": "F.list.arity-1.P1",
@@ -15352,8 +15804,11 @@
         "multiagg"
       ],
       "candidate": "stats list(user) AS result",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.list.arity-1.P1",
+      "assembly": "pipeline-tail",
+      "owner": "task6"
     },
     {
       "id": "F.list.arity-1.P2",
@@ -15362,8 +15817,11 @@
         "multiagg"
       ],
       "candidate": "stats list(code) AS result",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.list.arity-1.P2",
+      "assembly": "pipeline-tail",
+      "owner": "task6"
     },
     {
       "id": "F.list.N1",
@@ -15372,8 +15830,11 @@
         "multiagg"
       ],
       "candidate": "stats list() AS result",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "T3.aggregate.arity.list.2",
+      "assembly": "pipeline-tail",
+      "owner": "task6"
     },
     {
       "id": "F.list.N2",
@@ -15382,8 +15843,11 @@
         "multiagg"
       ],
       "candidate": "stats list(user,code) AS result",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.list.N2",
+      "assembly": "pipeline-tail",
+      "owner": "task6"
     },
     {
       "id": "F.first.arity-1.P1",
@@ -15392,8 +15856,11 @@
         "eventorder"
       ],
       "candidate": "stats first(user) AS result",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.first.arity-1.P1",
+      "assembly": "pipeline-tail",
+      "owner": "task6"
     },
     {
       "id": "F.first.arity-1.P2",
@@ -15402,8 +15869,11 @@
         "eventorder"
       ],
       "candidate": "stats first(code) AS result",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.first.arity-1.P2",
+      "assembly": "pipeline-tail",
+      "owner": "task6"
     },
     {
       "id": "F.first.N1",
@@ -15412,8 +15882,11 @@
         "eventorder"
       ],
       "candidate": "stats first() AS result",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "T3.aggregate.arity.first.2",
+      "assembly": "pipeline-tail",
+      "owner": "task6"
     },
     {
       "id": "F.first.N2",
@@ -15422,8 +15895,11 @@
         "eventorder"
       ],
       "candidate": "stats first(user,code) AS result",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.first.N2",
+      "assembly": "pipeline-tail",
+      "owner": "task6"
     },
     {
       "id": "F.last.arity-1.P1",
@@ -15446,8 +15922,11 @@
         "timemodifiers"
       ],
       "candidate": "stats last(user) AS result",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.last.arity-1.P1",
+      "assembly": "pipeline-tail",
+      "owner": "task6"
     },
     {
       "id": "F.last.arity-1.P2",
@@ -15470,8 +15949,11 @@
         "timemodifiers"
       ],
       "candidate": "stats last(code) AS result",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.last.arity-1.P2",
+      "assembly": "pipeline-tail",
+      "owner": "task6"
     },
     {
       "id": "F.last.N1",
@@ -15494,8 +15976,11 @@
         "timemodifiers"
       ],
       "candidate": "stats last() AS result",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "T3.aggregate.arity.last.2",
+      "assembly": "pipeline-tail",
+      "owner": "task6"
     },
     {
       "id": "F.last.N2",
@@ -15518,8 +16003,11 @@
         "timemodifiers"
       ],
       "candidate": "stats last(user,code) AS result",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "case_id": "F.last.N2",
+      "assembly": "pipeline-tail",
+      "owner": "task6"
     },
     {
       "id": "I.assign.P1",
@@ -24959,6 +25447,182 @@
       "disposition": "active",
       "assembly": "standalone",
       "case_id": "T5.fix1.evidenced.ds.minspan"
+    },
+    {
+      "id": "T6.sequential",
+      "form_id": "T6.canonical",
+      "source_keys": [
+        "doc136",
+        "doc169"
+      ],
+      "candidate": "FROM main | eval x=bytes, y=x+1 | table y",
+      "disposition": "active",
+      "case_id": "T6.sequential",
+      "assembly": "standalone",
+      "owner": "task6",
+      "evidence": "canonical-transfer-witness"
+    },
+    {
+      "id": "T6.null-removal",
+      "form_id": "T6.canonical",
+      "source_keys": [
+        "doc136",
+        "doc178"
+      ],
+      "candidate": "FROM main | eval x=bytes, x=null | where x>0",
+      "disposition": "active",
+      "case_id": "T6.null-removal",
+      "assembly": "standalone",
+      "owner": "task6",
+      "evidence": "canonical-transfer-witness"
+    },
+    {
+      "id": "T6.all-null",
+      "form_id": "T6.canonical",
+      "source_keys": [
+        "doc136",
+        "comparefunc"
+      ],
+      "candidate": "FROM main | eval x=if(code=201,null,null) | where x>0",
+      "disposition": "active",
+      "case_id": "T6.all-null",
+      "assembly": "standalone",
+      "owner": "task6",
+      "evidence": "canonical-transfer-witness"
+    },
+    {
+      "id": "T6.search-literals",
+      "form_id": "T6.canonical",
+      "source_keys": [
+        "doc163"
+      ],
+      "candidate": "search index=main code=bytes status IN (true,false) flag=\"-1\"",
+      "disposition": "active",
+      "case_id": "T6.search-literals",
+      "assembly": "standalone",
+      "owner": "task6",
+      "evidence": "canonical-transfer-witness"
+    },
+    {
+      "id": "T6.where-reads",
+      "form_id": "T6.canonical",
+      "source_keys": [
+        "doc178"
+      ],
+      "candidate": "FROM main | where bytes=rate",
+      "disposition": "active",
+      "case_id": "T6.where-reads",
+      "assembly": "standalone",
+      "owner": "task6",
+      "evidence": "canonical-transfer-witness"
+    },
+    {
+      "id": "T6.rename",
+      "form_id": "T6.canonical",
+      "source_keys": [
+        "doc158",
+        "doc169"
+      ],
+      "candidate": "FROM main | rename a AS x, b AS y | table x,y",
+      "disposition": "active",
+      "case_id": "T6.rename",
+      "assembly": "standalone",
+      "owner": "task6",
+      "evidence": "canonical-transfer-witness"
+    },
+    {
+      "id": "T6.native-labels",
+      "form_id": "T6.canonical",
+      "source_keys": [
+        "doc167",
+        "aggregatefunc"
+      ],
+      "candidate": "FROM main | stats count(), sum(bytes), dc(action) BY host",
+      "disposition": "active",
+      "case_id": "T6.native-labels",
+      "assembly": "standalone",
+      "owner": "task6",
+      "evidence": "canonical-transfer-witness"
+    },
+    {
+      "id": "T6.coalesce-fallback",
+      "form_id": "T6.canonical",
+      "source_keys": [
+        "comparefunc",
+        "convertfunc"
+      ],
+      "candidate": "FROM main | eval x=coalesce(tonumber(value),\"fallback\") | table x",
+      "disposition": "active",
+      "case_id": "T6.coalesce-fallback",
+      "assembly": "standalone",
+      "owner": "task6",
+      "evidence": "canonical-transfer-witness"
+    },
+    {
+      "id": "T6.conditional-output",
+      "form_id": "T6.canonical",
+      "source_keys": [
+        "convertfunc",
+        "doc169"
+      ],
+      "candidate": "FROM main | eval x=tonumber(value) | table x",
+      "disposition": "active",
+      "case_id": "T6.conditional-output",
+      "assembly": "standalone",
+      "owner": "task6",
+      "evidence": "canonical-transfer-witness"
+    },
+    {
+      "id": "T6.named-values",
+      "form_id": "T6.canonical",
+      "source_keys": [
+        "namingargs"
+      ],
+      "candidate": "FROM main | eval x=round(precision:2,num:bytes)",
+      "disposition": "active",
+      "case_id": "E.L06.named_arguments.P1",
+      "assembly": "standalone",
+      "owner": "task6",
+      "evidence": "canonical-transfer-witness"
+    },
+    {
+      "id": "T6.unknown-function",
+      "form_id": "T6.canonical",
+      "source_keys": [
+        "evalcompat"
+      ],
+      "candidate": "FROM main | eval x=mystery(bytes)",
+      "disposition": "active",
+      "case_id": "T6.unknown-function",
+      "assembly": "standalone",
+      "owner": "task6",
+      "evidence": "canonical-transfer-witness"
+    },
+    {
+      "id": "T6.profile-batch_id",
+      "form_id": "T6.canonical",
+      "source_keys": [
+        "evalcompat"
+      ],
+      "candidate": "FROM main | eval x=batch_id()",
+      "disposition": "active",
+      "case_id": "T6.profile-batch_id",
+      "assembly": "standalone",
+      "owner": "task6",
+      "evidence": "canonical-transfer-witness"
+    },
+    {
+      "id": "T6.profile-batch_time",
+      "form_id": "T6.canonical",
+      "source_keys": [
+        "evalcompat"
+      ],
+      "candidate": "FROM main | eval x=batch_time()",
+      "disposition": "active",
+      "case_id": "T6.profile-batch_time",
+      "assembly": "standalone",
+      "owner": "task6",
+      "evidence": "canonical-transfer-witness"
     }
   ],
   "holds": [

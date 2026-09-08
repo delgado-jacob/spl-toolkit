@@ -1,0 +1,1259 @@
+[
+  {
+    "id": "T6.sequential",
+    "obligation_ids": [
+      "T6.sequential"
+    ],
+    "source_keys": [
+      "doc136",
+      "doc169"
+    ],
+    "document": {
+      "text": "FROM main | eval x=bytes, y=x+1 | table y",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "T6.canonical"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "pipeline",
+          "text": "FROM main | eval x=bytes, y=x+1 | table y"
+        }
+      ]
+    },
+    "meaningful_id": "T6.sequential",
+    "floor_credit": false,
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "valid",
+      "syntax_complete": true,
+      "semantic_complete": true,
+      "expected_codes": [],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        },
+        {
+          "original_name": "x",
+          "normalized_name": "x",
+          "kind": "field",
+          "role": "create",
+          "binding": "not_applicable",
+          "start": 17,
+          "end": 18
+        },
+        {
+          "original_name": "bytes",
+          "normalized_name": "bytes",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 19,
+          "end": 24
+        },
+        {
+          "original_name": "y",
+          "normalized_name": "y",
+          "kind": "field",
+          "role": "create",
+          "binding": "not_applicable",
+          "start": 26,
+          "end": 27
+        },
+        {
+          "original_name": "x",
+          "normalized_name": "x",
+          "kind": "field",
+          "role": "read",
+          "binding": "derived",
+          "start": 28,
+          "end": 29
+        },
+        {
+          "original_name": "y",
+          "normalized_name": "y",
+          "kind": "field",
+          "role": "read",
+          "binding": "derived",
+          "start": 40,
+          "end": 41
+        }
+      ],
+      "fields": [
+        {
+          "name": "y",
+          "conditional": false
+        }
+      ],
+      "removed": [],
+      "open": false,
+      "uncertain": false,
+      "stage_commands": [
+        "from",
+        "eval",
+        "table"
+      ],
+      "stage_complete": [
+        true,
+        true,
+        true
+      ]
+    }
+  },
+  {
+    "id": "T6.null-removal",
+    "obligation_ids": [
+      "T6.null-removal"
+    ],
+    "source_keys": [
+      "doc136",
+      "doc178"
+    ],
+    "document": {
+      "text": "FROM main | eval x=bytes, x=null | where x>0",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "T6.canonical"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "pipeline",
+          "text": "FROM main | eval x=bytes, x=null | where x>0"
+        }
+      ]
+    },
+    "meaningful_id": "T6.null-removal",
+    "floor_credit": false,
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "invalid",
+      "syntax_complete": true,
+      "semantic_complete": true,
+      "expected_codes": [
+        "SPL_UNAVAILABLE_FIELD"
+      ],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        },
+        {
+          "original_name": "x",
+          "normalized_name": "x",
+          "kind": "field",
+          "role": "create",
+          "binding": "not_applicable",
+          "start": 17,
+          "end": 18
+        },
+        {
+          "original_name": "bytes",
+          "normalized_name": "bytes",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 19,
+          "end": 24
+        },
+        {
+          "original_name": "x",
+          "normalized_name": "x",
+          "kind": "field",
+          "role": "remove",
+          "binding": "not_applicable",
+          "start": 26,
+          "end": 27
+        },
+        {
+          "original_name": "x",
+          "normalized_name": "x",
+          "kind": "field",
+          "role": "read",
+          "binding": "unavailable",
+          "start": 41,
+          "end": 42
+        }
+      ],
+      "fields": [
+        {
+          "name": "bytes",
+          "conditional": false
+        }
+      ],
+      "removed": [
+        "x"
+      ],
+      "open": true,
+      "uncertain": false,
+      "stage_commands": [
+        "from",
+        "eval",
+        "where"
+      ],
+      "stage_complete": [
+        true,
+        true,
+        true
+      ]
+    }
+  },
+  {
+    "id": "T6.all-null",
+    "obligation_ids": [
+      "T6.all-null"
+    ],
+    "source_keys": [
+      "doc136",
+      "comparefunc"
+    ],
+    "document": {
+      "text": "FROM main | eval x=if(code=201,null,null) | where x>0",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "T6.canonical"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "pipeline",
+          "text": "FROM main | eval x=if(code=201,null,null) | where x>0"
+        }
+      ]
+    },
+    "meaningful_id": "T6.all-null",
+    "floor_credit": false,
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "invalid",
+      "syntax_complete": true,
+      "semantic_complete": true,
+      "expected_codes": [
+        "SPL_UNAVAILABLE_FIELD"
+      ],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        },
+        {
+          "original_name": "x",
+          "normalized_name": "x",
+          "kind": "field",
+          "role": "remove",
+          "binding": "not_applicable",
+          "start": 17,
+          "end": 18
+        },
+        {
+          "original_name": "code",
+          "normalized_name": "code",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 22,
+          "end": 26
+        },
+        {
+          "original_name": "x",
+          "normalized_name": "x",
+          "kind": "field",
+          "role": "read",
+          "binding": "unavailable",
+          "start": 50,
+          "end": 51
+        }
+      ],
+      "fields": [
+        {
+          "name": "code",
+          "conditional": false
+        }
+      ],
+      "removed": [
+        "x"
+      ],
+      "open": true,
+      "uncertain": false,
+      "stage_commands": [
+        "from",
+        "eval",
+        "where"
+      ],
+      "stage_complete": [
+        true,
+        true,
+        true
+      ]
+    }
+  },
+  {
+    "id": "T6.search-literals",
+    "obligation_ids": [
+      "T6.search-literals"
+    ],
+    "source_keys": [
+      "doc163"
+    ],
+    "document": {
+      "text": "search index=main code=bytes status IN (true,false) flag=\"-1\"",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "T6.canonical"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "pipeline",
+          "text": "search index=main code=bytes status IN (true,false) flag=\"-1\""
+        }
+      ]
+    },
+    "meaningful_id": "T6.search-literals",
+    "floor_credit": false,
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "valid",
+      "syntax_complete": true,
+      "semantic_complete": true,
+      "expected_codes": [],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "index",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 13,
+          "end": 17
+        },
+        {
+          "original_name": "code",
+          "normalized_name": "code",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 18,
+          "end": 22
+        },
+        {
+          "original_name": "status",
+          "normalized_name": "status",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 29,
+          "end": 35
+        },
+        {
+          "original_name": "flag",
+          "normalized_name": "flag",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 52,
+          "end": 56
+        }
+      ],
+      "fields": [
+        {
+          "name": "code",
+          "conditional": false
+        },
+        {
+          "name": "flag",
+          "conditional": false
+        },
+        {
+          "name": "status",
+          "conditional": false
+        }
+      ],
+      "removed": [],
+      "open": true,
+      "uncertain": false,
+      "stage_commands": [
+        "search"
+      ],
+      "stage_complete": [
+        true
+      ]
+    }
+  },
+  {
+    "id": "T6.where-reads",
+    "obligation_ids": [
+      "T6.where-reads"
+    ],
+    "source_keys": [
+      "doc178"
+    ],
+    "document": {
+      "text": "FROM main | where bytes=rate",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "T6.canonical"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "pipeline",
+          "text": "FROM main | where bytes=rate"
+        }
+      ]
+    },
+    "meaningful_id": "T6.where-reads",
+    "floor_credit": false,
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "valid",
+      "syntax_complete": true,
+      "semantic_complete": true,
+      "expected_codes": [],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        },
+        {
+          "original_name": "bytes",
+          "normalized_name": "bytes",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 18,
+          "end": 23
+        },
+        {
+          "original_name": "rate",
+          "normalized_name": "rate",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 24,
+          "end": 28
+        }
+      ],
+      "fields": [
+        {
+          "name": "bytes",
+          "conditional": false
+        },
+        {
+          "name": "rate",
+          "conditional": false
+        }
+      ],
+      "removed": [],
+      "open": true,
+      "uncertain": false,
+      "stage_commands": [
+        "from",
+        "where"
+      ],
+      "stage_complete": [
+        true,
+        true
+      ]
+    }
+  },
+  {
+    "id": "T6.rename",
+    "obligation_ids": [
+      "T6.rename"
+    ],
+    "source_keys": [
+      "doc158",
+      "doc169"
+    ],
+    "document": {
+      "text": "FROM main | rename a AS x, b AS y | table x,y",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "T6.canonical"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "pipeline",
+          "text": "FROM main | rename a AS x, b AS y | table x,y"
+        }
+      ]
+    },
+    "meaningful_id": "T6.rename",
+    "floor_credit": false,
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "valid",
+      "syntax_complete": true,
+      "semantic_complete": true,
+      "expected_codes": [],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        },
+        {
+          "original_name": "a",
+          "normalized_name": "a",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 19,
+          "end": 20
+        },
+        {
+          "original_name": "x",
+          "normalized_name": "x",
+          "kind": "field",
+          "role": "rename",
+          "binding": "not_applicable",
+          "start": 24,
+          "end": 25
+        },
+        {
+          "original_name": "b",
+          "normalized_name": "b",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 27,
+          "end": 28
+        },
+        {
+          "original_name": "y",
+          "normalized_name": "y",
+          "kind": "field",
+          "role": "rename",
+          "binding": "not_applicable",
+          "start": 32,
+          "end": 33
+        },
+        {
+          "original_name": "x",
+          "normalized_name": "x",
+          "kind": "field",
+          "role": "read",
+          "binding": "derived",
+          "start": 42,
+          "end": 43
+        },
+        {
+          "original_name": "y",
+          "normalized_name": "y",
+          "kind": "field",
+          "role": "read",
+          "binding": "derived",
+          "start": 44,
+          "end": 45
+        }
+      ],
+      "fields": [
+        {
+          "name": "x",
+          "conditional": false
+        },
+        {
+          "name": "y",
+          "conditional": false
+        }
+      ],
+      "removed": [
+        "a",
+        "b"
+      ],
+      "open": false,
+      "uncertain": false,
+      "stage_commands": [
+        "from",
+        "rename",
+        "table"
+      ],
+      "stage_complete": [
+        true,
+        true,
+        true
+      ]
+    }
+  },
+  {
+    "id": "T6.native-labels",
+    "obligation_ids": [
+      "T6.native-labels"
+    ],
+    "source_keys": [
+      "doc167",
+      "aggregatefunc"
+    ],
+    "document": {
+      "text": "FROM main | stats count(), sum(bytes), dc(action) BY host",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "T6.canonical"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "pipeline",
+          "text": "FROM main | stats count(), sum(bytes), dc(action) BY host"
+        }
+      ]
+    },
+    "meaningful_id": "T6.native-labels",
+    "floor_credit": false,
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "valid",
+      "syntax_complete": true,
+      "semantic_complete": true,
+      "expected_codes": [],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        },
+        {
+          "original_name": "count()",
+          "normalized_name": "count",
+          "kind": "field",
+          "role": "output",
+          "binding": "not_applicable",
+          "start": 18,
+          "end": 25
+        },
+        {
+          "original_name": "sum(bytes)",
+          "normalized_name": "sum(bytes)",
+          "kind": "field",
+          "role": "output",
+          "binding": "not_applicable",
+          "start": 27,
+          "end": 37
+        },
+        {
+          "original_name": "bytes",
+          "normalized_name": "bytes",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 31,
+          "end": 36
+        },
+        {
+          "original_name": "dc(action)",
+          "normalized_name": "dc(action)",
+          "kind": "field",
+          "role": "output",
+          "binding": "not_applicable",
+          "start": 39,
+          "end": 49
+        },
+        {
+          "original_name": "action",
+          "normalized_name": "action",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 42,
+          "end": 48
+        },
+        {
+          "original_name": "host",
+          "normalized_name": "host",
+          "kind": "field",
+          "role": "group",
+          "binding": "source",
+          "start": 53,
+          "end": 57
+        }
+      ],
+      "fields": [
+        {
+          "name": "count",
+          "conditional": false
+        },
+        {
+          "name": "dc(action)",
+          "conditional": false
+        },
+        {
+          "name": "host",
+          "conditional": false
+        },
+        {
+          "name": "sum(bytes)",
+          "conditional": true
+        }
+      ],
+      "removed": [],
+      "open": false,
+      "uncertain": false,
+      "stage_commands": [
+        "from",
+        "stats"
+      ],
+      "stage_complete": [
+        true,
+        true
+      ]
+    }
+  },
+  {
+    "id": "T6.coalesce-fallback",
+    "obligation_ids": [
+      "T6.coalesce-fallback"
+    ],
+    "source_keys": [
+      "comparefunc",
+      "convertfunc"
+    ],
+    "document": {
+      "text": "FROM main | eval x=coalesce(tonumber(value),\"fallback\") | table x",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "T6.canonical"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "pipeline",
+          "text": "FROM main | eval x=coalesce(tonumber(value),\"fallback\") | table x"
+        }
+      ]
+    },
+    "meaningful_id": "T6.coalesce-fallback",
+    "floor_credit": false,
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "valid",
+      "syntax_complete": true,
+      "semantic_complete": true,
+      "expected_codes": [],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        },
+        {
+          "original_name": "x",
+          "normalized_name": "x",
+          "kind": "field",
+          "role": "create",
+          "binding": "not_applicable",
+          "start": 17,
+          "end": 18
+        },
+        {
+          "original_name": "value",
+          "normalized_name": "value",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 37,
+          "end": 42
+        },
+        {
+          "original_name": "x",
+          "normalized_name": "x",
+          "kind": "field",
+          "role": "read",
+          "binding": "derived",
+          "start": 64,
+          "end": 65
+        }
+      ],
+      "fields": [
+        {
+          "name": "x",
+          "conditional": false
+        }
+      ],
+      "removed": [],
+      "open": false,
+      "uncertain": false,
+      "stage_commands": [
+        "from",
+        "eval",
+        "table"
+      ],
+      "stage_complete": [
+        true,
+        true,
+        true
+      ]
+    }
+  },
+  {
+    "id": "T6.conditional-output",
+    "obligation_ids": [
+      "T6.conditional-output"
+    ],
+    "source_keys": [
+      "convertfunc",
+      "doc169"
+    ],
+    "document": {
+      "text": "FROM main | eval x=tonumber(value) | table x",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "T6.canonical"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "pipeline",
+          "text": "FROM main | eval x=tonumber(value) | table x"
+        }
+      ]
+    },
+    "meaningful_id": "T6.conditional-output",
+    "floor_credit": false,
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "valid",
+      "syntax_complete": true,
+      "semantic_complete": true,
+      "expected_codes": [],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        },
+        {
+          "original_name": "x",
+          "normalized_name": "x",
+          "kind": "field",
+          "role": "create",
+          "binding": "not_applicable",
+          "start": 17,
+          "end": 18
+        },
+        {
+          "original_name": "value",
+          "normalized_name": "value",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 28,
+          "end": 33
+        },
+        {
+          "original_name": "x",
+          "normalized_name": "x",
+          "kind": "field",
+          "role": "read",
+          "binding": "indeterminate",
+          "start": 43,
+          "end": 44
+        }
+      ],
+      "fields": [
+        {
+          "name": "x",
+          "conditional": true
+        }
+      ],
+      "removed": [],
+      "open": false,
+      "uncertain": false,
+      "stage_commands": [
+        "from",
+        "eval",
+        "table"
+      ],
+      "stage_complete": [
+        true,
+        true,
+        true
+      ]
+    }
+  },
+  {
+    "id": "T6.unknown-function",
+    "obligation_ids": [
+      "T6.unknown-function"
+    ],
+    "source_keys": [
+      "evalcompat"
+    ],
+    "document": {
+      "text": "FROM main | eval x=mystery(bytes)",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "T6.canonical"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "pipeline",
+          "text": "FROM main | eval x=mystery(bytes)"
+        }
+      ]
+    },
+    "meaningful_id": "T6.unknown-function",
+    "floor_credit": false,
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "incomplete",
+      "syntax_complete": true,
+      "semantic_complete": false,
+      "expected_codes": [
+        "SPL_UNSUPPORTED_FUNCTION"
+      ],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        },
+        {
+          "original_name": "x",
+          "normalized_name": "x",
+          "kind": "field",
+          "role": "create",
+          "binding": "not_applicable",
+          "start": 17,
+          "end": 18
+        },
+        {
+          "original_name": "bytes",
+          "normalized_name": "bytes",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 27,
+          "end": 32
+        }
+      ],
+      "fields": [
+        {
+          "name": "bytes",
+          "conditional": false
+        },
+        {
+          "name": "x",
+          "conditional": true
+        }
+      ],
+      "removed": [],
+      "open": true,
+      "uncertain": true,
+      "stage_commands": [
+        "from",
+        "eval"
+      ],
+      "stage_complete": [
+        true,
+        false
+      ]
+    }
+  },
+  {
+    "id": "T6.profile-batch_id",
+    "obligation_ids": [
+      "T6.profile-batch_id"
+    ],
+    "source_keys": [
+      "evalcompat"
+    ],
+    "document": {
+      "text": "FROM main | eval x=batch_id()",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "T6.canonical"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "pipeline",
+          "text": "FROM main | eval x=batch_id()"
+        }
+      ]
+    },
+    "meaningful_id": "T6.profile-batch_id",
+    "floor_credit": false,
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "invalid",
+      "syntax_complete": false,
+      "semantic_complete": false,
+      "expected_codes": [
+        "SPL_PROFILE_MISMATCH"
+      ],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        },
+        {
+          "original_name": "x",
+          "normalized_name": "x",
+          "kind": "field",
+          "role": "create",
+          "binding": "not_applicable",
+          "start": 17,
+          "end": 18
+        }
+      ],
+      "fields": [
+        {
+          "name": "x",
+          "conditional": true
+        }
+      ],
+      "removed": [],
+      "open": true,
+      "uncertain": true,
+      "stage_commands": [
+        "from",
+        "eval"
+      ],
+      "stage_complete": [
+        true,
+        false
+      ]
+    }
+  },
+  {
+    "id": "T6.profile-batch_time",
+    "obligation_ids": [
+      "T6.profile-batch_time"
+    ],
+    "source_keys": [
+      "evalcompat"
+    ],
+    "document": {
+      "text": "FROM main | eval x=batch_time()",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "T6.canonical"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "pipeline",
+          "text": "FROM main | eval x=batch_time()"
+        }
+      ]
+    },
+    "meaningful_id": "T6.profile-batch_time",
+    "floor_credit": false,
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "invalid",
+      "syntax_complete": false,
+      "semantic_complete": false,
+      "expected_codes": [
+        "SPL_PROFILE_MISMATCH"
+      ],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        },
+        {
+          "original_name": "x",
+          "normalized_name": "x",
+          "kind": "field",
+          "role": "create",
+          "binding": "not_applicable",
+          "start": 17,
+          "end": 18
+        }
+      ],
+      "fields": [
+        {
+          "name": "x",
+          "conditional": true
+        }
+      ],
+      "removed": [],
+      "open": true,
+      "uncertain": true,
+      "stage_commands": [
+        "from",
+        "eval"
+      ],
+      "stage_complete": [
+        true,
+        false
+      ]
+    }
+  }
+]

@@ -23,7 +23,7 @@ func normalizeSelectors(options CapabilityOptions) (CapabilityOptions, error) {
 		if *option.value == "" {
 			*option.value = option.standard
 		}
-		if *option.value != option.standard {
+		if *option.value != option.standard && !(option.name == "language" && *option.value == "spl2") {
 			return options, fmt.Errorf("unsupported %s %q", option.name, *option.value)
 		}
 	}

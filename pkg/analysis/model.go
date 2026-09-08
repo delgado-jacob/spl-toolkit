@@ -45,6 +45,9 @@ type Scope struct {
 	StageID  string   `json:"stage_id"`
 	Location Location `json:"location"`
 }
+
+// Reference role null_test retains a located non-consuming field inspection.
+// It does not require or establish existence, and does not waive other reads.
 type Reference struct {
 	ID                 string   `json:"id"`
 	OriginalName       string   `json:"original_name"`

@@ -84,7 +84,7 @@ func TestDirectInputErrors(t *testing.T) {
 
 // Validation consumes the capability selector contract while keeping caller data exact.
 func TestRequestCapabilitySelectors(t *testing.T) {
-	for _, selectors := range []analysis.CapabilityOptions{{}, {Language: "spl", Profile: "splunkd", Version: "current"}} {
+	for _, selectors := range []analysis.CapabilityOptions{{}, {Language: "spl", Profile: "splunkd", Version: "current"}, {Language: "spl2"}} {
 		manifest, err := analysis.CapabilitiesFor(selectors)
 		if err != nil {
 			t.Fatal(err)
@@ -99,7 +99,7 @@ func TestRequestCapabilitySelectors(t *testing.T) {
 			t.Fatalf("selector/caller data mismatch: %#v", got)
 		}
 	}
-	for _, doc := range []analysis.QueryDocument{{Language: "spl2"}, {Profile: "edge"}, {Version: "next"}, {Language: "\xff"}, {Profile: "\xff"}, {Version: "\xff"}} {
+	for _, doc := range []analysis.QueryDocument{{Language: "SPL2"}, {Profile: "edge"}, {Version: "next"}, {Language: "\xff"}, {Profile: "\xff"}, {Version: "\xff"}} {
 		if _, err := validation.Validate(doc, validation.FieldCatalog{}); !validation.IsInputError(err) {
 			t.Fatalf("expected InputError for %#v: %v", doc, err)
 		}

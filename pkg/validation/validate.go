@@ -53,7 +53,7 @@ func validate(document analysis.QueryDocument, catalog FieldCatalog) (*Report, e
 		return Match{Name: name, Binding: binding, Outcome: outcome}
 	}
 	for _, ref := range result.References {
-		if ref.Role == "remove" || ref.Binding == "not_applicable" || ref.Kind != "field" {
+		if ref.Role == "remove" || ref.Role == "null_test" || ref.Binding == "not_applicable" || ref.Kind != "field" {
 			continue
 		}
 		item := ReferenceOutcome{ReferenceID: ref.ID, Matches: []Match{}}

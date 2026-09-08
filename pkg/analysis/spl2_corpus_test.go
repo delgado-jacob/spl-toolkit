@@ -9,16 +9,17 @@ import (
 )
 
 type spl2CorpusCase struct {
-	ID               string        `json:"id"`
-	ObligationIDs    []string      `json:"obligation_ids"`
-	SourceKeys       []string      `json:"source_keys"`
-	Document         QueryDocument `json:"document"`
-	FormIDs          []string      `json:"form_ids"`
-	SyntaxComplete   bool          `json:"syntax_complete"`
-	SemanticComplete bool          `json:"semantic_complete"`
-	Status           string        `json:"status"`
-	ExpectedCodes    []string      `json:"expected_codes"`
-	ForbiddenCodes   []string      `json:"forbidden_codes"`
+	Canonical        *spl2CanonicalExpectation `json:"canonical"`
+	ID               string                    `json:"id"`
+	ObligationIDs    []string                  `json:"obligation_ids"`
+	SourceKeys       []string                  `json:"source_keys"`
+	Document         QueryDocument             `json:"document"`
+	FormIDs          []string                  `json:"form_ids"`
+	SyntaxComplete   bool                      `json:"syntax_complete"`
+	SemanticComplete bool                      `json:"semantic_complete"`
+	Status           string                    `json:"status"`
+	ExpectedCodes    []string                  `json:"expected_codes"`
+	ForbiddenCodes   []string                  `json:"forbidden_codes"`
 	Assertions       struct {
 		Kinds         map[string]int `json:"kinds"`
 		ShapeContains []string       `json:"shape_contains"`

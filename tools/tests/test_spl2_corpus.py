@@ -61,7 +61,7 @@ class SPL2CorpusTests(unittest.TestCase):
 
     def test_pending_is_not_complete_or_floor_credit(self):
         self.manifest["enforce_final_floors"] = True
-        with self.assertRaisesRegex(ValueError, "pending|floor"):
+        with self.assertRaisesRegex(ValueError, "pending|floor|canonical"):
             self.audit()
 
     def test_assertions_are_required(self):
@@ -161,4 +161,60 @@ class SPL2CorpusTests(unittest.TestCase):
         self.assertEqual(self.audit()["meaningful"], before)
         case["floor_credit"] = True
         with self.assertRaisesRegex(ValueError, "held"):
+            self.audit()
+
+class SPL2CanonicalLayerTests(unittest.TestCase):
+    setUp = SPL2CorpusTests.setUp
+    audit = SPL2CorpusTests.audit
+    def test_syntax_layer_cannot_be_promoted(self):
+        self.cases[0]['semantic_complete'] = True
+        with self.assertRaisesRegex(ValueError, 'frontend'):
+            self.audit()
+
+    def test_canonical_layer_cannot_reuse_grammar_scope(self):
+        self.cases[0]['canonical'] = {'phase': 'syntax', 'scope': 'grammar-contexts-only'}
+        with self.assertRaisesRegex(ValueError, 'canonical'):
+            self.audit()
+
+    def test_held_canonical_cannot_be_promoted(self):
+        case = next(c for c in self.cases if c.get('hold_ids'))
+        case['canonical'] = {'phase': 'analysis', 'scope': 'canonical-result', 'status': 'valid', 'syntax_complete': True, 'semantic_complete': True, 'expected_codes': [], 'references': [], 'fields': [], 'removed': [], 'open': True, 'uncertain': False, 'stage_commands': [], 'stage_complete': []}
+        with self.assertRaisesRegex(ValueError, 'canonical'):
+            self.audit()
+
+    def test_unknown_syntax_canonical_cannot_be_promoted(self):
+        case = next(c for c in self.cases if c['status']=='incomplete' and not c['syntax_complete'] and not c.get('hold_ids'))
+        case['canonical'] = {'phase': 'analysis', 'scope': 'canonical-result', 'status': 'valid', 'syntax_complete': True, 'semantic_complete': True, 'expected_codes': [], 'references': [], 'fields': [], 'removed': [], 'open': True, 'uncertain': False, 'stage_commands': [], 'stage_complete': []}
+        with self.assertRaisesRegex(ValueError, 'canonical'):
+            self.audit()
+
+    def test_final_closure_requires_canonical(self):
+        self.manifest['enforce_final_floors'] = True
+        for c in self.cases:
+            c.pop('canonical', None)
+        with self.assertRaisesRegex(ValueError, 'canonical'):
+            self.audit()
+
+    def test_arbitrary_assembly_is_rejected(self):
+        obligation=next(o for o in self.provenance['obligations'] if o['disposition']=='active')
+        obligation['assembly']='eval:{candidate}'
+        with self.assertRaisesRegex(ValueError, 'assembly'):
+            self.audit()
+
+    def test_function_assembly_cannot_be_replaced(self):
+        obligation=next(o for o in self.provenance['obligations'] if o['id']=='F.abs.arity-1.P1')
+        obligation['assembly']='pipeline-tail'
+        with self.assertRaisesRegex(ValueError, 'source candidate'):
+            self.audit()
+
+    def test_active_function_cannot_omit_canonical(self):
+        obligation=next(o for o in self.provenance['obligations'] if o['id']=='F.abs.arity-1.P1')
+        next(c for c in self.cases if c['id']==obligation['case_id']).pop('canonical')
+        with self.assertRaisesRegex(ValueError, 'canonical'):
+            self.audit()
+
+    def test_unknown_canonical_semantics_cannot_promote_incomplete_syntax(self):
+        case=next(c for c in self.cases if c['status']=='incomplete' and not c['syntax_complete'] and not c.get('hold_ids'))
+        case['canonical']={'phase':'analysis','scope':'canonical-result','status':'incomplete','syntax_complete':False,'semantic_complete':True,'expected_codes':[],'references':[],'fields':[],'removed':[],'open':True,'uncertain':True,'stage_commands':[],'stage_complete':[]}
+        with self.assertRaisesRegex(ValueError, 'canonical'):
             self.audit()

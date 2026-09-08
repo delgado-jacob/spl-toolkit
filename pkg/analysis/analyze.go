@@ -36,9 +36,16 @@ func analyze(document QueryDocument, refinement *sourceRefinement) (*Result, err
 		return nil, err
 	}
 	result := newResult(normalized)
-	parsed := parseDocument(normalized.Text)
-	result.Diagnostics = append(result.Diagnostics, parsed.diagnostics...)
-	analyzeParsed(result, parsed, refinement)
+	if normalized.Language == "spl2" {
+		if refinement != nil {
+			refinement.literalSourceNames = true
+		}
+		analyzeSPL2(result, parseSPL2Document(normalized.Text), refinement)
+	} else {
+		parsed := parseDocument(normalized.Text)
+		result.Diagnostics = append(result.Diagnostics, parsed.diagnostics...)
+		analyzeParsed(result, parsed, refinement)
+	}
 	finalizeResult(result)
 	return result, nil
 }
