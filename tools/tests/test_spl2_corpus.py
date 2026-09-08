@@ -213,6 +213,36 @@ class SPL2CanonicalLayerTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'canonical'):
             self.audit()
 
+    def test_active_function_cannot_use_null_canonical(self):
+        obligation = next(o for o in self.provenance['obligations'] if o['id'] == 'F.abs.arity-1.P1')
+        next(c for c in self.cases if c['id'] == obligation['case_id'])['canonical'] = None
+        with self.assertRaisesRegex(ValueError, 'canonical.*object'):
+            self.audit()
+
+    def test_final_closure_cannot_use_null_canonical(self):
+        self.manifest['enforce_final_floors'] = True
+        for case in self.cases:
+            case.setdefault('canonical', None)
+        # Null layers must fail before the independent pending-obligation gate.
+        with self.assertRaisesRegex(ValueError, 'canonical.*object'):
+            self.audit()
+
+    def test_optional_canonical_must_be_an_object_when_present(self):
+        case = next(c for c in self.cases if 'canonical' not in c and
+                    not any(oid.startswith('F.') for oid in c['obligation_ids']))
+        for malformed in (None, [], False, 'canonical'):
+            with self.subTest(canonical=malformed):
+                case['canonical'] = malformed
+                with self.assertRaisesRegex(ValueError, 'canonical.*object'):
+                    self.audit()
+
+    def test_absent_optional_canonical_receives_no_evidence_credit(self):
+        case = next(c for c in self.cases if 'canonical' in c and
+                    not any(oid.startswith('F.') for oid in c['obligation_ids']))
+        before = self.audit()['canonical_queries']
+        case.pop('canonical')
+        self.assertEqual(self.audit()['canonical_queries'], before - 1)
+
     def test_unknown_canonical_semantics_cannot_promote_incomplete_syntax(self):
         case=next(c for c in self.cases if c['status']=='incomplete' and not c['syntax_complete'] and not c.get('hold_ids'))
         case['canonical']={'phase':'analysis','scope':'canonical-result','status':'incomplete','syntax_complete':False,'semantic_complete':True,'expected_codes':[],'references':[],'fields':[],'removed':[],'open':True,'uncertain':True,'stage_commands':[],'stage_complete':[]}

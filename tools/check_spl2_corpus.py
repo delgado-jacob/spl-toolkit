@@ -79,9 +79,10 @@ ASSEMBLIES = {"standalone": ("", ""), "pipeline-tail": ("FROM main | ", ""),
 
 
 def audit_canonical(case):
-    expected = case.get("canonical")
-    if expected is None:
-        return
+    if "canonical" not in case:
+        return False
+    expected = case["canonical"]
+    require(isinstance(expected, dict), "canonical expectation must be an object")
     require(expected.get("phase") == "analysis" and expected.get("scope") == "canonical-result", "invalid canonical layer")
     keys = {"status", "syntax_complete", "semantic_complete", "expected_codes", "references", "fields", "removed", "open", "uncertain", "stage_commands", "stage_complete"}
     require(keys <= expected.keys(), "incomplete canonical expectation")
@@ -98,6 +99,7 @@ def audit_canonical(case):
     for ref in expected["references"]:
         require({"original_name", "normalized_name", "kind", "role", "binding", "start", "end"} <= ref.keys(), "incomplete canonical reference")
         require(case["document"]["text"].encode("utf-8")[ref["start"]:ref["end"]].decode("utf-8") == ref["original_name"], "canonical reference source changed")
+    return True
 
 
 def audit(manifest, provenance, cases):
@@ -134,6 +136,7 @@ def audit(manifest, provenance, cases):
     require(canonical_provenance_digest(provenance) == CANONICAL_PROVENANCE_SHA256_V1,
             "canonical provenance identities or immutable values changed")
     aliases = set()
+    canonical_ids = set()
     for case in cases:
         require(case["id"] not in holds and not set(case["obligation_ids"]) & holds.keys(), "held case cannot receive floor credit")
         if case.get("hold_ids"):
@@ -153,7 +156,8 @@ def audit(manifest, provenance, cases):
             require(case["expected_codes"], "negative has no expected diagnostic")
         else:
             require(assertions.get("kinds") or assertions.get("shape_contains") or assertions.get("excerpts"), "missing typed syntax assertions")
-        audit_canonical(case)
+        if audit_canonical(case):
+            canonical_ids.add(case["id"])
         for oid in case["obligation_ids"]:
             require(oid not in aliases, "obligation aliases multiple queries")
             aliases.add(oid)
@@ -170,7 +174,7 @@ def audit(manifest, provenance, cases):
             prefix, suffix = ASSEMBLIES[assembly]
             expected = prefix + obligation["candidate"] + suffix
             if oid.startswith("F."):
-                require("canonical" in by_id[obligation["case_id"]], "active function requires canonical arity evidence")
+                require(obligation["case_id"] in canonical_ids, "active function requires canonical arity evidence")
             if oid != "E.L01.start.N1":
                 require(by_id[obligation["case_id"]]["document"]["text"] == expected, "source candidate changed")
         else:
@@ -188,11 +192,11 @@ def audit(manifest, provenance, cases):
     sql = {c["meaningful_id"] for c in credited if any(f.startswith(("Q", "E.L15", "E.L16", "E.L17")) for f in c["form_ids"])}
     pending = sum(o["disposition"] == "pending" for o in obligations.values())
     if manifest["enforce_final_floors"]:
-        require(all("canonical" in case for case in cases), "final closure requires canonical expectations")
+        require(len(canonical_ids) == len(cases), "final closure requires canonical expectations")
         require(pending == 0, "pending mandatory obligations remain")
         for key, actual in {"meaningful":len(meaningful), "definite_negative":len(negative), "sql_mixed":len(sql)}.items():
             require(actual >= manifest["final_floors"][key], f"unmet {key} floor")
-    return {"active_queries":len(cases), "active_obligations":len(aliases), "pending_obligations":pending, "meaningful":len(meaningful), "definite_negative":len(negative), "sql_mixed":len(sql), "held":len(holds), "canonical_queries":sum("canonical" in c for c in cases)}
+    return {"active_queries":len(cases), "active_obligations":len(aliases), "pending_obligations":pending, "meaningful":len(meaningful), "definite_negative":len(negative), "sql_mixed":len(sql), "held":len(holds), "canonical_queries":len(canonical_ids)}
 
 
 def main():
