@@ -219,7 +219,7 @@ func (p *ocsfTarget) constraintFacts(n ocsfNode, path string, m SchemaClass, poi
 			unknown = true
 			reason = "ocsf_constraint"
 		} else if len(names) == 1 && p.constraintPathSupported(n, names[0], m.Key) {
-			forced = len(strings.Split(names[0], "."))
+			forced = max(forced, len(strings.Split(names[0], ".")))
 			requirement = "required"
 		}
 		e := p.evidence(m, pointer+"/constraints/"+ocsfPointerName(operator), "constraints", "ocsf_attribute", requirement, reason)

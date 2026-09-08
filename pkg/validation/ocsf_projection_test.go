@@ -279,3 +279,35 @@ func TestOCSFCategoryProjectionBudget(t *testing.T) {
 		t.Fatalf("unbounded category projection: %s", got.Outcome)
 	}
 }
+
+func TestOCSFConjoinedSingletonConstraints(t *testing.T) {
+	var m map[string]any
+	if err := json.Unmarshal(edgeOCSF(t), &m); err != nil {
+		t.Fatal(err)
+	}
+	a := m["classes"].(map[string]any)["a"].(map[string]any)
+	a["constraints"] = map[string]any{
+		"at_least_one": []any{"cycle.next.value"},
+		"just_one":     []any{"cycle"},
+	}
+	raw, err := json.Marshal(m)
+	if err != nil {
+		t.Fatal(err)
+	}
+	p := ocsfPrepared(t, raw, OCSFSelection{Class: "a"})
+	got := assertOCSF(t, p, "cycle.next.value", "required")
+	for _, operator := range []string{"at_least_one", "just_one"} {
+		found := false
+		for _, e := range got.Evidence {
+			if e.Pointer == "/classes/a/constraints/"+operator && e.Operator == operator && e.Requirement == "required" {
+				found = true
+			}
+		}
+		if !found {
+			t.Fatalf("required %s evidence missing: %+v", operator, got.Evidence)
+		}
+	}
+	assertOCSF(t, p, "cycle", "required")
+	assertOCSF(t, p, "cycle.next", "required")
+	assertOCSF(t, p, "cycle.next.next.value", "optional")
+}
