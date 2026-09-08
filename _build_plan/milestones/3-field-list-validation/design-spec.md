@@ -1,6 +1,6 @@
 # Milestone 3 — Field-List Validation Design
 
-Status: approved by the delegated controller on 2026-09-07 and implemented after final Milestone2 acceptance at1f5c986. All five task reviews and the whole-milestone review through c6ae684 are approved; root runtime acceptance passed78964a7 with verified documentation-only ancestry. Final exact-SHA milestone acceptance remains controller-owned. The behavioral contract below is unchanged.
+Status: approved by the delegated controller on 2026-09-07 and implemented after final Milestone2 acceptance at1f5c986. All five task reviews and the whole-milestone review through c6ae684 are approved; root runtime acceptance passed78964a7 with verified documentation-only ancestry. Root accepted Milestone3 as complete at `753bd5a5247830c6afdcef9aee7031c948a77070`; this final record preserves that accepted snapshot. The behavioral contract below is unchanged.
 
 ## Purpose and scope
 
