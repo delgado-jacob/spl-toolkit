@@ -115,6 +115,11 @@ func (s *spl2SemanticStage) callWithExpression(c spl2.ICallContext, aggregate bo
 	case "lower", "upper", "len", "trim", "ltrim", "rtrim", "split":
 		out.nonnull = out.modeled
 		out.domain = "string"
+		if name == "len" {
+			out.domain = "number"
+		} else if name == "split" {
+			out.domain = "" // Multivalue output is not a proved scalar string.
+		}
 		for _, value := range values {
 			out.nonnull = out.nonnull && value.nonnull && value.domain == "string"
 		}

@@ -6,6 +6,61 @@ import (
 	"testing"
 )
 
+func TestSPL2NestedLenNumericPresence(t *testing.T) {
+	r := spl2AnalyzeTest(t, `FROM main | eval n=abs(len("abc")) | table n`)
+	if r.Status != Valid || !r.Coverage.SemanticComplete || spl2Ref(t, r, "n", "read").Binding != "derived" || r.Lineage[1].Transitions[0].Conditional {
+		t.Fatalf("numeric len result must preserve supported abs presence: %+v", r)
+	}
+	assertCorpusIntegrity(t, r)
+}
+
+func TestSPL2FunctionResultDomains(t *testing.T) {
+	for _, tc := range []struct {
+		expression string
+		status     Status
+		binding    string
+		input      string
+	}{
+		{`substr("abc",len("x"))`, Valid, "derived", ""},
+		{`len(lower("ABC"))`, Valid, "derived", ""},
+		{`split("a:b",":")`, Valid, "derived", ""},
+		{`lower(split("a:b",":"))`, Valid, "indeterminate", ""},
+		{`len(split("a:b",":"))`, Valid, "indeterminate", ""},
+		{`lower(len("abc"))`, Valid, "indeterminate", ""},
+		{`abs(len(null))`, Valid, "indeterminate", ""},
+		{`abs(len(7))`, Valid, "indeterminate", ""},
+		{`abs(len(value))`, Valid, "indeterminate", "value"},
+		{`split(value,":")`, Valid, "indeterminate", "value"},
+		{`split("a:b",null)`, Valid, "indeterminate", ""},
+		{`mvcount(split("a:b",":"))`, Valid, "indeterminate", ""},
+		{`abs(len(mystery(value)))`, Incomplete, "indeterminate", "value"},
+		{`abs(len(value:input))`, Incomplete, "indeterminate", "input"},
+		{`abs(len("abc",value))`, Invalid, "indeterminate", "value"},
+		{`split(value)`, Invalid, "indeterminate", "value"},
+	} {
+		t.Run(tc.expression, func(t *testing.T) {
+			r := spl2AnalyzeTest(t, "FROM main | eval n="+tc.expression+" | table n")
+			if r.Status != tc.status || spl2Ref(t, r, "n", "read").Binding != tc.binding || r.Lineage[1].Transitions[0].Conditional != (tc.binding == "indeterminate") {
+				t.Fatalf("result presence/domain composition: %+v", r)
+			}
+			if tc.status == Valid && (!r.Coverage.SyntaxComplete || !r.Coverage.SemanticComplete || len(r.Diagnostics) != 0) {
+				t.Fatalf("conditional presence must not change modeled analysis coverage: %+v", r)
+			}
+			if tc.input != "" && spl2Ref(t, r, tc.input, "read").Binding != "source" {
+				t.Fatalf("original input read changed: %+v", r)
+			}
+			if strings.Contains(tc.expression, "value:") {
+				for _, ref := range r.References {
+					if ref.NormalizedName == "value" {
+						t.Fatalf("named label became a read: %+v", ref)
+					}
+				}
+			}
+			assertCorpusIntegrity(t, r)
+		})
+	}
+}
+
 func TestSPL2FiniteFunctionArities(t *testing.T) {
 	signatures := []struct {
 		names     string

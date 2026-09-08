@@ -281,10 +281,10 @@ func (p *spl2ParsedDocument) inspectSyntax(tree antlr.Tree, lambdaDepth int) {
 		}
 	case *spl2.ModuleSuffixContext:
 		p.syntaxComplete = false
-		p.syntaxFinding(ctx, "SPL_UNSUPPORTED_MODULE", "unsupported", "Top-level statement terminators are outside the standalone contract")
+		p.syntaxFinding(ctx, "SPL_UNSUPPORTED_MODULE", "unsupported_syntax", "Top-level statement terminators are outside the standalone contract")
 	case *spl2.ModuleDeclarationContext:
 		p.syntaxComplete = false
-		p.syntaxFinding(ctx, "SPL_UNSUPPORTED_MODULE", "unsupported", "Module declarations are outside the standalone contract")
+		p.syntaxFinding(ctx, "SPL_UNSUPPORTED_MODULE", "unsupported_syntax", "Module declarations are outside the standalone contract")
 	case *spl2.LambdaParameterContext:
 		if value := ctx.StringLiteral(); value != nil && len(value.AllSTRING_INTERPOLATION()) > 0 {
 			p.syntaxFinding(value, CodeSyntaxError, "contract", "Lambda default strings must be constant")

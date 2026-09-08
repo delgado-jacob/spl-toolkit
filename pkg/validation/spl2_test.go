@@ -58,6 +58,40 @@ func TestSPL2FieldListCanonical(t *testing.T) {
 	}
 }
 
+func TestSPL2FunctionResultDomainValidation(t *testing.T) {
+	for _, tc := range []struct {
+		expression string
+		status     analysis.Status
+		outcome    string
+	}{
+		{`abs(len("abc"))`, analysis.Valid, "matching"},
+		{`substr("abc",len("x"))`, analysis.Valid, "matching"},
+		{`split("a:b",":")`, analysis.Valid, "matching"},
+		{`lower(split("a:b",":"))`, analysis.Incomplete, "indeterminate"},
+		{`lower(len("abc"))`, analysis.Incomplete, "indeterminate"},
+		{`abs(len(null))`, analysis.Incomplete, "indeterminate"},
+	} {
+		t.Run(tc.expression, func(t *testing.T) {
+			doc := analysis.QueryDocument{Text: "FROM main | eval n=" + tc.expression + " | table n", Language: "spl2", SourceID: "result-domain"}
+			field, err := Validate(doc, FieldCatalog{Fields: []string{}})
+			if err != nil {
+				t.Fatal(err)
+			}
+			schema, err := ValidateSchema(doc, SchemaTarget{Kind: "json_schema", Schema: json.RawMessage(`false`)})
+			if err != nil {
+				t.Fatal(err)
+			}
+			complete := tc.status == analysis.Valid
+			if field.Status != tc.status || field.Coverage.SchemaComplete != complete || len(field.Outcomes) != 1 || field.Outcomes[0].Outcome != tc.outcome || schema.Status != tc.status || schema.Coverage.SchemaComplete != complete || len(schema.Outcomes) != 1 || schema.Outcomes[0].Outcome != tc.outcome {
+				t.Fatalf("validation presence: field=%+v schema=%+v", field, schema)
+			}
+			if field.Analysis.Status != analysis.Valid || !field.Analysis.Coverage.SemanticComplete || schema.Analysis.Status != analysis.Valid || !schema.Analysis.Coverage.SemanticComplete {
+				t.Fatal("validation uncertainty changed modeled analysis status/coverage")
+			}
+		})
+	}
+}
+
 func TestSPL2FieldListMixedBatchAndInputs(t *testing.T) {
 	docs := []analysis.QueryDocument{{Text: "table host", SourceID: "legacy"}, {Text: "FROM main SELECT host", Language: "spl2", SourceID: "spl2"}, {Text: "FROM main | mystery", Language: "spl2", SourceID: "unknown"}, {Text: "table absent", SourceID: "missing"}}
 	catalog := FieldCatalog{Fields: []string{"host"}, OptionalFields: []string{}}

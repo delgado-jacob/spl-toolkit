@@ -158,6 +158,9 @@ func TestSPL2StartExcludedModule(t *testing.T) {
 		for _, d := range p.diagnostics {
 			if d.Code == "SPL_UNSUPPORTED_MODULE" {
 				found = true
+				if d.Category != "unsupported_syntax" || d.Severity != "error" || d.Location.Start.Offset < 0 || d.Location.End.Offset > len(text) || d.Location.Start.Offset >= d.Location.End.Offset {
+					t.Errorf("module diagnostic contract %q %+v", text, d)
+				}
 			}
 		}
 		if !found || p.syntaxComplete {

@@ -58,6 +58,16 @@ func TestSPL2CanonicalUnknownAndExclusions(t *testing.T) {
 			if r.Status != tt.status || !spl2HasCode(r, tt.code) || r.Coverage.SemanticComplete {
 				t.Fatalf("classification: %+v", r)
 			}
+			if tt.code == "SPL_UNSUPPORTED_MODULE" {
+				if r.Coverage.SyntaxComplete {
+					t.Fatalf("module syntax coverage promoted: %+v", r)
+				}
+				for _, d := range r.Diagnostics {
+					if d.Code == tt.code && (d.Category != "unsupported_syntax" || d.Severity != "error") {
+						t.Fatalf("module diagnostic contract: %+v", d)
+					}
+				}
+			}
 			if tt.read {
 				spl2Ref(t, r, "bytes", "read")
 			}
