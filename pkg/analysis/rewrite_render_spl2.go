@@ -28,7 +28,8 @@ func (s *spl2SemanticStage) rewriteSPL2Owner(ctx antlr.ParserRuleContext) rewrit
 		o.role = "lookup_local"
 	case spl2.ISearchValueContext:
 		o.role = "search_value"
-		if c.SearchSignedNumber() != nil || c.SearchUnprovedLiteral() != nil || c.SearchDirective() != nil || c.RAW_STRING() != nil || strings.Contains(c.GetText(), "*") || (c.StringLiteral() != nil && len(c.StringLiteral().AllExpression()) > 0) {
+		_, exact := rewriteSearchScalar(c.GetText(), "spl2")
+		if !exact || c.SearchSignedNumber() != nil || c.SearchUnprovedLiteral() != nil || c.SearchDirective() != nil || c.RAW_STRING() != nil || (c.StringLiteral() != nil && len(c.StringLiteral().AllExpression()) > 0) {
 			o.role = ""
 		}
 	case spl2.IStringLiteralContext:

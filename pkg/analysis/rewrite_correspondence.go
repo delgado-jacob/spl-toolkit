@@ -11,6 +11,12 @@ func (s *RewriteSession) Render(changes []RewriteReplacement) (*RewriteRendering
 	if s == nil || s.result == nil {
 		return nil, fmt.Errorf("missing rewrite session")
 	}
+	// Validate caller bytes before the JSON copy can replace malformed UTF-8.
+	for _, change := range changes {
+		if !rewriteValidIdentity(change.Target) {
+			return nil, fmt.Errorf("invalid rewrite replacement %q", change.SiteID)
+		}
+	}
 	r := &RewriteRendering{session: s, edits: []RewriteTextEdit{}, requirements: []RewriteRequirement{}, effects: []RewriteIdentityEffect{}, changes: rewriteCopy(changes)}
 	byID := map[string]*rewriteSite{}
 	byRef := map[string]*rewriteSite{}
@@ -20,7 +26,7 @@ func (s *RewriteSession) Render(changes []RewriteReplacement) (*RewriteRendering
 		byRef[site.public.ReferenceID] = site
 	}
 	for _, change := range r.changes {
-		if byID[change.SiteID] == nil || !rewriteValidIdentity(change.Target) {
+		if byID[change.SiteID] == nil {
 			return nil, fmt.Errorf("invalid rewrite replacement %q", change.SiteID)
 		}
 		if _, ok := selected[change.SiteID]; ok {
@@ -214,7 +220,10 @@ func (s *RewriteSession) Render(changes []RewriteReplacement) (*RewriteRendering
 				changed = true
 			}
 		}
-		if site.owner.prefix != "" {
+		if site.owner.prefix != "" && p.Identity.Name != nil {
+			// Separate datamodel operands retain a decoded composite identity;
+			// their original dataset token may include grammar quotes.
+			value = strings.TrimPrefix(*p.Identity.Name, site.owner.prefix)
 			for _, model := range s.sites {
 				if model.public.Kind == "data_model" && model.public.Location == site.owner.modelLocation {
 					if target, ok := selected[model.public.ID]; ok && target.Name != nil {

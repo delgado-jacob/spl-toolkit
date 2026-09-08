@@ -291,7 +291,6 @@ func (s *semanticStage) applyRename(pairs []renameOperands) {
 }
 func (s *semanticStage) applyAggregation(outputs []aggregateOutput, groups []locatedOperand, preserveInput bool) {
 	output := newEnvironment()
-	output.rewrite = s.env.rewrite.clone()
 	output.open = false
 	for _, operand := range groups {
 		names, ids := s.selectorAt(operand, "group", false)
@@ -303,6 +302,7 @@ func (s *semanticStage) applyAggregation(outputs []aggregateOutput, groups []loc
 		}
 	}
 	if !preserveInput {
+		output.rewrite = s.env.rewrite.clone()
 		output.rewriteProject(output.fields)
 		output.uncertain = !s.result.Stages[s.stage].SemanticComplete
 		s.env = output

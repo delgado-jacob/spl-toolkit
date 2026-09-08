@@ -108,6 +108,20 @@ func (s *semanticStage) rewriteFacts() []RewriteFactEvidence {
 	}
 	return out
 }
+
+// Search values (including quoted values) are pattern slots. Expression
+// strings use rewriteScalar directly, where an asterisk remains exact text.
+func rewriteSearchScalar(text, language string) (RewriteScalar, bool) {
+	scalar, ok := rewriteScalar(text, true, language)
+	if ok && scalar.Kind == "string" {
+		var value string
+		_ = json.Unmarshal(scalar.Value, &value)
+		if strings.Contains(value, "*") {
+			return RewriteScalar{}, false
+		}
+	}
+	return scalar, ok
+}
 func rewriteScalar(text string, search bool, language string) (RewriteScalar, bool) {
 	var value any
 	if strings.Contains(text, "${") {
@@ -355,7 +369,16 @@ func (s *semanticStage) rewritePredicateFacts(node antlr.Tree, language string, 
 				return empty
 			}
 		}
-		scalar, ok := rewriteScalar(literal.(antlr.ParserRuleContext).GetText(), search || metrics, language)
+		text := literal.(antlr.ParserRuleContext).GetText()
+		scalar, ok := rewriteScalar(text, search || metrics, language)
+		switch literal.(type) {
+		case parser.IAnalysisSearchValueContext, spl2.ISearchValueContext:
+			scalar, ok = rewriteSearchScalar(text, language)
+		default:
+			if metrics && kind == "index" {
+				scalar, ok = rewriteSearchScalar(text, language)
+			}
+		}
 		if !ok {
 			return empty
 		}

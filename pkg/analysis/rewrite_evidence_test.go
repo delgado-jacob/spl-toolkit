@@ -3,6 +3,7 @@ package analysis
 import (
 	"encoding/json"
 	"reflect"
+	"slices"
 	"strings"
 	"testing"
 )
@@ -500,5 +501,215 @@ func TestRewriteEvidenceHeldSearchValues(t *testing.T) {
 				t.Fatalf("held search value eligible in %q: %+v", query, site)
 			}
 		}
+	}
+}
+
+func TestRewriteSearchPatternFacts(t *testing.T) {
+	for _, language := range []string{"spl", "spl2"} {
+		for _, tc := range []struct{ predicate, kind, name string }{
+			{`tag="x*"`, "field", "tag"}, {`tag=x*`, "field", "tag"},
+			{`index="main*"`, "index", "main*"}, {`index=main*`, "index", "main*"},
+		} {
+			t.Run(language+"/"+tc.predicate, func(t *testing.T) {
+				s := rewriteTestSession(t, language, "search "+tc.predicate+" | lookup people user OUTPUT label", RewriteFactProbe{Kind: tc.kind, Identity: rewriteName(tc.name)})
+				fact := rewriteFind(t, s, "lookup", "people", 0).Facts[0]
+				if len(fact.GuaranteedValues) != 0 || fact.LiteralComplete {
+					t.Errorf("search pattern became an exact literal: %+v", fact)
+				}
+				if tc.kind != "field" && (fact.ReferenceState == "true" || len(fact.ReferenceIDs) != 0) {
+					t.Errorf("pattern dependency became an exact reference: %+v", fact)
+				}
+				if tc.kind == "field" && fact.ReferenceState != "true" {
+					t.Errorf("pattern value erased its exact field read: %+v", fact)
+				}
+			})
+		}
+		for _, tc := range []struct{ predicate, kind, name, value string }{
+			{`search tag="exact"`, "field", "tag", `"exact"`},
+			{`search index="main"`, "index", "main", `"main"`},
+			{`search index=main | where tag="x*"`, "field", "tag", `"x*"`},
+			{`search index=main | where index="main*"`, "field", "index", `"main*"`},
+		} {
+			t.Run(language+"/exact/"+tc.predicate, func(t *testing.T) {
+				s := rewriteTestSession(t, language, tc.predicate+" | lookup people user OUTPUT label", RewriteFactProbe{Kind: tc.kind, Identity: rewriteName(tc.name)})
+				fact := rewriteFind(t, s, "lookup", "people", 0).Facts[0]
+				if !fact.LiteralComplete || len(fact.GuaranteedValues) != 1 || string(fact.GuaranteedValues[0].Value) != tc.value || fact.ReferenceState != "true" {
+					t.Fatalf("exact typed literal lost: %+v", fact)
+				}
+			})
+		}
+	}
+}
+
+func TestRewriteRenderRejectsOriginalInvalidUTF8(t *testing.T) {
+	for _, language := range []string{"spl", "spl2"} {
+		s := rewriteTestSession(t, language, `search index=main | where user=1`)
+		site := rewriteFind(t, s, "field", "user", 0)
+		for _, invalid := range []string{string([]byte{0xff}), string([]byte{'a', 0xc3}), string([]byte{0xed, 0xa0, 0x80})} {
+			for _, target := range []RewriteIdentity{rewriteName(invalid), {Path: []string{"valid", invalid}}} {
+				if r, err := s.Render([]RewriteReplacement{{site.ID, target}}); err == nil || r != nil {
+					t.Errorf("%s accepted malformed target bytes %x: %+v %v", language, []byte(invalid), target, err)
+				}
+			}
+		}
+		target := "é😀"
+		changes := []RewriteReplacement{{site.ID, rewriteName(target)}}
+		r, err := s.Render(changes)
+		if err != nil {
+			t.Fatal(err)
+		}
+		*changes[0].Target.Name = "mutated"
+		if len(r.Effects()) != 1 || r.Effects()[0].After.Name == nil || *r.Effects()[0].After.Name != target {
+			t.Fatalf("valid UTF-8 target not privately preserved: %+v", r.Effects())
+		}
+		c := rewriteTestSession(t, language, rewriteApply(s.Evidence().Analysis.Document.Text, r.Edits()))
+		if proof := s.Verify(c, r); !proof.Proven {
+			t.Fatalf("valid identity did not survive copy: %+v", proof)
+		}
+	}
+}
+
+func TestRewriteNullInspectionOwnerProof(t *testing.T) {
+	for _, tc := range []struct {
+		language, expression string
+		eligible             bool
+	}{
+		{"spl", `unknown(isnull(user))=1`, false},
+		{"spl2", `unknown(isnull(user))=1`, false},
+		{"spl2", `abs(value:isnull(user))=1`, false},
+		{"spl", `isnull(user)`, true},
+		{"spl2", `isnull(user)`, true},
+	} {
+		t.Run(tc.language+"/"+tc.expression, func(t *testing.T) {
+			s := rewriteTestSession(t, tc.language, "search index=main | where "+tc.expression)
+			site := rewriteFind(t, s, "field", "user", 0)
+			if (site.Eligibility == "eligible") != tc.eligible {
+				t.Errorf("null inspection changed owner proof: %+v", site)
+			}
+			r, err := s.Render([]RewriteReplacement{{site.ID, rewriteName("account")}})
+			if err != nil {
+				t.Fatal(err)
+			}
+			if !tc.eligible {
+				if len(r.Edits()) != 0 || len(r.Requirements()) == 0 || len(r.Requirements()[0].Limitations) == 0 {
+					t.Fatalf("unproved null owner rendered: %+v %+v", r.Edits(), r.Requirements())
+				}
+				return
+			}
+			c := rewriteTestSession(t, tc.language, rewriteApply(s.Evidence().Analysis.Document.Text, r.Edits()))
+			if len(r.Edits()) != 1 || !s.Verify(c, r).Proven {
+				t.Fatalf("proved null owner refused: %+v %+v", r.Requirements(), s.Verify(c, r))
+			}
+		})
+	}
+}
+
+func TestRewriteModelOnlyQuotedDatasetEffect(t *testing.T) {
+	for _, component := range []string{`'All'`, `"All"`} {
+		t.Run(component, func(t *testing.T) {
+			s := rewriteTestSession(t, "spl", "datamodel Traffic "+component)
+			model := rewriteFind(t, s, "data_model", "Traffic", 0)
+			dataset := rewriteFind(t, s, "dataset", "Traffic.All", 0)
+			r, err := s.Render([]RewriteReplacement{{model.ID, rewriteName("Network")}})
+			if err != nil {
+				t.Fatal(err)
+			}
+			candidate := rewriteApply(s.Evidence().Analysis.Document.Text, r.Edits())
+			if candidate != "datamodel Network "+component {
+				t.Fatalf("component spelling changed: %s", candidate)
+			}
+			found := false
+			for _, effect := range r.Effects() {
+				if effect.ReferenceID == dataset.ReferenceID {
+					found = true
+					if !reflect.DeepEqual(effect.After, rewriteName("Network.All")) {
+						t.Errorf("quoted token became logical identity: %+v", effect)
+					}
+				}
+			}
+			if !found {
+				t.Error("missing enclosing dataset effect")
+			}
+			if proof := s.Verify(rewriteTestSession(t, "spl", candidate), r); !proof.Proven {
+				t.Errorf("model-only quoted component correspondence: %+v", proof)
+			}
+		})
+	}
+}
+
+func TestRewriteAggregationFirstReadEpoch(t *testing.T) {
+	s := rewriteTestSession(t, "spl", `stats count BY host | table host`, RewriteFactProbe{Kind: "field", Identity: rewriteName("host")})
+	group, consumer := rewriteFind(t, s, "field", "host", 0), rewriteFind(t, s, "field", "host", 1)
+	if group.SourceEpochID == "" || group.SourceEpochID != consumer.SourceEpochID || group.BindingID == "" || group.BindingID != consumer.BindingID {
+		t.Errorf("aggregation reset a retained source binding: group=%+v consumer=%+v", group, consumer)
+	}
+	fact := consumer.Facts[0]
+	if fact.ReferenceState != "true" || !slices.Contains(fact.ReferenceIDs, group.ReferenceID) {
+		t.Errorf("aggregation discarded grouping provenance: %+v", fact)
+	}
+}
+
+func TestRewriteLexicalMappingControls(t *testing.T) {
+	for _, language := range []string{"spl", "spl2"} {
+		count := "count"
+		if language == "spl2" {
+			count = "count()"
+		}
+		for _, tc := range []struct{ name, query, want string }{
+			{"comment", `search index=main | where user=1 /* user */ | table user`, `search index=main | where account=1 /* user */ | table account`},
+			{"option", `search index=main | where user=1 AND user=1 | stats delim="user" ` + count, `search index=main | where account=1 AND account=1 | stats delim="user" ` + count},
+			{"remote", `search index=main | where user=1 | lookup people user AS local OUTPUT label AS display | table user`, `search index=main | where account=1 | lookup people user AS local OUTPUT label AS display | table account`},
+		} {
+			t.Run(language+"/"+tc.name, func(t *testing.T) {
+				s := rewriteTestSession(t, language, tc.query)
+				changes := []RewriteReplacement{}
+				for _, site := range s.Evidence().Sites {
+					if site.Kind == "field" && site.Identity.Name != nil && *site.Identity.Name == "user" {
+						if site.Eligibility != "eligible" {
+							t.Fatalf("source mapping control is not eligible: %+v", site)
+						}
+						changes = append(changes, RewriteReplacement{site.ID, rewriteName("account")})
+					}
+				}
+				if len(changes) != 2 {
+					t.Fatalf("lexical text acquired field identity: %+v", s.Evidence().Sites)
+				}
+				r, err := s.Render(changes)
+				if err != nil {
+					t.Fatal(err)
+				}
+				if got := rewriteApply(tc.query, r.Edits()); got != tc.want {
+					t.Fatalf("lexical control changed: %s; %+v", got, r.Requirements())
+				}
+				if proof := s.Verify(rewriteTestSession(t, language, tc.want), r); !proof.Proven {
+					t.Fatalf("lexical-control correspondence: %+v", proof)
+				}
+			})
+		}
+	}
+}
+
+func TestRewriteSPL2PatternSlotControls(t *testing.T) {
+	for _, tc := range []struct {
+		query, kind, name string
+		exact             bool
+	}{
+		{`search index="main\u002a" | lookup people user OUTPUT label`, "index", "main*", false},
+		{`tstats aggregates=[count()] predicate=(index="main*") byfields=[host] | lookup people host OUTPUT label`, "index", "main*", false},
+		{`tstats aggregates=[count()] predicate=(port="x*") byfields=[host] | lookup people host OUTPUT label`, "field", "port", true},
+	} {
+		t.Run(tc.query, func(t *testing.T) {
+			s := rewriteTestSession(t, "spl2", tc.query, RewriteFactProbe{Kind: tc.kind, Identity: rewriteName(tc.name)})
+			fact := rewriteFind(t, s, "lookup", "people", 0).Facts[0]
+			if tc.exact {
+				// Probe at the predicate before aggregation projects port away.
+				fact = rewriteFind(t, s, "field", "port", 0).Facts[0]
+				if !fact.LiteralComplete || len(fact.GuaranteedValues) != 1 || string(fact.GuaranteedValues[0].Value) != `"x*"` {
+					t.Fatalf("metric expression string lost exact semantics: %+v", fact)
+				}
+			} else if fact.LiteralComplete || len(fact.GuaranteedValues) != 0 || fact.ReferenceState == "true" || len(fact.ReferenceIDs) != 0 {
+				t.Fatalf("pattern slot acquired exact proof: %+v", fact)
+			}
+		})
 	}
 }

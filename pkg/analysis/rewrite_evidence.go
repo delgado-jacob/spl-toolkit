@@ -200,7 +200,7 @@ func (s *semanticStage) rewriteReference(id string, operand locatedOperand, kind
 	if owner.location.End.Offset == 0 {
 		owner.location = operand.Location
 	}
-	if role == "null_test" {
+	if role == "null_test" && owner.role != "" && owner.role != "navigation" {
 		owner.role = "null_test"
 	}
 	site := &rewriteSite{owner: owner, public: RewriteSite{ID: fmt.Sprintf("site-%d", len(c.sites)), ReferenceID: id, SourceEpochID: flow.epoch, Kind: kind, Role: owner.role, Eligibility: "ineligible", Identity: rewriteAtom(operand.Name), Location: operand.Location, OwnerLocation: owner.location, Point: RewritePoint{ScopeID: st.ScopeID, StageID: st.ID, Phase: s.rewritePhase, LineageIndex: len(s.result.Lineage), Ordinal: s.rewriteOrdinal}, Facts: []RewriteFactEvidence{}, Limitations: []RewriteLimitation{}}}
@@ -218,7 +218,7 @@ func (s *semanticStage) rewriteReference(id string, operand locatedOperand, kind
 	if owner.role == "" || owner.role == "navigation" {
 		site.public.Limitations = append(site.public.Limitations, RewriteLimitation{"unproved_owner", "Canonical typed rendering ownership is unproved", operand.Location})
 	}
-	if kind != "field" {
+	if kind != "field" && operand.Resolution == "exact" && owner.role != "" && owner.role != "navigation" {
 		flow.seen[rewriteFactKey(kind, site.public.Identity)] = uniqueIDs(flow.seen[rewriteFactKey(kind, site.public.Identity)], []string{id})
 	}
 	site.public.Facts = s.rewriteFacts()
