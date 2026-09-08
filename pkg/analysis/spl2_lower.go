@@ -42,24 +42,19 @@ func analyzeSPL2(result *Result, parsed *spl2ParsedDocument, refinement *sourceR
 	env := newEnvironment()
 	aliases := map[string]bool{}
 	for _, ctx := range contexts {
+		if sql, ok := ctx.(spl2SQLCommand); ok && spl2ScheduledSQL(sql) {
+			env = executeSPL2SQL(result, parsed, refinement, sql, env, aliases)
+			continue
+		}
 		location := parsed.source.contextLocation(ctx)
 		command := strings.ToLower(ctx.GetStart().GetText())
 		if _, ok := ctx.(*spl2.ImplicitSearchContext); ok {
 			command = "search"
 		}
-		index := len(result.Stages)
-		id := fmt.Sprintf("stage-%d", index)
-		result.Stages = append(result.Stages, Stage{ID: id, Command: command, Position: index, ScopeID: "scope-0", Location: location, SemanticComplete: true})
+		index := registerSPL2Stage(result, location, command, len(result.Stages), "scope-0")
+		id := result.Stages[index].ID
 		s := &spl2SemanticStage{semanticStage: &semanticStage{result: result, stage: index, env: env, transitions: []Transition{}, refinement: refinement}, parsed2: parsed, aliases: aliases}
 		before := env.snapshot()
-		for i := range result.Diagnostics {
-			d := &result.Diagnostics[i]
-			if d.StageID == "" && d.Location.Start.Offset >= location.Start.Offset && d.Location.Start.Offset <= location.End.Offset {
-				d.StageID = id
-				d.ScopeID = "scope-0"
-				result.Stages[index].SemanticComplete = false
-			}
-		}
 		if spl2IntactSyntax(ctx) {
 			s.command(ctx)
 		} else {
@@ -72,6 +67,21 @@ func analyzeSPL2(result *Result, parsed *spl2ParsedDocument, refinement *sourceR
 		result.Lineage = append(result.Lineage, Lineage{StageID: id, ScopeID: "scope-0", Before: before, After: env.snapshot(), Transitions: s.transitions})
 	}
 	finalizeReferences(result, refinement)
+}
+
+func registerSPL2Stage(result *Result, location Location, command string, position int, scopeID string) int {
+	index := len(result.Stages)
+	id := fmt.Sprintf("stage-%d", index)
+	result.Stages = append(result.Stages, Stage{ID: id, Command: command, Position: position, ScopeID: scopeID, Location: location, SemanticComplete: true})
+	for i := range result.Diagnostics {
+		d := &result.Diagnostics[i]
+		if d.StageID == "" && d.Location.Start.Offset >= location.Start.Offset && d.Location.Start.Offset <= location.End.Offset {
+			d.StageID = id
+			d.ScopeID = scopeID
+			result.Stages[index].SemanticComplete = false
+		}
+	}
+	return index
 }
 func (s *spl2SemanticStage) operand(ctx antlr.ParserRuleContext) locatedOperand {
 	if ctx == nil || !spl2IntactSyntax(ctx) {

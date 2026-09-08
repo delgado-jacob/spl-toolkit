@@ -80,11 +80,13 @@ type Transition struct {
 	Conditional       bool     `json:"conditional"`
 }
 type Lineage struct {
-	StageID     string       `json:"stage_id"`
-	ScopeID     string       `json:"scope_id"`
-	Before      FieldState   `json:"before"`
-	After       FieldState   `json:"after"`
-	Transitions []Transition `json:"transitions"`
+	StageID        string       `json:"stage_id"`
+	ScopeID        string       `json:"scope_id"`
+	Before         FieldState   `json:"before"`
+	After          FieldState   `json:"after"`
+	Transitions    []Transition `json:"transitions"`
+	Phase          string       `json:"phase,omitempty"`
+	ExecutionOrder *int         `json:"execution_order,omitempty"`
 }
 type Dependencies struct {
 	Indexes     []string `json:"indexes"`

@@ -60,7 +60,7 @@ func TestSPL2SequentialFullState(t *testing.T) {
 	want.Stages = []Stage{{"stage-0", "from", 0, "scope-0", loc(0, 9), true}, {"stage-1", "eval", 1, "scope-0", loc(12, 31), true}, {"stage-2", "table", 2, "scope-0", loc(34, 41), true}}
 	want.Dependencies.Datasets = []string{"main"}
 	want.References = []Reference{ref("ref-0", "main", "read", "stage-0", "not_applicable", 5, 9), ref("ref-1", "x", "create", "stage-1", "not_applicable", 17, 18, "ref-2"), ref("ref-2", "bytes", "read", "stage-1", "source", 19, 24), ref("ref-3", "y", "create", "stage-1", "not_applicable", 26, 27, "ref-4", "ref-1", "ref-2"), ref("ref-4", "x", "read", "stage-1", "derived", 28, 29, "ref-1", "ref-2"), ref("ref-5", "y", "read", "stage-2", "derived", 40, 41, "ref-3", "ref-4", "ref-1", "ref-2")}
-	want.Lineage = []Lineage{{"stage-0", "scope-0", before, before, []Transition{}}, {"stage-1", "scope-0", before, assigned, []Transition{{"create", "x", []string{"ref-2"}, "ref-1", false}, {"create", "y", []string{"ref-4"}, "ref-3", false}}}, {"stage-2", "scope-0", assigned, after, []Transition{{"project", "y", []string{"ref-5"}, "", false}}}}
+	want.Lineage = []Lineage{{StageID: "stage-0", ScopeID: "scope-0", Before: before, After: before, Transitions: []Transition{}}, {StageID: "stage-1", ScopeID: "scope-0", Before: before, After: assigned, Transitions: []Transition{{"create", "x", []string{"ref-2"}, "ref-1", false}, {"create", "y", []string{"ref-4"}, "ref-3", false}}}, {StageID: "stage-2", ScopeID: "scope-0", Before: assigned, After: after, Transitions: []Transition{{"project", "y", []string{"ref-5"}, "", false}}}}
 	if !reflect.DeepEqual(got, want) {
 		g, _ := json.MarshalIndent(got, "", "  ")
 		w, _ := json.MarshalIndent(want, "", "  ")
