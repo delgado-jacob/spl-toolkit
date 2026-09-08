@@ -107,6 +107,8 @@ class GoCheckTests(unittest.TestCase):
                     "go.mod": "module example.invalid/check\n\ngo 1.22\n",
                     "main.go": "package check\n",
                     "parser/generated.go": "package parser\nfunc Generated( ){ }\n",
+                    "parser/spl2/generated.go": "package spl2\nfunc Generated( ){ }\n",
+                    "pkg/analysis/analysis.go": "package analysis\n",
                     "gen/generated.go": "package gen\nfunc Generated( ){ }\n",
                     "docs/docs.go": "package docs\nfunc Generated( ){ }\n",
                 },
@@ -120,6 +122,10 @@ class GoCheckTests(unittest.TestCase):
             )
 
         self.assertEqual(result.returncode, 0, result.stdout)
+
+        exclusion = next(line for line in result.stdout.splitlines() if line.startswith("excluding generated"))
+        self.assertIn("example.invalid/check/parser/spl2", exclusion)
+        self.assertNotIn("example.invalid/check/pkg/analysis", exclusion)
 
     def test_lint_does_not_write_missing_test_dependency_checksums(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

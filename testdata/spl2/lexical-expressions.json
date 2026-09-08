@@ -1,0 +1,4788 @@
+[
+  {
+    "id": "L01-P1",
+    "obligation_ids": [
+      "L01-P1"
+    ],
+    "source_keys": [
+      "start"
+    ],
+    "document": {
+      "text": "index=telemetry warning",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "L01"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [],
+      "excerpts": [
+        {
+          "kind": "start",
+          "text": "index=telemetry warning"
+        }
+      ],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L01.incomplete"
+  },
+  {
+    "id": "L01-P2",
+    "obligation_ids": [
+      "L01-P2"
+    ],
+    "source_keys": [
+      "start"
+    ],
+    "document": {
+      "text": "search 502 index=proxy",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "L01"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [],
+      "excerpts": [
+        {
+          "kind": "start",
+          "text": "search 502 index=proxy"
+        }
+      ],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L01.incomplete"
+  },
+  {
+    "id": "L01-N1",
+    "obligation_ids": [
+      "L01-N1"
+    ],
+    "source_keys": [
+      "start"
+    ],
+    "document": {
+      "text": "502 index=proxy",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "L01"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L01.invalid"
+  },
+  {
+    "id": "L01-N2",
+    "obligation_ids": [
+      "L01-N2"
+    ],
+    "source_keys": [
+      "start"
+    ],
+    "document": {
+      "text": "SELECT account",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "L01"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L01.invalid"
+  },
+  {
+    "id": "L02-P1",
+    "obligation_ids": [
+      "L02-P1"
+    ],
+    "source_keys": [
+      "syntax"
+    ],
+    "document": {
+      "text": "FROM main | eval 'métrique'=size, n='métrique'",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "L02"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [
+        "quotedName"
+      ],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L02.incomplete"
+  },
+  {
+    "id": "L02-P2",
+    "obligation_ids": [
+      "L02-P2"
+    ],
+    "source_keys": [
+      "syntax"
+    ],
+    "document": {
+      "text": "FROM main | fields 'group', 'peer.addr'",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "L02"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [
+        "quotedName"
+      ],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L02.incomplete"
+  },
+  {
+    "id": "L02-N1",
+    "obligation_ids": [
+      "L02-N1"
+    ],
+    "source_keys": [
+      "syntax"
+    ],
+    "document": {
+      "text": "FROM main | eval 'métrique=size",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "L02"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L02.invalid"
+  },
+  {
+    "id": "L02-N2",
+    "obligation_ids": [
+      "L02-N2",
+      "E.L02.identifier.N2"
+    ],
+    "source_keys": [
+      "syntax"
+    ],
+    "document": {
+      "text": "FROM main | fields group",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "L02",
+      "E.L02.identifier"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L02.invalid"
+  },
+  {
+    "id": "L03-P1",
+    "obligation_ids": [
+      "L03-P1"
+    ],
+    "source_keys": [
+      "types"
+    ],
+    "document": {
+      "text": "FROM main | eval long_n=91L, fraction=2.5F, precise=4D",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "L03"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [
+        "assignment"
+      ],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L03.incomplete"
+  },
+  {
+    "id": "L03-P2",
+    "obligation_ids": [
+      "L03-P2"
+    ],
+    "source_keys": [
+      "types"
+    ],
+    "document": {
+      "text": "FROM main | eval path=@\"C:\\logs\", text=\"a\\\"b\"",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "L03"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [
+        "assignment"
+      ],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L03.incomplete"
+  },
+  {
+    "id": "L03-N2",
+    "obligation_ids": [
+      "L03-N2"
+    ],
+    "source_keys": [
+      "types"
+    ],
+    "document": {
+      "text": "FROM main | eval n=2.5e+",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "L03"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L03.invalid"
+  },
+  {
+    "id": "L04-P1",
+    "obligation_ids": [
+      "L04-P1"
+    ],
+    "source_keys": [
+      "comments"
+    ],
+    "document": {
+      "text": "FROM main /* pipeline | is inert */ | fields account",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "L04"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "kinds": {
+        "PIPE": 1
+      },
+      "shape_contains": [],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L04.incomplete"
+  },
+  {
+    "id": "L04-P2",
+    "obligation_ids": [
+      "L04-P2"
+    ],
+    "source_keys": [
+      "comments"
+    ],
+    "document": {
+      "text": "FROM main // ignored | text\n| eval note=\"/*literal*/\"",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "L04"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "kinds": {
+        "PIPE": 1
+      },
+      "shape_contains": [],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L04.incomplete"
+  },
+  {
+    "id": "L04-N1",
+    "obligation_ids": [
+      "L04-N1"
+    ],
+    "source_keys": [
+      "comments"
+    ],
+    "document": {
+      "text": "FROM main /* never closed",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "L04"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L04.invalid"
+  },
+  {
+    "id": "L04-N2",
+    "obligation_ids": [
+      "L04-N2"
+    ],
+    "source_keys": [
+      "comments"
+    ],
+    "document": {
+      "text": "search index=main /* blocked */ account=guest",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "L04"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L04.invalid"
+  },
+  {
+    "id": "L06-P1",
+    "obligation_ids": [
+      "L06-P1"
+    ],
+    "source_keys": [
+      "expressions"
+    ],
+    "document": {
+      "text": "FROM main | eval calc=-size+rate*2, label=account+\":\"+server",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "L06"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [
+        "additive"
+      ],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L06.incomplete"
+  },
+  {
+    "id": "L06-P2",
+    "obligation_ids": [
+      "L06-P2"
+    ],
+    "source_keys": [
+      "expressions"
+    ],
+    "document": {
+      "text": "FROM main | eval calc=(size+rate)/2, rest=size%3",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "L06"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [
+        "additive"
+      ],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L06.incomplete"
+  },
+  {
+    "id": "L06-N1",
+    "obligation_ids": [
+      "L06-N1"
+    ],
+    "source_keys": [
+      "expressions"
+    ],
+    "document": {
+      "text": "FROM main | eval calc=-size+",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "L06"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L06.invalid"
+  },
+  {
+    "id": "L06-N2",
+    "obligation_ids": [
+      "L06-N2"
+    ],
+    "source_keys": [
+      "expressions"
+    ],
+    "document": {
+      "text": "FROM main | eval calc=(size+rate/2",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "L06"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L06.invalid"
+  },
+  {
+    "id": "L07-P1",
+    "obligation_ids": [
+      "L07-P1"
+    ],
+    "source_keys": [
+      "predicate"
+    ],
+    "document": {
+      "text": "FROM main | where size NOT BETWEEN 2 AND 8",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "L07"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [
+        "predicate"
+      ],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L07.incomplete"
+  },
+  {
+    "id": "L07-P2",
+    "obligation_ids": [
+      "L07-P2"
+    ],
+    "source_keys": [
+      "predicate"
+    ],
+    "document": {
+      "text": "FROM main | where account IS NOT NULL AND server LIKE \"api%\"",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "L07"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [
+        "predicate"
+      ],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L07.incomplete"
+  },
+  {
+    "id": "L07-N1",
+    "obligation_ids": [
+      "L07-N1"
+    ],
+    "source_keys": [
+      "predicate"
+    ],
+    "document": {
+      "text": "FROM main | where size BETWEEN 2",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "L07"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L07.invalid"
+  },
+  {
+    "id": "L07-N2",
+    "obligation_ids": [
+      "L07-N2"
+    ],
+    "source_keys": [
+      "predicate"
+    ],
+    "document": {
+      "text": "FROM main | where account IS NOT",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "L07"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L07.invalid"
+  },
+  {
+    "id": "L08-P1",
+    "obligation_ids": [
+      "L08-P1"
+    ],
+    "source_keys": [
+      "objects"
+    ],
+    "document": {
+      "text": "FROM main | eval pair=[account,size], obj={owner:account,n:size}",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "L08"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [
+        "object"
+      ],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L08.incomplete"
+  },
+  {
+    "id": "L08-P2",
+    "obligation_ids": [
+      "L08-P2"
+    ],
+    "source_keys": [
+      "objects"
+    ],
+    "document": {
+      "text": "FROM main | eval obj={\"two words\":server,'dash-key':[1,2]}",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "L08"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [
+        "object"
+      ],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L08.incomplete"
+  },
+  {
+    "id": "L08-N1",
+    "obligation_ids": [
+      "L08-N1"
+    ],
+    "source_keys": [
+      "objects"
+    ],
+    "document": {
+      "text": "FROM main | eval obj={owner account}",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "L08"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L08.invalid"
+  },
+  {
+    "id": "L08-N2",
+    "obligation_ids": [
+      "L08-N2"
+    ],
+    "source_keys": [
+      "objects"
+    ],
+    "document": {
+      "text": "FROM main | eval pair=[account,,size]",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "L08"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L08.invalid"
+  },
+  {
+    "id": "L09-P1",
+    "obligation_ids": [
+      "L09-P1"
+    ],
+    "source_keys": [
+      "access"
+    ],
+    "document": {
+      "text": "FROM main | eval owner=actor.user.name",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "L09"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [
+        "accessPart"
+      ],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L09.incomplete"
+  },
+  {
+    "id": "L09-P2",
+    "obligation_ids": [
+      "L09-P2"
+    ],
+    "source_keys": [
+      "access"
+    ],
+    "document": {
+      "text": "FROM main | eval selected=items[position][\"name\"]",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "L09"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [
+        "accessPart"
+      ],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L09.incomplete"
+  },
+  {
+    "id": "L09-N1",
+    "obligation_ids": [
+      "L09-N1"
+    ],
+    "source_keys": [
+      "access"
+    ],
+    "document": {
+      "text": "FROM main | eval owner=actor.",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "L09"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L09.invalid"
+  },
+  {
+    "id": "L09-N2",
+    "obligation_ids": [
+      "L09-N2"
+    ],
+    "source_keys": [
+      "access"
+    ],
+    "document": {
+      "text": "FROM main | eval selected=items[]",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "L09"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L09.invalid"
+  },
+  {
+    "id": "L10-P1",
+    "obligation_ids": [
+      "L10-P1"
+    ],
+    "source_keys": [
+      "templates"
+    ],
+    "document": {
+      "text": "FROM main | eval message=\"owner ${account}, bytes ${size}\"",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "L10"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [
+        "INTERPOLATION"
+      ],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L10.incomplete"
+  },
+  {
+    "id": "L10-P2",
+    "obligation_ids": [
+      "L10-P2"
+    ],
+    "source_keys": [
+      "templates"
+    ],
+    "document": {
+      "text": "FROM main | eval '${category}'=amount",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "L10"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [
+        "INTERPOLATION"
+      ],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L10.incomplete"
+  },
+  {
+    "id": "L10-N1",
+    "obligation_ids": [
+      "L10-N1"
+    ],
+    "source_keys": [
+      "templates"
+    ],
+    "document": {
+      "text": "FROM main | eval message=\"owner ${}\"",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "L10"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L10.invalid"
+  },
+  {
+    "id": "L10-N2",
+    "obligation_ids": [
+      "L10-N2"
+    ],
+    "source_keys": [
+      "templates"
+    ],
+    "document": {
+      "text": "FROM main | eval '${category'=amount",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "L10"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L10.invalid"
+  },
+  {
+    "id": "L11-P1",
+    "obligation_ids": [
+      "L11-P1"
+    ],
+    "source_keys": [
+      "lambda"
+    ],
+    "document": {
+      "text": "FROM main | eval doubled=map(items,$v -> $v*2)",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "L11"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [
+        "lambdaExpression"
+      ],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L11.incomplete"
+  },
+  {
+    "id": "L11-P2",
+    "obligation_ids": [
+      "L11-P2"
+    ],
+    "source_keys": [
+      "lambda"
+    ],
+    "document": {
+      "text": "FROM main | eval total=reduce(items,0,($a,$v) -> {$next=$a+$v; return $next})",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "L11"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [
+        "lambdaExpression"
+      ],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L11.incomplete"
+  },
+  {
+    "id": "L11-N1",
+    "obligation_ids": [
+      "L11-N1"
+    ],
+    "source_keys": [
+      "lambda"
+    ],
+    "document": {
+      "text": "FROM main | eval doubled=map(items,$v $v*2)",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "L11"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L11.invalid"
+  },
+  {
+    "id": "L11-N2",
+    "obligation_ids": [
+      "L11-N2"
+    ],
+    "source_keys": [
+      "lambda"
+    ],
+    "document": {
+      "text": "FROM main | eval total=reduce(items,0,($a,$v) -> {$next=$a+$v})",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "L11"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L11.invalid"
+  },
+  {
+    "id": "E.L01.start.P1",
+    "obligation_ids": [
+      "E.L01.start.P1"
+    ],
+    "source_keys": [
+      "start"
+    ],
+    "document": {
+      "text": "index=app failure",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L01.start"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [],
+      "excerpts": [
+        {
+          "kind": "start",
+          "text": "index=app failure"
+        }
+      ],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L01.incomplete"
+  },
+  {
+    "id": "E.L01.start.P2",
+    "obligation_ids": [
+      "E.L01.start.P2"
+    ],
+    "source_keys": [
+      "start"
+    ],
+    "document": {
+      "text": "SELECT host FROM app",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L01.start"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [],
+      "excerpts": [
+        {
+          "kind": "start",
+          "text": "SELECT host FROM app"
+        }
+      ],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L01.incomplete"
+  },
+  {
+    "id": "E.L01.start.N1",
+    "obligation_ids": [
+      "E.L01.start.N1"
+    ],
+    "source_keys": [
+      "start"
+    ],
+    "document": {
+      "text": "failure index=app",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L01.start"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L01.invalid"
+  },
+  {
+    "id": "E.L01.start.N2",
+    "obligation_ids": [
+      "E.L01.start.N2"
+    ],
+    "source_keys": [
+      "start"
+    ],
+    "document": {
+      "text": "SELECT host",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L01.start"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L01.invalid"
+  },
+  {
+    "id": "E.L02.identifier.P1",
+    "obligation_ids": [
+      "E.L02.identifier.P1"
+    ],
+    "source_keys": [
+      "syntax"
+    ],
+    "document": {
+      "text": "FROM main | eval 'résumé'=user,'literal.path'='résumé'",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L02.identifier"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [
+        "quotedName"
+      ],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L02.incomplete"
+  },
+  {
+    "id": "E.L02.identifier.P2",
+    "obligation_ids": [
+      "E.L02.identifier.P2"
+    ],
+    "source_keys": [
+      "syntax"
+    ],
+    "document": {
+      "text": "FROM main | fields 'group','user-id'",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L02.identifier"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [
+        "quotedName"
+      ],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L02.incomplete"
+  },
+  {
+    "id": "E.L02.identifier.N1",
+    "obligation_ids": [
+      "E.L02.identifier.N1"
+    ],
+    "source_keys": [
+      "syntax"
+    ],
+    "document": {
+      "text": "FROM main | eval 'résumé=user",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L02.identifier"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L02.invalid"
+  },
+  {
+    "id": "E.L03.number.P1",
+    "obligation_ids": [
+      "E.L03.number.P1"
+    ],
+    "source_keys": [
+      "types"
+    ],
+    "document": {
+      "text": "FROM main | eval a=42L,b=1.25F,c=8D",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L03.number"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [
+        "assignment"
+      ],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L03.incomplete"
+  },
+  {
+    "id": "E.L03.number.P2",
+    "obligation_ids": [
+      "E.L03.number.P2"
+    ],
+    "source_keys": [
+      "types"
+    ],
+    "document": {
+      "text": "FROM main | eval x=2.5e-3,y=-4E2F",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L03.number"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [
+        "assignment"
+      ],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L03.incomplete"
+  },
+  {
+    "id": "E.L03.number.N1",
+    "obligation_ids": [
+      "E.L03.number.N1"
+    ],
+    "source_keys": [
+      "types"
+    ],
+    "document": {
+      "text": "FROM main | eval x=2.5e-",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L03.number"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L03.invalid"
+  },
+  {
+    "id": "E.L03.number.N2",
+    "obligation_ids": [
+      "E.L03.number.N2"
+    ],
+    "source_keys": [
+      "types"
+    ],
+    "document": {
+      "text": "FROM main | eval x=4+",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L03.number"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L03.invalid"
+  },
+  {
+    "id": "E.L03.raw.P1",
+    "obligation_ids": [
+      "E.L03.raw.P1"
+    ],
+    "source_keys": [
+      "expressions"
+    ],
+    "document": {
+      "text": "FROM main | eval path=@\"C:\\data\\logs\"",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L03.raw"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "kinds": {
+        "RAW_STRING": 1
+      },
+      "shape_contains": [],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L03.incomplete"
+  },
+  {
+    "id": "E.L03.raw.P2",
+    "obligation_ids": [
+      "E.L03.raw.P2"
+    ],
+    "source_keys": [
+      "expressions"
+    ],
+    "document": {
+      "text": "FROM main | eval quote=@\"She said \"\"yes\"\"\"",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L03.raw"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "kinds": {
+        "RAW_STRING": 1
+      },
+      "shape_contains": [],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L03.incomplete"
+  },
+  {
+    "id": "E.L03.raw.N1",
+    "obligation_ids": [
+      "E.L03.raw.N1"
+    ],
+    "source_keys": [
+      "expressions"
+    ],
+    "document": {
+      "text": "FROM main | eval path=@\"C:\\data\\logs",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L03.raw"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L03.invalid"
+  },
+  {
+    "id": "E.L03.raw.N2",
+    "obligation_ids": [
+      "E.L03.raw.N2"
+    ],
+    "source_keys": [
+      "expressions"
+    ],
+    "document": {
+      "text": "FROM main | eval quote=@\"She said \"\"yes\"\"",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L03.raw"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L03.invalid"
+  },
+  {
+    "id": "E.L03.null_boolean.P1",
+    "obligation_ids": [
+      "E.L03.null_boolean.P1"
+    ],
+    "source_keys": [
+      "types"
+    ],
+    "document": {
+      "text": "FROM main | eval enabled=true,retired=null",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L03.null_boolean"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "kinds": {
+        "BOOLEAN": 1
+      },
+      "shape_contains": [],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L03.incomplete"
+  },
+  {
+    "id": "E.L03.null_boolean.P2",
+    "obligation_ids": [
+      "E.L03.null_boolean.P2"
+    ],
+    "source_keys": [
+      "types"
+    ],
+    "document": {
+      "text": "FROM main | eval enabled=false,copy=enabled",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L03.null_boolean"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "kinds": {
+        "BOOLEAN": 1
+      },
+      "shape_contains": [],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L03.incomplete"
+  },
+  {
+    "id": "E.L04.comments.P1",
+    "obligation_ids": [
+      "E.L04.comments.P1"
+    ],
+    "source_keys": [
+      "comments"
+    ],
+    "document": {
+      "text": "FROM main /* | inert */ | eval note=\"//text\"",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L04.comments"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "kinds": {
+        "PIPE": 1
+      },
+      "shape_contains": [],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L04.incomplete"
+  },
+  {
+    "id": "E.L04.comments.P2",
+    "obligation_ids": [
+      "E.L04.comments.P2"
+    ],
+    "source_keys": [
+      "comments"
+    ],
+    "document": {
+      "text": "FROM main // | inert\n| fields host",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L04.comments"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "kinds": {
+        "PIPE": 1
+      },
+      "shape_contains": [],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L04.incomplete"
+  },
+  {
+    "id": "E.L04.comments.N1",
+    "obligation_ids": [
+      "E.L04.comments.N1"
+    ],
+    "source_keys": [
+      "comments"
+    ],
+    "document": {
+      "text": "FROM main /* open",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L04.comments"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L04.invalid"
+  },
+  {
+    "id": "E.L04.comments.N2",
+    "obligation_ids": [
+      "E.L04.comments.N2"
+    ],
+    "source_keys": [
+      "comments"
+    ],
+    "document": {
+      "text": "search index=main /* disallowed */ host=api",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L04.comments"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L04.invalid"
+  },
+  {
+    "id": "E.L06.precedence.P1",
+    "obligation_ids": [
+      "E.L06.precedence.P1"
+    ],
+    "source_keys": [
+      "expressions"
+    ],
+    "document": {
+      "text": "FROM main | eval x=-(a+b)*c%2",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L06.precedence"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [
+        "additive"
+      ],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L06.incomplete"
+  },
+  {
+    "id": "E.L06.precedence.P2",
+    "obligation_ids": [
+      "E.L06.precedence.P2"
+    ],
+    "source_keys": [
+      "expressions"
+    ],
+    "document": {
+      "text": "FROM main | eval x=a/b-c, label=user+\":\"+host",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L06.precedence"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [
+        "additive"
+      ],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L06.incomplete"
+  },
+  {
+    "id": "E.L06.precedence.N1",
+    "obligation_ids": [
+      "E.L06.precedence.N1"
+    ],
+    "source_keys": [
+      "expressions"
+    ],
+    "document": {
+      "text": "FROM main | eval x=-(a+b)*",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L06.precedence"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L06.invalid"
+  },
+  {
+    "id": "E.L06.precedence.N2",
+    "obligation_ids": [
+      "E.L06.precedence.N2"
+    ],
+    "source_keys": [
+      "expressions"
+    ],
+    "document": {
+      "text": "FROM main | eval label=user+",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L06.precedence"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L06.invalid"
+  },
+  {
+    "id": "E.L07.between.P1",
+    "obligation_ids": [
+      "E.L07.between.P1"
+    ],
+    "source_keys": [
+      "predicate"
+    ],
+    "document": {
+      "text": "FROM main | where amount BETWEEN 0 AND 5",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L07.between"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [
+        "predicate"
+      ],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L07.incomplete"
+  },
+  {
+    "id": "E.L07.between.P2",
+    "obligation_ids": [
+      "E.L07.between.P2"
+    ],
+    "source_keys": [
+      "predicate"
+    ],
+    "document": {
+      "text": "FROM main | where amount NOT BETWEEN -2 AND 0",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L07.between"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [
+        "predicate"
+      ],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L07.incomplete"
+  },
+  {
+    "id": "E.L07.between.N1",
+    "obligation_ids": [
+      "E.L07.between.N1"
+    ],
+    "source_keys": [
+      "predicate"
+    ],
+    "document": {
+      "text": "FROM main | where amount BETWEEN 0",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L07.between"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L07.invalid"
+  },
+  {
+    "id": "E.L07.between.N2",
+    "obligation_ids": [
+      "E.L07.between.N2"
+    ],
+    "source_keys": [
+      "predicate"
+    ],
+    "document": {
+      "text": "FROM main | where amount NOT BETWEEN AND 0",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L07.between"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L07.invalid"
+  },
+  {
+    "id": "E.L07.in.P1",
+    "obligation_ids": [
+      "E.L07.in.P1"
+    ],
+    "source_keys": [
+      "predicate"
+    ],
+    "document": {
+      "text": "FROM main | where code IN (200,201)",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L07.in"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [
+        "predicate"
+      ],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L07.incomplete"
+  },
+  {
+    "id": "E.L07.in.P2",
+    "obligation_ids": [
+      "E.L07.in.P2"
+    ],
+    "source_keys": [
+      "predicate"
+    ],
+    "document": {
+      "text": "FROM main | where region NOT IN (primary,backup)",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L07.in"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [
+        "predicate"
+      ],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L07.incomplete"
+  },
+  {
+    "id": "E.L07.in.N1",
+    "obligation_ids": [
+      "E.L07.in.N1"
+    ],
+    "source_keys": [
+      "predicate"
+    ],
+    "document": {
+      "text": "FROM main | where code IN (200 201)",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L07.in"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L07.invalid"
+  },
+  {
+    "id": "E.L07.in.N2",
+    "obligation_ids": [
+      "E.L07.in.N2"
+    ],
+    "source_keys": [
+      "predicate"
+    ],
+    "document": {
+      "text": "FROM main | where region NOT IN (primary,)",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L07.in"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L07.invalid"
+  },
+  {
+    "id": "E.L07.like.P1",
+    "obligation_ids": [
+      "E.L07.like.P1"
+    ],
+    "source_keys": [
+      "predicate"
+    ],
+    "document": {
+      "text": "FROM main | where user LIKE \"admin%\"",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L07.like"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [
+        "predicate"
+      ],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L07.incomplete"
+  },
+  {
+    "id": "E.L07.like.P2",
+    "obligation_ids": [
+      "E.L07.like.P2"
+    ],
+    "source_keys": [
+      "predicate"
+    ],
+    "document": {
+      "text": "FROM main | where user NOT LIKE \"svc_\"",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L07.like"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [
+        "predicate"
+      ],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L07.incomplete"
+  },
+  {
+    "id": "E.L07.like.N1",
+    "obligation_ids": [
+      "E.L07.like.N1"
+    ],
+    "source_keys": [
+      "predicate"
+    ],
+    "document": {
+      "text": "FROM main | where user LIKE",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L07.like"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L07.invalid"
+  },
+  {
+    "id": "E.L07.like.N2",
+    "obligation_ids": [
+      "E.L07.like.N2"
+    ],
+    "source_keys": [
+      "predicate"
+    ],
+    "document": {
+      "text": "FROM main | where user NOT LIKE",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L07.like"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L07.invalid"
+  },
+  {
+    "id": "E.L07.is_null.P1",
+    "obligation_ids": [
+      "E.L07.is_null.P1"
+    ],
+    "source_keys": [
+      "predicate"
+    ],
+    "document": {
+      "text": "FROM main | where user IS NULL",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L07.is_null"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [
+        "predicate"
+      ],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L07.incomplete"
+  },
+  {
+    "id": "E.L07.is_null.P2",
+    "obligation_ids": [
+      "E.L07.is_null.P2"
+    ],
+    "source_keys": [
+      "predicate"
+    ],
+    "document": {
+      "text": "FROM main | where user IS NOT NULL",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L07.is_null"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [
+        "predicate"
+      ],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L07.incomplete"
+  },
+  {
+    "id": "E.L07.is_null.N1",
+    "obligation_ids": [
+      "E.L07.is_null.N1"
+    ],
+    "source_keys": [
+      "predicate"
+    ],
+    "document": {
+      "text": "FROM main | where user IS NOT",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L07.is_null"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L07.invalid"
+  },
+  {
+    "id": "E.L07.is_null.N2",
+    "obligation_ids": [
+      "E.L07.is_null.N2"
+    ],
+    "source_keys": [
+      "predicate"
+    ],
+    "document": {
+      "text": "FROM main | where IS NULL",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L07.is_null"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L07.invalid"
+  },
+  {
+    "id": "E.L07.is_type.P1",
+    "obligation_ids": [
+      "E.L07.is_type.P1"
+    ],
+    "source_keys": [
+      "predicate"
+    ],
+    "document": {
+      "text": "FROM main | where amount IS int",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L07.is_type"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [
+        "predicate"
+      ],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L07.incomplete"
+  },
+  {
+    "id": "E.L07.is_type.P2",
+    "obligation_ids": [
+      "E.L07.is_type.P2"
+    ],
+    "source_keys": [
+      "predicate"
+    ],
+    "document": {
+      "text": "FROM main | where NOT (user IS string)",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L07.is_type"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [
+        "predicate"
+      ],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L07.incomplete"
+  },
+  {
+    "id": "E.L07.is_type.N1",
+    "obligation_ids": [
+      "E.L07.is_type.N1"
+    ],
+    "source_keys": [
+      "predicate"
+    ],
+    "document": {
+      "text": "FROM main | where amount IS",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L07.is_type"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L07.invalid"
+  },
+  {
+    "id": "E.L07.is_type.N2",
+    "obligation_ids": [
+      "E.L07.is_type.N2"
+    ],
+    "source_keys": [
+      "predicate"
+    ],
+    "document": {
+      "text": "FROM main | where NOT (user IS)",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L07.is_type"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L07.invalid"
+  },
+  {
+    "id": "E.L08.array.P1",
+    "obligation_ids": [
+      "E.L08.array.P1"
+    ],
+    "source_keys": [
+      "objects"
+    ],
+    "document": {
+      "text": "FROM main | eval pair=[host,1]",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L08.array"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [
+        "array"
+      ],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L08.incomplete"
+  },
+  {
+    "id": "E.L08.array.P2",
+    "obligation_ids": [
+      "E.L08.array.P2"
+    ],
+    "source_keys": [
+      "objects"
+    ],
+    "document": {
+      "text": "FROM main | eval nested=[[1,2],bytes+1]",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L08.array"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [
+        "array"
+      ],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L08.incomplete"
+  },
+  {
+    "id": "E.L08.array.N1",
+    "obligation_ids": [
+      "E.L08.array.N1"
+    ],
+    "source_keys": [
+      "objects"
+    ],
+    "document": {
+      "text": "FROM main | eval pair=[host,,1]",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L08.array"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L08.invalid"
+  },
+  {
+    "id": "E.L08.array.N2",
+    "obligation_ids": [
+      "E.L08.array.N2"
+    ],
+    "source_keys": [
+      "objects"
+    ],
+    "document": {
+      "text": "FROM main | eval nested=[[1,2],bytes+1",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L08.array"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L08.invalid"
+  },
+  {
+    "id": "E.L08.object_keys.P1",
+    "obligation_ids": [
+      "E.L08.object_keys.P1"
+    ],
+    "source_keys": [
+      "objects"
+    ],
+    "document": {
+      "text": "FROM main | eval obj={owner:user,bytes:bytes,}",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L08.object_keys"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [
+        "object"
+      ],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L08.incomplete"
+  },
+  {
+    "id": "E.L08.object_keys.P2",
+    "obligation_ids": [
+      "E.L08.object_keys.P2"
+    ],
+    "source_keys": [
+      "objects"
+    ],
+    "document": {
+      "text": "FROM main | eval obj={'display name':user,\"role-name\":role}",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L08.object_keys"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [
+        "object"
+      ],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L08.incomplete"
+  },
+  {
+    "id": "E.L08.object_keys.N1",
+    "obligation_ids": [
+      "E.L08.object_keys.N1"
+    ],
+    "source_keys": [
+      "objects"
+    ],
+    "document": {
+      "text": "FROM main | eval obj={owner user}",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L08.object_keys"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L08.invalid"
+  },
+  {
+    "id": "E.L08.object_keys.N2",
+    "obligation_ids": [
+      "E.L08.object_keys.N2"
+    ],
+    "source_keys": [
+      "objects"
+    ],
+    "document": {
+      "text": "FROM main | eval obj={'display name':user,\"display name\":role}",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L08.object_keys"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L08.invalid"
+  },
+  {
+    "id": "E.L08.duplicate_keys.P1",
+    "obligation_ids": [
+      "E.L08.duplicate_keys.P1"
+    ],
+    "source_keys": [
+      "objects"
+    ],
+    "document": {
+      "text": "FROM main | eval obj={a:1,b:2}",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L08.duplicate_keys"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [
+        "object"
+      ],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L08.incomplete"
+  },
+  {
+    "id": "E.L08.duplicate_keys.P2",
+    "obligation_ids": [
+      "E.L08.duplicate_keys.P2"
+    ],
+    "source_keys": [
+      "objects"
+    ],
+    "document": {
+      "text": "FROM main | eval obj={name:user,'other-name':host}",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L08.duplicate_keys"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [
+        "object"
+      ],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L08.incomplete"
+  },
+  {
+    "id": "E.L08.duplicate_keys.N1",
+    "obligation_ids": [
+      "E.L08.duplicate_keys.N1"
+    ],
+    "source_keys": [
+      "objects"
+    ],
+    "document": {
+      "text": "FROM main | eval obj={a:1,a:2}",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L08.duplicate_keys"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L08.invalid"
+  },
+  {
+    "id": "E.L08.duplicate_keys.N2",
+    "obligation_ids": [
+      "E.L08.duplicate_keys.N2"
+    ],
+    "source_keys": [
+      "objects"
+    ],
+    "document": {
+      "text": "FROM main | eval obj={name:user,\"name\":host}",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L08.duplicate_keys"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L08.invalid"
+  },
+  {
+    "id": "E.L09.dot.P1",
+    "obligation_ids": [
+      "E.L09.dot.P1"
+    ],
+    "source_keys": [
+      "access"
+    ],
+    "document": {
+      "text": "FROM main | eval name=actor.user.name",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L09.dot"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [
+        "accessPart"
+      ],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L09.incomplete"
+  },
+  {
+    "id": "E.L09.dot.P2",
+    "obligation_ids": [
+      "E.L09.dot.P2"
+    ],
+    "source_keys": [
+      "access"
+    ],
+    "document": {
+      "text": "FROM main | eval name=actor.'group'.owner",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L09.dot"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [
+        "accessPart"
+      ],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L09.incomplete"
+  },
+  {
+    "id": "E.L09.dot.N1",
+    "obligation_ids": [
+      "E.L09.dot.N1"
+    ],
+    "source_keys": [
+      "access"
+    ],
+    "document": {
+      "text": "FROM main | eval name=actor.",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L09.dot"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L09.invalid"
+  },
+  {
+    "id": "E.L09.dot.N2",
+    "obligation_ids": [
+      "E.L09.dot.N2"
+    ],
+    "source_keys": [
+      "access"
+    ],
+    "document": {
+      "text": "FROM main | eval name=actor.'group",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L09.dot"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L09.invalid"
+  },
+  {
+    "id": "E.L09.bracket.P1",
+    "obligation_ids": [
+      "E.L09.bracket.P1"
+    ],
+    "source_keys": [
+      "access"
+    ],
+    "document": {
+      "text": "FROM main | eval x=rows[0][\"name\"]",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L09.bracket"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [
+        "accessPart"
+      ],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L09.incomplete"
+  },
+  {
+    "id": "E.L09.bracket.P2",
+    "obligation_ids": [
+      "E.L09.bracket.P2"
+    ],
+    "source_keys": [
+      "access"
+    ],
+    "document": {
+      "text": "FROM main | eval x=rows[position+1].value",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L09.bracket"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [
+        "accessPart"
+      ],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L09.incomplete"
+  },
+  {
+    "id": "E.L09.bracket.N1",
+    "obligation_ids": [
+      "E.L09.bracket.N1"
+    ],
+    "source_keys": [
+      "access"
+    ],
+    "document": {
+      "text": "FROM main | eval x=rows[]",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L09.bracket"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L09.invalid"
+  },
+  {
+    "id": "E.L09.bracket.N2",
+    "obligation_ids": [
+      "E.L09.bracket.N2"
+    ],
+    "source_keys": [
+      "access"
+    ],
+    "document": {
+      "text": "FROM main | eval x=rows[position+1",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L09.bracket"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L09.invalid"
+  },
+  {
+    "id": "E.L10.string_template.P1",
+    "obligation_ids": [
+      "E.L10.string_template.P1"
+    ],
+    "source_keys": [
+      "templates"
+    ],
+    "document": {
+      "text": "FROM main | eval label=\"host=${host}; size=${bytes}\"",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L10.string_template"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [
+        "INTERPOLATION"
+      ],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L10.incomplete"
+  },
+  {
+    "id": "E.L10.string_template.P2",
+    "obligation_ids": [
+      "E.L10.string_template.P2"
+    ],
+    "source_keys": [
+      "templates"
+    ],
+    "document": {
+      "text": "FROM main | eval label=\"delta=${abs(high-low)}\"",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L10.string_template"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [
+        "INTERPOLATION"
+      ],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L10.incomplete"
+  },
+  {
+    "id": "E.L10.string_template.N1",
+    "obligation_ids": [
+      "E.L10.string_template.N1"
+    ],
+    "source_keys": [
+      "templates"
+    ],
+    "document": {
+      "text": "FROM main | eval label=\"host=${}\"",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L10.string_template"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L10.invalid"
+  },
+  {
+    "id": "E.L10.string_template.N2",
+    "obligation_ids": [
+      "E.L10.string_template.N2"
+    ],
+    "source_keys": [
+      "templates"
+    ],
+    "document": {
+      "text": "FROM main | eval label=\"host=${host\"",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L10.string_template"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L10.invalid"
+  },
+  {
+    "id": "E.L10.field_template.P1",
+    "obligation_ids": [
+      "E.L10.field_template.P1"
+    ],
+    "source_keys": [
+      "fieldtemplates"
+    ],
+    "document": {
+      "text": "FROM main | eval '${kind}'=value",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L10.field_template"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [
+        "INTERPOLATION"
+      ],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L10.incomplete"
+  },
+  {
+    "id": "E.L10.field_template.P2",
+    "obligation_ids": [
+      "E.L10.field_template.P2"
+    ],
+    "source_keys": [
+      "fieldtemplates"
+    ],
+    "document": {
+      "text": "FROM main | eval '${'résumé'}-value'=bytes",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L10.field_template"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [
+        "INTERPOLATION"
+      ],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L10.incomplete"
+  },
+  {
+    "id": "E.L10.field_template.N1",
+    "obligation_ids": [
+      "E.L10.field_template.N1"
+    ],
+    "source_keys": [
+      "fieldtemplates"
+    ],
+    "document": {
+      "text": "FROM main | eval '${}'=value",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L10.field_template"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L10.invalid"
+  },
+  {
+    "id": "E.L10.field_template.N2",
+    "obligation_ids": [
+      "E.L10.field_template.N2"
+    ],
+    "source_keys": [
+      "fieldtemplates"
+    ],
+    "document": {
+      "text": "FROM main | eval '${kind'=value",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L10.field_template"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L10.invalid"
+  },
+  {
+    "id": "E.L11.one_param.P1",
+    "obligation_ids": [
+      "E.L11.one_param.P1"
+    ],
+    "source_keys": [
+      "lambda"
+    ],
+    "document": {
+      "text": "FROM main | eval result=map(items,$x -> $x+1)",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L11.one_param"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [
+        "lambdaExpression"
+      ],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L11.incomplete"
+  },
+  {
+    "id": "E.L11.one_param.P2",
+    "obligation_ids": [
+      "E.L11.one_param.P2"
+    ],
+    "source_keys": [
+      "lambda"
+    ],
+    "document": {
+      "text": "FROM main | eval result=map(items,($x) -> $x+factor)",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L11.one_param"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [
+        "lambdaExpression"
+      ],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L11.incomplete"
+  },
+  {
+    "id": "E.L11.one_param.N1",
+    "obligation_ids": [
+      "E.L11.one_param.N1"
+    ],
+    "source_keys": [
+      "lambda"
+    ],
+    "document": {
+      "text": "FROM main | eval result=map(items,$x $x+1)",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L11.one_param"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L11.invalid"
+  },
+  {
+    "id": "E.L11.one_param.N2",
+    "obligation_ids": [
+      "E.L11.one_param.N2"
+    ],
+    "source_keys": [
+      "lambda"
+    ],
+    "document": {
+      "text": "FROM main | eval result=map(items,($x) ->)",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L11.one_param"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L11.invalid"
+  },
+  {
+    "id": "E.L11.zero_multi.P1",
+    "obligation_ids": [
+      "E.L11.zero_multi.P1"
+    ],
+    "source_keys": [
+      "lambda"
+    ],
+    "document": {
+      "text": "FROM main | eval result=map(items,() -> 1)",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L11.zero_multi"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [
+        "lambdaExpression"
+      ],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L11.incomplete"
+  },
+  {
+    "id": "E.L11.zero_multi.P2",
+    "obligation_ids": [
+      "E.L11.zero_multi.P2"
+    ],
+    "source_keys": [
+      "lambda"
+    ],
+    "document": {
+      "text": "FROM main | eval result=reduce(items,0,($a,$b) -> $a+$b)",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L11.zero_multi"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [
+        "lambdaExpression"
+      ],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L11.incomplete"
+  },
+  {
+    "id": "E.L11.zero_multi.N1",
+    "obligation_ids": [
+      "E.L11.zero_multi.N1"
+    ],
+    "source_keys": [
+      "lambda"
+    ],
+    "document": {
+      "text": "FROM main | eval result=map(items,-> 1)",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L11.zero_multi"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L11.invalid"
+  },
+  {
+    "id": "E.L11.zero_multi.N2",
+    "obligation_ids": [
+      "E.L11.zero_multi.N2"
+    ],
+    "source_keys": [
+      "lambda"
+    ],
+    "document": {
+      "text": "FROM main | eval result=reduce(items,0,($a $b) -> $a+$b)",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L11.zero_multi"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L11.invalid"
+  },
+  {
+    "id": "E.L11.typed_default.P1",
+    "obligation_ids": [
+      "E.L11.typed_default.P1"
+    ],
+    "source_keys": [
+      "lambda"
+    ],
+    "document": {
+      "text": "FROM main | eval result=map(items,($x:int=2) -> $x+1)",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L11.typed_default"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [
+        "lambdaExpression"
+      ],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L11.incomplete"
+  },
+  {
+    "id": "E.L11.typed_default.P2",
+    "obligation_ids": [
+      "E.L11.typed_default.P2"
+    ],
+    "source_keys": [
+      "lambda"
+    ],
+    "document": {
+      "text": "FROM main | eval result=map(items,($x:string=\"none\") -> $x)",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L11.typed_default"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [
+        "lambdaExpression"
+      ],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L11.incomplete"
+  },
+  {
+    "id": "E.L11.typed_default.N1",
+    "obligation_ids": [
+      "E.L11.typed_default.N1"
+    ],
+    "source_keys": [
+      "lambda"
+    ],
+    "document": {
+      "text": "FROM main | eval result=map(items,($x int=2) -> $x)",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L11.typed_default"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L11.invalid"
+  },
+  {
+    "id": "E.L11.typed_default.N2",
+    "obligation_ids": [
+      "E.L11.typed_default.N2"
+    ],
+    "source_keys": [
+      "lambda"
+    ],
+    "document": {
+      "text": "FROM main | eval result=map(items,($x:int=fallback) -> $x)",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L11.typed_default"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L11.invalid"
+  },
+  {
+    "id": "E.L11.block.P1",
+    "obligation_ids": [
+      "E.L11.block.P1"
+    ],
+    "source_keys": [
+      "lambda"
+    ],
+    "document": {
+      "text": "FROM main | eval result=map(items,$x -> {$y=$x*2; return $y})",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L11.block"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [
+        "lambdaExpression"
+      ],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L11.incomplete"
+  },
+  {
+    "id": "E.L11.block.P2",
+    "obligation_ids": [
+      "E.L11.block.P2"
+    ],
+    "source_keys": [
+      "lambda"
+    ],
+    "document": {
+      "text": "FROM main | eval result=map(items,$x -> {\n$y=$x+1\nreturn $y\n})",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L11.block"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [
+        "lambdaExpression"
+      ],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L11.incomplete"
+  },
+  {
+    "id": "E.L11.block.N1",
+    "obligation_ids": [
+      "E.L11.block.N1"
+    ],
+    "source_keys": [
+      "lambda"
+    ],
+    "document": {
+      "text": "FROM main | eval result=map(items,$x -> {$y=$x*2})",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L11.block"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L11.invalid"
+  },
+  {
+    "id": "E.L11.block.N2",
+    "obligation_ids": [
+      "E.L11.block.N2"
+    ],
+    "source_keys": [
+      "lambda"
+    ],
+    "document": {
+      "text": "FROM main | eval result=map(items,$x -> {return $x; $y=2})",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L11.block"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L11.invalid"
+  },
+  {
+    "id": "E.L11.shortcut.P1",
+    "obligation_ids": [
+      "E.L11.shortcut.P1"
+    ],
+    "source_keys": [
+      "lambda"
+    ],
+    "document": {
+      "text": "FROM main | eval result=map(items,$it+2)",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L11.shortcut"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [
+        "LOCAL:"
+      ],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L11.incomplete"
+  },
+  {
+    "id": "E.L11.shortcut.P2",
+    "obligation_ids": [
+      "E.L11.shortcut.P2"
+    ],
+    "source_keys": [
+      "lambda"
+    ],
+    "document": {
+      "text": "FROM main | eval result=filter(items,$it.amount>0)",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L11.shortcut"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [
+        "LOCAL:"
+      ],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L11.incomplete"
+  },
+  {
+    "id": "E.L11.shortcut.N1",
+    "obligation_ids": [
+      "E.L11.shortcut.N1"
+    ],
+    "source_keys": [
+      "lambda"
+    ],
+    "document": {
+      "text": "FROM main | eval result=map(items,$it+)",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L11.shortcut"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L11.invalid"
+  },
+  {
+    "id": "E.L11.shortcut.N2",
+    "obligation_ids": [
+      "E.L11.shortcut.N2"
+    ],
+    "source_keys": [
+      "lambda"
+    ],
+    "document": {
+      "text": "FROM main | eval result=filter(items,$it.amount>)",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L11.shortcut"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L11.invalid"
+  },
+  {
+    "id": "E.L06.named_arguments.P1",
+    "obligation_ids": [
+      "E.L06.named_arguments.P1"
+    ],
+    "source_keys": [
+      "namingargs",
+      "evalcompat",
+      "aggcompat",
+      "statsintro",
+      "scalarstats"
+    ],
+    "document": {
+      "text": "FROM main | eval x=round(precision:2,num:bytes)",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L06.named_arguments"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [
+        "namedArgument"
+      ],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L06.incomplete"
+  },
+  {
+    "id": "E.L06.named_arguments.P2",
+    "obligation_ids": [
+      "E.L06.named_arguments.P2"
+    ],
+    "source_keys": [
+      "namingargs",
+      "evalcompat",
+      "aggcompat",
+      "statsintro",
+      "scalarstats"
+    ],
+    "document": {
+      "text": "FROM main | eval x=coalesce(values:[primary,backup])",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L06.named_arguments"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [
+        "namedArgument"
+      ],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L06.incomplete"
+  },
+  {
+    "id": "E.L06.named_arguments.N1",
+    "obligation_ids": [
+      "E.L06.named_arguments.N1"
+    ],
+    "source_keys": [
+      "namingargs",
+      "evalcompat",
+      "aggcompat",
+      "statsintro",
+      "scalarstats"
+    ],
+    "document": {
+      "text": "FROM main | eval x=round(num:bytes,2)",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L06.named_arguments"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L06.invalid"
+  },
+  {
+    "id": "E.L06.named_arguments.N2",
+    "obligation_ids": [
+      "E.L06.named_arguments.N2"
+    ],
+    "source_keys": [
+      "namingargs",
+      "evalcompat",
+      "aggcompat",
+      "statsintro",
+      "scalarstats"
+    ],
+    "document": {
+      "text": "FROM main | eval x=coalesce(values:primary,backup)",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L06.named_arguments"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L06.invalid"
+  },
+  {
+    "id": "I.named.P1",
+    "obligation_ids": [
+      "I.named.P1"
+    ],
+    "source_keys": [
+      "namingargs"
+    ],
+    "document": {
+      "text": "FROM main | eval result=round(bytes,precision:2)",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "I.named"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [
+        "namedArgument"
+      ],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L06.incomplete"
+  },
+  {
+    "id": "I.named.P2",
+    "obligation_ids": [
+      "I.named.P2"
+    ],
+    "source_keys": [
+      "namingargs"
+    ],
+    "document": {
+      "text": "FROM main | eval result=if(false_value:0,predicate:code=200,true_value:1)",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "I.named"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [
+        "namedArgument"
+      ],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L06.incomplete"
+  },
+  {
+    "id": "I.named.N1",
+    "obligation_ids": [
+      "I.named.N1"
+    ],
+    "source_keys": [
+      "namingargs"
+    ],
+    "document": {
+      "text": "FROM main | eval result=round(precision:2,bytes)",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "I.named"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L06.invalid"
+  },
+  {
+    "id": "I.named.N2",
+    "obligation_ids": [
+      "I.named.N2"
+    ],
+    "source_keys": [
+      "namingargs"
+    ],
+    "document": {
+      "text": "FROM main | eval result=coalesce(values:a,b)",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "I.named"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L06.invalid"
+  },
+  {
+    "id": "I.object.P1",
+    "obligation_ids": [
+      "I.object.P1"
+    ],
+    "source_keys": [
+      "objects"
+    ],
+    "document": {
+      "text": "FROM main | eval record={a:1,nested:{a:2}}",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "I.object"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [
+        "object"
+      ],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L08.incomplete"
+  },
+  {
+    "id": "I.object.P2",
+    "obligation_ids": [
+      "I.object.P2"
+    ],
+    "source_keys": [
+      "objects"
+    ],
+    "document": {
+      "text": "FROM main | eval record={a:user,b:host}",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "I.object"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [
+        "object"
+      ],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L08.incomplete"
+  },
+  {
+    "id": "I.object.N1",
+    "obligation_ids": [
+      "I.object.N1"
+    ],
+    "source_keys": [
+      "objects"
+    ],
+    "document": {
+      "text": "FROM main | eval record={a:1,a:2}",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "I.object"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L08.invalid"
+  },
+  {
+    "id": "I.object.N2",
+    "obligation_ids": [
+      "I.object.N2"
+    ],
+    "source_keys": [
+      "objects"
+    ],
+    "document": {
+      "text": "FROM main | eval record={name:user,\"name\":host}",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "I.object"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "kinds": {},
+      "shape_contains": [],
+      "excerpts": [],
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "meaningful_id": "L08.invalid"
+  }
+]

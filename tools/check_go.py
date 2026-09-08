@@ -61,7 +61,10 @@ def main() -> int:
     generated_package_names = {
         f"{module}/{name}" for name in GENERATED_DIRECTORIES | {"docs"}
     }
-    generated_packages = [name for name in packages if name in generated_package_names]
+    generated_packages = [
+        name for name in packages
+        if any(name == prefix or name.startswith(prefix + "/") for prefix in generated_package_names)
+    ]
     handwritten_packages = [name for name in packages if name not in generated_packages]
 
     if generated_packages:

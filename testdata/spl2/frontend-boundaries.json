@@ -1,0 +1,442 @@
+[
+  {
+    "id": "T2.division.chain",
+    "meaningful_id": "T2.division.chain",
+    "obligation_ids": [
+      "T2.division.chain"
+    ],
+    "source_keys": [
+      "expressions"
+    ],
+    "document": {
+      "text": "FROM main | eval x=a/b/c",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "L06"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "SLASH": 2,
+        "REGEX": 0
+      },
+      "shape_contains": [
+        "(multiplicative IDENTIFIER:\"a\" SLASH:\"/\" IDENTIFIER:\"b\" SLASH:\"/\" IDENTIFIER:\"c\")"
+      ],
+      "excerpts": []
+    }
+  },
+  {
+    "id": "T2.precedence.expression",
+    "meaningful_id": "T2.precedence.expression",
+    "obligation_ids": [
+      "T2.precedence.expression"
+    ],
+    "source_keys": [
+      "predicate"
+    ],
+    "document": {
+      "text": "FROM main | where a=1 OR b=2 AND c=3",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "L06"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {},
+      "shape_contains": [
+        "(orExpression (predicate IDENTIFIER:\"a\" ASSIGN:\"=\" NUMBER:\"1\") OR:\"OR\" (andExpression (predicate IDENTIFIER:\"b\" ASSIGN:\"=\" NUMBER:\"2\") AND:\"AND\" (predicate IDENTIFIER:\"c\" ASSIGN:\"=\" NUMBER:\"3\")))"
+      ],
+      "excerpts": []
+    }
+  },
+  {
+    "id": "T2.precedence.search",
+    "meaningful_id": "T2.precedence.search",
+    "obligation_ids": [
+      "T2.precedence.search"
+    ],
+    "source_keys": [
+      "doc163"
+    ],
+    "document": {
+      "text": "search a=1 OR b=2 AND c=3",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "L05"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {},
+      "shape_contains": [
+        "(searchAnd (searchOr (searchAtom IDENTIFIER:\"a\" ASSIGN:\"=\" NUMBER:\"1\") OR:\"OR\" (searchAtom IDENTIFIER:\"b\" ASSIGN:\"=\" NUMBER:\"2\")) AND:\"AND\" (searchAtom IDENTIFIER:\"c\" ASSIGN:\"=\" NUMBER:\"3\"))"
+      ],
+      "excerpts": []
+    }
+  },
+  {
+    "id": "T2.calls.positional_comparison",
+    "meaningful_id": "T2.calls.positional_comparison",
+    "obligation_ids": [
+      "T2.calls.positional_comparison"
+    ],
+    "source_keys": [
+      "namingargs"
+    ],
+    "document": {
+      "text": "FROM main | eval x=if(code=200,1,0)",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "L06"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "namedArgument": 0,
+        "call": 1,
+        "comparison": 1
+      },
+      "shape_contains": [],
+      "excerpts": []
+    }
+  },
+  {
+    "id": "T2.template.nested_ownership",
+    "meaningful_id": "T2.template.nested_ownership",
+    "obligation_ids": [
+      "T2.template.nested_ownership"
+    ],
+    "source_keys": [
+      "templates"
+    ],
+    "document": {
+      "text": "FROM main | eval x=\"${if(a=\"|\",{key:[b,2]},0)}\"",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "L10"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "PIPE": 1,
+        "objectEntry": 1,
+        "array": 1,
+        "STRING_INTERPOLATION": 1
+      },
+      "shape_contains": [],
+      "excerpts": [
+        {
+          "kind": "STRING_TEXT",
+          "text": "|"
+        }
+      ]
+    }
+  },
+  {
+    "id": "T2.string.dollar",
+    "meaningful_id": "T2.string.dollar",
+    "obligation_ids": [
+      "T2.string.dollar"
+    ],
+    "source_keys": [
+      "expressions"
+    ],
+    "document": {
+      "text": "FROM main | eval x=\"$\", y=@\"${literal}\"",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "L03"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "STRING_DOLLAR": 1,
+        "RAW_STRING": 1,
+        "STRING_INTERPOLATION": 0
+      },
+      "shape_contains": [],
+      "excerpts": []
+    }
+  },
+  {
+    "id": "T2.search_literal.expression",
+    "meaningful_id": "T2.search_literal.expression",
+    "obligation_ids": [
+      "T2.search_literal.expression"
+    ],
+    "source_keys": [
+      "searchliterals"
+    ],
+    "document": {
+      "text": "FROM main | eval x=if(`status=4*`,1,0)",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "L24"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "searchLiteral": 1,
+        "embeddedCommand": 0
+      },
+      "shape_contains": [],
+      "excerpts": []
+    }
+  },
+  {
+    "id": "T2.regex.character_class",
+    "meaningful_id": "T2.regex.character_class",
+    "obligation_ids": [
+      "T2.regex.character_class"
+    ],
+    "source_keys": [
+      "doc161"
+    ],
+    "document": {
+      "text": "FROM main | rex field=payload /(?<digits>[0-9]+)/ | eval x=a/b/c",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "L23"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "REGEX": 1,
+        "SLASH": 2,
+        "PIPE": 2
+      },
+      "shape_contains": [],
+      "excerpts": []
+    }
+  },
+  {
+    "id": "T2.regex.quoted_alternation",
+    "meaningful_id": "T2.regex.quoted_alternation",
+    "obligation_ids": [
+      "T2.regex.quoted_alternation"
+    ],
+    "source_keys": [
+      "doc161"
+    ],
+    "document": {
+      "text": "FROM main | rex field=payload \"(?<tag>red|blue)\"",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "L23"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "REGEX": 0,
+        "stringLiteral": 1,
+        "PIPE": 1
+      },
+      "shape_contains": [],
+      "excerpts": []
+    }
+  },
+  {
+    "id": "T2.comments.trailing",
+    "meaningful_id": "T2.comments.trailing",
+    "obligation_ids": [
+      "T2.comments.trailing"
+    ],
+    "source_keys": [
+      "comments"
+    ],
+    "document": {
+      "text": "search index=main /* forbidden */ | eval x=2",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "L04"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "PIPE": 1
+      },
+      "shape_contains": [],
+      "excerpts": []
+    }
+  },
+  {
+    "id": "T2.object.decoded_duplicate",
+    "meaningful_id": "T2.object.decoded_duplicate",
+    "obligation_ids": [
+      "T2.object.decoded_duplicate"
+    ],
+    "source_keys": [
+      "objects"
+    ],
+    "document": {
+      "text": "FROM main | eval x={'a':1,\"\\u0061\":2}",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "L08"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "objectEntry": 2
+      },
+      "shape_contains": [],
+      "excerpts": []
+    }
+  },
+  {
+    "id": "T2.source.unicode_crlf",
+    "meaningful_id": "T2.source.unicode_crlf",
+    "obligation_ids": [
+      "T2.source.unicode_crlf"
+    ],
+    "source_keys": [
+      "syntax"
+    ],
+    "document": {
+      "text": "FROM main // | ignored\r\n| eval 'résumé'='café'",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "L02"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "kinds": {
+        "quotedName": 2,
+        "PIPE": 1
+      },
+      "shape_contains": [],
+      "excerpts": [
+        {
+          "kind": "quotedName",
+          "text": "'résumé'"
+        },
+        {
+          "kind": "quotedName",
+          "text": "'café'"
+        }
+      ]
+    }
+  }
+]
