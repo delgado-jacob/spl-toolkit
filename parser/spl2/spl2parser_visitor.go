@@ -204,6 +204,9 @@ type SPL2ParserVisitor interface {
 	// Visit a parse tree produced by SPL2Parser#unknownOption.
 	VisitUnknownOption(ctx *UnknownOptionContext) interface{}
 
+	// Visit a parse tree produced by SPL2Parser#unknownOptionName.
+	VisitUnknownOptionName(ctx *UnknownOptionNameContext) interface{}
+
 	// Visit a parse tree produced by SPL2Parser#rexCommand.
 	VisitRexCommand(ctx *RexCommandContext) interface{}
 
@@ -248,6 +251,12 @@ type SPL2ParserVisitor interface {
 
 	// Visit a parse tree produced by SPL2Parser#searchValue.
 	VisitSearchValue(ctx *SearchValueContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#searchWordLiteral.
+	VisitSearchWordLiteral(ctx *SearchWordLiteralContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#searchSignedNumber.
+	VisitSearchSignedNumber(ctx *SearchSignedNumberContext) interface{}
 
 	// Visit a parse tree produced by SPL2Parser#searchBareValue.
 	VisitSearchBareValue(ctx *SearchBareValueContext) interface{}

@@ -62,10 +62,16 @@ func (p *spl2ParsedDocument) inspectSyntax(tree antlr.Tree, lambdaDepth int) {
 	case *spl2.RenameCommandContext:
 		p.inspectRename(ctx)
 	case *spl2.TableFieldContext:
-		if strings.Contains(ctx.GetText(), "*") {
-			p.heldSyntax(ctx, "H01 table wildcard quoting remains held")
-		} else if ctx.StringLiteral() != nil {
-			p.syntaxFinding(ctx, CodeSyntaxError, "contract", "Exact table fields require identifiers")
+		if spl2IntactSyntax(ctx) {
+			if literal := ctx.StringLiteral(); literal != nil && len(literal.AllSTRING_INTERPOLATION()) > 0 {
+				p.heldSyntax(ctx, "Interpolated table field remains unproved")
+			} else if name, ok := spl2DecodeKey(ctx.GetText()); !ok {
+				p.heldSyntax(ctx, "Unproved quoted table field")
+			} else if strings.Contains(name, "*") {
+				p.heldSyntax(ctx, "H01 table wildcard quoting remains held")
+			} else if ctx.StringLiteral() != nil {
+				p.syntaxFinding(ctx, CodeSyntaxError, "contract", "Exact table fields require identifiers")
+			}
 		}
 	case *spl2.GroupFieldContext:
 		if span := ctx.GroupSpan(); span != nil {
@@ -73,8 +79,12 @@ func (p *spl2ParsedDocument) inspectSyntax(tree antlr.Tree, lambdaDepth int) {
 				p.heldSyntax(span, "Grouping span in streamstats remains unproved")
 			}
 		}
-		if name := ctx.Identifier(); name != nil && strings.Contains(name.GetText(), "*") {
-			p.syntaxFinding(name, CodeSyntaxError, "contract", "Grouping fields cannot contain wildcards")
+		if name := ctx.Identifier(); name != nil && spl2IntactSyntax(name) {
+			if decoded, ok := spl2DecodeKey(name.GetText()); !ok {
+				p.heldSyntax(name, "Unproved quoted grouping field")
+			} else if strings.Contains(decoded, "*") {
+				p.syntaxFinding(name, CodeSyntaxError, "contract", "Grouping fields cannot contain wildcards")
+			}
 		}
 	case *spl2.StreamPostLayoutContext:
 		p.heldSyntax(ctx, "H02 postaggregate streamstats layout remains held")
@@ -83,6 +93,10 @@ func (p *spl2ParsedDocument) inspectSyntax(tree antlr.Tree, lambdaDepth int) {
 	case *spl2.SearchTimeModifierContext:
 		if op := ctx.Comparison(); op != nil && op.GetText() != "=" && op.GetText() != "!=" {
 			p.heldSyntax(ctx, "EH03 time modifier comparison remains held")
+		}
+	case *spl2.SearchSignedNumberContext:
+		if spl2IntactSyntax(ctx) {
+			p.heldSyntax(ctx, "Unquoted signed search number remains unproved")
 		}
 	case *spl2.SearchAtomContext:
 		if name := ctx.Identifier(); name != nil && ctx.Comparison() != nil {
@@ -275,10 +289,10 @@ func (p *spl2ParsedDocument) inspectInteger(ctx antlr.ParserRuleContext, positiv
 }
 
 func (p *spl2ParsedDocument) inspectUnknownOption(ctx *spl2.UnknownOptionContext) {
-	if ctx.IDENTIFIER() == nil {
+	if ctx.UnknownOptionName() == nil {
 		return
 	}
-	name := ctx.IDENTIFIER().GetText()
+	name := ctx.UnknownOptionName().GetText()
 	removed, profile := false, false
 	for parent := ctx.GetParent(); parent != nil; parent = parent.GetParent() {
 		switch parent.(type) {

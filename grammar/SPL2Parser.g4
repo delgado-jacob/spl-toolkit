@@ -12,6 +12,24 @@ var _ = strings.EqualFold
 func (p *SPL2Parser) contextualKeyword(word string) bool {
     return strings.EqualFold(p.GetTokenStream().LT(1).GetText(), word)
 }
+// Supported options must use their owning command's strict production. Tokens
+// documented for other commands remain typed, unproved options here.
+func (p *SPL2Parser) unreviewedOption(command int) bool {
+    token := p.GetTokenStream().LA(1)
+    switch command {
+    case SPL2ParserSTATS:
+        return token != SPL2ParserALLNUM && token != SPL2ParserDELIM && token != SPL2ParserPARTITIONS
+    case SPL2ParserEVENTSTATS:
+        return token != SPL2ParserALLNUM
+    case SPL2ParserSTREAMSTATS:
+        return token != SPL2ParserCURRENT && token != SPL2ParserRESET && token != SPL2ParserWINDOW
+    case SPL2ParserDEDUP:
+        return token != SPL2ParserKEEPEMPTY && token != SPL2ParserCONSECUTIVE
+    case SPL2ParserHEAD:
+        return token != SPL2ParserKEEPLAST && token != SPL2ParserWHILE
+    }
+    return true
+}
 }
 
 query: NL* (pipeline moduleSuffix? | moduleDeclaration) NL* EOF;
@@ -40,7 +58,7 @@ renameSource: identifier;
 renameTarget: identifier;
 aliasKeyword: AS | AS_LOWER;
 statsCommand: STATS statsOption* aggregate (COMMA aggregate)* aggregateGroup?;
-statsOption: allnumOption | delimOption | partitionsOption | unknownOption;
+statsOption: allnumOption | delimOption | partitionsOption | {p.unreviewedOption(SPL2ParserSTATS)}? unknownOption;
 allnumOption: ALLNUM ASSIGN BOOLEAN;
 delimOption: DELIM ASSIGN stringLiteral;
 partitionsOption: PARTITIONS ASSIGN (PLUS | MINUS)? NUMBER;
@@ -50,8 +68,8 @@ aggregateGroup: BY groupField (COMMA groupField)*;
 groupField: identifier groupSpan?;
 groupSpan: SPAN ASSIGN timeSpan;
 timeSpan: NUMBER? IDENTIFIER;
-eventstatsCommand: EVENTSTATS (allnumOption | unknownOption)* aggregate (COMMA aggregate)* aggregateGroup?;
-streamstatsCommand: STREAMSTATS unknownOption* streamGroup? currentOption? resetClause? windowOption? aggregate (COMMA aggregate)* streamPostLayout?;
+eventstatsCommand: EVENTSTATS (allnumOption | {p.unreviewedOption(SPL2ParserEVENTSTATS)}? unknownOption)* aggregate (COMMA aggregate)* aggregateGroup?;
+streamstatsCommand: STREAMSTATS ({p.unreviewedOption(SPL2ParserSTREAMSTATS)}? unknownOption)* streamGroup? currentOption? resetClause? windowOption? aggregate (COMMA aggregate)* streamPostLayout?;
 streamGroup: BY groupField (COMMA groupField)*;
 currentOption: CURRENT ASSIGN BOOLEAN;
 windowOption: WINDOW ASSIGN NUMBER;
@@ -61,29 +79,30 @@ resetAfter: AFTER expression;
 resetOnchange: ONCHANGE;
 // The documented contradictory layouts have explicit ownership and remain held.
 streamPostLayout: streamGroup resetClause? | resetClause;
-lookupCommand: LOOKUP unknownOption* lookupDataset lookupMatch (COMMA lookupMatch)* lookupOutputClause?;
+lookupCommand: LOOKUP ({p.unreviewedOption(SPL2ParserLOOKUP)}? unknownOption)* lookupDataset lookupMatch (COMMA lookupMatch)* lookupOutputClause?;
 lookupDataset: identifier;
 lookupMatch: lookupColumn (aliasKeyword lookupEventField)?;
 lookupOutputClause: (OUTPUT | OUTPUTNEW) lookupOutput (COMMA lookupOutput)*;
 lookupOutput: lookupColumn (aliasKeyword lookupEventField)?;
 lookupColumn: identifier;
 lookupEventField: identifier;
-sortCommand: SORT unknownOption* integerValue? sortTerm (COMMA sortTerm)*;
+sortCommand: SORT ({p.unreviewedOption(SPL2ParserSORT)}? unknownOption)* integerValue? sortTerm (COMMA sortTerm)*;
 sortTerm: (PLUS | MINUS)? (sortWrapper LPAREN identifier RPAREN | identifier);
 sortWrapper: AUTO | IP | NUM | STR;
 integerValue: (PLUS | MINUS)? NUMBER;
-dedupCommand: DEDUP unknownOption* integerValue? keepemptyOption? consecutiveOption? dedupField (COMMA dedupField)*;
+dedupCommand: DEDUP ({p.unreviewedOption(SPL2ParserDEDUP)}? unknownOption)* integerValue? keepemptyOption? consecutiveOption? dedupField (COMMA dedupField)*;
 keepemptyOption: KEEPEMPTY ASSIGN BOOLEAN;
 consecutiveOption: CONSECUTIVE ASSIGN BOOLEAN;
 dedupField: identifier;
-headCommand: HEAD unknownOption* (keeplastOption? headWhile? integerValue? | headPostLayout);
+headCommand: HEAD ({p.unreviewedOption(SPL2ParserHEAD)}? unknownOption)* (keeplastOption? headWhile? integerValue? | headPostLayout);
 keeplastOption: KEEPLAST ASSIGN BOOLEAN;
 headWhile: WHILE LPAREN expression RPAREN;
 headPostLayout: integerValue keeplastOption? headWhile;
 reverseCommand: REVERSE;
 // Unknown option literals are retained as bounded typed nodes, never an opaque
-// command body. Known option tokens cannot fall through this alternative.
-unknownOption: IDENTIFIER ASSIGN (literal | identifier);
+// command body. Known options of this command cannot fall through here.
+unknownOption: unknownOptionName ASSIGN (literal | identifier);
+unknownOptionName: IDENTIFIER | INDEX | pipelineKeyword;
 rexCommand: REX rexOption* (REGEX | stringLiteral | RAW_STRING);
 rexOption: IDENTIFIER ASSIGN (identifier | NUMBER);
 embeddedCommand: SPL1? embeddedText;
@@ -100,7 +119,11 @@ searchAnd: searchOr (AND? searchOr)*;
 searchOr: searchNot (OR searchNot)*;
 searchNot: NOT searchNot | searchAtom;
 searchAtom: LPAREN searchExpression RPAREN | searchTimeModifier | identifier comparison searchValue | identifier IN LPAREN searchValue (COMMA searchValue)* RPAREN | searchValue;
-searchValue: searchDirective | searchBareValue | stringLiteral | RAW_STRING;
+searchValue: searchDirective | searchBareValue | searchWordLiteral | searchSignedNumber | stringLiteral | RAW_STRING;
+// Boolean spellings here are literal search words, not expression evaluation.
+searchWordLiteral: BOOLEAN;
+// Signed values have narrow literal ownership and remain explicitly unproved.
+searchSignedNumber: (PLUS | MINUS) NUMBER;
 searchBareValue: (identifier | NUMBER) ((DOT | MINUS | SLASH | COLON) (identifier | NUMBER) | STAR)* | STAR;
 searchDirective: (TERM | CASE) LPAREN searchBareValue RPAREN;
 searchTimeModifier: timeModifierKey comparison timeModifierValue | TIMEFORMAT ASSIGN stringLiteral;

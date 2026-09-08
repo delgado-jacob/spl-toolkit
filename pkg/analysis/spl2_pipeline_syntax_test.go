@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/antlr4-go/antlr/v4"
@@ -224,5 +225,62 @@ func TestSPL2PipelineRecoveryContracts(t *testing.T) {
 				t.Fatalf("%s: recovered operand produced derivative contract finding: %+v", id, diagnostic)
 			}
 		}
+	}
+}
+
+func TestSPL2PipelineDynamicTableRemainsUnproved(t *testing.T) {
+	p := spl2PipelineFixture(t, "T3.fix1.dynamic.star")
+	if p.syntaxComplete {
+		t.Fatal("dynamic table value became a static field")
+	}
+	for _, d := range p.diagnostics {
+		if strings.HasPrefix(d.Message, "H01") {
+			t.Fatal("interpolated expression classified as a static wildcard")
+		}
+	}
+}
+
+func TestSPL2PipelineSearchLiteralOwnership(t *testing.T) {
+	for _, c := range []struct {
+		id, value string
+		signed    bool
+	}{
+		{"T3.fix1.search.true", "true", false}, {"T3.fix1.search.false", "false", false},
+		{"T3.fix1.search.minus", "-1", true}, {"T3.fix1.search.plus", "+1", true},
+	} {
+		p := spl2PipelineFixture(t, c.id)
+		atoms := p.tree.Pipeline().Start_().SearchCommand().SearchExpression().SearchXor().SearchAnd(0).AllSearchOr()
+		value := atoms[1].SearchNot(0).SearchAtom().SearchValue(0)
+		if c.signed {
+			spl2PipelineText(t, p, value.SearchSignedNumber(), c.value)
+			if p.syntaxComplete || len(p.diagnostics) != 1 {
+				t.Fatal("signed search literal lost its limitation")
+			}
+		} else {
+			spl2PipelineText(t, p, value.SearchWordLiteral(), c.value)
+			if !p.syntaxComplete || len(p.diagnostics) != 0 {
+				t.Fatal("literal word classified as unproved")
+			}
+		}
+		if len(spl2Nodes(p.syntax, "expression")) != 0 || len(spl2Nodes(p.syntax, "access")) != 0 || p.semanticComplete {
+			t.Fatal("search literal became an evaluated field expression")
+		}
+	}
+}
+
+func TestSPL2PipelineForeignKeywordOptionOwnership(t *testing.T) {
+	p := spl2PipelineFixture(t, "T3.fix1.foreign.stats")
+	option := p.tree.Pipeline().Command(0).StatsCommand().StatsOption(0).UnknownOption()
+	spl2PipelineText(t, p, option.UnknownOptionName(), "window")
+	spl2PipelineText(t, p, option.Literal(), "3")
+	if option.UnknownOptionName().GetStart().GetTokenType() != spl2.SPL2ParserWINDOW || p.syntaxComplete {
+		t.Fatal("foreign keyword lost its typed, unproved ownership")
+	}
+	p = spl2PipelineFixture(t, "T3.fix1.foreign.eventstats")
+	option = p.tree.Pipeline().Command(0).EventstatsCommand().UnknownOption(0)
+	spl2PipelineText(t, p, option.UnknownOptionName(), "delim")
+	spl2PipelineText(t, p, option.Literal().StringLiteral(), `";"`)
+	if p.syntaxComplete {
+		t.Fatal("foreign option acquired complete coverage")
 	}
 }

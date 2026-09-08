@@ -263,6 +263,10 @@ func (v *BaseSPL2ParserVisitor) VisitUnknownOption(ctx *UnknownOptionContext) in
 	return v.VisitChildren(ctx)
 }
 
+func (v *BaseSPL2ParserVisitor) VisitUnknownOptionName(ctx *UnknownOptionNameContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
 func (v *BaseSPL2ParserVisitor) VisitRexCommand(ctx *RexCommandContext) interface{} {
 	return v.VisitChildren(ctx)
 }
@@ -320,6 +324,14 @@ func (v *BaseSPL2ParserVisitor) VisitSearchAtom(ctx *SearchAtomContext) interfac
 }
 
 func (v *BaseSPL2ParserVisitor) VisitSearchValue(ctx *SearchValueContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitSearchWordLiteral(ctx *SearchWordLiteralContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitSearchSignedNumber(ctx *SearchSignedNumberContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 

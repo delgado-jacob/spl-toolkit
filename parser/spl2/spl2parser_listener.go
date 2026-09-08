@@ -199,6 +199,9 @@ type SPL2ParserListener interface {
 	// EnterUnknownOption is called when entering the unknownOption production.
 	EnterUnknownOption(c *UnknownOptionContext)
 
+	// EnterUnknownOptionName is called when entering the unknownOptionName production.
+	EnterUnknownOptionName(c *UnknownOptionNameContext)
+
 	// EnterRexCommand is called when entering the rexCommand production.
 	EnterRexCommand(c *RexCommandContext)
 
@@ -243,6 +246,12 @@ type SPL2ParserListener interface {
 
 	// EnterSearchValue is called when entering the searchValue production.
 	EnterSearchValue(c *SearchValueContext)
+
+	// EnterSearchWordLiteral is called when entering the searchWordLiteral production.
+	EnterSearchWordLiteral(c *SearchWordLiteralContext)
+
+	// EnterSearchSignedNumber is called when entering the searchSignedNumber production.
+	EnterSearchSignedNumber(c *SearchSignedNumberContext)
 
 	// EnterSearchBareValue is called when entering the searchBareValue production.
 	EnterSearchBareValue(c *SearchBareValueContext)
@@ -565,6 +574,9 @@ type SPL2ParserListener interface {
 	// ExitUnknownOption is called when exiting the unknownOption production.
 	ExitUnknownOption(c *UnknownOptionContext)
 
+	// ExitUnknownOptionName is called when exiting the unknownOptionName production.
+	ExitUnknownOptionName(c *UnknownOptionNameContext)
+
 	// ExitRexCommand is called when exiting the rexCommand production.
 	ExitRexCommand(c *RexCommandContext)
 
@@ -609,6 +621,12 @@ type SPL2ParserListener interface {
 
 	// ExitSearchValue is called when exiting the searchValue production.
 	ExitSearchValue(c *SearchValueContext)
+
+	// ExitSearchWordLiteral is called when exiting the searchWordLiteral production.
+	ExitSearchWordLiteral(c *SearchWordLiteralContext)
+
+	// ExitSearchSignedNumber is called when exiting the searchSignedNumber production.
+	ExitSearchSignedNumber(c *SearchSignedNumberContext)
 
 	// ExitSearchBareValue is called when exiting the searchBareValue production.
 	ExitSearchBareValue(c *SearchBareValueContext)

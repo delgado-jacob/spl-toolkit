@@ -404,6 +404,12 @@ func (s *BaseSPL2ParserListener) EnterUnknownOption(ctx *UnknownOptionContext) {
 // ExitUnknownOption is called when production unknownOption is exited.
 func (s *BaseSPL2ParserListener) ExitUnknownOption(ctx *UnknownOptionContext) {}
 
+// EnterUnknownOptionName is called when production unknownOptionName is entered.
+func (s *BaseSPL2ParserListener) EnterUnknownOptionName(ctx *UnknownOptionNameContext) {}
+
+// ExitUnknownOptionName is called when production unknownOptionName is exited.
+func (s *BaseSPL2ParserListener) ExitUnknownOptionName(ctx *UnknownOptionNameContext) {}
+
 // EnterRexCommand is called when production rexCommand is entered.
 func (s *BaseSPL2ParserListener) EnterRexCommand(ctx *RexCommandContext) {}
 
@@ -493,6 +499,18 @@ func (s *BaseSPL2ParserListener) EnterSearchValue(ctx *SearchValueContext) {}
 
 // ExitSearchValue is called when production searchValue is exited.
 func (s *BaseSPL2ParserListener) ExitSearchValue(ctx *SearchValueContext) {}
+
+// EnterSearchWordLiteral is called when production searchWordLiteral is entered.
+func (s *BaseSPL2ParserListener) EnterSearchWordLiteral(ctx *SearchWordLiteralContext) {}
+
+// ExitSearchWordLiteral is called when production searchWordLiteral is exited.
+func (s *BaseSPL2ParserListener) ExitSearchWordLiteral(ctx *SearchWordLiteralContext) {}
+
+// EnterSearchSignedNumber is called when production searchSignedNumber is entered.
+func (s *BaseSPL2ParserListener) EnterSearchSignedNumber(ctx *SearchSignedNumberContext) {}
+
+// ExitSearchSignedNumber is called when production searchSignedNumber is exited.
+func (s *BaseSPL2ParserListener) ExitSearchSignedNumber(ctx *SearchSignedNumberContext) {}
 
 // EnterSearchBareValue is called when production searchBareValue is entered.
 func (s *BaseSPL2ParserListener) EnterSearchBareValue(ctx *SearchBareValueContext) {}

@@ -17963,6 +17963,354 @@
       "disposition": "active",
       "assembly": "standalone",
       "case_id": "T3.recovery.contract.2"
+    },
+    {
+      "id": "T3.fix1.foreign.stats",
+      "form_id": "C08",
+      "candidate": "FROM main | stats window=3 count()",
+      "source_keys": [
+        "doc167"
+      ],
+      "evidence": "task3-review-regression",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.fix1.foreign.stats"
+    },
+    {
+      "id": "T3.fix1.foreign.eventstats",
+      "form_id": "C09",
+      "candidate": "FROM main | eventstats delim=\";\" count()",
+      "source_keys": [
+        "doc137"
+      ],
+      "evidence": "task3-review-regression",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.fix1.foreign.eventstats"
+    },
+    {
+      "id": "T3.fix1.foreign.streamstats",
+      "form_id": "C10",
+      "candidate": "FROM main | streamstats delim=\";\" count()",
+      "source_keys": [
+        "doc168"
+      ],
+      "evidence": "task3-review-regression",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.fix1.foreign.streamstats"
+    },
+    {
+      "id": "T3.fix1.foreign.sort",
+      "form_id": "C12",
+      "candidate": "FROM main | sort window=3 host",
+      "source_keys": [
+        "doc164"
+      ],
+      "evidence": "task3-review-regression",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.fix1.foreign.sort"
+    },
+    {
+      "id": "T3.fix1.foreign.dedup",
+      "form_id": "C13",
+      "candidate": "FROM main | dedup window=3 host",
+      "source_keys": [
+        "doc135"
+      ],
+      "evidence": "task3-review-regression",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.fix1.foreign.dedup"
+    },
+    {
+      "id": "T3.fix1.foreign.head",
+      "form_id": "C14",
+      "candidate": "FROM main | head allnum=true 4",
+      "source_keys": [
+        "doc144"
+      ],
+      "evidence": "task3-review-regression",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.fix1.foreign.head"
+    },
+    {
+      "id": "T3.fix1.foreign.lookup",
+      "form_id": "C11",
+      "candidate": "FROM main | lookup keepempty=true users uid OUTPUT name",
+      "source_keys": [
+        "doc150"
+      ],
+      "evidence": "task3-review-regression",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.fix1.foreign.lookup"
+    },
+    {
+      "id": "T3.fix1.known.stats",
+      "form_id": "C08",
+      "candidate": "FROM main | stats delim=1 count()",
+      "source_keys": [
+        "doc167"
+      ],
+      "evidence": "task3-review-regression",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.fix1.known.stats"
+    },
+    {
+      "id": "T3.fix1.known.stream",
+      "form_id": "C10",
+      "candidate": "FROM main | streamstats window=3 current=false count()",
+      "source_keys": [
+        "doc168"
+      ],
+      "evidence": "task3-review-regression",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.fix1.known.stream"
+    },
+    {
+      "id": "T3.fix1.wildcard.stats",
+      "form_id": "C08",
+      "candidate": "FROM main | stats count() BY 'host\\u002a'",
+      "source_keys": [
+        "doc167"
+      ],
+      "evidence": "task3-review-regression",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.fix1.wildcard.stats"
+    },
+    {
+      "id": "T3.fix1.wildcard.eventstats",
+      "form_id": "C09",
+      "candidate": "FROM main | eventstats count() BY 'host\\u002a'",
+      "source_keys": [
+        "doc137"
+      ],
+      "evidence": "task3-review-regression",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.fix1.wildcard.eventstats"
+    },
+    {
+      "id": "T3.fix1.wildcard.table0",
+      "form_id": "C06",
+      "candidate": "FROM main | table 'host\\u002a'",
+      "source_keys": [
+        "doc169"
+      ],
+      "evidence": "task3-review-regression",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.fix1.wildcard.table0"
+    },
+    {
+      "id": "T3.fix1.wildcard.table1",
+      "form_id": "C06",
+      "candidate": "FROM main | table \"host\\u002a\"",
+      "source_keys": [
+        "doc169"
+      ],
+      "evidence": "task3-review-regression",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.fix1.wildcard.table1"
+    },
+    {
+      "id": "T3.fix1.dynamic.table",
+      "form_id": "C06",
+      "candidate": "FROM main | table \"host${suffix}\"",
+      "source_keys": [
+        "doc169"
+      ],
+      "evidence": "task3-review-regression",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.fix1.dynamic.table"
+    },
+    {
+      "id": "T3.fix1.dynamic.star",
+      "form_id": "C06",
+      "candidate": "FROM main | table \"${if(flag,\"*\",\"host\")}\"",
+      "source_keys": [
+        "doc169"
+      ],
+      "evidence": "task3-review-regression",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.fix1.dynamic.star"
+    },
+    {
+      "id": "T3.fix1.search.true",
+      "form_id": "C01",
+      "candidate": "search index=app flag=true",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "root-2026-09-08-search-literal-ruling-signed-incomplete",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.fix1.search.true"
+    },
+    {
+      "id": "T3.fix1.search.false",
+      "form_id": "C01",
+      "candidate": "search index=app flag=false",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "root-2026-09-08-search-literal-ruling-signed-incomplete",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.fix1.search.false"
+    },
+    {
+      "id": "T3.fix1.search.words",
+      "form_id": "C01",
+      "candidate": "search index=app true false",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "root-2026-09-08-search-literal-ruling-signed-incomplete",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.fix1.search.words"
+    },
+    {
+      "id": "T3.fix1.search.list",
+      "form_id": "C01",
+      "candidate": "search index=app flag IN (true,false)",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "root-2026-09-08-search-literal-ruling-signed-incomplete",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.fix1.search.list"
+    },
+    {
+      "id": "T3.fix1.search.minus",
+      "form_id": "C01",
+      "candidate": "search index=app code=-1",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "root-2026-09-08-search-literal-ruling-signed-incomplete",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.fix1.search.minus"
+    },
+    {
+      "id": "T3.fix1.search.plus",
+      "form_id": "C01",
+      "candidate": "search index=app code=+1",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "root-2026-09-08-search-literal-ruling-signed-incomplete",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.fix1.search.plus"
+    },
+    {
+      "id": "T3.fix1.search.fraction",
+      "form_id": "C01",
+      "candidate": "search index=app rate=-2.5",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "root-2026-09-08-search-literal-ruling-signed-incomplete",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.fix1.search.fraction"
+    },
+    {
+      "id": "T3.fix1.search.quotedminus",
+      "form_id": "C01",
+      "candidate": "search index=app code=\"-1\"",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "root-2026-09-08-search-literal-ruling-signed-incomplete",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.fix1.search.quotedminus"
+    },
+    {
+      "id": "T3.fix1.search.quotedplus",
+      "form_id": "C01",
+      "candidate": "search index=app code=\"+1\"",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "root-2026-09-08-search-literal-ruling-signed-incomplete",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.fix1.search.quotedplus"
+    },
+    {
+      "id": "T3.fix1.search.fieldminus",
+      "form_id": "C01",
+      "candidate": "search index=app code=-bytes",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "root-2026-09-08-search-literal-ruling-signed-incomplete",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.fix1.search.fieldminus"
+    },
+    {
+      "id": "T3.fix1.search.fieldplus",
+      "form_id": "C01",
+      "candidate": "search index=app code=+bytes",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "root-2026-09-08-search-literal-ruling-signed-incomplete",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.fix1.search.fieldplus"
+    },
+    {
+      "id": "T3.fix1.search.expression",
+      "form_id": "C01",
+      "candidate": "search index=app code=-(1+2)",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "root-2026-09-08-search-literal-ruling-signed-incomplete",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.fix1.search.expression"
+    },
+    {
+      "id": "T3.fix1.search.arithmetic",
+      "form_id": "C01",
+      "candidate": "search index=app code=-1+rate",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "root-2026-09-08-search-literal-ruling-signed-incomplete",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.fix1.search.arithmetic"
+    },
+    {
+      "id": "T3.fix1.search.incomplete",
+      "form_id": "C01",
+      "candidate": "search index=app code=-",
+      "source_keys": [
+        "doc163"
+      ],
+      "evidence": "root-2026-09-08-search-literal-ruling-signed-incomplete",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T3.fix1.search.incomplete"
     }
   ],
   "holds": [
