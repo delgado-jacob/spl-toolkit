@@ -391,3 +391,19 @@ func TestJSONSchemaLiteralInterpretationEvidence(t *testing.T) {
 	}
 	wg.Wait()
 }
+func TestJSONSchemaConditionalLiteralDiscoveryActivity(t *testing.T) {
+	for _, schema := range []string{`{}`, `{"if":{"properties":{"a.b":true}}}`, `{"then":{"properties":{"a.b":true}}}`, `{"else":{"properties":{"a.b":true}}}`, `{"then":{"properties":{"a.b":true}},"else":{"properties":{"a.b":true}}}`} {
+		p := preparedJSON(t, schema)
+		got := p.project("a.b")
+		if got.Admission != analysis.SourceFieldAdmitted || got.Outcome != "permitted_unspecified" {
+			t.Errorf("inactive conditional %s: %+v", schema, got)
+		}
+	}
+	for _, schema := range []string{`{"if":{"properties":{"a.b":true}},"then":true}`, `{"if":{"properties":{"a.b":true}},"else":true}`} {
+		p := preparedJSON(t, schema)
+		got := p.project("a.b")
+		if got.Admission != analysis.SourceFieldIndeterminate || !slices.ContainsFunc(got.Evidence, func(e SchemaEvidence) bool { return e.Reason == "conditional_schema" }) {
+			t.Errorf("active conditional %s: %+v", schema, got)
+		}
+	}
+}

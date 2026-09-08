@@ -860,7 +860,7 @@ func (p *jsonSchemaTarget) discoverPathMerges(n *schemaNode, path []string, ctx 
 	// the evaluator still marks their membership effects unknown.
 	for _, keyword := range []string{"not", "if", "then", "else"} {
 		if child := n.children[keyword]; child != nil {
-			if (keyword == "then" || keyword == "else") && n.children["if"] == nil {
+			if keyword != "not" && (n.children["if"] == nil || (n.children["then"] == nil && n.children["else"] == nil)) {
 				continue
 			}
 			sameObject(child)
