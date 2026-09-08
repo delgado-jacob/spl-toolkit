@@ -23,7 +23,7 @@ All reports have integer schema_version 1. Invalid takes precedence over incompl
 
 ## Verification and source identity
 
-Accepted M2 predecessor: `1f5c98605aba26cab402fa46b6605f9e650cf643`. Task5 execution BASE: `390557bc018c500c7351a2923d662d5507cb1eed` (independently approved Tasks1–4). This log and its owned documentation/acceptance changes form the Task5 commit; its exact immutable HEAD and review range are recorded after committing in `.superpowers/sdd/milestone-3-implementation-plan/task-5-report.md`. No final controller review or outer oracle is claimed here.
+Accepted M2 predecessor: `1f5c98605aba26cab402fa46b6605f9e650cf643`. Task5 execution BASE: `390557bc018c500c7351a2923d662d5507cb1eed` (independently approved Tasks1–4). This log and its owned documentation/acceptance changes form the Task5 commit; its exact immutable HEAD and review range are recorded after committing in `.superpowers/sdd/milestone-3-implementation-plan/task-5-report.md`. The subsequent task-review and independent runtime results are recorded below; broad whole-milestone review and final controller acceptance remain pending.
 
 All commands run locally from the remaining-milestones worktree with the provisioned offline Go caches, GOPROXY=off, GOTOOLCHAIN=local, and Python development environment. Actual counts:
 
@@ -52,12 +52,25 @@ Artifact SHA-256 values:
 
 The local user demonstration is retained under the directory recorded in `/private/tmp/spl-toolkit-m3-task5-demo.json`. File input retained its final newline and path identity with exit 0; batch output retained ordered valid/invalid/incomplete reports with exit 1.
 
+## Independent runtime and source verification
+
+At `78964a7775bb2e74d2022bb760d17be4e6e27e3a`, the root controller independently ran local Python 3.14.1 source tests: 137 passed in 1.46s with zero skips. Eight independent canonical semantic cases matched complete Go/CLI/REST/native reports, including Unicode/CRLF locations, nested optional and derived fields, wildcard removal, literal-star catalog members, mixed bindings, retained uncertainty, empty catalogs, and child/parent isolation. Each case passed one native comparison plus eight concurrent native repeats. A four-document mixed-status batch retained order; file/stdin/output and batch input modes, 12 malformed Unicode/shape HTTP rejections, and atomic late-invalid batch rejection with native SPLMapperError also passed. These are additional local checks, not a pinned cross-platform release matrix.
+
+Root verified 169 tracked source hashes, 37 native source hashes, and five artifact hashes unchanged, with HEAD fixed and tracked tree/index clean. Evidence records all identify the tested SHA above:
+
+- `/private/tmp/spl-toolkit-root-m3-acceptance-py314.json`: Python source and independent surface command results.
+- `/private/tmp/spl-toolkit-root-m3-surface-acceptance.json`: eight complete cross-surface cases, concurrency, batch/input/error checks, and three runtime artifact hashes.
+- `/private/tmp/spl-toolkit-root-m3-go-acceptance.json`: independent canonical semantics, strict inputs, zero-value catalog equivalence, and unchanged caller catalog.
+- `/private/tmp/spl-toolkit-root-m3-final-verification.json`: complete source/native/artifact hash verification and evidence hashes.
+
+This follow-up changes only this log and compatibility documentation. The original machine/source record and package evidence remain unchanged; no binaries, packages, executable inputs, or tests were rebuilt or rerun for evidence-only wording. Its exact documentation delta and final SHA are recorded in the Task5 report and `/private/tmp/spl-toolkit-m3-task5-closure-source-delta.json`.
+
 ## Limitations, deviations, and next milestone
 
 Unknown commands/functions, macros, dynamic references, unsupported wildcard command forms, conditional outputs, and unresolved branch behavior retain incomplete coverage. Optional declarations cannot repair those uncertainties. JSON Schema and OCSF have not shipped; neither type checks nor event validation is implemented. No live Splunk execution, remote provider action, publication, or new release matrix was performed.
 
 Go1.22 floor tests use external linking because the previously observed default-link macOS LC_UUID loader failure happens before assertions. The existing bindings race LC_DYSYMTAB linker warning remains; passing results are not warning-free or proof of default-link execution. The package check also retains the existing Python tar-extraction deprecation warning. Loopback tests required the authorized execution context after sandbox bind denial. An exploratory source-mode surface run could not resolve the packaged-only native library; final required acceptance uses actual installed wheels and no source override.
 
-No semantic or adapter fix was necessary in Task5. Existing native closure/lifecycle evidence was retained, and affected broad/package gates were rerun. Final Task5 immutable review, whole-milestone review, controller-owned outer cross-surface/Python3.14 oracle, and controller acceptance remain open for the controller to close after this commit. Historical Task2 root evidence is separately archived at `/private/tmp/spl-toolkit-root-m3-go-acceptance-task2.json` and `/private/tmp/spl-toolkit-root-m3-go-results-task2.json`; it is not final-HEAD evidence.
+No semantic or adapter fix was necessary in Task5. Existing native closure/lifecycle evidence was retained, and affected broad/package gates were rerun. All five independent combined task reviews are complete, including Task5 approval at `78964a7775bb2e74d2022bb760d17be4e6e27e3a`, with no blocking findings. The controller-owned outer cross-surface/Python3.14 oracle also passed at that immutable HEAD. Broad whole-milestone review and final root milestone acceptance remain pending; this evidence-only follow-up will enter that broad review. Historical Task2 root evidence is separately archived at `/private/tmp/spl-toolkit-root-m3-go-acceptance-task2.json` and `/private/tmp/spl-toolkit-root-m3-go-results-task2.json`; it is not final-HEAD evidence.
 
 M4 must extend canonical validation for JSON Schema/OCSF without moving semantics into adapters, preserve field-list behavior and source identities, and distinguish declaration optionality from event/type/presence claims. Consume the exact controller-accepted M3 HEAD only after the remaining gates close.
