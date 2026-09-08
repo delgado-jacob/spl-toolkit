@@ -1325,7 +1325,7 @@
       "source_keys": [
         "types"
       ],
-      "disposition": "partial",
+      "disposition": "active",
       "owner": "task2-and-later-m5-tasks",
       "description": "L03 — literals"
     },
@@ -2641,7 +2641,7 @@
       "source_keys": [
         "types"
       ],
-      "disposition": "partial",
+      "disposition": "active",
       "owner": "task2-and-later-m5-tasks",
       "description": "E.L03.null_boolean"
     },
@@ -2956,7 +2956,7 @@
       "source_keys": [
         "searchliterals"
       ],
-      "disposition": "pending",
+      "disposition": "active",
       "owner": "later-m5-tasks",
       "description": "E.L24.search_literal"
     },
@@ -3298,7 +3298,7 @@
       "source_keys": [
         "compat"
       ],
-      "disposition": "pending",
+      "disposition": "active",
       "owner": "later-m5-tasks"
     },
     {
@@ -3306,7 +3306,7 @@
       "source_keys": [
         "expressions"
       ],
-      "disposition": "pending",
+      "disposition": "active",
       "owner": "later-m5-tasks"
     },
     {
@@ -3346,7 +3346,7 @@
       "source_keys": [
         "searchliterals"
       ],
-      "disposition": "pending",
+      "disposition": "active",
       "owner": "later-m5-tasks"
     },
     {
@@ -3362,6 +3362,16 @@
       "description": "Canonical ordinary transfers, nullability, function and profile boundaries with separate syntax evidence.",
       "disposition": "active",
       "owner": "task6"
+    },
+    {
+      "id": "T8.canonical",
+      "source_keys": [
+        "compat",
+        "expressions"
+      ],
+      "disposition": "active",
+      "owner": "task8-core",
+      "description": "Canonical typed recovery, scope input ownership, literal source fields and truthful native inventory."
     }
   ],
   "obligations": [
@@ -5172,8 +5182,11 @@
         "types"
       ],
       "candidate": "FROM main | streamstats current=TRUE count()",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "owner": "task8-core",
+      "assembly": "standalone",
+      "case_id": "L03-N1"
     },
     {
       "id": "L03-N2",
@@ -12150,8 +12163,11 @@
         "types"
       ],
       "candidate": "head keeplast=TRUE 2",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "owner": "task8-core",
+      "assembly": "pipeline-tail",
+      "case_id": "E.L03.null_boolean.N1"
     },
     {
       "id": "E.L03.null_boolean.N2",
@@ -12160,8 +12176,11 @@
         "types"
       ],
       "candidate": "dedup keepempty=1 host",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "owner": "task8-core",
+      "assembly": "pipeline-tail",
+      "case_id": "E.L03.null_boolean.N2"
     },
     {
       "id": "E.L04.comments.P1",
@@ -13802,8 +13821,11 @@
         "searchliterals"
       ],
       "candidate": "FROM main WHERE `502 failure` SELECT host",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "owner": "task8-core",
+      "assembly": "standalone",
+      "case_id": "E.L24.search_literal.P1"
     },
     {
       "id": "E.L24.search_literal.P2",
@@ -13812,8 +13834,11 @@
         "searchliterals"
       ],
       "candidate": "FROM main | eval class=if(`status=4*`,\"client\",\"other\")",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "owner": "task8-core",
+      "assembly": "standalone",
+      "case_id": "E.L24.search_literal.P2"
     },
     {
       "id": "E.L24.search_literal.N1",
@@ -13822,8 +13847,11 @@
         "searchliterals"
       ],
       "candidate": "FROM main WHERE `502 failure SELECT host",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "owner": "task8-core",
+      "assembly": "standalone",
+      "case_id": "E.L24.search_literal.N1"
     },
     {
       "id": "E.L24.search_literal.N2",
@@ -13832,8 +13860,11 @@
         "searchliterals"
       ],
       "candidate": "FROM main | eval class=if(`status=4*,\"client\",\"other\")",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "owner": "task8-core",
+      "assembly": "standalone",
+      "case_id": "E.L24.search_literal.N2"
     },
     {
       "id": "E.L06.named_arguments.P1",
@@ -16016,8 +16047,11 @@
         "expressions"
       ],
       "candidate": "FROM main | eval first=bytes, next=first+1",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "owner": "task8-core",
+      "assembly": "standalone",
+      "case_id": "I.assign.P1"
     },
     {
       "id": "I.assign.P2",
@@ -16026,8 +16060,11 @@
         "expressions"
       ],
       "candidate": "FROM main | eval first=null, next=first+1",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "owner": "task8-core",
+      "assembly": "standalone",
+      "case_id": "I.assign.P2"
     },
     {
       "id": "I.assign.N1",
@@ -16036,8 +16073,11 @@
         "expressions"
       ],
       "candidate": "FROM main | eval first=bytes next=first+1",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "owner": "task8-core",
+      "assembly": "standalone",
+      "case_id": "I.assign.N1"
     },
     {
       "id": "I.assign.N2",
@@ -16046,8 +16086,11 @@
         "expressions"
       ],
       "candidate": "FROM main | eval first=null, next=",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "owner": "task8-core",
+      "assembly": "standalone",
+      "case_id": "I.assign.N2"
     },
     {
       "id": "I.bin.P1",
@@ -16248,8 +16291,11 @@
         "searchliterals"
       ],
       "candidate": "FROM main | eval class=if(`error=4*`,\"user\",\"server\")",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "owner": "task8-core",
+      "assembly": "standalone",
+      "case_id": "I.literal.P1"
     },
     {
       "id": "I.literal.P2",
@@ -16258,8 +16304,11 @@
         "searchliterals"
       ],
       "candidate": "SELECT count(`500`) AS failures FROM main",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "owner": "task8-core",
+      "assembly": "standalone",
+      "case_id": "I.literal.P2"
     },
     {
       "id": "I.literal.N1",
@@ -16268,8 +16317,11 @@
         "searchliterals"
       ],
       "candidate": "FROM main | eval class=if(`error=4*,\"user\",\"server\")",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "owner": "task8-core",
+      "assembly": "standalone",
+      "case_id": "I.literal.N1"
     },
     {
       "id": "I.literal.N2",
@@ -16278,8 +16330,11 @@
         "searchliterals"
       ],
       "candidate": "SELECT count(`500) AS failures FROM main",
-      "disposition": "pending",
-      "evidence": "expansion"
+      "disposition": "active",
+      "evidence": "expansion",
+      "owner": "task8-core",
+      "assembly": "standalone",
+      "case_id": "I.literal.N2"
     },
     {
       "id": "B01",
@@ -16288,8 +16343,11 @@
         "compat"
       ],
       "candidate": "FROM main | decrypt",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "owner": "task8-core",
+      "assembly": "standalone",
+      "case_id": "B01"
     },
     {
       "id": "B02",
@@ -16298,8 +16356,11 @@
         "compat"
       ],
       "candidate": "FROM main | ocsf",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "owner": "task8-core",
+      "assembly": "standalone",
+      "case_id": "B02"
     },
     {
       "id": "B03",
@@ -16308,8 +16369,11 @@
         "compat"
       ],
       "candidate": "FROM main | route",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "owner": "task8-core",
+      "assembly": "standalone",
+      "case_id": "B03"
     },
     {
       "id": "B04",
@@ -16318,8 +16382,11 @@
         "compat"
       ],
       "candidate": "FROM main | stats mode=summary count()",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "owner": "task8-core",
+      "assembly": "standalone",
+      "case_id": "T3.stats.profile.option.0"
     },
     {
       "id": "B05",
@@ -16328,8 +16395,11 @@
         "compat"
       ],
       "candidate": "FROM main | stats prestats=raw count()",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "owner": "task8-core",
+      "assembly": "standalone",
+      "case_id": "T3.stats.profile.option.1"
     },
     {
       "id": "B06",
@@ -16338,8 +16408,11 @@
         "compat"
       ],
       "candidate": "FROM main | eval id=batch_id()",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "owner": "task8-core",
+      "assembly": "standalone",
+      "case_id": "B06"
     },
     {
       "id": "B07",
@@ -16348,8 +16421,11 @@
         "compat"
       ],
       "candidate": "FROM main | eval clock=batch_time()",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "owner": "task8-core",
+      "assembly": "standalone",
+      "case_id": "B07"
     },
     {
       "id": "B08",
@@ -16358,8 +16434,11 @@
         "compat"
       ],
       "candidate": "$saved = FROM main;",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "owner": "task8-core",
+      "assembly": "standalone",
+      "case_id": "B08"
     },
     {
       "id": "B09",
@@ -16368,8 +16447,11 @@
         "compat"
       ],
       "candidate": "import * from example;",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "owner": "task8-core",
+      "assembly": "standalone",
+      "case_id": "B09"
     },
     {
       "id": "B10",
@@ -16378,8 +16460,11 @@
         "compat"
       ],
       "candidate": "export $saved = FROM main;",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "owner": "task8-core",
+      "assembly": "standalone",
+      "case_id": "B10"
     },
     {
       "id": "B11",
@@ -16388,8 +16473,11 @@
         "compat"
       ],
       "candidate": "function label($x) { return $x }",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "owner": "task8-core",
+      "assembly": "standalone",
+      "case_id": "B11"
     },
     {
       "id": "B12",
@@ -16398,8 +16486,11 @@
         "compat"
       ],
       "candidate": "FROM main; FROM archive",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "owner": "task8-core",
+      "assembly": "standalone",
+      "case_id": "B12"
     },
     {
       "id": "B13",
@@ -16408,8 +16499,11 @@
         "compat"
       ],
       "candidate": "FROM main | rename a AS x, a AS y",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "owner": "task8-core",
+      "assembly": "standalone",
+      "case_id": "T3.rename.duplicate_source"
     },
     {
       "id": "B14",
@@ -16418,8 +16512,11 @@
         "compat"
       ],
       "candidate": "FROM main | rename a AS x, b AS x",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "owner": "task8-core",
+      "assembly": "standalone",
+      "case_id": "T3.rename.duplicate_target"
     },
     {
       "id": "B15",
@@ -16428,8 +16525,11 @@
         "compat"
       ],
       "candidate": "FROM main | rename alpha AS beta, beta AS gamma",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "owner": "task8-core",
+      "assembly": "standalone",
+      "case_id": "T3.rename.chain"
     },
     {
       "id": "B16",
@@ -16438,8 +16538,11 @@
         "compat"
       ],
       "candidate": "FROM main | rename a AS b, c AS a",
-      "disposition": "pending",
-      "evidence": "matrix"
+      "disposition": "active",
+      "evidence": "matrix",
+      "owner": "task8-core",
+      "assembly": "standalone",
+      "case_id": "T3.rename.overlap"
     },
     {
       "id": "T2.division.chain",
@@ -25623,6 +25726,84 @@
       "assembly": "standalone",
       "owner": "task6",
       "evidence": "canonical-transfer-witness"
+    },
+    {
+      "id": "T8.unknown-adjacent",
+      "form_id": "T8.canonical",
+      "source_keys": [
+        "compat",
+        "expressions"
+      ],
+      "candidate": "FROM main | mystery flag=1 | where bytes>0",
+      "disposition": "active",
+      "evidence": "canonical task8 hand-authored",
+      "assembly": "standalone",
+      "case_id": "T8.unknown-adjacent"
+    },
+    {
+      "id": "T8.native-branch",
+      "form_id": "T8.canonical",
+      "source_keys": [
+        "compat",
+        "expressions"
+      ],
+      "candidate": "FROM main | branch [where host=1 | into output]",
+      "disposition": "active",
+      "evidence": "canonical task8 hand-authored",
+      "assembly": "standalone",
+      "case_id": "T8.native-branch"
+    },
+    {
+      "id": "T8.native-into",
+      "form_id": "T8.canonical",
+      "source_keys": [
+        "compat",
+        "expressions"
+      ],
+      "candidate": "FROM main | into output",
+      "disposition": "active",
+      "evidence": "canonical task8 hand-authored",
+      "assembly": "standalone",
+      "case_id": "T8.native-into"
+    },
+    {
+      "id": "T8.native-thru",
+      "form_id": "T8.canonical",
+      "source_keys": [
+        "compat",
+        "expressions"
+      ],
+      "candidate": "FROM main | thru output",
+      "disposition": "active",
+      "evidence": "canonical task8 hand-authored",
+      "assembly": "standalone",
+      "case_id": "T8.native-thru"
+    },
+    {
+      "id": "T8.literal-source",
+      "form_id": "T8.canonical",
+      "source_keys": [
+        "compat",
+        "expressions"
+      ],
+      "candidate": "FROM [{host:\"a\"}] SELECT host",
+      "disposition": "active",
+      "evidence": "canonical task8 hand-authored",
+      "assembly": "standalone",
+      "case_id": "T8.literal-source"
+    },
+    {
+      "id": "T8.inherited-parent",
+      "form_id": "T8.canonical",
+      "source_keys": [
+        "compat",
+        "expressions"
+      ],
+      "candidate": "FROM main | eval parent=1 | appendpipe [table parent] | table parent",
+      "disposition": "active",
+      "evidence": "canonical task8 hand-authored",
+      "assembly": "standalone",
+      "case_id": "T8.inherited-parent"
     }
   ],
   "holds": [

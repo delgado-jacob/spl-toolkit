@@ -1139,13 +1139,16 @@
   {
     "id": "T3.rename.duplicate_source",
     "obligation_ids": [
-      "T3.rename.duplicate_source"
+      "T3.rename.duplicate_source",
+      "B13"
     ],
     "form_ids": [
-      "C07"
+      "C07",
+      "exclusions"
     ],
     "source_keys": [
-      "doc158"
+      "doc158",
+      "compat"
     ],
     "document": {
       "language": "spl2",
@@ -1168,13 +1171,16 @@
   {
     "id": "T3.rename.duplicate_target",
     "obligation_ids": [
-      "T3.rename.duplicate_target"
+      "T3.rename.duplicate_target",
+      "B14"
     ],
     "form_ids": [
-      "C07"
+      "C07",
+      "exclusions"
     ],
     "source_keys": [
-      "doc158"
+      "doc158",
+      "compat"
     ],
     "document": {
       "language": "spl2",
@@ -1197,13 +1203,16 @@
   {
     "id": "T3.rename.chain",
     "obligation_ids": [
-      "T3.rename.chain"
+      "T3.rename.chain",
+      "B15"
     ],
     "form_ids": [
-      "C07"
+      "C07",
+      "exclusions"
     ],
     "source_keys": [
-      "doc158"
+      "doc158",
+      "compat"
     ],
     "document": {
       "language": "spl2",
@@ -1226,13 +1235,16 @@
   {
     "id": "T3.rename.overlap",
     "obligation_ids": [
-      "T3.rename.overlap"
+      "T3.rename.overlap",
+      "B16"
     ],
     "form_ids": [
-      "C07"
+      "C07",
+      "exclusions"
     ],
     "source_keys": [
-      "doc158"
+      "doc158",
+      "compat"
     ],
     "document": {
       "language": "spl2",
@@ -7838,13 +7850,16 @@
   {
     "id": "T3.stats.profile.option.0",
     "obligation_ids": [
-      "T3.stats.profile.option.0"
+      "T3.stats.profile.option.0",
+      "B04"
     ],
     "source_keys": [
-      "doc167"
+      "doc167",
+      "compat"
     ],
     "form_ids": [
-      "C08"
+      "C08",
+      "exclusions"
     ],
     "document": {
       "text": "FROM main | stats mode=summary count()",
@@ -7867,13 +7882,16 @@
   {
     "id": "T3.stats.profile.option.1",
     "obligation_ids": [
-      "T3.stats.profile.option.1"
+      "T3.stats.profile.option.1",
+      "B05"
     ],
     "source_keys": [
-      "doc167"
+      "doc167",
+      "compat"
     ],
     "form_ids": [
-      "C08"
+      "C08",
+      "exclusions"
     ],
     "document": {
       "text": "FROM main | stats prestats=raw count()",

@@ -3,7 +3,6 @@ package analysis
 import (
 	"fmt"
 	"github.com/antlr4-go/antlr/v4"
-	"github.com/delgado-jacob/spl-toolkit/parser/spl2"
 	"strings"
 )
 
@@ -22,50 +21,19 @@ func analyzeSPL2(result *Result, parsed *spl2ParsedDocument, refinement *sourceR
 	if !parsed.syntaxComplete {
 		result.Coverage.SemanticComplete = false
 	}
-	pipeline := parsed.tree.Pipeline()
-	if pipeline == nil {
-		result.Coverage.SemanticComplete = false
-		return
-	}
-	contexts := []antlr.ParserRuleContext{}
-	for _, node := range pipeline.GetChildren() {
-		switch c := node.(type) {
-		case *spl2.StartContext, *spl2.CommandContext:
-			for _, child := range c.GetChildren() {
-				if ctx, ok := child.(antlr.ParserRuleContext); ok {
-					contexts = append(contexts, ctx)
-					break
-				}
-			}
+	sites := spl2RecoverySites(parsed, result)
+	trees := []antlr.Tree{}
+	for _, site := range sites {
+		if site.context != nil {
+			trees = append(trees, site.context)
 		}
 	}
-	env := newEnvironment()
-	aliases := map[string]bool{}
-	for _, ctx := range contexts {
-		if sql, ok := ctx.(spl2SQLCommand); ok && spl2ScheduledSQL(sql) {
-			env = executeSPL2SQL(result, parsed, refinement, sql, env, aliases)
-			continue
-		}
-		location := parsed.source.contextLocation(ctx)
-		command := strings.ToLower(ctx.GetStart().GetText())
-		if _, ok := ctx.(*spl2.ImplicitSearchContext); ok {
-			command = "search"
-		}
-		index := registerSPL2Stage(result, location, command, len(result.Stages), "scope-0")
-		id := result.Stages[index].ID
-		s := &spl2SemanticStage{semanticStage: &semanticStage{result: result, stage: index, env: env, transitions: []Transition{}, refinement: refinement}, parsed2: parsed, aliases: aliases}
-		before := env.snapshot()
-		if spl2IntactSyntax(ctx) {
-			s.command(ctx)
-		} else {
-			s.diagnosticAt(CodeUnsupportedSemantics, "warning", "unsupported_semantics", "Recovered SPL2 command effects are not yet modeled", location, true)
-		}
-		if !result.Stages[index].SemanticComplete {
-			s.env.uncertain = true
-		}
-		env = s.env
-		result.Lineage = append(result.Lineage, Lineage{StageID: id, ScopeID: "scope-0", Before: before, After: env.snapshot(), Transitions: s.transitions})
+	scheduler := &spl2ScopeScheduler{result: result, parsed: parsed, refinement: refinement, children: spl2ChildScopesIn(parsed, trees), executed: map[int]bool{}}
+	scheduler.pipeline(sites, newEnvironment(), map[string]bool{}, "scope-0", -1)
+	if len(result.Scopes) > 1 {
+		spl2FinalizeStages(result)
 	}
+
 	finalizeReferences(result, refinement)
 }
 
@@ -84,7 +52,7 @@ func registerSPL2Stage(result *Result, location Location, command string, positi
 	return index
 }
 func (s *spl2SemanticStage) operand(ctx antlr.ParserRuleContext) locatedOperand {
-	if ctx == nil || !spl2IntactSyntax(ctx) {
+	if ctx == nil || !s.parsed2.soundOperand(ctx) {
 		return locatedOperand{}
 	}
 	name, ok := spl2DecodeKey(ctx.GetText())

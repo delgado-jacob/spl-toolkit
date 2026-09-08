@@ -12,11 +12,7 @@ func (s *spl2SemanticStage) command(ctx antlr.ParserRuleContext) {
 		s.applySource()
 		clear(s.aliases)
 		source := c.SqlFromClause()
-		if source.Dataset().Identifier() != nil {
-			s.dependency(source.Dataset().Identifier(), "dataset")
-		} else {
-			s.unsupported(source.Dataset(), "Dataset literal field establishment is not yet modeled")
-		}
+		s.dataset(source.Dataset())
 		if alias := source.SourceAlias(); alias != nil {
 			o := s.operand(alias.Identifier())
 			if o.Sound {
@@ -111,6 +107,11 @@ func (s *spl2SemanticStage) command(ctx antlr.ParserRuleContext) {
 		if w := c.HeadWhile(); w != nil {
 			s.expression(w.Expression())
 		}
+	case *spl2.IfCommandContext:
+		for _, condition := range c.AllExpression() {
+			s.expression(condition)
+		}
+		s.unsupported(c, "Conditional child merge output is unproved")
 	case *spl2.ReverseCommandContext:
 	default:
 		s.unsupported(ctx, "Command field effects are not yet modeled")

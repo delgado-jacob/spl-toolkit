@@ -21,7 +21,7 @@ func spl2ScheduledSQL(c spl2SQLCommand) bool {
 
 // Stages retain lexical clause order. Each phase uses its real owning clause;
 // preparation and final restriction can therefore share the one SELECT stage.
-func executeSPL2SQL(result *Result, parsed *spl2ParsedDocument, refinement *sourceRefinement, c spl2SQLCommand, env *environment, aliases map[string]bool) *environment {
+func executeSPL2SQL(result *Result, parsed *spl2ParsedDocument, refinement *sourceRefinement, c spl2SQLCommand, env *environment, aliases map[string]bool, scheduler *spl2ScopeScheduler, scopeID string, parent, position int) *environment {
 	logical := []antlr.ParserRuleContext{}
 	for _, ctx := range []antlr.ParserRuleContext{c.SqlFromClause(), c.SqlWhereClause(), c.SqlGroupClause(), c.SqlSelectClause(), c.SqlHavingClause(), c.SqlOrderClause(), c.SqlLimitClause(), c.SqlOffsetClause()} {
 		if ctx != nil {
@@ -30,13 +30,13 @@ func executeSPL2SQL(result *Result, parsed *spl2ParsedDocument, refinement *sour
 	}
 	positions := map[antlr.ParserRuleContext]int{}
 	for i, ctx := range logical {
-		positions[ctx] = len(result.Stages) + i
+		positions[ctx] = position + i
 	}
 	lexical := append([]antlr.ParserRuleContext{}, logical...)
 	sort.SliceStable(lexical, func(i, j int) bool { return lexical[i].GetStart().GetStart() < lexical[j].GetStart().GetStart() })
 	stages := map[antlr.ParserRuleContext]int{}
 	for _, ctx := range lexical {
-		stages[ctx] = registerSPL2Stage(result, parsed.source.contextLocation(ctx), strings.ToLower(ctx.GetStart().GetText()), positions[ctx], "scope-0")
+		stages[ctx] = registerSPL2Stage(result, parsed.source.contextLocation(ctx), strings.ToLower(ctx.GetStart().GetText()), positions[ctx], scopeID)
 	}
 	s := &spl2SemanticStage{semanticStage: &semanticStage{result: result, env: env, refinement: refinement}, parsed2: parsed, aliases: aliases}
 	phase := func(ctx antlr.ParserRuleContext, name string, run func()) {
@@ -46,6 +46,7 @@ func executeSPL2SQL(result *Result, parsed *spl2ParsedDocument, refinement *sour
 		s.stage = stages[ctx]
 		s.transitions = []Transition{}
 		before := s.env.snapshot()
+		scheduler.runChildren(ctx, s.env, aliases, scopeID, parent)
 		if spl2IntactSyntax(ctx) {
 			run()
 		} else {
@@ -60,13 +61,11 @@ func executeSPL2SQL(result *Result, parsed *spl2ParsedDocument, refinement *sour
 	}
 	phase(c.SqlFromClause(), "source", func() {
 		s.applySource()
-		clear(aliases)
-		from := c.SqlFromClause()
-		if from.Dataset().Identifier() != nil {
-			s.dependency(from.Dataset().Identifier(), "dataset")
-		} else {
-			s.unsupported(from.Dataset(), "Dataset literal field establishment is not yet modeled")
+		if parent < 0 || scheduler.children[parent].input != "correlated" {
+			clear(aliases)
 		}
+		from := c.SqlFromClause()
+		s.dataset(from.Dataset())
 		if a := from.SourceAlias(); a != nil {
 			o := s.operand(a.Identifier())
 			if o.Sound {

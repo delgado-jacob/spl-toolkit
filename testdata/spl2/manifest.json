@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "stage": "task6-ordinary-canonical",
+  "stage": "task8-core-recovery-scopes-validation",
   "case_files": [
     "lexical-expressions.json",
     "frontend-boundaries.json",
@@ -11,7 +11,8 @@
     "extended-commands.json",
     "extended-boundaries.json",
     "functions.json",
-    "canonical-core.json"
+    "canonical-core.json",
+    "recovery-core.json"
   ],
   "provenance_file": "provenance.json",
   "mandatory_command_families": [
@@ -98,6 +99,7 @@
     "canonical": "Explicit canonical Result expectations on the same deduplicated documents; conditional output is modeled separately from later membership validation.",
     "assemblies": {
       "eval-rhs": "FROM main | eval result= followed by the exact scalar F candidate; command candidates retain pipeline-tail."
-    }
+    },
+    "recovery": "Corpus-only original command-token classification reconciles raw parser errors for unknown/native-deferred syntax with located canonical incomplete evidence; always no floor credit. Supported malformed syntax remains invalid."
   }
 }

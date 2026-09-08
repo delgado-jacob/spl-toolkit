@@ -12,6 +12,7 @@ type spl2ParsedDocument struct {
 	tree             spl2.IQueryContext
 	source           *sourceIndex
 	diagnostics      []Diagnostic
+	lexicalErrors    []Diagnostic
 	syntax           *spl2SyntaxNode
 	syntaxComplete   bool
 	semanticComplete bool
@@ -25,14 +26,20 @@ type spl2SyntaxListener struct {
 func (l *spl2SyntaxListener) SyntaxError(recognizer antlr.Recognizer, offending interface{}, line, column int, msg string, e antlr.RecognitionException) {
 	s := l.parsed.source
 	start, end := len(s.positions)-1, len(s.positions)-1
+	lexical := false
 	if token, ok := offending.(antlr.Token); ok && token.GetStart() >= 0 {
 		start = token.GetStart()
 		end = token.GetStop() + 1
 	} else if lexer, ok := recognizer.(antlr.Lexer); ok {
+		lexical = true
 		start = lexer.GetInputStream().Index()
 		end = start + 1
 	}
-	l.parsed.diagnostics = append(l.parsed.diagnostics, Diagnostic{Code: CodeSyntaxError, Severity: "error", Category: "syntax", Message: msg, Location: s.location(start, end)})
+	diagnostic := Diagnostic{Code: CodeSyntaxError, Severity: "error", Category: "syntax", Message: msg, Location: s.location(start, end)}
+	l.parsed.diagnostics = append(l.parsed.diagnostics, diagnostic)
+	if lexical {
+		l.parsed.lexicalErrors = append(l.parsed.lexicalErrors, diagnostic)
+	}
 }
 func parseSPL2Document(text string) *spl2ParsedDocument {
 	parsed := &spl2ParsedDocument{source: newSourceIndex(text), diagnostics: []Diagnostic{}}

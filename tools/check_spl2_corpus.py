@@ -78,8 +78,42 @@ ASSEMBLIES = {"standalone": ("", ""), "pipeline-tail": ("FROM main | ", ""),
               "eval-rhs": ("FROM main | eval result=", "")}
 
 
-def audit_canonical(case):
+def audit_recovery_classification(case, expected, inventory):
+    """Validate explicit evidence/credit metadata, never parse a query here.
+
+    The Go corpus verifies the original token, owning canonical stage and its
+    located unsupported diagnostic. Raw parser errors remain a separate layer.
+    """
+    recovery = case.get("recovery_classification")
+    if recovery is None:
+        return False
+    require(isinstance(recovery, dict) and set(recovery) == {"kind", "command", "start", "end", "stage_id"}, "invalid recovery classification metadata")
+    require(case.get("floor_credit") is False and not case.get("hold_ids"), "recovery classification has no floor credit")
+    require(case["status"] == "invalid" and not case["syntax_complete"] and case.get("expected_codes") == ["SPL_SYNTAX_ERROR"], "recovery classification must retain original parser errors")
+    require(expected["status"] == "incomplete" and not expected["syntax_complete"] and not expected["semantic_complete"], "recovery classification cannot promote complete/valid support")
+    require(expected["expected_codes"] == ["SPL_UNSUPPORTED_SEMANTICS"], "recovery classification cannot demote definite/profile/module findings")
+    command, start, end = recovery["command"], recovery["start"], recovery["end"]
+    text = case["document"]["text"].encode("utf-8")
+    require(isinstance(command, str) and command.isascii() and command.isidentifier() and command == command.lower(), "invalid recovery classification command")
+    require(type(start) is int and type(end) is int and 0 <= start < end <= len(text) and text[start:end] == command.encode("utf-8"), "recovery classification needs original nonempty token slice")
+    stages = {f"stage-{i}": name for i, name in enumerate(expected["stage_commands"])}
+    require(stages.get(recovery["stage_id"]) == command, "recovery classification owning stage mismatch")
+    index = int(recovery["stage_id"].removeprefix("stage-"))
+    require(not expected["stage_complete"][index], "recovery classification stage cannot be complete")
+    by_name = {entry["entry"]: entry for entry in inventory}
+    if recovery["kind"] == "unknown_command":
+        require(command not in by_name and command not in {"import", "export", "function"}, "unknown classification names a known command")
+    elif recovery["kind"] == "native_deferred":
+        entry = by_name.get(command)
+        require(entry is not None and entry["splunkd"] and entry["classification"] == "Deferred grammar/effects; U", "native_deferred classification lacks durable inventory")
+    else:
+        require(False, "unknown recovery classification kind")
+    return True
+
+
+def audit_canonical(case, inventory=()):
     if "canonical" not in case:
+        require("recovery_classification" not in case, "recovery classification needs canonical evidence")
         return False
     expected = case["canonical"]
     require(isinstance(expected, dict), "canonical expectation must be an object")
@@ -89,7 +123,8 @@ def audit_canonical(case):
     require(expected["status"] in {"valid", "invalid", "incomplete"}, "invalid canonical status")
     require(not expected["syntax_complete"] or case["syntax_complete"], "canonical cannot promote unproved syntax")
     require(expected["syntax_complete"] or not expected["semantic_complete"], "canonical cannot promote semantics of unproved syntax")
-    require(case["status"] != "invalid" or expected["status"] == "invalid", "canonical cannot erase definite syntax findings")
+    recovery = audit_recovery_classification(case, expected, inventory)
+    require(case["status"] != "invalid" or expected["status"] == "invalid" or recovery, "canonical cannot erase definite syntax findings")
     if case.get("hold_ids"):
         require(expected["status"] != "valid" and not expected["semantic_complete"], "canonical cannot promote held evidence")
     if expected["status"] == "valid":
@@ -156,7 +191,7 @@ def audit(manifest, provenance, cases):
             require(case["expected_codes"], "negative has no expected diagnostic")
         else:
             require(assertions.get("kinds") or assertions.get("shape_contains") or assertions.get("excerpts"), "missing typed syntax assertions")
-        if audit_canonical(case):
+        if audit_canonical(case, inventory):
             canonical_ids.add(case["id"])
         for oid in case["obligation_ids"]:
             require(oid not in aliases, "obligation aliases multiple queries")

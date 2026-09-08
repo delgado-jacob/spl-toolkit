@@ -1,0 +1,1273 @@
+[
+  {
+    "id": "L03-N1",
+    "meaningful_id": "L03.invalid",
+    "obligation_ids": [
+      "L03-N1"
+    ],
+    "source_keys": [
+      "types"
+    ],
+    "document": {
+      "text": "FROM main | streamstats current=TRUE count()",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "L03"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "floor_credit": false
+  },
+  {
+    "id": "E.L03.null_boolean.N1",
+    "meaningful_id": "E.L03.null_boolean.invalid",
+    "obligation_ids": [
+      "E.L03.null_boolean.N1"
+    ],
+    "source_keys": [
+      "types"
+    ],
+    "document": {
+      "text": "FROM main | head keeplast=TRUE 2",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L03.null_boolean"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "floor_credit": false
+  },
+  {
+    "id": "E.L03.null_boolean.N2",
+    "meaningful_id": "E.L03.null_boolean.invalid",
+    "obligation_ids": [
+      "E.L03.null_boolean.N2"
+    ],
+    "source_keys": [
+      "types"
+    ],
+    "document": {
+      "text": "FROM main | dedup keepempty=1 host",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L03.null_boolean"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "floor_credit": false
+  },
+  {
+    "id": "E.L24.search_literal.P1",
+    "meaningful_id": "E.L24.search_literal.incomplete",
+    "obligation_ids": [
+      "E.L24.search_literal.P1"
+    ],
+    "source_keys": [
+      "searchliterals"
+    ],
+    "document": {
+      "text": "FROM main WHERE `502 failure` SELECT host",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L24.search_literal"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "pipeline",
+          "text": "FROM main WHERE `502 failure` SELECT host"
+        }
+      ]
+    },
+    "floor_credit": false
+  },
+  {
+    "id": "E.L24.search_literal.P2",
+    "meaningful_id": "E.L24.search_literal.incomplete",
+    "obligation_ids": [
+      "E.L24.search_literal.P2"
+    ],
+    "source_keys": [
+      "searchliterals"
+    ],
+    "document": {
+      "text": "FROM main | eval class=if(`status=4*`,\"client\",\"other\")",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L24.search_literal"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "pipeline",
+          "text": "FROM main | eval class=if(`status=4*`,\"client\",\"other\")"
+        }
+      ]
+    },
+    "floor_credit": false
+  },
+  {
+    "id": "E.L24.search_literal.N1",
+    "meaningful_id": "E.L24.search_literal.invalid",
+    "obligation_ids": [
+      "E.L24.search_literal.N1"
+    ],
+    "source_keys": [
+      "searchliterals"
+    ],
+    "document": {
+      "text": "FROM main WHERE `502 failure SELECT host",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L24.search_literal"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "floor_credit": false
+  },
+  {
+    "id": "E.L24.search_literal.N2",
+    "meaningful_id": "E.L24.search_literal.invalid",
+    "obligation_ids": [
+      "E.L24.search_literal.N2"
+    ],
+    "source_keys": [
+      "searchliterals"
+    ],
+    "document": {
+      "text": "FROM main | eval class=if(`status=4*,\"client\",\"other\")",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "E.L24.search_literal"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "floor_credit": false
+  },
+  {
+    "id": "I.assign.P1",
+    "meaningful_id": "I.assign.incomplete",
+    "obligation_ids": [
+      "I.assign.P1"
+    ],
+    "source_keys": [
+      "expressions"
+    ],
+    "document": {
+      "text": "FROM main | eval first=bytes, next=first+1",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "I.assign"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "pipeline",
+          "text": "FROM main | eval first=bytes, next=first+1"
+        }
+      ]
+    },
+    "floor_credit": false
+  },
+  {
+    "id": "I.assign.P2",
+    "meaningful_id": "I.assign.incomplete",
+    "obligation_ids": [
+      "I.assign.P2"
+    ],
+    "source_keys": [
+      "expressions"
+    ],
+    "document": {
+      "text": "FROM main | eval first=null, next=first+1",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "I.assign"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "pipeline",
+          "text": "FROM main | eval first=null, next=first+1"
+        }
+      ]
+    },
+    "floor_credit": false
+  },
+  {
+    "id": "I.assign.N1",
+    "meaningful_id": "I.assign.invalid",
+    "obligation_ids": [
+      "I.assign.N1"
+    ],
+    "source_keys": [
+      "expressions"
+    ],
+    "document": {
+      "text": "FROM main | eval first=bytes next=first+1",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "I.assign"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "floor_credit": false
+  },
+  {
+    "id": "I.assign.N2",
+    "meaningful_id": "I.assign.invalid",
+    "obligation_ids": [
+      "I.assign.N2"
+    ],
+    "source_keys": [
+      "expressions"
+    ],
+    "document": {
+      "text": "FROM main | eval first=null, next=",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "I.assign"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "floor_credit": false
+  },
+  {
+    "id": "I.literal.P1",
+    "meaningful_id": "I.literal.incomplete",
+    "obligation_ids": [
+      "I.literal.P1"
+    ],
+    "source_keys": [
+      "searchliterals"
+    ],
+    "document": {
+      "text": "FROM main | eval class=if(`error=4*`,\"user\",\"server\")",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "I.literal"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "pipeline",
+          "text": "FROM main | eval class=if(`error=4*`,\"user\",\"server\")"
+        }
+      ]
+    },
+    "floor_credit": false
+  },
+  {
+    "id": "I.literal.P2",
+    "meaningful_id": "I.literal.incomplete",
+    "obligation_ids": [
+      "I.literal.P2"
+    ],
+    "source_keys": [
+      "searchliterals"
+    ],
+    "document": {
+      "text": "SELECT count(`500`) AS failures FROM main",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "I.literal"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [
+      "SPL_UNSUPPORTED_SEMANTICS"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "pipeline",
+          "text": "SELECT count(`500`) AS failures FROM main"
+        }
+      ]
+    },
+    "floor_credit": false
+  },
+  {
+    "id": "I.literal.N1",
+    "meaningful_id": "I.literal.invalid",
+    "obligation_ids": [
+      "I.literal.N1"
+    ],
+    "source_keys": [
+      "searchliterals"
+    ],
+    "document": {
+      "text": "FROM main | eval class=if(`error=4*,\"user\",\"server\")",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "I.literal"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "floor_credit": false
+  },
+  {
+    "id": "I.literal.N2",
+    "meaningful_id": "I.literal.invalid",
+    "obligation_ids": [
+      "I.literal.N2"
+    ],
+    "source_keys": [
+      "searchliterals"
+    ],
+    "document": {
+      "text": "SELECT count(`500) AS failures FROM main",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "I.literal"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "floor_credit": false
+  },
+  {
+    "id": "B01",
+    "meaningful_id": "exclusions.invalid",
+    "obligation_ids": [
+      "B01"
+    ],
+    "source_keys": [
+      "compat"
+    ],
+    "document": {
+      "text": "FROM main | decrypt",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "exclusions"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "floor_credit": false
+  },
+  {
+    "id": "B02",
+    "meaningful_id": "exclusions.invalid",
+    "obligation_ids": [
+      "B02"
+    ],
+    "source_keys": [
+      "compat"
+    ],
+    "document": {
+      "text": "FROM main | ocsf",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "exclusions"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "floor_credit": false
+  },
+  {
+    "id": "B03",
+    "meaningful_id": "exclusions.invalid",
+    "obligation_ids": [
+      "B03"
+    ],
+    "source_keys": [
+      "compat"
+    ],
+    "document": {
+      "text": "FROM main | route",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "exclusions"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "floor_credit": false
+  },
+  {
+    "id": "B06",
+    "meaningful_id": "exclusions.incomplete",
+    "obligation_ids": [
+      "B06"
+    ],
+    "source_keys": [
+      "compat"
+    ],
+    "document": {
+      "text": "FROM main | eval id=batch_id()",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "exclusions"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "pipeline",
+          "text": "FROM main | eval id=batch_id()"
+        }
+      ]
+    },
+    "floor_credit": false
+  },
+  {
+    "id": "B07",
+    "meaningful_id": "exclusions.incomplete",
+    "obligation_ids": [
+      "B07"
+    ],
+    "source_keys": [
+      "compat"
+    ],
+    "document": {
+      "text": "FROM main | eval clock=batch_time()",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "exclusions"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "pipeline",
+          "text": "FROM main | eval clock=batch_time()"
+        }
+      ]
+    },
+    "floor_credit": false
+  },
+  {
+    "id": "B08",
+    "meaningful_id": "exclusions.invalid",
+    "obligation_ids": [
+      "B08"
+    ],
+    "source_keys": [
+      "compat"
+    ],
+    "document": {
+      "text": "$saved = FROM main;",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "exclusions"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_UNSUPPORTED_MODULE"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "floor_credit": false
+  },
+  {
+    "id": "B09",
+    "meaningful_id": "exclusions.invalid",
+    "obligation_ids": [
+      "B09"
+    ],
+    "source_keys": [
+      "compat"
+    ],
+    "document": {
+      "text": "import * from example;",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "exclusions"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_UNSUPPORTED_MODULE"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "floor_credit": false
+  },
+  {
+    "id": "B10",
+    "meaningful_id": "exclusions.invalid",
+    "obligation_ids": [
+      "B10"
+    ],
+    "source_keys": [
+      "compat"
+    ],
+    "document": {
+      "text": "export $saved = FROM main;",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "exclusions"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_UNSUPPORTED_MODULE"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "floor_credit": false
+  },
+  {
+    "id": "B11",
+    "meaningful_id": "exclusions.invalid",
+    "obligation_ids": [
+      "B11"
+    ],
+    "source_keys": [
+      "compat"
+    ],
+    "document": {
+      "text": "function label($x) { return $x }",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "exclusions"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_UNSUPPORTED_MODULE"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "floor_credit": false
+  },
+  {
+    "id": "B12",
+    "meaningful_id": "exclusions.invalid",
+    "obligation_ids": [
+      "B12"
+    ],
+    "source_keys": [
+      "compat"
+    ],
+    "document": {
+      "text": "FROM main; FROM archive",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "exclusions"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_UNSUPPORTED_MODULE"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "floor_credit": false
+  },
+  {
+    "id": "T8.unknown-adjacent",
+    "meaningful_id": "T8.unknown-adjacent",
+    "obligation_ids": [
+      "T8.unknown-adjacent"
+    ],
+    "source_keys": [
+      "compat",
+      "expressions"
+    ],
+    "document": {
+      "text": "FROM main | mystery flag=1 | where bytes>0",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "T8.canonical"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "floor_credit": false,
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "incomplete",
+      "syntax_complete": false,
+      "semantic_complete": false,
+      "expected_codes": [
+        "SPL_UNSUPPORTED_SEMANTICS"
+      ],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        },
+        {
+          "original_name": "bytes",
+          "normalized_name": "bytes",
+          "kind": "field",
+          "role": "read",
+          "binding": "indeterminate",
+          "start": 35,
+          "end": 40
+        }
+      ],
+      "fields": [],
+      "removed": [],
+      "open": true,
+      "uncertain": true,
+      "stage_commands": [
+        "from",
+        "mystery",
+        "where"
+      ],
+      "stage_complete": [
+        true,
+        false,
+        true
+      ]
+    },
+    "recovery_classification": {
+      "kind": "unknown_command",
+      "command": "mystery",
+      "start": 12,
+      "end": 19,
+      "stage_id": "stage-1"
+    }
+  },
+  {
+    "id": "T8.native-branch",
+    "meaningful_id": "T8.native-branch",
+    "obligation_ids": [
+      "T8.native-branch"
+    ],
+    "source_keys": [
+      "compat",
+      "expressions"
+    ],
+    "document": {
+      "text": "FROM main | branch [where host=1 | into output]",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "T8.canonical"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "floor_credit": false,
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "incomplete",
+      "syntax_complete": false,
+      "semantic_complete": false,
+      "expected_codes": [
+        "SPL_UNSUPPORTED_SEMANTICS"
+      ],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        }
+      ],
+      "fields": [],
+      "removed": [],
+      "open": true,
+      "uncertain": true,
+      "stage_commands": [
+        "from",
+        "branch"
+      ],
+      "stage_complete": [
+        true,
+        false
+      ]
+    },
+    "recovery_classification": {
+      "kind": "native_deferred",
+      "command": "branch",
+      "start": 12,
+      "end": 18,
+      "stage_id": "stage-1"
+    }
+  },
+  {
+    "id": "T8.native-into",
+    "meaningful_id": "T8.native-into",
+    "obligation_ids": [
+      "T8.native-into"
+    ],
+    "source_keys": [
+      "compat",
+      "expressions"
+    ],
+    "document": {
+      "text": "FROM main | into output",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "T8.canonical"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "floor_credit": false,
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "incomplete",
+      "syntax_complete": false,
+      "semantic_complete": false,
+      "expected_codes": [
+        "SPL_UNSUPPORTED_SEMANTICS"
+      ],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        }
+      ],
+      "fields": [],
+      "removed": [],
+      "open": true,
+      "uncertain": true,
+      "stage_commands": [
+        "from",
+        "into"
+      ],
+      "stage_complete": [
+        true,
+        false
+      ]
+    },
+    "recovery_classification": {
+      "kind": "native_deferred",
+      "command": "into",
+      "start": 12,
+      "end": 16,
+      "stage_id": "stage-1"
+    }
+  },
+  {
+    "id": "T8.native-thru",
+    "meaningful_id": "T8.native-thru",
+    "obligation_ids": [
+      "T8.native-thru"
+    ],
+    "source_keys": [
+      "compat",
+      "expressions"
+    ],
+    "document": {
+      "text": "FROM main | thru output",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "T8.canonical"
+    ],
+    "syntax_complete": false,
+    "semantic_complete": false,
+    "status": "invalid",
+    "expected_codes": [
+      "SPL_SYNTAX_ERROR"
+    ],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true
+    },
+    "floor_credit": false,
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "incomplete",
+      "syntax_complete": false,
+      "semantic_complete": false,
+      "expected_codes": [
+        "SPL_UNSUPPORTED_SEMANTICS"
+      ],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        }
+      ],
+      "fields": [],
+      "removed": [],
+      "open": true,
+      "uncertain": true,
+      "stage_commands": [
+        "from",
+        "thru"
+      ],
+      "stage_complete": [
+        true,
+        false
+      ]
+    },
+    "recovery_classification": {
+      "kind": "native_deferred",
+      "command": "thru",
+      "start": 12,
+      "end": 16,
+      "stage_id": "stage-1"
+    }
+  },
+  {
+    "id": "T8.literal-source",
+    "meaningful_id": "T8.literal-source",
+    "obligation_ids": [
+      "T8.literal-source"
+    ],
+    "source_keys": [
+      "compat",
+      "expressions"
+    ],
+    "document": {
+      "text": "FROM [{host:\"a\"}] SELECT host",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "T8.canonical"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "pipeline",
+          "text": "FROM [{host:\"a\"}] SELECT host"
+        }
+      ]
+    },
+    "floor_credit": false,
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "valid",
+      "syntax_complete": true,
+      "semantic_complete": true,
+      "expected_codes": [],
+      "references": [
+        {
+          "original_name": "host",
+          "normalized_name": "host",
+          "kind": "field",
+          "role": "create",
+          "binding": "not_applicable",
+          "start": 7,
+          "end": 11
+        },
+        {
+          "original_name": "host",
+          "normalized_name": "host",
+          "kind": "field",
+          "role": "read",
+          "binding": "derived",
+          "start": 25,
+          "end": 29
+        }
+      ],
+      "fields": [
+        {
+          "name": "host",
+          "conditional": false
+        }
+      ],
+      "removed": [],
+      "open": false,
+      "uncertain": false,
+      "stage_commands": [
+        "from",
+        "select"
+      ],
+      "stage_complete": [
+        true,
+        true
+      ]
+    }
+  },
+  {
+    "id": "T8.inherited-parent",
+    "meaningful_id": "T8.inherited-parent",
+    "obligation_ids": [
+      "T8.inherited-parent"
+    ],
+    "source_keys": [
+      "compat",
+      "expressions"
+    ],
+    "document": {
+      "text": "FROM main | eval parent=1 | appendpipe [table parent] | table parent",
+      "language": "spl2"
+    },
+    "form_ids": [
+      "T8.canonical"
+    ],
+    "syntax_complete": true,
+    "semantic_complete": false,
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [],
+    "assertions": {
+      "phase": "syntax",
+      "scope": "grammar-contexts-only",
+      "source_exact": true,
+      "excerpts": [
+        {
+          "kind": "pipeline",
+          "text": "FROM main | eval parent=1 | appendpipe [table parent] | table parent"
+        }
+      ]
+    },
+    "floor_credit": false,
+    "canonical": {
+      "phase": "analysis",
+      "scope": "canonical-result",
+      "status": "incomplete",
+      "syntax_complete": true,
+      "semantic_complete": false,
+      "expected_codes": [
+        "SPL_UNSUPPORTED_SEMANTICS"
+      ],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        },
+        {
+          "original_name": "parent",
+          "normalized_name": "parent",
+          "kind": "field",
+          "role": "create",
+          "binding": "not_applicable",
+          "start": 17,
+          "end": 23
+        },
+        {
+          "original_name": "parent",
+          "normalized_name": "parent",
+          "kind": "field",
+          "role": "read",
+          "binding": "derived",
+          "start": 46,
+          "end": 52
+        },
+        {
+          "original_name": "parent",
+          "normalized_name": "parent",
+          "kind": "field",
+          "role": "read",
+          "binding": "derived",
+          "start": 62,
+          "end": 68
+        }
+      ],
+      "fields": [
+        {
+          "name": "parent",
+          "conditional": false
+        }
+      ],
+      "removed": [],
+      "open": false,
+      "uncertain": false,
+      "stage_commands": [
+        "from",
+        "eval",
+        "appendpipe",
+        "table",
+        "table"
+      ],
+      "stage_complete": [
+        true,
+        true,
+        false,
+        true,
+        true
+      ]
+    }
+  }
+]

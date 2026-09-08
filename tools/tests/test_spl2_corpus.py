@@ -248,3 +248,68 @@ class SPL2CanonicalLayerTests(unittest.TestCase):
         case['canonical']={'phase':'analysis','scope':'canonical-result','status':'incomplete','syntax_complete':False,'semantic_complete':True,'expected_codes':[],'references':[],'fields':[],'removed':[],'open':True,'uncertain':True,'stage_commands':[],'stage_complete':[]}
         with self.assertRaisesRegex(ValueError, 'canonical'):
             self.audit()
+
+class SPL2RecoveryClassificationTests(unittest.TestCase):
+    def setUp(self):
+        _, self.provenance, _ = CHECK.load(TOOLS.parent / "testdata/spl2")
+        self.case = {
+            "document": {"text": "FROM main | mystery flag=1", "language": "spl2"},
+            "status": "invalid", "syntax_complete": False,
+            "expected_codes": ["SPL_SYNTAX_ERROR"], "floor_credit": False,
+            "recovery_classification": {"kind": "unknown_command", "command": "mystery", "start": 12, "end": 19, "stage_id": "stage-1"},
+            "canonical": {"phase": "analysis", "scope": "canonical-result", "status": "incomplete", "syntax_complete": False, "semantic_complete": False,
+                          "expected_codes": ["SPL_UNSUPPORTED_SEMANTICS"], "references": [], "fields": [], "removed": [], "open": True, "uncertain": True,
+                          "stage_commands": ["from", "mystery"], "stage_complete": [True, False]},
+        }
+
+    def audit(self):
+        return CHECK.audit_canonical(self.case, self.provenance["inventory"])
+
+    def test_explicit_unknown_classification_preserves_raw_syntax(self):
+        self.assertTrue(self.audit())
+        self.assertEqual(self.case["status"], "invalid")
+        self.assertEqual(self.case["expected_codes"], ["SPL_SYNTAX_ERROR"])
+
+    def test_native_deferred_classification_requires_durable_inventory(self):
+        self.case["document"]["text"] = "FROM main | branch [into out]"
+        self.case["recovery_classification"].update(kind="native_deferred", command="branch", end=18)
+        self.case["canonical"]["stage_commands"][1] = "branch"
+        self.assertTrue(self.audit())
+        self.case["recovery_classification"]["kind"] = "unknown_command"
+        with self.assertRaisesRegex(ValueError, "classification"):
+            self.audit()
+
+    def test_recovery_cannot_be_arbitrary_override_or_credit(self):
+        original = copy.deepcopy(self.case)
+        mutations = {
+            "credit": lambda c: c.update(floor_credit=True),
+            "valid": lambda c: c["canonical"].update(status="valid"),
+            "syntax": lambda c: c["canonical"].update(syntax_complete=True),
+            "semantics": lambda c: c["canonical"].update(semantic_complete=True),
+            "wrongstage": lambda c: c["recovery_classification"].update(stage_id="stage-0"),
+            "empty": lambda c: c["recovery_classification"].update(end=12),
+            "outofbounds": lambda c: c["recovery_classification"].update(end=999),
+            "wrongtoken": lambda c: c["recovery_classification"].update(start=13),
+            "synthetic": lambda c: c["recovery_classification"].update(start=-1),
+            "override": lambda c: c["recovery_classification"].update(query_override="anything"),
+            "module": lambda c: c["canonical"].update(expected_codes=["SPL_UNSUPPORTED_MODULE"]),
+            "profile": lambda c: c["canonical"].update(expected_codes=["SPL_PROFILE_MISMATCH"]),
+            "definite": lambda c: c["canonical"].update(expected_codes=["SPL_SYNTAX_ERROR", "SPL_UNSUPPORTED_SEMANTICS"]),
+        }
+        for name, change in mutations.items():
+            with self.subTest(name=name):
+                self.case = copy.deepcopy(original)
+                change(self.case)
+                with self.assertRaises(ValueError):
+                    self.audit()
+
+    def test_supported_profile_and_module_commands_are_not_unknown(self):
+        original = copy.deepcopy(self.case)
+        for command in ("eval", "route", "import", "function", "branch"):
+            with self.subTest(command=command):
+                self.case = copy.deepcopy(original)
+                self.case["document"]["text"] = "FROM main | " + command
+                self.case["recovery_classification"].update(command=command, end=12 + len(command))
+                self.case["canonical"]["stage_commands"][1] = command
+                with self.assertRaisesRegex(ValueError, "classification"):
+                    self.audit()

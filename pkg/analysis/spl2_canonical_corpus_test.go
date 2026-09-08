@@ -70,6 +70,37 @@ func TestSPL2CorpusCanonical(t *testing.T) {
 				if e != nil {
 					t.Fatal(e)
 				}
+				if recovery := c.Recovery; recovery != nil {
+					parsed := parseSPL2Document(c.Document.Text)
+					original := false
+					for _, token := range parsed.tokens.GetAllTokens() {
+						location := parsed.source.location(token.GetStart(), token.GetStop()+1)
+						if location.Start.Offset == recovery.Start && location.End.Offset == recovery.End && token.GetText() == recovery.Command && token.GetTokenIndex() >= 0 {
+							original = true
+						}
+					}
+					if !original {
+						t.Fatal("recovery classification is not an original token")
+					}
+					found := false
+					for _, stage := range r.Stages {
+						if stage.ID == recovery.StageID && stage.Command == recovery.Command && stage.Location.Start.Offset == recovery.Start && stage.Location.End.Offset >= recovery.End {
+							for _, d := range r.Diagnostics {
+								if d.StageID == stage.ID && d.Code == CodeUnsupportedSemantics && d.Severity == "warning" && d.Location.Start.Offset <= recovery.Start && d.Location.End.Offset >= recovery.End {
+									found = true
+								}
+							}
+							for _, ref := range r.References {
+								if ref.StageID == stage.ID {
+									t.Fatal("unknown command fabricated a reference")
+								}
+							}
+						}
+					}
+					if !found {
+						t.Fatal("recovery classification lacks actual owning stage and located unsupported diagnostic")
+					}
+				}
 				got := spl2CanonicalExpectation{Phase: "analysis", Scope: "canonical-result", Status: r.Status, SyntaxComplete: r.Coverage.SyntaxComplete, SemanticComplete: r.Coverage.SemanticComplete, ExpectedCodes: []string{}, References: []spl2CanonicalReference{}, Fields: []spl2CanonicalField{}, Removed: []string{}, StageCommands: []string{}, StageComplete: []bool{}}
 				codes := map[string]bool{}
 				for _, d := range r.Diagnostics {
