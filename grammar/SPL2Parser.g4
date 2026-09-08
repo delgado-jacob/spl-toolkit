@@ -9,6 +9,30 @@ var _ = strings.EqualFold
 @members {
 // Casing is recognized only in an operator grammar position. The same lower-
 // case token remains an ordinary identifier or search literal elsewhere.
+func (p *SPL2Parser) extendedUnknownOption() bool {
+    token:=p.GetTokenStream().LA(1)
+    for ctx:=p.GetParserRuleContext();ctx!=nil; {
+        var known []int
+        switch ctx.(type) {
+        case *RexCommandContext: known=[]int{SPL2ParserFIELD,SPL2ParserMAX_MATCH,SPL2ParserOFFSET_FIELD,SPL2ParserMODE}
+        case *AppendpipeCommandContext: known=[]int{SPL2ParserRUN_IN_PREVIEW}
+        case *BinCommandContext: known=[]int{SPL2ParserBINS,SPL2ParserMINSPAN,SPL2ParserSPAN,SPL2ParserSTART,SPL2ParserEND,SPL2ParserALIGNTIME}
+        case *SpathCommandContext: known=[]int{SPL2ParserINPUT,SPL2ParserPATH,SPL2ParserOUTPUT_LOWER}
+        case *MakemvCommandContext: known=[]int{SPL2ParserDELIM,SPL2ParserTOKENIZER}
+        case *MvexpandCommandContext: known=[]int{SPL2ParserLIMIT}
+        case *MvcombineCommandContext: known=[]int{SPL2ParserDELIM}
+        case *FillnullCommandContext: known=[]int{SPL2ParserVALUE}
+        case *MetricsCommandContext: known=[]int{SPL2ParserAGGREGATES,SPL2ParserPREDICATE,SPL2ParserBYFIELDS,SPL2ParserDATAMODEL_NAME}
+        case *TimechartCommandContext: known=[]int{SPL2ParserBINS,SPL2ParserMINSPAN,SPL2ParserSPAN,SPL2ParserSTART,SPL2ParserEND,SPL2ParserALIGNTIME,SPL2ParserSEP,SPL2ParserFORMAT,SPL2ParserPARTIAL,SPL2ParserCONT,SPL2ParserFIXEDRANGE,SPL2ParserLIMIT,SPL2ParserAGG,SPL2ParserUSENULL,SPL2ParserUSEOTHER,SPL2ParserNULLSTR,SPL2ParserOTHERSTR}
+        }
+        if known!=nil {for _,k:=range known {if k==token {return false}};return true}
+        parent,_:=ctx.GetParent().(antlr.ParserRuleContext);ctx=parent
+    }
+    return true
+}
+func (p *SPL2Parser) adjacentPrevious() bool {
+ return p.GetTokenStream().LT(-1).GetStop()+1 == p.GetTokenStream().LT(1).GetStart()
+}
 func (p *SPL2Parser) contextualKeyword(word string) bool {
     return strings.EqualFold(p.GetTokenStream().LT(1).GetText(), word)
 }
@@ -44,11 +68,13 @@ func (p *SPL2Parser) unreviewedOption(command int) bool {
 
 query: NL* (pipeline moduleSuffix? | moduleDeclaration) NL* EOF;
 pipeline: start (NL* PIPE NL* command)*;
-start: fromCommand | selectCommand | searchCommand | implicitSearch | generator | embeddedCommand;
+start: fromCommand | selectCommand | searchCommand | implicitSearch | generator | loadjobCommand | metricsCommand | unionCommand | embeddedCommand;
 command: evalCommand | whereCommand | fieldsCommand | tableCommand | renameCommand
     | statsCommand | eventstatsCommand | streamstatsCommand | lookupCommand
     | sortCommand | dedupCommand | headCommand | reverseCommand
-    | fromCommand | selectCommand | searchCommand | rexCommand | embeddedCommand;
+    | fromCommand | selectCommand | searchCommand | rexCommand | embeddedCommand
+    | joinCommand | appendCommand | appendpipeCommand | appendcolsCommand | unionCommand | ifCommand
+    | binCommand | spathCommand | timechartCommand | timewrapCommand | makemvCommand | mvexpandCommand | mvcombineCommand | fillnullCommand;
 // Clause contexts own only their original lexical spans. Logical SQL scheduling
 // is deliberately deferred to lowering, not represented by reordered source.
 fromCommand: sqlFromClause (NL* sqlWhereClause)? (NL* sqlGroupClause NL* sqlSelectClause | NL* sqlSelectClause)?
@@ -80,7 +106,7 @@ sqlLimitClause: LIMIT integerValue;
 sqlOffsetClause: OFFSET integerValue;
 existsPredicate: EXISTS LPAREN (fromCommand | selectCommand) RPAREN;
 dataset: identifier | array;
-generator: MAKERESULTS NUMBER?;
+generator: MAKERESULTS extendedOption* integerValue?;
 evalCommand: EVAL assignment (COMMA assignment)*;
 assignment: fieldName ASSIGN expression;
 whereCommand: WHERE expression;
@@ -140,9 +166,47 @@ reverseCommand: REVERSE;
 // command body. Known options of this command cannot fall through here.
 unknownOption: unknownOptionName ASSIGN (literal | identifier);
 unknownOptionName: IDENTIFIER | INDEX | pipelineKeyword | sqlKeyword;
+// Bracket roles have distinct contexts; no array can become a command child.
+independentSearch: LBRACKET NL* pipeline NL* RBRACKET;
+inheritedSubpipe: LBRACKET NL* command (NL* PIPE NL* command)* NL* RBRACKET;
+joinCommand: JOIN joinOption* WHERE sqlJoinPredicate independentSearch;
+joinOption: LEFT ASSIGN identifier | RIGHT ASSIGN identifier | TYPE_OPTION ASSIGN joinType | MAX ASSIGN integerValue | {p.GetTokenStream().LA(1) != SPL2ParserLEFT && p.GetTokenStream().LA(1) != SPL2ParserRIGHT && p.GetTokenStream().LA(1) != SPL2ParserTYPE_OPTION && p.GetTokenStream().LA(1) != SPL2ParserMAX}? unknownOption;
+joinType: INNER | LEFT | OUTER | identifier;
+appendCommand: APPEND extendedOption* independentSearch;
+appendpipeCommand: APPENDPIPE extendedOption* (RUN_IN_PREVIEW ASSIGN BOOLEAN)? inheritedSubpipe;
+appendcolsCommand: APPENDCOLS extendedOption* independentSearch;
+unionCommand: UNION unionDataset (COMMA unionDataset)*;
+unionDataset: independentSearch | dataset;
+ifCommand: IF LPAREN expression RPAREN inheritedSubpipe (ELSEIF LPAREN expression RPAREN inheritedSubpipe)* (ELSE inheritedSubpipe)?;
+binCommand: BIN (binOption | extendedOption)* identifier (aliasKeyword identifier)?;
+binOption: BINS ASSIGN integerValue | MINSPAN ASSIGN binSpan | SPAN ASSIGN binSpan
+    | (START | END) ASSIGN signedNumber | alignmentOption;
+alignmentOption: ALIGNTIME ASSIGN (EARLIEST | LATEST | relativeTime);
+binSpan: logarithmicSpan | (signedNumber ({p.adjacentPrevious()}? IDENTIFIER | {!p.adjacentPrevious()}?) | IDENTIFIER) (AT IDENTIFIER)?;
+logarithmicSpan: signedNumber? LOG_SPAN;
+extendedOption: {p.extendedUnknownOption()}? unknownOption;
+signedNumber: (PLUS | MINUS)? NUMBER;
 rexCommand: REX rexOption* (REGEX | stringLiteral | RAW_STRING);
-rexOption: IDENTIFIER ASSIGN (identifier | NUMBER);
-embeddedCommand: SPL1? embeddedText;
+rexOption: FIELD ASSIGN identifier | MAX_MATCH ASSIGN integerValue | OFFSET_FIELD ASSIGN identifier | MODE ASSIGN SED | extendedOption;
+spathCommand: SPATH (spathOption | extendedOption)*;
+spathOption: INPUT ASSIGN identifier | PATH ASSIGN stringLiteral | OUTPUT_LOWER ASSIGN identifier;
+loadjobCommand: LOADJOB extendedOption* (NUMBER | identifier | stringLiteral);
+metricsCommand: (TSTATS | MSTATS) metricsAggregates metricsOption*;
+metricsAggregates: AGGREGATES ASSIGN LBRACKET aggregate (COMMA aggregate)* RBRACKET;
+metricsOption: PREDICATE ASSIGN LPAREN expression RPAREN | BYFIELDS ASSIGN LBRACKET groupField (COMMA groupField)* RBRACKET | DATAMODEL_NAME ASSIGN quotedName | extendedOption;
+timechartCommand: TIMECHART timechartOption* (EVAL LPAREN expression RPAREN timechartSplit | aggregate timechartExtraAggregate* timechartSplit?);
+timechartExtraAggregate: COMMA? aggregate;
+timechartOption: binOption | (SEP | FORMAT) ASSIGN stringLiteral | (PARTIAL | CONT | FIXEDRANGE) ASSIGN BOOLEAN
+    | LIMIT ASSIGN integerValue | AGG ASSIGN (LPAREN aggregate RPAREN | identifier) | extendedOption;
+timechartSplit: BY identifier timechartSplitOption*;
+timechartSplitOption: binOption | (USENULL | USEOTHER) ASSIGN BOOLEAN | (NULLSTR | OTHERSTR) ASSIGN stringLiteral | extendedOption;
+timewrapCommand: TIMEWRAP timeSpan (ALIGN ASSIGN (NOW | END | identifier))?;
+makemvCommand: MAKEMV (DELIM ASSIGN stringLiteral | TOKENIZER ASSIGN (stringLiteral | RAW_STRING) | extendedOption)* identifier;
+mvexpandCommand: MVEXPAND extendedOption* (LIMIT ASSIGN integerValue)? identifier;
+mvcombineCommand: MVCOMBINE extendedOption* delimOption? identifier;
+fillnullCommand: FILLNULL extendedOption* (VALUE ASSIGN stringLiteral)? (identifier (COMMA identifier)*)?;
+embeddedCommand: SPL1 stringLiteral | SPL1? embeddedText;
+
 embeddedText: BACKTICK EMBEDDED_TEXT? EMBEDDED_END;
 moduleSuffix: SEMI .*?;
 moduleDeclaration: (IMPORT | EXPORT | FUNCTION | LOCAL ASSIGN) .*?;
@@ -208,7 +272,8 @@ sqlKeyword: DISTINCT | HAVING | GROUPBY | ORDER | ORDERBY | LIMIT | OFFSET | ASC
 pipelineKeyword: AS_LOWER | RENAME | STATS | EVENTSTATS | STREAMSTATS | LOOKUP | SORT | DEDUP | HEAD | REVERSE
     | BY | OUTPUT | OUTPUTNEW | ALLNUM | DELIM | PARTITIONS | SPAN | CURRENT | RESET | BEFORE | AFTER | ONCHANGE | WINDOW
     | KEEPEMPTY | CONSECUTIVE | KEEPLAST | WHILE | AUTO | IP | NUM | STR | TERM | CASE
-    | EARLIEST | LATEST | INDEX_EARLIEST | INDEX_LATEST | TIMEFORMAT | STARTTIME | ENDTIME | NOW;
+    | EARLIEST | LATEST | INDEX_EARLIEST | INDEX_LATEST | TIMEFORMAT | STARTTIME | ENDTIME | NOW
+    | APPEND | APPENDPIPE | APPENDCOLS | UNION | IF | ELSEIF | ELSE | BIN | SPATH | LOADJOB | TSTATS | MSTATS | TIMECHART | TIMEWRAP | MAKEMV | MVEXPAND | MVCOMBINE | FILLNULL | RIGHT | RUN_IN_PREVIEW | MAX | BINS | MINSPAN | START | END | ALIGNTIME | FIELD | MAX_MATCH | OFFSET_FIELD | MODE | SED | INPUT | PATH | OUTPUT_LOWER | AGGREGATES | PREDICATE | BYFIELDS | DATAMODEL_NAME | SEP | FORMAT | PARTIAL | CONT | FIXEDRANGE | AGG | USENULL | USEOTHER | NULLSTR | OTHERSTR | ALIGN | TOKENIZER | VALUE | TYPE_OPTION | LOG_SPAN;
 array: LBRACKET (expression (COMMA expression)* COMMA?)? RBRACKET;
 object: LBRACE (objectEntry (COMMA objectEntry)* COMMA?)? RBRACE;
 objectEntry: objectKey COLON expression;

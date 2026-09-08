@@ -295,7 +295,8 @@
     "id": "T2.regex.quoted_alternation",
     "meaningful_id": "T2.regex.quoted_alternation",
     "obligation_ids": [
-      "T2.regex.quoted_alternation"
+      "T2.regex.quoted_alternation",
+      "E.C24.quoted_regex.P1"
     ],
     "source_keys": [
       "doc161"
@@ -305,7 +306,8 @@
       "language": "spl2"
     },
     "form_ids": [
-      "L23"
+      "L23",
+      "E.C24.quoted_regex"
     ],
     "syntax_complete": true,
     "semantic_complete": false,

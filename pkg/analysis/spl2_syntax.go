@@ -1,6 +1,7 @@
 package analysis
 
 import (
+	"math/big"
 	"strconv"
 	"strings"
 
@@ -59,11 +60,81 @@ func (p *spl2ParsedDocument) syntaxFinding(ctx antlr.ParserRuleContext, code, ca
 }
 func (p *spl2ParsedDocument) inspectSyntax(tree antlr.Tree, lambdaDepth int) {
 	switch ctx := tree.(type) {
+	case *spl2.MakemvCommandContext:
+		p.inspectNoninternalField(ctx.Identifier())
+	case *spl2.MvcombineCommandContext:
+		p.inspectNoninternalField(ctx.Identifier())
+	case *spl2.JoinCommandContext:
+		if ctx.JOIN() != nil && ctx.JOIN().GetText() != "join" {
+			p.heldSyntax(ctx, "H11 pipeline join command casing remains unproved")
+		}
+		if spl2IntactSyntax(ctx) {
+			left, right := false, false
+			for _, option := range ctx.AllJoinOption() {
+				left = left || option.LEFT() != nil
+				right = right || option.RIGHT() != nil
+			}
+			if !left || !right {
+				p.syntaxFinding(ctx, CodeSyntaxError, "contract", "Join requires both left and right aliases")
+			}
+		}
+	case *spl2.JoinTypeContext:
+		if spl2IntactSyntax(ctx) {
+			value := strings.ToLower(ctx.GetText())
+			if value != "inner" && value != "left" && value != "outer" {
+				p.syntaxFinding(ctx, CodeSyntaxError, "contract", "Join type requires inner, left or outer")
+			} else if value != ctx.GetText() {
+				p.heldSyntax(ctx, "H11 join type casing remains unproved")
+			}
+		}
+	case *spl2.UnionCommandContext:
+		if _, generating := ctx.GetParent().(*spl2.StartContext); generating && len(ctx.AllUnionDataset()) < 2 && spl2IntactSyntax(ctx) {
+			p.syntaxFinding(ctx, CodeSyntaxError, "contract", "Generating union requires at least two datasets")
+		}
+	case *spl2.SpathCommandContext:
+		if spl2IntactSyntax(ctx) {
+			path := false
+			for _, option := range ctx.AllSpathOption() {
+				path = path || option.PATH() != nil
+			}
+			if !path {
+				for _, option := range ctx.AllSpathOption() {
+					if option.OUTPUT_LOWER() != nil {
+						p.syntaxFinding(option, CodeSyntaxError, "contract", "Spath output requires a quoted path")
+					}
+				}
+			}
+		}
+	case *spl2.MetricsOptionContext:
+		if ctx.DATAMODEL_NAME() != nil && spl2IntactSyntax(ctx) {
+			if parent, ok := ctx.GetParent().(*spl2.MetricsCommandContext); ok && parent.MSTATS() != nil {
+				p.heldSyntax(ctx, "Datamodel option is unproved for mstats")
+			}
+		}
+	case *spl2.LogarithmicSpanContext:
+		p.inspectLogSpan(ctx)
+	case *spl2.BinSpanContext:
+		p.inspectBinSpan(ctx)
+	case *spl2.TimechartExtraAggregateContext:
+		if spl2IntactSyntax(ctx) {
+			p.heldSyntax(ctx, "H04 multiple timechart aggregates remain held")
+		}
+	case *spl2.TimechartOptionContext:
+		if ctx.AGG() != nil && ctx.Identifier() != nil && spl2IntactSyntax(ctx) {
+			p.heldSyntax(ctx, "EH02 bare timechart agg remains held")
+		}
+	case *spl2.TimewrapCommandContext:
+		if value := ctx.Identifier(); value != nil && spl2IntactSyntax(value) && value.GetText() != "now" && value.GetText() != "end" {
+			p.syntaxFinding(value, CodeSyntaxError, "contract", "Timewrap alignment requires now or end")
+		}
 	case *spl2.TimeSpanContext:
+		if _, ok := ctx.GetParent().(*spl2.TimewrapCommandContext); ok && spl2IntactSyntax(ctx) && !spl2TimewrapUnit(ctx.IDENTIFIER().GetText()) {
+			p.heldSyntax(ctx, "Unproved timewrap unit")
+		}
 		switch ctx.GetParent().(type) {
-		case *spl2.SqlSpanCallContext, *spl2.SqlSpanAssignmentContext, *spl2.SqlUnparenthesizedSpanContext:
+		case *spl2.SqlSpanCallContext, *spl2.SqlSpanAssignmentContext, *spl2.SqlUnparenthesizedSpanContext, *spl2.TimewrapCommandContext:
 			if ctx.NUMBER() != nil && spl2IntactSyntax(ctx) && !spl2SQLInteger(ctx.NUMBER().GetText()) {
-				p.syntaxFinding(ctx, CodeSyntaxError, "contract", "SQL span count requires an integer")
+				p.syntaxFinding(ctx, CodeSyntaxError, "contract", "Span count requires an integer")
 			}
 		}
 	case *spl2.SqlJoinFieldContext:
@@ -114,6 +185,9 @@ func (p *spl2ParsedDocument) inspectSyntax(tree antlr.Tree, lambdaDepth int) {
 		}
 	case *spl2.GroupFieldContext:
 		if span := ctx.GroupSpan(); span != nil {
+			if _, metrics := ctx.GetParent().(*spl2.MetricsOptionContext); metrics {
+				p.heldSyntax(span, "Grouping span in metrics arrays remains unproved")
+			}
 			if _, streaming := ctx.GetParent().(*spl2.StreamGroupContext); streaming {
 				p.heldSyntax(span, "Grouping span in streamstats remains unproved")
 			}
@@ -184,6 +258,18 @@ func (p *spl2ParsedDocument) inspectSyntax(tree antlr.Tree, lambdaDepth int) {
 		p.inspectUnknownOption(ctx)
 	case *spl2.AggregateContext:
 		p.inspectAggregate(ctx)
+		if _, ok := ctx.GetParent().(*spl2.TimechartCommandContext); ok && spl2IntactSyntax(ctx) {
+			if args := ctx.Call().Arguments(); args != nil {
+				for _, expr := range args.AllExpression() {
+					if access := spl2SingleAccess(expr); access != nil && access.Primary().FieldName() != nil && access.Primary().FieldName().Identifier() != nil {
+						name := access.Primary().FieldName()
+						if decoded, ok := spl2DecodeKey(name.GetText()); ok && strings.Contains(decoded, "*") {
+							p.syntaxFinding(name, CodeSyntaxError, "contract", "Timechart aggregate field cannot contain wildcards")
+						}
+					}
+				}
+			}
+		}
 	case *spl2.CallContext:
 		if name := ctx.Identifier(); name != nil && spl2IntactSyntax(ctx) && spl2StatisticalFunction(name.GetText()) && name.GetText() != "min" && name.GetText() != "max" {
 			for parent := ctx.GetParent(); parent != nil; parent = parent.GetParent() {
@@ -358,8 +444,36 @@ func (p *spl2ParsedDocument) inspectUnknownOption(ctx *spl2.UnknownOptionContext
 	}
 	name := ctx.UnknownOptionName().GetText()
 	removed, profile := false, false
+owners:
 	for parent := ctx.GetParent(); parent != nil; parent = parent.GetParent() {
-		switch parent.(type) {
+		switch owner := parent.(type) {
+		case *spl2.CommandContext, *spl2.StartContext:
+			break owners
+		case *spl2.GeneratorContext:
+			removed = name == "count"
+		case *spl2.LoadjobCommandContext:
+			switch name {
+			case "savedsearch", "result_event", "delegate", "artifact_offset", "ignore_running":
+				removed = true
+			}
+		case *spl2.AppendCommandContext:
+			removed = name == "maxtime" || name == "maxout" || name == "extendtimerange"
+		case *spl2.AppendcolsCommandContext:
+			removed = name == "override" || name == "maxtime" || name == "maxout" || name == "timeout"
+		case *spl2.MakemvCommandContext:
+			removed = name == "allowempty" || name == "setsv"
+		case *spl2.MetricsCommandContext:
+			if owner.TSTATS() != nil {
+				switch name {
+				case "prestats", "local", "append", "summariesonly", "include_reduced_buckets", "allow_old_summaries", "chunk_size", "fillnull_value":
+					removed = true
+				}
+			} else {
+				switch name {
+				case "append", "backfill", "chart", "chunk_size", "fillnull_value", "prestats", "span", "update_period":
+					removed = true
+				}
+			}
 		case *spl2.HeadCommandContext:
 			removed = name == "limit" || name == "null"
 		case *spl2.SortCommandContext:
@@ -631,4 +745,88 @@ func spl2SQLFieldAccess(tree antlr.Tree) spl2.IAccessContext {
 		access = spl2SingleAccess(access.Primary().Expression())
 	}
 	return access
+}
+
+// Span syntax retains its numeric and unit tokens. Only literal domains are
+// checked here; no time evaluation, regex parsing or source reconstruction.
+func (p *spl2ParsedDocument) inspectBinSpan(ctx *spl2.BinSpanContext) {
+	if !spl2IntactSyntax(ctx) {
+		return
+	}
+	if option, ok := ctx.GetParent().(*spl2.BinOptionContext); ok && option.MINSPAN() != nil && (ctx.LogarithmicSpan() != nil || ctx.AT() != nil) {
+		p.heldSyntax(ctx, "Logarithmic or snapped minspan remains unproved")
+	}
+	number := ctx.SignedNumber()
+	if number != nil && !spl2SQLInteger(strings.TrimPrefix(strings.TrimPrefix(number.GetText(), "+"), "-")) {
+		p.syntaxFinding(number, CodeSyntaxError, "contract", "Span count requires an integer")
+	}
+	units := ctx.AllIDENTIFIER()
+	if len(units) == 0 {
+		return
+	}
+	unit := units[0].GetText()
+	inBin := false
+	for parent := ctx.GetParent(); parent != nil; parent = parent.GetParent() {
+		if _, ok := parent.(*spl2.BinCommandContext); ok {
+			inBin = true
+			break
+		}
+	}
+	if inBin {
+		admitted := false
+		switch unit {
+		case "us", "ms", "cs", "ds", "s", "sec", "secs", "second", "seconds", "m", "min", "mins", "minute", "minutes", "h", "hr", "hrs", "hour", "hours", "d", "day", "days", "mon", "month", "months", "y", "yr", "year", "years":
+			admitted = true
+		}
+		if number == nil || !admitted || ctx.AT() != nil {
+			p.heldSyntax(ctx, "EH01 additional bin unit or span layout remains unproved")
+		}
+	} else if ctx.AT() == nil && !spl2TimewrapUnit(unit) && unit != "us" && unit != "ms" && unit != "cs" && unit != "ds" {
+		p.heldSyntax(ctx, "Unproved timechart unit")
+	} else if ctx.AT() != nil && unit != "w" && unit != "week" && unit != "weeks" {
+		p.heldSyntax(ctx, "Nonweekly snapped timechart spans remain unproved")
+	}
+}
+
+func (p *spl2ParsedDocument) inspectLogSpan(ctx *spl2.LogarithmicSpanContext) {
+	if !spl2IntactSyntax(ctx) {
+		return
+	}
+	baseText := strings.TrimPrefix(ctx.LOG_SPAN().GetText(), "log")
+	if baseText == "" {
+		baseText = "10"
+	}
+	base, ok := new(big.Rat).SetString(baseText)
+	if !ok {
+		p.heldSyntax(ctx, "Unproved logarithmic base literal")
+		return
+	}
+	one := big.NewRat(1, 1)
+	coefficient := one
+	if number := ctx.SignedNumber(); number != nil {
+		coefficient, ok = new(big.Rat).SetString(number.GetText())
+	}
+	if !ok {
+		p.heldSyntax(ctx, "Unproved logarithmic coefficient literal")
+		return
+	}
+	if base.Cmp(one) <= 0 || coefficient.Cmp(one) < 0 || coefficient.Cmp(base) >= 0 {
+		p.syntaxFinding(ctx, CodeSyntaxError, "contract", "Logarithmic span requires base > 1 and 1 <= coefficient < base")
+	}
+}
+func spl2TimewrapUnit(unit string) bool {
+	switch unit {
+	case "s", "sec", "secs", "second", "seconds", "min", "mins", "minute", "minutes", "h", "hr", "hrs", "hour", "hours", "d", "day", "days", "w", "week", "weeks", "m", "mon", "month", "months", "q", "qtr", "quarter", "quarters", "y", "yr", "yrs", "year", "years":
+		return true
+	}
+	return false
+}
+
+func (p *spl2ParsedDocument) inspectNoninternalField(ctx spl2.IIdentifierContext) {
+	if ctx == nil || !spl2IntactSyntax(ctx) {
+		return
+	}
+	if name, ok := spl2DecodeKey(ctx.GetText()); ok && strings.HasPrefix(name, "_") {
+		p.syntaxFinding(ctx, CodeSyntaxError, "contract", "This command requires a noninternal field")
+	}
 }

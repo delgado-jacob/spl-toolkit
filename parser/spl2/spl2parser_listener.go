@@ -271,11 +271,113 @@ type SPL2ParserListener interface {
 	// EnterUnknownOptionName is called when entering the unknownOptionName production.
 	EnterUnknownOptionName(c *UnknownOptionNameContext)
 
+	// EnterIndependentSearch is called when entering the independentSearch production.
+	EnterIndependentSearch(c *IndependentSearchContext)
+
+	// EnterInheritedSubpipe is called when entering the inheritedSubpipe production.
+	EnterInheritedSubpipe(c *InheritedSubpipeContext)
+
+	// EnterJoinCommand is called when entering the joinCommand production.
+	EnterJoinCommand(c *JoinCommandContext)
+
+	// EnterJoinOption is called when entering the joinOption production.
+	EnterJoinOption(c *JoinOptionContext)
+
+	// EnterJoinType is called when entering the joinType production.
+	EnterJoinType(c *JoinTypeContext)
+
+	// EnterAppendCommand is called when entering the appendCommand production.
+	EnterAppendCommand(c *AppendCommandContext)
+
+	// EnterAppendpipeCommand is called when entering the appendpipeCommand production.
+	EnterAppendpipeCommand(c *AppendpipeCommandContext)
+
+	// EnterAppendcolsCommand is called when entering the appendcolsCommand production.
+	EnterAppendcolsCommand(c *AppendcolsCommandContext)
+
+	// EnterUnionCommand is called when entering the unionCommand production.
+	EnterUnionCommand(c *UnionCommandContext)
+
+	// EnterUnionDataset is called when entering the unionDataset production.
+	EnterUnionDataset(c *UnionDatasetContext)
+
+	// EnterIfCommand is called when entering the ifCommand production.
+	EnterIfCommand(c *IfCommandContext)
+
+	// EnterBinCommand is called when entering the binCommand production.
+	EnterBinCommand(c *BinCommandContext)
+
+	// EnterBinOption is called when entering the binOption production.
+	EnterBinOption(c *BinOptionContext)
+
+	// EnterAlignmentOption is called when entering the alignmentOption production.
+	EnterAlignmentOption(c *AlignmentOptionContext)
+
+	// EnterBinSpan is called when entering the binSpan production.
+	EnterBinSpan(c *BinSpanContext)
+
+	// EnterLogarithmicSpan is called when entering the logarithmicSpan production.
+	EnterLogarithmicSpan(c *LogarithmicSpanContext)
+
+	// EnterExtendedOption is called when entering the extendedOption production.
+	EnterExtendedOption(c *ExtendedOptionContext)
+
+	// EnterSignedNumber is called when entering the signedNumber production.
+	EnterSignedNumber(c *SignedNumberContext)
+
 	// EnterRexCommand is called when entering the rexCommand production.
 	EnterRexCommand(c *RexCommandContext)
 
 	// EnterRexOption is called when entering the rexOption production.
 	EnterRexOption(c *RexOptionContext)
+
+	// EnterSpathCommand is called when entering the spathCommand production.
+	EnterSpathCommand(c *SpathCommandContext)
+
+	// EnterSpathOption is called when entering the spathOption production.
+	EnterSpathOption(c *SpathOptionContext)
+
+	// EnterLoadjobCommand is called when entering the loadjobCommand production.
+	EnterLoadjobCommand(c *LoadjobCommandContext)
+
+	// EnterMetricsCommand is called when entering the metricsCommand production.
+	EnterMetricsCommand(c *MetricsCommandContext)
+
+	// EnterMetricsAggregates is called when entering the metricsAggregates production.
+	EnterMetricsAggregates(c *MetricsAggregatesContext)
+
+	// EnterMetricsOption is called when entering the metricsOption production.
+	EnterMetricsOption(c *MetricsOptionContext)
+
+	// EnterTimechartCommand is called when entering the timechartCommand production.
+	EnterTimechartCommand(c *TimechartCommandContext)
+
+	// EnterTimechartExtraAggregate is called when entering the timechartExtraAggregate production.
+	EnterTimechartExtraAggregate(c *TimechartExtraAggregateContext)
+
+	// EnterTimechartOption is called when entering the timechartOption production.
+	EnterTimechartOption(c *TimechartOptionContext)
+
+	// EnterTimechartSplit is called when entering the timechartSplit production.
+	EnterTimechartSplit(c *TimechartSplitContext)
+
+	// EnterTimechartSplitOption is called when entering the timechartSplitOption production.
+	EnterTimechartSplitOption(c *TimechartSplitOptionContext)
+
+	// EnterTimewrapCommand is called when entering the timewrapCommand production.
+	EnterTimewrapCommand(c *TimewrapCommandContext)
+
+	// EnterMakemvCommand is called when entering the makemvCommand production.
+	EnterMakemvCommand(c *MakemvCommandContext)
+
+	// EnterMvexpandCommand is called when entering the mvexpandCommand production.
+	EnterMvexpandCommand(c *MvexpandCommandContext)
+
+	// EnterMvcombineCommand is called when entering the mvcombineCommand production.
+	EnterMvcombineCommand(c *MvcombineCommandContext)
+
+	// EnterFillnullCommand is called when entering the fillnullCommand production.
+	EnterFillnullCommand(c *FillnullCommandContext)
 
 	// EnterEmbeddedCommand is called when entering the embeddedCommand production.
 	EnterEmbeddedCommand(c *EmbeddedCommandContext)
@@ -721,11 +823,113 @@ type SPL2ParserListener interface {
 	// ExitUnknownOptionName is called when exiting the unknownOptionName production.
 	ExitUnknownOptionName(c *UnknownOptionNameContext)
 
+	// ExitIndependentSearch is called when exiting the independentSearch production.
+	ExitIndependentSearch(c *IndependentSearchContext)
+
+	// ExitInheritedSubpipe is called when exiting the inheritedSubpipe production.
+	ExitInheritedSubpipe(c *InheritedSubpipeContext)
+
+	// ExitJoinCommand is called when exiting the joinCommand production.
+	ExitJoinCommand(c *JoinCommandContext)
+
+	// ExitJoinOption is called when exiting the joinOption production.
+	ExitJoinOption(c *JoinOptionContext)
+
+	// ExitJoinType is called when exiting the joinType production.
+	ExitJoinType(c *JoinTypeContext)
+
+	// ExitAppendCommand is called when exiting the appendCommand production.
+	ExitAppendCommand(c *AppendCommandContext)
+
+	// ExitAppendpipeCommand is called when exiting the appendpipeCommand production.
+	ExitAppendpipeCommand(c *AppendpipeCommandContext)
+
+	// ExitAppendcolsCommand is called when exiting the appendcolsCommand production.
+	ExitAppendcolsCommand(c *AppendcolsCommandContext)
+
+	// ExitUnionCommand is called when exiting the unionCommand production.
+	ExitUnionCommand(c *UnionCommandContext)
+
+	// ExitUnionDataset is called when exiting the unionDataset production.
+	ExitUnionDataset(c *UnionDatasetContext)
+
+	// ExitIfCommand is called when exiting the ifCommand production.
+	ExitIfCommand(c *IfCommandContext)
+
+	// ExitBinCommand is called when exiting the binCommand production.
+	ExitBinCommand(c *BinCommandContext)
+
+	// ExitBinOption is called when exiting the binOption production.
+	ExitBinOption(c *BinOptionContext)
+
+	// ExitAlignmentOption is called when exiting the alignmentOption production.
+	ExitAlignmentOption(c *AlignmentOptionContext)
+
+	// ExitBinSpan is called when exiting the binSpan production.
+	ExitBinSpan(c *BinSpanContext)
+
+	// ExitLogarithmicSpan is called when exiting the logarithmicSpan production.
+	ExitLogarithmicSpan(c *LogarithmicSpanContext)
+
+	// ExitExtendedOption is called when exiting the extendedOption production.
+	ExitExtendedOption(c *ExtendedOptionContext)
+
+	// ExitSignedNumber is called when exiting the signedNumber production.
+	ExitSignedNumber(c *SignedNumberContext)
+
 	// ExitRexCommand is called when exiting the rexCommand production.
 	ExitRexCommand(c *RexCommandContext)
 
 	// ExitRexOption is called when exiting the rexOption production.
 	ExitRexOption(c *RexOptionContext)
+
+	// ExitSpathCommand is called when exiting the spathCommand production.
+	ExitSpathCommand(c *SpathCommandContext)
+
+	// ExitSpathOption is called when exiting the spathOption production.
+	ExitSpathOption(c *SpathOptionContext)
+
+	// ExitLoadjobCommand is called when exiting the loadjobCommand production.
+	ExitLoadjobCommand(c *LoadjobCommandContext)
+
+	// ExitMetricsCommand is called when exiting the metricsCommand production.
+	ExitMetricsCommand(c *MetricsCommandContext)
+
+	// ExitMetricsAggregates is called when exiting the metricsAggregates production.
+	ExitMetricsAggregates(c *MetricsAggregatesContext)
+
+	// ExitMetricsOption is called when exiting the metricsOption production.
+	ExitMetricsOption(c *MetricsOptionContext)
+
+	// ExitTimechartCommand is called when exiting the timechartCommand production.
+	ExitTimechartCommand(c *TimechartCommandContext)
+
+	// ExitTimechartExtraAggregate is called when exiting the timechartExtraAggregate production.
+	ExitTimechartExtraAggregate(c *TimechartExtraAggregateContext)
+
+	// ExitTimechartOption is called when exiting the timechartOption production.
+	ExitTimechartOption(c *TimechartOptionContext)
+
+	// ExitTimechartSplit is called when exiting the timechartSplit production.
+	ExitTimechartSplit(c *TimechartSplitContext)
+
+	// ExitTimechartSplitOption is called when exiting the timechartSplitOption production.
+	ExitTimechartSplitOption(c *TimechartSplitOptionContext)
+
+	// ExitTimewrapCommand is called when exiting the timewrapCommand production.
+	ExitTimewrapCommand(c *TimewrapCommandContext)
+
+	// ExitMakemvCommand is called when exiting the makemvCommand production.
+	ExitMakemvCommand(c *MakemvCommandContext)
+
+	// ExitMvexpandCommand is called when exiting the mvexpandCommand production.
+	ExitMvexpandCommand(c *MvexpandCommandContext)
+
+	// ExitMvcombineCommand is called when exiting the mvcombineCommand production.
+	ExitMvcombineCommand(c *MvcombineCommandContext)
+
+	// ExitFillnullCommand is called when exiting the fillnullCommand production.
+	ExitFillnullCommand(c *FillnullCommandContext)
 
 	// ExitEmbeddedCommand is called when exiting the embeddedCommand production.
 	ExitEmbeddedCommand(c *EmbeddedCommandContext)

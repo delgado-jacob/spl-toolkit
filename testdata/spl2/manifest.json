@@ -1,13 +1,15 @@
 {
   "schema_version": 1,
-  "stage": "task4-sql",
+  "stage": "task5-extended",
   "case_files": [
     "lexical-expressions.json",
     "frontend-boundaries.json",
     "pipeline-commands.json",
     "pipeline-boundaries.json",
     "sql-clauses.json",
-    "sql-boundaries.json"
+    "sql-boundaries.json",
+    "extended-commands.json",
+    "extended-boundaries.json"
   ],
   "provenance_file": "provenance.json",
   "mandatory_command_families": [

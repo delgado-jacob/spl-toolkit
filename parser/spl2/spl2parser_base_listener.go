@@ -548,6 +548,114 @@ func (s *BaseSPL2ParserListener) EnterUnknownOptionName(ctx *UnknownOptionNameCo
 // ExitUnknownOptionName is called when production unknownOptionName is exited.
 func (s *BaseSPL2ParserListener) ExitUnknownOptionName(ctx *UnknownOptionNameContext) {}
 
+// EnterIndependentSearch is called when production independentSearch is entered.
+func (s *BaseSPL2ParserListener) EnterIndependentSearch(ctx *IndependentSearchContext) {}
+
+// ExitIndependentSearch is called when production independentSearch is exited.
+func (s *BaseSPL2ParserListener) ExitIndependentSearch(ctx *IndependentSearchContext) {}
+
+// EnterInheritedSubpipe is called when production inheritedSubpipe is entered.
+func (s *BaseSPL2ParserListener) EnterInheritedSubpipe(ctx *InheritedSubpipeContext) {}
+
+// ExitInheritedSubpipe is called when production inheritedSubpipe is exited.
+func (s *BaseSPL2ParserListener) ExitInheritedSubpipe(ctx *InheritedSubpipeContext) {}
+
+// EnterJoinCommand is called when production joinCommand is entered.
+func (s *BaseSPL2ParserListener) EnterJoinCommand(ctx *JoinCommandContext) {}
+
+// ExitJoinCommand is called when production joinCommand is exited.
+func (s *BaseSPL2ParserListener) ExitJoinCommand(ctx *JoinCommandContext) {}
+
+// EnterJoinOption is called when production joinOption is entered.
+func (s *BaseSPL2ParserListener) EnterJoinOption(ctx *JoinOptionContext) {}
+
+// ExitJoinOption is called when production joinOption is exited.
+func (s *BaseSPL2ParserListener) ExitJoinOption(ctx *JoinOptionContext) {}
+
+// EnterJoinType is called when production joinType is entered.
+func (s *BaseSPL2ParserListener) EnterJoinType(ctx *JoinTypeContext) {}
+
+// ExitJoinType is called when production joinType is exited.
+func (s *BaseSPL2ParserListener) ExitJoinType(ctx *JoinTypeContext) {}
+
+// EnterAppendCommand is called when production appendCommand is entered.
+func (s *BaseSPL2ParserListener) EnterAppendCommand(ctx *AppendCommandContext) {}
+
+// ExitAppendCommand is called when production appendCommand is exited.
+func (s *BaseSPL2ParserListener) ExitAppendCommand(ctx *AppendCommandContext) {}
+
+// EnterAppendpipeCommand is called when production appendpipeCommand is entered.
+func (s *BaseSPL2ParserListener) EnterAppendpipeCommand(ctx *AppendpipeCommandContext) {}
+
+// ExitAppendpipeCommand is called when production appendpipeCommand is exited.
+func (s *BaseSPL2ParserListener) ExitAppendpipeCommand(ctx *AppendpipeCommandContext) {}
+
+// EnterAppendcolsCommand is called when production appendcolsCommand is entered.
+func (s *BaseSPL2ParserListener) EnterAppendcolsCommand(ctx *AppendcolsCommandContext) {}
+
+// ExitAppendcolsCommand is called when production appendcolsCommand is exited.
+func (s *BaseSPL2ParserListener) ExitAppendcolsCommand(ctx *AppendcolsCommandContext) {}
+
+// EnterUnionCommand is called when production unionCommand is entered.
+func (s *BaseSPL2ParserListener) EnterUnionCommand(ctx *UnionCommandContext) {}
+
+// ExitUnionCommand is called when production unionCommand is exited.
+func (s *BaseSPL2ParserListener) ExitUnionCommand(ctx *UnionCommandContext) {}
+
+// EnterUnionDataset is called when production unionDataset is entered.
+func (s *BaseSPL2ParserListener) EnterUnionDataset(ctx *UnionDatasetContext) {}
+
+// ExitUnionDataset is called when production unionDataset is exited.
+func (s *BaseSPL2ParserListener) ExitUnionDataset(ctx *UnionDatasetContext) {}
+
+// EnterIfCommand is called when production ifCommand is entered.
+func (s *BaseSPL2ParserListener) EnterIfCommand(ctx *IfCommandContext) {}
+
+// ExitIfCommand is called when production ifCommand is exited.
+func (s *BaseSPL2ParserListener) ExitIfCommand(ctx *IfCommandContext) {}
+
+// EnterBinCommand is called when production binCommand is entered.
+func (s *BaseSPL2ParserListener) EnterBinCommand(ctx *BinCommandContext) {}
+
+// ExitBinCommand is called when production binCommand is exited.
+func (s *BaseSPL2ParserListener) ExitBinCommand(ctx *BinCommandContext) {}
+
+// EnterBinOption is called when production binOption is entered.
+func (s *BaseSPL2ParserListener) EnterBinOption(ctx *BinOptionContext) {}
+
+// ExitBinOption is called when production binOption is exited.
+func (s *BaseSPL2ParserListener) ExitBinOption(ctx *BinOptionContext) {}
+
+// EnterAlignmentOption is called when production alignmentOption is entered.
+func (s *BaseSPL2ParserListener) EnterAlignmentOption(ctx *AlignmentOptionContext) {}
+
+// ExitAlignmentOption is called when production alignmentOption is exited.
+func (s *BaseSPL2ParserListener) ExitAlignmentOption(ctx *AlignmentOptionContext) {}
+
+// EnterBinSpan is called when production binSpan is entered.
+func (s *BaseSPL2ParserListener) EnterBinSpan(ctx *BinSpanContext) {}
+
+// ExitBinSpan is called when production binSpan is exited.
+func (s *BaseSPL2ParserListener) ExitBinSpan(ctx *BinSpanContext) {}
+
+// EnterLogarithmicSpan is called when production logarithmicSpan is entered.
+func (s *BaseSPL2ParserListener) EnterLogarithmicSpan(ctx *LogarithmicSpanContext) {}
+
+// ExitLogarithmicSpan is called when production logarithmicSpan is exited.
+func (s *BaseSPL2ParserListener) ExitLogarithmicSpan(ctx *LogarithmicSpanContext) {}
+
+// EnterExtendedOption is called when production extendedOption is entered.
+func (s *BaseSPL2ParserListener) EnterExtendedOption(ctx *ExtendedOptionContext) {}
+
+// ExitExtendedOption is called when production extendedOption is exited.
+func (s *BaseSPL2ParserListener) ExitExtendedOption(ctx *ExtendedOptionContext) {}
+
+// EnterSignedNumber is called when production signedNumber is entered.
+func (s *BaseSPL2ParserListener) EnterSignedNumber(ctx *SignedNumberContext) {}
+
+// ExitSignedNumber is called when production signedNumber is exited.
+func (s *BaseSPL2ParserListener) ExitSignedNumber(ctx *SignedNumberContext) {}
+
 // EnterRexCommand is called when production rexCommand is entered.
 func (s *BaseSPL2ParserListener) EnterRexCommand(ctx *RexCommandContext) {}
 
@@ -559,6 +667,102 @@ func (s *BaseSPL2ParserListener) EnterRexOption(ctx *RexOptionContext) {}
 
 // ExitRexOption is called when production rexOption is exited.
 func (s *BaseSPL2ParserListener) ExitRexOption(ctx *RexOptionContext) {}
+
+// EnterSpathCommand is called when production spathCommand is entered.
+func (s *BaseSPL2ParserListener) EnterSpathCommand(ctx *SpathCommandContext) {}
+
+// ExitSpathCommand is called when production spathCommand is exited.
+func (s *BaseSPL2ParserListener) ExitSpathCommand(ctx *SpathCommandContext) {}
+
+// EnterSpathOption is called when production spathOption is entered.
+func (s *BaseSPL2ParserListener) EnterSpathOption(ctx *SpathOptionContext) {}
+
+// ExitSpathOption is called when production spathOption is exited.
+func (s *BaseSPL2ParserListener) ExitSpathOption(ctx *SpathOptionContext) {}
+
+// EnterLoadjobCommand is called when production loadjobCommand is entered.
+func (s *BaseSPL2ParserListener) EnterLoadjobCommand(ctx *LoadjobCommandContext) {}
+
+// ExitLoadjobCommand is called when production loadjobCommand is exited.
+func (s *BaseSPL2ParserListener) ExitLoadjobCommand(ctx *LoadjobCommandContext) {}
+
+// EnterMetricsCommand is called when production metricsCommand is entered.
+func (s *BaseSPL2ParserListener) EnterMetricsCommand(ctx *MetricsCommandContext) {}
+
+// ExitMetricsCommand is called when production metricsCommand is exited.
+func (s *BaseSPL2ParserListener) ExitMetricsCommand(ctx *MetricsCommandContext) {}
+
+// EnterMetricsAggregates is called when production metricsAggregates is entered.
+func (s *BaseSPL2ParserListener) EnterMetricsAggregates(ctx *MetricsAggregatesContext) {}
+
+// ExitMetricsAggregates is called when production metricsAggregates is exited.
+func (s *BaseSPL2ParserListener) ExitMetricsAggregates(ctx *MetricsAggregatesContext) {}
+
+// EnterMetricsOption is called when production metricsOption is entered.
+func (s *BaseSPL2ParserListener) EnterMetricsOption(ctx *MetricsOptionContext) {}
+
+// ExitMetricsOption is called when production metricsOption is exited.
+func (s *BaseSPL2ParserListener) ExitMetricsOption(ctx *MetricsOptionContext) {}
+
+// EnterTimechartCommand is called when production timechartCommand is entered.
+func (s *BaseSPL2ParserListener) EnterTimechartCommand(ctx *TimechartCommandContext) {}
+
+// ExitTimechartCommand is called when production timechartCommand is exited.
+func (s *BaseSPL2ParserListener) ExitTimechartCommand(ctx *TimechartCommandContext) {}
+
+// EnterTimechartExtraAggregate is called when production timechartExtraAggregate is entered.
+func (s *BaseSPL2ParserListener) EnterTimechartExtraAggregate(ctx *TimechartExtraAggregateContext) {}
+
+// ExitTimechartExtraAggregate is called when production timechartExtraAggregate is exited.
+func (s *BaseSPL2ParserListener) ExitTimechartExtraAggregate(ctx *TimechartExtraAggregateContext) {}
+
+// EnterTimechartOption is called when production timechartOption is entered.
+func (s *BaseSPL2ParserListener) EnterTimechartOption(ctx *TimechartOptionContext) {}
+
+// ExitTimechartOption is called when production timechartOption is exited.
+func (s *BaseSPL2ParserListener) ExitTimechartOption(ctx *TimechartOptionContext) {}
+
+// EnterTimechartSplit is called when production timechartSplit is entered.
+func (s *BaseSPL2ParserListener) EnterTimechartSplit(ctx *TimechartSplitContext) {}
+
+// ExitTimechartSplit is called when production timechartSplit is exited.
+func (s *BaseSPL2ParserListener) ExitTimechartSplit(ctx *TimechartSplitContext) {}
+
+// EnterTimechartSplitOption is called when production timechartSplitOption is entered.
+func (s *BaseSPL2ParserListener) EnterTimechartSplitOption(ctx *TimechartSplitOptionContext) {}
+
+// ExitTimechartSplitOption is called when production timechartSplitOption is exited.
+func (s *BaseSPL2ParserListener) ExitTimechartSplitOption(ctx *TimechartSplitOptionContext) {}
+
+// EnterTimewrapCommand is called when production timewrapCommand is entered.
+func (s *BaseSPL2ParserListener) EnterTimewrapCommand(ctx *TimewrapCommandContext) {}
+
+// ExitTimewrapCommand is called when production timewrapCommand is exited.
+func (s *BaseSPL2ParserListener) ExitTimewrapCommand(ctx *TimewrapCommandContext) {}
+
+// EnterMakemvCommand is called when production makemvCommand is entered.
+func (s *BaseSPL2ParserListener) EnterMakemvCommand(ctx *MakemvCommandContext) {}
+
+// ExitMakemvCommand is called when production makemvCommand is exited.
+func (s *BaseSPL2ParserListener) ExitMakemvCommand(ctx *MakemvCommandContext) {}
+
+// EnterMvexpandCommand is called when production mvexpandCommand is entered.
+func (s *BaseSPL2ParserListener) EnterMvexpandCommand(ctx *MvexpandCommandContext) {}
+
+// ExitMvexpandCommand is called when production mvexpandCommand is exited.
+func (s *BaseSPL2ParserListener) ExitMvexpandCommand(ctx *MvexpandCommandContext) {}
+
+// EnterMvcombineCommand is called when production mvcombineCommand is entered.
+func (s *BaseSPL2ParserListener) EnterMvcombineCommand(ctx *MvcombineCommandContext) {}
+
+// ExitMvcombineCommand is called when production mvcombineCommand is exited.
+func (s *BaseSPL2ParserListener) ExitMvcombineCommand(ctx *MvcombineCommandContext) {}
+
+// EnterFillnullCommand is called when production fillnullCommand is entered.
+func (s *BaseSPL2ParserListener) EnterFillnullCommand(ctx *FillnullCommandContext) {}
+
+// ExitFillnullCommand is called when production fillnullCommand is exited.
+func (s *BaseSPL2ParserListener) ExitFillnullCommand(ctx *FillnullCommandContext) {}
 
 // EnterEmbeddedCommand is called when production embeddedCommand is entered.
 func (s *BaseSPL2ParserListener) EnterEmbeddedCommand(ctx *EmbeddedCommandContext) {}

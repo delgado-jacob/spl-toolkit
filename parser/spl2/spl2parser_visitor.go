@@ -276,11 +276,113 @@ type SPL2ParserVisitor interface {
 	// Visit a parse tree produced by SPL2Parser#unknownOptionName.
 	VisitUnknownOptionName(ctx *UnknownOptionNameContext) interface{}
 
+	// Visit a parse tree produced by SPL2Parser#independentSearch.
+	VisitIndependentSearch(ctx *IndependentSearchContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#inheritedSubpipe.
+	VisitInheritedSubpipe(ctx *InheritedSubpipeContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#joinCommand.
+	VisitJoinCommand(ctx *JoinCommandContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#joinOption.
+	VisitJoinOption(ctx *JoinOptionContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#joinType.
+	VisitJoinType(ctx *JoinTypeContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#appendCommand.
+	VisitAppendCommand(ctx *AppendCommandContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#appendpipeCommand.
+	VisitAppendpipeCommand(ctx *AppendpipeCommandContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#appendcolsCommand.
+	VisitAppendcolsCommand(ctx *AppendcolsCommandContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#unionCommand.
+	VisitUnionCommand(ctx *UnionCommandContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#unionDataset.
+	VisitUnionDataset(ctx *UnionDatasetContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#ifCommand.
+	VisitIfCommand(ctx *IfCommandContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#binCommand.
+	VisitBinCommand(ctx *BinCommandContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#binOption.
+	VisitBinOption(ctx *BinOptionContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#alignmentOption.
+	VisitAlignmentOption(ctx *AlignmentOptionContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#binSpan.
+	VisitBinSpan(ctx *BinSpanContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#logarithmicSpan.
+	VisitLogarithmicSpan(ctx *LogarithmicSpanContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#extendedOption.
+	VisitExtendedOption(ctx *ExtendedOptionContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#signedNumber.
+	VisitSignedNumber(ctx *SignedNumberContext) interface{}
+
 	// Visit a parse tree produced by SPL2Parser#rexCommand.
 	VisitRexCommand(ctx *RexCommandContext) interface{}
 
 	// Visit a parse tree produced by SPL2Parser#rexOption.
 	VisitRexOption(ctx *RexOptionContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#spathCommand.
+	VisitSpathCommand(ctx *SpathCommandContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#spathOption.
+	VisitSpathOption(ctx *SpathOptionContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#loadjobCommand.
+	VisitLoadjobCommand(ctx *LoadjobCommandContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#metricsCommand.
+	VisitMetricsCommand(ctx *MetricsCommandContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#metricsAggregates.
+	VisitMetricsAggregates(ctx *MetricsAggregatesContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#metricsOption.
+	VisitMetricsOption(ctx *MetricsOptionContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#timechartCommand.
+	VisitTimechartCommand(ctx *TimechartCommandContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#timechartExtraAggregate.
+	VisitTimechartExtraAggregate(ctx *TimechartExtraAggregateContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#timechartOption.
+	VisitTimechartOption(ctx *TimechartOptionContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#timechartSplit.
+	VisitTimechartSplit(ctx *TimechartSplitContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#timechartSplitOption.
+	VisitTimechartSplitOption(ctx *TimechartSplitOptionContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#timewrapCommand.
+	VisitTimewrapCommand(ctx *TimewrapCommandContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#makemvCommand.
+	VisitMakemvCommand(ctx *MakemvCommandContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#mvexpandCommand.
+	VisitMvexpandCommand(ctx *MvexpandCommandContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#mvcombineCommand.
+	VisitMvcombineCommand(ctx *MvcombineCommandContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#fillnullCommand.
+	VisitFillnullCommand(ctx *FillnullCommandContext) interface{}
 
 	// Visit a parse tree produced by SPL2Parser#embeddedCommand.
 	VisitEmbeddedCommand(ctx *EmbeddedCommandContext) interface{}
