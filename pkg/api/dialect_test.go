@@ -317,3 +317,54 @@ func TestDialectLegacyRESTRejectsMalformedSelectorMembers(t *testing.T) {
 		}
 	}
 }
+
+func TestDialectLegacyRESTUnicodeFoldedSelectors(t *testing.T) {
+	for _, operation := range []string{"map", "discover", "validate"} {
+		t.Run(operation, func(t *testing.T) {
+			body := `{"query":"search host=x"`
+			if operation == "map" {
+				body += `,"mappings":[{"source":"host","target":"server"}]`
+			}
+			route := "/api/v1/query/" + operation
+			baseline := serveAnalysisRequest(t, "POST", route, []byte(body+`}`), "application/json")
+			if baseline.Code != 200 {
+				t.Fatalf("valid request control: HTTP %d %s", baseline.Code, baseline.Body)
+			}
+			for _, tc := range []struct {
+				name, members, errorFragment string
+			}{
+				{"long-s null", `"verſion":null`, "expected a string"},
+				{"escaped long-s null", `"ver\u017fion":null`, "expected a string"},
+				{"folded duplicates", `"verſion":"next","verſion":"current"`, "duplicate property"},
+				{"folded then canonical", `"verſion":"next","version":"current"`, "duplicate property"},
+				{"canonical then folded", `"version":"next","VERſION":"current"`, "duplicate property"},
+				{"equal duplicate aliases", `"verſion":"current","VERSION":"current"`, "duplicate property"},
+				{"folded null then default", `"verſion":null,"version":""`, "duplicate property"},
+				{"folded unsupported", `"verſion":"next"`, "unsupported compatibility version"},
+				{"language null control", `"LANGUAGE":null`, "expected a string"},
+				{"profile null control", `"PROFILE":null`, "expected a string"},
+				{"folded current", `"verſion":"current"`, ""},
+				{"folded empty default", `"verſion":""`, ""},
+				{"mixed-case selectors", `"Language":"spl","ProFiLe":"splunkd","VERſION":"current"`, ""},
+				{"empty folded selectors", `"LANGUAGE":"","PROFILE":"","ver\u017fion":""`, ""},
+			} {
+				t.Run(tc.name, func(t *testing.T) {
+					response := serveAnalysisRequest(t, "POST", route, []byte(body+`,`+tc.members+`}`), "application/json")
+					if tc.errorFragment == "" {
+						if response.Code != 200 || response.Body.String() != baseline.Body.String() {
+							t.Fatalf("folded/default selector changed legacy response: HTTP %d %s", response.Code, response.Body)
+						}
+						return
+					}
+					var rejection ErrorResponse
+					if err := json.Unmarshal(response.Body.Bytes(), &rejection); err != nil {
+						t.Fatal(err)
+					}
+					if response.Code != 400 || !rejection.Error || !strings.Contains(rejection.Message, tc.errorFragment) {
+						t.Fatalf("selector %s: HTTP %d %s", tc.members, response.Code, response.Body)
+					}
+				})
+			}
+		})
+	}
+}

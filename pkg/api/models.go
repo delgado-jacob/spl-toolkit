@@ -327,13 +327,15 @@ func validateLegacySelectorMembers(body []byte) error {
 		if err := decoder.Decode(&value); err != nil {
 			return err
 		}
-		key := strings.ToLower(token.(string))
-		switch key {
-		case "language", "profile", "version":
-			// Retain every occurrence and its raw JSON type. Canonical decoding
-			// owns duplicate/null/selector validation, just as for documents.
+		for _, key := range []string{"language", "profile", "version"} {
+			if !strings.EqualFold(token.(string), key) {
+				continue
+			}
+			// Match encoding/json's Unicode field-name folding and retain every
+			// occurrence and raw type for canonical duplicate/null validation.
 			fmt.Fprintf(&document, ",%q:", key)
 			document.Write(value)
+			break
 		}
 	}
 	document.WriteString("}]")
