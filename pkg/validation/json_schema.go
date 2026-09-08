@@ -112,6 +112,9 @@ type projectionContext struct {
 	seen            map[projectionState]bool
 	memo            map[projectionState]fieldProjection
 	requirementMemo map[projectionState][]schemaRequirementFact
+	discoveryMemo   map[projectionState][][]string
+	discovering     map[projectionState]bool
+	exhausted       bool
 }
 
 func (p *jsonSchemaTarget) project(name string) fieldProjection {
@@ -123,9 +126,53 @@ func (p *jsonSchemaTarget) project(name string) fieldProjection {
 		return unknownProjection(p.root, "", "traversal_budget")
 	}
 	ctx := &projectionContext{active: map[projectionState]bool{}, seen: map[projectionState]bool{}}
-	result := p.walk(p.root, parts, ctx)
+	paths := [][]string{parts}
+	if len(parts) > 1 {
+		paths = p.pathInterpretations(parts, ctx)
+	}
+	values := make([]fieldProjection, 0, len(paths))
+	evidence := []SchemaEvidence{}
+	admitted, unresolved := 0, 0
+	winner := -1
+	for _, path := range paths {
+		if ctx.exhausted {
+			break
+		}
+		value := p.projectInterpretation(path, ctx)
+		values = append(values, value)
+		evidence = append(evidence, value.Evidence...)
+		if value.Admission == analysis.SourceFieldAdmitted {
+			admitted++
+			winner = len(values) - 1
+		} else if value.Admission == analysis.SourceFieldIndeterminate {
+			unresolved++
+		}
+	}
+	var result fieldProjection
+	switch {
+	case ctx.exhausted:
+		result = unknownProjection(p.root, "properties", "traversal_budget")
+	case len(values) == 1:
+		result = values[0]
+	case admitted == 0 && unresolved == 0:
+		result = newProjection(analysis.SourceFieldProhibited, "missing")
+	case admitted == 1 && unresolved == 0:
+		result = values[winner]
+	default:
+		result = unknownProjection(p.root, "properties", "literal_path_collision")
+	}
+	result.Evidence = uniqueSchemaEvidence(append(result.Evidence, evidence...))
+	sort.SliceStable(result.Evidence, func(i, j int) bool {
+		a, _ := json.Marshal(result.Evidence[i])
+		b, _ := json.Marshal(result.Evidence[j])
+		return string(a) < string(b)
+	})
+	return result
+}
+func (p *jsonSchemaTarget) projectInterpretation(path []string, ctx *projectionContext) fieldProjection {
+	result := p.walk(p.root, path, ctx)
 	if result.Admission == analysis.SourceFieldAdmitted {
-		facts := p.requirementFacts(p.root, parts, ctx, map[projectionState]bool{})
+		facts := p.requirementFacts(p.root, path, ctx, map[projectionState]bool{})
 		allRequired, allObjects := true, true
 		for _, fact := range facts {
 			allRequired = allRequired && fact.required
@@ -140,13 +187,9 @@ func (p *jsonSchemaTarget) project(name string) fieldProjection {
 			}
 		}
 	}
-	sort.SliceStable(result.Evidence, func(i, j int) bool {
-		a, _ := json.Marshal(result.Evidence[i])
-		b, _ := json.Marshal(result.Evidence[j])
-		return string(a) < string(b)
-	})
 	return result
 }
+
 func (p *jsonSchemaTarget) walk(n *schemaNode, path []string, ctx *projectionContext) (result fieldProjection) {
 	state := projectionState{n, schemaPathKey(path)}
 	if value, ok := ctx.memo[state]; ok {
@@ -327,9 +370,6 @@ func typeShape(n *schemaNode) (object, array, known bool) {
 	return
 }
 func (p *jsonSchemaTarget) local(n *schemaNode, path []string, ctx *projectionContext) (fieldProjection, bool) {
-	return p.localPath(n, path, ctx, false)
-}
-func (p *jsonSchemaTarget) localPath(n *schemaNode, path []string, ctx *projectionContext, ignoreLiteral bool) (fieldProjection, bool) {
 	if len(path) == 0 {
 		return newProjection(analysis.SourceFieldAdmitted, "permitted_unspecified"), false
 	}
@@ -346,27 +386,7 @@ func (p *jsonSchemaTarget) localPath(n *schemaNode, path []string, ctx *projecti
 	}
 	name := path[0]
 	props, _ := n.object["properties"].(map[string]any)
-	if len(path) > 1 && !ignoreLiteral {
-		nested, nestedDeclared := p.localPath(n, path, ctx, true)
-		for consumed := 2; consumed <= len(path); consumed++ {
-			literalName := strings.Join(path[:consumed], ".")
-			if _, literal := props[literalName]; literal {
-				literalPath := append([]string{literalName}, path[consumed:]...)
-				value, _ := p.localPath(n, literalPath, ctx, true)
-				if nested.Admission == analysis.SourceFieldProhibited {
-					return value, true
-				}
-				if value.Admission == analysis.SourceFieldProhibited {
-					continue
-				}
-				uncertainty := unknownProjection(n, "properties", "literal_path_collision")
-				uncertainty.Evidence = append(uncertainty.Evidence, nested.Evidence...)
-				uncertainty.Evidence = append(uncertainty.Evidence, value.Evidence...)
-				return uncertainty, false
-			}
-		}
-		return nested, nestedDeclared
-	}
+
 	req := "optional"
 	if names, ok := n.object["required"].([]any); ok {
 		for _, v := range names {
@@ -383,7 +403,9 @@ func (p *jsonSchemaTarget) localPath(n *schemaNode, path []string, ctx *projecti
 		if req == "required" && !objectCertain {
 			localReq = "unknown"
 		}
-		v.Evidence = append([]SchemaEvidence{schemaEv(n, key, basis, localReq, "")}, v.Evidence...)
+		declaration := schemaEv(n, key, basis, localReq, "")
+		declaration.Pointer = n.resourcePointer + strings.TrimPrefix(child.pointer, n.pointer)
+		v.Evidence = append([]SchemaEvidence{declaration}, v.Evidence...)
 		if v.Admission == analysis.SourceFieldAdmitted {
 			if v.Outcome == "indeterminate" {
 			} else if req == "required" && objectCertain && (len(path) == 1 || v.Outcome == "required") {
@@ -722,4 +744,137 @@ func schemaPathKey(path []string) string {
 		key.WriteString(part)
 	}
 	return key.String()
+}
+
+// Each interpretation preserves property boundaries through the entire effective
+// schema. Only an encountered explicit literal property can introduce a merge;
+// generic openness never invents dotted declarations. Repeated single merges
+// form a bounded closure, including combinations supplied by different conjuncts.
+func (p *jsonSchemaTarget) pathInterpretations(path []string, ctx *projectionContext) [][]string {
+	paths := [][]string{path}
+	known := map[string]bool{schemaPathKey(path): true}
+	ctx.discoveryMemo = map[projectionState][][]string{}
+	ctx.discovering = map[projectionState]bool{}
+	for i := 0; i < len(paths) && !ctx.exhausted; i++ {
+		for _, alternative := range p.discoverPathMerges(p.root, paths[i], ctx) {
+			key := schemaPathKey(alternative)
+			if known[key] {
+				continue
+			}
+			if !ctx.reserveDiscovery(projectionState{p.root, key}) {
+				break
+			}
+			known[key] = true
+			paths = append(paths, alternative)
+		}
+	}
+	return paths
+}
+func (ctx *projectionContext) reserveDiscovery(state projectionState) bool {
+	if ctx.seen[state] {
+		return true
+	}
+	if len(ctx.seen) >= schemaProjectionBudget {
+		ctx.exhausted = true
+		return false
+	}
+	ctx.seen[state] = true
+	return true
+}
+func (p *jsonSchemaTarget) discoverPathMerges(n *schemaNode, path []string, ctx *projectionContext) [][]string {
+	if len(path) == 0 || ctx.exhausted {
+		return nil
+	}
+	state := projectionState{n, schemaPathKey(path)}
+	if found, ok := ctx.discoveryMemo[state]; ok {
+		return found
+	}
+	if ctx.discovering[state] || !ctx.reserveDiscovery(state) {
+		return nil
+	}
+	ctx.discovering[state] = true
+	defer delete(ctx.discovering, state)
+	variants := map[string][]string{}
+	add := func(candidate []string) {
+		if ctx.exhausted {
+			return
+		}
+		key := schemaPathKey(candidate)
+		if _, ok := variants[key]; ok {
+			return
+		}
+		if len(variants) >= schemaProjectionBudget {
+			ctx.exhausted = true
+			return
+		}
+		variants[key] = candidate
+	}
+	props, _ := n.object["properties"].(map[string]any)
+	for consumed := 2; consumed <= len(path); consumed++ {
+		literal := strings.Join(path[:consumed], ".")
+		if _, ok := props[literal]; ok {
+			add(append([]string{literal}, path[consumed:]...))
+		}
+	}
+	descend := func(child *schemaNode) {
+		for _, suffix := range p.discoverPathMerges(child, path[1:], ctx) {
+			add(append([]string{path[0]}, suffix...))
+		}
+	}
+	matched := false
+	if child := n.children["properties/"+pointerEscape(path[0])]; child != nil {
+		matched = true
+		descend(child)
+	}
+	for _, pattern := range sortedKeys(n.patterns) {
+		match, known := n.patterns[pattern].match(path[0])
+		if match || !known {
+			descend(n.children["patternProperties/"+pointerEscape(pattern)])
+		}
+		matched = matched || match
+	}
+	if !matched {
+		if child := n.children["additionalProperties"]; child != nil {
+			descend(child)
+		}
+	}
+	sameObject := func(child *schemaNode) {
+		for _, alternative := range p.discoverPathMerges(child, path, ctx) {
+			add(alternative)
+		}
+	}
+	if ref := n.refs["$ref"]; ref != nil {
+		sameObject(ref)
+	}
+	for _, operator := range []string{"allOf", "anyOf", "oneOf"} {
+		if branches, ok := n.object[operator].([]any); ok {
+			for i := range branches {
+				if ctx.exhausted {
+					break
+				}
+				sameObject(n.children[operator+"/"+strconv.Itoa(i)])
+			}
+		}
+	}
+	// Unsupported object applicators may contain an evidenced literal alternative;
+	// the evaluator still marks their membership effects unknown.
+	for _, keyword := range []string{"not", "if", "then", "else"} {
+		if child := n.children[keyword]; child != nil {
+			if (keyword == "then" || keyword == "else") && n.children["if"] == nil {
+				continue
+			}
+			sameObject(child)
+		}
+	}
+	if dependencies, ok := n.object["dependentSchemas"].(map[string]any); ok {
+		for _, name := range sortedKeys(dependencies) {
+			sameObject(n.children["dependentSchemas/"+pointerEscape(name)])
+		}
+	}
+	result := make([][]string, 0, len(variants))
+	for _, key := range sortedKeys(variants) {
+		result = append(result, variants[key])
+	}
+	ctx.discoveryMemo[state] = result
+	return result
 }

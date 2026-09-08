@@ -118,6 +118,7 @@ func newSchemaIndex(t SchemaTarget) (*schemaIndex, *schemaNode, error) {
 		if !u.IsAbs() || u.Fragment != "" {
 			return nil, nil, inputError("base_uri must be absolute without fragment")
 		}
+		base = u.String()
 	}
 	build := func(raw json.RawMessage, base string) (*schemaNode, error) {
 		v, e := decodeUniqueJSON(raw)
@@ -345,7 +346,7 @@ func validateSchemaShapes(m map[string]any) error {
 		seen := map[string]bool{}
 		for _, v := range a {
 			s, ok := v.(string)
-			if !ok || seen[s] || !strings.Contains("|null|boolean|object|array|number|string|integer|", "|"+s+"|") {
+			if !ok || seen[s] || !validSchemaType(s) {
 				return inputError("invalid type")
 			}
 			seen[s] = true
@@ -503,6 +504,14 @@ func (idx *schemaIndex) resolve(n *schemaNode, ref string) (*schemaNode, error) 
 func knownSchemaVocabulary(uri string) bool {
 	switch uri {
 	case "https://json-schema.org/draft/2020-12/vocab/core", "https://json-schema.org/draft/2020-12/vocab/applicator", "https://json-schema.org/draft/2020-12/vocab/unevaluated", "https://json-schema.org/draft/2020-12/vocab/validation", "https://json-schema.org/draft/2020-12/vocab/meta-data", "https://json-schema.org/draft/2020-12/vocab/format-annotation", "https://json-schema.org/draft/2020-12/vocab/format-assertion", "https://json-schema.org/draft/2020-12/vocab/content":
+		return true
+	}
+	return false
+}
+
+func validSchemaType(name string) bool {
+	switch name {
+	case "null", "boolean", "object", "array", "number", "string", "integer":
 		return true
 	}
 	return false

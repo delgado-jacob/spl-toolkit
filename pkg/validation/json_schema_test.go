@@ -294,3 +294,100 @@ func TestJSONSchemaAnyOfUnspecifiedConclusion(t *testing.T) {
 		t.Fatal(got)
 	}
 }
+
+func TestJSONSchemaReviewRoundOne(t *testing.T) {
+	t.Run("effective_conjunction_literal_path", func(t *testing.T) {
+		p := preparedJSON(t, `{"allOf":[{"properties":{"a.b":{"type":"string"}}},{"properties":{"a":false}}]}`)
+		got := p.project("a.b")
+		if got.Admission != analysis.SourceFieldAdmitted {
+			t.Fatal(got)
+		}
+		if !slices.Contains(p.universe().Fields, "a.b") {
+			t.Fatal("admitted literal dropped from seeds")
+		}
+	})
+	t.Run("multiple_literal_interpretations", func(t *testing.T) {
+		p := preparedJSON(t, `{"properties":{"a.b":{"properties":{"c":{"type":"string"}},"additionalProperties":false},"a.b.c":{"type":"string"}},"additionalProperties":false}`)
+		got := p.project("a.b.c")
+		if got.Admission != analysis.SourceFieldIndeterminate {
+			t.Fatal(got)
+		}
+	})
+	t.Run("invalid_type_name", func(t *testing.T) {
+		for _, s := range []string{`{"type":"object|array"}`, `{"type":"null|boolean"}`, `{"type":["string|integer"]}`, `{"type":["object","object"]}`} {
+			_, e := prepareJSONSchema(SchemaTarget{Kind: "json_schema", Schema: json.RawMessage(s)})
+			if !IsInputError(e) {
+				t.Fatalf("accepted invalid type %s: %v", s, e)
+			}
+		}
+	})
+	t.Run("base_uri_empty_fragment", func(t *testing.T) {
+		p, e := prepareJSONSchema(SchemaTarget{Kind: "json_schema", BaseURI: "https://s.test/root#", Schema: json.RawMessage(`{"$ref":"#/$defs/x","$defs":{"x":{"properties":{"host":{"type":"string"}},"additionalProperties":false}}}`)})
+		if e != nil {
+			t.Fatal(e)
+		}
+		if got := p.project("host"); got.Admission != analysis.SourceFieldAdmitted {
+			t.Fatal(got)
+		}
+		if p.info().BaseURI != "https://s.test/root" {
+			t.Fatal(p.info())
+		}
+	})
+}
+func TestJSONSchemaEffectiveLiteralReferencesAndRequirements(t *testing.T) {
+	for _, s := range []string{
+		`{"type":"object","required":["a.b"],"$ref":"#/$defs/open","properties":{"a":false},"$defs":{"open":{"properties":{"a.b":{"type":"string"}}}}}`,
+		`{"allOf":[{"type":"object","required":["a.b"],"properties":{"a.b":{"type":"string"}}},{"properties":{"a":false}}]}`,
+	} {
+		p := preparedJSON(t, s)
+		got := p.project("a.b")
+		if got.Admission != analysis.SourceFieldAdmitted || got.Outcome != "required" {
+			t.Fatal(got)
+		}
+	}
+	p := preparedJSON(t, `{"type":"object","required":["actor"],"properties":{"actor":{"allOf":[{"type":"object","required":["a.b"],"properties":{"a.b":{"type":"string"}}},{"properties":{"a":false}}]}}}`)
+	if got := p.project("actor.a.b"); got.Outcome != "required" {
+		t.Fatal(got)
+	}
+}
+func TestJSONSchemaLiteralSegmentationBudget(t *testing.T) {
+	p := preparedJSON(t, `{"properties":{"a":{"$ref":"#"},"a.a":{"$ref":"#"}},"additionalProperties":false}`)
+	name := strings.TrimSuffix(strings.Repeat("a.", 22), ".")
+	ctx := &projectionContext{active: map[projectionState]bool{}, seen: map[projectionState]bool{}}
+	paths := p.pathInterpretations(strings.Split(name, "."), ctx)
+	if !ctx.exhausted || len(ctx.seen) > schemaProjectionBudget || len(paths) > schemaProjectionBudget {
+		t.Fatalf("segmentation accounting: exhausted=%v states=%d paths=%d", ctx.exhausted, len(ctx.seen), len(paths))
+	}
+	got := p.project(name)
+	if got.Admission != analysis.SourceFieldIndeterminate || !slices.ContainsFunc(got.Evidence, func(e SchemaEvidence) bool { return e.Reason == "traversal_budget" }) {
+		t.Fatalf("unbounded segmentation did not preserve budget uncertainty: admission=%d evidence=%d", got.Admission, len(got.Evidence))
+	}
+}
+func TestJSONSchemaLiteralCombinationsAcrossConjuncts(t *testing.T) {
+	p := preparedJSON(t, `{"allOf":[{"properties":{"a":false,"a.b":true}},{"additionalProperties":{"properties":{"c":false,"c.d":{"type":"string"}}}}]}`)
+	if got := p.project("a.b.c.d"); got.Admission != analysis.SourceFieldAdmitted {
+		t.Fatal(got)
+	}
+}
+func TestJSONSchemaLiteralInterpretationEvidence(t *testing.T) {
+	p := preparedJSON(t, `{"properties":{"a.b":{"properties":{"c":{"type":"string"}},"additionalProperties":false},"a.b.c":{"type":"string"}},"additionalProperties":false}`)
+	got := p.project("a.b.c")
+	for _, pointer := range []string{"/properties/a.b", "/properties/a.b/properties/c", "/properties/a.b.c"} {
+		if !slices.ContainsFunc(got.Evidence, func(e SchemaEvidence) bool { return e.Pointer == pointer }) {
+			t.Fatalf("missing interpretation evidence at %s: %+v", pointer, got)
+		}
+	}
+	var wg sync.WaitGroup
+	for i := 0; i < 4; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for j := 0; j < 10; j++ {
+				if !reflect.DeepEqual(got, p.project("a.b.c")) {
+					t.Error("shared interpretation state changed evidence")
+				}
+			}
+		}()
+	}
+	wg.Wait()
+}
