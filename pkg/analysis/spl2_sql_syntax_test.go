@@ -188,3 +188,48 @@ func TestSPL2SQLSyntaxContractLocations(t *testing.T) {
 		t.Fatalf("invalid plus incomplete coverage lost: %+v", p.diagnostics)
 	}
 }
+
+func TestSPL2SQLSyntaxQualifiedGroupingWildcards(t *testing.T) {
+	for _, c := range []struct{ name, expression, diagnostic string }{
+		{"qualified_raw", "m.'host*'", "'host*'"},
+		{"qualified_escaped", "m.'host\\u002a'", "'host\\u002a'"},
+		{"deeper", "m.payload.'host*'", "'host*'"},
+		{"plain_wildcard", "'host*'", "'host*'"},
+		{"literal_dot_wildcard", "'m.host*'", "'m.host*'"},
+		{"qualified", "m.host", ""},
+		{"plain", "host", ""},
+		{"literal_dot", "'m.host'", ""},
+		{"dynamic_bracket", "m[\"host*\"]", ""},
+		{"dynamic_template", "'host${\"*\"}'", ""},
+		{"unproved_escape", "m.'host\\q*'", ""},
+		{"function_name", "'function*'(host)", ""},
+	} {
+		for _, selectFirst := range []bool{false, true} {
+			hierarchy := "from_first"
+			text := "FROM main AS m GROUP BY " + c.expression + " SELECT count()"
+			if selectFirst {
+				hierarchy = "select_first"
+				text = "SELECT count() FROM main AS m GROUP BY " + c.expression
+			}
+			t.Run(c.name+"/"+hierarchy, func(t *testing.T) {
+				p := parseSPL2Document(text)
+				if !p.syntaxComplete || p.semanticComplete {
+					t.Fatalf("coverage %v/%v: %+v", p.syntaxComplete, p.semanticComplete, p.diagnostics)
+				}
+				if c.diagnostic == "" {
+					if len(p.diagnostics) != 0 {
+						t.Fatalf("static wildcard inferred for control: %+v", p.diagnostics)
+					}
+					return
+				}
+				if len(p.diagnostics) != 1 {
+					t.Fatalf("want one located wildcard error: %+v", p.diagnostics)
+				}
+				d := p.diagnostics[0]
+				if d.Code != CodeSyntaxError || d.Severity != "error" || d.Category != "contract" || text[d.Location.Start.Offset:d.Location.End.Offset] != c.diagnostic {
+					t.Fatalf("wrong wildcard ownership: %+v", d)
+				}
+			})
+		}
+	}
+}

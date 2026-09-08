@@ -465,9 +465,18 @@ func (p *spl2ParsedDocument) inspectSQLGroup(ctx *spl2.SqlGroupKeyContext) {
 	}
 	var visit func(antlr.Tree)
 	visit = func(tree antlr.Tree) {
-		if field, ok := tree.(*spl2.FieldNameContext); ok && field.Identifier() != nil {
-			if name, known := spl2DecodeKey(field.Identifier().GetText()); known && strings.Contains(name, "*") {
-				p.syntaxFinding(field, CodeSyntaxError, "contract", "SQL grouping keys cannot contain field wildcards")
+		var identifier spl2.IIdentifierContext
+		switch node := tree.(type) {
+		case *spl2.FieldNameContext:
+			identifier = node.Identifier()
+		case *spl2.AccessPartContext:
+			if node.DOT() != nil {
+				identifier = node.Identifier()
+			}
+		}
+		if identifier != nil {
+			if name, known := spl2DecodeKey(identifier.GetText()); known && strings.Contains(name, "*") {
+				p.syntaxFinding(identifier, CodeSyntaxError, "contract", "SQL grouping keys cannot contain field wildcards")
 			}
 		}
 		for _, child := range tree.GetChildren() {

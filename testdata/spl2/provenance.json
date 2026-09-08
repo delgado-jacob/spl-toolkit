@@ -18582,7 +18582,7 @@
     },
     {
       "id": "T4.boundary.join_inequality",
-      "form_id": "Q04",
+      "form_id": "E.L19.inner",
       "source_keys": [
         "fromsyntax"
       ],
@@ -18594,7 +18594,7 @@
     },
     {
       "id": "T4.boundary.join_literal",
-      "form_id": "Q04",
+      "form_id": "E.L19.inner",
       "source_keys": [
         "fromsyntax"
       ],
@@ -18606,7 +18606,7 @@
     },
     {
       "id": "T4.boundary.join_or",
-      "form_id": "Q04",
+      "form_id": "E.L19.inner",
       "source_keys": [
         "fromsyntax"
       ],
@@ -18618,7 +18618,7 @@
     },
     {
       "id": "T4.boundary.join_unqualified",
-      "form_id": "Q04",
+      "form_id": "E.L19.inner",
       "source_keys": [
         "fromsyntax"
       ],
@@ -18630,7 +18630,7 @@
     },
     {
       "id": "T4.boundary.join_deep_path",
-      "form_id": "Q04",
+      "form_id": "E.L19.inner",
       "source_keys": [
         "fromsyntax"
       ],
@@ -18642,7 +18642,7 @@
     },
     {
       "id": "T4.boundary.join_reversed",
-      "form_id": "Q04",
+      "form_id": "E.L19.inner",
       "source_keys": [
         "fromsyntax"
       ],
@@ -18654,9 +18654,9 @@
     },
     {
       "id": "T4.boundary.foreign_sql_option",
-      "form_id": "Q04",
+      "form_id": "C08",
       "source_keys": [
-        "fromsyntax"
+        "doc167"
       ],
       "candidate": "FROM main | stats limit=3 count()",
       "evidence": "task4-approved-form-boundary",
@@ -20094,7 +20094,7 @@
     },
     {
       "id": "T4.join.0.False",
-      "form_id": "Q04",
+      "form_id": "E.L19.inner",
       "source_keys": [
         "fromsyntax"
       ],
@@ -20106,7 +20106,7 @@
     },
     {
       "id": "T4.join.0.True",
-      "form_id": "Q04",
+      "form_id": "E.L19.inner",
       "source_keys": [
         "fromsyntax"
       ],
@@ -20118,7 +20118,7 @@
     },
     {
       "id": "T4.join.1.False",
-      "form_id": "Q04",
+      "form_id": "E.L19.inner",
       "source_keys": [
         "fromsyntax"
       ],
@@ -20130,7 +20130,7 @@
     },
     {
       "id": "T4.join.1.True",
-      "form_id": "Q04",
+      "form_id": "E.L19.inner",
       "source_keys": [
         "fromsyntax"
       ],
@@ -20142,7 +20142,7 @@
     },
     {
       "id": "T4.join.2.False",
-      "form_id": "Q04",
+      "form_id": "E.L19.left",
       "source_keys": [
         "fromsyntax"
       ],
@@ -20154,7 +20154,7 @@
     },
     {
       "id": "T4.join.2.True",
-      "form_id": "Q04",
+      "form_id": "E.L19.left",
       "source_keys": [
         "fromsyntax"
       ],
@@ -20166,7 +20166,7 @@
     },
     {
       "id": "T4.join.3.False",
-      "form_id": "Q04",
+      "form_id": "E.L19.left",
       "source_keys": [
         "fromsyntax"
       ],
@@ -20178,7 +20178,7 @@
     },
     {
       "id": "T4.join.3.True",
-      "form_id": "Q04",
+      "form_id": "E.L19.left",
       "source_keys": [
         "fromsyntax"
       ],
@@ -20355,6 +20355,294 @@
       "disposition": "active",
       "assembly": "standalone",
       "case_id": "T4.boundary.group_expression_call"
+    },
+    {
+      "id": "T4.fix1.group.qualified_raw.from",
+      "form_id": "E.L16.group_keys",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main AS m GROUP BY m.'host*' SELECT count()",
+      "evidence": "task4-fix1-static-qualified-group-selector-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.fix1.group.qualified_raw.from"
+    },
+    {
+      "id": "T4.fix1.group.qualified_raw.select",
+      "form_id": "E.L16.group_keys",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "SELECT count() FROM main AS m GROUP BY m.'host*'",
+      "evidence": "task4-fix1-static-qualified-group-selector-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.fix1.group.qualified_raw.select"
+    },
+    {
+      "id": "T4.fix1.group.qualified_escaped.from",
+      "form_id": "E.L16.group_keys",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main AS m GROUP BY m.'host\\u002a' SELECT count()",
+      "evidence": "task4-fix1-static-qualified-group-selector-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.fix1.group.qualified_escaped.from"
+    },
+    {
+      "id": "T4.fix1.group.qualified_escaped.select",
+      "form_id": "E.L16.group_keys",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "SELECT count() FROM main AS m GROUP BY m.'host\\u002a'",
+      "evidence": "task4-fix1-static-qualified-group-selector-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.fix1.group.qualified_escaped.select"
+    },
+    {
+      "id": "T4.fix1.group.deeper.from",
+      "form_id": "E.L16.group_keys",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main AS m GROUP BY m.payload.'host*' SELECT count()",
+      "evidence": "task4-fix1-static-qualified-group-selector-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.fix1.group.deeper.from"
+    },
+    {
+      "id": "T4.fix1.group.deeper.select",
+      "form_id": "E.L16.group_keys",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "SELECT count() FROM main AS m GROUP BY m.payload.'host*'",
+      "evidence": "task4-fix1-static-qualified-group-selector-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.fix1.group.deeper.select"
+    },
+    {
+      "id": "T4.fix1.group.plain_wildcard.from",
+      "form_id": "E.L16.group_keys",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main AS m GROUP BY 'host*' SELECT count()",
+      "evidence": "task4-fix1-static-qualified-group-selector-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.fix1.group.plain_wildcard.from"
+    },
+    {
+      "id": "T4.fix1.group.plain_wildcard.select",
+      "form_id": "E.L16.group_keys",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "SELECT count() FROM main AS m GROUP BY 'host*'",
+      "evidence": "task4-fix1-static-qualified-group-selector-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.fix1.group.plain_wildcard.select"
+    },
+    {
+      "id": "T4.fix1.group.literal_dot_wildcard.from",
+      "form_id": "E.L16.group_keys",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main AS m GROUP BY 'm.host*' SELECT count()",
+      "evidence": "task4-fix1-static-qualified-group-selector-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.fix1.group.literal_dot_wildcard.from"
+    },
+    {
+      "id": "T4.fix1.group.literal_dot_wildcard.select",
+      "form_id": "E.L16.group_keys",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "SELECT count() FROM main AS m GROUP BY 'm.host*'",
+      "evidence": "task4-fix1-static-qualified-group-selector-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.fix1.group.literal_dot_wildcard.select"
+    },
+    {
+      "id": "T4.fix1.group.qualified.from",
+      "form_id": "E.L16.group_keys",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main AS m GROUP BY m.host SELECT count()",
+      "evidence": "task4-fix1-static-qualified-group-selector-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.fix1.group.qualified.from"
+    },
+    {
+      "id": "T4.fix1.group.qualified.select",
+      "form_id": "E.L16.group_keys",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "SELECT count() FROM main AS m GROUP BY m.host",
+      "evidence": "task4-fix1-static-qualified-group-selector-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.fix1.group.qualified.select"
+    },
+    {
+      "id": "T4.fix1.group.plain.from",
+      "form_id": "E.L16.group_keys",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main AS m GROUP BY host SELECT count()",
+      "evidence": "task4-fix1-static-qualified-group-selector-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.fix1.group.plain.from"
+    },
+    {
+      "id": "T4.fix1.group.plain.select",
+      "form_id": "E.L16.group_keys",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "SELECT count() FROM main AS m GROUP BY host",
+      "evidence": "task4-fix1-static-qualified-group-selector-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.fix1.group.plain.select"
+    },
+    {
+      "id": "T4.fix1.group.literal_dot.from",
+      "form_id": "E.L16.group_keys",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main AS m GROUP BY 'm.host' SELECT count()",
+      "evidence": "task4-fix1-static-qualified-group-selector-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.fix1.group.literal_dot.from"
+    },
+    {
+      "id": "T4.fix1.group.literal_dot.select",
+      "form_id": "E.L16.group_keys",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "SELECT count() FROM main AS m GROUP BY 'm.host'",
+      "evidence": "task4-fix1-static-qualified-group-selector-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.fix1.group.literal_dot.select"
+    },
+    {
+      "id": "T4.fix1.group.dynamic_bracket.from",
+      "form_id": "E.L16.group_keys",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main AS m GROUP BY m[\"host*\"] SELECT count()",
+      "evidence": "task4-fix1-static-qualified-group-selector-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.fix1.group.dynamic_bracket.from"
+    },
+    {
+      "id": "T4.fix1.group.dynamic_bracket.select",
+      "form_id": "E.L16.group_keys",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "SELECT count() FROM main AS m GROUP BY m[\"host*\"]",
+      "evidence": "task4-fix1-static-qualified-group-selector-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.fix1.group.dynamic_bracket.select"
+    },
+    {
+      "id": "T4.fix1.group.dynamic_template.from",
+      "form_id": "E.L16.group_keys",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main AS m GROUP BY 'host${\"*\"}' SELECT count()",
+      "evidence": "task4-fix1-static-qualified-group-selector-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.fix1.group.dynamic_template.from"
+    },
+    {
+      "id": "T4.fix1.group.dynamic_template.select",
+      "form_id": "E.L16.group_keys",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "SELECT count() FROM main AS m GROUP BY 'host${\"*\"}'",
+      "evidence": "task4-fix1-static-qualified-group-selector-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.fix1.group.dynamic_template.select"
+    },
+    {
+      "id": "T4.fix1.group.unproved_escape.from",
+      "form_id": "E.L16.group_keys",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main AS m GROUP BY m.'host\\q*' SELECT count()",
+      "evidence": "task4-fix1-static-qualified-group-selector-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.fix1.group.unproved_escape.from"
+    },
+    {
+      "id": "T4.fix1.group.unproved_escape.select",
+      "form_id": "E.L16.group_keys",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "SELECT count() FROM main AS m GROUP BY m.'host\\q*'",
+      "evidence": "task4-fix1-static-qualified-group-selector-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.fix1.group.unproved_escape.select"
+    },
+    {
+      "id": "T4.fix1.group.function_name.from",
+      "form_id": "E.L16.group_keys",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "FROM main AS m GROUP BY 'function*'(host) SELECT count()",
+      "evidence": "task4-fix1-static-qualified-group-selector-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.fix1.group.function_name.from"
+    },
+    {
+      "id": "T4.fix1.group.function_name.select",
+      "form_id": "E.L16.group_keys",
+      "source_keys": [
+        "fromsyntax"
+      ],
+      "candidate": "SELECT count() FROM main AS m GROUP BY 'function*'(host)",
+      "evidence": "task4-fix1-static-qualified-group-selector-boundary",
+      "disposition": "active",
+      "assembly": "standalone",
+      "case_id": "T4.fix1.group.function_name.select"
     }
   ],
   "holds": [
