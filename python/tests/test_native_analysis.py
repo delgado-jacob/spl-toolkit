@@ -59,7 +59,7 @@ def test_analysis_preserves_source_and_arrays(query):
         assert query.encode()[location["start"]["offset"]:location["end"]["offset"]].decode() == reference["original_name"]
 
 
-@pytest.mark.parametrize("options, message", [({"language": "spl2"}, "unsupported language"), ({"profile": "other"}, "unsupported profile"), ({"version": "9"}, "unsupported compatibility version"), ({"source_id": "\ud800"}, "unpaired UTF-16")])
+@pytest.mark.parametrize("options, message", [({"language": "sql"}, "unsupported language"), ({"profile": "other"}, "unsupported profile"), ({"version": "9"}, "unsupported compatibility version"), ({"source_id": "\ud800"}, "unpaired UTF-16")])
 def test_analysis_options_are_api_errors(options, message):
     with SPLMapper(**mapper_kwargs()) as mapper:
         with pytest.raises(SPLMapperError, match=message):

@@ -156,6 +156,8 @@ class SPLMapper:
         self._lib.spl_mapper_validate_schema_batch.restype = ctypes.POINTER(SPLResult)
         self._lib.spl_mapper_capabilities.argtypes = [ctypes.c_int]
         self._lib.spl_mapper_capabilities.restype = ctypes.POINTER(SPLResult)
+        self._lib.spl_mapper_capabilities_for.argtypes = [ctypes.c_int, ctypes.c_char_p]
+        self._lib.spl_mapper_capabilities_for.restype = ctypes.POINTER(SPLResult)
 
         # spl_mapper_discover_query
         self._lib.spl_mapper_discover_query.argtypes = [ctypes.c_int, ctypes.c_char_p]
@@ -255,7 +257,7 @@ class SPLMapper:
                     self._lib.spl_string_free(error_pointer)
                 raise ConfigurationError(message)
     
-    def map_query(self, query: str) -> str:
+    def map_query(self, query: str, *, language="spl", profile="splunkd", version="current") -> str:
         """
         Apply field mappings to a SPL query
         
@@ -265,6 +267,7 @@ class SPLMapper:
         Returns:
             Mapped query string
         """
+        self._legacy_selectors(language, profile, version)
         query_bytes = query.encode('utf-8')
         with self._operation() as mapper_id:
             result_ptr = self._lib.spl_mapper_map_query(mapper_id, query_bytes)
@@ -282,7 +285,7 @@ class SPLMapper:
             finally:
                 self._lib.spl_result_free(result_ptr)
     
-    def map_query_with_context(self, query: str, context: Dict[str, Any]) -> str:
+    def map_query_with_context(self, query: str, context: Dict[str, Any], *, language="spl", profile="splunkd", version="current") -> str:
         """
         Apply field mappings to a SPL query with explicit context
         
@@ -293,6 +296,7 @@ class SPLMapper:
         Returns:
             Mapped query string
         """
+        self._legacy_selectors(language, profile, version)
         query_bytes = query.encode('utf-8')
         context_json = json.dumps(context).encode('utf-8')
         with self._operation() as mapper_id:
@@ -321,7 +325,11 @@ class SPLMapper:
         document = {"text": query, "language": language, "profile": profile,
                     "version": version, "source_id": source_id}
         with self._operation() as handle:
-            pointer = self._lib.spl_mapper_analyze_query(handle, json.dumps(document).encode("utf-8"))
+            try:
+                payload = json.dumps(document, allow_nan=False).encode("utf-8")
+            except (TypeError, ValueError) as error:
+                raise SPLMapperError(f"Invalid document JSON: {error}") from error
+            pointer = self._lib.spl_mapper_analyze_query(handle, payload)
             if not pointer:
                 raise SPLMapperError("Native analysis returned no result")
             try:
@@ -381,10 +389,18 @@ class SPLMapper:
             finally:
                 self._lib.spl_result_free(pointer)
 
-    def capabilities(self) -> dict:
+    def capabilities(self, *, language="spl", profile="splunkd", version="current") -> dict:
         """Return the native analysis capability manifest."""
         with self._operation() as handle:
-            pointer = self._lib.spl_mapper_capabilities(handle)
+            if (language, profile, version) == ("spl", "splunkd", "current"):
+                pointer = self._lib.spl_mapper_capabilities(handle)
+            else:
+                try:
+                    payload = json.dumps({"language": language, "profile": profile, "version": version},
+                                         allow_nan=False).encode("utf-8")
+                except (TypeError, ValueError) as error:
+                    raise SPLMapperError(f"Invalid capability options JSON: {error}") from error
+                pointer = self._lib.spl_mapper_capabilities_for(handle, payload)
             if not pointer:
                 raise SPLMapperError("Native capabilities returned no result")
             try:
@@ -394,7 +410,13 @@ class SPLMapper:
             finally:
                 self._lib.spl_result_free(pointer)
 
-    def discover_query(self, query: str) -> QueryInfo:
+    def _legacy_selectors(self, language, profile, version):
+        if (language, profile, version) != ("spl", "splunkd", "current"):
+            manifest = self.capabilities(language=language, profile=profile, version=version)
+            if manifest["language"] == "spl2":
+                raise SPLMapperError("SPL2 requires analyze_query, validate_fields, or validate_schema")
+
+    def discover_query(self, query: str, *, language="spl", profile="splunkd", version="current") -> QueryInfo:
         """
         Analyze a SPL query and discover information about it
         
@@ -404,6 +426,7 @@ class SPLMapper:
         Returns:
             QueryInfo object with discovered information
         """
+        self._legacy_selectors(language, profile, version)
         query_bytes = query.encode('utf-8')
         with self._operation() as mapper_id:
             result_ptr = self._lib.spl_mapper_discover_query(mapper_id, query_bytes)
@@ -435,7 +458,7 @@ class SPLMapper:
             finally:
                 self._lib.spl_query_info_free(result_ptr)
     
-    def get_input_fields(self, query: str) -> List[str]:
+    def get_input_fields(self, query: str, *, language="spl", profile="splunkd", version="current") -> List[str]:
         """
         Get all input fields required for a query
         
@@ -445,5 +468,5 @@ class SPLMapper:
         Returns:
             List of field names
         """
-        info = self.discover_query(query)
+        info = self.discover_query(query, language=language, profile=profile, version=version)
         return info.input_fields

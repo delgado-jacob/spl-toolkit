@@ -159,7 +159,7 @@ def test_native_schema_bad_target_does_not_poison_calls(target, batch):
         assert mapper.validate_schema("table host", TARGET)["status"] == "valid"
 
 
-@pytest.mark.parametrize("options", [{"language": "spl2"}, {"profile": "other"},
+@pytest.mark.parametrize("options", [{"language": "sql"}, {"profile": "other"},
     {"version": "9"}, {"source_id": "\ud800"}, {"source_id": None}, {"language": 1}])
 def test_native_schema_options_rejected(options):
     with SPLMapper(**mapper_kwargs()) as mapper:

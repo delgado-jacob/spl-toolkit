@@ -37,7 +37,10 @@ static void free_string_array(char** arr, int count) {
 import "C"
 
 import (
+	"bytes"
 	"encoding/json"
+	"fmt"
+	"io"
 	"runtime"
 	"unsafe"
 
@@ -169,39 +172,16 @@ func spl_mapper_map_query_with_context(mapperID C.int, query *C.char, contextJSO
 
 //export spl_mapper_analyze_query
 func spl_mapper_analyze_query(mapperID C.int, documentJSON *C.char) *C.SPLResult {
-	result := (*C.SPLResult)(C.malloc(C.sizeof_SPLResult))
-	result.error = nil
-	result.result = nil
-
-	m, exists := registry.get(int(mapperID))
-	if !exists {
-		result.error = C.CString("Mapper not found")
-		return result
-	}
-	defer runtime.KeepAlive(m)
-
-	data := []byte(C.GoString(documentJSON))
-	if err := jsoninput.ValidateUnicode(data); err != nil {
-		result.error = C.CString("Invalid document JSON: " + err.Error())
-		return result
-	}
-	var document analysis.QueryDocument
-	if err := json.Unmarshal(data, &document); err != nil {
-		result.error = C.CString("Invalid document JSON: " + err.Error())
-		return result
-	}
-	report, err := analysis.Analyze(document)
-	if err != nil {
-		result.error = C.CString(err.Error())
-		return result
-	}
-	encoded, err := json.Marshal(report)
-	if err != nil {
-		result.error = C.CString(err.Error())
-		return result
-	}
-	result.result = C.CString(string(encoded))
-	return result
+	return ownedMapperJSONResult(mapperID, func() (any, error) {
+		documents, err := validation.DecodeDocuments([]byte("[" + C.GoString(documentJSON) + "]"))
+		if err != nil {
+			return nil, err
+		}
+		if len(documents) != 1 {
+			return nil, fmt.Errorf("expected one query document")
+		}
+		return analysis.Analyze(documents[0])
+	})
 }
 
 // ownedMapperJSONResult retains an admitted mapper and returns one owned result,
@@ -273,6 +253,63 @@ func spl_mapper_validate_schema_batch(mapperID C.int, requestJSON *C.char) *C.SP
 			return nil, err
 		}
 		return validation.ValidateSchemaBatch(request.Documents, request.Target)
+	})
+}
+
+// capabilitiesJSON checks the options envelope; selector semantics stay in analysis.
+func capabilitiesJSON(data []byte) (analysis.CapabilityManifest, error) {
+	var options analysis.CapabilityOptions
+	invalid := func() (analysis.CapabilityManifest, error) {
+		return analysis.CapabilityManifest{}, fmt.Errorf("expected one capability options object with unique language, profile, version string members")
+	}
+	if err := jsoninput.ValidateUnicode(data); err != nil {
+		return analysis.CapabilityManifest{}, err
+	}
+	decoder := json.NewDecoder(bytes.NewReader(data))
+	start, err := decoder.Token()
+	if err != nil || start != json.Delim('{') {
+		return invalid()
+	}
+	seen := map[string]bool{}
+	for decoder.More() {
+		key, err := decoder.Token()
+		if err != nil {
+			return invalid()
+		}
+		name, ok := key.(string)
+		if !ok || seen[name] {
+			return invalid()
+		}
+		seen[name] = true
+		token, err := decoder.Token()
+		value, ok := token.(string)
+		if err != nil || !ok {
+			return invalid()
+		}
+		switch name {
+		case "language":
+			options.Language = value
+		case "profile":
+			options.Profile = value
+		case "version":
+			options.Version = value
+		default:
+			return invalid()
+		}
+	}
+	if end, err := decoder.Token(); err != nil || end != json.Delim('}') {
+		return invalid()
+	}
+	if _, err := decoder.Token(); err != io.EOF {
+		return invalid()
+	}
+	return analysis.CapabilitiesFor(options)
+}
+
+//export spl_mapper_capabilities_for
+func spl_mapper_capabilities_for(mapperID C.int, optionsJSON *C.char) *C.SPLResult {
+	return ownedMapperJSONResult(mapperID, func() (any, error) {
+		return capabilitiesJSON([]byte(C.GoString(optionsJSON)))
 	})
 }
 

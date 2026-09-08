@@ -35,6 +35,7 @@ SDIST_FIXED_FILES = {
     "spl_toolkit.egg-info/dependency_links.txt", "spl_toolkit.egg-info/top_level.txt",
     "tests/test_mapper.py", "tests/test_native_abi.py", "tests/test_native_mapper.py",
     "tests/test_native_analysis.py", "tests/test_native_validation.py", "tests/test_native_schema_validation.py",
+    "tests/test_native_spl2.py",
 }
 INSTALL_SCRIPT = """
 import importlib.metadata, pathlib, sys
@@ -48,7 +49,7 @@ with SPLMapper() as mapper:
     mapper.load_mappings([{'source':'src_ip','target':'source_ip'}])
     assert mapper.map_query('search src_ip=1') == 'search source_ip=1'
 """
-NATIVE_TESTS = ("test_native_abi.py", "test_native_mapper.py", "test_native_analysis.py", "test_native_validation.py", "test_native_schema_validation.py")
+NATIVE_TESTS = ("test_native_abi.py", "test_native_mapper.py", "test_native_analysis.py", "test_native_validation.py", "test_native_schema_validation.py", "test_native_spl2.py")
 SCHEMA_FIXTURE_FILES = (
     "cases.json", "requests.json", "ocsf/edge-cases.json",
     "ocsf/1.6.0/base.json.gz", "ocsf/1.6.0/windows.json.gz",
@@ -56,12 +57,19 @@ SCHEMA_FIXTURE_FILES = (
     "ocsf/1.6.0/SCHEMA-NOTICE", "ocsf/1.6.0/SCHEMA-LICENSE",
     "ocsf/1.6.0/COMPILER-NOTICE", "ocsf/1.6.0/COMPILER-LICENSE",
 )
+SPL2_FIXTURE_FILES = (
+    "manifest.json", "provenance.json", "lexical-expressions.json", "frontend-boundaries.json",
+    "pipeline-commands.json", "pipeline-boundaries.json", "sql-clauses.json", "sql-boundaries.json",
+    "extended-commands.json", "extended-boundaries.json", "functions.json", "canonical-core.json",
+    "recovery-core.json",
+)
 ACCEPTANCE_FILES = ("test_documented_cli.py", "test_surfaces.py", "test_analysis_surfaces.py", "test_validation_surfaces.py", "test_schema_surfaces.py", "cli_examples.json")
 REQUIRED_PYTEST_PLUGIN = r'''\
 import json
 import os
 
 collected = 0
+collected_files = set()
 passed = set()
 failed = set()
 skipped = set()
@@ -69,6 +77,7 @@ skipped = set()
 def pytest_collection_finish(session):
     global collected
     collected = len(session.items)
+    collected_files.update(os.path.basename(str(item.path)) for item in session.items)
 
 def pytest_runtest_logreport(report):
     if report.skipped:
@@ -92,7 +101,8 @@ def pytest_sessionfinish(session, exitstatus):
             json.dump(counts, output, sort_keys=True)
             output.write("\n")
         os.replace(temporary, destination)
-    if collected == 0 or not passed or failed or skipped or len(passed) != collected:
+    required = set(json.loads(os.environ.get("SPL_REQUIRED_TEST_FILES", "[]")))
+    if required - collected_files or collected == 0 or not passed or failed or skipped or len(passed) != collected:
         session.exitstatus = 1
 '''
 
@@ -142,7 +152,7 @@ def run(command: list[str], *, cwd: Path, env: dict[str, str] | None = None) -> 
 
 def clean_env() -> dict[str, str]:
     env = os.environ.copy()
-    for name in ("PYTHONPATH", "PYTHONHOME", "SPL_NATIVE_LIBRARY", "SPL_EXPECTED_VERSION", "SPL_SCHEMA_FIXTURES"):
+    for name in ("PYTHONPATH", "PYTHONHOME", "SPL_NATIVE_LIBRARY", "SPL_EXPECTED_VERSION", "SPL_SCHEMA_FIXTURES", "SPL_SPL2_FIXTURES"):
         env.pop(name, None)
     return env
 
@@ -201,6 +211,20 @@ def copy_schema_fixtures(source: Path, destination: Path) -> dict[str, str]:
         shutil.copy2(original, copied)
         if sha256(copied) != expected:
             raise AssertionError(f"schema fixture hash mismatch: {relative}")
+        hashes[relative] = expected
+    return hashes
+
+
+def copy_spl2_fixtures(source: Path, destination: Path) -> dict[str, str]:
+    """Copy the durable SPL2 corpus outside checkout and bind each copied input."""
+    destination.mkdir()
+    hashes = {}
+    for relative in SPL2_FIXTURE_FILES:
+        original, copied = source / relative, destination / relative
+        expected = sha256(original)
+        shutil.copy2(original, copied)
+        if sha256(copied) != expected:
+            raise AssertionError(f"SPL2 fixture hash mismatch: {relative}")
         hashes[relative] = expected
     return hashes
 
@@ -286,7 +310,7 @@ def verify_sdist_sources(source: Path, root: Path) -> dict[str, str]:
     originals = {
         relative: root / "python" / relative for relative in (
             "native-source-files.txt", "spl_toolkit/mapper.py", "spl_toolkit/libspl_toolkit.h",
-            "tests/test_native_schema_validation.py",
+            "tests/test_native_schema_validation.py", "tests/test_native_spl2.py",
         )
     }
     for relative in manifest.read_text(encoding="utf-8").splitlines():
@@ -303,7 +327,8 @@ def verify_sdist_sources(source: Path, root: Path) -> dict[str, str]:
 
 def _run_required_suite(python: Path, suite: Path, result: Path, outside: Path, env: dict[str, str]) -> dict[str, int]:
     write_required_pytest_plugin(suite)
-    child_env = env | {"SPL_TEST_COUNTS": str(result)}
+    child_env = env | {"SPL_TEST_COUNTS": str(result),
+                       "SPL_REQUIRED_TEST_FILES": json.dumps(sorted(p.name for p in suite.glob("test_*.py")))}
     run([str(python), "-I", "-m", "pytest", str(suite), "-q"], cwd=outside, env=child_env)
     counts = json.loads(result.read_text(encoding="utf-8"))
     if set(counts) != {"collected", "passed", "failed", "skipped"}:
@@ -354,11 +379,14 @@ def install_and_check(
     shutil.copy2(docs_root / "testdata" / "analysis" / "cases.json", analysis_fixture)
     schema_fixtures = outside_checkout / f"schema-fixtures-{directory.name}"
     schema_hashes = copy_schema_fixtures(docs_root / "testdata/schemas", schema_fixtures)
+    spl2_fixtures = outside_checkout / f"spl2-fixtures-{directory.name}"
+    spl2_hashes = copy_spl2_fixtures(docs_root / "testdata/spl2", spl2_fixtures)
     runtime_env = {key: "http://127.0.0.1:9" for key in ("HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY", "http_proxy", "https_proxy", "all_proxy")}
     runtime_env.update(NO_PROXY="127.0.0.1,localhost", no_proxy="127.0.0.1,localhost")
     analysis_env = runtime_env | {
         "SPL_ANALYSIS_FIXTURES": str(analysis_fixture.resolve()),
         "SPL_SCHEMA_FIXTURES": str(schema_fixtures.resolve()),
+        "SPL_SPL2_FIXTURES": str(spl2_fixtures.resolve()),
     }
     native_counts = _run_required_suite(
         python, installed_test_dir, outside_checkout / f"native-counts-{directory.name}.json", outside_checkout, install_env | analysis_env
@@ -388,8 +416,10 @@ def install_and_check(
         "wheel_sha256": sha256(wheel),
         "wheel_payload_hashes": wheel_payload_hashes,
         "source_header_sha256": sha256(docs_root / "python/spl_toolkit/libspl_toolkit.h"),
-        "fixture_hashes": {"baseline": sha256(fixture), "analysis": sha256(analysis_fixture), "validation": sha256(validation_fixture), "schema": schema_hashes},
+        "fixture_hashes": {"baseline": sha256(fixture), "analysis": sha256(analysis_fixture), "validation": sha256(validation_fixture), "schema": schema_hashes, "spl2": spl2_hashes},
         "tests": {"required_native": native_counts, "surface_acceptance": surface_counts},
+        "required_test_files": {"native": list(NATIVE_TESTS),
+                                "acceptance": [name for name in ACCEPTANCE_FILES if name.endswith(".py")]},
         "cli_examples": "passed",
         "surface_parity": "passed",
         "version_agreement": "passed",

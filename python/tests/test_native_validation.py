@@ -87,7 +87,7 @@ def test_native_validation_catalog_errors_are_mapper_errors(catalog, batch):
         assert mapper.validate_fields("table host", ["host"])["status"] == "valid"
 
 
-@pytest.mark.parametrize("options", [{"language": "spl2"}, {"profile": "other"},
+@pytest.mark.parametrize("options", [{"language": "sql"}, {"profile": "other"},
     {"version": "9"}, {"source_id": "\ud800"}, {"source_id": None}, {"language": 1}])
 def test_native_validation_options_are_mapper_errors(options):
     with SPLMapper(**mapper_kwargs()) as mapper:

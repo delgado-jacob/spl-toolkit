@@ -350,6 +350,7 @@ def test_release_tree_contains_complete_analysis_and_validation_source_closure(t
     command.make_release_tree(str(release), [])
     required = [p for p in (ROOT / "pkg/analysis").glob("*.go") if not p.name.endswith("_test.go")]
     required.extend(p for p in (ROOT / "pkg/validation").glob("*.go") if not p.name.endswith("_test.go"))
+    required.extend((ROOT / "parser/spl2").glob("*.go"))
     required.append(ROOT / "internal/jsoninput/unicode.go")
     for path in required:
         assert (release / "_native_src" / path.relative_to(ROOT)).read_bytes() == path.read_bytes()
@@ -499,6 +500,7 @@ def test_installed_schema_fixtures_exist_before_both_suites(tmp_path: Path, monk
     monkeypatch.setattr(checker.subprocess, "run", lambda *args, **kwargs: subprocess.CompletedProcess(
         args, 0, stdout=json.dumps({"installed_module": str(directory / "module.py"),
                                    "loaded_library": str(library), "native_sha256": checker.sha256(library)}) + "\n"))
+    monkeypatch.setenv("SPL_SPL2_FIXTURES", "checkout-only")
     seen = []
     counts = {"collected": 1, "passed": 1, "failed": 0, "skipped": 0}
 
@@ -508,6 +510,10 @@ def test_installed_schema_fixtures_exist_before_both_suites(tmp_path: Path, monk
         assert not fixtures.is_relative_to(ROOT)
         for relative in SCHEMA_FIXTURES:
             assert (fixtures / relative).read_bytes() == (ROOT / "testdata/schemas" / relative).read_bytes()
+        spl2 = Path(env["SPL_SPL2_FIXTURES"])
+        assert spl2.is_absolute() and spl2.is_relative_to(outside)
+        for original in (ROOT / "testdata/spl2").glob("*.json"):
+            assert (spl2 / original.name).read_bytes() == original.read_bytes()
         if "SPL_SCHEMA_EVIDENCE" in env:
             Path(env["SPL_SCHEMA_EVIDENCE"]).write_text("{}")
         seen.append(fixtures)
@@ -535,7 +541,7 @@ def test_sdist_source_verification_requires_exact_handwritten_sources_and_native
     command.ensure_finalized()
     release = tmp_path / "release"
     command.make_release_tree(str(release), [])
-    for relative in ("native-source-files.txt", "spl_toolkit/mapper.py", "spl_toolkit/libspl_toolkit.h", "tests/test_native_schema_validation.py"):
+    for relative in ("native-source-files.txt", "spl_toolkit/mapper.py", "spl_toolkit/libspl_toolkit.h", "tests/test_native_schema_validation.py", "tests/test_native_spl2.py"):
         destination = release / relative
         destination.parent.mkdir(parents=True, exist_ok=True)
         destination.write_bytes((PYTHON_DIR / relative).read_bytes())
@@ -641,3 +647,46 @@ def test_wheel_header_rejects_compiler_region_changes(tmp_path: Path, before, af
         archive.writestr("spl_toolkit/" + checker.native_library_name(), b"native")
     with pytest.raises(AssertionError, match="header"):
         checker.verify_wheel_sources(wheel, ROOT)
+
+
+def test_installed_native_suite_requires_spl2(tmp_path):
+    checker = load_package_checker()
+    destination = tmp_path / "tests"
+    checker._copy_required_files(ROOT / "python/tests", destination, checker.NATIVE_TESTS)
+    assert (destination / "test_native_spl2.py").read_bytes() == (ROOT / "python/tests/test_native_spl2.py").read_bytes()
+    assert "tests/test_native_spl2.py" in checker.SDIST_FIXED_FILES
+
+
+def test_spl2_fixture_copy_and_source_override(tmp_path, monkeypatch):
+    checker = load_package_checker()
+    monkeypatch.setenv("SPL_SPL2_FIXTURES", "checkout-only")
+    assert "SPL_SPL2_FIXTURES" not in checker.clean_env()
+    destination = tmp_path / "spl2"
+    hashes = checker.copy_spl2_fixtures(ROOT / "testdata/spl2", destination)
+    assert hashes == {p.name: checker.sha256(p) for p in (ROOT / "testdata/spl2").glob("*.json")}
+    assert hashes == {p.name: checker.sha256(p) for p in destination.glob("*.json")}
+
+
+def test_spl2_fixture_copy_rejects_missing_or_changed_input(tmp_path, monkeypatch):
+    checker = load_package_checker()
+    with pytest.raises(FileNotFoundError):
+        checker.copy_spl2_fixtures(tmp_path / "missing", tmp_path / "copy")
+    real_copy = checker.shutil.copy2
+    def corrupt(source, destination):
+        real_copy(source, destination)
+        Path(destination).write_bytes(b"changed")
+    monkeypatch.setattr(checker.shutil, "copy2", corrupt)
+    with pytest.raises(AssertionError, match="hash"):
+        checker.copy_spl2_fixtures(ROOT / "testdata/spl2", tmp_path / "changed")
+
+
+def test_required_pytest_plugin_rejects_uncollected_registered_suite(tmp_path):
+    checker = load_package_checker()
+    suite = tmp_path / 'suite'
+    suite.mkdir()
+    (suite / 'test_existing.py').write_text('def test_pass(): pass\n')
+    (suite / 'test_native_spl2.py').write_text('"""Accidentally empty suite."""\n')
+    checker.write_required_pytest_plugin(suite)
+    completed = subprocess.run([sys.executable, '-m', 'pytest', str(suite), '-q'],
+        env=checker.clean_env() | {'SPL_REQUIRED_TEST_FILES': json.dumps(['test_existing.py', 'test_native_spl2.py'])}, check=False)
+    assert completed.returncode != 0
