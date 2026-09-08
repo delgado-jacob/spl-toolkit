@@ -1,0 +1,352 @@
+{
+  "status": "accepted",
+  "accepted_predecessor": "0bb169c9fb1f0212d1e7758be6ab35a1804bbbaf",
+  "source_sha": "40e6e171a1d215e5c67758fbf346cc5b78892ee2",
+  "scope": "M5 implementation, independent task and broad/scoped reviews, and root runtime acceptance completed at 40e6e171. This record closes the separately authorized fourteen-path documentation/evidence change. Source and build continuity were checked without repeating unchanged runtime suites.",
+  "task11_review": {
+    "status": "approved",
+    "path": ".superpowers/sdd/milestone-5-implementation-plan/task-11-review.md",
+    "sha256": "55a7dc571bfad0a414195fbe8475e454c936cfd09b5b2b8a4179d16a6bd279ce",
+    "critical": 0,
+    "important": 0,
+    "minor_actionable": 0
+  },
+  "broad_review": {
+    "status": "with_fixes",
+    "path": ".superpowers/sdd/milestone-5-implementation-plan/milestone-5-broad-review.md",
+    "sha256": "d074b6839481ee338caf16bbbd024dd305a77141868f3c3cbca229ad94126ff8",
+    "source_sha": "fcbb74ac60da312bc06275e4e3de29b570a3bf2e",
+    "critical": 0,
+    "important": 1,
+    "minor_actionable": 1,
+    "findings": [
+      "M5-BR-01",
+      "M5-BR-02"
+    ]
+  },
+  "corpus": {
+    "original_documents": 1714,
+    "active_obligations": 1835,
+    "independent_exact_canonical": 732,
+    "independently_reviewed_snapshots": 982,
+    "supplemental_assertions_without_extra_credit": 38,
+    "meaningful": 288,
+    "definite_negative": 139,
+    "sql_mixed": 45,
+    "holds": 17,
+    "pending": 0,
+    "semantic_credit_from_full_go_transport": 0
+  },
+  "local_verification": {
+    "go_floor": "Go1.22.12 six-package external-link pass; initial API sandbox bind failure and authorized API-only retry retained",
+    "full_check_go": "passed including race",
+    "tooling_tests": 191,
+    "source_python312": 339,
+    "source_actual_documented_cli_schema_spl2": 78,
+    "installed_primary_wheel": {
+      "native": 322,
+      "acceptance": 102,
+      "failed": 0,
+      "skipped": 0
+    },
+    "installed_rebuilt_sdist_wheel": {
+      "native": 322,
+      "acceptance": 102,
+      "failed": 0,
+      "skipped": 0
+    },
+    "full_reports_per_transport": 1714,
+    "full_go_transport_sha256": "053f87af1a35e1c2caa375f783668e44794114df045168ef1e5aa05ec956ce86",
+    "deterministic_antlr": "4.13.2/Java21; two rounds/ten files/equal existing bytes",
+    "openapi": "pinned generation no changes",
+    "scope": "Historical Task11 verification at fcbb; fixed-candidate affected checks and new transport are recorded under broad_fix_1."
+  },
+  "closure_owned_paths": [
+    "_build_plan/milestones/5-standalone-spl2/conformance-matrix.md",
+    "_build_plan/milestones/5-standalone-spl2/conformance-rereview.md",
+    "_build_plan/milestones/5-standalone-spl2/conformance-review.md",
+    "_build_plan/milestones/5-standalone-spl2/design-spec.md",
+    "_build_plan/milestones/5-standalone-spl2/draft-architecture-rereview.md",
+    "_build_plan/milestones/5-standalone-spl2/draft-architecture-review.md",
+    "_build_plan/milestones/5-standalone-spl2/form-expansion-rereview.md",
+    "_build_plan/milestones/5-standalone-spl2/form-expansion-review.md",
+    "_build_plan/milestones/5-standalone-spl2/form-expansion.md",
+    "_build_plan/milestones/5-standalone-spl2/milestone-5-implementation-plan.md",
+    "_build_plan/milestones/5-standalone-spl2/research-notes.md",
+    "_build_plan/milestones/5-standalone-spl2/milestone-log.md",
+    "docs/evidence/milestone-5/closure.json",
+    "docs/evidence/milestone-5/acceptance-reviews.json.gz"
+  ],
+  "original_authored_hashes": {
+    "_build_plan/milestones/5-standalone-spl2/conformance-matrix.md": "84d07d0ba4638cff5e3e7cf021698a9d570d0b4a81f46414a670f0eb8491fe51",
+    "_build_plan/milestones/5-standalone-spl2/conformance-rereview.md": "dcd3c17bf999436e9b5f694d79e9748bc9355429d7d9dcc84d6ba75cb7152e63",
+    "_build_plan/milestones/5-standalone-spl2/conformance-review.md": "b6ac0d8e2d36846fc450de9fec6abc0a3933cd6a176a3bf3007cf6fa5035ca0d",
+    "_build_plan/milestones/5-standalone-spl2/design-spec.md": "05660c261d860eb0ed09e9dadbf30309ae82a01498e4fdfa144828205139b911",
+    "_build_plan/milestones/5-standalone-spl2/draft-architecture-rereview.md": "24ebe162c39058d76b6241a087e00e64f32dde4e2441e07cd175fc013fd8d788",
+    "_build_plan/milestones/5-standalone-spl2/draft-architecture-review.md": "9c4ec0fe70120429cabef5051a8f6031ff5648cac74f46d0356f95cc83b0509a",
+    "_build_plan/milestones/5-standalone-spl2/form-expansion-rereview.md": "f1ef90de3494005696c67b9cfb1733973123fae9a89f17b334148f0396303ed1",
+    "_build_plan/milestones/5-standalone-spl2/form-expansion-review.md": "b6765781547ad0de524fe095f19689071995a9cba071f215f33f3b5ef3e6a6b1",
+    "_build_plan/milestones/5-standalone-spl2/form-expansion.md": "6eb5f7242f8dd8078ce9ec2daed06a374c0fec873dfb314156cc83d5cb36e2ba",
+    "_build_plan/milestones/5-standalone-spl2/milestone-5-implementation-plan.md": "cd0f0b1657d89fd6bd17d5a2590e16528aa69aeb3f7f5a081c81f7f00dd2a18b",
+    "_build_plan/milestones/5-standalone-spl2/research-notes.md": "002b2176f662c95058ecd894bcb27f9b3df629580a3723a0597ac7fbd04166ad"
+  },
+  "acceptance_reviews_archive": {
+    "path": "docs/evidence/milestone-5/acceptance-reviews.json.gz",
+    "sha256": "43aee93ad9a71d8e91f3ff0af6530e22fef85a54651d6ced00b245127ac672e0",
+    "bytes": 18192,
+    "raw_sha256": "7061c6428491dd94711fb14179f2f700988623621f35c0475a3308518d9a4769",
+    "raw_bytes": 51778,
+    "review_count": 3,
+    "root_summary_count": 2,
+    "status": "complete"
+  },
+  "documentation_and_continuity_checks": {
+    "status": "passed before exact-owned commit",
+    "runtime_tested_head": "40e6e171a1d215e5c67758fbf346cc5b78892ee2",
+    "new_head_scope": "fourteen authored-document/evidence paths only; no runtime input or build changes",
+    "protected_nonowned_files_unchanged": 398,
+    "held_tools_and_artifacts_unchanged": 9,
+    "original_authored_documents_unchanged": 10,
+    "owned_paths": 14,
+    "new_or_revised_files": 4,
+    "original_source_design_projection_sha256": "3345cf5712b1bdbf467d1651784fdb8bccc596805038da0d54e7a123384e3a4e",
+    "archive_review_hashes_verified": 3,
+    "archive_safe_root_summaries_verified": 2,
+    "check_kind": "data/hash, document structure and exact-path correspondence; no product runtime rerun"
+  },
+  "retained_limits": [
+    "Local macOS arm64 verification, not full release matrix or live Splunk execution certification.",
+    "Native/CLI/server embed actual precommit base/dirty VCS metadata; exact checked source-byte equality binds them to source_sha, not a claim of rebuilt final-SHA metadata.",
+    "29 historical runner receipts name predecessor helper source not retained;83 current helper receipts and all final checks bind the retained final helper. Historical source is not reconstructed.",
+    "Capture3/4/5 failures and versioned source-derived authority corrections remain preserved; snapshots and transport output never substitute for independent semantic authority.",
+    "Existing linker, OpenAPI package-discovery and Python tar warnings remain qualified.",
+    "Only terminal blank-line removal after tooling check; exact byte correspondence retained.",
+    "Root private --file harness assumption corrected to documented validation file/stdin path; original failure/scripts retained, no product change or repeated Py314 run.",
+    "No merge, push, publication, source cleanup or M6/M7 production release from this closure record.",
+    "Broad-fix tests/builds retain their actual dirty-fcbb checkout metadata with exact checked-source correspondence to7571f1c; root final checks ran at committed40e6e171. Ignored SDD review/checkpoint finalization was explicitly allowed and attributed outside the root runtime input maps."
+  ],
+  "source_fix_sha": "7571f1cb578968caf92996b050ebfc3092f02605",
+  "broad_fix_1": {
+    "status": "accepted",
+    "source_sha": "7571f1cb578968caf92996b050ebfc3092f02605",
+    "parent_sha": "fcbb74ac60da312bc06275e4e3de29b570a3bf2e",
+    "changed_source_paths": 6,
+    "changed_product_paths": 2,
+    "scope": "len numeric result proof; split unknown result domain; module diagnostic category unsupported_syntax",
+    "canonical_fixture_changes": 0,
+    "full_report_delta": {
+      "changed_reports": 5,
+      "changed_ids": [
+        "B08",
+        "B09",
+        "B10",
+        "B11",
+        "B12"
+      ],
+      "changed_leaf": "/report/diagnostics/0/category",
+      "before": "unsupported",
+      "after": "unsupported_syntax",
+      "other_reports_unchanged": 1709
+    },
+    "full_go_transport_sha256": "17bb01a589bcd650a3180f1d68479811b4e19851ae22e06925d29db3a75905be",
+    "verification_status": "Affected analysis/validation floor,vet,race; source Python339 and surface78; both installed322native+102acceptance passed with no skips. Existing unrelated checks retained through exact relevant-input continuity.",
+    "review_status": "Approved at 40e6e171; both findings closed with no actionable findings",
+    "root_reacceptance_status": "passed at 40e6e171a1d215e5c67758fbf346cc5b78892ee2",
+    "evidence_head": "40e6e171a1d215e5c67758fbf346cc5b78892ee2",
+    "report": {
+      "path": ".superpowers/sdd/milestone-5-implementation-plan/broad-fix-1-report.md",
+      "sha256": "347300bde92cd949fa9ee74d8ec4692bef84925b2178e51c195e539a190623b5"
+    },
+    "verification": {
+      "path": "docs/evidence/milestone-5/broad-fix-1/verification.json",
+      "sha256": "6f49c2dce2feca5cc5979edc1edc95a45b4a8f0d7887f474af4fe8fd6a1d27a6"
+    },
+    "hold_receipt_sha256": "00cbba80d05a51cdef921b461d76303b368de59077441ad4562611ca257c3488",
+    "controller_identity_receipt_sha256": "7a2a1aff5345c17bbb405f979d26dd44f3a73066245fc0fedbd8d8961272982e",
+    "complete_full_report_comparisons": 15426,
+    "precommit_build_metadata": "Actual checks/builds record fcbb dirty-tree HEAD; all tested source/test bytes match source7571. Evidence-only40e6 changes none of those inputs.",
+    "review": {
+      "path": ".superpowers/sdd/milestone-5-implementation-plan/milestone-5-broad-rereview-1.md",
+      "sha256": "c906a7a32b5dcdd045d688f293e9fd15c2d036d09e56c5fa80efe6cdcb1296bc",
+      "critical": 0,
+      "important": 0,
+      "minor_actionable": 0
+    }
+  },
+  "initial_root_result": {
+    "path": "/private/tmp/spl-toolkit-root-m5-final-acceptance-receipt.json",
+    "sha256": "daa4b3e94fbc514e08c2b4caaf58c1111daa0333693b9d0fac268f175a4aac95",
+    "status": "passed",
+    "counts": {
+      "analysis_cases": 16,
+      "legacy": 1,
+      "task11_independent_cases": 12,
+      "concurrent_native_analysis_calls": 68,
+      "schema_cases": 9,
+      "native_schema_calls_per_case": 5,
+      "field_cases": 4,
+      "mixed_batch_documents_per_target": 4,
+      "input_rejections": {
+        "capability_queries": 6,
+        "raw_unicode_http": 3,
+        "legacy_cli": 3,
+        "legacy_http": 3,
+        "legacy_python": 4,
+        "legacy_selector_members_http": 9
+      }
+    },
+    "surface_checks": {
+      "late_invalid_batch_atomicity": "passed",
+      "file_stdin_output": "passed",
+      "caller_target_batch_capability_ownership": "passed",
+      "task8_full_canonical_parity": "passed"
+    },
+    "python314": {
+      "interpreter": "3.14.1 (main, Dec  2 2025, 12:51:37) [Clang 17.0.0 (clang-1700.4.4.1)]",
+      "executable": "/private/tmp/spl-toolkit-remaining-py314/bin/python",
+      "counts": {
+        "tests": 339,
+        "errors": 0,
+        "failures": 0,
+        "skipped": 0
+      },
+      "spl2_native_test_count": 109,
+      "native_sha256": "d58c1a45441056788e8939cec5ea54db8dfc40d8b36a8e09795372b3e72dc56a"
+    },
+    "harness_correction": {
+      "path": "/private/tmp/spl-toolkit-root-m5-file-input-harness-correction.json",
+      "sha256": "9ca180425f5ea964146b960054470ab4e2f3caadaf5ba817f0486d70c08d51a1",
+      "classification": "Root harness option assumption, not a product defect; corrected only documented file/stdin route with exact bytes/locations preserved. Original failure and script retained; no unchanged Py314 rerun."
+    },
+    "source_sha": "fcbb74ac60da312bc06275e4e3de29b570a3bf2e"
+  },
+  "root_final_result": {
+    "path": "/private/tmp/spl-toolkit-root-m5-40e6e171-final-acceptance-receipt.json",
+    "sha256": "567ba8d92ec4b63f54c02b1e2c6ae49d86d094013b3ae69934ddf51337249014",
+    "status": "passed",
+    "summary": {
+      "candidate": "40e6e171a1d215e5c67758fbf346cc5b78892ee2",
+      "implementation_commit": "7571f1cb578968caf92996b050ebfc3092f02605",
+      "status": "Root final runtime acceptance passed; broad findings resolved; authored-document closure remains open",
+      "scoped_review": {
+        "path": "/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/.superpowers/sdd/milestone-5-implementation-plan/milestone-5-broad-rereview-1.md",
+        "sha256": "c906a7a32b5dcdd045d688f293e9fd15c2d036d09e56c5fa80efe6cdcb1296bc"
+      },
+      "freeze_receipt": {
+        "path": "/private/tmp/spl-toolkit-m5-40e6e171-final-window-freeze.json",
+        "sha256": "6fdbb59ed009fe658bbb6a69e8963018a54ccd5969f919f7195376e359ec1777"
+      },
+      "historical_fcbb_acceptance": {
+        "path": "/private/tmp/spl-toolkit-root-m5-final-acceptance-receipt.json",
+        "sha256": "daa4b3e94fbc514e08c2b4caaf58c1111daa0333693b9d0fac268f175a4aac95"
+      },
+      "attempts": {
+        "surfaces": {
+          "path": "/private/tmp/spl-toolkit-root-m5-final-attempts/40e6e171a1d2-surfaces-20260908T192052704052Z/attempt.json",
+          "sha256": "6167f243297916368809c1f990ac5fe77b3a2076c632b696bca50b868419f303",
+          "status": "passed",
+          "exit_code": 0,
+          "inputs_unchanged": true
+        },
+        "py314": {
+          "path": "/private/tmp/spl-toolkit-root-m5-final-attempts/40e6e171a1d2-py314-20260908T192105114142Z/attempt.json",
+          "sha256": "d34ec357f28c9ca1c1f2b51f374b5f64321141bab3deaf7c4678a29ea378337a",
+          "status": "passed",
+          "exit_code": 0,
+          "inputs_unchanged": true
+        }
+      },
+      "current_identity": {
+        "tracked": 380,
+        "untracked": 30,
+        "built_or_packaged_artifacts": 5,
+        "equal_between_python_and_surface_windows": true,
+        "current_snapshot_matches": true,
+        "all_nine_held_tool_artifacts_match": true
+      },
+      "surface_counts": {
+        "analysis_cases": 16,
+        "legacy": 1,
+        "task11_independent_cases": 14,
+        "broad_fix_validation_controls": 2,
+        "concurrent_native_analysis_calls": 68,
+        "native_schema_calls_per_case": 5,
+        "mixed_batch_documents_per_target": 4,
+        "input_rejections": {
+          "capability_queries": 6,
+          "raw_unicode_http": 3,
+          "legacy_cli": 3,
+          "legacy_http": 3,
+          "legacy_python": 4,
+          "legacy_selector_members_http": 9
+        },
+        "schema_cases": 9,
+        "field_cases": 4
+      },
+      "surface_checks": {
+        "late_invalid_batch_atomicity": "passed",
+        "file_stdin_output": "passed",
+        "caller_target_batch_capability_ownership": "passed",
+        "task8_full_canonical_parity": "passed with explicit module-category contract amendment"
+      },
+      "python314": {
+        "interpreter": "3.14.1 (main, Dec  2 2025, 12:51:37) [Clang 17.0.0 (clang-1700.4.4.1)]",
+        "executable": "/private/tmp/spl-toolkit-remaining-py314/bin/python",
+        "counts": {
+          "tests": 339,
+          "errors": 0,
+          "failures": 0,
+          "skipped": 0
+        },
+        "spl2_native_test_count": 109,
+        "native_sha256": "26a561e20dcb5c4eae2e95a6603bcd42ebdb0f6a79a92715cc83bb870ce2ffc3"
+      },
+      "baseline_amendment": {
+        "path": "/private/tmp/spl-toolkit-root-m5-approved-contract-amendments.json",
+        "sha256": "da907a495392127e66f08fd4ed2aec7a09901fd44e04a4d63b291e4bf19841c7"
+      },
+      "unchanged_task8_baseline": {
+        "path": "/private/tmp/spl-toolkit-root-m5-go-results-task8.json",
+        "sha256": "02456051aa87dedd1267d6b47f4f9ac818b60add2b9765cd9152acdb65833407"
+      },
+      "evidence": {
+        "spl-toolkit-root-m5-surface-acceptance.json": {
+          "path": "/private/tmp/spl-toolkit-root-m5-surface-acceptance.json",
+          "sha256": "bf29c7ba79803c806fbda3e291a46e48f9785a6bff3baa7e668535604da366c4"
+        },
+        "spl-toolkit-root-m5-acceptance-py314.json": {
+          "path": "/private/tmp/spl-toolkit-root-m5-acceptance-py314.json",
+          "sha256": "24c742d64d47d9762cf2302dd5599565ce78ced23e5f6701904f841ec4d90b78"
+        },
+        "spl-toolkit-root-m5-go-acceptance.json": {
+          "path": "/private/tmp/spl-toolkit-root-m5-go-acceptance.json",
+          "sha256": "d3dded8662c2679c18e418650b7a6223a4874f090f7ca36f6d93e54cce2d6052"
+        },
+        "task11-semantic-reports.json": {
+          "path": "/private/tmp/spl-toolkit-root-m5-surfaces/task11-semantic-reports.json",
+          "sha256": "9f311abfb5a5a9199e9d27b2e200c09633c0780b0aa8ffa7de0c78bb17beeb97"
+        }
+      },
+      "qualification": [
+        "Root checks actually ran at fixed committed candidate40e6e171. Native/CLI/server are held precommit builds whose checked source content equals7571f1c; embedded VCS metadata is not asserted to name finalHEAD.",
+        "Both root runs preserve380tracked+30untracked+5build/package identities before/after and betweenwindows. Explicitly allowed ignored SDD review/checkpoint finalization is outside these runtime input maps and attributed in freeze receipt.",
+        "The immutable Task8 baseline is unchanged. Only the independently approved module diagnostic category leaf is amended in memory; every other full-report value remains compared.",
+        "The two added broad-fix controls assert complete analysis separately from binding presence and field-validation completeness; both use full CLI/HTTP/native parity.",
+        "Prior fcbb root passes, initial root CLI-file assumption failure, unexecuted semantic-draft correction and broad With-fixes report remain historical and preserved.",
+        "Source Python3.12 and additional Python3.14 are local checks, not the full release matrix or live Splunk certification. Worker installed package evidence was reviewed separately and not rerun by root.",
+        "Both root processes exited; no merge/push/publication. Documentation/evidence closure remains to be applied and checked."
+      ]
+    }
+  },
+  "runtime_artifacts": {
+    "/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/build/libspl_toolkit.h": "94e3efdaab910e28b5acb80e3c728443bd9792e1de4ea3adc338d880afdd5d9a",
+    "/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/build/spl-toolkit-server": "ee425b4c7fab4736ad20ccfacfbd6e25c7fe2db0720eff75c9c24c9d55e6b5e6",
+    "/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/build/libspl_toolkit.dylib": "26a561e20dcb5c4eae2e95a6603bcd42ebdb0f6a79a92715cc83bb870ce2ffc3",
+    "/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/build/spl-toolkit": "66a55a51bd0a18badc9b1a0649ea083a32baa7d46cf0c39fbd1a903dba90b8ec",
+    "/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/dist/spl_toolkit-0.1.1.tar.gz": "885a28c80952d75430a061df5b4091c6390121b2719215468a3ada344133aa8c",
+    "/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/dist/spl_toolkit-0.1.1-py3-none-macosx_15_0_arm64.whl": "7cab5c18c155935ec72045d314b9846437c9805ad99dc71df2d8f37a408b80f4",
+    "/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/python/spl_toolkit/libspl_toolkit.h": "94e3efdaab910e28b5acb80e3c728443bd9792e1de4ea3adc338d880afdd5d9a",
+    "/Library/Frameworks/Python.framework/Versions/3.12/bin/python3.12": "69e6adfac00978215c4e5f3eaf63d262a5fb646b6dca1897b29f78872c4c5a26",
+    "/private/tmp/spl-toolkit-remaining-tools/antlr-4.13.2-complete.jar": "eae2dfa119a64327444672aff63e9ec35a20180dc5b8090b7a6ab85125df4d76"
+  }
+}
