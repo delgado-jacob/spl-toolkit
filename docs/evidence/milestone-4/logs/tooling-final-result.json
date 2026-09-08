@@ -1,0 +1,15 @@
+{
+  "command": [
+    "/private/tmp/spl-toolkit-remaining-venv/bin/python",
+    "-m",
+    "pytest",
+    "tools/tests",
+    "-q"
+  ],
+  "base_sha": "7b6580fff46917045230668141d23f17489891df",
+  "input_manifest": "/private/tmp/m4-task7/tooling-final-inputs.json",
+  "input_manifest_sha256": "9291f87d70eb9e5be0e138123baec287f23aaf215bfc9838f9f293adea18bf7f",
+  "exit": 0,
+  "elapsed_seconds": 5.212329864501953,
+  "log": "/private/tmp/m4-task7/tooling-final.log"
+}

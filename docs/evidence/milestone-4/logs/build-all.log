@@ -1,0 +1,6 @@
+mkdir -p build
+go build -mod=readonly -trimpath -ldflags "-X=github.com/delgado-jacob/spl-toolkit/internal/buildinfo.Version=0.1.1" -o build/spl-toolkit ./cmd
+mkdir -p build
+go build -mod=readonly -trimpath -ldflags "-X=github.com/delgado-jacob/spl-toolkit/internal/buildinfo.Version=0.1.1" -o build/spl-toolkit-server ./cmd/server
+mkdir -p build
+MACOSX_DEPLOYMENT_TARGET=15.0 CGO_CFLAGS=" -mmacosx-version-min=15.0" CGO_LDFLAGS=" -mmacosx-version-min=15.0" go build -mod=readonly -trimpath -buildmode=c-shared -ldflags "-X=github.com/delgado-jacob/spl-toolkit/internal/buildinfo.Version=0.1.1" -o build/libspl_toolkit.dylib ./pkg/bindings

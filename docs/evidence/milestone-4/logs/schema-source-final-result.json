@@ -1,0 +1,16 @@
+{
+  "command": [
+    "/private/tmp/spl-toolkit-remaining-venv/bin/python",
+    "-m",
+    "pytest",
+    "tests/acceptance/test_schema_surfaces.py",
+    "tests/acceptance/test_documented_cli.py",
+    "-q"
+  ],
+  "base_sha": "7b6580fff46917045230668141d23f17489891df",
+  "input_manifest": "/private/tmp/m4-task7/schema-source-final-inputs.json",
+  "input_manifest_sha256": "0f5e1671c9ae12fdb65061ae5647aabe58c04c28f438fe60f628a09143398832",
+  "exit": 0,
+  "elapsed_seconds": 14.104912281036377,
+  "log": "/private/tmp/m4-task7/schema-source-final.log"
+}

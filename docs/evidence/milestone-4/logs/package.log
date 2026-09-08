@@ -1,0 +1,16 @@
+Traceback (most recent call last):
+  File "/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/tools/check_package.py", line 629, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/tools/check_package.py", line 610, in main
+    evidence = _check_package(
+               ^^^^^^^^^^^^^^^
+  File "/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/tools/check_package.py", line 524, in _check_package
+    evidence = install_and_check(
+               ^^^^^^^^^^^^^^^^^^
+  File "/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/tools/check_package.py", line 263, in install_and_check
+    wheel_payload_hashes = verify_wheel_sources(wheel, docs_root)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/tools/check_package.py", line 214, in verify_wheel_sources
+    raise AssertionError(f"wheel source hash mismatch: {relative}")
+AssertionError: wheel source hash mismatch: spl_toolkit/libspl_toolkit.h

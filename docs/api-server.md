@@ -22,6 +22,8 @@ Routes are under `/api/v1`:
 | POST | `/query/validate` | syntax validation |
 | POST | `/query/validate-fields` | canonical local field validation |
 | POST | `/query/validate-fields/batch` | ordered local field validation batch |
+| POST | `/query/validate-schema` | canonical local JSON Schema/OCSF field validation |
+| POST | `/query/validate-schema/batch` | ordered schema validation batch |
 | GET | `/openapi.json` | OpenAPI 3.1 document |
 | GET | `/docs` | Swagger UI |
 | POST | `/mappings` | development-only global configuration; disabled by default |
@@ -70,3 +72,19 @@ Both endpoints require `Content-Type: application/json` (charset parameters are 
 A single report has integer `schema_version: 1`, `target`, `analysis`, `status`, `coverage`, `outcomes`, and `diagnostics`. All arrays are non-null. Outcomes include matching, missing, unavailable, optional_equivalent, and indeterminate, with concrete matches where known. Reports include original document options and identity, half-open UTF-8 byte offsets, and one-based Unicode code-point columns. Batch output has integer `schema_version: 1`, aggregate `status`, and ordered `reports`; status precedence is invalid, then incomplete, then valid. The machine-readable schemas are available at `/api/v1/openapi.json`.
 
 OpenAPI generation uses `make generate-docs` with pinned Swag v2.0.0-rc4 and the pinned PyYAML development dependency from `python/requirements-dev.txt`. The generation postprocessor reconciles strict validation input schemas across JSON, YAML, and the served Go template; it preserves the shared analysis document schema.
+
+## JSON Schema and OCSF requests
+
+`POST /api/v1/query/validate-schema` takes exactly `document` and `target`. The batch route `/api/v1/query/validate-schema/batch` takes exactly `documents` (nonempty) and `target`:
+
+```json
+{"document":{"text":"table host","source_id":"single.spl"},"target":{"kind":"json_schema","schema":{"properties":{"host":{}},"required":["host"],"additionalProperties":false}}}
+```
+
+```json
+{"documents":[{"text":"table host","source_id":"first.spl"},{"text":"table missing","source_id":"second.spl"}],"target":{"kind":"json_schema","schema":{"properties":{"host":{}},"additionalProperties":false}}}
+```
+
+Both schema routes require JSON content type and allow bodies up to exactly 8 MiB (8,388,608 bytes); 8,388,609 bytes returns 400, including streamed/unknown-length bodies. Existing field-list/legacy limits stay 1 MiB. Genuine base and Windows OCSF catalogs fit without removing tables. Each request supplies its own inline raw catalog; no global catalog registry or URL/file retrieval is available.
+
+HTTP 200 contains the full canonical valid, invalid or incomplete report. HTTP 400 means a malformed target/document, unsupported dialect/selection/compile version, duplicate JSON keys, mixed/unknown wrapper members, nulls, malformed Unicode, invalid content type or oversized body. A batch input error is atomic and has no partial reports. Unexpected internal errors return 500. An unresolved local reference is a valid request yielding incomplete content, not an input error. See the [schema API](API.md#json-schema-and-ocsf-field-validation) for target shapes, optional/category-dependent fields, locations and evidence.

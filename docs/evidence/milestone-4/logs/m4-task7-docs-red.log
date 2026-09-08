@@ -1,0 +1,27 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+______________ test_schema_capability_reason_documentation_parity ______________
+
+    def test_schema_capability_reason_documentation_parity():
+        source = (ROOT / "pkg/validation/json_schema.go").read_text()
+        registry = source.split("var schemaCapabilityReasons = map[string]string{", 1)[1].split("\n}", 1)[0]
+        reasons = set(re.findall(r'"([a-z_]+)"\s*:', registry))
+        document = (ROOT / "docs/API.md").read_text()
+        documented = set(re.findall(r'^\| `([a-z_]+)` \|', document, re.MULTILINE))
+>       assert reasons and reasons <= documented, sorted(reasons - documented)
+E       AssertionError: ['alternative_branches', 'array_traversal', 'conditional_schema', 'dependent_required', 'dependent_schema', 'dynamic_ref', ...]
+E       assert ({'alternative_branches', 'array_traversal', 'conditional_schema', 'dependent_required', 'dependent_schema', 'dynamic_ref', ...} and {'alternative...mic_ref', ...} <= {'coverage', ... 'references'}
+E
+E         Extra items in the left set:
+E         'pattern_properties'
+E         'unsupported_pattern'
+E         'ocsf_constraint'
+E         'ocsf_profile_requirement'
+E         'dynamic_ref'...
+E
+E         ...Full output truncated (20 lines hidden), use '-vv' to show)
+
+tools/tests/test_schema_docs.py:14: AssertionError
+=========================== short test summary info ============================
+FAILED tools/tests/test_schema_docs.py::test_schema_capability_reason_documentation_parity
+1 failed in 0.02s

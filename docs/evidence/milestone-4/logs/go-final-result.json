@@ -1,0 +1,12 @@
+{
+  "command": [
+    "/private/tmp/spl-toolkit-remaining-venv/bin/python",
+    "tools/check_go.py"
+  ],
+  "base_sha": "7b6580fff46917045230668141d23f17489891df",
+  "input_manifest": "/private/tmp/m4-task7/go-final-inputs.json",
+  "input_manifest_sha256": "0f5e1671c9ae12fdb65061ae5647aabe58c04c28f438fe60f628a09143398832",
+  "exit": 0,
+  "elapsed_seconds": 109.70965600013733,
+  "log": "/private/tmp/m4-task7/go-final.log"
+}

@@ -1,0 +1,132 @@
+Looking in links: /private/tmp/spl-toolkit-offline-wheelhouse
+Ignoring colorama: markers 'platform_system == "Windows"' don't match your environment
+Processing /private/tmp/spl-toolkit-offline-wheelhouse/pip-25.2-py3-none-any.whl (from -r /Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/python/requirements-build.txt (line 1))
+Processing /private/tmp/spl-toolkit-offline-wheelhouse/setuptools-80.9.0-py3-none-any.whl (from -r /Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/python/requirements-build.txt (line 2))
+Processing /private/tmp/spl-toolkit-offline-wheelhouse/wheel-0.45.1-py3-none-any.whl (from -r /Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/python/requirements-build.txt (line 3))
+Processing /private/tmp/spl-toolkit-offline-wheelhouse/build-1.3.0-py3-none-any.whl (from -r /Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/python/requirements-build.txt (line 4))
+Processing /private/tmp/spl-toolkit-offline-wheelhouse/packaging-25.0-py3-none-any.whl (from -r /Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/python/requirements-build.txt (line 5))
+Processing /private/tmp/spl-toolkit-offline-wheelhouse/pyproject_hooks-1.2.0-py3-none-any.whl (from -r /Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/python/requirements-build.txt (line 6))
+Processing /private/tmp/spl-toolkit-offline-wheelhouse/pytest-8.4.2-py3-none-any.whl (from -r /Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/python/requirements-dev.txt (line 2))
+Processing /private/tmp/spl-toolkit-offline-wheelhouse/pytest_mock-3.15.1-py3-none-any.whl (from -r /Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/python/requirements-dev.txt (line 3))
+Processing /private/tmp/spl-toolkit-offline-wheelhouse/iniconfig-2.1.0-py3-none-any.whl (from -r /Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/python/requirements-dev.txt (line 4))
+Processing /private/tmp/spl-toolkit-offline-wheelhouse/pluggy-1.6.0-py3-none-any.whl (from -r /Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/python/requirements-dev.txt (line 5))
+Processing /private/tmp/spl-toolkit-offline-wheelhouse/pygments-2.19.2-py3-none-any.whl (from -r /Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/python/requirements-dev.txt (line 6))
+Processing /private/tmp/spl-toolkit-offline-wheelhouse/pyyaml-6.0.3-cp312-cp312-macosx_11_0_arm64.whl (from -r /Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/python/requirements-dev.txt (line 7))
+Installing collected packages: wheel, setuptools, PyYAML, pyproject-hooks, pygments, pluggy, pip, packaging, iniconfig, pytest, build, pytest-mock
+  Attempting uninstall: pip
+    Found existing installation: pip 24.2
+    Uninstalling pip-24.2:
+      Successfully uninstalled pip-24.2
+Successfully installed PyYAML-6.0.3 build-1.3.0 iniconfig-2.1.0 packaging-25.0 pip-25.2 pluggy-1.6.0 pygments-2.19.2 pyproject-hooks-1.2.0 pytest-8.4.2 pytest-mock-3.15.1 setuptools-80.9.0 wheel-0.45.1
+Looking in links: /private/tmp/spl-toolkit-offline-wheelhouse
+Processing /Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/dist/spl_toolkit-0.1.1-py3-none-macosx_15_0_arm64.whl
+Installing collected packages: spl-toolkit
+Successfully installed spl-toolkit-0.1.1
+........................................................................ [ 33%]
+........................................................................ [ 67%]
+.....................................................................    [100%]
+213 passed in 5.92s
+........................................................................ [ 88%]
+.........                                                                [100%]
+81 passed in 16.86s
+/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/tools/check_package.py:450: DeprecationWarning: Python 3.14 will, by default, filter extracted tar archives and reject files or modify their metadata. Use the filter argument to control this behavior.
+  archive.extractall(destination)
+running egg_info
+creating /var/folders/6d/zc3z9vpd1gg2tjsrl0c30gf40000gn/T/spl-package-check-ya3uf362/metadata/spl_toolkit.egg-info
+writing /var/folders/6d/zc3z9vpd1gg2tjsrl0c30gf40000gn/T/spl-package-check-ya3uf362/metadata/spl_toolkit.egg-info/PKG-INFO
+writing dependency_links to /var/folders/6d/zc3z9vpd1gg2tjsrl0c30gf40000gn/T/spl-package-check-ya3uf362/metadata/spl_toolkit.egg-info/dependency_links.txt
+writing top-level names to /var/folders/6d/zc3z9vpd1gg2tjsrl0c30gf40000gn/T/spl-package-check-ya3uf362/metadata/spl_toolkit.egg-info/top_level.txt
+writing manifest file '/var/folders/6d/zc3z9vpd1gg2tjsrl0c30gf40000gn/T/spl-package-check-ya3uf362/metadata/spl_toolkit.egg-info/SOURCES.txt'
+reading manifest file '/var/folders/6d/zc3z9vpd1gg2tjsrl0c30gf40000gn/T/spl-package-check-ya3uf362/metadata/spl_toolkit.egg-info/SOURCES.txt'
+reading manifest template 'MANIFEST.in'
+adding license file 'LICENSE'
+writing manifest file '/var/folders/6d/zc3z9vpd1gg2tjsrl0c30gf40000gn/T/spl-package-check-ya3uf362/metadata/spl_toolkit.egg-info/SOURCES.txt'
+Looking in links: /private/tmp/spl-toolkit-offline-wheelhouse
+Ignoring colorama: markers 'platform_system == "Windows"' don't match your environment
+Processing /private/tmp/spl-toolkit-offline-wheelhouse/pip-25.2-py3-none-any.whl (from -r /private/var/folders/6d/zc3z9vpd1gg2tjsrl0c30gf40000gn/T/spl-package-check-ya3uf362/sdist/spl_toolkit-0.1.1/requirements-build.txt (line 1))
+Processing /private/tmp/spl-toolkit-offline-wheelhouse/setuptools-80.9.0-py3-none-any.whl (from -r /private/var/folders/6d/zc3z9vpd1gg2tjsrl0c30gf40000gn/T/spl-package-check-ya3uf362/sdist/spl_toolkit-0.1.1/requirements-build.txt (line 2))
+Processing /private/tmp/spl-toolkit-offline-wheelhouse/wheel-0.45.1-py3-none-any.whl (from -r /private/var/folders/6d/zc3z9vpd1gg2tjsrl0c30gf40000gn/T/spl-package-check-ya3uf362/sdist/spl_toolkit-0.1.1/requirements-build.txt (line 3))
+Processing /private/tmp/spl-toolkit-offline-wheelhouse/build-1.3.0-py3-none-any.whl (from -r /private/var/folders/6d/zc3z9vpd1gg2tjsrl0c30gf40000gn/T/spl-package-check-ya3uf362/sdist/spl_toolkit-0.1.1/requirements-build.txt (line 4))
+Processing /private/tmp/spl-toolkit-offline-wheelhouse/packaging-25.0-py3-none-any.whl (from -r /private/var/folders/6d/zc3z9vpd1gg2tjsrl0c30gf40000gn/T/spl-package-check-ya3uf362/sdist/spl_toolkit-0.1.1/requirements-build.txt (line 5))
+Processing /private/tmp/spl-toolkit-offline-wheelhouse/pyproject_hooks-1.2.0-py3-none-any.whl (from -r /private/var/folders/6d/zc3z9vpd1gg2tjsrl0c30gf40000gn/T/spl-package-check-ya3uf362/sdist/spl_toolkit-0.1.1/requirements-build.txt (line 6))
+Processing /private/tmp/spl-toolkit-offline-wheelhouse/pytest-8.4.2-py3-none-any.whl (from -r /private/var/folders/6d/zc3z9vpd1gg2tjsrl0c30gf40000gn/T/spl-package-check-ya3uf362/sdist/spl_toolkit-0.1.1/requirements-dev.txt (line 2))
+Processing /private/tmp/spl-toolkit-offline-wheelhouse/pytest_mock-3.15.1-py3-none-any.whl (from -r /private/var/folders/6d/zc3z9vpd1gg2tjsrl0c30gf40000gn/T/spl-package-check-ya3uf362/sdist/spl_toolkit-0.1.1/requirements-dev.txt (line 3))
+Processing /private/tmp/spl-toolkit-offline-wheelhouse/iniconfig-2.1.0-py3-none-any.whl (from -r /private/var/folders/6d/zc3z9vpd1gg2tjsrl0c30gf40000gn/T/spl-package-check-ya3uf362/sdist/spl_toolkit-0.1.1/requirements-dev.txt (line 4))
+Processing /private/tmp/spl-toolkit-offline-wheelhouse/pluggy-1.6.0-py3-none-any.whl (from -r /private/var/folders/6d/zc3z9vpd1gg2tjsrl0c30gf40000gn/T/spl-package-check-ya3uf362/sdist/spl_toolkit-0.1.1/requirements-dev.txt (line 5))
+Processing /private/tmp/spl-toolkit-offline-wheelhouse/pygments-2.19.2-py3-none-any.whl (from -r /private/var/folders/6d/zc3z9vpd1gg2tjsrl0c30gf40000gn/T/spl-package-check-ya3uf362/sdist/spl_toolkit-0.1.1/requirements-dev.txt (line 6))
+Processing /private/tmp/spl-toolkit-offline-wheelhouse/pyyaml-6.0.3-cp312-cp312-macosx_11_0_arm64.whl (from -r /private/var/folders/6d/zc3z9vpd1gg2tjsrl0c30gf40000gn/T/spl-package-check-ya3uf362/sdist/spl_toolkit-0.1.1/requirements-dev.txt (line 7))
+Installing collected packages: wheel, setuptools, PyYAML, pyproject-hooks, pygments, pluggy, pip, packaging, iniconfig, pytest, build, pytest-mock
+  Attempting uninstall: pip
+    Found existing installation: pip 24.2
+    Uninstalling pip-24.2:
+      Successfully uninstalled pip-24.2
+Successfully installed PyYAML-6.0.3 build-1.3.0 iniconfig-2.1.0 packaging-25.0 pip-25.2 pluggy-1.6.0 pygments-2.19.2 pyproject-hooks-1.2.0 pytest-8.4.2 pytest-mock-3.15.1 setuptools-80.9.0 wheel-0.45.1
+Looking in links: /private/tmp/spl-toolkit-offline-wheelhouse
+Processing /private/var/folders/6d/zc3z9vpd1gg2tjsrl0c30gf40000gn/T/spl-package-check-ya3uf362/sdist-wheel/spl_toolkit-0.1.1-py3-none-macosx_15_0_arm64.whl
+Installing collected packages: spl-toolkit
+Successfully installed spl-toolkit-0.1.1
+........................................................................ [ 33%]
+........................................................................ [ 67%]
+.....................................................................    [100%]
+213 passed in 5.44s
+........................................................................ [ 88%]
+.........                                                                [100%]
+81 passed in 16.29s
+* Getting build dependencies for wheel...
+running egg_info
+writing spl_toolkit.egg-info/PKG-INFO
+writing dependency_links to spl_toolkit.egg-info/dependency_links.txt
+writing top-level names to spl_toolkit.egg-info/top_level.txt
+reading manifest file 'spl_toolkit.egg-info/SOURCES.txt'
+reading manifest template 'MANIFEST.in'
+adding license file 'LICENSE'
+writing manifest file 'spl_toolkit.egg-info/SOURCES.txt'
+* Building wheel...
+running bdist_wheel
+running build
+running build_py
+creating build/lib.macosx-10.13-universal2-cpython-312/spl_toolkit
+copying spl_toolkit/mapper.py -> build/lib.macosx-10.13-universal2-cpython-312/spl_toolkit
+copying spl_toolkit/__init__.py -> build/lib.macosx-10.13-universal2-cpython-312/spl_toolkit
+copying spl_toolkit/exceptions.py -> build/lib.macosx-10.13-universal2-cpython-312/spl_toolkit
+running egg_info
+writing spl_toolkit.egg-info/PKG-INFO
+writing dependency_links to spl_toolkit.egg-info/dependency_links.txt
+writing top-level names to spl_toolkit.egg-info/top_level.txt
+reading manifest file 'spl_toolkit.egg-info/SOURCES.txt'
+reading manifest template 'MANIFEST.in'
+adding license file 'LICENSE'
+writing manifest file 'spl_toolkit.egg-info/SOURCES.txt'
+copying spl_toolkit/libspl_toolkit.h -> build/lib.macosx-10.13-universal2-cpython-312/spl_toolkit
+running build_ext
+installing to build/bdist.macosx-10.13-universal2/wheel
+running install
+running install_lib
+creating build/bdist.macosx-10.13-universal2/wheel
+creating build/bdist.macosx-10.13-universal2/wheel/spl_toolkit
+copying build/lib.macosx-10.13-universal2-cpython-312/spl_toolkit/libspl_toolkit.h -> build/bdist.macosx-10.13-universal2/wheel/./spl_toolkit
+copying build/lib.macosx-10.13-universal2-cpython-312/spl_toolkit/mapper.py -> build/bdist.macosx-10.13-universal2/wheel/./spl_toolkit
+copying build/lib.macosx-10.13-universal2-cpython-312/spl_toolkit/PARSER-LICENSE -> build/bdist.macosx-10.13-universal2/wheel/./spl_toolkit
+copying build/lib.macosx-10.13-universal2-cpython-312/spl_toolkit/__init__.py -> build/bdist.macosx-10.13-universal2/wheel/./spl_toolkit
+copying build/lib.macosx-10.13-universal2-cpython-312/spl_toolkit/libspl_toolkit.dylib -> build/bdist.macosx-10.13-universal2/wheel/./spl_toolkit
+copying build/lib.macosx-10.13-universal2-cpython-312/spl_toolkit/exceptions.py -> build/bdist.macosx-10.13-universal2/wheel/./spl_toolkit
+creating build/bdist.macosx-10.13-universal2/wheel/spl_toolkit/.go-tmp
+running install_egg_info
+Copying spl_toolkit.egg-info to build/bdist.macosx-10.13-universal2/wheel/./spl_toolkit-0.1.1-py3.12.egg-info
+running install_scripts
+creating build/bdist.macosx-10.13-universal2/wheel/spl_toolkit-0.1.1.dist-info/WHEEL
+creating '/var/folders/6d/zc3z9vpd1gg2tjsrl0c30gf40000gn/T/spl-package-check-ya3uf362/sdist-wheel/.tmp-mb_rr84d/spl_toolkit-0.1.1-py3-none-macosx_15_0_arm64.whl' and adding 'build/bdist.macosx-10.13-universal2/wheel' to it
+adding 'spl_toolkit/PARSER-LICENSE'
+adding 'spl_toolkit/__init__.py'
+adding 'spl_toolkit/exceptions.py'
+adding 'spl_toolkit/libspl_toolkit.dylib'
+adding 'spl_toolkit/libspl_toolkit.h'
+adding 'spl_toolkit/mapper.py'
+adding 'spl_toolkit-0.1.1.dist-info/licenses/LICENSE'
+adding 'spl_toolkit-0.1.1.dist-info/METADATA'
+adding 'spl_toolkit-0.1.1.dist-info/WHEEL'
+adding 'spl_toolkit-0.1.1.dist-info/top_level.txt'
+adding 'spl_toolkit-0.1.1.dist-info/RECORD'
+removing build/bdist.macosx-10.13-universal2/wheel
+Successfully built spl_toolkit-0.1.1-py3-none-macosx_15_0_arm64.whl
+package acceptance passed

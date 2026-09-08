@@ -1,0 +1,18 @@
+{
+  "command": [
+    "/private/tmp/spl-toolkit-remaining-venv/bin/python",
+    "tools/check_package.py",
+    "--sdist",
+    "dist/spl_toolkit-0.1.1.tar.gz",
+    "--wheel-dir",
+    "dist",
+    "--evidence",
+    "/private/tmp/spl-toolkit-m4-package-evidence.json"
+  ],
+  "base_sha": "7b6580fff46917045230668141d23f17489891df",
+  "input_manifest": "/private/tmp/m4-task7/package-inputs.json",
+  "input_manifest_sha256": "21290f611e945321a1d308046c812b24a1c9ccc243774cfeaf3fdda4483b0941",
+  "exit": 1,
+  "elapsed_seconds": 1.5459251403808594,
+  "log": "/private/tmp/m4-task7/package.log"
+}

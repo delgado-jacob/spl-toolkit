@@ -508,6 +508,8 @@ def test_installed_schema_fixtures_exist_before_both_suites(tmp_path: Path, monk
         assert not fixtures.is_relative_to(ROOT)
         for relative in SCHEMA_FIXTURES:
             assert (fixtures / relative).read_bytes() == (ROOT / "testdata/schemas" / relative).read_bytes()
+        if "SPL_SCHEMA_EVIDENCE" in env:
+            Path(env["SPL_SCHEMA_EVIDENCE"]).write_text("{}")
         seen.append(fixtures)
         return counts
 
@@ -563,5 +565,55 @@ def test_wheel_source_verification_rejects_stale_wrapper_or_header(tmp_path: Pat
         with zipfile.ZipFile(wheel, "w") as archive:
             for name, payload in entries.items():
                 archive.writestr(name, b"stale" if name == changed else payload)
-        with pytest.raises(AssertionError, match="hash"):
+        with pytest.raises(AssertionError, match="hash|header"):
             checker.verify_wheel_sources(wheel, ROOT)
+
+
+def test_package_copies_required_schema_surface_acceptance(tmp_path: Path):
+    checker = load_package_checker()
+    assert "test_schema_surfaces.py" in checker.ACCEPTANCE_FILES
+    destination = tmp_path / "acceptance"
+    checker._copy_required_files(ROOT / "tests/acceptance", destination, checker.ACCEPTANCE_FILES)
+    assert (destination / "test_schema_surfaces.py").read_bytes() == (ROOT / "tests/acceptance/test_schema_surfaces.py").read_bytes()
+
+
+@pytest.mark.parametrize("compiler", ["1.22", "1.25"])
+def test_wheel_accepts_real_cgo_headers_and_records_actual_bytes(tmp_path: Path, compiler):
+    import zipfile
+    checker = load_package_checker()
+    header = (ROOT / f"tools/tests/fixtures/cgo-go{compiler}.h").read_bytes()
+    wheel = tmp_path / "wheel.whl"
+    with zipfile.ZipFile(wheel, "w") as archive:
+        archive.writestr("spl_toolkit/mapper.py", (PYTHON_DIR / "spl_toolkit/mapper.py").read_bytes())
+        archive.writestr("spl_toolkit/libspl_toolkit.h", header)
+        archive.writestr("spl_toolkit/" + checker.native_library_name(), b"native")
+    hashes = checker.verify_wheel_sources(wheel, ROOT)
+    assert hashes["spl_toolkit/libspl_toolkit.h"] == checker.hashlib.sha256(header).hexdigest()
+
+
+@pytest.mark.parametrize("before,after", [
+    ("extern SPLResult* spl_mapper_validate_schema(int mapperID, char* requestJSON);", ""),
+    ("extern void spl_mapper_free(int mapperID);", "extern void spl_mapper_free(char* mapperID);"),
+    ("extern void spl_mapper_free(int mapperID);", "extern void spl_mapper_free(int mapperID);\nextern void surprise(void);"),
+    ("char* result;", "int result;"),
+    ("int data_models_count;", "int new_count;\n    int data_models_count;"),
+    ('/* Start of preamble from import "C" comments.  */', '/* Start of preamble from import "C" comments. */'),
+    ('/* End of preamble from import "C" comments.  */', ''),
+    ('/* Start of boilerplate cgo prologue.  */', '/* Start of boilerplate cgo prologue.  */\n/* Start of boilerplate cgo prologue.  */'),
+    ('/* End of boilerplate cgo prologue.  */', '/* End of boilerplate cgo prologue.  */\nextern void unexpected(void);'),
+    ('/* Start of boilerplate cgo prologue.  */', 'extern void unexpected(void);\n/* Start of boilerplate cgo prologue.  */'),
+    ('#line 3 "bindings.go"', '#line 3 "bindings.go" extern void unexpected(void);'),
+    ('#ifdef __cplusplus\n}\n#endif', '#ifdef __cplusplus\n}\n#endif\nextern void appended(void);'),
+])
+def test_wheel_header_contract_rejects_layout_exports_and_boundary_changes(tmp_path: Path, before, after):
+    import zipfile
+    checker = load_package_checker()
+    original = (PYTHON_DIR / "spl_toolkit/libspl_toolkit.h").read_text()
+    assert before in original
+    wheel = tmp_path / "wheel.whl"
+    with zipfile.ZipFile(wheel, "w") as archive:
+        archive.writestr("spl_toolkit/mapper.py", (PYTHON_DIR / "spl_toolkit/mapper.py").read_bytes())
+        archive.writestr("spl_toolkit/libspl_toolkit.h", original.replace(before, after))
+        archive.writestr("spl_toolkit/" + checker.native_library_name(), b"native")
+    with pytest.raises(AssertionError, match="header"):
+        checker.verify_wheel_sources(wheel, ROOT)

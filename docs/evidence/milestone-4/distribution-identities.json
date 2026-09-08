@@ -1,0 +1,7 @@
+{
+  "files": {
+    "dist/spl_toolkit-0.1.1.tar.gz": "3ed2b8334a62555867b94e27a0e5d69b92591d903e068ac558d18589cc2e54ea",
+    "dist/spl_toolkit-0.1.1-py3-none-macosx_15_0_arm64.whl": "9455b36b7bf09e02b497dac146245cc4b8e775ff1575d92da0d113b1f3e14ac2"
+  },
+  "wheel_native_build_info": "/private/tmp/m4-task7/wheel-native.dylib: go1.22.12\n\tpath\tgithub.com/delgado-jacob/spl-toolkit/pkg/bindings\n\tmod\tgithub.com/delgado-jacob/spl-toolkit\t(devel)\t\n\tdep\tgithub.com/antlr4-go/antlr/v4\tv4.13.1\th1:SqQKkuVZ+zWkMMNkjy5FZe5mr5WURWnlpmOuzYWrPrQ=\n\tdep\tgolang.org/x/exp\tv0.0.0-20240506185415-9bf2ced13842\th1:vr/HnozRka3pE4EsMEg1lgkXJkTFJCVUX+S/ZT6wYzM=\n\tbuild\t-buildmode=c-shared\n\tbuild\t-compiler=gc\n\tbuild\t-trimpath=true\n\tbuild\tCGO_ENABLED=1\n\tbuild\tGOARCH=arm64\n\tbuild\tGOOS=darwin\n"
+}

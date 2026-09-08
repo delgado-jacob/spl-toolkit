@@ -1,0 +1,16 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+____________ test_package_copies_required_schema_surface_acceptance ____________
+
+tmp_path = PosixPath('/private/var/folders/6d/zc3z9vpd1gg2tjsrl0c30gf40000gn/T/pytest-of-jacobdelgado/pytest-604/test_package_copies_required_s0')
+
+    def test_package_copies_required_schema_surface_acceptance(tmp_path: Path):
+        checker = load_package_checker()
+>       assert "test_schema_surfaces.py" in checker.ACCEPTANCE_FILES
+E       AssertionError: assert 'test_schema_surfaces.py' in ('test_documented_cli.py', 'test_surfaces.py', 'test_analysis_surfaces.py', 'test_validation_surfaces.py', 'cli_examples.json')
+E        +  where ('test_documented_cli.py', 'test_surfaces.py', 'test_analysis_surfaces.py', 'test_validation_surfaces.py', 'cli_examples.json') = <module 'check_package' from '/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/tools/check_package.py'>.ACCEPTANCE_FILES
+
+tools/tests/test_package.py:572: AssertionError
+=========================== short test summary info ============================
+FAILED tools/tests/test_package.py::test_package_copies_required_schema_surface_acceptance
+1 failed, 47 deselected in 0.08s

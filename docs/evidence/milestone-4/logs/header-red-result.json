@@ -1,0 +1,17 @@
+{
+  "command": [
+    "/private/tmp/spl-toolkit-remaining-venv/bin/python",
+    "-m",
+    "pytest",
+    "tools/tests/test_package.py",
+    "-q",
+    "-k",
+    "real_cgo_headers"
+  ],
+  "base_sha": "7b6580fff46917045230668141d23f17489891df",
+  "input_manifest": "/private/tmp/m4-task7/header-red-inputs.json",
+  "input_manifest_sha256": "5b0bcf345fe9c328a36892144cd27b97937b844a6e48735935c5a44f12967e4e",
+  "exit": 1,
+  "elapsed_seconds": 0.36746907234191895,
+  "log": "/private/tmp/m4-task7/header-red.log"
+}

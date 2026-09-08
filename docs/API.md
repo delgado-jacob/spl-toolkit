@@ -248,3 +248,99 @@ Each outcome contains `reference_id`, `outcome`, and ordered `matches`. Outcome 
 Coverage separately reports `syntax_complete`, `semantic_complete`, and `schema_complete`, with reasons. Supported projection/removal wildcards refine downstream canonical lineage as well as matches. Unsupported wildcard command forms (including wildcard rename and aggregate/grouping forms), unknown commands/functions, dynamic references, macros, uncertain conditional outputs, and unresolved branch behavior retain incomplete coverage. Optional declarations cannot resolve conditional availability.
 
 Advanced Go integrations can call `analysis.AnalyzeWithSourceFields(document, fields) (*analysis.SourceAnalysis, error)`. This uses a finite universe of concrete source names; nil and empty both mean a known empty universe. It returns `Result` (`analysis` in JSON) and ordered `Expansions` (`expansions`), where each entry contains `reference_id`, `complete`, and `matches` with concrete `name` and `binding`. `complete: true` with no matches is conclusive empty membership; `complete: false` retains uncertainty. Consumers must preserve completeness and all per-match evidence. This hook refines canonical transfer and lineage but does not classify catalog optionality. Plain `analysis.Analyze` and its wire format remain unchanged. Call validation for ordinary field-catalog decisions.
+
+## JSON Schema and OCSF field validation
+
+Check nested field declarations, optional ancestors, and fields that depend on a schema branch or OCSF category member. Supply local JSON Schema resources or an exact compiled OCSF version. Reports retain uncertainty for open wildcard sets, unsupported patterns/keywords, array descendants, and missing profile provenance. This is field declaration projection, not complete JSON Schema instance validation: no events are checked, expressions typechecked, or queries executed. `required` is a schema statement, not evidence that an event contains the field. A declared array itself is supported; descending into it is incomplete.
+
+Go exposes `validation.ValidateSchema(document, target)` and `validation.ValidateSchemaBatch(documents, target)`, returning `*SchemaReport` and `*SchemaBatchReport` plus an error. Targets are explicitly supplied values; Go has no network access or global catalog registry. `analysis.Analyze` and the existing analysis capability output remain unchanged. Each prepared target owns its copied inputs and immutable indexes; calls share no mutable projection memo state.
+
+```go
+target := validation.SchemaTarget{
+    Kind: "json_schema",
+    Schema: json.RawMessage(`{"properties":{"host":{}},"required":["host"],"additionalProperties":false}`),
+}
+report, err := validation.ValidateSchema(analysis.QueryDocument{Text: "table host"}, target)
+```
+
+A JSON Schema target has `kind: "json_schema"`, required inline object/boolean `schema`, optional `identity`, `base_uri`, and URI-keyed inline `resources`. Draft 2020-12 is the default; explicit unsupported dialects are input errors. `$id`, local `$ref`, JSON Pointer fragments and anchors resolve only in these supplied resources. An HTTPS URI is an identity, never an instruction to retrieve. Missing local references return located incomplete results. There is no implicit file lookup, URL dereference, schema compiler, account, or registry.
+
+Outcomes are `required`, `optional`, `permitted_unspecified`, `conditional`, `indeterminate`, `missing`, `unavailable`, and `matching` for derived fields. Nested requiredness needs every ancestor to be required; an optional ancestor makes its descendant optional. `additionalProperties` can permit an unspecified name without enumerating the source universe. `allOf` intersects permissions; prohibited syntactic property names are excluded. `anyOf` membership disagreement is conditional with both positive and negative evidence; `oneOf` viability remains indeterminate. Derived fields bypass external declarations. Removal selectors incur no schema obligations, and a schema declaration cannot restore a structurally removed field.
+
+Single reports preserve `analysis`, `target`, `status`, `coverage`, `outcomes`, and located `diagnostics`, with integer `schema_version: 1`. Batches have `schema_version`, aggregate `status`, and ordered `reports`. Invalid wins over incomplete without erasing coverage gaps. `target.limitations` describes the target's capabilities; it does not itself make every query incomplete. Consult per-reference evidence and all three coverage flags. Known partial wildcard matches do not establish exhaustive expansion. A later complete output stage does not erase earlier semantic incompleteness.
+
+For `table actor.name`, the reference spans UTF-8 offsets `[6,16)` and one-based columns `[7,17)`. An outcome links its `reference_id` to that analysis reference. Evidence identifies the URI, JSON Pointer, keyword, declaration basis, and requiredness, for example:
+
+```json
+{"resource_uri":"https://schemas.example.test/user","pointer":"/$defs/user/properties/name","keyword":"properties","declaration_basis":"property","requirement":"required"}
+```
+
+This is a compact evidence illustration; the full report also carries ancestor evidence from the event resource. An unresolved target may include `"limitations":["array_traversal","partial_name_universe","unresolved_ref"]`. The CLI guide has the [complete executable local-resource example](cli.md#json-schema-with-local-resources).
+
+### OCSF preparation and selection
+
+Use normal official compiler output with `compile_version: 1`. Pin schema commit `d0cd8a0fef198bf93086044e33fda6d80c74b9ef` (OCSF 1.6.0) and compiler commit `d6b0b781d51a6b9682ea99396636ae01437b41b4`. Compiler preparation used Python 3.14.1 and compiler version `0.0.0-dev`; toolkit runtime floors remain Go 1.22+ and Python 3.11+. Preparation is an explicit separate operation:
+
+```sh
+git clone https://github.com/ocsf/ocsf-schema.git
+git -C ocsf-schema checkout --detach d0cd8a0fef198bf93086044e33fda6d80c74b9ef
+git clone https://github.com/ocsf/ocsf-schema-compiler.git
+git -C ocsf-schema-compiler checkout --detach d6b0b781d51a6b9682ea99396636ae01437b41b4
+SCHEMA="$(pwd)/ocsf-schema"
+cd ocsf-schema-compiler/src
+python3.14 -m ocsf_schema_compiler "$SCHEMA" --ignore-platform-extensions > base-catalog.json
+python3.14 -m ocsf_schema_compiler "$SCHEMA" --ignore-platform-extensions --extensions-path "$SCHEMA/extensions/windows" > windows-catalog.json
+```
+
+The compiler default includes platform extensions; use `--ignore-platform-extensions` for the base catalog. Do not prune normal classes/objects/tables to fit an API payload. The pinned catalog hashes, source archive identities, compiler commands and upstream license/notices live in `testdata/schemas/ocsf/1.6.0/provenance.json` and its neighboring notice files. Raw base SHA-256 is `9b609f8fb670772f04191c1c276b46d34d6e9110d2417c71fa89c4f54c585137`; raw Windows is `19af77ce259f3ff57debc33e52da51b8220a1af59399d06553f29629678595e9`.
+
+An OCSF target has exactly `kind: "ocsf"`, inline `catalog`, `selection`, and optional `identity`. Selection requires exact `version` and exactly one concrete `class`, `class_uid`, `category`, or `category_uid`. Abstract/base classes are not concrete selections. `profiles` and `extensions` are unique case-sensitive arrays; omission means empty and null is invalid. Select the full compiled extension set, not just extensions thought relevant to a query. The Windows fixture requires `["win"]`, UID 2, version 1.6.0. Version and extension identity are not inferred from query values.
+
+Using the [CLI conventions](cli.md):
+
+```bash
+spl-toolkit validate-schema --ocsf-catalog base-catalog.json --ocsf-version 1.6.0 --ocsf-class authentication --query 'table time actor.user.name unmapped.vendor_field' --format json
+spl-toolkit validate-schema --ocsf-catalog base-catalog.json --ocsf-version 1.6.0 --ocsf-category iam --query 'table time group' --format json
+spl-toolkit validate-schema --ocsf-catalog base-catalog.json --ocsf-version 1.6.0 --ocsf-class authentication --ocsf-profile cloud --ocsf-profile datetime --query 'table cloud time_dt' --format json
+spl-toolkit validate-schema --ocsf-catalog windows-catalog.json --ocsf-version 1.6.0 --ocsf-class win/registry_key_activity --ocsf-extension win --query 'table time' --format json
+```
+
+A category result includes supporting, missing, and indeterminate classes. Generic `unmapped`/`xattributes` objects permit unspecified descendants where the compiled structure proves that behavior. Profile inclusion and merged strongest requiredness lose some source provenance: partial enabling-profile selection and unresolved inherited profile membership remain qualified. No finite/exhaustive claim is made for open, recursive, patterned, or provenance-limited universes.
+
+### Pattern subset and bounds
+
+The supported regex subset is ASCII literals, `^` only at the beginning, `$` only at the end, positive ASCII character classes and ranges, escaped punctuation from `\^$.*+?()[]{}|/-`, and single-atom `?`, `*`, `+`, `{n}`, `{n,}`, `{n,m}` quantifiers. Counts are at most 1000 with no leading zeros except `0`; a finite maximum must be at least its minimum. Matching is unanchored unless anchors are present. Bare `.`, groups, alternation, negated classes, shorthand/Unicode escapes, lookaround, backreferences, lazy quantifiers, non-ASCII patterns, and non-ASCII/CR/LF candidate names are outside this subset and yield uncertainty. Malformed supported patterns are input errors. This narrow gate avoids claiming Go regex semantics are full ECMAScript semantics.
+
+Projection is bounded to 4096 visited states and 128 path segments; candidate enumeration is bounded to 4096 work/name units. Exhaustion yields incomplete evidence rather than an absent-field claim. Recursive references without path progress are incomplete; supplied references that consume path segments can progress within the bounds. Array descendants remain incomplete regardless of a declared `items` schema.
+
+### Schema diagnostic reasons
+
+`SPL_UNKNOWN_FIELD` is a proven missing declaration; `SPL_INDETERMINATE_FIELD` is a located schema-ambiguity warning. Existing `SPL_UNAVAILABLE_FIELD` and syntax/semantic diagnostics are preserved. `coverage.reasons` carries diagnostic codes. The following stable reason identifiers appear in target limitations or reference evidence, not as replacement diagnostic codes:
+
+| Reason | Meaning |
+|---|---|
+| `alternative_branches` | Alternative branches disagree on membership. |
+| `array_traversal` | Array traversal is outside field projection. |
+| `conditional_schema` | Conditional field constraints are unsupported. |
+| `dependent_required` | Dependent requiredness is unsupported. |
+| `dependent_schema` | Dependent schemas are unsupported. |
+| `dynamic_ref` | Dynamic reference evaluation is unsupported. |
+| `enumeration_budget` | Candidate enumeration reached its work or name bound. |
+| `exclusive_branches` | Exclusive branch viability is unresolved. |
+| `literal_path_collision` | Literal dotted and nested names collide. |
+| `negation` | Negated field constraints are unsupported. |
+| `object_shape_unknown` | Requiredness depends on an unproved object shape. |
+| `object_value_constraint` | Object value and cardinality constraints are unsupported. |
+| `ocsf_constraint` | A relevant compiled OCSF constraint form is unsupported. |
+| `ocsf_profile_inheritance` | Selected profile inheritance cannot be resolved from compiled provenance. |
+| `ocsf_profile_requirement` | A strict subset of enabling profiles cannot establish merged requiredness. |
+| `partial_name_universe` | The source name universe is not exhaustive. |
+| `pattern_properties` | Patterns can admit unenumerated names. |
+| `property_names` | Property name constraints are unsupported. |
+| `recursive_ref` | A reference cycle made no path progress. |
+| `required_vocabulary` | A required custom vocabulary is unsupported. |
+| `traversal_budget` | The requested path exceeded the projection state or segment bound. |
+| `unevaluated_properties` | Unevaluated property tracking is unsupported. |
+| `unrepresentable_source_name` | An admitted blank source name cannot be represented by the canonical source universe. |
+| `unresolved_ref` | The reference has no supplied local schema target. |
+| `unsupported_pattern` | The pattern is outside the supported ASCII subset. |

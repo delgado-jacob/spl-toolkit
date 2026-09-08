@@ -39,6 +39,16 @@ def main() -> int:
         info = mapper.discover_query("| inputlookup ip_geo_lookup.csv | search country=US")
         print(f"Lookups: {info.lookups}")
         print(f"Input fields: {info.input_fields}")
+    target = {"kind": "json_schema", "schema": {"type": "object", "properties": {"host": {}},
+              "required": ["host"], "additionalProperties": False}}
+    with SPLMapper() as mapper:
+        report = mapper.validate_schema("table host", target, source_id="first.spl")
+        assert report["outcomes"][0]["outcome"] == "required"
+        batch = mapper.validate_schema_batch(
+            [{"text": "table host", "source_id": "first.spl"},
+             {"text": "table missing", "source_id": "second.spl"}], target)
+        assert batch["status"] == "invalid"
+        print(f"Schema status: {report['status']}; ordered batch: {batch['status']}")
     return 0
 
 

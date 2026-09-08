@@ -67,3 +67,25 @@ spl-toolkit validate-fields --fields fields.json --batch queries.json --format j
 ```
 
 The first query is valid because `label` is derived from declared `host`; it needs no separate catalog declaration. The batch emits both reports and exits 1 for the missing field. Valid exits 0, invalid exits 1, incomplete exits 3, and request/I/O errors exit 2. The [field-list API](API.md#field-list-validation) includes Go, Python, and REST single/batch workflows, catalog metadata and optional fields, source identities, and exact report semantics. Validation checks declarations, not event presence or types.
+
+## Check nested schema declarations
+
+Use the [complete local-resource CLI tutorial](cli.md#json-schema-with-local-resources) to check `actor.name` against two local JSON Schema resources. It returns required evidence from both resources; omitting the second resource returns incomplete without fetching its HTTPS identity. The same target works in Python:
+
+```python
+import json
+from pathlib import Path
+from spl_toolkit import SPLMapper
+
+target = {"kind": "json_schema", "schema": json.loads(Path("event.schema.json").read_text()),
+          "resources": json.loads(Path("resources.json").read_text())}
+with SPLMapper() as mapper:
+    report = mapper.validate_schema("table actor.name", target)
+    assert report["outcomes"][0]["outcome"] == "required"
+    batch = mapper.validate_schema_batch(
+        [{"text": "table actor.name", "source_id": "first.spl"},
+         {"text": "table absent", "source_id": "second.spl"}], target)
+    assert batch["status"] == "invalid"
+```
+
+Required and optional outcomes describe declarations, not actual events. Arrays may be declared, but array descendants are incomplete. For exact OCSF versions, class/category selection and profile-dependent fields, see the [schema API](API.md#json-schema-and-ocsf-field-validation). Open wildcard sets and unsupported features retain explicit uncertainty.

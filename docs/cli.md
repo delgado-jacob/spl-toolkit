@@ -115,3 +115,52 @@ JSON output is the full canonical report (schema version 1), including analysis,
 | 1 | Missing/unavailable field or syntax-invalid content |
 | 3 | Incomplete validation |
 | 2 | Usage, malformed catalog/document, unsupported options, Unicode, input I/O, or output-write error |
+
+## JSON Schema with local resources
+
+After `make build-all`, the local binary is `build/spl-toolkit`; `export PATH="$PWD/build:$PATH"` makes the following commands available.
+
+`validate-schema` checks nested field declarations using exactly one `--schema FILE` or `--ocsf-catalog FILE`. Inputs are explicit local files; `-` is not accepted for target/resource paths. Query sources are positional/`--query`, `--file`, `--stdin`, or `--batch FILE` (including `--batch -`). Single document flags are `--language spl`, `--profile splunkd`, `--compatibility-version current`, and `--source-id ID`. Batch objects carry their own options; global document flags are rejected in batch mode.
+
+Create `event.schema.json` with this complete content:
+
+```json
+{"$id":"https://schemas.example.test/event","type":"object","properties":{"actor":{"$ref":"user#/$defs/user"}},"required":["actor"],"additionalProperties":false}
+```
+
+Create `resources.json` with this complete content:
+
+```json
+{"https://schemas.example.test/user":{"$defs":{"user":{"type":"object","properties":{"name":{"type":"string"}},"required":["name"],"additionalProperties":false}}}}
+```
+
+<!-- cli-example: schema-local-resources -->
+```bash
+spl-toolkit validate-schema --schema event.schema.json --schema-resources resources.json --query 'table actor.name' --format json
+```
+
+Exit 0; `actor.name` is required, with evidence from both local resources. `required` describes schema declarations, not event presence. `--schema-base-uri URI` supplies a base for relative references when needed. Neither HTTPS identities nor missing references trigger retrieval.
+
+<!-- cli-example: schema-unresolved-resource -->
+```bash
+spl-toolkit validate-schema --schema event.schema.json --query 'table actor.name' --format json
+```
+
+Exit 3; the unresolved reference remains incomplete. The report locates the affected reference and retains its schema evidence.
+
+Create `queries.json`:
+
+```json
+[{"text":"table actor.name","source_id":"first.spl"},{"text":"table absent","source_id":"second.spl"}]
+```
+
+<!-- cli-example: schema-local-batch -->
+```bash
+spl-toolkit validate-schema --schema event.schema.json --schema-resources resources.json --batch queries.json --format json
+```
+
+Exit 1; the batch preserves both documents in order and reports the closed missing field. Valid is exit 0, invalid is 1, incomplete is 3, and usage/target/I/O failure is 2. A content report is emitted before its exit status; failed requests do not emit partial reports. Text output includes target limitations, locations and evidence; JSON is the full canonical report. `--output FILE` writes reports to that path.
+
+For OCSF, pass exact `--ocsf-version` and exactly one `--ocsf-class` or `--ocsf-category` (key or decimal UID). Repeat `--ocsf-profile` and `--ocsf-extension` for selections; duplicate names are rejected. These schema profiles are separate from query compatibility `--profile splunkd`. The [OCSF preparation and selection guide](API.md#ocsf-preparation-and-selection) includes pinned compiler commands and executable authentication, IAM category, cloud/datetime, and Windows examples. Selection must equal the entire compiled extension set.
+
+Optional ancestors and category/branch dependence stay visible. Declared arrays are supported; descendants, open wildcard sets, unsupported patterns/keywords and profile-provenance gaps can remain incomplete. This is not event validation or expression typechecking. See the [schema API contract](API.md#json-schema-and-ocsf-field-validation) for exact pattern support and traversal bounds.

@@ -1,6 +1,6 @@
 # SPL Toolkit Python bindings
 
-This package provides Python 3.11+ bindings for SPL Toolkit 0.1.1's offline mapping, discovery, structured analysis, and field-list validation APIs. Wheels include the native Go library and do not require Go at installation or runtime.
+This package provides Python 3.11+ bindings for SPL Toolkit 0.1.1's offline mapping, discovery, structured analysis, field-list validation, and JSON Schema/OCSF field declaration APIs. Wheels include the native Go library and do not require Go at installation or runtime.
 
 ```python
 from spl_toolkit import SPLMapper
@@ -37,7 +37,7 @@ Reports preserve source text and source ID and expose ordered stages/scopes, ref
 
 Capabilities separate syntax from semantic support and list limitations and function arities. Unknown commands/functions, unexpanded macros, branch merges, unresolved wildcard membership, and unsupported options remain incomplete. Open-input `fields` inclusion also remains incomplete when retained internal membership is unknown. A later stage cannot erase an earlier coverage gap.
 
-Legacy discovery and mapping retain their own contracts. Flat `input_fields` does not encode flow, scope, or completeness and is not guaranteed to match structured classifications. New consumers should use reference roles/bindings and status/coverage. The [API reference](https://github.com/delgado-jacob/spl-toolkit/blob/main/docs/API.md) describes every surface and the supported forms; this package does not perform JSON Schema validation, broad SPL2 analysis, or new rewriting.
+Legacy discovery and mapping retain their own contracts. Flat `input_fields` does not encode flow, scope, or completeness and is not guaranteed to match structured classifications. New consumers should use reference roles/bindings and status/coverage. The [API reference](https://github.com/delgado-jacob/spl-toolkit/blob/main/docs/API.md) describes every surface and the supported forms; this package does not perform event instance validation, broad SPL2 analysis, or new rewriting.
 
 ## Field-list validation
 
@@ -69,3 +69,27 @@ Validation follows fields through the query, including created and removed field
 Both validation operations use the same context manager and close rules as other mapper methods. Native results are released after decoding, including failures. For direct C callers, `spl_mapper_validate_fields(int mapperID, char* requestJSON)` takes `{"document": {...}, "catalog": ...}` and `spl_mapper_validate_fields_batch` takes `{"documents": [...], "catalog": ...}`. Each returns an owned `SPLResult*` to release with `spl_result_free`, including request/handle errors. Null requests are errors.
 
 Optionality is declaration-only: `optional_equivalent` is valid but says nothing about whether an event contains the field. It cannot repair a structurally removed or conditional field. Each outcome retains every concrete match with its `name`, `binding` (`source` or `derived`), and individual `outcome`; mixed ordinary/optional matches must not be collapsed. A conclusively empty wildcard inclusion is missing, while an empty exclusion is harmless. Unsupported wildcard command forms, dynamic references, and conditional/branch effects remain incomplete. Plain `analyze_query` remains catalog-free.
+
+## JSON Schema and OCSF fields
+
+```python
+from spl_toolkit import SPLMapper
+
+target = {"kind": "json_schema", "schema": {"type": "object",
+          "properties": {"actor": {"type": "object", "properties": {"name": {"type": "string"}},
+                                   "required": ["name"], "additionalProperties": False}},
+          "required": ["actor"], "additionalProperties": False}}
+with SPLMapper() as mapper:
+    report = mapper.validate_schema("table actor.name", target, source_id="first.spl")
+    assert report["outcomes"][0]["outcome"] == "required"
+    batch = mapper.validate_schema_batch(
+        [{"text": "table actor.name", "source_id": "first.spl"},
+         {"text": "table absent", "source_id": "second.spl"}], target)
+    assert batch["status"] == "invalid"
+```
+
+`validate_schema` uses the same keyword-only document defaults as analysis. `validate_schema_batch` accepts a nonempty list of document dictionaries with their own options. Both return full dictionaries with report format integer `1`, original documents, target limitations, located evidence and separate syntax/semantic/schema coverage. Status precedence is invalid, incomplete, valid. Invalid target/document inputs raise `SPLMapperError`; content diagnostics stay in reports. Requests are copied, results are independently owned, and native results are freed on success or error.
+
+Supply JSON Schema object/boolean `schema`, optional `base_uri` and URI-keyed inline `resources`. Draft 2020-12 is the default. For OCSF use `{"kind":"ocsf","catalog":catalog,"selection":{"version":"1.6.0","class":"authentication","profiles":[],"extensions":[]}}`, loading your prepared catalog explicitly with `json.loads(Path("base-catalog.json").read_text())`. The complete compiled extension set must match selection; Windows requires `["win"]`. Choose `category: "iam"` instead of `class` for category evidence, or select `profiles: ["cloud", "datetime"]` explicitly. Preparation uses the official compiler outside the toolkit runtime. No URI is retrieved and no process-global catalog is consulted.
+
+Nested optional ancestors, category/branch-dependent membership, open wildcard sets, unsupported patterns/keywords, array descendants and missing profile provenance remain qualified. A declared array is supported, but descent is incomplete. Requiredness is a schema statement, not event presence. This does not validate JSON event instances or expression types. See the [full schema contract and pinned compiler preparation](https://github.com/delgado-jacob/spl-toolkit/blob/main/docs/API.md#json-schema-and-ocsf-field-validation).

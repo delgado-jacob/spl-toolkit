@@ -1,0 +1,15 @@
+{
+  "command": [
+    "/private/tmp/spl-toolkit-floor-tools/gomodcache/golang.org/toolchain@v0.0.1-go1.22.12.darwin-arm64/bin/go",
+    "test",
+    "-mod=readonly",
+    "-ldflags=-linkmode=external",
+    "./pkg/api"
+  ],
+  "base_sha": "7b6580fff46917045230668141d23f17489891df",
+  "input_manifest": "/private/tmp/m4-task7/go-floor-api-final-inputs.json",
+  "input_manifest_sha256": "f9902ec424c8cdaab8ed4967b492f43169a9f5425df75e0402fe991aa9671c70",
+  "exit": 0,
+  "elapsed_seconds": 11.22904896736145,
+  "log": "/private/tmp/m4-task7/go-floor-api-final.log"
+}

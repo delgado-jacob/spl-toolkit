@@ -1,0 +1,12 @@
+{
+  "command": [
+    "/private/tmp/spl-toolkit-remaining-venv/bin/python",
+    "tools/check_docs.py"
+  ],
+  "base_sha": "7b6580fff46917045230668141d23f17489891df",
+  "input_manifest": "/private/tmp/m4-task7/docs-final-inputs.json",
+  "input_manifest_sha256": "207e2a797eff929dd6cc99a89329f48d51a75c7a5ddb63b850403c59befb2b71",
+  "exit": 0,
+  "elapsed_seconds": 0.05390787124633789,
+  "log": "/private/tmp/m4-task7/docs-final.log"
+}

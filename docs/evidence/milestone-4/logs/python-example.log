@@ -1,0 +1,6 @@
+Original query: search src_ip=192.168.1.1 dst_port=80
+Mapped query: search source_ip=192.168.1.1 destination_port=80
+Conditional mapping: search sourcetype=web source_ip=1
+Lookups: ['ip_geo_lookup']
+Input fields: ['country']
+Schema status: valid; ordered batch: invalid

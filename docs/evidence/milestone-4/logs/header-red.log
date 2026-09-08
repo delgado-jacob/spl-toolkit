@@ -1,0 +1,40 @@
+F.                                                                       [100%]
+=================================== FAILURES ===================================
+______ test_wheel_accepts_real_cgo_headers_and_records_actual_bytes[1.22] ______
+
+tmp_path = PosixPath('/private/var/folders/6d/zc3z9vpd1gg2tjsrl0c30gf40000gn/T/pytest-of-jacobdelgado/pytest-611/test_wheel_accepts_real_cgo_he0')
+compiler = '1.22'
+
+    @pytest.mark.parametrize("compiler", ["1.22", "1.25"])
+    def test_wheel_accepts_real_cgo_headers_and_records_actual_bytes(tmp_path: Path, compiler):
+        import zipfile
+        checker = load_package_checker()
+        header = (ROOT / f"tools/tests/fixtures/cgo-go{compiler}.h").read_bytes()
+        wheel = tmp_path / "wheel.whl"
+        with zipfile.ZipFile(wheel, "w") as archive:
+            archive.writestr("spl_toolkit/mapper.py", (PYTHON_DIR / "spl_toolkit/mapper.py").read_bytes())
+            archive.writestr("spl_toolkit/libspl_toolkit.h", header)
+            archive.writestr("spl_toolkit/" + checker.native_library_name(), b"native")
+>       hashes = checker.verify_wheel_sources(wheel, ROOT)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tools/tests/test_package.py:590:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+wheel = PosixPath('/private/var/folders/6d/zc3z9vpd1gg2tjsrl0c30gf40000gn/T/pytest-of-jacobdelgado/pytest-611/test_wheel_accepts_real_cgo_he0/wheel.whl')
+root = PosixPath('/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones')
+
+    def verify_wheel_sources(wheel: Path, root: Path) -> dict[str, str]:
+        """Bind the installed wrapper/header and native payload to this wheel."""
+        hashes = {}
+        with zipfile.ZipFile(wheel) as archive:
+            for relative in ("spl_toolkit/mapper.py", "spl_toolkit/libspl_toolkit.h"):
+                digest = hashlib.sha256(archive.read(relative)).hexdigest()
+                if digest != sha256(root / "python" / relative):
+>                   raise AssertionError(f"wheel source hash mismatch: {relative}")
+E                   AssertionError: wheel source hash mismatch: spl_toolkit/libspl_toolkit.h
+
+tools/check_package.py:214: AssertionError
+=========================== short test summary info ============================
+FAILED tools/tests/test_package.py::test_wheel_accepts_real_cgo_headers_and_records_actual_bytes[1.22]
+1 failed, 1 passed, 60 deselected in 0.09s

@@ -1,0 +1,15 @@
+{
+  "command": [
+    "/private/tmp/spl-toolkit-remaining-venv/bin/python",
+    "-m",
+    "pytest",
+    "tools/tests/test_schema_docs.py",
+    "-q"
+  ],
+  "base_sha": "7b6580fff46917045230668141d23f17489891df",
+  "input_manifest": "/private/tmp/m4-task7/docs-reason-final-inputs.json",
+  "input_manifest_sha256": "4545b27f475440934390155744c718885ed6342d74ffa57d360ac2d4ad19463a",
+  "exit": 0,
+  "elapsed_seconds": 0.2730119228363037,
+  "log": "/private/tmp/m4-task7/docs-reason-final.log"
+}

@@ -1,0 +1,16 @@
+excluding generated packages from handwritten go vet gate: github.com/delgado-jacob/spl-toolkit/docs, github.com/delgado-jacob/spl-toolkit/gen, github.com/delgado-jacob/spl-toolkit/parser; generated ANTLR and OpenAPI sources are committed build inputs
+# github.com/delgado-jacob/spl-toolkit/pkg/bindings.test
+ld: warning: '/private/var/folders/6d/zc3z9vpd1gg2tjsrl0c30gf40000gn/T/go-link-3786477352/000012.o' has malformed LC_DYSYMTAB, expected 98 undefined symbols to start at index 1626, found 95 undefined symbols starting at index 1626
+ok  	github.com/delgado-jacob/spl-toolkit/cmd	31.110s
+?   	github.com/delgado-jacob/spl-toolkit/cmd/server	[no test files]
+?   	github.com/delgado-jacob/spl-toolkit/docs	[no test files]
+?   	github.com/delgado-jacob/spl-toolkit/examples/go/basic	[no test files]
+?   	github.com/delgado-jacob/spl-toolkit/gen	[no test files]
+?   	github.com/delgado-jacob/spl-toolkit/internal/buildinfo	[no test files]
+ok  	github.com/delgado-jacob/spl-toolkit/internal/jsoninput	(cached)
+?   	github.com/delgado-jacob/spl-toolkit/parser	[no test files]
+ok  	github.com/delgado-jacob/spl-toolkit/pkg/analysis	(cached)
+ok  	github.com/delgado-jacob/spl-toolkit/pkg/api	107.120s
+ok  	github.com/delgado-jacob/spl-toolkit/pkg/bindings	1.887s
+ok  	github.com/delgado-jacob/spl-toolkit/pkg/mapper	(cached)
+ok  	github.com/delgado-jacob/spl-toolkit/pkg/validation	87.188s

@@ -6,9 +6,10 @@ SPL Toolkit 0.1.1 is an offline library and command-line tool for bounded operat
 - discover data models, datasets, lookups, macros, sources, sourcetypes, and input fields;
 - validate queries against the bundled legacy grammar;
 - analyze query flow, located references, lineage, dependencies, and coverage;
-- validate source field obligations against an offline field catalog, singly or in ordered batches.
+- validate source field obligations against an offline field catalog, singly or in ordered batches;
+- check nested declarations against local JSON Schema resources and exact compiled OCSF versions, keeping optional and category-dependent findings visible.
 
-The Go implementation is canonical. The Python package includes the native Go library, and the REST server calls the same Go APIs. Structured analysis supports the bounded SPL/splunkd/current contract. It does not provide JSON Schema or OCSF validation, raw-to-data-model translation, data-model rewriting, learned mappings, SPL2 modules, or complete Splunk syntax coverage.
+The Go implementation is canonical. The Python package includes the native Go library, and the REST server calls the same Go APIs. Structured analysis supports the bounded SPL/splunkd/current contract. It does not provide event instance validation, expression typechecking, raw-to-data-model translation, data-model rewriting, learned mappings, SPL2 modules, or complete Splunk syntax coverage.
 
 ## Structured analysis
 
@@ -29,6 +30,10 @@ spl-toolkit validate-fields --fields fields.json --query 'eval label=host | tabl
 ```
 
 Validation follows derived fields, removals, and supported wildcards through canonical query flow. Nested names match exactly; optional declarations are valid without asserting event presence. Reports distinguish valid, invalid, and incomplete coverage, with exits 0, 1, and 3 (2 for request/I/O errors). Go, CLI, native Python, and REST expose identical single/batch reports. See the [validation API](docs/API.md#field-list-validation) for catalog shapes, options, examples, and limitations.
+
+## JSON Schema and OCSF
+
+Check nested fields using your local schema or compiled OCSF catalog. Reports distinguish required, optional, category/branch-dependent and unspecified fields. Open wildcard sets, unsupported patterns/keywords, array descendants, and profile-provenance gaps stay visibly incomplete. Declared arrays are supported; requiredness describes a schema, not event presence. No schema URL is fetched. See the [local-resource CLI tutorial](docs/cli.md#json-schema-with-local-resources), [schema API contract](docs/API.md#json-schema-and-ocsf-field-validation), and [local verification limits](docs/compatibility.md).
 
 ## Go
 

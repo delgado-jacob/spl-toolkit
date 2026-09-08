@@ -1,0 +1,85 @@
+ok  	github.com/delgado-jacob/spl-toolkit/pkg/analysis	0.773s
+ok  	github.com/delgado-jacob/spl-toolkit/pkg/validation	10.812s
+ok  	github.com/delgado-jacob/spl-toolkit/pkg/mapper	(cached)
+ok  	github.com/delgado-jacob/spl-toolkit/pkg/bindings	0.561s
+ok  	github.com/delgado-jacob/spl-toolkit/cmd	4.136s
+{"time":"2026-09-07T23:23:00.450581-04:00","level":"INFO","msg":"http request","method":"POST","path":"/api/v1/query/analyze","status":200,"duration_ms":11,"request_id":"","remote_addr":"192.0.2.1","user_agent":"","content_length":176}
+{"time":"2026-09-07T23:23:00.455786-04:00","level":"INFO","msg":"http request","method":"POST","path":"/api/v1/query/analyze","status":200,"duration_ms":4,"request_id":"","remote_addr":"192.0.2.1","user_agent":"","content_length":161}
+{"time":"2026-09-07T23:23:00.456952-04:00","level":"INFO","msg":"http request","method":"POST","path":"/api/v1/query/analyze","status":200,"duration_ms":1,"request_id":"","remote_addr":"192.0.2.1","user_agent":"","content_length":158}
+{"time":"2026-09-07T23:23:00.464017-04:00","level":"INFO","msg":"http request","method":"POST","path":"/api/v1/query/analyze","status":200,"duration_ms":6,"request_id":"","remote_addr":"192.0.2.1","user_agent":"","content_length":179}
+{"time":"2026-09-07T23:23:00.468656-04:00","level":"INFO","msg":"http request","method":"POST","path":"/api/v1/query/analyze","status":200,"duration_ms":4,"request_id":"","remote_addr":"192.0.2.1","user_agent":"","content_length":210}
+{"time":"2026-09-07T23:23:00.471306-04:00","level":"INFO","msg":"http request","method":"POST","path":"/api/v1/query/analyze","status":200,"duration_ms":2,"request_id":"","remote_addr":"192.0.2.1","user_agent":"","content_length":202}
+{"time":"2026-09-07T23:23:00.471703-04:00","level":"INFO","msg":"http request","method":"POST","path":"/api/v1/query/analyze","status":200,"duration_ms":0,"request_id":"","remote_addr":"192.0.2.1","user_agent":"","content_length":116}
+{"time":"2026-09-07T23:23:00.481413-04:00","level":"INFO","msg":"http request","method":"POST","path":"/api/v1/query/analyze","status":200,"duration_ms":9,"request_id":"","remote_addr":"192.0.2.1","user_agent":"","content_length":129}
+{"time":"2026-09-07T23:23:00.482012-04:00","level":"INFO","msg":"http request","method":"POST","path":"/api/v1/query/analyze","status":200,"duration_ms":0,"request_id":"","remote_addr":"192.0.2.1","user_agent":"","content_length":108}
+{"time":"2026-09-07T23:23:00.482924-04:00","level":"INFO","msg":"http request","method":"POST","path":"/api/v1/query/analyze","status":200,"duration_ms":0,"request_id":"","remote_addr":"192.0.2.1","user_agent":"","content_length":132}
+{"time":"2026-09-07T23:23:00.484117-04:00","level":"INFO","msg":"http request","method":"POST","path":"/api/v1/query/analyze","status":200,"duration_ms":1,"request_id":"","remote_addr":"192.0.2.1","user_agent":"","content_length":132}
+{"time":"2026-09-07T23:23:00.492702-04:00","level":"INFO","msg":"http request","method":"POST","path":"/api/v1/query/analyze","status":200,"duration_ms":8,"request_id":"","remote_addr":"192.0.2.1","user_agent":"","content_length":160}
+{"time":"2026-09-07T23:23:00.503303-04:00","level":"INFO","msg":"http request","method":"POST","path":"/api/v1/query/analyze","status":200,"duration_ms":10,"request_id":"","remote_addr":"192.0.2.1","user_agent":"","content_length":189}
+{"time":"2026-09-07T23:23:00.504324-04:00","level":"INFO","msg":"http request","method":"POST","path":"/api/v1/query/analyze","status":200,"duration_ms":0,"request_id":"","remote_addr":"192.0.2.1","user_agent":"","content_length":152}
+{"time":"2026-09-07T23:23:00.506266-04:00","level":"INFO","msg":"http request","method":"POST","path":"/api/v1/query/analyze","status":200,"duration_ms":1,"request_id":"","remote_addr":"192.0.2.1","user_agent":"","content_length":138}
+{"time":"2026-09-07T23:23:00.526816-04:00","level":"INFO","msg":"http request","method":"POST","path":"/api/v1/query/analyze","status":200,"duration_ms":20,"request_id":"","remote_addr":"192.0.2.1","user_agent":"","content_length":334}
+{"time":"2026-09-07T23:23:00.527312-04:00","level":"INFO","msg":"http request","method":"POST","path":"/api/v1/query/analyze","status":200,"duration_ms":0,"request_id":"","remote_addr":"192.0.2.1","user_agent":"","content_length":110}
+{"time":"2026-09-07T23:23:00.527535-04:00","level":"INFO","msg":"http request","method":"POST","path":"/api/v1/query/analyze","status":200,"duration_ms":0,"request_id":"","remote_addr":"192.0.2.1","user_agent":"","content_length":116}
+{"time":"2026-09-07T23:23:00.528269-04:00","level":"INFO","msg":"http request","method":"POST","path":"/api/v1/query/analyze","status":200,"duration_ms":0,"request_id":"","remote_addr":"192.0.2.1","user_agent":"","content_length":125}
+{"time":"2026-09-07T23:23:00.528804-04:00","level":"INFO","msg":"http request","method":"POST","path":"/api/v1/query/analyze","status":200,"duration_ms":0,"request_id":"","remote_addr":"192.0.2.1","user_agent":"","content_length":142}
+{"time":"2026-09-07T23:23:00.530726-04:00","level":"INFO","msg":"http request","method":"POST","path":"/api/v1/query/analyze","status":200,"duration_ms":1,"request_id":"","remote_addr":"192.0.2.1","user_agent":"","content_length":160}
+{"time":"2026-09-07T23:23:00.532649-04:00","level":"INFO","msg":"http request","method":"POST","path":"/api/v1/query/analyze","status":200,"duration_ms":1,"request_id":"","remote_addr":"192.0.2.1","user_agent":"","content_length":117}
+{"time":"2026-09-07T23:23:00.53403-04:00","level":"INFO","msg":"http request","method":"POST","path":"/api/v1/query/analyze","status":200,"duration_ms":0,"request_id":"","remote_addr":"192.0.2.1","user_agent":"","content_length":121}
+{"time":"2026-09-07T23:23:00.541049-04:00","level":"INFO","msg":"http request","method":"POST","path":"/api/v1/query/analyze","status":200,"duration_ms":6,"request_id":"","remote_addr":"192.0.2.1","user_agent":"","content_length":179}
+{"time":"2026-09-07T23:23:00.543303-04:00","level":"INFO","msg":"http request","method":"POST","path":"/api/v1/query/analyze","status":200,"duration_ms":1,"request_id":"","remote_addr":"192.0.2.1","user_agent":"","content_length":157}
+{"time":"2026-09-07T23:23:00.544682-04:00","level":"INFO","msg":"http request","method":"POST","path":"/api/v1/query/analyze","status":200,"duration_ms":1,"request_id":"","remote_addr":"192.0.2.1","user_agent":"","content_length":133}
+{"time":"2026-09-07T23:23:00.545612-04:00","level":"INFO","msg":"http request","method":"POST","path":"/api/v1/query/analyze","status":200,"duration_ms":0,"request_id":"","remote_addr":"192.0.2.1","user_agent":"","content_length":145}
+{"time":"2026-09-07T23:23:00.54632-04:00","level":"INFO","msg":"http request","method":"POST","path":"/api/v1/query/analyze","status":200,"duration_ms":0,"request_id":"","remote_addr":"192.0.2.1","user_agent":"","content_length":147}
+{"time":"2026-09-07T23:23:00.547627-04:00","level":"INFO","msg":"http request","method":"POST","path":"/api/v1/query/analyze","status":200,"duration_ms":1,"request_id":"","remote_addr":"192.0.2.1","user_agent":"","content_length":152}
+{"time":"2026-09-07T23:23:00.548635-04:00","level":"INFO","msg":"http request","method":"POST","path":"/api/v1/query/analyze","status":200,"duration_ms":0,"request_id":"","remote_addr":"192.0.2.1","user_agent":"","content_length":154}
+{"time":"2026-09-07T23:23:00.549511-04:00","level":"INFO","msg":"http request","method":"POST","path":"/api/v1/query/analyze","status":200,"duration_ms":0,"request_id":"","remote_addr":"192.0.2.1","user_agent":"","content_length":151}
+{"time":"2026-09-07T23:23:00.553602-04:00","level":"INFO","msg":"http request","method":"POST","path":"/api/v1/query/analyze","status":200,"duration_ms":1,"request_id":"","remote_addr":"192.0.2.1","user_agent":"","content_length":153}
+{"time":"2026-09-07T23:23:00.556497-04:00","level":"INFO","msg":"http request","method":"POST","path":"/api/v1/query/analyze","status":200,"duration_ms":2,"request_id":"","remote_addr":"192.0.2.1","user_agent":"","content_length":174}
+{"time":"2026-09-07T23:23:00.557262-04:00","level":"INFO","msg":"http request","method":"POST","path":"/api/v1/query/analyze","status":200,"duration_ms":0,"request_id":"","remote_addr":"192.0.2.1","user_agent":"","content_length":176}
+{"time":"2026-09-07T23:23:00.557435-04:00","level":"INFO","msg":"http request","method":"POST","path":"/api/v1/query/analyze","status":200,"duration_ms":0,"request_id":"","remote_addr":"192.0.2.1","user_agent":"","content_length":66}
+{"time":"2026-09-07T23:23:00.557512-04:00","level":"INFO","msg":"http request","method":"POST","path":"/api/v1/query/analyze","status":200,"duration_ms":0,"request_id":"","remote_addr":"192.0.2.1","user_agent":"","content_length":73}
+{"time":"2026-09-07T23:23:00.558058-04:00","level":"INFO","msg":"http request","method":"POST","path":"/api/v1/query/analyze","status":400,"duration_ms":0,"request_id":"","remote_addr":"192.0.2.1","user_agent":"","content_length":8}
+{"time":"2026-09-07T23:23:00.558136-04:00","level":"INFO","msg":"http request","method":"POST","path":"/api/v1/query/analyze","status":400,"duration_ms":0,"request_id":"","remote_addr":"192.0.2.1","user_agent":"","content_length":4}
+{"time":"2026-09-07T23:23:00.558297-04:00","level":"INFO","msg":"http request","method":"POST","path":"/api/v1/query/analyze","status":400,"duration_ms":0,"request_id":"","remote_addr":"192.0.2.1","user_agent":"","content_length":24}
+{"time":"2026-09-07T23:23:00.558748-04:00","level":"INFO","msg":"http request","method":"POST","path":"/api/v1/query/analyze","status":400,"duration_ms":0,"request_id":"","remote_addr":"192.0.2.1","user_agent":"","content_length":34}
+{"time":"2026-09-07T23:23:00.558842-04:00","level":"INFO","msg":"http request","method":"POST","path":"/api/v1/query/analyze","status":400,"duration_ms":0,"request_id":"","remote_addr":"192.0.2.1","user_agent":"","content_length":39}
+{"time":"2026-09-07T23:23:00.558903-04:00","level":"INFO","msg":"http request","method":"POST","path":"/api/v1/query/analyze","status":400,"duration_ms":0,"request_id":"","remote_addr":"192.0.2.1","user_agent":"","content_length":39}
+{"time":"2026-09-07T23:23:00.558971-04:00","level":"INFO","msg":"http request","method":"POST","path":"/api/v1/query/analyze","status":400,"duration_ms":0,"request_id":"","remote_addr":"192.0.2.1","user_agent":"","content_length":37}
+{"time":"2026-09-07T23:23:00.559016-04:00","level":"INFO","msg":"http request","method":"POST","path":"/api/v1/query/analyze","status":400,"duration_ms":0,"request_id":"","remote_addr":"192.0.2.1","user_agent":"","content_length":12}
+{"time":"2026-09-07T23:23:00.559061-04:00","level":"INFO","msg":"http request","method":"POST","path":"/api/v1/query/analyze","status":400,"duration_ms":0,"request_id":"","remote_addr":"192.0.2.1","user_agent":"","content_length":37}
+{"time":"2026-09-07T23:23:00.559106-04:00","level":"INFO","msg":"http request","method":"POST","path":"/api/v1/query/analyze","status":400,"duration_ms":0,"request_id":"","remote_addr":"192.0.2.1","user_agent":"","content_length":21}
+{"time":"2026-09-07T23:23:00.559151-04:00","level":"INFO","msg":"http request","method":"POST","path":"/api/v1/query/analyze","status":400,"duration_ms":0,"request_id":"","remote_addr":"192.0.2.1","user_agent":"","content_length":21}
+{"time":"2026-09-07T23:23:00.56275-04:00","level":"INFO","msg":"http request","method":"POST","path":"/api/v1/query/analyze","status":400,"duration_ms":3,"request_id":"","remote_addr":"192.0.2.1","user_agent":"","content_length":1048588}
+{"time":"2026-09-07T23:23:00.562888-04:00","level":"INFO","msg":"http request","method":"POST","path":"/api/v1/query/analyze","status":400,"duration_ms":0,"request_id":"","remote_addr":"192.0.2.1","user_agent":"","content_length":17}
+{"time":"2026-09-07T23:23:00.562934-04:00","level":"INFO","msg":"http request","method":"POST","path":"/api/v1/query/analyze","status":400,"duration_ms":0,"request_id":"","remote_addr":"192.0.2.1","user_agent":"","content_length":18}
+{"time":"2026-09-07T23:23:00.563401-04:00","level":"INFO","msg":"http request","method":"POST","path":"/api/v1/query/analyze","status":400,"duration_ms":0,"request_id":"","remote_addr":"192.0.2.1","user_agent":"","content_length":23}
+{"time":"2026-09-07T23:23:00.563466-04:00","level":"INFO","msg":"http request","method":"POST","path":"/api/v1/query/analyze","status":400,"duration_ms":0,"request_id":"","remote_addr":"192.0.2.1","user_agent":"","content_length":42}
+{"time":"2026-09-07T23:23:00.56392-04:00","level":"INFO","msg":"http request","method":"POST","path":"/api/v1/query/analyze","status":200,"duration_ms":0,"request_id":"","remote_addr":"192.0.2.1","user_agent":"","content_length":65}
+{"time":"2026-09-07T23:23:00.564083-04:00","level":"INFO","msg":"http request","method":"GET","path":"/api/v1/capabilities","status":200,"duration_ms":0,"request_id":"","remote_addr":"192.0.2.1","user_agent":"","content_length":0}
+{"time":"2026-09-07T23:23:00.565135-04:00","level":"INFO","msg":"http request","method":"GET","path":"/api/v1/openapi.json","status":200,"duration_ms":0,"request_id":"","remote_addr":"192.0.2.1","user_agent":"","content_length":0}
+--- FAIL: TestHTTPBaselineParity (0.00s)
+panic: httptest: failed to listen on a port: listen tcp6 [::1]:0: bind: operation not permitted [recovered]
+	panic: httptest: failed to listen on a port: listen tcp6 [::1]:0: bind: operation not permitted
+
+goroutine 120 [running]:
+testing.tRunner.func1.2({0x102c1b3c0, 0x14000805320})
+	/private/tmp/spl-toolkit-floor-tools/gomodcache/golang.org/toolchain@v0.0.1-go1.22.12.darwin-arm64/src/testing/testing.go:1631 +0x1c4
+testing.tRunner.func1()
+	/private/tmp/spl-toolkit-floor-tools/gomodcache/golang.org/toolchain@v0.0.1-go1.22.12.darwin-arm64/src/testing/testing.go:1634 +0x33c
+panic({0x102c1b3c0?, 0x14000805320?})
+	/private/tmp/spl-toolkit-floor-tools/gomodcache/golang.org/toolchain@v0.0.1-go1.22.12.darwin-arm64/src/runtime/panic.go:770 +0x124
+net/http/httptest.newLocalListener()
+	/private/tmp/spl-toolkit-floor-tools/gomodcache/golang.org/toolchain@v0.0.1-go1.22.12.darwin-arm64/src/net/http/httptest/server.go:71 +0xdc
+net/http/httptest.NewUnstartedServer(...)
+	/private/tmp/spl-toolkit-floor-tools/gomodcache/golang.org/toolchain@v0.0.1-go1.22.12.darwin-arm64/src/net/http/httptest/server.go:119
+net/http/httptest.NewServer({0x102d13e68, 0x140007036a0})
+	/private/tmp/spl-toolkit-floor-tools/gomodcache/golang.org/toolchain@v0.0.1-go1.22.12.darwin-arm64/src/net/http/httptest/server.go:106 +0x28
+github.com/delgado-jacob/spl-toolkit/pkg/api.TestHTTPBaselineParity(0x140001cab60)
+	/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/pkg/api/baseline_test.go:78 +0x4c
+testing.tRunner(0x140001cab60, 0x102d0ffd8)
+	/private/tmp/spl-toolkit-floor-tools/gomodcache/golang.org/toolchain@v0.0.1-go1.22.12.darwin-arm64/src/testing/testing.go:1689 +0xec
+created by testing.(*T).Run in goroutine 1
+	/private/tmp/spl-toolkit-floor-tools/gomodcache/golang.org/toolchain@v0.0.1-go1.22.12.darwin-arm64/src/testing/testing.go:1742 +0x318
+FAIL	github.com/delgado-jacob/spl-toolkit/pkg/api	1.026s
+FAIL

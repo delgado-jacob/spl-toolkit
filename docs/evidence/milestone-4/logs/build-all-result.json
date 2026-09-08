@@ -1,0 +1,12 @@
+{
+  "command": [
+    "make",
+    "build-all"
+  ],
+  "base_sha": "7b6580fff46917045230668141d23f17489891df",
+  "input_manifest": "/private/tmp/m4-task7/build-all-inputs.json",
+  "input_manifest_sha256": "244d83154a70fa98349e39a3766a704b34c82e19019a965de5dcc863d52c29b5",
+  "exit": 0,
+  "elapsed_seconds": 3.075624942779541,
+  "log": "/private/tmp/m4-task7/build-all.log"
+}

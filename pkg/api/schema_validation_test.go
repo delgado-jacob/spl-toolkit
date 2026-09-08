@@ -76,6 +76,20 @@ func TestSchemaRESTStrictWrappers(t *testing.T) {
 	badTargets := []string{`null`, `[]`, `{}`, `{"kind":"wat","schema":{}}`, `{"kind":"json_schema","schema":{},"catalog":null}`, `{"kind":"json_schema","schema":null}`, `{"kind":"json_schema","schema":{},"extra":1}`, `{"kind":"json_schema","kind":"json_schema","schema":{}}`, `{"kind":"json_schema","schema":{"title":"a","title":"b"}}`, `{"kind":"json_schema","schema":{},"resources":null}`, `{"kind":"json_schema","schema":{},"base_uri":null}`, `{"kind":"json_schema","schema":{"$schema":"http://json-schema.org/draft-04/schema#"}}`,
 		`{"kind":"ocsf","catalog":{},"selection":null}`, `{"kind":"ocsf","catalog":{},"selection":{"version":"1.6.0","class":"x","profiles":null}}`, `{"kind":"ocsf","catalog":{},"selection":{"version":"1.6.0","class":"x","extensions":null}}`, `{"kind":"ocsf","catalog":{},"selection":{"version":"1.6.0","class":"x","class_uid":1}}`, `{"kind":"ocsf","catalog":{},"selection":{"version":"1.6.0","class_uid":1.1}}`, `{"kind":"ocsf","catalog":{},"selection":{"version":"1.6.0","class_uid":9223372036854775808}}`, `{"kind":"ocsf","catalog":{},"selection":{"version":"1.6.0","class":"x","profiles":["p","p"]}}`, `{"kind":"ocsf","catalog":{},"selection":{"version":"1.6.0","class":"x","unknown":1}}`,
 	}
+	// Selection errors must not be masked by an independently invalid catalog.
+	catalog := string(readSchemaFixture(t, "base"))
+	validTarget := `{"kind":"ocsf","catalog":` + catalog + `,"selection":{"version":"1.6.0","class":"authentication","profiles":["cloud"]}}`
+	baseline := schemaREST(t, handler, "validate-schema", []byte(`{"document":{"text":"table time"},"target":`+validTarget+`}`), "application/json", false)
+	if baseline.Code != 200 {
+		t.Fatalf("selection baseline: %d %s", baseline.Code, baseline.Body)
+	}
+	for i, target := range badTargets {
+		if strings.Contains(target, `"kind":"ocsf"`) {
+			target = strings.Replace(target, `"catalog":{}`, `"catalog":`+catalog, 1)
+			target = strings.ReplaceAll(target, `"class":"x"`, `"class":"authentication"`)
+			badTargets[i] = strings.ReplaceAll(target, `"p"`, `"cloud"`)
+		}
+	}
 	for _, batch := range []bool{false, true} {
 		route := "validate-schema"
 		key := "document"

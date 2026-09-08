@@ -1,0 +1,484 @@
+{
+  "accepted_m3_sha": "e401402e5d8cd80f469884b2c3ad80245266ad66",
+  "artifacts": {
+    "/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/build/libspl_toolkit.dylib": "be3089d8c008b919bfb07c6d522b7bf66bdde8198071f98515fbc3f52d5d3209",
+    "/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/build/spl-toolkit": "9a124d351315f3788ba52067ef735558d5bc70b6a949992fdb31af99a543fafd",
+    "/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/build/spl-toolkit-server": "e5ceea22b3235edc13237f46425ade001e43390dd086c54c9492a6ff04224092",
+    "dist/spl_toolkit-0.1.1-py3-none-macosx_15_0_arm64.whl": "9455b36b7bf09e02b497dac146245cc4b8e775ff1575d92da0d113b1f3e14ac2",
+    "dist/spl_toolkit-0.1.1.tar.gz": "3ed2b8334a62555867b94e27a0e5d69b92591d903e068ac558d18589cc2e54ea"
+  },
+  "base_sha": "7b6580fff46917045230668141d23f17489891df",
+  "commands": {
+    "build-all": {
+      "base_sha": "7b6580fff46917045230668141d23f17489891df",
+      "command": [
+        "make",
+        "build-all"
+      ],
+      "elapsed_seconds": 3.075624942779541,
+      "exit": 0,
+      "input_manifest": "/private/tmp/m4-task7/build-all-inputs.json",
+      "input_manifest_sha256": "244d83154a70fa98349e39a3766a704b34c82e19019a965de5dcc863d52c29b5",
+      "log": "/private/tmp/m4-task7/build-all.log",
+      "permanent_input_manifest": "logs/build-all-inputs.json",
+      "permanent_log": "logs/build-all.log"
+    },
+    "docs": {
+      "base_sha": "7b6580fff46917045230668141d23f17489891df",
+      "command": [
+        "/private/tmp/spl-toolkit-remaining-venv/bin/python",
+        "tools/check_docs.py"
+      ],
+      "elapsed_seconds": 0.05301785469055176,
+      "exit": 0,
+      "input_manifest": "/private/tmp/m4-task7/docs-inputs.json",
+      "input_manifest_sha256": "21290f611e945321a1d308046c812b24a1c9ccc243774cfeaf3fdda4483b0941",
+      "log": "/private/tmp/m4-task7/docs.log",
+      "permanent_input_manifest": "logs/docs-inputs.json",
+      "permanent_log": "logs/docs.log"
+    },
+    "docs-final": {
+      "base_sha": "7b6580fff46917045230668141d23f17489891df",
+      "command": [
+        "/private/tmp/spl-toolkit-remaining-venv/bin/python",
+        "tools/check_docs.py"
+      ],
+      "elapsed_seconds": 0.05390787124633789,
+      "exit": 0,
+      "input_manifest": "/private/tmp/m4-task7/docs-final-inputs.json",
+      "input_manifest_sha256": "207e2a797eff929dd6cc99a89329f48d51a75c7a5ddb63b850403c59befb2b71",
+      "log": "/private/tmp/m4-task7/docs-final.log",
+      "permanent_input_manifest": "logs/docs-final-inputs.json",
+      "permanent_log": "logs/docs-final.log"
+    },
+    "docs-reason-final": {
+      "base_sha": "7b6580fff46917045230668141d23f17489891df",
+      "command": [
+        "/private/tmp/spl-toolkit-remaining-venv/bin/python",
+        "-m",
+        "pytest",
+        "tools/tests/test_schema_docs.py",
+        "-q"
+      ],
+      "elapsed_seconds": 0.2730119228363037,
+      "exit": 0,
+      "input_manifest": "/private/tmp/m4-task7/docs-reason-final-inputs.json",
+      "input_manifest_sha256": "4545b27f475440934390155744c718885ed6342d74ffa57d360ac2d4ad19463a",
+      "log": "/private/tmp/m4-task7/docs-reason-final.log",
+      "permanent_input_manifest": "logs/docs-reason-final-inputs.json",
+      "permanent_log": "logs/docs-reason-final.log"
+    },
+    "go-final": {
+      "base_sha": "7b6580fff46917045230668141d23f17489891df",
+      "command": [
+        "/private/tmp/spl-toolkit-remaining-venv/bin/python",
+        "tools/check_go.py"
+      ],
+      "elapsed_seconds": 109.70965600013733,
+      "exit": 0,
+      "input_manifest": "/private/tmp/m4-task7/go-final-inputs.json",
+      "input_manifest_sha256": "0f5e1671c9ae12fdb65061ae5647aabe58c04c28f438fe60f628a09143398832",
+      "log": "/private/tmp/m4-task7/go-final.log",
+      "permanent_input_manifest": "logs/go-final-inputs.json",
+      "permanent_log": "logs/go-final.log"
+    },
+    "go-floor": {
+      "base_sha": "7b6580fff46917045230668141d23f17489891df",
+      "command": [
+        "/private/tmp/spl-toolkit-floor-tools/gomodcache/golang.org/toolchain@v0.0.1-go1.22.12.darwin-arm64/bin/go",
+        "test",
+        "-mod=readonly",
+        "-ldflags=-linkmode=external",
+        "./pkg/analysis",
+        "./pkg/validation",
+        "./pkg/mapper",
+        "./pkg/bindings",
+        "./cmd",
+        "./pkg/api"
+      ],
+      "elapsed_seconds": 12.387843132019043,
+      "exit": 1,
+      "input_manifest": "/private/tmp/m4-task7/go-floor-inputs.json",
+      "input_manifest_sha256": "329cf027521904c813bca93ab01d06447289d2bf2bfbd29f1cd493c762747b73",
+      "log": "/private/tmp/m4-task7/go-floor.log",
+      "permanent_input_manifest": "logs/go-floor-inputs.json",
+      "permanent_log": "logs/go-floor.log"
+    },
+    "go-floor-api-final": {
+      "base_sha": "7b6580fff46917045230668141d23f17489891df",
+      "command": [
+        "/private/tmp/spl-toolkit-floor-tools/gomodcache/golang.org/toolchain@v0.0.1-go1.22.12.darwin-arm64/bin/go",
+        "test",
+        "-mod=readonly",
+        "-ldflags=-linkmode=external",
+        "./pkg/api"
+      ],
+      "elapsed_seconds": 11.22904896736145,
+      "exit": 0,
+      "input_manifest": "/private/tmp/m4-task7/go-floor-api-final-inputs.json",
+      "input_manifest_sha256": "f9902ec424c8cdaab8ed4967b492f43169a9f5425df75e0402fe991aa9671c70",
+      "log": "/private/tmp/m4-task7/go-floor-api-final.log",
+      "permanent_input_manifest": "logs/go-floor-api-final-inputs.json",
+      "permanent_log": "logs/go-floor-api-final.log"
+    },
+    "header-green": {
+      "base_sha": "7b6580fff46917045230668141d23f17489891df",
+      "command": [
+        "/private/tmp/spl-toolkit-remaining-venv/bin/python",
+        "-m",
+        "pytest",
+        "tools/tests/test_package.py",
+        "-q"
+      ],
+      "elapsed_seconds": 2.880949020385742,
+      "exit": 0,
+      "input_manifest": "/private/tmp/m4-task7/header-green-inputs.json",
+      "input_manifest_sha256": "c2510dfd5872e84b551d395c444651dc06fd6067920a937a0a581c84b1b66eed",
+      "log": "/private/tmp/m4-task7/header-green.log",
+      "permanent_input_manifest": "logs/header-green-inputs.json",
+      "permanent_log": "logs/header-green.log"
+    },
+    "header-red": {
+      "base_sha": "7b6580fff46917045230668141d23f17489891df",
+      "command": [
+        "/private/tmp/spl-toolkit-remaining-venv/bin/python",
+        "-m",
+        "pytest",
+        "tools/tests/test_package.py",
+        "-q",
+        "-k",
+        "real_cgo_headers"
+      ],
+      "elapsed_seconds": 0.36746907234191895,
+      "exit": 1,
+      "input_manifest": "/private/tmp/m4-task7/header-red-inputs.json",
+      "input_manifest_sha256": "5b0bcf345fe9c328a36892144cd27b97937b844a6e48735935c5a44f12967e4e",
+      "log": "/private/tmp/m4-task7/header-red.log",
+      "permanent_input_manifest": "logs/header-red-inputs.json",
+      "permanent_log": "logs/header-red.log"
+    },
+    "native-source": {
+      "base_sha": "7b6580fff46917045230668141d23f17489891df",
+      "command": [
+        "/private/tmp/spl-toolkit-remaining-venv/bin/python",
+        "-m",
+        "pytest",
+        "python/tests",
+        "-q"
+      ],
+      "elapsed_seconds": 5.935003995895386,
+      "exit": 0,
+      "input_manifest": "/private/tmp/m4-task7/native-source-inputs.json",
+      "input_manifest_sha256": "0f5e1671c9ae12fdb65061ae5647aabe58c04c28f438fe60f628a09143398832",
+      "log": "/private/tmp/m4-task7/native-source.log",
+      "permanent_input_manifest": "logs/native-source-inputs.json",
+      "permanent_log": "logs/native-source.log"
+    },
+    "package": {
+      "base_sha": "7b6580fff46917045230668141d23f17489891df",
+      "command": [
+        "/private/tmp/spl-toolkit-remaining-venv/bin/python",
+        "tools/check_package.py",
+        "--sdist",
+        "dist/spl_toolkit-0.1.1.tar.gz",
+        "--wheel-dir",
+        "dist",
+        "--evidence",
+        "/private/tmp/spl-toolkit-m4-package-evidence.json"
+      ],
+      "elapsed_seconds": 1.5459251403808594,
+      "exit": 1,
+      "input_manifest": "/private/tmp/m4-task7/package-inputs.json",
+      "input_manifest_sha256": "21290f611e945321a1d308046c812b24a1c9ccc243774cfeaf3fdda4483b0941",
+      "log": "/private/tmp/m4-task7/package.log",
+      "permanent_input_manifest": "logs/package-inputs.json",
+      "permanent_log": "logs/package.log"
+    },
+    "package-final": {
+      "base_sha": "7b6580fff46917045230668141d23f17489891df",
+      "command": [
+        "/private/tmp/spl-toolkit-remaining-venv/bin/python",
+        "tools/check_package.py",
+        "--sdist",
+        "dist/spl_toolkit-0.1.1.tar.gz",
+        "--wheel-dir",
+        "dist",
+        "--evidence",
+        "/private/tmp/spl-toolkit-m4-package-evidence.json"
+      ],
+      "elapsed_seconds": 60.804970026016235,
+      "exit": 0,
+      "input_manifest": "/private/tmp/m4-task7/package-final-inputs.json",
+      "input_manifest_sha256": "9291f87d70eb9e5be0e138123baec287f23aaf215bfc9838f9f293adea18bf7f",
+      "log": "/private/tmp/m4-task7/package-final.log",
+      "permanent_input_manifest": "logs/package-final-inputs.json",
+      "permanent_log": "logs/package-final.log"
+    },
+    "python-build": {
+      "base_sha": "7b6580fff46917045230668141d23f17489891df",
+      "command": [
+        "make",
+        "python-build",
+        "PYTHON=/private/tmp/spl-toolkit-remaining-venv/bin/python",
+        "PIP=/private/tmp/spl-toolkit-remaining-venv/bin/pip"
+      ],
+      "elapsed_seconds": 3.4792821407318115,
+      "exit": 0,
+      "input_manifest": "/private/tmp/m4-task7/python-build-inputs.json",
+      "input_manifest_sha256": "21290f611e945321a1d308046c812b24a1c9ccc243774cfeaf3fdda4483b0941",
+      "log": "/private/tmp/m4-task7/python-build.log",
+      "permanent_input_manifest": "logs/python-build-inputs.json",
+      "permanent_log": "logs/python-build.log"
+    },
+    "python-example": {
+      "base_sha": "7b6580fff46917045230668141d23f17489891df",
+      "command": [
+        "/private/tmp/spl-toolkit-remaining-venv/bin/python",
+        "python/examples/basic_usage.py"
+      ],
+      "elapsed_seconds": 0.4403371810913086,
+      "exit": 0,
+      "input_manifest": "/private/tmp/m4-task7/python-example-inputs.json",
+      "input_manifest_sha256": "21290f611e945321a1d308046c812b24a1c9ccc243774cfeaf3fdda4483b0941",
+      "log": "/private/tmp/m4-task7/python-example.log",
+      "permanent_input_manifest": "logs/python-example-inputs.json",
+      "permanent_log": "logs/python-example.log"
+    },
+    "schema-source-final": {
+      "base_sha": "7b6580fff46917045230668141d23f17489891df",
+      "command": [
+        "/private/tmp/spl-toolkit-remaining-venv/bin/python",
+        "-m",
+        "pytest",
+        "tests/acceptance/test_schema_surfaces.py",
+        "tests/acceptance/test_documented_cli.py",
+        "-q"
+      ],
+      "elapsed_seconds": 14.104912281036377,
+      "exit": 0,
+      "input_manifest": "/private/tmp/m4-task7/schema-source-final-inputs.json",
+      "input_manifest_sha256": "0f5e1671c9ae12fdb65061ae5647aabe58c04c28f438fe60f628a09143398832",
+      "log": "/private/tmp/m4-task7/schema-source-final.log",
+      "permanent_input_manifest": "logs/schema-source-final-inputs.json",
+      "permanent_log": "logs/schema-source-final.log"
+    },
+    "tooling": {
+      "base_sha": "7b6580fff46917045230668141d23f17489891df",
+      "command": [
+        "/private/tmp/spl-toolkit-remaining-venv/bin/python",
+        "-m",
+        "pytest",
+        "tools/tests",
+        "-q"
+      ],
+      "elapsed_seconds": 4.822354078292847,
+      "exit": 0,
+      "input_manifest": "/private/tmp/m4-task7/tooling-inputs.json",
+      "input_manifest_sha256": "0f5e1671c9ae12fdb65061ae5647aabe58c04c28f438fe60f628a09143398832",
+      "log": "/private/tmp/m4-task7/tooling.log",
+      "permanent_input_manifest": "logs/tooling-inputs.json",
+      "permanent_log": "logs/tooling.log"
+    },
+    "tooling-final": {
+      "base_sha": "7b6580fff46917045230668141d23f17489891df",
+      "command": [
+        "/private/tmp/spl-toolkit-remaining-venv/bin/python",
+        "-m",
+        "pytest",
+        "tools/tests",
+        "-q"
+      ],
+      "elapsed_seconds": 5.212329864501953,
+      "exit": 0,
+      "input_manifest": "/private/tmp/m4-task7/tooling-final-inputs.json",
+      "input_manifest_sha256": "9291f87d70eb9e5be0e138123baec287f23aaf215bfc9838f9f293adea18bf7f",
+      "log": "/private/tmp/m4-task7/tooling-final.log",
+      "permanent_input_manifest": "logs/tooling-final-inputs.json",
+      "permanent_log": "logs/tooling-final.log"
+    }
+  },
+  "counts": {
+    "docs": {
+      "pages_passed": 13
+    },
+    "go_floor": {
+      "required_packages_passed": 6
+    },
+    "go_race": {
+      "no_test_packages": 6,
+      "test_bearing_packages": 7
+    },
+    "installed_rebuilt_sdist": {
+      "required_native": {
+        "collected": 213,
+        "failed": 0,
+        "passed": 213,
+        "skipped": 0
+      },
+      "surface_acceptance": {
+        "collected": 81,
+        "failed": 0,
+        "passed": 81,
+        "skipped": 0
+      }
+    },
+    "installed_wheel": {
+      "required_native": {
+        "collected": 213,
+        "failed": 0,
+        "passed": 213,
+        "skipped": 0
+      },
+      "surface_acceptance": {
+        "collected": 81,
+        "failed": 0,
+        "passed": 81,
+        "skipped": 0
+      }
+    },
+    "schema_surface_per_environment": {
+      "additional_file_activity_case": 1,
+      "frozen_full_reports": 28,
+      "ordered_target_groups": 19,
+      "raw_invalid_requests": 22
+    },
+    "source_python": {
+      "passed": 230,
+      "skipped": 0
+    },
+    "source_schema_and_documented_cli": {
+      "passed": 57,
+      "skipped": 0
+    },
+    "tooling_final": {
+      "passed": 114
+    }
+  },
+  "diagnostic_log_storage": {
+    "logs/header-red.log": {
+      "display_normalization": "trailing whitespace removed",
+      "exact_raw_log": "logs/header-red.log.raw.json"
+    },
+    "logs/m4-task7-docs-red.log": {
+      "display_normalization": "trailing whitespace removed",
+      "exact_raw_log": "logs/m4-task7-docs-red.log.raw.json"
+    }
+  },
+  "evidence_hashes": {
+    "distribution-identities.json": "ee2cede49c8c95928cda78da2ce6124f6e039f036170156035f7ac45976308ad",
+    "logs/build-all-inputs.json": "244d83154a70fa98349e39a3766a704b34c82e19019a965de5dcc863d52c29b5",
+    "logs/build-all-result.json": "f74468e25d2faa8454938130a44263296e49d2b997a72fe6d2367abbf4726c75",
+    "logs/build-all.log": "93cb7e15175f8d0473a17196638af23212218c8f064952d405860439ec9155be",
+    "logs/docs-final-inputs.json": "207e2a797eff929dd6cc99a89329f48d51a75c7a5ddb63b850403c59befb2b71",
+    "logs/docs-final-result.json": "45a6aea24e1aa9c6f3c38f882d3ff30cabd89343d8a1624c20d0a18016704df3",
+    "logs/docs-final.log": "6b0d44f2f60beff0e783d5186c0883a9df9abeec64bff457c48e0b4fe0069b13",
+    "logs/docs-inputs.json": "21290f611e945321a1d308046c812b24a1c9ccc243774cfeaf3fdda4483b0941",
+    "logs/docs-reason-final-inputs.json": "4545b27f475440934390155744c718885ed6342d74ffa57d360ac2d4ad19463a",
+    "logs/docs-reason-final-result.json": "9dd08c9b7f8d36bb43d9b2755da4c8d8130d9412c58a54e26b1bcfb0286a764f",
+    "logs/docs-reason-final.log": "4bcefcc9f6c645923b9993ccf73ad92e6b400ca25458ea14e095857fc2131342",
+    "logs/docs-result.json": "bea44786d180192ba8de5f8057911dd7d67e32954c1bad49c3fa00b4d4e10285",
+    "logs/docs.log": "6b0d44f2f60beff0e783d5186c0883a9df9abeec64bff457c48e0b4fe0069b13",
+    "logs/go-final-inputs.json": "0f5e1671c9ae12fdb65061ae5647aabe58c04c28f438fe60f628a09143398832",
+    "logs/go-final-result.json": "abc42385cafa7abdea0fdfc7ea0155ca2a2143d06efffe4b8c4f734c3b9f7894",
+    "logs/go-final.log": "acf7144a6d8a6195a1a8ac08a80d3f6226653e0cabe3c7d5582d7aaf4f6a4e2b",
+    "logs/go-floor-api-final-inputs.json": "f9902ec424c8cdaab8ed4967b492f43169a9f5425df75e0402fe991aa9671c70",
+    "logs/go-floor-api-final-result.json": "7baf8de5a9346822b5cb0b5616b0960012c9f4777cedbe8bfcbf62190e12e7bc",
+    "logs/go-floor-api-final.log": "08077ed1b0fccce58a9b6ba06d715975c7cf2b2476172c3105e052ce226c504d",
+    "logs/go-floor-inputs.json": "329cf027521904c813bca93ab01d06447289d2bf2bfbd29f1cd493c762747b73",
+    "logs/go-floor-result.json": "9aa2ec04ff3e0d3a39ec8edc2b7b6394ad4febae35cd32abba8fef0fa252874c",
+    "logs/go-floor.log": "c3e495cf9f5a9f80e0ab8132354115b3429da8da4fc044451a020e5d61ea27a1",
+    "logs/header-green-inputs.json": "c2510dfd5872e84b551d395c444651dc06fd6067920a937a0a581c84b1b66eed",
+    "logs/header-green-result.json": "2d41d5bc0c915fea7b6bb2aedba1719ee3c71730efeb1dc4875e7d8a31160e8e",
+    "logs/header-green.log": "fb40bd2c58764d6372ca35daa0e4dd3579ec160c1032ffe0e7e0e34ec9258bdd",
+    "logs/header-red-inputs.json": "5b0bcf345fe9c328a36892144cd27b97937b844a6e48735935c5a44f12967e4e",
+    "logs/header-red-result.json": "d7661c2072ab558470fa830f25bdcad0a1836e487e1997549b752200a8da1925",
+    "logs/header-red.log": "9160cd2284b73c8ffef236500ca88e2e278946bdb28fc212b99890d907f83dbd",
+    "logs/header-red.log.raw.json": "1d069cf82f16a0c8f7906ead75adba8f1bf4bc5df0a9f3af14f858a8f533f3ec",
+    "logs/m4-task7-docs-red.log": "b2f90190ef40e79e37ade7f4253be6a4417570983910980dab0e7157a2cb6237",
+    "logs/m4-task7-docs-red.log.raw.json": "89061b3d147a0432ed0e73ec4751008fdf24a9c5cb2831cfc2269f7a728af10a",
+    "logs/m4-task7-green.log": "7793a3a4ea7507072c392661f7e2bbc206fb6b5f565f3bdda965579171c786d5",
+    "logs/m4-task7-red.log": "22786d0cbc8f6a7866ca0c8a49062688fd96c83ee1bc73c6a580c88448eb313b",
+    "logs/m4-task7-rest-focused.log": "6efdfa1829f4ad989eee5b92e617a8b2defb59d1acb20453101af95bfef8a8e8",
+    "logs/m4-task7-tooling-focused.log": "2ed5e4de51f6131d4ccf17bfd0c4cb91151d2da9f883fdda633fbeeb50132cae",
+    "logs/native-source-inputs.json": "0f5e1671c9ae12fdb65061ae5647aabe58c04c28f438fe60f628a09143398832",
+    "logs/native-source-result.json": "3f76811f8b6832948479c2f10cf51ca9cf29d66bdfea5aead3776cd0971b8cf7",
+    "logs/native-source.log": "e73bf7a99fcf4ff8251498484adef0462283bb116f701fa57935a3f9be9d4cbe",
+    "logs/package-final-inputs.json": "9291f87d70eb9e5be0e138123baec287f23aaf215bfc9838f9f293adea18bf7f",
+    "logs/package-final-result.json": "ccdb89c74243525abfe606f34306806cb68fab87655029dd9505bc2d5cb04d9d",
+    "logs/package-final.log": "65cb5fb72f022ee2605880ed6e59a6e5e166c21057c47450fe3c0fed49c54c94",
+    "logs/package-inputs.json": "21290f611e945321a1d308046c812b24a1c9ccc243774cfeaf3fdda4483b0941",
+    "logs/package-result.json": "579a74ae84a71656d9a1aa4be3347432a2a46bfaaf7f54d338c45fbffc57e81e",
+    "logs/package.log": "23e61687f6b1064ecab8f84bd643fab823f43cf4f4c6c533418367e968d254a3",
+    "logs/python-build-inputs.json": "21290f611e945321a1d308046c812b24a1c9ccc243774cfeaf3fdda4483b0941",
+    "logs/python-build-result.json": "7ba4a1dc0ec455474d0fd54f4edfec50aedd2dc428e7aa7dbb0a4152e17a7c0f",
+    "logs/python-build.log": "5f4cb0e049bccde663ae2ba4a75807563b5ba89cae9deb64397a3a6d5824cbdb",
+    "logs/python-example-inputs.json": "21290f611e945321a1d308046c812b24a1c9ccc243774cfeaf3fdda4483b0941",
+    "logs/python-example-result.json": "236f104b1c92ad3758af6770606404e1753f71a5c9c06aa6e35c203af93da830",
+    "logs/python-example.log": "1c30689960e55647d35869a113f79c234c3cbc049d457b1446a140f90bc6ac58",
+    "logs/schema-source-final-inputs.json": "0f5e1671c9ae12fdb65061ae5647aabe58c04c28f438fe60f628a09143398832",
+    "logs/schema-source-final-result.json": "901a260a8d4446fb521a49fa2ffb7f86c83da41cefbaf7e84ed92f59fabd5092",
+    "logs/schema-source-final.log": "251f7429a6bf4cf075e69be7a1014bbf13a4650cc9fda48e866ad3c6a6627520",
+    "logs/tooling-final-inputs.json": "9291f87d70eb9e5be0e138123baec287f23aaf215bfc9838f9f293adea18bf7f",
+    "logs/tooling-final-result.json": "c82c89bf549016bb069dc28769a1fdd93c25fbd58a4846bddf44b64917f70c37",
+    "logs/tooling-final.log": "d86c38fa246a41a08ed54818b9fc05beb1e790f79f270f9ffe09b70a82a692db",
+    "logs/tooling-inputs.json": "0f5e1671c9ae12fdb65061ae5647aabe58c04c28f438fe60f628a09143398832",
+    "logs/tooling-result.json": "408b223ef3152be936a9e80c91e76f02ae79af259cc78fda1ec487b47c4e43e0",
+    "logs/tooling.log": "33adf7c954a1e43b0e351441df9d1c45a00ab5b5f3ab298eb9723d583b5ad981",
+    "package.json": "71a35cc7daa3890394457c306940f4e933962f2f19a62b4f8a05129dfb9a7227",
+    "source-identity.json": "955cb2ad793b3743564d6f0ceabfcc2d8d014b1fb3fcd6b45126fc37db61600d",
+    "source-surfaces.json": "07231e8b0211227c87c06a1f25c010827fdd9287028fd4bc4cdb026ea0be4dc8",
+    "tools-and-builds.json": "731bd0fdca877932ec117124439cda73f187691da1c5426d298295ff4a1ed8e1"
+  },
+  "identity_note": "Commands ran with Task7 uncommitted inputs recorded before each command; all compiled Go/source Python and source acceptance inputs still match. Final commit identity is attested in Task7 controller report after commit. Later documentation is not relabeled as a rebuilt executable.",
+  "installed_identity": {
+    "native_sha256": "3f05e96cdd8391edfd00537f546a0a8efceaf12221de3cbb3115923f04f6423c",
+    "rebuilt_sdist_native_sha256": "1da3f04bacb48ebdc29856d1afac6f1564676c80d9c923aa43560f8bf108c3b9",
+    "rebuilt_sdist_wheel_sha256": "c1b96a0da2d811b0e53f798728b44bb3a96173a0ee975ae135693e9b5ec90211",
+    "wheel_sha256": "9455b36b7bf09e02b497dac146245cc4b8e775ff1575d92da0d113b1f3e14ac2"
+  },
+  "kind": "milestone-4-local-checks",
+  "limits": [
+    "local macOS26.2 arm64 only",
+    "Python3.12.6 local acceptance does not establish other supported runtimes",
+    "Go1.22.12 external linking verified; known default-link LC_UUID failure not repeated",
+    "existing Go race LC_DYSYMTAB linker warning",
+    "no unrun Linux/Windows release or external Splunk conformance claim",
+    "no complete JSON Schema event instance validation"
+  ],
+  "offline_environment": {
+    "GOCACHE": "/private/tmp/spl-toolkit-go-cache",
+    "GOMODCACHE": "/private/tmp/spl-toolkit-remaining-gomodcache",
+    "GOPROXY": "off",
+    "GOTOOLCHAIN": "local",
+    "PIP_CACHE_DIR": "/private/tmp/spl-toolkit-pip-cache",
+    "PIP_CONFIG_FILE": "/dev/null",
+    "PIP_FIND_LINKS": "/private/tmp/spl-toolkit-offline-wheelhouse",
+    "PIP_NO_INDEX": "1",
+    "runtime_proxies": {
+      "ALL_PROXY": "http://127.0.0.1:9",
+      "HTTPS_PROXY": "http://127.0.0.1:9",
+      "HTTP_PROXY": "http://127.0.0.1:9",
+      "NO_PROXY": "127.0.0.1,localhost"
+    }
+  },
+  "open_gates": [
+    "independent Task7 review",
+    "broad milestone review",
+    "root stable-build oracle",
+    "controller acceptance"
+  ],
+  "retained_floor_artifacts": "/private/tmp/m4-task7/floor-distribution",
+  "runtime_inspection": {
+    "files": [
+      "pkg/validation/schema_target.go",
+      "pkg/validation/json_schema_resources.go",
+      "pkg/validation/ocsf.go",
+      "pkg/validation/ocsf_projection.go"
+    ],
+    "finding": "Preparation parses supplied raw JSON and resolves URI identities through immutable local indexes. No validation production HTTP or OS opener exists. Explicit CLI file reading remains at the transport boundary. Offline timing is supplementary, not sole proof."
+  },
+  "schema_version": 1,
+  "source_environment_script": "/private/tmp/m4-task7/source-env.sh",
+  "source_environment_script_contents": "export PYTHONPATH=/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/python\nexport SPL_SCHEMA_FIXTURES=/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/testdata/schemas\nexport SPL_NATIVE_LIBRARY=/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/build/libspl_toolkit.dylib\nexport SPL_EXPECTED_VERSION=0.1.1\nexport SPL_CLI=/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/build/spl-toolkit\nexport SPL_SERVER=/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/build/spl-toolkit-server\nexport SPL_FIXTURES=/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/testdata/baseline/cases.json\nexport SPL_ANALYSIS_FIXTURES=/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/testdata/analysis/cases.json\nexport SPL_VALIDATION_FIXTURES=/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/testdata/validation/cases.json\nexport SPL_DOCS_ROOT=/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones\nexport HTTP_PROXY=http://127.0.0.1:9 HTTPS_PROXY=http://127.0.0.1:9 ALL_PROXY=http://127.0.0.1:9\nexport http_proxy=http://127.0.0.1:9 https_proxy=http://127.0.0.1:9 all_proxy=http://127.0.0.1:9\nexport NO_PROXY=127.0.0.1,localhost no_proxy=127.0.0.1,localhost\nexport SPL_SCHEMA_EVIDENCE=/private/tmp/m4-task7/source-surfaces.json\n",
+  "status": "local_checks_passed_review_pending"
+}
