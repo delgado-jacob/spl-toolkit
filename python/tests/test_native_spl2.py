@@ -94,7 +94,7 @@ def test_legacy_selectors_reject_spl2_before_legacy_abi(operation, args, monkeyp
         for options in ({'language': 'spl2'}, {'language': 'SPL2'}, {'profile': 'cloud'}, {'version': None}):
             with pytest.raises(SPLMapperError):
                 getattr(mapper, operation)(*args, **options)
-        with pytest.raises(SPLMapperError, match='analyze_query.*validate_fields.*validate_schema'):
+        with pytest.raises(SPLMapperError, match='unsupported_dialect_for_operation.*analyze_query.*validate_fields.*validate_schema'):
             getattr(mapper, operation)(*args, language='spl2')
 
 

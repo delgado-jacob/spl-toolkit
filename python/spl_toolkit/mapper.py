@@ -414,7 +414,7 @@ class SPLMapper:
         if (language, profile, version) != ("spl", "splunkd", "current"):
             manifest = self.capabilities(language=language, profile=profile, version=version)
             if manifest["language"] == "spl2":
-                raise SPLMapperError("SPL2 requires analyze_query, validate_fields, or validate_schema")
+                raise SPLMapperError("unsupported_dialect_for_operation: SPL2 requires analyze_query, validate_fields, or validate_schema")
 
     def discover_query(self, query: str, *, language="spl", profile="splunkd", version="current") -> QueryInfo:
         """
