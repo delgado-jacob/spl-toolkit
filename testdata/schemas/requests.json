@@ -1,0 +1,116 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "id": "null",
+      "batch": false,
+      "input": "null"
+    },
+    {
+      "id": "empty",
+      "batch": false,
+      "input": "{}"
+    },
+    {
+      "id": "null_document",
+      "batch": false,
+      "input": "{\"document\":null,\"target\":{\"kind\":\"json_schema\",\"schema\":true}}"
+    },
+    {
+      "id": "extra",
+      "batch": false,
+      "input": "{\"document\":{\"text\":\"table host\"},\"target\":{\"kind\":\"json_schema\",\"schema\":true},\"extra\":0}"
+    },
+    {
+      "id": "duplicate_wrapper",
+      "batch": false,
+      "input": "{\"document\":{\"text\":\"table host\"},\"document\":{\"text\":\"table host\"},\"target\":{\"kind\":\"json_schema\",\"schema\":true}}"
+    },
+    {
+      "id": "duplicate_document",
+      "batch": false,
+      "input": "{\"document\":{\"text\":\"x\",\"text\":\"y\"},\"target\":{\"kind\":\"json_schema\",\"schema\":true}}"
+    },
+    {
+      "id": "lone_surrogate",
+      "batch": false,
+      "input": "{\"document\":{\"text\":\"\\ud800\"},\"target\":{\"kind\":\"json_schema\",\"schema\":true}}"
+    },
+    {
+      "id": "invalid_utf8",
+      "batch": false,
+      "input": "",
+      "hex": "7b22646f63756d656e74223a7b2274657874223a227461626c6520ff227d2c22746172676574223a7b226b696e64223a226a736f6e5f736368656d61222c22736368656d61223a747275657d7d"
+    },
+    {
+      "id": "trailing_value",
+      "batch": false,
+      "input": "{\"document\":{\"text\":\"table host\"},\"target\":{\"kind\":\"json_schema\",\"schema\":true}} {}"
+    },
+    {
+      "id": "unsupported_option",
+      "batch": false,
+      "input": "{\"document\":{\"text\":\"x\",\"profile\":\"cloud\"},\"target\":{\"kind\":\"json_schema\",\"schema\":true}}"
+    },
+    {
+      "id": "null_target",
+      "batch": false,
+      "input": "{\"document\":{\"text\":\"table host\"},\"target\":null}"
+    },
+    {
+      "id": "mixed_null",
+      "batch": false,
+      "input": "{\"document\":{\"text\":\"table host\"},\"target\":{\"kind\":\"json_schema\",\"schema\":true,\"catalog\":null}}"
+    },
+    {
+      "id": "duplicate_schema",
+      "batch": false,
+      "input": "{\"document\":{\"text\":\"table host\"},\"target\":{\"kind\":\"json_schema\",\"schema\":{\"type\":\"object\",\"type\":\"string\"}}}"
+    },
+    {
+      "id": "null_schema",
+      "batch": false,
+      "input": "{\"document\":{\"text\":\"table host\"},\"target\":{\"kind\":\"json_schema\",\"schema\":null}}"
+    },
+    {
+      "id": "unsupported_dialect",
+      "batch": false,
+      "input": "{\"document\":{\"text\":\"table host\"},\"target\":{\"kind\":\"json_schema\",\"schema\":{\"$schema\":\"https://json-schema.org/draft-07/schema\"}}}"
+    },
+    {
+      "id": "null_profiles",
+      "batch": false,
+      "input": "{\"document\":{\"text\":\"table host\"},\"target\":{\"kind\":\"ocsf\",\"catalog\":{},\"selection\":{\"version\":\"1.6.0\",\"class\":\"authentication\",\"profiles\":null}}}"
+    },
+    {
+      "id": "float_class_id",
+      "batch": false,
+      "input": "{\"document\":{\"text\":\"table host\"},\"target\":{\"kind\":\"ocsf\",\"catalog\":{},\"selection\":{\"version\":\"1.6.0\",\"class_uid\":3002.0}}}"
+    },
+    {
+      "id": "duplicate_profiles",
+      "batch": false,
+      "input": "{\"document\":{\"text\":\"table host\"},\"target\":{\"kind\":\"ocsf\",\"catalog\":{},\"selection\":{\"version\":\"1.6.0\",\"class\":\"authentication\",\"profiles\":[\"cloud\",\"cloud\"]}}}"
+    },
+    {
+      "id": "null_batch",
+      "batch": true,
+      "input": "{\"documents\":null,\"target\":{\"kind\":\"json_schema\",\"schema\":true}}"
+    },
+    {
+      "id": "empty_batch",
+      "batch": true,
+      "input": "{\"documents\":[],\"target\":{\"kind\":\"json_schema\",\"schema\":true}}"
+    },
+    {
+      "id": "invalid_second_document",
+      "batch": true,
+      "input": "{\"documents\":[{\"text\":\"table host\"},{\"text\":\"x\",\"version\":\"old\"}],\"target\":{\"kind\":\"json_schema\",\"schema\":true}}"
+    },
+    {
+      "id": "batch_extra",
+      "batch": true,
+      "input": "{\"documents\":[{\"text\":\"x\"}],\"target\":{\"kind\":\"json_schema\",\"schema\":true},\"document\":{}}"
+    }
+  ]
+}

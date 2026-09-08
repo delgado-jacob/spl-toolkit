@@ -113,8 +113,12 @@ func validate(document analysis.QueryDocument, catalog FieldCatalog) (*Report, e
 }
 
 func finalizeReport(report *Report) {
-	sort.SliceStable(report.Diagnostics, func(i, j int) bool {
-		a, b := report.Diagnostics[i], report.Diagnostics[j]
+	report.Diagnostics, report.Status = finalizeValidation(report.Diagnostics, &report.Coverage)
+}
+
+func finalizeValidation(diagnostics []analysis.Diagnostic, coverage *Coverage) ([]analysis.Diagnostic, analysis.Status) {
+	sort.SliceStable(diagnostics, func(i, j int) bool {
+		a, b := diagnostics[i], diagnostics[j]
 		if a.Location.Start.Offset != b.Location.Start.Offset {
 			return a.Location.Start.Offset < b.Location.Start.Offset
 		}
@@ -124,28 +128,29 @@ func finalizeReport(report *Report) {
 		return a.Message < b.Message
 	})
 	seen := map[analysis.Diagnostic]bool{}
-	unique := make([]analysis.Diagnostic, 0, len(report.Diagnostics))
-	for _, d := range report.Diagnostics {
+	unique := make([]analysis.Diagnostic, 0, len(diagnostics))
+	for _, d := range diagnostics {
 		if !seen[d] {
 			unique = append(unique, d)
 			seen[d] = true
 		}
 	}
-	report.Diagnostics = unique
+	diagnostics = unique
 	reasons := map[string]bool{}
-	for _, d := range report.Diagnostics {
+	for _, d := range diagnostics {
 		if !reasons[d.Code] {
-			report.Coverage.Reasons = append(report.Coverage.Reasons, d.Code)
+			coverage.Reasons = append(coverage.Reasons, d.Code)
 			reasons[d.Code] = true
 		}
 	}
-	report.Status = analysis.Valid
-	if !report.Coverage.SyntaxComplete || !report.Coverage.SemanticComplete || !report.Coverage.SchemaComplete {
-		report.Status = analysis.Incomplete
+	status := analysis.Valid
+	if !coverage.SyntaxComplete || !coverage.SemanticComplete || !coverage.SchemaComplete {
+		status = analysis.Incomplete
 	}
-	for _, d := range report.Diagnostics {
+	for _, d := range diagnostics {
 		if d.Severity == "error" {
-			report.Status = analysis.Invalid
+			status = analysis.Invalid
 		}
 	}
+	return diagnostics, status
 }

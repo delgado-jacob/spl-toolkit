@@ -70,3 +70,43 @@ type preparedSchemaTarget interface {
 	universe() analysis.SourceUniverse
 	info() SchemaTargetInfo
 }
+
+// SchemaRequest validates one document against an explicitly supplied offline target.
+type SchemaRequest struct {
+	Document analysis.QueryDocument `json:"document"`
+	Target   SchemaTarget           `json:"target"`
+}
+type SchemaBatchRequest struct {
+	Documents []analysis.QueryDocument `json:"documents"`
+	Target    SchemaTarget             `json:"target"`
+}
+type SchemaMatch struct {
+	Name     string           `json:"name"`
+	Binding  string           `json:"binding"`
+	Outcome  string           `json:"outcome"`
+	Evidence []SchemaEvidence `json:"evidence"`
+}
+type SchemaReferenceOutcome struct {
+	ReferenceID          string           `json:"reference_id"`
+	Outcome              string           `json:"outcome"`
+	MatchesComplete      bool             `json:"matches_complete"`
+	Matches              []SchemaMatch    `json:"matches"`
+	Evidence             []SchemaEvidence `json:"evidence"`
+	SupportingClasses    []SchemaClass    `json:"supporting_classes"`
+	MissingClasses       []SchemaClass    `json:"missing_classes"`
+	IndeterminateClasses []SchemaClass    `json:"indeterminate_classes"`
+}
+type SchemaReport struct {
+	SchemaVersion int                      `json:"schema_version"`
+	Target        SchemaTargetInfo         `json:"target"`
+	Analysis      *analysis.Result         `json:"analysis"`
+	Status        analysis.Status          `json:"status"`
+	Coverage      Coverage                 `json:"coverage"`
+	Outcomes      []SchemaReferenceOutcome `json:"outcomes"`
+	Diagnostics   []analysis.Diagnostic    `json:"diagnostics"`
+}
+type SchemaBatchReport struct {
+	SchemaVersion int             `json:"schema_version"`
+	Status        analysis.Status `json:"status"`
+	Reports       []*SchemaReport `json:"reports"`
+}
