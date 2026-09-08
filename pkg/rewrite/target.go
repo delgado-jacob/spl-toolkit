@@ -15,7 +15,8 @@ type ValidationTarget struct {
 	SchemaTarget *validation.SchemaTarget
 }
 
-// CandidateValidation retains one complete original validation report.
+// CandidateValidation retains one complete original validation report in Go.
+// Its field-list JSON omits catalog arrays, preserving only target metadata.
 type CandidateValidation struct {
 	Kind      string                   `json:"kind"`
 	FieldList *validation.Report       `json:"field_list,omitempty"`
@@ -28,6 +29,23 @@ func (c CandidateValidation) MarshalJSON() ([]byte, error) {
 		if c.FieldList == nil || c.Schema != nil {
 			return nil, inputError("field_list validation requires exactly one field-list report")
 		}
+		// Override only target on the embedded report; do not mutate its catalog
+		// or change standalone validation.Report serialization.
+		report := struct {
+			*validation.Report
+			Target struct {
+				Kind     string `json:"kind"`
+				Identity string `json:"identity"`
+				Version  string `json:"version"`
+			} `json:"target"`
+		}{Report: c.FieldList}
+		report.Target.Kind = c.FieldList.Target.Kind
+		report.Target.Identity = c.FieldList.Target.Identity
+		report.Target.Version = c.FieldList.Target.Version
+		return json.Marshal(struct {
+			Kind      string `json:"kind"`
+			FieldList any    `json:"field_list"`
+		}{Kind: c.Kind, FieldList: report})
 	case "json_schema", "ocsf":
 		if c.Schema == nil || c.FieldList != nil {
 			return nil, inputError("schema validation requires exactly one schema report")
