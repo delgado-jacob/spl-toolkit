@@ -1,0 +1,64 @@
+{
+  "kind": "data-only final artifact integrity and exact committed-source reconciliation; no new runtime/conformance credit",
+  "implementation_commit": "7571f1cb578968caf92996b050ebfc3092f02605",
+  "verification_sha256": "6f49c2dce2feca5cc5979edc1edc95a45b4a8f0d7887f474af4fe8fd6a1d27a6",
+  "helper_sha256": "35919252facbcd01f373156341f3a88109c45a4d9f2beb2f353c485b178e9433",
+  "helper_source": "from pathlib import Path\nimport gzip,hashlib,json,subprocess,tarfile\nROOT=Path.cwd();DEST=ROOT/'docs/evidence/milestone-5/broad-fix-1';DATA=Path('/private/tmp/spl-toolkit-m5-broad-fix-1')\nsha=lambda data:hashlib.sha256(data).hexdigest()\nv=json.loads((DEST/'verification.json').read_text())\nfor name,want in v['evidence_artifacts'].items():\n    data=(DEST/name).read_bytes();assert sha(data)==want['sha256'];assert len(data)==want['bytes']\nwith tarfile.open(DEST/'execution-records.tar.gz') as archive:\n    found={m.name:sha(archive.extractfile(m).read()) for m in archive.getmembers() if m.isfile()}\nassert found==v['execution_archive_manifest']\nfor name,original in [('go-transport.json.gz','go-transport.json'),('category-amended-transport-expectation.json.gz','category-amended-transport-expectation.json'),('source-spl2.json.gz','source-spl2-evidence.json'),('source-schema.json.gz','source-schema-evidence.json'),('package.json.gz','package-evidence.json')]:\n    assert gzip.decompress((DEST/name).read_bytes())==(DATA/original).read_bytes()\ntransport=json.loads(gzip.decompress((DEST/'go-transport.json.gz').read_bytes()))\nexpected=json.loads(gzip.decompress((DEST/'category-amended-transport-expectation.json.gz').read_bytes()))\nassert transport['reports']==expected['reports']\nreports={x['id']:x['report'] for x in transport['reports']};assert len(reports)==1714\nsource=json.loads(gzip.decompress((DEST/'source-spl2.json.gz').read_bytes()))\npackage=json.loads(gzip.decompress((DEST/'package.json.gz').read_bytes()))\ncorpus_counts={}\nfor name,surface in [('source',source),('installed_wheel',package['spl2_surface_evidence']),('rebuilt_sdist',package['rebuilt_sdist']['spl2_surface_evidence'])]:\n    assert len(surface['corpus'])==1714\n    assert {x['id'] for x in surface['corpus']}==set(reports)\n    for entry in surface['corpus']:\n        for channel in ('native','cli','http'):assert entry[channel]==reports[entry['id']],(name,entry['id'],channel)\n    assert surface['go_transport']['sha256']==v['corpus_delta']['actual_transport_sha256']\n    corpus_counts[name]={'records':1714,'full_reports_compared':5142}\nfor p,h in v['tool_and_artifact_identities']['protected_continuity'].items():assert sha((ROOT/p).read_bytes())==h,p\nfor p,h in v['source_identity']['owned_source_hashes'].items():\n    assert sha((ROOT/p).read_bytes())==h\n    assert sha(subprocess.check_output(['git','show',v['implementation_commit']+':'+p]))==h\nfor p,want in v['tool_and_artifact_identities']['artifacts'].items():assert sha(Path(p).read_bytes())==want['sha256']\nrecord={'kind':'data-only final artifact integrity and exact committed-source reconciliation; no new runtime/conformance credit','implementation_commit':v['implementation_commit'],'verification_sha256':sha((DEST/'verification.json').read_bytes()),'helper_sha256':sha(Path(__file__).read_bytes()),'helper_source':Path(__file__).read_text(),'evidence_artifacts':v['evidence_artifacts'],'execution_archive_files':len(found),'protected_unchanged':len(v['tool_and_artifact_identities']['protected_continuity']),'committed_source_blobs':len(v['source_identity']['owned_source_hashes']),'full_corpus_parity':corpus_counts,'build_artifacts_unchanged':True,'result':'pass'}\nwith (DEST/'artifact-validation.json').open('x') as out:json.dump(record,out,indent=2);out.write('\\n')\nprint(json.dumps({k:record[k] for k in ('result','execution_archive_files','protected_unchanged','committed_source_blobs','full_corpus_parity')}))\n",
+  "evidence_artifacts": {
+    "category-amended-transport-expectation.json.gz": {
+      "sha256": "d9e8ff25d30f64cd2a8237a2c70e1ba434ea820a61e9b970ef8704d463f48491",
+      "bytes": 194021
+    },
+    "category-authority-freeze.json": {
+      "sha256": "e423165ce7a3a803bf44e71bc0946d742bd7ef34e015a26d80c2d4a39cef6062",
+      "bytes": 6232
+    },
+    "corpus-delta.json": {
+      "sha256": "a563891fb85b80c6aabb6ef11cdb35bb48888bafb5fb2d34d743d29204d01bc0",
+      "bytes": 1853
+    },
+    "execution-records.tar.gz": {
+      "sha256": "b72210450a9587cec5073ef6b5964769ad2b23a452613e35f557ab2f1b2a3d21",
+      "bytes": 887614
+    },
+    "go-transport.json.gz": {
+      "sha256": "6aa90c8342ce37567968ed754a48ca5e4e6d6b79fe08131e519daa821efc7a3a",
+      "bytes": 190228
+    },
+    "historical-artifacts.json": {
+      "sha256": "45be49af5f1a03b59010650faedda6e4314b1793a9c90807ee9655ac8577b3df",
+      "bytes": 830
+    },
+    "package.json.gz": {
+      "sha256": "d9161e5959e410c391ae1a8ea0e2f915dfd35aea6547db72aed2bcadc1152d5a",
+      "bytes": 1782904
+    },
+    "source-schema.json.gz": {
+      "sha256": "26d32f22f3c5355510bcf5e4305295ec845e84380c14509510a32f00fdfa3fc9",
+      "bytes": 77235
+    },
+    "source-spl2.json.gz": {
+      "sha256": "e47b990848dafaa8e5f1b9999eb799ce50bf2aa02346f85d3d26d7f53cba065d",
+      "bytes": 729022
+    }
+  },
+  "execution_archive_files": 45,
+  "protected_unchanged": 456,
+  "committed_source_blobs": 6,
+  "full_corpus_parity": {
+    "source": {
+      "records": 1714,
+      "full_reports_compared": 5142
+    },
+    "installed_wheel": {
+      "records": 1714,
+      "full_reports_compared": 5142
+    },
+    "rebuilt_sdist": {
+      "records": 1714,
+      "full_reports_compared": 5142
+    }
+  },
+  "build_artifacts_unchanged": true,
+  "result": "pass"
+}

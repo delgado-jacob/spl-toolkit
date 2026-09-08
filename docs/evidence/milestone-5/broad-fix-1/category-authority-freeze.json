@@ -1,0 +1,186 @@
+{
+  "kind": "source-derived category-only transport amendment; zero conformance credit",
+  "basis": "root-approved M5-BR-02 and design-spec.md:77, SPL_UNSUPPORTED_MODULE category unsupported_syntax; all prior reviewed report values otherwise unchanged",
+  "old_transport_sha256": "053f87af1a35e1c2caa375f783668e44794114df045168ef1e5aa05ec956ce86",
+  "expected_transport_sha256": "04c621d2e31c4366607e78f223e8aa4035dc01bb0bcb8c5ea966d2fc5d2b516f",
+  "source_contract_sha256": "05660c261d860eb0ed09e9dadbf30309ae82a01498e4fdfa144828205139b911",
+  "helper_sha256": "ebaaca90bd4abb3151805bc976a529c4438a0d77777d7d79a9835315b64c38a9",
+  "records": 1714,
+  "changed_ids": 5,
+  "changed_leaves": 5,
+  "changes": [
+    {
+      "id": "B08",
+      "old_entry_sha256": "3dc7e1b566f47a440ef418adbee594f72e65f5dd6f479332b631ec1c1157f196",
+      "expected_entry_sha256": "564c7c109f6500a421069409f531096422f17105a5b8a8876da12a115ae432c7",
+      "leaves": [
+        {
+          "path": "/report/diagnostics/0/category",
+          "before": "unsupported",
+          "after": "unsupported_syntax",
+          "location": {
+            "start": {
+              "offset": 0,
+              "line": 1,
+              "column": 1
+            },
+            "end": {
+              "offset": 19,
+              "line": 1,
+              "column": 20
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "B09",
+      "old_entry_sha256": "8626a8b707715feb92fa3d1bc21c47e686b49a0da7836226c5e06365dccc8253",
+      "expected_entry_sha256": "00f0b3c39a5d5721c12715391ea760fbbcfd8cf689dc168b18723052cef5e7d9",
+      "leaves": [
+        {
+          "path": "/report/diagnostics/0/category",
+          "before": "unsupported",
+          "after": "unsupported_syntax",
+          "location": {
+            "start": {
+              "offset": 0,
+              "line": 1,
+              "column": 1
+            },
+            "end": {
+              "offset": 22,
+              "line": 1,
+              "column": 23
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "B10",
+      "old_entry_sha256": "dbc5ded9dc22fa538cbe1682e6092a5ecab1f830debbc72c399cd13e9d233dcd",
+      "expected_entry_sha256": "7c41bfb1b8ff0c77bc47e46276e683f210d377edba2cb4861c966763c1412f3e",
+      "leaves": [
+        {
+          "path": "/report/diagnostics/0/category",
+          "before": "unsupported",
+          "after": "unsupported_syntax",
+          "location": {
+            "start": {
+              "offset": 0,
+              "line": 1,
+              "column": 1
+            },
+            "end": {
+              "offset": 26,
+              "line": 1,
+              "column": 27
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "B11",
+      "old_entry_sha256": "587da2a9092c031e024c79f7bf03a31e646c2f6f062b7de810e382a59648672d",
+      "expected_entry_sha256": "57a94f14f589296a0bc209f569c894b134026e1ec7f39fde0f8c4bc2a959ef18",
+      "leaves": [
+        {
+          "path": "/report/diagnostics/0/category",
+          "before": "unsupported",
+          "after": "unsupported_syntax",
+          "location": {
+            "start": {
+              "offset": 0,
+              "line": 1,
+              "column": 1
+            },
+            "end": {
+              "offset": 32,
+              "line": 1,
+              "column": 33
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "B12",
+      "old_entry_sha256": "423298126cdfe411e48887099c65787235fd50fa63699a9b843232ad69433527",
+      "expected_entry_sha256": "a1ff8df0b95810ac2b1b305b654f7ea3a6306c6521cefb62fcee5ddb00e41876",
+      "leaves": [
+        {
+          "path": "/report/diagnostics/0/category",
+          "before": "unsupported",
+          "after": "unsupported_syntax",
+          "location": {
+            "start": {
+              "offset": 9,
+              "line": 1,
+              "column": 10
+            },
+            "end": {
+              "offset": 23,
+              "line": 1,
+              "column": 24
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "len_split_text_candidates": [
+    {
+      "id": "F.len.arity-1.P1",
+      "text": "FROM main | eval result=len(\"Abc\")"
+    },
+    {
+      "id": "F.len.arity-1.P2",
+      "text": "FROM main | eval result=len(name)"
+    },
+    {
+      "id": "F.len.N1",
+      "text": "FROM main | eval result=len()"
+    },
+    {
+      "id": "F.len.N2",
+      "text": "FROM main | eval result=len(name,2)"
+    },
+    {
+      "id": "F.mvcount.arity-1.P2",
+      "text": "FROM main | eval result=mvcount(split(name,\":\"))"
+    },
+    {
+      "id": "F.split.arity-2.P1",
+      "text": "FROM main | eval result=split(name,\":\")"
+    },
+    {
+      "id": "F.split.arity-2.P2",
+      "text": "FROM main | eval result=split(\"a/b\",\"/\")"
+    },
+    {
+      "id": "F.split.N1",
+      "text": "FROM main | eval result=split(name)"
+    },
+    {
+      "id": "F.split.N2",
+      "text": "FROM main | eval result=split(name,\":\",2)"
+    }
+  ],
+  "fixture_hashes": {
+    "canonical-core.json": "5a92362f7add86e15dfc66c8d76f2fc9a696364a002d45849674eebfcde02549",
+    "extended-boundaries.json": "31fe2b3a5a6527878da69c6bdd41ecf8b5560847325de565118d86d78f318068",
+    "extended-commands.json": "9db16e1d8b85194ec4d6407abb48266bb649d2192768d9b397f61ad5fd1af71e",
+    "frontend-boundaries.json": "2bb2f436a6eb6590e71f03bcec5b4ad7b52764b7a404ec86eea7960d5f77f3e0",
+    "functions.json": "4fbab0b5043efa2e63cd20157e40a2599eb8cdaf791a9f807476ca513f923433",
+    "lexical-expressions.json": "ee8e28db9ff40b3e8cc0df9b289c90fc0e052eb034de90db16d4660c983b969f",
+    "manifest.json": "af32f78be384aac592b2bd717056cb55928de5ebb79b4f95a90e01fba0fb9ddb",
+    "pipeline-boundaries.json": "b5a4f64275d1c4cc8f63b2c850b9951184eebcf183993edd4742b1f068315ae3",
+    "pipeline-commands.json": "b36af9a09dc945108f234b11481f555c5f4ceb7b2d08b6a1ec6822fac37ecd64",
+    "provenance.json": "343495093814b5ab40a70fc26c328fb54f9b7bedf9c27cb021bdc1deae4747a9",
+    "recovery-core.json": "f233df8fdc7a6a7c2f325b71afeb52098ad0e3bcbda1954b94cb1883a89e6882",
+    "sql-boundaries.json": "3cef32735efc2a2807d3116cb03ba8d10a5862a4c8167dbde0cbbd2bc37f436c",
+    "sql-clauses.json": "ed0f218b42ab3dd15afd7c58bc40c39c7279b5121d6aa54ae8a97dc84682dbdb"
+  }
+}

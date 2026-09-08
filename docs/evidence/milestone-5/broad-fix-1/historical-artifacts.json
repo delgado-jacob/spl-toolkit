@@ -1,0 +1,12 @@
+{
+  "archive_sha256": "ff9fc79b3aad6da0df3908dc5566be4bf8c0e5d92343a4a3aeaa6c5f50549343",
+  "files": {
+    "build/libspl_toolkit.h": "94e3efdaab910e28b5acb80e3c728443bd9792e1de4ea3adc338d880afdd5d9a",
+    "build/spl-toolkit-server": "7ed57682fa9870fde8aa7908a936114691d3c7c76b91b420de3590082a454a3a",
+    "build/libspl_toolkit.dylib": "d58c1a45441056788e8939cec5ea54db8dfc40d8b36a8e09795372b3e72dc56a",
+    "build/spl-toolkit": "75f6bf0a29e7909288d2b1091209e79d5b6d0cea1fe37acb74955f288bab4de4",
+    "dist/spl_toolkit-0.1.1.tar.gz": "021f90e53d203a2abf99d38740fe5b6247ba2e1ae22bbbe426cb5f0f172a58b6",
+    "dist/spl_toolkit-0.1.1-py3-none-macosx_15_0_arm64.whl": "6a808e5a2f5dcf3dd4880364c62370f074bb72896b7fc72a57a0da566e495cc9"
+  },
+  "basis": "preserved exact fcbb held build/package bytes before released replacement builds"
+}
