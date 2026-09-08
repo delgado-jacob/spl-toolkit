@@ -281,12 +281,14 @@ func TestRewriteConditionRuleOrderAndProposals(t *testing.T) {
 
 func TestRewriteConditionEligibilityAndUnknown(t *testing.T) {
 	for _, tc := range []struct {
-		query, source, reason string
-		conditional           bool
+		query, source, reason   string
+		conditional, incomplete bool
 	}{
-		{`search index=main | eval src=1 | table src`, "src", ReasonUnsupportedReference, false},
-		{`search index=main | table src*`, "src*", ReasonDynamicReference, false},
-		{`search index=main | where unknown(EventCode)=1 | table src`, "src", ReasonConditionUnknown, true},
+		{`search index=main | eval src=1 | table src`, "src", ReasonUnsupportedReference, false, false},
+		{`search index=main | table src*`, "src*", ReasonDynamicReference, false, true},
+		{`search index=main | where unknown(EventCode)=1 | table src`, "src", ReasonConditionUnknown, true, true},
+		{`search index=main | mystery | table src`, "src", ReasonUnsupportedReference, false, true},
+		{`search index=main | eval src=1 | where unknown(src)=2`, "src", ReasonUnsupportedReference, false, true},
 	} {
 		t.Run(tc.reason, func(t *testing.T) {
 			rule := Rule{ID: "rename", Kind: "field", Source: conditionIdentity(tc.source), Target: conditionIdentity("user")}
@@ -304,8 +306,8 @@ func TestRewriteConditionEligibilityAndUnknown(t *testing.T) {
 				t.Fatal(err)
 			}
 			got := selectRules(rules, probes, session.Evidence())
-			if !got.Incomplete || len(got.Proposals) != 0 || len(got.Evaluations) == 0 {
-				t.Fatalf("unsafe proposal or absent uncertainty: %+v", got)
+			if got.Incomplete != tc.incomplete || len(got.Proposals) != 0 || len(got.Evaluations) == 0 {
+				t.Fatalf("selection: %+v; want no proposals, located skips and incomplete=%t", got, tc.incomplete)
 			}
 			for _, e := range got.Evaluations {
 				if e.Reason != tc.reason || e.Outcome != "skipped" || e.Location == nil {
@@ -455,5 +457,73 @@ func TestRewriteConditionRequestOrder(t *testing.T) {
 		if sites[proposal.SiteID].Location.Start.Offset != wantOffset || !reflect.DeepEqual(proposal.RuleIDs, wantRuleIDs) {
 			t.Errorf("proposal %d: %+v; want source offset %d and rules %v", i, proposal, wantOffset, wantRuleIDs)
 		}
+	}
+}
+
+// A known definition/derived exclusion needs the real reference's binding and
+// exact resolution; the generic binding_not_source limitation alone is not proof.
+func TestRewriteConditionDerivedExclusionProof(t *testing.T) {
+	rules, err := prepareRules([]Rule{{ID: "rename", Kind: "field", Source: conditionIdentity("src"), Target: conditionIdentity("user")}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	probes := conditionProbes(rules)
+	session, err := analysis.PrepareRewrite(analysis.QueryDocument{Text: `search index=main | eval src=1 | table src`}, probes)
+	if err != nil {
+		t.Fatal(err)
+	}
+	evidence := session.Evidence()
+	bindings := []string{}
+	for _, ref := range evidence.Analysis.References {
+		if ref.NormalizedName == "src" {
+			bindings = append(bindings, ref.Role+":"+ref.Binding)
+		}
+	}
+	if !reflect.DeepEqual(bindings, []string{"create:not_applicable", "read:derived"}) {
+		t.Fatalf("fixture lacks known binding proof: %v", bindings)
+	}
+	got := selectRules(rules, probes, evidence)
+	if got.Incomplete || len(got.Proposals) != 0 || len(got.Evaluations) != 2 {
+		t.Fatalf("known derived exclusion is not an ordinary skip: %+v", got)
+	}
+	evidence.Analysis.References = nil
+	missing := selectRules(rules, probes, evidence)
+	if !missing.Incomplete || len(missing.Proposals) != 0 || len(missing.Evaluations) != 2 {
+		t.Fatalf("missing canonical binding proof treated as complete: %+v", missing)
+	}
+}
+
+func TestRewriteConditionDerivedExclusionUnknownGuard(t *testing.T) {
+	first, second := conditionLiteral("EventCode", "equals", `1`), conditionLiteral("EventCode", "equals", `2`)
+	condition := Condition{Any: []Condition{first, second}}
+	rules, err := prepareRules([]Rule{{ID: "rename", Kind: "field", Source: conditionIdentity("src"), Target: conditionIdentity("user"), When: &condition}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	probes := conditionProbes(rules)
+	for _, tc := range []struct {
+		name, query string
+		incomplete  bool
+		reason      string
+	}{
+		{"known exclusion", `search index=main | where EventCode=other | eval src=1 | table src`, false, ReasonUnsupportedReference},
+		{"eligible source", `search index=main | where EventCode=other | table src`, true, ReasonConditionUnknown},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			session, err := analysis.PrepareRewrite(analysis.QueryDocument{Text: tc.query}, probes)
+			if err != nil {
+				t.Fatal(err)
+			}
+			got := selectRules(rules, probes, session.Evidence())
+			if got.Incomplete != tc.incomplete || len(got.Proposals) != 0 || len(got.Evaluations) == 0 {
+				t.Fatalf("unknown guard changed source eligibility summary: %+v", got)
+			}
+			for _, evaluation := range got.Evaluations {
+				c := evaluation.Condition
+				if evaluation.Reason != tc.reason || c == nil || c.State != "unknown" || len(c.Children) != 2 || c.Children[0].State != "unknown" || c.Children[1].State != "unknown" {
+					t.Fatalf("lost exclusion or child uncertainty: %+v", evaluation)
+				}
+			}
+		})
 	}
 }

@@ -251,6 +251,17 @@ func selectRules(rules []Rule, probes []analysis.RewriteFactProbe, evidence anal
 	for i, site := range sites {
 		siteOrder[site.ID] = i
 	}
+	// Canonical creation roles and derived bindings identify conclusive source-
+	// mapping exclusions. The facade's binding_not_source limitation alone also
+	// covers indeterminate/unavailable reads, so it cannot establish this proof.
+	knownNonSource := map[string]bool{}
+	for _, ref := range evidence.Analysis.References {
+		if ref.Kind != "field" || ref.Resolution != "exact" {
+			continue
+		}
+		created := ref.Binding == "not_applicable" && (ref.Role == "create" || ref.Role == "rename" || ref.Role == "output")
+		knownNonSource[ref.ID] = ref.Binding == "derived" || created
+	}
 	result := ruleSelection{Evaluations: []RuleEvaluation{}, Proposals: []ruleProposal{}}
 	proposalByKey := map[string]int{}
 	for _, rule := range rules {
@@ -266,7 +277,15 @@ func selectRules(rules []Rule, probes []analysis.RewriteFactProbe, evidence anal
 			if rule.When != nil {
 				evaluation.Condition = &condition
 			}
+			ordinaryExclusion := site.Eligibility != "eligible" && knownNonSource[site.ReferenceID]
+			for _, limitation := range site.Limitations {
+				if limitation.Code != "binding_not_source" {
+					ordinaryExclusion = false
+				}
+			}
 			switch {
+			case ordinaryExclusion:
+				evaluation.Reason = ReasonUnsupportedReference
 			case condition.State == "false":
 				evaluation.Reason = ReasonConditionFalse
 			case condition.State == "unknown":
