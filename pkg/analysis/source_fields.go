@@ -5,8 +5,6 @@ import (
 	"sort"
 	"strings"
 	"unicode/utf8"
-
-	"github.com/delgado-jacob/spl-toolkit/parser"
 )
 
 // ExpandedField is a proven member of a selector's finite field universe.
@@ -227,8 +225,8 @@ func (s *semanticStage) selectorStructurallyAbsent(pattern string) bool {
 	return removedMatch
 }
 
-func (s *semanticStage) refinedSelector(c parser.IAnalysisSelectorContext, role, id string) []string {
-	pattern := selectorName(c)
+func (s *semanticStage) refinedSelectorAt(operand locatedOperand, role, id string) []string {
+	pattern := operand.Name
 	// Removal operates on tracked obligations too, even when external validation
 	// would find those names absent. These are transfer candidates, not evidence.
 	removals := map[string]bool{}
@@ -245,14 +243,14 @@ func (s *semanticStage) refinedSelector(c parser.IAnalysisSelectorContext, role,
 	matches := s.provenExpandedFields(names, bindings)
 	if !complete {
 		s.recordExpansion(id, false, matches)
-		s.diagnostic(CodeUnresolvedWildcard, fmt.Sprintf("wildcard %q membership is unresolved", pattern), c)
+		s.diagnosticAt(CodeUnresolvedWildcard, "warning", "unsupported_semantics", fmt.Sprintf("wildcard %q membership is unresolved", pattern), operand.Location, true)
 	} else {
 		s.recordExpansion(id, true, matches)
 		if role != "remove" {
 			ref.Binding = "source"
 			if len(matches) == 0 && s.selectorStructurallyAbsent(pattern) {
 				ref.Binding = "unavailable"
-				s.diagnostic(CodeUnavailableField, fmt.Sprintf("wildcard %q is unavailable after an earlier pipeline transfer", pattern), c)
+				s.diagnosticAt(CodeUnavailableField, "error", "unavailable_field", fmt.Sprintf("wildcard %q is unavailable after an earlier pipeline transfer", pattern), operand.Location, false)
 			} else if len(matches) > 0 {
 				ref.Binding = matches[0].Binding
 				for _, match := range matches[1:] {

@@ -127,3 +127,10 @@ type CapabilityManifest struct {
 	Commands      []Capability `json:"commands"`
 	Functions     []Capability `json:"functions"`
 }
+
+// CapabilityOptions selects an available language compatibility contract.
+type CapabilityOptions struct {
+	Language string `json:"language"`
+	Profile  string `json:"profile"`
+	Version  string `json:"version"`
+}

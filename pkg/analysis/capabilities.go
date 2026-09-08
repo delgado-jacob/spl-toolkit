@@ -33,3 +33,11 @@ func Capabilities() CapabilityManifest {
 	sort.Slice(m.Functions, func(i, j int) bool { return m.Functions[i].Name < m.Functions[j].Name })
 	return m
 }
+
+// CapabilitiesFor validates selectors and returns a fresh available manifest.
+func CapabilitiesFor(options CapabilityOptions) (CapabilityManifest, error) {
+	if _, err := normalizeSelectors(options); err != nil {
+		return CapabilityManifest{}, err
+	}
+	return Capabilities(), nil
+}

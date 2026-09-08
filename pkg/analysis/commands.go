@@ -1,10 +1,8 @@
 package analysis
 
 import (
-	"fmt"
 	"github.com/antlr4-go/antlr/v4"
 	"github.com/delgado-jacob/spl-toolkit/parser"
-	"sort"
 	"strconv"
 	"strings"
 )
@@ -83,7 +81,7 @@ func evalCommand(s *semanticStage, node antlr.ParserRuleContext) {
 			continue
 		}
 		inputs := s.expression(a.AnalysisExpression())
-		s.create(a.AnalysisIdentifier(), normalizedName(a.AnalysisIdentifier().GetText()), "create", "create", inputs, !s.result.Stages[s.stage].SemanticComplete)
+		s.applyAssignment(s.operand(a.AnalysisIdentifier(), normalizedName(a.AnalysisIdentifier().GetText())), inputs, !s.result.Stages[s.stage].SemanticComplete, false)
 	}
 }
 func wildcardMatches(pattern, name string) bool { // Selectors admit only '*' wildcard syntax.
@@ -130,176 +128,44 @@ func selectorName(c parser.IAnalysisSelectorContext) string {
 	return name.String()
 }
 func (s *semanticStage) selector(c parser.IAnalysisSelectorContext, role string) ([]string, []string) {
-	name := selectorName(c)
-	if !selectorPattern(c) {
-		return []string{name}, []string{s.read(c, name, role)}
-	}
-	id := s.reference(c, name, "field", role)
-	if id == "" {
-		return []string{}, []string{}
-	}
-	ref := &s.result.References[len(s.result.References)-1]
-	if role != "remove" {
-		ref.Binding = "indeterminate"
-	}
 	command := s.result.Stages[s.stage].Command
-	if s.refinement != nil {
-		names := s.refinedSelector(c, role, id)
-		if command != "fields" && command != "table" && command != "rename" {
-			s.diagnostic(CodeUnsupportedSemantics, fmt.Sprintf("wildcard selectors for command %q are unmodeled", command), c)
-			return []string{}, []string{id}
-		}
-		return names, []string{id}
-	}
-	if command != "fields" && command != "table" && command != "rename" {
-		s.diagnostic(CodeUnsupportedSemantics, fmt.Sprintf("wildcard selectors for command %q are unmodeled", command), c)
-		return []string{}, []string{id}
-	}
-	names := []string{}
-	origins := []string{}
-	for n, f := range s.env.fields {
-		if wildcardMatches(name, n) {
-			names = append(names, n)
-			origins = uniqueIDs(origins, f.OriginReferenceIDs)
-		}
-	}
-	sort.Strings(names)
-	sort.Strings(origins)
-	ref.OriginReferenceIDs = origins
-	if s.env.open || s.env.uncertain {
-		s.diagnostic(CodeUnresolvedWildcard, fmt.Sprintf("wildcard %q membership is unresolved", name), c)
-	}
-	return names, []string{id}
+	return s.selectorAt(s.operand(c, selectorName(c)), role, command == "fields" || command == "table" || command == "rename")
 }
 func renameCommand(s *semanticStage, node antlr.ParserRuleContext) {
-	ctx := node.(*parser.AnalysisRenameStageContext)
-	original := s.env
-	before := s.env.clone()
-	type rename struct {
-		source, dest string
-		ctx          parser.IAnalysisAliasContext
-		input        string
-		conditional  bool
-	}
-	items := []rename{}
-	sources, dests := map[string]bool{}, map[string]bool{}
-	conflict := false
-	for _, r := range ctx.AllAnalysisRename() {
+	pairs := []renameOperands{}
+	for _, r := range node.(*parser.AnalysisRenameStageContext).AllAnalysisRename() {
 		if !intact(r) {
 			continue
 		}
-		src := normalizedName(r.AnalysisSelector().GetText())
-		dst := normalizedName(r.AnalysisAlias().AnalysisIdentifier().GetText())
-		if selectorPattern(r.AnalysisSelector()) || strings.Contains(dst, "*") {
-			s.env = before
-			names, _ := s.selector(r.AnalysisSelector(), "read")
-			for _, name := range names {
-				sources[name] = true
-			}
-			dests[dst] = true
-			s.diagnostic(CodeUnsupportedSemantics, "wildcard rename substitution is unmodeled", r)
-			conflict = true
-			continue
+		source := s.operand(r.AnalysisSelector(), normalizedName(r.AnalysisSelector().GetText()))
+		if selectorPattern(r.AnalysisSelector()) {
+			source.Name = selectorName(r.AnalysisSelector())
 		}
-		s.env = before
-		id := s.read(r.AnalysisSelector(), src, "read")
-		_, existingDestination := original.fields[dst]
-		if sources[src] || dests[dst] || existingDestination {
-			conflict = true
+		target := s.operand(r.AnalysisAlias().AnalysisIdentifier(), normalizedName(r.AnalysisAlias().AnalysisIdentifier().GetText()))
+		if strings.Contains(target.Name, "*") {
+			target.Resolution = "wildcard"
 		}
-		sources[src] = true
-		dests[dst] = true
-		binding := s.result.References[len(s.result.References)-1].Binding
-		items = append(items, rename{src, dst, r.AnalysisAlias(), id, binding == "indeterminate" || binding == "unavailable"})
+		pairs = append(pairs, renameOperands{Source: source, Target: target})
 	}
-	s.env = before // All reads observed the snapshot; no destination was installed while reading.
-	for name := range sources {
-		if dests[name] {
-			conflict = true
-		}
-	}
-	if conflict {
-		s.diagnostic(CodeUnsupportedSemantics, "rename has conflicting or unsupported source/destination mappings", ctx)
-		for name := range sources {
-			delete(s.env.fields, name)
-		}
-		for name := range dests {
-			delete(s.env.fields, name)
-		}
-		return
-	}
-	for _, r := range items {
-		s.env.remove(r.source)
-	}
-	for _, r := range items {
-		s.create(r.ctx.AnalysisIdentifier(), r.dest, "rename", "rename", []string{r.input}, r.conditional)
-	}
+	s.applyRename(pairs)
 }
 func fieldsCommand(s *semanticStage, node antlr.ParserRuleContext) {
 	ctx := node.(*parser.AnalysisFieldsStageContext)
-	exclude := ctx.SUB() != nil
-	if s.result.Stages[s.stage].Command == "table" && (ctx.SUB() != nil || ctx.ADD() != nil) {
-		s.diagnostic(CodeUnsupportedSemantics, "table does not support signed projection", ctx)
-		return
+	mode := "include"
+	if s.result.Stages[s.stage].Command == "table" {
+		if ctx.SUB() != nil || ctx.ADD() != nil {
+			s.diagnostic(CodeUnsupportedSemantics, "table does not support signed projection", ctx)
+			return
+		}
+		mode = "table"
+	} else if ctx.SUB() != nil {
+		mode = "exclude"
 	}
-	selected := map[string]trackedField{}
-	if !exclude && s.result.Stages[s.stage].Command == "fields" {
-		internalsComplete := true
-		if s.refinement != nil {
-			internalsComplete = s.retainSourceInternals()
-		}
-		for name, field := range s.env.fields {
-			if strings.HasPrefix(name, "_") {
-				selected[name] = field
-			}
-		}
-		if (s.env.open && s.refinement == nil) || !internalsComplete {
-			s.diagnostic(CodeUnsupportedSemantics, "fields inclusion retains internal fields with unresolved open-source membership", ctx)
-		}
-	}
+	selectors := []locatedOperand{}
 	for _, c := range ctx.AnalysisFieldList().AllAnalysisSelector() {
-		if exclude && !selectorPattern(c) {
-			name := normalizedName(c.GetText())
-			id := s.reference(c, name, "field", "remove")
-			s.env.remove(name)
-			s.transitions = append(s.transitions, Transition{Operation: "remove", Output: name, InputReferenceIDs: []string{}, OutputReferenceID: id})
-			continue
-		}
-		role := "read"
-		if exclude {
-			role = "remove"
-		}
-		names, ids := s.selector(c, role)
-		for _, name := range names {
-			if exclude {
-				s.env.remove(name)
-				s.transitions = append(s.transitions, Transition{Operation: "remove", Output: name, InputReferenceIDs: copyIDs(ids)})
-			} else if f, ok := s.projectedField(name, ids); ok {
-				selected[name] = f
-				s.transitions = append(s.transitions, Transition{Operation: "project", Output: name, InputReferenceIDs: copyIDs(ids)})
-			}
-		}
+		selectors = append(selectors, s.operand(c, selectorName(c)))
 	}
-	if !exclude {
-		s.env.fields = selected
-		// Partial selectors retain an unknown remainder; finite compatibility keeps
-		// its historical closed-output wire shape.
-		s.env.open = s.refinement != nil && !s.refinement.finiteCompatibility && s.env.open && !s.result.Stages[s.stage].SemanticComplete
-		if s.result.Stages[s.stage].Command == "table" && s.result.Stages[s.stage].SemanticComplete {
-			s.env.uncertain = false
-		}
-	}
-}
-
-// Exact projection fixes the output names without proving conditional inputs exist.
-func (s *semanticStage) projectedField(name string, ids []string) (trackedField, bool) {
-	if field, known := s.env.fields[name]; known {
-		return field, true
-	}
-	if s.env.uncertain {
-		return trackedField{FieldBinding: FieldBinding{Name: name, OriginReferenceIDs: s.origins(ids), Conditional: true}}, true
-	}
-	return trackedField{}, false
+	s.applyProjection(selectors, mode, mode == "include")
 }
 
 func statsCommand(s *semanticStage, node antlr.ParserRuleContext) {
@@ -307,14 +173,7 @@ func statsCommand(s *semanticStage, node antlr.ParserRuleContext) {
 	if len(ctx.AllAnalysisOption()) > 0 {
 		s.diagnostic(CodeUnsupportedSemantics, "aggregate command options are unmodeled", ctx)
 	}
-	output := newEnvironment()
-	output.open = false
-	type aggregate struct {
-		ctx    antlr.ParserRuleContext
-		name   string
-		inputs []string
-	}
-	outputs := []aggregate{}
+	outputs := []aggregateOutput{}
 	for _, a := range ctx.AllAnalysisAggregate() {
 		if !intact(a) {
 			continue
@@ -354,28 +213,18 @@ func statsCommand(s *semanticStage, node antlr.ParserRuleContext) {
 			outCtx = a.AnalysisAlias().AnalysisIdentifier()
 		}
 		if name != "" {
-			outputs = append(outputs, aggregate{outCtx, name, ids})
+			outputs = append(outputs, aggregateOutput{Target: s.operand(outCtx, name), InputReferenceIDs: ids})
 		}
 	}
+	groups := []locatedOperand{}
 	if group := ctx.AnalysisGroup(); group != nil {
 		for _, c := range group.AnalysisFieldList().AllAnalysisSelector() {
-			names, ids := s.selector(c, "group")
-			for _, name := range names {
-				if f, ok := s.projectedField(name, ids); ok {
-					output.fields[name] = f
-				}
-				s.transitions = append(s.transitions, Transition{Operation: "project", Output: name, InputReferenceIDs: copyIDs(ids)})
-			}
+			groups = append(groups, s.operand(c, selectorName(c)))
 		}
 	}
-	if s.result.Stages[s.stage].Command == "stats" {
-		output.uncertain = !s.result.Stages[s.stage].SemanticComplete
-		s.env = output
-	}
-	for _, o := range outputs {
-		s.create(o.ctx, o.name, "output", "aggregate", o.inputs, !s.result.Stages[s.stage].SemanticComplete)
-	}
+	s.applyAggregation(outputs, groups, s.result.Stages[s.stage].Command != "stats")
 }
+
 func lookupCommand(s *semanticStage, node antlr.ParserRuleContext) {
 	c := node.(*parser.AnalysisLookupStageContext).AnalysisLookup()
 	s.dependency(c.AnalysisCatalogName(), normalizedName(c.AnalysisCatalogName().GetText()), "lookup")
@@ -408,14 +257,9 @@ func lookupCommand(s *semanticStage, node antlr.ParserRuleContext) {
 				s.diagnostic(CodeUnsupportedSemantics, "lookup wildcard output columns are unmodeled", item)
 				continue
 			}
-			conditional := out.OUTPUTNEW() != nil
-			if conditional {
-				if _, known := s.env.fields[name]; known {
-					s.reference(local, name, "field", "output")
-					continue
-				}
-			}
-			s.create(local, name, "output", "lookup", ids, conditional || !s.result.Stages[s.stage].SemanticComplete)
+			// Preserve source-order diagnostics while every output shares the same
+			// once-prepared local match references, including overlapping destinations.
+			s.applyLookupOutputs(ids, []lookupOutput{{Target: s.operand(local, name), PreserveExisting: out.OUTPUTNEW() != nil}})
 		}
 	}
 }

@@ -112,18 +112,11 @@ func array(data []byte) ([]json.RawMessage, error) {
 }
 
 func normalizeDocument(doc analysis.QueryDocument) (analysis.QueryDocument, error) {
-	for _, option := range []struct {
-		name     string
-		value    *string
-		standard string
-	}{{"language", &doc.Language, "spl"}, {"profile", &doc.Profile, "splunkd"}, {"version", &doc.Version, "current"}} {
-		if *option.value == "" {
-			*option.value = option.standard
-		}
-		if *option.value != option.standard {
-			return doc, inputError("unsupported %s %q", option.name, *option.value)
-		}
+	manifest, err := analysis.CapabilitiesFor(analysis.CapabilityOptions{Language: doc.Language, Profile: doc.Profile, Version: doc.Version})
+	if err != nil {
+		return doc, inputError("%v", err)
 	}
+	doc.Language, doc.Profile, doc.Version = manifest.Language, manifest.Profile, manifest.Version
 	if !utf8.ValidString(doc.Text) || !utf8.ValidString(doc.SourceID) {
 		return doc, inputError("document text and source_id must be valid UTF-8")
 	}

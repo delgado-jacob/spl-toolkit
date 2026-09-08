@@ -52,19 +52,15 @@ func intact(node antlr.Tree) bool {
 	return true
 }
 func (s *semanticStage) diagnostic(code, message string, ctx antlr.ParserRuleContext) {
-	st := &s.result.Stages[s.stage]
-	severity, category := "warning", "unsupported_semantics"
+	severity, category, incomplete := "warning", "unsupported_semantics", true
 	if code == CodeUnavailableField {
-		severity, category = "error", "unavailable_field"
-	} else {
-		st.SemanticComplete = false
-		s.env.uncertain = true
+		severity, category, incomplete = "error", "unavailable_field", false
 	}
-	s.result.Diagnostics = append(s.result.Diagnostics, Diagnostic{Code: code, Severity: severity, Category: category, Message: message, Location: s.parsed.source.contextLocation(ctx), StageID: st.ID, ScopeID: st.ScopeID})
+	s.diagnosticAt(code, severity, category, message, s.parsed.source.contextLocation(ctx), incomplete)
 }
-func (s *semanticStage) reference(ctx antlr.ParserRuleContext, name, kind, role string) string {
+func (s *semanticStage) operand(ctx antlr.ParserRuleContext, name string) locatedOperand {
 	if !s.sound(ctx) {
-		return ""
+		return locatedOperand{Name: name}
 	}
 	loc := s.parsed.source.contextLocation(ctx)
 	resolution := "exact"
@@ -87,7 +83,10 @@ func (s *semanticStage) reference(ctx antlr.ParserRuleContext, name, kind, role 
 			}
 		}
 	}
-	return s.referenceAt(loc, name, kind, role, resolution)
+	return locatedOperand{Name: name, Location: loc, Resolution: resolution, Sound: true}
+}
+func (s *semanticStage) reference(ctx antlr.ParserRuleContext, name, kind, role string) string {
+	return s.operandReference(s.operand(ctx, name), kind, role)
 }
 func (s *semanticStage) referenceAt(loc Location, name, kind, role, resolution string) string {
 	st := s.result.Stages[s.stage]
@@ -96,32 +95,7 @@ func (s *semanticStage) referenceAt(loc Location, name, kind, role, resolution s
 	return id
 }
 func (s *semanticStage) read(ctx antlr.ParserRuleContext, name, role string) string {
-	id := s.reference(ctx, name, "field", role)
-	if id == "" {
-		return id
-	}
-	ref := &s.result.References[len(s.result.References)-1]
-	f, known := s.env.fields[name]
-	switch {
-	case known && !f.Conditional:
-		ref.Binding = "derived"
-		if f.source {
-			ref.Binding = "source"
-		}
-		ref.OriginReferenceIDs = copyIDs(f.OriginReferenceIDs)
-	case s.env.uncertain || (known && f.Conditional):
-		ref.Binding = "indeterminate"
-		if known {
-			ref.OriginReferenceIDs = copyIDs(f.OriginReferenceIDs)
-		}
-	case s.env.removed[name] || !s.env.open:
-		ref.Binding = "unavailable"
-		s.diagnostic(CodeUnavailableField, fmt.Sprintf("field %q is unavailable after an earlier pipeline transfer", name), ctx)
-	default:
-		ref.Binding = "source"
-		s.env.fields[name] = trackedField{FieldBinding: FieldBinding{Name: name, OriginReferenceIDs: []string{id}}, source: true}
-	}
-	return id
+	return s.readAt(s.operand(ctx, name), role)
 }
 func (s *semanticStage) origins(ids []string) []string {
 	out := copyIDs(ids)
@@ -136,15 +110,7 @@ func (s *semanticStage) origins(ids []string) []string {
 	return out
 }
 func (s *semanticStage) create(ctx antlr.ParserRuleContext, name, role, operation string, inputs []string, conditional bool) string {
-	id := s.reference(ctx, name, "field", role)
-	if id == "" {
-		return id
-	}
-	origins := s.origins(inputs)
-	s.result.References[len(s.result.References)-1].OriginReferenceIDs = copyIDs(origins)
-	s.env.install(name, uniqueIDs([]string{id}, origins), conditional)
-	s.transitions = append(s.transitions, Transition{Operation: operation, Output: name, InputReferenceIDs: copyIDs(inputs), OutputReferenceID: id, Conditional: conditional})
-	return id
+	return s.createAt(s.operand(ctx, name), role, operation, inputs, conditional)
 }
 func (s *semanticStage) expression(node antlr.Tree) []string {
 	ids := []string{}

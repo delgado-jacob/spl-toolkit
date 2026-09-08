@@ -8,24 +8,11 @@ import (
 )
 
 func normalizeDocument(document QueryDocument) (QueryDocument, error) {
-	if document.Language == "" {
-		document.Language = "spl"
+	selectors, err := normalizeSelectors(CapabilityOptions{Language: document.Language, Profile: document.Profile, Version: document.Version})
+	if err != nil {
+		return document, err
 	}
-	if document.Language != "spl" {
-		return document, fmt.Errorf("unsupported language %q", document.Language)
-	}
-	if document.Profile == "" {
-		document.Profile = "splunkd"
-	}
-	if document.Profile != "splunkd" {
-		return document, fmt.Errorf("unsupported profile %q", document.Profile)
-	}
-	if document.Version == "" {
-		document.Version = "current"
-	}
-	if document.Version != "current" {
-		return document, fmt.Errorf("unsupported compatibility version %q", document.Version)
-	}
+	document.Language, document.Profile, document.Version = selectors.Language, selectors.Profile, selectors.Version
 	if !utf8.ValidString(document.Text) {
 		return document, fmt.Errorf("document text is not valid UTF-8")
 	}

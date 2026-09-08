@@ -81,3 +81,27 @@ func TestDirectInputErrors(t *testing.T) {
 		}
 	}
 }
+
+// Validation consumes the capability selector contract while keeping caller data exact.
+func TestRequestCapabilitySelectors(t *testing.T) {
+	for _, selectors := range []analysis.CapabilityOptions{{}, {Language: "spl", Profile: "splunkd", Version: "current"}} {
+		manifest, err := analysis.CapabilitiesFor(selectors)
+		if err != nil {
+			t.Fatal(err)
+		}
+		doc := analysis.QueryDocument{Text: "search café=*\r\n", SourceID: " exact ", Language: selectors.Language, Profile: selectors.Profile, Version: selectors.Version}
+		result, err := validation.Validate(doc, validation.FieldCatalog{})
+		if err != nil {
+			t.Fatal(err)
+		}
+		got := result.Analysis.Document
+		if got.Text != doc.Text || got.SourceID != doc.SourceID || got.Language != manifest.Language || got.Profile != manifest.Profile || got.Version != manifest.Version {
+			t.Fatalf("selector/caller data mismatch: %#v", got)
+		}
+	}
+	for _, doc := range []analysis.QueryDocument{{Language: "spl2"}, {Profile: "edge"}, {Version: "next"}, {Language: "\xff"}, {Profile: "\xff"}, {Version: "\xff"}} {
+		if _, err := validation.Validate(doc, validation.FieldCatalog{}); !validation.IsInputError(err) {
+			t.Fatalf("expected InputError for %#v: %v", doc, err)
+		}
+	}
+}
