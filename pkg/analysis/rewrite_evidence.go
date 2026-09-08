@@ -185,7 +185,7 @@ func (s *semanticStage) rewriteState() *rewriteFlow {
 	if s.env.rewrite == nil {
 		c := s.result.rewrite
 		c.epoch++
-		s.env.rewrite = &rewriteFlow{epoch: fmt.Sprintf("source-%d", c.epoch), facts: map[string]rewriteFact{}, seen: map[string][]string{}}
+		s.env.rewrite = &rewriteFlow{complete: !s.env.uncertain && s.result.Stages[s.stage].SemanticComplete, epoch: fmt.Sprintf("source-%d", c.epoch), facts: map[string]rewriteFact{}, seen: map[string][]string{}}
 	}
 	return s.env.rewrite
 }
@@ -213,9 +213,11 @@ func (s *semanticStage) rewriteReference(id string, operand locatedOperand, kind
 		site.public.BindingID = flow.epoch + ":" + kind + ":" + operand.Name
 	}
 	if operand.Resolution != "exact" {
+		flow.complete = false
 		site.public.Limitations = append(site.public.Limitations, RewriteLimitation{"dynamic_identity", "Wildcard or dynamic identity is not an exact rewrite operand", operand.Location})
 	}
 	if owner.role == "" || owner.role == "navigation" {
+		flow.complete = false
 		site.public.Limitations = append(site.public.Limitations, RewriteLimitation{"unproved_owner", "Canonical typed rendering ownership is unproved", operand.Location})
 	}
 	if kind != "field" && operand.Resolution == "exact" && owner.role != "" && owner.role != "navigation" {
@@ -338,6 +340,7 @@ func (s *semanticStage) rewriteUnprovedOperand(operand locatedOperand, kind, rol
 		return
 	}
 	flow := s.rewriteState()
+	flow.complete = false
 	stage := s.result.Stages[s.stage]
 	identity := RewriteIdentity{}
 	if operand.Name != "" {

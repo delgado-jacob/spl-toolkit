@@ -16,16 +16,18 @@ type rewriteFact struct {
 	locations []Location
 }
 type rewriteFlow struct {
-	epoch string
-	facts map[string]rewriteFact
-	seen  map[string][]string
+	// complete records observed query-fact coverage, not event availability.
+	complete bool
+	epoch    string
+	facts    map[string]rewriteFact
+	seen     map[string][]string
 }
 
 func (f *rewriteFlow) clone() *rewriteFlow {
 	if f == nil {
 		return nil
 	}
-	out := &rewriteFlow{epoch: f.epoch, facts: map[string]rewriteFact{}, seen: map[string][]string{}}
+	out := &rewriteFlow{complete: f.complete, epoch: f.epoch, facts: map[string]rewriteFact{}, seen: map[string][]string{}}
 	for k, v := range f.facts {
 		v.values = rewriteCopy(v.values)
 		v.locations = append([]Location{}, v.locations...)
@@ -45,11 +47,12 @@ func (e *environment) rewriteInvalidate(name string) {
 		return
 	}
 	key := rewriteFactKey("field", rewriteAtom(name))
-	delete(e.rewrite.facts, key)
+	e.rewrite.facts[key] = rewriteFact{}
 	delete(e.rewrite.seen, key)
 }
 func (e *environment) rewriteBarrier() {
 	if e.rewrite != nil {
+		e.rewrite.complete = false
 		e.rewrite.facts = map[string]rewriteFact{}
 		e.rewrite.seen = map[string][]string{}
 	}
@@ -64,7 +67,7 @@ func (e *environment) rewriteProject(fields map[string]trackedField) {
 	}
 	for key := range e.rewrite.facts {
 		if strings.HasPrefix(key, "field:") && !retained[key] {
-			delete(e.rewrite.facts, key)
+			e.rewrite.facts[key] = rewriteFact{}
 		}
 	}
 	for key := range e.rewrite.seen {
@@ -104,7 +107,15 @@ func (s *semanticStage) rewriteFacts() []RewriteFactEvidence {
 		} else if s.env.uncertain || p.Identity.Name == nil {
 			state = "unknown"
 		}
-		out = append(out, RewriteFactEvidence{ProbeIndex: i, GuaranteedValues: rewriteCopy(append([]RewriteScalar{}, fact.values...)), LiteralComplete: known && fact.complete, ReferenceState: state, ReferenceIDs: refs, Locations: append([]Location{}, fact.locations...), Limitations: []RewriteLimitation{}})
+		complete := flow.complete && (!known || fact.complete) && p.Identity.Name != nil && !s.env.uncertain
+		if p.Kind == "field" && p.Identity.Name != nil {
+			name := *p.Identity.Name
+			field, bound := s.env.fields[name]
+			if (bound && (!field.source || field.Conditional)) || (!bound && (s.env.removed[name] || !s.env.open)) {
+				complete = false
+			}
+		}
+		out = append(out, RewriteFactEvidence{ProbeIndex: i, GuaranteedValues: rewriteCopy(append([]RewriteScalar{}, fact.values...)), LiteralComplete: complete, ReferenceState: state, ReferenceIDs: refs, Locations: append([]Location{}, fact.locations...), Limitations: []RewriteLimitation{}})
 	}
 	return out
 }
@@ -235,24 +246,25 @@ func (s *semanticStage) rewritePredicate(node antlr.Tree, language string, searc
 	if s.result.rewrite == nil || node == nil {
 		return
 	}
-	facts := s.rewritePredicateFacts(node, language, search, metrics)
+	facts, complete := s.rewritePredicateFacts(node, language, search, metrics)
 	flow := s.rewriteState()
+	flow.complete = flow.complete && complete
 	flow.facts = rewriteMergeFacts(flow.facts, facts, false)
 }
-func (s *semanticStage) rewritePredicateFacts(node antlr.Tree, language string, search, metrics bool) map[string]rewriteFact {
+func (s *semanticStage) rewritePredicateFacts(node antlr.Tree, language string, search, metrics bool) (map[string]rewriteFact, bool) {
 	empty := map[string]rewriteFact{}
 	if node == nil {
-		return empty
+		return empty, false
 	}
 	if ctx, ok := node.(antlr.ParserRuleContext); ok && !intact(ctx) {
-		return empty
+		return empty, false
 	}
 	var name, kind string
 	var literal antlr.Tree
 	var location Location
 	source := s.parsed
 	if language == "spl" && source == nil {
-		return empty
+		return empty, false
 	}
 	locate := func(ctx antlr.ParserRuleContext) Location {
 		if language == "spl" {
@@ -260,16 +272,12 @@ func (s *semanticStage) rewritePredicateFacts(node antlr.Tree, language string, 
 		}
 		return s.result.rewrite.source.contextLocation(ctx)
 	}
-	or := false
+	or, negated := false, false
 	switch c := node.(type) {
 	case parser.IAnalysisSearchUnaryContext:
-		if c.NOT() != nil {
-			return empty
-		}
+		negated = c.NOT() != nil
 	case parser.IAnalysisNotContext:
-		if c.NOT() != nil {
-			return empty
-		}
+		negated = c.NOT() != nil
 	case parser.IAnalysisSearchContext:
 		or = len(c.AllAnalysisSearchAnd()) > 1
 	case parser.IAnalysisOrContext:
@@ -289,41 +297,37 @@ func (s *semanticStage) rewritePredicateFacts(node antlr.Tree, language string, 
 			}
 		}
 	case spl2.ISearchNotContext:
-		if c.NOT() != nil {
-			return empty
-		}
+		negated = c.NOT() != nil
 	case spl2.INotExpressionContext:
-		if c.LogicalNot() != nil {
-			return empty
-		}
+		negated = c.LogicalNot() != nil
 	case spl2.ISearchXorContext:
 		if len(c.AllSearchAnd()) > 1 {
-			return empty
+			return empty, false
 		}
 	case spl2.IXorExpressionContext:
 		if len(c.AllOrExpression()) > 1 {
-			return empty
+			return empty, false
 		}
 	case spl2.ISearchOrContext:
 		or = len(c.AllSearchNot()) > 1
 	case spl2.IOrExpressionContext:
 		for _, op := range c.AllLogicalOr() {
 			if op.GetText() != "OR" {
-				return empty
+				return empty, false
 			}
 		}
 		or = len(c.AllAndExpression()) > 1
 	case spl2.IAndExpressionContext:
 		for _, op := range c.AllLogicalAnd() {
 			if op.GetText() != "AND" {
-				return empty
+				return empty, false
 			}
 		}
 	case spl2.ISearchAtomContext:
 		if c.Identifier() != nil && c.Comparison() != nil && (c.Comparison().ASSIGN() != nil || c.Comparison().EQ() != nil) && len(c.AllSearchValue()) == 1 {
 			v := c.SearchValue(0)
 			if v.SearchSignedNumber() != nil || v.SearchUnprovedLiteral() != nil || v.SearchDirective() != nil || v.RAW_STRING() != nil || (v.StringLiteral() != nil && len(v.StringLiteral().AllExpression()) > 0) {
-				return empty
+				return empty, false
 			}
 			name, _ = spl2DecodeKey(c.Identifier().GetText())
 			literal = v
@@ -353,8 +357,16 @@ func (s *semanticStage) rewritePredicateFacts(node antlr.Tree, language string, 
 				}
 			}
 		}
+	case parser.IAnalysisAtomContext:
+		if c.AnalysisExpression() == nil {
+			return empty, false
+		}
+	case spl2.IPrimaryContext:
+		if c.Expression() == nil {
+			return empty, false
+		}
 	case parser.IAnalysisFunctionCallContext, parser.IAnalysisSubqueryContext, parser.IAnalysisMacroContext, spl2.ICallContext, spl2.IExistsPredicateContext, spl2.ISearchLiteralContext, spl2.ILambdaExpressionContext:
-		return empty
+		return empty, false
 	}
 	if name != "" && literal != nil {
 		if kind == "" {
@@ -366,11 +378,11 @@ func (s *semanticStage) rewritePredicateFacts(node antlr.Tree, language string, 
 		if kind == "field" {
 			field, known := s.env.fields[name]
 			if (known && (!field.source || field.Conditional)) || (!known && (s.env.uncertain || s.env.removed[name] || !s.env.open)) {
-				return empty
+				return empty, false
 			}
 		}
 		text := literal.(antlr.ParserRuleContext).GetText()
-		scalar, ok := rewriteScalar(text, search || metrics, language)
+		scalar, ok := rewriteScalar(text, search, language)
 		switch literal.(type) {
 		case parser.IAnalysisSearchValueContext, spl2.ISearchValueContext:
 			scalar, ok = rewriteSearchScalar(text, language)
@@ -380,7 +392,7 @@ func (s *semanticStage) rewritePredicateFacts(node antlr.Tree, language string, 
 			}
 		}
 		if !ok {
-			return empty
+			return empty, false
 		}
 		identity := rewriteAtom(name)
 		if kind != "field" {
@@ -393,27 +405,28 @@ func (s *semanticStage) rewritePredicateFacts(node antlr.Tree, language string, 
 			identity = rewriteAtom(value)
 			location = locate(literal.(antlr.ParserRuleContext))
 		}
-		return map[string]rewriteFact{rewriteFactKey(kind, identity): {values: []RewriteScalar{scalar}, complete: true, locations: []Location{location}}}
+		return map[string]rewriteFact{rewriteFactKey(kind, identity): {values: []RewriteScalar{scalar}, complete: true, locations: []Location{location}}}, true
 	}
 	// Only routing/Boolean nodes reach children: an unsuccessful comparison may
 	// contain literal-looking nested computations, which are not equality proof.
 	switch node.(type) {
-	case parser.IAnalysisComparisonContext, spl2.IPredicateContext:
+	case parser.IAnalysisComparisonContext, parser.IAnalysisConcatContext, parser.IAnalysisAddContext, parser.IAnalysisMultiplyContext, parser.IAnalysisPowerContext, parser.IAnalysisUnaryContext, spl2.IPredicateContext, spl2.IAdditiveContext, spl2.IMultiplicativeContext, spl2.IUnaryContext, spl2.IAccessContext:
 		if node.GetChildCount() != 1 {
-			return empty
+			return empty, false
 		}
 	}
 	out := empty
-	first := true
+	first, complete := true, true
 	for _, child := range node.GetChildren() {
 		if _, ok := child.(antlr.ParserRuleContext); !ok {
 			continue
 		}
 		switch child.(type) {
-		case spl2.ILogicalOrContext, spl2.ILogicalAndContext, spl2.ILogicalXorContext:
+		case parser.IAnalysisCommandNameContext, spl2.ILogicalOrContext, spl2.ILogicalAndContext, spl2.ILogicalXorContext, spl2.ILogicalNotContext:
 			continue
 		}
-		next := s.rewritePredicateFacts(child, language, search, metrics)
+		next, observed := s.rewritePredicateFacts(child, language, search, metrics)
+		complete = complete && observed
 		if first {
 			out = next
 			first = false
@@ -421,7 +434,10 @@ func (s *semanticStage) rewritePredicateFacts(node antlr.Tree, language string, 
 			out = rewriteMergeFacts(out, next, or)
 		}
 	}
-	return out
+	if negated {
+		return empty, complete && !first
+	}
+	return out, complete && !first
 }
 func rewriteSPLSingleIdentifier(n antlr.Tree) parser.IAnalysisIdentifierContext {
 	if c, ok := n.(parser.IAnalysisIdentifierContext); ok {
@@ -457,9 +473,11 @@ func rewriteScalarEqual(a, b RewriteScalar) bool {
 	return ok && x.Cmp(y) == 0
 }
 func (s *semanticStage) rewriteUncertain() {
-	if s.env.rewrite == nil {
+	if s.result.rewrite == nil {
 		return
 	}
+	// Record an unobserved prefix even before the first operand creates a site.
+	s.rewriteState().complete = false
 	command := s.result.Stages[s.stage].Command
 	if command == "where" || command == "search" || s.rewritePhase == "filter" {
 		for key, fact := range s.env.rewrite.facts {

@@ -204,7 +204,7 @@ func TestRewriteEvidenceFactsAndBarriers(t *testing.T) {
 			body     string
 			values   int
 			complete bool
-		}{{` | where (status=200 AND tag="ok") OR (status=200 AND tag="bad") | table bytes`, 1, true}, {` | where status=200 OR status=201 | table bytes`, 0, true}, {` | where NOT status=200 | table bytes`, 0, false}, {` | where status=200 | eval status=other | table bytes`, 0, false}, {` | where status=200 | fields - status | table bytes`, 0, false}} {
+		}{{` | where (status=200 AND tag="ok") OR (status=200 AND tag="bad") | table bytes`, 1, true}, {` | where status=200 OR status=201 | table bytes`, 0, true}, {` | where NOT status=200 | table bytes`, 0, true}, {` | where status=200 | eval status=other | table bytes`, 0, false}, {` | where status=200 | fields - status | table bytes`, 0, false}} {
 			s := rewriteTestSession(t, lang, start+tc.body, RewriteFactProbe{Kind: "field", Identity: rewriteName("status")})
 			site := rewriteFind(t, s, "field", "bytes", 0)
 			fact := site.Facts[0]
@@ -711,5 +711,144 @@ func TestRewriteSPL2PatternSlotControls(t *testing.T) {
 				t.Fatalf("pattern slot acquired exact proof: %+v", fact)
 			}
 		})
+	}
+}
+
+func TestRewriteProducerCompleteAbsence(t *testing.T) {
+	for _, language := range []string{"spl", "spl2"} {
+		for _, tc := range []struct{ predicate, kind, name string }{
+			{`(sourcetype=a OR sourcetype=b) src=x`, "sourcetype", "a"},
+			{`NOT sourcetype=a src=x`, "sourcetype", "a"},
+			{`(EventCode=1 OR EventCode=2) src=x`, "field", "EventCode"},
+			{`NOT EventCode=1 src=x`, "field", "EventCode"},
+			{`src=x`, "field", "EventCode"},
+		} {
+			t.Run(language+"/"+tc.predicate, func(t *testing.T) {
+				s := rewriteTestSession(t, language, "search "+tc.predicate+" | table src", RewriteFactProbe{Kind: tc.kind, Identity: rewriteName(tc.name)})
+				for occurrence := 0; occurrence < 2; occurrence++ {
+					fact := rewriteFind(t, s, "field", "src", occurrence).Facts[0]
+					if !fact.LiteralComplete || len(fact.GuaranteedValues) != 0 {
+						t.Errorf("supported absence is not conclusive at occurrence %d: %+v", occurrence, fact)
+					}
+				}
+			})
+		}
+		t.Run(language+"/no-backfill", func(t *testing.T) {
+			s := rewriteTestSession(t, language, `search src=x | where EventCode=1 | table src`, RewriteFactProbe{Kind: "field", Identity: rewriteName("EventCode")})
+			early, late := rewriteFind(t, s, "field", "src", 0).Facts[0], rewriteFind(t, s, "field", "src", 1).Facts[0]
+			if !early.LiteralComplete || len(early.GuaranteedValues) != 0 || early.ReferenceState != "false" || len(early.ReferenceIDs) != 0 || len(early.Locations) != 0 {
+				t.Errorf("earlier complete absence lost or backfilled: %+v", early)
+			}
+			if !late.LiteralComplete || len(late.GuaranteedValues) != 1 || late.GuaranteedValues[0].Kind != "number" || string(late.GuaranteedValues[0].Value) != "1" || late.ReferenceState != "true" {
+				t.Errorf("later positive guarantee lost: %+v", late)
+			}
+		})
+	}
+}
+
+func TestRewriteProducerUnknownCompleteness(t *testing.T) {
+	for _, language := range []string{"spl", "spl2"} {
+		for _, query := range []string{
+			`search EventCode="x*" src=x | table src`,
+			`search tag="x*" src=x | table src`,
+			`search NOT EventCode="x*" src=x | table src`,
+			`search src=x | where EventCode=unknown(other) | table src`,
+			`search src=x | where NOT unknown(EventCode)=1 | table src`,
+			`search src=x | where -(EventCode=1) | table src`,
+			`search src=x | eval EventCode=other | table src`,
+			`search src=x | fields - EventCode | table src`,
+		} {
+			t.Run(language+"/"+query, func(t *testing.T) {
+				s := rewriteTestSession(t, language, query, RewriteFactProbe{Kind: "field", Identity: rewriteName("EventCode")})
+				fact := rewriteFind(t, s, "field", "src", 1).Facts[0]
+				if fact.LiteralComplete || len(fact.GuaranteedValues) != 0 {
+					t.Fatalf("unproved flow became conclusive: %+v", fact)
+				}
+			})
+		}
+		t.Run(language+"/partial-positive", func(t *testing.T) {
+			s := rewriteTestSession(t, language, `search src=x | where EventCode=1 AND unknown(other)=2 | table src`, RewriteFactProbe{Kind: "field", Identity: rewriteName("EventCode")})
+			fact := rewriteFind(t, s, "field", "src", 1).Facts[0]
+			if fact.LiteralComplete || len(fact.GuaranteedValues) != 1 || string(fact.GuaranteedValues[0].Value) != "1" {
+				t.Fatalf("incomplete predicate discarded an independent guarantee: %+v", fact)
+			}
+		})
+	}
+	for _, query := range []string{`search src=x | where EventCode=1F | table src`, `search src=x | where EventCode=@"one" | table src`, `search src=x | where EventCode="${other}" | table src`, `search src=x | where [EventCode=1] | table src`} {
+		s := rewriteTestSession(t, "spl2", query, RewriteFactProbe{Kind: "field", Identity: rewriteName("EventCode")})
+		if fact := rewriteFind(t, s, "field", "src", 1).Facts[0]; fact.LiteralComplete || len(fact.GuaranteedValues) != 0 {
+			t.Fatalf("unproved scalar became conclusive in %q: %+v", query, fact)
+		}
+	}
+	s := rewriteTestSession(t, "spl2", `FROM main | table src`, RewriteFactProbe{Kind: "field", Identity: RewriteIdentity{Path: []string{"event", "code"}}})
+	if fact := rewriteFind(t, s, "field", "src", 0).Facts[0]; fact.LiteralComplete || fact.ReferenceState != "unknown" {
+		t.Fatalf("unproved path binding became conclusive: %+v", fact)
+	}
+}
+
+func TestRewriteProducerScopeAndSourceBoundaries(t *testing.T) {
+	for _, language := range []string{"spl", "spl2"} {
+		s, err := PrepareRewrite(QueryDocument{Language: language, Text: `search src=x | where EventCode=1 | mystery | table src`}, []RewriteFactProbe{{Kind: "field", Identity: rewriteName("EventCode")}})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if fact := rewriteFind(t, s, "field", "src", 1).Facts[0]; fact.LiteralComplete || len(fact.GuaranteedValues) != 0 {
+			t.Fatalf("unknown command effects acquired complete facts: %+v", fact)
+		}
+		for _, query := range []string{
+			`search EventCode=1 src=x | inputlookup people | table child`,
+			`search EventCode=1 src=x | append [search child=x | table child]`,
+		} {
+			if language == "spl2" {
+				query = strings.Replace(query, "inputlookup people", "FROM people", 1)
+			}
+			s := rewriteTestSession(t, language, query, RewriteFactProbe{Kind: "field", Identity: rewriteName("EventCode")})
+			fact := rewriteFind(t, s, "field", "child", 0).Facts[0]
+			if len(fact.GuaranteedValues) != 0 || fact.ReferenceState != "false" || len(fact.ReferenceIDs) != 0 {
+				t.Fatalf("independent source inherited a guarantee: %+v", fact)
+			}
+		}
+	}
+}
+
+func TestRewriteProducerMetricBooleanRole(t *testing.T) {
+	for _, value := range []string{"true", "false", `"true"`, `"false"`} {
+		kind := "boolean"
+		if strings.HasPrefix(value, `"`) {
+			kind = "string"
+		}
+		for _, query := range []string{`tstats aggregates=[count()] predicate=(flag=` + value + `) byfields=[host]`, `FROM main | where flag=` + value} {
+			t.Run(query, func(t *testing.T) {
+				s := rewriteTestSession(t, "spl2", query, RewriteFactProbe{Kind: "field", Identity: rewriteName("flag")})
+				fact := rewriteFind(t, s, "field", "flag", 0).Facts[0]
+				if !fact.LiteralComplete || len(fact.GuaranteedValues) != 1 || fact.GuaranteedValues[0].Kind != kind || string(fact.GuaranteedValues[0].Value) != value {
+					t.Fatalf("expression scalar changed grammar category: %+v", fact)
+				}
+			})
+		}
+	}
+	for _, language := range []string{"spl", "spl2"} {
+		s := rewriteTestSession(t, language, `search flag=true | table src`, RewriteFactProbe{Kind: "field", Identity: rewriteName("flag")})
+		fact := rewriteFind(t, s, "field", "src", 0).Facts[0]
+		if len(fact.GuaranteedValues) != 1 || fact.GuaranteedValues[0].Kind != "string" || string(fact.GuaranteedValues[0].Value) != `"true"` {
+			t.Fatalf("search word became an expression Boolean: %+v", fact)
+		}
+	}
+}
+
+func TestRewriteProducerUnobservedPrefix(t *testing.T) {
+	for _, language := range []string{"spl", "spl2"} {
+		count := "count"
+		if language == "spl2" {
+			count = "count()"
+		}
+		s, err := PrepareRewrite(QueryDocument{Language: language, Text: "mystery | stats " + count + " | lookup people count OUTPUT label"}, []RewriteFactProbe{{Kind: "sourcetype", Identity: rewriteName("a")}})
+		if err != nil {
+			t.Fatal(err)
+		}
+		fact := rewriteFind(t, s, "lookup", "people", 0).Facts[0]
+		if fact.LiteralComplete || len(fact.GuaranteedValues) != 0 {
+			t.Errorf("%s unknown prefix lost before first evidence read: %+v", language, fact)
+		}
 	}
 }
