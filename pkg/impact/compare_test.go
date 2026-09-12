@@ -2,8 +2,10 @@ package impact
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"testing"
 
@@ -309,6 +311,166 @@ func TestMappingIdentityBaseline(t *testing.T) {
 	e := r.Entries[0]
 	if e.BeforeRewrite == nil || e.AfterRewrite == nil || e.BeforeRewrite.CandidateText != "table src" || e.AfterRewrite.CandidateText != "table user" || e.AfterRewrite.Text != "table src" || e.AfterRewrite.Committed || e.Classification != Affected {
 		t.Fatalf("identity baseline or preview policy lost: %+v", e)
+	}
+}
+
+func TestMappingIncompleteCandidateObservedValidationRegression(t *testing.T) {
+	for _, tc := range []struct {
+		query        string
+		beforeStatus analysis.Status
+	}{
+		{"search host=x missing=y | mystery", analysis.Invalid},
+		{"table host | mystery", analysis.Incomplete},
+	} {
+		t.Run(tc.query, func(t *testing.T) {
+			request, err := DecodeMappingRequest([]byte(fmt.Sprintf(`{"schema_version":1,"documents":[{"id":"q","document":{"text":%q}}],"before_rules":{"schema_version":1,"rules":[]},"after_rules":{"schema_version":1,"rules":[]},"before_target":{"kind":"field_list","catalog":{"fields":["host"]}},"after_target":{"kind":"field_list","catalog":{"fields":[]}}}`, tc.query)))
+			if err != nil {
+				t.Fatal(err)
+			}
+			report, err := CompareMappings(request)
+			if err != nil {
+				t.Fatal(err)
+			}
+			e := report.Entries[0]
+			if e.BeforeStatus != tc.beforeStatus || e.AfterStatus != analysis.Invalid || e.BeforeRewrite.CandidateText != tc.query || e.AfterRewrite.CandidateText != tc.query {
+				t.Fatalf("canonical regression setup: before=%s after=%s candidates=%q/%q", e.BeforeStatus, e.AfterStatus, e.BeforeRewrite.CandidateText, e.AfterRewrite.CandidateText)
+			}
+			var hostOutcome, hostDiagnostic bool
+			for _, d := range e.Deltas {
+				hostOutcome = hostOutcome || (d.Category == "outcome" && d.Change == "changed" && d.Key == "ref-0")
+				hostDiagnostic = hostDiagnostic || (d.Category == "diagnostic" && d.Change == "introduced" && strings.Contains(d.Key, "SPL_UNKNOWN_FIELD") && strings.HasSuffix(d.Key, "|ref-0"))
+			}
+			if !hostOutcome || !hostDiagnostic || e.Classification != Affected || report.Counts.Affected != 1 || report.Counts.Indeterminate != 0 {
+				t.Fatalf("observed host regression hidden: classification=%s counts=%+v hostOutcome=%v hostDiagnostic=%v", e.Classification, report.Counts, hostOutcome, hostDiagnostic)
+			}
+			if e.BeforeRewrite.Coverage.SemanticComplete || e.AfterRewrite.Coverage.SemanticComplete || len(e.Alignment.Unmatched) == 0 && report.Counts.Unmatched == 0 {
+				t.Fatal("incomplete background evidence was lost")
+			}
+		})
+	}
+}
+
+func TestMappingIdenticalRuleMultipleOccurrencesUnchanged(t *testing.T) {
+	for _, query := range []string{"search src=x | table src", "table src src"} {
+		t.Run(query, func(t *testing.T) {
+			rules := `{"schema_version":1,"rules":[{"id":"r","kind":"field","source":{"name":"src"},"target":{"name":"user"}}]}`
+			request, err := DecodeMappingRequest([]byte(fmt.Sprintf(`{"schema_version":1,"documents":[{"id":"q","document":{"text":%q}}],"before_rules":%s,"after_rules":%s}`, query, rules, rules)))
+			if err != nil {
+				t.Fatal(err)
+			}
+			report, err := CompareMappings(request)
+			if err != nil {
+				t.Fatal(err)
+			}
+			e := report.Entries[0]
+			if e.BeforeStatus != analysis.Valid || e.AfterStatus != analysis.Valid || len(e.BeforeRewrite.RuleEvaluations) != 2 || len(e.AfterRewrite.RuleEvaluations) != 2 {
+				t.Fatal("expected two complete canonical rule occurrences")
+			}
+			if e.Classification != Unchanged || len(e.Deltas) != 0 || report.Counts.Ambiguous != 0 || report.Counts.Unchanged != 1 {
+				t.Fatalf("equal occurrences invented ambiguity: classification=%s counts=%+v", e.Classification, report.Counts)
+			}
+		})
+	}
+}
+
+func TestMappingRuleEvaluationDeltaIsPerOccurrence(t *testing.T) {
+	first := analysis.Location{Start: analysis.Position{Offset: 6}, End: analysis.Position{Offset: 9}}
+	second := analysis.Location{Start: analysis.Position{Offset: 10}, End: analysis.Position{Offset: 13}}
+	before := []rewrite.RuleEvaluation{
+		{RuleID: "r", Outcome: "proposed", Reason: "matched", ReferenceIDs: []string{"ref-0"}, Location: &first},
+		{RuleID: "r", Outcome: "proposed", Reason: "matched", ReferenceIDs: []string{"ref-1"}, Location: &second},
+	}
+	after := append([]rewrite.RuleEvaluation{}, before...)
+	after[1].Outcome, after[1].Reason = "skipped", rewrite.ReasonConditionFalse
+	deltas := compareEvidence(evidence{mapping: true, rules: before}, evidence{mapping: true, rules: after}, Alignment{Pairs: []ReferencePair{{BeforeID: "ref-0", AfterID: "ref-0", Domain: "original"}, {BeforeID: "ref-1", AfterID: "ref-1", Domain: "original"}}})
+	if len(deltas) != 1 || deltas[0].Category != "rule_evaluation" || deltas[0].Change != "changed" {
+		t.Fatalf("per-occurrence change lost: %s", canonicalRaw(deltas))
+	}
+	var b, a rewrite.RuleEvaluation
+	if err := json.Unmarshal(deltas[0].Before, &b); err != nil {
+		t.Fatal(err)
+	}
+	if err := json.Unmarshal(deltas[0].After, &a); err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(b.ReferenceIDs, []string{"ref-1"}) || !reflect.DeepEqual(a.ReferenceIDs, []string{"ref-1"}) || b.Outcome != "proposed" || a.Outcome != "skipped" || a.Location == nil || *a.Location != second {
+		t.Fatalf("wrong occurrence paired: before=%+v after=%+v", b, a)
+	}
+}
+
+func TestMappingUnresolvedAlternativesRetainObservedValidationChange(t *testing.T) {
+	beforeTarget, afterTarget := fieldTarget("host"), fieldTarget()
+	p, err := PrepareMappings(
+		MappingSide{Rules: rewrite.RuleSet{SchemaVersion: 1}, ValidationTarget: &beforeTarget},
+		MappingSide{Rules: rewrite.RuleSet{SchemaVersion: 1, Rules: []rewrite.Rule{fieldRule("a", "host", "user"), fieldRule("b", "host", "owner")}}, ValidationTarget: &afterTarget},
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	report, err := p.Compare(impactInput("table host"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	e := report.Entries[0]
+	if e.BeforeRewrite.CandidateText != "table host" || e.AfterRewrite.CandidateText != "table host" || e.AfterRewrite.Coverage.RewriteComplete || len(e.Alignment.Ambiguous) == 0 {
+		t.Fatal("expected unresolved alternatives with equal candidate text")
+	}
+	if e.Classification != Affected || report.Counts.Affected != 1 || e.BeforeStatus != analysis.Valid || e.AfterStatus != analysis.Invalid {
+		t.Fatalf("validation regression masked by alternatives: classification=%s statuses=%s/%s counts=%+v", e.Classification, e.BeforeStatus, e.AfterStatus, report.Counts)
+	}
+}
+
+func TestMappingRuleEvaluationDuplicateAndUnalignedEvidence(t *testing.T) {
+	loc := analysis.Location{Start: analysis.Position{Offset: 6}, End: analysis.Position{Offset: 9}}
+	r := rewrite.RuleEvaluation{RuleID: "r", Outcome: "proposed", Reason: "matched", ReferenceIDs: []string{"ref-0"}, Location: &loc}
+	deltas := compareEvidence(evidence{mapping: true, rules: []rewrite.RuleEvaluation{r, r}}, evidence{mapping: true, rules: []rewrite.RuleEvaluation{r}}, Alignment{Pairs: []ReferencePair{{BeforeID: "ref-0", AfterID: "ref-0", Domain: "original"}}})
+	if len(deltas) != 3 {
+		t.Fatalf("duplicate occurrence evidence lost: %s", canonicalRaw(deltas))
+	}
+	for _, d := range deltas {
+		if d.Category != "rule_evaluation" || d.Change != "ambiguous" {
+			t.Fatalf("duplicate occurrence falsely paired: %s", canonicalRaw(deltas))
+		}
+	}
+	deltas = compareEvidence(evidence{mapping: true, rules: []rewrite.RuleEvaluation{r}}, evidence{mapping: true, rules: []rewrite.RuleEvaluation{r}}, Alignment{})
+	if len(deltas) != 2 {
+		t.Fatalf("unaligned evaluation disappeared: %s", canonicalRaw(deltas))
+	}
+	for _, d := range deltas {
+		if d.Change != "unmatched" {
+			t.Fatalf("unaligned evaluation paired: %s", canonicalRaw(deltas))
+		}
+	}
+}
+
+func TestOriginalFallbackRequiresMutualUniqueness(t *testing.T) {
+	b1 := analysis.Reference{ID: "before-1", Kind: "field", Role: "read", ScopeID: "scope-0", StageID: "stage-0", OriginalName: "host", NormalizedName: "host", Location: analysis.Location{Start: analysis.Position{Offset: 6}, End: analysis.Position{Offset: 10}}}
+	b2, a1 := b1, b1
+	b2.ID, a1.ID = "before-2", "after-1"
+	for _, refs := range [][]analysis.Reference{{b1, b2}, {b2, b1}} {
+		for _, reverseSides := range []bool{false, true} {
+			before, after := refs, []analysis.Reference{a1}
+			if reverseSides {
+				before, after = after, before
+			}
+			got := alignOriginal(&analysis.Result{References: before}, &analysis.Result{References: after}, "rev", "rev")
+			if len(got.Pairs) != 0 || len(got.Ambiguous) != 3 {
+				t.Errorf("duplicate fallback paired or hid ambiguity (first=%s reverse=%v): %+v", refs[0].ID, reverseSides, got)
+			}
+		}
+	}
+}
+
+func TestOriginalAlignmentReservesExactIDsBeforeFallback(t *testing.T) {
+	b := analysis.Reference{ID: "fallback", Kind: "field", Role: "read"}
+	exact, after := b, b
+	exact.ID, after.ID = "exact", "exact"
+	for _, refs := range [][]analysis.Reference{{b, exact}, {exact, b}} {
+		got := alignOriginal(&analysis.Result{References: refs}, &analysis.Result{References: []analysis.Reference{after}}, "rev", "rev")
+		want := []ReferencePair{{BeforeID: "exact", AfterID: "exact", Domain: "original", Basis: "canonical_original_id"}}
+		if !reflect.DeepEqual(got.Pairs, want) || !reflect.DeepEqual(got.Unmatched, []string{"before:fallback"}) {
+			t.Errorf("fallback consumed canonical match: %+v", got)
+		}
 	}
 }
 

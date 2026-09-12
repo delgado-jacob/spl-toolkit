@@ -108,31 +108,62 @@ func alignOriginal(before, after *analysis.Result, beforeRevision, afterRevision
 		}
 		return a
 	}
-	used := map[string]bool{}
-	byID := map[string]analysis.Reference{}
-	byEvidence := map[string][]analysis.Reference{}
-	for _, r := range after.References {
-		byID[r.ID] = r
-		byEvidence[referenceEvidence(r)] = append(byEvidence[referenceEvidence(r)], r)
+	beforeIDs, afterIDs := map[string][]int{}, map[string][]int{}
+	for i, r := range before.References {
+		beforeIDs[r.ID] = append(beforeIDs[r.ID], i)
 	}
-	for _, b := range before.References {
-		if r, ok := byID[b.ID]; ok && referenceEvidence(b) == referenceEvidence(r) && !used[r.ID] {
-			a.Pairs = append(a.Pairs, ReferencePair{BeforeID: b.ID, AfterID: r.ID, Domain: "original", Basis: "canonical_original_id"})
-			used[r.ID] = true
+	for i, r := range after.References {
+		afterIDs[r.ID] = append(afterIDs[r.ID], i)
+	}
+	usedBefore, usedAfter := map[int]bool{}, map[int]bool{}
+	// Reserve every exact identity before fallback can consume its candidate.
+	for i, b := range before.References {
+		matches := afterIDs[b.ID]
+		if len(beforeIDs[b.ID]) != 1 || len(matches) != 1 {
 			continue
 		}
-		matches := byEvidence[referenceEvidence(b)]
-		if len(matches) == 1 && !used[matches[0].ID] {
-			a.Pairs = append(a.Pairs, ReferencePair{BeforeID: b.ID, AfterID: matches[0].ID, Domain: "original", Basis: "unique_exact_original_evidence"})
-			used[matches[0].ID] = true
-		} else if len(matches) > 1 {
-			a.Ambiguous = append(a.Ambiguous, "before:"+b.ID)
-		} else {
-			a.Unmatched = append(a.Unmatched, "before:"+b.ID)
+		j := matches[0]
+		r := after.References[j]
+		if referenceEvidence(b) == referenceEvidence(r) {
+			a.Pairs = append(a.Pairs, ReferencePair{BeforeID: b.ID, AfterID: r.ID, Domain: "original", Basis: "canonical_original_id"})
+			usedBefore[i], usedAfter[j] = true, true
 		}
 	}
-	for _, r := range after.References {
-		if !used[r.ID] {
+	beforeEvidence, afterEvidence := map[string][]int{}, map[string][]int{}
+	for i, r := range before.References {
+		if !usedBefore[i] {
+			key := referenceEvidence(r)
+			beforeEvidence[key] = append(beforeEvidence[key], i)
+		}
+	}
+	for i, r := range after.References {
+		if !usedAfter[i] {
+			key := referenceEvidence(r)
+			afterEvidence[key] = append(afterEvidence[key], i)
+		}
+	}
+	for key, bs := range beforeEvidence {
+		as := afterEvidence[key]
+		if len(bs) == 1 && len(as) == 1 {
+			b, r := before.References[bs[0]], after.References[as[0]]
+			a.Pairs = append(a.Pairs, ReferencePair{BeforeID: b.ID, AfterID: r.ID, Domain: "original", Basis: "unique_exact_original_evidence"})
+			usedBefore[bs[0]], usedAfter[as[0]] = true, true
+		} else if len(as) != 0 {
+			for _, i := range bs {
+				a.Ambiguous = append(a.Ambiguous, "before:"+before.References[i].ID)
+			}
+			for _, i := range as {
+				a.Ambiguous = append(a.Ambiguous, "after:"+after.References[i].ID)
+			}
+		}
+	}
+	for i, r := range before.References {
+		if !usedBefore[i] {
+			a.Unmatched = append(a.Unmatched, "before:"+r.ID)
+		}
+	}
+	for i, r := range after.References {
+		if !usedAfter[i] {
 			a.Unmatched = append(a.Unmatched, "after:"+r.ID)
 		}
 	}
@@ -312,7 +343,7 @@ func compareEvidence(before, after evidence, alignment Alignment) []EvidenceDelt
 	deltas = append(deltas, diagnosticDeltas(before.diagnostics, after.diagnostics, before.analysis, after.analysis, alignment, domain)...)
 	if before.mapping || after.mapping {
 		deltas = append(deltas, keyedDeltas("rewrite_change", changesAsFindings(before.changes), changesAsFindings(after.changes))...)
-		deltas = append(deltas, keyedDeltas("rule_evaluation", rulesAsFindings(before.rules), rulesAsFindings(after.rules))...)
+		deltas = append(deltas, ruleEvaluationDeltas(before.rules, after.rules, alignment)...)
 	}
 	sort.Slice(deltas, func(i, j int) bool {
 		a, b := deltas[i], deltas[j]
@@ -464,12 +495,44 @@ func changesAsFindings(changes []rewrite.Change) []finding {
 	}
 	return out
 }
-func rulesAsFindings(rules []rewrite.RuleEvaluation) []finding {
-	out := []finding{}
-	for _, r := range rules {
-		out = append(out, finding{r.RuleID, r})
+func ruleEvaluationDeltas(before, after []rewrite.RuleEvaluation, alignment Alignment) []EvidenceDelta {
+	beforeIDs, afterIDs := map[string]string{}, map[string]string{}
+	for _, p := range alignment.Pairs {
+		if p.Domain == "original" {
+			beforeIDs[p.BeforeID], afterIDs[p.AfterID] = p.BeforeID, p.BeforeID
+		}
 	}
-	return out
+	out := []EvidenceDelta{}
+	findings := func(rules []rewrite.RuleEvaluation, ids map[string]string, side string) []finding {
+		values := []finding{}
+		for _, r := range rules {
+			refs := []string{}
+			aligned := true
+			for _, id := range r.ReferenceIDs {
+				if original, ok := ids[id]; ok {
+					refs = append(refs, original)
+				} else {
+					aligned = false
+				}
+			}
+			sort.Strings(refs)
+			key := string(canonicalRaw([]any{r.RuleID, refs, r.Location}))
+			if !aligned {
+				d := EvidenceDelta{Category: "rule_evaluation", Change: "unmatched", Key: side + ":" + string(canonicalRaw([]any{r.RuleID, r.ReferenceIDs, r.Location}))}
+				if side == "before" {
+					d.Before = canonicalRaw(r)
+				} else {
+					d.After = canonicalRaw(r)
+				}
+				out = append(out, d)
+				continue
+			}
+			values = append(values, finding{key, r})
+		}
+		return values
+	}
+	b, a := findings(before, beforeIDs, "before"), findings(after, afterIDs, "after")
+	return append(out, keyedDeltas("rule_evaluation", b, a)...)
 }
 
 func keyedDeltas(category string, before, after []finding) []EvidenceDelta {
@@ -515,10 +578,12 @@ func classify(deltas []EvidenceDelta, complete bool, unresolvedOnly bool, alignm
 		return Indeterminate, []string{"rewrite_or_validation_incomplete"}
 	}
 	if len(deltas) != 0 {
-		for _, d := range deltas {
-			if d.Change != "ambiguous" && d.Change != "unmatched" {
-				return Affected, []string{"observed_static_delta"}
+		if hasObservedDelta(deltas) {
+			reasons := []string{"observed_static_delta"}
+			if !complete {
+				reasons = append(reasons, "comparison_coverage_incomplete")
 			}
+			return Affected, reasons
 		}
 		return Indeterminate, []string{"alignment_ambiguous"}
 	}
@@ -529,4 +594,13 @@ func classify(deltas []EvidenceDelta, complete bool, unresolvedOnly bool, alignm
 		return Indeterminate, []string{"comparison_coverage_incomplete"}
 	}
 	return Unchanged, []string{}
+}
+
+func hasObservedDelta(deltas []EvidenceDelta) bool {
+	for _, d := range deltas {
+		if d.Change != "ambiguous" && d.Change != "unmatched" {
+			return true
+		}
+	}
+	return false
 }

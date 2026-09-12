@@ -196,8 +196,29 @@ func (p *PreparedMappingComparison) Compare(input corpus.Input) (*Report, error)
 		e.BeforeStatus, e.AfterStatus = bv.status, av.status
 		e.Alignment = alignMapping(e.BeforeRewrite, e.AfterRewrite, e.AnalysisRevision)
 		e.Deltas = compareEvidence(bv, av, e.Alignment)
-		e.Classification, e.Reasons = classify(e.Deltas, bv.complete && av.complete, e.BeforeRewrite.CandidateText == e.AfterRewrite.CandidateText && (!bv.complete || !av.complete), e.Alignment)
+		unresolvedOnly := false
+		if !e.BeforeRewrite.Coverage.RewriteComplete || !e.AfterRewrite.Coverage.RewriteComplete {
+			// Unresolved alternatives can change rewrite status/audit without an
+			// observed candidate change. Check candidate analysis and validation
+			// independently, so a definite static regression still wins.
+			candidateDeltas := compareEvidence(candidateEvidence(bv, e.BeforeRewrite), candidateEvidence(av, e.AfterRewrite), e.Alignment)
+			unresolvedOnly = !hasObservedDelta(candidateDeltas)
+		}
+		e.Classification, e.Reasons = classify(e.Deltas, bv.complete && av.complete, unresolvedOnly, e.Alignment)
 		r.append(e)
 	}
 	return r, nil
+}
+
+func candidateEvidence(e evidence, r *rewrite.Result) evidence {
+	e.status, e.coverage = r.CandidateAnalysis.Status, r.CandidateAnalysis.Coverage
+	e.changes, e.rules = nil, nil
+	if v := r.CandidateValidation; v != nil {
+		if v.FieldList != nil {
+			e.status, e.coverage = v.FieldList.Status, v.FieldList.Coverage
+		} else if v.Schema != nil {
+			e.status, e.coverage = v.Schema.Status, v.Schema.Coverage
+		}
+	}
+	return e
 }
