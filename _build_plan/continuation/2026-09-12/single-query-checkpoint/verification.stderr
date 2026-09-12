@@ -1,0 +1,7 @@
+go: downloading github.com/antlr4-go/antlr/v4 v4.13.1
+# github.com/delgado-jacob/spl-toolkit/pkg/rewrite
+pkg/analysis/commands.go:4:2: module lookup disabled by GOPROXY=off
+# github.com/delgado-jacob/spl-toolkit/pkg/analysis
+pkg/analysis/commands.go:4:2: module lookup disabled by GOPROXY=off
+# github.com/delgado-jacob/spl-toolkit/pkg/validation
+pkg/analysis/commands.go:4:2: module lookup disabled by GOPROXY=off

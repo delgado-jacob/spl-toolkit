@@ -1,0 +1,171 @@
+{
+  "purpose": "Coordinator-only continuation inputs; never expose private acceptance oracles to implementation workers. Preserve missing-input gaps.",
+  "source_commit": "7927ac3c372d4c359b07e0bedab64e09db96a5a3",
+  "files": [
+    {
+      "original_path": "/private/tmp/spl-toolkit-root-continuation.json",
+      "bundle_path": "coordinator-inputs/spl-toolkit-root-continuation.json",
+      "bytes": 167656,
+      "sha256": "ecbc8276ec0f289091837c998941971b9c1e70ee7f8e6b4cf0e15aa9544f01e5"
+    },
+    {
+      "original_path": "/private/tmp/spl-toolkit-root-m5-40e6e171-final-acceptance-receipt.json",
+      "bundle_path": "coordinator-inputs/spl-toolkit-root-m5-40e6e171-final-acceptance-receipt.json",
+      "bytes": 5584,
+      "sha256": "567ba8d92ec4b63f54c02b1e2c6ae49d86d094013b3ae69934ddf51337249014"
+    },
+    {
+      "original_path": "/private/tmp/spl-toolkit-root-m5-acceptance-py314.json",
+      "bundle_path": "coordinator-inputs/spl-toolkit-root-m5-acceptance-py314.json",
+      "bytes": 43537,
+      "sha256": "24c742d64d47d9762cf2302dd5599565ce78ced23e5f6701904f841ec4d90b78"
+    },
+    {
+      "original_path": "/private/tmp/spl-toolkit-root-m5-closure-audit.json",
+      "bundle_path": "coordinator-inputs/spl-toolkit-root-m5-closure-audit.json",
+      "bytes": 4527,
+      "sha256": "73f10808f7d73f99091652e8d0f1ddb58a9f6167237f09cdb0253f2ac49bc9a9"
+    },
+    {
+      "original_path": "/private/tmp/spl-toolkit-root-m6-cases.json",
+      "bundle_path": "coordinator-inputs/spl-toolkit-root-m6-cases.json",
+      "bytes": 28964,
+      "sha256": "ca02c00621c714aab6ac090ac1216511c1c574f840637a04417db09ae255a2e6"
+    },
+    {
+      "original_path": "/private/tmp/spl-toolkit-root-m6-core-attempt-preparation.json",
+      "bundle_path": "coordinator-inputs/spl-toolkit-root-m6-core-attempt-preparation.json",
+      "bytes": 1424,
+      "sha256": "ea9ffc6b1a652bf00f1f49efe8c3e604a8ffb3cec32a217dc69aebc32e3b008f"
+    },
+    {
+      "original_path": "/private/tmp/spl-toolkit-root-m6-core-attempt.py",
+      "bundle_path": "coordinator-inputs/spl-toolkit-root-m6-core-attempt.py",
+      "bytes": 5334,
+      "sha256": "fda2c418da021030b7ecf54e605151264c81f9a19329fe5a6d980c3aa993aada"
+    },
+    {
+      "original_path": "/private/tmp/spl-toolkit-root-m6-final-acceptance.py",
+      "bundle_path": "coordinator-inputs/spl-toolkit-root-m6-final-acceptance.py",
+      "bytes": 5311,
+      "sha256": "9c1a9469ba2f0afdc025db726bfad89db9bd0fb56c6e4794ea9ee1bf9f557b1b"
+    },
+    {
+      "original_path": "/private/tmp/spl-toolkit-root-m6-go-acceptance.py",
+      "bundle_path": "coordinator-inputs/spl-toolkit-root-m6-go-acceptance.py",
+      "bytes": 6200,
+      "sha256": "a3bb1c6c63d874ac642ead40057e64ec8caca030911b45bde737fee491b5db87"
+    },
+    {
+      "original_path": "/private/tmp/spl-toolkit-root-m6-post-m5-handoff.md",
+      "bundle_path": "coordinator-inputs/spl-toolkit-root-m6-post-m5-handoff.md",
+      "bytes": 3812,
+      "sha256": "e5a8596922095a0bdd3fb289560d0531ea87208bd04078dec8a65295ce32b696"
+    },
+    {
+      "original_path": "/private/tmp/spl-toolkit-root-m6-preparation.json",
+      "bundle_path": "coordinator-inputs/spl-toolkit-root-m6-preparation.json",
+      "bytes": 8163,
+      "sha256": "a06bf4156b0f6038fc61dcd563575072504bfd5212f87d9cad502c51b5374e7f"
+    },
+    {
+      "original_path": "/private/tmp/spl-toolkit-root-m6-private-plan-review.json",
+      "bundle_path": "coordinator-inputs/spl-toolkit-root-m6-private-plan-review.json",
+      "bytes": 898,
+      "sha256": "83454aebcbb5cbf05d66036fa81fd1ecb28e7e86bc4709a3a9be3407a58524c2"
+    },
+    {
+      "original_path": "/private/tmp/spl-toolkit-root-m6-production-release.json",
+      "bundle_path": "coordinator-inputs/spl-toolkit-root-m6-production-release.json",
+      "bytes": 2037,
+      "sha256": "4d21108dd0eac7d1271a9e6e7a21ed54240fa3429e6bc40f97a0032eb874937b"
+    },
+    {
+      "original_path": "/private/tmp/spl-toolkit-root-m6-replacement-dispatch.md",
+      "bundle_path": "coordinator-inputs/spl-toolkit-root-m6-replacement-dispatch.md",
+      "bytes": 3919,
+      "sha256": "498e049aaaab4d07225a775faead932990eb539729c9e2910dab9a5e97fb2d51"
+    },
+    {
+      "original_path": "/private/tmp/spl-toolkit-root-m6-semantic-checks.py",
+      "bundle_path": "coordinator-inputs/spl-toolkit-root-m6-semantic-checks.py",
+      "bytes": 9861,
+      "sha256": "670e0601868a0cb10f81b77e31d1c72db4ea3e872a5048e7a17c6e66963f7943"
+    },
+    {
+      "original_path": "/private/tmp/spl-toolkit-root-m6-surface-acceptance.py",
+      "bundle_path": "coordinator-inputs/spl-toolkit-root-m6-surface-acceptance.py",
+      "bytes": 13658,
+      "sha256": "80081261a9d5283abd3845cab3a4970855f45ead0665ca003abdb550a1ae6c21"
+    },
+    {
+      "original_path": "/private/tmp/spl-toolkit-root-m7-acceptance-design.json",
+      "bundle_path": "coordinator-inputs/spl-toolkit-root-m7-acceptance-design.json",
+      "bytes": 7610,
+      "sha256": "f16a7078812b459d9634949a26c105578ed2be85637d63c42606ccd5a30d8ce9"
+    },
+    {
+      "original_path": "/private/tmp/spl-toolkit-root-m7-acquisition-cases.json",
+      "bundle_path": "coordinator-inputs/spl-toolkit-root-m7-acquisition-cases.json",
+      "bytes": 6781,
+      "sha256": "8c63c74b92a8d118c02fdd40bdfbd479f8cc1f136aaa04857e795f6ece61668c"
+    },
+    {
+      "original_path": "/private/tmp/spl-toolkit-root-m7-acquisition-fixtures.py",
+      "bundle_path": "coordinator-inputs/spl-toolkit-root-m7-acquisition-fixtures.py",
+      "bytes": 5555,
+      "sha256": "9a360ff659dd15a4d51c92de9a1f3589d21fa1ed4eabd2b946594089ac3ffb6c"
+    },
+    {
+      "original_path": "/private/tmp/spl-toolkit-root-m7-lsp-acceptance.py",
+      "bundle_path": "coordinator-inputs/spl-toolkit-root-m7-lsp-acceptance.py",
+      "bytes": 12433,
+      "sha256": "e2e718c3775b8675160c515cab8dcb3cd73762a7af734f9844d26059e54f534f"
+    },
+    {
+      "original_path": "/private/tmp/spl-toolkit-root-m7-lsp-preparation.json",
+      "bundle_path": "coordinator-inputs/spl-toolkit-root-m7-lsp-preparation.json",
+      "bytes": 1893,
+      "sha256": "a7aaf682af7b39f982a894d3fda5706889877a55e32ca4f34561ca9dd13f966d"
+    },
+    {
+      "original_path": "/private/tmp/spl-toolkit-root-m7-replacement-dispatch.md",
+      "bundle_path": "coordinator-inputs/spl-toolkit-root-m7-replacement-dispatch.md",
+      "bytes": 4106,
+      "sha256": "81e10da1e239cacebcbdcbd6aab5fa3ffedace1c51b454116dc5a966c116444a"
+    },
+    {
+      "original_path": "/private/tmp/spl-toolkit-root-m7-sarif-preparation.json",
+      "bundle_path": "coordinator-inputs/spl-toolkit-root-m7-sarif-preparation.json",
+      "bytes": 1841,
+      "sha256": "355b4e474e834384ce090d0ec5076346865949f34bd573ac2748d589583cfa34"
+    },
+    {
+      "original_path": "/private/tmp/spl-toolkit-root-m7-sarif-semantic-checks.py",
+      "bundle_path": "coordinator-inputs/spl-toolkit-root-m7-sarif-semantic-checks.py",
+      "bytes": 6307,
+      "sha256": "4fa98a01a8296b3f17aef5b459e2b4f63766f3f36d19bdb9a2ba527d6f7ff513"
+    }
+  ],
+  "missing_private_inputs": {
+    "/private/tmp/spl-toolkit-root-m6-go.go": "b770bdc35f289a2681b9479e63b5e7a5ef7a3bf814b9b958f23eebd7cc80ca3e",
+    "/private/tmp/spl-toolkit-root-m6-validation-cases.json": "d83ca0e8a0f7a944ffc5b8b6b4405ab1db99533f559a8c9ea764f39e284c9456",
+    "/private/tmp/spl-toolkit-root-m6-python-acceptance.py": "45db0224a6bea4c19788bd5e3e93f1074225440ea0d1171ad410cd1315e272e8"
+  },
+  "sdd_archive": {
+    "path": "milestone-6-sdd.tar.gz",
+    "sha256": "5de8517569f854e8ca5bff5d781d9f576e88b78837e6ed133e905709a4c6c9a2",
+    "file_count": 477,
+    "uncompressed_bytes": 4477340
+  },
+  "project_context": {
+    "PRD.md": "dfa613423fd364342e11ac572be3f1f122de69d2a0ba530eb2dd4fb44dcdabec",
+    "milestone-prompts/1-trustworthy-baseline.md": "9e1688dd00306c41f82f7e29da85947d19ab810956ee1e1c9f1d994c2324c367",
+    "milestone-prompts/2-structured-analysis-kernel.md": "6b06038af298d9750ba7b5263565febd89fa434d90e796e9f3bd0456c2efd228",
+    "milestone-prompts/3-field-list-validation.md": "7fa9af56a9a1744cdee8ac4ff3d9220b91525d7702051d76b5b0c300b3ff41d4",
+    "milestone-prompts/4-json-schema-ocsf-validation.md": "6265d913f2f52524761428bebb40d271aa65babca8d5ca90df4270993b84dfa6",
+    "milestone-prompts/5-standalone-spl2.md": "4b9217874a17c721f467407fe7e5641fbe20b397e1789075cfcd9dd1e66e1e4f",
+    "milestone-prompts/6-safe-rewrite-mapping.md": "908fbd8a0a32039eb8ff958eb2666cbb82a904e06c24edfb493680ddd609cc26",
+    "milestone-prompts/7-developer-tooling.md": "dd83fd8516d9a014d8e8f8d07187d1e84cc1a554c5d40c44cac9dc729873f277"
+  }
+}

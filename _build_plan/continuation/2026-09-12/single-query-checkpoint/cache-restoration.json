@@ -1,0 +1,46 @@
+{
+  "mode": "Read existing local cache; copy two pinned dependencies only; no downloads/dependency changes",
+  "gomodcache": "/private/tmp/spl-toolkit-handoff-gomodcache",
+  "copied_metadata": [
+    {
+      "source": "/Users/jacobdelgado/go/pkg/mod/cache/download/github.com/antlr4-go/antlr/v4/@v/v4.13.1.mod",
+      "destination": "/private/tmp/spl-toolkit-handoff-gomodcache/cache/download/github.com/antlr4-go/antlr/v4/@v/v4.13.1.mod",
+      "sha256": "92e843258f45cd21bb0b1186d9b6864ee4047a30c1154d603ebab8664aa5caba"
+    },
+    {
+      "source": "/Users/jacobdelgado/go/pkg/mod/cache/download/github.com/antlr4-go/antlr/v4/@v/v4.13.1.info",
+      "destination": "/private/tmp/spl-toolkit-handoff-gomodcache/cache/download/github.com/antlr4-go/antlr/v4/@v/v4.13.1.info",
+      "sha256": "e37b2f36d8106828af06291914e8988b484a57d5cff98f3c58c7b7a87af3bbbe"
+    },
+    {
+      "source": "/Users/jacobdelgado/go/pkg/mod/cache/download/github.com/antlr4-go/antlr/v4/@v/v4.13.1.zip",
+      "destination": "/private/tmp/spl-toolkit-handoff-gomodcache/cache/download/github.com/antlr4-go/antlr/v4/@v/v4.13.1.zip",
+      "sha256": "2fb455ab1f46e53a3cfa678306a6e405f291b34858222db9240335c018ae9554"
+    },
+    {
+      "source": "/Users/jacobdelgado/go/pkg/mod/cache/download/github.com/antlr4-go/antlr/v4/@v/v4.13.1.ziphash",
+      "destination": "/private/tmp/spl-toolkit-handoff-gomodcache/cache/download/github.com/antlr4-go/antlr/v4/@v/v4.13.1.ziphash",
+      "sha256": "49eabd77603596a6202c1b618416e5b56d517e186868b6cadc49b03b8c85192d"
+    },
+    {
+      "source": "/Users/jacobdelgado/go/pkg/mod/cache/download/golang.org/x/exp/@v/v0.0.0-20240506185415-9bf2ced13842.mod",
+      "destination": "/private/tmp/spl-toolkit-handoff-gomodcache/cache/download/golang.org/x/exp/@v/v0.0.0-20240506185415-9bf2ced13842.mod",
+      "sha256": "e418ec6dab79a2878e66866513c61f87bf8178f85fcb78756708efd635580ca0"
+    },
+    {
+      "source": "/Users/jacobdelgado/go/pkg/mod/cache/download/golang.org/x/exp/@v/v0.0.0-20240506185415-9bf2ced13842.info",
+      "destination": "/private/tmp/spl-toolkit-handoff-gomodcache/cache/download/golang.org/x/exp/@v/v0.0.0-20240506185415-9bf2ced13842.info",
+      "sha256": "5452f4dffa2d0fcfac68a904ccbd4e998dc5f7eb4d3e8ac2b61a33c3f16e41c5"
+    },
+    {
+      "source": "/Users/jacobdelgado/go/pkg/mod/cache/download/golang.org/x/exp/@v/v0.0.0-20240506185415-9bf2ced13842.zip",
+      "destination": "/private/tmp/spl-toolkit-handoff-gomodcache/cache/download/golang.org/x/exp/@v/v0.0.0-20240506185415-9bf2ced13842.zip",
+      "sha256": "6b4a2c206c65da1945186e59b9fdf8da26f13db40ee18a37f963c6ea053a665c"
+    },
+    {
+      "source": "/Users/jacobdelgado/go/pkg/mod/cache/download/golang.org/x/exp/@v/v0.0.0-20240506185415-9bf2ced13842.ziphash",
+      "destination": "/private/tmp/spl-toolkit-handoff-gomodcache/cache/download/golang.org/x/exp/@v/v0.0.0-20240506185415-9bf2ced13842.ziphash",
+      "sha256": "26437d04ee0c148e9d7a70d8424d24fe1be2f75dee1681e676d3d07406e46ec9"
+    }
+  ]
+}

@@ -1,0 +1,234 @@
+{
+  "status": "prepared-not-executed",
+  "basis": "Approved M7 dedicated-file/strict-manifest/held-object/output-handle semantics; filesystem and product interface execution wait for M7 windows",
+  "files": [
+    {
+      "path": "a.spl",
+      "text": "search marker=\"🙂\" host=web\r\n| eval alias=host | table alias",
+      "language": "spl",
+      "expected_content_status": "valid"
+    },
+    {
+      "path": "nested/é 🙂 #%.spl2",
+      "text": "SELECT host AS alias FROM main WHERE status=200 | table alias",
+      "language": "spl2",
+      "expected_content_status": "valid"
+    },
+    {
+      "path": "z.spl",
+      "text": "eval marker=\"🙂\", broken=",
+      "language": "spl",
+      "expected_content_status": "invalid"
+    },
+    {
+      "path": "notes.txt",
+      "text": "THIS IS NOT A DEDICATED QUERY FILE",
+      "selected": false
+    },
+    {
+      "path": ".git/excluded.spl",
+      "text": "search host=ignored",
+      "selected": false
+    },
+    {
+      "path": ".hg/excluded.spl",
+      "text": "search host=ignored",
+      "selected": false
+    },
+    {
+      "path": ".svn/excluded.spl",
+      "text": "search host=ignored",
+      "selected": false
+    },
+    {
+      "path": ".worktrees/excluded.spl",
+      "text": "search host=ignored",
+      "selected": false
+    },
+    {
+      "path": "node_modules/excluded.spl",
+      "text": "search host=ignored",
+      "selected": false
+    },
+    {
+      "path": "vendor/excluded.spl",
+      "text": "search host=ignored",
+      "selected": false
+    },
+    {
+      "path": ".venv/excluded.spl",
+      "text": "search host=ignored",
+      "selected": false
+    },
+    {
+      "path": "venv/excluded.spl",
+      "text": "search host=ignored",
+      "selected": false
+    },
+    {
+      "path": "build/excluded.spl",
+      "text": "search host=ignored",
+      "selected": false
+    },
+    {
+      "path": "dist/excluded.spl",
+      "text": "search host=ignored",
+      "selected": false
+    }
+  ],
+  "directory_expected_paths": [
+    "a.spl",
+    "nested/é 🙂 #%.spl2",
+    "z.spl"
+  ],
+  "directory_obligations": [
+    "Exact whole-file UTF8 and CRLF preserved",
+    "Relative slash paths sorted lexically",
+    "Fixed ignored directories excluded",
+    "No host-language extraction",
+    "Distinct document IDs even if SourceID values coincide"
+  ],
+  "manifest_cases": [
+    {
+      "id": "unicode-first",
+      "file": "nested/é 🙂 #%.spl2",
+      "language": "spl2",
+      "source_id": "opaque:same",
+      "expected": "analyzed"
+    },
+    {
+      "id": "invalid-utf8",
+      "file": "invalid-utf8.spl",
+      "bytes_hex": "ff",
+      "language": "spl",
+      "source_id": "opaque:invalid-bytes",
+      "expected": "acquisition_failure"
+    },
+    {
+      "id": "missing",
+      "file": "missing.spl",
+      "language": "spl",
+      "source_id": "opaque:missing",
+      "expected": "acquisition_failure"
+    },
+    {
+      "id": "inline",
+      "text": "search host=inline",
+      "language": "spl",
+      "source_id": "opaque:same",
+      "expected": "analyzed"
+    },
+    {
+      "id": "first-file-last",
+      "file": "a.spl",
+      "language": "spl",
+      "source_id": "opaque:same",
+      "expected": "analyzed"
+    },
+    {
+      "id": "explicit-ignored",
+      "file": ".git/excluded.spl",
+      "language": "spl",
+      "source_id": "opaque:explicit-ignored",
+      "expected": "analyzed"
+    }
+  ],
+  "manifest_obligations": [
+    "Preserve exact requested order with all successful neighboring entries",
+    "Explicitly selected ignored directory file is permitted",
+    "Missing/invalidUTF8 are located acquisition failures with no fake query range",
+    "Any acquisition failure makes execution incomplete and CLI exit2",
+    "Malformed shared target rejected before acquisition even when all selected paths fail",
+    "An empty selection is an input error"
+  ],
+  "filesystem_cases": [
+    {
+      "name": "root-final-symlink",
+      "expected": "reject"
+    },
+    {
+      "name": "ordinary-ancestor-alias-above-root",
+      "expected": "allow real declared root"
+    },
+    {
+      "name": "directory-file-and-directory-symlinks",
+      "expected": "skip without traversal and report skipped-selection evidence"
+    },
+    {
+      "name": "explicit-manifest-component-or-leaf-symlink",
+      "expected": "per-entry acquisition failure"
+    },
+    {
+      "name": "selected-fifo",
+      "expected": "bounded regular-file rejection with no blocking read"
+    },
+    {
+      "name": "selected-directory",
+      "expected": "per-entry nonregular failure"
+    },
+    {
+      "name": "held-parent-or-leaf-replaced",
+      "expected": "original held object or explicit failure; never follow replacement"
+    },
+    {
+      "name": "unix-held-object-moved",
+      "expected": "same held object semantics; do not claim immutable ancestry"
+    },
+    {
+      "name": "directory-traversal-failure",
+      "expected": "retain successful selections, execution incomplete, no silent complete report"
+    }
+  ],
+  "output_collision_cases": [
+    {
+      "name": "same-query-path",
+      "protected_input": "selected query"
+    },
+    {
+      "name": "same-manifest-path",
+      "protected_input": "manifest"
+    },
+    {
+      "name": "same-rule-path",
+      "protected_input": "mapping rules"
+    },
+    {
+      "name": "same-target-path",
+      "protected_input": "schema or OCSF target"
+    },
+    {
+      "name": "same-resources-path",
+      "protected_input": "schema resources"
+    },
+    {
+      "name": "hardlink-query-alias",
+      "protected_input": "selected query"
+    },
+    {
+      "name": "leaf-symlink-query-alias",
+      "protected_input": "selected query"
+    },
+    {
+      "name": "parent-alias-query-path",
+      "protected_input": "selected query"
+    },
+    {
+      "name": "output-is-missing-selected-input",
+      "protected_input": "missing selected query path; do not create it"
+    }
+  ],
+  "output_obligations": [
+    "Complete acquisition and serialize before opening report output",
+    "Reject protected identities and unknown identity before truncation",
+    "No source mutation, temporary rename or stdout fallback",
+    "Use the same checked output handle for truncate/write",
+    "Create new output exclusively only after protected-path proof",
+    "Capture and compare original input bytes and missing-path state before/after each actual run"
+  ],
+  "qualifications": [
+    "This file contains independent future inputs and semantic assertions only",
+    "No filesystem fixture, product query, build, test or consumer has run",
+    "Actual Manifest/CLI/Go field names and platform execution are reconciled at accepted M7 gates",
+    "Deterministic descriptor-race proof belongs to actual loader tests and cannot be inferred from ordinary CLI success"
+  ]
+}

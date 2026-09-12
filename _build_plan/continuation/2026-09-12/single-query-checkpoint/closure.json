@@ -1,0 +1,30 @@
+{
+  "status": "single-query atomic checkpoint verified; full Task5 incomplete",
+  "source_commit": "7927ac3c372d4c359b07e0bedab64e09db96a5a3",
+  "accepted_task4": "14a3a0dcfe4652240dc8b949461f905b206f215a",
+  "owned_source_sha256": {
+    "pkg/rewrite/rewrite.go": "ae7e1f49fb2df547f3367acc715b77179b79ab20828fb94ab534febb7f89d850",
+    "pkg/rewrite/verify.go": "a06a98208b5f52d5d0062474f5c9a9e681932a0b086f04cba1d412a7b8de8002",
+    "pkg/rewrite/rewrite_test.go": "c9e38e2a9ee9445cee10cb398d1a4515bdaf49bdcf6855e96e142d46e0556ce8"
+  },
+  "review": {
+    "path": "single-unit-review.md",
+    "sha256": "46bd0c9cf6df87447d181127e93c14f3ff433a8c7197b0135b3c19d345e61aee",
+    "verdict": "Bounded source review approved,0findings; report predates successful environment repair."
+  },
+  "verification": {
+    "path": "restored-cache.json",
+    "sha256": "ad0701d84068fe3b5d041287f7e6ce9dd584b7a0dda80dc411194ce678a233a3",
+    "exit_code": 0,
+    "source_unchanged": true,
+    "stdout_sha256": "ef81357294ea4e8995c776be211b46805b6973571bebf879410dd4efa46100fe",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "packages": [
+      "pkg/rewrite",
+      "pkg/analysis",
+      "pkg/validation"
+    ],
+    "go_version": "go version go1.25.5 darwin/arm64"
+  },
+  "qualification": "Earlier setup failure and historical misleading green-named failure retained. No private Task5 acceptance or batch/negative-proof/concurrent/whole-milestone acceptance claimed. Root ran user-requested package tests after agents ended, not private root acceptance."
+}

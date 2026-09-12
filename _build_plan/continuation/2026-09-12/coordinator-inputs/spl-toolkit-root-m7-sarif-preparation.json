@@ -1,0 +1,24 @@
+{
+  "status": "prepared-not-executed",
+  "scope": "Root independent SARIF semantic oracle; official JSON Schema validation is separate prerequisite",
+  "script": "/private/tmp/spl-toolkit-root-m7-sarif-semantic-checks.py",
+  "script_sha256": "4fa98a01a8296b3f17aef5b459e2b4f63766f3f36d19bdb9a2ba527d6f7ff513",
+  "official_schema_source": "/private/tmp/spl-toolkit-m7-schema-validator-preflight/sarif-schema-2.1.0.json",
+  "official_schema_sha256": "ad6db49878699b091f3eeb765b6e29e92a34bad4da88664d000c923b549c3a25",
+  "preparation_checks": "Python AST only; no imports or product/consumer/schema runtime",
+  "planned_checks": [
+    "canonical diagnostic multiset and severity/message identity",
+    "exact original UTF-8 offsets and Unicode line/columns including CRLF",
+    "encoded artifact URI/base/index consistency and cycle/index refusal",
+    "rule index/ID consistency and unique declared IDs",
+    "virtual artifact exact original contents",
+    "executionSuccessful distinguishes scan execution from query validity"
+  ],
+  "run_gate": "Final accepted M7 producer/inline/file URI contract and diagnostic shapes must be reconciled before use; derive expected URIs/findings from original inputs/canonical reports, never from output SARIF. Actual consumer acceptance remains separate.",
+  "preexecution_contract_corrections": [
+    "Compare separately expected fully unlocated or file-only completeness/failure results, no invented ranges and no ignored results",
+    "Resolve allowed missing startColumn/endLine/endColumn from original Unicode source; compare exact canonical range",
+    "Select explicit producer result.level; no inaccurate universal warning fallback or additional configuration feature",
+    "Require every emitted ruleId in the approved deterministic rule table; ruleIndex optional but checked when present"
+  ]
+}

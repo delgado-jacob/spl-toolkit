@@ -1,0 +1,113 @@
+{
+  "candidate": "40e6e171a1d215e5c67758fbf346cc5b78892ee2",
+  "implementation_commit": "7571f1cb578968caf92996b050ebfc3092f02605",
+  "status": "Root final runtime acceptance passed; broad findings resolved; authored-document closure remains open",
+  "scoped_review": {
+    "path": "/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/.superpowers/sdd/milestone-5-implementation-plan/milestone-5-broad-rereview-1.md",
+    "sha256": "c906a7a32b5dcdd045d688f293e9fd15c2d036d09e56c5fa80efe6cdcb1296bc"
+  },
+  "freeze_receipt": {
+    "path": "/private/tmp/spl-toolkit-m5-40e6e171-final-window-freeze.json",
+    "sha256": "6fdbb59ed009fe658bbb6a69e8963018a54ccd5969f919f7195376e359ec1777"
+  },
+  "historical_fcbb_acceptance": {
+    "path": "/private/tmp/spl-toolkit-root-m5-final-acceptance-receipt.json",
+    "sha256": "daa4b3e94fbc514e08c2b4caaf58c1111daa0333693b9d0fac268f175a4aac95"
+  },
+  "attempts": {
+    "surfaces": {
+      "path": "/private/tmp/spl-toolkit-root-m5-final-attempts/40e6e171a1d2-surfaces-20260908T192052704052Z/attempt.json",
+      "sha256": "6167f243297916368809c1f990ac5fe77b3a2076c632b696bca50b868419f303",
+      "status": "passed",
+      "exit_code": 0,
+      "inputs_unchanged": true
+    },
+    "py314": {
+      "path": "/private/tmp/spl-toolkit-root-m5-final-attempts/40e6e171a1d2-py314-20260908T192105114142Z/attempt.json",
+      "sha256": "d34ec357f28c9ca1c1f2b51f374b5f64321141bab3deaf7c4678a29ea378337a",
+      "status": "passed",
+      "exit_code": 0,
+      "inputs_unchanged": true
+    }
+  },
+  "current_identity": {
+    "tracked": 380,
+    "untracked": 30,
+    "built_or_packaged_artifacts": 5,
+    "equal_between_python_and_surface_windows": true,
+    "current_snapshot_matches": true,
+    "all_nine_held_tool_artifacts_match": true
+  },
+  "surface_counts": {
+    "analysis_cases": 16,
+    "legacy": 1,
+    "task11_independent_cases": 14,
+    "broad_fix_validation_controls": 2,
+    "concurrent_native_analysis_calls": 68,
+    "native_schema_calls_per_case": 5,
+    "mixed_batch_documents_per_target": 4,
+    "input_rejections": {
+      "capability_queries": 6,
+      "raw_unicode_http": 3,
+      "legacy_cli": 3,
+      "legacy_http": 3,
+      "legacy_python": 4,
+      "legacy_selector_members_http": 9
+    },
+    "schema_cases": 9,
+    "field_cases": 4
+  },
+  "surface_checks": {
+    "late_invalid_batch_atomicity": "passed",
+    "file_stdin_output": "passed",
+    "caller_target_batch_capability_ownership": "passed",
+    "task8_full_canonical_parity": "passed with explicit module-category contract amendment"
+  },
+  "python314": {
+    "interpreter": "3.14.1 (main, Dec  2 2025, 12:51:37) [Clang 17.0.0 (clang-1700.4.4.1)]",
+    "executable": "/private/tmp/spl-toolkit-remaining-py314/bin/python",
+    "counts": {
+      "tests": 339,
+      "errors": 0,
+      "failures": 0,
+      "skipped": 0
+    },
+    "spl2_native_test_count": 109,
+    "native_sha256": "26a561e20dcb5c4eae2e95a6603bcd42ebdb0f6a79a92715cc83bb870ce2ffc3"
+  },
+  "baseline_amendment": {
+    "path": "/private/tmp/spl-toolkit-root-m5-approved-contract-amendments.json",
+    "sha256": "da907a495392127e66f08fd4ed2aec7a09901fd44e04a4d63b291e4bf19841c7"
+  },
+  "unchanged_task8_baseline": {
+    "path": "/private/tmp/spl-toolkit-root-m5-go-results-task8.json",
+    "sha256": "02456051aa87dedd1267d6b47f4f9ac818b60add2b9765cd9152acdb65833407"
+  },
+  "evidence": {
+    "spl-toolkit-root-m5-surface-acceptance.json": {
+      "path": "/private/tmp/spl-toolkit-root-m5-surface-acceptance.json",
+      "sha256": "bf29c7ba79803c806fbda3e291a46e48f9785a6bff3baa7e668535604da366c4"
+    },
+    "spl-toolkit-root-m5-acceptance-py314.json": {
+      "path": "/private/tmp/spl-toolkit-root-m5-acceptance-py314.json",
+      "sha256": "24c742d64d47d9762cf2302dd5599565ce78ced23e5f6701904f841ec4d90b78"
+    },
+    "spl-toolkit-root-m5-go-acceptance.json": {
+      "path": "/private/tmp/spl-toolkit-root-m5-go-acceptance.json",
+      "sha256": "d3dded8662c2679c18e418650b7a6223a4874f090f7ca36f6d93e54cce2d6052"
+    },
+    "task11-semantic-reports.json": {
+      "path": "/private/tmp/spl-toolkit-root-m5-surfaces/task11-semantic-reports.json",
+      "sha256": "9f311abfb5a5a9199e9d27b2e200c09633c0780b0aa8ffa7de0c78bb17beeb97"
+    }
+  },
+  "qualification": [
+    "Root checks actually ran at fixed committed candidate40e6e171. Native/CLI/server are held precommit builds whose checked source content equals7571f1c; embedded VCS metadata is not asserted to name finalHEAD.",
+    "Both root runs preserve380tracked+30untracked+5build/package identities before/after and betweenwindows. Explicitly allowed ignored SDD review/checkpoint finalization is outside these runtime input maps and attributed in freeze receipt.",
+    "The immutable Task8 baseline is unchanged. Only the independently approved module diagnostic category leaf is amended in memory; every other full-report value remains compared.",
+    "The two added broad-fix controls assert complete analysis separately from binding presence and field-validation completeness; both use full CLI/HTTP/native parity.",
+    "Prior fcbb root passes, initial root CLI-file assumption failure, unexecuted semantic-draft correction and broad With-fixes report remain historical and preserved.",
+    "Source Python3.12 and additional Python3.14 are local checks, not the full release matrix or live Splunk certification. Worker installed package evidence was reviewed separately and not rerun by root.",
+    "Both root processes exited; no merge/push/publication. Documentation/evidence closure remains to be applied and checked."
+  ]
+}

@@ -1,0 +1,1783 @@
+{
+  "status": "goal-active-not-complete",
+  "objective": "Implement remaining SPL Toolkit PRD milestones2-7 with milestone brainstorming/design/plan and serial reviewed SDD; M1 was complete",
+  "production_worktree": "/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones",
+  "production_branch": "codex/remaining-milestones",
+  "original_checkout": "/Users/jacobdelgado/repos/spl-toolkit",
+  "original_head": "6898cc052eb7109fbcc7495ee826c993aaa93352",
+  "authorization": "Root answers and approves designs from PRD; local task commits permitted; no merge/push/publish/destructive cleanup; no new user approval for routine scoped fixes",
+  "closed": {
+    "M2": {
+      "accepted": "1f5c98605aba26cab402fa46b6605f9e650cf643",
+      "runtime": "347d12fb5f35d5a13079c1e0232f7bf529d62198",
+      "evidence_prefix": "/private/tmp/spl-toolkit-root-m2-"
+    },
+    "M3": {
+      "accepted": "753bd5a5247830c6afdcef9aee7031c948a77070",
+      "handoff": "e401402e5d8cd80f469884b2c3ad80245266ad66",
+      "runtime": "78964a7775bb2e74d2022bb760d17be4e6e27e3a",
+      "evidence_prefix": "/private/tmp/spl-toolkit-root-m3-"
+    },
+    "M4": {
+      "accepted": "0bb169c9fb1f0212d1e7758be6ab35a1804bbbaf",
+      "runtime": "92879052b0454db12aead045188ce4b15fa9d83a",
+      "closure": "/private/tmp/spl-toolkit-root-m4-closure-acceptance.json",
+      "permanent_closure": "docs/evidence/milestone-4/closure.json"
+    }
+  },
+  "M5": {
+    "lead": "/root/milestone5_xhigh",
+    "status": "CLOSED accepted237e62ac",
+    "released_plan_sha256": "b4d254d5723b31c26a8e4ab1bcb6138e04e0074e4daedd256df7a76c3701a968",
+    "task1_accepted": "09a167845956f909639824a1781d4895ea26972d",
+    "task2_accepted": "5f85b8b64933cd0c020331ee1d53c3418730b100",
+    "task3_reviewed_commit": "13523ad2da657ae2a9b192c1bb4dbcd9a7bb2374",
+    "task3_status": "complete; root read clean scoped round2 report, all findings closed",
+    "task3_findings": [
+      "Unknown cross-command keyword option names must remain typed incomplete without weakening known option contracts",
+      "Decode intact static names before table/group wildcard restrictions; preserve dynamic distinction"
+    ],
+    "root_literal_ruling": "true/false in search are ordinary literal words; unquoted signed-number search values recognized incomplete with located RHS, no field reads/arithmetic/final floor credit; quoted signed strings ordinary. General expression docs explicitly exclude search; no unsupported negative claim.",
+    "next": "Task11 then clean immutable review; freeze final HEAD/builds for root surface/Py314 acceptance and broad read-only review before M5closure",
+    "windows": [
+      "After Task8: root Go-only acceptance before Task9; preserve immutable go-results-task8.json",
+      "After Task11 clean review: root final source/native/surfaces with locked builds, broad read-only may run alongside"
+    ],
+    "root_preparation": "/private/tmp/spl-toolkit-root-m5-preparation.json",
+    "task3_fix_commit": "daa51380fcafe2639a4224b767772ec597554338",
+    "task3_fix_evidence": "27 inputs hashed before/after checks and exact committed blobs;777 focused test/subtest lines,16 tooling,two-pass ten-output generation;660 active queries,663 obligations,222 meaningful,105 negatives pending evidence correction,681 pending,17 holds,zero SQL credit",
+    "root_search_negative_clarification": "The no-arithmetic-evaluation ruling does not prove code=-bytes/+bytes/-1+rate/- invalid: RHS is a literal and names do not establish field-expression intent. Reviewer confirmed source quoting prose is tempered by documented unquoted dotted segmentation. Correct classification/credit without a broad punctuation parser; await final report. Root also approved exact code=-(1+2) as incomplete/no credit because lone signed literal plus adjacent group does not imply arithmetic evaluation; no new sign-before-group prohibition supported. Preserve missing RHS, malformed comma lists, unclosed delimiters as structural negatives.",
+    "task3_fix2_commit": "e3c1a256192ef8e7dcb1c775156a9e5b1c65c2bc",
+    "task3_fix2_evidence": "11 paths tracked clean;27 before/after/committed input hashes;781 focused test/subtest lines,16 tooling,auditor,two-pass ten-output generation pass.663 active queries,223 meaningful,106 definite negatives (unsupported group removed/two BY groups added),681 pending,17 holds,0 SQL; syntax-only.",
+    "task3_accepted": "e3c1a256192ef8e7dcb1c775156a9e5b1c65c2bc",
+    "task4_status": "Complete: scoped review closes P2/P3 with no new findings.1136 focused test/subtest lines,16 tooling,61 current input hashes and retained generated identities verified.945 queries/954 active obligations/565 pending/288 meaningful/139 negative/45 SQL-mixed/17 holds; syntax-only.",
+    "current_plan_sha256_after_ownership_amendments": "5a5ad81eadce7e30086c1b7be13e0db52ce536b906eab8c83550f0b51227df52",
+    "task4_commit": "81855ec2256d33d6029d0b35569ba1da4ecf038a",
+    "task4_accepted": "42e261db46d796b057da431dec175d3bbe0b063c",
+    "task5_status": "Complete; clean scoped fix review,1926 focused/16 tooling/66 committed-input hashes and two-pass generation verified. Historical descriptor RED qualification retained.",
+    "task5_checkpoint": "Final verification after targeted self-review corrections:66 input hashes,2 generation passes,focused/tooling/auditor and commit identity pending. Interim1451queries/1531active/189pending/17holds,credited288meaningful/139negative/45SQL unchanged; syntax only.",
+    "task5_commit": "04c4a2c2dad10432b2f0cfe347ce9902542c7ddb",
+    "task5_evidence_qualification": "Child grammar has initial RED, but direct descriptor source/parent/recovery assertions lack separately captured preimplementation API RED. Functional verification passes; retain qualification, no reconstruction/redundant rerun.",
+    "task6_corpus_amendment": "Root approved additive canonical-analysis expectations alongside intact syntax assertions on same deduplicated query records. Finite exact eval-RHS/aggregate wrappers only as needed; existing stats command candidates retain pipeline-tail. V1 original provenance pin/candidates/IDs/source unchanged (assembly explicitly excluded). Auditor tests must reject layer confusion, held/unknown promotion, bad candidate assembly and final closure missing canonical expectations. Activate implemented F forms in Task6, Task11 closes remainder; report syntax versus semantic evidence separately.",
+    "task5_findings": [
+      "Signed weekly spans +w@w1/-w@w1 falsely invalid despite optional magnitude",
+      "timechart reuses timewrap quarter/year domain and falsely claims complete syntax; unproved extras must remain incomplete with no negative credit"
+    ],
+    "task5_fix_commit": "2d7a758257c753112b33ca3db2951364d209f788",
+    "task5_accepted": "2d7a758257c753112b33ca3db2951364d209f788",
+    "task6_status": "Complete; clean scoped R1 rereview, auditor-only fix,29tests/current corpus GREEN,159 committed hashes match and157 other inputs unchanged.",
+    "last_reported_plan_sha256_before_nullability_clarification": "09ea08a189fd59a33908c970ef16c3e53fc5c0bc86f10dd7d7c88f604683cad8",
+    "task6_nullability_ruling": "Supported positional effects may stay semantically complete with Conditional=true output when expression proof cannot establish unconditional presence. Reserve U for actual unmodeled effects. Consumers retain indeterminate binding and validators cannot create conclusive matches. Preserve ordinary source-assignment and SPL controls. Explicit narrow extension beyond prior literal-only rule: structurally always-null supported intact compositions coalesce(null,null)/if(cond,null,null) may use actual LHS remove/tombstone while preserving RHS reads/independent diagnostics; no arbitrary evaluation or blanket name inference. Paired regressions and one reconciled plan/ledger delta required.",
+    "root_schema_preparation_update": {
+      "analysis_cases": 16,
+      "schema_cases": 9,
+      "field_cases": 4,
+      "analysis_cases_sha256": "3b0eaa09e115cf5e25452f784bbcdaaed01d1096604c4d43d4f0da42ff3a34b8",
+      "validation_cases_sha256": "dc9656c68267501d494a414041fa8ace053ace96afce91494f6635688a8ad364",
+      "semantic_oracle_sha256": "90b516485a940bd819fa03fde455747c046ab61427920954a9829ca5112fd62d",
+      "scope": "16 analysis,9schema,4field-list inputs. Crossed identity and direct null_test controls, supported fields partial-expansion with observed flat source, and independent unknown-command unterminated-string error. JSON/AST only, no runtime; dynamic Go/surface drivers unchanged;68 planned interleaved analysis calls including legacy."
+    },
+    "task6_checkpoint": "Reviewer audited159 tested/committed inputs,24 unchanged generated artifacts,all1545 inherited case values,V1pin and158F activations,then full handwritten semantics/auditor. Only R1 canonical:null guard finding; original worker active for scoped fix.",
+    "task6_path_guard": "Lead approved minimal private zero-default locatedOperand.UnresolvedSource: withhold only otherwise exact source binding when refinement != nil && refinement.resolve != nil. Plain Analyze and finite/partial flat lists without resolver retain literal-dot exact reads; schema/OCSF/custom resolvers conservative because string-only proof lacks identity distinction. Typed navigation retains separate U/base-read behavior. Preserve derived/unavailable/default SPL; full controls required. No public path API or duplicate validator.",
+    "task6_null_inspection_ruling": "Root approved minimal canonical null_test field-reference role for intact supported positional isnull/isnotnull direct field operand (harmless parentheses allowed). Preserve location/name/binding/origins; shared resolution handles missing/tombstoned without error solely for inspection, no diagnostic erasure/not_applicable hiding, no materializing unknown presence or changing tombstones. Both canonical validators omit existence outcome for this role, no new outcomes/guessed matching. Preserve independent syntax/semantic/path errors; ordinary nested arithmetic/sibling/other inputs keep requirements, no blanket subtree exemption or second branch-flow engine. Paired existing/absent/derived/conditional/tombstoned Analyze/flat/schema controls and subsequent ordinary read/nested controls required. Explicit narrow validator/shared-read/model-doc test ownership, legacy SPL never selects role; final corpus/docs/surfaces must carry it.",
+    "task6_first_final_evidence": "Before wildcard amendment: analysis+validation,focused mixed-dialect race,25 auditor tests,corpus,diff-check pass;159 before/after input hashes match,24 grammar/generated identities retained.1683 syntax documents/1798active/31pending/171canonical expectations,credited288/139/45 and17holds unchanged. Historical first-final only; preserve rather than relabel after mutation.",
+    "task6_wildcard_ruling": "Root approved source_fields.go/shared-expansion ownership now. Apply SPL2-only resolver-present identity policy per candidate (including * results), withholding ambiguous dotted source members and exhaustive completeness while retaining proved derived/unambiguous flat members via existing partial expansion. No certain environment installation/schema refill of withheld candidates. Preserve no-resolver finite/partial flat controls,literal-star roles,SPL and M4 semantics. Minimal private policy signal through existing matcher/admission, no second resolver. Paired actor.* and * callbacks/schema+derived/flat/subsequent-read tests,located incompleteness. Retain grammar hashes if unchanged, rerun affected shared analysis/validation and finalTask6 checks.",
+    "task6_commit": "c48fdba5e0e75c1b085333d7a59abe043315b6d5",
+    "task6_additional_fixes": [
+      "Aliased aggregate wildcard effects remain incomplete; alias does not establish aggregate membership/effects",
+      "Unmodeled array/template children propagate so outer all-null proof cannot silently remove the destination"
+    ],
+    "task6_review_finding": "Explicit canonical:null can pass key-presence evidence guards and keep F/canonical credit while Go skips nil expectation. Fix must reject null-present evidence; current171 objects sound. Narrow Python auditor/unit mutation RED/GREEN and current corpus audit, then immutable scoped review; no production/corpus/Go/race/generated changes or redundant reruns.",
+    "task6_accepted": "e77a3a8c0e753289f405801adb17d64b8f3331b2",
+    "task7_status": "Complete; clean T7-R1 scoped rereview, no remaining or out-of-scope findings.",
+    "root_go_runner_preparation_sha256": "f9c6288c7ac7668f08b8912d61cf0ac586dd6c67852928c477ecd44aae888912",
+    "root_failure_evidence_preparation": "AST-only adjustment: preserve raw Go stdout/stderr and source/input identity before any oracle can fail; attempt artifact never implies acceptance. All validation outcomes now explicitly exclude remove/null_test roles. No runtime.",
+    "task7_checkpoint": "5ownedfiles direct e77 parent;49top/546subtests pass across SQL/shared source, unchanged SPL wire, affected SPL2 core;104 checked inputs match before/after/committed. No shared transfer/API changes. Root-owned progress ledger changed externally during checks, attribution confirmed; other protected guidance stable. Actual child execution/remapping remains Task8 dependency; honest iteration RED qualifications retained.",
+    "task7_commit": "16022901930cf13ff1747c4740bac96893c5e5e5",
+    "task7_review_finding": "SELECT if(count(),1) AS total FROM main incorrectly only U, skips definite enclosing scalar arity error. Preserve validcompoundU and aggregate reads once; narrow shared helper extraction allowed if needed, no duplicate SQL policy or extra semantics. Independent104input/49top546subtests evidence verified.",
+    "task7_accepted": "d2b3af94b3d946a696409b5b5cf5391aec7c8170",
+    "task7_fix_evidence": "Three-file fix reuses single finite call policy via private evaluator callback;27top/258subtests,159checkedinputs and6guidance pins verified.",
+    "task8_status": "Complete: two root findings fixed and scoped review approved; fresh independent core acceptance passed",
+    "task8_checkpoint": "Corrected final analysis+validation/auditor pass;33tooling tests proven on34unchangedinputs.148checkedinputs(147committed+brief) match aggregatehashb306c1097a15a0ca84b49bd257e9d70b1f16a2ff4d27671edbdc3a460ca11002.1714syntax/1835active/177canonical/0pending; floors288meaningful/139negative/45SQL and17holds unchanged. Capabilities separately53inventory/260activeforms/17holds. Late lexer-provenance and H09emptydataset U fixes retained historical-pass qualifications. No unresolved policy.",
+    "task8_error_api_ruling": "Preserve accepted analysis public API: Analyze/CapabilitiesFor return nonnil input-rejection errors/no fallback (Analyze no result); no new analysis InputError/IsInputError exports. Existing validation wrappers retain typed InputError/IsInputError. Clarify brief/plan wording, preserve canonical messages and wrapping, test actual boundaries without string-based type classification. Wording clarification only, no added behavior or gate.",
+    "task8_validation_checkpoint": "Closed/crossed-path/conditional/OCSF/mixed/strict tests reported passing overall, but original claim that a closedroot with true-schema leaves proves host+local was corrected as premature inference, not passing evidence. Both unobserved generic-leaf open/closed controls local-only; worker adds actually finite scalar-leaf closed target and observed-open control. Raw log preserved; no matcher/validator changes.",
+    "task8_fields_ruling": "Preserve existing uncertainty; per-candidate policy cannot upgrade conditional/unproved bindings. Closedroot alone does not prove finite membership, especially true-schema leaves. Preserve failed generic-leaf inference/log plus original open/closed local-only controls and finite scalar-leaf/observed controls. No new Splunk semantic claim or flat exclusion without causal state.",
+    "root_partial_selector_correction": "Pre-execution specification reconciliation: original table host* fixture improperly assumed H01 held table wildcard semantics. Use supported fields single-quoted selector after an independently observed hostname read. Expect optional read then indeterminate partial selector with proved hostname match. Preserves open-universe/internal uncertainty and checks original intended partial expansion without promoting H01. No product runtime or copied actual report.",
+    "task8_corpus_recovery_ruling": "Approved corpus-only recovery_classification{kind:unknown_command|native_deferred,command,start,end}: exact original UTF8 command-token slice/real canonical stage, authoritative inventory/disposition agreement, canonical incomplete/bothcoveragefalse/accepted unsupported diagnostic, no syntax-profile-module errors, floor_credit=false removing meaningful/negative credit. Preserve raw invalid syntax evidence and all source pins. No valid/complete promotion, wrong-stage/synthetic ranges, arbitrary override, or query parser/public metadata. Auditor structural checks plus Go typed recovery/corpus assertions and adjacent-supported-malformed/independent-inherited-child controls. Record actual count changes.",
+    "task8_deferred_child_ruling": "Malformed-child recovery controls apply to actual typed supported append/appendpipe independent/inherited owners, including adjacency to unknown/deferred stages. No new branch grammar/descriptors. Unmodeled native branch remains syntax/effects incomplete with no fabricated child refs/ownership/inner grammar errors; independently established lexical/supported syntax errors under existing rules retained. Include honest branch uncertainty/no fabricated-child control; no scope expansion.",
+    "task8_first_final": "Analysis+validation/auditor+33tooling first final batch passed; retain earlier-byte evidence only.",
+    "root_lexer_recovery_preparation": "Added independent unterminated-string inside unknown-command case: canonical invalid retains syntax error and incomplete coverage. JSON/AST only, no runtime;16analysis+legacy now68interleaved analysis calls. Same dynamic drivers.",
+    "task8_commit": "23e3c0eb02adf0bf79b9bcdc35123b87f4fc1354",
+    "root_go_initial_attempt": "/private/tmp/spl-toolkit-root-m5-go-task8-initial-attempt.json",
+    "root_go_initial_diagnostics": "/private/tmp/spl-toolkit-root-m5-go-task8-initial-diagnostics.json",
+    "root_preparation_current_inputs": {
+      "/private/tmp/spl-toolkit-root-m5-cases.json": "6b412bb6b3e5fa50d26fc4ba68bb5b36142903a14ccbbd7256615eb222218f72",
+      "/private/tmp/spl-toolkit-root-m5-validation-cases.json": "d1a09526d0872392b93dc3a4e9d8222feb1f64565e2d3a52f86529152a278966",
+      "/private/tmp/spl-toolkit-root-m5-semantic-checks.py": "65a6715e911e9ffa33b26c818e57353b83c16f5bad1cf93965a2e4ea8df23799",
+      "/private/tmp/spl-toolkit-root-m5-go.go": "8328871d9706c8858aee5299cb51b55cdc85d6fdf11214df3421e4d27b4de59a",
+      "/private/tmp/spl-toolkit-root-m5-go-acceptance.py": "f9c6288c7ac7668f08b8912d61cf0ac586dd6c67852928c477ecd44aae888912"
+    },
+    "task8_root_fix_ruling": "Five owned files: real token opener/end stack in spl2_parse.go yields located syntax diagnostics from unmatched original openers; lexicalErrors retained through recovery, no text balance or fake tokens. model.go optional DocumentationSnapshot string omitempty, SPL2 static spl2-provenance-v1:sha256:3345cf5712b1bdbf467d1651784fdb8bccc596805038da0d54e7a123384e3a4e in spl2_capabilities.go; identity is existing source/design/original-ID/inventory/holds projection, not page or mutable corpus hash. Two test files, scoped review, hold for root.",
+    "task8_accepted": "471e28746c288fea544d5cc4652d37ecad636a2c",
+    "task8_root_evidence": {
+      "/private/tmp/spl-toolkit-root-m5-go-results-task8.json": "02456051aa87dedd1267d6b47f4f9ac818b60add2b9765cd9152acdb65833407",
+      "/private/tmp/spl-toolkit-root-m5-go-acceptance-task8.json": "672d3d58ea6f0edb034244dbb4f497169f2aa19303dd06e20e1c1dd9fed852e2",
+      "/private/tmp/spl-toolkit-root-m5-go-task8-accepted-attempt.json": "a60ce2d032673606cd7d81f9e1ff6dcd74d9c6b4f20a8aea8d5630ae0d9f3fd5",
+      "/private/tmp/spl-toolkit-root-m5-go-task8-accepted-attempt.stdout.json": "38f5dec9e14709d346e9dfbf9880e4f216a373fa5fec7da825f16b04a744f21b",
+      "/private/tmp/spl-toolkit-root-m5-go-task8-accepted-attempt.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "task8_root_acceptance": "16analysis+9schema+4field-list,68interleaved,legacy fullM2report,mixedbatches,7badselectors,target/capabilitycopies,UTF8CRLF,lineage/conditional-origin checks all passed; finaladapters/milestoneacceptance remain open",
+    "task9_status": "Complete; clean scoped rereview accepted by milestone lead.",
+    "current_plan_sha256": "cd0f0b1657d89fd6bd17d5a2590e16528aa69aeb3f7f5a081c81f7f00dd2a18b",
+    "task10_11_sequence": "Task10 installs new nativeSPL2 suite plus existing acceptance and copiedfixtures; Task11 owns creating/registering newSPL2surface suite and reruns final installedchecks. No missing-future-suite claim.",
+    "task9_commit": "32012e009e7aa468c2312d6cab8f148a79a52d75",
+    "task9_review_finding": "Legacy rawselector extractionstrings.ToLower fails ver\u017fion equivalence thatencoding/json accepts; null/duplicatefallback. Match decoderfoldequivalence withfocusedRED/GREEN; preservecanonicalstrictandlegacydefaults. Minor reportfreezewordingqualificationneeded, no docs/coresuite repeats.",
+    "task9_protected_continuity": "LeadcomparedTask7snapshot30protectedfiles:28unchanged;knownM5livingplan5737ff74androotledger95c480b7c83543f735a6e671ab963282856fdd304b14f3447d840049d4e95ac5 areorchestrationedits. RootverifiedledgerandattributedpreTask9gap. HistoricalcontinuitynotfabricatedTask9-startsnapshot; captureactualfixbefore/after.",
+    "root_final_surface_preparation_sha256": "9efd597a5e70b00ee530dfa42f57d5d3214e93ab597bf0920e85f2c6b4ffdd93",
+    "root_final_surface_added_controls": "Prepared9 realHTTP Unicode-folded legacyselector null/duplicate/unsupported controls acrossmap/discover/validate afterTask9reviewfinding; ASTonly, finalsource/buildwindowrequired.",
+    "task9_fix_checkpoint": "FreshREDonall3legacyroutes;minimalEqualFoldrecognitionpasses42newcases+priorselectors. Exactmodels.go/APItests,currentserverrebuilt,affectedlegacyAPIregressionsrunning;fresh30protectedfile/anchorhashesbeforeedit.",
+    "task9_fix_commit": "b9c98c76e1b0b1da4ae2f66c3094715fbd0b6235",
+    "final_review_coordination": "AfterreviewedTask11, broadmilestonereviewmayrunread-onlyalongside stablebuilt/native rootacceptanceonsameimmutableHEAD/artifacts; production/buildsfrozen,waitbothbeforeclosure,concretefixesaffectedchecks/scopedreview. Noacceptanceobligationwaived.",
+    "task9_accepted": "b9c98c76e1b0b1da4ae2f66c3094715fbd0b6235",
+    "task10_status": "Complete; clean scoped rereview and lead accepted",
+    "task10_commit": "641e616f8db68b4dad7e8eed3eecb64e4bf12f0c",
+    "task10_root_api_reconciliation": "Root read exact immutable Python method signatures; all prepared calls fit. Potential named unsupported_dialect_for_operation category mismatch in Python _legacy_selectors sent to lead for explicit review/ruling; prepared root checker requires category. No runtime or oracle change.",
+    "usage_recovery": "One retry succeeded for existing lead and existing reviewer; no reset/purchase/new goal, saved audit retained.",
+    "root_final_attempt_wrapper": {
+      "path": "/private/tmp/spl-toolkit-root-m5-final-acceptance.py",
+      "sha256": "11dbd58a62428bac6210985a542fb2572cc9ae84bdd3ba52d0ad0db5bcb6c28b",
+      "status": "Prepared AST-only; records unique before/after/source/artifact/input/log attempt even on failed final scope. Actual final gate required.",
+      "run_notes": "Only after reviewed Task11 frozen HEAD/builds: wrapper args worktree exactSHA surfaces|py314; wrapper chooses accepted3.12 surfaces and root3.14 Python itself. Use Go1.25 PATH/cache/local/offline, strict pip noindex and blocked external proxies with loopback NO_PROXY. Surface command needs already-authorized loopback sandbox escalation. May run the independent two read-only scopes alongside broad read-only review on frozen artifacts; start approval sequentially. Unique attempt directories preserve failures; final acceptance still needs both child evidence and clean broad review."
+    },
+    "task10_fix_commit": "b754b9bfa80eb990cb83ee05d3b4588c2c2e54c3",
+    "task10_accepted": "b754b9bfa80eb990cb83ee05d3b4588c2c2e54c3",
+    "task11_status": "Fresh /root/milestone5/task11_implementer active: canonical layer closure/newSPL2surface suite/docs/final checks then immutable review/root+broadfrozenwindow",
+    "task11_checkpoint": "Capture3safecheckpoint:732exactcomparisonsPASS;982snapshotpredicates900PASS/82FAIL(24SQL,58extended), observedexit1, rawlogsretained; no snapshotsintegrated. No diagnosisafteruserdelegationsteering untilqualifyingcoordinationhandoff. ExistingXHighworkerpreserved/held.",
+    "task11_expectation_strategy": "Lead accepted explicit annotations/templates from approved contracts, not runtime output capture. Three bounded read-only specialists on immutableb754b9b derive/check lexical/recovery203, pipeline452, SQL282 missing records; sole Task11 implementer owns extended600 + all fixture edits + surfaces/docs. Specialists cannot run queries/capture outputs/write production; flag unproved exact graphs. Total1537missing canonical records.",
+    "task11_underdetermined_evidence_ruling": "Approved non-vacuous independent per-form required/forbidden semantic assertions as conformance authority, frozen before any output capture. Separately label exact recovery/representation snapshots as deterministic regression evidence for underdetermined cases, including repeated literal-row creation representation. Independently review snapshots against normative assertions and canonical ownership/location/soundness. Snapshot alone never earns conformance credit. Determined intact semantics remain independently exact. Minimal fixed assertion harness/auditor schema with mutationtests: missingnormative/forbiddenfacts/falsevalidcomplete/snapshot-only finalclosure fail. Preserve all cases/IDs/queries/syntax/provenance/floors; report independently-exact vs snapshot-backed counts separately. No new survivor semantics.",
+    "task11_having_ruling": {
+      "decision": "Fix aggregate-only HAVING without GROUP BY as already-promised A/K E.L16.having.P1; do not relabel to U to fit engine.",
+      "reason": "Plan94/427 excludes newly approving nongrouped HAVING via nonaggregate evaluate phase; it does not revoke supported aggregate preparation or explicit form promise. Source confirms aggregate overentireinput and HAVINGafteraggregation; hierarchy permits skippedclauses.",
+      "sources": [
+        "https://help.splunk.com/en/splunk-enterprise/search/spl2-search-reference/from-command/from-command-syntax",
+        "https://help.splunk.com/en/splunk-enterprise/search/spl2-search-reference/from-command/from-command-usage"
+      ],
+      "scope": "Minimal SQL lowering/helper+paired RED/GREEN withinTask11. SELECT-first/FROM-first count()ASn HAVINGn>2 fullrefs/derivedn/phases/project; preserve nonaggregate nongroupedU,hidden/unselected,mixedprojections,aliascollisions,malformed/unknownaggregates,conditional sum. No grammar/row-semantics expansion or provenancepin change. Add positive+preservedlimitation toTask11 fullsurface sample. ExistingTask8rootbaselineimmutable; finalparity checks it."
+    },
+    "task11_assertion_schema": {
+      "sha256": "de195d49946743871ee8bf4c7e8a0fe295b504e7d405fb6a171799b238da6f9c",
+      "shape": "Fixed canonical_assertions: independent status/coverage, required/forbidden codes, exact required refs, forbidden token spans, proved fields/absence, located stage completeness, scope bound, recovery/representation category+basis. Separate canonical arrays labelled regression_snapshot only for underdetermined records.",
+      "root_precision": "Determined complete finite final-field set/closedness must remain exact, particularly valid literal datasets; reference occurrence/multiplicity ambiguity never permits invented extra fields. Freeze assertions before snapshotcapture, paired mutationtests and independentreview required.",
+      "status": "Lead accepted concrete implementation shape; schema evidence retained for taskreview, no extra rootgate"
+    },
+    "task11_semantic_rulings": {
+      "null_arithmetic": "first=null,next=first+1: preserve removal/unavailable read; next conditional. No arithmetic extension of finite all-null evaluator.",
+      "string_template": "Supported intact composition produces present string including null interpolation stringification; preserve input obligations/independent errors and genuinely unmodeled/damaged children. Narrow SPL2 fix and paired controls approved; no general function nonnull inference.",
+      "string_template_source": "https://help.splunk.com/en/splunk-cloud-platform/search/spl2-search-manual/expressions-and-predicates/string-templates-in-expressions",
+      "lookup_default_output": "Unconditional pre-output user read for lookup users uid AS user; unknown default OUTPUT may have nonmatch user column overriding local alias, so no unconditional post-stage guarantee. Keep conservative known names/origins; preserve explicit OUTPUT/OUTPUTNEW; flag shared ownership.",
+      "lookup_source": "https://help.splunk.com/en/splunk-enterprise/search/spl2-search-reference/lookup-command/lookup-command-overview-syntax-and-usage",
+      "contract_invalid_coverage": "Grammatical invalid bounds/duplicate constructors syntax_complete=true; rejected effects owning stage/report semantic_complete=false while preserving adjacent proved facts/definite error. Not blanket invalid-report coverage rule."
+    },
+    "root_task11_semantics_preparation": {
+      "status": "Authored from root rulings before product execution/output capture; AST only; existing Task8 baseline unchanged",
+      "cases": 12,
+      "scope": "SELECT/FROM aggregate-only HAVING and nonaggregate U; supported function/null and unmodeled template; null arithmetic; unspecified lookup outputs; final CLI/REST/native parity; deferred tstats inputs/atomic model dependency and rex explicit input/output intention without inferred outputs; metrics index dependency and downstream group-field indeterminacy; unknown standalone initial-word ambiguity remains incomplete without fabricated index dependency",
+      "sha256": {
+        "/private/tmp/spl-toolkit-root-m5-task11-semantics.py": "b011d6d0f81c9a6c4714a06908537affce16a64a6a0b8964c53781febe080bd3",
+        "/private/tmp/spl-toolkit-root-m5-surface-acceptance.py": "2c591e00495a3a50d407ff7ed8bef6cfd4b061ae4eec3d943e9aa4379138735b",
+        "/private/tmp/spl-toolkit-root-m5-final-acceptance.py": "d1c561c5d93fce2a24933bdc0c43a0c225302c578b8e1e94f7dfa0b5e4bcac6e"
+      }
+    },
+    "task11_repeated_options_ruling": "Conflicting repeated values without proved precedence retain syntax_complete but located semantic U; no guessed first/last wins, conditional binding not substitute, preserve independent facts. No automatic downgrade of identical repeats.",
+    "task11_deferred_roles": {
+      "status": "Root approved pre-mutation nine-family inventory; exact per-form annotations/focused REDGREEN/final review pending",
+      "families": [
+        "bin",
+        "rex",
+        "spath",
+        "tstats",
+        "mstats",
+        "timechart",
+        "makemv",
+        "mvexpand",
+        "mvcombine"
+      ],
+      "scope": "Retain typed explicit input roles and explicit destination intentions where promised; all effects remain U, no inferred raw/capture/path/series fields or state outputs. Preserve independently known selector dependencies. Earlier435 source-only GREEN insufficient conformance evidence until corrected.",
+      "data_model": "Accepted tstats DATAMODEL_NAME: one data_model reference/dependency, decoded whole quoted atom and full source-token span. No inferred model/root-dataset decomposition. Held mstats/dynamic/damaged remain refused. Supersedes M6 dependency-only prerequisite; M6 render owner still needed.",
+      "metrics_selector": "Root fetched primary tstats/mstats examples; narrow command-owned typed bare index equality with exact static string/documented simple bare atom RHS is index dependency, Boolean leaves allowed as mentioned dependencies not guaranteed selection. No quoted LHS/BY/aggregate/larger expression specialization or wildcard exactness.",
+      "post_state": "Read inputs before effects; tstats/mstats/timechart known names/origins become conditional candidates under open/uncertain post-state, no created/removed outputs. Other deferred families conditionalize potentially overwritten known names, all if output names may collide. SPL2-only, preserve shared legacy.",
+      "explicit_aliases": "Root approved intact explicit aggregate AS aliases as field/output/not_applicable candidate references only, no state creation/final-name guarantee/downstream alias binding. Timechart doc172agg section542\u2013545 supports naming intention; format/sep/series unmodeled. Implicit/dynamic/damaged remain unproved; M6 cannot infer rewrite eligibility from candidate alone.",
+      "loadjob_and_join": "Rootapproved: static SID located nonconsuming search_job reference/not_applicable, no new Dependencies collection/state; retain U; dynamic/damaged cannot gainexactidentity. Pipelinejoin wholedecodedqualifiedname L.id as located fieldread indeterminatebinding, namespace/independentchildpreserved; no root L.id/id state, catalogproof or guessedorigins. M6/M7 leads notified; no newrewritekind.",
+      "dynamic_metrics_clarification": "Recognized bareindex selector with unresolvable RHS cannot become conclusive ordinary event-field requirement; no exact dependency/membership, withholdunprovedfacts/existingunresolvedpolicy and preserve soundRHSreads+U. No broader expression semantics.",
+      "fillnull_spath": "Rootapproved: fillnull intactexplicitselectors field/output/not_applicable targetintentions, no existenceobligation/state/guaranteedcreation, preservepattern/dynamicidentity. spath output=user_name missingpath retainsintactdestinationintention butcontracterror/invalidincomplete/noinstalledfield. Missingdamageddestination noexactref; notrelaxingassignmentguard."
+    },
+    "task11_snapshot_checkpoint": "First95 lexical diagnostic captures against prior external v4 assertions, none integrated; attempted local231 freeze aborted at too-strict implicit-index stage token validation. No231freeze claim. Independent specialists find11 damaged/constructor target product gaps; failure index=app ambiguity held separately. SQL6 captured and13 precapture uncertainty expectations corrected from prepared-projection contract; failures retained.",
+    "task11_initial_start_conflict": "RESOLVED rootapproved: E.L01.start.N1 failure index=app indistinguishable typedunknowncommand, existing unknown_command recovery metadata span0:7; canonical incomplete/bothcoveragefalse/locatedU/floorfalse. Preserve rawsyntaxnegative/originalbytesIDprovenance and record superseding earlierinvalidwording/countdelta. No parser/name exception.",
+    "task11_assignment_guard": "Rootapproved11damaged/duplicate effectfixes: preserveRHSreads then requirewholetypedassignment/originaltoken soundness and no overlapping contractsyntaxerror before LHS effects. Preserve source-unavailable/conditional assignments, adjacent intact andunknownfunction controls; no sharedparser/recoverychanges.",
+    "task11_capture2_findings": "Rootapproved: held H11 nOt expression targetx conditionalcandidate, retaininputs/U/no newcasingproof/coverage/allnull. Typed malformed _index_latest=- modifier label mustnot leakfield; retain RHSerror/soundadjacentreads, noglobalblacklist. Earlierpassingpartialcaptureinsufficient for omittedinvariant; version independentstrengtheningbeforerecapture.",
+    "task11_forbidden_comment_ownership": "Rootapproved exactcase: search index=main stageends17 beforeforbiddencomment18:33, stageeffectscomplete andintactevalcomplete while queryinvalid/bothcoveragefalse/locatedcommenterror. Correctstagepredicatefromownership, no blanketinvalid=>everystageincomplete. Separate x41:42 occurrencecorrection independentlyconfirmed.",
+    "task11_sql_recovery_ruling": "Rootapproved scoped spl2_sql.go/spl2_recovery.go/spl2_sql_test.go: soundJOINdataset intentions; localizeemptyHAVINGerror; onecanonical-only sameANTLR retry ofunchangedoriginalSQLrange onlyrealSELECTatemptySqlGroupKeyentry. Preserve rawdiagnostics/invalid/sourcecoordinates/ownership; syntheticgroupunsound. No textualrepair/candidate-search. PairednestedSELECT/damaged-adjacent/nonzerooffsetUnicode controls; recoveredSELECTnormaltypedchecksnotpromotion.",
+    "task11_scope_recovery_ruling": "Rootapproved spl2_scopes.go narrow independentlysound typedSearch/ImplicitSearch/FROM inputsalvage beforewholeownerU with existingproof. No unknownstartinference/invalidliteralfields/childleak. Recognizedmalformedowner spanmayreach onlyestablishedoriginalcommandrange for droppederroneousoperands, no pipes/hiddenboundarycomments/newstages/changeddiagnostics. Q06GROUPkeyreparse/diagnosticownership proposalstillpending; earlierSELECTretryauthorizationdoesnotcoverit.",
+    "task11_timewrap_prerequisite": "Rootapproved T5.boundary.043 FROMmain|timewrapfortnight canonicalinvalid for independentlyprovedmissingtimechartpredecessor, while unitremainsU/nouniterror/nocredit. Separatelocatedprereqerror; no guessedownerchain. Pairprecedingtimechart+sameheldunit remainsincompletewithoutprereqerror.",
+    "task11_q06_ruling": "RESOLVED rootapproved: originalintactGROUP/BY/keyposition; onebareIDENTIFIERwholeactualSqlGroupKey immediatelyfollowedbyexistingemptyHAVINGowner; sameANTLRIdentifier exactunchangedtokenconsumption. Keep originalparserdiagnostic/invalidity/coordinates asdocumentrecovery, exemptonly identifiedpredictionerror fromthatkeyGROUPdamage; preserveallothererrors, HAVINGmissingoperand/U. Normalgroupread/transferverifiedoriginalidentifier, nofakekeynode; noquoted/call/keyword/keyplus/generalmessageexemptions orswallowingGroupKeyretry. One lastkey/emptyHAVINGboundary perSQLrange, near-miss/priorerrorcontrols.",
+    "task11_q06_provenance": "Lead/rootapproved spl2_parse.go privatecall-local syntaxlistener provenance for typed antlr.NoViableAltException actualparserrulecontext plus existingdiag; boundedexistingdiagnostics, no rawtree/flags/publicchange, no genericerrorwaiver. Exacttaskownership/inputhashesrequired.",
+    "retired_lead": "/root/milestone5",
+    "task11_capture3_followup": "New qualifying coordinator retained sole writer and disjoint existing specialists; affected deferred21 check observed exit0 with frozen assertions and443 input identities stable. Full corpus, all82 discrepancy closure and final acceptance remain pending.",
+    "task11_intact_child_ruling": "Root approved principle: original wholly bracketed independent child body owned by actual recognized join may retain fresh independent evidence despite preceding damaged parent options; no parent-prefix inference, merge effect, synthetic delimiters or blanket coverage promotion. Require independent source/typed-owner and closing/body near-miss proof before authority correction.",
+    "task11_missing_select_eof_ruling": {
+      "status": "Root approved bounded product attribution; focused implementation/checks pending",
+      "evidence": {
+        "log": ".superpowers/sdd/milestone-5-implementation-plan/task-11-logs/capture3-eof-owner-provenance.log",
+        "log_sha256": "c1e143cbbb7340711b68937b15d7c66625b1145dc79a3d633fa1f846253f2c3c",
+        "metadata_sha256": "c08ad3ab505ad723fb81bf91b74fcdb38b9c71bf996c6d535089bc485440f0e8",
+        "root_review": "Read complete log and helper; verified both hashes and generated symbolic SELECT/NL token constants. No repeated diagnostic execution."
+      },
+      "contract": "Private call-local typed InputMisMatchException at actual FromCommand/original EOF with intact GROUP key, no SqlSelectClause and exact expected {SELECT,NL}; exclude only that diagnostic from already-surviving original operand damage. Preserve all other errors, raw invalidity, missing SELECT/owner incompleteness, no outputs or state promotion. No retry, generic EOF waiver, message/numeric-state match, fake nodes, or nested/substream EOF without original ownership proof. Paired malformed key/span/prior-error/boundary controls."
+    },
+    "task11_no_surviving_nodes_policy": "Design-spec21 preserves intact typed contexts and withholds findings dependent on inserted/damaged nodes;27 no generalized missing-command recovery. Does not require new SqlSpanCall/WHERE/projection/JOIN retries when no original semantic node survives. Held pending independent SQL report for any explicit stronger source/contract obligation; no snapshot-driven inference.",
+    "task11_no_surviving_nodes_ruling": {
+      "status": "Root approved architectural boundary after full SQL v1 review; versioned oracle amendments and affected verification pending",
+      "review_path": "/private/tmp/spl-toolkit-m5-xhigh-capture3-review/sql-review.md",
+      "review_sha256": "9bf464b4cfd1f89c735b5ac6d301782e56fa3521bffc42ac9c0d2c73b13e1fbb",
+      "ruling": "No additional canonical retries beyond approved SELECT/Q06; no SqlSpanCall/WHERE/projection/late-JOIN reconstruction solely to satisfy assertions. Preserve independently sound original surviving typed inputs; withhold inferred roles/stages/effects when only error nodes or swallowed/wrong-order tails remain. Preserve original syntax errors/invalidity/U and sound adjacent evidence. Oracle must record versioned per-case original node/owner evidence and nonvacuous residual assertions; failures retained. Stronger explicit prior per-case promises still require reconciliation. FROM completeness follows actual owner range, no blanket invalid implies every stage incomplete. Q05 v1 surviving-span claim must be corrected; no span retry."
+    },
+    "task11_latest_checkpoint": {
+      "source": "Qualifying M5 coordinator compact checkpoint after root EOF/no-surviving-node rulings",
+      "state": "No root-held decision or blocker; sole writer Task11 remains uncommitted at accepted b754b9b",
+      "verified_scope": "Deferred21 frozen assertions GREEN with443 stable inputs. EOF/count/input salvage GREEN across10 focused/existing functions:3GROUP positives,9EOF guards,4promised counts,10count-safety guards. Additional local review found3 count-collision REDs (qualified same-name, dynamic index, multi-navigation), original writer fixing private collision-only classifier without root-field inference.",
+      "authority": "28 independently justified scope corrections integrated with receipt preserving originalquery/status/coverage/finalstate.3join-prefix supplement and SQL no-node corrections underway using direct13case original parser-node inventory.",
+      "comparison": "Historical82 failed IDs remain last full capture; no new capture/integration or final acceptance claim."
+    },
+    "task11_capture4_checkpoint": {
+      "source": "Qualifying coordinator inspected command/rawlog/metadata; root receipt, no repeated execution",
+      "authority_corrections": 45,
+      "exact_pass": 732,
+      "snapshot_pass": 980,
+      "snapshot_total": 982,
+      "exit": 1,
+      "stable_inputs": 443,
+      "capture_path": "/private/tmp/spl-toolkit-m5-task11-capture-4.json",
+      "capture_sha256": "75d00fe84768de0feba944f019cb27f47908d3042e4f20f0187ed0e188f2c2d3",
+      "remaining": [
+        "E.L16.group_keys.P2:count now definite and normalized conditional as promised; final state uncertain=true vs requiredfalse",
+        "T4.boundary.missing_group_key:count conditional after approved retry; original missing SELECT EOF diagnostic adjacent to recovered projection end"
+      ],
+      "status": "Reused qualifying SQL oracle investigating exactly2; no blanket EOF waiver or authority change; sole writer doing owned fullGo parity artifact plumbing; no final integration/acceptance."
+    },
+    "task11_capture4_residual_review": {
+      "report_path": "/private/tmp/spl-toolkit-m5-xhigh-capture4-review/sql-residual-review.md",
+      "report_sha256": "7d5617bc93a1c4cf684829a0069a2e2781f8bda14db9ced569adb98c167db71c",
+      "adjudication_sha256": "4e87267334913e3b07b710458c9c4f51712e1cb073cf20c86ac8375343e1406b",
+      "source_archive_sha256": "81ae7ccbde990abf69b4e68b04d24387e324df10ec66bd0187ab95ca4bf97a33",
+      "root_review": "Read complete report/adjudication, verified both and archive hashes, inspected existing SELECT retry and count proof code from frozen archive.",
+      "first_residual": "Proved product gap in exact final SELECT destination membership; lead approved narrowly proved finite-shape correction, conditional fields/coverage preserved. No authority change.",
+      "second_residual": "Exact T4 v2 direct provenance now establishes original InputMisMatchException/FromCommand0/actual EOF token13 byte33:33/expected SELECT+NL/no original SELECT; original GROUP swallowed SELECT/count. Existing same-original-token/range retry establishes intact SELECT19:33/count26:33 while retaining GROUP-key SELECT19:25 errors. Earlier source-path inference and first instrumentation failure remain qualified.",
+      "released_diagnostic": "Root approved one new bounded exact-T4 original + already-approved retry provenance inspection, unchanged original ranges/tokens, private helper/source hashes/argv/rawlog/exit/before-after inputs. No new recovery or product semantics. Retain earlier artifacts and add explicit evidence-qualification correction.",
+      "held_mutation": null,
+      "direct_provenance": {
+        "receipt_path": "/private/tmp/spl-toolkit-m5-xhigh-capture4-review/missing-group-provenance-receipt-v2.json",
+        "receipt_sha256": "5282c9e9a3f16b89ec9d9b9e956521c9b332f87cb65bbd8d2d8c120f2ce6cc00",
+        "rawlog_sha256": "3c1186dfa76905f7c4d8f97ddcb30d0721a694f6b0f4892cda0213c541180a62",
+        "root_review": "Read full receipt/rawlog; verified receipt and all6 referenced hashes; exit0/stable inputs. First helper wrongly cast generated recognizer and mislabeled parser events lexical, preserved; v2 only instrumentation cast correction to antlr.Parser."
+      },
+      "root_approved_correction": "Pair exact original typed FromCommand InputMisMatchException at actual original EOF, absent SELECT/exact expected symbolic SELECT+NL, with same original SQL range already-approved empty-group SELECT retry. Exclude only recorded pre-retry missing-SELECT diagnostic from same intact recovered native count projection local soundness proof, original token/range/owner identity and existing zero-argument count/valid destination/no collision proof required. Preserve all other original/retry/lexical/contract errors, especially GROUP-key SELECT19:25, query invalidity/false coverage/damaged GROUP. No global diagnostic removal/generic EOF equality waiver/new retry/fake nodes/arbitrary recovered-output promotion. Separate from intact-original-GROUP input exception. Minimal original writer integration+paired malformed call/alias/collision/overlap/boundary controls released; no authority changes."
+    },
+    "task11_capture4_snapshot_review": {
+      "source": "Qualifying lead read all3 independent reports and verified20+48+8 supporting artifacts, with existing authority receipts reused",
+      "snapshot_total": 982,
+      "groups": {
+        "lexical_deferred": 388,
+        "pipeline_extended": 400,
+        "sql": 194
+      },
+      "result": "All records semantically sound within frozen contracts except2 already approved SQL fixes; no additional product defect found by snapshot review",
+      "remaining_metadata": "255 deferred canonical_basis prose stale and held T5.boundary.049 missing positive child/role authority: source-backed correction/strengthening released without policy or floor credit change",
+      "next": "Original worker applies2SQLfixes/transport plumbing; next changed captured records receive scoped independent delta review before integration. Preserve capture4 review/failures/versioned authority; do not repeat unchanged full review."
+    },
+    "task11_residual_focused_green": {
+      "source": "Qualifying M5 coordinator observed receipt",
+      "result": "Both residual source fixes focused GREEN; recovered count10valid native-count positives,12no-waiver/damage/collision cases plus original token/provenance/overlap/neighbor/nested guards and earlier EOF/count/finite-shape checks",
+      "qualification": "Initial alias positive controls had independent original AS-site error, not qualifying EOF. Failed controls/evidence preserved, corrected to no-waiver guards; no frozen count expectation changed.",
+      "remaining": "24 extra independent-exact companion canonical_basis prose records found alongside255; source-grounded prose-only correction by existing oracle. Next frozen capture5 and changed-record review, integration/fullchecks/commit/review/rootacceptance remain. No new semantic blocker."
+    },
+    "task11_capture5_checkpoint": {
+      "source": "Qualifying M5 coordinator receipt; exact artifact hashes to be linked in final handoff",
+      "exact_pass": 732,
+      "snapshot_pass": 980,
+      "snapshot_total": 982,
+      "exit": 1,
+      "input_maps_stable": true,
+      "snapshot_changed": 24,
+      "snapshot_unchanged": 958,
+      "fixed": "The two capture4 source defects now pass their unchanged assertions.",
+      "remaining": [
+        "E.L16.alias.P2",
+        "I.literal.P2"
+      ],
+      "remaining_detail": "Exact AS-destination cases retain conditional fields; new finite projection proof makes universe uncertain=false while earlier frozen assertions requiretrue. Existing qualifying SQL oracle adjudicates original destination-membership contract and reviews24 deltas; no expectation change or new root-held gate. Preserve historical capture5 failure.",
+      "metadata": "All279 stale prose replacements approved from existing family authority,255 frozen assertion bases plus24 exact companions grouped3ways;7 companion files verified, no expected semantic values changed."
+    },
+    "task11_capture5_partial_expansion_guard": {
+      "source": "Qualifying lead found specific existing-test concern; original worker ran one targeted check",
+      "result": "GREEN: lead inspected actual log/metadata, exit0/450 before-after inputs equal; existing wildcard test, partial/complete-flat/unrelated controls and finite/recovered-count guards pass.",
+      "released_fix": "SQL finiteShape override must refuse proof for selected input/provenance depending on recorded incomplete source expansion; preserve proved matches, typed-path admission, conditionality/shared transfers and avoid unrelated-expansion contamination. Original writer adds partial/complete/unrelated controls.",
+      "authority_distinction": "I.literal.P2 is an opaque literal with exact alias, not the incomplete wildcard expansion witness used for its older uncertainty expectation. Independent finite-alias correction remains separate; no blanket expectation or finite-shape weakening.",
+      "implementation": "Only new SQL finiteShape override refuses when s.origins(item.value.ids) reaches recorded incomplete expansion; shared resolver/transfers unchanged."
+    },
+    "task11_capture5_delta_acceptance": {
+      "source": "Qualifying lead read complete24delta review, original lexical-owner crosscheck and verified11 artifact hashes",
+      "reviewed_changed": 24,
+      "unchanged_equal": 958,
+      "approved_authority_changes": "Exactly E.L16.alias.P2 and I.literal.P2: final_state.uncertain plus basis only. Independently supersede old transfer/wildcard witness inference; all conditional/opaque/source/coverage obligations retained. Separate incomplete SourceUniverse expansion witness remains binding and GREEN.",
+      "next": "Freeze2 amendments and check postguard source; require all982 outputs equal to reviewed capture5 before reusing review. No need repeat unchanged full semantic review. Full final corpus/checks/commit/task+broad/root acceptance still open."
+    },
+    "task11_canonical_closure": {
+      "source": "Qualifying M5 coordinator receipt",
+      "capture6_exit": 0,
+      "snapshots_compared_equal": 982,
+      "equality": "Full report and canonical objects exactly equal reviewed capture5",
+      "raw_equality_sha256": "62e1cbd9af3d4d22d9626eca2230861b6b4812d27913acbff504cf5b318714d8",
+      "integration_receipt_sha256": "11f60b1fc8df908ea3f162edbe5e2f6d109dacfbe5193fd4386c5ab1ef40e1ea",
+      "integration_scope": "Canonical snapshot objects only, final floors enabled",
+      "auditor_exit": 0,
+      "counts": {
+        "active_obligations": 1835,
+        "canonical_cases": 1714,
+        "independent_exact": 732,
+        "snapshots": 982,
+        "meaningful": 288,
+        "definite_negative": 139,
+        "sql_mixed": 45,
+        "holds": 17,
+        "pending": 0
+      },
+      "current_check": "Go1.22 six-package external-link required check running; first postintegration full Go transport artifact emitted by this planned run. Root has no running process.",
+      "remaining": "Explicit postintegration Go corpus execution732+982, required full Go/docs/native/realHTTP/offline package verification, exact-owned Task11 commit/immutable qualifying review, fixed root final/broad review and closure. No final Task11/milestone acceptance yet."
+    },
+    "task11_floor_checkpoint": {
+      "source": "Qualifying lead receipt from required postintegration Go1.22 external-link run",
+      "passed_packages": [
+        "analysis",
+        "validation",
+        "mapper",
+        "bindings",
+        "cmd"
+      ],
+      "canonical_execution": "All1714 canonical cases executed noncached and passed; fresh fullGo transport emitted",
+      "api_attempt": "Failed before HTTP assertions on sandbox tcp6 loopback bind, preserved raw failure; not complete API/floor acceptance",
+      "retry": "Original writer using existing authorized escalation to retry only pkg/api on identical source/inputs; preserve five passed package results, no duplicate suite",
+      "final_floor_gate": "Complete for required local Go1.22 six-package external-link check",
+      "api_retry": "PASS8.753 seconds under existing authorized escalation; previous sandbox bind failure preserved, five passed packages retained"
+    },
+    "task11_tooling_preclosure_fixture_update": {
+      "source": "Qualifying lead isolated final tooling result",
+      "passed": 183,
+      "failed": 8,
+      "ownership": "tools/tests/test_spl2_corpus.py only",
+      "cause": "Stale preclosure assumptions: expected missing/pending corpus, reused canonical claims on synthetic different query, or stronger original-source rejection now precedes intended guard",
+      "released_fix": "Explicitly construct intended preclosure/negative fixtures so guard under test is reached. Keep product auditor, frozen authority, original-source integrity and final closure/negative checks unchanged. Preserve raw RED and affected GREEN when observed.",
+      "verification_custody": "Attribute existing Go passes across Python-test-only delta using explicit relevant-input equality; no unrelated reruns.",
+      "final_result": "All191 tooling tests PASS after test-only fixture construction repair"
+    },
+    "task11_build_and_go_transport_checkpoint": {
+      "build_all": "PASS",
+      "openapi_regeneration": "Pinned regeneration byte-identical",
+      "full_go_transport": {
+        "reports": 1714,
+        "sha256": "053f87af1a35e1c2caa375f783668e44794114df045168ef1e5aa05ec956ce86",
+        "bytes": 5274710,
+        "validation": "Current source+fixtures validated, per qualifying lead receipt"
+      },
+      "current_check": "Full tools/check_go.py with owned race check running; known LC_DYSYMTAB warning retained",
+      "remaining": "Go race result, native/realHTTP/offline package verification, exact Task11 commit and immutable review, root final+broad review/closure",
+      "full_check_go": {
+        "exit": 0,
+        "scope": "All packages and race",
+        "analysis_seconds": 18.089,
+        "api_seconds": 114.87,
+        "warning": "Known LC_DYSYMTAB retained"
+      }
+    },
+    "task11_source_python_and_surfaces": {
+      "source_python": {
+        "passed": 339,
+        "skipped": 0,
+        "native_library": "Fresh absolute override, per qualifying lead receipt"
+      },
+      "current": "Actual documented CLI/schema/newSPL2 source surface suites running",
+      "package_policy": "Installed-only legacy/analysis/field surfaces reserved for mandatory direct-wheel and rebuilt-sdist outside-checkout checks, avoiding stale/default-library mixing",
+      "remaining": "Strict-offline packages, finaldocs,exactcommit/taskreview/root+broadacceptance"
+    },
+    "task11_installed_packages": {
+      "source": "Qualifying lead receipt; full artifact IDs follow immutable report",
+      "paths": [
+        "direct wheel",
+        "rebuilt sdist wheel"
+      ],
+      "per_path": {
+        "native_pass": 322,
+        "acceptance_pass": 102,
+        "failed": 0,
+        "skipped": 0,
+        "required_modules_in_each_suite": 6,
+        "full_report_parity_cases": 1714
+      },
+      "parity_surfaces": [
+        "Go",
+        "CLI",
+        "HTTP",
+        "native"
+      ],
+      "copied_fixtures": {
+        "spl2": 13,
+        "schema": 11,
+        "maintained_docs": 15
+      },
+      "checker_inputs_unchanged": 453,
+      "go_artifact_equality_sha256": "053f87af1a35e1c2caa375f783668e44794114df045168ef1e5aa05ec956ce86",
+      "partial_hash_receipt": {
+        "primary_wheel": "6a808e5a",
+        "primary_native": "9c2aacb4",
+        "sdist_rebuilt_wheel": "bfe234ad",
+        "rebuilt_native": "91d54eef"
+      },
+      "warning": "Known tar warning retained",
+      "status": "Both strict-offline paths PASS. Writer finalizes compressed permanent evidence/docs/diff/identity and exact implementation+evidence commits. Fresh immutable task review follows; root final window not released."
+    },
+    "task11_committed_candidate": {
+      "head": "fcbb74ac60da312bc06275e4e3de29b570a3bf2e",
+      "implementation_commit": "48d8012286dbfa2467717c6046d0a79e9ab589e3",
+      "receipt": "/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/.superpowers/sdd/milestone-5-implementation-plan/task-11-logs/final-review-candidate.json",
+      "receipt_sha256": "775f12bec91d58f38973be478b79bdbab6baedffbb8ecb4a6bd9d2dab92020e8",
+      "report": "/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/.superpowers/sdd/milestone-5-implementation-plan/task-11-report.md",
+      "report_sha256": "5336e286554aa032da2253095a61b45f1ae00c58afa30226c826fa779951608d",
+      "status": "Worker checks passed; root read full report and receipt structure; corrected lead verified all48 owned+46 protected+9 artifacts; qualifying immutable task review running; root final and broad review still gated. Builds predate commit; source blob identity checked, not rebuilt at final SHA."
+    },
+    "task11_accepted": {
+      "candidate": "fcbb74ac60da312bc06275e4e3de29b570a3bf2e",
+      "review_sha256": "55a7dc571bfad0a414195fbe8475e454c936cfd09b5b2b8a4179d16a6bd279ce",
+      "freeze_sha256": "f82501a820586441c5742afc4dfe9808bc2c9e9f538a195f294535765aa4ca9a"
+    },
+    "root_final_runtime_acceptance": {
+      "receipt": "/private/tmp/spl-toolkit-root-m5-final-acceptance-receipt.json",
+      "sha256": "daa4b3e94fbc514e08c2b4caaf58c1111daa0333693b9d0fac268f175a4aac95",
+      "status": "Root final runtime acceptance passed; broad milestone review and closure remain open"
+    },
+    "closure_preparation_review": {
+      "status": "Root read full private plan diff and14-path scope; approach approved as private preparation, repository apply remains gated on broad verdict",
+      "plan_sha256": "8fdd8757fd2120d2e0c23f5546d0184b352e970e2cc60a5e63802ae92a8038a5",
+      "ownership_sha256": "9c305ad551eeb6d86d28b5ce7c44854368491ff3e55b152ff3a0bd9203f206a9",
+      "requested_precision": "Say product source/build inputs fixed, rather than all executable inputs, because root private harness changed between attempts."
+    },
+    "broad_review_findings_pending_final_report": {
+      "candidate": "fcbb74ac60da312bc06275e4e3de29b570a3bf2e",
+      "findings": [
+        {
+          "priority": "P2",
+          "source": "pkg/analysis/spl2_functions.go:115-119",
+          "ruling": "Correct len numeric and split multivalue return domain; preserve existing input/nullability/arity/source guards, no evaluator/typechecker expansion. Original worker RED nested abs(len(\"abc\")) before bounded fix."
+        },
+        {
+          "priority": "P3",
+          "source": "pkg/analysis/spl2_syntax.go:284,287",
+          "ruling": "Two module diagnostic categories unsupported\u2192approved unsupported_syntax per design-spec:77. Keep code/severity/status/coverage/location/recovery and original/provenance bytes."
+        }
+      ],
+      "status": "Root read full initial broadreport d074b683...; With fixes, exactlyP2/P3, nootherCritical/Important. Both windows ended; lead deliberately liftedfreeze only for approvedfixes. Original eligiblewriter now released, brief243a36aa...; no unnecessarycorpus edits, measuredfullreportdelta and affectedverification required."
+    },
+    "root_broad_fix_preparation": {
+      "path": "/private/tmp/spl-toolkit-root-m5-broad-fix-preparation/preparation.json",
+      "sha256": "e11255a82d82de93f5939a772f72c6fee31e135d65ce3a4352dc5e304dca8b56",
+      "status": "Prepared and AST-only; not executed on current fcbb74ac, which still contains reviewed defects",
+      "before": {
+        "spl-toolkit-root-m5-surface-acceptance.py": "9efd597a5e70b00ee530dfa42f57d5d3214e93ab597bf0920e85f2c6b4ffdd93",
+        "spl-toolkit-root-m5-task11-semantics.py": "b011d6d0f81c9a6c4714a06908537affce16a64a6a0b8964c53781febe080bd3",
+        "spl-toolkit-root-m5-final-acceptance.py": "d1c561c5d93fce2a24933bdc0c43a0c225302c578b8e1e94f7dfa0b5e4bcac6e"
+      },
+      "after": {
+        "spl-toolkit-root-m5-surface-acceptance.py": "d5ae4a04dec6924b1354fb56caf80cd96191ab0490b5e4e056941e59bb745397",
+        "spl-toolkit-root-m5-task11-semantics.py": "d537f1ca015153b2255cca45c4b4e4bc80520bb83b27038058b8777de6849ed1",
+        "spl-toolkit-root-m5-final-acceptance.py": "51e48b5f30a1f8595c37047e84489238c5d01129e8bcd90285d0ee119ed9435e"
+      },
+      "amendment_sha256": "da907a495392127e66f08fd4ed2aec7a09901fd44e04a4d63b291e4bf19841c7",
+      "source_changes": false,
+      "semantic_controls": "Two new pre-runtime composition cases; original12 unchanged. len numeric positive and multivalue-to-abs no-definite-presence guard. Not a new evaluator/typechecker.",
+      "baseline": "Original immutable Task8 bytes preserved; exactly one explicit approved category leaf amended in memory; all other full report fields still compared.",
+      "current_pass_qualification": "Prior fcbb runtime acceptance remains a historical passing result with no claims about future fixed candidate. Required affected verification and root rerun follow reviewed fixes.",
+      "pre_runtime_oracle_correction": {
+        "before_sha256": "5e0877afbc39c5af8104aaeaa6e48722748ef1a9592eacfc630a6fb8496d0576",
+        "after_sha256": "d537f1ca015153b2255cca45c4b4e4bc80520bb83b27038058b8777de6849ed1",
+        "basis": "Broad report explicitly does not claim analysis-only status incomplete. Root read transfers.go54-69: conditional field only changes binding; validation/validate.go105-107 adds schema warning/coverage. Both supported calls have complete analysis; negative presence stays conditional and field validation becomes incomplete. Corrected before any runtime capture, original draft retained.",
+        "new_checks": "Both added cases also verify field validation status/outcome and full native/CLI/HTTP parity against empty field catalog."
+      }
+    },
+    "broad_review_initial": {
+      "path": "/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/.superpowers/sdd/milestone-5-implementation-plan/milestone-5-broad-review.md",
+      "sha256": "d074b6839481ee338caf16bbbd024dd305a77141868f3c3cbca229ad94126ff8",
+      "verdict": "With fixes",
+      "findings": [
+        "M5-BR-01 Important",
+        "M5-BR-02 Minor"
+      ],
+      "root_read": "full"
+    },
+    "broad_fix_red_checkpoint": "Originalqualifiedwriter 01-nested-len-red exit1 beforeproductmutation; analysisvalid/complete,nconditional/tablereadindeterminate.471inputbaselineatfcbb afterattributedSDDappend. Composition/null/source/unknown/named/arity/field/schema controlsREDstage; splitunknown domain convention; no unnecessarycompactcorpus edits.",
+    "broad_fix_green_progress": {
+      "basis": "lead report, runtime receipt pending root read",
+      "canonical_records": 1714,
+      "compact_fixtures_unchanged": 13,
+      "full_report_delta": "Exactly B08-B12 unsupported to unsupported_syntax category; 1709 others unchanged including 9 len/split candidates. Expected category leaves frozen before capture.",
+      "full_go_sha256": "17bb01a589bcd650a3180f1d68479811b4e19851ae22e06925d29db3a75905be",
+      "affected_checks_reported": "Go1.22 analysis/validation; current vet/race; build-all; source Python339 passed. Source/native/HTTP parity and both installed packages pending.",
+      "root_status": "No runtime active; awaiting fixed reviewed candidate and freeze."
+    },
+    "broad_fix_source_commit": {
+      "commit": "7571f1cb578968caf92996b050ebfc3092f02605",
+      "parent": "fcbb74ac60da312bc06275e4e3de29b570a3bf2e",
+      "paths": 6,
+      "root_read": "Full product/test diff and actual commands/exits/changed inputs from logs01-16; green affected floor/race/vet/build339Python78surfaces/package. Root final runtime still gated on evidence commit and stable freeze.",
+      "lead_commit_verification": "Every current/commit blob equals checkedsource; immutable diff SHA81168bd199a86924dbfc093e220307a81975e9ce6462bf26ad61f65e832ab33e",
+      "reviewer": "Existing /root/milestone5_xhigh/broad_review resumed, protected eligible; scoped two-findings plus logs.",
+      "evidence_status": "Writer preparing separate owned evidence/report commit."
+    },
+    "broad_fix_root_acceptance": {
+      "head": "40e6e171a1d215e5c67758fbf346cc5b78892ee2",
+      "implementation_commit": "7571f1cb578968caf92996b050ebfc3092f02605",
+      "receipt": "/private/tmp/spl-toolkit-root-m5-40e6e171-final-acceptance-receipt.json",
+      "receipt_sha256": "567ba8d92ec4b63f54c02b1e2c6ae49d86d094013b3ae69934ddf51337249014",
+      "scoped_review_sha256": "c906a7a32b5dcdd045d688f293e9fd15c2d036d09e56c5fa80efe6cdcb1296bc",
+      "freeze_receipt": "/private/tmp/spl-toolkit-m5-40e6e171-final-window-freeze.json",
+      "freeze_sha256": "6fdbb59ed009fe658bbb6a69e8963018a54ccd5969f919f7195376e359ec1777",
+      "root_read": "Full fix report/scoped rereview/freeze; actual exits/rawresults; allattemptchild/loghashes and380tracked30untracked5artifacts unchanged/current;9heldtools match. Originalfcbb receipt unchanged. Both processes exited."
+    },
+    "closure_release": {
+      "status": "authorized exact14 previouslyapproved paths; no product/build/corpus/rootaggregate/M6/M7/userowned edits. Lead applying docs/evidence only after root567ba8d9. Root must inspect final closure commit/sourceidentity then append ownedaggregate in stablegap."
+    },
+    "closure_accepted": {
+      "head": "237e62ac063755559207870b45744db6b2544a17",
+      "root_audit": "/private/tmp/spl-toolkit-root-m5-closure-audit.json",
+      "root_audit_sha256": "73f10808f7d73f99091652e8d0f1ddb58a9f6167237f09cdb0253f2ac49bc9a9",
+      "closure_json_sha256": "dd30f5aad38fd96fe50735cac96c68916a9e78ee99f9a1c4975488e47cd2ca04",
+      "progress_receipt": "/private/tmp/spl-toolkit-root-m5-final-progress-receipt.json",
+      "progress_sha256": "88288019d06f16aa4fea1844a2051293918a26803b32a438a39a8c2825699bc2"
+    }
+  },
+  "M6": {
+    "lead": "/root/milestone6_xhigh",
+    "status": "Tasks1\u20134 accepted; Task5 SINGLE-query atomic checkpoint committed7927ac3, verified; rest ofTask5 and private acceptance incomplete. User requested fresh-session handoff; no old agents live.",
+    "plan_sha256": "a02c833dd645a08d7ac72241ad1cf7e679b520cd68b954f42a23dcf98d718890",
+    "final_reconciliation_items": 2,
+    "windows": [
+      "After Task5 root core; preserve go-results-task5.json",
+      "After Task8 root final"
+    ],
+    "root_preparation": "/private/tmp/spl-toolkit-root-m6-preparation.json",
+    "typed_frontend_preparation": {
+      "path": "/private/tmp/spl-toolkit-m6-typed-frontend-preparation.md",
+      "sha256": "15bbd63853bb1c13901a440bf413050b53d1efba70daf75cff08bca46fd7afca",
+      "source_pin": "2d7a758257c753112b33ca3db2951364d209f788",
+      "status": "root read complete pin-bound note; no runtime or final reconciliation closed, lead idle until accepted M5",
+      "key_edges": "Per-call edit/fact sidecar at canonical typed lowering with shared ID remap, no spl2SyntaxNode AST. Composite model/dataset location/normalized-name mismatch. Unaliased lookup can introduce documented local AS alias only if final correspondence proves preservation of remote column, otherwise located refusal. Binding/implicit outputs/SQL phases/recovery/package facade await final M5."
+    },
+    "null_test_handoff": "Root sent accepted Task6 null_test role and resolver-present per-candidate dotted identity policy; final reconciliation remains gated on accepted M5.",
+    "root_preparation_current_inputs": {
+      "/private/tmp/spl-toolkit-root-m6-cases.json": "ce33d6f11d0a08ce08a26b76e909ca5289c5f65379d220342540dfd3473bc2f7",
+      "/private/tmp/spl-toolkit-root-m6-validation-cases.json": "d83ca0e8a0f7a944ffc5b8b6b4405ab1db99533f559a8c9ea764f39e284c9456",
+      "/private/tmp/spl-toolkit-root-m6-go.go": "b770bdc35f289a2681b9479e63b5e7a5ef7a3bf814b9b958f23eebd7cc80ca3e",
+      "/private/tmp/spl-toolkit-root-m6-semantic-checks.py": "874bae83bde06e598749f1fa36cf769b6b13f4d1780e32a7586327d9581f9d28",
+      "/private/tmp/spl-toolkit-root-m6-go-acceptance.py": "e2ff9ce72873a3d5659c3fab99da2725a53e6ef42863ae4059dadf12d9dc6124"
+    },
+    "root_cases": "20base including6preparedSPL2/linkage additions plus5target;50plannedGo/75nativeconcurrent calls. First23semantic contracts reviewed;2implicit cases pin-derived recommendation; JSON/AST only, no runtime.",
+    "root_preparation_contract_review": {
+      "path": "/private/tmp/spl-toolkit-m6-root-expectation-review.md",
+      "sha256": "381efc54151a9e628e1874a6883f6f0713f4b4e101a2f1da86158faf20882a9a",
+      "status": "root-read accepted contract-only review; narrow physical quoted-edit interval correction applied; 23case semantics consistent; no runtime/final interface reconciliations; lead idle"
+    },
+    "task2_datamodel_prerequisite_ruling": "Root approved minimal exact located data_model dependency and typed render owner for alreadyaccepted tstats DATAMODEL_NAME. Explicit additive ordinary-analysis detail exception only for missingdependency; preserveallfield-effectU/held/dynamic/damaged controls and legacy/unrelatedM5reports. Quoteidentityatomicunlessexistingevidenceprovesdecomposition. Positive rewrite needs independent slot/group/postproof despite retainedfieldU; no grammar/fieldsemantic expansion. Note/proposal only, no productionrelease.",
+    "core_preflight": {
+      "path": "/private/tmp/spl-toolkit-m6-core-preflight.md",
+      "sha256": "7cca1be6826e956c43140e2d16703b25fa8586dab4c6480845817b4ba819830d",
+      "pin": "471e28746c288fea544d5cc4652d37ecad636a2c",
+      "status": "root-read complete and approved proposal; no implementation/plan release; final relevantM5deltas andadapter/native/packageitem5 pending",
+      "clarifications": "Render pure/original evidence, copied outputs and session provenance before Verify; intentional additive rewrite capability field preserves existing values notwholeJSONidentity; tstats dependency-onlyexception; finalcorpusdelta reconcile"
+    },
+    "capability_role_clarification": "Role incompactRewriteCapabilityForm is stable documented render context/form granularenoughfordistinctions, not merelygenericread/create or generatedANTLRtypename. Noextrafield/frameworknecessary; carryintofinalplan.",
+    "final_reconciliation_scope": [
+      "Relevant intervening core/validation/corpus deltas from approved471e287 proposal to accepted finalM5",
+      "Intervening adapter/native/package deltas from approved b9c98c7 and641e616 preflights, especially Python category fix and Task11 surfaces/corpus/docs/checker closure"
+    ],
+    "original_register_status": "Originalfive-itemregister:1\u20134concretecoreproposalrootapproved; onlyinterveningdeltasremainforthose. Item5notyetfinal. No repeatedbroadarchitecturegate; finalplanmustintegrateacceptedproposal/clarificationsandactualitem5beforeproduction.",
+    "adapter_preflight": {
+      "path": "/private/tmp/spl-toolkit-m6-cli-rest-preflight.md",
+      "sha256": "1b8c9ba06e2d679e8b3bbbb63730b65ca218a88287dae604f8346597647ffb11",
+      "pin": "b9c98c76e1b0b1da4ae2f66c3094715fbd0b6235",
+      "status": "Root read all87lines and verified hash; concrete CLI/REST proposal approved, no runtime/production/finalplan release; final native/package and relevant intervening deltas remain"
+    },
+    "native_package_preflight": {
+      "path": "/private/tmp/spl-toolkit-m6-native-package-preflight.md",
+      "sha256": "8714af82801d9f60fdea1bb5e24e77bcb3af2889d039f2b62f6a7f46de10035a",
+      "pin": "641e616f8db68b4dad7e8eed3eecb64e4bf12f0c",
+      "status": "Root read complete and approved proposal; no runtime/plan/production. Pending Python category fix and Task11/finalM5 relevant deltas remain.",
+      "header_clarification": "Refresh both complete fixture headers from actual corresponding Go1.22/Go1.25 planned builds; never synthetic insertion of exports into stale fixtures. Preserve genuine per-compiler output and comparator allowances."
+    },
+    "root_final_attempt_wrapper": {
+      "path": "/private/tmp/spl-toolkit-root-m6-final-acceptance.py",
+      "sha256": "9c1a9469ba2f0afdc025db726bfad89db9bd0fb56c6e4794ea9ee1bf9f557b1b",
+      "status": "AST-only unexecuted; actual interfaces/build window remain gated"
+    },
+    "task2_datamodel_prerequisite_supersession": "M5 Task11 now authorized to supply the exact atomic DATAMODEL_NAME canonical dependency within semantic closure; final accepted commit must confirm. Then M6 Task2 consumes that report and adds private render ownership only, not duplicate dependency insertion. Lead notified while idle.",
+    "task11_reference_handoff": "PendingfinalM5: field/output/not_applicable deferreddestinationintentions do not implyrewriteeligibility; staticSID search_jobref isnotnewrulekind; qualifiedjoinreads indeterminatewholeidentityneverrootfields. Finaldeltasverifybeforeplanrelease.",
+    "retired_lead": "/root/milestone6",
+    "lead_replacement_required_before_release": false,
+    "replacement_adoption": {
+      "status": "Root read full receipt and accepted; replacement available until accepted final M5, no product release",
+      "lead": "/root/milestone6_xhigh",
+      "model": "gpt-6-astra",
+      "reasoning_effort": "xhigh",
+      "role": "default",
+      "fork_turns": "none",
+      "role_override": false,
+      "attestation": "Explicit tool-assigned configuration, not backend execution proof",
+      "private_receipt_directory": "/private/tmp/spl-toolkit-m6-xhigh-adoption/",
+      "receipt_path": "/private/tmp/spl-toolkit-m6-xhigh-adoption/adoption-receipt.md",
+      "receipt_sha256": "24a26ef84d14ec6dee5ee04ccb726b15de9cd89bc74bfe5a53b1852934b70fba",
+      "verified_instructions": {
+        "/Users/jacobdelgado/.codex/AGENTS.md": "f756502be4e3d178a372f4254e6c9129bbf4513392b5e2db4ab4a5a35fd834e2",
+        "/Users/jacobdelgado/.codex/skills/efficient-delegation/SKILL.md": "2b0c89a340dafe57c5af827aa24476e7e0371de8b7a3d4dbfac275c3482e77e7"
+      }
+    },
+    "post_m5_handoff_preparation": {
+      "path": "/private/tmp/spl-toolkit-root-m6-post-m5-handoff.md",
+      "sha256": "e5a8596922095a0bdd3fb289560d0531ea87208bd04078dec8a65295ce32b696",
+      "status": "Prepared only; no dispatch or implementation release. Provisional M5 candidate fcbb74ac must be superseded by actual root acceptance when available."
+    },
+    "private_final_delta_preparation": {
+      "lead": "/root/milestone6_xhigh",
+      "status": "Private provisionalplan andreceipt completed; root read receipt andplan1\u2013372. Existing XHighlead now checking one source-coordinate bridge clarification; no repository or implementation release.",
+      "ownership": "/private/tmp/spl-toolkit-m6-final-m5-delta-preparation/",
+      "allowed": "Only relevant preflight delta reads, exact input hashes and private integrated ExecPlan draft; no new research, unchanged tests/preflights, subordinate dispatch or candidate mutation",
+      "qualification": "Final accepted-M5 source identity reconciliation required before applying draft or production dispatch"
+    },
+    "private_plan_review_progress": {
+      "path": "/private/tmp/spl-toolkit-m6-final-m5-delta-preparation/milestone-6-implementation-plan.private.md",
+      "sha256": "c6e82990ba16db27650c5714af7e4493f0a89b6ccda037c7e4a9be8501c6a4e3",
+      "bytes": 94128,
+      "lines": 571,
+      "read": "Full private plan; ranges1\u2013165/166\u2013230/231\u2013294/295\u2013372/373\u2013451/452\u2013EOF",
+      "status": "Provisionally reviewed; root release pending exact canonical-coordinate bridge clarification and final accepted-M5 delta reconciliation",
+      "assessment": "Approved product scope, eight-task ownership/strict contracts/facts/render/proof/adapter/native/package/verification boundaries retained; no additional design or scope issue found in full read.",
+      "open_clarification": "Existing M6XHigh lead checking exact canonical-owned service for arbitrary candidate edit coordinates, no duplicate sourceIndex logic",
+      "production_release": false,
+      "receipt": "/private/tmp/spl-toolkit-root-m6-private-plan-review.json",
+      "receipt_sha256": "83454aebcbb5cbf05d66036fa81fd1ecb28e7e86bc4709a3a9be3407a58524c2"
+    },
+    "coordinate_bridge_ruling": {
+      "status": "Root approved complete proposal at663a20a3 and connectedTask2/4changes; privatefinalwordingupdatepending",
+      "helper": "analysis.LocateRewriteBytes(text string, ranges []RewriteByteRange) ([]Location,error)",
+      "requirements": "Strict UTF8, halfopenbytebounds/exactruneboundariesincludingEOF; all-or-error/no partial, empty nonnil results/inputorder; one canonicalnewSourceIndex/exactPosition.Offset lookup; no clamping/normalization/parser/proof creation. Helper/value/privatebyteLocation method in rewrite_evidence.go wherepossible; preserve originalsource.go behavior. Task4 owns candidateconstruction; Render/Verify own semanticproof.",
+      "source_plan_sha256": "663a20a3a296477c4ea045e659a9fa435966018a43d1f36a89da29f143b68411",
+      "remaining": "Final acceptedM5 source reconciliation and actualrepositoryplan/rootproductionrelease; no productwork now"
+    },
+    "coordinate_private_approval_received": {
+      "identities": {
+        "/Users/jacobdelgado/.codex/AGENTS.md": "f756502be4e3d178a372f4254e6c9129bbf4513392b5e2db4ab4a5a35fd834e2",
+        "/Users/jacobdelgado/.codex/skills/efficient-delegation/SKILL.md": "2b0c89a340dafe57c5af827aa24476e7e0371de8b7a3d4dbfac275c3482e77e7",
+        "/private/tmp/spl-toolkit-m6-final-m5-delta-preparation/milestone-6-implementation-plan.private.md": "e518c17da6c8f3549c02a3356be2731488fb34deedae841454b383484c6c2af8",
+        "/private/tmp/spl-toolkit-m6-final-m5-delta-preparation/coordinate-approval-receipt.md": "6ac19e971579878900181fa8404109d18df4a0758c047c8a6f965361cdd30a79"
+      },
+      "root_review": "Full approval receipt and complete proposal-to-approved private plan diff read; matches root ruling. Prepared plan accepted, final accepted-M5 source reconciliation and repository/production release pending."
+    },
+    "private_final_source_reconciliation": {
+      "starting_private_plan_sha256": "e518c17da6c8f3549c02a3356be2731488fb34deedae841454b383484c6c2af8",
+      "accepted_source": "40e6e171a1d215e5c67758fbf346cc5b78892ee2",
+      "scope": "Only fcbb\u219240e6e171 sixsource/test and12evidence deltas. Preserveoriginalprivateplan andcoordinateapproval. No tests/builds/repo edits/delegates. Finalclosureidentity step remains."
+    },
+    "final_m5_closure_head": "237e62ac063755559207870b45744db6b2544a17",
+    "production_release": {
+      "receipt": "/private/tmp/spl-toolkit-root-m6-production-release.json",
+      "sha256": "4d21108dd0eac7d1271a9e6e7a21ed54240fa3429e6bc40f97a0032eb874937b",
+      "approved_private_plan_sha256": "86ce9d9ca0e2a5245caddc01fe748aad437bf31471016cf0a3d990c1233e9d71",
+      "approved_final_delta_sha256": "8d6df484e9f7d00eb9f9cd2fe01d0e1b941a236d0bd4bfc8413b1962211fdea1",
+      "accepted_predecessor": "237e62ac063755559207870b45744db6b2544a17",
+      "scope": "Applyexactprivateplanplusadministrativereleasewording;8serialtasks/freshqualifiedworkers+reviews;rootwindows5/8;noM7release."
+    },
+    "plan_application": {
+      "applied_sha256": "9f68ab4860deca314351271911692aa4423fc69de0844983bc48fe1b486ffb9c",
+      "receipt": "/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/.superpowers/sdd/milestone-6-implementation-plan/plan-application-receipt.json",
+      "receipt_sha256": "b10b9290e1857816be90ca5436a8525dc6034640cf23ab4639eb231f76fa5cf3",
+      "admin_diff": "/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/.superpowers/sdd/milestone-6-implementation-plan/plan-application-admin.diff",
+      "admin_diff_sha256": "569bd389dbe44a98931eb0d25f58b86cca74dae0d8ac5b59c7dc99209ff50b0c",
+      "root_read": "Fullreceipt/admin diff; onlyreleasedtitle/intro/Progress/revision changed. Fullapprovedprivate86cepreserved."
+    },
+    "task1_assignment": {
+      "agent": "/root/milestone6_xhigh/task1_implementer",
+      "assignment_receipt": "/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/.superpowers/sdd/milestone-6-implementation-plan/task-1-assignment-receipt.json",
+      "sha256": "c4c447ad96eefe51e439fd98b0f5d23fe13c43494fdc1a8361ffac06b0ff09c6",
+      "configured_model": "gpt-6-astra",
+      "configured_effort": "xhigh",
+      "role": "default",
+      "fork_turns": "none",
+      "role_override_check": "default has no override;explicitmodel+effort match coordinator. Configuration only, notbackendattestation.",
+      "ownership": "pkg/rewrite/model.go,request.go,target.go,diagnostics.go,focusedcontracttests,testdata/rewrite/requests.json",
+      "review": "Fresh independent combinedreview afterimmutabletaskcommit",
+      "status": "running"
+    },
+    "artifact_replacement_ruling": "Futuretask-authorized builds may replace shared outputs after preserving currentM5payloadbytes/identities; retain historicalevidence/sourcequalifications. Routinepreservation, no newapprovalgate.",
+    "predecessor_artifacts": {
+      "receipt": "/private/tmp/spl-toolkit-m6-predecessor-artifacts-237e62ac/preservation-receipt.json",
+      "sha256": "866493a787c8d0786654bdf342504ee09b9f3fedefb103c2be622a3d490bb809",
+      "reported_count": 9,
+      "reported_bytes": 54673329,
+      "basis": "Lead retained all nine files from committed M5closure artifact identities before shared M6 builds; source inputs unchanged. Root receipt hash readverified."
+    },
+    "task1_checkpoint": {
+      "basis": "Qualifying lead checkpoint; final immutable report/review pending",
+      "red_exit": 1,
+      "focused_green_exit": 0,
+      "implemented": "Strict request/rule/condition preparation, target composition and reportmodels; ownednewfilesonly",
+      "coverage": "Exactnumeric/nullpresence,Unicode/nested-key rejection,directGo normalization/ownership,auditarrays",
+      "next": "Workerselfreview/finalaffectedpackagecheck/immutablecommit/freshindependentcombinedreview",
+      "unresolved_decision": null
+    },
+    "task1_commit": "f90d364c3cf1ab0bebb62c263a0183cd440076b3",
+    "task1_review": {
+      "path": "/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/.superpowers/sdd/milestone-6-implementation-plan/task-1-review.md",
+      "sha256": "59d0cbf6824164e5315e9ddc50451272548b28430a580f00440573e9a27d7c07",
+      "root_read": "Full report read before ruling",
+      "verdict": "Needs fixes",
+      "finding": "I1 Important: rewrite field-list report repeats whole catalog, contrary to accepted no-repeated-catalog requirement",
+      "other_findings": 0
+    },
+    "task1_root_wire_ruling": {
+      "path": "/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/.superpowers/sdd/milestone-6-implementation-plan/task-1-root-wire-ruling.json",
+      "sha256": "779127ebe0fb176105868209a7d363bc2ae2bf3250abfadf6c8bf2e6faad0381",
+      "contents": {
+        "root_ruling": "Root ruling 2026-09-08, Task1 I1: Keep CandidateValidation.FieldList *validation.Report complete and unchanged in Go. Only rewrite CandidateValidation JSON field_list.target projects original {kind, identity, version}; all three keys remain present, including empty metadata strings, and fields/optional_fields keys are absent. Preserve every other canonical report field/value/analysis/outcome/coverage/diagnostic. No new metadata/default/hash/validation logic. Canonical validation.Report serialization and JSON Schema/OCSF branch remain unchanged. Use a small rewrite-only projection without mutating the original report; retain array/union guards. Test a populated required+optional catalog with nonvacuous report evidence, exact JSON equivalence after excluding ONLY those two target keys, unchanged Go original, standalone canonical arrays still present and unchanged schema serialization.",
+        "fix_base": "f90d364c3cf1ab0bebb62c263a0183cd440076b3",
+        "plan_before_sha256": "9f68ab4860deca314351271911692aa4423fc69de0844983bc48fe1b486ffb9c",
+        "plan_after_sha256": "6eb9ea9b10490f3d3b93a01008c3601daefcecce32ddce41969e892a412197c1",
+        "task1_brief_before_sha256": "83d58671b1d3f078d16c6567147c920ac9bf81b7dc0e06cd928702a342da72ce",
+        "task1_brief_after_sha256": "38896be4715dc414ca5e6aab5f7d8ad5017ac5130433855085ce165a12ebbc61",
+        "fix_brief_sha256": "8cd7df93ca833edffe395925e51c56a6192a746b10d9ff6d0d26198bf0fe8ca5",
+        "instructions_reread_unchanged": {
+          "/Users/jacobdelgado/.codex/AGENTS.md": "f756502be4e3d178a372f4254e6c9129bbf4513392b5e2db4ab4a5a35fd834e2",
+          "/Users/jacobdelgado/.codex/skills/efficient-delegation/SKILL.md": "2b0c89a340dafe57c5af827aa24476e7e0371de8b7a3d4dbfac275c3482e77e7"
+        },
+        "retained_assignment": "gpt-6-astra/xhigh/default; no role override, isolated original context",
+        "status": "root approved; original writer fix round1 released"
+      },
+      "root_read": "Full ruling receipt and full plan clarification diff read",
+      "status": "Root approved; original eligible writer scoped fix RED/GREEN reported; final check/commit/scoped rereview pending"
+    },
+    "root_field_target_projection_preparation": {
+      "path": "/private/tmp/spl-toolkit-root-m6-field-target-projection-preparation/preparation-receipt.json",
+      "sha256": "049a2324e981b293bc30cd0cacd4724efe1ae15b7a082c261475d5dd5cfaf416",
+      "status": "AST-only, no product runtime",
+      "original_versions_preserved": true,
+      "go_canonical_baseline_unchanged": true
+    },
+    "task1_acceptance": {
+      "path": "/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/.superpowers/sdd/milestone-6-implementation-plan/task-1-acceptance-receipt.json",
+      "sha256": "30f1e4531bfa444d53a2c9d35583114daa47c951ab6029140638f1f4219d6471",
+      "contents": {
+        "task": 1,
+        "status": "complete; immutable review gate approved",
+        "base": "237e62ac063755559207870b45744db6b2544a17",
+        "initial_commit": "f90d364c3cf1ab0bebb62c263a0183cd440076b3",
+        "accepted_head": "3a29058949b5b0000e4b90d9406764dbe11ce2ee",
+        "initial_review_sha256": "59d0cbf6824164e5315e9ddc50451272548b28430a580f00440573e9a27d7c07",
+        "scoped_rereview_sha256": "e71fa142b8888314e9b6a5f9d7dc43e3c4df7c94df49dc22313896626e95692c",
+        "report_sha256": "54279b1d46354f9ab0288a124966a4f8262c18e91ab9e421aaa4d6d3fb41efa6",
+        "open_findings": [],
+        "rulings": [
+          "Structural target decoding now; canonical semantic preparation at Task5 before reports.",
+          "Root-approved rewrite-only field_list.target metadata projection; complete original Go report retained."
+        ],
+        "verification": "Retained expected initial/narrow RED and focused/fresh-package GREEN read; all8 committed hashes matched tested evidence; current HEAD verified; no redundant test run.",
+        "next_task": 2,
+        "next_base": "3a29058949b5b0000e4b90d9406764dbe11ce2ee",
+        "plan_sha256": "9a89d095a3ce2e82ecbce39429987e0d83c1d933ca3e74112d772c24eac79c3e",
+        "task2_brief_sha256": "f764b9ba70fca83fa87c1a351b496caebdb0bc6e28759887adf1500d4ddb28d4",
+        "current_instruction_hashes": {
+          "/Users/jacobdelgado/.codex/AGENTS.md": "f756502be4e3d178a372f4254e6c9129bbf4513392b5e2db4ab4a5a35fd834e2",
+          "/Users/jacobdelgado/.codex/skills/efficient-delegation/SKILL.md": "2b0c89a340dafe57c5af827aa24476e7e0371de8b7a3d4dbfac275c3482e77e7"
+        },
+        "next_assignment_check": "Fresh gpt-6-astra/xhigh/default with fork none; catalog supports model/effort and default has no override."
+      },
+      "scoped_rereview_path": "/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/.superpowers/sdd/milestone-6-implementation-plan/task-1-rereview-1.md",
+      "scoped_rereview_sha256": "e71fa142b8888314e9b6a5f9d7dc43e3c4df7c94df49dc22313896626e95692c",
+      "root_read": "Full acceptance receipt and full scoped rereview read; no duplicate unchanged tests"
+    },
+    "task2_assignment": {
+      "path": "/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/.superpowers/sdd/milestone-6-implementation-plan/task-2-assignment-receipt.json",
+      "sha256": "9e405c3083210544422c1332281c3a52859c9fa11ac3610d326fb956c75443ac",
+      "contents": {
+        "task": 2,
+        "agent": "/root/milestone6_xhigh/task2_implementer",
+        "requested_model": "gpt-6-astra",
+        "requested_reasoning_effort": "xhigh",
+        "agent_type": "default",
+        "fork_turns": "none",
+        "role_override_check": "default has no fixed override; catalog supports xhigh; explicit settings match coordinator protected floor",
+        "base": "3a29058949b5b0000e4b90d9406764dbe11ce2ee",
+        "brief": "task-2-brief.md",
+        "brief_sha256": "f764b9ba70fca83fa87c1a351b496caebdb0bc6e28759887adf1500d4ddb28d4",
+        "report": "task-2-report.md",
+        "ownership": "New analysis evidence/facts/render/correspondence files and focused tests, forms.json, explicitly enumerated canonical hooks/capability files only; source.go readonly; no rewrite import in analysis.",
+        "review": "Fresh independent combined immutable task review after implementer report; no worker children.",
+        "retained_boundaries": "Approved typed forms/facts/coordinates; M5 tstats already canonical; preserve all others, root oracles/aggregate and predecessor history."
+      },
+      "root_read": "Full receipt; model and reasoning floor plus non-overriding role confirmed"
+    },
+    "task2_owner_hook_ruling": {
+      "path": "/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/.superpowers/sdd/milestone-6-implementation-plan/task-2-owner-hook-ruling.json",
+      "sha256": "eb3451a23c8c5debbf3c4faa8ea22396aaac9ed5010f6af8c62e4a81aa38cf47",
+      "contents": {
+        "ruling": "Task2 ownership ruling: Permit pkg/analysis/dependencies.go only to register private render-owner information inside the existing qualifiedCatalog(ctx, from), adjacent to its existing data_model/dataset reference emissions. Accepted/current source SHA256 122c652ba117a02904bdd37496114a940f300b6f1930365a9428e0612970e620; qualifiedCatalog at lines 84\u2013114 retains the original typed context, datamodel prefix, quote form and bounded overlapping components that referenceAt alone does not receive. Preserve extraction, dependencies, diagnostics, normalization, public reference locations and ordinary Analyze results exactly. This supplies the already approved composite-owner bridge; no new forms, reconstruction, duplicate extraction or SPL2 tstats behavior is authorized.",
+        "source_pin": "3a29058949b5b0000e4b90d9406764dbe11ce2ee",
+        "source_path": "pkg/analysis/dependencies.go",
+        "source_sha256": "122c652ba117a02904bdd37496114a940f300b6f1930365a9428e0612970e620",
+        "authority": "Coordinator routine ownership reconciliation inside root-approved canonical bridge; immutable task review will assess actual hook.",
+        "plan_before_sha256": "9a89d095a3ce2e82ecbce39429987e0d83c1d933ca3e74112d772c24eac79c3e",
+        "plan_after_sha256": "f7d7d84210a3939e78ec1e7846f80e21ffdb7e7396c2f521adc57a32aef10950",
+        "brief_after_sha256": "5c358776c156824986775b2e294adaf0e89923fea9a4f94beb470b4a565ef3c2",
+        "risk_if_wrong": "A hook could alter canonical extraction/location behavior; existing analysis regressions and immutable task review must reject such a change."
+      },
+      "root_read": "Full receipt; compatible with approved typed composite-owner bridge, no new approval gate",
+      "verification_pending": "First behavior verification and immutable task review"
+    },
+    "task2_checkpoint": {
+      "basis": "Qualifying lead relayed retained writer progress; immutable report/review pending",
+      "implemented": "Facade/value copies; strict batched byte coordinates; canonical site/binding/fact hooks; typed SPL/SPL2 rendering; implicit-link boundaries; initial correspondence",
+      "focused_status": "Compiles on real canonical queries; ordinary Analyze JSON parity, Unicode/injection rendering, coordinate rejection and implicit-group checks reported passing",
+      "behavioral_red": "SPL2 rename operand is RenameSourceContext itself, not IdentifierContext; writer correcting hook",
+      "remaining": "Conservative/proof tests, capabilities, full affected checks, immutable commit and independent review",
+      "evidence": "Initial absent-facade RED and behavioral RED retained",
+      "full_task_green": false,
+      "blocker": null
+    },
+    "task2_expanded_green": {
+      "basis": "Qualified lead retained-evidence checkpoint; final immutable report/review pending",
+      "observed_exit_code": 0,
+      "elapsed_seconds": 0.47,
+      "raw_log": "W/.superpowers/sdd/milestone-6-implementation-plan/task-2-evidence/expanded-green.log",
+      "covered": "Ordinary Analyze JSON parity; field/dependency/alias/lookup ownership; exact byte coordinates; AND/OR/NOT facts and invalidation; SQL evaluate/project ownership; both-dialect injection-safe atoms; lookup AS insertion; SPL composite normalization; implicit groups and SPL2 refusal; path refusal; snapshot/render provenance",
+      "remaining": "Capability/forms declarations, additional conservative/proof cases, affected-package checks, immutable commit/review",
+      "full_task_accepted": false
+    },
+    "task2_proof_green": {
+      "basis": "Qualified lead retained writer result; final immutable report/review pending",
+      "observed_exit_code": 0,
+      "elapsed_seconds": 0.46,
+      "raw_log": "W/.superpowers/sdd/milestone-6-implementation-plan/task-2-evidence/proof-green.log",
+      "covered": "Capability manifest; exact numeric intersection; partial guarantees across unknown filters; missing-reference dynamic-name refusals; linked datamodel requirements; unsafe removal-only field-state proof rejection",
+      "remaining": "Durable forms fixture, self-review, affected analysis/validation/rewrite checks, immutable commit/review",
+      "blocker": null
+    },
+    "task2_self_review_checkpoint": {
+      "basis": "Qualified lead retained writer evidence, before final immutable review",
+      "forms": {
+        "count": 19,
+        "observed_exit_code": 0,
+        "raw_log": "task-2-evidence/forms-green-2.log"
+      },
+      "prior_affected_packages": {
+        "analysis_seconds": 2.282,
+        "validation_seconds": 9.054,
+        "rewrite_seconds": 0.613,
+        "status": "passed before subsequent self-review fixes; not final source proof"
+      },
+      "self_review_regressions": [
+        {
+          "finding": "Derived-alias predicates counted as source facts",
+          "status": "RED regression retained; corrected focused GREEN in final-focused.log"
+        },
+        {
+          "finding": "Aggregation retained facts for removed fields",
+          "status": "RED regression retained; correction in focused verification"
+        }
+      ],
+      "remaining": "Final affected-package rerun justified by new fixes, immutable commit, fresh independent review",
+      "external_blocker": null
+    },
+    "task2_immutable_candidate_checkpoint": {
+      "basis": "Qualified lead final corrected-source verification summary; source/evidence report and fresh independent review pending",
+      "commit_prefix": "02c2e32",
+      "owned_file_count": 22,
+      "final_focused": {
+        "exit_code": 0,
+        "elapsed_seconds": 0.511
+      },
+      "final_affected_packages": {
+        "exit_code": 0,
+        "analysis_seconds": 1.804,
+        "validation_seconds": 9.294,
+        "rewrite_seconds": 0.882
+      },
+      "source_go": "Unchanged approved c0421ed1 identity reported",
+      "pending": "Fresh combined independent review active; lead read report and verified all22 tested source hashes, unchanged source.go and Go tool identity",
+      "code_changes_pending": false,
+      "unresolved_interface_decision": null,
+      "root_runtime_executed": false,
+      "commit": "02c2e3217df6edef01cada136d9e623da0de7a93",
+      "last_self_review_correction": "Interpolated-dependency eligibility corrected before recorded final GREEN; retained failures classified in writer report"
+    },
+    "task2_review_assignment": {
+      "path": "/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/.superpowers/sdd/milestone-6-implementation-plan/task-2-review-assignment.json",
+      "sha256": "a1589daa5824741134a8c5e5e55c970f38dc8a5b1dbe0d64c26c28c25f3ea270",
+      "contents": {
+        "task": 2,
+        "agent": "/root/milestone6_xhigh/task2_reviewer",
+        "requested_model": "gpt-6-astra",
+        "requested_reasoning_effort": "xhigh",
+        "agent_type": "default",
+        "fork_turns": "none",
+        "role_override_check": "default has no override; explicit model/effort matches protected coordinator floor; assigned settings are not a backend execution attestation",
+        "base": "3a29058949b5b0000e4b90d9406764dbe11ce2ee",
+        "head": "02c2e3217df6edef01cada136d9e623da0de7a93",
+        "brief": "task-2-brief.md",
+        "review_instructions": "task-2-review-brief.md",
+        "review_instructions_sha256": "e8e4627202c2dfc91ba3cbfb80503fc57dd80e828d8ae9d36ea92e64482ff2d5",
+        "implementer_report": "task-2-report.md",
+        "implementer_report_sha256": "846b84ef967c92e9b4b9d92257f57f507af835b1caddf932cfaf76ef2d895407",
+        "review_package": "review-3a29058..02c2e32.diff",
+        "review_package_sha256": "32e7ecde097af683f1df3fc73a54407b03b2decdd0a8bb674f0b5d9f2b467a30",
+        "candidate_identity_receipt": "task-2-candidate-identity.json",
+        "candidate_identity_receipt_sha256": "b8c7d089743aa8e23fecf9ebf39d128e9e1262a07ddeb1d85dfb18ea1b36c193",
+        "review_report": "task-2-review.md",
+        "scope": "Independent combined spec/code review; readonly product and Git state; no duplicate covered tests or subagents"
+      },
+      "root_read": "Full assignment receipt; configured model/effort/non-overriding role and immutable scope checked"
+    },
+    "task2_review_pre_report_checkpoint": {
+      "basis": "Qualified lead reports reviewer retained narrow reproductions at exact candidate hashes; full report pending",
+      "candidate": "02c2e3217df6edef01cada136d9e623da0de7a93",
+      "confirmed_important_findings": [
+        "SPL/SPL2 quoted search wildcard values and quoted index patterns supply false definite literal evidence; lookup edit Verify incorrectly proves",
+        "Render JSON-copies invalid target byte ff into U+FFFD before validation, then proves a changed identity",
+        "Model-only Traffic to Network in quoted SPL datamodel produces incorrect enclosing dataset Effects and fails correspondence despite correct bytes",
+        "First-use aggregate BY passthrough changes SourceEpochID because sidecar cloned before initialization"
+      ],
+      "additional": "Separate lexical-test gap being finalized",
+      "next": "One original-writer scoped fix round using complete report/probes; same reviewer scoped rereview",
+      "root_position": "All within approved strict UTF-8/typed-fact/composite-owner/provenance bridge; no new approval or architecture gate",
+      "root_inputs": "No new acceptance cases or expectation changes; no root M6 product execution"
+    },
+    "task2_review": {
+      "path": "/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/.superpowers/sdd/milestone-6-implementation-plan/task-2-review.md",
+      "sha256": "ba209a3b16c51a49ea5544562b992d490bd0df407f11c7059b072fea7ab8bbb3",
+      "root_read": "Full report read; decisive retained probes and observed-exit qualifications explicit; no probe rerun",
+      "verdict": "Needs fixes",
+      "candidate": "02c2e3217df6edef01cada136d9e623da0de7a93",
+      "important_findings": {
+        "I1": "Quoted SPL/SPL2 field and index search patterns become complete exact literal guarantees; unsafe authorization survives correspondence",
+        "I2": "Render JSON-copy sanitizes invalid caller UTF-8 before validating; target Name/Path must validate first",
+        "I3": "SPL2 null_test role overwrites unknown/unmodeled owner refusal; unknown(isnull(user)) becomes editable and proven",
+        "I4": "Model-only edit of quoted SPL datamodel dataset computes quoted effect Network.quotedAll instead of decoded Network.All",
+        "I5": "Aggregate BY first-use read initializes source state after prior clone; output creates a false new SourceEpochID/BindingID"
+      },
+      "minor_M1": "Requested same-text comment/option-value/remote-column with different local alias controls missing",
+      "root_minor_ruling": "Include exactly these three controls in current original-writer fix round within owned test file; do not defer to Task8, no broader matrix/new feature",
+      "deferred_consuming_obligations": "Task6 text capabilities/OpenAPI; Tasks3\u20135 grouping/condition/destination/apply behavior",
+      "root_contextual_contract": {
+        "path": "/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/.superpowers/sdd/milestone-6-implementation-plan/task-2-fix-root-contract.json",
+        "sha256": "4ef5a66fa2c174c841fae9a6a5f426f3aec0cedf9e5262ae7cd96743826ee47e",
+        "root_read": "Full receipt read; pattern vs exact literal contexts and original Unicode validation retained"
+      },
+      "next": "Original eligible writer consolidated fix round, retained regressions/focused+affected checks, same reviewer scoped rereview"
+    },
+    "task2_fix_m1_inclusion": {
+      "path": "/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/.superpowers/sdd/milestone-6-implementation-plan/task-2-fix-m1-root-inclusion.json",
+      "sha256": "4a390c9e9001cbfc926f2fc4480f362c344c9a6ec12e2d3d13cb8c9ee841c82e",
+      "contents": {
+        "root_direction": "All five Important fixes are required within existing approved scope; preserve typed unsupported-owner refusal when specializing null_test. Include M1 same-text comment, option value, and remote lookup label with different local alias in the current original-writer fix round and owned test file. One affected verification/review may close this concrete coverage gap. No broader lexical matrix or feature.",
+        "prior_fix_brief_sha256": "e10dada601202dc25944406726b030751ecdfd71c027a6a486ca8231b71999b6",
+        "current_fix_brief_sha256": "65a544abe9f60dad49606bb8f22a635316c56af1ae03432ebf1035877e1079c1",
+        "prior_brief_preserved": "task-2-fix-1-brief-before-m1.md",
+        "effect": "M1 moves from deferred Task8 triage to current Task2 fix round at explicit root direction; other integration obligations unchanged"
+      },
+      "root_read": "Full receipt; original writer received current bounded brief, previous brief preserved and earlier deferral superseded"
+    },
+    "root_pattern_context_preparation": {
+      "path": "/private/tmp/spl-toolkit-root-m6-pattern-context-preparation/preparation-receipt.json",
+      "sha256": "c8979f4cde83fc0b721b355b1b0f33beebc93f7f583dd16449b12659abc86f05",
+      "contents": {
+        "status": "prepared-not-executed",
+        "created_utc": "2026-09-08T21:31:49.431695+00:00",
+        "basis": {
+          "status": "prepared-not-executed",
+          "basis": "Confirmed Task2 I1 review and root-approved canonical contract: unknown literal syntax stays unknown; separately guaranteed matching values survive LiteralComplete=false; strict typed distinction between search patterns and exact expression strings",
+          "added_cases": [
+            "spl_quoted_pattern_no_literal_authority",
+            "spl_exact_string_after_pattern",
+            "spl2_quoted_pattern_no_literal_authority",
+            "spl2_exact_string_after_pattern"
+          ],
+          "existing_twenty_cases_unchanged": true,
+          "retained_before_directory": "/private/tmp/spl-toolkit-root-m6-pattern-context-preparation",
+          "verification": "JSON round-trip and Python AST only; no M6 compile/import/product/runtime or facade-probe execution; expected texts/statuses fixed before engine/condition implementation and acceptance"
+        },
+        "review_path": "/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/.superpowers/sdd/milestone-6-implementation-plan/task-2-review.md",
+        "review_sha256": "ba209a3b16c51a49ea5544562b992d490bd0df407f11c7059b072fea7ab8bbb3",
+        "before_sha256": {
+          "spl-toolkit-root-m6-cases.json": "ce33d6f11d0a08ce08a26b76e909ca5289c5f65379d220342540dfd3473bc2f7",
+          "spl-toolkit-root-m6-semantic-checks.py": "5584bb1d47d2427e57b617f4de6e43472b9bfa84ddebd9eb9dc1dea48649051d",
+          "spl-toolkit-root-m6-preparation.json": "672cff82d849c006e48837e2d94b694bddb7176134f9dcc3d9c3f782e396247e"
+        },
+        "after_sha256": {
+          "spl-toolkit-root-m6-cases.json": "db98441f28ae4ce495545fdeead254a74605486a0d6267ece2d94993aef00496",
+          "spl-toolkit-root-m6-semantic-checks.py": "670e0601868a0cb10f81b77e31d1c72db4ea3e872a5048e7a17c6e66963f7943",
+          "spl-toolkit-root-m6-preparation.json": "12bd461e7950614e2d58277ae80ed649b63e9b74091b79f17ddac0307d663fa9"
+        },
+        "case_counts": {
+          "base": 24,
+          "destination": 5,
+          "total": 29,
+          "go_concurrent": 58,
+          "native_concurrent": 87
+        },
+        "runtime_execution": false,
+        "existing_cases_unchanged": true,
+        "go_driver_unchanged_sha256": "b770bdc35f289a2681b9479e63b5e7a5ef7a3bf814b9b958f23eebd7cc80ca3e",
+        "go_runner_unchanged_sha256": "a3bb1c6c63d874ac642ead40057e64ec8caca030911b45bde737fee491b5db87",
+        "surface_runner_unchanged_sha256": "80081261a9d5283abd3845cab3a4970855f45ead0665ca003abdb550a1ae6c21"
+      },
+      "status": "Prepared JSON/AST only before M6 root runtime; private inputs not shared with workers"
+    },
+    "task2_fix_focused_checkpoint": {
+      "basis": "Qualified lead retained writer result; immutable fix/scoped review pending",
+      "red": "All five Important regressions reproduced; ordinary Analyze equality passed. M1 option-value control initially crossed existing unmodeled stats-option boundary; selected source reads moved earlier without runtime support expansion. Failures retained.",
+      "focused_green": {
+        "observed_exit_code": 0,
+        "covered": "I1\u2013I5; exact-expression asterisk positives; original malformed Name/Path bytes; known/unknown/named null owners; single/double quoted model-only effects; grouping epochs/supporting references; all3 M1 lexical controls in both dialects"
+      },
+      "changed_owned_files": 6,
+      "remaining": "Self-review, affected-package checks, immutable fix, same-reviewer scoped rereview",
+      "blocker": null
+    },
+    "task2_fix_immutable_checkpoint": {
+      "basis": "Qualified lead read appended report/raw RED and final focused/affected GREEN; root scoped review pending",
+      "commit": "0b8dd62068be0638e470a532544acd1cc0a48507",
+      "base": "02c2e3217df6edef01cada136d9e623da0de7a93",
+      "changed_paths": 6,
+      "final_affected_packages": {
+        "observed_exit_code": 0,
+        "analysis_seconds": 1.686,
+        "validation_seconds": 9.373,
+        "rewrite_seconds": 0.489,
+        "count_flag": "-count=1",
+        "warnings": null
+      },
+      "identity": "Lead checked all22 source/fixture files and21 Go paths against final run manifests/currentcommit; unchanged forms fixture/source.go",
+      "same_eligible_reviewer": "/root/milestone6_xhigh/task2_reviewer",
+      "review_scope": "I1\u2013I5 and M1, fresh scoped rereview",
+      "state": "Source frozen pending verdict; no repeated product tests"
+    },
+    "task2_acceptance": {
+      "path": "/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/.superpowers/sdd/milestone-6-implementation-plan/task-2-acceptance-receipt.json",
+      "sha256": "dac20363f6a0ad7690b660ac78aa200d46f9c92600b02007b3b5d4ada43de0b6",
+      "contents": {
+        "task": 2,
+        "base": "3a29058949b5b0000e4b90d9406764dbe11ce2ee",
+        "initial_commit": "02c2e3217df6edef01cada136d9e623da0de7a93",
+        "accepted_commit": "0b8dd62068be0638e470a532544acd1cc0a48507",
+        "review_sha256": "ba209a3b16c51a49ea5544562b992d490bd0df407f11c7059b072fea7ab8bbb3",
+        "rereview_sha256": "b44506c42e7a2b644a2db53f668a96dcf0b4c1bedc89af19ffb856b41c30b570",
+        "fix_identity_sha256": "8eb9ba0476a908f50a5032b404b7e07675780d1eb8cfa40ffeb8dce8b78d9eb6",
+        "closed_findings": [
+          "I1",
+          "I2",
+          "I3",
+          "I4",
+          "I5",
+          "M1"
+        ],
+        "review_rounds": 1,
+        "open_findings_in_round": [],
+        "deferred_observations": [
+          "O1: pre-existing metric Boolean scalar-kind typing; exact final-review triage pointer retained in ledger/task-8-review-obligations.md"
+        ],
+        "integration_obligations": [
+          "Tasks3\u20135 original-point conditions, linked groups, whole-request proof, target validation/apply/batch policy",
+          "Task6 text/OpenAPI capability exposure; Task8 corpus/documentation truth"
+        ],
+        "plan_sha256": "021c5e7b6b8830cc2936cede5625311cad1d5818291a1d65d51b3f6c39e3ea1d",
+        "task3_brief_sha256": "bca31843ef95be69c8d39b08ad731e492ffbacb49288286630a9cf60db34a3b2",
+        "verification": "Retained final focused and affected packages pass; all21 Go path hashes match final tested manifests, all22 recorded source/fixture hashes match immutable/current bytes, source.go unchanged, tracked tree clean. No coordinator tests/builds."
+      },
+      "scoped_rereview_path": "/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/.superpowers/sdd/milestone-6-implementation-plan/task-2-rereview-1.md",
+      "scoped_rereview_sha256": "b44506c42e7a2b644a2db53f668a96dcf0b4c1bedc89af19ffb856b41c30b570",
+      "root_read": "Full acceptance receipt and complete scoped rereview read; I1\u2013I5/M1 closed; O1 separately unprobed at review"
+    },
+    "task3_assignment": {
+      "path": "/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/.superpowers/sdd/milestone-6-implementation-plan/task-3-assignment-receipt.json",
+      "sha256": "cd58e0b9696c778e4609f34a34078377c8a92a099203dd1d4a2575fa7c9c3ed9",
+      "contents": {
+        "task": 3,
+        "agent": "/root/milestone6_xhigh/task3_implementer",
+        "requested_model": "gpt-6-astra",
+        "requested_reasoning_effort": "xhigh",
+        "agent_type": "default",
+        "fork_turns": "none",
+        "role_override_check": "default has no fixed lower override; explicit model and effort match protected coordinator floor; no claim of backend execution attestation",
+        "base": "0b8dd62068be0638e470a532544acd1cc0a48507",
+        "brief": "task-3-brief.md",
+        "brief_sha256": "bca31843ef95be69c8d39b08ad731e492ffbacb49288286630a9cf60db34a3b2",
+        "owned_paths": [
+          "pkg/rewrite/conditions.go",
+          "pkg/rewrite/conditions_test.go",
+          "testdata/rewrite/conditions.json"
+        ],
+        "report": "task-3-report.md",
+        "evidence": "task-3-evidence/",
+        "instruction_hashes": {
+          "/Users/jacobdelgado/.codex/AGENTS.md": "f756502be4e3d178a372f4254e6c9129bbf4513392b5e2db4ab4a5a35fd834e2",
+          "/Users/jacobdelgado/.codex/skills/efficient-delegation/SKILL.md": "2b0c89a340dafe57c5af827aa24476e7e0371de8b7a3d4dbfac275c3482e77e7"
+        },
+        "boundaries": "Serial production; no subagents/reviewers, canonical fact changes, downstream implementation, root oracle/aggregate or other milestone artifact access. Actual affected tests and exact-owned commits authorized."
+      },
+      "root_read": "Full receipt; explicit Astra/xhigh/default/forknone and no role override verified"
+    },
+    "metric_boolean_O1_root_check": {
+      "method": "Bounded read-only source/grammar inspection, no runtime probe",
+      "source_files": {
+        "pkg/analysis/rewrite_facts.go": "33e6512750b78fffcee5887b372075dd86f277a8529076fe5603f9e43eeeb3aa",
+        "grammar/SPL2Parser.g4": "6bbed063c63b678bcb0653d31860c56a36615de296ac49254437bc9f09b23aed"
+      },
+      "finding": "metricsOption predicate uses expression (grammar201); literal includes BOOLEAN (268). Fact dispatch passes search||metrics at rewrite_facts373; helper converts bool to text for search mode around153\u2013156. Mechanism supports reviewer concern; runtime confirmation pending.",
+      "root_direction": "Move single O1 reproduction from final broad triage to next stable producer follow-up; reuse eligible original Task2 writer; correct canonically only if confirmed, no consumer coercion.",
+      "status": "Runtime reproduced by qualified writer and fixed; scoped review accepted57450416, no open O1"
+    },
+    "task3_producer_gap_ruling": {
+      "basis": "Lead retained public facade probe at accepted0b8dd62, observed process exit0; root confirmed semantics from approved plan, no probe rerun",
+      "probe_artifacts": "W/.superpowers/sdd/milestone-6-implementation-plan/task-3-evidence/producer-probe.{json,stdout,stderr}",
+      "observed": "Complete sourcetype=a OR sourcetype=b, NOT a, and absent earlier EventCode restriction return empty GuaranteedValues with LiteralComplete=false; later EventCode=1 correctly becomes complete",
+      "root_ruling": "At fully supported/observed original query points, complete OR branches without common guarantee, NOT without positive guarantee, and no earlier literal restriction yield empty GuaranteedValues and LiteralComplete=true: conclusive false query-fact evidence, never event/field absence. Later restrictions cannot propagate backward. Unproved scalar/pattern/owner/binding/scope evidence remains unknown; separately guaranteed values survive incomplete other evidence. Do not mark every missing map key complete.",
+      "execution_direction": "At next safe checkpoint preserve and pause Task3 production; reuse eligible original Task2 writer for one bounded canonical producer follow-up including queued O1 reproduction/fix if confirmed. Keep writers serial, preserve/freeze all tested input identities, scoped qualified review before Task3 real-query acceptance resumes. No new API/architecture/coercion/approval gate.",
+      "status": "Closed by reviewed57450416; Task3 resumed under existing scope"
+    },
+    "task3_partial_freeze": {
+      "path": "/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/.superpowers/sdd/milestone-6-implementation-plan/task-3-freeze-receipt.json",
+      "sha256": "397fc83b548f34a7a5f0ca2e9dc113ad6b40bc77436b9da566b8a263a1b3d837",
+      "contents": {
+        "state": "Task3 PARTIAL, frozen; no commit, production/test activity stopped after red-selection",
+        "base": "0b8dd62068be0638e470a532544acd1cc0a48507",
+        "owned_paths": [
+          {
+            "path": "pkg/rewrite/conditions.go",
+            "sha256": "6721f6ea136eee71c2497fe04425bc1620864ace075c34e415ed244cdfcb9361",
+            "copy": ".superpowers/sdd/milestone-6-implementation-plan/task-3-frozen-before-producer/pkg/rewrite/conditions.go"
+          },
+          {
+            "path": "pkg/rewrite/conditions_test.go",
+            "sha256": "8d7d3743c8694871666d900254af62bbd674be9c297a747933fc859a5ad850ae",
+            "copy": ".superpowers/sdd/milestone-6-implementation-plan/task-3-frozen-before-producer/pkg/rewrite/conditions_test.go"
+          },
+          {
+            "path": "testdata/rewrite/conditions.json",
+            "sha256": "9aaa221e3c3ef42caef7f3d5ae6025443d82b88ed970abf716a9100ddb48500f",
+            "copy": ".superpowers/sdd/milestone-6-implementation-plan/task-3-frozen-before-producer/testdata/rewrite/conditions.json"
+          }
+        ],
+        "report_sha256": "99c8441ff879dcdba6549605f767437ca1da2c4be6047320ca992f0a8b4dad48",
+        "frozen_artifact_sha256": {
+          "pkg/rewrite/conditions.go": "6721f6ea136eee71c2497fe04425bc1620864ace075c34e415ed244cdfcb9361",
+          "pkg/rewrite/conditions_test.go": "8d7d3743c8694871666d900254af62bbd674be9c297a747933fc859a5ad850ae",
+          "task-3-evidence/green-unit.json": "2238a0943d2a75e61da2a21a86ff703068f1b152addb5a8672c57ef8050bf6e9",
+          "task-3-evidence/green-unit.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "task-3-evidence/green-unit.stdout": "2ee2b675d5022b1d533119104f550653b090e5975e132f6e6d1d423d5ff93c3d",
+          "task-3-evidence/probe.go": "6012c3c830019ef4b75365ae159845fb025c9eac93f39e124b45764e70ecd94f",
+          "task-3-evidence/producer-probe.json": "bd940fb5ae0c341e1ace2ef373192976a3dbbd636da3be3a3cea2fae1d897be7",
+          "task-3-evidence/producer-probe.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "task-3-evidence/producer-probe.stdout": "b3ead4c6a0321290311ef04461bb121b53c9483148d4dfeb73870a8dec97c2b3",
+          "task-3-evidence/red-selection.json": "17cd291ad0ccc7e4fbfda1e9c53236e45811c2e8bbab3302f36688cad99d68b0",
+          "task-3-evidence/red-selection.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "task-3-evidence/red-selection.stdout": "2ddab8666101da9517162f1fc81502d7037c75a1abdc20c2904ccf3111f7cf70",
+          "task-3-evidence/red-unit.json": "714504e9f4348c39ca731dcfd8743834ef17619cd1ecf60b73312e5c369766ac",
+          "task-3-evidence/red-unit.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "task-3-evidence/red-unit.stdout": "8252f64b3503a9483e879138c7b88871a7789e6ce8d1f16ae7e12d4bb9c59344",
+          "task-3-evidence/run.py": "188db85f54262a23a87c8b4c1393b86183e84c543238ccea6f455e20d0ebaa2f",
+          "task-3-report.md": "99c8441ff879dcdba6549605f767437ca1da2c4be6047320ca992f0a8b4dad48",
+          "testdata/rewrite/conditions.json": "9aaa221e3c3ef42caef7f3d5ae6025443d82b88ed970abf716a9100ddb48500f"
+        },
+        "observed_checks": {
+          "producer-probe": 0,
+          "red-unit": 1,
+          "green-unit": 0,
+          "red-selection": 1
+        },
+        "qualification": "Pure evaluator unit GREEN precedes newly added selection tests. Latest selection/integration RED is against deliberate probe/selection stubs, not an additional producer finding. No Task3 acceptance claimed.",
+        "pending": "Implement probes/selection, reconcile producer, final affected verification/review/commit",
+        "serial_rule": "Task3 writer remains stopped. Only canonical producer follow-up may write product source next. Preserve these current WIP bytes; do not stage or execute incomplete pkg/rewrite tests during producer work."
+      },
+      "root_read": "Full receipt read; serial preservation, ownership and explicit role/capability checked where applicable"
+    },
+    "producer_followup_assignment": {
+      "path": "/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/.superpowers/sdd/milestone-6-implementation-plan/task-2-producer-followup-assignment.json",
+      "sha256": "8e61fcd108e5798046a196684765e0a0e4fb171c97356a96054657ecc799c614",
+      "contents": {
+        "agent": "/root/milestone6_xhigh/task2_implementer",
+        "requested_model": "gpt-6-astra",
+        "requested_reasoning_effort": "xhigh",
+        "agent_type": "default",
+        "continuation": "original eligible writer via followup_task; isolated original fork none context retained",
+        "role_override_check": "default has no lower role override; explicit original model/effort match coordinator protected floor",
+        "base": "0b8dd62068be0638e470a532544acd1cc0a48507",
+        "brief": "task-2-producer-followup-brief.md",
+        "brief_sha256": "1c2c0deb6230ec440b339fc20d100eb277fe65cc0605383aee1adfab68e49b85",
+        "root_contract_sha256": "5f759c6249656e35ccbd230b19922cf830244f34f152acf211a73b430126255c",
+        "task3_freeze_sha256": "397fc83b548f34a7a5f0ca2e9dc113ad6b40bc77436b9da566b8a263a1b3d837",
+        "owned_paths": [
+          "pkg/analysis/rewrite_facts.go",
+          "pkg/analysis/rewrite_evidence.go",
+          "pkg/analysis/transfers.go",
+          "pkg/analysis/rewrite_evidence_test.go"
+        ],
+        "report": "task-2-producer-followup-report.md",
+        "scope": "Confirmed canonical completeness gap plus O1 narrow reproduction and correction only if confirmed; serial production; no Task3 code/test/staging or private root inputs"
+      },
+      "root_read": "Full receipt read; serial preservation, ownership and explicit role/capability checked where applicable"
+    },
+    "producer_followup_root_contract": {
+      "path": "/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/.superpowers/sdd/milestone-6-implementation-plan/task-2-producer-followup-root-contract.json",
+      "sha256": "5f759c6249656e35ccbd230b19922cf830244f34f152acf211a73b430126255c",
+      "contents": {
+        "authority": "Root confirmation of existing approved fact-completeness semantics and serial producer follow-up",
+        "public_contract": "For a fully supported, fully observed original query point, complete OR branches with no common value, NOT without a positive guarantee, and no earlier EventCode restriction yield conclusive false query-fact evidence (empty GuaranteedValues, LiteralComplete=true). This asserts absence of a proven query guarantee, never event/field absence. A later restriction must not propagate backward. Preserve unknown for unproved scalar/pattern/owner/binding/scope information, and preserve separately guaranteed matching values even when other literal evidence is incomplete; do not make every missing map entry complete by default. At the next safe Task3 checkpoint, preserve its work and pause its production writer, then reuse eligible Task2 writer for one bounded canonical producer follow-up covering this confirmed gap and queued O1 reproduction/fix if confirmed. Keep writers serial, retain frozen/tested identities and report partial Task3 honestly. Scoped qualified review before resuming Task3 real-query acceptance. No consumer coercion, extra API/architecture or new approval gate.",
+        "source_base": "0b8dd62068be0638e470a532544acd1cc0a48507",
+        "evidence": "task-3-evidence/producer-probe.json, producer-probe.stdout, producer-probe.stderr, probe.go",
+        "O1_static_authority": "Root read grammar/SPL2Parser.g4:201 predicate=expression, :268 BOOLEAN literal; rewrite_facts.go:373 search||metrics, :153\u2013156 bool-to-search-word. Static concern only; narrow runtime reproduction still required before any O1 fix."
+      },
+      "root_read": "Full receipt read; serial preservation, ownership and explicit role/capability checked where applicable"
+    },
+    "producer_followup_plan_reconciliation": {
+      "prior_preserved": "W/.superpowers/sdd/milestone-6-implementation-plan/plan-before-producer-followup.md",
+      "prior_sha256": "021c5e7b6b8830cc2936cede5625311cad1d5818291a1d65d51b3f6c39e3ea1d",
+      "basis": "Lead execution/contract reconciliation receipt; APIs and root Task5/Task8 windows unchanged"
+    },
+    "root_dependency_probe_reconciliation": {
+      "path": "/private/tmp/spl-toolkit-root-m6-dependency-probe-reconciliation/preparation-receipt.json",
+      "sha256": "10a40551e5af5f4376fbef33d6c56dc2c58f9da9d2080835ac4e6fc33b865144",
+      "contents": {
+        "status": "prepared-not-executed",
+        "utc": "2026-09-08T22:02:04.821176+00:00",
+        "basis": {
+          "status": "prepared-not-executed",
+          "basis": "Actual accepted canonical RewriteFactProbe identities address the dependency value: kind sourcetype/identity a in retained public Task3 producer probe; approved source/dependency identity model and rewrite_facts nonfield key construction. The conceptual root requests previously used the selector attribute name.",
+          "changes": [
+            {
+              "case": "guaranteed_and_fact",
+              "pointer": "/request/rules/0/when/identity/name",
+              "before": "sourcetype",
+              "after": "auth"
+            },
+            {
+              "case": "or_common_fact",
+              "pointer": "/request/rules/0/when/identity/name",
+              "before": "sourcetype",
+              "after": "auth"
+            },
+            {
+              "case": "or_no_guaranteed_fact",
+              "pointer": "/request/rules/0/when/identity/name",
+              "before": "sourcetype",
+              "after": "auth"
+            }
+          ],
+          "preserved": "All document bytes, literal condition values, rule targets, expected statuses/text/commit flags, helper assertions and the other21 base cases unchanged; no runtime-derived expected-output updates.",
+          "retained_before_directory": "/private/tmp/spl-toolkit-root-m6-dependency-probe-reconciliation",
+          "verification": "JSON round-trip only; no import/compile/product/probe/runtime execution; final actual wire reconciliation before root acceptance remains required"
+        },
+        "public_probe_source": "/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/.superpowers/sdd/milestone-6-implementation-plan/task-3-evidence/probe.go",
+        "public_probe_source_sha256": "6012c3c830019ef4b75365ae159845fb025c9eac93f39e124b45764e70ecd94f",
+        "before_sha256": {
+          "spl-toolkit-root-m6-cases.json": "db98441f28ae4ce495545fdeead254a74605486a0d6267ece2d94993aef00496",
+          "spl-toolkit-root-m6-preparation.json": "12bd461e7950614e2d58277ae80ed649b63e9b74091b79f17ddac0307d663fa9"
+        },
+        "after_sha256": {
+          "spl-toolkit-root-m6-cases.json": "ca02c00621c714aab6ac090ac1216511c1c574f840637a04417db09ae255a2e6",
+          "spl-toolkit-root-m6-preparation.json": "a06bf4156b0f6038fc61dcd563575072504bfd5212f87d9cad502c51b5374e7f"
+        },
+        "unchanged_helper_sha256": "670e0601868a0cb10f81b77e31d1c72db4ea3e872a5048e7a17c6e66963f7943",
+        "unchanged_go_driver_sha256": "b770bdc35f289a2681b9479e63b5e7a5ef7a3bf814b9b958f23eebd7cc80ca3e",
+        "runtime_executed": false
+      },
+      "status": "JSON-only before root runtime; three conceptual nonfield probe identities aligned to canonical dependency value, no query/condition-value/expected-result change"
+    },
+    "producer_followup_checkpoint": {
+      "basis": "Qualified lead original-writer retained public facade reproduction",
+      "O1_runtime_confirmed": "tstats flag=true produces scalar string true while ordinary where produces boolean true; quoted controls remain string",
+      "frozen_Task3_preservation": "All18 artifact hashes checked unchanged by producer writer",
+      "current_work": "Add completeness/O1 RED regressions before bounded canonical fix",
+      "root_runtime_executed": false,
+      "parallel_writer": false,
+      "scope_gap": null
+    },
+    "producer_followup_green_checkpoint": {
+      "basis": "Qualified lead original writer retained final focused and affected checks",
+      "focused": "GREEN observed exit0; complete OR/NOT/earlier absence/no-backfill both dialects, unknown scalar/pattern/owner/binding contexts, independent guarantees with incomplete predicates, O1 boolean versus quoted-string kinds",
+      "affected_packages": {
+        "exit_code": 0,
+        "analysis_seconds": 1.789,
+        "validation_seconds": 9.11
+      },
+      "self_review_guards": "Unknown prefixes before first site and non-predicate scalar/array owners tested",
+      "changed_paths": [
+        "pkg/analysis/rewrite_facts.go",
+        "pkg/analysis/rewrite_evidence.go",
+        "pkg/analysis/rewrite_evidence_test.go"
+      ],
+      "frozen_Task3": "All18 artifact hashes unchanged; no pkg/rewrite tests",
+      "pending": "Commit/separate report, qualified immutable scoped follow-up review, then Task3 resume",
+      "root_runtime_executed": false
+    },
+    "producer_followup_immutable_checkpoint": {
+      "basis": "Qualified lead full report/identity reconciliation read; root scoped review pending",
+      "candidate": "5745041676c8d6cddfb7b769c2aaa2630d3ab8a2",
+      "parent": "0b8dd62068be0638e470a532544acd1cc0a48507",
+      "changed_paths": 3,
+      "verified": "22 Task2 paths,157 final tested Go/module hashes,18 frozen Task3 artifacts; final focused and analysis/validation GREEN, no stderr",
+      "identity_receipt": "W/.superpowers/sdd/milestone-6-implementation-plan/task-2-producer-followup-identity.json",
+      "identity_sha256": "3a5f9f9b71521465239a54389d212eb2c5ac2110fab7a1131e9859bdc7cf2c66",
+      "review_assignment_sha256": "87c7cd3974c5c62b811427c00f39df23fe1dcab7c893da3f80ecfa58a59aab93",
+      "reviewer": "Existing eligible /root/milestone6_xhigh/task2_reviewer resumed for immutable scoped follow-up review",
+      "Task3": "Still partial/frozen; no pkg/rewrite test or acceptance claim",
+      "root_runtime_executed": false
+    },
+    "producer_followup_acceptance": {
+      "path": "/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/.superpowers/sdd/milestone-6-implementation-plan/task-2-producer-followup-acceptance.json",
+      "sha256": "57adddf716d90d1ffa151a1307716fb77ac541573b9c1cc0bcb35be2feac94f5",
+      "contents": {
+        "base": "0b8dd62068be0638e470a532544acd1cc0a48507",
+        "accepted_head": "5745041676c8d6cddfb7b769c2aaa2630d3ab8a2",
+        "verdict": "Spec and code approved; 0 open findings; completeness and O1 addressed",
+        "review_sha256": "f07bd46f515508630b4a2342c043d877cac2ed2f6501d48294a3ba83bebffcb6",
+        "identity_sha256": "3a5f9f9b71521465239a54389d212eb2c5ac2110fab7a1131e9859bdc7cf2c66",
+        "full_review_read": true,
+        "no_new_observations": true,
+        "unchanged_frozen_artifacts_before_task3_resume": 18,
+        "no_coordinator_product_rerun": true,
+        "qualification": "Producer acceptance only; Task3 is partial until implementation, final affected verification and independent review. Root checkpoint remains after reviewed Task5."
+      },
+      "review_path": "/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/.superpowers/sdd/milestone-6-implementation-plan/task-2-producer-followup-review.md",
+      "review_sha256": "f07bd46f515508630b4a2342c043d877cac2ed2f6501d48294a3ba83bebffcb6",
+      "root_read": "Full review and acceptance receipt; explicit complete/unknown contract, O1 and all retained exit classifications read; no product/probe rerun",
+      "open_findings": 0,
+      "observations": 0
+    },
+    "task3_resume_assignment": {
+      "path": "/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/.superpowers/sdd/milestone-6-implementation-plan/task-3-resume-assignment.json",
+      "sha256": "4c29a34338cb62412faec907b048a959ba83ad8ca6924f77b0a2bc590900b6e7",
+      "contents": {
+        "agent": "/root/milestone6_xhigh/task3_implementer",
+        "continuation": true,
+        "requested_model": "gpt-6-astra",
+        "requested_reasoning_effort": "xhigh",
+        "agent_type": "default",
+        "original_fork_turns": "none",
+        "role_override_check": "default has no model/effort override; retained explicit settings match coordinator protected floor, not backend attestation",
+        "original_writing_base": "0b8dd62068be0638e470a532544acd1cc0a48507",
+        "accepted_continuation_review_base": "5745041676c8d6cddfb7b769c2aaa2630d3ab8a2",
+        "brief": "task-3-brief.md",
+        "brief_sha256": "f1309cad25b5f540301e87ecd983b243bb7d475b34d528f8ab5b366c4069ad79",
+        "original_brief_preserved": "task-3-brief-original-base-0b8dd620.md",
+        "original_brief_sha256": "bca31843ef95be69c8d39b08ad731e492ffbacb49288286630a9cf60db34a3b2",
+        "producer_review_sha256": "f07bd46f515508630b4a2342c043d877cac2ed2f6501d48294a3ba83bebffcb6",
+        "producer_acceptance_sha256": "57adddf716d90d1ffa151a1307716fb77ac541573b9c1cc0bcb35be2feac94f5",
+        "task3_freeze_sha256": "397fc83b548f34a7a5f0ca2e9dc113ad6b40bc77436b9da566b8a263a1b3d837",
+        "all_18_frozen_artifacts_unchanged_before_resume": true,
+        "owned_product_paths": [
+          "pkg/rewrite/conditions.go",
+          "pkg/rewrite/conditions_test.go",
+          "testdata/rewrite/conditions.json"
+        ],
+        "no_children": true,
+        "single_production_writer": true
+      },
+      "root_read": "Full receipt; same eligible original writer, explicit model/effort and no role override, all18 preserved artifacts and sole-writer scope checked"
+    },
+    "root_task3_numeric_read": {
+      "basis": "Bounded frozen conditions.go:162\u2013185 source read only",
+      "observation": "Normalizes coefficient and big.Int exponent without power expansion; no additional issue raised and no product execution",
+      "scope": "Not a full Task3 review/acceptance"
+    },
+    "task3_resumed_green_checkpoint": {
+      "basis": "Qualified lead relayed natural original-writer checkpoint; final source/report/review pending",
+      "reported_checks": "Focused and full pkg/rewrite GREEN,246 tests/subtests,0failures/skips,empty stderr; all26 durable scope fixtures pass unchanged against accepted producer57450416",
+      "self_review_reconciliation": "Lead relayed already approved request-order/contributing-RuleIDs output-order clause after checkpoint mentioned rule-ID ordering; reconcile exact order before commit without changing simultaneous semantics",
+      "pending": "Order reconciliation, final affected-source checks if changed, exact3ownedpaths commit/report and fresh independent combined review",
+      "root_runtime_executed": false
+    },
+    "task3_immutable_review_checkpoint": {
+      "utc": "2026-09-08T22:54:35.526134+00:00",
+      "status": "Candidate committed; fresh independent review active. Review has reported ordinary derived skip incorrectly marking incomplete; full verdict pending. Existing scoped fix authority acknowledged.",
+      "base": "5745041676c8d6cddfb7b769c2aaa2630d3ab8a2",
+      "head": "3892f6dc8db7e8fb3e1de78d443704fb56b696ef",
+      "assignment": "/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/.superpowers/sdd/milestone-6-implementation-plan/task-3-review-assignment.json",
+      "assignment_sha256": "907b6a73e4ab8efadfa3036434828ed9ae9f32ded0fab76369df68057f7be649",
+      "assignment_read": "Full assignment read and hash verified by root; explicit model/effort/role checked.",
+      "identity_sha256": "32962fd1db773d33c02a1df7ac0048b876ed61a195f27cf0af9ae05a0416580a",
+      "implementer_report_sha256": "520c540280abb8e28415a694e0303bff6f7758eec4d00d43cbc31de8a2e4aa9d",
+      "final_lead_verification": "247 passing pkg/rewrite tests/subtests, zero failures/skips, empty stderr, 26 durable fixtures; request-order correction RED/GREEN retained. Lead reported and read exact tested/committed identities; root did not duplicate tests.",
+      "root_runtime": "No M6 product code or acceptance runtime executed. Root Go window after reviewed Task5; final after Task8 and broad review."
+    },
+    "task3_review": {
+      "status": "One Important I1: known derived/definition skips falsely mark private selection incomplete. Full review root-read; existing approved contract, no new decision. Original eligible writer active scoped correction; same reviewer to rereview.",
+      "path": "/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/.superpowers/sdd/milestone-6-implementation-plan/task-3-review.md",
+      "sha256": "97f97f35e41f39b23edfb849cf66d99cc9a40066ecf9b43388d03526ff905dad",
+      "fix_assignment": "/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/.superpowers/sdd/milestone-6-implementation-plan/task-3-fix-1-assignment.json",
+      "fix_assignment_sha256": "aba0d220bf68a372d6b34bb47ad56e375ccba264948b372acc69ff41955d50bb",
+      "root_runtime": "None; no repeat tests or product probe.",
+      "root_private_acceptance": "Read only existing derived_only_is_skip and target_captures_derived_alias cases; unchanged expectations already distinguish ordinary derived skip from target collision."
+    },
+    "task3_acceptance": {
+      "path": "/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/.superpowers/sdd/milestone-6-implementation-plan/task-3-acceptance-receipt.json",
+      "sha256": "7c40a37ebf8a89791bfa14071e9472447ed59c73250f32844c74e0af49177062",
+      "accepted_head": "6c18c32a073b944375d1d37da7e47b768d16656a",
+      "root_read": "Full scoped rereview90bc77f0 and acceptance receipt read; I1closed/no new findings or observations.253passes,0fail/skips,empty stderr/no warnings; retained exact owned-byte evidence, no root duplicate runtime.",
+      "scoped_review": {
+        "path": "/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/.superpowers/sdd/milestone-6-implementation-plan/task-3-rereview-1.md",
+        "sha256": "90bc77f088d3ea961352fe3f2caf9dac46e96e070d5db98f2f89c14d42593a3a"
+      }
+    },
+    "task4_assignment": {
+      "path": "/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/.superpowers/sdd/milestone-6-implementation-plan/task-4-assignment-receipt.json",
+      "sha256": "87d33c7691437d8f23ea9fb6c05fa5fd5daca26e98e6056b8eaf4a68bb8b39b3",
+      "status": "Fresh writer active, root read complete assignment and checked model+effort+nonoverriding role; eligible Astra/xhigh/default/forknone.",
+      "agent": "/root/milestone6_xhigh/task4_implementer",
+      "owned_paths": [
+        "pkg/rewrite/groups.go",
+        "pkg/rewrite/groups_test.go",
+        "pkg/rewrite/edits.go",
+        "pkg/rewrite/edits_test.go",
+        "testdata/rewrite/edits.json"
+      ]
+    },
+    "root_driver_contract_checkpoint": {
+      "status": "Preparation only, no M6 compilation/import/product runtime. Existing DecodeRequest/DecodeBatchRequest value signatures, IsInputError,document/original_text/candidate_text report fields match prepared Go driver. No driver/expected-result mutation. Rewrite/RewriteBatch remain Task5 actual reconciliation.",
+      "utc": "2026-09-08T23:13:04.145670+00:00"
+    },
+    "task4_green_checkpoint": {
+      "utc": "2026-09-08T23:29:01.167888+00:00",
+      "status": "Lead reports retained 05-affected-green exit0; not final acceptance.",
+      "covered": "Explicit alias preservation; SPL implicit links; conservative SPL2 implicit refusal; each required member original-point authorization; wildcard/unknown closure and independent child scopes; catalog coupling; conflict/coalescing; capture/collapse; simultaneous swaps/chains; skipped safety dependencies with a safe survivor; byte/overlap/Unicode/CRLF/newline/EOF.",
+      "producer_boundary": "Existing canonical lineage Before/After origins and Uncertain supplied closure proof; no new producer API.",
+      "next": "End-to-end audit, deterministic/concurrent assertions, final affected/package verification and immutable commit/review.",
+      "root": "No duplicate source scan, product run, or acceptance. Root Go window after reviewedTask5 unchanged."
+    },
+    "root_core_attempt_wrapper": {
+      "status": "Prepared AST-only; not imported or executed; no M6 product runtime",
+      "utc": "2026-09-08T23:36:51.738735+00:00",
+      "source_wrapper": "/private/tmp/spl-toolkit-root-m6-final-acceptance.py",
+      "source_wrapper_sha256": "9c1a9469ba2f0afdc025db726bfad89db9bd0fb56c6e4794ea9ee1bf9f557b1b",
+      "path": "/private/tmp/spl-toolkit-root-m6-core-attempt.py",
+      "sha256": "fda2c418da021030b7ecf54e605151264c81f9a19329fe5a6d980c3aa993aada",
+      "scope": "Unique core attempt directory captures outer raw logs, actual child returncode, timeout classification, before/after source/build/input snapshots and copies of observed inner outputs. Existing expected results, driver and semantic checks unchanged. No requirement on unavailable pre-Task5 go-results artifact.",
+      "execution_gate": "Only reviewed Task5 at a held exact commit; same existing root Go window.",
+      "checks": "ast.parse of generated source only; exact replacement preconditions; original final wrapper unchanged.",
+      "prior_wrapper_sha256": "904de7ebab10b5b44a4203c259d4539f29e6e50654ece6160b5b6456038b82bb",
+      "prior_wrapper_path": "/private/tmp/spl-toolkit-root-m6-core-attempt-preparation/904de7ebab10b5b44a4203c259d4539f29e6e50654ece6160b5b6456038b82bb.py",
+      "tooling": "At eventual run, record resolved Go version/path and Python path, selected non-secret Go environment, and include both resolved executable hashes in before/after input snapshots.",
+      "preparation_receipt": "/private/tmp/spl-toolkit-root-m6-core-attempt-preparation.json",
+      "preparation_receipt_sha256": "ea9ffc6b1a652bf00f1f49efe8c3e604a8ffb3cec32a217dc69aebc32e3b008f"
+    },
+    "task4_immutable_review_checkpoint": {
+      "utc": "2026-09-08T23:40:12.968540+00:00",
+      "status": "Candidate14a3a0dc fresh combined review active; not acceptance.",
+      "head": "14a3a0dcfe4652240dc8b949461f905b206f215a",
+      "report_sha256": "17a90b443e00f0ccd266c17b69871e96c44f0150b5f60a491c8267970ea7216c",
+      "identity_sha256": "3c5556f59922d1a24209dacc7935b53d265eaa288bfe17bb3e7df533db19de07",
+      "assignment_path": "/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/.superpowers/sdd/milestone-6-implementation-plan/task-4-review-assignment.json",
+      "assignment_sha256": "bb7c529de8dc2527ac608f7cb1ddd8d502797f923cea20fc16b3620c1373c0c1",
+      "verification": "Lead read full report and exact five committed/tested path hashes. Final affected58,full rewrite package,targeted concurrent race all exit0/empty stderr; prior failures classified. No root rerun.",
+      "latest_self_review_fix": "Independent source epoch collision interaction fixed without producer API; unknown conditional audit evidence retained for linked consumer even with independently authorizing unconditional rule.",
+      "root_runtime": "None. Prepared core capture wrapper only; no product code/import/Go execution. Window after reviewedTask5 unchanged."
+    },
+    "task4_acceptance": {
+      "path": "/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/.superpowers/sdd/milestone-6-implementation-plan/task-4-acceptance-receipt.json",
+      "sha256": "794f27a68ea8f23178718a00bb59e4cc8b3221d745ee6b6dfdfa8c53d1ce4646",
+      "accepted_head": "14a3a0dcfe4652240dc8b949461f905b206f215a",
+      "review": {
+        "path": "/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/.superpowers/sdd/milestone-6-implementation-plan/task-4-review.md",
+        "sha256": "375a8a1ea8383cf33fb25260eb2e60ee8d6048c20b06e13c2b0fc5fc7ff4d88e"
+      },
+      "root_read": "Full review and acceptance read.0findings; affected58/full rewrite/targeted concurrent race pass. Two reviewer overlays retained and qualified; no root reruns.",
+      "investigated_limits": [
+        "Ordering probe exit1 asserted unapproved internal monotonic GroupIDs; public changes remain sorted/deterministic, no finding.",
+        "SQL phase comparison exit0 supported control; qualified sibling carries affected src origins through canonical uncertain transitions, so refusal has independent closure basis; no proven independent sibling or defect. No further probe/API/coverage gate."
+      ]
+    },
+    "task5_assignment": {
+      "path": "/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/.superpowers/sdd/milestone-6-implementation-plan/task-5-assignment-receipt.json",
+      "sha256": "52de1cb672f1b01aa212b841833a13cedf9406f0969142ef978c99684cbe6ebd",
+      "agent": "/root/milestone6_xhigh/task5_implementer",
+      "status": "Fresh writer active; complete assignment root-read, explicitAstra/xhigh/default/forknone eligible,7owned paths,no children.",
+      "owned_paths": [
+        "pkg/rewrite/verify.go",
+        "pkg/rewrite/verify_test.go",
+        "pkg/rewrite/rewrite.go",
+        "pkg/rewrite/rewrite_test.go",
+        "pkg/rewrite/batch.go",
+        "pkg/rewrite/batch_test.go",
+        "testdata/rewrite/cases.json"
+      ]
+    },
+    "task5_usage_recovery": {
+      "utc": "2026-09-09T17:33:00.190249+00:00",
+      "previous_goal_turn": "progress: Task3 correction accepted, Task4 implemented/reviewed/accepted, Task5 dispatched; no completion claim.",
+      "authoritative_agent_state": "Live list_agents confirmed milestone6_xhigh and task5_implementer terminal errored with usage-limit message. Other retained relevant agents completed.",
+      "current_external_state": "Fresh get_usage_limits returned codex usedPercent60, rateLimitReachedType null, spendControlReached false, zero credits/resets; no purchase or reset action.",
+      "source_observation": "git status shows preserved untracked plans and only pkg/rewrite/rewrite_test.go as untracked product work; task5 report absent. Full Task5 brief root-read, hash863f1e64a3ebc368cf3cf15327626d3013de795189d810bb5e8d85282eae7724.",
+      "action": "One followup to existing milestone6_xhigh admitted based on changed live quota state. Lead to reconcile HEAD/hash/preserve partial work and resume SAME task5_implementer at retained explicit protected floor. No replacement, duplicate writer or unchanged rerun. Await recovery outcome.",
+      "root_runtime": "No M6 product code/compilation/acceptance executed. No concurrent source changes/tests by root; original root window unchanged.",
+      "blocker_audit": "Not at impasse; live usage allows recovery attempt. Do not mark goal blocked or complete.",
+      "live_recovery_observation": {
+        "utc": "2026-09-09T17:38:06.710479+00:00",
+        "lead": "list_agents confirmed /root/milestone6_xhigh running after the single followup",
+        "worker": "At same observation original task5_implementer remained terminal; lead is reconciling before resumption. Do not assume worker active until authoritative update.",
+        "instruction": "Continue same live lead handle; do not restart from timeout or dispatch competing worker. Current quota60%used made this recovery distinct from unchanged failed dispatch."
+      },
+      "result": {
+        "utc": "2026-09-09T17:40:07.374397+00:00",
+        "status": "Recovered: authoritative list_agents on exact original task5_implementer now RUNNING. Existing lead running; same assigned model/effort/non-overriding role.",
+        "receipt": "/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/.superpowers/sdd/milestone-6-implementation-plan/task-5-recovery-1/receipt.json",
+        "sha256": "fd53ce38c0aae2c7b8d501d69b4b0a8c8c9a3ab6b042d9c0770627350259b3d1",
+        "root_read": "Full recovery receipt read; preserved10326byte partialtest SHAa1419424a57e96a62a083a41efbc04affe003343b0e3485144b45270a363ec08. No report/logs or tracked/index changes at preservation; no tests/builds or reset/credits action.",
+        "blocker_audit": "Usage interruption resolved in current live state; not blocked. Continue same active goal and Task5, no replacement worker."
+      }
+    }
+  },
+  "M7": {
+    "lead": "/root/milestone7_xhigh",
+    "status": "draft-approved-idle-untilacceptedM6; boundedrootpreparationcontractreviewcomplete,privatecheckerfixesASTonly",
+    "plan_sha256": "5c32a7ccba682dd6504e94c441bfa2376c047c5718294f887bc7f7629ead6acf",
+    "research_sha256": "b2183661394278472c6860b0c6ca3dce97b51402ad6de51007256bc70aaa71c1",
+    "final_reconciliation_items": 6,
+    "research_acceptance": "/private/tmp/spl-toolkit-root-m7-research-acceptance.json",
+    "research_topics_approved": [
+      "Anchored no-follow input acquisition using existing x/sys0.20.0",
+      "Full JSON Schema dev-only nine-package maximum stack and deny retrieval registry",
+      "New M7 checked output handle collision protection"
+    ],
+    "windows": [
+      "After Task8 root core",
+      "After Task12 root final and actual isolated VSCode/SARIF consumer evidence"
+    ],
+    "root_acceptance_design": "/private/tmp/spl-toolkit-root-m7-acceptance-design.json",
+    "root_lsp_preparation": "/private/tmp/spl-toolkit-root-m7-lsp-preparation.json",
+    "dependency_preflight": {
+      "status": "root-accepted-local-library-only; lead idle until accepted M6",
+      "path": "/private/tmp/spl-toolkit-m7-schema-validator-preflight/preflight.json",
+      "sha256": "0f7dcb441e5dd2dafc188cb8ba8cc5885ccf1c6fba7225b493a473a589b34a2e",
+      "local_scope": "macOS arm64 Python3.12.6 and3.14.1, full dev pins offline/pip check,15 library checks each,zero validation network attempts",
+      "wheelhouse": "/private/tmp/spl-toolkit-m7-schema-validator-preflight/wheelhouse",
+      "wheels": 23,
+      "rpds_cp312_sha256": "6abc8880d9d036ecaafe709079969f56e876fcf107f7a8e9920ba6d5a3878d05",
+      "rpds_cp314_sha256": "ec7c4490c672c1a0389d319b3a9cfcd098dcdc4783991553c332a15acf7249be",
+      "official_sarif_sha256": "ad6db49878699b091f3eeb765b6e29e92a34bad4da88664d000c923b549c3a25",
+      "qualifications": "Original13-wheelhouse unchanged. Initial DNS and Python TLS failures retained, verified retries succeeded. Not product acceptance, all-platform wheel lock, Python3.11/3.13 or other OS runtime."
+    },
+    "anchored_input_preflight": {
+      "status": "root-accepted-local-API-only; lead idle",
+      "path": "/private/tmp/spl-toolkit-m7-anchored-input-preflight",
+      "scope": "Local macOS floor-Go existing x/sys0.20.0 held-parent Openat/no-follow/Readdirnames/regular-read/rename/symlink/FIFO leaf spike only; no production/plan edits, downloads, output engine or other-OS/product acceptance; return idle on finish.",
+      "summary_sha256": "a25a2ac946d4db85b454b0153da86badee580c2eb4ea4d5a95397a0fb42362e6",
+      "cases_passed": 9,
+      "test_code_sha256": "5729cfab7b779e57091004035ab3d2f9b5fe73c3425a31b6403a34e3c0a836f8",
+      "review": "Root read complete tests/runner/commands/cache provenance/output; all seven referenced hashes and summary match. No downloads or blocker. Recorded Go1.22.12 macOS arm64 only; actual M7 loader and other-OS runtime remain unexecuted."
+    },
+    "root_sarif_preparation": "/private/tmp/spl-toolkit-root-m7-sarif-preparation.json",
+    "root_sarif_oracle_sha256": "4fa98a01a8296b3f17aef5b459e2b4f63766f3f36d19bdb9a2ba527d6f7ff513",
+    "root_acceptance_design_sha256": "f16a7078812b459d9634949a26c105578ed2be85637d63c42606ccd5a30d8ce9",
+    "root_sarif_unicode_preparation": "Root-invalid now eval marker=\"\ud83d\ude42\", broken=; root-incomplete now eval marker=\"\ud83d\ude42\" | mystery_op | table host. Same four IDs/status expectations, no runtime. Both diagnostics follow same-line astral character; URI/range oracle prepared AST-only.",
+    "root_lsp_preparation_sha256": "e2e718c3775b8675160c515cab8dcb3cd73762a7af734f9844d26059e54f534f",
+    "visible_config_error_ruling": "Require window/showMessage(typeError=1) for malformed configuration visible-serviceerror; logsoptionalnotsole notification. Root preparedscript narrowedpreexecution; carryintofinalTask9plan. Otherfullsynclifecycleassertionsmatchedapprovedplan; actualprotocol/editorunexecuted.",
+    "root_preparation_contract_review_status": "Complete; targetlabelsneitherreplacecontentdigestnorrequirefullrevisioninvariance; mutationattestationnotautoobservers; URI/operationaldistinctionsretained. PreparedSARIFcorrectedunlocated/rangedefaults/explicitseverity; actualAPI/schema/product/consumerunexecuted.",
+    "root_preparation_contract_review": {
+      "path": "/private/tmp/spl-toolkit-m7-root-preparation-contract-review.md",
+      "sha256": "50b6ebe3c86cae2f1ba59d4e61a352b3137f84d69acade3a299e2c84f4ecfd81",
+      "status": "Rootread;3preparedcheckerissuescorrectedASTonly;notproductacceptance"
+    },
+    "root_acquisition_preparation": {
+      "path": "/private/tmp/spl-toolkit-root-m7-acquisition-cases.json",
+      "sha256": "8c63c74b92a8d118c02fdd40bdfbd479f8cc1f136aaa04857e795f6ece61668c",
+      "status": "Data-only preparation, no fixture materialization/runtime; exact actual M7 interfaces remain gated"
+    },
+    "lsp_transport_preflight": {
+      "status": "Root read full note, verified hash and approved stdlib transport proposal; no runtime/plan/production. ActualM5/M6 integration remains gated.",
+      "scope": "Select existing compatible dependency if present else approved narrow framing; concrete envelopes/lifecycle/cancellation with accepted buffer/config semantics. FinalM5/M6 gates remain.",
+      "batch_ruling": {
+        "choice": "One Request/Notification/Response object per frame; top-levelarrays InvalidRequest id:null without dispatch; appropriate array params unaffected",
+        "basis": [
+          "https://raw.githubusercontent.com/microsoft/language-server-protocol/gh-pages/_specifications/lsp/3.18/specification.md",
+          "https://github.com/microsoft/language-server-protocol/issues/988"
+        ],
+        "qualification": "Root fetched full primary sources: later3.18 explicitbatchclause plus2020maintainerproposalcontext, not verbatim3.17 prohibition or versionupgrade; no general JSONRPC batch engine"
+      },
+      "path": "/private/tmp/spl-toolkit-m7-lsp-transport-preflight.md",
+      "sha256": "19878163f5e125ab90fd2eddae6ab11237c9d119824180cefab961699939ac4d",
+      "raw_unicode_clarification": "Validate raw frame UTF8/JSON surrogate well-formedness before encoding/json replacement, reuse accepted helper; malformed bounded frame cannot mutate buffer/config or invent ranges. Keep client-capability compatibility distinct from strict owned options.",
+      "limits": "Finite documented frame/work limits selected with actual M6 interfaces at final reconciliation; no new research gate."
+    },
+    "task11_reference_handoff": "PendingfinalM6: actualcanonical referencekind search_job and output-intention/nonapplicable, qualifiedjoinindeterminate must be represented in contracts/graphs without fabricated fieldstate/edges. Leadnotified, no productionrelease.",
+    "retired_lead": "/root/milestone7",
+    "lead_replacement_required_before_release": false,
+    "root_acquisition_materializer": {
+      "path": "/private/tmp/spl-toolkit-root-m7-acquisition-fixtures.py",
+      "sha256": "9a360ff659dd15a4d51c92de9a1f3589d21fa1ed4eabd2b946594089ac3ffb6c",
+      "status": "AST-only, unexecuted; no fixture creation or product check",
+      "scope": "Independent prepared data drives separate directory/manifest layouts, guarded symlinks/nonregular controls, output aliases and preservation receipts; actual M7 interface/race checks remain future gates"
+    },
+    "replacement_adoption": {
+      "status": "Root read full receipt and accepted; replacement available until accepted final M6, no production release",
+      "lead": "/root/milestone7_xhigh",
+      "model": "gpt-6-astra",
+      "reasoning_effort": "xhigh",
+      "role": "default",
+      "fork_turns": "none",
+      "role_override": false,
+      "attestation": "Explicit tool-assigned configuration, not backend execution proof",
+      "private_receipt_directory": "/private/tmp/spl-toolkit-m7-xhigh-adoption/",
+      "receipt_path": "/private/tmp/spl-toolkit-m7-xhigh-adoption/adoption-receipt.md",
+      "receipt_sha256": "b27b22227b85bbe7e4c49bcfe9c677a480e331bcff0bd3fe65fdac1dc65a5fb2",
+      "verified_instructions": {
+        "/Users/jacobdelgado/.codex/AGENTS.md": "f756502be4e3d178a372f4254e6c9129bbf4513392b5e2db4ab4a5a35fd834e2",
+        "/Users/jacobdelgado/.codex/skills/efficient-delegation/SKILL.md": "2b0c89a340dafe57c5af827aa24476e7e0371de8b7a3d4dbfac275c3482e77e7"
+      }
+    }
+  },
+  "original_preservation_interim": "/private/tmp/spl-toolkit-root-original-preservation-interim.json",
+  "progress_log": "_build_plan/remaining-milestones-progress.md",
+  "requirements": [
+    "No product/build mutation during root locked acceptance",
+    "Review generated bulk by full structured/hash accounting; read handwritten changes",
+    "Do not rerun unchanged full checks merely for orientation",
+    "All prepared root harnesses remain UNEXECUTED until their milestones/windows and actual interface reconciliation",
+    "Preserve local toolchain/release matrix/header evidence qualifications; no fake remote acceptance",
+    "Final original preservation, branch ancestry/clean status and whole-goal completion remain pending"
+  ],
+  "root_final_wrapper_archival": {
+    "status": "AST-only prepared; no runtime",
+    "sha256": {
+      "/private/tmp/spl-toolkit-root-m5-final-acceptance.py": "d1c561c5d93fce2a24933bdc0c43a0c225302c578b8e1e94f7dfa0b5e4bcac6e",
+      "/private/tmp/spl-toolkit-root-m6-final-acceptance.py": "9c1a9469ba2f0afdc025db726bfad89db9bd0fb56c6e4794ea9ee1bf9f557b1b"
+    },
+    "scope": "Unique attempt archive observed childraw JSON/XML/logs including failures; beforehashes explicitly separate staleobservations fromproofofexecution."
+  },
+  "efficient_delegation": {
+    "status": "Both current user-requested files read and relayed; all three coordinator assignments corrected to Astra/xhigh/default. M5 active with qualifying retained worker/reviewers. M6/M7 read-only adoptions root accepted, available for predecessor-gated release. Existing goal/scope/approvals preserved; mandatory through all continuations.",
+    "files": {
+      "/Users/jacobdelgado/.codex/AGENTS.md": "f756502be4e3d178a372f4254e6c9129bbf4513392b5e2db4ab4a5a35fd834e2",
+      "/Users/jacobdelgado/.codex/skills/efficient-delegation/SKILL.md": "2b0c89a340dafe57c5af827aa24476e7e0371de8b7a3d4dbfac275c3482e77e7"
+    },
+    "coordinator_configuration": {
+      "model": "gpt-6-astra",
+      "reasoning_effort": "xhigh",
+      "evidence": "current root session turn_context; not backend execution attestation"
+    },
+    "audit": "/private/tmp/spl-toolkit-efficient-delegation-root-dispatch-audit.json",
+    "protected_floor": "Equal/higher capability than root; conservative gpt-6-astra/xhigh with worker/default non-overriding role. Check both explicit settings and role overrides. Unknown use documented inheritance/non-overriding role elselocal. No lower-cap protected debugging/architecture/security/high-consequence judgment.",
+    "corrections": {
+      "milestone5": "Corrected: /root/milestone5_xhigh explicit Astra/xhigh/default/fork none active; old lead retired; qualifying retained worker and specialists released.",
+      "milestone6": "Corrected by explicit Astra/xhigh/default/fork-none replacement /root/milestone6_xhigh; bounded read-only adoption active, no production or review rerun; old High lead retired.",
+      "milestone7": "Corrected by explicit Astra/xhigh/default/fork-none replacement /root/milestone7_xhigh; bounded read-only adoption active, no production or review rerun; old High lead retired."
+    },
+    "eligible_existing": "Logged creation calls: Task11 implementer Astra/xhigh/worker; lexical/pipeline/SQL oracles and snapshot reviewer Astra/xhigh/default; no overriding roles. Released by qualifying replacement and root; not backend execution attestation.",
+    "workflow": "Minimal isolated context/artifactpaths/explicitownership; retain rawlogs+exitstatus+failures; no unchangedreruns or repeatedfaileddispatches; economicalmodels onlyeligible routinework. Preserveexistinggoal/scope/approvals and carryineverycheckpoint/continuation.",
+    "progress_update": {
+      "path": "/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/_build_plan/remaining-milestones-progress.md",
+      "before_sha256": "95c480b7c83543f735a6e671ab963282856fdd304b14f3447d840049d4e95ac5",
+      "after_sha256": "38476a477af63a220412369b172b7c8ba336c71d2f98bf0b867ab0f89e335f76",
+      "owner": "root",
+      "checkpoint": "after capture3 complete, before replacement M5 coordinator mutation release",
+      "scope": "orchestration-only status and mandatory user delegation policy; no product/build/authority changes"
+    },
+    "handoff": {
+      "directory": "/private/tmp/spl-toolkit-m5-controller-handoff-20260908",
+      "sha256": {
+        "HANDOFF.md": "9872e1e58b08ae3be8e557de48ad78c179676506ea1b11ebb85aa98d6b17132d",
+        "state.json": "f5c33301ce02bff881781f0067fa2b39b93873872d6e4fc2d92466ba911961c1",
+        "delegation-inventory.json": "4f1144b0ba4d3d055fb1cd788aba5bb3f218775239a661796735b9d81ca7bf58"
+      },
+      "root_review": "Read complete HANDOFF and delegation inventory; verified all three artifact hashes. New coordinator independently verified complete state inputs and exact creation calls. Existing qualifying sole implementer and specialists released; old High leads retired."
+    },
+    "prepared_replacement_briefs": {
+      "status": "Prepared only; no production release or new worker dispatched",
+      "sha256": {
+        "/private/tmp/spl-toolkit-root-m6-replacement-dispatch.md": "498e049aaaab4d07225a775faead932990eb539729c9e2910dab9a5e97fb2d51",
+        "/private/tmp/spl-toolkit-root-m7-replacement-dispatch.md": "81e10da1e239cacebcbdcbd6aab5fa3ffedace1c51b454116dc5a966c116444a"
+      }
+    },
+    "aggregate_ledger_pending": false,
+    "post_adoption_progress_update": {
+      "path": "/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/_build_plan/remaining-milestones-progress.md",
+      "before_sha256": "38476a477af63a220412369b172b7c8ba336c71d2f98bf0b867ab0f89e335f76",
+      "after_sha256": "605906cf35e01390220420164ec19b3ca80827a4a553abda90bb3ef1ede93a20",
+      "owner": "root",
+      "scope": "Aggregate orchestration ledger append only, no product/build/frozen authority mutation",
+      "checkpoint": "Worker confirmed green-full-go-transport-evidence10/10 complete and no active process; held new checks for this append",
+      "utc": "2026-09-08T16:30:19.153727+00:00",
+      "receipt_path": "/private/tmp/spl-toolkit-root-post-adoption-progress-receipt.json"
+    },
+    "latest_checkpoint": {
+      "utc": "2026-09-08T20:21:52.359990+00:00",
+      "current_files_read_full": {
+        "/Users/jacobdelgado/.codex/AGENTS.md": "f756502be4e3d178a372f4254e6c9129bbf4513392b5e2db4ab4a5a35fd834e2",
+        "/Users/jacobdelgado/.codex/skills/efficient-delegation/SKILL.md": "2b0c89a340dafe57c5af827aa24476e7e0371de8b7a3d4dbfac275c3482e77e7"
+      },
+      "active_assignments_requiring_correction": [],
+      "lead_relay": "/root/milestone6_xhigh acknowledged; eligible original writer/reviewer retained",
+      "protected_floor": "Explicit gpt-6-astra/xhigh/default non-overriding role and isolated context; configured assignments, not backend attestation; persist into subsequent tasks/checkpoints",
+      "current_files_full_read_again_utc": "2026-09-08T23:13:04.145670+00:00"
+    }
+  },
+  "checkpoint_utc": "2026-09-12T12:54:10.603251+00:00",
+  "quick_checkpoint": {
+    "path": "/private/tmp/spl-toolkit-root-current-checkpoint.md",
+    "sha256": "8b677f2735b52c2e2f670e5cacadd9fa9804f5ddd0ba779bef47c4689b337710",
+    "prior_recoverable_path": "/private/tmp/spl-toolkit-root-checkpoint-history/a46736a49f263983e91d05ba768e16d61c867165e08c3fd853345cf48a39215f.md",
+    "prior_sha256": "a46736a49f263983e91d05ba768e16d61c867165e08c3fd853345cf48a39215f"
+  },
+  "handoff_current": {
+    "date": "2026-09-12",
+    "source_commit": "7927ac3c372d4c359b07e0bedab64e09db96a5a3",
+    "goal_tool_status": "usageLimited; full objective not complete; do not mark complete or redefine scope",
+    "atomic_unit": {
+      "status": "single-query atomic checkpoint verified; full Task5 incomplete",
+      "source_commit": "7927ac3c372d4c359b07e0bedab64e09db96a5a3",
+      "accepted_task4": "14a3a0dcfe4652240dc8b949461f905b206f215a",
+      "owned_source_sha256": {
+        "pkg/rewrite/rewrite.go": "ae7e1f49fb2df547f3367acc715b77179b79ab20828fb94ab534febb7f89d850",
+        "pkg/rewrite/verify.go": "a06a98208b5f52d5d0062474f5c9a9e681932a0b086f04cba1d412a7b8de8002",
+        "pkg/rewrite/rewrite_test.go": "c9e38e2a9ee9445cee10cb398d1a4515bdaf49bdcf6855e96e142d46e0556ce8"
+      },
+      "review": {
+        "path": "single-unit-review.md",
+        "sha256": "46bd0c9cf6df87447d181127e93c14f3ff433a8c7197b0135b3c19d345e61aee",
+        "verdict": "Bounded source review approved,0findings; report predates successful environment repair."
+      },
+      "verification": {
+        "path": "restored-cache.json",
+        "sha256": "ad0701d84068fe3b5d041287f7e6ce9dd584b7a0dda80dc411194ce678a233a3",
+        "exit_code": 0,
+        "source_unchanged": true,
+        "stdout_sha256": "ef81357294ea4e8995c776be211b46805b6973571bebf879410dd4efa46100fe",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "packages": [
+          "pkg/rewrite",
+          "pkg/analysis",
+          "pkg/validation"
+        ],
+        "go_version": "go version go1.25.5 darwin/arm64"
+      },
+      "qualification": "Earlier setup failure and historical misleading green-named failure retained. No private Task5 acceptance or batch/negative-proof/concurrent/whole-milestone acceptance claimed. Root ran user-requested package tests after agents ended, not private root acceptance."
+    },
+    "delegation": "Explicit user replacement instructions override older diskAGENTS. Current skill path missing; retained rules in checkpoint/CONTINUATION_RULES.md. New bounded reviewer Astra/xhigh/default/forknone completed.",
+    "missing_private_inputs": {
+      "/private/tmp/spl-toolkit-root-m6-go.go": "b770bdc35f289a2681b9479e63b5e7a5ef7a3bf814b9b958f23eebd7cc80ca3e",
+      "/private/tmp/spl-toolkit-root-m6-validation-cases.json": "d83ca0e8a0f7a944ffc5b8b6b4405ab1db99533f559a8c9ea764f39e284c9456",
+      "/private/tmp/spl-toolkit-root-m6-python-acceptance.py": "45db0224a6bea4c19788bd5e3e93f1074225440ea0d1171ad410cd1315e272e8"
+    },
+    "root_runtime": "Fresh handoff package checks executed successfully. Private independent M6/M7 acceptance remains unexecuted."
+  }
+}

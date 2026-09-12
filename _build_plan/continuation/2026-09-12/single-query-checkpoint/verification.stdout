@@ -1,0 +1,4 @@
+FAIL	github.com/delgado-jacob/spl-toolkit/pkg/rewrite [setup failed]
+FAIL	github.com/delgado-jacob/spl-toolkit/pkg/analysis [setup failed]
+FAIL	github.com/delgado-jacob/spl-toolkit/pkg/validation [setup failed]
+FAIL

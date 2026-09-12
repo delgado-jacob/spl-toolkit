@@ -1,0 +1,53 @@
+{
+  "status": "M5 accepted locally at documentation237e62a with unchanged runtime-tested40e6/source7571",
+  "head": "237e62ac063755559207870b45744db6b2544a17",
+  "parent": "40e6e171a1d215e5c67758fbf346cc5b78892ee2",
+  "owned_paths": [
+    "_build_plan/milestones/5-standalone-spl2/conformance-matrix.md",
+    "_build_plan/milestones/5-standalone-spl2/conformance-rereview.md",
+    "_build_plan/milestones/5-standalone-spl2/conformance-review.md",
+    "_build_plan/milestones/5-standalone-spl2/design-spec.md",
+    "_build_plan/milestones/5-standalone-spl2/draft-architecture-rereview.md",
+    "_build_plan/milestones/5-standalone-spl2/draft-architecture-review.md",
+    "_build_plan/milestones/5-standalone-spl2/form-expansion-rereview.md",
+    "_build_plan/milestones/5-standalone-spl2/form-expansion-review.md",
+    "_build_plan/milestones/5-standalone-spl2/form-expansion.md",
+    "_build_plan/milestones/5-standalone-spl2/milestone-5-implementation-plan.md",
+    "_build_plan/milestones/5-standalone-spl2/milestone-log.md",
+    "_build_plan/milestones/5-standalone-spl2/research-notes.md",
+    "docs/evidence/milestone-5/acceptance-reviews.json.gz",
+    "docs/evidence/milestone-5/closure.json"
+  ],
+  "owned_hashes": {
+    "_build_plan/milestones/5-standalone-spl2/conformance-matrix.md": "84d07d0ba4638cff5e3e7cf021698a9d570d0b4a81f46414a670f0eb8491fe51",
+    "_build_plan/milestones/5-standalone-spl2/conformance-rereview.md": "dcd3c17bf999436e9b5f694d79e9748bc9355429d7d9dcc84d6ba75cb7152e63",
+    "_build_plan/milestones/5-standalone-spl2/conformance-review.md": "b6ac0d8e2d36846fc450de9fec6abc0a3933cd6a176a3bf3007cf6fa5035ca0d",
+    "_build_plan/milestones/5-standalone-spl2/design-spec.md": "05660c261d860eb0ed09e9dadbf30309ae82a01498e4fdfa144828205139b911",
+    "_build_plan/milestones/5-standalone-spl2/draft-architecture-rereview.md": "24ebe162c39058d76b6241a087e00e64f32dde4e2441e07cd175fc013fd8d788",
+    "_build_plan/milestones/5-standalone-spl2/draft-architecture-review.md": "9c4ec0fe70120429cabef5051a8f6031ff5648cac74f46d0356f95cc83b0509a",
+    "_build_plan/milestones/5-standalone-spl2/form-expansion-rereview.md": "f1ef90de3494005696c67b9cfb1733973123fae9a89f17b334148f0396303ed1",
+    "_build_plan/milestones/5-standalone-spl2/form-expansion-review.md": "b6765781547ad0de524fe095f19689071995a9cba071f215f33f3b5ef3e6a6b1",
+    "_build_plan/milestones/5-standalone-spl2/form-expansion.md": "6eb5f7242f8dd8078ce9ec2daed06a374c0fec873dfb314156cc83d5cb36e2ba",
+    "_build_plan/milestones/5-standalone-spl2/milestone-5-implementation-plan.md": "439b93da9797b7579a81ac716c9ab1c204f8a38b67cb30543b05ebb9da68ec2b",
+    "_build_plan/milestones/5-standalone-spl2/milestone-log.md": "12bf7a7f9f05b975578a41af685243d7d13b359dbcaf51859cac6cbca59a56b8",
+    "_build_plan/milestones/5-standalone-spl2/research-notes.md": "002b2176f662c95058ecd894bcb27f9b3df629580a3723a0597ac7fbd04166ad",
+    "docs/evidence/milestone-5/acceptance-reviews.json.gz": "43aee93ad9a71d8e91f3ff0af6530e22fef85a54651d6ced00b245127ac672e0",
+    "docs/evidence/milestone-5/closure.json": "dd30f5aad38fd96fe50735cac96c68916a9e78ee99f9a1c4975488e47cd2ca04"
+  },
+  "unchanged_nonowned": 398,
+  "original_documents_unchanged": 10,
+  "artifact_count": 9,
+  "review_texts_verified": 3,
+  "root_summaries_verified": 2,
+  "closure_sha256": "dd30f5aad38fd96fe50735cac96c68916a9e78ee99f9a1c4975488e47cd2ca04",
+  "controller_receipt_sha256": "32691243777b41de113c55222df3cbed385960cc8c43a6f6182712888e053840",
+  "root_aggregate_sha256": "605906cf35e01390220420164ec19b3ca80827a4a553abda90bb3ef1ede93a20",
+  "root_read": "Full closure JSON, committed milestone-log append, plan Progress/Decision/Outcomes/final revision, all retained deterministic plan mutation recipes and public successor handoff. Exact owned paths/current/committed hashes plus398nonowned/10originaldocs/9artifacts/review texts and safe root summaries verified.",
+  "historical_plan_limitation": {
+    "original_plan_sha256": "cd0f0b1657d89fd6bd17d5a2590e16528aa69aeb3f7f5a081c81f7f00dd2a18b",
+    "standalone_before_payload_retained": false,
+    "retained_actual_mutation_recipes": "/private/tmp/spl-toolkit-m5-closure-draft/retained-plan-mutation-recipes.txt",
+    "recipes_sha256": "7efba4c79d71e7cc526c6c4ba35a82c252aa61abda171383ea53a30d869be08f",
+    "qualification": "Recipe text was read, not executed or used to reconstruct historical bytes. Changes cover Progress, Decision Log, Outcomes and final revision; task implementation sections remain outside those recipes."
+  }
+}

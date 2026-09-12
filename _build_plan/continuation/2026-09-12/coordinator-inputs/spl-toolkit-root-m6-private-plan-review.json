@@ -1,0 +1,11 @@
+{
+  "path": "/private/tmp/spl-toolkit-m6-final-m5-delta-preparation/milestone-6-implementation-plan.private.md",
+  "sha256": "c6e82990ba16db27650c5714af7e4493f0a89b6ccda037c7e4a9be8501c6a4e3",
+  "bytes": 94128,
+  "lines": 571,
+  "read": "Full private plan; ranges1\u2013165/166\u2013230/231\u2013294/295\u2013372/373\u2013451/452\u2013EOF",
+  "status": "Provisionally reviewed; root release pending exact canonical-coordinate bridge clarification and final accepted-M5 delta reconciliation",
+  "assessment": "Approved product scope, eight-task ownership/strict contracts/facts/render/proof/adapter/native/package/verification boundaries retained; no additional design or scope issue found in full read.",
+  "open_clarification": "Existing M6XHigh lead checking exact canonical-owned service for arbitrary candidate edit coordinates, no duplicate sourceIndex logic",
+  "production_release": false
+}

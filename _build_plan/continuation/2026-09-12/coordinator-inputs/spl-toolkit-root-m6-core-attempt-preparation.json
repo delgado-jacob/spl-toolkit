@@ -1,0 +1,14 @@
+{
+  "status": "Prepared AST-only; not imported or executed; no M6 product runtime",
+  "utc": "2026-09-08T23:36:51.738735+00:00",
+  "source_wrapper": "/private/tmp/spl-toolkit-root-m6-final-acceptance.py",
+  "source_wrapper_sha256": "9c1a9469ba2f0afdc025db726bfad89db9bd0fb56c6e4794ea9ee1bf9f557b1b",
+  "path": "/private/tmp/spl-toolkit-root-m6-core-attempt.py",
+  "sha256": "fda2c418da021030b7ecf54e605151264c81f9a19329fe5a6d980c3aa993aada",
+  "scope": "Unique core attempt directory captures outer raw logs, actual child returncode, timeout classification, before/after source/build/input snapshots and copies of observed inner outputs. Existing expected results, driver and semantic checks unchanged. No requirement on unavailable pre-Task5 go-results artifact.",
+  "execution_gate": "Only reviewed Task5 at a held exact commit; same existing root Go window.",
+  "checks": "ast.parse of generated source only; exact replacement preconditions; original final wrapper unchanged.",
+  "prior_wrapper_sha256": "904de7ebab10b5b44a4203c259d4539f29e6e50654ece6160b5b6456038b82bb",
+  "prior_wrapper_path": "/private/tmp/spl-toolkit-root-m6-core-attempt-preparation/904de7ebab10b5b44a4203c259d4539f29e6e50654ece6160b5b6456038b82bb.py",
+  "tooling": "At eventual run, record resolved Go version/path and Python path, selected non-secret Go environment, and include both resolved executable hashes in before/after input snapshots."
+}

@@ -1,0 +1,19 @@
+{
+  "status": "Root-approved complete M6 plan; exact repository application and serial production released",
+  "accepted_m5": "237e62ac063755559207870b45744db6b2544a17",
+  "private_plan": "/private/tmp/spl-toolkit-m6-final-m5-delta-preparation/milestone-6-implementation-plan.private.md",
+  "private_plan_sha256": "86ce9d9ca0e2a5245caddc01fe748aad437bf31471016cf0a3d990c1233e9d71",
+  "root_read": "Full earlier integrated c6e82990 plan; complete coordinate proposal and approval diff; complete152line e518-to-final delta and finalreceipt. No unresolvedinterface issue.",
+  "verified_private_identities": {
+    "milestone-6-implementation-plan.private.md": "86ce9d9ca0e2a5245caddc01fe748aad437bf31471016cf0a3d990c1233e9d71",
+    "final-m5-reconciliation-e518-to-final.diff": "8d6df484e9f7d00eb9f9cd2fe01d0e1b941a236d0bd4bfc8413b1962211fdea1",
+    "final-accepted-m5-reconciliation-receipt.md": "223c4f26d71fc1cf53a95169b2ce1b1e55db8d44d6fce7c06a806a89bd6f4a37",
+    "milestone-6-implementation-plan.pre-final-source-e518c17d.md": "e518c17da6c8f3549c02a3356be2731488fb34deedae841454b383484c6c2af8",
+    "milestone-6-implementation-plan.pre-closure-d167b733.md": "d167b733bfac6b68cc7a05034b274112811a638797edbe091bf3cece04bffdf7"
+  },
+  "repository_plan_before_sha256": "e087f92156a07b46de037beae754c063640efe4b9770d26e28a647d718c6e3a5",
+  "root_aggregate_sha256": "88288019d06f16aa4fea1844a2051293918a26803b32a438a39a8c2825699bc2",
+  "execution": "8serialtasks, fresheligibleimplementer/task andindependentcombinedreview; rootGoafter5/finalbuilt+Py314after8; broadreview. Only administrative title/intro/Progress/revision release wording changes allowed on repository application; no contract/task changes.",
+  "delegation": "Protectedfloor gpt-6-astra/xhigh with explicitmodel/effort and nonoverridingdefault/worker role; isolatedbriefs/ownedpaths/preserveothers/rawfailures/no unchangedpredecessorretests.",
+  "not_authorized": "No merge/push/publication/destructivecleanup/useroriginalcheckout edits; noM7productionbeforeacceptedM6."
+}

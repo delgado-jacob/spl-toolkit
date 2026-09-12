@@ -1,0 +1,916 @@
+{
+  "status": "prepared-not-executed",
+  "basis": "Root-approved M6 design; conceptual request wire pending final M5/M6 API reconciliation; no product execution",
+  "cases": [
+    {
+      "name": "source_alias_unicode_crlf",
+      "request": {
+        "schema_version": 1,
+        "mode": "apply",
+        "document": {
+          "text": "search marker=\"🙂\" src=x\r\n| eval alias=src | table alias",
+          "language": "spl",
+          "profile": "splunkd",
+          "version": "current",
+          "source_id": "root/m6/source_alias_unicode_crlf"
+        },
+        "rules": [
+          {
+            "id": "src-actor",
+            "kind": "field",
+            "source": {
+              "name": "src"
+            },
+            "target": {
+              "name": "actor"
+            }
+          }
+        ]
+      },
+      "expected_status": "valid",
+      "expected_candidate_text": "search marker=\"🙂\" actor=x\r\n| eval alias=actor | table alias",
+      "expected_text": "search marker=\"🙂\" actor=x\r\n| eval alias=actor | table alias",
+      "expected_committed": true,
+      "oracle_obligations": [
+        "Only source reads change; explicit alias and downstream alias remain unchanged.",
+        "Original/candidate UTF-8 byte locations account for emoji, CRLF and longer replacement.",
+        "Unaffected bytes, source IDs, rule evidence and canonical identities remain exact."
+      ]
+    },
+    {
+      "name": "preview_keeps_original",
+      "request": {
+        "schema_version": 1,
+        "mode": "preview",
+        "document": {
+          "text": "search marker=\"🙂\" src=x\r\n| eval alias=src | table alias",
+          "language": "spl",
+          "profile": "splunkd",
+          "version": "current",
+          "source_id": "root/m6/preview_keeps_original"
+        },
+        "rules": [
+          {
+            "id": "src-actor",
+            "kind": "field",
+            "source": {
+              "name": "src"
+            },
+            "target": {
+              "name": "actor"
+            }
+          }
+        ]
+      },
+      "expected_status": "valid",
+      "expected_candidate_text": "search marker=\"🙂\" actor=x\r\n| eval alias=actor | table alias",
+      "expected_text": "search marker=\"🙂\" src=x\r\n| eval alias=src | table alias",
+      "expected_committed": false,
+      "oracle_obligations": [
+        "Candidate included changes have candidate_applied true and committed false.",
+        "Authoritative text remains the original despite applied preview audit."
+      ]
+    },
+    {
+      "name": "rename_keeps_alias",
+      "request": {
+        "schema_version": 1,
+        "mode": "apply",
+        "document": {
+          "text": "search src=x | rename src AS alias | table alias",
+          "language": "spl",
+          "profile": "splunkd",
+          "version": "current",
+          "source_id": "root/m6/rename_keeps_alias"
+        },
+        "rules": [
+          {
+            "id": "rename-source",
+            "kind": "field",
+            "source": {
+              "name": "src"
+            },
+            "target": {
+              "name": "dst"
+            }
+          }
+        ]
+      },
+      "expected_status": "valid",
+      "expected_candidate_text": "search dst=x | rename dst AS alias | table alias",
+      "expected_text": "search dst=x | rename dst AS alias | table alias",
+      "expected_committed": true,
+      "oracle_obligations": [
+        "Rename input follows source identity; target alias and later reads stay alias."
+      ]
+    },
+    {
+      "name": "dependency_kind_not_spelling",
+      "request": {
+        "schema_version": 1,
+        "mode": "apply",
+        "document": {
+          "text": "search sourcetype=auth | where sourcetype=\"auth\" | table sourcetype",
+          "language": "spl",
+          "profile": "splunkd",
+          "version": "current",
+          "source_id": "root/m6/dependency_kind_not_spelling"
+        },
+        "rules": [
+          {
+            "id": "source-type",
+            "kind": "sourcetype",
+            "source": {
+              "name": "auth"
+            },
+            "target": {
+              "name": "audit"
+            }
+          }
+        ]
+      },
+      "expected_status": "valid",
+      "expected_candidate_text": "search sourcetype=audit | where sourcetype=\"auth\" | table sourcetype",
+      "expected_text": "search sourcetype=audit | where sourcetype=\"auth\" | table sourcetype",
+      "expected_committed": true,
+      "oracle_obligations": [
+        "Only grammar-recognized dependency value changes.",
+        "Same spelling in expression field and string literal is preserved."
+      ]
+    },
+    {
+      "name": "guaranteed_and_fact",
+      "request": {
+        "schema_version": 1,
+        "mode": "apply",
+        "document": {
+          "text": "search sourcetype=auth AND src=a | table src",
+          "language": "spl",
+          "profile": "splunkd",
+          "version": "current",
+          "source_id": "root/m6/guaranteed_and_fact"
+        },
+        "rules": [
+          {
+            "id": "conditional-src",
+            "kind": "field",
+            "source": {
+              "name": "src"
+            },
+            "target": {
+              "name": "dst"
+            },
+            "when": {
+              "fact": "literal",
+              "kind": "sourcetype",
+              "identity": {
+                "name": "auth"
+              },
+              "operator": "equals",
+              "value": "auth"
+            }
+          }
+        ]
+      },
+      "expected_status": "valid",
+      "expected_candidate_text": "search sourcetype=auth AND dst=a | table dst",
+      "expected_text": "search sourcetype=auth AND dst=a | table dst",
+      "expected_committed": true,
+      "oracle_obligations": [
+        "Complete relevant predicate authorizes both same-stage and later source reads."
+      ]
+    },
+    {
+      "name": "or_common_fact",
+      "request": {
+        "schema_version": 1,
+        "mode": "apply",
+        "document": {
+          "text": "search (sourcetype=auth AND src=a) OR (sourcetype=auth AND src=b) | table src",
+          "language": "spl",
+          "profile": "splunkd",
+          "version": "current",
+          "source_id": "root/m6/or_common_fact"
+        },
+        "rules": [
+          {
+            "id": "conditional-src",
+            "kind": "field",
+            "source": {
+              "name": "src"
+            },
+            "target": {
+              "name": "dst"
+            },
+            "when": {
+              "fact": "literal",
+              "kind": "sourcetype",
+              "identity": {
+                "name": "auth"
+              },
+              "operator": "equals",
+              "value": "auth"
+            }
+          }
+        ]
+      },
+      "expected_status": "valid",
+      "expected_candidate_text": "search (sourcetype=auth AND dst=a) OR (sourcetype=auth AND dst=b) | table dst",
+      "expected_text": "search (sourcetype=auth AND dst=a) OR (sourcetype=auth AND dst=b) | table dst",
+      "expected_committed": true,
+      "oracle_obligations": [
+        "Only facts common to both OR branches can authorize mapping."
+      ]
+    },
+    {
+      "name": "or_no_guaranteed_fact",
+      "request": {
+        "schema_version": 1,
+        "mode": "apply",
+        "document": {
+          "text": "search (sourcetype=auth AND src=a) OR (sourcetype=other AND src=b) | table src",
+          "language": "spl",
+          "profile": "splunkd",
+          "version": "current",
+          "source_id": "root/m6/or_no_guaranteed_fact"
+        },
+        "rules": [
+          {
+            "id": "conditional-src",
+            "kind": "field",
+            "source": {
+              "name": "src"
+            },
+            "target": {
+              "name": "dst"
+            },
+            "when": {
+              "fact": "literal",
+              "kind": "sourcetype",
+              "identity": {
+                "name": "auth"
+              },
+              "operator": "equals",
+              "value": "auth"
+            }
+          }
+        ]
+      },
+      "expected_status": "valid",
+      "expected_candidate_text": "search (sourcetype=auth AND src=a) OR (sourcetype=other AND src=b) | table src",
+      "expected_text": "search (sourcetype=auth AND src=a) OR (sourcetype=other AND src=b) | table src",
+      "expected_committed": false,
+      "oracle_obligations": [
+        "No guaranteed sourcetype auth fact; ordinary condition_false skip rather than event-absence claim."
+      ]
+    },
+    {
+      "name": "conflicting_targets",
+      "request": {
+        "schema_version": 1,
+        "mode": "apply",
+        "document": {
+          "text": "search src=a | table src",
+          "language": "spl",
+          "profile": "splunkd",
+          "version": "current",
+          "source_id": "root/m6/conflicting_targets"
+        },
+        "rules": [
+          {
+            "id": "to-first",
+            "kind": "field",
+            "source": {
+              "name": "src"
+            },
+            "target": {
+              "name": "first"
+            }
+          },
+          {
+            "id": "to-second",
+            "kind": "field",
+            "source": {
+              "name": "src"
+            },
+            "target": {
+              "name": "second"
+            }
+          }
+        ]
+      },
+      "expected_status": "incomplete",
+      "expected_candidate_text": "search src=a | table src",
+      "expected_text": "search src=a | table src",
+      "expected_committed": false,
+      "oracle_obligations": [
+        "Both targets conflict without a priority winner.",
+        "Ambiguous audit has no candidate or committed edits."
+      ]
+    },
+    {
+      "name": "identical_targets_coalesce",
+      "request": {
+        "schema_version": 1,
+        "mode": "apply",
+        "document": {
+          "text": "search src=a | table src",
+          "language": "spl",
+          "profile": "splunkd",
+          "version": "current",
+          "source_id": "root/m6/identical_targets_coalesce"
+        },
+        "rules": [
+          {
+            "id": "same-first",
+            "kind": "field",
+            "source": {
+              "name": "src"
+            },
+            "target": {
+              "name": "dst"
+            }
+          },
+          {
+            "id": "same-second",
+            "kind": "field",
+            "source": {
+              "name": "src"
+            },
+            "target": {
+              "name": "dst"
+            }
+          }
+        ]
+      },
+      "expected_status": "valid",
+      "expected_candidate_text": "search dst=a | table dst",
+      "expected_text": "search dst=a | table dst",
+      "expected_committed": true,
+      "oracle_obligations": [
+        "One physical replacement per site retains both rule IDs/evaluations."
+      ]
+    },
+    {
+      "name": "simultaneous_swap",
+      "request": {
+        "schema_version": 1,
+        "mode": "apply",
+        "document": {
+          "text": "search a=1 b=2 | table a b",
+          "language": "spl",
+          "profile": "splunkd",
+          "version": "current",
+          "source_id": "root/m6/simultaneous_swap"
+        },
+        "rules": [
+          {
+            "id": "a-to-b",
+            "kind": "field",
+            "source": {
+              "name": "a"
+            },
+            "target": {
+              "name": "b"
+            }
+          },
+          {
+            "id": "b-to-a",
+            "kind": "field",
+            "source": {
+              "name": "b"
+            },
+            "target": {
+              "name": "a"
+            }
+          }
+        ]
+      },
+      "expected_status": "valid",
+      "expected_candidate_text": "search b=1 a=2 | table b a",
+      "expected_text": "search b=1 a=2 | table b a",
+      "expected_committed": true,
+      "oracle_obligations": [
+        "Original identities govern simultaneous edits; no cascading replacement.",
+        "Prove corresponding bindings and lineage across candidate source translation."
+      ]
+    },
+    {
+      "name": "derived_only_is_skip",
+      "request": {
+        "schema_version": 1,
+        "mode": "apply",
+        "document": {
+          "text": "eval src=other | table src",
+          "language": "spl",
+          "profile": "splunkd",
+          "version": "current",
+          "source_id": "root/m6/derived_only_is_skip"
+        },
+        "rules": [
+          {
+            "id": "derived-name",
+            "kind": "field",
+            "source": {
+              "name": "src"
+            },
+            "target": {
+              "name": "dst"
+            }
+          }
+        ]
+      },
+      "expected_status": "valid",
+      "expected_candidate_text": "eval src=other | table src",
+      "expected_text": "eval src=other | table src",
+      "expected_committed": false,
+      "oracle_obligations": [
+        "Creation-only and derived reads are outside source mapping; no fabricated source eligibility."
+      ]
+    },
+    {
+      "name": "target_captures_derived_alias",
+      "request": {
+        "schema_version": 1,
+        "mode": "apply",
+        "document": {
+          "text": "eval target=other | table src target",
+          "language": "spl",
+          "profile": "splunkd",
+          "version": "current",
+          "source_id": "root/m6/target_captures_derived_alias"
+        },
+        "rules": [
+          {
+            "id": "capture",
+            "kind": "field",
+            "source": {
+              "name": "src"
+            },
+            "target": {
+              "name": "target"
+            }
+          }
+        ]
+      },
+      "expected_status": "incomplete",
+      "expected_candidate_text": "eval target=other | table src target",
+      "expected_text": "eval target=other | table src target",
+      "expected_committed": false,
+      "oracle_obligations": [
+        "Prospective source mapping would capture an existing derived target binding.",
+        "Refuse the connected edit group with binding_collision and preserve original text."
+      ]
+    },
+    {
+      "name": "no_change_identity",
+      "request": {
+        "schema_version": 1,
+        "mode": "apply",
+        "document": {
+          "text": "search src=a | table src",
+          "language": "spl",
+          "profile": "splunkd",
+          "version": "current",
+          "source_id": "root/m6/no_change_identity"
+        },
+        "rules": [
+          {
+            "id": "same",
+            "kind": "field",
+            "source": {
+              "name": "src"
+            },
+            "target": {
+              "name": "src"
+            }
+          }
+        ]
+      },
+      "expected_status": "valid",
+      "expected_candidate_text": "search src=a | table src",
+      "expected_text": "search src=a | table src",
+      "expected_committed": false,
+      "oracle_obligations": [
+        "Source-equals-target is explained no-op; committed false and no fabricated applied edit."
+      ]
+    },
+    {
+      "name": "malformed_original",
+      "request": {
+        "schema_version": 1,
+        "mode": "apply",
+        "document": {
+          "text": "eval src=",
+          "language": "spl",
+          "profile": "splunkd",
+          "version": "current",
+          "source_id": "root/m6/malformed_original"
+        },
+        "rules": [
+          {
+            "id": "malformed",
+            "kind": "field",
+            "source": {
+              "name": "src"
+            },
+            "target": {
+              "name": "dst"
+            }
+          }
+        ]
+      },
+      "expected_status": "invalid",
+      "expected_candidate_text": "eval src=",
+      "expected_text": "eval src=",
+      "expected_committed": false,
+      "oracle_obligations": [
+        "Original syntax failure produces no edits, preserves diagnostic and invalid status."
+      ]
+    },
+    {
+      "name": "spl2_sql_alias_unicode_crlf",
+      "request": {
+        "schema_version": 1,
+        "mode": "apply",
+        "document": {
+          "text": "SELECT src AS alias FROM main WHERE status=200 AND marker=\"🙂\"\r\n| table alias",
+          "language": "spl2",
+          "profile": "splunkd",
+          "version": "current",
+          "source_id": "root/m6/spl2_sql_alias_unicode_crlf"
+        },
+        "rules": [
+          {
+            "id": "spl2_sql_alias_unicode_crlf",
+            "kind": "field",
+            "source": {
+              "name": "src"
+            },
+            "target": {
+              "name": "actor"
+            }
+          }
+        ]
+      },
+      "expected_status": "valid",
+      "expected_candidate_text": "SELECT actor AS alias FROM main WHERE status=200 AND marker=\"🙂\"\r\n| table alias",
+      "expected_text": "SELECT actor AS alias FROM main WHERE status=200 AND marker=\"🙂\"\r\n| table alias",
+      "expected_committed": true,
+      "oracle_obligations": [
+        "Source SELECT operand changes; explicit SQL alias and its table consumer stay unchanged.",
+        "Original SQL lexical order and logical phases remain canonical; emoji and CRLF outside edit survive exactly."
+      ]
+    },
+    {
+      "name": "spl2_sql_phase_condition",
+      "request": {
+        "schema_version": 1,
+        "mode": "apply",
+        "document": {
+          "text": "SELECT src AS alias FROM main WHERE status=200 | table alias",
+          "language": "spl2",
+          "profile": "splunkd",
+          "version": "current",
+          "source_id": "root/m6/spl2_sql_phase_condition"
+        },
+        "rules": [
+          {
+            "id": "spl2_sql_phase_condition",
+            "kind": "field",
+            "source": {
+              "name": "src"
+            },
+            "target": {
+              "name": "actor"
+            },
+            "when": {
+              "fact": "literal",
+              "kind": "field",
+              "identity": {
+                "name": "status"
+              },
+              "operator": "equals",
+              "value": 200
+            }
+          }
+        ]
+      },
+      "expected_status": "valid",
+      "expected_candidate_text": "SELECT actor AS alias FROM main WHERE status=200 | table alias",
+      "expected_text": "SELECT actor AS alias FROM main WHERE status=200 | table alias",
+      "expected_committed": true,
+      "oracle_obligations": [
+        "WHERE establishes a field-kind literal fact before SELECT evaluation despite later lexical position.",
+        "Conditional source edit is authorized at logical SELECT phase; explicit alias is preserved."
+      ]
+    },
+    {
+      "name": "spl2_dataset_identity",
+      "request": {
+        "schema_version": 1,
+        "mode": "apply",
+        "document": {
+          "text": "SELECT host FROM main | table host",
+          "language": "spl2",
+          "profile": "splunkd",
+          "version": "current",
+          "source_id": "root/m6/spl2_dataset_identity"
+        },
+        "rules": [
+          {
+            "id": "spl2_dataset_identity",
+            "kind": "dataset",
+            "source": {
+              "name": "main"
+            },
+            "target": {
+              "name": "archive"
+            }
+          }
+        ]
+      },
+      "expected_status": "valid",
+      "expected_candidate_text": "SELECT host FROM archive | table host",
+      "expected_text": "SELECT host FROM archive | table host",
+      "expected_committed": true,
+      "oracle_obligations": [
+        "Only typed FROM dataset identity changes; fields and SELECT phase ownership remain intact."
+      ]
+    },
+    {
+      "name": "spl2_quoted_dotted_atom",
+      "request": {
+        "schema_version": 1,
+        "mode": "apply",
+        "document": {
+          "text": "FROM main | where 'actor.name'=\"Ada\"",
+          "language": "spl2",
+          "profile": "splunkd",
+          "version": "current",
+          "source_id": "root/m6/spl2_quoted_dotted_atom"
+        },
+        "rules": [
+          {
+            "id": "spl2_quoted_dotted_atom",
+            "kind": "field",
+            "source": {
+              "name": "actor.name"
+            },
+            "target": {
+              "name": "actor_name"
+            }
+          }
+        ]
+      },
+      "expected_status": "valid",
+      "expected_candidate_text": "FROM main | where 'actor_name'=\"Ada\"",
+      "expected_text": "FROM main | where 'actor_name'=\"Ada\"",
+      "expected_committed": true,
+      "oracle_obligations": [
+        "Unrefined exact literal dotted atom is distinct from navigation path identity.",
+        "Retain compatible single-quote style and literal value bytes; no path parser or schema proof is assumed."
+      ]
+    },
+    {
+      "name": "spl_implicit_aggregate_link",
+      "request": {
+        "schema_version": 1,
+        "mode": "apply",
+        "document": {
+          "text": "search index=main | stats sum(bytes) | table 'sum(bytes)'",
+          "language": "spl",
+          "profile": "splunkd",
+          "version": "current",
+          "source_id": "root/m6/spl_implicit_aggregate_link"
+        },
+        "rules": [
+          {
+            "id": "implicit-bytes",
+            "kind": "field",
+            "source": {
+              "name": "bytes"
+            },
+            "target": {
+              "name": "octets"
+            }
+          }
+        ]
+      },
+      "expected_status": "valid",
+      "expected_candidate_text": "search index=main | stats sum(octets) | table 'sum(octets)'",
+      "expected_text": "search index=main | stats sum(octets) | table 'sum(octets)'",
+      "expected_committed": true,
+      "oracle_obligations": [
+        "Pinned SPL typed aggregate naming and unconditional output permit atomic bytes input and exact implicit consumer migration.",
+        "Both source and generated-name consumer edits must occur together; canonical output/binding/provenance correspondence must be retained."
+      ]
+    },
+    {
+      "name": "spl2_unproved_implicit_link_refused",
+      "request": {
+        "schema_version": 1,
+        "mode": "apply",
+        "document": {
+          "text": "FROM main | stats sum(bytes) | table 'sum(bytes)'",
+          "language": "spl2",
+          "profile": "splunkd",
+          "version": "current",
+          "source_id": "root/m6/spl2_unproved_implicit_link_refused"
+        },
+        "rules": [
+          {
+            "id": "implicit-bytes",
+            "kind": "field",
+            "source": {
+              "name": "bytes"
+            },
+            "target": {
+              "name": "octets"
+            }
+          }
+        ]
+      },
+      "expected_status": "incomplete",
+      "expected_candidate_text": "FROM main | stats sum(bytes) | table 'sum(bytes)'",
+      "expected_text": "FROM main | stats sum(bytes) | table 'sum(bytes)'",
+      "expected_committed": false,
+      "oracle_obligations": [
+        "Pinned SPL2 implicit labels are narrow; mapped sum(octets) name is unproved and existing conditional consumer cannot justify guessed linkage.",
+        "Refuse the entire linked group with located explanation; no isolated aggregate-input edit or synthetic AS alias."
+      ]
+    },
+    {
+      "name": "spl_quoted_pattern_no_literal_authority",
+      "request": {
+        "schema_version": 1,
+        "mode": "apply",
+        "document": {
+          "text": "search tag=\"x*\" | lookup people user OUTPUT label",
+          "language": "spl",
+          "profile": "splunkd",
+          "version": "current",
+          "source_id": "root/m6/spl_quoted_pattern_no_literal_authority"
+        },
+        "rules": [
+          {
+            "id": "pattern-context",
+            "kind": "lookup",
+            "source": {
+              "name": "people"
+            },
+            "target": {
+              "name": "accounts"
+            },
+            "when": {
+              "fact": "literal",
+              "kind": "field",
+              "identity": {
+                "name": "tag"
+              },
+              "operator": "equals",
+              "value": "x*"
+            }
+          }
+        ]
+      },
+      "expected_status": "incomplete",
+      "expected_candidate_text": "search tag=\"x*\" | lookup people user OUTPUT label",
+      "expected_text": "search tag=\"x*\" | lookup people user OUTPUT label",
+      "expected_committed": false,
+      "oracle_obligations": [
+        "Quoted wildcard search syntax does not establish the exact literal tag=\"x*\".",
+        "Incomplete original literal evidence makes the conditional lookup edit condition_unknown; preserve all bytes and do not commit."
+      ]
+    },
+    {
+      "name": "spl_exact_string_after_pattern",
+      "request": {
+        "schema_version": 1,
+        "mode": "apply",
+        "document": {
+          "text": "search tag=\"x*\" | where tag=\"x*\" | lookup people user OUTPUT label",
+          "language": "spl",
+          "profile": "splunkd",
+          "version": "current",
+          "source_id": "root/m6/spl_exact_string_after_pattern"
+        },
+        "rules": [
+          {
+            "id": "pattern-context",
+            "kind": "lookup",
+            "source": {
+              "name": "people"
+            },
+            "target": {
+              "name": "accounts"
+            },
+            "when": {
+              "fact": "literal",
+              "kind": "field",
+              "identity": {
+                "name": "tag"
+              },
+              "operator": "equals",
+              "value": "x*"
+            }
+          }
+        ]
+      },
+      "expected_status": "valid",
+      "expected_candidate_text": "search tag=\"x*\" | where tag=\"x*\" | lookup accounts user OUTPUT label",
+      "expected_text": "search tag=\"x*\" | where tag=\"x*\" | lookup accounts user OUTPUT label",
+      "expected_committed": true,
+      "oracle_obligations": [
+        "A proven exact expression-string comparison establishes tag=\"x*\" even after a search pattern supplied incomplete literal evidence.",
+        "A separately guaranteed matching value authorizes the lookup edit despite incomplete unrelated guarantees; only the catalog identity changes."
+      ]
+    },
+    {
+      "name": "spl2_quoted_pattern_no_literal_authority",
+      "request": {
+        "schema_version": 1,
+        "mode": "apply",
+        "document": {
+          "text": "search tag=\"x*\" | lookup people user OUTPUT label",
+          "language": "spl2",
+          "profile": "splunkd",
+          "version": "current",
+          "source_id": "root/m6/spl2_quoted_pattern_no_literal_authority"
+        },
+        "rules": [
+          {
+            "id": "pattern-context",
+            "kind": "lookup",
+            "source": {
+              "name": "people"
+            },
+            "target": {
+              "name": "accounts"
+            },
+            "when": {
+              "fact": "literal",
+              "kind": "field",
+              "identity": {
+                "name": "tag"
+              },
+              "operator": "equals",
+              "value": "x*"
+            }
+          }
+        ]
+      },
+      "expected_status": "incomplete",
+      "expected_candidate_text": "search tag=\"x*\" | lookup people user OUTPUT label",
+      "expected_text": "search tag=\"x*\" | lookup people user OUTPUT label",
+      "expected_committed": false,
+      "oracle_obligations": [
+        "Quoted wildcard search syntax does not establish the exact literal tag=\"x*\".",
+        "Incomplete original literal evidence makes the conditional lookup edit condition_unknown; preserve all bytes and do not commit."
+      ]
+    },
+    {
+      "name": "spl2_exact_string_after_pattern",
+      "request": {
+        "schema_version": 1,
+        "mode": "apply",
+        "document": {
+          "text": "search tag=\"x*\" | where tag=\"x*\" | lookup people user OUTPUT label",
+          "language": "spl2",
+          "profile": "splunkd",
+          "version": "current",
+          "source_id": "root/m6/spl2_exact_string_after_pattern"
+        },
+        "rules": [
+          {
+            "id": "pattern-context",
+            "kind": "lookup",
+            "source": {
+              "name": "people"
+            },
+            "target": {
+              "name": "accounts"
+            },
+            "when": {
+              "fact": "literal",
+              "kind": "field",
+              "identity": {
+                "name": "tag"
+              },
+              "operator": "equals",
+              "value": "x*"
+            }
+          }
+        ]
+      },
+      "expected_status": "valid",
+      "expected_candidate_text": "search tag=\"x*\" | where tag=\"x*\" | lookup accounts user OUTPUT label",
+      "expected_text": "search tag=\"x*\" | where tag=\"x*\" | lookup accounts user OUTPUT label",
+      "expected_committed": true,
+      "oracle_obligations": [
+        "A proven exact expression-string comparison establishes tag=\"x*\" even after a search pattern supplied incomplete literal evidence.",
+        "A separately guaranteed matching value authorizes the lookup edit despite incomplete unrelated guarantees; only the catalog identity changes."
+      ]
+    }
+  ]
+}

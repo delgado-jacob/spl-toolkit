@@ -1,0 +1,22 @@
+{
+  "status": "prepared-not-executed",
+  "basis": "Root-approved M7 LSP draft lifecycle/UTF16/buffer/configuration contract",
+  "run_gate": "After accepted M7 Task12 and stable built artifact window; reconcile actual configuration and canonical diagnostic wire names",
+  "scope": [
+    "Full UTF16/full-sync negotiation",
+    "Alias read/write highlights after emoji",
+    "Unsaved-buffer authority versus contradictory disk file",
+    "Canonical diagnostic range conversion across CRLF",
+    "Open/change/close versioned replacement and clearing",
+    "Visible invalid configuration error and paused dependent request",
+    "Corrected configuration latest-buffer recovery",
+    "Unknown method and clean shutdown/exit",
+    "Exactly one response per request ID and protocol-only stdout",
+    "Single-message transport rejects empty/nonempty top-level arrays with InvalidRequest/null-ID; no embedded request dispatch"
+  ],
+  "qualification": "Prepared local stdio transcript only; no runtime, compiler, server, dependency or actual editor execution; deterministic race tests and real VSCode consumer remain distinct required task evidence",
+  "harness": "/private/tmp/spl-toolkit-root-m7-lsp-acceptance.py",
+  "sha256": "e2e718c3775b8675160c515cab8dcb3cd73762a7af734f9844d26059e54f534f",
+  "preexecution_contract_pass": "Root read full script against approved LSP lifecycle plan. UTF16 advertisement, fullsync/versionedbuffer/aliasbinding/clearing/invalidconfigpause/latestresume/shutdown assertions consistent. Narrowed visible config error to window/showMessage typeError; optional logging alone is insufficient user notification. JSON/AST only, no runtime.",
+  "batch_boundary": "Root approved object-per-frame LSP3.17 boundary based on later official3.18 batch clarification and historical maintainer issue988; not a claim of verbatim3.17 prohibition. Prepared checks only, no runtime."
+}

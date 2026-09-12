@@ -1,0 +1,171 @@
+{
+  "status": "prepared-not-executed",
+  "basis": "Approved M7 design and corrected draft plan plus held-root research clarification; no actual M7 API/wire assumptions frozen",
+  "inline_documents": [
+    {
+      "id": "root-spl-unicode",
+      "document": {
+        "text": "search marker=\"🙂\" host=web\r\n| eval alias=host | table alias",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "opaque:same"
+      }
+    },
+    {
+      "id": "root-spl2-alias",
+      "document": {
+        "text": "SELECT host AS alias FROM main WHERE status=200 | table alias",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "opaque:same"
+      }
+    },
+    {
+      "id": "root-invalid",
+      "document": {
+        "text": "eval marker=\"🙂\", broken=",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "virtual:invalid"
+      }
+    },
+    {
+      "id": "root-incomplete",
+      "document": {
+        "text": "eval marker=\"🙂\" | mystery_op | table host",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "virtual:unknown"
+      }
+    }
+  ],
+  "schema_target": {
+    "kind": "json_schema",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "marker": {
+          "type": "string"
+        },
+        "host": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "marker",
+        "host",
+        "status"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "scenarios": [
+    {
+      "name": "inline_full_canonical_corpus",
+      "obligations": [
+        "Per-document canonical analysis/validation full equality with direct calls; caller copy isolation",
+        "Duplicate source_id retained under distinct IDs; report order exactly request order",
+        "Aggregate invalid precedence, all four reports retained, uncertainty not erased"
+      ],
+      "expected_status": "invalid",
+      "expected_report_statuses": [
+        "valid",
+        "valid",
+        "invalid",
+        "incomplete"
+      ]
+    },
+    {
+      "name": "manifest_acquisition_isolation",
+      "obligations": [
+        "Manifest order differs from lexical order; explicit language and opaque source_id retained",
+        "Regular UTF8 source analyzed; invalid UTF8 and missing selected files become per-document failures",
+        "Failures retain successful reports; execution completeness false and exit2",
+        "Malformed shared target rejected before any acquisition, including every selected file failing"
+      ]
+    },
+    {
+      "name": "held_root_no_follow",
+      "obligations": [
+        "Deterministic real filesystem swaps before intermediate/leaf open cannot read outside sentinel",
+        "Root final symlink rejected, ordinary pre-root ancestor alias permitted",
+        "Post-acquisition pathname replacement uses original held object or explicitly fails",
+        "Unix post-acquisition object move is recorded as held-object semantics, no immutable ancestry claim",
+        "No FIFO hang; no fallback from rejected symlink/nonregular handles; all descriptors close"
+      ]
+    },
+    {
+      "name": "directory_selection_and_output_collision",
+      "obligations": [
+        "Only dedicated .spl/.spl2 files; fixed exclusions skipped; lexical relative order",
+        "Traversal failure retained instead of silently complete scan",
+        "Output alias to selected query/manifest/rules/target rejected before write; query bytes unchanged"
+      ]
+    },
+    {
+      "name": "revision_and_detached_document",
+      "obligations": [
+        "Exact source bytes, dialect/profile/version, tool/contract and target content/options affect revisions",
+        "Changing only target label does not masquerade as changed target content",
+        "Detached document mutation cannot poison canonical result or another view; mutation invalidates revision attestation",
+        "Byte interval lookups are half-open; EOF and Unicode boundaries do not invent references"
+      ]
+    },
+    {
+      "name": "graph_identity_and_sql_phases",
+      "obligations": [
+        "Distinct corpus IDs remain distinct despite repeated source_id and text",
+        "Node/edge IDs include revision and canonical entity identity; every report pointer resolves",
+        "Source-derived binding/lineage edges follow canonical references; no guessed edge across uncertainty",
+        "SQL lexical stage order differs from actual phase execution; SELECT evaluation/project does not duplicate reference obligations"
+      ]
+    },
+    {
+      "name": "sarif_full_schema_and_semantics",
+      "obligations": [
+        "Use official declared-draft schema with local registry and required format checks",
+        "unicodeCodePoints one-based half-open ranges agree with source; URI percent encoding and base resolution independent of flat consumer",
+        "Rule/artifact indices resolve; file-backed paths rooted safely and virtual sources carry contents",
+        "Acquisition/traversal failures mark invocation failure while retaining findings and completeness metadata",
+        "Invalid and incomplete diagnostics occur after an astral character on the same line, so Unicode code-point columns cannot pass with UTF16 or byte columns"
+      ]
+    },
+    {
+      "name": "schema_and_mapping_impact",
+      "obligations": [
+        "Before/after schema targets compared against identical original documents and aligned canonical obligations",
+        "Fine-grained gained/lost/optional/conditional/unknown evidence survives unchanged top-level status",
+        "Equal incomplete evidence stays unobserved/unknown rather than conclusive unchanged",
+        "Mapping impacts call accepted rewrite preview; no query mutation, second condition parser, or nearest-location matching"
+      ]
+    },
+    {
+      "name": "lsp_buffer_and_invalid_configuration",
+      "obligations": [
+        "Real protocol client: full-sync buffer overrides disk; UTF16 spans account for emoji before references",
+        "Rapid versions/config changes cannot publish stale diagnostics; close clears latest URI generation",
+        "Invalid initialization fails; invalid config visibly errors, invalidates pending work, clears affected findings and pauses publication",
+        "Lifecycle/buffer tracking continues; dependent requests fail clearly until corrected config resumes latest buffer",
+        "Explicit valid target removal resumes ordinary analysis; highlight uses request snapshot and every request responds"
+      ]
+    },
+    {
+      "name": "real_editor_and_sarif_consumer",
+      "obligations": [
+        "Pinned isolated VSCode extension host uses official language client and actual LSP binary",
+        "Open/change/diagnostics/binding highlights observed through actual editor APIs, no user profile edits",
+        "Pinned sarif-tools reads real produced report into summary/CSV/HTML; assert retained rule/message/severity/URI/line",
+        "Consumer flattened columns/base resolution/navigation limitations are not represented as passed"
+      ]
+    }
+  ],
+  "run_gate": "Reconcile actual accepted M5/M6 and implemented M7 contracts; root core window afterTask8 and final built/native/consumer window",
+  "sarif_preparation_note": "Prepared-only fixtures strengthened with same-line astral characters before both invalid and incomplete diagnostics. No product parser, validator, or SARIF producer executed."
+}

@@ -1,0 +1,108 @@
+{
+  "status": "prepared-not-executed",
+  "basis": "Approved draft M6 source-preserving rewrite/whole-request validation contract",
+  "planned_scope": {
+    "base_rewrite_cases": 24,
+    "destination_validation_cases": 5,
+    "batch_documents": 4,
+    "strict_shape_unicode_request_errors": 8,
+    "concurrent_repeats": 2,
+    "checks": [
+      "exact candidate and authoritative text",
+      "independent original/candidate canonical analysis",
+      "Canonical destination report equality; only rewrite field-list target omits fields/optional_fields per explicit Task1 I1 ruling, retaining kind/identity/version including empty strings",
+      "source-ordered edits reconstruct exact bytes",
+      "UTF8 Unicode CRLF original/candidate coordinates",
+      "whole-request failed-apply audit and ownership",
+      "ordered atomic batch rejection",
+      "Typed search-pattern uncertainty refuses conditional edits; exact expression strings with asterisks retain guaranteed authority after an incomplete pattern, in both dialects"
+    ]
+  },
+  "verification": "Go formatting/parser and Python AST syntax only; no M6 compilation, package import, analysis/rewrite/native/runtime product execution",
+  "run_gate": "After reviewed Task5 and actual public/wire-name reconciliation; additional SPL2 inputs depend on accepted M5",
+  "input_sha256": {
+    "/private/tmp/spl-toolkit-root-m6-cases.json": "ca02c00621c714aab6ac090ac1216511c1c574f840637a04417db09ae255a2e6",
+    "/private/tmp/spl-toolkit-root-m6-validation-cases.json": "d83ca0e8a0f7a944ffc5b8b6b4405ab1db99533f559a8c9ea764f39e284c9456",
+    "/private/tmp/spl-toolkit-root-m6-go.go": "b770bdc35f289a2681b9479e63b5e7a5ef7a3bf814b9b958f23eebd7cc80ca3e",
+    "/private/tmp/spl-toolkit-root-m6-semantic-checks.py": "670e0601868a0cb10f81b77e31d1c72db4ea3e872a5048e7a17c6e66963f7943",
+    "/private/tmp/spl-toolkit-root-m6-go-acceptance.py": "a3bb1c6c63d874ac642ead40057e64ec8caca030911b45bde737fee491b5db87"
+  },
+  "final_surface_preparation": {
+    "status": "prepared-not-executed",
+    "basis": "Approved M6 draft transport and preview/apply contract; reconcile actual method and flag names before execution",
+    "run_gate": "After Task8 clean review and final build lock; preserve immutable root Task5 go-results-task5.json beforehand",
+    "scope": [
+      "All29 independently specified SPL/SPL2 cases across Go, CLI, real HTTP, source native",
+      "Exact full root Task5 result continuity",
+      "87 interleaved native calls; caller request ownership",
+      "Four ordered batch documents and late-invalid atomic rejection",
+      "Eight raw strict shape/duplicate/Unicode HTTP errors",
+      "Unicode/CRLF file, stdin and report-output behavior; source file unchanged",
+      "Source Python3.14 zero skips; nonzero SPL2 and rewrite native suites; growth from accepted M5 collection"
+    ],
+    "verification": "Python AST syntax only; no import, server, native, product or build execution",
+    "input_sha256": {
+      "/private/tmp/spl-toolkit-root-m6-python-acceptance.py": "45db0224a6bea4c19788bd5e3e93f1074225440ea0d1171ad410cd1315e272e8",
+      "/private/tmp/spl-toolkit-root-m6-surface-acceptance.py": "80081261a9d5283abd3845cab3a4970855f45ead0665ca003abdb550a1ae6c21"
+    }
+  },
+  "spl2_preparation": "Four JSON/AST-only cases added while M5 fix runs: explicit SQL alias/Unicode CRLF, logical WHERE fact before lexical SELECT, typed FROM dataset, quoted exact dotted atom. Based on accepted core semantics and M6 approved design; no product execution, final M5/M6 reconciliation remains required.",
+  "preexecution_quoted_atom_oracle_correction": "Approved audit permits a whole quoted token or proven interior identity edit. Preserve exact candidate quoting, one source site and all actual interval/byte/identity assertions; do not require unchanged delimiters to be part of edit. M6 lead contract check identified before any runtime.",
+  "failure_evidence_preparation": "AST-only: preserve raw Go stdout/stderr and checked source/input identities before oracle execution. Attempt artifact never implies acceptance; successful artifact only after all checks and unchanged-input proof.",
+  "implicit_link_preparation": "Added pin-derived SPL sum(bytes)\u2192sum(octets) atomic positive and SPL2 narrow implicit-label whole-group refusal. M6 lead identified accepted typed proof at471e287 without execution; root exact text/audit checks remain subject to final hook reconciliation. JSON/AST only.",
+  "final_attempt_wrapper": {
+    "path": "/private/tmp/spl-toolkit-root-m6-final-acceptance.py",
+    "sha256": "9c1a9469ba2f0afdc025db726bfad89db9bd0fb56c6e4794ea9ee1bf9f557b1b",
+    "status": "AST-only prepared, no M6 runtime. Freeze source/builds, distinct surfaces/Py314 attempts and failure logs, Task5 baseline and M5 Py314 predecessor identities."
+  },
+  "attempt_output_archival": "Prepared wrapper archives observed raw child JSON, XML and logs per unique attempt with before hashes; stale observations explicitly do not prove execution. AST only, no runtime.",
+  "field_list_target_projection_preparation": {
+    "status": "prepared-not-executed",
+    "basis": "Root Task1 I1 ruling after independent review found whole-catalog duplication conflicting with the approved plan; no product-derived expectation refresh",
+    "retained_before_directory": "/private/tmp/spl-toolkit-root-m6-field-target-projection-preparation",
+    "change": "Only expected rewrite field_list.target projects original kind/identity/version. Independent canonical Go report stays complete; exact full tagged wrapper equality and all other canonical fields remain required. JSON Schema/OCSF comparison unchanged.",
+    "cases_unchanged": true,
+    "go_driver_unchanged": true,
+    "verification": "Python AST only; no product runtime, import, compile or test execution"
+  },
+  "pattern_context_preparation": {
+    "status": "prepared-not-executed",
+    "basis": "Confirmed Task2 I1 review and root-approved canonical contract: unknown literal syntax stays unknown; separately guaranteed matching values survive LiteralComplete=false; strict typed distinction between search patterns and exact expression strings",
+    "added_cases": [
+      "spl_quoted_pattern_no_literal_authority",
+      "spl_exact_string_after_pattern",
+      "spl2_quoted_pattern_no_literal_authority",
+      "spl2_exact_string_after_pattern"
+    ],
+    "existing_twenty_cases_unchanged": true,
+    "retained_before_directory": "/private/tmp/spl-toolkit-root-m6-pattern-context-preparation",
+    "verification": "JSON round-trip and Python AST only; no M6 compile/import/product/runtime or facade-probe execution; expected texts/statuses fixed before engine/condition implementation and acceptance"
+  },
+  "dependency_fact_probe_wire_reconciliation": {
+    "status": "prepared-not-executed",
+    "basis": "Actual accepted canonical RewriteFactProbe identities address the dependency value: kind sourcetype/identity a in retained public Task3 producer probe; approved source/dependency identity model and rewrite_facts nonfield key construction. The conceptual root requests previously used the selector attribute name.",
+    "changes": [
+      {
+        "case": "guaranteed_and_fact",
+        "pointer": "/request/rules/0/when/identity/name",
+        "before": "sourcetype",
+        "after": "auth"
+      },
+      {
+        "case": "or_common_fact",
+        "pointer": "/request/rules/0/when/identity/name",
+        "before": "sourcetype",
+        "after": "auth"
+      },
+      {
+        "case": "or_no_guaranteed_fact",
+        "pointer": "/request/rules/0/when/identity/name",
+        "before": "sourcetype",
+        "after": "auth"
+      }
+    ],
+    "preserved": "All document bytes, literal condition values, rule targets, expected statuses/text/commit flags, helper assertions and the other21 base cases unchanged; no runtime-derived expected-output updates.",
+    "retained_before_directory": "/private/tmp/spl-toolkit-root-m6-dependency-probe-reconciliation",
+    "verification": "JSON round-trip only; no import/compile/product/probe/runtime execution; final actual wire reconciliation before root acceptance remains required"
+  }
+}
