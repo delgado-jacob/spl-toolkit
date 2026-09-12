@@ -13,7 +13,7 @@
       "fact": "literal",
       "kind": "sourcetype",
       "identity": {
-        "name": "a"
+        "name": "sourcetype"
       },
       "operator": "equals",
       "value": "a"
@@ -34,7 +34,7 @@
       "fact": "literal",
       "kind": "sourcetype",
       "identity": {
-        "name": "a"
+        "name": "sourcetype"
       },
       "operator": "equals",
       "value": "a"
@@ -55,7 +55,7 @@
       "fact": "literal",
       "kind": "sourcetype",
       "identity": {
-        "name": "a"
+        "name": "sourcetype"
       },
       "operator": "equals",
       "value": "a"
@@ -76,7 +76,7 @@
       "fact": "literal",
       "kind": "sourcetype",
       "identity": {
-        "name": "a"
+        "name": "sourcetype"
       },
       "operator": "equals",
       "value": "a"

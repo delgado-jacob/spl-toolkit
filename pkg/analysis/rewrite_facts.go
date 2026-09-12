@@ -14,6 +14,10 @@ type rewriteFact struct {
 	values    []RewriteScalar
 	complete  bool
 	locations []Location
+	// A fully understood conflict establishes no positive guarantee. Retain it
+	// separately from incomplete coverage so later AND/OR merges cannot restore
+	// authorization by forgetting one of the incompatible restrictions.
+	conflicting bool
 }
 type rewriteFlow struct {
 	// complete records observed query-fact coverage, not event availability.
@@ -204,7 +208,7 @@ func rewriteMergeFacts(a, b map[string]rewriteFact, or bool) map[string]rewriteF
 	for k, v := range b {
 		prior, ok := out[k]
 		if !ok {
-			if !or {
+			if !or || v.conflicting {
 				out[k] = v
 			}
 			continue
@@ -231,11 +235,15 @@ func rewriteMergeFacts(a, b map[string]rewriteFact, or bool) map[string]rewriteF
 				}
 			}
 		}
-		out[k] = rewriteFact{values: values, complete: prior.complete && v.complete, locations: append(append([]Location{}, prior.locations...), v.locations...)}
+		conflicting := prior.conflicting || v.conflicting || (!or && len(values) > 1)
+		if conflicting {
+			values = []RewriteScalar{}
+		}
+		out[k] = rewriteFact{values: values, complete: prior.complete && v.complete, locations: append(append([]Location{}, prior.locations...), v.locations...), conflicting: conflicting}
 	}
 	if or {
 		for k := range out {
-			if _, ok := b[k]; !ok {
+			if _, ok := b[k]; !ok && !out[k].conflicting {
 				delete(out, k)
 			}
 		}
@@ -400,9 +408,8 @@ func (s *semanticStage) rewritePredicateFacts(node antlr.Tree, language string, 
 				scalar.Value, _ = json.Marshal(literal.(antlr.ParserRuleContext).GetText())
 				scalar.Kind = "string"
 			}
-			var value string
-			_ = json.Unmarshal(scalar.Value, &value)
-			identity = rewriteAtom(value)
+			// Literal probes select the grammar selector (for example sourcetype),
+			// not its value. The dependency reference still owns the value span.
 			location = locate(literal.(antlr.ParserRuleContext))
 		}
 		return map[string]rewriteFact{rewriteFactKey(kind, identity): {values: []RewriteScalar{scalar}, complete: true, locations: []Location{location}}}, true

@@ -322,7 +322,7 @@ func TestRewriteScalarUnknownForms(t *testing.T) {
 }
 
 func TestRewriteEvidenceMetricsAndSourceEpoch(t *testing.T) {
-	s := rewriteTestSession(t, "spl2", `tstats aggregates=[count()] predicate=(index=main AND port=443) byfields=[host]`, RewriteFactProbe{Kind: "index", Identity: rewriteName("main")})
+	s := rewriteTestSession(t, "spl2", `tstats aggregates=[count()] predicate=(index=main AND port=443) byfields=[host]`, RewriteFactProbe{Kind: "index", Identity: rewriteName("index")})
 	index := rewriteFind(t, s, "index", "main", 0)
 	if index.Role != "metric_value" {
 		t.Fatalf("metric value role: %+v", index)
@@ -508,7 +508,7 @@ func TestRewriteSearchPatternFacts(t *testing.T) {
 	for _, language := range []string{"spl", "spl2"} {
 		for _, tc := range []struct{ predicate, kind, name string }{
 			{`tag="x*"`, "field", "tag"}, {`tag=x*`, "field", "tag"},
-			{`index="main*"`, "index", "main*"}, {`index=main*`, "index", "main*"},
+			{`index="main*"`, "index", "index"}, {`index=main*`, "index", "index"},
 		} {
 			t.Run(language+"/"+tc.predicate, func(t *testing.T) {
 				s := rewriteTestSession(t, language, "search "+tc.predicate+" | lookup people user OUTPUT label", RewriteFactProbe{Kind: tc.kind, Identity: rewriteName(tc.name)})
@@ -526,7 +526,7 @@ func TestRewriteSearchPatternFacts(t *testing.T) {
 		}
 		for _, tc := range []struct{ predicate, kind, name, value string }{
 			{`search tag="exact"`, "field", "tag", `"exact"`},
-			{`search index="main"`, "index", "main", `"main"`},
+			{`search index="main"`, "index", "index", `"main"`},
 			{`search index=main | where tag="x*"`, "field", "tag", `"x*"`},
 			{`search index=main | where index="main*"`, "field", "index", `"main*"`},
 		} {
@@ -801,8 +801,8 @@ func TestRewriteSPL2PatternSlotControls(t *testing.T) {
 func TestRewriteProducerCompleteAbsence(t *testing.T) {
 	for _, language := range []string{"spl", "spl2"} {
 		for _, tc := range []struct{ predicate, kind, name string }{
-			{`(sourcetype=a OR sourcetype=b) src=x`, "sourcetype", "a"},
-			{`NOT sourcetype=a src=x`, "sourcetype", "a"},
+			{`(sourcetype=a OR sourcetype=b) src=x`, "sourcetype", "sourcetype"},
+			{`NOT sourcetype=a src=x`, "sourcetype", "sourcetype"},
 			{`(EventCode=1 OR EventCode=2) src=x`, "field", "EventCode"},
 			{`NOT EventCode=1 src=x`, "field", "EventCode"},
 			{`src=x`, "field", "EventCode"},
@@ -926,7 +926,7 @@ func TestRewriteProducerUnobservedPrefix(t *testing.T) {
 		if language == "spl2" {
 			count = "count()"
 		}
-		s, err := PrepareRewrite(QueryDocument{Language: language, Text: "mystery | stats " + count + " | lookup people count OUTPUT label"}, []RewriteFactProbe{{Kind: "sourcetype", Identity: rewriteName("a")}})
+		s, err := PrepareRewrite(QueryDocument{Language: language, Text: "mystery | stats " + count + " | lookup people count OUTPUT label"}, []RewriteFactProbe{{Kind: "sourcetype", Identity: rewriteName("sourcetype")}})
 		if err != nil {
 			t.Fatal(err)
 		}

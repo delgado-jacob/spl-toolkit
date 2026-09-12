@@ -193,7 +193,7 @@ func TestRewriteConditionScopeAndOrder(t *testing.T) {
 }
 
 func TestRewriteConditionRuleOrderAndProposals(t *testing.T) {
-	when := conditionLiteral("a", "equals", `"b"`)
+	when := conditionLiteral("sourcetype", "equals", `"b"`)
 	when.Kind = "sourcetype"
 	rules, err := prepareRules([]Rule{
 		{ID: "rename", Kind: "field", Source: conditionIdentity("src"), Target: conditionIdentity("user")},
@@ -341,7 +341,7 @@ func TestConditionProbeIdentityAndOwnership(t *testing.T) {
 // Losing either condition's evidence during coalescing, or aliasing a returned
 // evidence slice to the original canonical snapshot, must fail.
 func TestRewriteConditionProposalEvidence(t *testing.T) {
-	sourceType := conditionLiteral("a", "equals", `"a"`)
+	sourceType := conditionLiteral("sourcetype", "equals", `"a"`)
 	sourceType.Kind = "sourcetype"
 	eventCode := conditionLiteral("EventCode", "equals", `1`)
 	rules, err := prepareRules([]Rule{
