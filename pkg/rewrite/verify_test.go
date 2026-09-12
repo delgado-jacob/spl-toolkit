@@ -74,19 +74,43 @@ func TestRewritePostVerificationFailure(t *testing.T) {
 		name, query, language, target, proofCode string
 		corrupt                                  func([]analysis.RewriteTextEdit)
 		syntaxComplete, semanticComplete         bool
+		newUncertainty                           bool
 	}{
 		{name: "candidate syntax damage", query: "table src", target: "user", proofCode: "candidate_mismatch",
 			corrupt: func(edits []analysis.RewriteTextEdit) { edits[0].After = "'" }},
 		{name: "derived alias capture", language: "spl2", query: "FROM main | eval account=1 | table src", target: "account", proofCode: "reference_correspondence", syntaxComplete: true, semanticComplete: true},
 		{name: "lost implicit linkage", query: "stats sum(src) | table 'sum(src)'", target: "user", proofCode: "required_change_missing", syntaxComplete: true, semanticComplete: true},
-		{name: "new affected uncertainty", query: "table src", target: "user", proofCode: "candidate_mismatch", syntaxComplete: true,
+		{name: "malformed rendering adds command", query: "table src", target: "user", proofCode: "candidate_mismatch", syntaxComplete: true,
 			corrupt: func(edits []analysis.RewriteTextEdit) { edits[0].After = "user | mystery" }},
+		// Lookup-local rendering can encode this atom, but canonical transfer
+		// treats wildcard lookup inputs as unmodeled and conditions the output.
+		{name: "new affected uncertainty", query: "lookup users src OUTPUT result | table result", target: "user*", proofCode: "reference_correspondence", syntaxComplete: true, newUncertainty: true},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			pending := internalProposedEdit(t, analysis.QueryDocument{Text: tc.query, Language: tc.language, SourceID: "fault.spl"}, "src", tc.target, tc.corrupt)
+			if tc.newUncertainty {
+				original := pending.original.Evidence().Analysis
+				rendered, _, err := reconstructEdits(original.Document.Text, pending.candidate.Rendering.Edits())
+				if err != nil || rendered != pending.candidate.Text {
+					t.Fatalf("uncertainty fixture must reach semantic proof: rendered=%q candidate=%q err=%v", rendered, pending.candidate.Text, err)
+				}
+				next := pending.candidate.Session.Evidence().Analysis
+				if pending.candidate.Text != "lookup users src AS 'user*' OUTPUT result | table result" || len(pending.candidate.Rendering.Requirements()) != 0 || original.Status != analysis.Valid || next.Status != analysis.Incomplete || !original.Coverage.SyntaxComplete || !original.Coverage.SemanticComplete || !next.Coverage.SyntaxComplete || next.Coverage.SemanticComplete {
+					t.Fatalf("fixture must introduce semantic uncertainty without syntax or render failure: original=%+v candidate=%+v", original.Coverage, next.Coverage)
+				}
+				if len(original.Lineage) != 2 || len(next.Lineage) != 2 || original.Lineage[0].After.Uncertain || !next.Lineage[0].After.Uncertain || len(original.Lineage[0].Transitions) != 1 || len(next.Lineage[0].Transitions) != 1 || original.Lineage[0].Transitions[0].Conditional || !next.Lineage[0].Transitions[0].Conditional {
+					t.Fatal("lookup output must become conditional in a newly uncertain stage")
+				}
+				if len(original.References) != 4 || len(next.References) != 3 || original.References[3].NormalizedName != "result" || next.References[2].NormalizedName != "result" || original.References[3].Binding != "derived" || next.References[2].Binding != "indeterminate" || len(next.Diagnostics) != 1 || next.Diagnostics[0].Code != analysis.CodeUnsupportedSemantics || next.Diagnostics[0].StageID != "stage-0" {
+					t.Fatal("affected downstream consumer must lose its proven binding")
+				}
+			}
 			proof := pending.original.Verify(pending.candidate.Session, pending.candidate.Rendering)
 			if proof.Proven || len(proof.Limitations) == 0 || proof.Limitations[0].Code != tc.proofCode {
 				t.Fatalf("wrong negative proof fixture: %+v", proof)
+			}
+			if tc.newUncertainty && !reflect.DeepEqual(proof.References, []analysis.RewriteReferencePair{{OriginalID: "ref-0", CandidateID: "ref-0"}}) {
+				t.Fatalf("semantic proof must pass rendering checks and match the unaffected lookup before refusing the unmodeled input: %+v", proof)
 			}
 			got := finishRewrite(pending, Apply, nil)
 			assertRewriteRollback(t, got)
@@ -97,6 +121,16 @@ func TestRewritePostVerificationFailure(t *testing.T) {
 				location := change.CandidateLocation
 				if got.CandidateText[location.Start.Offset:location.End.Offset] != change.NewText {
 					t.Errorf("malformed edit evidence discarded: %+v", change)
+				}
+			}
+			if tc.newUncertainty {
+				if len(got.Changes) != 1 || got.Changes[0].OldText != "" || got.Changes[0].NewText != " AS 'user*'" || got.Changes[0].OriginalLocation.Start.Offset != 16 || got.Changes[0].OriginalLocation.End.Offset != 16 || got.Changes[0].CandidateLocation.Start.Offset != 16 || got.Changes[0].CandidateLocation.End.Offset != 27 {
+					t.Fatalf("failed apply must retain the exact proposed lookup alias insertion: %+v", got.Changes)
+				}
+				control := internalProposedEdit(t, analysis.QueryDocument{Text: tc.query, SourceID: "fault.spl"}, "src", "user", nil)
+				accepted := finishRewrite(control, Apply, nil)
+				if !accepted.Committed || accepted.Status != analysis.Valid || accepted.Text != "lookup users src AS user OUTPUT result | table result" || !accepted.Coverage.RewriteComplete {
+					t.Fatal("ordinary lookup-local mapping must remain proven")
 				}
 			}
 		})
