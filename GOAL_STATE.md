@@ -4,7 +4,7 @@ Updated September 12, 2026. Milestone 6 is accepted at product source `98e38b941
 
 ## Current goal stage
 
-Milestones 1–6 are complete; M7 developer tooling is **implementing** under its [approved design](_build_plan/milestones/7-developer-tooling/design-spec.md) and [12-task ExecPlan](_build_plan/milestones/7-developer-tooling/milestone-7-implementation-plan.md), reconciled to M6 product `98e38b9`. Task 1 was accepted at `d528393a63a922702ae9c0271adacac8ba5e6e74`. Task 2 contained filesystem acquisition was accepted at `988f6088170f290c9a0e2d03393da9ed8a014b3f` after its original `2f8568e` and two P2 security corrections received same-reviewer approval. Task 3 canonical prepared target access and in-memory corpus reporting is released and is the exact next action. The remaining tasks are serial, followed by root windows and final cross-milestone audit. No merge or push.
+Milestones 1–6 are complete; M7 developer tooling is **implementing** under its [approved design](_build_plan/milestones/7-developer-tooling/design-spec.md) and [12-task ExecPlan](_build_plan/milestones/7-developer-tooling/milestone-7-implementation-plan.md), reconciled to M6 product `98e38b9`. Tasks 1–3 are accepted at `d528393a63a922702ae9c0271adacac8ba5e6e74`, `988f6088170f290c9a0e2d03393da9ed8a014b3f` and `b3914f67a0707766444a5adee43fc50f935e5670`. Task 3's one P2 typed-selection contradiction was corrected and same-reviewer approved. Task 4 detached advanced document access is released and is the exact next action. Remaining tasks are serial, followed by root windows and final cross-milestone audit. No merge or push.
 
 M6 product checkpoint `98e38b9` is the direct child of Task 8's `fbde61b` and contains both broad-review fixes. Independent same-reviewer broad rereview [approved](.superpowers/sdd/milestone-6-implementation-plan/milestone-6-broad-rereview-1.md) with zero findings. Fresh root-owned checks at that exact clean tracked/index source passed: official Go 1.22.12 built CLI/server/native plus 29 independent Go/CLI/real-HTTP/native cases, ordered batch/error/concurrency and original/candidate/validation parity; Python 3.14.1 source/native 459 tests without skips; and fresh direct-wheel and rebuilt-sdist installed Python 3.12 lanes, each 438 native + 242 surface tests without failures/skips. Immutable private root receipts and qualification details are in the M6 milestone log and plan. The legacy ignored worktree `dist/` wheel was not used for this closure.
 
@@ -51,7 +51,7 @@ All accepted milestone commits below were verified as ancestors of the current b
 | M6 Task6 | Accepted at `e724af4cd22ba6f29e53de99c572275db7627843`. CLI/HTTP/OpenAPI/docs parity is reviewed; stale guidance, strict schema parity, body-limit coverage and partial-commit CLI coverage are closed. The local Go 1.22 GOROOT is incomplete, so no fresh floor compile is claimed. |
 | M6 Task7 | Accepted at `8e0e0b89a3c4b2825ca10f510d3a191f9b6dd1db`. Native/Python APIs, real Go 1.22/1.25 headers, 20 exports, ownership/race checks and formal direct/rebuilt package closure passed; Task 8/root platform acceptance remain separate. |
 | M6 Task8 and milestone | Task8 independently accepted at `fbde61b`; broad-review corrections accepted at `98e38b941ea868468376b9dd6533e684009d35c0`, with broad rereview and fresh root surface/Python3.14/installed package acceptance. Complete within the stated local-platform limits. |
-| M7: developer tooling | Design and 12-task ExecPlan approved against accepted M6; Tasks 1–2 accepted (`d528393`, `988f608`), Task 3 released. |
+| M7: developer tooling | Design and 12-task ExecPlan approved against accepted M6; Tasks 1–3 accepted (`d528393`, `988f608`, `b3914f6`), Task 4 released. |
 
 The completed atomic unit consists of `pkg/rewrite/rewrite.go`, `pkg/rewrite/verify.go`, and `pkg/rewrite/rewrite_test.go`. The interrupted file bytes were preserved before verification. No failing test expectation was rewritten during this handoff: the earlier worker had already corrected its hand-counted offsets. The retained historical `single-first-green` run actually exited 1 and remains a failure record.
 
@@ -76,7 +76,7 @@ Use bounded ownership and artifact paths, preserve others' work, retain actual e
 
 ## Remaining work
 
-**M6 and M7 Tasks 1–2 are accepted.** Implement/review Task 3 next, then the remaining nine tasks and specified independent acceptance windows. Consumer inputs must be newly reviewed and provisioned for Task 12 because the historical preflight artifacts are missing. Do not redo settled brainstorming. Complete requirement-by-requirement final audit for all milestones before claiming the original goal complete.
+**M6 and M7 Tasks 1–3 are accepted.** Implement/review Task 4 next, then the remaining eight tasks and specified independent acceptance windows. Consumer inputs must be newly reviewed and provisioned for Task 12 because the historical preflight artifacts are missing. Do not redo settled brainstorming. Complete requirement-by-requirement final audit for all milestones before claiming the original goal complete.
 
 ## Current blockers and evidence gaps
 
