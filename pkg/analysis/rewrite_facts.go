@@ -2,10 +2,10 @@ package analysis
 
 import (
 	"encoding/json"
-	"math/big"
 	"strings"
 
 	"github.com/antlr4-go/antlr/v4"
+	"github.com/delgado-jacob/spl-toolkit/internal/jsoninput"
 	"github.com/delgado-jacob/spl-toolkit/parser"
 	"github.com/delgado-jacob/spl-toolkit/parser/spl2"
 )
@@ -472,12 +472,8 @@ func rewriteScalarEqual(a, b RewriteScalar) bool {
 	if a.Kind != "number" {
 		return string(a.Value) == string(b.Value)
 	}
-	x, ok := new(big.Rat).SetString(string(a.Value))
-	if !ok {
-		return false
-	}
-	y, ok := new(big.Rat).SetString(string(b.Value))
-	return ok && x.Cmp(y) == 0
+	// Both scalars came from rewriteScalar's strict JSON-number decoding.
+	return jsoninput.CanonicalNumber(string(a.Value)) == jsoninput.CanonicalNumber(string(b.Value))
 }
 func (s *semanticStage) rewriteUncertain() {
 	if s.result.rewrite == nil {

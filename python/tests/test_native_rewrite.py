@@ -40,6 +40,46 @@ def raw_result(mapper, operation, payload, *, handle=None, reject=False):
         mapper._lib.spl_result_free(pointer)
 
 
+@pytest.mark.parametrize("operator", ["AND", "OR"])
+@pytest.mark.parametrize("left,right,equal", [
+    ("1e1000001", "1e1000001", True),
+    ("1e1000001", "10e1000000", True),
+    ("1e1000001", "2e1000001", False),
+    ("1e-1000001", "1e-1000001", True),
+    ("1e-1000001", "10e-1000002", True),
+    ("1e-1000001", "1e-1000002", False),
+    ("1e9223372036854775809", "1e9223372036854775809", True),
+    ("1e9223372036854775809", "10e9223372036854775808", True),
+    ("1e9223372036854775809", "1e9223372036854775810", False),
+    ("1e-9223372036854775809", "1e-9223372036854775809", True),
+    ("1e-9223372036854775809", "10e-9223372036854775810", True),
+    ("1e-9223372036854775809", "2e-9223372036854775809", False),
+])
+def test_raw_rewrite_exact_large_exponent_guarantees(left, right, equal, operator):
+    # The Python value API cannot express an arbitrary-precision numeric JSON
+    # token. Exercise the owned C entrypoint directly, with no float conversion.
+    query = f"FROM main | where n={left} {operator} n={right} | table src"
+    rules = deepcopy(RULES)
+    rules[0]["when"] = {"fact": "literal", "kind": "field", "identity": {"name": "n"},
+                        "operator": "equals", "value": "__EXACT_NUMBER__"}
+    document = {"text": query, "language": "spl2"}
+    request = {"schema_version": 1, "mode": "apply", "document": document, "rules": rules}
+    payload = json.dumps(request).replace('"__EXACT_NUMBER__"', left).encode()
+    with SPLMapper(**mapper_kwargs()) as mapper:
+        report = raw_result(mapper, "rewrite", payload)
+        batch = {k: v for k, v in request.items() if k != "document"} | {"documents": [document]}
+        batch_payload = json.dumps(batch).replace('"__EXACT_NUMBER__"', left).encode()
+        assert raw_result(mapper, "rewrite_batch", batch_payload) == {
+            "schema_version": 1, "status": "valid", "reports": [report]}
+    expected = query.replace("table src", "table user") if equal else query
+    assert report["status"] == "valid" and report["committed"] is equal
+    assert report["candidate_text"] == report["text"] == expected
+    assert len(report["rule_evaluations"]) == 1
+    assert report["rule_evaluations"][0]["condition"] == {
+        "state": "true" if equal else "false", "reason": "condition_true" if equal else "condition_false",
+        "reference_ids": ["ref-1", "ref-2"], "children": []}
+
+
 def call_request(mapper, request):
     request = deepcopy(request)
     document = request.pop("document")

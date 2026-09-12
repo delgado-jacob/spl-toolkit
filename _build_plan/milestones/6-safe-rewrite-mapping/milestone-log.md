@@ -1,5 +1,14 @@
 ## What's new in the app
 
+Broad-review follow-up: the later `fbde61b` checkpoint was not accepted as final
+M6. The broad-review fix integrates supported SQL HAVING predicates at their
+restricted logical phase and shares exact input-sized JSON decimal normalization
+between canonical fact merges and condition comparison. The final corpus has 125
+public cases and 106 required groups, with 24 additional raw-native exact-number
+regressions. The broad-review verification section below records the final
+candidate placeholder, fresh artifact closure and the explicit Python numeric
+serialization boundary. Broad rereview and renewed root acceptance remain separate.
+
 Task 8 review follow-up: the initial `c3a175b` evidence below is historical and
 was not accepted as final. Scoped producer correction
 `e76d351d58a73d17b04d4f7e1728a3ccedaca2a9` is independently approved: literal
@@ -172,3 +181,95 @@ macOS26.2 arm64/Python3.12.6 proof. Task8 rereview, broad M6 review, root stable
 Python3.14 acceptance, other release platforms, sanitizers and external runtime
 conformance are unexecuted separate gates. No private acceptance inputs, new
 dependencies, generated schema changes, user-file edits, merge or push occurred.
+
+## Broad-review verification
+
+This section supersedes the preceding historical Task8/r1 artifact counts. The
+broad review at `fbde61b4383e473522355319fb45f7bf5b332d35` required two producer
+corrections. The exact candidate containing this log is resolved after commit in
+`milestone-6-broad-fix-report.md` and `task-8-evidence/broad-post-commit.json`;
+it is a direct child of that reviewed base, not a claimed independently approved
+producer. Existing accepted dependencies, including `f6572c35` and `e76d351`,
+remain ancestors.
+
+Supported HAVING predicates now use the shared canonical predicate reader inside
+the same restricted visibility view as SQL references, at the HAVING phase.
+Only its fact/reference evidence survives the temporary view. WHERE, GROUP BY,
+selection, aliases, later ordering and diagnostics keep their established phase
+contracts. Hidden operands do not suppress a conflicting visible restriction.
+Ungrouped HAVING and derived/unsupported guarantees remain non-authorizing.
+Fact merges and condition comparison share the existing exact decimal
+coefficient/exponent normalization, factored into `internal/jsoninput/number.go`
+and included in the native sdist manifest. It uses input-sized storage, never
+expands powers of ten and never coerces numeric values through floats.
+
+The independently authored corpus adds 19 cases: nine HAVING/visibility/phase
+cases and ten numeric AND/OR cases. There are now 125 public reports over 100
+distinct dialect/query texts (67 SPL, 58 SPL2): 90 valid, 30 incomplete, five
+invalid, 71 committed. All 106 required groups have deletion guards, including
+18 new HAVING/numeric groups. The 31 positively exercised supported roles, 34-row
+capability matrix and two private proof-fault cases remain unchanged. Full
+six-surface parity covers 61 ordered batches, including 20 multi-document groups,
+three atomic request errors, eight real HTTP limits and the existing local OCSF
+catalog. All predecessor schema/SPL2/native/surface obligations remain registered.
+
+Meaningful RED is retained for missing HAVING and exact nonzero exponent facts,
+the hidden-operand conflict refinement, and two new obligation-deletion tests.
+Against the old native, 16 positive exact-number tests failed while eight
+different-value controls passed; all 24 pass against the final rebuilt native in
+source and both installed lanes. Independent corpus authoring corrections were
+resolved from the grammar and canonical origin/visibility contracts, not copied
+from producer reports. Initial pre-refinement successful artifacts and all failed
+evidence remain historical; only the `broad-final-*` set below is final.
+
+| Final qualified check | Result |
+| --- | --- |
+| Official Go1.22.12 floor | all seven packages passed |
+| Full Go formatting/vet/race | eight tested packages passed |
+| Source-native Python | 459 passed, zero skips |
+| Source documented/schema/SPL2/rewrite surfaces | 218 passed, zero skips |
+| Tooling tests | 224 passed, zero skips |
+| Docs checker | 15 current pages passed |
+| Direct wheel outside checkout | 438 native + 242 surface passed; zero failures/skips |
+| Rebuilt-sdist wheel outside checkout | 438 native + 242 surface passed; zero failures/skips |
+| Exact closure audit | full reports/batches/errors/limits and current source/fixture/docs hashes agree |
+
+Closure binds 169 producing Go source hashes, 87 sdist source files, all seven
+rewrite fixtures and 18 copied documentation/example files. Both installed native
+libraries have SHA256 `fde1fa58452845a516e7f601029f154f1bb308afe20773eed429c01c2abab416`.
+Observed imports and loaded libraries are inside separate outside-checkout
+Python3.12 site-packages environments. The 12 Python3.12 wheelhouse inputs and
+official compiler remain byte-identical to the prior input receipt; a separately
+available cp314 wheel is inventoried, not claimed as execution of Python3.14.
+
+| Final retained artifact | SHA256 |
+| --- | --- |
+| CLI | `b9248dd8bb1488fc270c17e0ed77340263e0b1523c264ef3519d30a2e40500d2` |
+| Server | `946ba20d58758cc7dcaf5cad5a68f0e912c5b7d0bd882cf80ebdc908aca90714` |
+| Source native | `acb2609c034585d4b571c4dc0ad6d19940d6cb5e51bb47bafd977b0608b5927a` |
+| Direct wheel | `e385183999e29743cc096b7eb7449bfc8c35c023421e2cf65e4ea1d575e9ec76` |
+| Sdist | `1524ff8e3729a996136a0070262fa4d9b005b82eedfc03a696b64680fb04333e` |
+| Rebuilt-sdist wheel | `e4699fe9ab98dfef533c04a73ea8d17a996469c81a72973eb161fe4c888df8ec` |
+| broad-final-package-evidence.json | `8cf4d383b60494672ae347d615b064ceda2aa1d154164988844f75d18443f6cc` |
+| broad-final-source-rewrite-evidence.json | `33ccd2ee29216733eab9238d276c632b61e0cdbd4517ca46cad623bea8abf61a` |
+| broad-final-closure.json | `6e0583b51d7e22835543204c4f8da7771d60a689d0d03aa3f1094f04273d5fa5` |
+
+Corpus SHA256 is `26ad72ded80f3e7611e1a4763bc57f3abea000c0621db0f4dcc639d5ccab4121`;
+Go transport SHA256 is `2f4f92ab6417d64faef7e34c82f0a19322be5ed032dd5cb0644ebec51782d5c9`
+(transport only, zero semantic credit). Exact commands, exit statuses, origins,
+official input hashes and log hashes are retained in the final closure.
+
+The coordinator approved keeping Python's convenience value-serialization API
+unchanged. Six-surface zero/exponent AND/OR cases exercise the shared producer
+merge and exact-decimal path. They are not six-surface proof for a nonzero
+arbitrary-precision numeric JSON token: those tokens are covered by exact Go/raw-C
+tests. No Decimal API, float coercion or broader SPL exponent grammar is claimed.
+
+Proof remains local macOS26.2 arm64/Python3.12.6/official Go1.22.12 with the
+disclosed external-link workaround and retained LC_DYSYMTAB warnings. CLI VCS
+metadata still reports outer baseline `6898cc052`, modified=true; actual worktree
+source/command/hash evidence binds its inputs, not a claimed clean candidate
+stamp. Broad re-review and renewed root stable/Python3.14 acceptance, other
+release platforms, sanitizer/leak checks and external Splunk runtime conformance
+remain separate. No coordinator-private inputs, dependency upgrades, generated
+schema edits, user-file changes, merge or push occurred.

@@ -88,6 +88,19 @@ affected facts. A conclusive false condition is an ordinary skip; unknown eviden
 keeps the report incomplete. Static reference presence does not prove event-field
 presence. All condition children retain evidence even when one controls the result.
 
+Supported SQL HAVING equalities enter the original fact flow at the HAVING phase,
+after grouping/selection and before later consumers. They do not authorize earlier
+phases or manufacture source facts for derived aggregate aliases. Conflicting
+WHERE/HAVING restrictions cannot authorize a later rewrite.
+
+Numeric equality is exact decimal equality without expanding powers of ten.
+SPL2 supports exponent notation in query literals; the current SPL grammar does
+not. CLI/HTTP/Go/native JSON requests can retain arbitrary numeric tokens, including
+huge exponents. Python convenience methods accept Python JSON values, not raw
+numeric tokens or Decimal objects: they cannot express a nonzero arbitrary-precision
+exponent token without a representable Python value. No float coercion is performed
+to widen that interface.
+
 Mappings are simultaneous: a→b and b→c use original identities, and do not cascade
 a into c. Identical replacements coalesce, while different targets are ambiguous.
 Linked consumers must be authorized together. Static checks reject observed live

@@ -21785,5 +21785,6484 @@
         ]
       ]
     }
+  },
+  {
+    "id": "sql-having-only",
+    "groups": [
+      "sql",
+      "conditional-spl2",
+      "having-only",
+      "having-phase-order"
+    ],
+    "request": {
+      "schema_version": 1,
+      "mode": "apply",
+      "document": {
+        "text": "SELECT marker FROM main GROUP BY marker HAVING marker=1 | lookup people marker OUTPUT label",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "sql-having-only"
+      },
+      "rules": [
+        {
+          "id": "early",
+          "kind": "dataset",
+          "source": {
+            "name": "main"
+          },
+          "target": {
+            "name": "archive"
+          },
+          "when": {
+            "fact": "literal",
+            "kind": "field",
+            "identity": {
+              "name": "marker"
+            },
+            "operator": "equals",
+            "value": 1
+          }
+        },
+        {
+          "id": "map",
+          "kind": "lookup",
+          "source": {
+            "name": "people"
+          },
+          "target": {
+            "name": "users"
+          },
+          "when": {
+            "fact": "literal",
+            "kind": "field",
+            "identity": {
+              "name": "marker"
+            },
+            "operator": "equals",
+            "value": 1
+          }
+        }
+      ]
+    },
+    "target": null,
+    "expected": {
+      "status": "valid",
+      "candidate_text": "SELECT marker FROM main GROUP BY marker HAVING marker=1 | lookup users marker OUTPUT label",
+      "text": "SELECT marker FROM main GROUP BY marker HAVING marker=1 | lookup users marker OUTPUT label",
+      "committed": true,
+      "coverage": {
+        "syntax_complete": true,
+        "semantic_complete": true,
+        "rewrite_complete": true,
+        "reasons": []
+      },
+      "changes": [
+        {
+          "outcome": "applied",
+          "reason": "matched",
+          "group_id": "group-0",
+          "rule_ids": [
+            "map"
+          ],
+          "original_reference_ids": [
+            "ref-4"
+          ],
+          "candidate_reference_ids": [
+            "ref-4"
+          ],
+          "original_location": [
+            65,
+            71
+          ],
+          "candidate_location": [
+            65,
+            70
+          ],
+          "old_text": "people",
+          "new_text": "users",
+          "candidate_applied": true,
+          "committed": true
+        }
+      ],
+      "rule_evaluations": [
+        {
+          "rule_id": "early",
+          "outcome": "skipped",
+          "reason": "condition_false",
+          "reference_ids": [
+            "ref-1"
+          ],
+          "location": [
+            19,
+            23
+          ],
+          "condition": {
+            "state": "false",
+            "reason": "condition_false",
+            "reference_ids": [],
+            "children": []
+          }
+        },
+        {
+          "rule_id": "map",
+          "outcome": "proposed",
+          "reason": "matched",
+          "reference_ids": [
+            "ref-4"
+          ],
+          "location": [
+            65,
+            71
+          ],
+          "condition": {
+            "state": "true",
+            "reason": "condition_true",
+            "reference_ids": [
+              "ref-2",
+              "ref-3"
+            ],
+            "children": []
+          }
+        }
+      ],
+      "original_references": [
+        [
+          "ref-0",
+          "marker",
+          "field",
+          "read",
+          "source",
+          [
+            "ref-2"
+          ]
+        ],
+        [
+          "ref-1",
+          "main",
+          "dataset",
+          "read",
+          "not_applicable",
+          []
+        ],
+        [
+          "ref-2",
+          "marker",
+          "field",
+          "group",
+          "source",
+          []
+        ],
+        [
+          "ref-3",
+          "marker",
+          "field",
+          "read",
+          "source",
+          [
+            "ref-2"
+          ]
+        ],
+        [
+          "ref-4",
+          "people",
+          "lookup",
+          "read",
+          "not_applicable",
+          []
+        ],
+        [
+          "ref-5",
+          "marker",
+          "field",
+          "read",
+          "source",
+          [
+            "ref-2"
+          ]
+        ],
+        [
+          "ref-6",
+          "label",
+          "field",
+          "output",
+          "not_applicable",
+          [
+            "ref-5",
+            "ref-2"
+          ]
+        ]
+      ],
+      "candidate_references": [
+        [
+          "ref-0",
+          "marker",
+          "field",
+          "read",
+          "source",
+          [
+            "ref-2"
+          ]
+        ],
+        [
+          "ref-1",
+          "main",
+          "dataset",
+          "read",
+          "not_applicable",
+          []
+        ],
+        [
+          "ref-2",
+          "marker",
+          "field",
+          "group",
+          "source",
+          []
+        ],
+        [
+          "ref-3",
+          "marker",
+          "field",
+          "read",
+          "source",
+          [
+            "ref-2"
+          ]
+        ],
+        [
+          "ref-4",
+          "users",
+          "lookup",
+          "read",
+          "not_applicable",
+          []
+        ],
+        [
+          "ref-5",
+          "marker",
+          "field",
+          "read",
+          "source",
+          [
+            "ref-2"
+          ]
+        ],
+        [
+          "ref-6",
+          "label",
+          "field",
+          "output",
+          "not_applicable",
+          [
+            "ref-5",
+            "ref-2"
+          ]
+        ]
+      ],
+      "original_lineage": [
+        [
+          "stage-1",
+          "scope-0",
+          "source",
+          [],
+          []
+        ],
+        [
+          "stage-2",
+          "scope-0",
+          "group",
+          [
+            [
+              "marker",
+              false
+            ]
+          ],
+          [
+            {
+              "operation": "project",
+              "output": "marker",
+              "input_reference_ids": [
+                "ref-2"
+              ],
+              "output_reference_id": "",
+              "conditional": false
+            }
+          ]
+        ],
+        [
+          "stage-0",
+          "scope-0",
+          "evaluate",
+          [
+            [
+              "marker",
+              false
+            ]
+          ],
+          []
+        ],
+        [
+          "stage-3",
+          "scope-0",
+          "having",
+          [
+            [
+              "marker",
+              false
+            ]
+          ],
+          []
+        ],
+        [
+          "stage-0",
+          "scope-0",
+          "project",
+          [
+            [
+              "marker",
+              false
+            ]
+          ],
+          [
+            {
+              "operation": "project",
+              "output": "marker",
+              "input_reference_ids": [
+                "ref-0"
+              ],
+              "output_reference_id": "",
+              "conditional": false
+            }
+          ]
+        ],
+        [
+          "stage-4",
+          "scope-0",
+          "",
+          [
+            [
+              "label",
+              false
+            ],
+            [
+              "marker",
+              false
+            ]
+          ],
+          [
+            {
+              "operation": "lookup",
+              "output": "label",
+              "input_reference_ids": [
+                "ref-5"
+              ],
+              "output_reference_id": "ref-6",
+              "conditional": false
+            }
+          ]
+        ]
+      ],
+      "candidate_lineage": [
+        [
+          "stage-1",
+          "scope-0",
+          "source",
+          [],
+          []
+        ],
+        [
+          "stage-2",
+          "scope-0",
+          "group",
+          [
+            [
+              "marker",
+              false
+            ]
+          ],
+          [
+            {
+              "operation": "project",
+              "output": "marker",
+              "input_reference_ids": [
+                "ref-2"
+              ],
+              "output_reference_id": "",
+              "conditional": false
+            }
+          ]
+        ],
+        [
+          "stage-0",
+          "scope-0",
+          "evaluate",
+          [
+            [
+              "marker",
+              false
+            ]
+          ],
+          []
+        ],
+        [
+          "stage-3",
+          "scope-0",
+          "having",
+          [
+            [
+              "marker",
+              false
+            ]
+          ],
+          []
+        ],
+        [
+          "stage-0",
+          "scope-0",
+          "project",
+          [
+            [
+              "marker",
+              false
+            ]
+          ],
+          [
+            {
+              "operation": "project",
+              "output": "marker",
+              "input_reference_ids": [
+                "ref-0"
+              ],
+              "output_reference_id": "",
+              "conditional": false
+            }
+          ]
+        ],
+        [
+          "stage-4",
+          "scope-0",
+          "",
+          [
+            [
+              "label",
+              false
+            ],
+            [
+              "marker",
+              false
+            ]
+          ],
+          [
+            {
+              "operation": "lookup",
+              "output": "label",
+              "input_reference_ids": [
+                "ref-5"
+              ],
+              "output_reference_id": "ref-6",
+              "conditional": false
+            }
+          ]
+        ]
+      ]
+    }
+  },
+  {
+    "id": "sql-having-conflict",
+    "groups": [
+      "sql",
+      "conditional-spl2",
+      "having-conflict"
+    ],
+    "request": {
+      "schema_version": 1,
+      "mode": "apply",
+      "document": {
+        "text": "SELECT marker FROM main WHERE marker=1 GROUP BY marker HAVING marker=2 | lookup people marker OUTPUT label",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "sql-having-conflict"
+      },
+      "rules": [
+        {
+          "id": "map",
+          "kind": "lookup",
+          "source": {
+            "name": "people"
+          },
+          "target": {
+            "name": "users"
+          },
+          "when": {
+            "fact": "literal",
+            "kind": "field",
+            "identity": {
+              "name": "marker"
+            },
+            "operator": "equals",
+            "value": 1
+          }
+        }
+      ]
+    },
+    "target": null,
+    "expected": {
+      "status": "valid",
+      "candidate_text": "SELECT marker FROM main WHERE marker=1 GROUP BY marker HAVING marker=2 | lookup people marker OUTPUT label",
+      "text": "SELECT marker FROM main WHERE marker=1 GROUP BY marker HAVING marker=2 | lookup people marker OUTPUT label",
+      "committed": false,
+      "coverage": {
+        "syntax_complete": true,
+        "semantic_complete": true,
+        "rewrite_complete": true,
+        "reasons": []
+      },
+      "changes": [],
+      "rule_evaluations": [
+        {
+          "rule_id": "map",
+          "outcome": "skipped",
+          "reason": "condition_false",
+          "reference_ids": [
+            "ref-5"
+          ],
+          "location": [
+            80,
+            86
+          ],
+          "condition": {
+            "state": "false",
+            "reason": "condition_false",
+            "reference_ids": [
+              "ref-2",
+              "ref-3",
+              "ref-4"
+            ],
+            "children": []
+          }
+        }
+      ],
+      "original_references": [
+        [
+          "ref-0",
+          "marker",
+          "field",
+          "read",
+          "source",
+          [
+            "ref-2"
+          ]
+        ],
+        [
+          "ref-1",
+          "main",
+          "dataset",
+          "read",
+          "not_applicable",
+          []
+        ],
+        [
+          "ref-2",
+          "marker",
+          "field",
+          "read",
+          "source",
+          []
+        ],
+        [
+          "ref-3",
+          "marker",
+          "field",
+          "group",
+          "source",
+          [
+            "ref-2"
+          ]
+        ],
+        [
+          "ref-4",
+          "marker",
+          "field",
+          "read",
+          "source",
+          [
+            "ref-2"
+          ]
+        ],
+        [
+          "ref-5",
+          "people",
+          "lookup",
+          "read",
+          "not_applicable",
+          []
+        ],
+        [
+          "ref-6",
+          "marker",
+          "field",
+          "read",
+          "source",
+          [
+            "ref-2"
+          ]
+        ],
+        [
+          "ref-7",
+          "label",
+          "field",
+          "output",
+          "not_applicable",
+          [
+            "ref-6",
+            "ref-2"
+          ]
+        ]
+      ],
+      "candidate_references": [
+        [
+          "ref-0",
+          "marker",
+          "field",
+          "read",
+          "source",
+          [
+            "ref-2"
+          ]
+        ],
+        [
+          "ref-1",
+          "main",
+          "dataset",
+          "read",
+          "not_applicable",
+          []
+        ],
+        [
+          "ref-2",
+          "marker",
+          "field",
+          "read",
+          "source",
+          []
+        ],
+        [
+          "ref-3",
+          "marker",
+          "field",
+          "group",
+          "source",
+          [
+            "ref-2"
+          ]
+        ],
+        [
+          "ref-4",
+          "marker",
+          "field",
+          "read",
+          "source",
+          [
+            "ref-2"
+          ]
+        ],
+        [
+          "ref-5",
+          "people",
+          "lookup",
+          "read",
+          "not_applicable",
+          []
+        ],
+        [
+          "ref-6",
+          "marker",
+          "field",
+          "read",
+          "source",
+          [
+            "ref-2"
+          ]
+        ],
+        [
+          "ref-7",
+          "label",
+          "field",
+          "output",
+          "not_applicable",
+          [
+            "ref-6",
+            "ref-2"
+          ]
+        ]
+      ],
+      "original_lineage": [
+        [
+          "stage-1",
+          "scope-0",
+          "source",
+          [],
+          []
+        ],
+        [
+          "stage-2",
+          "scope-0",
+          "filter",
+          [
+            [
+              "marker",
+              false
+            ]
+          ],
+          []
+        ],
+        [
+          "stage-3",
+          "scope-0",
+          "group",
+          [
+            [
+              "marker",
+              false
+            ]
+          ],
+          [
+            {
+              "operation": "project",
+              "output": "marker",
+              "input_reference_ids": [
+                "ref-3"
+              ],
+              "output_reference_id": "",
+              "conditional": false
+            }
+          ]
+        ],
+        [
+          "stage-0",
+          "scope-0",
+          "evaluate",
+          [
+            [
+              "marker",
+              false
+            ]
+          ],
+          []
+        ],
+        [
+          "stage-4",
+          "scope-0",
+          "having",
+          [
+            [
+              "marker",
+              false
+            ]
+          ],
+          []
+        ],
+        [
+          "stage-0",
+          "scope-0",
+          "project",
+          [
+            [
+              "marker",
+              false
+            ]
+          ],
+          [
+            {
+              "operation": "project",
+              "output": "marker",
+              "input_reference_ids": [
+                "ref-0"
+              ],
+              "output_reference_id": "",
+              "conditional": false
+            }
+          ]
+        ],
+        [
+          "stage-5",
+          "scope-0",
+          "",
+          [
+            [
+              "label",
+              false
+            ],
+            [
+              "marker",
+              false
+            ]
+          ],
+          [
+            {
+              "operation": "lookup",
+              "output": "label",
+              "input_reference_ids": [
+                "ref-6"
+              ],
+              "output_reference_id": "ref-7",
+              "conditional": false
+            }
+          ]
+        ]
+      ],
+      "candidate_lineage": [
+        [
+          "stage-1",
+          "scope-0",
+          "source",
+          [],
+          []
+        ],
+        [
+          "stage-2",
+          "scope-0",
+          "filter",
+          [
+            [
+              "marker",
+              false
+            ]
+          ],
+          []
+        ],
+        [
+          "stage-3",
+          "scope-0",
+          "group",
+          [
+            [
+              "marker",
+              false
+            ]
+          ],
+          [
+            {
+              "operation": "project",
+              "output": "marker",
+              "input_reference_ids": [
+                "ref-3"
+              ],
+              "output_reference_id": "",
+              "conditional": false
+            }
+          ]
+        ],
+        [
+          "stage-0",
+          "scope-0",
+          "evaluate",
+          [
+            [
+              "marker",
+              false
+            ]
+          ],
+          []
+        ],
+        [
+          "stage-4",
+          "scope-0",
+          "having",
+          [
+            [
+              "marker",
+              false
+            ]
+          ],
+          []
+        ],
+        [
+          "stage-0",
+          "scope-0",
+          "project",
+          [
+            [
+              "marker",
+              false
+            ]
+          ],
+          [
+            {
+              "operation": "project",
+              "output": "marker",
+              "input_reference_ids": [
+                "ref-0"
+              ],
+              "output_reference_id": "",
+              "conditional": false
+            }
+          ]
+        ],
+        [
+          "stage-5",
+          "scope-0",
+          "",
+          [
+            [
+              "label",
+              false
+            ],
+            [
+              "marker",
+              false
+            ]
+          ],
+          [
+            {
+              "operation": "lookup",
+              "output": "label",
+              "input_reference_ids": [
+                "ref-6"
+              ],
+              "output_reference_id": "ref-7",
+              "conditional": false
+            }
+          ]
+        ]
+      ]
+    }
+  },
+  {
+    "id": "sql-having-where-control",
+    "groups": [
+      "sql",
+      "conditional-spl2",
+      "having-where-control"
+    ],
+    "request": {
+      "schema_version": 1,
+      "mode": "apply",
+      "document": {
+        "text": "SELECT marker FROM main WHERE marker=1 GROUP BY marker | lookup people marker OUTPUT label",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "sql-having-where-control"
+      },
+      "rules": [
+        {
+          "id": "map",
+          "kind": "lookup",
+          "source": {
+            "name": "people"
+          },
+          "target": {
+            "name": "users"
+          },
+          "when": {
+            "fact": "literal",
+            "kind": "field",
+            "identity": {
+              "name": "marker"
+            },
+            "operator": "equals",
+            "value": 1
+          }
+        }
+      ]
+    },
+    "target": null,
+    "expected": {
+      "status": "valid",
+      "candidate_text": "SELECT marker FROM main WHERE marker=1 GROUP BY marker | lookup users marker OUTPUT label",
+      "text": "SELECT marker FROM main WHERE marker=1 GROUP BY marker | lookup users marker OUTPUT label",
+      "committed": true,
+      "coverage": {
+        "syntax_complete": true,
+        "semantic_complete": true,
+        "rewrite_complete": true,
+        "reasons": []
+      },
+      "changes": [
+        {
+          "outcome": "applied",
+          "reason": "matched",
+          "group_id": "group-0",
+          "rule_ids": [
+            "map"
+          ],
+          "original_reference_ids": [
+            "ref-4"
+          ],
+          "candidate_reference_ids": [
+            "ref-4"
+          ],
+          "original_location": [
+            64,
+            70
+          ],
+          "candidate_location": [
+            64,
+            69
+          ],
+          "old_text": "people",
+          "new_text": "users",
+          "candidate_applied": true,
+          "committed": true
+        }
+      ],
+      "rule_evaluations": [
+        {
+          "rule_id": "map",
+          "outcome": "proposed",
+          "reason": "matched",
+          "reference_ids": [
+            "ref-4"
+          ],
+          "location": [
+            64,
+            70
+          ],
+          "condition": {
+            "state": "true",
+            "reason": "condition_true",
+            "reference_ids": [
+              "ref-2",
+              "ref-3"
+            ],
+            "children": []
+          }
+        }
+      ],
+      "original_references": [
+        [
+          "ref-0",
+          "marker",
+          "field",
+          "read",
+          "source",
+          [
+            "ref-2"
+          ]
+        ],
+        [
+          "ref-1",
+          "main",
+          "dataset",
+          "read",
+          "not_applicable",
+          []
+        ],
+        [
+          "ref-2",
+          "marker",
+          "field",
+          "read",
+          "source",
+          []
+        ],
+        [
+          "ref-3",
+          "marker",
+          "field",
+          "group",
+          "source",
+          [
+            "ref-2"
+          ]
+        ],
+        [
+          "ref-4",
+          "people",
+          "lookup",
+          "read",
+          "not_applicable",
+          []
+        ],
+        [
+          "ref-5",
+          "marker",
+          "field",
+          "read",
+          "source",
+          [
+            "ref-2"
+          ]
+        ],
+        [
+          "ref-6",
+          "label",
+          "field",
+          "output",
+          "not_applicable",
+          [
+            "ref-5",
+            "ref-2"
+          ]
+        ]
+      ],
+      "candidate_references": [
+        [
+          "ref-0",
+          "marker",
+          "field",
+          "read",
+          "source",
+          [
+            "ref-2"
+          ]
+        ],
+        [
+          "ref-1",
+          "main",
+          "dataset",
+          "read",
+          "not_applicable",
+          []
+        ],
+        [
+          "ref-2",
+          "marker",
+          "field",
+          "read",
+          "source",
+          []
+        ],
+        [
+          "ref-3",
+          "marker",
+          "field",
+          "group",
+          "source",
+          [
+            "ref-2"
+          ]
+        ],
+        [
+          "ref-4",
+          "users",
+          "lookup",
+          "read",
+          "not_applicable",
+          []
+        ],
+        [
+          "ref-5",
+          "marker",
+          "field",
+          "read",
+          "source",
+          [
+            "ref-2"
+          ]
+        ],
+        [
+          "ref-6",
+          "label",
+          "field",
+          "output",
+          "not_applicable",
+          [
+            "ref-5",
+            "ref-2"
+          ]
+        ]
+      ],
+      "original_lineage": [
+        [
+          "stage-1",
+          "scope-0",
+          "source",
+          [],
+          []
+        ],
+        [
+          "stage-2",
+          "scope-0",
+          "filter",
+          [
+            [
+              "marker",
+              false
+            ]
+          ],
+          []
+        ],
+        [
+          "stage-3",
+          "scope-0",
+          "group",
+          [
+            [
+              "marker",
+              false
+            ]
+          ],
+          [
+            {
+              "operation": "project",
+              "output": "marker",
+              "input_reference_ids": [
+                "ref-3"
+              ],
+              "output_reference_id": "",
+              "conditional": false
+            }
+          ]
+        ],
+        [
+          "stage-0",
+          "scope-0",
+          "evaluate",
+          [
+            [
+              "marker",
+              false
+            ]
+          ],
+          []
+        ],
+        [
+          "stage-0",
+          "scope-0",
+          "project",
+          [
+            [
+              "marker",
+              false
+            ]
+          ],
+          [
+            {
+              "operation": "project",
+              "output": "marker",
+              "input_reference_ids": [
+                "ref-0"
+              ],
+              "output_reference_id": "",
+              "conditional": false
+            }
+          ]
+        ],
+        [
+          "stage-4",
+          "scope-0",
+          "",
+          [
+            [
+              "label",
+              false
+            ],
+            [
+              "marker",
+              false
+            ]
+          ],
+          [
+            {
+              "operation": "lookup",
+              "output": "label",
+              "input_reference_ids": [
+                "ref-5"
+              ],
+              "output_reference_id": "ref-6",
+              "conditional": false
+            }
+          ]
+        ]
+      ],
+      "candidate_lineage": [
+        [
+          "stage-1",
+          "scope-0",
+          "source",
+          [],
+          []
+        ],
+        [
+          "stage-2",
+          "scope-0",
+          "filter",
+          [
+            [
+              "marker",
+              false
+            ]
+          ],
+          []
+        ],
+        [
+          "stage-3",
+          "scope-0",
+          "group",
+          [
+            [
+              "marker",
+              false
+            ]
+          ],
+          [
+            {
+              "operation": "project",
+              "output": "marker",
+              "input_reference_ids": [
+                "ref-3"
+              ],
+              "output_reference_id": "",
+              "conditional": false
+            }
+          ]
+        ],
+        [
+          "stage-0",
+          "scope-0",
+          "evaluate",
+          [
+            [
+              "marker",
+              false
+            ]
+          ],
+          []
+        ],
+        [
+          "stage-0",
+          "scope-0",
+          "project",
+          [
+            [
+              "marker",
+              false
+            ]
+          ],
+          [
+            {
+              "operation": "project",
+              "output": "marker",
+              "input_reference_ids": [
+                "ref-0"
+              ],
+              "output_reference_id": "",
+              "conditional": false
+            }
+          ]
+        ],
+        [
+          "stage-4",
+          "scope-0",
+          "",
+          [
+            [
+              "label",
+              false
+            ],
+            [
+              "marker",
+              false
+            ]
+          ],
+          [
+            {
+              "operation": "lookup",
+              "output": "label",
+              "input_reference_ids": [
+                "ref-5"
+              ],
+              "output_reference_id": "ref-6",
+              "conditional": false
+            }
+          ]
+        ]
+      ]
+    }
+  },
+  {
+    "id": "sql-having-hidden",
+    "groups": [
+      "sql",
+      "conditional-spl2",
+      "having-hidden"
+    ],
+    "request": {
+      "schema_version": 1,
+      "mode": "apply",
+      "document": {
+        "text": "SELECT marker FROM main GROUP BY marker HAVING hidden=1 | lookup people marker OUTPUT label",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "sql-having-hidden"
+      },
+      "rules": [
+        {
+          "id": "map",
+          "kind": "lookup",
+          "source": {
+            "name": "people"
+          },
+          "target": {
+            "name": "users"
+          },
+          "when": {
+            "fact": "literal",
+            "kind": "field",
+            "identity": {
+              "name": "hidden"
+            },
+            "operator": "equals",
+            "value": 1
+          }
+        }
+      ]
+    },
+    "target": null,
+    "expected": {
+      "status": "incomplete",
+      "candidate_text": "SELECT marker FROM main GROUP BY marker HAVING hidden=1 | lookup people marker OUTPUT label",
+      "text": "SELECT marker FROM main GROUP BY marker HAVING hidden=1 | lookup people marker OUTPUT label",
+      "committed": false,
+      "coverage": {
+        "syntax_complete": true,
+        "semantic_complete": false,
+        "rewrite_complete": false,
+        "reasons": [
+          "SPL_UNSUPPORTED_SEMANTICS",
+          "condition_unknown"
+        ]
+      },
+      "changes": [],
+      "rule_evaluations": [
+        {
+          "rule_id": "map",
+          "outcome": "skipped",
+          "reason": "condition_unknown",
+          "reference_ids": [
+            "ref-4"
+          ],
+          "location": [
+            65,
+            71
+          ],
+          "condition": {
+            "state": "unknown",
+            "reason": "condition_unknown",
+            "reference_ids": [],
+            "children": []
+          }
+        }
+      ],
+      "original_references": [
+        [
+          "ref-0",
+          "marker",
+          "field",
+          "read",
+          "source",
+          [
+            "ref-2"
+          ]
+        ],
+        [
+          "ref-1",
+          "main",
+          "dataset",
+          "read",
+          "not_applicable",
+          []
+        ],
+        [
+          "ref-2",
+          "marker",
+          "field",
+          "group",
+          "source",
+          []
+        ],
+        [
+          "ref-3",
+          "hidden",
+          "field",
+          "read",
+          "indeterminate",
+          []
+        ],
+        [
+          "ref-4",
+          "people",
+          "lookup",
+          "read",
+          "not_applicable",
+          []
+        ],
+        [
+          "ref-5",
+          "marker",
+          "field",
+          "read",
+          "source",
+          [
+            "ref-2"
+          ]
+        ],
+        [
+          "ref-6",
+          "label",
+          "field",
+          "output",
+          "not_applicable",
+          [
+            "ref-5",
+            "ref-2"
+          ]
+        ]
+      ],
+      "candidate_references": [
+        [
+          "ref-0",
+          "marker",
+          "field",
+          "read",
+          "source",
+          [
+            "ref-2"
+          ]
+        ],
+        [
+          "ref-1",
+          "main",
+          "dataset",
+          "read",
+          "not_applicable",
+          []
+        ],
+        [
+          "ref-2",
+          "marker",
+          "field",
+          "group",
+          "source",
+          []
+        ],
+        [
+          "ref-3",
+          "hidden",
+          "field",
+          "read",
+          "indeterminate",
+          []
+        ],
+        [
+          "ref-4",
+          "people",
+          "lookup",
+          "read",
+          "not_applicable",
+          []
+        ],
+        [
+          "ref-5",
+          "marker",
+          "field",
+          "read",
+          "source",
+          [
+            "ref-2"
+          ]
+        ],
+        [
+          "ref-6",
+          "label",
+          "field",
+          "output",
+          "not_applicable",
+          [
+            "ref-5",
+            "ref-2"
+          ]
+        ]
+      ],
+      "original_lineage": [
+        [
+          "stage-1",
+          "scope-0",
+          "source",
+          [],
+          []
+        ],
+        [
+          "stage-2",
+          "scope-0",
+          "group",
+          [
+            [
+              "marker",
+              false
+            ]
+          ],
+          [
+            {
+              "operation": "project",
+              "output": "marker",
+              "input_reference_ids": [
+                "ref-2"
+              ],
+              "output_reference_id": "",
+              "conditional": false
+            }
+          ]
+        ],
+        [
+          "stage-0",
+          "scope-0",
+          "evaluate",
+          [
+            [
+              "marker",
+              false
+            ]
+          ],
+          []
+        ],
+        [
+          "stage-3",
+          "scope-0",
+          "having",
+          [
+            [
+              "marker",
+              false
+            ]
+          ],
+          []
+        ],
+        [
+          "stage-0",
+          "scope-0",
+          "project",
+          [
+            [
+              "marker",
+              false
+            ]
+          ],
+          [
+            {
+              "operation": "project",
+              "output": "marker",
+              "input_reference_ids": [
+                "ref-0"
+              ],
+              "output_reference_id": "",
+              "conditional": false
+            }
+          ]
+        ],
+        [
+          "stage-4",
+          "scope-0",
+          "",
+          [
+            [
+              "label",
+              false
+            ],
+            [
+              "marker",
+              false
+            ]
+          ],
+          [
+            {
+              "operation": "lookup",
+              "output": "label",
+              "input_reference_ids": [
+                "ref-5"
+              ],
+              "output_reference_id": "ref-6",
+              "conditional": false
+            }
+          ]
+        ]
+      ],
+      "candidate_lineage": [
+        [
+          "stage-1",
+          "scope-0",
+          "source",
+          [],
+          []
+        ],
+        [
+          "stage-2",
+          "scope-0",
+          "group",
+          [
+            [
+              "marker",
+              false
+            ]
+          ],
+          [
+            {
+              "operation": "project",
+              "output": "marker",
+              "input_reference_ids": [
+                "ref-2"
+              ],
+              "output_reference_id": "",
+              "conditional": false
+            }
+          ]
+        ],
+        [
+          "stage-0",
+          "scope-0",
+          "evaluate",
+          [
+            [
+              "marker",
+              false
+            ]
+          ],
+          []
+        ],
+        [
+          "stage-3",
+          "scope-0",
+          "having",
+          [
+            [
+              "marker",
+              false
+            ]
+          ],
+          []
+        ],
+        [
+          "stage-0",
+          "scope-0",
+          "project",
+          [
+            [
+              "marker",
+              false
+            ]
+          ],
+          [
+            {
+              "operation": "project",
+              "output": "marker",
+              "input_reference_ids": [
+                "ref-0"
+              ],
+              "output_reference_id": "",
+              "conditional": false
+            }
+          ]
+        ],
+        [
+          "stage-4",
+          "scope-0",
+          "",
+          [
+            [
+              "label",
+              false
+            ],
+            [
+              "marker",
+              false
+            ]
+          ],
+          [
+            {
+              "operation": "lookup",
+              "output": "label",
+              "input_reference_ids": [
+                "ref-5"
+              ],
+              "output_reference_id": "ref-6",
+              "conditional": false
+            }
+          ]
+        ]
+      ]
+    }
+  },
+  {
+    "id": "sql-having-unsupported",
+    "groups": [
+      "sql",
+      "conditional-spl2",
+      "having-unsupported"
+    ],
+    "request": {
+      "schema_version": 1,
+      "mode": "apply",
+      "document": {
+        "text": "SELECT marker FROM main GROUP BY marker HAVING unknown(marker)=1 | lookup people marker OUTPUT label",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "sql-having-unsupported"
+      },
+      "rules": [
+        {
+          "id": "map",
+          "kind": "lookup",
+          "source": {
+            "name": "people"
+          },
+          "target": {
+            "name": "users"
+          },
+          "when": {
+            "fact": "literal",
+            "kind": "field",
+            "identity": {
+              "name": "marker"
+            },
+            "operator": "equals",
+            "value": 1
+          }
+        }
+      ]
+    },
+    "target": null,
+    "expected": {
+      "status": "incomplete",
+      "candidate_text": "SELECT marker FROM main GROUP BY marker HAVING unknown(marker)=1 | lookup people marker OUTPUT label",
+      "text": "SELECT marker FROM main GROUP BY marker HAVING unknown(marker)=1 | lookup people marker OUTPUT label",
+      "committed": false,
+      "coverage": {
+        "syntax_complete": true,
+        "semantic_complete": false,
+        "rewrite_complete": false,
+        "reasons": [
+          "SPL_UNSUPPORTED_FUNCTION",
+          "condition_unknown"
+        ]
+      },
+      "changes": [],
+      "rule_evaluations": [
+        {
+          "rule_id": "map",
+          "outcome": "skipped",
+          "reason": "condition_unknown",
+          "reference_ids": [
+            "ref-4"
+          ],
+          "location": [
+            74,
+            80
+          ],
+          "condition": {
+            "state": "unknown",
+            "reason": "condition_unknown",
+            "reference_ids": [],
+            "children": []
+          }
+        }
+      ],
+      "original_references": [
+        [
+          "ref-0",
+          "marker",
+          "field",
+          "read",
+          "source",
+          [
+            "ref-2"
+          ]
+        ],
+        [
+          "ref-1",
+          "main",
+          "dataset",
+          "read",
+          "not_applicable",
+          []
+        ],
+        [
+          "ref-2",
+          "marker",
+          "field",
+          "group",
+          "source",
+          []
+        ],
+        [
+          "ref-3",
+          "marker",
+          "field",
+          "read",
+          "source",
+          [
+            "ref-2"
+          ]
+        ],
+        [
+          "ref-4",
+          "people",
+          "lookup",
+          "read",
+          "not_applicable",
+          []
+        ],
+        [
+          "ref-5",
+          "marker",
+          "field",
+          "read",
+          "source",
+          [
+            "ref-2"
+          ]
+        ],
+        [
+          "ref-6",
+          "label",
+          "field",
+          "output",
+          "not_applicable",
+          [
+            "ref-5",
+            "ref-2"
+          ]
+        ]
+      ],
+      "candidate_references": [
+        [
+          "ref-0",
+          "marker",
+          "field",
+          "read",
+          "source",
+          [
+            "ref-2"
+          ]
+        ],
+        [
+          "ref-1",
+          "main",
+          "dataset",
+          "read",
+          "not_applicable",
+          []
+        ],
+        [
+          "ref-2",
+          "marker",
+          "field",
+          "group",
+          "source",
+          []
+        ],
+        [
+          "ref-3",
+          "marker",
+          "field",
+          "read",
+          "source",
+          [
+            "ref-2"
+          ]
+        ],
+        [
+          "ref-4",
+          "people",
+          "lookup",
+          "read",
+          "not_applicable",
+          []
+        ],
+        [
+          "ref-5",
+          "marker",
+          "field",
+          "read",
+          "source",
+          [
+            "ref-2"
+          ]
+        ],
+        [
+          "ref-6",
+          "label",
+          "field",
+          "output",
+          "not_applicable",
+          [
+            "ref-5",
+            "ref-2"
+          ]
+        ]
+      ],
+      "original_lineage": [
+        [
+          "stage-1",
+          "scope-0",
+          "source",
+          [],
+          []
+        ],
+        [
+          "stage-2",
+          "scope-0",
+          "group",
+          [
+            [
+              "marker",
+              false
+            ]
+          ],
+          [
+            {
+              "operation": "project",
+              "output": "marker",
+              "input_reference_ids": [
+                "ref-2"
+              ],
+              "output_reference_id": "",
+              "conditional": false
+            }
+          ]
+        ],
+        [
+          "stage-0",
+          "scope-0",
+          "evaluate",
+          [
+            [
+              "marker",
+              false
+            ]
+          ],
+          []
+        ],
+        [
+          "stage-3",
+          "scope-0",
+          "having",
+          [
+            [
+              "marker",
+              false
+            ]
+          ],
+          []
+        ],
+        [
+          "stage-0",
+          "scope-0",
+          "project",
+          [
+            [
+              "marker",
+              false
+            ]
+          ],
+          [
+            {
+              "operation": "project",
+              "output": "marker",
+              "input_reference_ids": [
+                "ref-0"
+              ],
+              "output_reference_id": "",
+              "conditional": false
+            }
+          ]
+        ],
+        [
+          "stage-4",
+          "scope-0",
+          "",
+          [
+            [
+              "label",
+              false
+            ],
+            [
+              "marker",
+              false
+            ]
+          ],
+          [
+            {
+              "operation": "lookup",
+              "output": "label",
+              "input_reference_ids": [
+                "ref-5"
+              ],
+              "output_reference_id": "ref-6",
+              "conditional": false
+            }
+          ]
+        ]
+      ],
+      "candidate_lineage": [
+        [
+          "stage-1",
+          "scope-0",
+          "source",
+          [],
+          []
+        ],
+        [
+          "stage-2",
+          "scope-0",
+          "group",
+          [
+            [
+              "marker",
+              false
+            ]
+          ],
+          [
+            {
+              "operation": "project",
+              "output": "marker",
+              "input_reference_ids": [
+                "ref-2"
+              ],
+              "output_reference_id": "",
+              "conditional": false
+            }
+          ]
+        ],
+        [
+          "stage-0",
+          "scope-0",
+          "evaluate",
+          [
+            [
+              "marker",
+              false
+            ]
+          ],
+          []
+        ],
+        [
+          "stage-3",
+          "scope-0",
+          "having",
+          [
+            [
+              "marker",
+              false
+            ]
+          ],
+          []
+        ],
+        [
+          "stage-0",
+          "scope-0",
+          "project",
+          [
+            [
+              "marker",
+              false
+            ]
+          ],
+          [
+            {
+              "operation": "project",
+              "output": "marker",
+              "input_reference_ids": [
+                "ref-0"
+              ],
+              "output_reference_id": "",
+              "conditional": false
+            }
+          ]
+        ],
+        [
+          "stage-4",
+          "scope-0",
+          "",
+          [
+            [
+              "label",
+              false
+            ],
+            [
+              "marker",
+              false
+            ]
+          ],
+          [
+            {
+              "operation": "lookup",
+              "output": "label",
+              "input_reference_ids": [
+                "ref-5"
+              ],
+              "output_reference_id": "ref-6",
+              "conditional": false
+            }
+          ]
+        ]
+      ]
+    }
+  },
+  {
+    "id": "sql-having-ungrouped",
+    "groups": [
+      "sql",
+      "conditional-spl2",
+      "having-ungrouped"
+    ],
+    "request": {
+      "schema_version": 1,
+      "mode": "apply",
+      "document": {
+        "text": "SELECT marker FROM main HAVING marker=1 | lookup people marker OUTPUT label",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "sql-having-ungrouped"
+      },
+      "rules": [
+        {
+          "id": "map",
+          "kind": "lookup",
+          "source": {
+            "name": "people"
+          },
+          "target": {
+            "name": "users"
+          },
+          "when": {
+            "fact": "literal",
+            "kind": "field",
+            "identity": {
+              "name": "marker"
+            },
+            "operator": "equals",
+            "value": 1
+          }
+        }
+      ]
+    },
+    "target": null,
+    "expected": {
+      "status": "incomplete",
+      "candidate_text": "SELECT marker FROM main HAVING marker=1 | lookup people marker OUTPUT label",
+      "text": "SELECT marker FROM main HAVING marker=1 | lookup people marker OUTPUT label",
+      "committed": false,
+      "coverage": {
+        "syntax_complete": true,
+        "semantic_complete": false,
+        "rewrite_complete": false,
+        "reasons": [
+          "SPL_UNSUPPORTED_SEMANTICS",
+          "condition_unknown"
+        ]
+      },
+      "changes": [],
+      "rule_evaluations": [
+        {
+          "rule_id": "map",
+          "outcome": "skipped",
+          "reason": "condition_unknown",
+          "reference_ids": [
+            "ref-3"
+          ],
+          "location": [
+            49,
+            55
+          ],
+          "condition": {
+            "state": "unknown",
+            "reason": "condition_unknown",
+            "reference_ids": [],
+            "children": []
+          }
+        }
+      ],
+      "original_references": [
+        [
+          "ref-0",
+          "marker",
+          "field",
+          "read",
+          "source",
+          []
+        ],
+        [
+          "ref-1",
+          "main",
+          "dataset",
+          "read",
+          "not_applicable",
+          []
+        ],
+        [
+          "ref-2",
+          "marker",
+          "field",
+          "read",
+          "source",
+          [
+            "ref-0"
+          ]
+        ],
+        [
+          "ref-3",
+          "people",
+          "lookup",
+          "read",
+          "not_applicable",
+          []
+        ],
+        [
+          "ref-4",
+          "marker",
+          "field",
+          "read",
+          "source",
+          [
+            "ref-0"
+          ]
+        ],
+        [
+          "ref-5",
+          "label",
+          "field",
+          "output",
+          "not_applicable",
+          [
+            "ref-4",
+            "ref-0"
+          ]
+        ]
+      ],
+      "candidate_references": [
+        [
+          "ref-0",
+          "marker",
+          "field",
+          "read",
+          "source",
+          []
+        ],
+        [
+          "ref-1",
+          "main",
+          "dataset",
+          "read",
+          "not_applicable",
+          []
+        ],
+        [
+          "ref-2",
+          "marker",
+          "field",
+          "read",
+          "source",
+          [
+            "ref-0"
+          ]
+        ],
+        [
+          "ref-3",
+          "people",
+          "lookup",
+          "read",
+          "not_applicable",
+          []
+        ],
+        [
+          "ref-4",
+          "marker",
+          "field",
+          "read",
+          "source",
+          [
+            "ref-0"
+          ]
+        ],
+        [
+          "ref-5",
+          "label",
+          "field",
+          "output",
+          "not_applicable",
+          [
+            "ref-4",
+            "ref-0"
+          ]
+        ]
+      ],
+      "original_lineage": [
+        [
+          "stage-1",
+          "scope-0",
+          "source",
+          [],
+          []
+        ],
+        [
+          "stage-0",
+          "scope-0",
+          "evaluate",
+          [
+            [
+              "marker",
+              false
+            ]
+          ],
+          []
+        ],
+        [
+          "stage-2",
+          "scope-0",
+          "having",
+          [
+            [
+              "marker",
+              false
+            ]
+          ],
+          []
+        ],
+        [
+          "stage-0",
+          "scope-0",
+          "project",
+          [
+            [
+              "marker",
+              false
+            ]
+          ],
+          [
+            {
+              "operation": "project",
+              "output": "marker",
+              "input_reference_ids": [
+                "ref-0"
+              ],
+              "output_reference_id": "",
+              "conditional": false
+            }
+          ]
+        ],
+        [
+          "stage-3",
+          "scope-0",
+          "",
+          [
+            [
+              "label",
+              false
+            ],
+            [
+              "marker",
+              false
+            ]
+          ],
+          [
+            {
+              "operation": "lookup",
+              "output": "label",
+              "input_reference_ids": [
+                "ref-4"
+              ],
+              "output_reference_id": "ref-5",
+              "conditional": false
+            }
+          ]
+        ]
+      ],
+      "candidate_lineage": [
+        [
+          "stage-1",
+          "scope-0",
+          "source",
+          [],
+          []
+        ],
+        [
+          "stage-0",
+          "scope-0",
+          "evaluate",
+          [
+            [
+              "marker",
+              false
+            ]
+          ],
+          []
+        ],
+        [
+          "stage-2",
+          "scope-0",
+          "having",
+          [
+            [
+              "marker",
+              false
+            ]
+          ],
+          []
+        ],
+        [
+          "stage-0",
+          "scope-0",
+          "project",
+          [
+            [
+              "marker",
+              false
+            ]
+          ],
+          [
+            {
+              "operation": "project",
+              "output": "marker",
+              "input_reference_ids": [
+                "ref-0"
+              ],
+              "output_reference_id": "",
+              "conditional": false
+            }
+          ]
+        ],
+        [
+          "stage-3",
+          "scope-0",
+          "",
+          [
+            [
+              "label",
+              false
+            ],
+            [
+              "marker",
+              false
+            ]
+          ],
+          [
+            {
+              "operation": "lookup",
+              "output": "label",
+              "input_reference_ids": [
+                "ref-4"
+              ],
+              "output_reference_id": "ref-5",
+              "conditional": false
+            }
+          ]
+        ]
+      ]
+    }
+  },
+  {
+    "id": "sql-having-compatible-from",
+    "groups": [
+      "sql",
+      "conditional-spl2",
+      "having-compatible"
+    ],
+    "request": {
+      "schema_version": 1,
+      "mode": "apply",
+      "document": {
+        "text": "FROM main WHERE marker=1 GROUP BY marker SELECT marker HAVING marker=1 | lookup people marker OUTPUT label",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "sql-having-compatible-from"
+      },
+      "rules": [
+        {
+          "id": "map",
+          "kind": "lookup",
+          "source": {
+            "name": "people"
+          },
+          "target": {
+            "name": "users"
+          },
+          "when": {
+            "fact": "literal",
+            "kind": "field",
+            "identity": {
+              "name": "marker"
+            },
+            "operator": "equals",
+            "value": 1
+          }
+        }
+      ]
+    },
+    "target": null,
+    "expected": {
+      "status": "valid",
+      "candidate_text": "FROM main WHERE marker=1 GROUP BY marker SELECT marker HAVING marker=1 | lookup users marker OUTPUT label",
+      "text": "FROM main WHERE marker=1 GROUP BY marker SELECT marker HAVING marker=1 | lookup users marker OUTPUT label",
+      "committed": true,
+      "coverage": {
+        "syntax_complete": true,
+        "semantic_complete": true,
+        "rewrite_complete": true,
+        "reasons": []
+      },
+      "changes": [
+        {
+          "outcome": "applied",
+          "reason": "matched",
+          "group_id": "group-0",
+          "rule_ids": [
+            "map"
+          ],
+          "original_reference_ids": [
+            "ref-5"
+          ],
+          "candidate_reference_ids": [
+            "ref-5"
+          ],
+          "original_location": [
+            80,
+            86
+          ],
+          "candidate_location": [
+            80,
+            85
+          ],
+          "old_text": "people",
+          "new_text": "users",
+          "candidate_applied": true,
+          "committed": true
+        }
+      ],
+      "rule_evaluations": [
+        {
+          "rule_id": "map",
+          "outcome": "proposed",
+          "reason": "matched",
+          "reference_ids": [
+            "ref-5"
+          ],
+          "location": [
+            80,
+            86
+          ],
+          "condition": {
+            "state": "true",
+            "reason": "condition_true",
+            "reference_ids": [
+              "ref-1",
+              "ref-2",
+              "ref-4"
+            ],
+            "children": []
+          }
+        }
+      ],
+      "original_references": [
+        [
+          "ref-0",
+          "main",
+          "dataset",
+          "read",
+          "not_applicable",
+          []
+        ],
+        [
+          "ref-1",
+          "marker",
+          "field",
+          "read",
+          "source",
+          []
+        ],
+        [
+          "ref-2",
+          "marker",
+          "field",
+          "group",
+          "source",
+          [
+            "ref-1"
+          ]
+        ],
+        [
+          "ref-3",
+          "marker",
+          "field",
+          "read",
+          "source",
+          [
+            "ref-1"
+          ]
+        ],
+        [
+          "ref-4",
+          "marker",
+          "field",
+          "read",
+          "source",
+          [
+            "ref-1"
+          ]
+        ],
+        [
+          "ref-5",
+          "people",
+          "lookup",
+          "read",
+          "not_applicable",
+          []
+        ],
+        [
+          "ref-6",
+          "marker",
+          "field",
+          "read",
+          "source",
+          [
+            "ref-1"
+          ]
+        ],
+        [
+          "ref-7",
+          "label",
+          "field",
+          "output",
+          "not_applicable",
+          [
+            "ref-6",
+            "ref-1"
+          ]
+        ]
+      ],
+      "candidate_references": [
+        [
+          "ref-0",
+          "main",
+          "dataset",
+          "read",
+          "not_applicable",
+          []
+        ],
+        [
+          "ref-1",
+          "marker",
+          "field",
+          "read",
+          "source",
+          []
+        ],
+        [
+          "ref-2",
+          "marker",
+          "field",
+          "group",
+          "source",
+          [
+            "ref-1"
+          ]
+        ],
+        [
+          "ref-3",
+          "marker",
+          "field",
+          "read",
+          "source",
+          [
+            "ref-1"
+          ]
+        ],
+        [
+          "ref-4",
+          "marker",
+          "field",
+          "read",
+          "source",
+          [
+            "ref-1"
+          ]
+        ],
+        [
+          "ref-5",
+          "users",
+          "lookup",
+          "read",
+          "not_applicable",
+          []
+        ],
+        [
+          "ref-6",
+          "marker",
+          "field",
+          "read",
+          "source",
+          [
+            "ref-1"
+          ]
+        ],
+        [
+          "ref-7",
+          "label",
+          "field",
+          "output",
+          "not_applicable",
+          [
+            "ref-6",
+            "ref-1"
+          ]
+        ]
+      ],
+      "original_lineage": [
+        [
+          "stage-0",
+          "scope-0",
+          "source",
+          [],
+          []
+        ],
+        [
+          "stage-1",
+          "scope-0",
+          "filter",
+          [
+            [
+              "marker",
+              false
+            ]
+          ],
+          []
+        ],
+        [
+          "stage-2",
+          "scope-0",
+          "group",
+          [
+            [
+              "marker",
+              false
+            ]
+          ],
+          [
+            {
+              "operation": "project",
+              "output": "marker",
+              "input_reference_ids": [
+                "ref-2"
+              ],
+              "output_reference_id": "",
+              "conditional": false
+            }
+          ]
+        ],
+        [
+          "stage-3",
+          "scope-0",
+          "evaluate",
+          [
+            [
+              "marker",
+              false
+            ]
+          ],
+          []
+        ],
+        [
+          "stage-4",
+          "scope-0",
+          "having",
+          [
+            [
+              "marker",
+              false
+            ]
+          ],
+          []
+        ],
+        [
+          "stage-3",
+          "scope-0",
+          "project",
+          [
+            [
+              "marker",
+              false
+            ]
+          ],
+          [
+            {
+              "operation": "project",
+              "output": "marker",
+              "input_reference_ids": [
+                "ref-3"
+              ],
+              "output_reference_id": "",
+              "conditional": false
+            }
+          ]
+        ],
+        [
+          "stage-5",
+          "scope-0",
+          "",
+          [
+            [
+              "label",
+              false
+            ],
+            [
+              "marker",
+              false
+            ]
+          ],
+          [
+            {
+              "operation": "lookup",
+              "output": "label",
+              "input_reference_ids": [
+                "ref-6"
+              ],
+              "output_reference_id": "ref-7",
+              "conditional": false
+            }
+          ]
+        ]
+      ],
+      "candidate_lineage": [
+        [
+          "stage-0",
+          "scope-0",
+          "source",
+          [],
+          []
+        ],
+        [
+          "stage-1",
+          "scope-0",
+          "filter",
+          [
+            [
+              "marker",
+              false
+            ]
+          ],
+          []
+        ],
+        [
+          "stage-2",
+          "scope-0",
+          "group",
+          [
+            [
+              "marker",
+              false
+            ]
+          ],
+          [
+            {
+              "operation": "project",
+              "output": "marker",
+              "input_reference_ids": [
+                "ref-2"
+              ],
+              "output_reference_id": "",
+              "conditional": false
+            }
+          ]
+        ],
+        [
+          "stage-3",
+          "scope-0",
+          "evaluate",
+          [
+            [
+              "marker",
+              false
+            ]
+          ],
+          []
+        ],
+        [
+          "stage-4",
+          "scope-0",
+          "having",
+          [
+            [
+              "marker",
+              false
+            ]
+          ],
+          []
+        ],
+        [
+          "stage-3",
+          "scope-0",
+          "project",
+          [
+            [
+              "marker",
+              false
+            ]
+          ],
+          [
+            {
+              "operation": "project",
+              "output": "marker",
+              "input_reference_ids": [
+                "ref-3"
+              ],
+              "output_reference_id": "",
+              "conditional": false
+            }
+          ]
+        ],
+        [
+          "stage-5",
+          "scope-0",
+          "",
+          [
+            [
+              "label",
+              false
+            ],
+            [
+              "marker",
+              false
+            ]
+          ],
+          [
+            {
+              "operation": "lookup",
+              "output": "label",
+              "input_reference_ids": [
+                "ref-6"
+              ],
+              "output_reference_id": "ref-7",
+              "conditional": false
+            }
+          ]
+        ]
+      ]
+    }
+  },
+  {
+    "id": "sql-having-derived",
+    "groups": [
+      "sql",
+      "conditional-spl2",
+      "having-derived"
+    ],
+    "request": {
+      "schema_version": 1,
+      "mode": "apply",
+      "document": {
+        "text": "SELECT count() AS n FROM main HAVING n=1 | lookup people n OUTPUT label",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "sql-having-derived"
+      },
+      "rules": [
+        {
+          "id": "map",
+          "kind": "lookup",
+          "source": {
+            "name": "people"
+          },
+          "target": {
+            "name": "users"
+          },
+          "when": {
+            "fact": "literal",
+            "kind": "field",
+            "identity": {
+              "name": "n"
+            },
+            "operator": "equals",
+            "value": 1
+          }
+        }
+      ]
+    },
+    "target": null,
+    "expected": {
+      "status": "incomplete",
+      "candidate_text": "SELECT count() AS n FROM main HAVING n=1 | lookup people n OUTPUT label",
+      "text": "SELECT count() AS n FROM main HAVING n=1 | lookup people n OUTPUT label",
+      "committed": false,
+      "coverage": {
+        "syntax_complete": true,
+        "semantic_complete": true,
+        "rewrite_complete": false,
+        "reasons": [
+          "condition_unknown"
+        ]
+      },
+      "changes": [],
+      "rule_evaluations": [
+        {
+          "rule_id": "map",
+          "outcome": "skipped",
+          "reason": "condition_unknown",
+          "reference_ids": [
+            "ref-3"
+          ],
+          "location": [
+            50,
+            56
+          ],
+          "condition": {
+            "state": "unknown",
+            "reason": "condition_unknown",
+            "reference_ids": [],
+            "children": []
+          }
+        }
+      ],
+      "original_references": [
+        [
+          "ref-0",
+          "n",
+          "field",
+          "output",
+          "not_applicable",
+          []
+        ],
+        [
+          "ref-1",
+          "main",
+          "dataset",
+          "read",
+          "not_applicable",
+          []
+        ],
+        [
+          "ref-2",
+          "n",
+          "field",
+          "read",
+          "derived",
+          [
+            "ref-0"
+          ]
+        ],
+        [
+          "ref-3",
+          "people",
+          "lookup",
+          "read",
+          "not_applicable",
+          []
+        ],
+        [
+          "ref-4",
+          "n",
+          "field",
+          "read",
+          "derived",
+          [
+            "ref-0"
+          ]
+        ],
+        [
+          "ref-5",
+          "label",
+          "field",
+          "output",
+          "not_applicable",
+          [
+            "ref-4",
+            "ref-0"
+          ]
+        ]
+      ],
+      "candidate_references": [
+        [
+          "ref-0",
+          "n",
+          "field",
+          "output",
+          "not_applicable",
+          []
+        ],
+        [
+          "ref-1",
+          "main",
+          "dataset",
+          "read",
+          "not_applicable",
+          []
+        ],
+        [
+          "ref-2",
+          "n",
+          "field",
+          "read",
+          "derived",
+          [
+            "ref-0"
+          ]
+        ],
+        [
+          "ref-3",
+          "people",
+          "lookup",
+          "read",
+          "not_applicable",
+          []
+        ],
+        [
+          "ref-4",
+          "n",
+          "field",
+          "read",
+          "derived",
+          [
+            "ref-0"
+          ]
+        ],
+        [
+          "ref-5",
+          "label",
+          "field",
+          "output",
+          "not_applicable",
+          [
+            "ref-4",
+            "ref-0"
+          ]
+        ]
+      ],
+      "original_lineage": [
+        [
+          "stage-1",
+          "scope-0",
+          "source",
+          [],
+          []
+        ],
+        [
+          "stage-0",
+          "scope-0",
+          "aggregate",
+          [
+            [
+              "n",
+              false
+            ]
+          ],
+          [
+            {
+              "operation": "aggregate",
+              "output": "n",
+              "input_reference_ids": [],
+              "output_reference_id": "ref-0",
+              "conditional": false
+            }
+          ]
+        ],
+        [
+          "stage-2",
+          "scope-0",
+          "having",
+          [
+            [
+              "n",
+              false
+            ]
+          ],
+          []
+        ],
+        [
+          "stage-0",
+          "scope-0",
+          "project",
+          [
+            [
+              "n",
+              false
+            ]
+          ],
+          [
+            {
+              "operation": "project",
+              "output": "n",
+              "input_reference_ids": [
+                "ref-0"
+              ],
+              "output_reference_id": "",
+              "conditional": false
+            }
+          ]
+        ],
+        [
+          "stage-3",
+          "scope-0",
+          "",
+          [
+            [
+              "label",
+              false
+            ],
+            [
+              "n",
+              false
+            ]
+          ],
+          [
+            {
+              "operation": "lookup",
+              "output": "label",
+              "input_reference_ids": [
+                "ref-4"
+              ],
+              "output_reference_id": "ref-5",
+              "conditional": false
+            }
+          ]
+        ]
+      ],
+      "candidate_lineage": [
+        [
+          "stage-1",
+          "scope-0",
+          "source",
+          [],
+          []
+        ],
+        [
+          "stage-0",
+          "scope-0",
+          "aggregate",
+          [
+            [
+              "n",
+              false
+            ]
+          ],
+          [
+            {
+              "operation": "aggregate",
+              "output": "n",
+              "input_reference_ids": [],
+              "output_reference_id": "ref-0",
+              "conditional": false
+            }
+          ]
+        ],
+        [
+          "stage-2",
+          "scope-0",
+          "having",
+          [
+            [
+              "n",
+              false
+            ]
+          ],
+          []
+        ],
+        [
+          "stage-0",
+          "scope-0",
+          "project",
+          [
+            [
+              "n",
+              false
+            ]
+          ],
+          [
+            {
+              "operation": "project",
+              "output": "n",
+              "input_reference_ids": [
+                "ref-0"
+              ],
+              "output_reference_id": "",
+              "conditional": false
+            }
+          ]
+        ],
+        [
+          "stage-3",
+          "scope-0",
+          "",
+          [
+            [
+              "label",
+              false
+            ],
+            [
+              "n",
+              false
+            ]
+          ],
+          [
+            {
+              "operation": "lookup",
+              "output": "label",
+              "input_reference_ids": [
+                "ref-4"
+              ],
+              "output_reference_id": "ref-5",
+              "conditional": false
+            }
+          ]
+        ]
+      ]
+    }
+  },
+  {
+    "id": "number-positive-repeat",
+    "groups": [
+      "conditions",
+      "number-exponent-positive",
+      "number-exponent-int64",
+      "number-exponent-and"
+    ],
+    "request": {
+      "schema_version": 1,
+      "mode": "apply",
+      "document": {
+        "text": "search index=main | where n=0e9223372036854775809 AND n=0e9223372036854775809 | table src",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "number-positive-repeat"
+      },
+      "rules": [
+        {
+          "id": "map",
+          "kind": "field",
+          "source": {
+            "name": "src"
+          },
+          "target": {
+            "name": "user"
+          },
+          "when": {
+            "fact": "literal",
+            "kind": "field",
+            "identity": {
+              "name": "n"
+            },
+            "operator": "equals",
+            "value": 0
+          }
+        }
+      ]
+    },
+    "target": null,
+    "expected": {
+      "status": "valid",
+      "candidate_text": "search index=main | where n=0e9223372036854775809 AND n=0e9223372036854775809 | table user",
+      "text": "search index=main | where n=0e9223372036854775809 AND n=0e9223372036854775809 | table user",
+      "committed": true,
+      "coverage": {
+        "syntax_complete": true,
+        "semantic_complete": true,
+        "rewrite_complete": true,
+        "reasons": []
+      },
+      "changes": [
+        {
+          "outcome": "applied",
+          "reason": "matched",
+          "group_id": "group-0",
+          "rule_ids": [
+            "map"
+          ],
+          "original_reference_ids": [
+            "ref-3"
+          ],
+          "candidate_reference_ids": [
+            "ref-3"
+          ],
+          "original_location": [
+            86,
+            89
+          ],
+          "candidate_location": [
+            86,
+            90
+          ],
+          "old_text": "src",
+          "new_text": "user",
+          "candidate_applied": true,
+          "committed": true
+        }
+      ],
+      "rule_evaluations": [
+        {
+          "rule_id": "map",
+          "outcome": "proposed",
+          "reason": "matched",
+          "reference_ids": [
+            "ref-3"
+          ],
+          "location": [
+            86,
+            89
+          ],
+          "condition": {
+            "state": "true",
+            "reason": "condition_true",
+            "reference_ids": [
+              "ref-1",
+              "ref-2"
+            ],
+            "children": []
+          }
+        }
+      ],
+      "original_references": [
+        [
+          "ref-0",
+          "main",
+          "index",
+          "read",
+          "not_applicable",
+          []
+        ],
+        [
+          "ref-1",
+          "n",
+          "field",
+          "read",
+          "source",
+          []
+        ],
+        [
+          "ref-2",
+          "n",
+          "field",
+          "read",
+          "source",
+          [
+            "ref-1"
+          ]
+        ],
+        [
+          "ref-3",
+          "src",
+          "field",
+          "read",
+          "source",
+          []
+        ]
+      ],
+      "candidate_references": [
+        [
+          "ref-0",
+          "main",
+          "index",
+          "read",
+          "not_applicable",
+          []
+        ],
+        [
+          "ref-1",
+          "n",
+          "field",
+          "read",
+          "source",
+          []
+        ],
+        [
+          "ref-2",
+          "n",
+          "field",
+          "read",
+          "source",
+          [
+            "ref-1"
+          ]
+        ],
+        [
+          "ref-3",
+          "user",
+          "field",
+          "read",
+          "source",
+          []
+        ]
+      ],
+      "original_lineage": [
+        [
+          "stage-0",
+          "scope-0",
+          "",
+          [],
+          []
+        ],
+        [
+          "stage-1",
+          "scope-0",
+          "",
+          [
+            [
+              "n",
+              false
+            ]
+          ],
+          []
+        ],
+        [
+          "stage-2",
+          "scope-0",
+          "",
+          [
+            [
+              "src",
+              false
+            ]
+          ],
+          [
+            {
+              "operation": "project",
+              "output": "src",
+              "input_reference_ids": [
+                "ref-3"
+              ],
+              "output_reference_id": "",
+              "conditional": false
+            }
+          ]
+        ]
+      ],
+      "candidate_lineage": [
+        [
+          "stage-0",
+          "scope-0",
+          "",
+          [],
+          []
+        ],
+        [
+          "stage-1",
+          "scope-0",
+          "",
+          [
+            [
+              "n",
+              false
+            ]
+          ],
+          []
+        ],
+        [
+          "stage-2",
+          "scope-0",
+          "",
+          [
+            [
+              "user",
+              false
+            ]
+          ],
+          [
+            {
+              "operation": "project",
+              "output": "user",
+              "input_reference_ids": [
+                "ref-3"
+              ],
+              "output_reference_id": "",
+              "conditional": false
+            }
+          ]
+        ]
+      ]
+    }
+  },
+  {
+    "id": "number-positive-equivalent",
+    "groups": [
+      "conditions",
+      "number-exponent-positive",
+      "number-exponent-int64",
+      "number-exponent-or"
+    ],
+    "request": {
+      "schema_version": 1,
+      "mode": "apply",
+      "document": {
+        "text": "search index=main | where n=0e9223372036854775809 OR n=0.00e9223372036854775808 | table src",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "number-positive-equivalent"
+      },
+      "rules": [
+        {
+          "id": "map",
+          "kind": "field",
+          "source": {
+            "name": "src"
+          },
+          "target": {
+            "name": "user"
+          },
+          "when": {
+            "fact": "literal",
+            "kind": "field",
+            "identity": {
+              "name": "n"
+            },
+            "operator": "equals",
+            "value": 0
+          }
+        }
+      ]
+    },
+    "target": null,
+    "expected": {
+      "status": "valid",
+      "candidate_text": "search index=main | where n=0e9223372036854775809 OR n=0.00e9223372036854775808 | table user",
+      "text": "search index=main | where n=0e9223372036854775809 OR n=0.00e9223372036854775808 | table user",
+      "committed": true,
+      "coverage": {
+        "syntax_complete": true,
+        "semantic_complete": true,
+        "rewrite_complete": true,
+        "reasons": []
+      },
+      "changes": [
+        {
+          "outcome": "applied",
+          "reason": "matched",
+          "group_id": "group-0",
+          "rule_ids": [
+            "map"
+          ],
+          "original_reference_ids": [
+            "ref-3"
+          ],
+          "candidate_reference_ids": [
+            "ref-3"
+          ],
+          "original_location": [
+            88,
+            91
+          ],
+          "candidate_location": [
+            88,
+            92
+          ],
+          "old_text": "src",
+          "new_text": "user",
+          "candidate_applied": true,
+          "committed": true
+        }
+      ],
+      "rule_evaluations": [
+        {
+          "rule_id": "map",
+          "outcome": "proposed",
+          "reason": "matched",
+          "reference_ids": [
+            "ref-3"
+          ],
+          "location": [
+            88,
+            91
+          ],
+          "condition": {
+            "state": "true",
+            "reason": "condition_true",
+            "reference_ids": [
+              "ref-1",
+              "ref-2"
+            ],
+            "children": []
+          }
+        }
+      ],
+      "original_references": [
+        [
+          "ref-0",
+          "main",
+          "index",
+          "read",
+          "not_applicable",
+          []
+        ],
+        [
+          "ref-1",
+          "n",
+          "field",
+          "read",
+          "source",
+          []
+        ],
+        [
+          "ref-2",
+          "n",
+          "field",
+          "read",
+          "source",
+          [
+            "ref-1"
+          ]
+        ],
+        [
+          "ref-3",
+          "src",
+          "field",
+          "read",
+          "source",
+          []
+        ]
+      ],
+      "candidate_references": [
+        [
+          "ref-0",
+          "main",
+          "index",
+          "read",
+          "not_applicable",
+          []
+        ],
+        [
+          "ref-1",
+          "n",
+          "field",
+          "read",
+          "source",
+          []
+        ],
+        [
+          "ref-2",
+          "n",
+          "field",
+          "read",
+          "source",
+          [
+            "ref-1"
+          ]
+        ],
+        [
+          "ref-3",
+          "user",
+          "field",
+          "read",
+          "source",
+          []
+        ]
+      ],
+      "original_lineage": [
+        [
+          "stage-0",
+          "scope-0",
+          "",
+          [],
+          []
+        ],
+        [
+          "stage-1",
+          "scope-0",
+          "",
+          [
+            [
+              "n",
+              false
+            ]
+          ],
+          []
+        ],
+        [
+          "stage-2",
+          "scope-0",
+          "",
+          [
+            [
+              "src",
+              false
+            ]
+          ],
+          [
+            {
+              "operation": "project",
+              "output": "src",
+              "input_reference_ids": [
+                "ref-3"
+              ],
+              "output_reference_id": "",
+              "conditional": false
+            }
+          ]
+        ]
+      ],
+      "candidate_lineage": [
+        [
+          "stage-0",
+          "scope-0",
+          "",
+          [],
+          []
+        ],
+        [
+          "stage-1",
+          "scope-0",
+          "",
+          [
+            [
+              "n",
+              false
+            ]
+          ],
+          []
+        ],
+        [
+          "stage-2",
+          "scope-0",
+          "",
+          [
+            [
+              "user",
+              false
+            ]
+          ],
+          [
+            {
+              "operation": "project",
+              "output": "user",
+              "input_reference_ids": [
+                "ref-3"
+              ],
+              "output_reference_id": "",
+              "conditional": false
+            }
+          ]
+        ]
+      ]
+    }
+  },
+  {
+    "id": "number-negative-repeat",
+    "groups": [
+      "conditions",
+      "number-exponent-negative",
+      "number-exponent-int64",
+      "number-exponent-or"
+    ],
+    "request": {
+      "schema_version": 1,
+      "mode": "apply",
+      "document": {
+        "text": "search index=main | where n=0e-9223372036854775809 OR n=0e-9223372036854775809 | table src",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "number-negative-repeat"
+      },
+      "rules": [
+        {
+          "id": "map",
+          "kind": "field",
+          "source": {
+            "name": "src"
+          },
+          "target": {
+            "name": "user"
+          },
+          "when": {
+            "fact": "literal",
+            "kind": "field",
+            "identity": {
+              "name": "n"
+            },
+            "operator": "equals",
+            "value": 0
+          }
+        }
+      ]
+    },
+    "target": null,
+    "expected": {
+      "status": "valid",
+      "candidate_text": "search index=main | where n=0e-9223372036854775809 OR n=0e-9223372036854775809 | table user",
+      "text": "search index=main | where n=0e-9223372036854775809 OR n=0e-9223372036854775809 | table user",
+      "committed": true,
+      "coverage": {
+        "syntax_complete": true,
+        "semantic_complete": true,
+        "rewrite_complete": true,
+        "reasons": []
+      },
+      "changes": [
+        {
+          "outcome": "applied",
+          "reason": "matched",
+          "group_id": "group-0",
+          "rule_ids": [
+            "map"
+          ],
+          "original_reference_ids": [
+            "ref-3"
+          ],
+          "candidate_reference_ids": [
+            "ref-3"
+          ],
+          "original_location": [
+            87,
+            90
+          ],
+          "candidate_location": [
+            87,
+            91
+          ],
+          "old_text": "src",
+          "new_text": "user",
+          "candidate_applied": true,
+          "committed": true
+        }
+      ],
+      "rule_evaluations": [
+        {
+          "rule_id": "map",
+          "outcome": "proposed",
+          "reason": "matched",
+          "reference_ids": [
+            "ref-3"
+          ],
+          "location": [
+            87,
+            90
+          ],
+          "condition": {
+            "state": "true",
+            "reason": "condition_true",
+            "reference_ids": [
+              "ref-1",
+              "ref-2"
+            ],
+            "children": []
+          }
+        }
+      ],
+      "original_references": [
+        [
+          "ref-0",
+          "main",
+          "index",
+          "read",
+          "not_applicable",
+          []
+        ],
+        [
+          "ref-1",
+          "n",
+          "field",
+          "read",
+          "source",
+          []
+        ],
+        [
+          "ref-2",
+          "n",
+          "field",
+          "read",
+          "source",
+          [
+            "ref-1"
+          ]
+        ],
+        [
+          "ref-3",
+          "src",
+          "field",
+          "read",
+          "source",
+          []
+        ]
+      ],
+      "candidate_references": [
+        [
+          "ref-0",
+          "main",
+          "index",
+          "read",
+          "not_applicable",
+          []
+        ],
+        [
+          "ref-1",
+          "n",
+          "field",
+          "read",
+          "source",
+          []
+        ],
+        [
+          "ref-2",
+          "n",
+          "field",
+          "read",
+          "source",
+          [
+            "ref-1"
+          ]
+        ],
+        [
+          "ref-3",
+          "user",
+          "field",
+          "read",
+          "source",
+          []
+        ]
+      ],
+      "original_lineage": [
+        [
+          "stage-0",
+          "scope-0",
+          "",
+          [],
+          []
+        ],
+        [
+          "stage-1",
+          "scope-0",
+          "",
+          [
+            [
+              "n",
+              false
+            ]
+          ],
+          []
+        ],
+        [
+          "stage-2",
+          "scope-0",
+          "",
+          [
+            [
+              "src",
+              false
+            ]
+          ],
+          [
+            {
+              "operation": "project",
+              "output": "src",
+              "input_reference_ids": [
+                "ref-3"
+              ],
+              "output_reference_id": "",
+              "conditional": false
+            }
+          ]
+        ]
+      ],
+      "candidate_lineage": [
+        [
+          "stage-0",
+          "scope-0",
+          "",
+          [],
+          []
+        ],
+        [
+          "stage-1",
+          "scope-0",
+          "",
+          [
+            [
+              "n",
+              false
+            ]
+          ],
+          []
+        ],
+        [
+          "stage-2",
+          "scope-0",
+          "",
+          [
+            [
+              "user",
+              false
+            ]
+          ],
+          [
+            {
+              "operation": "project",
+              "output": "user",
+              "input_reference_ids": [
+                "ref-3"
+              ],
+              "output_reference_id": "",
+              "conditional": false
+            }
+          ]
+        ]
+      ]
+    }
+  },
+  {
+    "id": "number-negative-equivalent",
+    "groups": [
+      "conditions",
+      "number-exponent-negative",
+      "number-exponent-int64",
+      "number-exponent-and"
+    ],
+    "request": {
+      "schema_version": 1,
+      "mode": "apply",
+      "document": {
+        "text": "search index=main | where n=0e-9223372036854775809 AND n=0.00e-9223372036854775810 | table src",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "number-negative-equivalent"
+      },
+      "rules": [
+        {
+          "id": "map",
+          "kind": "field",
+          "source": {
+            "name": "src"
+          },
+          "target": {
+            "name": "user"
+          },
+          "when": {
+            "fact": "literal",
+            "kind": "field",
+            "identity": {
+              "name": "n"
+            },
+            "operator": "equals",
+            "value": 0
+          }
+        }
+      ]
+    },
+    "target": null,
+    "expected": {
+      "status": "valid",
+      "candidate_text": "search index=main | where n=0e-9223372036854775809 AND n=0.00e-9223372036854775810 | table user",
+      "text": "search index=main | where n=0e-9223372036854775809 AND n=0.00e-9223372036854775810 | table user",
+      "committed": true,
+      "coverage": {
+        "syntax_complete": true,
+        "semantic_complete": true,
+        "rewrite_complete": true,
+        "reasons": []
+      },
+      "changes": [
+        {
+          "outcome": "applied",
+          "reason": "matched",
+          "group_id": "group-0",
+          "rule_ids": [
+            "map"
+          ],
+          "original_reference_ids": [
+            "ref-3"
+          ],
+          "candidate_reference_ids": [
+            "ref-3"
+          ],
+          "original_location": [
+            91,
+            94
+          ],
+          "candidate_location": [
+            91,
+            95
+          ],
+          "old_text": "src",
+          "new_text": "user",
+          "candidate_applied": true,
+          "committed": true
+        }
+      ],
+      "rule_evaluations": [
+        {
+          "rule_id": "map",
+          "outcome": "proposed",
+          "reason": "matched",
+          "reference_ids": [
+            "ref-3"
+          ],
+          "location": [
+            91,
+            94
+          ],
+          "condition": {
+            "state": "true",
+            "reason": "condition_true",
+            "reference_ids": [
+              "ref-1",
+              "ref-2"
+            ],
+            "children": []
+          }
+        }
+      ],
+      "original_references": [
+        [
+          "ref-0",
+          "main",
+          "index",
+          "read",
+          "not_applicable",
+          []
+        ],
+        [
+          "ref-1",
+          "n",
+          "field",
+          "read",
+          "source",
+          []
+        ],
+        [
+          "ref-2",
+          "n",
+          "field",
+          "read",
+          "source",
+          [
+            "ref-1"
+          ]
+        ],
+        [
+          "ref-3",
+          "src",
+          "field",
+          "read",
+          "source",
+          []
+        ]
+      ],
+      "candidate_references": [
+        [
+          "ref-0",
+          "main",
+          "index",
+          "read",
+          "not_applicable",
+          []
+        ],
+        [
+          "ref-1",
+          "n",
+          "field",
+          "read",
+          "source",
+          []
+        ],
+        [
+          "ref-2",
+          "n",
+          "field",
+          "read",
+          "source",
+          [
+            "ref-1"
+          ]
+        ],
+        [
+          "ref-3",
+          "user",
+          "field",
+          "read",
+          "source",
+          []
+        ]
+      ],
+      "original_lineage": [
+        [
+          "stage-0",
+          "scope-0",
+          "",
+          [],
+          []
+        ],
+        [
+          "stage-1",
+          "scope-0",
+          "",
+          [
+            [
+              "n",
+              false
+            ]
+          ],
+          []
+        ],
+        [
+          "stage-2",
+          "scope-0",
+          "",
+          [
+            [
+              "src",
+              false
+            ]
+          ],
+          [
+            {
+              "operation": "project",
+              "output": "src",
+              "input_reference_ids": [
+                "ref-3"
+              ],
+              "output_reference_id": "",
+              "conditional": false
+            }
+          ]
+        ]
+      ],
+      "candidate_lineage": [
+        [
+          "stage-0",
+          "scope-0",
+          "",
+          [],
+          []
+        ],
+        [
+          "stage-1",
+          "scope-0",
+          "",
+          [
+            [
+              "n",
+              false
+            ]
+          ],
+          []
+        ],
+        [
+          "stage-2",
+          "scope-0",
+          "",
+          [
+            [
+              "user",
+              false
+            ]
+          ],
+          [
+            {
+              "operation": "project",
+              "output": "user",
+              "input_reference_ids": [
+                "ref-3"
+              ],
+              "output_reference_id": "",
+              "conditional": false
+            }
+          ]
+        ]
+      ]
+    }
+  },
+  {
+    "id": "number-positive-different",
+    "groups": [
+      "conditions",
+      "number-exponent-different",
+      "number-exponent-and"
+    ],
+    "request": {
+      "schema_version": 1,
+      "mode": "apply",
+      "document": {
+        "text": "search index=main | where n=0e9223372036854775809 AND n=1e9223372036854775809 | table src",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "number-positive-different"
+      },
+      "rules": [
+        {
+          "id": "map",
+          "kind": "field",
+          "source": {
+            "name": "src"
+          },
+          "target": {
+            "name": "user"
+          },
+          "when": {
+            "fact": "literal",
+            "kind": "field",
+            "identity": {
+              "name": "n"
+            },
+            "operator": "equals",
+            "value": 0
+          }
+        }
+      ]
+    },
+    "target": null,
+    "expected": {
+      "status": "valid",
+      "candidate_text": "search index=main | where n=0e9223372036854775809 AND n=1e9223372036854775809 | table src",
+      "text": "search index=main | where n=0e9223372036854775809 AND n=1e9223372036854775809 | table src",
+      "committed": false,
+      "coverage": {
+        "syntax_complete": true,
+        "semantic_complete": true,
+        "rewrite_complete": true,
+        "reasons": []
+      },
+      "changes": [],
+      "rule_evaluations": [
+        {
+          "rule_id": "map",
+          "outcome": "skipped",
+          "reason": "condition_false",
+          "reference_ids": [
+            "ref-3"
+          ],
+          "location": [
+            86,
+            89
+          ],
+          "condition": {
+            "state": "false",
+            "reason": "condition_false",
+            "reference_ids": [
+              "ref-1",
+              "ref-2"
+            ],
+            "children": []
+          }
+        }
+      ],
+      "original_references": [
+        [
+          "ref-0",
+          "main",
+          "index",
+          "read",
+          "not_applicable",
+          []
+        ],
+        [
+          "ref-1",
+          "n",
+          "field",
+          "read",
+          "source",
+          []
+        ],
+        [
+          "ref-2",
+          "n",
+          "field",
+          "read",
+          "source",
+          [
+            "ref-1"
+          ]
+        ],
+        [
+          "ref-3",
+          "src",
+          "field",
+          "read",
+          "source",
+          []
+        ]
+      ],
+      "candidate_references": [
+        [
+          "ref-0",
+          "main",
+          "index",
+          "read",
+          "not_applicable",
+          []
+        ],
+        [
+          "ref-1",
+          "n",
+          "field",
+          "read",
+          "source",
+          []
+        ],
+        [
+          "ref-2",
+          "n",
+          "field",
+          "read",
+          "source",
+          [
+            "ref-1"
+          ]
+        ],
+        [
+          "ref-3",
+          "src",
+          "field",
+          "read",
+          "source",
+          []
+        ]
+      ],
+      "original_lineage": [
+        [
+          "stage-0",
+          "scope-0",
+          "",
+          [],
+          []
+        ],
+        [
+          "stage-1",
+          "scope-0",
+          "",
+          [
+            [
+              "n",
+              false
+            ]
+          ],
+          []
+        ],
+        [
+          "stage-2",
+          "scope-0",
+          "",
+          [
+            [
+              "src",
+              false
+            ]
+          ],
+          [
+            {
+              "operation": "project",
+              "output": "src",
+              "input_reference_ids": [
+                "ref-3"
+              ],
+              "output_reference_id": "",
+              "conditional": false
+            }
+          ]
+        ]
+      ],
+      "candidate_lineage": [
+        [
+          "stage-0",
+          "scope-0",
+          "",
+          [],
+          []
+        ],
+        [
+          "stage-1",
+          "scope-0",
+          "",
+          [
+            [
+              "n",
+              false
+            ]
+          ],
+          []
+        ],
+        [
+          "stage-2",
+          "scope-0",
+          "",
+          [
+            [
+              "src",
+              false
+            ]
+          ],
+          [
+            {
+              "operation": "project",
+              "output": "src",
+              "input_reference_ids": [
+                "ref-3"
+              ],
+              "output_reference_id": "",
+              "conditional": false
+            }
+          ]
+        ]
+      ]
+    }
+  },
+  {
+    "id": "number-negative-different",
+    "groups": [
+      "conditions",
+      "number-exponent-different",
+      "number-exponent-or"
+    ],
+    "request": {
+      "schema_version": 1,
+      "mode": "apply",
+      "document": {
+        "text": "search index=main | where n=0e-9223372036854775809 OR n=1e-9223372036854775809 | table src",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "number-negative-different"
+      },
+      "rules": [
+        {
+          "id": "map",
+          "kind": "field",
+          "source": {
+            "name": "src"
+          },
+          "target": {
+            "name": "user"
+          },
+          "when": {
+            "fact": "literal",
+            "kind": "field",
+            "identity": {
+              "name": "n"
+            },
+            "operator": "equals",
+            "value": 0
+          }
+        }
+      ]
+    },
+    "target": null,
+    "expected": {
+      "status": "valid",
+      "candidate_text": "search index=main | where n=0e-9223372036854775809 OR n=1e-9223372036854775809 | table src",
+      "text": "search index=main | where n=0e-9223372036854775809 OR n=1e-9223372036854775809 | table src",
+      "committed": false,
+      "coverage": {
+        "syntax_complete": true,
+        "semantic_complete": true,
+        "rewrite_complete": true,
+        "reasons": []
+      },
+      "changes": [],
+      "rule_evaluations": [
+        {
+          "rule_id": "map",
+          "outcome": "skipped",
+          "reason": "condition_false",
+          "reference_ids": [
+            "ref-3"
+          ],
+          "location": [
+            87,
+            90
+          ],
+          "condition": {
+            "state": "false",
+            "reason": "condition_false",
+            "reference_ids": [
+              "ref-1",
+              "ref-2"
+            ],
+            "children": []
+          }
+        }
+      ],
+      "original_references": [
+        [
+          "ref-0",
+          "main",
+          "index",
+          "read",
+          "not_applicable",
+          []
+        ],
+        [
+          "ref-1",
+          "n",
+          "field",
+          "read",
+          "source",
+          []
+        ],
+        [
+          "ref-2",
+          "n",
+          "field",
+          "read",
+          "source",
+          [
+            "ref-1"
+          ]
+        ],
+        [
+          "ref-3",
+          "src",
+          "field",
+          "read",
+          "source",
+          []
+        ]
+      ],
+      "candidate_references": [
+        [
+          "ref-0",
+          "main",
+          "index",
+          "read",
+          "not_applicable",
+          []
+        ],
+        [
+          "ref-1",
+          "n",
+          "field",
+          "read",
+          "source",
+          []
+        ],
+        [
+          "ref-2",
+          "n",
+          "field",
+          "read",
+          "source",
+          [
+            "ref-1"
+          ]
+        ],
+        [
+          "ref-3",
+          "src",
+          "field",
+          "read",
+          "source",
+          []
+        ]
+      ],
+      "original_lineage": [
+        [
+          "stage-0",
+          "scope-0",
+          "",
+          [],
+          []
+        ],
+        [
+          "stage-1",
+          "scope-0",
+          "",
+          [
+            [
+              "n",
+              false
+            ]
+          ],
+          []
+        ],
+        [
+          "stage-2",
+          "scope-0",
+          "",
+          [
+            [
+              "src",
+              false
+            ]
+          ],
+          [
+            {
+              "operation": "project",
+              "output": "src",
+              "input_reference_ids": [
+                "ref-3"
+              ],
+              "output_reference_id": "",
+              "conditional": false
+            }
+          ]
+        ]
+      ],
+      "candidate_lineage": [
+        [
+          "stage-0",
+          "scope-0",
+          "",
+          [],
+          []
+        ],
+        [
+          "stage-1",
+          "scope-0",
+          "",
+          [
+            [
+              "n",
+              false
+            ]
+          ],
+          []
+        ],
+        [
+          "stage-2",
+          "scope-0",
+          "",
+          [
+            [
+              "src",
+              false
+            ]
+          ],
+          [
+            {
+              "operation": "project",
+              "output": "src",
+              "input_reference_ids": [
+                "ref-3"
+              ],
+              "output_reference_id": "",
+              "conditional": false
+            }
+          ]
+        ]
+      ]
+    }
+  },
+  {
+    "id": "number-million-positive",
+    "groups": [
+      "conditions",
+      "number-exponent-million",
+      "number-exponent-and"
+    ],
+    "request": {
+      "schema_version": 1,
+      "mode": "apply",
+      "document": {
+        "text": "search index=main | where n=0e1000001 AND n=0.00e1000000 | table src",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "number-million-positive"
+      },
+      "rules": [
+        {
+          "id": "map",
+          "kind": "field",
+          "source": {
+            "name": "src"
+          },
+          "target": {
+            "name": "user"
+          },
+          "when": {
+            "fact": "literal",
+            "kind": "field",
+            "identity": {
+              "name": "n"
+            },
+            "operator": "equals",
+            "value": 0
+          }
+        }
+      ]
+    },
+    "target": null,
+    "expected": {
+      "status": "valid",
+      "candidate_text": "search index=main | where n=0e1000001 AND n=0.00e1000000 | table user",
+      "text": "search index=main | where n=0e1000001 AND n=0.00e1000000 | table user",
+      "committed": true,
+      "coverage": {
+        "syntax_complete": true,
+        "semantic_complete": true,
+        "rewrite_complete": true,
+        "reasons": []
+      },
+      "changes": [
+        {
+          "outcome": "applied",
+          "reason": "matched",
+          "group_id": "group-0",
+          "rule_ids": [
+            "map"
+          ],
+          "original_reference_ids": [
+            "ref-3"
+          ],
+          "candidate_reference_ids": [
+            "ref-3"
+          ],
+          "original_location": [
+            65,
+            68
+          ],
+          "candidate_location": [
+            65,
+            69
+          ],
+          "old_text": "src",
+          "new_text": "user",
+          "candidate_applied": true,
+          "committed": true
+        }
+      ],
+      "rule_evaluations": [
+        {
+          "rule_id": "map",
+          "outcome": "proposed",
+          "reason": "matched",
+          "reference_ids": [
+            "ref-3"
+          ],
+          "location": [
+            65,
+            68
+          ],
+          "condition": {
+            "state": "true",
+            "reason": "condition_true",
+            "reference_ids": [
+              "ref-1",
+              "ref-2"
+            ],
+            "children": []
+          }
+        }
+      ],
+      "original_references": [
+        [
+          "ref-0",
+          "main",
+          "index",
+          "read",
+          "not_applicable",
+          []
+        ],
+        [
+          "ref-1",
+          "n",
+          "field",
+          "read",
+          "source",
+          []
+        ],
+        [
+          "ref-2",
+          "n",
+          "field",
+          "read",
+          "source",
+          [
+            "ref-1"
+          ]
+        ],
+        [
+          "ref-3",
+          "src",
+          "field",
+          "read",
+          "source",
+          []
+        ]
+      ],
+      "candidate_references": [
+        [
+          "ref-0",
+          "main",
+          "index",
+          "read",
+          "not_applicable",
+          []
+        ],
+        [
+          "ref-1",
+          "n",
+          "field",
+          "read",
+          "source",
+          []
+        ],
+        [
+          "ref-2",
+          "n",
+          "field",
+          "read",
+          "source",
+          [
+            "ref-1"
+          ]
+        ],
+        [
+          "ref-3",
+          "user",
+          "field",
+          "read",
+          "source",
+          []
+        ]
+      ],
+      "original_lineage": [
+        [
+          "stage-0",
+          "scope-0",
+          "",
+          [],
+          []
+        ],
+        [
+          "stage-1",
+          "scope-0",
+          "",
+          [
+            [
+              "n",
+              false
+            ]
+          ],
+          []
+        ],
+        [
+          "stage-2",
+          "scope-0",
+          "",
+          [
+            [
+              "src",
+              false
+            ]
+          ],
+          [
+            {
+              "operation": "project",
+              "output": "src",
+              "input_reference_ids": [
+                "ref-3"
+              ],
+              "output_reference_id": "",
+              "conditional": false
+            }
+          ]
+        ]
+      ],
+      "candidate_lineage": [
+        [
+          "stage-0",
+          "scope-0",
+          "",
+          [],
+          []
+        ],
+        [
+          "stage-1",
+          "scope-0",
+          "",
+          [
+            [
+              "n",
+              false
+            ]
+          ],
+          []
+        ],
+        [
+          "stage-2",
+          "scope-0",
+          "",
+          [
+            [
+              "user",
+              false
+            ]
+          ],
+          [
+            {
+              "operation": "project",
+              "output": "user",
+              "input_reference_ids": [
+                "ref-3"
+              ],
+              "output_reference_id": "",
+              "conditional": false
+            }
+          ]
+        ]
+      ]
+    }
+  },
+  {
+    "id": "number-million-negative",
+    "groups": [
+      "conditions",
+      "number-exponent-million",
+      "number-exponent-or"
+    ],
+    "request": {
+      "schema_version": 1,
+      "mode": "apply",
+      "document": {
+        "text": "search index=main | where n=0e-1000001 OR n=0.00e-1000002 | table src",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "number-million-negative"
+      },
+      "rules": [
+        {
+          "id": "map",
+          "kind": "field",
+          "source": {
+            "name": "src"
+          },
+          "target": {
+            "name": "user"
+          },
+          "when": {
+            "fact": "literal",
+            "kind": "field",
+            "identity": {
+              "name": "n"
+            },
+            "operator": "equals",
+            "value": 0
+          }
+        }
+      ]
+    },
+    "target": null,
+    "expected": {
+      "status": "valid",
+      "candidate_text": "search index=main | where n=0e-1000001 OR n=0.00e-1000002 | table user",
+      "text": "search index=main | where n=0e-1000001 OR n=0.00e-1000002 | table user",
+      "committed": true,
+      "coverage": {
+        "syntax_complete": true,
+        "semantic_complete": true,
+        "rewrite_complete": true,
+        "reasons": []
+      },
+      "changes": [
+        {
+          "outcome": "applied",
+          "reason": "matched",
+          "group_id": "group-0",
+          "rule_ids": [
+            "map"
+          ],
+          "original_reference_ids": [
+            "ref-3"
+          ],
+          "candidate_reference_ids": [
+            "ref-3"
+          ],
+          "original_location": [
+            66,
+            69
+          ],
+          "candidate_location": [
+            66,
+            70
+          ],
+          "old_text": "src",
+          "new_text": "user",
+          "candidate_applied": true,
+          "committed": true
+        }
+      ],
+      "rule_evaluations": [
+        {
+          "rule_id": "map",
+          "outcome": "proposed",
+          "reason": "matched",
+          "reference_ids": [
+            "ref-3"
+          ],
+          "location": [
+            66,
+            69
+          ],
+          "condition": {
+            "state": "true",
+            "reason": "condition_true",
+            "reference_ids": [
+              "ref-1",
+              "ref-2"
+            ],
+            "children": []
+          }
+        }
+      ],
+      "original_references": [
+        [
+          "ref-0",
+          "main",
+          "index",
+          "read",
+          "not_applicable",
+          []
+        ],
+        [
+          "ref-1",
+          "n",
+          "field",
+          "read",
+          "source",
+          []
+        ],
+        [
+          "ref-2",
+          "n",
+          "field",
+          "read",
+          "source",
+          [
+            "ref-1"
+          ]
+        ],
+        [
+          "ref-3",
+          "src",
+          "field",
+          "read",
+          "source",
+          []
+        ]
+      ],
+      "candidate_references": [
+        [
+          "ref-0",
+          "main",
+          "index",
+          "read",
+          "not_applicable",
+          []
+        ],
+        [
+          "ref-1",
+          "n",
+          "field",
+          "read",
+          "source",
+          []
+        ],
+        [
+          "ref-2",
+          "n",
+          "field",
+          "read",
+          "source",
+          [
+            "ref-1"
+          ]
+        ],
+        [
+          "ref-3",
+          "user",
+          "field",
+          "read",
+          "source",
+          []
+        ]
+      ],
+      "original_lineage": [
+        [
+          "stage-0",
+          "scope-0",
+          "",
+          [],
+          []
+        ],
+        [
+          "stage-1",
+          "scope-0",
+          "",
+          [
+            [
+              "n",
+              false
+            ]
+          ],
+          []
+        ],
+        [
+          "stage-2",
+          "scope-0",
+          "",
+          [
+            [
+              "src",
+              false
+            ]
+          ],
+          [
+            {
+              "operation": "project",
+              "output": "src",
+              "input_reference_ids": [
+                "ref-3"
+              ],
+              "output_reference_id": "",
+              "conditional": false
+            }
+          ]
+        ]
+      ],
+      "candidate_lineage": [
+        [
+          "stage-0",
+          "scope-0",
+          "",
+          [],
+          []
+        ],
+        [
+          "stage-1",
+          "scope-0",
+          "",
+          [
+            [
+              "n",
+              false
+            ]
+          ],
+          []
+        ],
+        [
+          "stage-2",
+          "scope-0",
+          "",
+          [
+            [
+              "user",
+              false
+            ]
+          ],
+          [
+            {
+              "operation": "project",
+              "output": "user",
+              "input_reference_ids": [
+                "ref-3"
+              ],
+              "output_reference_id": "",
+              "conditional": false
+            }
+          ]
+        ]
+      ]
+    }
+  },
+  {
+    "id": "number-spl-decimal-and",
+    "groups": [
+      "conditions",
+      "number-decimal-spl",
+      "number-exponent-and"
+    ],
+    "request": {
+      "schema_version": 1,
+      "mode": "apply",
+      "document": {
+        "text": "search index=main | where n=0 AND n=0.0 | table src",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "number-spl-decimal-and"
+      },
+      "rules": [
+        {
+          "id": "map",
+          "kind": "field",
+          "source": {
+            "name": "src"
+          },
+          "target": {
+            "name": "user"
+          },
+          "when": {
+            "fact": "literal",
+            "kind": "field",
+            "identity": {
+              "name": "n"
+            },
+            "operator": "equals",
+            "value": 0
+          }
+        }
+      ]
+    },
+    "target": null,
+    "expected": {
+      "status": "valid",
+      "candidate_text": "search index=main | where n=0 AND n=0.0 | table user",
+      "text": "search index=main | where n=0 AND n=0.0 | table user",
+      "committed": true,
+      "coverage": {
+        "syntax_complete": true,
+        "semantic_complete": true,
+        "rewrite_complete": true,
+        "reasons": []
+      },
+      "changes": [
+        {
+          "outcome": "applied",
+          "reason": "matched",
+          "group_id": "group-0",
+          "rule_ids": [
+            "map"
+          ],
+          "original_reference_ids": [
+            "ref-3"
+          ],
+          "candidate_reference_ids": [
+            "ref-3"
+          ],
+          "original_location": [
+            48,
+            51
+          ],
+          "candidate_location": [
+            48,
+            52
+          ],
+          "old_text": "src",
+          "new_text": "user",
+          "candidate_applied": true,
+          "committed": true
+        }
+      ],
+      "rule_evaluations": [
+        {
+          "rule_id": "map",
+          "outcome": "proposed",
+          "reason": "matched",
+          "reference_ids": [
+            "ref-3"
+          ],
+          "location": [
+            48,
+            51
+          ],
+          "condition": {
+            "state": "true",
+            "reason": "condition_true",
+            "reference_ids": [
+              "ref-1",
+              "ref-2"
+            ],
+            "children": []
+          }
+        }
+      ],
+      "original_references": [
+        [
+          "ref-0",
+          "main",
+          "index",
+          "read",
+          "not_applicable",
+          []
+        ],
+        [
+          "ref-1",
+          "n",
+          "field",
+          "read",
+          "source",
+          []
+        ],
+        [
+          "ref-2",
+          "n",
+          "field",
+          "read",
+          "source",
+          [
+            "ref-1"
+          ]
+        ],
+        [
+          "ref-3",
+          "src",
+          "field",
+          "read",
+          "source",
+          []
+        ]
+      ],
+      "candidate_references": [
+        [
+          "ref-0",
+          "main",
+          "index",
+          "read",
+          "not_applicable",
+          []
+        ],
+        [
+          "ref-1",
+          "n",
+          "field",
+          "read",
+          "source",
+          []
+        ],
+        [
+          "ref-2",
+          "n",
+          "field",
+          "read",
+          "source",
+          [
+            "ref-1"
+          ]
+        ],
+        [
+          "ref-3",
+          "user",
+          "field",
+          "read",
+          "source",
+          []
+        ]
+      ],
+      "original_lineage": [
+        [
+          "stage-0",
+          "scope-0",
+          "",
+          [],
+          []
+        ],
+        [
+          "stage-1",
+          "scope-0",
+          "",
+          [
+            [
+              "n",
+              false
+            ]
+          ],
+          []
+        ],
+        [
+          "stage-2",
+          "scope-0",
+          "",
+          [
+            [
+              "src",
+              false
+            ]
+          ],
+          [
+            {
+              "operation": "project",
+              "output": "src",
+              "input_reference_ids": [
+                "ref-3"
+              ],
+              "output_reference_id": "",
+              "conditional": false
+            }
+          ]
+        ]
+      ],
+      "candidate_lineage": [
+        [
+          "stage-0",
+          "scope-0",
+          "",
+          [],
+          []
+        ],
+        [
+          "stage-1",
+          "scope-0",
+          "",
+          [
+            [
+              "n",
+              false
+            ]
+          ],
+          []
+        ],
+        [
+          "stage-2",
+          "scope-0",
+          "",
+          [
+            [
+              "user",
+              false
+            ]
+          ],
+          [
+            {
+              "operation": "project",
+              "output": "user",
+              "input_reference_ids": [
+                "ref-3"
+              ],
+              "output_reference_id": "",
+              "conditional": false
+            }
+          ]
+        ]
+      ]
+    }
+  },
+  {
+    "id": "number-spl-decimal-or",
+    "groups": [
+      "conditions",
+      "number-decimal-spl",
+      "number-exponent-or"
+    ],
+    "request": {
+      "schema_version": 1,
+      "mode": "apply",
+      "document": {
+        "text": "search index=main | where n=0.0 OR n=0 | table src",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "number-spl-decimal-or"
+      },
+      "rules": [
+        {
+          "id": "map",
+          "kind": "field",
+          "source": {
+            "name": "src"
+          },
+          "target": {
+            "name": "user"
+          },
+          "when": {
+            "fact": "literal",
+            "kind": "field",
+            "identity": {
+              "name": "n"
+            },
+            "operator": "equals",
+            "value": 0
+          }
+        }
+      ]
+    },
+    "target": null,
+    "expected": {
+      "status": "valid",
+      "candidate_text": "search index=main | where n=0.0 OR n=0 | table user",
+      "text": "search index=main | where n=0.0 OR n=0 | table user",
+      "committed": true,
+      "coverage": {
+        "syntax_complete": true,
+        "semantic_complete": true,
+        "rewrite_complete": true,
+        "reasons": []
+      },
+      "changes": [
+        {
+          "outcome": "applied",
+          "reason": "matched",
+          "group_id": "group-0",
+          "rule_ids": [
+            "map"
+          ],
+          "original_reference_ids": [
+            "ref-3"
+          ],
+          "candidate_reference_ids": [
+            "ref-3"
+          ],
+          "original_location": [
+            47,
+            50
+          ],
+          "candidate_location": [
+            47,
+            51
+          ],
+          "old_text": "src",
+          "new_text": "user",
+          "candidate_applied": true,
+          "committed": true
+        }
+      ],
+      "rule_evaluations": [
+        {
+          "rule_id": "map",
+          "outcome": "proposed",
+          "reason": "matched",
+          "reference_ids": [
+            "ref-3"
+          ],
+          "location": [
+            47,
+            50
+          ],
+          "condition": {
+            "state": "true",
+            "reason": "condition_true",
+            "reference_ids": [
+              "ref-1",
+              "ref-2"
+            ],
+            "children": []
+          }
+        }
+      ],
+      "original_references": [
+        [
+          "ref-0",
+          "main",
+          "index",
+          "read",
+          "not_applicable",
+          []
+        ],
+        [
+          "ref-1",
+          "n",
+          "field",
+          "read",
+          "source",
+          []
+        ],
+        [
+          "ref-2",
+          "n",
+          "field",
+          "read",
+          "source",
+          [
+            "ref-1"
+          ]
+        ],
+        [
+          "ref-3",
+          "src",
+          "field",
+          "read",
+          "source",
+          []
+        ]
+      ],
+      "candidate_references": [
+        [
+          "ref-0",
+          "main",
+          "index",
+          "read",
+          "not_applicable",
+          []
+        ],
+        [
+          "ref-1",
+          "n",
+          "field",
+          "read",
+          "source",
+          []
+        ],
+        [
+          "ref-2",
+          "n",
+          "field",
+          "read",
+          "source",
+          [
+            "ref-1"
+          ]
+        ],
+        [
+          "ref-3",
+          "user",
+          "field",
+          "read",
+          "source",
+          []
+        ]
+      ],
+      "original_lineage": [
+        [
+          "stage-0",
+          "scope-0",
+          "",
+          [],
+          []
+        ],
+        [
+          "stage-1",
+          "scope-0",
+          "",
+          [
+            [
+              "n",
+              false
+            ]
+          ],
+          []
+        ],
+        [
+          "stage-2",
+          "scope-0",
+          "",
+          [
+            [
+              "src",
+              false
+            ]
+          ],
+          [
+            {
+              "operation": "project",
+              "output": "src",
+              "input_reference_ids": [
+                "ref-3"
+              ],
+              "output_reference_id": "",
+              "conditional": false
+            }
+          ]
+        ]
+      ],
+      "candidate_lineage": [
+        [
+          "stage-0",
+          "scope-0",
+          "",
+          [],
+          []
+        ],
+        [
+          "stage-1",
+          "scope-0",
+          "",
+          [
+            [
+              "n",
+              false
+            ]
+          ],
+          []
+        ],
+        [
+          "stage-2",
+          "scope-0",
+          "",
+          [
+            [
+              "user",
+              false
+            ]
+          ],
+          [
+            {
+              "operation": "project",
+              "output": "user",
+              "input_reference_ids": [
+                "ref-3"
+              ],
+              "output_reference_id": "",
+              "conditional": false
+            }
+          ]
+        ]
+      ]
+    }
+  },
+  {
+    "id": "sql-having-conflict-hidden",
+    "groups": [
+      "sql",
+      "conditional-spl2",
+      "having-conflict-unknown"
+    ],
+    "request": {
+      "schema_version": 1,
+      "mode": "apply",
+      "document": {
+        "text": "SELECT marker FROM main WHERE marker=1 GROUP BY marker HAVING marker=2 AND hidden=1 | lookup people marker OUTPUT label",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "sql-having-conflict-hidden"
+      },
+      "rules": [
+        {
+          "id": "map",
+          "kind": "lookup",
+          "source": {
+            "name": "people"
+          },
+          "target": {
+            "name": "users"
+          },
+          "when": {
+            "fact": "literal",
+            "kind": "field",
+            "identity": {
+              "name": "marker"
+            },
+            "operator": "equals",
+            "value": 1
+          }
+        }
+      ]
+    },
+    "target": null,
+    "expected": {
+      "status": "incomplete",
+      "candidate_text": "SELECT marker FROM main WHERE marker=1 GROUP BY marker HAVING marker=2 AND hidden=1 | lookup people marker OUTPUT label",
+      "text": "SELECT marker FROM main WHERE marker=1 GROUP BY marker HAVING marker=2 AND hidden=1 | lookup people marker OUTPUT label",
+      "committed": false,
+      "coverage": {
+        "syntax_complete": true,
+        "semantic_complete": false,
+        "rewrite_complete": false,
+        "reasons": [
+          "SPL_UNSUPPORTED_SEMANTICS",
+          "condition_unknown"
+        ]
+      },
+      "changes": [],
+      "rule_evaluations": [
+        {
+          "rule_id": "map",
+          "outcome": "skipped",
+          "reason": "condition_unknown",
+          "reference_ids": [
+            "ref-6"
+          ],
+          "location": [
+            93,
+            99
+          ],
+          "condition": {
+            "state": "unknown",
+            "reason": "condition_unknown",
+            "reference_ids": [
+              "ref-2",
+              "ref-3",
+              "ref-4"
+            ],
+            "children": []
+          }
+        }
+      ],
+      "original_references": [
+        [
+          "ref-0",
+          "marker",
+          "field",
+          "read",
+          "source",
+          [
+            "ref-2"
+          ]
+        ],
+        [
+          "ref-1",
+          "main",
+          "dataset",
+          "read",
+          "not_applicable",
+          []
+        ],
+        [
+          "ref-2",
+          "marker",
+          "field",
+          "read",
+          "source",
+          []
+        ],
+        [
+          "ref-3",
+          "marker",
+          "field",
+          "group",
+          "source",
+          [
+            "ref-2"
+          ]
+        ],
+        [
+          "ref-4",
+          "marker",
+          "field",
+          "read",
+          "source",
+          [
+            "ref-2"
+          ]
+        ],
+        [
+          "ref-5",
+          "hidden",
+          "field",
+          "read",
+          "indeterminate",
+          []
+        ],
+        [
+          "ref-6",
+          "people",
+          "lookup",
+          "read",
+          "not_applicable",
+          []
+        ],
+        [
+          "ref-7",
+          "marker",
+          "field",
+          "read",
+          "source",
+          [
+            "ref-2"
+          ]
+        ],
+        [
+          "ref-8",
+          "label",
+          "field",
+          "output",
+          "not_applicable",
+          [
+            "ref-7",
+            "ref-2"
+          ]
+        ]
+      ],
+      "candidate_references": [
+        [
+          "ref-0",
+          "marker",
+          "field",
+          "read",
+          "source",
+          [
+            "ref-2"
+          ]
+        ],
+        [
+          "ref-1",
+          "main",
+          "dataset",
+          "read",
+          "not_applicable",
+          []
+        ],
+        [
+          "ref-2",
+          "marker",
+          "field",
+          "read",
+          "source",
+          []
+        ],
+        [
+          "ref-3",
+          "marker",
+          "field",
+          "group",
+          "source",
+          [
+            "ref-2"
+          ]
+        ],
+        [
+          "ref-4",
+          "marker",
+          "field",
+          "read",
+          "source",
+          [
+            "ref-2"
+          ]
+        ],
+        [
+          "ref-5",
+          "hidden",
+          "field",
+          "read",
+          "indeterminate",
+          []
+        ],
+        [
+          "ref-6",
+          "people",
+          "lookup",
+          "read",
+          "not_applicable",
+          []
+        ],
+        [
+          "ref-7",
+          "marker",
+          "field",
+          "read",
+          "source",
+          [
+            "ref-2"
+          ]
+        ],
+        [
+          "ref-8",
+          "label",
+          "field",
+          "output",
+          "not_applicable",
+          [
+            "ref-7",
+            "ref-2"
+          ]
+        ]
+      ],
+      "original_lineage": [
+        [
+          "stage-1",
+          "scope-0",
+          "source",
+          [],
+          []
+        ],
+        [
+          "stage-2",
+          "scope-0",
+          "filter",
+          [
+            [
+              "marker",
+              false
+            ]
+          ],
+          []
+        ],
+        [
+          "stage-3",
+          "scope-0",
+          "group",
+          [
+            [
+              "marker",
+              false
+            ]
+          ],
+          [
+            {
+              "operation": "project",
+              "output": "marker",
+              "input_reference_ids": [
+                "ref-3"
+              ],
+              "output_reference_id": "",
+              "conditional": false
+            }
+          ]
+        ],
+        [
+          "stage-0",
+          "scope-0",
+          "evaluate",
+          [
+            [
+              "marker",
+              false
+            ]
+          ],
+          []
+        ],
+        [
+          "stage-4",
+          "scope-0",
+          "having",
+          [
+            [
+              "marker",
+              false
+            ]
+          ],
+          []
+        ],
+        [
+          "stage-0",
+          "scope-0",
+          "project",
+          [
+            [
+              "marker",
+              false
+            ]
+          ],
+          [
+            {
+              "operation": "project",
+              "output": "marker",
+              "input_reference_ids": [
+                "ref-0"
+              ],
+              "output_reference_id": "",
+              "conditional": false
+            }
+          ]
+        ],
+        [
+          "stage-5",
+          "scope-0",
+          "",
+          [
+            [
+              "label",
+              false
+            ],
+            [
+              "marker",
+              false
+            ]
+          ],
+          [
+            {
+              "operation": "lookup",
+              "output": "label",
+              "input_reference_ids": [
+                "ref-7"
+              ],
+              "output_reference_id": "ref-8",
+              "conditional": false
+            }
+          ]
+        ]
+      ],
+      "candidate_lineage": [
+        [
+          "stage-1",
+          "scope-0",
+          "source",
+          [],
+          []
+        ],
+        [
+          "stage-2",
+          "scope-0",
+          "filter",
+          [
+            [
+              "marker",
+              false
+            ]
+          ],
+          []
+        ],
+        [
+          "stage-3",
+          "scope-0",
+          "group",
+          [
+            [
+              "marker",
+              false
+            ]
+          ],
+          [
+            {
+              "operation": "project",
+              "output": "marker",
+              "input_reference_ids": [
+                "ref-3"
+              ],
+              "output_reference_id": "",
+              "conditional": false
+            }
+          ]
+        ],
+        [
+          "stage-0",
+          "scope-0",
+          "evaluate",
+          [
+            [
+              "marker",
+              false
+            ]
+          ],
+          []
+        ],
+        [
+          "stage-4",
+          "scope-0",
+          "having",
+          [
+            [
+              "marker",
+              false
+            ]
+          ],
+          []
+        ],
+        [
+          "stage-0",
+          "scope-0",
+          "project",
+          [
+            [
+              "marker",
+              false
+            ]
+          ],
+          [
+            {
+              "operation": "project",
+              "output": "marker",
+              "input_reference_ids": [
+                "ref-0"
+              ],
+              "output_reference_id": "",
+              "conditional": false
+            }
+          ]
+        ],
+        [
+          "stage-5",
+          "scope-0",
+          "",
+          [
+            [
+              "label",
+              false
+            ],
+            [
+              "marker",
+              false
+            ]
+          ],
+          [
+            {
+              "operation": "lookup",
+              "output": "label",
+              "input_reference_ids": [
+                "ref-7"
+              ],
+              "output_reference_id": "ref-8",
+              "conditional": false
+            }
+          ]
+        ]
+      ]
+    }
   }
 ]

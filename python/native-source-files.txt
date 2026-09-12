@@ -1,6 +1,7 @@
 go.mod
 go.sum
 internal/buildinfo/version.go
+internal/jsoninput/number.go
 internal/jsoninput/unicode.go
 parser/spl2/spl2_lexer.go
 parser/spl2/spl2_parser.go

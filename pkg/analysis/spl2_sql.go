@@ -146,16 +146,17 @@ func executeSPL2SQL(result *Result, parsed *spl2ParsedDocument, refinement *sour
 		selected, visible, selectedShape = s.prepareSQLSelection(c.SqlSelectClause(), pregroup, aggregate, c.SqlGroupClause() != nil)
 	})
 	phase(c.SqlHavingClause(), "having", func() {
-		if c.SqlGroupClause() == nil && !aggregate {
+		predicate := c.SqlGroupClause() != nil || aggregate
+		if !predicate {
 			s.unsupported(c.SqlHavingClause(), "SQL HAVING without grouping is unproved")
 		}
-		s.sqlRestrictedExpression(c.SqlHavingClause().SqlPredicate(), visible)
+		s.sqlRestrictedExpression(c.SqlHavingClause().SqlPredicate(), visible, predicate)
 	})
 	phase(c.SqlOrderClause(), "order", func() {
 		if c.SqlSelectClause() == nil {
 			s.expression(c.SqlOrderClause())
 		} else {
-			s.sqlRestrictedExpression(c.SqlOrderClause(), visible)
+			s.sqlRestrictedExpression(c.SqlOrderClause(), visible, false)
 		}
 	})
 	phase(c.SqlSelectClause(), "project", func() {
@@ -260,7 +261,7 @@ func (s *spl2SemanticStage) prepareSQLSelection(clause spl2.ISqlSelectClauseCont
 			if field == nil || !groups[s.operand(field).Name] {
 				s.unsupported(p, "Mixed SQL aggregate/non-grouped projection is unproved")
 			}
-			item.value = s.sqlRestrictedExpression(p.Expression(), groups)
+			item.value = s.sqlRestrictedExpression(p.Expression(), groups, false)
 		} else {
 			item.value = s.expression(p.Expression())
 		}
@@ -428,7 +429,7 @@ func (s *spl2SemanticStage) sqlProjectionEffectSound(ctx antlr.ParserRuleContext
 // A temporary visibility view keeps hidden source/group origins without
 // claiming availability or mutating the actual phase state. The shared reader
 // still decides source/derived/null-test/conditional binding for every operand.
-func (s *spl2SemanticStage) sqlRestrictedExpression(tree antlr.Tree, visible map[string]bool) spl2ExpressionEvidence {
+func (s *spl2SemanticStage) sqlRestrictedExpression(tree antlr.Tree, visible map[string]bool, predicate bool) spl2ExpressionEvidence {
 	actual := s.env
 	s.env = actual.clone()
 	var inspect func(antlr.Tree)
@@ -454,12 +455,23 @@ func (s *spl2SemanticStage) sqlRestrictedExpression(tree antlr.Tree, visible map
 		}
 	}
 	inspect(tree)
+	if predicate {
+		// Extract at the HAVING phase inside the same restricted source/derived
+		// visibility view as its reads. Earlier SQL phases cannot see these facts.
+		// A hidden operand must not suppress a conflicting visible-key restriction.
+		s.rewritePredicate(tree, "spl2", false, false)
+	}
 	var value spl2ExpressionEvidence
 	if spl2SQLHasAggregate(tree) {
 		s.unsupported(tree.(antlr.ParserRuleContext), "SQL postaggregate expression visibility is unproved")
 		value = s.sqlUnprovedAggregateExpression(tree)
 	} else {
 		value = s.expression(tree)
+	}
+	if predicate {
+		// Persist predicate/observed-reference evidence, not the temporary field
+		// visibility or expression effects used to classify HAVING operands.
+		actual.rewrite = s.env.rewrite
 	}
 	s.env = actual
 	return value

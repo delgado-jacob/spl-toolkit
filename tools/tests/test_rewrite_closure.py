@@ -149,3 +149,14 @@ def test_rewrite_local_catalog_and_outcomes_cannot_be_substituted(tmp_path, rewr
     (tmp_path / "corpus.json").write_text(json.dumps(cases))
     with pytest.raises(AssertionError):
         transport.load_cases(tmp_path)
+
+
+@pytest.mark.parametrize("prefix", ["sql-having-", "number-"])
+def test_rewrite_broad_contract_obligations_cannot_disappear(tmp_path, rewrite_transport_helpers, prefix):
+    transport, _ = rewrite_transport_helpers
+    cases = json.loads((ROOT / "testdata/rewrite/corpus.json").read_text())
+    remaining = [case for case in cases if not case["id"].startswith(prefix)]
+    assert len(remaining) < len(cases)
+    (tmp_path / "corpus.json").write_text(json.dumps(remaining))
+    with pytest.raises(AssertionError, match="required rewrite group"):
+        transport.load_cases(tmp_path)

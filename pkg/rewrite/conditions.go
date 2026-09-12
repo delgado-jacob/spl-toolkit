@@ -3,10 +3,10 @@ package rewrite
 import (
 	"bytes"
 	"encoding/json"
-	"math/big"
 	"sort"
 	"strings"
 
+	"github.com/delgado-jacob/spl-toolkit/internal/jsoninput"
 	"github.com/delgado-jacob/spl-toolkit/pkg/analysis"
 )
 
@@ -146,7 +146,7 @@ func conditionScalar(raw json.RawMessage) (kind, value string, ok bool) {
 	case string:
 		return "string", v, true
 	case json.Number:
-		return "number", conditionNumber(string(v)), true
+		return "number", jsoninput.CanonicalNumber(string(v)), true
 	case bool:
 		if v {
 			return "boolean", "true", true
@@ -157,32 +157,6 @@ func conditionScalar(raw json.RawMessage) (kind, value string, ok bool) {
 	default:
 		return "", "", false
 	}
-}
-
-// Normalize a valid JSON number as coefficient * 10^exponent without expanding
-// the exponent. Even very large accepted exponents require only input-sized
-// storage, unlike converting the decimal into a rational numerator/denominator.
-func conditionNumber(number string) string {
-	sign := ""
-	if strings.HasPrefix(number, "-") {
-		sign, number = "-", number[1:]
-	}
-	exponent := new(big.Int)
-	if i := strings.IndexAny(number, "eE"); i >= 0 {
-		exponent.SetString(number[i+1:], 10)
-		number = number[:i]
-	}
-	if i := strings.IndexByte(number, '.'); i >= 0 {
-		exponent.Sub(exponent, big.NewInt(int64(len(number)-i-1)))
-		number = number[:i] + number[i+1:]
-	}
-	number = strings.TrimLeft(number, "0")
-	if number == "" {
-		return "0"
-	}
-	coefficient := strings.TrimRight(number, "0")
-	exponent.Add(exponent, big.NewInt(int64(len(number)-len(coefficient))))
-	return sign + coefficient + "e" + exponent.String()
 }
 
 // ruleProposal leaves target conflicts to candidate construction while retaining
