@@ -1,0 +1,14 @@
+[
+  {"name":"inline empty source","kind":"corpus","valid":true,"request":{"schema_version":1,"documents":[{"id":"empty","document":{"text":""}}]}},
+  {"name":"mixed inline languages","kind":"corpus","valid":true,"request":{"schema_version":1,"documents":[{"id":"spl","document":{"text":"search user=alice"}},{"id":"spl2","document":{"text":"from main | select user","language":"spl2"}}]}},
+  {"name":"field list target","kind":"corpus","valid":true,"request":{"schema_version":1,"documents":[{"id":"q","document":{"text":"search user=alice"}}],"validation_target":{"kind":"field_list","catalog":{"fields":["user"]}}}},
+  {"name":"duplicate corpus id","kind":"corpus","valid":false,"request":{"schema_version":1,"documents":[{"id":"q","document":{"text":"a"}},{"id":"q","document":{"text":"b"}}]}},
+  {"name":"duplicate document property","kind":"corpus","valid":false,"request":{"schema_version":1,"documents":[{"id":"q","document":{"text":"a","text":"b"}}]}},
+  {"name":"no synthetic path in memory","kind":"corpus","valid":false,"request":{"schema_version":1,"documents":[{"id":"q","path":"q.spl"}]}},
+  {"name":"manifest empty inline","kind":"manifest","valid":true,"request":{"schema_version":1,"documents":[{"id":"q","text":""}]}},
+  {"name":"manifest ordered paths","kind":"manifest","valid":true,"request":{"schema_version":1,"base":"../queries","documents":[{"id":"first","path":"a.spl"},{"id":"second","path":"b.spl2"}]}},
+  {"name":"manifest source conflict","kind":"manifest","valid":false,"request":{"schema_version":1,"documents":[{"id":"q","text":"","path":"q.spl"}]}},
+  {"name":"manifest parent escape","kind":"manifest","valid":false,"request":{"schema_version":1,"documents":[{"id":"q","path":"../q.spl"}]}},
+  {"name":"manifest duplicate key","kind":"manifest","valid":false,"request":{"schema_version":1,"documents":[{"id":"q","text":"a","text":"b"}]}},
+  {"name":"manifest unknown extension needs dialect","kind":"manifest","valid":false,"request":{"schema_version":1,"documents":[{"id":"q","path":"query.txt"}]}}
+]
