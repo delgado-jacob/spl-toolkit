@@ -5,6 +5,7 @@ go 1.22
 require (
 	github.com/antlr4-go/antlr/v4 v4.13.1
 	github.com/swaggo/swag/v2 v2.0.0-rc4
+	golang.org/x/sys v0.20.0
 )
 
 require (
