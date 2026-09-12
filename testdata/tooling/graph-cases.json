@@ -1,0 +1,8 @@
+[
+  {"name":"mixed","documents":[{"id":"first","document":{"text":"search host=web | eval owner=host | table owner"}},{"id":"second","document":{"text":"search host=other | weird owner | table owner"}}]},
+  {"name":"revision","documents":[{"id":"spl","document":{"text":"search host=web","language":"spl"}},{"id":"spl2","document":{"text":"search host=web","language":"spl2"}}]},
+  {"name":"conditional","documents":[{"id":"wildcard","document":{"text":"search a1=1 | rename a* AS b | where a1=2"}}]},
+  {"name":"conditional_transition","documents":[{"id":"lookup","document":{"text":"search key=1 | lookup users key OUTPUTNEW a | rename a AS b | where b>0"}}]},
+  {"name":"sql","documents":[{"id":"sql","document":{"text":"SELECT host FROM main WHERE bytes>0","language":"spl2"}}]},
+  {"name":"scopes","documents":[{"id":"branches","document":{"text":"search root=1 | append [ search child=1 | eval root=child ] | where root=2"}}]}
+]
