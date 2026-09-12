@@ -162,7 +162,13 @@ Stable diagnostic codes are `SPL_SYNTAX_ERROR`, `SPL_UNAVAILABLE_FIELD`, `SPL_UN
 
 ## Migrating from discovery
 
-Legacy Go `DiscoverQuery`, Python `QueryInfo`/`discover_query`, CLI `discover`, REST discovery, and mapping remain available. Flat `InputFields`/`input_fields` cannot describe read timing, derived fields, scopes, source positions, or coverage. Structured consumers should call analysis, inspect each reference's role/binding and scope, and check status/coverage before treating the result as conclusive. Legacy and structured field classification are distinct contracts; do not infer identical flat field lists or replace mapping behavior based on an analysis report. Use field-list validation below for external declarations. Field-list and JSON Schema/OCSF validation accept both dialects. Select standalone SPL2 explicitly; new rewrite semantics and SPL2 modules remain outside this API.
+Legacy Go `DiscoverQuery`, Python `QueryInfo`/`discover_query`, CLI `discover`, REST discovery, and mapping remain available. Flat `InputFields`/`input_fields` cannot describe read timing, derived fields, scopes, source positions, or coverage. Structured consumers should call analysis, inspect each reference's role/binding and scope, and check status/coverage before treating the result as conclusive. Legacy and structured field classification are distinct contracts; do not infer identical flat field lists or replace mapping behavior based on an analysis report. Use field-list validation below for external declarations. Field-list, JSON Schema/OCSF validation and safe rewriting accept both dialects. Select standalone SPL2 explicitly; SPL2 modules remain excluded.
+
+## Safe rewrite
+
+`pkg/rewrite.Rewrite` and `RewriteBatch`, Python `SPLMapper.rewrite` and `rewrite_batch`, CLI `rewrite`, and `POST /api/v1/query/rewrite` / `/query/rewrite/batch` expose the same version-1 canonical reports. Requests use explicit static rules; they do not read legacy mapper configuration or caller-supplied facts. The selected capability manifest adds a `rewrite` object with mapping kinds, canonical render roles, identity forms and limitations.
+
+Preview preserves returned `text`; apply publishes `candidate_text` only when whole-candidate proof and any explicit destination validation pass. Reports retain original and candidate analyses, exact audit changes, rule evaluations and separate status/commit decisions. See the [complete rewrite contract](rewrite.md) for request shapes, examples, alias/implicit-name safety, refusal behavior and batch atomicity.
 
 ## Field-list validation
 

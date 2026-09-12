@@ -7,9 +7,14 @@ SPL Toolkit 0.1.1 is an offline library and command-line tool for bounded operat
 - validate queries against the bundled legacy grammar;
 - analyze query flow, located references, lineage, dependencies, and coverage;
 - validate source field obligations against an offline field catalog, singly or in ordered batches;
+- preview or apply explicit source-identity rewrites with linked-edit proof, audit trails, and optional destination validation;
 - check nested declarations against local JSON Schema resources and exact compiled OCSF versions, keeping optional and category-dependent findings visible.
 
-The Go implementation is canonical. The Python package includes the native Go library, and the REST server calls the same Go APIs. Structured analysis supports bounded SPL and standalone SPL2 contracts under splunkd/current; SPL2 requires explicit selection. It does not provide event instance validation, expression typechecking, raw-to-data-model translation, data-model rewriting, learned mappings, SPL2 modules, or complete Splunk syntax coverage.
+The Go implementation is canonical. The Python package includes the native Go library, and the REST server calls the same Go APIs. Structured analysis and safe rewriting support bounded SPL and standalone SPL2 contracts under splunkd/current; SPL2 requires explicit selection. This does not provide event instance validation, expression typechecking, raw-to-data-model translation, learned mappings, SPL2 modules, or complete Splunk syntax coverage.
+
+## Safe rewrite
+
+Use `rewrite` with explicit versioned rules for fields, indexes, sources, sourcetypes, lookups, data models, or datasets. Preview returns original `text` plus `candidate_text`; `--apply` returns the candidate only when its syntax, affected bindings and optional destination validation are proved. Explicit aliases stay fixed. An independently safe group may commit beside refused groups, so inspect both `status` and `committed`. Legacy `map` retains its separate configuration and context precedence. See the [rewrite contract and runnable example](docs/rewrite.md).
 
 ## Structured analysis
 
@@ -79,7 +84,7 @@ Use a context manager or call `close()`. The package checks that its metadata ve
 
 ## CLI
 
-Mapping requires a configuration file; field-list validation requires a catalog file. Discovery and legacy grammar validation do not. See the executable [CLI usage](docs/cli.md) for commands, output, and exit codes.
+Legacy mapping requires a configuration file; safe rewriting requires a rules file; field-list validation requires a catalog file. Discovery and legacy grammar validation do not. See the executable [CLI usage](docs/cli.md) for commands, output, and exit codes.
 
 ```bash
 spl-toolkit map --config testdata/baseline/mappings.json --query 'search src_ip=1'

@@ -1,6 +1,6 @@
 # SPL Toolkit Python bindings
 
-This package provides Python 3.11+ bindings for SPL Toolkit 0.1.1's offline mapping, discovery, structured analysis, field-list validation, and JSON Schema/OCSF field declaration APIs. Wheels include the native Go library and do not require Go at installation or runtime.
+This package provides Python 3.11+ bindings for SPL Toolkit 0.1.1's offline mapping, discovery, structured analysis, safe rewriting, field-list validation, and JSON Schema/OCSF field declaration APIs. Wheels include the native Go library and do not require Go at installation or runtime.
 
 ```python
 from spl_toolkit import SPLMapper
@@ -37,7 +37,23 @@ Reports preserve source text and source ID and expose ordered stages/scopes, ref
 
 Capabilities separate syntax from semantic support and list limitations and function arities. Unknown commands/functions, unexpanded macros, branch merges, unresolved wildcard membership, and unsupported options remain incomplete. Open-input `fields` inclusion also remains incomplete when retained internal membership is unknown. A later stage cannot erase an earlier coverage gap.
 
-Legacy discovery and mapping retain their own contracts. Flat `input_fields` does not encode flow, scope, or completeness and is not guaranteed to match structured classifications. New consumers should use reference roles/bindings and status/coverage. The [API reference](https://github.com/delgado-jacob/spl-toolkit/blob/main/docs/API.md) describes every surface and the supported forms; this package does not perform event instance validation, SPL2 modules, or new rewriting.
+Legacy discovery and mapping retain their own contracts. Flat `input_fields` does not encode flow, scope, or completeness and is not guaranteed to match structured classifications. New consumers should use reference roles/bindings and status/coverage. The [API reference](https://github.com/delgado-jacob/spl-toolkit/blob/main/docs/API.md) describes every surface and the supported forms; this package does not perform event instance validation or SPL2 modules.
+
+## Safe rewrite
+
+```python
+rules = [{"id": "source-user", "kind": "field",
+          "source": {"name": "src"}, "target": {"name": "user"}}]
+with SPLMapper() as mapper:
+    preview = mapper.rewrite("search src=alice", rules)
+    applied = mapper.rewrite("search src=alice", rules, mode="apply")
+    assert preview["text"] == "search src=alice" and not preview["committed"]
+    assert applied["text"] == "search user=alice" and applied["committed"]
+```
+
+`rewrite(query, rules, *, mode="preview", validation_target=None, language="spl", profile="splunkd", version="current", source_id="")` returns the Go report dictionary. `rewrite_batch(documents, rules, *, mode="preview", validation_target=None)` preserves document order. Explicit aliases stay fixed; source-bound uses and provable implicit consumers change together. A safe group can commit beside a refused group with `status="incomplete"`; invalid or incomplete destination validation prevents all commits. The candidate and audit remain visible on rollback. Input errors raise `SPLMapperError` and publish no partial batch.
+
+Rules are independent of legacy configuration/precedence and use only original canonical facts. The [rewrite guide](https://github.com/delgado-jacob/spl-toolkit/blob/main/docs/rewrite.md) defines identities, conditions, targets and limitations. `examples/basic_usage.py` runs preview, apply, validation rollback and ordered valid/incomplete/invalid batches with the real native library. Rebuild and reinstall after native API changes; older same-version libraries need not contain these additive exports.
 
 ## Field-list validation
 

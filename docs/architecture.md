@@ -5,6 +5,14 @@ layout: page
 
 # Architecture
 
+## Canonical safe rewriting
+
+`pkg/rewrite` strictly prepares explicit rules and optional validation targets, then consumes the analysis-owned `PrepareRewrite` evidence, typed rendering and whole-candidate `Verify` facade. It selects against original facts, resolves simultaneous linked groups and collisions, reconstructs only declared byte edits, reparses the candidate, and applies one final publication gate. Adapters never infer aliases, implicit labels, SQL phases or source bindings themselves.
+
+The report preserves both analyses and exact original/candidate audit locations even when apply returns the original string. CLI, real HTTP and owned C results/native Python serialize that report without reclassification. Legacy mapper/configuration precedence remains separate. The [rewrite guide](rewrite.md) describes the supported contract.
+
+Durable rewrite assertions own candidate/returned text, status, commit, audit, source bindings and lineage independently of Go-produced transport reports. Installed acceptance copies every used fixture and maintained example outside the checkout and compares full reports across Go, CLI, HTTP and packaged native Python. Source/fixture hashes bind transport to the producing inputs; transport snapshots grant no semantic credit. Required native and surface suites cannot disappear or skip tests.
+
 The Go core is the source of behavior. The generated ANTLR lexer and parser build the supported Milestone 1 parse tree. Listener code discovers seven flat categories, while a token rewriter replaces configured field tokens without reformatting the surrounding query.
 
 ```text

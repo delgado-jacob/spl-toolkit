@@ -5,7 +5,7 @@ layout: page
 
 # API surfaces
 
-All current surfaces use the canonical Go implementation.
+All current surfaces use the canonical Go implementation. Structured analysis, field-list and JSON Schema/OCSF validation, and safe single/batch rewriting are described in the [structured API](../API.md) and [rewrite contract](../rewrite.md). They are distinct from the legacy operations below.
 
 - [Go](go.md) exposes mapping, explicit-context mapping, discovery, validation, and parsing.
 - Python exposes `SPLMapper` with `load_mappings`, `map_query`, `map_query_with_context`, `discover_query`, and `get_input_fields`.

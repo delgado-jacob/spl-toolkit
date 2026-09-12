@@ -48,6 +48,18 @@ class DocumentationTests(unittest.TestCase):
         self.assertNotEqual(result.returncode, 0, result.stdout)
         self.assertIn("docs/superpowers/specs/design.md", result.stdout)
 
+    def test_retained_evidence_readme_exclusion_does_not_hide_sibling_pages(self):
+        config = (CHECKER.parents[1] / "docs/_config.yml").read_text(encoding="utf-8")
+        evidence = "docs/evidence/milestone-5/broad-fix-1/"
+        files = {"docs/_config.yml": config, evidence + "README.md": "# Retained evidence\n"}
+        result = self.check(files)
+        self.assertEqual(result.returncode, 0, result.stdout)
+        files[evidence + "public.md"] = "# Public page without metadata\n"
+        result = self.check(files)
+        self.assertNotEqual(result.returncode, 0, result.stdout)
+        self.assertIn(evidence + "public.md", result.stdout)
+        self.assertNotIn(evidence + "README.md", result.stdout)
+
 
 if __name__ == "__main__":
     unittest.main()

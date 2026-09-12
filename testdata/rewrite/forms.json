@@ -1,24 +1,1217 @@
 {
   "schema_version": 1,
   "forms": [
-    {"id":"spl-expression-atom","language":"spl","query":"search index=main | where user=1","kind":"field","name":"user","role":"expression_atom","eligible":true,"target":"account","candidate":"search index=main | where account=1"},
-    {"id":"spl-search-field","language":"spl","query":"search user=1","kind":"field","name":"user","role":"search_field","eligible":true,"target":"account","candidate":"search account=1"},
-    {"id":"spl-search-value","language":"spl","query":"search index=main source=app sourcetype=json","kind":"index","name":"main","role":"search_value","eligible":true,"target":"archive","candidate":"search index=archive source=app sourcetype=json"},
-    {"id":"spl-source-value","language":"spl","query":"search source=app","kind":"source","name":"app","role":"search_value","eligible":true,"target":"logs","candidate":"search source=logs"},
-    {"id":"spl-sourcetype-value","language":"spl","query":"search sourcetype=json","kind":"sourcetype","name":"json","role":"search_value","eligible":true,"target":"syslog","candidate":"search sourcetype=syslog"},
-    {"id":"spl-lookup-catalog","language":"spl","query":"inputlookup people","kind":"lookup","name":"people","role":"catalog_atom","eligible":true,"target":"accounts","candidate":"inputlookup accounts"},
-    {"id":"spl-datamodel","language":"spl","query":"datamodel Traffic All","kind":"data_model","name":"Traffic","role":"catalog_atom","eligible":true,"target":"Network","candidate":"datamodel Network All"},
-    {"id":"spl-dataset-component","language":"spl","query":"datamodel Traffic 'All'","kind":"dataset","name":"Traffic.All","role":"catalog_component","eligible":true,"target":"Traffic.Flows","candidate":"datamodel Traffic 'Flows'"},
-    {"id":"spl-qualified-dataset","language":"spl","query":"from datamodel:Traffic.All","kind":"dataset","name":"Traffic.All","role":"qualified_dataset","eligible":true,"target":"Traffic.Flows","candidate":"from datamodel:Traffic.Flows"},
-    {"id":"spl-selector-atom","language":"spl","query":"search index=main | table user","kind":"field","name":"user","role":"selector_atom","eligible":true,"target":"account","candidate":"search index=main | table account"},
-    {"id":"spl-wildcard-refused","language":"spl","query":"search index=main | table user*","kind":"field","name":"user*","role":"selector_atom","eligible":false},
-    {"id":"spl2-expression-atom","language":"spl2","query":"FROM main | where 'actor.name'=1","kind":"field","name":"actor.name","role":"expression_atom","eligible":true,"target":"account.name","candidate":"FROM main | where 'account.name'=1"},
-    {"id":"spl2-source-dataset","language":"spl2","query":"FROM main","kind":"dataset","name":"main","role":"catalog_atom","eligible":true,"target":"archive","candidate":"FROM archive"},
-    {"id":"spl2-search-value","language":"spl2","query":"search index=main source=app sourcetype=json","kind":"index","name":"main","role":"search_value","eligible":true,"target":"archive","candidate":"search index=archive source=app sourcetype=json"},
-    {"id":"spl2-rename-input","language":"spl2","query":"FROM main | rename user AS actor","kind":"field","name":"user","role":"rename_input","eligible":true,"target":"account","candidate":"FROM main | rename account AS actor"},
-    {"id":"spl2-metric-index","language":"spl2","query":"tstats aggregates=[count()] predicate=(index=main)","kind":"index","name":"main","role":"metric_value","eligible":true,"target":"archive","candidate":"tstats aggregates=[count()] predicate=(index=\"archive\")"},
-    {"id":"spl2-tstats-atomic-model","language":"spl2","query":"tstats aggregates=[count()] datamodel_name='Traffic.All'","kind":"data_model","name":"Traffic.All","role":"quoted_catalog_atom","eligible":true,"target":"Network.Flow","candidate":"tstats aggregates=[count()] datamodel_name='Network.Flow'"},
-    {"id":"spl2-tstats-dynamic-model-refused","language":"spl2","query":"tstats aggregates=[count()] datamodel_name='Traffic.*'","kind":"data_model","name":"Traffic.*","role":"quoted_catalog_atom","eligible":false},
-    {"id":"spl2-quoted-wildcard-refused","language":"spl2","query":"FROM main | table 'user*'","kind":"field","name":"user*","role":"selector_atom","eligible":false}
+    {
+      "id": "spl-expression-atom",
+      "language": "spl",
+      "query": "search index=main | where user=1",
+      "kind": "field",
+      "name": "user",
+      "role": "expression_atom",
+      "eligible": true,
+      "target": "account",
+      "candidate": "search index=main | where account=1"
+    },
+    {
+      "id": "spl-search-field",
+      "language": "spl",
+      "query": "search user=1",
+      "kind": "field",
+      "name": "user",
+      "role": "search_field",
+      "eligible": true,
+      "target": "account",
+      "candidate": "search account=1"
+    },
+    {
+      "id": "spl-search-value",
+      "language": "spl",
+      "query": "search index=main source=app sourcetype=json",
+      "kind": "index",
+      "name": "main",
+      "role": "search_value",
+      "eligible": true,
+      "target": "archive",
+      "candidate": "search index=archive source=app sourcetype=json"
+    },
+    {
+      "id": "spl-source-value",
+      "language": "spl",
+      "query": "search source=app",
+      "kind": "source",
+      "name": "app",
+      "role": "search_value",
+      "eligible": true,
+      "target": "logs",
+      "candidate": "search source=logs"
+    },
+    {
+      "id": "spl-sourcetype-value",
+      "language": "spl",
+      "query": "search sourcetype=json",
+      "kind": "sourcetype",
+      "name": "json",
+      "role": "search_value",
+      "eligible": true,
+      "target": "syslog",
+      "candidate": "search sourcetype=syslog"
+    },
+    {
+      "id": "spl-lookup-catalog",
+      "language": "spl",
+      "query": "inputlookup people",
+      "kind": "lookup",
+      "name": "people",
+      "role": "catalog_atom",
+      "eligible": true,
+      "target": "accounts",
+      "candidate": "inputlookup accounts"
+    },
+    {
+      "id": "spl-datamodel",
+      "language": "spl",
+      "query": "datamodel Traffic All",
+      "kind": "data_model",
+      "name": "Traffic",
+      "role": "catalog_atom",
+      "eligible": true,
+      "target": "Network",
+      "candidate": "datamodel Network All"
+    },
+    {
+      "id": "spl-dataset-component",
+      "language": "spl",
+      "query": "datamodel Traffic 'All'",
+      "kind": "dataset",
+      "name": "Traffic.All",
+      "role": "catalog_component",
+      "eligible": true,
+      "target": "Traffic.Flows",
+      "candidate": "datamodel Traffic 'Flows'"
+    },
+    {
+      "id": "spl-qualified-dataset",
+      "language": "spl",
+      "query": "from datamodel:Traffic.All",
+      "kind": "dataset",
+      "name": "Traffic.All",
+      "role": "qualified_dataset",
+      "eligible": true,
+      "target": "Traffic.Flows",
+      "candidate": "from datamodel:Traffic.Flows"
+    },
+    {
+      "id": "spl-selector-atom",
+      "language": "spl",
+      "query": "search index=main | table user",
+      "kind": "field",
+      "name": "user",
+      "role": "selector_atom",
+      "eligible": true,
+      "target": "account",
+      "candidate": "search index=main | table account"
+    },
+    {
+      "id": "spl-wildcard-refused",
+      "language": "spl",
+      "query": "search index=main | table user*",
+      "kind": "field",
+      "name": "user*",
+      "role": "selector_atom",
+      "eligible": false
+    },
+    {
+      "id": "spl2-expression-atom",
+      "language": "spl2",
+      "query": "FROM main | where 'actor.name'=1",
+      "kind": "field",
+      "name": "actor.name",
+      "role": "expression_atom",
+      "eligible": true,
+      "target": "account.name",
+      "candidate": "FROM main | where 'account.name'=1"
+    },
+    {
+      "id": "spl2-source-dataset",
+      "language": "spl2",
+      "query": "FROM main",
+      "kind": "dataset",
+      "name": "main",
+      "role": "catalog_atom",
+      "eligible": true,
+      "target": "archive",
+      "candidate": "FROM archive"
+    },
+    {
+      "id": "spl2-search-value",
+      "language": "spl2",
+      "query": "search index=main source=app sourcetype=json",
+      "kind": "index",
+      "name": "main",
+      "role": "search_value",
+      "eligible": true,
+      "target": "archive",
+      "candidate": "search index=archive source=app sourcetype=json"
+    },
+    {
+      "id": "spl2-rename-input",
+      "language": "spl2",
+      "query": "FROM main | rename user AS actor",
+      "kind": "field",
+      "name": "user",
+      "role": "rename_input",
+      "eligible": true,
+      "target": "account",
+      "candidate": "FROM main | rename account AS actor"
+    },
+    {
+      "id": "spl2-metric-index",
+      "language": "spl2",
+      "query": "tstats aggregates=[count()] predicate=(index=main)",
+      "kind": "index",
+      "name": "main",
+      "role": "metric_value",
+      "eligible": true,
+      "target": "archive",
+      "candidate": "tstats aggregates=[count()] predicate=(index=\"archive\")"
+    },
+    {
+      "id": "spl2-tstats-atomic-model",
+      "language": "spl2",
+      "query": "tstats aggregates=[count()] datamodel_name='Traffic.All'",
+      "kind": "data_model",
+      "name": "Traffic.All",
+      "role": "quoted_catalog_atom",
+      "eligible": true,
+      "target": "Network.Flow",
+      "candidate": "tstats aggregates=[count()] datamodel_name='Network.Flow'"
+    },
+    {
+      "id": "spl2-tstats-dynamic-model-refused",
+      "language": "spl2",
+      "query": "tstats aggregates=[count()] datamodel_name='Traffic.*'",
+      "kind": "data_model",
+      "name": "Traffic.*",
+      "role": "quoted_catalog_atom",
+      "eligible": false
+    },
+    {
+      "id": "spl2-quoted-wildcard-refused",
+      "language": "spl2",
+      "query": "FROM main | table 'user*'",
+      "kind": "field",
+      "name": "user*",
+      "role": "selector_atom",
+      "eligible": false
+    }
+  ],
+  "capability_checks": [
+    {
+      "id": "spl-cap-field-expression_atom",
+      "language": "spl",
+      "kind": "field",
+      "role": "expression_atom",
+      "supported": true,
+      "positive": {
+        "query": "search index=main | where user=1",
+        "source": "user",
+        "target": "account",
+        "candidate": "search index=main | where account=1",
+        "sitename": "user"
+      },
+      "negative": {
+        "query": "search index=main | eval user=1 | where user=1",
+        "source": "user",
+        "target": "account",
+        "reason": "unsupported_reference"
+      }
+    },
+    {
+      "id": "spl-cap-field-search_field",
+      "language": "spl",
+      "kind": "field",
+      "role": "search_field",
+      "supported": true,
+      "positive": {
+        "query": "search user=1",
+        "source": "user",
+        "target": "account",
+        "candidate": "search account=1",
+        "sitename": "user"
+      },
+      "negative": {
+        "query": "search index=main | eval user=1 | search user=1",
+        "source": "user",
+        "target": "account",
+        "reason": "unsupported_reference"
+      }
+    },
+    {
+      "id": "spl-cap-field-selector_atom",
+      "language": "spl",
+      "kind": "field",
+      "role": "selector_atom",
+      "supported": true,
+      "positive": {
+        "query": "search index=main | table user",
+        "source": "user",
+        "target": "account",
+        "candidate": "search index=main | table account",
+        "sitename": "user"
+      },
+      "negative": {
+        "query": "search index=main | eval user=1 | table user",
+        "source": "user",
+        "target": "account",
+        "reason": "unsupported_reference"
+      }
+    },
+    {
+      "id": "spl-cap-field-rename_input",
+      "language": "spl",
+      "kind": "field",
+      "role": "rename_input",
+      "supported": true,
+      "positive": {
+        "query": "search index=main | rename user AS owner",
+        "source": "user",
+        "target": "account",
+        "candidate": "search index=main | rename account AS owner",
+        "sitename": "user"
+      },
+      "negative": {
+        "query": "search index=main | eval user=1 | rename user AS owner",
+        "source": "user",
+        "target": "account",
+        "reason": "unsupported_reference"
+      }
+    },
+    {
+      "id": "spl-cap-field-null_test",
+      "language": "spl",
+      "kind": "field",
+      "role": "null_test",
+      "supported": true,
+      "positive": {
+        "query": "search index=main | where isnull(user)",
+        "source": "user",
+        "target": "account",
+        "candidate": "search index=main | where isnull(account)",
+        "sitename": "user"
+      },
+      "negative": {
+        "query": "search index=main | eval user=1 | where isnull(user)",
+        "source": "user",
+        "target": "account",
+        "reason": "unsupported_reference"
+      }
+    },
+    {
+      "id": "spl-cap-field-lookup_local",
+      "language": "spl",
+      "kind": "field",
+      "role": "lookup_local",
+      "supported": true,
+      "positive": {
+        "query": "search index=main | lookup people remote AS user OUTPUT label",
+        "source": "user",
+        "target": "account",
+        "candidate": "search index=main | lookup people remote AS account OUTPUT label",
+        "sitename": "user"
+      },
+      "negative": {
+        "query": "search index=main | eval user=1 | lookup people remote AS user OUTPUT label",
+        "source": "user",
+        "target": "account",
+        "reason": "unsupported_reference"
+      }
+    },
+    {
+      "id": "spl-cap-field-lookup_dual",
+      "language": "spl",
+      "kind": "field",
+      "role": "lookup_dual",
+      "supported": true,
+      "positive": {
+        "query": "search index=main | lookup people user OUTPUT label",
+        "source": "user",
+        "target": "account",
+        "candidate": "search index=main | lookup people user AS account OUTPUT label",
+        "sitename": "user"
+      },
+      "negative": {
+        "query": "search index=main | eval user=1 | lookup people user OUTPUT label",
+        "source": "user",
+        "target": "account",
+        "reason": "unsupported_reference"
+      }
+    },
+    {
+      "id": "spl-cap-implicit",
+      "language": "spl",
+      "kind": "field",
+      "role": "implicit_output",
+      "supported": true,
+      "positive": {
+        "query": "stats sum(src) | table 'sum(src)'",
+        "source": "src",
+        "target": "user",
+        "candidate": "stats sum(user) | table 'sum(user)'",
+        "sitename": "sum(src)"
+      },
+      "negative": {
+        "query": "stats sum(src) AS user | table user",
+        "source": "user",
+        "target": "account",
+        "reason": "unsupported_reference"
+      }
+    },
+    {
+      "id": "spl-cap-navigation",
+      "language": "spl",
+      "kind": "field",
+      "role": "navigation",
+      "supported": false,
+      "positive": null,
+      "negative": {
+        "query": "search index=main | where actor.name=1",
+        "source": "actor.name",
+        "target": "user",
+        "reason": "no_match"
+      }
+    },
+    {
+      "id": "spl-cap-index",
+      "language": "spl",
+      "kind": "index",
+      "role": "search_value",
+      "supported": true,
+      "positive": {
+        "query": "search index=main",
+        "source": "main",
+        "target": "archive",
+        "candidate": "search index=archive",
+        "sitename": "main"
+      },
+      "negative": {
+        "query": "search note=\"main\"",
+        "source": "main",
+        "target": "archive",
+        "reason": "no_match"
+      }
+    },
+    {
+      "id": "spl-cap-source",
+      "language": "spl",
+      "kind": "source",
+      "role": "search_value",
+      "supported": true,
+      "positive": {
+        "query": "search source=main",
+        "source": "main",
+        "target": "archive",
+        "candidate": "search source=archive",
+        "sitename": "main"
+      },
+      "negative": {
+        "query": "search note=\"main\"",
+        "source": "main",
+        "target": "archive",
+        "reason": "no_match"
+      }
+    },
+    {
+      "id": "spl-cap-sourcetype",
+      "language": "spl",
+      "kind": "sourcetype",
+      "role": "search_value",
+      "supported": true,
+      "positive": {
+        "query": "search sourcetype=main",
+        "source": "main",
+        "target": "archive",
+        "candidate": "search sourcetype=archive",
+        "sitename": "main"
+      },
+      "negative": {
+        "query": "search note=\"main\"",
+        "source": "main",
+        "target": "archive",
+        "reason": "no_match"
+      }
+    },
+    {
+      "id": "spl-cap-lookup",
+      "language": "spl",
+      "kind": "lookup",
+      "role": "catalog_atom",
+      "supported": true,
+      "positive": {
+        "query": "inputlookup people",
+        "source": "people",
+        "target": "archive",
+        "candidate": "inputlookup archive",
+        "sitename": "people"
+      },
+      "negative": {
+        "query": "search note=\"people\"",
+        "source": "people",
+        "target": "archive",
+        "reason": "no_match"
+      }
+    },
+    {
+      "id": "spl-cap-dataset",
+      "language": "spl",
+      "kind": "dataset",
+      "role": "catalog_atom",
+      "supported": true,
+      "positive": {
+        "query": "from main",
+        "source": "main",
+        "target": "archive",
+        "candidate": "from archive",
+        "sitename": "main"
+      },
+      "negative": {
+        "query": "search note=\"main\"",
+        "source": "main",
+        "target": "archive",
+        "reason": "no_match"
+      }
+    },
+    {
+      "id": "spl-cap-data_model-catalog_atom",
+      "language": "spl",
+      "kind": "data_model",
+      "role": "catalog_atom",
+      "supported": true,
+      "positive": {
+        "query": "datamodel Traffic All",
+        "source": "Traffic",
+        "target": "Network",
+        "candidate": "datamodel Network All",
+        "sitename": "Traffic"
+      },
+      "negative": {
+        "query": "search note=\"Traffic\"",
+        "source": "Traffic",
+        "target": "Network",
+        "reason": "no_match"
+      }
+    },
+    {
+      "id": "spl-cap-data_model-catalog_component",
+      "language": "spl",
+      "kind": "data_model",
+      "role": "catalog_component",
+      "supported": true,
+      "positive": {
+        "query": "from datamodel:Traffic.All",
+        "source": "Traffic",
+        "target": "Network",
+        "candidate": "from datamodel:Network.All",
+        "sitename": "Traffic"
+      },
+      "negative": {
+        "query": "search note=\"Traffic\"",
+        "source": "Traffic",
+        "target": "Network",
+        "reason": "no_match"
+      }
+    },
+    {
+      "id": "spl-cap-dataset-catalog_component",
+      "language": "spl",
+      "kind": "dataset",
+      "role": "catalog_component",
+      "supported": true,
+      "positive": {
+        "query": "datamodel Traffic 'All'",
+        "source": "Traffic.All",
+        "target": "Traffic.Flows",
+        "candidate": "datamodel Traffic 'Flows'",
+        "sitename": "Traffic.All"
+      },
+      "negative": {
+        "query": "search note=\"Traffic.All\"",
+        "source": "Traffic.All",
+        "target": "Traffic.Flows",
+        "reason": "no_match"
+      }
+    },
+    {
+      "id": "spl-cap-dataset-qualified_dataset",
+      "language": "spl",
+      "kind": "dataset",
+      "role": "qualified_dataset",
+      "supported": true,
+      "positive": {
+        "query": "from datamodel:Traffic.All",
+        "source": "Traffic.All",
+        "target": "Traffic.Flows",
+        "candidate": "from datamodel:Traffic.Flows",
+        "sitename": "Traffic.All"
+      },
+      "negative": {
+        "query": "search note=\"Traffic.All\"",
+        "source": "Traffic.All",
+        "target": "Traffic.Flows",
+        "reason": "no_match"
+      }
+    },
+    {
+      "id": "spl2-cap-field-expression_atom",
+      "language": "spl2",
+      "kind": "field",
+      "role": "expression_atom",
+      "supported": true,
+      "positive": {
+        "query": "FROM main | where user=1",
+        "source": "user",
+        "target": "account",
+        "candidate": "FROM main | where account=1",
+        "sitename": "user"
+      },
+      "negative": {
+        "query": "FROM main | eval user=1 | where user=1",
+        "source": "user",
+        "target": "account",
+        "reason": "unsupported_reference"
+      }
+    },
+    {
+      "id": "spl2-cap-field-search_field",
+      "language": "spl2",
+      "kind": "field",
+      "role": "search_field",
+      "supported": true,
+      "positive": {
+        "query": "search user=1",
+        "source": "user",
+        "target": "account",
+        "candidate": "search account=1",
+        "sitename": "user"
+      },
+      "negative": {
+        "query": "FROM main | eval user=1 | search user=1",
+        "source": "user",
+        "target": "account",
+        "reason": "unsupported_reference"
+      }
+    },
+    {
+      "id": "spl2-cap-field-selector_atom",
+      "language": "spl2",
+      "kind": "field",
+      "role": "selector_atom",
+      "supported": true,
+      "positive": {
+        "query": "FROM main | table user",
+        "source": "user",
+        "target": "account",
+        "candidate": "FROM main | table account",
+        "sitename": "user"
+      },
+      "negative": {
+        "query": "FROM main | eval user=1 | table user",
+        "source": "user",
+        "target": "account",
+        "reason": "unsupported_reference"
+      }
+    },
+    {
+      "id": "spl2-cap-field-rename_input",
+      "language": "spl2",
+      "kind": "field",
+      "role": "rename_input",
+      "supported": true,
+      "positive": {
+        "query": "FROM main | rename user AS owner",
+        "source": "user",
+        "target": "account",
+        "candidate": "FROM main | rename account AS owner",
+        "sitename": "user"
+      },
+      "negative": {
+        "query": "FROM main | eval user=1 | rename user AS owner",
+        "source": "user",
+        "target": "account",
+        "reason": "unsupported_reference"
+      }
+    },
+    {
+      "id": "spl2-cap-field-null_test",
+      "language": "spl2",
+      "kind": "field",
+      "role": "null_test",
+      "supported": true,
+      "positive": {
+        "query": "FROM main | where isnull(user)",
+        "source": "user",
+        "target": "account",
+        "candidate": "FROM main | where isnull(account)",
+        "sitename": "user"
+      },
+      "negative": {
+        "query": "FROM main | eval user=1 | where isnull(user)",
+        "source": "user",
+        "target": "account",
+        "reason": "unsupported_reference"
+      }
+    },
+    {
+      "id": "spl2-cap-field-lookup_local",
+      "language": "spl2",
+      "kind": "field",
+      "role": "lookup_local",
+      "supported": true,
+      "positive": {
+        "query": "FROM main | lookup people remote AS user OUTPUT label",
+        "source": "user",
+        "target": "account",
+        "candidate": "FROM main | lookup people remote AS account OUTPUT label",
+        "sitename": "user"
+      },
+      "negative": {
+        "query": "FROM main | eval user=1 | lookup people remote AS user OUTPUT label",
+        "source": "user",
+        "target": "account",
+        "reason": "unsupported_reference"
+      }
+    },
+    {
+      "id": "spl2-cap-field-lookup_dual",
+      "language": "spl2",
+      "kind": "field",
+      "role": "lookup_dual",
+      "supported": true,
+      "positive": {
+        "query": "FROM main | lookup people user OUTPUT label",
+        "source": "user",
+        "target": "account",
+        "candidate": "FROM main | lookup people user AS account OUTPUT label",
+        "sitename": "user"
+      },
+      "negative": {
+        "query": "FROM main | eval user=1 | lookup people user OUTPUT label",
+        "source": "user",
+        "target": "account",
+        "reason": "unsupported_reference"
+      }
+    },
+    {
+      "id": "spl2-cap-implicit",
+      "language": "spl2",
+      "kind": "field",
+      "role": "implicit_output",
+      "supported": false,
+      "positive": null,
+      "negative": {
+        "query": "FROM main | stats sum(bytes) | table 'sum(bytes)'",
+        "source": "bytes",
+        "target": "octets",
+        "reason": "linked_edit_unproven"
+      }
+    },
+    {
+      "id": "spl2-cap-navigation",
+      "language": "spl2",
+      "kind": "field",
+      "role": "navigation",
+      "supported": false,
+      "positive": null,
+      "negative": {
+        "query": "FROM main | where actor.name=1",
+        "source": "actor.name",
+        "target": "user",
+        "reason": "unsupported_reference"
+      }
+    },
+    {
+      "id": "spl2-cap-index",
+      "language": "spl2",
+      "kind": "index",
+      "role": "search_value",
+      "supported": true,
+      "positive": {
+        "query": "search index=main",
+        "source": "main",
+        "target": "archive",
+        "candidate": "search index=archive",
+        "sitename": "main"
+      },
+      "negative": {
+        "query": "search note=\"main\"",
+        "source": "main",
+        "target": "archive",
+        "reason": "no_match"
+      }
+    },
+    {
+      "id": "spl2-cap-source",
+      "language": "spl2",
+      "kind": "source",
+      "role": "search_value",
+      "supported": true,
+      "positive": {
+        "query": "search source=main",
+        "source": "main",
+        "target": "archive",
+        "candidate": "search source=archive",
+        "sitename": "main"
+      },
+      "negative": {
+        "query": "search note=\"main\"",
+        "source": "main",
+        "target": "archive",
+        "reason": "no_match"
+      }
+    },
+    {
+      "id": "spl2-cap-sourcetype",
+      "language": "spl2",
+      "kind": "sourcetype",
+      "role": "search_value",
+      "supported": true,
+      "positive": {
+        "query": "search sourcetype=main",
+        "source": "main",
+        "target": "archive",
+        "candidate": "search sourcetype=archive",
+        "sitename": "main"
+      },
+      "negative": {
+        "query": "search note=\"main\"",
+        "source": "main",
+        "target": "archive",
+        "reason": "no_match"
+      }
+    },
+    {
+      "id": "spl2-cap-lookup",
+      "language": "spl2",
+      "kind": "lookup",
+      "role": "catalog_atom",
+      "supported": true,
+      "positive": {
+        "query": "FROM main | lookup people user OUTPUT label",
+        "source": "people",
+        "target": "archive",
+        "candidate": "FROM main | lookup archive user OUTPUT label",
+        "sitename": "people"
+      },
+      "negative": {
+        "query": "search note=\"people\"",
+        "source": "people",
+        "target": "archive",
+        "reason": "no_match"
+      }
+    },
+    {
+      "id": "spl2-cap-dataset",
+      "language": "spl2",
+      "kind": "dataset",
+      "role": "catalog_atom",
+      "supported": true,
+      "positive": {
+        "query": "FROM main",
+        "source": "main",
+        "target": "archive",
+        "candidate": "FROM archive",
+        "sitename": "main"
+      },
+      "negative": {
+        "query": "search note=\"main\"",
+        "source": "main",
+        "target": "archive",
+        "reason": "no_match"
+      }
+    },
+    {
+      "id": "spl2-cap-index-metric_value",
+      "language": "spl2",
+      "kind": "index",
+      "role": "metric_value",
+      "supported": true,
+      "positive": {
+        "query": "tstats aggregates=[count()] predicate=(index=main)",
+        "source": "main",
+        "target": "archive",
+        "candidate": "tstats aggregates=[count()] predicate=(index=\"archive\")",
+        "sitename": "main"
+      },
+      "negative": {
+        "query": "search note=\"main\"",
+        "source": "main",
+        "target": "archive",
+        "reason": "no_match"
+      }
+    },
+    {
+      "id": "spl2-cap-data_model-quoted_catalog_atom",
+      "language": "spl2",
+      "kind": "data_model",
+      "role": "quoted_catalog_atom",
+      "supported": true,
+      "positive": {
+        "query": "tstats aggregates=[count()] datamodel_name='Traffic.All'",
+        "source": "Traffic.All",
+        "target": "Network.Flow",
+        "candidate": "tstats aggregates=[count()] datamodel_name='Network.Flow'",
+        "sitename": "Traffic.All"
+      },
+      "negative": {
+        "query": "search note=\"Traffic.All\"",
+        "source": "Traffic.All",
+        "target": "Network.Flow",
+        "reason": "no_match"
+      }
+    }
+  ],
+  "safety_cases": [
+    {
+      "id": "proof-candidate-syntax",
+      "groups": [
+        "candidate-syntax"
+      ],
+      "request": {
+        "schema_version": 1,
+        "mode": "apply",
+        "document": {
+          "text": "table src",
+          "language": "spl",
+          "profile": "splunkd",
+          "version": "current",
+          "source_id": "proof-candidate-syntax"
+        },
+        "rules": [
+          {
+            "id": "map",
+            "kind": "field",
+            "source": {
+              "name": "src"
+            },
+            "target": {
+              "name": "user"
+            }
+          }
+        ]
+      },
+      "target": null,
+      "expected": {
+        "status": "invalid",
+        "candidate_text": "table '",
+        "text": "table src",
+        "committed": false,
+        "coverage": {
+          "syntax_complete": false,
+          "semantic_complete": false,
+          "rewrite_complete": false,
+          "reasons": [
+            "SPL_SYNTAX_ERROR",
+            "post_verification_failed"
+          ]
+        },
+        "changes": [
+          {
+            "outcome": "skipped",
+            "reason": "post_verification_failed",
+            "group_id": "internal-test-group",
+            "rule_ids": [
+              "internal-test-rule"
+            ],
+            "original_reference_ids": [],
+            "candidate_reference_ids": [],
+            "original_location": [
+              6,
+              9
+            ],
+            "candidate_location": [
+              6,
+              7
+            ],
+            "old_text": "src",
+            "new_text": "'",
+            "candidate_applied": true,
+            "committed": false
+          }
+        ],
+        "rule_evaluations": [],
+        "original_references": [
+          [
+            "ref-0",
+            "src",
+            "field",
+            "read",
+            "source",
+            []
+          ]
+        ],
+        "candidate_references": [],
+        "original_lineage": [
+          [
+            "stage-0",
+            "scope-0",
+            "",
+            [
+              [
+                "src",
+                false
+              ]
+            ],
+            [
+              {
+                "operation": "project",
+                "output": "src",
+                "input_reference_ids": [
+                  "ref-0"
+                ],
+                "output_reference_id": "",
+                "conditional": false
+              }
+            ]
+          ]
+        ],
+        "candidate_lineage": [
+          [
+            "stage-0",
+            "scope-0",
+            "",
+            [],
+            []
+          ]
+        ]
+      },
+      "fault": "candidate-syntax",
+      "proof_code": "candidate_mismatch"
+    },
+    {
+      "id": "proof-candidate-binding",
+      "groups": [
+        "candidate-binding"
+      ],
+      "request": {
+        "schema_version": 1,
+        "mode": "apply",
+        "document": {
+          "text": "FROM main | eval user=1 | table src",
+          "language": "spl2",
+          "profile": "splunkd",
+          "version": "current",
+          "source_id": "proof-candidate-binding"
+        },
+        "rules": [
+          {
+            "id": "map",
+            "kind": "field",
+            "source": {
+              "name": "src"
+            },
+            "target": {
+              "name": "user"
+            }
+          }
+        ]
+      },
+      "target": null,
+      "expected": {
+        "status": "incomplete",
+        "candidate_text": "FROM main | eval user=1 | table user",
+        "text": "FROM main | eval user=1 | table src",
+        "committed": false,
+        "coverage": {
+          "syntax_complete": true,
+          "semantic_complete": true,
+          "rewrite_complete": false,
+          "reasons": [
+            "post_verification_failed"
+          ]
+        },
+        "changes": [
+          {
+            "outcome": "skipped",
+            "reason": "post_verification_failed",
+            "group_id": "internal-test-group",
+            "rule_ids": [
+              "internal-test-rule"
+            ],
+            "original_reference_ids": [],
+            "candidate_reference_ids": [],
+            "original_location": [
+              32,
+              35
+            ],
+            "candidate_location": [
+              32,
+              36
+            ],
+            "old_text": "src",
+            "new_text": "user",
+            "candidate_applied": true,
+            "committed": false
+          }
+        ],
+        "rule_evaluations": [],
+        "original_references": [
+          [
+            "ref-0",
+            "main",
+            "dataset",
+            "read",
+            "not_applicable",
+            []
+          ],
+          [
+            "ref-1",
+            "user",
+            "field",
+            "create",
+            "not_applicable",
+            []
+          ],
+          [
+            "ref-2",
+            "src",
+            "field",
+            "read",
+            "source",
+            []
+          ]
+        ],
+        "candidate_references": [
+          [
+            "ref-0",
+            "main",
+            "dataset",
+            "read",
+            "not_applicable",
+            []
+          ],
+          [
+            "ref-1",
+            "user",
+            "field",
+            "create",
+            "not_applicable",
+            []
+          ],
+          [
+            "ref-2",
+            "user",
+            "field",
+            "read",
+            "derived",
+            [
+              "ref-1"
+            ]
+          ]
+        ],
+        "original_lineage": [
+          [
+            "stage-0",
+            "scope-0",
+            "",
+            [],
+            []
+          ],
+          [
+            "stage-1",
+            "scope-0",
+            "",
+            [
+              [
+                "user",
+                false
+              ]
+            ],
+            [
+              {
+                "operation": "create",
+                "output": "user",
+                "input_reference_ids": [],
+                "output_reference_id": "ref-1",
+                "conditional": false
+              }
+            ]
+          ],
+          [
+            "stage-2",
+            "scope-0",
+            "",
+            [
+              [
+                "src",
+                false
+              ]
+            ],
+            [
+              {
+                "operation": "project",
+                "output": "src",
+                "input_reference_ids": [
+                  "ref-2"
+                ],
+                "output_reference_id": "",
+                "conditional": false
+              }
+            ]
+          ]
+        ],
+        "candidate_lineage": [
+          [
+            "stage-0",
+            "scope-0",
+            "",
+            [],
+            []
+          ],
+          [
+            "stage-1",
+            "scope-0",
+            "",
+            [
+              [
+                "user",
+                false
+              ]
+            ],
+            [
+              {
+                "operation": "create",
+                "output": "user",
+                "input_reference_ids": [],
+                "output_reference_id": "ref-1",
+                "conditional": false
+              }
+            ]
+          ],
+          [
+            "stage-2",
+            "scope-0",
+            "",
+            [
+              [
+                "user",
+                false
+              ]
+            ],
+            [
+              {
+                "operation": "project",
+                "output": "user",
+                "input_reference_ids": [
+                  "ref-2"
+                ],
+                "output_reference_id": "",
+                "conditional": false
+              }
+            ]
+          ]
+        ]
+      },
+      "fault": "candidate-binding",
+      "proof_code": "reference_correspondence"
+    }
   ]
 }

@@ -49,6 +49,34 @@ def main() -> int:
              {"text": "table missing", "source_id": "second.spl"}], target)
         assert batch["status"] == "invalid"
         print(f"Schema status: {report['status']}; ordered batch: {batch['status']}")
+
+    # Safe rewriting uses explicit rules, independently of legacy mapper config.
+    rules = [{"id": "source-user", "kind": "field",
+              "source": {"name": "src"}, "target": {"name": "user"}}]
+    query = "search src=alice | rename src AS owner | table owner"
+    candidate = "search user=alice | rename user AS owner | table owner"
+    with SPLMapper() as mapper:
+        preview = mapper.rewrite(query, rules)
+        applied = mapper.rewrite(query, rules, mode="apply")
+        assert preview["candidate_text"] == candidate
+        assert preview["text"] == query and not preview["committed"]
+        assert applied["text"] == candidate and applied["committed"]
+        print(f"Rewrite preview committed: {preview['committed']}; "
+              f"apply committed: {applied['committed']}")
+        rejected = mapper.rewrite(
+            query, rules, mode="apply",
+            validation_target={"kind": "field_list", "catalog": {"fields": ["src"]}})
+        assert rejected["status"] == "invalid" and not rejected["committed"]
+        assert rejected["text"] == query and rejected["candidate_text"] == candidate
+        batch = mapper.rewrite_batch([
+            {"text": "search src=alice", "language": "spl", "source_id": "valid.spl"},
+            {"text": "FROM main | stats sum(src) | table 'sum(src)'",
+             "language": "spl2", "source_id": "incomplete.spl2"},
+            {"text": "search src=x | eval =", "language": "spl", "source_id": "invalid.spl"},
+        ], rules, mode="apply")
+        statuses = [report["status"] for report in batch["reports"]]
+        assert statuses == ["valid", "incomplete", "invalid"]
+        print(f"Rewrite ordered batch: {', '.join(statuses)}")
     return 0
 
 

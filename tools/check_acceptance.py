@@ -18,9 +18,9 @@ PYTHON_VERSIONS = tuple(CONFIG["test_python"])
 EXPECTED_COUNTS = {"required_native": 11, "surface_acceptance": 6}
 REQUIRED_TEST_FILES = {
     "native": {"test_native_abi.py", "test_native_mapper.py", "test_native_analysis.py",
-               "test_native_validation.py", "test_native_schema_validation.py", "test_native_spl2.py"},
+               "test_native_validation.py", "test_native_schema_validation.py", "test_native_spl2.py", "test_native_rewrite.py"},
     "acceptance": {"test_documented_cli.py", "test_surfaces.py", "test_analysis_surfaces.py",
-                   "test_validation_surfaces.py", "test_schema_surfaces.py", "test_spl2_surfaces.py"},
+                   "test_validation_surfaces.py", "test_schema_surfaces.py", "test_spl2_surfaces.py", "test_rewrite_surfaces.py"},
 }
 HASH_RE = re.compile(r"^[0-9a-f]{64}$")
 SHA_RE = re.compile(r"^[0-9a-f]{40}$")
@@ -43,7 +43,7 @@ KIND_FIELDS = {
 }
 OPTIONAL_KIND_FIELDS = {
     "installed-wheel": {"loaded_library", "native_sha256", "wheel_payload_hashes", "source_header_sha256",
-                        "fixture_hashes", "schema_surface_evidence", "spl2_surface_evidence", "documentation_hashes"},
+                        "fixture_hashes", "schema_surface_evidence", "spl2_surface_evidence", "rewrite_surface_evidence", "documentation_hashes"},
 }
 SINGLETONS = {"go-floor", "native-memory", "clean-source", "docker-examples"}
 ENVIRONMENT_FIELDS = {

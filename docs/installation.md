@@ -23,6 +23,8 @@ python -m pip install dist/spl_toolkit-0.1.1-*.whl
 
 Source distributions contain the native Go sources needed to build a wheel. Building one requires the pinned packages from `python/requirements-build.txt`, plus Go and a platform C compiler. Normal development and test dependencies are pinned in `python/requirements-dev.txt`.
 
+The current source build includes safe `rewrite` / `rewrite_batch` APIs and their native exports. Rebuild and reinstall the wheel after changing native or Python sources; an older library with the same package version does not establish availability of additive APIs. The [rewrite guide](rewrite.md) and `python/examples/basic_usage.py` use the actual packaged library. Source-native and installed-wheel verification are separate checks.
+
 Supported native release targets are Linux x86-64, macOS x86-64, macOS arm64, and Windows x86-64. Use a wheel matching the operating system and architecture. See the [tested compatibility matrix](compatibility.md) for exact Python versions, runner images, toolchains, wheel tags, and acceptance evidence. The Python wrapper raises `ConfigurationError` if package and native versions differ.
 
 Verify from source with:

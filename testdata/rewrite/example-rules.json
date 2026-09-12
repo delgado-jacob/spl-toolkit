@@ -1,0 +1,1 @@
+{"schema_version":1,"rules":[{"id":"source-user","kind":"field","source":{"name":"src"},"target":{"name":"user"}}]}

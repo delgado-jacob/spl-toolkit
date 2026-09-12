@@ -97,9 +97,9 @@ def passing_records() -> list[dict]:
                 },
                 "required_test_files": {
                     "native": ["test_native_abi.py", "test_native_mapper.py", "test_native_analysis.py",
-                               "test_native_validation.py", "test_native_schema_validation.py", "test_native_spl2.py"],
+                               "test_native_validation.py", "test_native_schema_validation.py", "test_native_spl2.py", "test_native_rewrite.py"],
                     "acceptance": ["test_documented_cli.py", "test_surfaces.py", "test_analysis_surfaces.py",
-                                   "test_validation_surfaces.py", "test_schema_surfaces.py", "test_spl2_surfaces.py"],
+                                   "test_validation_surfaces.py", "test_schema_surfaces.py", "test_spl2_surfaces.py", "test_rewrite_surfaces.py"],
                 },
                 "cli_examples": "passed", "surface_parity": "passed", "version_agreement": "passed",
             })

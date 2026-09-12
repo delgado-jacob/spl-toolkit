@@ -19,6 +19,6 @@ CLI syntax and expected output are executable cases; see the [CLI guide](cli.md)
 
 The Go implementation is canonical. Preserve exported mapper signatures, all seven discovery categories, the C result layouts, and existing exit codes. Mapping and discovery changes should have behavior-level tests at the Go boundary and across any affected CLI, Python, or REST surface.
 
-Milestone 1 is limited to the bundled grammar, field-token rewriting, flat discovery, and validation. Grammar expansion, SPL2 modules, structured lineage, schemas, data-model rewriting, and new SDKs require later milestone design rather than opportunistic changes.
+The current bounded contracts include legacy mapping/discovery, structured SPL/SPL2 analysis and lineage, offline field/schema validation, and explicit safe rewriting. Preserve their documented limitations and independent corpus expectations. Further grammar expansion, SPL2 modules and new SDKs require approved design rather than opportunistic changes. See the [rewrite contract](rewrite.md) before changing source-binding or commit-gate behavior.
 
 Do not edit generated parser output to suppress tool warnings. Regenerate it through the pinned workflow when an approved grammar change requires regeneration. Build and runtime paths must not depend on temporary planning files.

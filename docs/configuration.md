@@ -5,7 +5,7 @@ layout: page
 
 # Configuration
 
-A mapping configuration is JSON with a required non-empty `version` and a `mappings` array. `name`, `description`, `rules`, and `metadata` are optional.
+A legacy mapping configuration is JSON with a required non-empty `version` and a `mappings` array. `name`, `description`, `rules`, and `metadata` are optional. The separate [safe rewrite API](rewrite.md) uses explicit versioned rules and original canonical facts, not this configuration or its precedence/context semantics.
 
 ```json
 {
@@ -50,6 +50,6 @@ Supported conditions are:
 
 Source and sourcetype conditions accept a string or a JSON array of strings in explicit context; any matching array item satisfies the condition. Invalid regular expressions and unsupported operators are rejected. `starts_with`, `ends_with`, `not_equals`, numeric comparisons, and unary `not` are unsupported.
 
-The current validation checks required values, supported condition shapes and operators, regex compilation, mapping field names, and the unsupported data-model rewrite field. It does not perform JSON Schema validation, version compatibility negotiation, unique-rule-ID checks, or circular mapping analysis. A non-empty `datamodels` configuration is rejected because data-model rewriting is outside Milestone 1.
+Legacy configuration validation checks required values, supported condition shapes and operators, regex compilation, mapping field names, and the unsupported `datamodels` configuration field. It does not perform JSON Schema validation, version compatibility negotiation, unique-rule-ID checks, or circular mapping analysis. A non-empty `datamodels` configuration remains rejected here; explicit `data_model` rules belong to the separate safe rewrite API.
 
 Validate a file using the executable case in the [CLI guide](cli.md).

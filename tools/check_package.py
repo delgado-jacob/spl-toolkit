@@ -50,7 +50,7 @@ with SPLMapper() as mapper:
     assert mapper.map_query('search src_ip=1') == 'search source_ip=1'
 """
 NATIVE_TESTS = ("test_native_abi.py", "test_native_mapper.py", "test_native_analysis.py", "test_native_validation.py", "test_native_schema_validation.py", "test_native_spl2.py", "test_native_rewrite.py")
-REWRITE_FIXTURE_FILES = ("cases.json", "forms.json")
+REWRITE_FIXTURE_FILES = ("cases.json", "conditions.json", "corpus.json", "edits.json", "example-rules.json", "forms.json", "requests.json")
 SCHEMA_FIXTURE_FILES = (
     "cases.json", "requests.json", "ocsf/edge-cases.json",
     "ocsf/1.6.0/base.json.gz", "ocsf/1.6.0/windows.json.gz",
@@ -64,7 +64,7 @@ SPL2_FIXTURE_FILES = (
     "extended-commands.json", "extended-boundaries.json", "functions.json", "canonical-core.json",
     "recovery-core.json",
 )
-ACCEPTANCE_FILES = ("test_documented_cli.py", "test_surfaces.py", "test_analysis_surfaces.py", "test_validation_surfaces.py", "test_schema_surfaces.py", "test_spl2_surfaces.py", "spl2_transport.py", "cli_examples.json")
+ACCEPTANCE_FILES = ("test_documented_cli.py", "test_surfaces.py", "test_analysis_surfaces.py", "test_validation_surfaces.py", "test_schema_surfaces.py", "test_spl2_surfaces.py", "test_rewrite_surfaces.py", "spl2_transport.py", "cli_examples.json")
 REQUIRED_PYTEST_PLUGIN = r'''\
 import json
 import os
@@ -153,7 +153,7 @@ def run(command: list[str], *, cwd: Path, env: dict[str, str] | None = None) -> 
 
 def clean_env() -> dict[str, str]:
     env = os.environ.copy()
-    for name in ("PYTHONPATH", "PYTHONHOME", "SPL_NATIVE_LIBRARY", "SPL_EXPECTED_VERSION", "SPL_SCHEMA_FIXTURES", "SPL_SPL2_FIXTURES", "SPL_SPL2_GO_REPORTS", "SPL_SPL2_GO_SHA256", "SPL_REWRITE_FIXTURES"):
+    for name in ("PYTHONPATH", "PYTHONHOME", "SPL_NATIVE_LIBRARY", "SPL_EXPECTED_VERSION", "SPL_SCHEMA_FIXTURES", "SPL_SPL2_FIXTURES", "SPL_SPL2_GO_REPORTS", "SPL_SPL2_GO_SHA256", "SPL_REWRITE_FIXTURES", "SPL_REWRITE_GO_REPORTS", "SPL_REWRITE_GO_SHA256", "SPL_REWRITE_EVIDENCE"):
         env.pop(name, None)
     return env
 
@@ -246,10 +246,10 @@ def copy_rewrite_fixtures(source: Path, destination: Path) -> dict[str, str]:
 
 def copy_documentation(source: Path, destination: Path) -> dict[str, str]:
     """Bind the maintained docs that the installed CLI example harness reads."""
-    paths = [source / "README.md"] + sorted(
+    paths = [source / "README.md", source / "python/examples/basic_usage.py"] + sorted(
         path for path in (source / "docs").rglob("*.md") if "superpowers" not in path.parts
     )
-    required = {"README.md", "docs/cli.md", "docs/spl2.md"}
+    required = {"README.md", "docs/cli.md", "docs/spl2.md", "docs/rewrite.md", "python/examples/basic_usage.py"}
     names = {path.relative_to(source).as_posix() for path in paths}
     if not required <= names:
         raise FileNotFoundError(f"missing maintained documentation: {sorted(required - names)}")
@@ -384,6 +384,7 @@ def install_and_check(
     fixture_source: Path,
     docs_root: Path,
     go_transport: Path,
+    rewrite_transport: Path,
 ) -> dict[str, object]:
     wheel_payload_hashes = verify_wheel_sources(wheel, docs_root)
     python = create_test_environment(directory)
@@ -426,6 +427,11 @@ def install_and_check(
     go_transport_hash = sha256(go_transport)
     if sha256(copied_go_transport) != go_transport_hash:
         raise AssertionError("Go transport copy hash mismatch")
+    copied_rewrite_transport = outside_checkout / f"rewrite-go-transport-{directory.name}.json"
+    shutil.copy2(rewrite_transport, copied_rewrite_transport)
+    rewrite_transport_hash = sha256(rewrite_transport)
+    if sha256(copied_rewrite_transport) != rewrite_transport_hash:
+        raise AssertionError("rewrite Go transport copy hash mismatch")
     runtime_env = {key: "http://127.0.0.1:9" for key in ("HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY", "http_proxy", "https_proxy", "all_proxy")}
     runtime_env.update(NO_PROXY="127.0.0.1,localhost", no_proxy="127.0.0.1,localhost")
     analysis_env = runtime_env | {
@@ -446,6 +452,7 @@ def install_and_check(
     shutil.copy2(docs_root / "testdata" / "validation" / "cases.json", validation_fixture)
     schema_evidence = outside_checkout / f"schema-surface-evidence-{directory.name}.json"
     spl2_evidence = outside_checkout / f"spl2-surface-evidence-{directory.name}.json"
+    rewrite_evidence = outside_checkout / f"rewrite-surface-evidence-{directory.name}.json"
     documentation = outside_checkout / f"docs-{directory.name}"
     documentation_hashes = copy_documentation(docs_root, documentation)
     acceptance_env = install_env | analysis_env | {
@@ -453,6 +460,9 @@ def install_and_check(
         "SPL_SPL2_EVIDENCE": str(spl2_evidence),
         "SPL_SPL2_GO_REPORTS": str(copied_go_transport.resolve()),
         "SPL_SPL2_GO_SHA256": go_transport_hash,
+        "SPL_REWRITE_EVIDENCE": str(rewrite_evidence),
+        "SPL_REWRITE_GO_REPORTS": str(copied_rewrite_transport.resolve()),
+        "SPL_REWRITE_GO_SHA256": rewrite_transport_hash,
         "SPL_VALIDATION_FIXTURES": str(validation_fixture.resolve()),
         "SPL_CLI": str(cli.resolve()),
         "SPL_SERVER": str(server.resolve()),
@@ -466,11 +476,12 @@ def install_and_check(
     return metadata | {
         "schema_surface_evidence": json.loads(schema_evidence.read_text(encoding="utf-8")),
         "spl2_surface_evidence": json.loads(spl2_evidence.read_text(encoding="utf-8")),
+        "rewrite_surface_evidence": json.loads(rewrite_evidence.read_text(encoding="utf-8")),
         "documentation_hashes": documentation_hashes,
         "wheel_sha256": sha256(wheel),
         "wheel_payload_hashes": wheel_payload_hashes,
         "source_header_sha256": sha256(docs_root / "python/spl_toolkit/libspl_toolkit.h"),
-        "fixture_hashes": {"baseline": sha256(fixture), "analysis": sha256(analysis_fixture), "validation": sha256(validation_fixture), "schema": schema_hashes, "spl2": spl2_hashes, "rewrite": rewrite_hashes, "spl2_go_transport": go_transport_hash},
+        "fixture_hashes": {"baseline": sha256(fixture), "analysis": sha256(analysis_fixture), "validation": sha256(validation_fixture), "schema": schema_hashes, "spl2": spl2_hashes, "rewrite": rewrite_hashes, "spl2_go_transport": go_transport_hash, "rewrite_go_transport": rewrite_transport_hash},
         "tests": {"required_native": native_counts, "surface_acceptance": surface_counts},
         "required_test_files": {"native": list(NATIVE_TESTS),
                                 "acceptance": [name for name in ACCEPTANCE_FILES if name.startswith("test_") and name.endswith(".py")]},
@@ -669,10 +680,12 @@ def _check_package(
             cli, server = build_surface_binaries(root, temp / "surface-binaries", version)
         go_transport = outside / "spl2-go-transport.json"
         run([sys.executable, str(root / "tests/acceptance/spl2_transport.py"), "--root", str(root), "--output", str(go_transport)], cwd=root, env=clean_env())
+        rewrite_transport = outside / "rewrite-go-transport.json"
+        run([sys.executable, str(root / "tests/acceptance/test_rewrite_surfaces.py"), "--root", str(root), "--output", str(rewrite_transport)], cwd=root, env=clean_env())
         fixture = root / "testdata" / "baseline" / "cases.json"
         evidence = install_and_check(
             wheel, temp / "wheel-venv", outside, version, requirements,
-            cli, server, fixture, root, go_transport,
+            cli, server, fixture, root, go_transport, rewrite_transport,
         )
 
         if wheel_only:
@@ -689,7 +702,7 @@ def _check_package(
             inspect_wheel(source_wheel, version)
             evidence["rebuilt_sdist"] = install_and_check(
                 source_wheel, temp / "sdist-venv", outside, version,
-                source / "requirements-dev.txt", cli, server, fixture, root, go_transport,
+                source / "requirements-dev.txt", cli, server, fixture, root, go_transport, rewrite_transport,
             )
             evidence["rebuilt_sdist"]["sdist_source_hashes"] = source_hashes
             check_missing_compiler(source, temp / "failed-wheel", clean_env())

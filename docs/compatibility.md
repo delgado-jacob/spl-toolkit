@@ -43,6 +43,14 @@ Local source verification passed the Go1.22.12 external-link floor, the full Go 
 
 The initial floor API attempt was blocked by sandbox loopback permissions; the same API scope passed with authorized local listener access. The known race-linker warning remains nonblocking. Python3.14 acceptance, independent task review, broad milestone review and final root acceptance are separate gates. Local macOS arm64 evidence does not establish unrun Linux/Windows/Python release combinations or external Splunk execution conformance.
 
+## Safe rewrite verification boundary
+
+The [safe rewrite contract](rewrite.md) adds explicit preview/apply and ordered batches for SPL and standalone SPL2 without changing legacy mapping precedence. The durable suite contains 62 independently specified public reports, a complete 34-entry dialect/kind/render-role capability matrix, and two private candidate-syntax/binding fault cases. The matrix and fault cases are separate checks, not extra full-report conformance credit. Required groups cannot become empty; unsupported syntax and changed SPL2 implicit labels remain refusal cases.
+
+Go checks authored candidate/returned text, commit/status, exact audit, source bindings and lineage before producing transport reports. CLI, real local HTTP, source-native Python, a directly built wheel and a wheel rebuilt from sdist compare every full canonical JSON value; only object key order is immaterial. Both installed paths require the rewrite native/surface suites alongside predecessor schema/SPL2/documentation checks, exact copied fixture hashes, isolated module/library origins, nonzero collection and zero required skips.
+
+Local automated verification uses official Go 1.22.12 with external linking and Python 3.12.6 on macOS arm64, with offline modules and pinned packaging wheels. It does not establish a new release, other OS/CPU/Python combinations, ASAN/leak-sanitizer acceptance, or Splunk runtime equivalence. Independent Task8 review, broad milestone review and root-owned stable-built/installed/Python3.14 acceptance are separate gates. The retained milestone log identifies actual command results and artifact hashes; the historical matrix below does not certify these new APIs.
+
 ## Historical 0.1.1 release acceptance
 
 SPL Toolkit 0.1.1 was accepted at source commit `6b55f8902ff1a990aea8951cd78934b32c90660a` by [GitHub Actions run 34077738907](https://github.com/delgado-jacob/spl-toolkit/actions/runs/34077738907). All 24 jobs passed, including exact-source aggregation of 28 evidence records.

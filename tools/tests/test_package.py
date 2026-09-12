@@ -503,6 +503,8 @@ def test_installed_schema_fixtures_exist_before_both_suites(tmp_path: Path, monk
                                    "loaded_library": str(library), "native_sha256": checker.sha256(library)}) + "\n"))
     go_transport = tmp_path / "go-transport.json"
     go_transport.write_text("{\"kind\":\"spl2-go-transport\"}")
+    rewrite_transport = tmp_path / "rewrite-transport.json"
+    rewrite_transport.write_text("{\"kind\":\"rewrite-go-transport\"}")
     monkeypatch.setenv("SPL_SPL2_FIXTURES", "checkout-only")
     monkeypatch.setenv("SPL_REWRITE_FIXTURES", "checkout-only")
     seen = []
@@ -525,6 +527,10 @@ def test_installed_schema_fixtures_exist_before_both_suites(tmp_path: Path, monk
         if "SPL_SCHEMA_EVIDENCE" in env:
             Path(env["SPL_SCHEMA_EVIDENCE"]).write_text("{}")
             Path(env["SPL_SPL2_EVIDENCE"]).write_text("{}")
+            Path(env["SPL_REWRITE_EVIDENCE"]).write_text("{}")
+            copied_rewrite = Path(env["SPL_REWRITE_GO_REPORTS"])
+            assert copied_rewrite.is_relative_to(outside) and copied_rewrite.read_bytes() == rewrite_transport.read_bytes()
+            assert env["SPL_REWRITE_GO_SHA256"] == checker.sha256(rewrite_transport)
             copied_go = Path(env["SPL_SPL2_GO_REPORTS"])
             assert copied_go.is_relative_to(outside) and copied_go.read_bytes() == go_transport.read_bytes()
             assert env["SPL_SPL2_GO_SHA256"] == checker.sha256(go_transport)
@@ -536,7 +542,7 @@ def test_installed_schema_fixtures_exist_before_both_suites(tmp_path: Path, monk
 
     monkeypatch.setattr(checker, "_run_required_suite", suite)
     result = checker.install_and_check(wheel, directory, outside, "0.1.1", PYTHON_DIR / "requirements-dev.txt",
-                                       tmp_path / "cli", tmp_path / "server", ROOT / "testdata/baseline/cases.json", ROOT, go_transport)
+                                       tmp_path / "cli", tmp_path / "server", ROOT / "testdata/baseline/cases.json", ROOT, go_transport, rewrite_transport)
     assert len(seen) == 2 and seen[0] == seen[1]
     assert result["fixture_hashes"]["schema"] == {name: checker.sha256(ROOT / "testdata/schemas" / name) for name in SCHEMA_FIXTURES}
     assert result["fixture_hashes"]["rewrite"] == {name: checker.sha256(ROOT / "testdata/rewrite" / name) for name in checker.REWRITE_FIXTURE_FILES}
@@ -613,7 +619,8 @@ def test_package_copies_documentation_closure_outside_checkout(tmp_path: Path):
     expected = {"README.md", "docs/cli.md", "docs/spl2.md"}
     assert expected <= hashes.keys()
     assert all((destination / name).read_bytes() == (ROOT / name).read_bytes() for name in hashes)
-    assert not (destination / "python").exists()
+    assert (destination / "python/examples/basic_usage.py").read_bytes() == (ROOT / "python/examples/basic_usage.py").read_bytes()
+    assert not (destination / "python/spl_toolkit").exists()
 
 
 @pytest.mark.parametrize("compiler", ["1.22", "1.25"])
@@ -704,7 +711,7 @@ def test_rewrite_fixture_copy_and_source_override(tmp_path, monkeypatch):
     assert "SPL_REWRITE_FIXTURES" not in checker.clean_env()
     destination = tmp_path / "rewrite"
     hashes = checker.copy_rewrite_fixtures(ROOT / "testdata/rewrite", destination)
-    assert hashes == {name: checker.sha256(ROOT / "testdata/rewrite" / name) for name in ("cases.json", "forms.json")}
+    assert hashes == {name: checker.sha256(ROOT / "testdata/rewrite" / name) for name in ("cases.json", "conditions.json", "corpus.json", "edits.json", "example-rules.json", "forms.json", "requests.json")}
     assert hashes == {p.name: checker.sha256(p) for p in destination.glob("*.json")}
 
 
