@@ -1,0 +1,8 @@
+{
+  "windows_root": "file:///C:/scan%20root/",
+  "relative_path": "q #100%/naïve.spl",
+  "encoded_relative_uri": "q%20%23100%25/na%C3%AFve.spl",
+  "unicode_source": "a😀b\r\nç",
+  "inline_id": "draft/α #1",
+  "inline_uri": "spl-toolkit:///inline/draft%2F%CE%B1%20%231"
+}
