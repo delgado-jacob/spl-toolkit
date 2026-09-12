@@ -12,6 +12,7 @@ Updated September 12, 2026. This is the current handoff; it supersedes historica
 - Fresh continuation implementer `/root/m6_task5_fresh_implementer` completed Task 5 and its acceptance fix; independent reviewer `/root/m6_task5_reviewer` approved both fix rounds. Treat the SDD ledger as authoritative after these disposable handles are no longer live.
 - Task 5 is accepted. Its failed preview-contract attempt and passing exact-head Go window are retained under `_build_plan/continuation/2026-09-12/task5-go-acceptance/`.
 - Task 6 is accepted at `e724af4cd22ba6f29e53de99c572275db7627843` after an independent full review and one scoped fix/re-review. Task 7 native/Python/package integration is released; Task 8 remains gated on its acceptance.
+- Task 7 has a reviewed partial checkpoint at `f7e7aff44859905974f24311f0172889cce53f64`: no product defect or material test gap was found, and current-compiler source/native/direct-wheel/rebuilt-sdist evidence passes. It is not accepted because the retained Go 1.22.12 installation lacks standard-library sources and the formal pinned wheelhouse is absent. Task 8 remains gated.
 - The old task ID is `01a07d20-1e65-7963-a516-10d357e8ac16`. Its goal tool most recently reported `usageLimited`; the September 12 handoff work and qualified review nevertheless ran successfully. Check current availability rather than assuming that old error is still active. No credits were purchased or resets consumed.
 
 The canonical copy of this file is in the implementation worktree. An identical copy in the original checkout makes the continuation point discoverable.
@@ -41,6 +42,7 @@ All accepted milestone commits below were verified as ancestors of the current b
 | M6 Task4: linked groups / edits | Accepted at `14a3a0dcfe4652240dc8b949461f905b206f215a`. |
 | M6 Task5 | Accepted source `c8be29f6fead17e9e40a06073878edf2b2efa35e`; all review findings closed. Independent Go-only acceptance passed at `5d1e50f8ab3fa10cc5e6b2abae0678870df00081` across 29 single/destination cases, ordered batch and ownership/concurrency/error checks. |
 | M6 Task6 | Accepted at `e724af4cd22ba6f29e53de99c572275db7627843`. CLI/HTTP/OpenAPI/docs parity is reviewed; stale guidance, strict schema parity, body-limit coverage and partial-commit CLI coverage are closed. The local Go 1.22 GOROOT is incomplete, so no fresh floor compile is claimed. |
+| M6 Task7 | Reviewed partial checkpoint at `f7e7aff44859905974f24311f0172889cce53f64`. Native/Python APIs, real Go 1.25 headers and package closure pass current-compiler review. Exact Go 1.22.12 header generation and formal floor wheel/sdist acceptance remain open external-input gates. |
 | M7: developer tooling | Brainstorming, design, ExecPlan and preflights prepared/approved subject to final M6 interface reconciliation. No production implementation accepted. |
 
 The completed atomic unit consists of `pkg/rewrite/rewrite.go`, `pkg/rewrite/verify.go`, and `pkg/rewrite/rewrite_test.go`. The interrupted file bytes were preserved before verification. No failing test expectation was rewritten during this handoff: the earlier worker had already corrected its hand-counted offsets. The retained historical `single-first-green` run actually exited 1 and remains a failure record.
@@ -66,7 +68,7 @@ Use bounded ownership and artifact paths, preserve others' work, retain actual e
 
 ## Remaining work
 
-**Implement M6 Task 7 next.** Task 6 is accepted after reviewed CLI/HTTP/OpenAPI/docs integration. Complete Task 7 native/Python/package interfaces, then Task 8 corpus/docs/full verification, followed by separate broad review and final surface acceptance.
+**Close M6 Task 7's external-input gates next.** Restore a complete official Go 1.22.12 darwin-arm64 toolchain and the exact pinned Python wheelhouse, regenerate the real floor header, and run formal floor wheel/sdist acceptance. Then accept Task 7 and release Task 8 corpus/docs/full verification, followed by separate broad review and final surface acceptance.
 
 After accepted M6, reconcile M7 with the actual final public/prepared-target/CLI/native interfaces, then execute its approved 12-task plan with qualified implementation/review and the specified coordinator acceptance windows. Do not redo settled brainstorming merely because a new session starts. Complete requirement-by-requirement final audit for all milestones before claiming the original goal complete.
 
@@ -74,6 +76,7 @@ After accepted M6, reconcile M7 with the actual final public/prepared-target/CLI
 
 - **No unresolved Task 5 defect remains.** The accepted core window is recorded in `task5-go-acceptance/closure.json`; CLI/HTTP/native/installed/Python and cross-platform acceptance remain future gates.
 - The earlier temporary module cache was incomplete. Handoff copied the two pinned dependencies from the existing local cache into `/private/tmp/spl-toolkit-handoff-gomodcache`; no network download or `go.mod`/`go.sum` change occurred. Future broader checks may need additional pinned tools/modules. Check actual availability first.
+- Task 7's bounded offline search found no complete Go 1.22.12 installation/archive: the retained binary reports the right version but its GOROOT has empty standard-library source directories, and no alternative exists in Homebrew, `/usr/local/go`, `~/sdk`, or known caches. The formal wheelhouse also lacks required artifacts. Current-compiler diagnostic packaging used exact retained caches and is not relabeled as floor acceptance. External download authority is required to close these gates; never synthesize the historical header or weaken its strict comparison.
 - `/Users/jacobdelgado/.codex/skills/efficient-delegation/SKILL.md` is now missing. It was read in full earlier (recorded SHA `2b0c89a340dafe57c5af827aa24476e7e0371de8b7a3d4dbfac275c3482e77e7`). Standard-location searches found no replacement. Apply the explicit user instructions and retained rules; do not treat the missing file as permission to downgrade capability.
 - The recovered private M6 Go driver and validation cases were executed only inside the accepted Task 5 coordinator window; the Python input remains unexecuted and coordinator-only for the final surface gate.
 - Remaining private M6/M7 inputs are retained in the coordinator-only bundle. The accepted Go window covered 24 base + 5 destination cases, ordered batches, strict input errors and concurrent equality. Final adapter/native/package acceptance remains unexecuted.
