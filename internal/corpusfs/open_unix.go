@@ -13,24 +13,19 @@ import (
 
 const directoryFlags = unix.O_RDONLY | unix.O_CLOEXEC | unix.O_NOFOLLOW | unix.O_DIRECTORY
 
-func openRoot(absolute string) (*Dir, error) {
+func openRoot(root string) (*Dir, error) {
+	if !strings.HasPrefix(root, "/") {
+		cwd, err := os.Getwd()
+		if err != nil {
+			return nil, err
+		}
+		root = cwd + "/" + root
+	}
 	fd, err := unix.Open("/", directoryFlags, 0)
 	if err != nil {
 		return nil, err
 	}
-	d := &Dir{file: os.NewFile(uintptr(fd), "/")}
-	for _, p := range strings.Split(strings.TrimPrefix(absolute, "/"), "/") {
-		if p == "" {
-			continue
-		}
-		child, err := d.OpenDir(p)
-		d.Close()
-		if err != nil {
-			return nil, err
-		}
-		d = child
-	}
-	return d, nil
+	return walkRoot(&Dir{file: os.NewFile(uintptr(fd), "/")}, strings.Split(root, "/"))
 }
 
 func openChild(parent *os.File, name string, directory bool) (*os.File, error) {

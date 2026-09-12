@@ -7,8 +7,8 @@ import (
 	"errors"
 	"io"
 	"os"
-	"path/filepath"
 	"strings"
+	"unicode/utf8"
 )
 
 var (
@@ -37,19 +37,48 @@ func opened(name string, directory bool) {
 func (d *Dir) Close() error { return d.file.Close() }
 
 func component(name string) bool {
-	return name != "" && name != "." && name != ".." && !strings.ContainsAny(name, "/\\\x00")
+	return name != "" && name != "." && name != ".." && utf8.ValidString(name) && !strings.ContainsAny(name, "/\\\x00")
 }
 
 // OpenRoot checks each ancestor starting at the filesystem/volume root.
 func OpenRoot(root string) (*Dir, error) {
-	if root == "" || strings.ContainsRune(root, 0) {
+	if root == "" || !utf8.ValidString(root) || strings.ContainsRune(root, 0) {
 		return nil, ErrUnsafePath
 	}
-	absolute, err := filepath.Abs(root)
-	if err != nil {
-		return nil, err
+	return openRoot(root)
+}
+
+// walkRoot preserves the supplied sequence: even a named component canceled by
+// a later '..' must be opened without following aliases. Parent segments pop a
+// held ancestor, never a mutable native '..' entry after a directory rename.
+// Ownership of anchor transfers here; every handle except the result is closed.
+func walkRoot(anchor *Dir, parts []string) (*Dir, error) {
+	stack := []*Dir{anchor}
+	defer func() {
+		for _, d := range stack {
+			d.Close()
+		}
+	}()
+	for _, part := range parts {
+		switch part {
+		case "", ".":
+			continue
+		case "..":
+			if len(stack) > 1 {
+				stack[len(stack)-1].Close()
+				stack = stack[:len(stack)-1]
+			}
+		default:
+			child, err := stack[len(stack)-1].OpenDir(part)
+			if err != nil {
+				return nil, err
+			}
+			stack = append(stack, child)
+		}
 	}
-	return openRoot(absolute)
+	result := stack[len(stack)-1]
+	stack = stack[:len(stack)-1]
+	return result, nil
 }
 
 func (d *Dir) OpenDir(name string) (*Dir, error) {

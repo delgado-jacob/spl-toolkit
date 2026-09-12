@@ -16,7 +16,22 @@ import (
 	"golang.org/x/sys/windows"
 )
 
-func openRoot(absolute string) (*Dir, error) {
+func openRoot(root string) (*Dir, error) {
+	absolute := strings.ReplaceAll(root, "/", `\`)
+	if !filepath.IsAbs(absolute) {
+		volume := filepath.VolumeName(absolute)
+		// Resolve only the implicit current-directory prefix; never give the
+		// caller's named components to filepath.Abs/GetFullPathName cleanup.
+		cwd, err := filepath.Abs(volume + ".")
+		if err != nil {
+			return nil, err
+		}
+		if strings.HasPrefix(absolute, `\`) {
+			absolute = filepath.VolumeName(cwd) + absolute
+		} else {
+			absolute = cwd + `\` + absolute[len(volume):]
+		}
+	}
 	// Reject device namespaces; only a drive or UNC share may anchor the walk.
 	if strings.HasPrefix(absolute, `\\?\`) || strings.HasPrefix(absolute, `\\.\`) {
 		return nil, ErrUnsafePath
@@ -38,19 +53,7 @@ func openRoot(absolute string) (*Dir, error) {
 	if err != nil {
 		return nil, err
 	}
-	d := &Dir{file: f}
-	for _, p := range strings.Split(strings.TrimPrefix(absolute[len(volume):], `\`), `\`) {
-		if p == "" {
-			continue
-		}
-		child, err := d.OpenDir(p)
-		d.Close()
-		if err != nil {
-			return nil, err
-		}
-		d = child
-	}
-	return d, nil
+	return walkRoot(&Dir{file: f}, strings.Split(absolute[len(volume):], `\`))
 }
 
 func openChild(parent *os.File, name string, directory bool) (*os.File, error) {

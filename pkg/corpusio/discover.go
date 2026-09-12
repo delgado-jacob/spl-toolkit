@@ -1,9 +1,11 @@
 package corpusio
 
 import (
+	"fmt"
 	"path"
 	"path/filepath"
 	"sort"
+	"unicode/utf8"
 
 	"github.com/delgado-jacob/spl-toolkit/internal/corpusfs"
 	"github.com/delgado-jacob/spl-toolkit/pkg/analysis"
@@ -38,15 +40,15 @@ type directoryReader func(*corpusfs.Dir) ([]corpusfs.Entry, error)
 // Roots require physical ancestry. Traversal failures make selection incomplete;
 // local file failures do not discard independently acquired neighbors.
 func LoadDirectory(rootPath string) (corpus.Input, error) {
-	absolute, err := filepath.Abs(rootPath)
-	if err != nil {
-		return corpus.Input{}, inputError("scan root: %v", err)
-	}
 	root, err := corpusfs.OpenRoot(rootPath)
 	if err != nil {
 		return corpus.Input{}, inputError("scan root: %v", err)
 	}
 	defer root.Close()
+	absolute, err := filepath.Abs(rootPath)
+	if err != nil {
+		return corpus.Input{}, inputError("scan root: %v", err)
+	}
 	return discover(root, baseURI(absolute), func(d *corpusfs.Dir) ([]corpusfs.Entry, error) { return d.Entries() })
 }
 
@@ -68,6 +70,18 @@ func discover(root *corpusfs.Dir, uri string, readDirectory directoryReader) (co
 		}
 		sort.Slice(entries, func(i, j int) bool { return entries[i].Name < entries[j].Name })
 		for _, e := range entries {
+			// Native Unix names can be arbitrary bytes. Never assign an identity
+			// or path that JSON would silently replace with U+FFFD. Keep the
+			// containing directory as the path and encode the offending bytes as
+			// labeled evidence, distinct even for names with the same replacement.
+			if !utf8.ValidString(e.Name) {
+				out.Selection.Complete = false
+				out.Selection.TraversalFailures = append(out.Selection.TraversalFailures, corpus.AcquisitionError{
+					Code: "invalid_name", Phase: "traverse", Path: prefix,
+					Message: fmt.Sprintf("directory entry name is not valid UTF-8 (name bytes, hex: %x)", []byte(e.Name)),
+				})
+				continue
+			}
 			p := path.Join(prefix, e.Name)
 			if e.Symlink {
 				out.Selection.SkippedSymlinks = append(out.Selection.SkippedSymlinks, p)
@@ -111,7 +125,14 @@ func discover(root *corpusfs.Dir, uri string, readDirectory directoryReader) (co
 	sort.Slice(out.Entries, func(i, j int) bool { return out.Entries[i].ID < out.Entries[j].ID })
 	sort.Strings(out.Selection.SkippedSymlinks)
 	sort.Slice(out.Selection.TraversalFailures, func(i, j int) bool {
-		return out.Selection.TraversalFailures[i].Path < out.Selection.TraversalFailures[j].Path
+		a, b := out.Selection.TraversalFailures[i], out.Selection.TraversalFailures[j]
+		if a.Path != b.Path {
+			return a.Path < b.Path
+		}
+		if a.Code != b.Code {
+			return a.Code < b.Code
+		}
+		return a.Message < b.Message
 	})
 	if len(out.Entries) == 0 && out.Selection.Complete {
 		return corpus.Input{}, inputError("selection contains no query documents")

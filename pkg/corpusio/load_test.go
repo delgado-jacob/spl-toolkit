@@ -33,6 +33,31 @@ func TestManifestParentBaseAndIgnoredOverride(t *testing.T) {
 	}
 }
 
+func TestCancelledSymlinkRejectedAcrossLocalSelections(t *testing.T) {
+	root := testRoot(t)
+	writeQuery(t, root, "queries/valid.spl", []byte("| table host"))
+	if err := os.Symlink(testRoot(t), filepath.Join(root, "alias")); err != nil {
+		t.Skip(err)
+	}
+	t.Run("directory root", func(t *testing.T) {
+		if _, err := LoadDirectory(root + "/alias/../queries"); err == nil {
+			t.Fatal("cancelled symlink root accepted")
+		}
+	})
+	t.Run("manifest base", func(t *testing.T) {
+		m := manifest(t, `{"schema_version":1,"base":"alias/../queries","documents":[{"id":"q","path":"valid.spl"}]}`)
+		if _, err := LoadManifest(m, filepath.Join(root, "manifest.json")); err == nil {
+			t.Fatal("cancelled symlink base accepted")
+		}
+	})
+	t.Run("manifest locator parent", func(t *testing.T) {
+		m := manifest(t, `{"schema_version":1,"base":"queries","documents":[{"id":"q","path":"valid.spl"}]}`)
+		if _, err := LoadManifest(m, root+"/alias/../manifest.json"); err == nil {
+			t.Fatal("cancelled symlink locator parent accepted")
+		}
+	})
+}
+
 func testRoot(t *testing.T) string {
 	t.Helper()
 	p, err := filepath.EvalSymlinks(t.TempDir())

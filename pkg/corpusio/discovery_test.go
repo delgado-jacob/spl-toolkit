@@ -3,14 +3,59 @@
 package corpusio
 
 import (
+	"bytes"
+	"encoding/json"
 	"errors"
 	"os"
 	"path/filepath"
 	"reflect"
+	"strings"
 	"testing"
+	"unicode/utf8"
 
 	"github.com/delgado-jacob/spl-toolkit/internal/corpusfs"
 )
+
+func TestDiscoveryInvalidByteNamesDoNotPublishLossyIdentities(t *testing.T) {
+	rootPath := testRoot(t)
+	writeQuery(t, rootPath, "é.spl", []byte("| table host"))
+	root, err := corpusfs.OpenRoot(rootPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer root.Close()
+	in, err := discover(root, "file:///fixture/", func(*corpusfs.Dir) ([]corpusfs.Entry, error) {
+		return []corpusfs.Entry{{Name: "a\xff.spl"}, {Name: "a\xfe.spl"}, {Name: "dir\xff", Directory: true}, {Name: "link\xfe", Symlink: true}, {Name: "é.spl"}}, nil
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if in.Selection.Complete || len(in.Entries) != 1 || in.Entries[0].ID != "é.spl" || in.Entries[0].Document == nil || in.Entries[0].Document.SourceID != "é.spl" {
+		t.Fatalf("unsafe identities or lost valid neighbor: %+v", in)
+	}
+	if len(in.Selection.SkippedSymlinks) != 0 || len(in.Selection.TraversalFailures) != 4 {
+		t.Fatalf("unsafe metadata: %+v", in.Selection)
+	}
+	var evidence []string
+	for _, f := range in.Selection.TraversalFailures {
+		if f.Code != "invalid_name" || f.Phase != "traverse" || !utf8.ValidString(f.Path) || !utf8.ValidString(f.Message) {
+			t.Fatalf("unsafe failure: %+v", f)
+		}
+		evidence = append(evidence, f.Message)
+	}
+	for _, originalHex := range []string{"61ff2e73706c", "61fe2e73706c", "646972ff", "6c696e6bfe"} {
+		if !strings.Contains(strings.Join(evidence, "\n"), originalHex) {
+			t.Fatalf("lost raw-name evidence %s: %v", originalHex, evidence)
+		}
+	}
+	raw, err := json.Marshal(in)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if bytes.Contains(raw, []byte(`\ufffd`)) || bytes.Contains(raw, []byte("�")) {
+		t.Fatalf("lossy JSON: %s", raw)
+	}
+}
 
 func TestDirectorySelectionOrder(t *testing.T) {
 	root := testRoot(t)

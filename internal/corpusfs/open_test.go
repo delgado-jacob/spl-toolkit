@@ -3,11 +3,21 @@
 package corpusfs
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 	"reflect"
 	"testing"
 )
+
+func TestRootRejectsInvalidUTF8BeforeResolution(t *testing.T) {
+	if d, err := OpenRoot(physicalTemp(t) + "/bad\xff/.."); !errors.Is(err, ErrUnsafePath) {
+		if d != nil {
+			d.Close()
+		}
+		t.Fatalf("invalid root text was not refused at admission: %v", err)
+	}
+}
 
 func physicalTemp(t *testing.T) string {
 	t.Helper()
@@ -75,6 +85,56 @@ func TestRootAndAncestorSymlinksRefused(t *testing.T) {
 			d.Close()
 			t.Fatalf("accepted aliased root %s", p)
 		}
+	}
+}
+
+func TestRootChecksCancelledComponents(t *testing.T) {
+	root := physicalTemp(t)
+	must(t, os.Mkdir(filepath.Join(root, "real"), 0700))
+	put(t, filepath.Join(root, "q.spl"), "original")
+	put(t, filepath.Join(root, "file"), "not a directory")
+	link(t, physicalTemp(t), filepath.Join(root, "alias"))
+	for _, part := range []string{"alias", "missing", "file"} {
+		if d, err := OpenRoot(root + "/" + part + "/.."); err == nil {
+			d.Close()
+			t.Errorf("accepted cancelled component %q", part)
+		}
+	}
+	d, err := OpenRoot(root + "/real/..")
+	must(t, err)
+	defer d.Close()
+	b, err := d.ReadFile("q.spl")
+	must(t, err)
+	if string(b) != "original" {
+		t.Fatalf("parent selection: %q", b)
+	}
+}
+
+func TestParentSegmentsUseHeldAncestorsAfterRename(t *testing.T) {
+	root := physicalTemp(t)
+	outside := physicalTemp(t)
+	must(t, os.Mkdir(filepath.Join(root, "cancelled-component"), 0700))
+	put(t, filepath.Join(root, "q.spl"), "original")
+	put(t, filepath.Join(outside, "q.spl"), "SENTINEL")
+	visited := false
+	afterOpen = func(name string, directory bool) {
+		if name == "cancelled-component" && directory {
+			afterOpen = nil
+			visited = true
+			must(t, os.Rename(filepath.Join(root, name), filepath.Join(outside, name)))
+		}
+	}
+	defer func() { afterOpen = nil }()
+	d, err := OpenRoot(root + "/cancelled-component/..")
+	must(t, err)
+	defer d.Close()
+	if !visited {
+		t.Fatal("cancelled component was never checked")
+	}
+	b, err := d.ReadFile("q.spl")
+	must(t, err)
+	if string(b) != "original" {
+		t.Fatalf("parent segment escaped held ancestor: %q", b)
 	}
 }
 

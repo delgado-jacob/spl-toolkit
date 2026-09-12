@@ -53,6 +53,10 @@ func TestOpenFailuresCloseHandles(t *testing.T) {
 	}
 	before := count()
 	for i := 0; i < 100; i++ {
+		if opened, err := OpenRoot(root + "/sub/../missing"); err == nil {
+			opened.Close()
+			t.Fatal("expected failed root traversal")
+		}
 		for _, p := range []string{"sub/missing.spl", "sub/dir.spl", "sub/pipe.spl", "sub/missing/q.spl"} {
 			if _, err := d.ReadFile(p); err == nil {
 				t.Fatal("expected failure")

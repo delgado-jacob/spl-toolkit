@@ -132,25 +132,30 @@ func LoadManifest(manifest Manifest, manifestPath string) (corpus.Input, error) 
 	if err != nil {
 		return corpus.Input{}, err
 	}
-	absolute, err := filepath.Abs(manifestPath)
-	if err != nil {
-		return corpus.Input{}, inputError("manifest path: %v", err)
+	// Split retains canceled components in the locator parent. Dir/Join/Abs
+	// would erase them before the no-follow walk could check their objects.
+	parent, _ := filepath.Split(manifestPath)
+	if parent == "" {
+		parent = "." + string(filepath.Separator)
 	}
-	parent := filepath.Dir(absolute)
 	// Check the supplied parent even when a base with '..' chooses another root.
 	p, err := corpusfs.OpenRoot(parent)
 	if err != nil {
 		return corpus.Input{}, inputError("manifest parent: %v", err)
 	}
 	p.Close()
-	base := filepath.Join(parent, filepath.FromSlash(m.Base))
+	base := parent + filepath.FromSlash(m.Base)
 	root, err := corpusfs.OpenRoot(base)
 	if err != nil {
 		return corpus.Input{}, inputError("manifest base: %v", err)
 	}
 	defer root.Close()
+	absolute, err := filepath.Abs(base)
+	if err != nil {
+		return corpus.Input{}, inputError("manifest base: %v", err)
+	}
 	out := selection("manifest")
-	uri := baseURI(base)
+	uri := baseURI(absolute)
 	for _, e := range m.Documents {
 		out.Entries = append(out.Entries, loadedEntry(e, root, uri))
 	}
