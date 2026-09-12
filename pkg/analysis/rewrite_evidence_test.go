@@ -571,18 +571,35 @@ func TestRewriteRenderRejectsOriginalInvalidUTF8(t *testing.T) {
 
 func TestRewriteNullInspectionOwnerProof(t *testing.T) {
 	for _, tc := range []struct {
-		language, expression string
-		eligible             bool
+		language, expression, role string
+		eligible                   bool
 	}{
-		{"spl", `unknown(isnull(user))=1`, false},
-		{"spl2", `unknown(isnull(user))=1`, false},
-		{"spl2", `abs(value:isnull(user))=1`, false},
-		{"spl", `isnull(user)`, true},
-		{"spl2", `isnull(user)`, true},
+		{"spl", `unknown(isnull(user))=1`, "", false},
+		{"spl2", `unknown(isnull(user))=1`, "", false},
+		{"spl2", `abs(value:isnull(user))=1`, "", false},
+		{"spl", `abs(value:isnull(user))=1`, "", false},
+		{"spl", `searchmatch(isnull(user))=1`, "", false},
+		{"spl", `isnull(user)`, "null_test", true},
+		{"spl2", `isnull(user)`, "null_test", true},
+		{"spl", `isnotnull(user)`, "null_test", true},
+		{"spl2", `isnotnull(user)`, "null_test", true},
+		{"spl", `ISNULL('user')`, "null_test", true},
+		{"spl", `abs(isnull(user))=1`, "null_test", true},
+		{"spl2", `abs(isnull(user))=1`, "null_test", true},
+		{"spl", `isnull(isnotnull(user))`, "null_test", true},
+		{"spl", `abs(user)=1`, "expression_atom", true},
+		{"spl", `isnull(abs(user))`, "expression_atom", true},
+		{"spl2", `isnull(abs(user))`, "expression_atom", true},
+		{"spl", `isnull(user+1)`, "expression_atom", true},
+		{"spl2", `isnull(user+1)`, "expression_atom", true},
+		{"spl", `isnull((user))`, "expression_atom", true},
 	} {
 		t.Run(tc.language+"/"+tc.expression, func(t *testing.T) {
 			s := rewriteTestSession(t, tc.language, "search index=main | where "+tc.expression)
 			site := rewriteFind(t, s, "field", "user", 0)
+			if site.Role != tc.role {
+				t.Errorf("null inspection role = %q, want %q", site.Role, tc.role)
+			}
 			if (site.Eligibility == "eligible") != tc.eligible {
 				t.Errorf("null inspection changed owner proof: %+v", site)
 			}
@@ -599,6 +616,73 @@ func TestRewriteNullInspectionOwnerProof(t *testing.T) {
 			c := rewriteTestSession(t, tc.language, rewriteApply(s.Evidence().Analysis.Document.Text, r.Edits()))
 			if len(r.Edits()) != 1 || !s.Verify(c, r).Proven {
 				t.Fatalf("proved null owner refused: %+v %+v", r.Requirements(), s.Verify(c, r))
+			}
+		})
+	}
+}
+
+func TestRewriteSPLNullInspectionBoundaries(t *testing.T) {
+	for _, tc := range []struct {
+		query, name, role, binding string
+		syntax                     bool
+	}{
+		{`search user=x | where isnull(user)`, "user", "null_test", "source", true},
+		{`search user=x | eval checked=isnotnull(user)`, "user", "null_test", "source", true},
+		{`search user=x | eval user=1 | where isnull(user)`, "user", "null_test", "derived", true},
+		{`search user=x | table other | where isnull(user)`, "user", "null_test", "unavailable", true},
+		{`search index=main | mystery | where isnull(user)`, "user", "null_test", "indeterminate", true},
+		{`search user=x | where isnull(user, 1)`, "user", "expression_atom", "source", true},
+		{`search user=x | where isnotnull(user, 1)`, "user", "expression_atom", "source", true},
+		{`search user=x | stats isnull(user)`, "user", "expression_atom", "source", true},
+		{`search user=x | where isnull(user . other)`, "user", "expression_atom", "source", true},
+		{`search user=x | where isnull(user`, "user", "expression_atom", "source", false},
+		{`search user=x | where isnull(user @)`, "user", "expression_atom", "source", false},
+		{`search user=x | where isnull(user[0])`, "user", "expression_atom", "source", false},
+	} {
+		t.Run(tc.query, func(t *testing.T) {
+			document := QueryDocument{Language: "spl", Text: tc.query}
+			ordinary, err := Analyze(document)
+			if err != nil {
+				t.Fatal(err)
+			}
+			s, err := PrepareRewrite(document, nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+			evidence := s.Evidence()
+			a, _ := json.Marshal(ordinary)
+			b, _ := json.Marshal(evidence.Analysis)
+			if string(a) != string(b) || evidence.Analysis.Coverage.SyntaxComplete != tc.syntax {
+				t.Fatalf("ordinary analysis or syntax changed: %+v", evidence.Analysis)
+			}
+			offset := strings.LastIndex(tc.query, tc.name)
+			for _, site := range evidence.Sites {
+				if site.Kind != "field" || site.Location.Start.Offset != offset {
+					continue
+				}
+				if site.Role != tc.role || site.Location.End.Offset != offset+len(tc.name) || site.OwnerLocation != site.Location {
+					t.Errorf("wrong role or operand location: %+v", site)
+				}
+				var reference Reference
+				for _, ref := range evidence.Analysis.References {
+					if ref.ID == site.ReferenceID {
+						reference = ref
+					}
+				}
+				if reference.Binding != tc.binding || reference.Role != "read" || reference.Location != site.Location {
+					t.Errorf("ordinary null-inspection reference changed: %+v", reference)
+				}
+				if tc.binding != "source" || !tc.syntax {
+					r, err := s.Render([]RewriteReplacement{{site.ID, rewriteName("account")}})
+					if err != nil || len(r.Edits()) != 0 || len(r.Requirements()) == 0 {
+						t.Fatalf("unproved or malformed null inspection rendered: %+v %v", r, err)
+					}
+				}
+				return
+			}
+			// Parser recovery may discard the damaged operand entirely.
+			if tc.syntax {
+				t.Fatal("missing null-inspection operand")
 			}
 		})
 	}

@@ -36,11 +36,19 @@ func (s *semanticStage) rewriteSPLOwner(ctx antlr.ParserRuleContext) rewriteOwne
 	for parent := ctx.GetParent(); parent != nil; parent = parent.GetParent() {
 		switch c := parent.(type) {
 		case parser.IAnalysisFunctionCallContext:
-			spec, known := functions[strings.ToLower(c.AnalysisFunctionName().GetText())]
+			name := strings.ToLower(c.AnalysisFunctionName().GetText())
+			spec, known := functions[name]
 			if !known || spec.dynamic {
 				o.role = ""
 				o.location = s.parsed.source.contextLocation(c)
 				return o
+			}
+			if o.role == "expression_atom" && (name == "isnull" || name == "isnotnull") && s.sound(c) {
+				_, aggregate := c.GetParent().(parser.IAnalysisAggregateContext)
+				args := c.AnalysisArgumentList()
+				if !aggregate && args != nil && len(args.AllAnalysisExpression()) == 1 && rewriteSPLSingleIdentifier(args.AnalysisExpression(0)) == ctx {
+					o.role = "null_test"
+				}
 			}
 		case parser.IAnalysisSearchTermContext:
 			if o.role == "expression_atom" {
