@@ -1,7 +1,7 @@
 # Developer Tooling and Ecosystem Implementation Plan — APPROVED FOR SERIAL EXECUTION
 
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development. Root approved this reconciled plan; Task 1 was independently accepted at `d528393` and Task 2 is now released. Use one implementer at a time, then independent specification/code review of its immutable owned-file commit, fixes and scoped re-review before the next task. Later tasks release only after their predecessor is accepted.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development. Root approved this reconciled plan; Tasks 1–2 were independently accepted, with Task 2's security corrections approved at `988f608`. Task 3 is released. Use one implementer at a time, then independent specification/code review of its immutable owned-file commit, fixes and scoped re-review before the next task.
 
 **Goal:** Let users scan local query repositories, consume honest aggregate/SARIF/graph results, compare schema and mapping changes, embed a detached document view, and receive actual local editor diagnostics/highlights from the canonical engine.
 
@@ -48,8 +48,8 @@ Preserve all other users/agents' changes in the shared worktree. During this pla
 - [x] (2026-09-12 UTC) Independent architecture review found one offline-module-cache recipe defect; same reviewer approved the exact correction with zero residual blocking findings.
 - [x] (2026-09-12 UTC) Root approved the affected M7 design ruling and final plan against M6, and released Task 1 for serial SDD.
 - [x] (2026-09-12 UTC) Task 1: strict corpus/manifest models and revision identity; `d528393a63a922702ae9c0271adacac8ba5e6e74`, independent review APPROVE, fresh four-package tests and focused vet passed.
-- [ ] Task 2: contained filesystem acquisition and deterministic selection; released after Task 1 review.
-- [ ] Task 3: canonical prepared target access and in-memory corpus reports.
+- [x] (2026-09-12 UTC) Task 2: contained filesystem acquisition and deterministic selection; initial `2f8568e`, two P2 security findings corrected/re-reviewed at `988f6088170f290c9a0e2d03393da9ed8a014b3f`. Go1.22 Darwin runtime/race/vet and Linux/Windows compile checks passed; Linux/Windows runtime remains open.
+- [ ] Task 3: canonical prepared target access and in-memory corpus reports; released after Task 2 rereview.
 - [ ] Task 4: detached advanced document access.
 - [ ] Task 5: evidence-preserving graph export.
 - [ ] Task 6: standards-correct SARIF export.
@@ -98,7 +98,7 @@ The directory `/private/tmp/spl-toolkit-m7-consumer-preflight` survives only as 
 ## Outcomes & Retrospective
 
 
-Root approved the reconciled design/plan and accepted Task 1 at `d528393` after independent immutable-commit review. It establishes strict input/manifest contracts and revision identity, not loader or analysis execution. Task 2 is released; remaining task, root and real-consumer gates stay open. Missing consumer inputs are an explicit Task12 provisioning prerequisite.
+Root approved the reconciled design/plan and accepted Tasks 1–2 after independent immutable-commit reviews. Task 2's two security findings were corrected and same-reviewer rereview approved; no broader runtime platform proof is inferred from cross-compilation. Task 3 is released; later task, root and real-consumer gates stay open. Missing consumer inputs are an explicit Task12 provisioning prerequisite.
 
 
 ## Context and Orientation
@@ -432,3 +432,5 @@ Revision note (2026-09-12, independent plan-review fix): The reviewer found that
 Revision note (2026-09-12, root release): Root reviewed the bounded design change and final-plan reconciliation against accepted M6, accepted the scoped review's correction/rereview, and approved all twelve task contracts. Task 1 alone is released for a fresh implementer and independent immutable-commit review; later tasks and root acceptance windows remain gated. No predecessor code was changed by planning.
 
 Revision note (2026-09-12, Task 1 acceptance): Strict corpus/manifest and identity contracts are committed at `d528393a63a922702ae9c0271adacac8ba5e6e74`. Independent Task 1 review APPROVE is retained at `.superpowers/sdd/milestone-7-implementation-plan/task-1-review.md`, with no actionable findings; package tests and focused vet passed. Root released only Task 2 next. The review does not establish filesystem containment or corpus execution.
+
+Revision note (2026-09-12, Task 2 acceptance): Held-handle loader first committed at `2f8568e6afc745947d3109bc0b67b31fc4a7de12`; independent security review exposed root alias/parent normalization and invalid UTF-8 filename identity defects. Scoped fix `988f6088170f290c9a0e2d03393da9ed8a014b3f` made the original repros fail safely, passed local Go1.22/race/vet and cross-compiles, and same-reviewer rereview APPROVED. Windows/Linux runtime containment remains open. Root released Task 3 only; it must preserve incomplete traversal with zero acquired entries.
