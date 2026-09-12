@@ -6,11 +6,11 @@ Updated September 12, 2026. This is the current handoff; it supersedes historica
 
 - **Implementation worktree:** `/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones`
 - **Branch:** `codex/remaining-milestones`
-- **Reviewed source checkpoint:** `fcc5dd373b76fe5ab3af5b2ecb86a79ee2fb4274` — complete Milestone 6 Task 5 implementation and approved fix-round re-review. Coordinator Go-only acceptance is the next gate.
+- **Reviewed source checkpoint:** `c8be29f6fead17e9e40a06073878edf2b2efa35e` — complete Milestone 6 Task 5 plus the approved public preview-audit contract fix. A fresh coordinator Go-only attempt is the next gate.
 - **Original checkout:** `/Users/jacobdelgado/repos/spl-toolkit`, still on `main` at `6898cc052eb7109fbcc7495ee826c993aaa93352`. Do not implement there or overwrite its existing untracked files.
 - No old milestone worker handle remains live. A new session must establish new qualified assignments rather than attempt to resume historical agent IDs.
 - Fresh continuation implementer `/root/m6_task5_fresh_implementer` completed Task 5; independent reviewer `/root/m6_task5_reviewer` approved fix round 1 at `fcc5dd373b76fe5ab3af5b2ecb86a79ee2fb4274`. Treat the SDD ledger as authoritative after these disposable handles are no longer live.
-- Task 5 is review-clean but not yet coordinator-accepted; the Go-only acceptance window and adapters remain gated.
+- Task 5's implementation and acceptance fix are review-clean. The first Go-only product attempt remains retained as a failure record; a new exact-head attempt is pending and adapters remain gated.
 - The old task ID is `01a07d20-1e65-7963-a516-10d357e8ac16`. Its goal tool most recently reported `usageLimited`; the September 12 handoff work and qualified review nevertheless ran successfully. Check current availability rather than assuming that old error is still active. No credits were purchased or resets consumed.
 
 The canonical copy of this file is in the implementation worktree. An identical copy in the original checkout makes the continuation point discoverable.
@@ -38,7 +38,7 @@ All accepted milestone commits below were verified as ancestors of the current b
 | M6 Task2: canonical rewrite bridge | Accepted at `0b8dd62068be0638e470a532544acd1cc0a48507`; reviewed producer follow-up accepted at `5745041676c8d6cddfb7b769c2aaa2630d3ab8a2`. |
 | M6 Task3: conditions / selection | Accepted at `6c18c32a073b944375d1d37da7e47b768d16656a`. |
 | M6 Task4: linked groups / edits | Accepted at `14a3a0dcfe4652240dc8b949461f905b206f215a`. |
-| M6 Task5 | Full implementation and fix committed at `fcc5dd373b76fe5ab3af5b2ecb86a79ee2fb4274`. Independent full review plus scoped fix re-review approved with no open findings. Coordinator Go-only acceptance is pending. **Task5 is not yet accepted.** |
+| M6 Task5 | Full implementation plus review and acceptance fixes committed at `c8be29f6fead17e9e40a06073878edf2b2efa35e`; all independent review findings are closed. A fresh coordinator Go-only attempt is pending. **Task5 is not yet accepted.** |
 | M7: developer tooling | Brainstorming, design, ExecPlan and preflights prepared/approved subject to final M6 interface reconciliation. No production implementation accepted. |
 
 The completed atomic unit consists of `pkg/rewrite/rewrite.go`, `pkg/rewrite/verify.go`, and `pkg/rewrite/rewrite_test.go`. The interrupted file bytes were preserved before verification. No failing test expectation was rewritten during this handoff: the earlier worker had already corrected its hand-counted offsets. The retained historical `single-first-green` run actually exited 1 and remains a failure record.
@@ -64,7 +64,7 @@ Use bounded ownership and artifact paths, preserve others' work, retain actual e
 
 ## Remaining work
 
-**Run the held coordinator Go-only acceptance window before adapters.** Task 5 is committed and review-clean at `fcc5dd373b76fe5ab3af5b2ecb86a79ee2fb4274`. Preserve the successful Go result as an immutable baseline. Only after that window is accepted may M6 Task6 CLI/HTTP, Task7 native/Python/package interfaces and Task8 corpus/docs/full verification proceed. Finish separate broad review and final CLI/HTTP/native/installed/Python acceptance before closing M6.
+**Rerun the Go-only acceptance window before adapters.** The initial preflight restored the exact tracked OCSF fixture; the first product attempt exposed the preview-audit outcome defect, which is now fixed and independently approved at `c8be29f6fead17e9e40a06073878edf2b2efa35e`. Run a new immutable attempt and preserve a successful Go result as the baseline. Only after that window is accepted may M6 Task6 CLI/HTTP, Task7 native/Python/package interfaces and Task8 corpus/docs/full verification proceed.
 
 After accepted M6, reconcile M7 with the actual final public/prepared-target/CLI/native interfaces, then execute its approved 12-task plan with qualified implementation/review and the specified coordinator acceptance windows. Do not redo settled brainstorming merely because a new session starts. Complete requirement-by-requirement final audit for all milestones before claiming the original goal complete.
 
