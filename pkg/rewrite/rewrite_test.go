@@ -41,6 +41,17 @@ func TestRewritePreviewApply(t *testing.T) {
 			request.Mode = mode
 			request.Rules = append(request.Rules, Rule{ID: "keep-alias", Kind: "field", Source: conditionIdentity("total"), Target: conditionIdentity("other")})
 			got := requireRewrite(t, request)
+			wantReport := explicitAliasReport(mode)
+			if !reflect.DeepEqual(got, wantReport) {
+				// Compare every public field, including canonical provenance and empty
+				// collections, against the manually derived report below.
+				a, b := reflect.ValueOf(*got), reflect.ValueOf(*wantReport)
+				for i := 0; i < a.NumField(); i++ {
+					if !reflect.DeepEqual(a.Field(i).Interface(), b.Field(i).Interface()) {
+						t.Errorf("%s: got %+v; want %+v", a.Type().Field(i).Name, a.Field(i).Interface(), b.Field(i).Interface())
+					}
+				}
+			}
 			wantText := original
 			if mode == Apply {
 				wantText = candidate
@@ -88,6 +99,71 @@ func TestRewritePreviewApply(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+// This expectation is hand-derived from the query's four lexical references:
+// the search establishes src; sum reads that same source; total is an explicit
+// aggregate output; table reads total through the aggregate's full origin chain.
+// It never invokes analysis, selection, rendering, verification, or Rewrite.
+func explicitAliasReport(mode Mode) *Result {
+	loc := func(start, end int) analysis.Location {
+		return analysis.Location{Start: analysis.Position{Offset: start, Line: 1, Column: start + 1}, End: analysis.Position{Offset: end, Line: 1, Column: end + 1}}
+	}
+	analyses := make([]*analysis.Result, 2)
+	for i, expected := range []struct {
+		text, name string
+		ends       [3]int
+		starts     [3]int
+		refs       [4][2]int
+	}{
+		{"search src=x | stats sum(src) AS total | table total", "src", [3]int{12, 38, 52}, [3]int{0, 15, 41}, [4][2]int{{7, 10}, {25, 28}, {33, 38}, {47, 52}}},
+		{"search user=x | stats sum(user) AS total | table total", "user", [3]int{13, 40, 54}, [3]int{0, 16, 43}, [4][2]int{{7, 11}, {26, 30}, {35, 40}, {49, 54}}},
+	} {
+		empty := analysis.FieldState{Fields: []analysis.FieldBinding{}, Removed: []string{}, Open: true}
+		source := analysis.FieldState{Fields: []analysis.FieldBinding{{Name: expected.name, OriginReferenceIDs: []string{"ref-0"}}}, Removed: []string{}, Open: true}
+		total := analysis.FieldState{Fields: []analysis.FieldBinding{{Name: "total", OriginReferenceIDs: []string{"ref-2", "ref-1", "ref-0"}}}, Removed: []string{}}
+		analyses[i] = &analysis.Result{
+			SchemaVersion: 1, Document: analysis.QueryDocument{Text: expected.text, Language: "spl", Profile: "splunkd", Version: "current", SourceID: "source.spl"}, Status: analysis.Valid,
+			Coverage: analysis.Coverage{SyntaxComplete: true, SemanticComplete: true, Reasons: []string{}},
+			Stages: []analysis.Stage{
+				{ID: "stage-0", Command: "search", Position: 0, ScopeID: "scope-0", Location: loc(expected.starts[0], expected.ends[0]), SemanticComplete: true},
+				{ID: "stage-1", Command: "stats", Position: 1, ScopeID: "scope-0", Location: loc(expected.starts[1], expected.ends[1]), SemanticComplete: true},
+				{ID: "stage-2", Command: "table", Position: 2, ScopeID: "scope-0", Location: loc(expected.starts[2], expected.ends[2]), SemanticComplete: true},
+			},
+			Scopes: []analysis.Scope{{ID: "scope-0", Kind: "root", Location: loc(0, expected.ends[2])}},
+			References: []analysis.Reference{
+				{ID: "ref-0", OriginalName: expected.name, NormalizedName: expected.name, Kind: "field", Role: "filter", StageID: "stage-0", ScopeID: "scope-0", Location: loc(expected.refs[0][0], expected.refs[0][1]), Resolution: "exact", Binding: "source", OriginReferenceIDs: []string{}},
+				{ID: "ref-1", OriginalName: expected.name, NormalizedName: expected.name, Kind: "field", Role: "read", StageID: "stage-1", ScopeID: "scope-0", Location: loc(expected.refs[1][0], expected.refs[1][1]), Resolution: "exact", Binding: "source", OriginReferenceIDs: []string{"ref-0"}},
+				{ID: "ref-2", OriginalName: "total", NormalizedName: "total", Kind: "field", Role: "output", StageID: "stage-1", ScopeID: "scope-0", Location: loc(expected.refs[2][0], expected.refs[2][1]), Resolution: "exact", Binding: "not_applicable", OriginReferenceIDs: []string{"ref-1", "ref-0"}},
+				{ID: "ref-3", OriginalName: "total", NormalizedName: "total", Kind: "field", Role: "read", StageID: "stage-2", ScopeID: "scope-0", Location: loc(expected.refs[3][0], expected.refs[3][1]), Resolution: "exact", Binding: "derived", OriginReferenceIDs: []string{"ref-2", "ref-1", "ref-0"}},
+			},
+			Lineage: []analysis.Lineage{
+				{StageID: "stage-0", ScopeID: "scope-0", Before: empty, After: source, Transitions: []analysis.Transition{}},
+				{StageID: "stage-1", ScopeID: "scope-0", Before: source, After: total, Transitions: []analysis.Transition{{Operation: "aggregate", Output: "total", InputReferenceIDs: []string{"ref-1"}, OutputReferenceID: "ref-2"}}},
+				{StageID: "stage-2", ScopeID: "scope-0", Before: total, After: total, Transitions: []analysis.Transition{{Operation: "project", Output: "total", InputReferenceIDs: []string{"ref-3"}}}},
+			},
+			Dependencies: analysis.Dependencies{Indexes: []string{}, Sources: []string{}, SourceTypes: []string{}, Datasets: []string{}, Lookups: []string{}, DataModels: []string{}, Macros: []string{}}, Diagnostics: []analysis.Diagnostic{},
+		}
+	}
+	a0, b0, a1, b1, alias, consumer := loc(7, 10), loc(7, 11), loc(25, 28), loc(26, 30), loc(33, 38), loc(47, 52)
+	text, outcome, committed := analyses[0].Document.Text, "proposed", false
+	if mode == Apply {
+		text, outcome, committed = analyses[1].Document.Text, "applied", true
+	}
+	return &Result{SchemaVersion: 1, Document: analyses[0].Document, Mode: mode, Status: analysis.Valid,
+		Coverage:     Coverage{SyntaxComplete: true, SemanticComplete: true, RewriteComplete: true, Reasons: []string{}},
+		OriginalText: analyses[0].Document.Text, CandidateText: analyses[1].Document.Text, Text: text, Committed: committed,
+		Changes: []Change{
+			{Outcome: outcome, Reason: "matched", GroupID: "group-0", RuleIDs: []string{"src-user"}, OriginalReferenceIDs: []string{"ref-0"}, CandidateReferenceIDs: []string{"ref-0"}, OriginalLocation: &a0, CandidateLocation: &b0, OldText: "src", NewText: "user", CandidateApplied: true, Committed: committed},
+			{Outcome: outcome, Reason: "matched", GroupID: "group-0", RuleIDs: []string{"src-user"}, OriginalReferenceIDs: []string{"ref-1"}, CandidateReferenceIDs: []string{"ref-1"}, OriginalLocation: &a1, CandidateLocation: &b1, OldText: "src", NewText: "user", CandidateApplied: true, Committed: committed},
+		},
+		RuleEvaluations: []RuleEvaluation{
+			{RuleID: "src-user", Outcome: "proposed", Reason: "matched", ReferenceIDs: []string{"ref-0"}, Location: &a0},
+			{RuleID: "src-user", Outcome: "proposed", Reason: "matched", ReferenceIDs: []string{"ref-1"}, Location: &a1},
+			{RuleID: "keep-alias", Outcome: "skipped", Reason: "unsupported_reference", ReferenceIDs: []string{"ref-2"}, Location: &alias},
+			{RuleID: "keep-alias", Outcome: "skipped", Reason: "unsupported_reference", ReferenceIDs: []string{"ref-3"}, Location: &consumer},
+		}, OriginalAnalysis: analyses[0], CandidateAnalysis: analyses[1],
 	}
 }
 
@@ -219,5 +295,94 @@ func assertRewriteRollback(t *testing.T, got *Result) {
 		if change.CandidateApplied && (change.Outcome != "skipped" || change.Reason != ReasonPostVerificationFailed || change.CandidateLocation == nil) {
 			t.Errorf("rollback audit lost inclusion/coordinates: %+v", change)
 		}
+	}
+}
+
+// The corpus detects changed public publication policy, linked edit loss, byte
+// damage outside edit intervals, or IDs that no longer resolve in the report.
+func TestRewriteCorpus(t *testing.T) {
+	data, err := os.ReadFile("../../testdata/rewrite/cases.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	type expectation struct {
+		Status           analysis.Status `json:"status"`
+		CandidateText    string          `json:"candidate_text"`
+		Text             string          `json:"text"`
+		Committed        bool            `json:"committed"`
+		SyntaxComplete   bool            `json:"syntax_complete"`
+		SemanticComplete bool            `json:"semantic_complete"`
+		RewriteComplete  bool            `json:"rewrite_complete"`
+		ChangeOutcomes   []string        `json:"change_outcomes"`
+	}
+	var cases []struct {
+		Name    string          `json:"name"`
+		Request json.RawMessage `json:"request"`
+		Want    expectation     `json:"want"`
+	}
+	if err := json.Unmarshal(data, &cases); err != nil {
+		t.Fatal(err)
+	}
+	if len(cases) == 0 {
+		t.Fatal("missing durable cases")
+	}
+	for _, tc := range cases {
+		t.Run(tc.Name, func(t *testing.T) {
+			request, err := DecodeRequest(tc.Request)
+			if err != nil {
+				t.Fatal(err)
+			}
+			got := requireRewrite(t, request)
+			actual := expectation{Status: got.Status, CandidateText: got.CandidateText, Text: got.Text, Committed: got.Committed,
+				SyntaxComplete: got.Coverage.SyntaxComplete, SemanticComplete: got.Coverage.SemanticComplete, RewriteComplete: got.Coverage.RewriteComplete, ChangeOutcomes: []string{}}
+			originalEnd, candidateEnd := 0, 0
+			for _, change := range got.Changes {
+				actual.ChangeOutcomes = append(actual.ChangeOutcomes, change.Outcome)
+				if change.Committed != (got.Committed && change.CandidateApplied) {
+					t.Errorf("change commitment contradicts publication: %+v", change)
+				}
+				if !change.CandidateApplied {
+					continue
+				}
+				if change.OriginalLocation == nil || change.CandidateLocation == nil {
+					t.Fatal("included edit lost locations")
+				}
+				a, b := change.OriginalLocation, change.CandidateLocation
+				if a.Start.Offset < originalEnd || b.Start.Offset < candidateEnd || a.End.Offset > len(got.OriginalText) || b.End.Offset > len(got.CandidateText) {
+					t.Fatalf("invalid or unordered audit interval: %+v", change)
+				}
+				if got.OriginalText[originalEnd:a.Start.Offset] != got.CandidateText[candidateEnd:b.Start.Offset] || got.OriginalText[a.Start.Offset:a.End.Offset] != change.OldText || got.CandidateText[b.Start.Offset:b.End.Offset] != change.NewText {
+					t.Errorf("audit cannot reconstruct byte-preserving edits: %+v", change)
+				}
+				originalEnd, candidateEnd = a.End.Offset, b.End.Offset
+				for i, ids := range [][]string{change.OriginalReferenceIDs, change.CandidateReferenceIDs} {
+					if len(ids) == 0 {
+						t.Fatal("included edit lost canonical identities")
+					}
+					refs := got.OriginalAnalysis.References
+					if i == 1 {
+						refs = got.CandidateAnalysis.References
+					}
+					for _, id := range ids {
+						found := false
+						for _, ref := range refs {
+							found = found || ref.ID == id
+						}
+						if !found {
+							t.Errorf("unresolvable reference ID %q", id)
+						}
+					}
+				}
+			}
+			if got.OriginalText[originalEnd:] != got.CandidateText[candidateEnd:] {
+				t.Error("text changed after last included edit")
+			}
+			if !reflect.DeepEqual(actual, tc.Want) {
+				t.Fatalf("got %+v; want %+v", actual, tc.Want)
+			}
+			if got.OriginalText != request.Document.Text || got.Document != request.Document || got.CandidateAnalysis.Document.SourceID != request.Document.SourceID {
+				t.Error("document source identity changed")
+			}
+		})
 	}
 }

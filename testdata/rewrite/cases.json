@@ -1,0 +1,52 @@
+[
+  {
+    "name": "explicit alias preview preserves authoritative bytes",
+    "request": {"schema_version":1,"mode":"preview","document":{"text":"search src=x | stats sum(src) AS total | table total","source_id":"explicit.spl"},"rules":[{"id":"map","kind":"field","source":{"name":"src"},"target":{"name":"user"}}]},
+    "want": {"status":"valid","candidate_text":"search user=x | stats sum(user) AS total | table total","text":"search src=x | stats sum(src) AS total | table total","committed":false,"syntax_complete":true,"semantic_complete":true,"rewrite_complete":true,"change_outcomes":["proposed","proposed"]}
+  },
+  {
+    "name": "implicit output and consumer commit together",
+    "request": {"schema_version":1,"mode":"apply","document":{"text":"stats sum(src) | table 'sum(src)'","source_id":"implicit.spl"},"rules":[{"id":"map","kind":"field","source":{"name":"src"},"target":{"name":"user"}}]},
+    "want": {"status":"valid","candidate_text":"stats sum(user) | table 'sum(user)'","text":"stats sum(user) | table 'sum(user)'","committed":true,"syntax_complete":true,"semantic_complete":true,"rewrite_complete":true,"change_outcomes":["applied","applied"]}
+  },
+  {
+    "name": "SPL2 SQL source binding and alias phase",
+    "request": {"schema_version":1,"mode":"apply","document":{"text":"FROM main SELECT src AS total","language":"spl2","source_id":"query.spl2"},"rules":[{"id":"map","kind":"field","source":{"name":"src"},"target":{"name":"user"}}]},
+    "want": {"status":"valid","candidate_text":"FROM main SELECT user AS total","text":"FROM main SELECT user AS total","committed":true,"syntax_complete":true,"semantic_complete":true,"rewrite_complete":true,"change_outcomes":["applied"]}
+  },
+  {
+    "name": "simultaneous source swap",
+    "request": {"schema_version":1,"mode":"apply","document":{"text":"search src=x dst=y | table src dst"},"rules":[{"id":"forward","kind":"field","source":{"name":"src"},"target":{"name":"dst"}},{"id":"reverse","kind":"field","source":{"name":"dst"},"target":{"name":"src"}}]},
+    "want": {"status":"valid","candidate_text":"search dst=x src=y | table dst src","text":"search dst=x src=y | table dst src","committed":true,"syntax_complete":true,"semantic_complete":true,"rewrite_complete":true,"change_outcomes":["applied","applied","applied","applied"]}
+  },
+  {
+    "name": "Unicode comments and CRLF survive public operation",
+    "request": {"schema_version":1,"mode":"apply","document":{"text":"FROM main\r\n| where 'pré'=1 /* é|src */\r\n| table 'pré'","language":"spl2","source_id":"é.spl2"},"rules":[{"id":"unicode","kind":"field","source":{"name":"pré"},"target":{"name":"用户"}}]},
+    "want": {"status":"valid","candidate_text":"FROM main\r\n| where '用户'=1 /* é|src */\r\n| table '用户'","text":"FROM main\r\n| where '用户'=1 /* é|src */\r\n| table '用户'","committed":true,"syntax_complete":true,"semantic_complete":true,"rewrite_complete":true,"change_outcomes":["applied","applied"]}
+  },
+  {
+    "name": "original fact rejects a false condition",
+    "request": {"schema_version":1,"mode":"apply","document":{"text":"search EventCode=2 src=x | table src"},"rules":[{"id":"conditional","kind":"field","source":{"name":"src"},"target":{"name":"user"},"when":{"fact":"literal","kind":"field","identity":{"name":"EventCode"},"operator":"equals","value":1}}]},
+    "want": {"status":"valid","candidate_text":"search EventCode=2 src=x | table src","text":"search EventCode=2 src=x | table src","committed":false,"syntax_complete":true,"semantic_complete":true,"rewrite_complete":true,"change_outcomes":[]}
+  },
+  {
+    "name": "safe edits beside retained conflicting alternatives",
+    "request": {"schema_version":1,"mode":"apply","document":{"text":"search src=x other=y | table src other"},"rules":[{"id":"safe","kind":"field","source":{"name":"src"},"target":{"name":"user"}},{"id":"a","kind":"field","source":{"name":"other"},"target":{"name":"a"}},{"id":"b","kind":"field","source":{"name":"other"},"target":{"name":"b"}}]},
+    "want": {"status":"incomplete","candidate_text":"search user=x other=y | table user other","text":"search user=x other=y | table user other","committed":true,"syntax_complete":true,"semantic_complete":true,"rewrite_complete":false,"change_outcomes":["applied","ambiguous","ambiguous","applied","ambiguous","ambiguous"]}
+  },
+  {
+    "name": "destination error prevents whole candidate publication",
+    "request": {"schema_version":1,"mode":"apply","document":{"text":"search src=x | table src"},"rules":[{"id":"map","kind":"field","source":{"name":"src"},"target":{"name":"user"}}],"validation_target":{"kind":"field_list","catalog":{"fields":["other"],"identity":"destination","version":"2"}}},
+    "want": {"status":"invalid","candidate_text":"search user=x | table user","text":"search src=x | table src","committed":false,"syntax_complete":true,"semantic_complete":true,"rewrite_complete":true,"change_outcomes":["skipped","skipped"]}
+  },
+  {
+    "name": "schema uncertainty retains proposed candidate only",
+    "request": {"schema_version":1,"mode":"apply","document":{"text":"table src"},"rules":[{"id":"map","kind":"field","source":{"name":"src"},"target":{"name":"user"}}],"validation_target":{"kind":"json_schema","schema":{"$ref":"https://offline.invalid/missing"}}},
+    "want": {"status":"incomplete","candidate_text":"table user","text":"table src","committed":false,"syntax_complete":true,"semantic_complete":true,"rewrite_complete":true,"change_outcomes":["skipped"]}
+  },
+  {
+    "name": "source equals target preserves empty audit",
+    "request": {"schema_version":1,"mode":"apply","document":{"text":"search src=x\r\n| table src"},"rules":[{"id":"same","kind":"field","source":{"name":"src"},"target":{"name":"src"}}]},
+    "want": {"status":"valid","candidate_text":"search src=x\r\n| table src","text":"search src=x\r\n| table src","committed":false,"syntax_complete":true,"semantic_complete":true,"rewrite_complete":true,"change_outcomes":[]}
+  }
+]
