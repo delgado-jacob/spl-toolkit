@@ -5,3 +5,13 @@ iniconfig==2.1.0
 pluggy==1.6.0
 pygments==2.19.2
 PyYAML==6.0.3
+# Independent JSON instance contract validation; test dependencies only.
+jsonschema==4.26.0
+referencing==0.37.0
+jsonschema-specifications==2025.9.1
+rpds-py==0.30.0
+attrs==25.4.0
+rfc3339-validator==0.1.4
+rfc3986-validator==0.1.1
+six==1.17.0
+typing-extensions==4.16.0; python_version < "3.13"

@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/impact.schema.json",
+  "title": "SPL Toolkit impact v1",
+  "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/impact.Report",
+  "$defs": {
+    "SchemaRequest": {
+      "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/impact.SchemaRequest"
+    },
+    "MappingRequest": {
+      "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/impact.MappingRequest"
+    }
+  }
+}

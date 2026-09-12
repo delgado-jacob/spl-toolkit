@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/schema-validation.schema.json",
+  "title": "SPL Toolkit schema-validation v1",
+  "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/schema.SchemaReport",
+  "$defs": {
+    "Request": {
+      "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/schema.SchemaRequest"
+    },
+    "BatchRequest": {
+      "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/schema.SchemaBatchRequest"
+    },
+    "BatchReport": {
+      "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/schema.SchemaBatchReport"
+    },
+    "Target": {
+      "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/SchemaTargetRequest"
+    }
+  }
+}

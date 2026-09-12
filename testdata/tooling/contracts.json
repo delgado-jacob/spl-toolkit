@@ -1,0 +1,811 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "id": "query-minimal",
+      "family": "query-document",
+      "valid": true,
+      "instance": {
+        "text": "search host=web"
+      }
+    },
+    {
+      "id": "query-opaque-source",
+      "family": "query-document",
+      "valid": true,
+      "instance": {
+        "text": "search host=web",
+        "source_id": "not a URI \t🌍"
+      }
+    },
+    {
+      "id": "query-missing-text",
+      "family": "query-document",
+      "valid": false,
+      "instance": {}
+    },
+    {
+      "id": "query-null-text",
+      "family": "query-document",
+      "valid": false,
+      "instance": {
+        "text": null
+      }
+    },
+    {
+      "id": "query-extra-key",
+      "family": "query-document",
+      "valid": false,
+      "instance": {
+        "text": "search host=web",
+        "extra": true
+      }
+    },
+    {
+      "id": "query-unsupported-language",
+      "family": "query-document",
+      "valid": false,
+      "instance": {
+        "text": "search host=web",
+        "language": "sql"
+      }
+    },
+    {
+      "id": "corpus-request",
+      "family": "corpus",
+      "definition": "Request",
+      "valid": true,
+      "instance": {
+        "schema_version": 1,
+        "documents": [
+          {
+            "id": "q",
+            "document": {
+              "text": "search host=web"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "corpus-extra-key",
+      "family": "corpus",
+      "definition": "Request",
+      "valid": false,
+      "instance": {
+        "schema_version": 1,
+        "documents": [
+          {
+            "id": "q",
+            "document": {
+              "text": "search host=web"
+            }
+          }
+        ],
+        "root": "/"
+      }
+    },
+    {
+      "id": "corpus-empty",
+      "family": "corpus",
+      "definition": "Request",
+      "valid": false,
+      "instance": {
+        "schema_version": 1,
+        "documents": []
+      }
+    },
+    {
+      "id": "corpus-null-target",
+      "family": "corpus",
+      "definition": "Request",
+      "valid": false,
+      "instance": {
+        "schema_version": 1,
+        "documents": [
+          {
+            "id": "q",
+            "document": {
+              "text": "search host=web"
+            }
+          }
+        ],
+        "validation_target": null
+      }
+    },
+    {
+      "id": "corpus-mixed-target",
+      "family": "corpus",
+      "definition": "Request",
+      "valid": false,
+      "instance": {
+        "schema_version": 1,
+        "documents": [
+          {
+            "id": "q",
+            "document": {
+              "text": "search host=web"
+            }
+          }
+        ],
+        "validation_target": {
+          "kind": "field_list",
+          "catalog": {
+            "fields": [
+              "host"
+            ]
+          },
+          "schema": {}
+        }
+      }
+    },
+    {
+      "id": "corpus-field-target",
+      "family": "corpus",
+      "definition": "Request",
+      "valid": true,
+      "instance": {
+        "schema_version": 1,
+        "documents": [
+          {
+            "id": "q",
+            "document": {
+              "text": "search host=web"
+            }
+          }
+        ],
+        "validation_target": {
+          "kind": "field_list",
+          "catalog": {
+            "fields": [
+              "host"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "corpus-array-catalog",
+      "family": "corpus",
+      "definition": "Request",
+      "valid": true,
+      "instance": {
+        "schema_version": 1,
+        "documents": [
+          {
+            "id": "q",
+            "document": {
+              "text": "search host=web"
+            }
+          }
+        ],
+        "validation_target": {
+          "kind": "field_list",
+          "catalog": [
+            "host"
+          ]
+        }
+      }
+    },
+    {
+      "id": "corpus-schema-target",
+      "family": "corpus",
+      "definition": "Request",
+      "valid": true,
+      "instance": {
+        "schema_version": 1,
+        "documents": [
+          {
+            "id": "q",
+            "document": {
+              "text": "search host=web"
+            }
+          }
+        ],
+        "validation_target": {
+          "kind": "json_schema",
+          "schema": true
+        }
+      }
+    },
+    {
+      "id": "manifest-inline",
+      "family": "manifest",
+      "valid": true,
+      "instance": {
+        "schema_version": 1,
+        "documents": [
+          {
+            "id": "q",
+            "text": ""
+          }
+        ]
+      }
+    },
+    {
+      "id": "manifest-path",
+      "family": "manifest",
+      "valid": true,
+      "instance": {
+        "schema_version": 1,
+        "base": "../queries",
+        "documents": [
+          {
+            "id": "q",
+            "path": "a/b.spl"
+          }
+        ]
+      }
+    },
+    {
+      "id": "manifest-mixed",
+      "family": "manifest",
+      "valid": false,
+      "instance": {
+        "schema_version": 1,
+        "documents": [
+          {
+            "id": "q",
+            "text": "",
+            "path": "a.spl"
+          }
+        ]
+      }
+    },
+    {
+      "id": "manifest-parent-path",
+      "family": "manifest",
+      "valid": false,
+      "instance": {
+        "schema_version": 1,
+        "documents": [
+          {
+            "id": "q",
+            "path": "../a.spl"
+          }
+        ]
+      }
+    },
+    {
+      "id": "manifest-unknown",
+      "family": "manifest",
+      "valid": false,
+      "instance": {
+        "schema_version": 1,
+        "documents": [
+          {
+            "id": "q",
+            "text": "",
+            "extra": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "rewrite-noop-default-mode",
+      "family": "rewrite",
+      "definition": "Request",
+      "valid": true,
+      "instance": {
+        "schema_version": 1,
+        "document": {
+          "text": "search host=web"
+        },
+        "rules": []
+      }
+    },
+    {
+      "id": "rewrite-null-rules",
+      "family": "rewrite",
+      "definition": "Request",
+      "valid": false,
+      "instance": {
+        "schema_version": 1,
+        "document": {
+          "text": "search host=web"
+        },
+        "rules": null
+      }
+    },
+    {
+      "id": "rewrite-unknown-mode",
+      "family": "rewrite",
+      "definition": "Request",
+      "valid": false,
+      "instance": {
+        "schema_version": 1,
+        "document": {
+          "text": "search host=web"
+        },
+        "rules": [],
+        "mode": "force"
+      }
+    },
+    {
+      "id": "rewrite-rule",
+      "family": "rewrite",
+      "definition": "Request",
+      "valid": true,
+      "instance": {
+        "schema_version": 1,
+        "document": {
+          "text": "search host=web"
+        },
+        "rules": [
+          {
+            "id": "host",
+            "kind": "field",
+            "source": {
+              "name": "host"
+            },
+            "target": {
+              "name": "server"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "rewrite-one-component-path",
+      "family": "rewrite",
+      "definition": "Request",
+      "valid": true,
+      "instance": {
+        "schema_version": 1,
+        "document": {
+          "text": "search host=web"
+        },
+        "rules": [
+          {
+            "id": "host",
+            "kind": "field",
+            "source": {
+              "path": [
+                "host"
+              ]
+            },
+            "target": {
+              "name": "server"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "rewrite-mixed-identity",
+      "family": "rewrite",
+      "definition": "Request",
+      "valid": false,
+      "instance": {
+        "schema_version": 1,
+        "document": {
+          "text": "search host=web"
+        },
+        "rules": [
+          {
+            "id": "host",
+            "kind": "field",
+            "source": {
+              "name": "host",
+              "path": [
+                "host"
+              ]
+            },
+            "target": {
+              "name": "server"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "rewrite-nonfield-path",
+      "family": "rewrite",
+      "definition": "Request",
+      "valid": false,
+      "instance": {
+        "schema_version": 1,
+        "document": {
+          "text": "search host=web"
+        },
+        "rules": [
+          {
+            "id": "host",
+            "kind": "index",
+            "source": {
+              "path": [
+                "main"
+              ]
+            },
+            "target": {
+              "name": "server"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "rewrite-null-literal",
+      "family": "rewrite",
+      "definition": "Request",
+      "valid": true,
+      "instance": {
+        "schema_version": 1,
+        "document": {
+          "text": "search host=web"
+        },
+        "rules": [
+          {
+            "id": "host",
+            "kind": "field",
+            "source": {
+              "name": "host"
+            },
+            "target": {
+              "name": "server"
+            },
+            "when": {
+              "fact": "literal",
+              "kind": "field",
+              "identity": {
+                "name": "host"
+              },
+              "operator": "equals",
+              "value": null
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "rewrite-contains-number",
+      "family": "rewrite",
+      "definition": "Request",
+      "valid": false,
+      "instance": {
+        "schema_version": 1,
+        "document": {
+          "text": "search host=web"
+        },
+        "rules": [
+          {
+            "id": "host",
+            "kind": "field",
+            "source": {
+              "name": "host"
+            },
+            "target": {
+              "name": "server"
+            },
+            "when": {
+              "fact": "literal",
+              "kind": "field",
+              "identity": {
+                "name": "host"
+              },
+              "operator": "contains",
+              "value": 1
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "field-request",
+      "family": "field-validation",
+      "definition": "Request",
+      "valid": true,
+      "instance": {
+        "document": {
+          "text": "search host=web"
+        },
+        "catalog": [
+          "host"
+        ]
+      }
+    },
+    {
+      "id": "field-missing-catalog",
+      "family": "field-validation",
+      "definition": "Request",
+      "valid": false,
+      "instance": {
+        "document": {
+          "text": "search host=web"
+        }
+      }
+    },
+    {
+      "id": "field-duplicate",
+      "family": "field-validation",
+      "definition": "Catalog",
+      "valid": false,
+      "instance": [
+        "host",
+        "host"
+      ]
+    },
+    {
+      "id": "schema-request",
+      "family": "schema-validation",
+      "definition": "Request",
+      "valid": true,
+      "instance": {
+        "document": {
+          "text": "search host=web"
+        },
+        "target": {
+          "kind": "json_schema",
+          "schema": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    {
+      "id": "schema-mixed-union",
+      "family": "schema-validation",
+      "definition": "Request",
+      "valid": false,
+      "instance": {
+        "document": {
+          "text": "search host=web"
+        },
+        "target": {
+          "kind": "json_schema",
+          "schema": {},
+          "catalog": {}
+        }
+      }
+    },
+    {
+      "id": "ocsf-selection",
+      "family": "schema-validation",
+      "definition": "Target",
+      "valid": true,
+      "instance": {
+        "kind": "ocsf",
+        "catalog": {},
+        "selection": {
+          "version": "1.3.0",
+          "class_uid": 1001
+        }
+      }
+    },
+    {
+      "id": "ocsf-mixed-selection",
+      "family": "schema-validation",
+      "definition": "Target",
+      "valid": false,
+      "instance": {
+        "kind": "ocsf",
+        "catalog": {},
+        "selection": {
+          "version": "1.3.0",
+          "class_uid": 1001,
+          "category_uid": 1
+        }
+      }
+    },
+    {
+      "id": "schema-invalid-uri",
+      "family": "schema-validation",
+      "definition": "Target",
+      "valid": false,
+      "instance": {
+        "kind": "json_schema",
+        "schema": {},
+        "base_uri": "not a URI"
+      }
+    },
+    {
+      "id": "impact-schema",
+      "family": "impact",
+      "definition": "SchemaRequest",
+      "valid": true,
+      "instance": {
+        "schema_version": 1,
+        "documents": [
+          {
+            "id": "q",
+            "document": {
+              "text": "search host=web"
+            }
+          }
+        ],
+        "before_target": {
+          "kind": "field_list",
+          "catalog": {
+            "fields": [
+              "host"
+            ]
+          }
+        },
+        "after_target": {
+          "kind": "field_list",
+          "catalog": {
+            "fields": [
+              "host"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "impact-extra-key",
+      "family": "impact",
+      "definition": "SchemaRequest",
+      "valid": false,
+      "instance": {
+        "schema_version": 1,
+        "documents": [
+          {
+            "id": "q",
+            "document": {
+              "text": "search host=web"
+            }
+          }
+        ],
+        "before_target": {
+          "kind": "field_list",
+          "catalog": {
+            "fields": [
+              "host"
+            ]
+          }
+        },
+        "after_target": {
+          "kind": "field_list",
+          "catalog": {
+            "fields": [
+              "host"
+            ]
+          }
+        },
+        "apply": true
+      }
+    },
+    {
+      "id": "impact-mapping",
+      "family": "impact",
+      "definition": "MappingRequest",
+      "valid": true,
+      "instance": {
+        "schema_version": 1,
+        "documents": [
+          {
+            "id": "q",
+            "document": {
+              "text": "search host=web"
+            }
+          }
+        ],
+        "before_rules": {
+          "schema_version": 1,
+          "rules": []
+        },
+        "after_rules": {
+          "schema_version": 1,
+          "rules": []
+        }
+      }
+    },
+    {
+      "id": "lsp-analysis",
+      "family": "lsp-configuration",
+      "valid": true,
+      "instance": {}
+    },
+    {
+      "id": "lsp-target",
+      "family": "lsp-configuration",
+      "valid": true,
+      "instance": {
+        "validation_target": {
+          "kind": "field_list",
+          "catalog": {
+            "fields": [
+              "host"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "lsp-null",
+      "family": "lsp-configuration",
+      "valid": false,
+      "instance": {
+        "validation_target": null
+      }
+    },
+    {
+      "id": "lsp-unknown",
+      "family": "lsp-configuration",
+      "valid": false,
+      "instance": {
+        "url": "https://example.invalid"
+      }
+    },
+    {
+      "id": "lsp-wrong-profile",
+      "family": "lsp-configuration",
+      "valid": false,
+      "instance": {
+        "profile": "cloud"
+      }
+    },
+    {
+      "id": "manifest-parent-after-newline",
+      "family": "manifest",
+      "valid": false,
+      "instance": {
+        "schema_version": 1,
+        "documents": [
+          {
+            "id": "q",
+            "path": "a\n/../b.spl"
+          }
+        ]
+      }
+    },
+    {
+      "id": "manifest-backslash-after-newline",
+      "family": "manifest",
+      "valid": false,
+      "instance": {
+        "schema_version": 1,
+        "documents": [
+          {
+            "id": "q",
+            "path": "a\n\\b.spl"
+          }
+        ]
+      }
+    }
+  ],
+  "decoder_cases": [
+    {
+      "id": "query-duplicate-text",
+      "family": "query-document",
+      "raw": "{\"text\":\"x\",\"text\":\"y\"}",
+      "expected": "rejected"
+    },
+    {
+      "id": "corpus-duplicate-version",
+      "family": "corpus",
+      "raw": "{\"schema_version\":1,\"schema_version\":1,\"documents\":[{\"id\":\"q\",\"document\":{\"text\":\"\"}}]}",
+      "expected": "rejected"
+    },
+    {
+      "id": "manifest-duplicate-text",
+      "family": "manifest",
+      "raw": "{\"schema_version\":1,\"documents\":[{\"id\":\"q\",\"text\":\"\",\"text\":\"\"}]}",
+      "expected": "rejected"
+    },
+    {
+      "id": "rewrite-duplicate-rules",
+      "family": "rewrite",
+      "raw": "{\"schema_version\":1,\"document\":{\"text\":\"\"},\"rules\":[],\"rules\":[]}",
+      "expected": "rejected"
+    },
+    {
+      "id": "impact-duplicate-target",
+      "family": "impact",
+      "raw": "{\"schema_version\":1,\"documents\":[{\"id\":\"q\",\"document\":{\"text\":\"search host=web\"}}],\"before_target\":{\"kind\":\"field_list\",\"catalog\":{\"fields\":[\"host\"],\"fields\":[]}},\"after_target\":{\"kind\":\"field_list\",\"catalog\":{\"fields\":[\"host\"]}}}",
+      "expected": "rejected"
+    },
+    {
+      "id": "corpus-decimal-version",
+      "family": "corpus",
+      "raw": "{\"schema_version\":1.0,\"documents\":[{\"id\":\"q\",\"document\":{\"text\":\"search host=web\"}}]}",
+      "expected": "rejected"
+    },
+    {
+      "id": "query-legacy-minimal",
+      "family": "query-document",
+      "raw": "{\"text\":\"search host=web\"}",
+      "expected": "accepted"
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/field-validation.schema.json",
+  "title": "SPL Toolkit field-validation v1",
+  "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/validation.Report",
+  "$defs": {
+    "Request": {
+      "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/validation.Request"
+    },
+    "BatchRequest": {
+      "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/validation.BatchRequest"
+    },
+    "BatchReport": {
+      "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/validation.BatchReport"
+    },
+    "Catalog": {
+      "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/FieldCatalogRequest"
+    }
+  }
+}

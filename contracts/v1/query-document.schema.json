@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/query-document.schema.json",
+  "title": "SPL Toolkit query-document v1",
+  "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/QueryDocumentRequest",
+  "$defs": {
+    "Normalized": {
+      "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.QueryDocument"
+    }
+  }
+}
