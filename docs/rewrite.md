@@ -64,9 +64,24 @@ strings, numbers, Booleans and null remain distinct. Contains checks proven
 literal values, not query text. There is no condition-language NOT, regex,
 priority, caller-supplied context or executable expression.
 
+Dependency literal conditions name the grammar selector, while dependency mapping
+rules name its value. For `search sourcetype=auth src=alice | table src`, this
+condition authorizes a `src` to `user` rule:
+
+```json
+{"fact":"literal","kind":"sourcetype","identity":{"name":"sourcetype"},"operator":"equals","value":"auth"}
+```
+
+The equivalent selector identities are `index` and `source`. An expression field
+named `sourcetype` remains a `field`-kind fact; it is not a dependency by spelling.
+
 Facts come from the original canonical query and its flow point. Compatible AND
 guarantees combine; OR keeps only common guarantees; query NOT establishes no
 positive equality. Later restrictions cannot authorize earlier references.
+Incompatible exact AND restrictions on one identity establish no usable guarantee;
+subsequent repeated restrictions or OR branches cannot revive that conflict.
+Complete supported absence is false, while unsupported evidence remains unknown.
+Unrelated independently proven facts can still authorize their own rules.
 Independent children neither inherit nor export parent facts; inherited subpipes
 receive the existing environment. Overwrites, removals and unknown flow invalidate
 affected facts. A conclusive false condition is an ordinary skip; unknown evidence

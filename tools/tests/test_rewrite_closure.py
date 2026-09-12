@@ -108,3 +108,44 @@ def test_rewrite_collection_requires_unique_nonempty_groups(tmp_path, rewrite_tr
     (tmp_path / "corpus.json").write_text(json.dumps(cases))
     with pytest.raises(AssertionError):
         transport.load_cases(tmp_path)
+
+
+@pytest.mark.parametrize("missing", ["condition-common-or", "condition-noncommon-or",
+                                    "condition-not-positive", "overwritten-fact-unknown",
+                                    "independent-child-no-parent-fact", "inherited-child-fact",
+                                    "validation-schema-unresolved"])
+def test_rewrite_collection_cannot_lose_a_semantic_obligation(tmp_path, rewrite_transport_helpers, missing):
+    transport, _ = rewrite_transport_helpers
+    cases = json.loads((ROOT / "testdata/rewrite/corpus.json").read_text())
+    remaining = [case for case in cases if case["id"] != missing]
+    assert len(remaining) == len(cases) - 1
+    (tmp_path / "corpus.json").write_text(json.dumps(remaining))
+    with pytest.raises(AssertionError, match="required rewrite group"):
+        transport.load_cases(tmp_path)
+
+
+def test_rewrite_collection_rejects_every_empty_required_subgroup(tmp_path, rewrite_transport_helpers):
+    transport, _ = rewrite_transport_helpers
+    cases = json.loads((ROOT / "testdata/rewrite/corpus.json").read_text())
+    for group in transport.REQUIRED_GROUPS:
+        remaining = [case for case in cases if group not in case["groups"]]
+        assert len(remaining) < len(cases), group
+        (tmp_path / "corpus.json").write_text(json.dumps(remaining))
+        with pytest.raises(AssertionError):
+            transport.load_cases(tmp_path)
+
+
+@pytest.mark.parametrize("damage", ["hash", "path", "outcomes"])
+def test_rewrite_local_catalog_and_outcomes_cannot_be_substituted(tmp_path, rewrite_transport_helpers, damage):
+    transport, _ = rewrite_transport_helpers
+    cases = json.loads((ROOT / "testdata/rewrite/corpus.json").read_text())
+    case = next(c for c in cases if c["id"] == "validation-local-ocsf")
+    if damage == "hash":
+        case["catalog_raw_sha256"] = "0" * 64
+    elif damage == "path":
+        case["catalog_fixture"] = "https://outside.invalid/catalog"
+    else:
+        del case["expected"]["validation_summary"]
+    (tmp_path / "corpus.json").write_text(json.dumps(cases))
+    with pytest.raises(AssertionError):
+        transport.load_cases(tmp_path)

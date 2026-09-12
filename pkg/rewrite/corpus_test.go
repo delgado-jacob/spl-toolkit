@@ -17,14 +17,39 @@ import (
 // The corpus owns independent publication, exact audit, source binding and
 // lineage assertions. Exported full reports are transport evidence only.
 type conformanceCase struct {
-	ID       string          `json:"id"`
-	Groups   []string        `json:"groups"`
-	Request  json.RawMessage `json:"request"`
-	Target   json.RawMessage `json:"target"`
-	Expected map[string]any  `json:"expected"`
+	ID               string          `json:"id"`
+	Groups           []string        `json:"groups"`
+	Request          json.RawMessage `json:"request"`
+	Target           json.RawMessage `json:"target"`
+	Expected         map[string]any  `json:"expected"`
+	CatalogFixture   string          `json:"catalog_fixture"`
+	CatalogRawSHA256 string          `json:"catalog_raw_sha256"`
 }
 
-var rewriteRequiredGroups = []string{"preview", "apply", "aliases", "implicit", "conditions", "boolean", "contains", "fact-order", "scopes", "sql", "identity-kinds", "atom-path", "collisions", "chains-swaps", "dependent-skips", "bytes", "syntax", "validation", "no-op", "refusals", "lexical-controls", "batch"}
+var rewriteRequiredGroups = []string{
+	"preview", "apply", "aliases", "implicit",
+	"conditions", "boolean", "contains", "fact-order",
+	"scopes", "sql", "identity-kinds", "atom-path",
+	"collisions", "chains-swaps", "dependent-skips", "bytes",
+	"syntax", "validation", "no-op", "refusals",
+	"lexical-controls", "batch", "all-false-unknown", "all-true-unknown",
+	"and-compatible-repeat", "and-conflict", "and-conflict-contains", "any-false-unknown",
+	"any-true-unknown", "atom-path-control", "chain", "coalescing",
+	"common-or", "common-or-spl", "conditional-spl", "conditional-spl2",
+	"conflict-independent", "conflict-or", "conflict-unknown", "contains-pattern-unknown",
+	"contains-query-text-control", "dataset-component", "dependency-context-control", "dependency-index",
+	"dependency-source", "dependency-sourcetype", "dependency-value-control", "dependent-collision",
+	"empty-rules", "eval-alias", "field-target-invalid", "field-target-valid",
+	"implicit-consumer", "implicit-refusal", "independent-child", "inherited-child",
+	"json-schema-conditional", "json-schema-invalid", "json-schema-unresolved", "json-schema-valid",
+	"later-fact", "literal-comment-control", "literal-target", "lookup-catalog-spl2",
+	"macro-refusal", "metric-index", "navigation-refusal", "no-change",
+	"no-match", "noncommon-or", "noncommon-or-spl", "not",
+	"not-spl", "null-spl2", "ocsf-local", "overwritten-fact",
+	"qualified-corender", "reference-present", "removed-fact", "rename-spl2",
+	"sql-logical-order", "swap", "typed-boolean", "typed-contains-exact-star",
+	"typed-null", "typed-number-string", "unicode-crlf", "wildcard-refusal",
+}
 
 // The matrix is separate from the full semantic corpus: each advertised role
 // needs a real positive producer and a context in which mapping stays fixed.
@@ -188,7 +213,34 @@ func readConformance(t *testing.T) []conformanceCase {
 		t.Fatal(err)
 	}
 	ids, groups := map[string]bool{}, map[string]bool{}
-	for _, c := range cases {
+	for i := range cases {
+		c := &cases[i]
+		if c.CatalogFixture != "" {
+			if c.CatalogFixture != "ocsf/1.6.0/base.json.gz" || c.CatalogRawSHA256 != "9b609f8fb670772f04191c1c276b46d34d6e9110d2417c71fa89c4f54c585137" {
+				t.Fatalf("%s: unknown local catalog fixture", c.ID)
+			}
+			// Reuse the accepted local catalog loader and its raw-byte hash check.
+			catalog := ocsfRewriteTarget(t).SchemaTarget.Catalog
+			var request map[string]json.RawMessage
+			var target map[string]json.RawMessage
+			if err := json.Unmarshal(c.Request, &request); err != nil {
+				t.Fatal(err)
+			}
+			if err := json.Unmarshal(request["validation_target"], &target); err != nil {
+				t.Fatal(err)
+			}
+			target["catalog"] = catalog
+			var err error
+			request["validation_target"], err = json.Marshal(target)
+			if err != nil {
+				t.Fatal(err)
+			}
+			c.Request, err = json.Marshal(request)
+			if err != nil {
+				t.Fatal(err)
+			}
+			c.Target = request["validation_target"]
+		}
 		if c.ID == "" || ids[c.ID] {
 			t.Fatalf("missing or duplicate corpus ID %q", c.ID)
 		}
@@ -203,6 +255,14 @@ func readConformance(t *testing.T) []conformanceCase {
 			if _, ok := c.Expected[k]; !ok {
 				t.Fatalf("%s: missing independent %s expectation", c.ID, k)
 			}
+		}
+		if string(c.Target) != "null" && c.Expected["validation_summary"] == nil {
+			t.Fatalf("%s: target requires independent validation outcomes", c.ID)
+		}
+	}
+	for _, group := range rewriteRequiredGroups {
+		if !groups[group] {
+			t.Errorf("empty required rewrite group %s", group)
 		}
 	}
 	return cases
@@ -291,6 +351,19 @@ func conformanceProjection(r *Result) map[string]any {
 	for _, k := range []string{"status", "candidate_text", "text", "committed", "coverage", "changes", "rule_evaluations"} {
 		out[k] = report[k]
 	}
+	if wrapper, ok := report["candidate_validation"].(map[string]any); ok {
+		key := "schema"
+		if wrapper["kind"] == "field_list" {
+			key = "field_list"
+		}
+		validation := wrapper[key].(map[string]any)
+		outcomes := []any{}
+		for _, raw := range validation["outcomes"].([]any) {
+			item := raw.(map[string]any)
+			outcomes = append(outcomes, []any{item["reference_id"], item["outcome"]})
+		}
+		out["validation_summary"] = []any{wrapper["kind"], validation["status"], outcomes}
+	}
 	for _, key := range []string{"changes", "rule_evaluations"} {
 		for _, value := range out[key].([]any) {
 			entry := value.(map[string]any)
@@ -366,6 +439,7 @@ func TestRewriteConformance(t *testing.T) {
 	cases := readConformance(t)
 	entries := []any{}
 	results := map[string]*Result{}
+	coveredForms := map[string]bool{}
 	for _, c := range cases {
 		t.Run(c.ID, func(t *testing.T) {
 			request, err := DecodeRequest(c.Request)
@@ -391,9 +465,53 @@ func TestRewriteConformance(t *testing.T) {
 				}
 			}
 			assertConformanceBytes(t, r)
+			// Capability presence is not surface proof. Every advertised positive
+			// role must occur in an actual candidate-applied corpus edit.
+			session, err := analysis.PrepareRewrite(request.Document, nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+			applied := map[string]bool{}
+			for _, change := range r.Changes {
+				if change.CandidateApplied {
+					for _, id := range change.OriginalReferenceIDs {
+						applied[id] = true
+					}
+				}
+			}
+			for _, site := range session.Evidence().Sites {
+				changed := applied[site.ReferenceID]
+				// An implicit definition is re-rendered by its input edit, not an
+				// additional overlapping edit. Require its actual candidate name
+				// to change, alongside the independently asserted lineage/report.
+				if site.Role == "implicit_output" && site.Identity.Name != nil && len(applied) > 0 {
+					for _, ref := range r.CandidateAnalysis.References {
+						if ref.ID == site.ReferenceID && ref.NormalizedName != *site.Identity.Name {
+							changed = true
+						}
+					}
+				}
+				if changed {
+					coveredForms[request.Document.Language+"/"+site.Kind+"/"+site.Role] = true
+				}
+			}
 			results[c.ID] = r
 			entries = append(entries, map[string]any{"id": c.ID, "request": json.RawMessage(c.Request), "report": r})
 		})
+	}
+	if t.Failed() {
+		return
+	}
+	for _, language := range []string{"spl", "spl2"} {
+		capabilities, err := analysis.CapabilitiesFor(analysis.CapabilityOptions{Language: language})
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, form := range capabilities.Rewrite.Forms {
+			if form.Supported && !coveredForms[language+"/"+form.Kind+"/"+form.Role] {
+				t.Errorf("missing full-report positive form %s/%s/%s", language, form.Kind, form.Role)
+			}
+		}
 	}
 	if t.Failed() {
 		return

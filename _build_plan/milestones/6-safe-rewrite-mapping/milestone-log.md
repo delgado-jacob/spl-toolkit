@@ -1,5 +1,20 @@
 ## What's new in the app
 
+Task 8 review follow-up: the initial `c3a175b` evidence below is historical and
+was not accepted as final. Scoped producer correction
+`e76d351d58a73d17b04d4f7e1728a3ccedaca2a9` is independently approved: literal
+dependency facts retain grammar selector identities and conflicting exact AND
+restrictions cannot authorize rewrites. The final corpus now has 106 independent
+public cases, 88 required semantic/form subgroups, all 31 advertised positive
+render roles represented in candidate-applied full reports, and the preserved
+34-row capability matrix plus two private proof-fault cases. It adds SQL logical
+ordering, typed SPL2 conditions, selector/context/conflict controls, concrete
+JSON Schema outcomes and local versioned OCSF, exact missing forms, byte/alias/
+macro/wildcard/navigation boundaries, and real HTTP exact/over-limit checks.
+Final refreshed artifact counts/hashes and follow-up commit identity are recorded
+in the review-follow-up verification section below; broad review/root acceptance
+and unexecuted release/runtime gates remain open.
+
 SPL Toolkit now previews and applies explicit safe rewrite rules through canonical Go, CLI, REST and native Python. Rules map field, index, source, sourcetype, lookup, dataset and data-model identities in supported SPL/SPL2 forms. Reports retain original/candidate/returned text, exact audit entries, original facts, bindings, lineage, refusal evidence and optional destination validation. Explicit aliases remain fixed. A separately proved group may commit beside a refused group with incomplete status; a failed whole-candidate or destination gate returns the original string. Legacy mapping precedence and context semantics remain unchanged.
 
 Task8 implementation is ready for independent review. This is not final milestone/root acceptance, release-platform certification or Splunk runtime equivalence.
@@ -85,3 +100,75 @@ Corpus SHA256 is `370e01b0cb84334b985dac8c1a36b743cdadb8df83778932f3dc5e22b1a777
 The fresh CLI's embedded VCS metadata names outer baseline `6898cc052eb7109fbcc7495ee826c993aaa93352` with `modified=true`, not the Task8 candidate. Recorded worktree build commands, actual Go package directories, source hashes, native manifests and full report parity bind its inputs; no final-commit stamp is claimed. Native wheel builds use the existing `-buildvcs=false` release recipe. The local Go external-link path is qualified for the known LC_UUID issue; race runs retain LC_DYSYMTAB warnings and floor logs retain deployment-target warnings without claiming other-host execution.
 
 Independent Task8 review, broad M6 review and root's reserved stable Go/built/native/installed/Python3.14 acceptance remain separate. Linux/Windows/other architectures, supported Python release combinations, ASAN/leak-sanitizer execution and external Splunk runtime equivalence were not run here. No merge, push, release or Milestone7 implementation is implied. User-owned untracked files, GOAL_STATE, predecessor evidence and root-private inputs remain untouched.
+
+## Review-follow-up verification
+
+This section supersedes the historical Task8 candidate counts and artifacts above.
+Review round one identified selector-identity and conflicting-AND producer defects
+plus missing full-parity obligations. The separately committed producer fix
+`e76d351d58a73d17b04d4f7e1728a3ccedaca2a9` received independent approval with
+zero findings (`task-8-fact-fix-review.md`, SHA256
+`5a1d302cd9edad40b7af7c3f54373ded5134cbe9a62e252e4827f7e17a951f5c`).
+The follow-up commit containing this log changes only corpus/tests and documentation;
+its exact SHA is resolved in `task-8-report.md` and `r1-post-commit.json` after commit.
+
+The final 106 public cases (+44) cover 81 distinct dialect/query texts: 65 SPL,
+41 SPL2; 76 valid, 25 incomplete, five invalid; 60 committed. All 88 required
+groups (22 original umbrellas plus 66 semantic/form subgroups) have deletion
+guards. All 31 advertised supported roles occur in actually changed full reports;
+the 34-row capability matrix and two private proof-fault cases remain separate.
+The 56 real ordered batch groups include 18 multi-document groups. Three malformed
+batch inputs retain atomic rejection. Eight real-HTTP checks exercise exact 8 MiB
+and one-byte-over bodies for single/batch and known-length/chunked requests.
+Destination cases independently assert field-list, JSON Schema valid/invalid/
+conditional/unresolved, and real local OCSF outcomes. The existing OCSF 1.6.0
+catalog is reused with its raw SHA256, not duplicated or downloaded.
+
+Seven obligation-deletion tests first failed because the old broad guards let
+their cases disappear (`r1-obligation-red.log`, SHA256
+`e4992e54217e8f851d113f9e40b1ae45eeaebd5aaa75b865e952220d4b820a11`).
+Expanded guards and independent cases then passed. Draft corrections were
+reconciled against canonical public roles, SQL phase order, deferred tstats output
+effects, null/rename provenance, removal transitions and refusal audit semantics;
+the report preserves that authoring ledger. No live report became an oracle.
+
+Fresh official Go1.22.12/offline runs passed: seven-package floor; full formatting,
+vet and race checks (eight tested packages); 222 tooling tests; 435 source-native
+Python tests; 199 documented/schema/SPL2/rewrite surface tests; and a final 121-test
+rewrite run binding the final fixture bytes. Both direct and rebuilt-sdist installed
+paths passed 414 native plus 223 surface tests, with zero failures/skips. The docs
+checker passed all 15 current pages. The initial floor attempt was denied a local
+HTTP listener by the sandbox; the authorized local-listener rerun passed and is
+the counted floor evidence. No test failure was waived.
+
+Task-local refreshed artifacts are under `task-8-evidence/r1-build`, `r1-dist` and
+`r1-rebuilt-sdist`; previous artifacts and ignored Python build staging were kept
+intact. Full source/direct/rebuilt JSON values, ordered batches, atomic errors and
+HTTP limits match. Closure retains all seven rewrite fixtures, 18 copied docs/
+examples, 86 sdist source files, 165 producing Go source hashes and all predecessor
+schema/SPL2 suites, including 1,714 SPL2 documents. Installed module/native origins
+were observed in separate outside-checkout Python3.12 site-packages environments.
+
+| Refreshed artifact | SHA256 |
+| --- | --- |
+| CLI | `d32e067be0f37cad0fb39b47a63d9d76a5e78054f0816f716ad16ed44732c524` |
+| Server | `49ffd68641c647885489482f7727de1c4a8cfab7774e905b3e70a3e8f103b3b8` |
+| Source native | `e0bfbea75b44b628a1fdca14816e3747439e6801b45a781846d8c068168213c7` |
+| Both installed native libraries | `be4c7feb64d5d8e7565990b19604210b4816ae18fe3c39f2245226e6137186fd` |
+| Direct wheel | `5ed1af89e7bdc7259f9e4f5e0444883765ef504d3b9e37248aa691cc34902b03` |
+| Sdist | `e16362b51fd7bfb77f44f359ea87b2a9272f798566bbab42856f6bc2e071e540` |
+| Rebuilt-sdist wheel | `af2750ade8d4959e6c602c91fec982ba1860525134f91f2ecc72cbd50f235531` |
+| r1-package-evidence.json | `c0a2262ac2b46bb4ee9edef5245794652248a6de4e2d66d75aac467e368ad14c` |
+| r1-final-source-rewrite-evidence.json | `58bb05c747e7e986cc916993a865a6b8c2bd102922d2bc7279b394b44a895d00` |
+| r1-closure.json | `40f9774d795723e8de6a659caf2fb0ccfa08321177c9a1eb516abfb2d547339c` |
+
+Final corpus SHA256 is `30078c0abe82f0e2c82c9efc90fb3acc8c99d252b1c920961dcd41abcf5e8c83`;
+full Go transport SHA256 is `854fc4acd93d385964b0829a50899bd4845c0b76a9779c128e13d4d8c377b2d3`
+(transport only, zero semantic credit). Exact command/log/input hashes are in the
+closure record. The previously disclosed outer-revision `6898cc052`, modified=true,
+CLI metadata and external-link warnings still apply; actual worktree source hashes
+bind these binaries, not a claimed clean candidate stamp. Results remain local
+macOS26.2 arm64/Python3.12.6 proof. Task8 rereview, broad M6 review, root stable and
+Python3.14 acceptance, other release platforms, sanitizers and external runtime
+conformance are unexecuted separate gates. No private acceptance inputs, new
+dependencies, generated schema changes, user-file edits, merge or push occurred.

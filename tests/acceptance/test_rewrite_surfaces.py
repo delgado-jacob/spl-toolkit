@@ -4,17 +4,39 @@ This module also prepares the Go transport artifact before package installation.
 The artifact grants no semantic credit: every consumer checks authored expectations.
 """
 from copy import deepcopy
+import gzip
 import hashlib
 import json
 import os
 from pathlib import Path
 import subprocess
+from urllib.error import HTTPError
+from urllib.request import Request, urlopen
 
 
 REQUIRED_GROUPS = {"preview", "apply", "aliases", "implicit", "conditions", "boolean", "contains",
                    "fact-order", "scopes", "sql", "identity-kinds", "atom-path", "collisions",
                    "chains-swaps", "dependent-skips", "bytes", "syntax", "validation", "no-op",
                    "refusals", "lexical-controls", "batch"}
+REQUIRED_GROUPS.update({
+    "all-false-unknown", "all-true-unknown", "and-compatible-repeat", "and-conflict",
+    "and-conflict-contains", "any-false-unknown", "any-true-unknown", "atom-path-control",
+    "chain", "coalescing", "common-or", "common-or-spl",
+    "conditional-spl", "conditional-spl2", "conflict-independent", "conflict-or",
+    "conflict-unknown", "contains-pattern-unknown", "contains-query-text-control", "dataset-component",
+    "dependency-context-control", "dependency-index", "dependency-source", "dependency-sourcetype",
+    "dependency-value-control", "dependent-collision", "empty-rules", "eval-alias",
+    "field-target-invalid", "field-target-valid", "implicit-consumer", "implicit-refusal",
+    "independent-child", "inherited-child", "json-schema-conditional", "json-schema-invalid",
+    "json-schema-unresolved", "json-schema-valid", "later-fact", "literal-comment-control",
+    "literal-target", "lookup-catalog-spl2", "macro-refusal", "metric-index",
+    "navigation-refusal", "no-change", "no-match", "noncommon-or",
+    "noncommon-or-spl", "not", "not-spl", "null-spl2",
+    "ocsf-local", "overwritten-fact", "qualified-corender", "reference-present",
+    "removed-fact", "rename-spl2", "sql-logical-order", "swap",
+    "typed-boolean", "typed-contains-exact-star", "typed-null", "typed-number-string",
+    "unicode-crlf", "wildcard-refusal",
+})
 REPORT_KEYS = {"schema_version", "document", "mode", "status", "coverage", "original_text", "candidate_text",
                "text", "committed", "changes", "rule_evaluations", "original_analysis", "candidate_analysis"}
 
@@ -38,11 +60,23 @@ def load_cases(fixtures):
         assert case["request"]["document"]["source_id"] == case["id"]
         assert set(case["request"]["document"]) == {"text", "language", "profile", "version", "source_id"}
         assert case["target"] == case["request"].get("validation_target")
+        assert not case["target"] or "validation_summary" in case["expected"]
+        if "catalog_fixture" in case:
+            assert case["catalog_fixture"] == "ocsf/1.6.0/base.json.gz", "unknown rewrite catalog fixture"
+            schemas = Path(os.environ.get("SPL_SCHEMA_FIXTURES", fixtures.parent / "schemas"))
+            raw = gzip.decompress((schemas / case["catalog_fixture"]).read_bytes())
+            assert hashlib.sha256(raw).hexdigest() == case["catalog_raw_sha256"] == "9b609f8fb670772f04191c1c276b46d34d6e9110d2417c71fa89c4f54c585137"
+            case["target"]["catalog"] = json.loads(raw)
+            case["request"]["validation_target"] = deepcopy(case["target"])
     return cases
 
 
 def projection(report):
     result = {k: deepcopy(report[k]) for k in ("status", "candidate_text", "text", "committed", "coverage", "changes", "rule_evaluations")}
+    if wrapper := report.get("candidate_validation"):
+        validation = wrapper["field_list" if wrapper["kind"] == "field_list" else "schema"]
+        result["validation_summary"] = [wrapper["kind"], validation["status"],
+                                        [[item["reference_id"], item["outcome"]] for item in validation["outcomes"]]]
     for key in ("changes", "rule_evaluations"):
         for entry in result[key]:
             for name in ("location", "original_location", "candidate_location"):
@@ -204,7 +238,9 @@ def rewrite_evidence(cli_path, rewrite_go_reports):
     record = {"schema_version": 1, "fixture_hashes": {p.name: digest(p) for p in FIXTURES.glob("*.json")},
               "artifacts": {str(p): digest(p) for p in (cli_path, required_absolute_path("SPL_SERVER"), library)},
               "go_transport": {k: v for k, v in rewrite_go_reports.items() if k not in ("reports", "batches")},
-              "cases": [], "batches": [], "request_errors": []}
+              "cases": [], "batches": [], "request_errors": [], "body_limits": [],
+              "catalogs": [{"fixture": c["catalog_fixture"], "raw_sha256": c["catalog_raw_sha256"]}
+                           for c in CASES if "catalog_fixture" in c]}
     yield record
     if destination := os.environ.get("SPL_REWRITE_EVIDENCE"):
         Path(destination).write_text(json.dumps(record, sort_keys=True, ensure_ascii=False) + "\n", encoding="utf-8")
@@ -276,6 +312,38 @@ def test_rewrite_batch_input_errors_are_atomic(documents, cli_path, server_url, 
     cli = subprocess.run([str(cli_path), "rewrite", "--rules", str(path), "--apply", "--batch", "-", "--format", "json"], input=json.dumps(documents), capture_output=True, text=True, timeout=10)
     assert cli.returncode == 2 and cli.stdout == "" and set(json.loads(cli.stderr)) == {"error"}
     rewrite_evidence["request_errors"].append({"request": request, "http_status": code, "cli_exit": cli.returncode})
+
+
+@pytest.mark.parametrize("batch", [False, True])
+@pytest.mark.parametrize("chunked", [False, True])
+@pytest.mark.parametrize("overflow", [False, True])
+def test_rewrite_real_http_body_limit(batch, chunked, overflow, server_url, rewrite_go_reports, rewrite_evidence):
+    # Whitespace padding changes only transport size. The accepted exact-limit
+    # request must retain the complete canonical single/batch result.
+    case = next(c for c in CASES if c["id"] == "spl-search-apply")
+    request = deepcopy(case["request"])
+    expected = rewrite_go_reports["reports"][case["id"]]
+    if batch:
+        request["documents"] = [request.pop("document")]
+        expected = {"schema_version": 1, "status": "valid", "reports": [expected]}
+    raw = json.dumps(request).encode()
+    raw += b" " * ((8 << 20) + int(overflow) - len(raw))
+    url = server_url + "/query/rewrite" + ("/batch" if batch else "")
+    data = iter([raw]) if chunked else raw
+    http_request = Request(url, data=data, headers={"Content-Type": "application/json"}, method="POST")
+    if overflow:
+        with pytest.raises(HTTPError) as caught:
+            urlopen(http_request, timeout=15)
+        with caught.value as response:
+            status, actual = response.code, json.load(response)
+        assert status == 400 and "reports" not in actual and "candidate_text" not in actual
+        assert "8 MiB" in json.dumps(actual)
+    else:
+        with urlopen(http_request, timeout=15) as response:
+            status, actual = response.status, json.load(response)
+        assert status == 200 and actual == expected
+    rewrite_evidence["body_limits"].append({"batch": batch, "chunked": chunked, "bytes": len(raw),
+                                            "sha256": hashlib.sha256(raw).hexdigest(), "http_status": status})
 
 
 def test_python_rewrite_example_uses_real_native(monkeypatch, capsys):
