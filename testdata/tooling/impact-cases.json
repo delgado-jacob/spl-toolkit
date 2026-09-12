@@ -1,0 +1,33 @@
+{
+  "schema_same_status_changed_outcome": {
+    "request": {
+      "schema_version": 1,
+      "documents": [{"id": "q", "document": {"text": "search host=x missing=y"}}],
+      "before_target": {"kind": "field_list", "catalog": {"fields": ["host"]}},
+      "after_target": {"kind": "field_list", "catalog": {"fields": []}}
+    },
+    "classification": "affected",
+    "before_status": "invalid",
+    "after_status": "invalid"
+  },
+  "mapping_identity_baseline": {
+    "request": {
+      "schema_version": 1,
+      "documents": [{"id": "q", "document": {"text": "table src"}}],
+      "before_rules": {"schema_version": 1, "rules": []},
+      "after_rules": {"schema_version": 1, "rules": [{"id": "rename", "kind": "field", "source": {"name": "src"}, "target": {"name": "user"}}]}
+    },
+    "classification": "affected",
+    "before_candidate_text": "table src",
+    "after_candidate_text": "table user"
+  },
+  "mapping_equal_incomplete": {
+    "request": {
+      "schema_version": 1,
+      "documents": [{"id": "q", "document": {"text": "| mystery | table src"}}],
+      "before_rules": {"schema_version": 1, "rules": []},
+      "after_rules": {"schema_version": 1, "rules": []}
+    },
+    "classification": "indeterminate"
+  }
+}
