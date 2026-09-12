@@ -304,7 +304,7 @@ func validateLegacyDialect(language, profile, version string) error {
 		return err
 	}
 	if manifest.Language == "spl2" {
-		return fmt.Errorf("unsupported_dialect_for_operation: legacy operations support SPL only; use /query/analyze, /query/validate-fields, or /query/validate-schema for SPL2; SPL2 rewriting is not available")
+		return fmt.Errorf("unsupported_dialect_for_operation: legacy operations support SPL only; use /query/analyze, /query/validate-fields, /query/validate-schema, or /query/rewrite for SPL2 where the selected capability manifest marks the requested rewrite form supported")
 	}
 	return nil
 }

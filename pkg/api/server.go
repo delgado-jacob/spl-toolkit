@@ -195,6 +195,8 @@ func (s *Server) setupRoutes() {
 	s.mux.HandleFunc("POST /api/v1/query/validate-fields/batch", s.handleValidateFieldsBatch)
 	s.mux.HandleFunc("POST /api/v1/query/validate-schema", s.handleValidateSchema)
 	s.mux.HandleFunc("POST /api/v1/query/validate-schema/batch", s.handleValidateSchemaBatch)
+	s.mux.HandleFunc("POST /api/v1/query/rewrite", s.handleRewrite)
+	s.mux.HandleFunc("POST /api/v1/query/rewrite/batch", s.handleRewriteBatch)
 	s.mux.HandleFunc("GET /api/v1/capabilities", s.handleCapabilities)
 
 	// Mapping configuration endpoints

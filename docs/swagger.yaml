@@ -32,6 +32,10 @@ components:
           type: string
         profile:
           type: string
+        rewrite:
+          $ref: '#/components/schemas/analysis.RewriteCapabilityManifest'
+          description: Optional rewrite support for this selected dialect; inspect
+            each form rather than assuming universal support.
         schema_version:
           type: integer
         version:
@@ -247,6 +251,45 @@ components:
           uniqueItems: false
         status:
           $ref: '#/components/schemas/analysis.Status'
+      type: object
+    analysis.RewriteCapabilityForm:
+      properties:
+        identity_forms:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        kind:
+          type: string
+        limitations:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        role:
+          type: string
+        supported:
+          type: boolean
+      required:
+      - kind
+      - role
+      - identity_forms
+      - supported
+      - limitations
+      type: object
+    analysis.RewriteCapabilityManifest:
+      properties:
+        forms:
+          items:
+            $ref: '#/components/schemas/analysis.RewriteCapabilityForm'
+          type: array
+          uniqueItems: false
+        schema_version:
+          const: 1
+          type: integer
+      required:
+      - schema_version
+      - forms
       type: object
     analysis.Scope:
       properties:
@@ -492,6 +535,314 @@ components:
           example: true
           type: boolean
           x-order: '3'
+      type: object
+    api.RewriteBatchRequest:
+      additionalProperties: false
+      properties:
+        documents:
+          items:
+            $ref: '#/components/schemas/validation.QueryDocument'
+          minItems: 1
+          type: array
+        mode:
+          default: preview
+          enum:
+          - preview
+          - apply
+          type: string
+        rules:
+          items:
+            $ref: '#/components/schemas/api.RewriteRule'
+          type: array
+        schema_version:
+          const: 1
+          type: integer
+        validation_target:
+          description: Optional inline offline validation target. Paths and retrieval
+            URLs are not accepted.
+          oneOf:
+          - additionalProperties: false
+            properties:
+              catalog:
+                oneOf:
+                - items:
+                    minLength: 1
+                    type: string
+                  type: array
+                  uniqueItems: true
+                - $ref: '#/components/schemas/validation.FieldCatalog'
+              kind:
+                const: field_list
+            required:
+            - kind
+            - catalog
+            type: object
+          - additionalProperties: false
+            properties:
+              base_uri:
+                minLength: 1
+                pattern: \S
+                type: string
+              identity:
+                minLength: 1
+                pattern: \S
+                type: string
+              kind:
+                const: json_schema
+              resources:
+                additionalProperties:
+                  oneOf:
+                  - type: object
+                  - type: boolean
+                description: URI-keyed local inline JSON Schema resources. No URI
+                  is fetched.
+                propertyNames:
+                  minLength: 1
+                  pattern: \S
+                  type: string
+                type: object
+              schema:
+                oneOf:
+                - type: object
+                - type: boolean
+            required:
+            - kind
+            - schema
+            type: object
+          - additionalProperties: false
+            properties:
+              catalog:
+                description: Official compiled OCSF catalog with compile_version 1,
+                  exact version and full extension set. Catalog vocabulary and annotation
+                  members are allowed.
+                type: object
+              identity:
+                minLength: 1
+                pattern: \S
+                type: string
+              kind:
+                const: ocsf
+              selection:
+                $ref: '#/components/schemas/api.SchemaValidationSelection'
+            required:
+            - kind
+            - catalog
+            - selection
+            type: object
+      required:
+      - schema_version
+      - documents
+      - rules
+      type: object
+    api.RewriteCondition:
+      additionalProperties: false
+      oneOf:
+      - required:
+        - all
+      - required:
+        - any
+      - oneOf:
+        - properties:
+            fact:
+              const: literal
+          required:
+          - operator
+          - value
+        - not:
+            anyOf:
+            - required:
+              - operator
+            - required:
+              - value
+          properties:
+            fact:
+              const: source_reference_present
+        required:
+        - fact
+        - kind
+        - identity
+      properties:
+        all:
+          items: &id001
+            $ref: '#/components/schemas/api.RewriteCondition'
+          minItems: 1
+          type: array
+        any:
+          items: *id001
+          minItems: 1
+          type: array
+        fact:
+          enum:
+          - literal
+          - source_reference_present
+          type: string
+        identity:
+          $ref: '#/components/schemas/api.RewriteIdentity'
+        kind:
+          enum:
+          - field
+          - index
+          - source
+          - sourcetype
+          - lookup
+          - dataset
+          - data_model
+          type: string
+        operator:
+          enum:
+          - equals
+          - contains
+          type: string
+        value:
+          oneOf:
+          - type: string
+          - type: number
+          - type: boolean
+          - type: 'null'
+      type: object
+    api.RewriteIdentity:
+      additionalProperties: false
+      oneOf:
+      - required:
+        - name
+      - required:
+        - path
+      properties:
+        name:
+          minLength: 1
+          pattern: \S
+          type: string
+        path:
+          items:
+            minLength: 1
+            pattern: \S
+            type: string
+          minItems: 1
+          type: array
+      type: object
+    api.RewriteRequest:
+      additionalProperties: false
+      properties:
+        document:
+          $ref: '#/components/schemas/validation.QueryDocument'
+        mode:
+          default: preview
+          enum:
+          - preview
+          - apply
+          type: string
+        rules:
+          items:
+            $ref: '#/components/schemas/api.RewriteRule'
+          type: array
+        schema_version:
+          const: 1
+          type: integer
+        validation_target:
+          description: Optional inline offline validation target. Paths and retrieval
+            URLs are not accepted.
+          oneOf:
+          - additionalProperties: false
+            properties:
+              catalog:
+                oneOf:
+                - items:
+                    minLength: 1
+                    type: string
+                  type: array
+                  uniqueItems: true
+                - $ref: '#/components/schemas/validation.FieldCatalog'
+              kind:
+                const: field_list
+            required:
+            - kind
+            - catalog
+            type: object
+          - additionalProperties: false
+            properties:
+              base_uri:
+                minLength: 1
+                pattern: \S
+                type: string
+              identity:
+                minLength: 1
+                pattern: \S
+                type: string
+              kind:
+                const: json_schema
+              resources:
+                additionalProperties:
+                  oneOf:
+                  - type: object
+                  - type: boolean
+                description: URI-keyed local inline JSON Schema resources. No URI
+                  is fetched.
+                propertyNames:
+                  minLength: 1
+                  pattern: \S
+                  type: string
+                type: object
+              schema:
+                oneOf:
+                - type: object
+                - type: boolean
+            required:
+            - kind
+            - schema
+            type: object
+          - additionalProperties: false
+            properties:
+              catalog:
+                description: Official compiled OCSF catalog with compile_version 1,
+                  exact version and full extension set. Catalog vocabulary and annotation
+                  members are allowed.
+                type: object
+              identity:
+                minLength: 1
+                pattern: \S
+                type: string
+              kind:
+                const: ocsf
+              selection:
+                $ref: '#/components/schemas/api.SchemaValidationSelection'
+            required:
+            - kind
+            - catalog
+            - selection
+            type: object
+      required:
+      - schema_version
+      - document
+      - rules
+      type: object
+    api.RewriteRule:
+      additionalProperties: false
+      properties:
+        id:
+          minLength: 1
+          pattern: \S
+          type: string
+        kind:
+          enum:
+          - field
+          - index
+          - source
+          - sourcetype
+          - lookup
+          - dataset
+          - data_model
+          type: string
+        source:
+          $ref: '#/components/schemas/api.RewriteIdentity'
+        target:
+          $ref: '#/components/schemas/api.RewriteIdentity'
+        when:
+          $ref: '#/components/schemas/api.RewriteCondition'
+      required:
+      - id
+      - kind
+      - source
+      - target
       type: object
     api.SchemaValidationBatchRequest:
       additionalProperties: false
@@ -859,6 +1210,167 @@ components:
           uniqueItems: false
       type: object
       x-order: '2'
+    rewrite.BatchResult:
+      properties:
+        reports:
+          items:
+            $ref: '#/components/schemas/rewrite.Result'
+          type: array
+          uniqueItems: false
+        schema_version:
+          type: integer
+        status:
+          type: string
+          x-enum-varnames:
+          - Valid
+          - Invalid
+          - Incomplete
+      type: object
+    rewrite.CandidateValidation:
+      properties:
+        field_list:
+          $ref: '#/components/schemas/validation.Report'
+        kind:
+          type: string
+        schema:
+          $ref: '#/components/schemas/validation.SchemaReport'
+      type: object
+    rewrite.Change:
+      properties:
+        candidate_applied:
+          type: boolean
+        candidate_location:
+          $ref: '#/components/schemas/analysis.Location'
+        candidate_reference_ids:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        committed:
+          type: boolean
+        group_id:
+          type: string
+        new_text:
+          type: string
+        old_text:
+          type: string
+        original_location:
+          $ref: '#/components/schemas/analysis.Location'
+        original_reference_ids:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        outcome:
+          type: string
+        reason:
+          type: string
+        rule_ids:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+      type: object
+    rewrite.ConditionEvaluation:
+      properties:
+        children:
+          items:
+            $ref: '#/components/schemas/rewrite.ConditionEvaluation'
+          type: array
+          uniqueItems: false
+        reason:
+          type: string
+        reference_ids:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        state:
+          type: string
+      type: object
+    rewrite.Coverage:
+      properties:
+        reasons:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        rewrite_complete:
+          type: boolean
+        semantic_complete:
+          type: boolean
+        syntax_complete:
+          type: boolean
+        validation:
+          $ref: '#/components/schemas/validation.Coverage'
+      type: object
+    rewrite.Mode:
+      type: string
+      x-enum-varnames:
+      - Preview
+      - Apply
+    rewrite.Result:
+      properties:
+        candidate_analysis:
+          $ref: '#/components/schemas/analysis.Result'
+        candidate_text:
+          type: string
+        candidate_validation:
+          $ref: '#/components/schemas/rewrite.CandidateValidation'
+        changes:
+          items:
+            $ref: '#/components/schemas/rewrite.Change'
+          type: array
+          uniqueItems: false
+        committed:
+          type: boolean
+        coverage:
+          $ref: '#/components/schemas/rewrite.Coverage'
+        document:
+          $ref: '#/components/schemas/analysis.QueryDocument'
+        mode:
+          type: string
+          x-enum-varnames:
+          - Preview
+          - Apply
+        original_analysis:
+          $ref: '#/components/schemas/analysis.Result'
+        original_text:
+          type: string
+        rule_evaluations:
+          items:
+            $ref: '#/components/schemas/rewrite.RuleEvaluation'
+          type: array
+          uniqueItems: false
+        schema_version:
+          type: integer
+        status:
+          type: string
+          x-enum-varnames:
+          - Valid
+          - Invalid
+          - Incomplete
+        text:
+          type: string
+      type: object
+    rewrite.RuleEvaluation:
+      properties:
+        condition:
+          $ref: '#/components/schemas/rewrite.ConditionEvaluation'
+        location:
+          $ref: '#/components/schemas/analysis.Location'
+        outcome:
+          type: string
+        reason:
+          type: string
+        reference_ids:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        rule_id:
+          type: string
+      type: object
     validation.BatchReport:
       properties:
         reports:
@@ -1490,6 +2002,76 @@ paths:
                 $ref: '#/components/schemas/api.ErrorResponse'
           description: Internal server error
       summary: Map fields in an SPL query
+      tags:
+      - query
+  /query/rewrite:
+    post:
+      description: Strict versioned request with one query document, explicit inline
+        rules, optional inline validation target, and preview mode by default. No
+        filesystem paths, URL retrieval, or mapper configuration. Query statuses valid,
+        invalid, and incomplete all return HTTP 200. Body limit is 8 MiB.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/api.RewriteRequest'
+        description: Versioned single-query rewrite request
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/rewrite.Result'
+          description: Canonical rewrite report
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api.ErrorResponse'
+          description: Input error, content type, or body limit
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api.ErrorResponse'
+          description: Unexpected internal error
+      summary: Preview or apply explicit safe rewrite rules
+      tags:
+      - query
+  /query/rewrite/batch:
+    post:
+      description: Strict versioned request with nonempty query documents, explicit
+        inline rules, optional inline validation target, and preview mode by default.
+        No filesystem paths, URL retrieval, or mapper configuration. Query statuses
+        valid, invalid, and incomplete all return HTTP 200. Body limit is 8 MiB.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/api.RewriteBatchRequest'
+        description: Versioned ordered-batch rewrite request
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/rewrite.BatchResult'
+          description: Canonical ordered rewrite reports
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api.ErrorResponse'
+          description: Input error, content type, or body limit
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api.ErrorResponse'
+          description: Unexpected internal error
+      summary: Preview or apply explicit safe rewrite rules to an ordered batch
       tags:
       - query
   /query/validate:

@@ -130,6 +130,78 @@ def update(directory: Path) -> None:
         request.update(required=[key, "target"], additionalProperties=False)
         request["properties"][key] = value
 
+    # M6 request-only rewrite schemas. Runtime remains the canonical strict
+    # decoder; these definitions make that contract executable for clients.
+    identity = shape("api.RewriteIdentity", ("name", "path"))
+    expected_identity = {"type": "object", "properties": {
+        "name": {"type": "string"},
+        "path": {"type": "array", "items": {"type": "string"}, "uniqueItems": False}}}
+    patched_identity = {"type": "object", "properties": {
+        "name": copy.deepcopy(nonblank),
+        "path": {"type": "array", "items": copy.deepcopy(nonblank), "minItems": 1}},
+        "additionalProperties": False, "oneOf": [{"required": ["name"]}, {"required": ["path"]}]}
+    if identity not in (expected_identity, patched_identity):
+        raise ValueError("unexpected pinned rewrite identity shape")
+    identity.update(additionalProperties=False, oneOf=[{"required": ["name"]}, {"required": ["path"]}])
+    identity["properties"] = {
+        "name": copy.deepcopy(nonblank),
+        "path": {"type": "array", "items": copy.deepcopy(nonblank), "minItems": 1}}
+
+    condition = shape("api.RewriteCondition", ("all", "any", "fact", "kind", "identity", "operator", "value"))
+    condition_ref = {"$ref": PREFIX + "api.RewriteCondition"}
+    for key in ("all", "any"):
+        condition["properties"][key] = {"type": "array", "items": condition_ref, "minItems": 1}
+    condition["properties"]["fact"] = {"type": "string", "enum": ["literal", "source_reference_present"]}
+    condition["properties"]["kind"] = {"type": "string", "enum": ["field", "index", "source", "sourcetype", "lookup", "dataset", "data_model"]}
+    condition["properties"]["identity"] = {"$ref": PREFIX + "api.RewriteIdentity"}
+    condition["properties"]["operator"] = {"type": "string", "enum": ["equals", "contains"]}
+    condition["properties"]["value"] = {"oneOf": [{"type": "string"}, {"type": "number"}, {"type": "boolean"}, {"type": "null"}]}
+    leaf = {"required": ["fact", "kind", "identity"], "oneOf": [
+        {"properties": {"fact": {"const": "literal"}}, "required": ["operator", "value"]},
+        {"properties": {"fact": {"const": "source_reference_present"}},
+         "not": {"anyOf": [{"required": ["operator"]}, {"required": ["value"]}]}}]}
+    condition.update(additionalProperties=False, oneOf=[{"required": ["all"]}, {"required": ["any"]}, leaf])
+
+    rule = shape("api.RewriteRule", ("id", "kind", "source", "target", "when"))
+    rule.update(required=["id", "kind", "source", "target"], additionalProperties=False)
+    rule["properties"]["id"] = copy.deepcopy(nonblank)
+    rule["properties"]["kind"] = {"type": "string", "enum": ["field", "index", "source", "sourcetype", "lookup", "dataset", "data_model"]}
+    for key in ("source", "target"):
+        rule["properties"][key] = {"$ref": PREFIX + "api.RewriteIdentity"}
+    rule["properties"]["when"] = {"$ref": PREFIX + "api.RewriteCondition"}
+
+    field_target = {"type": "object", "required": ["kind", "catalog"], "additionalProperties": False,
+                    "properties": {"kind": {"const": "field_list"}, "catalog": copy.deepcopy(union)}}
+    rewrite_target = {"oneOf": [field_target] + copy.deepcopy(target_union["oneOf"]),
+                      "description": "Optional inline offline validation target. Paths and retrieval URLs are not accepted."}
+    for name, key in (("api.RewriteRequest", "document"), ("api.RewriteBatchRequest", "documents")):
+        request = shape(name, ("schema_version", "mode", key, "rules", "validation_target"))
+        doc_ref = {"$ref": PREFIX + "validation.QueryDocument"}
+        old_doc_ref = {"$ref": PREFIX + "analysis.QueryDocument"}
+        value = doc_ref if key == "document" else {"type": "array", "items": doc_ref, "minItems": 1}
+        current = {k: v for k, v in request["properties"][key].items() if k != "uniqueItems"}
+        unpatched = old_doc_ref if key == "document" else {"type": "array", "items": old_doc_ref}
+        if current not in (unpatched, value):
+            raise ValueError(f"unexpected pinned rewrite document reference: {name}")
+        request.update(required=["schema_version", key, "rules"], additionalProperties=False)
+        request["properties"]["schema_version"] = {"type": "integer", "const": 1}
+        request["properties"]["mode"] = {"type": "string", "enum": ["preview", "apply"], "default": "preview"}
+        request["properties"][key] = value
+        request["properties"]["rules"] = {"type": "array", "items": {"$ref": PREFIX + "api.RewriteRule"}}
+        request["properties"]["validation_target"] = copy.deepcopy(rewrite_target)
+
+    capability_form = shape("analysis.RewriteCapabilityForm", ("kind", "role", "identity_forms", "supported", "limitations"))
+    capability_form.update(required=["kind", "role", "identity_forms", "supported", "limitations"])
+    capability = shape("analysis.RewriteCapabilityManifest", ("schema_version", "forms"))
+    capability.update(required=["schema_version", "forms"])
+    capability["properties"]["schema_version"] = {"type": "integer", "const": 1}
+    manifest = schemas.get("analysis.CapabilityManifest")
+    if not isinstance(manifest, dict) or "rewrite" not in manifest.get("properties", {}):
+        raise ValueError("optional rewrite capability missing from selected manifest")
+    manifest["properties"]["rewrite"] = {
+        "$ref": PREFIX + "analysis.RewriteCapabilityManifest",
+        "description": "Optional rewrite support for this selected dialect; inspect each form rather than assuming universal support."}
+
     components = json.dumps(spec["components"], ensure_ascii=True, separators=(",", ":"))
     match = matches[0]
     template = template[:match.start(1)] + components + template[match.end(1):]

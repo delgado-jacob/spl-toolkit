@@ -18,6 +18,7 @@ type cliOptions struct {
 	ocsfProfiles         []string
 	ocsfExtensions       []string
 	fields               string
+	rules                string
 	file                 string
 	batch                string
 	hasFields            bool
@@ -33,6 +34,7 @@ type cliOptions struct {
 	compatibilityVersion string
 	sourceID             string
 	help                 bool
+	apply                bool
 
 	hasConfig               bool
 	hasQuery                bool
@@ -43,6 +45,8 @@ type cliOptions struct {
 	hasCompatibilityVersion bool
 	hasSourceID             bool
 	hasHelp                 bool
+	hasRules                bool
+	hasApply                bool
 }
 
 func runCLI(args []string, stdout, stderr io.Writer) int {
@@ -79,6 +83,8 @@ func runCLIWithInput(args []string, stdin io.Reader, stdout, stderr io.Writer) i
 		return runSchemaValidationCLI(args[1:], stdin, stdout, stderr)
 	case "validate-fields":
 		return runValidationCLI(args[1:], stdin, stdout, stderr)
+	case "rewrite":
+		return runRewriteCLI(args[1:], stdin, stdout, stderr)
 	case "map", "discover", "validate", "analyze", "capabilities":
 		return runQueryCommand(command, args[1:], stdout, stderr)
 	default:
@@ -121,7 +127,7 @@ func parseCLIOptions(command string, args []string) (cliOptions, string, error) 
 		}
 		if !terminated && strings.HasPrefix(argument, "--") {
 			name, value, hasEquals := strings.Cut(strings.TrimPrefix(argument, "--"), "=")
-			if (command == "validate-fields" || command == "validate-schema") && name == "stdin" {
+			if (command == "validate-fields" || command == "validate-schema" || command == "rewrite") && name == "stdin" {
 				if hasEquals {
 					return options, errorFormat, fmt.Errorf("option --stdin does not accept a value")
 				}
@@ -129,6 +135,16 @@ func parseCLIOptions(command string, args []string) (cliOptions, string, error) 
 					return options, errorFormat, fmt.Errorf("duplicate option --stdin")
 				}
 				options.hasStdin = true
+				continue
+			}
+			if command == "rewrite" && name == "apply" {
+				if hasEquals {
+					return options, errorFormat, fmt.Errorf("option --apply does not accept a value")
+				}
+				if options.hasApply {
+					return options, errorFormat, fmt.Errorf("duplicate option --apply")
+				}
+				options.apply, options.hasApply = true, true
 				continue
 			}
 			if name == "help" {
@@ -141,7 +157,7 @@ func parseCLIOptions(command string, args []string) (cliOptions, string, error) 
 				options.help, options.hasHelp = true, true
 				continue
 			}
-			if !(command == "validate-schema" && (isSchemaCLIOption(name) || name == "file" || name == "batch")) && !(command == "validate-fields" && (name == "fields" || name == "file" || name == "batch")) && name != "config" && name != "query" && name != "format" && name != "output" && name != "language" && name != "profile" && name != "compatibility-version" && name != "source-id" {
+			if !(command == "validate-schema" && (isSchemaCLIOption(name) || name == "file" || name == "batch")) && !(command == "validate-fields" && (name == "fields" || name == "file" || name == "batch")) && !(command == "rewrite" && (isSchemaCLIOption(name) || name == "fields" || name == "rules" || name == "file" || name == "batch")) && name != "config" && name != "query" && name != "format" && name != "output" && name != "language" && name != "profile" && name != "compatibility-version" && name != "source-id" {
 				return options, errorFormat, fmt.Errorf("unknown option --%s", name)
 			}
 			if !hasEquals {
@@ -182,7 +198,7 @@ func analysisOptionMayBeEmpty(command, name string) bool {
 	case "language", "profile", "compatibility-version":
 		return true
 	case "query", "source-id":
-		return command == "analyze" || command == "validate-fields" || command == "validate-schema"
+		return command == "analyze" || command == "validate-fields" || command == "validate-schema" || command == "rewrite"
 	default:
 		return false
 	}
@@ -198,6 +214,11 @@ func setCLIOption(options *cliOptions, name, value string) error {
 			return fmt.Errorf("duplicate option --fields")
 		}
 		options.fields, options.hasFields = value, true
+	case "rules":
+		if options.hasRules {
+			return fmt.Errorf("duplicate option --rules")
+		}
+		options.rules, options.hasRules = value, true
 	case "file":
 		if options.hasFile {
 			return fmt.Errorf("duplicate option --file")
@@ -262,7 +283,7 @@ func validateCLIOptions(command string, options cliOptions) error {
 			return err
 		}
 		if manifest.Language == "spl2" {
-			return fmt.Errorf("unsupported_dialect_for_operation: %s supports SPL only; use analyze, validate-fields, or validate-schema for SPL2; SPL2 rewriting is not available", command)
+			return fmt.Errorf("unsupported_dialect_for_operation: %s supports SPL only; use analyze, validate-fields, validate-schema, or rewrite for SPL2 where the selected capability manifest marks the requested rewrite form supported", command)
 		}
 	}
 	switch command {

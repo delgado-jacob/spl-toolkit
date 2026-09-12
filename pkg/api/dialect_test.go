@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"github.com/delgado-jacob/spl-toolkit/pkg/analysis"
+	"github.com/delgado-jacob/spl-toolkit/pkg/rewrite"
 	"github.com/delgado-jacob/spl-toolkit/pkg/validation"
 	"net/http/httptest"
 	"os"
@@ -85,6 +86,8 @@ func TestDialectRESTExactBodyLimits(t *testing.T) {
 		{"validate-fields/batch", `{"documents":[{"text":"table host"},{"text":"FROM main | table host","language":"spl2"}],"catalog":["host"]}`, 1 << 20},
 		{"validate-schema", `{"document":{"text":"FROM main | table host","language":"spl2"},"target":{"kind":"json_schema","schema":{"properties":{"host":{}}}}}`, 8 << 20},
 		{"validate-schema/batch", `{"documents":[{"text":"table host"},{"text":"FROM main | table host","language":"spl2"}],"target":{"kind":"json_schema","schema":{"properties":{"host":{}}}}}`, 8 << 20},
+		{"rewrite", `{"schema_version":1,"document":{"text":"search src=x"},"rules":[]}`, 8 << 20},
+		{"rewrite/batch", `{"schema_version":1,"documents":[{"text":"search src=x"}],"rules":[]}`, 8 << 20},
 	} {
 		for _, extra := range []int{0, 1} {
 			body := append([]byte(tc.body), bytes.Repeat([]byte(" "), tc.limit-len(tc.body)+extra)...)
@@ -111,7 +114,7 @@ func TestDialectMaintainedAPIExamples(t *testing.T) {
 	}
 	pattern := regexp.MustCompile("(?s)<!-- api-example: ([a-z0-9-]+) (/query/[a-z/-]+) (valid|invalid|incomplete|legacy) -->\\n```json\\n(.*?)\\n```")
 	examples := pattern.FindAllSubmatch(data, -1)
-	if len(examples) != 14 || bytes.Count(data, []byte("```json\n")) != len(examples) {
+	if len(examples) != 16 || bytes.Count(data, []byte("```json\n")) != len(examples) {
 		t.Fatalf("request marker coverage: %d", len(examples))
 	}
 	seen := map[string]bool{}
@@ -180,6 +183,26 @@ func TestDialectMaintainedAPIExamples(t *testing.T) {
 					t.Fatal(e)
 				}
 				want = report
+			case "/query/rewrite":
+				request, e := rewrite.DecodeRequest(body)
+				if e != nil {
+					t.Fatal(e)
+				}
+				report, e := rewrite.Rewrite(request)
+				if e != nil {
+					t.Fatal(e)
+				}
+				want = report
+			case "/query/rewrite/batch":
+				request, e := rewrite.DecodeBatchRequest(body)
+				if e != nil {
+					t.Fatal(e)
+				}
+				report, e := rewrite.RewriteBatch(request)
+				if e != nil {
+					t.Fatal(e)
+				}
+				want = report
 			default:
 				t.Fatalf("unhandled documented route %s", route)
 			}
@@ -237,6 +260,7 @@ func TestDialectOpenAPISelectorsAndMetadata(t *testing.T) {
 				Properties map[string]struct {
 					Type string   `json:"type"`
 					Enum []string `json:"enum"`
+					Ref  string   `json:"$ref"`
 				} `json:"properties"`
 			} `json:"schemas"`
 		} `json:"components"`
@@ -268,6 +292,15 @@ func TestDialectOpenAPISelectorsAndMetadata(t *testing.T) {
 			if required == tc.key {
 				t.Fatalf("additive metadata became mandatory: %+v", tc)
 			}
+		}
+	}
+	rewriteCapability, ok := schemas["analysis.CapabilityManifest"].Properties["rewrite"]
+	if !ok || rewriteCapability.Ref != "#/components/schemas/analysis.RewriteCapabilityManifest" {
+		t.Fatal("rewrite capability must remain an optional referenced manifest")
+	}
+	for _, path := range []string{"/query/rewrite", "/query/rewrite/batch"} {
+		if _, ok := spec.Paths[path]["post"]; !ok {
+			t.Fatalf("missing rewrite route %s", path)
 		}
 	}
 }

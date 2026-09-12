@@ -26,11 +26,12 @@ Commands:
   analyze [query]   Analyze field availability, lineage, and coverage
   validate-fields   Validate fields against a local catalog
   validate-schema   Validate fields against local JSON Schema or OCSF
+  rewrite           Safely preview or apply explicit rewrite rules
   capabilities      Show supported analysis commands and limitations
   demo              Run demonstration examples
   help              Show this help message
 
-Options for map, discover, validate, analyze, validate-fields, validate-schema, and capabilities:
+Options for map, discover, validate, analyze, validate-fields, validate-schema, rewrite, and capabilities:
   --format FORMAT   Output format: text or json (default: text)
   --output FILE     Write the result to a file (including analysis diagnostics)
   --help            Show this help message
@@ -43,13 +44,13 @@ Compatibility selectors (analyze, capabilities, and single-query validation):
   --compatibility-version VERSION  Compatibility version (default: current)
   --source-id ID                   Source identifier (document operations only)
 analyze and capabilities accept language/profile/version selectors.
-Legacy map/discover/validate reject spl2; use analyze or structured validation.
+Legacy map/discover/validate reject spl2; use analyze, structured validation, or rewrite where its capability form is supported.
 Empty compatibility selectors use defaults; unknown selectors are input errors.
 
 Additional validate-fields options:
   --fields FILE     Required local JSON field catalog (array or object; not -)
 
-Shared validate-fields and validate-schema query inputs:
+Shared validate-fields, validate-schema, and rewrite query inputs:
   --file FILE       Read one query verbatim; default source ID is FILE
   --stdin           Read one query verbatim; default source ID is <stdin>
   --batch FILE      Read a nonempty JSON document array (- reads stdin)
@@ -69,7 +70,14 @@ Additional validate-schema options:
 Choose exactly one --schema or --ocsf-catalog; target options cannot be mixed.
 OCSF requires exactly one --ocsf-class or --ocsf-category selector.
 
-Analyze, validate-fields, and validate-schema exit codes: 0 valid, 1 invalid content, 3 incomplete analysis.
+Additional rewrite options:
+  --rules FILE      Required local versioned rewrite rule set (not -)
+  --apply           Return a verified candidate when safe (default: preview)
+  --fields FILE     Optional local field-list validation target
+Rewrite also accepts the shared query inputs and optional schema/OCSF target options.
+Choose at most one --fields, --schema, or --ocsf-catalog target family.
+
+Analyze, validate-fields, validate-schema, and rewrite exit codes: 0 valid, 1 invalid content, 3 incomplete analysis.
 Request or output errors exit 2. Invalid and incomplete reports are still emitted.
 `, buildinfo.Version)
 	return err

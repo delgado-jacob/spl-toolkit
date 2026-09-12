@@ -133,12 +133,33 @@ Batches are nonempty JSON arrays of documents, not lines of query text. Each obj
 
 JSON output is the full canonical report (schema version 1), including analysis, target catalog, coverage, located diagnostics, and per-reference matching outcomes. Batch JSON contains `schema_version`, `status`, and ordered `reports`. Text output shows status, identity, completeness, located outcomes, matches, and diagnostics. All content reports are written before returning their exit status; `--output` writes only to the selected file.
 
+## Safe rewrite
+
+`rewrite --rules FILE` reads a local versioned `RuleSet` containing only `schema_version` and `rules`. It previews by default; `--apply` requests a verified candidate. A rules file cannot select apply mode. The command accepts the shared positional, `--query`, `--file`, `--stdin`, and `--batch` sources. It never edits a source file in place. Add at most one optional `--fields`, `--schema`, or `--ocsf-catalog` validation target family.
+
+<!-- cli-example: rewrite-preview -->
+```bash
+spl-toolkit rewrite --rules rules.json --query 'search src=alice'
+```
+
+<!-- cli-example: rewrite-stdin-apply -->
+```bash
+printf 'search src=alice\n' | spl-toolkit rewrite --rules rules.json --stdin --source-id pipeline --apply
+```
+
+<!-- cli-example: rewrite-output-file -->
+```bash
+spl-toolkit rewrite --rules rules.json --batch queries.json --apply --output rewrite-report.txt
+```
+
+Text output labels original, candidate, and returned text separately. A preview can show an applied candidate while returning the original text. Reports are written before exits 1 or 3; exit 3 denotes incomplete proof and does not by itself mean every document was refused or uncommitted. With `--output`, stdout remains empty.
+
 | Exit | Meaning |
 |---|---|
-| 0 | Valid field report or all-valid batch |
-| 1 | Missing/unavailable field or syntax-invalid content |
-| 3 | Incomplete validation |
-| 2 | Usage, malformed catalog/document, unsupported options, Unicode, input I/O, or output-write error |
+| 0 | Valid report or all-valid batch |
+| 1 | Invalid content, including failed destination validation |
+| 3 | Incomplete analysis or rewrite proof; some batch reports may still be committed |
+| 2 | Usage, malformed rules/target/document, unsupported options, Unicode, input I/O, or output-write error |
 
 ## JSON Schema with local resources
 

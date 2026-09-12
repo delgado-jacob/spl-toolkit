@@ -72,6 +72,14 @@ func formatCapabilitiesText(manifest analysis.CapabilityManifest) []byte {
 	if manifest.DocumentationSnapshot != "" {
 		fmt.Fprintf(&payload, "Documentation snapshot: %s\n", manifest.DocumentationSnapshot)
 	}
+	if manifest.Rewrite != nil {
+		fmt.Fprintf(&payload, "Rewrite schema version: %d\n", manifest.Rewrite.SchemaVersion)
+		payload.WriteString("Rewrite forms:\n")
+		for _, form := range manifest.Rewrite.Forms {
+			fmt.Fprintf(&payload, "  - %s/%s: supported=%t identities=%s", form.Kind, form.Role, form.Supported, strings.Join(form.IdentityForms, ","))
+			writeCapabilityLimitations(&payload, form.Limitations)
+		}
+	}
 	payload.WriteString("Commands:\n")
 	for _, capability := range manifest.Commands {
 		fmt.Fprintf(&payload, "  - %s: syntax=%t semantic=%t", capability.Name, capability.SyntaxSupported, capability.SemanticSupported)

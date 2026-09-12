@@ -26,6 +26,8 @@ Routes are under `/api/v1`:
 | POST | `/query/validate-fields/batch` | ordered local field validation batch |
 | POST | `/query/validate-schema` | canonical local JSON Schema/OCSF field validation |
 | POST | `/query/validate-schema/batch` | ordered schema validation batch |
+| POST | `/query/rewrite` | canonical safe rewrite preview/apply report |
+| POST | `/query/rewrite/batch` | ordered safe rewrite batch |
 | GET | `/openapi.json` | OpenAPI 3.1 document |
 | GET | `/docs` | Swagger UI |
 | POST | `/mappings` | development-only global configuration; disabled by default |
@@ -42,7 +44,7 @@ Map request:
 
 Instead of `mappings`, a request may provide a complete `config` and optional `context`. When neither is present, the server retains the existing process-global fallback behavior. The CLI requirement for `--config` does not apply to the Go or REST APIs.
 
-Legacy mapping/discovery/validation accept optional string `language`, `profile`, and `version` selectors, defaulting to `spl`, `splunkd`, and `current`; empty strings select defaults. Unknown values, null selectors, and duplicate selector members are input errors. Explicit `spl2` returns 400 with `unsupported_dialect_for_operation` and guidance to canonical analysis or structured validation before a mapper runs. SPL2 rewriting is not available. Default legacy response shapes are retained.
+Legacy mapping/discovery/validation accept optional string `language`, `profile`, and `version` selectors, defaulting to `spl`, `splunkd`, and `current`; empty strings select defaults. Unknown values, null selectors, and duplicate selector members are input errors. Explicit `spl2` returns 400 with `unsupported_dialect_for_operation` and guidance to canonical analysis, structured validation, or the rewrite route where the selected capability form is supported. Default legacy response shapes are retained.
 
 Legacy mapping/discovery/validation requests require `Content-Type: application/json`, reject unknown JSON fields, limit request bodies to 1 MiB, and limit queries to 64 KiB. Structural or configuration errors return 400. Syntax rejection from `/query/validate` returns 422. Successful operations return 200.
 
@@ -114,7 +116,7 @@ Both endpoints require `Content-Type: application/json` (charset parameters are 
 
 A single report has integer `schema_version: 1`, `target`, `analysis`, `status`, `coverage`, `outcomes`, and `diagnostics`. All arrays are non-null. Outcomes include matching, missing, unavailable, optional_equivalent, and indeterminate, with concrete matches where known. Reports include original document options and identity, half-open UTF-8 byte offsets, and one-based Unicode code-point columns. Batch output has integer `schema_version: 1`, aggregate `status`, and ordered `reports`; status precedence is invalid, then incomplete, then valid. The machine-readable schemas are available at `/api/v1/openapi.json`.
 
-OpenAPI generation uses `make generate-docs` with pinned Swag v2.0.0-rc4 and the pinned PyYAML development dependency from `python/requirements-dev.txt`. The generation postprocessor reconciles strict validation input schemas across JSON, YAML, and the served Go template; it supplies strict request-only document selector schemas while preserving report document and normalized OCSF selection schemas.
+OpenAPI generation uses `make generate-docs` with pinned Swag v2.0.0-rc4 and the pinned PyYAML development dependency from `python/requirements-dev.txt`. The generation postprocessor reconciles strict validation and rewrite input schemas across JSON, YAML, and the served Go template; it supplies strict request-only document, rule, condition, identity, target, and optional capability schemas while preserving report document and normalized OCSF selection schemas.
 
 ## JSON Schema and OCSF requests
 
@@ -152,3 +154,19 @@ HTTP 200 contains the full canonical valid, invalid or incomplete report. HTTP 4
 ```
 
 Both schema routes use the same per-document language contract and their existing strict 8 MiB decoders. JSON Schema and OCSF targets are separate request union branches. OCSF selection requires the exact catalog version and exactly one class/class_uid/category/category_uid, with unique profiles/extensions arrays; omitted arrays normalize to empty, but null is rejected. Request selectors are separate from the report's normalized selection, which includes resolved class/category data. Canonical reports preserve null-test obligations, schema evidence, and unresolved dotted wildcard paths without adapter inference. See [canonical CLI usage](cli.md) for file/stdin and mixed-language batch equivalents.
+
+## Safe rewrite requests
+
+`POST /api/v1/query/rewrite` and `POST /api/v1/query/rewrite/batch` accept strict, versioned JSON with inline rules and an optional inline field-list, JSON Schema, or OCSF validation target. Preview is the default; `mode: "apply"` returns candidate text only when the canonical rewrite proof permits it. Filesystem paths, remote retrieval URLs, legacy mapper configuration, and global batch document selectors are not part of these routes. Both routes use the exact 8 MiB schema-body policy and return complete query reports with HTTP 200 for valid, invalid, and incomplete statuses.
+
+<!-- api-example: rewrite-preview /query/rewrite valid -->
+```json
+{"schema_version":1,"document":{"text":"search src=alice | table src","source_id":"preview.spl"},"rules":[{"id":"rename-src","kind":"field","source":{"name":"src"},"target":{"name":"user"}}]}
+```
+
+<!-- api-example: rewrite-batch-apply /query/rewrite/batch incomplete -->
+```json
+{"schema_version":1,"mode":"apply","documents":[{"text":"search src=alice","source_id":"safe.spl"},{"text":"| mystery src","source_id":"partial.spl"}],"rules":[{"id":"rename-src","kind":"field","source":{"name":"src"},"target":{"name":"user"}}]}
+```
+
+An exit or report status of `incomplete` is not itself a refusal: individual reports can have `committed: true` when their candidate is proven, while the ordered batch aggregate remains incomplete. The selected capability manifest exposes rewrite support per kind, role, and identity form; clients must inspect those optional entries rather than assume universal rewriting support.

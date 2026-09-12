@@ -35,6 +35,16 @@ class ValidationOpenAPITests(unittest.TestCase):
             if key == "documents":
                 value = {"type": "array", "items": value, "uniqueItems": False}
             schemas["api." + name] = {"type": "object", "properties": {key: value, "target": {"$ref": "#/components/schemas/api.SchemaValidationTarget"}}}
+        schemas["api.RewriteIdentity"] = {"type": "object", "properties": {"name": {"type": "string"}, "path": {"type": "array", "items": {"type": "string"}, "uniqueItems": False}}}
+        schemas["api.RewriteCondition"] = {"type": "object", "properties": {"all": {"type": "array", "items": {"$ref": "#/components/schemas/api.RewriteCondition"}, "uniqueItems": False}, "any": {"type": "array", "items": {"$ref": "#/components/schemas/api.RewriteCondition"}, "uniqueItems": False}, "fact": {"type": "string"}, "kind": {"type": "string"}, "identity": {"$ref": "#/components/schemas/api.RewriteIdentity"}, "operator": {"type": "string"}, "value": {}}}
+        schemas["api.RewriteRule"] = {"type": "object", "properties": {"id": {"type": "string"}, "kind": {"type": "string"}, "source": {"$ref": "#/components/schemas/api.RewriteIdentity"}, "target": {"$ref": "#/components/schemas/api.RewriteIdentity"}, "when": {"$ref": "#/components/schemas/api.RewriteCondition"}}}
+        for name, key in (("RewriteRequest", "document"), ("RewriteBatchRequest", "documents")):
+            value = {"$ref": "#/components/schemas/analysis.QueryDocument"}
+            if key == "documents": value = {"type": "array", "items": value, "uniqueItems": False}
+            schemas["api." + name] = {"type": "object", "properties": {"schema_version": {"type": "integer"}, "mode": {"type": "string"}, key: value, "rules": {"type": "array", "items": {"$ref": "#/components/schemas/api.RewriteRule"}, "uniqueItems": False}, "validation_target": {"type": "object"}}}
+        schemas["analysis.RewriteCapabilityForm"] = {"type": "object", "properties": {"kind": {"type": "string"}, "role": {"type": "string"}, "identity_forms": {"type": "array", "items": {"type": "string"}, "uniqueItems": False}, "supported": {"type": "boolean"}, "limitations": {"type": "array", "items": {"type": "string"}, "uniqueItems": False}}}
+        schemas["analysis.RewriteCapabilityManifest"] = {"type": "object", "properties": {"schema_version": {"type": "integer"}, "forms": {"type": "array", "items": {"$ref": "#/components/schemas/analysis.RewriteCapabilityForm"}, "uniqueItems": False}}}
+        schemas["analysis.CapabilityManifest"] = {"type": "object", "properties": {"rewrite": {"$ref": "#/components/schemas/analysis.RewriteCapabilityManifest"}, "schema_version": {"type": "integer"}, "language": {"type": "string"}, "profile": {"type": "string"}, "version": {"type": "string"}, "documentation_snapshot": {"type": "string"}, "commands": {"type": "array", "items": {"type": "object"}}, "functions": {"type": "array", "items": {"type": "object"}}}}
         spec = {"openapi": "3.1.0", "components": {"schemas": schemas}, "paths": {"/unrelated": {}}}
         (root / "swagger.json").write_text(json.dumps(spec), encoding="utf-8")
         (root / "swagger.yaml").write_text(yaml.safe_dump(spec), encoding="utf-8")
@@ -117,8 +127,37 @@ class ValidationOpenAPITests(unittest.TestCase):
             self.assertEqual(self.run_script(root).returncode, 0)
             self.assertEqual(before, {p.name: p.read_bytes() for p in root.iterdir()})
 
+    def test_rewrite_requests_and_optional_capability_are_strict(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self.fixture(root)
+            result = self.run_script(root)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            schemas = json.loads((root / "swagger.json").read_text())["components"]["schemas"]
+            for name, key in (("api.RewriteRequest", "document"), ("api.RewriteBatchRequest", "documents")):
+                request = schemas[name]
+                self.assertEqual(request["required"], ["schema_version", key, "rules"])
+                self.assertIs(request["additionalProperties"], False)
+                self.assertEqual(request["properties"]["schema_version"], {"type": "integer", "const": 1})
+                self.assertEqual(request["properties"]["mode"], {"type": "string", "enum": ["preview", "apply"], "default": "preview"})
+                if key == "documents": self.assertEqual(request["properties"][key]["minItems"], 1)
+            identity = schemas["api.RewriteIdentity"]
+            self.assertEqual(identity["oneOf"], [{"required": ["name"]}, {"required": ["path"]}])
+            self.assertIs(identity["additionalProperties"], False)
+            rule = schemas["api.RewriteRule"]
+            self.assertEqual(rule["required"], ["id", "kind", "source", "target"])
+            self.assertEqual(rule["properties"]["kind"]["enum"], ["field", "index", "source", "sourcetype", "lookup", "dataset", "data_model"])
+            condition = schemas["api.RewriteCondition"]
+            self.assertEqual(len(condition["oneOf"]), 3)
+            self.assertEqual(condition["properties"]["value"]["oneOf"], [{"type": "string"}, {"type": "number"}, {"type": "boolean"}, {"type": "null"}])
+            self.assertEqual(schemas["analysis.CapabilityManifest"]["properties"]["rewrite"], {"$ref": "#/components/schemas/analysis.RewriteCapabilityManifest", "description": "Optional rewrite support for this selected dialect; inspect each form rather than assuming universal support."})
+            self.assertEqual(schemas["analysis.RewriteCapabilityManifest"]["required"], ["schema_version", "forms"])
+            before = {p.name: p.read_bytes() for p in root.iterdir()}
+            self.assertEqual(self.run_script(root).returncode, 0)
+            self.assertEqual(before, {p.name: p.read_bytes() for p in root.iterdir()})
+
     def test_unexpected_shape_fails_without_writes(self):
-        for failure in ("missing schema", "template mismatch", "yaml mismatch", "catalog type drift"):
+        for failure in ("missing schema", "template mismatch", "yaml mismatch", "catalog type drift", "rewrite identity drift"):
             with self.subTest(failure=failure), tempfile.TemporaryDirectory() as directory:
                 root = Path(directory)
                 spec = self.fixture(root)
@@ -134,10 +173,14 @@ class ValidationOpenAPITests(unittest.TestCase):
                         content = path.read_text()
                         if path.suffix == ".yaml":
                             data = yaml.safe_load(content)
-                            data["components"]["schemas"]["validation.FieldCatalog"]["properties"]["identity"]["type"] = "integer"
+                            name = "validation.FieldCatalog" if failure == "catalog type drift" else "api.RewriteIdentity"
+                            key = "identity" if failure == "catalog type drift" else "name"
+                            data["components"]["schemas"][name]["properties"][key]["type"] = "integer"
                             path.write_text(yaml.safe_dump(data))
                         else:
-                            path.write_text(content.replace('"identity": {"type": "string"}', '"identity": {"type": "integer"}'))
+                            old = '"identity": {"type": "string"}' if failure == "catalog type drift" else '"name": {"type": "string"}'
+                            new = '"identity": {"type": "integer"}' if failure == "catalog type drift" else '"name": {"type": "integer"}'
+                            path.write_text(content.replace(old, new))
                 before = {p.name: p.read_bytes() for p in root.iterdir()}
                 result = self.run_script(root)
                 self.assertNotEqual(result.returncode, 0)
