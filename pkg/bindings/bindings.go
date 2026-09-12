@@ -48,6 +48,7 @@ import (
 	"github.com/delgado-jacob/spl-toolkit/internal/jsoninput"
 	"github.com/delgado-jacob/spl-toolkit/pkg/analysis"
 	"github.com/delgado-jacob/spl-toolkit/pkg/mapper"
+	"github.com/delgado-jacob/spl-toolkit/pkg/rewrite"
 	"github.com/delgado-jacob/spl-toolkit/pkg/validation"
 )
 
@@ -253,6 +254,28 @@ func spl_mapper_validate_schema_batch(mapperID C.int, requestJSON *C.char) *C.SP
 			return nil, err
 		}
 		return validation.ValidateSchemaBatch(request.Documents, request.Target)
+	})
+}
+
+//export spl_mapper_rewrite
+func spl_mapper_rewrite(mapperID C.int, requestJSON *C.char) *C.SPLResult {
+	return ownedMapperJSONResult(mapperID, func() (any, error) {
+		request, err := rewrite.DecodeRequest([]byte(C.GoString(requestJSON)))
+		if err != nil {
+			return nil, err
+		}
+		return rewrite.Rewrite(request)
+	})
+}
+
+//export spl_mapper_rewrite_batch
+func spl_mapper_rewrite_batch(mapperID C.int, requestJSON *C.char) *C.SPLResult {
+	return ownedMapperJSONResult(mapperID, func() (any, error) {
+		request, err := rewrite.DecodeBatchRequest([]byte(C.GoString(requestJSON)))
+		if err != nil {
+			return nil, err
+		}
+		return rewrite.RewriteBatch(request)
 	})
 }
 

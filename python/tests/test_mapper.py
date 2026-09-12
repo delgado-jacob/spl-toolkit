@@ -34,6 +34,38 @@ def mapper_kwargs():
     return {"library_path": os.environ["SPL_NATIVE_LIBRARY"]} if "SPL_NATIVE_LIBRARY" in os.environ else {}
 
 
+@pytest.mark.parametrize("batch", [False, True])
+@pytest.mark.parametrize("target", [None, {"kind": "field_list", "catalog": {"fields": ["user"]}}])
+def test_rewrite_wrapper_preserves_request_and_frees_result(batch, target):
+    rules = [{"id": "map", "kind": "field", "source": {"name": "src"}, "target": {"name": "user"}}]
+    document = {"text": "\tFROM main | table src\r\n", "language": "spl2", "profile": "splunkd",
+                "version": "current", "source_id": "é😀\x00"}
+    with patch("ctypes.CDLL") as loader:
+        lib = loader.return_value
+        configure_mock_version(lib)
+        lib.spl_mapper_new.return_value = 7
+        result = SPLResult(error=None, result=b'{"schema_version":1,"status":"incomplete","reports":[]}')
+        operation = "rewrite_batch" if batch else "rewrite"
+        native = getattr(lib, "spl_mapper_" + operation)
+        native.return_value = ctypes.pointer(result)
+        with SPLMapper(library_path=MOCK_LIBRARY) as mapper:
+            assert callable(getattr(mapper, operation, None)), "missing Python rewrite request boundary"
+            if batch:
+                actual = mapper.rewrite_batch([document], rules, mode="apply", validation_target=target)
+            else:
+                actual = mapper.rewrite(document["text"], rules, mode="apply", validation_target=target,
+                                        **{k: v for k, v in document.items() if k != "text"})
+        assert actual == {"schema_version": 1, "status": "incomplete", "reports": []}
+        expected = {"schema_version": 1, "mode": "apply", "rules": rules}
+        expected.update({"documents": [document]} if batch else {"document": document})
+        if target is not None:
+            expected["validation_target"] = target
+        assert native.call_count == 1
+        handle, payload = native.call_args.args
+        assert handle == 7 and json.loads(payload) == expected
+        lib.spl_result_free.assert_called_once_with(native.return_value)
+
+
 class TestSPLMapper:
     """Test SPL Toolkit functionality"""
     

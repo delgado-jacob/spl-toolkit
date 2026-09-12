@@ -154,6 +154,10 @@ class SPLMapper:
         self._lib.spl_mapper_validate_schema.restype = ctypes.POINTER(SPLResult)
         self._lib.spl_mapper_validate_schema_batch.argtypes = [ctypes.c_int, ctypes.c_char_p]
         self._lib.spl_mapper_validate_schema_batch.restype = ctypes.POINTER(SPLResult)
+        self._lib.spl_mapper_rewrite.argtypes = [ctypes.c_int, ctypes.c_char_p]
+        self._lib.spl_mapper_rewrite.restype = ctypes.POINTER(SPLResult)
+        self._lib.spl_mapper_rewrite_batch.argtypes = [ctypes.c_int, ctypes.c_char_p]
+        self._lib.spl_mapper_rewrite_batch.restype = ctypes.POINTER(SPLResult)
         self._lib.spl_mapper_capabilities.argtypes = [ctypes.c_int]
         self._lib.spl_mapper_capabilities.restype = ctypes.POINTER(SPLResult)
         self._lib.spl_mapper_capabilities_for.argtypes = [ctypes.c_int, ctypes.c_char_p]
@@ -373,15 +377,32 @@ class SPLMapper:
         return self._validate_fields_request(
             self._lib.spl_mapper_validate_schema_batch, {"documents": documents, "target": target})
 
-    def _validate_fields_request(self, native, request) -> dict:
+    def rewrite(self, query, rules, *, mode="preview", validation_target=None,
+                language="spl", profile="splunkd", version="current", source_id="") -> dict:
+        """Preview or apply explicit safe rules using the canonical Go report."""
+        request = {"schema_version": 1, "mode": mode, "rules": rules,
+                   "document": {"text": query, "language": language, "profile": profile,
+                                "version": version, "source_id": source_id}}
+        if validation_target is not None:
+            request["validation_target"] = validation_target
+        return self._validate_fields_request(self._lib.spl_mapper_rewrite, request, operation="rewrite")
+
+    def rewrite_batch(self, documents, rules, *, mode="preview", validation_target=None) -> dict:
+        """Rewrite document dictionaries in order, retaining per-document status."""
+        request = {"schema_version": 1, "mode": mode, "rules": rules, "documents": documents}
+        if validation_target is not None:
+            request["validation_target"] = validation_target
+        return self._validate_fields_request(self._lib.spl_mapper_rewrite_batch, request, operation="rewrite")
+
+    def _validate_fields_request(self, native, request, *, operation="validation") -> dict:
         with self._operation() as handle:
             try:
                 payload = json.dumps(request, allow_nan=False).encode("utf-8")
             except (TypeError, ValueError) as error:
-                raise SPLMapperError(f"Invalid validation request JSON: {error}") from error
+                raise SPLMapperError(f"Invalid {operation} request JSON: {error}") from error
             pointer = native(handle, payload)
             if not pointer:
-                raise SPLMapperError("Native validation returned no result")
+                raise SPLMapperError(f"Native {operation} returned no result")
             try:
                 if pointer.contents.error:
                     raise SPLMapperError(pointer.contents.error.decode("utf-8"))
@@ -414,7 +435,7 @@ class SPLMapper:
         if (language, profile, version) != ("spl", "splunkd", "current"):
             manifest = self.capabilities(language=language, profile=profile, version=version)
             if manifest["language"] == "spl2":
-                raise SPLMapperError("unsupported_dialect_for_operation: SPL2 requires analyze_query, validate_fields, or validate_schema")
+                raise SPLMapperError("unsupported_dialect_for_operation: SPL2 requires analyze_query, validate_fields, validate_schema, or rewrite")
 
     def discover_query(self, query: str, *, language="spl", profile="splunkd", version="current") -> QueryInfo:
         """

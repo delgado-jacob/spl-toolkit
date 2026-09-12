@@ -350,6 +350,7 @@ def test_release_tree_contains_complete_analysis_and_validation_source_closure(t
     command.make_release_tree(str(release), [])
     required = [p for p in (ROOT / "pkg/analysis").glob("*.go") if not p.name.endswith("_test.go")]
     required.extend(p for p in (ROOT / "pkg/validation").glob("*.go") if not p.name.endswith("_test.go"))
+    required.extend(p for p in (ROOT / "pkg/rewrite").glob("*.go") if not p.name.endswith("_test.go"))
     required.extend((ROOT / "parser/spl2").glob("*.go"))
     required.append(ROOT / "internal/jsoninput/unicode.go")
     for path in required:
@@ -503,6 +504,7 @@ def test_installed_schema_fixtures_exist_before_both_suites(tmp_path: Path, monk
     go_transport = tmp_path / "go-transport.json"
     go_transport.write_text("{\"kind\":\"spl2-go-transport\"}")
     monkeypatch.setenv("SPL_SPL2_FIXTURES", "checkout-only")
+    monkeypatch.setenv("SPL_REWRITE_FIXTURES", "checkout-only")
     seen = []
     counts = {"collected": 1, "passed": 1, "failed": 0, "skipped": 0}
 
@@ -516,6 +518,10 @@ def test_installed_schema_fixtures_exist_before_both_suites(tmp_path: Path, monk
         assert spl2.is_absolute() and spl2.is_relative_to(outside)
         for original in (ROOT / "testdata/spl2").glob("*.json"):
             assert (spl2 / original.name).read_bytes() == original.read_bytes()
+        rewrite = Path(env["SPL_REWRITE_FIXTURES"])
+        assert rewrite.is_absolute() and rewrite.is_relative_to(outside) and not rewrite.is_relative_to(ROOT)
+        for relative in checker.REWRITE_FIXTURE_FILES:
+            assert (rewrite / relative).read_bytes() == (ROOT / "testdata/rewrite" / relative).read_bytes()
         if "SPL_SCHEMA_EVIDENCE" in env:
             Path(env["SPL_SCHEMA_EVIDENCE"]).write_text("{}")
             Path(env["SPL_SPL2_EVIDENCE"]).write_text("{}")
@@ -533,6 +539,7 @@ def test_installed_schema_fixtures_exist_before_both_suites(tmp_path: Path, monk
                                        tmp_path / "cli", tmp_path / "server", ROOT / "testdata/baseline/cases.json", ROOT, go_transport)
     assert len(seen) == 2 and seen[0] == seen[1]
     assert result["fixture_hashes"]["schema"] == {name: checker.sha256(ROOT / "testdata/schemas" / name) for name in SCHEMA_FIXTURES}
+    assert result["fixture_hashes"]["rewrite"] == {name: checker.sha256(ROOT / "testdata/rewrite" / name) for name in checker.REWRITE_FIXTURE_FILES}
     assert result["wheel_payload_hashes"] == payload_hashes
 
 
@@ -550,7 +557,7 @@ def test_sdist_source_verification_requires_exact_handwritten_sources_and_native
     command.ensure_finalized()
     release = tmp_path / "release"
     command.make_release_tree(str(release), [])
-    for relative in ("native-source-files.txt", "spl_toolkit/mapper.py", "spl_toolkit/libspl_toolkit.h", "tests/test_native_schema_validation.py", "tests/test_native_spl2.py"):
+    for relative in ("native-source-files.txt", "spl_toolkit/mapper.py", "spl_toolkit/libspl_toolkit.h", "tests/test_native_schema_validation.py", "tests/test_native_spl2.py", "tests/test_native_rewrite.py"):
         destination = release / relative
         destination.parent.mkdir(parents=True, exist_ok=True)
         destination.write_bytes((PYTHON_DIR / relative).read_bytes())
@@ -683,6 +690,37 @@ def test_installed_native_suite_requires_spl2(tmp_path):
     assert "tests/test_native_spl2.py" in checker.SDIST_FIXED_FILES
 
 
+def test_installed_native_suite_requires_rewrite(tmp_path):
+    checker = load_package_checker()
+    destination = tmp_path / "tests"
+    checker._copy_required_files(ROOT / "python/tests", destination, checker.NATIVE_TESTS)
+    assert (destination / "test_native_rewrite.py").read_bytes() == (ROOT / "python/tests/test_native_rewrite.py").read_bytes()
+    assert "tests/test_native_rewrite.py" in checker.SDIST_FIXED_FILES
+
+
+def test_rewrite_fixture_copy_and_source_override(tmp_path, monkeypatch):
+    checker = load_package_checker()
+    monkeypatch.setenv("SPL_REWRITE_FIXTURES", "checkout-only")
+    assert "SPL_REWRITE_FIXTURES" not in checker.clean_env()
+    destination = tmp_path / "rewrite"
+    hashes = checker.copy_rewrite_fixtures(ROOT / "testdata/rewrite", destination)
+    assert hashes == {name: checker.sha256(ROOT / "testdata/rewrite" / name) for name in ("cases.json", "forms.json")}
+    assert hashes == {p.name: checker.sha256(p) for p in destination.glob("*.json")}
+
+
+def test_rewrite_fixture_copy_rejects_missing_or_changed_input(tmp_path, monkeypatch):
+    checker = load_package_checker()
+    with pytest.raises(FileNotFoundError):
+        checker.copy_rewrite_fixtures(tmp_path / "missing", tmp_path / "copy")
+    real_copy = checker.shutil.copy2
+    def corrupt(source, destination):
+        real_copy(source, destination)
+        Path(destination).write_bytes(b"changed")
+    monkeypatch.setattr(checker.shutil, "copy2", corrupt)
+    with pytest.raises(AssertionError, match="hash"):
+        checker.copy_rewrite_fixtures(ROOT / "testdata/rewrite", tmp_path / "changed")
+
+
 def test_spl2_fixture_copy_and_source_override(tmp_path, monkeypatch):
     checker = load_package_checker()
     monkeypatch.setenv("SPL_SPL2_FIXTURES", "checkout-only")
@@ -706,13 +744,14 @@ def test_spl2_fixture_copy_rejects_missing_or_changed_input(tmp_path, monkeypatc
         checker.copy_spl2_fixtures(ROOT / "testdata/spl2", tmp_path / "changed")
 
 
-def test_required_pytest_plugin_rejects_uncollected_registered_suite(tmp_path):
+@pytest.mark.parametrize("required", ["test_native_spl2.py", "test_native_rewrite.py"])
+def test_required_pytest_plugin_rejects_uncollected_registered_suite(tmp_path, required):
     checker = load_package_checker()
     suite = tmp_path / 'suite'
     suite.mkdir()
     (suite / 'test_existing.py').write_text('def test_pass(): pass\n')
-    (suite / 'test_native_spl2.py').write_text('"""Accidentally empty suite."""\n')
+    (suite / required).write_text('"""Accidentally empty suite."""\n')
     checker.write_required_pytest_plugin(suite)
     completed = subprocess.run([sys.executable, '-m', 'pytest', str(suite), '-q'],
-        env=checker.clean_env() | {'SPL_REQUIRED_TEST_FILES': json.dumps(['test_existing.py', 'test_native_spl2.py'])}, check=False)
+        env=checker.clean_env() | {'SPL_REQUIRED_TEST_FILES': json.dumps(['test_existing.py', required])}, check=False)
     assert completed.returncode != 0
