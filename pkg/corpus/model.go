@@ -97,6 +97,36 @@ type CoverageCounts struct {
 	Schema   CoverageCount `json:"schema"`
 }
 
+// StatusCounts count only documents with canonical analysis or validation reports.
+type StatusCounts struct {
+	Valid      int `json:"valid"`
+	Invalid    int `json:"invalid"`
+	Incomplete int `json:"incomplete"`
+}
+
+// CommandCoverage describes observed stage commands against the exact selected
+// language capability manifest. An undeclared command has Declared=false.
+type CommandCoverage struct {
+	Language          string   `json:"language"`
+	Profile           string   `json:"profile"`
+	Version           string   `json:"version"`
+	Command           string   `json:"command"`
+	Count             int      `json:"count"`
+	Declared          bool     `json:"declared"`
+	SyntaxSupported   bool     `json:"syntax_supported"`
+	SemanticSupported bool     `json:"semantic_supported"`
+	Limitations       []string `json:"limitations"`
+}
+
+// ObservedReferenceForm counts canonical reference kind/role/resolution tuples.
+// It does not claim the distinct M6 rewrite render-form capability.
+type ObservedReferenceForm struct {
+	Kind       string `json:"kind"`
+	Role       string `json:"role"`
+	Resolution string `json:"resolution"`
+	Count      int    `json:"count"`
+}
+
 type DependencySummary struct {
 	Kind         string   `json:"kind"`
 	Name         string   `json:"name"`
@@ -105,13 +135,17 @@ type DependencySummary struct {
 }
 
 type Report struct {
-	SchemaVersion     int                 `json:"schema_version"`
-	Status            analysis.Status     `json:"status"`
-	ExecutionComplete bool                `json:"execution_complete"`
-	Mode              string              `json:"mode"`
-	Selection         Selection           `json:"selection"`
-	Counts            Counts              `json:"counts"`
-	Coverage          CoverageCounts      `json:"coverage"`
-	Dependencies      []DependencySummary `json:"dependencies"`
-	Entries           []ReportEntry       `json:"entries"`
+	SchemaVersion          int                     `json:"schema_version"`
+	Status                 analysis.Status         `json:"status"`
+	ExecutionComplete      bool                    `json:"execution_complete"`
+	Mode                   string                  `json:"mode"`
+	Selection              Selection               `json:"selection"`
+	Counts                 Counts                  `json:"counts"`
+	StatusCounts           StatusCounts            `json:"status_counts"`
+	Coverage               CoverageCounts          `json:"coverage"`
+	CoverageReasons        []string                `json:"coverage_reasons"`
+	CommandCoverage        []CommandCoverage       `json:"command_coverage"`
+	ObservedReferenceForms []ObservedReferenceForm `json:"observed_reference_forms"`
+	Dependencies           []DependencySummary     `json:"dependencies"`
+	Entries                []ReportEntry           `json:"entries"`
 }
