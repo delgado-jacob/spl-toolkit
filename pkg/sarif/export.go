@@ -34,6 +34,14 @@ func Export(report *corpus.Report) (*Log, error) {
 			return nil, fmt.Errorf("sarif: duplicate or empty document ID at entry %d", i)
 		}
 		seenIDs[entry.ID] = true
+		if entry.Failure != nil {
+			if entry.Evaluation != nil {
+				return nil, fmt.Errorf("sarif: entry %q has failure and evaluation", entry.ID)
+			}
+			failures++
+			run.Invocations[0].ToolExecutionNotifications = append(run.Invocations[0].ToolExecutionNotifications, failureNotification(*entry.Failure, entry.ID))
+			continue
+		}
 		location, base, err := originLocation(entry.ID, entry.Origin)
 		if err != nil {
 			return nil, fmt.Errorf("sarif: entry %q: %w", entry.ID, err)
@@ -43,14 +51,6 @@ func Export(report *corpus.Report) (*Log, error) {
 				return nil, fmt.Errorf("sarif: multiple file roots in one run")
 			}
 			root = base
-		}
-		if entry.Failure != nil {
-			if entry.Evaluation != nil {
-				return nil, fmt.Errorf("sarif: entry %q has failure and evaluation", entry.ID)
-			}
-			failures++
-			run.Invocations[0].ToolExecutionNotifications = append(run.Invocations[0].ToolExecutionNotifications, failureNotification(*entry.Failure, entry.ID))
-			continue
 		}
 		source, diagnostics, status, coverage, err := evaluated(entry.Evaluation)
 		if err != nil {

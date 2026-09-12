@@ -64,6 +64,7 @@ type sourcePositions struct {
 	length       int
 	points       map[int]coordinate
 	eofInsertion coordinate
+	bomLength    int
 }
 
 // sourceCoordinates uses Unicode code points and treats CRLF as one newline.
@@ -78,9 +79,16 @@ func sourceCoordinates(text string, diagnostics []analysis.Diagnostic) sourcePos
 	points := make(map[int]coordinate, len(wanted)+1)
 	line, column := 1, 1
 	lastTerminated := coordinate{}
+	bomLength := 0
+	if strings.HasPrefix(text, "\ufeff") {
+		bomLength = len("\ufeff")
+	}
 	for offset, r := range text {
 		if wanted[offset] {
 			points[offset] = coordinate{line, column}
+		}
+		if offset == 0 && bomLength != 0 {
+			continue
 		}
 		switch r {
 		case '\r':
@@ -101,9 +109,9 @@ func sourceCoordinates(text string, diagnostics []analysis.Diagnostic) sourcePos
 	}
 	points[len(text)] = coordinate{line, column}
 	if strings.HasSuffix(text, "\n") || strings.HasSuffix(text, "\r") {
-		return sourcePositions{len(text), points, lastTerminated}
+		return sourcePositions{len(text), points, lastTerminated, bomLength}
 	}
-	return sourcePositions{len(text), points, points[len(text)]}
+	return sourcePositions{len(text), points, points[len(text)], bomLength}
 }
 
 func sourceRegion(source sourcePositions, location analysis.Location) (*Region, error) {
@@ -118,6 +126,10 @@ func sourceRegion(source sourcePositions, location analysis.Location) (*Region, 
 	b, okB := source.points[end.Offset]
 	if !okA || !okB {
 		return nil, fmt.Errorf("sarif: source location splits a UTF-8 code point")
+	}
+	if source.bomLength != 0 && start.Offset < source.bomLength && end.Offset > start.Offset {
+		offset, length := start.Offset, end.Offset-start.Offset
+		return &Region{ByteOffset: &offset, ByteLength: &length}, nil
 	}
 	if start.Offset == end.Offset && end.Offset == source.length {
 		a, b = source.eofInsertion, source.eofInsertion

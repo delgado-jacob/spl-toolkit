@@ -52,10 +52,12 @@ type Artifact struct {
 	Properties     map[string]any    `json:"properties,omitempty"`
 }
 type Region struct {
-	StartLine   int `json:"startLine"`
-	StartColumn int `json:"startColumn"`
-	EndLine     int `json:"endLine"`
-	EndColumn   int `json:"endColumn"`
+	StartLine   int  `json:"startLine,omitempty"`
+	StartColumn int  `json:"startColumn,omitempty"`
+	EndLine     int  `json:"endLine,omitempty"`
+	EndColumn   int  `json:"endColumn,omitempty"`
+	ByteOffset  *int `json:"byteOffset,omitempty"`
+	ByteLength  *int `json:"byteLength,omitempty"`
 }
 type PhysicalLocation struct {
 	ArtifactLocation ArtifactLocation `json:"artifactLocation"`

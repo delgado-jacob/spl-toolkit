@@ -185,6 +185,92 @@ func TestSARIFInvocationVsContent(t *testing.T) {
 	}
 }
 
+func TestSARIFPublicCorpusFailureWithoutOriginPreservesFindings(t *testing.T) {
+	catalog := validation.FieldCatalog{Fields: []string{"host"}}
+	prepared, err := corpus.Prepare(corpus.ScanOptions{ValidationTarget: &corpus.ValidationTarget{Kind: "field_list", Catalog: &catalog}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	document := analysis.QueryDocument{Text: "search missing=x"}
+	r, err := prepared.Scan(corpus.Input{Selection: corpus.Selection{Mode: "manifest", Complete: true}, Entries: []corpus.Entry{
+		{ID: "bad", Origin: corpus.Origin{Kind: "inline"}, Document: &document},
+		{ID: "lost", Failure: &corpus.AcquisitionError{Code: "not_found", Phase: "open", Message: "unavailable"}},
+	}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if r.Status != analysis.Invalid || r.ExecutionComplete {
+		t.Fatalf("public corpus repro changed: %+v", r)
+	}
+	got, err := Export(r)
+	if err != nil {
+		t.Fatal(err)
+	}
+	run := got.Runs[0]
+	found := false
+	for _, result := range run.Results {
+		if result.RuleID == validation.CodeUnknownField && result.Level == "error" {
+			found = true
+		}
+	}
+	if !found || len(run.Artifacts) != 1 || run.Invocations[0].ExecutionSuccessful || len(run.Invocations[0].ToolExecutionNotifications) != 1 || run.Invocations[0].ToolExecutionNotifications[0].Properties["code"] != "not_found" {
+		t.Fatalf("failure swallowed neighboring findings or notification: %+v", run)
+	}
+}
+
+func TestSARIFBOMDoesNotShiftPublicCorpusColumns(t *testing.T) {
+	plainText := "| mystery | table host"
+	bomText := "\ufeff" + plainText
+	scan := func(id, text string) *Log {
+		t.Helper()
+		r, err := corpus.Scan(corpus.Request{SchemaVersion: 1, Documents: []corpus.RequestDocument{{ID: id, Document: analysis.QueryDocument{Text: text}}}})
+		if err != nil {
+			t.Fatal(err)
+		}
+		got, err := Export(r)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return got
+	}
+	plain, withBOM := scan("plain", plainText), scan("bom", bomText)
+	find := func(log *Log, code string) *Result {
+		t.Helper()
+		for i := range log.Runs[0].Results {
+			if log.Runs[0].Results[i].RuleID == code {
+				return &log.Runs[0].Results[i]
+			}
+		}
+		t.Fatalf("missing canonical result %q", code)
+		return nil
+	}
+	plainCommand := find(plain, analysis.CodeUnsupportedCommand)
+	bomCommand := find(withBOM, analysis.CodeUnsupportedCommand)
+	want := Region{StartLine: 1, StartColumn: 3, EndLine: 1, EndColumn: 10}
+	if len(plainCommand.Locations) != 1 || len(bomCommand.Locations) != 1 || plainCommand.Locations[0].PhysicalLocation.Region == nil || bomCommand.Locations[0].PhysicalLocation.Region == nil || *plainCommand.Locations[0].PhysicalLocation.Region != want || *bomCommand.Locations[0].PhysicalLocation.Region != want {
+		t.Fatalf("BOM moved a post-BOM finding: plain=%+v bom=%+v", plainCommand, bomCommand)
+	}
+	bomSyntax := find(withBOM, analysis.CodeSyntaxError)
+	if len(bomSyntax.Locations) != 1 || bomSyntax.Locations[0].PhysicalLocation.Region == nil {
+		t.Fatalf("BOM finding lost: %+v", bomSyntax)
+	}
+	encoded, err := json.Marshal(bomSyntax.Locations[0].PhysicalLocation.Region)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var wire map[string]any
+	if err := json.Unmarshal(encoded, &wire); err != nil {
+		t.Fatal(err)
+	}
+	if wire["byteOffset"] != float64(0) || wire["byteLength"] != float64(3) || wire["startLine"] != nil || wire["startColumn"] != nil || wire["endLine"] != nil || wire["endColumn"] != nil || wire["charOffset"] != nil || wire["charLength"] != nil {
+		t.Fatalf("BOM itself requires an exact byte-only region, got %s", encoded)
+	}
+	artifact := withBOM.Runs[0].Artifacts[0]
+	if artifact.Contents == nil || artifact.Contents.Text != bomText || artifact.Hashes["sha-256"] != corpus.SourceHash(bomText) {
+		t.Fatalf("BOM snapshot bytes changed: %+v", artifact)
+	}
+}
+
 func TestSARIFTraversalFailureWithoutEntries(t *testing.T) {
 	r := &corpus.Report{SchemaVersion: 1, Status: analysis.Incomplete, ExecutionComplete: false, Mode: "analysis", Selection: corpus.Selection{Mode: "directory", Complete: false, TraversalFailures: []corpus.AcquisitionError{{Code: "traversal_failed", Phase: "traverse"}}}, Counts: corpus.Counts{TraversalFailed: 1}}
 	got, err := Export(r)
