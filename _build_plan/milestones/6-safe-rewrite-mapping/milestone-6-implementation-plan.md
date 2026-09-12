@@ -57,12 +57,12 @@ This private preparation authorizes no repository/source/plan/ledger mutation, p
 - [x] Task 2: minimal canonical evidence and render eligibility for proven forms. Reviewed at 0b8dd620; I1–I5 and M1 closed. Root-authorized completeness/O1 producer follow-up independently approved at 57450416 with no open findings.
 - [x] Task 3: three-valued conditional rule selection. Reviewed at 6c18c32a after scoped I1 known-derived ordinary-skip correction; zero open findings.
 - [x] Task 4: linked edit groups, conflicts and byte-preserving candidate/audit. Independent combined review approved at 14a3a0dc with zero open findings; investigated limits retained.
-- [ ] Task 5: post-verification, optional validation, apply rollback and ordered batch API. Fresh implementation released from reviewed Task4 head 14a3a0dc; root Go-only checkpoint follows its immutable review.
-- [ ] Root receives a stable Go-only canonical acceptance window before adapters.
-- [ ] Task 6: CLI/HTTP reports and maintained executable examples.
-- [ ] Task 7: owned C/native Python API and installed source/fixture closure.
-- [ ] Task 8: full durable corpus, documentation, surface parity and milestone handoff.
-- [ ] Root receives final stable built/native/HTTP/Python 3.14 acceptance alongside independent broad review, then gives exact-head milestone acceptance.
+- [x] Task 5: post-verification, optional validation, apply rollback and ordered batch API; accepted source c8be29f6 after independent review.
+- [x] Root Go-only canonical acceptance passed at 5d1e50f8 before adapters.
+- [x] Task 6: CLI/HTTP reports and maintained executable examples, reviewed at e724af4.
+- [x] Task 7: owned C/native Python API and installed source/fixture closure, reviewed at 8e0e0b8.
+- [x] Task 8: full durable corpus, documentation, surface parity and milestone handoff, reviewed at fbde61b; broad-review corrections at 98e38b9.
+- [x] Broad M6 review and same-reviewer rereview approved at 98e38b9; renewed root stable built/native/HTTP/Python 3.14/direct-wheel/rebuilt-sdist acceptance passed at that exact product source. See milestone log for immutable receipts and local-platform qualifications.
 
 
 ## Surprises & Discoveries
@@ -108,6 +108,8 @@ Root ruling 2026-09-08, Task1 I1: Keep CandidateValidation.FieldList *validation
 Task2 ownership ruling: Permit pkg/analysis/dependencies.go only to register private render-owner information inside the existing qualifiedCatalog(ctx, from), adjacent to its existing data_model/dataset reference emissions. Accepted/current source SHA256 122c652ba117a02904bdd37496114a940f300b6f1930365a9428e0612970e620; qualifiedCatalog at lines 84–114 retains the original typed context, datamodel prefix, quote form and bounded overlapping components that referenceAt alone does not receive. Preserve extraction, dependencies, diagnostics, normalization, public reference locations and ordinary Analyze results exactly. This supplies the already approved composite-owner bridge; no new forms, reconstruction, duplicate extraction or SPL2 tstats behavior is authorized.
 
 ## Outcomes & Retrospective
+
+Final outcome (2026-09-12): All eight task units, independent reviews, broad M6 review and both substantive broad-review corrections are accepted. The renewed root acceptance at product source `98e38b9` passed its reserved transport/native, Python 3.14 and two installed-package windows; the milestone log records exact artifacts and limits. Earlier private-plan-only wording below describes the historical preimplementation stage, not current status. M7 remains separate.
 
 
 This phase produced a private integrated plan, bounded delta receipts and immutable source/hash records only. It did not run product tests, build artifacts, change repository files or dispatch implementation. No M6 behavior is implemented or verified. Root approved the exact LocateRewriteBytes contract below and accepted M5's fixed source/runtime at 40e6e171. Its six source/test changes and twelve evidence additions are reconciled without changing the approved interfaces or task scope. Final M5 authored-document closure at 237e62ac is now accepted and reconciled. Only root's exact plan/application/production release remains required.

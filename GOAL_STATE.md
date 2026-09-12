@@ -1,18 +1,25 @@
 # SPL Toolkit continuation state
 
-Updated September 12, 2026. This is the current handoff; it supersedes historical “worker running” and “root has never run product tests” notes. The user requested a fresh-session checkpoint after the current atomic unit. **The original goal is unfinished.**
+Updated September 12, 2026. Milestone 6 is accepted at product source `98e38b941ea868468376b9dd6533e684009d35c0`; Milestone 7 is the first incomplete milestone. Historical handoff/task notes below are retained for provenance, but this current-state section and the later M6 closure supersede their old “Task 8 next” wording. **The original goal is unfinished.**
+
+## Current goal stage
+
+Milestones 1–6 are complete; M7 developer tooling is **planned**, awaiting final interface/dependency/consumer-preflight reconciliation and root release of its existing 12-task ExecPlan. No M7 production task is accepted. The first incomplete action is to resolve the six pending M7 plan entries against accepted M6, record concrete offline/platform recipes, then release Task 1 for serial fresh-implementer/independent-review execution. After M7 acceptance, perform the separate cross-milestone final audit. No merge or push.
+
+M6 product checkpoint `98e38b9` is the direct child of Task 8's `fbde61b` and contains both broad-review fixes. Independent same-reviewer broad rereview [approved](.superpowers/sdd/milestone-6-implementation-plan/milestone-6-broad-rereview-1.md) with zero findings. Fresh root-owned checks at that exact clean tracked/index source passed: official Go 1.22.12 built CLI/server/native plus 29 independent Go/CLI/real-HTTP/native cases, ordered batch/error/concurrency and original/candidate/validation parity; Python 3.14.1 source/native 459 tests without skips; and fresh direct-wheel and rebuilt-sdist installed Python 3.12 lanes, each 438 native + 242 surface tests without failures/skips. Immutable private root receipts and qualification details are in the M6 milestone log and plan. The legacy ignored worktree `dist/` wheel was not used for this closure.
+
+Local proof is macOS arm64 with the documented external-link LC_UUID accommodation. Other OS/architecture and Python release matrix combinations, sanitizers/leak checks and external Splunk runtime equivalence remain unexecuted, not silently waived. Preserve the ten untracked user files listed by git status and the untouched original checkout.
 
 ## Start here
 
 - **Implementation worktree:** `/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones`
 - **Branch:** `codex/remaining-milestones`
-- **Accepted Task 5 source:** `c8be29f6fead17e9e40a06073878edf2b2efa35e`; **Go-only acceptance head:** `5d1e50f8ab3fa10cc5e6b2abae0678870df00081`. The independent core window passed and Task 6 adapters are now released.
+- **Accepted M6 source:** `98e38b941ea868468376b9dd6533e684009d35c0`; earlier Task 5 source `c8be29f6` and Go-only acceptance head `5d1e50f8` remain historical ancestors.
 - **Original checkout:** `/Users/jacobdelgado/repos/spl-toolkit`, still on `main` at `6898cc052eb7109fbcc7495ee826c993aaa93352`. Do not implement there or overwrite its existing untracked files.
 - No old milestone worker handle remains live. A new session must establish new qualified assignments rather than attempt to resume historical agent IDs.
 - Fresh continuation implementer `/root/m6_task5_fresh_implementer` completed Task 5 and its acceptance fix; independent reviewer `/root/m6_task5_reviewer` approved both fix rounds. Treat the SDD ledger as authoritative after these disposable handles are no longer live.
 - Task 5 is accepted. Its failed preview-contract attempt and passing exact-head Go window are retained under `_build_plan/continuation/2026-09-12/task5-go-acceptance/`.
-- Task 6 is accepted at `e724af4cd22ba6f29e53de99c572275db7627843` after an independent full review and one scoped fix/re-review. Task 7 native/Python/package integration is released; Task 8 remains gated on its acceptance.
-- Task 7 is accepted at `8e0e0b89a3c4b2825ca10f510d3a191f9b6dd1db`. User-authorized official inputs closed the prior floor blocker; real Go 1.22.12 headers, source/native ownership, and formal direct-wheel/rebuilt-sdist checks passed independent re-review. Task 8 is released.
+- Task 6 was accepted at `e724af4`; Task 7 at `8e0e0b8`; Task 8 and the broad-review corrections are now accepted at `98e38b9`. Their immutable task and review artifacts remain in the M6 SDD ledger.
 - The old task ID is `01a07d20-1e65-7963-a516-10d357e8ac16`. Its goal tool most recently reported `usageLimited`; the September 12 handoff work and qualified review nevertheless ran successfully. Check current availability rather than assuming that old error is still active. No credits were purchased or resets consumed.
 
 The canonical copy of this file is in the implementation worktree. An identical copy in the original checkout makes the continuation point discoverable.
@@ -43,6 +50,7 @@ All accepted milestone commits below were verified as ancestors of the current b
 | M6 Task5 | Accepted source `c8be29f6fead17e9e40a06073878edf2b2efa35e`; all review findings closed. Independent Go-only acceptance passed at `5d1e50f8ab3fa10cc5e6b2abae0678870df00081` across 29 single/destination cases, ordered batch and ownership/concurrency/error checks. |
 | M6 Task6 | Accepted at `e724af4cd22ba6f29e53de99c572275db7627843`. CLI/HTTP/OpenAPI/docs parity is reviewed; stale guidance, strict schema parity, body-limit coverage and partial-commit CLI coverage are closed. The local Go 1.22 GOROOT is incomplete, so no fresh floor compile is claimed. |
 | M6 Task7 | Accepted at `8e0e0b89a3c4b2825ca10f510d3a191f9b6dd1db`. Native/Python APIs, real Go 1.22/1.25 headers, 20 exports, ownership/race checks and formal direct/rebuilt package closure passed; Task 8/root platform acceptance remain separate. |
+| M6 Task8 and milestone | Task8 independently accepted at `fbde61b`; broad-review corrections accepted at `98e38b941ea868468376b9dd6533e684009d35c0`, with broad rereview and fresh root surface/Python3.14/installed package acceptance. Complete within the stated local-platform limits. |
 | M7: developer tooling | Brainstorming, design, ExecPlan and preflights prepared/approved subject to final M6 interface reconciliation. No production implementation accepted. |
 
 The completed atomic unit consists of `pkg/rewrite/rewrite.go`, `pkg/rewrite/verify.go`, and `pkg/rewrite/rewrite_test.go`. The interrupted file bytes were preserved before verification. No failing test expectation was rewritten during this handoff: the earlier worker had already corrected its hand-counted offsets. The retained historical `single-first-green` run actually exited 1 and remains a failure record.
@@ -68,11 +76,11 @@ Use bounded ownership and artifact paths, preserve others' work, retain actual e
 
 ## Remaining work
 
-**Implement M6 Task 8 next.** Complete the durable corpus, full transport/native/installed parity, capability truth, documentation and milestone handoff, followed by separate broad review and final root surface acceptance.
-
-After accepted M6, reconcile M7 with the actual final public/prepared-target/CLI/native interfaces, then execute its approved 12-task plan with qualified implementation/review and the specified coordinator acceptance windows. Do not redo settled brainstorming merely because a new session starts. Complete requirement-by-requirement final audit for all milestones before claiming the original goal complete.
+**M6 Task 8, broad review and root acceptance are complete.** Reconcile M7's existing plan with actual final public/prepared-target/CLI/native interfaces and concrete platform/offline-consumer dependencies. Then execute its 12 tasks with qualified implementation/review and specified independent acceptance windows. Do not redo settled brainstorming. Complete requirement-by-requirement final audit for all milestones before claiming the original goal complete.
 
 ## Current blockers and evidence gaps
+
+The entries immediately below were recorded for the earlier Task 5 handoff and are retained as historical evidence, not active M6 blockers. The current limits and next stage are stated above.
 
 - **No unresolved Task 5 defect remains.** The accepted core window is recorded in `task5-go-acceptance/closure.json`; CLI/HTTP/native/installed/Python and cross-platform acceptance remain future gates.
 - The earlier temporary module cache was incomplete. Handoff copied the two pinned dependencies from the existing local cache into `/private/tmp/spl-toolkit-handoff-gomodcache`; no network download or `go.mod`/`go.sum` change occurred. Future broader checks may need additional pinned tools/modules. Check actual availability first.

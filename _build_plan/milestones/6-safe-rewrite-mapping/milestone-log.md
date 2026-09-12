@@ -273,3 +273,48 @@ stamp. Broad re-review and renewed root stable/Python3.14 acceptance, other
 release platforms, sanitizer/leak checks and external Splunk runtime conformance
 remain separate. No coordinator-private inputs, dependency upgrades, generated
 schema edits, user-file changes, merge or push occurred.
+
+## Final root milestone acceptance — 2026-09-12
+
+The preceding Task8/broad-fix producer checks remain intact. The independent
+same-reviewer [broad rereview](../../../.superpowers/sdd/milestone-6-implementation-plan/milestone-6-broad-rereview-1.md)
+approved exact product source `98e38b941ea868468376b9dd6533e684009d35c0`
+with zero findings, closing both original Important issues. Root then renewed
+all reserved acceptance windows against that exact clean tracked/index source:
+
+- The official Go1.22.12-built CLI/server/native and independent 29-case Go,
+  actual CLI, real HTTP and raw-native checks passed, with four ordered batch
+  documents, strict errors, concurrency, exact original/candidate bytes and
+  canonical validation parity. Receipt:
+  `/private/tmp/spl-toolkit-root-m6-final-attempts/98e38b941ea8-surfaces-20260912T201835255501Z/attempt.json`,
+  SHA256 `64ed6d3d053d18d3122633fcfcd1acc5c26d0611c66ccfa0713ed58a8299e509`.
+  CLI/server/native SHA256 respectively `42dc3732aefd0d854565540040206d653b424f84b754b34c922af9117be635a0`,
+  `738c54683a728dd6015bf255b7ce7d05da41efef175b3c92593bf3c9a0b42bbe`,
+  `74a0feb7fe5368e5e967a42482b3344b8427278b3c527015a6f2a04e45e75f1f`.
+- Fresh Python3.14.1 source/native tests passed: 459, zero skips.
+  Receipt `/private/tmp/spl-toolkit-root-m6-final-attempts/98e38b941ea8-py314-20260912T201853032997Z/attempt.json`,
+  SHA256 `0a543de55c4a470c3a52d81c5027d1224b174ee8f8cb46d242b83a210b12c660`;
+  result `/private/tmp/spl-toolkit-root-m6-acceptance-py314.json`,
+  SHA256 `d19b99718504c1d64851e986a0bd6b8eaf6762d6490c6cfcca7f412d6f4fe8ae`.
+- Fresh outside-checkout direct wheel and independently rebuilt-sdist wheel
+  each passed the unchanged formal checker: 438 native and 242 surface tests,
+  zero failures/skips, distinct installed Python3.12 site-packages origins.
+  Receipt `/private/tmp/spl-toolkit-root-m6-final-package-acceptance.json`,
+  SHA256 `7794c826c713687e1d6b2221ebdad418ad4e3b4e91a2cea2aeccdfcbe0b9e069`.
+  Direct wheel `ed37d91f749489f26cb2a4aa27876d75cae13564bdd604c78a9af9e331c4e01a`,
+  sdist `ae71f137426b2489d02a1d7ca497ab23450bf55dec1cb9142356611bd7c5ca66`,
+  rebuilt wheel `404c28a2c2fef5285d44940483c9d25f8156fb5b7f4fe7c60df53305f5502c79`.
+  The older ignored worktree `dist/` archives are unrelated to this gate.
+
+The final private surface oracle was reconciled to approved selector identity
+`{name:"sourcetype"}` in three cases (its original `auth` identity was
+inconsistent with the design), and the historical Task5 baseline comparison
+allows only the reviewed additional `ref-2` evidence in three
+`or_no_guaranteed_fact` cases. Both amendments and preceding failed attempts
+are retained in the private attempt records; no production semantic failure
+was waived. All validated input/source snapshots were unchanged by the runs.
+The Go floor artifacts use external linking to supply macOS LC_UUID; the local
+linker emits the retained LC_DYSYMTAB warning. Other OS/architectures, the
+entire Python-version matrix, sanitizers/leak tooling and external Splunk
+runtime equivalence were not executed. This is accepted M6 local evidence,
+not a release-platform certification or a search-runtime guarantee.
