@@ -6,11 +6,11 @@ Updated September 12, 2026. This is the current handoff; it supersedes historica
 
 - **Implementation worktree:** `/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones`
 - **Branch:** `codex/remaining-milestones`
-- **Reviewed source checkpoint:** `c8be29f6fead17e9e40a06073878edf2b2efa35e` — complete Milestone 6 Task 5 plus the approved public preview-audit contract fix. A fresh coordinator Go-only attempt is the next gate.
+- **Accepted Task 5 source:** `c8be29f6fead17e9e40a06073878edf2b2efa35e`; **Go-only acceptance head:** `5d1e50f8ab3fa10cc5e6b2abae0678870df00081`. The independent core window passed and Task 6 adapters are now released.
 - **Original checkout:** `/Users/jacobdelgado/repos/spl-toolkit`, still on `main` at `6898cc052eb7109fbcc7495ee826c993aaa93352`. Do not implement there or overwrite its existing untracked files.
 - No old milestone worker handle remains live. A new session must establish new qualified assignments rather than attempt to resume historical agent IDs.
-- Fresh continuation implementer `/root/m6_task5_fresh_implementer` completed Task 5; independent reviewer `/root/m6_task5_reviewer` approved fix round 1 at `fcc5dd373b76fe5ab3af5b2ecb86a79ee2fb4274`. Treat the SDD ledger as authoritative after these disposable handles are no longer live.
-- Task 5's implementation and acceptance fix are review-clean. The first Go-only product attempt remains retained as a failure record; a new exact-head attempt is pending and adapters remain gated.
+- Fresh continuation implementer `/root/m6_task5_fresh_implementer` completed Task 5 and its acceptance fix; independent reviewer `/root/m6_task5_reviewer` approved both fix rounds. Treat the SDD ledger as authoritative after these disposable handles are no longer live.
+- Task 5 is accepted. Its failed preview-contract attempt and passing exact-head Go window are retained under `_build_plan/continuation/2026-09-12/task5-go-acceptance/`.
 - The old task ID is `01a07d20-1e65-7963-a516-10d357e8ac16`. Its goal tool most recently reported `usageLimited`; the September 12 handoff work and qualified review nevertheless ran successfully. Check current availability rather than assuming that old error is still active. No credits were purchased or resets consumed.
 
 The canonical copy of this file is in the implementation worktree. An identical copy in the original checkout makes the continuation point discoverable.
@@ -38,7 +38,7 @@ All accepted milestone commits below were verified as ancestors of the current b
 | M6 Task2: canonical rewrite bridge | Accepted at `0b8dd62068be0638e470a532544acd1cc0a48507`; reviewed producer follow-up accepted at `5745041676c8d6cddfb7b769c2aaa2630d3ab8a2`. |
 | M6 Task3: conditions / selection | Accepted at `6c18c32a073b944375d1d37da7e47b768d16656a`. |
 | M6 Task4: linked groups / edits | Accepted at `14a3a0dcfe4652240dc8b949461f905b206f215a`. |
-| M6 Task5 | Full implementation plus review and acceptance fixes committed at `c8be29f6fead17e9e40a06073878edf2b2efa35e`; all independent review findings are closed. A fresh coordinator Go-only attempt is pending. **Task5 is not yet accepted.** |
+| M6 Task5 | Accepted source `c8be29f6fead17e9e40a06073878edf2b2efa35e`; all review findings closed. Independent Go-only acceptance passed at `5d1e50f8ab3fa10cc5e6b2abae0678870df00081` across 29 single/destination cases, ordered batch and ownership/concurrency/error checks. |
 | M7: developer tooling | Brainstorming, design, ExecPlan and preflights prepared/approved subject to final M6 interface reconciliation. No production implementation accepted. |
 
 The completed atomic unit consists of `pkg/rewrite/rewrite.go`, `pkg/rewrite/verify.go`, and `pkg/rewrite/rewrite_test.go`. The interrupted file bytes were preserved before verification. No failing test expectation was rewritten during this handoff: the earlier worker had already corrected its hand-counted offsets. The retained historical `single-first-green` run actually exited 1 and remains a failure record.
@@ -64,40 +64,42 @@ Use bounded ownership and artifact paths, preserve others' work, retain actual e
 
 ## Remaining work
 
-**Rerun the Go-only acceptance window before adapters.** The initial preflight restored the exact tracked OCSF fixture; the first product attempt exposed the preview-audit outcome defect, which is now fixed and independently approved at `c8be29f6fead17e9e40a06073878edf2b2efa35e`. Run a new immutable attempt and preserve a successful Go result as the baseline. Only after that window is accepted may M6 Task6 CLI/HTTP, Task7 native/Python/package interfaces and Task8 corpus/docs/full verification proceed.
+**Implement M6 Task 6 next.** The Task 5 Go-only window is accepted and its immutable result is `task5-go-acceptance/go-results-task5.json` (SHA256 `97da4ba51e2bd1a9841f2df4104d8560fbd9bcd5661ab0e7ecbd94f95471eedd`). Task 6 may now add CLI/HTTP reports and maintained executable examples. Then complete Task 7 native/Python/package interfaces and Task 8 corpus/docs/full verification, followed by separate broad review and final surface acceptance.
 
 After accepted M6, reconcile M7 with the actual final public/prepared-target/CLI/native interfaces, then execute its approved 12-task plan with qualified implementation/review and the specified coordinator acceptance windows. Do not redo settled brainstorming merely because a new session starts. Complete requirement-by-requirement final audit for all milestones before claiming the original goal complete.
 
 ## Current blockers and evidence gaps
 
-- **No unresolved defect blocks this single-query checkpoint.** Fresh package checks passed after repairing the test environment.
+- **No unresolved Task 5 defect remains.** The accepted core window is recorded in `task5-go-acceptance/closure.json`; CLI/HTTP/native/installed/Python and cross-platform acceptance remain future gates.
 - The earlier temporary module cache was incomplete. Handoff copied the two pinned dependencies from the existing local cache into `/private/tmp/spl-toolkit-handoff-gomodcache`; no network download or `go.mod`/`go.sum` change occurred. Future broader checks may need additional pinned tools/modules. Check actual availability first.
 - `/Users/jacobdelgado/.codex/skills/efficient-delegation/SKILL.md` is now missing. It was read in full earlier (recorded SHA `2b0c89a340dafe57c5af827aa24476e7e0371de8b7a3d4dbfac275c3482e77e7`). Standard-location searches found no replacement. Apply the explicit user instructions and retained rules; do not treat the missing file as permission to downgrade capability.
-- The three previously missing private M6 acceptance files were recovered from the retained original session artifact into `/private/tmp`: `spl-toolkit-root-m6-go.go`, `spl-toolkit-root-m6-validation-cases.json`, and `spl-toolkit-root-m6-python-acceptance.py`. Root independently verified their byte counts and SHA256 identities against the bundle manifest. They remain unexecuted and coordinator-only.
-- Remaining private M6/M7 inputs have been copied out of temporary storage into the coordinator-only bundle. Original preparation covered 24 base + 5 destination cases, ordered batches, strict input errors and concurrent equality. Those acceptance runs are still **unexecuted**. The September 12 package test run is separate.
+- The recovered private M6 Go driver and validation cases were executed only inside the accepted Task 5 coordinator window; the Python input remains unexecuted and coordinator-only for the final surface gate.
+- Remaining private M6/M7 inputs are retained in the coordinator-only bundle. The accepted Go window covered 24 base + 5 destination cases, ordered batches, strict input errors and concurrent equality. Final adapter/native/package acceptance remains unexecuted.
 - Historical full-matrix/installed/live acceptance applies only to its recorded source/build identities. Do not claim refreshed cross-platform, editor, provider or installed-package acceptance from the current package checks.
 
-## Verification performed for this handoff
+## Verification performed for the accepted Task 5 checkpoint
 
-Executed on the exact bytes committed in `7927ac3`, with Go `1.25.5 darwin/arm64`:
+The earlier single-query package checkpoint at `7927ac3` remains retained. The independent Task 5 core acceptance was then executed at exact clean tracked/index head `5d1e50f8ab3fa10cc5e6b2abae0678870df00081`, containing accepted source `c8be29f6fead17e9e40a06073878edf2b2efa35e`, with Go `1.25.5 darwin/arm64`.
 
 ```sh
 cd /Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones
 env GOCACHE=/private/tmp/spl-toolkit-go-cache \
     GOMODCACHE=/private/tmp/spl-toolkit-handoff-gomodcache \
     GOPROXY=off GOSUMDB=off GOTOOLCHAIN=local \
-    /opt/homebrew/bin/go test -mod=readonly -count=1 \
-    ./pkg/rewrite ./pkg/analysis ./pkg/validation
+    /private/tmp/spl-toolkit-remaining-venv/bin/python \
+    /private/tmp/spl-toolkit-root-m6-core-attempt.py \
+    /Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones \
+    5d1e50f8ab3fa10cc5e6b2abae0678870df00081
 ```
 
-**Exit 0:** rewrite 1.125 s, analysis 1.984 s, validation 9.805 s; empty stderr, source hashes unchanged. The earlier setup failure is retained. The successful receipt, raw logs, source-review report and coordinator closure are in [single-query-checkpoint](/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/_build_plan/continuation/2026-09-12/single-query-checkpoint). The review report predates cache repair and correctly describes its then-missing runtime evidence; `closure.json` links that source review to the later passing run.
+**Exit 0:** 29 independent query/destination cases, five destination-validation cases, a four-document ordered batch, two concurrent repeats, eight strict invalid requests, late atomic errors, caller ownership, canonical report parity and exact byte/coordinate reconstruction passed; stderr was empty and the wrapper's before/after source/input snapshots were identical. Evidence and the retained failed preview-contract attempt are in [task5-go-acceptance](/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/_build_plan/continuation/2026-09-12/task5-go-acceptance).
 
 ## Relevant files and exact next steps
 
-1. Open this worktree, run `git status --short`, `git rev-parse HEAD` and `git log -3 --oneline`. Preserve the original checkout and existing untracked files. The source checkpoint is `7927ac3`; a subsequent documentation commit records this handoff. Confirm ancestry rather than checking out/resetting an old SHA.
+1. Open this worktree, run `git status --short`, `git rev-parse HEAD` and `git log -3 --oneline`. Preserve the original checkout and existing untracked files. Confirm accepted Task 5 source `c8be29f6` and acceptance head `5d1e50f8` are ancestors; never check out/reset to them over later work.
 2. Read this file, retained delegation rules, the [M6 ExecPlan](/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/_build_plan/milestones/6-safe-rewrite-mapping/milestone-6-implementation-plan.md), its Task5 brief and the checkpoint closure. Use the existing approved [M6 design](/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/_build_plan/milestones/6-safe-rewrite-mapping/design-spec.md). Do not send coordinator-private acceptance inputs to implementation workers.
-3. Run and reconcile the coordinator Go-only acceptance window at the exact reviewed Task5 head. Do not start adapters until that window is accepted.
-4. Before that acceptance window, inspect [manifest.json](/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/_build_plan/continuation/2026-09-12/manifest.json). Verify archived input hashes and restore needed temporary paths only when missing or when the existing bytes match. The three formerly missing acceptance inputs now match their recorded hashes in `/private/tmp`; verify them again immediately before use and reconcile actual public signatures before execution. The prepared core launcher is `spl-toolkit-root-m6-core-attempt.py WORKTREE ACCEPTED_HEAD`; it expects restored private inputs and the recorded Python/Go runtime paths.
+3. Resume the M6 SDD ledger at Task 6. Preserve `task5-go-acceptance/go-results-task5.json` as immutable baseline evidence; adapters may now proceed.
+4. Before later coordinator acceptance windows, inspect [manifest.json](/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/_build_plan/continuation/2026-09-12/manifest.json), verify archived/private input hashes and reconcile actual public signatures. Do not expose coordinator-private oracles to implementation workers.
 5. Continue M6 Tasks6–8 and final acceptance, then the [M7 ExecPlan](/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/_build_plan/milestones/7-developer-tooling/milestone-7-implementation-plan.md) and [M7 design](/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/_build_plan/milestones/7-developer-tooling/design-spec.md). Revalidate actual tool paths/caches before relying on old preflights; their research and decisions remain available.
 6. Use [coordinator-inputs/spl-toolkit-root-continuation.json](/Users/jacobdelgado/repos/spl-toolkit/.worktrees/remaining-milestones/_build_plan/continuation/2026-09-12/coordinator-inputs/spl-toolkit-root-continuation.json) only for targeted historical decisions/evidence. Its `handoff_current` entry supersedes historical agent/runtime status fields. Full M6 SDD evidence is preserved in `milestone-6-sdd.tar.gz`; verify its manifest hash before extracting into an empty directory. M4/M5 permanent closure evidence remains under `docs/evidence/`.
 

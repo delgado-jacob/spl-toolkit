@@ -1,0 +1,41 @@
+{
+  "status": "passed",
+  "accepted_head": "5d1e50f8ab3fa10cc5e6b2abae0678870df00081",
+  "accepted_source_commit": "c8be29f6fead17e9e40a06073878edf2b2efa35e",
+  "scope": "Milestone 6 Task 5 independent Go-only canonical rewrite and destination-validation acceptance",
+  "passed_attempt": {
+    "path": "passed-attempt/attempt.json",
+    "sha256": "d7c6eaad86506c61ccaf2e29510f9d24cf8a0f3af8b198e61a22523af1fea613",
+    "exit_code": 0,
+    "inputs_unchanged": true,
+    "stdout_sha256": "26c9c8286f8abd5c6744e4885e3c2741b8799002e07c1cabe15e31734bfa34f5",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "result": {
+    "path": "go-results-task5.json",
+    "sha256": "97da4ba51e2bd1a9841f2df4104d8560fbd9bcd5661ab0e7ecbd94f95471eedd",
+    "single_and_destination_cases": 29,
+    "destination_validation_cases": 5,
+    "batch_documents": 4,
+    "concurrent_repeats": 2,
+    "strict_invalid_requests": 8,
+    "late_invalid_batch_atomicity": "passed",
+    "caller_request_target_ownership": "passed",
+    "canonical_report_parity": "passed",
+    "exact_byte_reconstruction_and_coordinates": "passed"
+  },
+  "retained_failure": {
+    "path": "failed-preview-contract-attempt/attempt.json",
+    "sha256": "580768f329db0ab54bcd924fc7b2521cd62aa93333ae0dabd24ec11d32e8df9c",
+    "head": "192221bb5c715d6833666f849ab73f7e4c0b539f",
+    "exit_code": 1,
+    "cause": "Public preview Change outcome used proposed instead of the approved applied value; fixed and independently re-reviewed in c8be29f6fead17e9e40a06073878edf2b2efa35e."
+  },
+  "preflight_recovery": {
+    "cause": "The first wrapper invocation stopped before product execution because the private OCSF fixture path was absent.",
+    "restored_from": "testdata/schemas/ocsf/1.6.0/base.json.gz",
+    "restored_path": "/private/tmp/spl-toolkit-ocsf-preflight/base-catalog.json",
+    "uncompressed_sha256": "9b609f8fb670772f04191c1c276b46d34d6e9110d2417c71fa89c4f54c585137"
+  },
+  "qualification": "This accepts the Task 5 Go core only. CLI, HTTP, native, installed-package, Python, cross-platform and final Milestone 6 acceptance remain open."
+}
