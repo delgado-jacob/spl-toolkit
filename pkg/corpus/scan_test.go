@@ -35,7 +35,7 @@ func TestAllAcquisitionsFail(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	input := Input{Selection: Selection{Mode: "manifest", Complete: true}, Entries: []Entry{{ID: "a", Origin: Origin{Kind: "file", RelativePath: "a.spl"}, Failure: &AcquisitionError{Code: "not_found", Phase: "open", ID: "a"}}, {ID: "b", Origin: Origin{Kind: "file", RelativePath: "b.spl"}, Failure: &AcquisitionError{Code: "permission_denied", Phase: "read", ID: "b"}}}}
+	input := Input{Selection: Selection{Mode: "manifest", Complete: true, IgnoredNames: []string{"vendor"}, SkippedSymlinks: []string{"linked.spl"}}, Entries: []Entry{{ID: "a", Origin: Origin{Kind: "file", RelativePath: "a.spl"}, Failure: &AcquisitionError{Code: "not_found", Phase: "open", ID: "a"}}, {ID: "b", Origin: Origin{Kind: "file", RelativePath: "b.spl"}, Failure: &AcquisitionError{Code: "permission_denied", Phase: "read", ID: "b"}}}}
 	r, err := p.Scan(input)
 	if err != nil {
 		t.Fatal(err)
@@ -43,12 +43,38 @@ func TestAllAcquisitionsFail(t *testing.T) {
 	if r.Status != analysis.Incomplete || r.ExecutionComplete || r.Counts != (Counts{Selected: 2, AcquisitionFailed: 2}) || len(r.Entries) != 2 || r.Entries[0].Failure == nil || r.Entries[1].Failure == nil || r.Coverage.Syntax.Denominator != 0 || !r.Coverage.Schema.NotRequested {
 		t.Fatalf("wrong all-failed report: %+v", r)
 	}
+	if !reflect.DeepEqual(r.Selection.IgnoredNames, []string{"vendor"}) || !reflect.DeepEqual(r.Selection.SkippedSymlinks, []string{"linked.spl"}) {
+		t.Fatalf("selection metadata lost: %+v", r.Selection)
+	}
 	input.Selection.Complete = false
 	input.Selection.TraversalFailures = []AcquisitionError{{Code: "traversal_failed", Path: "sub"}}
 	input.Entries = nil
 	r, err = p.Scan(input)
 	if err != nil || r == nil || r.Status != analysis.Incomplete || r.ExecutionComplete || r.Counts.TraversalFailed != 1 {
 		t.Fatalf("zero-entry traversal loss: %+v, %v", r, err)
+	}
+}
+
+func TestCorpusRejectsContradictorySelectionCompleteness(t *testing.T) {
+	p, err := Prepare(ScanOptions{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, tc := range []struct {
+		name      string
+		selection Selection
+		entries   []Entry
+	}{
+		{"incomplete_without_failure_zero_entries", Selection{Mode: "directory", Complete: false}, nil},
+		{"incomplete_without_failure_with_entry", Selection{Mode: "directory", Complete: false}, []Entry{corpusDocument("q", "search host=web")}},
+		{"complete_with_failure", Selection{Mode: "directory", Complete: true, TraversalFailures: []AcquisitionError{{Code: "traversal_failed", Phase: "traverse", Path: "sub"}}}, []Entry{corpusDocument("q", "search host=web")}},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			report, err := p.Scan(Input{Selection: tc.selection, Entries: tc.entries})
+			if report != nil || !IsInputError(err) {
+				t.Fatalf("contradictory selection published report: %+v, %v", report, err)
+			}
+		})
 	}
 }
 

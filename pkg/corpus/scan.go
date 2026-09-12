@@ -15,7 +15,10 @@ func (p *PreparedScan) Scan(input Input) (*Report, error) {
 	if input.Selection.Mode == "" {
 		return nil, inputError("selection mode is required")
 	}
-	if len(input.Entries) == 0 && input.Selection.Complete && len(input.Selection.TraversalFailures) == 0 {
+	if input.Selection.Complete != (len(input.Selection.TraversalFailures) == 0) {
+		return nil, inputError("selection completeness must match traversal failures")
+	}
+	if len(input.Entries) == 0 && input.Selection.Complete {
 		return nil, inputError("selection must be nonempty")
 	}
 	seen := make(map[string]bool, len(input.Entries))
