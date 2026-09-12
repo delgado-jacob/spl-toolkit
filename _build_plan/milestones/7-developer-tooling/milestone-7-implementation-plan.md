@@ -1,7 +1,7 @@
 # Developer Tooling and Ecosystem Implementation Plan — APPROVED FOR SERIAL EXECUTION
 
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development. Root approved this reconciled plan; Tasks 1–5 are independently accepted, Task 5 at `07f9e40`. Task 6 is released. Use one implementer at a time, then independent specification/code review of its immutable owned-file commit, fixes and scoped re-review before the next task.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development. Root approved this reconciled plan; Tasks 1–6 are independently accepted, Task 6's SARIF corrections at `6871b18`. Task 7 is released. Use one implementer at a time, then independent specification/code review of its immutable owned-file commit, fixes and scoped re-review before the next task.
 
 **Goal:** Let users scan local query repositories, consume honest aggregate/SARIF/graph results, compare schema and mapping changes, embed a detached document view, and receive actual local editor diagnostics/highlights from the canonical engine.
 
@@ -52,8 +52,8 @@ Preserve all other users/agents' changes in the shared worktree. During this pla
 - [x] (2026-09-12 UTC) Task 3: canonical prepared target access and in-memory corpus reports; initial `2bc5d42`, one P2 typed-selection contradiction fixed/re-reviewed at `b3914f67a0707766444a5adee43fc50f935e5670`. Go1.22 affected packages, focused race and vet passed.
 - [x] (2026-09-12 UTC) Task 4: detached advanced document access; `69b47de45f108720c6c8449905fb136cbae5c62e`, independent review APPROVE, Go1.22 focused tests/vet and host race passed.
 - [x] (2026-09-12 UTC) Task 5: evidence-preserving graph export; `07f9e4032686bbcb6470ebd5b755117fee737640`, independent review APPROVE, Go1.22 tests/vet and host race passed.
-- [ ] Task 6: standards-correct SARIF export; released after Task 5 review.
-- [ ] Task 7: before/after schema and mapping impact.
+- [x] (2026-09-12 UTC) Task 6: SARIF export; initial `c6af03d`, two public-API review findings fixed/re-reviewed at `6871b189781c8cd7cd3e86287789cd82bd5e5926`. Go1.22 affected tests/vet and host race passed; official schema/consumer remain later gates.
+- [ ] Task 7: before/after schema and mapping impact; released after Task 6 rereview.
 - [ ] Task 8: published machine schemas and independent contract validation.
 - [ ] Root completes a stable Go-only core acceptance window before any adapters.
 - [ ] Task 9: local LSP lifecycle and source conversion.
@@ -98,7 +98,7 @@ The directory `/private/tmp/spl-toolkit-m7-consumer-preflight` survives only as 
 ## Outcomes & Retrospective
 
 
-Root accepted Tasks 1–5 after independent reviews and scoped fixes. Task 5 projects revision-qualified graph evidence without inventing a live dependency identity or complete edge for uncertainty. Task 6 is released. Official SARIF schema and real-consumer gates remain separate, and no broader runtime platform proof is inferred from cross-compilation. Missing consumer inputs are an explicit Task12 provisioning prerequisite.
+Root accepted Tasks 1–6 after independent reviews and scoped fixes. Task 6 emits source-correct SARIF findings plus operational notifications, including exact BOM byte regions and BOM-independent later columns; official schema and real-consumer gates remain separate. Task 7 is released. No broader runtime platform proof is inferred from cross-compilation, and missing consumer inputs remain a Task12 provisioning prerequisite.
 
 
 ## Context and Orientation
@@ -440,3 +440,5 @@ Revision note (2026-09-12, Task 3 acceptance): Prepared canonical targets, corpu
 Revision note (2026-09-12, Task 4 acceptance): Detached advanced document view committed at `69b47de45f108720c6c8449905fb136cbae5c62e`, with explicit ToolVersion/ContractVersion/TargetDigest context and checked source/range/ID lookups over caller-owned copies. Independent review APPROVE found no actionable defect; focused Go1.22/race/vet evidence passed. Root released Task 5 only. A mutated snapshot never receives fresh engine attestation.
 
 Revision note (2026-09-12, Task 5 acceptance): Graph exporter committed at `07f9e4032686bbcb6470ebd5b755117fee737640`; its revision-qualified IDs, endpoints, direct evidence links, conditionality and SQL phase/order retained focused Go1.22/race/vet proof. Independent review APPROVE found no actionable defect. Root released Task 6 only. Official SARIF validation, later adapters and consumer acceptance remain separate.
+
+Revision note (2026-09-12, Task 6 acceptance): Initial SARIF exporter `c6af03da2a953305f713d40f7dabad60ff91c667` received two independent review findings: originless acquisition failures aborted export, and leading BOM shifted later columns. Scoped `6871b189781c8cd7cd3e86287789cd82bd5e5926` correction preserved neighboring results and represented BOM-only findings with exact byte regions; public corpus-to-SARIF repros and same-reviewer rereview APPROVED. Root released Task 7 only. The official schema instance check and actual sarif-tools ingestion remain Task8/12 gates.
