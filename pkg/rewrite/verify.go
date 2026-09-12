@@ -69,10 +69,12 @@ func finishRewrite(pending *pendingRewrite, mode Mode, validation *CandidateVali
 	for i := range result.Changes {
 		change := &result.Changes[i]
 		change.Committed = result.Committed && change.CandidateApplied
-		if change.Committed {
+		if change.CandidateApplied {
+			// Public applied means inclusion in the candidate, including preview.
 			change.Outcome = "applied"
-		} else if mode == Apply && !gate && change.CandidateApplied {
-			change.Outcome, change.Reason = "skipped", ReasonPostVerificationFailed
+			if mode == Apply && !gate {
+				change.Outcome, change.Reason = "skipped", ReasonPostVerificationFailed
+			}
 		}
 	}
 	return result

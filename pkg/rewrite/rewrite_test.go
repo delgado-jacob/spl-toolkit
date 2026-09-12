@@ -75,12 +75,8 @@ func TestRewritePreviewApply(t *testing.T) {
 				if change.OldText != "src" || change.NewText != "user" || change.Reason != "matched" || !change.CandidateApplied || change.Committed != got.Committed || !reflect.DeepEqual(change.RuleIDs, []string{"src-user"}) {
 					t.Errorf("change %d: %+v", i, change)
 				}
-				wantOutcome := "proposed"
-				if mode == Apply {
-					wantOutcome = "applied"
-				}
-				if change.Outcome != wantOutcome {
-					t.Errorf("outcome=%s want %s", change.Outcome, wantOutcome)
+				if change.Outcome != "applied" {
+					t.Errorf("public outcome=%s want applied for candidate inclusion", change.Outcome)
 				}
 				if change.OriginalLocation == nil || change.CandidateLocation == nil || len(change.OriginalReferenceIDs) != 1 || len(change.CandidateReferenceIDs) != 1 {
 					t.Fatalf("missing edit correspondence: %+v", change)
@@ -147,16 +143,16 @@ func explicitAliasReport(mode Mode) *Result {
 		}
 	}
 	a0, b0, a1, b1, alias, consumer := loc(7, 10), loc(7, 11), loc(25, 28), loc(26, 30), loc(33, 38), loc(47, 52)
-	text, outcome, committed := analyses[0].Document.Text, "proposed", false
+	text, committed := analyses[0].Document.Text, false
 	if mode == Apply {
-		text, outcome, committed = analyses[1].Document.Text, "applied", true
+		text, committed = analyses[1].Document.Text, true
 	}
 	return &Result{SchemaVersion: 1, Document: analyses[0].Document, Mode: mode, Status: analysis.Valid,
 		Coverage:     Coverage{SyntaxComplete: true, SemanticComplete: true, RewriteComplete: true, Reasons: []string{}},
 		OriginalText: analyses[0].Document.Text, CandidateText: analyses[1].Document.Text, Text: text, Committed: committed,
 		Changes: []Change{
-			{Outcome: outcome, Reason: "matched", GroupID: "group-0", RuleIDs: []string{"src-user"}, OriginalReferenceIDs: []string{"ref-0"}, CandidateReferenceIDs: []string{"ref-0"}, OriginalLocation: &a0, CandidateLocation: &b0, OldText: "src", NewText: "user", CandidateApplied: true, Committed: committed},
-			{Outcome: outcome, Reason: "matched", GroupID: "group-0", RuleIDs: []string{"src-user"}, OriginalReferenceIDs: []string{"ref-1"}, CandidateReferenceIDs: []string{"ref-1"}, OriginalLocation: &a1, CandidateLocation: &b1, OldText: "src", NewText: "user", CandidateApplied: true, Committed: committed},
+			{Outcome: "applied", Reason: "matched", GroupID: "group-0", RuleIDs: []string{"src-user"}, OriginalReferenceIDs: []string{"ref-0"}, CandidateReferenceIDs: []string{"ref-0"}, OriginalLocation: &a0, CandidateLocation: &b0, OldText: "src", NewText: "user", CandidateApplied: true, Committed: committed},
+			{Outcome: "applied", Reason: "matched", GroupID: "group-0", RuleIDs: []string{"src-user"}, OriginalReferenceIDs: []string{"ref-1"}, CandidateReferenceIDs: []string{"ref-1"}, OriginalLocation: &a1, CandidateLocation: &b1, OldText: "src", NewText: "user", CandidateApplied: true, Committed: committed},
 		},
 		RuleEvaluations: []RuleEvaluation{
 			{RuleID: "src-user", Outcome: "proposed", Reason: "matched", ReferenceIDs: []string{"ref-0"}, Location: &a0},

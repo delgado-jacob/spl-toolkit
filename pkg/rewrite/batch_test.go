@@ -114,6 +114,46 @@ func TestRewriteBatchSafeBesideAmbiguous(t *testing.T) {
 	}
 }
 
+// Public preview audit reports candidate inclusion as applied independently of
+// commitment or validation failure; internal rule proposals remain proposed.
+func TestRewritePreviewBatchAudit(t *testing.T) {
+	for _, target := range []*ValidationTarget{nil, {Kind: "field_list", Catalog: &validation.FieldCatalog{Fields: []string{"missing"}}}} {
+		request := BatchRequest{SchemaVersion: 1,
+			Documents: []analysis.QueryDocument{{Text: "search src=x other=y | table src other"}, {Text: "FROM main SELECT src", Language: "spl2"}},
+			Rules: []Rule{
+				{ID: "safe", Kind: "field", Source: conditionIdentity("src"), Target: conditionIdentity("user")},
+				{ID: "a", Kind: "field", Source: conditionIdentity("other"), Target: conditionIdentity("a")},
+				{ID: "b", Kind: "field", Source: conditionIdentity("other"), Target: conditionIdentity("b")},
+			}, ValidationTarget: target,
+		}
+		got, err := RewriteBatch(request)
+		if err != nil || got == nil || len(got.Reports) != 2 {
+			t.Fatalf("preview batch: %+v, %v", got, err)
+		}
+		for i, want := range []struct {
+			candidate string
+			outcomes  []string
+		}{
+			{"search user=x other=y | table user other", []string{"applied", "ambiguous", "ambiguous", "applied", "ambiguous", "ambiguous"}},
+			{"FROM main SELECT user", []string{"applied"}},
+		} {
+			report := got.Reports[i]
+			if report.Mode != Preview || report.Committed || report.Text != request.Documents[i].Text || report.CandidateText != want.candidate || len(report.Changes) != len(want.outcomes) || report.RuleEvaluations[0].Outcome != "proposed" {
+				t.Fatalf("preview authority, candidate, or rule evaluation changed: %+v", report)
+			}
+			if target != nil && report.CandidateValidation.FieldList.Status != analysis.Invalid {
+				t.Fatal("preview must retain failed destination validation")
+			}
+			for j, outcome := range want.outcomes {
+				change := report.Changes[j]
+				if change.Outcome != outcome || change.Committed || change.CandidateApplied != (outcome == "applied") {
+					t.Errorf("public preview change %d/%d: outcome=%s want=%s included=%v committed=%v", i, j, change.Outcome, outcome, change.CandidateApplied, change.Committed)
+				}
+			}
+		}
+	}
+}
+
 // Status precedence and no-op target checking must not depend on document order
 // or whether any rule produced an edit.
 func TestRewriteBatchStatusAndNoopTargets(t *testing.T) {

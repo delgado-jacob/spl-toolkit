@@ -210,7 +210,7 @@ func TestRewriteWholeRequestGateDoesNotRetrySubset(t *testing.T) {
 				t.Fatalf("whole-request gate selected a reduced candidate: %+v", got)
 			}
 			for _, change := range got.Changes {
-				outcome, reason := "proposed", "matched"
+				outcome, reason := "applied", "matched"
 				if mode == Apply {
 					outcome, reason = "skipped", ReasonPostVerificationFailed
 				}

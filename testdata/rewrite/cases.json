@@ -2,7 +2,7 @@
   {
     "name": "explicit alias preview preserves authoritative bytes",
     "request": {"schema_version":1,"mode":"preview","document":{"text":"search src=x | stats sum(src) AS total | table total","source_id":"explicit.spl"},"rules":[{"id":"map","kind":"field","source":{"name":"src"},"target":{"name":"user"}}]},
-    "want": {"status":"valid","candidate_text":"search user=x | stats sum(user) AS total | table total","text":"search src=x | stats sum(src) AS total | table total","committed":false,"syntax_complete":true,"semantic_complete":true,"rewrite_complete":true,"change_outcomes":["proposed","proposed"]}
+    "want": {"status":"valid","candidate_text":"search user=x | stats sum(user) AS total | table total","text":"search src=x | stats sum(src) AS total | table total","committed":false,"syntax_complete":true,"semantic_complete":true,"rewrite_complete":true,"change_outcomes":["applied","applied"]}
   },
   {
     "name": "implicit output and consumer commit together",
