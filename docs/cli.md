@@ -79,7 +79,7 @@ Exit 0; stdout is empty and the file contains the complete selected manifest. Te
 
 Content reports use exit 0 for valid, 1 for invalid, and 3 for incomplete. Malformed supported SPL2 forms remain invalid. Modules/declarations and wrong-profile constructs report `SPL_UNSUPPORTED_MODULE` and `SPL_PROFILE_MISMATCH` with incomplete coverage; unknown or deferred forms remain incomplete. Input errors write to stderr and emit no report. `--output FILE` preserves the full report even for invalid or incomplete content.
 
-Legacy `map`, `discover`, and `validate` accept only the default SPL compatibility contract. Explicit `--language spl2` returns exit 2 with `unsupported_dialect_for_operation` and guidance to `analyze` or structured validation. SPL2 rewriting is not available. Default legacy success and error formats are retained.
+Legacy `map`, `discover`, and `validate` accept only the default SPL compatibility contract. Explicit `--language spl2` returns exit 2 with `unsupported_dialect_for_operation` and guidance to `analyze` or structured validation. Use `rewrite` for local, rule-driven SPL or SPL2 rewrites, and inspect `capabilities` for the selected dialect's supported rewrite forms and limitations; support is not universal. Default legacy success and error formats are retained.
 
 ## Local field validation
 

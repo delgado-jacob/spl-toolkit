@@ -119,6 +119,38 @@ func TestRewriteCLIBatchTargetOutputAndIncompleteCommit(t *testing.T) {
 	}
 }
 
+func TestRewriteCLISingleTransportsIncompleteCommittedPartialRewrite(t *testing.T) {
+	rules := rewriteFile(t, "rules.json", `{"schema_version":1,"rules":[{"id":"src-user","kind":"field","source":{"name":"src"},"target":{"name":"user"}},{"id":"other-a","kind":"field","source":{"name":"other"},"target":{"name":"a"}},{"id":"other-b","kind":"field","source":{"name":"other"},"target":{"name":"b"}}]}`)
+	query := "search src=x other=y | table src other"
+	var stdout, stderr bytes.Buffer
+	code := runCLIWithInput([]string{"rewrite", "--rules", rules, "--query", query, "--apply", "--format=json"}, strings.NewReader(""), &stdout, &stderr)
+	var got rewrite.Result
+	if err := json.Unmarshal(stdout.Bytes(), &got); err != nil {
+		t.Fatalf("decode stdout: %v; stderr=%s", err, &stderr)
+	}
+	if code != 3 || stderr.Len() != 0 || got.Status != analysis.Incomplete || !got.Committed || got.Text != "search user=x other=y | table user other" || got.Text == got.OriginalText {
+		t.Fatalf("code=%d report=%+v stderr=%s", code, got, &stderr)
+	}
+	applied, ambiguous := 0, 0
+	for _, change := range got.Changes {
+		switch change.Outcome {
+		case "applied":
+			applied++
+			if !change.CandidateApplied || !change.Committed {
+				t.Errorf("applied change lost commit evidence: %+v", change)
+			}
+		case "ambiguous":
+			ambiguous++
+			if change.CandidateApplied || change.Committed {
+				t.Errorf("ambiguous change was transported as applied: %+v", change)
+			}
+		}
+	}
+	if applied != 2 || ambiguous != 4 {
+		t.Fatalf("partial audit lost: applied=%d ambiguous=%d", applied, ambiguous)
+	}
+}
+
 func TestRewriteCLIRejectsInvalidCombinations(t *testing.T) {
 	rules := rewriteRulesFile(t)
 	fields := rewriteFile(t, "fields.json", `["user"]`)

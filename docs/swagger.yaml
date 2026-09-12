@@ -637,38 +637,192 @@ components:
     api.RewriteCondition:
       additionalProperties: false
       oneOf:
-      - required:
+      - not:
+          anyOf:
+          - required:
+            - any
+          - required:
+            - fact
+          - required:
+            - kind
+          - required:
+            - identity
+          - required:
+            - operator
+          - required:
+            - value
+        required:
         - all
-      - required:
+      - not:
+          anyOf:
+          - required:
+            - all
+          - required:
+            - fact
+          - required:
+            - kind
+          - required:
+            - identity
+          - required:
+            - operator
+          - required:
+            - value
+        required:
         - any
-      - oneOf:
-        - properties:
-            fact:
-              const: literal
-          required:
-          - operator
-          - value
-        - not:
-            anyOf:
-            - required:
-              - operator
-            - required:
-              - value
-          properties:
-            fact:
-              const: source_reference_present
+      - not:
+          anyOf:
+          - required:
+            - all
+          - required:
+            - any
+          - required:
+            - operator
+          - required:
+            - value
+        properties:
+          fact:
+            const: source_reference_present
+          identity:
+            $ref: '#/components/schemas/api.RewriteIdentity'
+          kind:
+            const: field
         required:
         - fact
         - kind
         - identity
+      - not:
+          anyOf:
+          - required:
+            - all
+          - required:
+            - any
+        properties:
+          fact:
+            const: literal
+          identity:
+            $ref: '#/components/schemas/api.RewriteIdentity'
+          kind:
+            enum:
+            - field
+            type: string
+          operator:
+            const: equals
+          value:
+            oneOf:
+            - type: string
+            - type: number
+            - type: boolean
+            - type: 'null'
+        required:
+        - fact
+        - kind
+        - identity
+        - operator
+        - value
+      - not:
+          anyOf:
+          - required:
+            - all
+          - required:
+            - any
+        properties:
+          fact:
+            const: literal
+          identity:
+            $ref: '#/components/schemas/api.RewriteIdentity'
+          kind:
+            enum:
+            - field
+            type: string
+          operator:
+            const: contains
+          value:
+            type: string
+        required:
+        - fact
+        - kind
+        - identity
+        - operator
+        - value
+      - not:
+          anyOf:
+          - required:
+            - all
+          - required:
+            - any
+        properties:
+          fact:
+            const: literal
+          identity:
+            additionalProperties: false
+            properties:
+              name:
+                minLength: 1
+                pattern: \S
+                type: string
+            required:
+            - name
+            type: object
+          kind:
+            enum: &id001
+            - index
+            - source
+            - sourcetype
+            type: string
+          operator:
+            const: equals
+          value:
+            oneOf:
+            - type: string
+            - type: number
+            - type: boolean
+            - type: 'null'
+        required:
+        - fact
+        - kind
+        - identity
+        - operator
+        - value
+      - not:
+          anyOf:
+          - required:
+            - all
+          - required:
+            - any
+        properties:
+          fact:
+            const: literal
+          identity:
+            additionalProperties: false
+            properties:
+              name:
+                minLength: 1
+                pattern: \S
+                type: string
+            required:
+            - name
+            type: object
+          kind:
+            enum: *id001
+            type: string
+          operator:
+            const: contains
+          value:
+            type: string
+        required:
+        - fact
+        - kind
+        - identity
+        - operator
+        - value
       properties:
         all:
-          items: &id001
+          items: &id002
             $ref: '#/components/schemas/api.RewriteCondition'
           minItems: 1
           type: array
         any:
-          items: *id001
+          items: *id002
           minItems: 1
           type: array
         fact:
@@ -817,6 +971,44 @@ components:
       type: object
     api.RewriteRule:
       additionalProperties: false
+      oneOf:
+      - properties:
+          kind:
+            const: field
+          source:
+            $ref: '#/components/schemas/api.RewriteIdentity'
+          target:
+            $ref: '#/components/schemas/api.RewriteIdentity'
+      - properties:
+          kind:
+            enum:
+            - index
+            - source
+            - sourcetype
+            - lookup
+            - dataset
+            - data_model
+            type: string
+          source:
+            additionalProperties: false
+            properties:
+              name:
+                minLength: 1
+                pattern: \S
+                type: string
+            required:
+            - name
+            type: object
+          target:
+            additionalProperties: false
+            properties:
+              name:
+                minLength: 1
+                pattern: \S
+                type: string
+            required:
+            - name
+            type: object
       properties:
         id:
           minLength: 1

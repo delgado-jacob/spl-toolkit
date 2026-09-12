@@ -82,6 +82,19 @@ func TestRewriteRESTStrictRequestsAndBodyLimit(t *testing.T) {
 	}
 }
 
+func TestRewriteRESTBatchKnownLengthBodyLimit(t *testing.T) {
+	handler := NewServer().Handler()
+	base := []byte(`{"schema_version":1,"documents":[{"text":"search src=x"}],"rules":[` + apiRewriteRule + `]}`)
+	exact := append(base, bytes.Repeat([]byte(" "), (8<<20)-len(base))...)
+	if response := schemaREST(t, handler, "rewrite/batch", exact, "application/json", false); response.Code != http.StatusOK {
+		t.Fatalf("exact known-length batch limit: %d %s", response.Code, response.Body)
+	}
+	response := schemaREST(t, handler, "rewrite/batch", append(exact, ' '), "application/json", false)
+	if response.Code != http.StatusBadRequest || !strings.Contains(response.Body.String(), "request body exceeds 8 MiB limit") {
+		t.Fatalf("overflow known-length batch limit: %d %s", response.Code, response.Body)
+	}
+}
+
 func TestRewriteRESTRejectsMalformedTargetsAndBatchWrappers(t *testing.T) {
 	for _, batch := range []bool{false, true} {
 		route, key, document := "rewrite", "document", `{"text":"search src=x"}`

@@ -1,6 +1,7 @@
 import copy
 import json
 from pathlib import Path
+import re
 import subprocess
 import sys
 import tempfile
@@ -13,6 +14,55 @@ SCRIPT = Path(__file__).resolve().parents[1] / "update_validation_openapi.py"
 
 
 class ValidationOpenAPITests(unittest.TestCase):
+    def schema_accepts(self, schemas, name, instance):
+        def valid(schema, value):
+            if "$ref" in schema:
+                return valid(schemas[schema["$ref"].removeprefix("#/components/schemas/")], value)
+            if "const" in schema and value != schema["const"]:
+                return False
+            if "enum" in schema and value not in schema["enum"]:
+                return False
+            if "type" in schema:
+                expected = schema["type"]
+                matches = {
+                    "object": isinstance(value, dict),
+                    "array": isinstance(value, list),
+                    "string": isinstance(value, str),
+                    "integer": isinstance(value, int) and not isinstance(value, bool),
+                    "number": isinstance(value, (int, float)) and not isinstance(value, bool),
+                    "boolean": isinstance(value, bool),
+                    "null": value is None,
+                }[expected]
+                if not matches:
+                    return False
+            if "oneOf" in schema and sum(valid(branch, value) for branch in schema["oneOf"]) != 1:
+                return False
+            if "anyOf" in schema and not any(valid(branch, value) for branch in schema["anyOf"]):
+                return False
+            if "not" in schema and valid(schema["not"], value):
+                return False
+            if isinstance(value, dict):
+                if any(key not in value for key in schema.get("required", [])):
+                    return False
+                properties = schema.get("properties", {})
+                if schema.get("additionalProperties") is False and any(key not in properties for key in value):
+                    return False
+                if any(not valid(properties[key], item) for key, item in value.items() if key in properties):
+                    return False
+            if isinstance(value, list):
+                if len(value) < schema.get("minItems", 0):
+                    return False
+                if "items" in schema and any(not valid(schema["items"], item) for item in value):
+                    return False
+            if isinstance(value, str):
+                if len(value) < schema.get("minLength", 0):
+                    return False
+                if "pattern" in schema and re.search(schema["pattern"], value) is None:
+                    return False
+            return True
+
+        return valid({"$ref": "#/components/schemas/" + name}, instance)
+
     def fixture(self, root):
         document = {"type": "object", "properties": {key: {"type": "string"} for key in ("text", "language", "profile", "version", "source_id")}}
         catalog = {"type": "object", "properties": {"fields": {"type": "array", "items": {"type": "string"}}, "optional_fields": {"type": "array", "items": {"type": "string"}}, "identity": {"type": "string"}, "version": {"type": "string"}}}
@@ -144,12 +194,34 @@ class ValidationOpenAPITests(unittest.TestCase):
             identity = schemas["api.RewriteIdentity"]
             self.assertEqual(identity["oneOf"], [{"required": ["name"]}, {"required": ["path"]}])
             self.assertIs(identity["additionalProperties"], False)
-            rule = schemas["api.RewriteRule"]
-            self.assertEqual(rule["required"], ["id", "kind", "source", "target"])
-            self.assertEqual(rule["properties"]["kind"]["enum"], ["field", "index", "source", "sourcetype", "lookup", "dataset", "data_model"])
-            condition = schemas["api.RewriteCondition"]
-            self.assertEqual(len(condition["oneOf"]), 3)
-            self.assertEqual(condition["properties"]["value"]["oneOf"], [{"type": "string"}, {"type": "number"}, {"type": "boolean"}, {"type": "null"}])
+            document = {"text": "search src=x"}
+            accepted_rules = [
+                {"id": "field-path", "kind": "field", "source": {"path": ["actor", "name"]}, "target": {"path": ["user", "name"]}},
+                {"id": "source-name", "kind": "source", "source": {"name": "old"}, "target": {"name": "new"},
+                 "when": {"fact": "literal", "kind": "source", "identity": {"name": "old"}, "operator": "contains", "value": "prod"}},
+                {"id": "presence", "kind": "field", "source": {"name": "src"}, "target": {"name": "user"},
+                 "when": {"fact": "source_reference_present", "kind": "field", "identity": {"path": ["actor", "name"]}}},
+            ]
+            for rule in accepted_rules:
+                request = {"schema_version": 1, "document": document, "rules": [rule]}
+                self.assertTrue(self.schema_accepts(schemas, "api.RewriteRequest", request), rule)
+            rejected_rules = [
+                {"id": "presence-index", "kind": "index", "source": {"name": "old"}, "target": {"name": "new"},
+                 "when": {"fact": "source_reference_present", "kind": "index", "identity": {"name": "main"}}},
+                {"id": "literal-lookup", "kind": "lookup", "source": {"name": "old"}, "target": {"name": "new"},
+                 "when": {"fact": "literal", "kind": "lookup", "identity": {"name": "users"}, "operator": "equals", "value": "users"}},
+                {"id": "contains-number", "kind": "field", "source": {"name": "src"}, "target": {"name": "user"},
+                 "when": {"fact": "literal", "kind": "field", "identity": {"name": "src"}, "operator": "contains", "value": 7}},
+                {"id": "rule-path-index", "kind": "index", "source": {"path": ["old"]}, "target": {"name": "new"}},
+                {"id": "rule-target-path-index", "kind": "index", "source": {"name": "old"}, "target": {"path": ["new"]}},
+                {"id": "condition-path-source", "kind": "source", "source": {"name": "old"}, "target": {"name": "new"},
+                 "when": {"fact": "literal", "kind": "source", "identity": {"path": ["old"]}, "operator": "equals", "value": "old"}},
+            ]
+            for rule in rejected_rules:
+                request = {"schema_version": 1, "document": document, "rules": [rule]}
+                self.assertFalse(self.schema_accepts(schemas, "api.RewriteRequest", request), rule)
+            batch = {"schema_version": 1, "documents": [document], "rules": accepted_rules}
+            self.assertTrue(self.schema_accepts(schemas, "api.RewriteBatchRequest", batch))
             self.assertEqual(schemas["analysis.CapabilityManifest"]["properties"]["rewrite"], {"$ref": "#/components/schemas/analysis.RewriteCapabilityManifest", "description": "Optional rewrite support for this selected dialect; inspect each form rather than assuming universal support."})
             self.assertEqual(schemas["analysis.RewriteCapabilityManifest"]["required"], ["schema_version", "forms"])
             before = {p.name: p.read_bytes() for p in root.iterdir()}

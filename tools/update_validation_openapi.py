@@ -147,6 +147,10 @@ def update(directory: Path) -> None:
         "name": copy.deepcopy(nonblank),
         "path": {"type": "array", "items": copy.deepcopy(nonblank), "minItems": 1}}
 
+    name_identity = {"type": "object", "required": ["name"], "additionalProperties": False,
+                     "properties": {"name": copy.deepcopy(nonblank)}}
+    field_identity = {"$ref": PREFIX + "api.RewriteIdentity"}
+    scalar = {"oneOf": [{"type": "string"}, {"type": "number"}, {"type": "boolean"}, {"type": "null"}]}
     condition = shape("api.RewriteCondition", ("all", "any", "fact", "kind", "identity", "operator", "value"))
     condition_ref = {"$ref": PREFIX + "api.RewriteCondition"}
     for key in ("all", "any"):
@@ -155,20 +159,45 @@ def update(directory: Path) -> None:
     condition["properties"]["kind"] = {"type": "string", "enum": ["field", "index", "source", "sourcetype", "lookup", "dataset", "data_model"]}
     condition["properties"]["identity"] = {"$ref": PREFIX + "api.RewriteIdentity"}
     condition["properties"]["operator"] = {"type": "string", "enum": ["equals", "contains"]}
-    condition["properties"]["value"] = {"oneOf": [{"type": "string"}, {"type": "number"}, {"type": "boolean"}, {"type": "null"}]}
-    leaf = {"required": ["fact", "kind", "identity"], "oneOf": [
-        {"properties": {"fact": {"const": "literal"}}, "required": ["operator", "value"]},
-        {"properties": {"fact": {"const": "source_reference_present"}},
-         "not": {"anyOf": [{"required": ["operator"]}, {"required": ["value"]}]}}]}
-    condition.update(additionalProperties=False, oneOf=[{"required": ["all"]}, {"required": ["any"]}, leaf])
+    condition["properties"]["value"] = copy.deepcopy(scalar)
+    combinator_other = ["any", "fact", "kind", "identity", "operator", "value"]
+    all_branch = {"required": ["all"], "not": {"anyOf": [{"required": [key]} for key in combinator_other]}}
+    any_branch = {"required": ["any"], "not": {"anyOf": [{"required": [key]} for key in ["all"] + combinator_other[1:]]}}
+    leaf_other = {"not": {"anyOf": [{"required": ["all"]}, {"required": ["any"]}]}}
+
+    def literal_branch(kinds, identity_schema, operator, value_schema):
+        branch = copy.deepcopy(leaf_other)
+        branch.update(required=["fact", "kind", "identity", "operator", "value"], properties={
+            "fact": {"const": "literal"}, "kind": {"type": "string", "enum": kinds},
+            "identity": copy.deepcopy(identity_schema), "operator": {"const": operator},
+            "value": copy.deepcopy(value_schema)})
+        return branch
+
+    source_reference = copy.deepcopy(leaf_other)
+    source_reference.update(required=["fact", "kind", "identity"], properties={
+        "fact": {"const": "source_reference_present"}, "kind": {"const": "field"},
+        "identity": copy.deepcopy(field_identity)})
+    source_reference["not"] = {"anyOf": [{"required": [key]} for key in ("all", "any", "operator", "value")]}
+    dependency_kinds = ["index", "source", "sourcetype"]
+    condition.update(additionalProperties=False, oneOf=[
+        all_branch, any_branch, source_reference,
+        literal_branch(["field"], field_identity, "equals", scalar),
+        literal_branch(["field"], field_identity, "contains", {"type": "string"}),
+        literal_branch(dependency_kinds, name_identity, "equals", scalar),
+        literal_branch(dependency_kinds, name_identity, "contains", {"type": "string"})])
 
     rule = shape("api.RewriteRule", ("id", "kind", "source", "target", "when"))
     rule.update(required=["id", "kind", "source", "target"], additionalProperties=False)
     rule["properties"]["id"] = copy.deepcopy(nonblank)
-    rule["properties"]["kind"] = {"type": "string", "enum": ["field", "index", "source", "sourcetype", "lookup", "dataset", "data_model"]}
+    rule_kinds = ["field", "index", "source", "sourcetype", "lookup", "dataset", "data_model"]
+    rule["properties"]["kind"] = {"type": "string", "enum": rule_kinds}
     for key in ("source", "target"):
         rule["properties"][key] = {"$ref": PREFIX + "api.RewriteIdentity"}
     rule["properties"]["when"] = {"$ref": PREFIX + "api.RewriteCondition"}
+    rule["oneOf"] = [
+        {"properties": {"kind": {"const": "field"}, "source": copy.deepcopy(field_identity), "target": copy.deepcopy(field_identity)}},
+        {"properties": {"kind": {"type": "string", "enum": rule_kinds[1:]},
+                        "source": copy.deepcopy(name_identity), "target": copy.deepcopy(name_identity)}}]
 
     field_target = {"type": "object", "required": ["kind", "catalog"], "additionalProperties": False,
                     "properties": {"kind": {"const": "field_list"}, "catalog": copy.deepcopy(union)}}
