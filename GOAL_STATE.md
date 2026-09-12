@@ -11,6 +11,7 @@ Updated September 12, 2026. This is the current handoff; it supersedes historica
 - No old milestone worker handle remains live. A new session must establish new qualified assignments rather than attempt to resume historical agent IDs.
 - Fresh continuation implementer `/root/m6_task5_fresh_implementer` completed Task 5 and its acceptance fix; independent reviewer `/root/m6_task5_reviewer` approved both fix rounds. Treat the SDD ledger as authoritative after these disposable handles are no longer live.
 - Task 5 is accepted. Its failed preview-contract attempt and passing exact-head Go window are retained under `_build_plan/continuation/2026-09-12/task5-go-acceptance/`.
+- Task 6 is accepted at `e724af4cd22ba6f29e53de99c572275db7627843` after an independent full review and one scoped fix/re-review. Task 7 native/Python/package integration is released; Task 8 remains gated on its acceptance.
 - The old task ID is `01a07d20-1e65-7963-a516-10d357e8ac16`. Its goal tool most recently reported `usageLimited`; the September 12 handoff work and qualified review nevertheless ran successfully. Check current availability rather than assuming that old error is still active. No credits were purchased or resets consumed.
 
 The canonical copy of this file is in the implementation worktree. An identical copy in the original checkout makes the continuation point discoverable.
@@ -39,6 +40,7 @@ All accepted milestone commits below were verified as ancestors of the current b
 | M6 Task3: conditions / selection | Accepted at `6c18c32a073b944375d1d37da7e47b768d16656a`. |
 | M6 Task4: linked groups / edits | Accepted at `14a3a0dcfe4652240dc8b949461f905b206f215a`. |
 | M6 Task5 | Accepted source `c8be29f6fead17e9e40a06073878edf2b2efa35e`; all review findings closed. Independent Go-only acceptance passed at `5d1e50f8ab3fa10cc5e6b2abae0678870df00081` across 29 single/destination cases, ordered batch and ownership/concurrency/error checks. |
+| M6 Task6 | Accepted at `e724af4cd22ba6f29e53de99c572275db7627843`. CLI/HTTP/OpenAPI/docs parity is reviewed; stale guidance, strict schema parity, body-limit coverage and partial-commit CLI coverage are closed. The local Go 1.22 GOROOT is incomplete, so no fresh floor compile is claimed. |
 | M7: developer tooling | Brainstorming, design, ExecPlan and preflights prepared/approved subject to final M6 interface reconciliation. No production implementation accepted. |
 
 The completed atomic unit consists of `pkg/rewrite/rewrite.go`, `pkg/rewrite/verify.go`, and `pkg/rewrite/rewrite_test.go`. The interrupted file bytes were preserved before verification. No failing test expectation was rewritten during this handoff: the earlier worker had already corrected its hand-counted offsets. The retained historical `single-first-green` run actually exited 1 and remains a failure record.
@@ -64,7 +66,7 @@ Use bounded ownership and artifact paths, preserve others' work, retain actual e
 
 ## Remaining work
 
-**Implement M6 Task 6 next.** The Task 5 Go-only window is accepted and its immutable result is `task5-go-acceptance/go-results-task5.json` (SHA256 `97da4ba51e2bd1a9841f2df4104d8560fbd9bcd5661ab0e7ecbd94f95471eedd`). Task 6 may now add CLI/HTTP reports and maintained executable examples. Then complete Task 7 native/Python/package interfaces and Task 8 corpus/docs/full verification, followed by separate broad review and final surface acceptance.
+**Implement M6 Task 7 next.** Task 6 is accepted after reviewed CLI/HTTP/OpenAPI/docs integration. Complete Task 7 native/Python/package interfaces, then Task 8 corpus/docs/full verification, followed by separate broad review and final surface acceptance.
 
 After accepted M6, reconcile M7 with the actual final public/prepared-target/CLI/native interfaces, then execute its approved 12-task plan with qualified implementation/review and the specified coordinator acceptance windows. Do not redo settled brainstorming merely because a new session starts. Complete requirement-by-requirement final audit for all milestones before claiming the original goal complete.
 
