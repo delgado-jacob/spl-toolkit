@@ -1,7 +1,7 @@
 # Developer Tooling and Ecosystem Implementation Plan — APPROVED FOR SERIAL EXECUTION
 
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development. Root approved this reconciled plan; Tasks 1–4 are independently accepted, Task 4 at `69b47de`. Task 5 is released. Use one implementer at a time, then independent specification/code review of its immutable owned-file commit, fixes and scoped re-review before the next task.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development. Root approved this reconciled plan; Tasks 1–5 are independently accepted, Task 5 at `07f9e40`. Task 6 is released. Use one implementer at a time, then independent specification/code review of its immutable owned-file commit, fixes and scoped re-review before the next task.
 
 **Goal:** Let users scan local query repositories, consume honest aggregate/SARIF/graph results, compare schema and mapping changes, embed a detached document view, and receive actual local editor diagnostics/highlights from the canonical engine.
 
@@ -51,8 +51,8 @@ Preserve all other users/agents' changes in the shared worktree. During this pla
 - [x] (2026-09-12 UTC) Task 2: contained filesystem acquisition and deterministic selection; initial `2f8568e`, two P2 security findings corrected/re-reviewed at `988f6088170f290c9a0e2d03393da9ed8a014b3f`. Go1.22 Darwin runtime/race/vet and Linux/Windows compile checks passed; Linux/Windows runtime remains open.
 - [x] (2026-09-12 UTC) Task 3: canonical prepared target access and in-memory corpus reports; initial `2bc5d42`, one P2 typed-selection contradiction fixed/re-reviewed at `b3914f67a0707766444a5adee43fc50f935e5670`. Go1.22 affected packages, focused race and vet passed.
 - [x] (2026-09-12 UTC) Task 4: detached advanced document access; `69b47de45f108720c6c8449905fb136cbae5c62e`, independent review APPROVE, Go1.22 focused tests/vet and host race passed.
-- [ ] Task 5: evidence-preserving graph export; released after Task 4 review.
-- [ ] Task 6: standards-correct SARIF export.
+- [x] (2026-09-12 UTC) Task 5: evidence-preserving graph export; `07f9e4032686bbcb6470ebd5b755117fee737640`, independent review APPROVE, Go1.22 tests/vet and host race passed.
+- [ ] Task 6: standards-correct SARIF export; released after Task 5 review.
 - [ ] Task 7: before/after schema and mapping impact.
 - [ ] Task 8: published machine schemas and independent contract validation.
 - [ ] Root completes a stable Go-only core acceptance window before any adapters.
@@ -98,7 +98,7 @@ The directory `/private/tmp/spl-toolkit-m7-consumer-preflight` survives only as 
 ## Outcomes & Retrospective
 
 
-Root accepted Tasks 1–4 after independent reviews and scoped fixes. Task 4 provides detached canonical snapshots and checked current-copy lookups, not a second AST or verified report after caller mutation. Task 5 is released. Root and real-consumer gates remain open, and no broader runtime platform proof is inferred from cross-compilation. Missing consumer inputs are an explicit Task12 provisioning prerequisite.
+Root accepted Tasks 1–5 after independent reviews and scoped fixes. Task 5 projects revision-qualified graph evidence without inventing a live dependency identity or complete edge for uncertainty. Task 6 is released. Official SARIF schema and real-consumer gates remain separate, and no broader runtime platform proof is inferred from cross-compilation. Missing consumer inputs are an explicit Task12 provisioning prerequisite.
 
 
 ## Context and Orientation
@@ -438,3 +438,5 @@ Revision note (2026-09-12, Task 2 acceptance): Held-handle loader first committe
 Revision note (2026-09-12, Task 3 acceptance): Prepared canonical targets, corpus assessment, explicit analyzed status/coverage counts and observed capability evidence landed at `2bc5d423743945f3fb10dab2538d6331f0f32a5b`. Independent review found one P2 public typed-input contradiction: incomplete selection without traversal evidence or complete selection with failures. Scoped `b3914f67a0707766444a5adee43fc50f935e5670` fix and same-reviewer rereview APPROVED; genuine zero-entry traversal and per-file failures remain reports. Actual loader-preparation ordering remains a Task10 adapter integration check. Root released Task 4 only.
 
 Revision note (2026-09-12, Task 4 acceptance): Detached advanced document view committed at `69b47de45f108720c6c8449905fb136cbae5c62e`, with explicit ToolVersion/ContractVersion/TargetDigest context and checked source/range/ID lookups over caller-owned copies. Independent review APPROVE found no actionable defect; focused Go1.22/race/vet evidence passed. Root released Task 5 only. A mutated snapshot never receives fresh engine attestation.
+
+Revision note (2026-09-12, Task 5 acceptance): Graph exporter committed at `07f9e4032686bbcb6470ebd5b755117fee737640`; its revision-qualified IDs, endpoints, direct evidence links, conditionality and SQL phase/order retained focused Go1.22/race/vet proof. Independent review APPROVE found no actionable defect. Root released Task 6 only. Official SARIF validation, later adapters and consumer acceptance remain separate.
