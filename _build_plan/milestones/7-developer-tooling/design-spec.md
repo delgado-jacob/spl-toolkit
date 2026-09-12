@@ -1,6 +1,6 @@
 # Milestone 7 — Developer Tooling and Ecosystem Design
 
-Status: architectural design and complete written spec approved by the delegated controller on 2026-09-07. The verified Milestone 6 handoff remains a prerequisite for a final implementation plan. This document specifies behavior; it does not authorize production changes, version bumps, commits, uploads, publishing or migration writes.
+Status: architectural design approved on 2026-09-07; root approved the affected mapping-target preflight/batch ruling and reconciled final plan on 2026-09-12 against accepted M6 product source `98e38b941ea868468376b9dd6533e684009d35c0`. Task 1 alone is released for serial implementation and independent review. No version bump, upload, publishing or migration write is implied.
 
 ## Purpose and scope
 
@@ -66,7 +66,7 @@ Preserve canonical conditionality, uncertainty, partial wildcard membership, ind
 
 ## Schema and mapping change impact
 
-Schema impact snapshots one corpus once, then validates the identical documents against explicit before and after local targets through the existing field-list/JSON Schema/OCSF operations. A comparison can use different supported target kinds if the caller selected them explicitly. Prepare each target once; invalid target structure rejects the request. Mapping impact runs M6 previews for explicit before/after mapping requests against those unchanged original snapshots. An empty mapping side represents an explicit identity baseline. Preserve complete rewrite audits, candidate documents, post-analysis and requested validation for each side; no source files are changed.
+Schema impact snapshots one corpus once, then validates the identical documents against explicit before and after local targets through the existing field-list/JSON Schema/OCSF operations. A comparison can use different supported target kinds if the caller selected them explicitly. Prepare each schema target once for its corpus comparison; invalid target structure rejects the request before file acquisition. Mapping impact runs M6 previews for explicit before/after mapping requests against those unchanged original snapshots. An empty mapping side represents an explicit identity baseline. Optional mapping validation targets are checked before acquisition, then M6's canonical ordered batch preview validates the acquired candidates; its internal target preparation may repeat the preflight compilation. This bounded duplication preserves M6's single owner of rewrite verification/status instead of reimplementing it in impact. Preserve complete rewrite audits, candidate documents, post-analysis and requested validation for each side; no source files are changed.
 
 Each document result shows before/after status and coverage, changes in dependency evidence, field outcomes and diagnostics, and applied/skipped/ambiguous rewrite groups where applicable. Include introduced/resolved/changed findings even when coarse status remains invalid or incomplete. Report a static affected/unchanged/indeterminate classification with reasons. Unchanged is reserved for equal compared canonical evidence with complete comparison coverage; equal incomplete reports remain indeterminate about unobserved impact. A new validation error is an observed static regression; disappearance of an error is not proof of runtime-equivalent behavior.
 
@@ -130,6 +130,6 @@ Run the established relevant Go race, native Python, package/source/build and pa
 
 ## Handoff and written-spec gate
 
-Before final planning, obtain the controller's verified M6 commit and milestone handoff; inspect actual canonical document/phase/refinement, rewrite preview/audit/post-validation, source helpers, adapters and package contracts. Resolve exact interfaces and any minimum shared-kernel extension against those facts. Do not freeze unfinished types or replay semantics in tooling. Root written-spec approval was received on 2026-09-07; substantive changes after dependency review require renewed review of the affected design.
+The controller verified M6 product source `98e38b9` and its milestone handoff. The reviewed M7 plan binds its actual canonical document/phase/refinement, rewrite preview/audit/post-validation, source helpers, adapters and package contracts. Do not replay semantics in tooling. Root approved the written spec in 2026-09-07 and the subsequent bounded mapping-target preflight/batch-preparation ruling on 2026-09-12 before Task 1 release.
 
 The final plan must be named `milestone-7-implementation-plan.md` in this milestone directory. No implementation plan or production task sequence is included here. The controller retains integration and commit authority. The eventual milestone log begins with human-readable new capabilities and records executed evidence, supported contract versions, remaining limitations and unrun integration/platform gates without overstating completeness.
