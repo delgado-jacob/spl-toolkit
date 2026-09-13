@@ -1563,6 +1563,2250 @@ components:
         rule_id:
           type: string
       type: object
+    tooling.CandidateFieldReport:
+      additionalProperties: true
+      properties:
+        analysis:
+          $ref: '#/components/schemas/tooling.analysis.Result'
+        coverage:
+          $ref: '#/components/schemas/tooling.validation.Coverage'
+        diagnostics:
+          items:
+            $ref: '#/components/schemas/tooling.analysis.Diagnostic'
+          type: array
+        outcomes:
+          items:
+            $ref: '#/components/schemas/tooling.validation.ReferenceOutcome'
+          type: array
+        schema_version:
+          const: 1
+          type: integer
+        status:
+          enum:
+          - valid
+          - invalid
+          - incomplete
+          type: string
+        target:
+          additionalProperties: true
+          properties:
+            identity:
+              type: string
+            kind:
+              const: field_list
+            version:
+              type: string
+          required:
+          - kind
+          - identity
+          - version
+          type: object
+      required:
+      - schema_version
+      - target
+      - analysis
+      - status
+      - coverage
+      - outcomes
+      - diagnostics
+      type: object
+    tooling.CandidateValidation:
+      oneOf:
+      - additionalProperties: true
+        not:
+          required:
+          - schema
+        properties:
+          field_list:
+            $ref: '#/components/schemas/tooling.CandidateFieldReport'
+          kind:
+            const: field_list
+        required:
+        - kind
+        - field_list
+        type: object
+      - additionalProperties: true
+        not:
+          required:
+          - field_list
+        properties:
+          kind:
+            enum:
+            - json_schema
+            - ocsf
+            type: string
+          schema:
+            $ref: '#/components/schemas/tooling.schema.SchemaReport'
+        required:
+        - kind
+        - schema
+        type: object
+    tooling.FieldCatalogRequest:
+      oneOf:
+      - items:
+          pattern: \S
+          type: string
+        type: array
+        uniqueItems: true
+      - additionalProperties: false
+        properties:
+          fields:
+            items:
+              pattern: \S
+              type: string
+            type: array
+            uniqueItems: true
+          identity:
+            type: string
+          optional_fields:
+            items:
+              pattern: \S
+              type: string
+            type: array
+            uniqueItems: true
+          version:
+            type: string
+        required:
+        - fields
+        type: object
+    tooling.OCSFSelectionRequest:
+      additionalProperties: false
+      oneOf:
+      - not:
+          anyOf:
+          - required:
+            - class_uid
+          - required:
+            - category
+          - required:
+            - category_uid
+        required:
+        - class
+      - not:
+          anyOf:
+          - required:
+            - class
+          - required:
+            - category
+          - required:
+            - category_uid
+        required:
+        - class_uid
+      - not:
+          anyOf:
+          - required:
+            - class
+          - required:
+            - class_uid
+          - required:
+            - category_uid
+        required:
+        - category
+      - not:
+          anyOf:
+          - required:
+            - class
+          - required:
+            - class_uid
+          - required:
+            - category
+        required:
+        - category_uid
+      properties:
+        category:
+          type: string
+        category_uid:
+          type: integer
+        class:
+          type: string
+        class_uid:
+          type: integer
+        extensions:
+          items:
+            pattern: \S
+            type: string
+          type: array
+          uniqueItems: true
+        profiles:
+          items:
+            pattern: \S
+            type: string
+          type: array
+          uniqueItems: true
+        version:
+          pattern: \S
+          type: string
+      required:
+      - version
+      type: object
+    tooling.QueryDocumentRequest:
+      additionalProperties: false
+      properties:
+        language:
+          enum:
+          - ''
+          - spl
+          - spl2
+          type: string
+        profile:
+          enum:
+          - ''
+          - splunkd
+          type: string
+        source_id:
+          type: string
+        text:
+          type: string
+        version:
+          enum:
+          - ''
+          - current
+          type: string
+      required:
+      - text
+      type: object
+    tooling.SchemaTargetRequest:
+      oneOf:
+      - additionalProperties: false
+        properties:
+          base_uri:
+            format: uri
+            type: string
+          identity:
+            pattern: \S
+            type: string
+          kind:
+            const: json_schema
+          resources:
+            additionalProperties:
+              type:
+              - object
+              - boolean
+            type: object
+          schema:
+            type:
+            - object
+            - boolean
+        required:
+        - kind
+        - schema
+        type: object
+      - additionalProperties: false
+        properties:
+          catalog:
+            type: object
+          identity:
+            pattern: \S
+            type: string
+          kind:
+            const: ocsf
+          selection:
+            $ref: '#/components/schemas/tooling.OCSFSelectionRequest'
+        required:
+        - kind
+        - catalog
+        - selection
+        type: object
+    tooling.ValidationTarget:
+      oneOf:
+      - additionalProperties: false
+        properties:
+          catalog:
+            $ref: '#/components/schemas/tooling.FieldCatalogRequest'
+          kind:
+            const: field_list
+        required:
+        - kind
+        - catalog
+        type: object
+      - $ref: '#/components/schemas/tooling.SchemaTargetRequest'
+    tooling.analysis.Coverage:
+      additionalProperties: true
+      properties:
+        reasons:
+          items:
+            type: string
+          type: array
+        semantic_complete:
+          type: boolean
+        syntax_complete:
+          type: boolean
+      required:
+      - syntax_complete
+      - semantic_complete
+      - reasons
+      type: object
+    tooling.analysis.Dependencies:
+      additionalProperties: true
+      properties:
+        data_models:
+          items:
+            type: string
+          type: array
+        datasets:
+          items:
+            type: string
+          type: array
+        indexes:
+          items:
+            type: string
+          type: array
+        lookups:
+          items:
+            type: string
+          type: array
+        macros:
+          items:
+            type: string
+          type: array
+        source_types:
+          items:
+            type: string
+          type: array
+        sources:
+          items:
+            type: string
+          type: array
+      required:
+      - indexes
+      - sources
+      - source_types
+      - datasets
+      - lookups
+      - data_models
+      - macros
+      type: object
+    tooling.analysis.Diagnostic:
+      additionalProperties: true
+      properties:
+        category:
+          type: string
+        code:
+          type: string
+        location:
+          $ref: '#/components/schemas/tooling.analysis.Location'
+        message:
+          type: string
+        scope_id:
+          type: string
+        severity:
+          enum:
+          - error
+          - warning
+          - info
+          type: string
+        stage_id:
+          type: string
+      required:
+      - code
+      - severity
+      - category
+      - message
+      - location
+      - stage_id
+      - scope_id
+      type: object
+    tooling.analysis.FieldBinding:
+      additionalProperties: true
+      properties:
+        conditional:
+          type: boolean
+        name:
+          type: string
+        origin_reference_ids:
+          items:
+            type: string
+          type: array
+      required:
+      - name
+      - origin_reference_ids
+      - conditional
+      type: object
+    tooling.analysis.FieldState:
+      additionalProperties: true
+      properties:
+        fields:
+          items:
+            $ref: '#/components/schemas/tooling.analysis.FieldBinding'
+          type: array
+        open:
+          type: boolean
+        removed:
+          items:
+            type: string
+          type: array
+        uncertain:
+          type: boolean
+      required:
+      - fields
+      - removed
+      - open
+      - uncertain
+      type: object
+    tooling.analysis.Lineage:
+      additionalProperties: true
+      properties:
+        after:
+          $ref: '#/components/schemas/tooling.analysis.FieldState'
+        before:
+          $ref: '#/components/schemas/tooling.analysis.FieldState'
+        execution_order:
+          minimum: 0
+          type: integer
+        phase:
+          type: string
+        scope_id:
+          type: string
+        stage_id:
+          type: string
+        transitions:
+          items:
+            $ref: '#/components/schemas/tooling.analysis.Transition'
+          type: array
+      required:
+      - stage_id
+      - scope_id
+      - before
+      - after
+      - transitions
+      type: object
+    tooling.analysis.Location:
+      additionalProperties: true
+      properties:
+        end:
+          $ref: '#/components/schemas/tooling.analysis.Position'
+        start:
+          $ref: '#/components/schemas/tooling.analysis.Position'
+      required:
+      - start
+      - end
+      type: object
+    tooling.analysis.Position:
+      additionalProperties: true
+      properties:
+        column:
+          minimum: 1
+          type: integer
+        line:
+          minimum: 1
+          type: integer
+        offset:
+          minimum: 0
+          type: integer
+      required:
+      - offset
+      - line
+      - column
+      type: object
+    tooling.analysis.QueryDocument:
+      additionalProperties: true
+      properties:
+        language:
+          enum:
+          - spl
+          - spl2
+          type: string
+        profile:
+          const: splunkd
+        source_id:
+          type: string
+        text:
+          type: string
+        version:
+          const: current
+      required:
+      - text
+      - language
+      - profile
+      - version
+      - source_id
+      type: object
+    tooling.analysis.Reference:
+      additionalProperties: true
+      properties:
+        binding:
+          type: string
+        id:
+          type: string
+        kind:
+          type: string
+        location:
+          $ref: '#/components/schemas/tooling.analysis.Location'
+        normalized_name:
+          type: string
+        origin_reference_ids:
+          items:
+            type: string
+          type: array
+        original_name:
+          type: string
+        resolution:
+          type: string
+        role:
+          type: string
+        scope_id:
+          type: string
+        stage_id:
+          type: string
+      required:
+      - id
+      - original_name
+      - normalized_name
+      - kind
+      - role
+      - stage_id
+      - scope_id
+      - location
+      - resolution
+      - binding
+      - origin_reference_ids
+      type: object
+    tooling.analysis.Result:
+      additionalProperties: true
+      properties:
+        coverage:
+          $ref: '#/components/schemas/tooling.analysis.Coverage'
+        dependencies:
+          $ref: '#/components/schemas/tooling.analysis.Dependencies'
+        diagnostics:
+          items:
+            $ref: '#/components/schemas/tooling.analysis.Diagnostic'
+          type: array
+        document:
+          $ref: '#/components/schemas/tooling.analysis.QueryDocument'
+        lineage:
+          items:
+            $ref: '#/components/schemas/tooling.analysis.Lineage'
+          type: array
+        references:
+          items:
+            $ref: '#/components/schemas/tooling.analysis.Reference'
+          type: array
+        schema_version:
+          const: 1
+          type: integer
+        scopes:
+          items:
+            $ref: '#/components/schemas/tooling.analysis.Scope'
+          type: array
+        stages:
+          items:
+            $ref: '#/components/schemas/tooling.analysis.Stage'
+          type: array
+        status:
+          enum:
+          - valid
+          - invalid
+          - incomplete
+          type: string
+      required:
+      - schema_version
+      - document
+      - status
+      - coverage
+      - stages
+      - scopes
+      - references
+      - lineage
+      - dependencies
+      - diagnostics
+      type: object
+    tooling.analysis.Scope:
+      additionalProperties: true
+      properties:
+        id:
+          type: string
+        kind:
+          type: string
+        location:
+          $ref: '#/components/schemas/tooling.analysis.Location'
+        parent_id:
+          type: string
+        stage_id:
+          type: string
+      required:
+      - id
+      - parent_id
+      - kind
+      - stage_id
+      - location
+      type: object
+    tooling.analysis.Stage:
+      additionalProperties: true
+      properties:
+        command:
+          type: string
+        id:
+          type: string
+        location:
+          $ref: '#/components/schemas/tooling.analysis.Location'
+        position:
+          type: integer
+        scope_id:
+          type: string
+        semantic_complete:
+          type: boolean
+      required:
+      - id
+      - command
+      - position
+      - scope_id
+      - location
+      - semantic_complete
+      type: object
+    tooling.analysis.Transition:
+      additionalProperties: true
+      properties:
+        conditional:
+          type: boolean
+        input_reference_ids:
+          items:
+            type: string
+          type: array
+        operation:
+          type: string
+        output:
+          type: string
+        output_reference_id:
+          type: string
+      required:
+      - operation
+      - output
+      - input_reference_ids
+      - output_reference_id
+      - conditional
+      type: object
+    tooling.corpus.AcquisitionError:
+      additionalProperties: true
+      properties:
+        code:
+          type: string
+        id:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        phase:
+          type: string
+      required:
+      - code
+      - phase
+      - message
+      type: object
+    tooling.corpus.CommandCoverage:
+      additionalProperties: true
+      properties:
+        command:
+          type: string
+        count:
+          type: integer
+        declared:
+          type: boolean
+        language:
+          type: string
+        limitations:
+          items:
+            type: string
+          type: array
+        profile:
+          type: string
+        semantic_supported:
+          type: boolean
+        syntax_supported:
+          type: boolean
+        version:
+          type: string
+      required:
+      - language
+      - profile
+      - version
+      - command
+      - count
+      - declared
+      - syntax_supported
+      - semantic_supported
+      - limitations
+      type: object
+    tooling.corpus.Counts:
+      additionalProperties: true
+      properties:
+        acquisition_failed:
+          minimum: 0
+          type: integer
+        analyzed:
+          minimum: 0
+          type: integer
+        selected:
+          minimum: 0
+          type: integer
+        traversal_failed:
+          minimum: 0
+          type: integer
+      required:
+      - selected
+      - analyzed
+      - acquisition_failed
+      - traversal_failed
+      type: object
+    tooling.corpus.CoverageCount:
+      additionalProperties: true
+      properties:
+        complete:
+          minimum: 0
+          type: integer
+        denominator:
+          minimum: 0
+          type: integer
+        incomplete:
+          minimum: 0
+          type: integer
+        not_requested:
+          type: boolean
+      required:
+      - complete
+      - incomplete
+      - denominator
+      type: object
+    tooling.corpus.CoverageCounts:
+      additionalProperties: true
+      properties:
+        schema:
+          $ref: '#/components/schemas/tooling.corpus.CoverageCount'
+        semantic:
+          $ref: '#/components/schemas/tooling.corpus.CoverageCount'
+        syntax:
+          $ref: '#/components/schemas/tooling.corpus.CoverageCount'
+      required:
+      - syntax
+      - semantic
+      - schema
+      type: object
+    tooling.corpus.DependencySummary:
+      additionalProperties: true
+      properties:
+        document_ids:
+          items:
+            type: string
+          type: array
+        kind:
+          type: string
+        name:
+          type: string
+        reference_ids:
+          items:
+            type: string
+          type: array
+      required:
+      - kind
+      - name
+      - document_ids
+      - reference_ids
+      type: object
+    tooling.corpus.Evaluation:
+      additionalProperties: true
+      oneOf:
+      - not:
+          anyOf:
+          - required:
+            - field_validation
+          - required:
+            - schema_validation
+        properties:
+          kind:
+            const: analysis
+        required:
+        - analysis
+      - not:
+          anyOf:
+          - required:
+            - analysis
+          - required:
+            - schema_validation
+        properties:
+          kind:
+            const: field_list
+        required:
+        - field_validation
+      - not:
+          anyOf:
+          - required:
+            - analysis
+          - required:
+            - field_validation
+        properties:
+          kind:
+            const: json_schema
+        required:
+        - schema_validation
+      - not:
+          anyOf:
+          - required:
+            - analysis
+          - required:
+            - field_validation
+        properties:
+          kind:
+            const: ocsf
+        required:
+        - schema_validation
+      properties:
+        analysis:
+          $ref: '#/components/schemas/tooling.analysis.Result'
+        field_validation:
+          $ref: '#/components/schemas/tooling.validation.Report'
+        kind:
+          type: string
+        schema_validation:
+          $ref: '#/components/schemas/tooling.schema.SchemaReport'
+      required:
+      - kind
+      type: object
+    tooling.corpus.ObservedReferenceForm:
+      additionalProperties: true
+      properties:
+        count:
+          type: integer
+        kind:
+          type: string
+        resolution:
+          type: string
+        role:
+          type: string
+      required:
+      - kind
+      - role
+      - resolution
+      - count
+      type: object
+    tooling.corpus.Origin:
+      additionalProperties: true
+      properties:
+        base_uri:
+          format: uri
+          type: string
+        kind:
+          enum:
+          - inline
+          - file
+          type: string
+        relative_path:
+          type: string
+      required:
+      - kind
+      type: object
+    tooling.corpus.Report:
+      additionalProperties: true
+      properties:
+        command_coverage:
+          items:
+            $ref: '#/components/schemas/tooling.corpus.CommandCoverage'
+          type: array
+        counts:
+          $ref: '#/components/schemas/tooling.corpus.Counts'
+        coverage:
+          $ref: '#/components/schemas/tooling.corpus.CoverageCounts'
+        coverage_reasons:
+          items:
+            type: string
+          type: array
+        dependencies:
+          items:
+            $ref: '#/components/schemas/tooling.corpus.DependencySummary'
+          type: array
+        entries:
+          items:
+            $ref: '#/components/schemas/tooling.corpus.ReportEntry'
+          type: array
+        execution_complete:
+          type: boolean
+        mode:
+          enum:
+          - analysis
+          - field_list
+          - json_schema
+          - ocsf
+          type: string
+        observed_reference_forms:
+          items:
+            $ref: '#/components/schemas/tooling.corpus.ObservedReferenceForm'
+          type: array
+        schema_version:
+          const: 1
+          type: integer
+        selection:
+          $ref: '#/components/schemas/tooling.corpus.Selection'
+        status:
+          enum:
+          - valid
+          - invalid
+          - incomplete
+          type: string
+        status_counts:
+          $ref: '#/components/schemas/tooling.corpus.StatusCounts'
+      required:
+      - schema_version
+      - status
+      - execution_complete
+      - mode
+      - selection
+      - counts
+      - status_counts
+      - coverage
+      - coverage_reasons
+      - command_coverage
+      - observed_reference_forms
+      - dependencies
+      - entries
+      type: object
+    tooling.corpus.ReportEntry:
+      additionalProperties: true
+      oneOf:
+      - not:
+          required:
+          - failure
+        required:
+        - evaluation
+        - source_hash
+        - analysis_revision
+      - not:
+          required:
+          - evaluation
+        required:
+        - failure
+      properties:
+        analysis_revision:
+          type: string
+        evaluation:
+          $ref: '#/components/schemas/tooling.corpus.Evaluation'
+        failure:
+          $ref: '#/components/schemas/tooling.corpus.AcquisitionError'
+        id:
+          type: string
+        origin:
+          $ref: '#/components/schemas/tooling.corpus.Origin'
+        source_hash:
+          pattern: ^[a-f0-9]{64}$
+          type: string
+        target_digest:
+          type: string
+      required:
+      - id
+      - origin
+      type: object
+    tooling.corpus.Request:
+      additionalProperties: false
+      properties:
+        documents:
+          items:
+            $ref: '#/components/schemas/tooling.corpus.RequestDocument'
+          minItems: 1
+          type: array
+        schema_version:
+          const: 1
+          type: integer
+        validation_target:
+          $ref: '#/components/schemas/tooling.ValidationTarget'
+      required:
+      - schema_version
+      - documents
+      type: object
+    tooling.corpus.RequestDocument:
+      additionalProperties: false
+      properties:
+        document:
+          $ref: '#/components/schemas/tooling.QueryDocumentRequest'
+        id:
+          pattern: \S
+          type: string
+      required:
+      - id
+      - document
+      type: object
+    tooling.corpus.Selection:
+      additionalProperties: true
+      properties:
+        complete:
+          type: boolean
+        ignored_names:
+          items:
+            type: string
+          type: array
+        mode:
+          enum:
+          - inline
+          - manifest
+          - directory
+          type: string
+        skipped_symlinks:
+          items:
+            type: string
+          type: array
+        traversal_failures:
+          items:
+            $ref: '#/components/schemas/tooling.corpus.AcquisitionError'
+          type: array
+      required:
+      - mode
+      - complete
+      - ignored_names
+      - skipped_symlinks
+      - traversal_failures
+      type: object
+    tooling.corpus.StatusCounts:
+      additionalProperties: true
+      properties:
+        incomplete:
+          minimum: 0
+          type: integer
+        invalid:
+          minimum: 0
+          type: integer
+        valid:
+          minimum: 0
+          type: integer
+      required:
+      - valid
+      - invalid
+      - incomplete
+      type: object
+    tooling.document.RevisionContext:
+      additionalProperties: true
+      properties:
+        contract_version:
+          type: string
+        target_digest:
+          type: string
+        tool_version:
+          type: string
+      required:
+      - tool_version
+      - contract_version
+      type: object
+    tooling.document.Snapshot:
+      additionalProperties: true
+      properties:
+        coverage:
+          $ref: '#/components/schemas/tooling.analysis.Coverage'
+        dependencies:
+          $ref: '#/components/schemas/tooling.analysis.Dependencies'
+        diagnostics:
+          items:
+            $ref: '#/components/schemas/tooling.analysis.Diagnostic'
+          type: array
+        document:
+          $ref: '#/components/schemas/tooling.analysis.QueryDocument'
+        lineage:
+          items:
+            $ref: '#/components/schemas/tooling.analysis.Lineage'
+          type: array
+        references:
+          items:
+            $ref: '#/components/schemas/tooling.analysis.Reference'
+          type: array
+        revision:
+          $ref: '#/components/schemas/tooling.document.RevisionContext'
+        schema_version:
+          const: 1
+          type: integer
+        scopes:
+          items:
+            $ref: '#/components/schemas/tooling.analysis.Scope'
+          type: array
+        source_hash:
+          pattern: ^[a-f0-9]{64}$
+          type: string
+        stages:
+          items:
+            $ref: '#/components/schemas/tooling.analysis.Stage'
+          type: array
+        status:
+          enum:
+          - valid
+          - invalid
+          - incomplete
+          type: string
+      required:
+      - schema_version
+      - revision
+      - source_hash
+      - document
+      - status
+      - coverage
+      - stages
+      - scopes
+      - references
+      - lineage
+      - dependencies
+      - diagnostics
+      type: object
+    tooling.graph.Edge:
+      additionalProperties: true
+      properties:
+        analysis_revision:
+          type: string
+        conditional:
+          type: boolean
+        document_id:
+          type: string
+        from:
+          type: string
+        id:
+          type: string
+        relation:
+          enum:
+          - contains_scope
+          - parent_scope
+          - owns_stage
+          - owns_reference
+          - reference_origin
+          - executes_phase
+          - records_transition
+          - transition_input
+          - transition_output
+          - mentions_dependency
+        report_pointer:
+          type: string
+        target_digest:
+          type: string
+        to:
+          type: string
+      required:
+      - id
+      - from
+      - to
+      - relation
+      - report_pointer
+      type: object
+    tooling.graph.Node:
+      additionalProperties: true
+      oneOf:
+      - properties:
+          kind:
+            const: document
+        required:
+        - document_id
+      - properties:
+          kind:
+            const: dependency
+        required:
+        - dependency_kind
+        - name
+      - properties:
+          kind:
+            const: scope
+        required:
+        - canonical_id
+        - document_id
+        - analysis_revision
+        - scope_kind
+        - location
+      - properties:
+          kind:
+            const: stage
+        required:
+        - canonical_id
+        - document_id
+        - analysis_revision
+        - position
+        - semantic_complete
+        - command
+        - location
+      - properties:
+          kind:
+            const: reference
+        required:
+        - canonical_id
+        - document_id
+        - analysis_revision
+        - location
+      - properties:
+          kind:
+            const: phase
+        required:
+        - stage_id
+        - before
+        - after
+        - occurrence
+      - properties:
+          kind:
+            const: transition
+        required:
+        - stage_id
+        - operation
+        - occurrence
+      properties:
+        after:
+          $ref: '#/components/schemas/tooling.analysis.FieldState'
+        analysis_revision:
+          type: string
+        before:
+          $ref: '#/components/schemas/tooling.analysis.FieldState'
+        binding:
+          type: string
+        canonical_id:
+          type: string
+        command:
+          type: string
+        conditional:
+          type: boolean
+        dependency_kind:
+          type: string
+        document_id:
+          type: string
+        execution_order:
+          type: integer
+        failure:
+          $ref: '#/components/schemas/tooling.corpus.AcquisitionError'
+        id:
+          type: string
+        kind:
+          enum:
+          - document
+          - dependency
+          - scope
+          - stage
+          - reference
+          - phase
+          - transition
+          type: string
+        location:
+          $ref: '#/components/schemas/tooling.analysis.Location'
+        name:
+          type: string
+        occurrence:
+          type: integer
+        operation:
+          type: string
+        original_name:
+          type: string
+        phase:
+          type: string
+        position:
+          type: integer
+        report_pointer:
+          type: string
+        resolution:
+          type: string
+        role:
+          type: string
+        scope_id:
+          type: string
+        scope_kind:
+          type: string
+        semantic_complete:
+          type: boolean
+        source_hash:
+          pattern: ^[a-f0-9]{64}$
+          type: string
+        stage_id:
+          type: string
+        target_digest:
+          type: string
+      required:
+      - id
+      - kind
+      - report_pointer
+      type: object
+    tooling.graph.Report:
+      additionalProperties: true
+      properties:
+        coverage:
+          $ref: '#/components/schemas/tooling.corpus.CoverageCounts'
+        coverage_reasons:
+          items:
+            type: string
+          type: array
+        edges:
+          items:
+            $ref: '#/components/schemas/tooling.graph.Edge'
+          type: array
+        execution_complete:
+          type: boolean
+        mode:
+          enum:
+          - analysis
+          - field_list
+          - json_schema
+          - ocsf
+          type: string
+        nodes:
+          items:
+            $ref: '#/components/schemas/tooling.graph.Node'
+          type: array
+        schema_version:
+          const: 1
+          type: integer
+        status:
+          enum:
+          - valid
+          - invalid
+          - incomplete
+          type: string
+      required:
+      - schema_version
+      - status
+      - execution_complete
+      - mode
+      - coverage
+      - coverage_reasons
+      - nodes
+      - edges
+      type: object
+    tooling.impact.Alignment:
+      additionalProperties: true
+      properties:
+        ambiguous:
+          items:
+            type: string
+          type: array
+        pairs:
+          items:
+            $ref: '#/components/schemas/tooling.impact.ReferencePair'
+          type: array
+        unmatched:
+          items:
+            type: string
+          type: array
+      required:
+      - pairs
+      - unmatched
+      - ambiguous
+      type: object
+    tooling.impact.Counts:
+      additionalProperties: true
+      properties:
+        affected:
+          minimum: 0
+          type: integer
+        ambiguous:
+          minimum: 0
+          type: integer
+        changed:
+          minimum: 0
+          type: integer
+        compared:
+          minimum: 0
+          type: integer
+        denominator:
+          minimum: 0
+          type: integer
+        failed:
+          minimum: 0
+          type: integer
+        indeterminate:
+          minimum: 0
+          type: integer
+        introduced:
+          minimum: 0
+          type: integer
+        resolved:
+          minimum: 0
+          type: integer
+        selected:
+          minimum: 0
+          type: integer
+        traversal_failed:
+          minimum: 0
+          type: integer
+        unchanged:
+          minimum: 0
+          type: integer
+        unmatched:
+          minimum: 0
+          type: integer
+      required:
+      - selected
+      - compared
+      - denominator
+      - traversal_failed
+      - affected
+      - unchanged
+      - indeterminate
+      - failed
+      - introduced
+      - resolved
+      - changed
+      - unmatched
+      - ambiguous
+      type: object
+    tooling.impact.EvidenceDelta:
+      additionalProperties: true
+      properties:
+        after: {}
+        before: {}
+        category:
+          type: string
+        change:
+          enum:
+          - introduced
+          - resolved
+          - changed
+          - unmatched
+          - ambiguous
+          type: string
+        key:
+          type: string
+      required:
+      - category
+      - change
+      - key
+      type: object
+    tooling.impact.ImpactEntry:
+      additionalProperties: true
+      oneOf:
+      - not:
+          anyOf:
+          - required:
+            - before
+          - required:
+            - after
+          - required:
+            - before_rewrite
+          - required:
+            - after_rewrite
+        properties:
+          classification:
+            const: failed
+        required:
+        - failure
+      - not:
+          anyOf:
+          - required:
+            - failure
+          - required:
+            - before_rewrite
+          - required:
+            - after_rewrite
+        properties:
+          classification:
+            enum:
+            - affected
+            - unchanged
+            - indeterminate
+        required:
+        - before
+        - after
+        - source_hash
+        - analysis_revision
+        - before_status
+        - after_status
+      - not:
+          anyOf:
+          - required:
+            - failure
+          - required:
+            - before
+          - required:
+            - after
+        properties:
+          classification:
+            enum:
+            - affected
+            - unchanged
+            - indeterminate
+        required:
+        - before_rewrite
+        - after_rewrite
+        - source_hash
+        - analysis_revision
+        - before_status
+        - after_status
+      properties:
+        after:
+          $ref: '#/components/schemas/tooling.corpus.Evaluation'
+        after_rewrite:
+          $ref: '#/components/schemas/tooling.rewrite.Result'
+        after_status:
+          enum:
+          - valid
+          - invalid
+          - incomplete
+          type: string
+        alignment:
+          $ref: '#/components/schemas/tooling.impact.Alignment'
+        analysis_revision:
+          type: string
+        before:
+          $ref: '#/components/schemas/tooling.corpus.Evaluation'
+        before_rewrite:
+          $ref: '#/components/schemas/tooling.rewrite.Result'
+        before_status:
+          enum:
+          - valid
+          - invalid
+          - incomplete
+          type: string
+        classification:
+          enum:
+          - affected
+          - unchanged
+          - indeterminate
+          - failed
+          type: string
+        deltas:
+          items:
+            $ref: '#/components/schemas/tooling.impact.EvidenceDelta'
+          type: array
+        failure:
+          $ref: '#/components/schemas/tooling.corpus.AcquisitionError'
+        id:
+          type: string
+        origin:
+          $ref: '#/components/schemas/tooling.corpus.Origin'
+        reasons:
+          items:
+            type: string
+          type: array
+        source_hash:
+          pattern: ^[a-f0-9]{64}$
+          type: string
+      required:
+      - id
+      - origin
+      - deltas
+      - alignment
+      - classification
+      - reasons
+      type: object
+    tooling.impact.MappingRequest:
+      additionalProperties: false
+      properties:
+        after_rules:
+          $ref: '#/components/schemas/tooling.rewrite.RuleSet'
+        after_target:
+          $ref: '#/components/schemas/tooling.ValidationTarget'
+        before_rules:
+          $ref: '#/components/schemas/tooling.rewrite.RuleSet'
+        before_target:
+          $ref: '#/components/schemas/tooling.ValidationTarget'
+        documents:
+          items:
+            $ref: '#/components/schemas/tooling.corpus.RequestDocument'
+          minItems: 1
+          type: array
+        schema_version:
+          const: 1
+          type: integer
+      required:
+      - schema_version
+      - documents
+      - before_rules
+      - after_rules
+      type: object
+    tooling.impact.ReferencePair:
+      additionalProperties: true
+      properties:
+        after_id:
+          type: string
+        basis:
+          type: string
+        before_id:
+          type: string
+        domain:
+          enum:
+          - original
+          - candidate
+          type: string
+      required:
+      - before_id
+      - after_id
+      - domain
+      - basis
+      type: object
+    tooling.impact.Report:
+      additionalProperties: true
+      properties:
+        after_digest:
+          type: string
+        before_digest:
+          type: string
+        counts:
+          $ref: '#/components/schemas/tooling.impact.Counts'
+        entries:
+          items:
+            $ref: '#/components/schemas/tooling.impact.ImpactEntry'
+          type: array
+        execution_complete:
+          type: boolean
+        kind:
+          enum:
+          - schema
+          - mapping
+          type: string
+        schema_version:
+          const: 1
+          type: integer
+        selection:
+          $ref: '#/components/schemas/tooling.corpus.Selection'
+      required:
+      - schema_version
+      - kind
+      - execution_complete
+      - selection
+      - before_digest
+      - after_digest
+      - counts
+      - entries
+      type: object
+    tooling.impact.SchemaRequest:
+      additionalProperties: false
+      properties:
+        after_target:
+          $ref: '#/components/schemas/tooling.ValidationTarget'
+        before_target:
+          $ref: '#/components/schemas/tooling.ValidationTarget'
+        documents:
+          items:
+            $ref: '#/components/schemas/tooling.corpus.RequestDocument'
+          minItems: 1
+          type: array
+        schema_version:
+          const: 1
+          type: integer
+      required:
+      - schema_version
+      - documents
+      - before_target
+      - after_target
+      type: object
+    tooling.rewrite.Change:
+      additionalProperties: true
+      properties:
+        candidate_applied:
+          type: boolean
+        candidate_location:
+          $ref: '#/components/schemas/tooling.analysis.Location'
+        candidate_reference_ids:
+          items:
+            type: string
+          type: array
+        committed:
+          type: boolean
+        group_id:
+          type: string
+        new_text:
+          type: string
+        old_text:
+          type: string
+        original_location:
+          $ref: '#/components/schemas/tooling.analysis.Location'
+        original_reference_ids:
+          items:
+            type: string
+          type: array
+        outcome:
+          type: string
+        reason:
+          type: string
+        rule_ids:
+          items:
+            type: string
+          type: array
+      required:
+      - outcome
+      - reason
+      - group_id
+      - rule_ids
+      - original_reference_ids
+      - candidate_reference_ids
+      - old_text
+      - new_text
+      - candidate_applied
+      - committed
+      type: object
+    tooling.rewrite.Condition:
+      oneOf:
+      - additionalProperties: false
+        properties:
+          all:
+            items:
+              $ref: '#/components/schemas/tooling.rewrite.Condition'
+            minItems: 1
+            type: array
+        required:
+        - all
+        type: object
+      - additionalProperties: false
+        properties:
+          any:
+            items:
+              $ref: '#/components/schemas/tooling.rewrite.Condition'
+            minItems: 1
+            type: array
+        required:
+        - any
+        type: object
+      - additionalProperties: false
+        properties:
+          fact:
+            const: source_reference_present
+          identity:
+            $ref: '#/components/schemas/tooling.rewrite.Identity'
+          kind:
+            const: field
+        required:
+        - fact
+        - kind
+        - identity
+        type: object
+      - additionalProperties: false
+        allOf:
+        - if:
+            properties:
+              operator:
+                const: contains
+          then:
+            properties:
+              value:
+                type: string
+        properties:
+          fact:
+            const: literal
+          identity:
+            $ref: '#/components/schemas/tooling.rewrite.Identity'
+          kind:
+            enum:
+            - field
+            - index
+            - source
+            - sourcetype
+            type: string
+          operator:
+            enum:
+            - equals
+            - contains
+            type: string
+          value:
+            type:
+            - string
+            - number
+            - boolean
+            - 'null'
+        required:
+        - fact
+        - kind
+        - identity
+        - operator
+        - value
+        type: object
+    tooling.rewrite.ConditionEvaluation:
+      additionalProperties: true
+      properties:
+        children:
+          items:
+            $ref: '#/components/schemas/tooling.rewrite.ConditionEvaluation'
+          type: array
+        reason:
+          type: string
+        reference_ids:
+          items:
+            type: string
+          type: array
+        state:
+          type: string
+      required:
+      - state
+      - reason
+      - reference_ids
+      - children
+      type: object
+    tooling.rewrite.Coverage:
+      additionalProperties: true
+      properties:
+        reasons:
+          items:
+            type: string
+          type: array
+        rewrite_complete:
+          type: boolean
+        semantic_complete:
+          type: boolean
+        syntax_complete:
+          type: boolean
+        validation:
+          $ref: '#/components/schemas/tooling.validation.Coverage'
+      required:
+      - syntax_complete
+      - semantic_complete
+      - rewrite_complete
+      - reasons
+      type: object
+    tooling.rewrite.Identity:
+      oneOf:
+      - additionalProperties: false
+        properties:
+          name:
+            pattern: \S
+            type: string
+        required:
+        - name
+        type: object
+      - additionalProperties: false
+        properties:
+          path:
+            items:
+              pattern: \S
+              type: string
+            minItems: 1
+            type: array
+        required:
+        - path
+        type: object
+    tooling.rewrite.Result:
+      additionalProperties: true
+      properties:
+        candidate_analysis:
+          $ref: '#/components/schemas/tooling.analysis.Result'
+        candidate_text:
+          type: string
+        candidate_validation:
+          $ref: '#/components/schemas/tooling.CandidateValidation'
+        changes:
+          items:
+            $ref: '#/components/schemas/tooling.rewrite.Change'
+          type: array
+        committed:
+          type: boolean
+        coverage:
+          $ref: '#/components/schemas/tooling.rewrite.Coverage'
+        document:
+          $ref: '#/components/schemas/tooling.analysis.QueryDocument'
+        mode:
+          enum:
+          - preview
+          - apply
+          type: string
+        original_analysis:
+          $ref: '#/components/schemas/tooling.analysis.Result'
+        original_text:
+          type: string
+        rule_evaluations:
+          items:
+            $ref: '#/components/schemas/tooling.rewrite.RuleEvaluation'
+          type: array
+        schema_version:
+          const: 1
+          type: integer
+        status:
+          enum:
+          - valid
+          - invalid
+          - incomplete
+          type: string
+        text:
+          type: string
+      required:
+      - schema_version
+      - document
+      - mode
+      - status
+      - coverage
+      - original_text
+      - candidate_text
+      - text
+      - committed
+      - changes
+      - rule_evaluations
+      - original_analysis
+      - candidate_analysis
+      type: object
+    tooling.rewrite.Rule:
+      additionalProperties: false
+      allOf:
+      - if:
+          properties:
+            kind:
+              not:
+                const: field
+        then:
+          properties:
+            source:
+              required:
+              - name
+            target:
+              required:
+              - name
+      properties:
+        id:
+          pattern: \S
+          type: string
+        kind:
+          enum:
+          - field
+          - index
+          - source
+          - sourcetype
+          - lookup
+          - dataset
+          - data_model
+          type: string
+        source:
+          $ref: '#/components/schemas/tooling.rewrite.Identity'
+        target:
+          $ref: '#/components/schemas/tooling.rewrite.Identity'
+        when:
+          $ref: '#/components/schemas/tooling.rewrite.Condition'
+      required:
+      - id
+      - kind
+      - source
+      - target
+      type: object
+    tooling.rewrite.RuleEvaluation:
+      additionalProperties: true
+      properties:
+        condition:
+          $ref: '#/components/schemas/tooling.rewrite.ConditionEvaluation'
+        location:
+          $ref: '#/components/schemas/tooling.analysis.Location'
+        outcome:
+          type: string
+        reason:
+          type: string
+        reference_ids:
+          items:
+            type: string
+          type: array
+        rule_id:
+          type: string
+      required:
+      - rule_id
+      - outcome
+      - reason
+      - reference_ids
+      type: object
+    tooling.rewrite.RuleSet:
+      additionalProperties: false
+      properties:
+        rules:
+          items:
+            $ref: '#/components/schemas/tooling.rewrite.Rule'
+          type: array
+        schema_version:
+          const: 1
+          type: integer
+      required:
+      - schema_version
+      - rules
+      type: object
+    tooling.schema.OCSFSelection:
+      additionalProperties: true
+      properties:
+        category:
+          type: string
+        category_uid:
+          type: integer
+        class:
+          type: string
+        class_uid:
+          type: integer
+        extensions:
+          items:
+            type: string
+          type: array
+        profiles:
+          items:
+            type: string
+          type: array
+        version:
+          type: string
+      required:
+      - version
+      - profiles
+      - extensions
+      type: object
+    tooling.schema.SchemaClass:
+      additionalProperties: true
+      properties:
+        key:
+          type: string
+        uid:
+          type: integer
+      required:
+      - key
+      - uid
+      type: object
+    tooling.schema.SchemaEvidence:
+      additionalProperties: true
+      properties:
+        branch:
+          type: string
+        class_key:
+          type: string
+        class_uid:
+          type: integer
+        declaration_basis:
+          type: string
+        keyword:
+          type: string
+        operator:
+          type: string
+        pointer:
+          type: string
+        reason:
+          type: string
+        requirement:
+          type: string
+        resource_uri:
+          type: string
+      required: []
+      type: object
+    tooling.schema.SchemaExtension:
+      additionalProperties: true
+      properties:
+        key:
+          type: string
+        uid:
+          type: integer
+        version:
+          type: string
+      required:
+      - key
+      - uid
+      - version
+      type: object
+    tooling.schema.SchemaMatch:
+      additionalProperties: true
+      properties:
+        binding:
+          type: string
+        evidence:
+          items:
+            $ref: '#/components/schemas/tooling.schema.SchemaEvidence'
+          type: array
+        name:
+          type: string
+        outcome:
+          type: string
+      required:
+      - name
+      - binding
+      - outcome
+      - evidence
+      type: object
+    tooling.schema.SchemaReferenceOutcome:
+      additionalProperties: true
+      properties:
+        evidence:
+          items:
+            $ref: '#/components/schemas/tooling.schema.SchemaEvidence'
+          type: array
+        indeterminate_classes:
+          items:
+            $ref: '#/components/schemas/tooling.schema.SchemaClass'
+          type: array
+        matches:
+          items:
+            $ref: '#/components/schemas/tooling.schema.SchemaMatch'
+          type: array
+        matches_complete:
+          type: boolean
+        missing_classes:
+          items:
+            $ref: '#/components/schemas/tooling.schema.SchemaClass'
+          type: array
+        outcome:
+          type: string
+        reference_id:
+          type: string
+        supporting_classes:
+          items:
+            $ref: '#/components/schemas/tooling.schema.SchemaClass'
+          type: array
+      required:
+      - reference_id
+      - outcome
+      - matches_complete
+      - matches
+      - evidence
+      - supporting_classes
+      - missing_classes
+      - indeterminate_classes
+      type: object
+    tooling.schema.SchemaReport:
+      additionalProperties: true
+      properties:
+        analysis:
+          $ref: '#/components/schemas/tooling.analysis.Result'
+        coverage:
+          $ref: '#/components/schemas/tooling.validation.Coverage'
+        diagnostics:
+          items:
+            $ref: '#/components/schemas/tooling.analysis.Diagnostic'
+          type: array
+        outcomes:
+          items:
+            $ref: '#/components/schemas/tooling.schema.SchemaReferenceOutcome'
+          type: array
+        schema_version:
+          const: 1
+          type: integer
+        status:
+          enum:
+          - valid
+          - invalid
+          - incomplete
+          type: string
+        target:
+          $ref: '#/components/schemas/tooling.schema.SchemaTargetInfo'
+      required:
+      - schema_version
+      - target
+      - analysis
+      - status
+      - coverage
+      - outcomes
+      - diagnostics
+      type: object
+    tooling.schema.SchemaTargetInfo:
+      additionalProperties: true
+      properties:
+        base_uri:
+          type: string
+        compile_version:
+          type: integer
+        dialect:
+          type: string
+        extensions:
+          items:
+            $ref: '#/components/schemas/tooling.schema.SchemaExtension'
+          type: array
+        identity:
+          type: string
+        kind:
+          type: string
+        limitations:
+          items:
+            type: string
+          type: array
+        members:
+          items:
+            $ref: '#/components/schemas/tooling.schema.SchemaClass'
+          type: array
+        resource_uris:
+          items:
+            type: string
+          type: array
+        selection:
+          $ref: '#/components/schemas/tooling.schema.OCSFSelection'
+        version:
+          type: string
+      required:
+      - kind
+      - resource_uris
+      - members
+      - extensions
+      - limitations
+      type: object
+    tooling.validation.Coverage:
+      additionalProperties: true
+      properties:
+        reasons:
+          items:
+            type: string
+          type: array
+        schema_complete:
+          type: boolean
+        semantic_complete:
+          type: boolean
+        syntax_complete:
+          type: boolean
+      required:
+      - syntax_complete
+      - semantic_complete
+      - schema_complete
+      - reasons
+      type: object
+    tooling.validation.Match:
+      additionalProperties: true
+      properties:
+        binding:
+          type: string
+        name:
+          type: string
+        outcome:
+          type: string
+      required:
+      - name
+      - binding
+      - outcome
+      type: object
+    tooling.validation.ReferenceOutcome:
+      additionalProperties: true
+      properties:
+        matches:
+          items:
+            $ref: '#/components/schemas/tooling.validation.Match'
+          type: array
+        outcome:
+          type: string
+        reference_id:
+          type: string
+      required:
+      - reference_id
+      - outcome
+      - matches
+      type: object
+    tooling.validation.Report:
+      additionalProperties: true
+      properties:
+        analysis:
+          $ref: '#/components/schemas/tooling.analysis.Result'
+        coverage:
+          $ref: '#/components/schemas/tooling.validation.Coverage'
+        diagnostics:
+          items:
+            $ref: '#/components/schemas/tooling.analysis.Diagnostic'
+          type: array
+        outcomes:
+          items:
+            $ref: '#/components/schemas/tooling.validation.ReferenceOutcome'
+          type: array
+        schema_version:
+          const: 1
+          type: integer
+        status:
+          enum:
+          - valid
+          - invalid
+          - incomplete
+          type: string
+        target:
+          $ref: '#/components/schemas/tooling.validation.Target'
+      required:
+      - schema_version
+      - target
+      - analysis
+      - status
+      - coverage
+      - outcomes
+      - diagnostics
+      type: object
+    tooling.validation.Target:
+      additionalProperties: true
+      properties:
+        fields:
+          items:
+            type: string
+          type: array
+        identity:
+          type: string
+        kind:
+          const: field_list
+        optional_fields:
+          items:
+            type: string
+          type: array
+        version:
+          type: string
+      required:
+      - kind
+      - fields
+      - optional_fields
+      - identity
+      - version
+      type: object
     validation.BatchReport:
       properties:
         reports:
@@ -2009,6 +4253,181 @@ paths:
       summary: Get analysis capabilities
       tags:
       - query
+  /corpus/graph:
+    post:
+      description: Strict inline JSON only; no filesystem paths or remote retrieval.
+        Reject unknown or duplicate members, nulls, malformed Unicode and trailing
+        JSON. Exact body limit 8,388,608 bytes. Content statuses valid, invalid and
+        incomplete return 200. Full canonical evidence is retained. SARIF's official
+        schema is vendored under contracts/sarif for offline validation.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/tooling.corpus.Request'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/tooling.graph.Report'
+          description: Canonical report
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api.ErrorResponse'
+          description: Invalid input, content type or body limit
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api.ErrorResponse'
+          description: Internal failure
+      summary: Canonical corpus graph
+      tags:
+      - tooling
+  /corpus/impact-mapping:
+    post:
+      description: Strict inline JSON only; no filesystem paths or remote retrieval.
+        Reject unknown or duplicate members, nulls, malformed Unicode and trailing
+        JSON. Exact body limit 8,388,608 bytes. Content statuses valid, invalid and
+        incomplete return 200. Full canonical evidence is retained. SARIF's official
+        schema is vendored under contracts/sarif for offline validation.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/tooling.impact.MappingRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/tooling.impact.Report'
+          description: Canonical report
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api.ErrorResponse'
+          description: Invalid input, content type or body limit
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api.ErrorResponse'
+          description: Internal failure
+      summary: Canonical corpus impact-mapping
+      tags:
+      - tooling
+  /corpus/impact-schema:
+    post:
+      description: Strict inline JSON only; no filesystem paths or remote retrieval.
+        Reject unknown or duplicate members, nulls, malformed Unicode and trailing
+        JSON. Exact body limit 8,388,608 bytes. Content statuses valid, invalid and
+        incomplete return 200. Full canonical evidence is retained. SARIF's official
+        schema is vendored under contracts/sarif for offline validation.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/tooling.impact.SchemaRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/tooling.impact.Report'
+          description: Canonical report
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api.ErrorResponse'
+          description: Invalid input, content type or body limit
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api.ErrorResponse'
+          description: Internal failure
+      summary: Canonical corpus impact-schema
+      tags:
+      - tooling
+  /corpus/sarif:
+    post:
+      description: Strict inline JSON only; no filesystem paths or remote retrieval.
+        Reject unknown or duplicate members, nulls, malformed Unicode and trailing
+        JSON. Exact body limit 8,388,608 bytes. Content statuses valid, invalid and
+        incomplete return 200. Full canonical evidence is retained. SARIF's official
+        schema is vendored under contracts/sarif for offline validation.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/tooling.corpus.Request'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: https://docs.oasis-open.org/sarif/sarif/v2.1.0/errata01/os/schemas/sarif-schema-2.1.0.json
+          description: Canonical report
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api.ErrorResponse'
+          description: Invalid input, content type or body limit
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api.ErrorResponse'
+          description: Internal failure
+      summary: Canonical corpus sarif
+      tags:
+      - tooling
+  /corpus/scan:
+    post:
+      description: Strict inline JSON only; no filesystem paths or remote retrieval.
+        Reject unknown or duplicate members, nulls, malformed Unicode and trailing
+        JSON. Exact body limit 8,388,608 bytes. Content statuses valid, invalid and
+        incomplete return 200. Full canonical evidence is retained. SARIF's official
+        schema is vendored under contracts/sarif for offline validation.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/tooling.corpus.Request'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/tooling.corpus.Report'
+          description: Canonical report
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api.ErrorResponse'
+          description: Invalid input, content type or body limit
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api.ErrorResponse'
+          description: Internal failure
+      summary: Canonical corpus scan
+      tags:
+      - tooling
   /docs:
     get:
       description: Serve interactive Swagger UI documentation for the SPL Toolkit
@@ -2161,6 +4580,41 @@ paths:
       summary: Discover information about an SPL query
       tags:
       - query
+  /query/document:
+    post:
+      description: Strict inline JSON only; no filesystem paths or remote retrieval.
+        Reject unknown or duplicate members, nulls, malformed Unicode and trailing
+        JSON. Exact body limit 8,388,608 bytes. Content statuses valid, invalid and
+        incomplete return 200. Full canonical evidence is retained. SARIF's official
+        schema is vendored under contracts/sarif for offline validation.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/tooling.QueryDocumentRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/tooling.document.Snapshot'
+          description: Canonical report
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api.ErrorResponse'
+          description: Invalid input, content type or body limit
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api.ErrorResponse'
+          description: Internal failure
+      summary: Canonical query document
+      tags:
+      - tooling
   /query/map:
     post:
       description: Apply field mappings to transform field names in an SPL query.

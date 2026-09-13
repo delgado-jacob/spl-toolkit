@@ -197,6 +197,12 @@ func (s *Server) setupRoutes() {
 	s.mux.HandleFunc("POST /api/v1/query/validate-schema/batch", s.handleValidateSchemaBatch)
 	s.mux.HandleFunc("POST /api/v1/query/rewrite", s.handleRewrite)
 	s.mux.HandleFunc("POST /api/v1/query/rewrite/batch", s.handleRewriteBatch)
+	s.mux.HandleFunc("POST /api/v1/query/document", s.handleDocument)
+	s.mux.HandleFunc("POST /api/v1/corpus/scan", s.handleToolingScan)
+	s.mux.HandleFunc("POST /api/v1/corpus/graph", s.handleToolingGraph)
+	s.mux.HandleFunc("POST /api/v1/corpus/sarif", s.handleToolingSARIF)
+	s.mux.HandleFunc("POST /api/v1/corpus/impact-schema", s.handleToolingSchema)
+	s.mux.HandleFunc("POST /api/v1/corpus/impact-mapping", s.handleToolingMapping)
 	s.mux.HandleFunc("GET /api/v1/capabilities", s.handleCapabilities)
 
 	// Mapping configuration endpoints

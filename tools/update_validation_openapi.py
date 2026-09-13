@@ -17,6 +17,61 @@ import yaml
 PREFIX = "#/components/schemas/"
 
 
+def add_tooling(spec):
+    """Embed reviewed owned contracts without changing legacy generated types."""
+    source = Path(__file__).resolve().parents[1] / "contracts/v1/shared.schema.json"
+    shared = json.loads(source.read_text(encoding="utf-8"))
+    origin = shared["$id"] + "#/$defs/"
+    schemas = spec["components"]["schemas"]
+    needed = set()
+
+    def convert(value):
+        if isinstance(value, list):
+            return [convert(item) for item in value]
+        if not isinstance(value, dict):
+            return value
+        result = {key: convert(item) for key, item in value.items()}
+        if "$ref" in result:
+            ref = result["$ref"]
+            if not ref.startswith(origin):
+                raise ValueError("unexpected external tooling contract reference")
+            name = ref.removeprefix(origin)
+            needed.add(name)
+            result["$ref"] = PREFIX + "tooling." + name
+        return result
+
+    def reference(name):
+        needed.add(name)
+        return {"$ref": PREFIX + "tooling." + name}
+
+    for route, request, report in (
+        ("corpus/scan", "corpus.Request", "corpus.Report"),
+        ("corpus/graph", "corpus.Request", "graph.Report"),
+        ("corpus/sarif", "corpus.Request", None),
+        ("corpus/impact-schema", "impact.SchemaRequest", "impact.Report"),
+        ("corpus/impact-mapping", "impact.MappingRequest", "impact.Report"),
+        ("query/document", "QueryDocumentRequest", "document.Snapshot"),
+    ):
+        response = reference(report) if report else {
+            "$ref": "https://docs.oasis-open.org/sarif/sarif/v2.1.0/errata01/os/schemas/sarif-schema-2.1.0.json"}
+        spec["paths"]["/" + route] = {"post": {
+            "summary": "Canonical " + route.replace("/", " "),
+            "description": "Strict inline JSON only; no filesystem paths or remote retrieval. Reject unknown or duplicate members, nulls, malformed Unicode and trailing JSON. Exact body limit 8,388,608 bytes. Content statuses valid, invalid and incomplete return 200. Full canonical evidence is retained. SARIF's official schema is vendored under contracts/sarif for offline validation.",
+            "tags": ["tooling"],
+            "requestBody": {"required": True, "content": {"application/json": {"schema": reference(request)}}},
+            "responses": {
+                "200": {"description": "Canonical report", "content": {"application/json": {"schema": response}}},
+                **{code: {"description": message, "content": {"application/json": {"schema": {"$ref": PREFIX + "api.ErrorResponse"}}}}
+                   for code, message in (("400", "Invalid input, content type or body limit"), ("500", "Internal failure"))},
+            },
+        }}
+    visited = set()
+    while needed - visited:
+        name = sorted(needed - visited)[0]
+        schemas["tooling." + name] = convert(shared["$defs"][name])
+        visited.add(name)
+
+
 def update(directory: Path) -> None:
     json_path, yaml_path, go_path = (directory / name for name in ("swagger.json", "swagger.yaml", "docs.go"))
     spec = json.loads(json_path.read_text(encoding="utf-8"))
@@ -231,6 +286,14 @@ def update(directory: Path) -> None:
         "$ref": PREFIX + "analysis.RewriteCapabilityManifest",
         "description": "Optional rewrite support for this selected dialect; inspect each form rather than assuming universal support."}
 
+    path_matches = list(re.finditer(r'^    "paths": (\{.*\}),?$', template, re.MULTILINE))
+    if len(path_matches) != 1 or json.loads(path_matches[0][1]) != spec["paths"]:
+        raise ValueError("unexpected pinned paths template")
+    add_tooling(spec)
+    path_match = path_matches[0]
+    template = template[:path_match.start(1)] + json.dumps(spec["paths"], ensure_ascii=True, separators=(",", ":")) + template[path_match.end(1):]
+    # Recalculate the component span after replacing paths.
+    matches = list(re.finditer(r'^    "components": (\{.*\}),$', template, re.MULTILINE))
     components = json.dumps(spec["components"], ensure_ascii=True, separators=(",", ":"))
     match = matches[0]
     template = template[:match.start(1)] + components + template[match.end(1):]

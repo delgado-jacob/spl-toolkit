@@ -98,7 +98,7 @@ class ValidationOpenAPITests(unittest.TestCase):
         spec = {"openapi": "3.1.0", "components": {"schemas": schemas}, "paths": {"/unrelated": {}}}
         (root / "swagger.json").write_text(json.dumps(spec), encoding="utf-8")
         (root / "swagger.yaml").write_text(yaml.safe_dump(spec), encoding="utf-8")
-        (root / "docs.go").write_text('package docs\nconst docTemplate = `{\n    "components": ' + json.dumps(spec["components"]) + ',\n    "info": {"title": "{{.Title}}"}\n}`\n', encoding="utf-8")
+        (root / "docs.go").write_text('package docs\nconst docTemplate = `{\n    "components": ' + json.dumps(spec["components"]) + ',\n    "paths": ' + json.dumps(spec["paths"]) + ',\n    "info": {"title": "{{.Title}}"}\n}`\n', encoding="utf-8")
         return copy.deepcopy(spec)
 
     def run_script(self, root):
@@ -115,7 +115,13 @@ class ValidationOpenAPITests(unittest.TestCase):
             self.assertEqual(schemas["analysis.QueryDocument"], original["components"]["schemas"]["analysis.QueryDocument"])
             self.assertEqual(schemas["validation.OCSFSelection"], original["components"]["schemas"]["validation.OCSFSelection"])
             self.assertEqual(schemas["unrelated"], original["components"]["schemas"]["unrelated"])
-            self.assertEqual(spec["paths"], original["paths"])
+            self.assertEqual(spec["paths"]["/unrelated"], original["paths"]["/unrelated"])
+            self.assertEqual(set(spec["paths"]) - set(original["paths"]), {
+                "/corpus/scan", "/corpus/graph", "/corpus/sarif",
+                "/corpus/impact-schema", "/corpus/impact-mapping", "/query/document"})
+            self.assertEqual(spec["paths"]["/query/document"]["post"]["requestBody"]["content"]["application/json"]["schema"],
+                             {"$ref": "#/components/schemas/tooling.QueryDocumentRequest"})
+            self.assertIs(schemas["tooling.corpus.Request"]["additionalProperties"], False)
             for name, keys in (("validation.Request", ["document", "catalog"]), ("validation.BatchRequest", ["documents", "catalog"]), ("validation.QueryDocument", ["text"]), ("validation.FieldCatalog", ["fields"])):
                 self.assertEqual(schemas[name]["required"], keys)
                 self.assertIs(schemas[name]["additionalProperties"], False)

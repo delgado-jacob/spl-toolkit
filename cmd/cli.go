@@ -85,6 +85,8 @@ func runCLIWithInput(args []string, stdin io.Reader, stdout, stderr io.Writer) i
 		return runValidationCLI(args[1:], stdin, stdout, stderr)
 	case "rewrite":
 		return runRewriteCLI(args[1:], stdin, stdout, stderr)
+	case "scan", "graph", "impact-schema", "impact-mapping", "lsp", "document":
+		return runToolingCLI(command, args[1:], stdin, stdout, stderr)
 	case "map", "discover", "validate", "analyze", "capabilities":
 		return runQueryCommand(command, args[1:], stdout, stderr)
 	default:
@@ -460,6 +462,7 @@ func helpPayload() []byte {
 	if err := showHelp(&payload); err != nil {
 		return nil
 	}
+	payload.WriteString("\n" + toolingHelp)
 	return payload.Bytes()
 }
 
