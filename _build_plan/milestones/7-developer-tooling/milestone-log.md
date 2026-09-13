@@ -13,8 +13,12 @@ operations, with published machine contracts and runnable embedding examples.
 M6 accepted product source: `98e38b941ea868468376b9dd6533e684009d35c0`.
 M7 Task11 accepted native/package source: `6dc178a20b080a40e22455732e264e5e2ba264e0`.
 Task12 began at administrative HEAD `985383eb12f6fc206f4a6b9fc363a645183cb430`.
-Task12's source commit is identified in its independent review and immutable
-consumer evidence; final M7/root acceptance remains pending at this log revision.
+Task12 source `df7e0ff` and acceptance-fixture correction `302f085` were
+independently reviewed. Broad-review CI dependency-closure fix `14fc34e` and
+documentation correction `660a9c9bad964a09a6d496a6010e38833172b1a9`
+were independently re-reviewed; this last commit is the exact root-tested
+product source. The subsequent administrative checkpoint changes no product
+or release-source bytes.
 No merge, push, upload, version bump or new release target was performed.
 
 The product remains 0.1.1. New corpus, graph, impact and document-view families
@@ -91,17 +95,35 @@ file also contained a mistyped source SHA and is not acceptance evidence.
 
 ## Evidence and remaining gates
 
-Task-owned evidence root:
-`/private/tmp/spl-toolkit-m7-consumers-task12.QOw6lh`.
-The ignored Task12 report records final candidate source, command outcomes,
-manifest/lock hashes and consumer evidence paths. Precommit diagnostic consumer
-runs are provisional; final source/executable hashes and immutable reruns are
-required before acceptance.
+Task-owned evidence root: `/private/tmp/spl-toolkit-m7-consumers-task12.QOw6lh`.
+The root's exact-product-source receipts are
+`/private/tmp/spl-toolkit-m7-root-final-editor.json` and
+`/private/tmp/spl-toolkit-m7-root-final-sarif.json`; both passed against CLI
+SHA256 `6a1f1e02e662b377ef00623331e6df01feaba858c473ab8df17968c00fe230a1`.
+The first editor attempt inside the sandbox exited without client assertions;
+the isolated GUI host passed with authorized macOS access. Precommit diagnostic
+receipts remain historical only.
 
-Independent Task12 review, the broad M7/cross-milestone review and root's stable
-final built/native/Python3.14/real-consumer acceptance remain open. Root owns that
-window; no shared artifact is rebuilt during it. Linux/Windows filesystem
-runtime and the complete pinned four-target release matrix have not run locally.
+Root built CLI/server/native with official Go1.22.12 and passed uncached full
+`go test -race -ldflags=-linkmode=external ./...`, 563 Python3.14 source/native
+tests, 247 tooling tests, ten machine-contract tests, six real CLI/HTTP/LSP
+acceptance tests and documentation checks. Fresh wheel and rebuilt-sdist
+installation on each of Python3.12.6 and 3.14.1 passed 542 native plus 255
+surface tests per lane with zero failures/skips and outside-checkout origins.
+Receipts: `/private/tmp/spl-toolkit-m7-root-final-package-evidence.json` and
+`/private/tmp/spl-toolkit-m7-root-final-package-py314-evidence.json`; both
+carry native SHA256 `f7efa585c10ebbe01d9a52ac3e42e50824d191a70084b5d4b4d7ee90ec267c32`.
+Root packaged and extracted the current 185-file source closure and rebuilt
+CLI/server/basic and tooling Go examples with the same offline Go1.22 cache.
+
+The CI dependency fix adds a marker-aware, publisher-hash-verified wheel
+closure for all sixteen target/Python combinations and keeps installed checks
+offline. This is provisioning evidence, not foreign-platform runtime evidence.
+The pinned release tool rejected the local Go1.22.12 host because it requires
+Go1.26.8; no four-target release or remote CI success is claimed. Linux/Windows
+filesystem runtime and the complete pinned four-target release matrix remain
+unrun locally. The default Go1.22 macOS binary hit dyld `LC_UUID`; external
+linking made the runtime checks executable without changing the release pins.
 Compile-only checks do not prove runtime platform guarantees. Existing pinned
 release/reproducibility/acceptance tools remain authoritative and are not relaxed
 to convert local diagnostic environments into release acceptance.

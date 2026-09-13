@@ -1,14 +1,14 @@
 # SPL Toolkit continuation state
 
-Updated September 12, 2026. Milestone 6 is accepted at product source `98e38b941ea868468376b9dd6533e684009d35c0`; Milestone 7 is the first incomplete milestone. Historical handoff/task notes below are retained for provenance, but this current-state section and the later M6 closure supersede their old “Task 8 next” wording. **The original goal is unfinished.**
+Updated September 12, 2026. Milestones 2–7 have been implemented and locally verified; M7's root-tested product source is `660a9c9bad964a09a6d496a6010e38833172b1a9`. Historical handoff/task notes below are retained for provenance; this current-state section supersedes their old “Task 8/12 next” wording. No merge, push or publication occurred.
 
 ## Current goal stage
 
-Milestones 1–6 are complete; M7 developer tooling is **implementing** under its [approved design](_build_plan/milestones/7-developer-tooling/design-spec.md) and [12-task ExecPlan](_build_plan/milestones/7-developer-tooling/milestone-7-implementation-plan.md), reconciled to M6 product `98e38b9`. Tasks 1–11 are accepted through native/package closure `6dc178a20b080a40e22455732e264e5e2ba264e0`, with independent reviews and scoped corrections closed. The reserved root Go-only core window passed on host Go and uncached official Go 1.22.12; Task 12 real consumers/release evidence is the exact next action, then final root window and cross-milestone audit. No merge or push.
+All seven PRD milestones are **complete within local verification scope**. M7's [approved design](_build_plan/milestones/7-developer-tooling/design-spec.md) and [12-task ExecPlan](_build_plan/milestones/7-developer-tooling/milestone-7-implementation-plan.md) have independent task reviews and broad re-review through the CI dependency fix and documentation correction. Root's exact-source acceptance covers full Go1.22 race, Python3.14 source/native, both Python3.12 and 3.14 installed wheel/rebuilt-sdist lanes, real CLI/HTTP/LSP, VS Code and SARIF consumer checks, offline machine contracts and source-archive builds. The dedicated final cross-milestone audit found no blocking integration defect. No merge or push.
 
 M6 product checkpoint `98e38b9` is the direct child of Task 8's `fbde61b` and contains both broad-review fixes. Independent same-reviewer broad rereview [approved](.superpowers/sdd/milestone-6-implementation-plan/milestone-6-broad-rereview-1.md) with zero findings. Fresh root-owned checks at that exact clean tracked/index source passed: official Go 1.22.12 built CLI/server/native plus 29 independent Go/CLI/real-HTTP/native cases, ordered batch/error/concurrency and original/candidate/validation parity; Python 3.14.1 source/native 459 tests without skips; and fresh direct-wheel and rebuilt-sdist installed Python 3.12 lanes, each 438 native + 242 surface tests without failures/skips. Immutable private root receipts and qualification details are in the M6 milestone log and plan. The legacy ignored worktree `dist/` wheel was not used for this closure.
 
-Local proof is macOS arm64 with the documented external-link LC_UUID accommodation. Other OS/architecture and Python release matrix combinations, sanitizers/leak checks and external Splunk runtime equivalence remain unexecuted, not silently waived. Preserve the ten untracked user files listed by git status and the untouched original checkout.
+Local proof is macOS arm64 with the documented external-link LC_UUID accommodation. The pinned four-target Go1.26.8 release matrix could not run under the local Go1.22.12 host, and remote CI was not run. CI now provisions reviewed hashed wheel closures across sixteen target/Python combinations, but other OS/architecture runtime combinations, sanitizers/leak checks and external Splunk runtime equivalence remain unexecuted, not silently waived. Preserve the ten untracked user files listed by git status and the untouched original checkout.
 
 ## Start here
 
@@ -51,7 +51,7 @@ All accepted milestone commits below were verified as ancestors of the current b
 | M6 Task6 | Accepted at `e724af4cd22ba6f29e53de99c572275db7627843`. CLI/HTTP/OpenAPI/docs parity is reviewed; stale guidance, strict schema parity, body-limit coverage and partial-commit CLI coverage are closed. The local Go 1.22 GOROOT is incomplete, so no fresh floor compile is claimed. |
 | M6 Task7 | Accepted at `8e0e0b89a3c4b2825ca10f510d3a191f9b6dd1db`. Native/Python APIs, real Go 1.22/1.25 headers, 20 exports, ownership/race checks and formal direct/rebuilt package closure passed; Task 8/root platform acceptance remain separate. |
 | M6 Task8 and milestone | Task8 independently accepted at `fbde61b`; broad-review corrections accepted at `98e38b941ea868468376b9dd6533e684009d35c0`, with broad rereview and fresh root surface/Python3.14/installed package acceptance. Complete within the stated local-platform limits. |
-| M7: developer tooling | Design and 12-task ExecPlan approved against accepted M6; Tasks 1–11 accepted through `6dc178a`, root Go-only core window passed, Task 12 released. |
+| M7: developer tooling | Tasks 1–12, independent reviews, broad re-review and fresh local acceptance complete at product `660a9c9`; release-matrix/platform limits above remain open. |
 
 The completed atomic unit consists of `pkg/rewrite/rewrite.go`, `pkg/rewrite/verify.go`, and `pkg/rewrite/rewrite_test.go`. The interrupted file bytes were preserved before verification. No failing test expectation was rewritten during this handoff: the earlier worker had already corrected its hand-counted offsets. The retained historical `single-first-green` run actually exited 1 and remains a failure record.
 
@@ -76,7 +76,7 @@ Use bounded ownership and artifact paths, preserve others' work, retain actual e
 
 ## Remaining work
 
-**M6 and M7 Tasks 1–11 are accepted.** Implement/review Task 12 next, then final independent acceptance. Consumer inputs must be newly reviewed and provisioned because the historical preflight artifacts are missing. Do not redo settled brainstorming. Complete requirement-by-requirement final audit for all milestones before claiming the original goal complete.
+**No remaining implementation task.** The accepted product source and root receipts are recorded in the [M7 milestone log](_build_plan/milestones/7-developer-tooling/milestone-log.md). The next optional external acceptance is running the pinned release/CI matrix on its declared toolchain and supported hosts; do not present it as already passing. Integration into `main`, push and publication remain user-controlled.
 
 ## Current blockers and evidence gaps
 
