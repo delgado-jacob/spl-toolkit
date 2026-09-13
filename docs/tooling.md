@@ -8,6 +8,7 @@ layout: page
 SPL Toolkit 0.1.1 scans dedicated query files, exports graph/SARIF evidence,
 compares local schema or mapping changes, and serves editor diagnostics and
 document highlights. Every operation uses the canonical offline Go engine.
+For option details and canonical command usage, see the [CLI guide](cli.md).
 
 ## Repository and CI use
 
