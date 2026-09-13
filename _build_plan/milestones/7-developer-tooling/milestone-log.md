@@ -105,3 +105,17 @@ runtime and the complete pinned four-target release matrix have not run locally.
 Compile-only checks do not prove runtime platform guarantees. Existing pinned
 release/reproducibility/acceptance tools remain authoritative and are not relaxed
 to convert local diagnostic environments into release acceptance.
+
+## Task12 fixture correction
+
+Independent re-review found that the exact named acceptance manifest and target
+from the implementation plan were absent. Added `testdata/tooling/example-corpus.json`,
+`example-target.json` and `example-corpus-missing-file.json`, plus a real CLI
+regression and their explicit installed-fixture copy registration. The regression
+first failed with exit2 for the missing target, then passed with the required
+three-entry invalid/incomplete report (exit1) and four-selected/three-analyzed/
+one-acquisition-failure report (exit2). It checks source bytes, unknown semantic
+coverage and complete entry/identity preservation after reordering. No runtime
+code or consumer dependency changed. Three tooling surface tests, 84 package
+tests and focused Go1.22 corpus/corpusio tests passed. Existing consumer/package
+receipts remain bound to their prior commits; root owns fresh final acceptance.

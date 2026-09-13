@@ -156,3 +156,41 @@ def test_document_and_transport_errors(tooling_binaries, tooling_server):
         assert error.value.code == 400
     help_result = subprocess.run([str(tooling_binaries[0]), "help"], capture_output=True, text=True, check=True)
     assert "scan --directory" in help_result.stdout and "lsp --stdio" in help_result.stdout
+
+
+def test_documented_corpus_fixtures(tooling_binaries, tmp_path):
+    fixtures = Path(os.environ.get("SPL_TOOLING_FIXTURES", ROOT / "testdata/tooling")).resolve()
+    names = ("example-corpus.json", "example-target.json", "example-corpus-missing-file.json")
+    before = {name: (fixtures / name).read_bytes() for name in names if (fixtures / name).is_file()}
+    reports = []
+    for manifest, expected_exit in ((names[0], 1), (names[2], 2)):
+        completed = subprocess.run([str(tooling_binaries[0]), "scan", "--manifest", str(fixtures / manifest),
+                                    "--target", str(fixtures / names[1]), "--format", "json"],
+                                   capture_output=True, text=True)
+        assert completed.returncode == expected_exit, completed.stderr
+        report = json.loads(completed.stdout)
+        reports.append(report)
+        assert report["status"] == "invalid"
+        assert report["counts"] == {"selected": 3 if expected_exit == 1 else 4, "analyzed": 3,
+                                     "acquisition_failed": 0 if expected_exit == 1 else 1, "traversal_failed": 0}
+        assert report["execution_complete"] is (expected_exit == 1)
+        assert report["coverage"]["semantic"]["incomplete"] == 1
+        assert report["coverage"]["semantic"]["denominator"] == 3
+        entries = report["entries"]
+        assert [entry["id"] for entry in entries[:3]] == ["good", "missing", "unknown"]
+        assert [entry["evaluation"]["field_validation"]["status"] for entry in entries[:3]] == ["valid", "invalid", "incomplete"]
+        assert [entry["evaluation"]["field_validation"]["analysis"]["document"]["text"] for entry in entries[:3]] == [
+            "search host=web", "search missing=x", "| mystery | table host"]
+        if expected_exit == 2:
+            assert entries[3]["id"] == "unreadable"
+            assert "failure" in entries[3] and "evaluation" not in entries[3]
+    assert reports[0]["entries"] == reports[1]["entries"][:3]
+    reordered = json.loads(before[names[0]])
+    reordered["documents"].reverse()
+    path = tmp_path.resolve() / "reordered.json"
+    path.write_text(json.dumps(reordered), encoding="utf-8")
+    code, report = cli(tooling_binaries[0], "scan", "--manifest", str(path),
+                       "--target", str(fixtures / names[1]), "--format", "json")
+    assert code == 1
+    assert report["entries"] == list(reversed(reports[0]["entries"]))
+    assert before == {name: (fixtures / name).read_bytes() for name in names}

@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "documents": [
+    {"id": "good", "text": "search host=web"},
+    {"id": "missing", "text": "search missing=x"},
+    {"id": "unknown", "text": "| mystery | table host"},
+    {"id": "unreadable", "path": "absent-task12-source.spl"}
+  ]
+}

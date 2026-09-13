@@ -464,7 +464,8 @@ def install_and_check(
     tooling_fixtures = tooling_root / "testdata/tooling"
     tooling_fixtures.parent.mkdir(parents=True, exist_ok=True)
     _copy_required_files(docs_root / "testdata/tooling", tooling_fixtures,
-                         ("contracts.json", "graph-cases.json", "impact-cases.json", "requests.json", "sarif-cases.json"))
+                         ("contracts.json", "graph-cases.json", "impact-cases.json", "requests.json", "sarif-cases.json",
+                          "example-corpus.json", "example-target.json", "example-corpus-missing-file.json"))
     tooling_hashes = {p.name: sha256(p) for p in tooling_fixtures.iterdir()}
     _copy_required_files(rewrite_fixtures, tooling_root / "testdata/rewrite", ("forms.json",))
     tooling_hashes["../rewrite/forms.json"] = sha256(tooling_root / "testdata/rewrite/forms.json")
