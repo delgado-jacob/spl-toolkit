@@ -219,12 +219,18 @@ def tooling_go(tmp_path_factory):
     directory = tmp_path_factory.mktemp("native-tooling-go")
     source = directory / "main.go"
     source.write_text(GO_TOOLING)
-    binary = directory / "tooling"
+    binary = directory / ("tooling.exe" if os.name == "nt" else "tooling")
     root = Path(os.environ.get("SPL_TOOLING_SOURCE_ROOT", Path(__file__).resolve().parents[2]))
-    subprocess.run([os.environ.get("SPL_TOOLING_GO", "go"), "build", "-mod=readonly",
-                    "-ldflags=-linkmode=external -X=github.com/delgado-jacob/spl-toolkit/internal/buildinfo.Version=0.1.1",
-                    "-o", str(binary), str(source)],
-                   cwd=root, check=True, capture_output=True, text=True)
+    ldflags = "-X=github.com/delgado-jacob/spl-toolkit/internal/buildinfo.Version=0.1.1"
+    if os.name != "nt":
+        ldflags = "-linkmode=external " + ldflags
+    try:
+        subprocess.run([os.environ.get("SPL_TOOLING_GO", "go"), "build", "-mod=readonly",
+                        "-ldflags=" + ldflags,
+                        "-o", str(binary), str(source)],
+                       cwd=root, check=True, capture_output=True, text=True)
+    except subprocess.CalledProcessError as error:
+        pytest.fail(f"Go tooling build failed:\n{error.stderr[-3000:]}")
     return binary
 
 
