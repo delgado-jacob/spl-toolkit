@@ -675,6 +675,14 @@ def test_wheel_accepts_real_cgo_headers_and_records_actual_bytes(tmp_path: Path,
     assert hashes["spl_toolkit/libspl_toolkit.h"] == checker.hashlib.sha256(header).hexdigest()
 
 
+def test_wheel_header_contract_accepts_windows_checkout_line_endings():
+    checker = load_package_checker()
+    header = (PYTHON_DIR / "spl_toolkit/libspl_toolkit.h").read_bytes()
+    lf_header = header.replace(b"\r\n", b"\n")
+    crlf_header = lf_header.replace(b"\n", b"\r\n")
+    assert checker.toolkit_header_contract(lf_header) == checker.toolkit_header_contract(crlf_header)
+
+
 @pytest.mark.parametrize("before,after", [
     ("extern SPLResult* spl_mapper_validate_schema(int mapperID, char* requestJSON);", ""),
     ("extern void spl_mapper_free(int mapperID);", "extern void spl_mapper_free(char* mapperID);"),

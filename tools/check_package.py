@@ -278,7 +278,7 @@ def toolkit_header_contract(payload: bytes) -> str:
         '/* End of boilerplate cgo prologue.  */',
     )
     try:
-        header = payload.decode("utf-8")
+        header = payload.decode("utf-8").replace("\r\n", "\n")
     except UnicodeDecodeError as error:
         raise AssertionError("invalid wheel header encoding") from error
     observed = re.findall(r'/\* (?:Start|End) of (?:preamble|boilerplate)[^\n]*\*/', header)
