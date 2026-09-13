@@ -388,7 +388,7 @@ def _run_required_suite(python: Path, suite: Path, result: Path, outside: Path, 
     write_required_pytest_plugin(suite)
     child_env = env | {"SPL_TEST_COUNTS": str(result),
                        "SPL_REQUIRED_TEST_FILES": json.dumps(sorted(p.name for p in suite.glob("test_*.py")))}
-    run([str(python), "-I", "-m", "pytest", str(suite), "-q"], cwd=outside, env=child_env)
+    run([str(python), "-I", "-X", "utf8", "-m", "pytest", str(suite), "-q"], cwd=outside, env=child_env)
     counts = json.loads(result.read_text(encoding="utf-8"))
     if set(counts) != {"collected", "passed", "failed", "skipped"}:
         raise AssertionError(f"required suite returned invalid counts: {counts}")

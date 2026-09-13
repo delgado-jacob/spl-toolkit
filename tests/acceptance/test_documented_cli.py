@@ -42,7 +42,7 @@ def test_documented_cli_examples(cli_path: Path, tmp_path: Path) -> None:
         for fixture in case.get("files", []):
             destination = Path(render(fixture["path"], substitutions))
             destination.parent.mkdir(parents=True, exist_ok=True)
-            destination.write_text(fixture["content"], encoding="utf-8")
+            destination.write_bytes(fixture["content"].encode("utf-8"))
         completed = subprocess.run(
             render(case["argv"], substitutions),
             cwd=case_dir,
@@ -59,7 +59,7 @@ def test_documented_cli_examples(cli_path: Path, tmp_path: Path) -> None:
             assert completed.stderr == "", case["id"]
         for expected in case.get("output_files", []):
             destination = Path(render(expected["path"], substitutions))
-            assert destination.read_text(encoding="utf-8") == expected["content"], case["id"]
+            assert destination.read_bytes() == expected["content"].encode("utf-8"), case["id"]
 
 
 def test_documentation_example_coverage() -> None:
