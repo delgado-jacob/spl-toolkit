@@ -16,6 +16,7 @@ CONFIG = json.loads((ROOT / "tools" / "release-env.json").read_text(encoding="ut
 TARGETS = CONFIG["targets"]
 PYTHON_VERSIONS = tuple(CONFIG["test_python"])
 EXPECTED_COUNTS = {"required_native": 11, "surface_acceptance": 6}
+EXPECTED_MACHINE_CONTRACT_COUNT = 10
 REQUIRED_TEST_FILES = {
     "native": {"test_native_abi.py", "test_native_mapper.py", "test_native_analysis.py",
                "test_native_validation.py", "test_native_schema_validation.py", "test_native_spl2.py", "test_native_rewrite.py"},
@@ -24,6 +25,19 @@ REQUIRED_TEST_FILES = {
 }
 HASH_RE = re.compile(r"^[0-9a-f]{64}$")
 SHA_RE = re.compile(r"^[0-9a-f]{40}$")
+WHEEL_CONTRACT_KEYS = {
+    "spl_toolkit/" + path.relative_to(ROOT).as_posix()
+    for path in (ROOT / "contracts").rglob("*") if path.is_file()
+}
+TOOLING_SOURCE_KEYS = {
+    line for line in (ROOT / "python/native-source-files.txt").read_text(encoding="utf-8").splitlines()
+    if line and not line.startswith("#")
+}
+TOOLING_FIXTURE_KEYS = {
+    "contracts.json", "graph-cases.json", "impact-cases.json", "requests.json",
+    "sarif-cases.json", "example-corpus.json", "example-target.json",
+    "example-corpus-missing-file.json", "../rewrite/forms.json",
+}
 COMMON_FIELDS = {"schema_version", "kind", "source_sha", "status"}
 KIND_FIELDS = {
     "native": {"target", "architecture", "environment"},
@@ -35,6 +49,8 @@ KIND_FIELDS = {
         "target", "architecture", "python_version", "python_runtime", "wheel_sha256", "venv_prefix",
         "installed_module", "package_version", "native_version", "tests",
         "cli_examples", "surface_parity", "version_agreement", "required_test_files",
+        "wheel_contract_hashes", "tooling_source_hashes", "tooling_fixture_hashes",
+        "machine_contract_tests",
     },
     "go-floor": {"go_version"},
     "native-memory": {"compiler", "sanitizer"},
@@ -119,6 +135,15 @@ def _validate_counts(record: dict, errors: list[str], label: str) -> None:
             errors.append(f"{label}: {suite} has failed tests")
         if counts["skipped"]:
             errors.append(f"{label}: {suite} has skipped tests")
+
+
+def _validate_hash_map(value: object, expected: set[str], field: str,
+                       errors: list[str], label: str) -> None:
+    if not isinstance(value, dict) or set(value) != expected:
+        errors.append(f"{label}: {field} has incorrect paths")
+        return
+    if any(not isinstance(digest, str) or not HASH_RE.fullmatch(digest) for digest in value.values()):
+        errors.append(f"{label}: {field} contains an invalid SHA-256")
 
 
 def _normalized_architecture(value: object) -> str:
@@ -289,6 +314,23 @@ def validate_records(records: list[dict], source_sha: str) -> list[str]:
                 if record.get(gate) != "passed":
                     errors.append(f"{label}: {gate} must be passed")
             _validate_counts(record, errors, label)
+            for field, expected in (
+                ("wheel_contract_hashes", WHEEL_CONTRACT_KEYS),
+                ("tooling_source_hashes", TOOLING_SOURCE_KEYS),
+                ("tooling_fixture_hashes", TOOLING_FIXTURE_KEYS),
+            ):
+                _validate_hash_map(record.get(field), expected, field, errors, label)
+            contract_counts = record.get("machine_contract_tests")
+            count_fields = {"collected", "passed", "failed", "skipped"}
+            if not isinstance(contract_counts, dict) or set(contract_counts) != count_fields:
+                errors.append(f"{label}: machine_contract_tests has invalid count fields")
+            elif any(type(contract_counts[name]) is not int or contract_counts[name] < 0
+                     for name in count_fields):
+                errors.append(f"{label}: machine_contract_tests counts must be nonnegative integers")
+            elif (contract_counts["collected"] < EXPECTED_MACHINE_CONTRACT_COUNT
+                  or contract_counts["passed"] != contract_counts["collected"]
+                  or contract_counts["failed"] or contract_counts["skipped"]):
+                errors.append(f"{label}: machine_contract_tests must all pass without skips")
             registered = record.get("required_test_files")
             if not isinstance(registered, dict) or set(registered) != set(REQUIRED_TEST_FILES):
                 errors.append(f"{label}: required_test_files must contain native and acceptance")

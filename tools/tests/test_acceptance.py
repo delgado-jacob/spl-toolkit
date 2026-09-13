@@ -11,6 +11,7 @@ from tools.check_acceptance import load_records, validate_records
 
 SHA = "a" * 40
 HASH = "b" * 64
+ROOT = Path(__file__).resolve().parents[2]
 TARGETS = {
     "linux-amd64": "x86_64",
     "darwin-amd64": "x86_64",
@@ -91,6 +92,20 @@ def passing_records() -> list[dict]:
                 "venv_prefix": f"/tmp/{target}/{version}/venv",
                 "installed_module": f"/tmp/{target}/{version}/venv/site/spl_toolkit/__init__.py",
                 "package_version": "0.1.1", "native_version": "0.1.1",
+                "wheel_contract_hashes": {
+                    "spl_toolkit/" + path.relative_to(ROOT).as_posix(): HASH
+                    for path in (ROOT / "contracts").rglob("*") if path.is_file()
+                },
+                "tooling_source_hashes": {
+                    line: HASH for line in (ROOT / "python/native-source-files.txt").read_text().splitlines()
+                    if line and not line.startswith("#")
+                },
+                "tooling_fixture_hashes": {name: HASH for name in (
+                    "contracts.json", "graph-cases.json", "impact-cases.json", "requests.json",
+                    "sarif-cases.json", "example-corpus.json", "example-target.json",
+                    "example-corpus-missing-file.json", "../rewrite/forms.json",
+                )},
+                "machine_contract_tests": {"collected": 10, "passed": 10, "failed": 0, "skipped": 0},
                 "tests": {
                     "required_native": {"collected": 11, "passed": 11, "failed": 0, "skipped": 0},
                     "surface_acceptance": {"collected": 6, "passed": 6, "failed": 0, "skipped": 0},
@@ -114,6 +129,28 @@ def passing_records() -> list[dict]:
 
 def test_complete_current_evidence_passes():
     assert validate_records(passing_records(), SHA) == []
+
+
+def test_installed_contract_evidence_cannot_be_missing_or_malformed():
+    original = passing_records()
+    index = next(i for i, record in enumerate(original) if record["kind"] == "installed-wheel")
+    for field in ("wheel_contract_hashes", "tooling_source_hashes",
+                  "tooling_fixture_hashes", "machine_contract_tests"):
+        records = copy.deepcopy(original)
+        del records[index][field]
+        assert any(f"missing fields: {field}" in error for error in validate_records(records, SHA))
+
+    records = copy.deepcopy(original)
+    records[index]["machine_contract_tests"]["passed"] = 9
+    assert any("machine_contract_tests must all pass" in error for error in validate_records(records, SHA))
+
+    for field in ("wheel_contract_hashes", "tooling_source_hashes", "tooling_fixture_hashes"):
+        records = copy.deepcopy(original)
+        first = next(iter(records[index][field]))
+        records[index][field][first] = "not a hash"
+        assert any(f"{field} contains an invalid SHA-256" in error for error in validate_records(records, SHA))
+        del records[index][field][first]
+        assert any(f"{field} has incorrect paths" in error for error in validate_records(records, SHA))
 
 
 def test_installed_evidence_cannot_omit_spl2_surface_suite():
