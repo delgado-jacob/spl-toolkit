@@ -25,6 +25,8 @@ def test_installed_wheel_job_bootstraps_package_checker_dependencies():
     )
     checker = "python tools/check_package.py --wheel-only"
 
+    assert "actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5" in installed_job
+    assert installed_job.index("actions/setup-go@") < installed_job.index(checker)
     assert bootstrap in installed_job
     assert installed_job.index(bootstrap) < installed_job.index(checker)
     assert "packaging==25.0" in (PYTHON_DIR / "requirements-build.txt").read_text(
