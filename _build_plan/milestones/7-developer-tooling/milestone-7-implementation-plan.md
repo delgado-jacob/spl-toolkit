@@ -56,8 +56,8 @@ Preserve all other users/agents' changes in the shared worktree. During this pla
 - [x] (2026-09-12 UTC) Task 7: static schema/mapping impact; initial `6ffd1f5`, three architecture review findings fixed/re-reviewed at `4993877c8a1a0b87367b903cbc4554cb35179089`. Go1.22 affected tests/race/vet passed; source writes remain absent.
 - [x] (2026-09-12 UTC) Task 8: published machine schemas and independent contract validation; `895f9e8114eb09bfd4a57ac948574bc6ccfa0b27`, independent review APPROVE, official OASIS Errata01 Draft-04 checksum and Python3.12/3.14 offline suites passed. Historical GitHub Draft-07 preflight was excluded.
 - [x] (2026-09-12 UTC) Root stable Go-only core acceptance: seven packages passed on host Go and fresh uncached official Go 1.22.12 with offline task cache; tracked tree clean.
-- [ ] Task 9: local LSP lifecycle and source conversion; released after root core acceptance.
-- [ ] Task 10: CLI/HTTP operations and executable examples.
+- [x] (2026-09-12 UTC) Task 9: local LSP lifecycle and source conversion; `d2ba9c8af35ccc2679e2b9289fff7ffa6972d1e2`, independent review APPROVE, Go1.22 race/vet, real stdio harness and independent Unicode/CRLF highlight transcripts passed.
+- [ ] Task 10: CLI/HTTP operations and executable examples; released after Task 9 review.
 - [ ] Task 11: native Python and installed package closure.
 - [ ] Task 12: actual editor/SARIF consumers and release evidence closure.
 - [ ] Root completes a stable final built/native/real-consumer window; broad review and independent exact-head acceptance close M7.
