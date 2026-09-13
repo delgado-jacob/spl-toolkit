@@ -5,6 +5,7 @@ COPY go.mod go.sum ./
 RUN go mod download
 COPY VERSION LICENSE README.md ./
 COPY cmd ./cmd
+COPY contracts ./contracts
 COPY internal ./internal
 COPY grammar ./grammar
 COPY parser ./parser

@@ -21,14 +21,17 @@ def run(*args: str, cwd: Path, env: dict[str, str] | None = None) -> subprocess.
     )
 
 
-def init_repository(root: Path, files: dict[str, str]) -> None:
+def init_repository(root: Path, files: dict[str, str | bytes]) -> None:
     run("git", "init", "-q", cwd=root)
     run("git", "config", "user.name", "Build Check Test", cwd=root)
     run("git", "config", "user.email", "build-check@example.invalid", cwd=root)
     for name, contents in files.items():
         path = root / name
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(contents, encoding="utf-8")
+        if isinstance(contents, bytes):
+            path.write_bytes(contents)
+        else:
+            path.write_text(contents, encoding="utf-8")
     run("git", "add", ".", cwd=root)
     result = run("git", "commit", "-q", "-m", "fixture", cwd=root)
     if result.returncode:
@@ -77,6 +80,35 @@ class CleanBuildTests(unittest.TestCase):
 
 
 class GoCheckTests(unittest.TestCase):
+    def test_requested_race_timeout_terminates_a_slow_test(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            init_repository(
+                root,
+                {
+                    "go.mod": "module example.invalid/check\n\ngo 1.22\n",
+                    "main.go": "package check\n",
+                    "main_test.go": (
+                        "package check\n\n"
+                        "import (\n\t\"testing\"\n\t\"time\"\n)\n\n"
+                        "func TestSlow(t *testing.T) {\n"
+                        "\ttime.Sleep(200 * time.Millisecond)\n"
+                        "}\n"
+                    ),
+                },
+            )
+
+            result = run(
+                sys.executable,
+                str(TOOLS / "check_go.py"),
+                "--race-timeout=1ms",
+                cwd=root,
+                env={**os.environ, "GOTOOLCHAIN": "local"},
+            )
+
+        self.assertNotEqual(result.returncode, 0, result.stdout)
+        self.assertIn("test timed out after 1ms", result.stdout)
+
     def test_rejects_unformatted_handwritten_go(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -97,6 +129,26 @@ class GoCheckTests(unittest.TestCase):
 
         self.assertEqual(result.returncode, 1, result.stdout)
         self.assertIn("bad.go", result.stdout)
+
+    def test_accepts_windows_line_endings_when_go_code_is_formatted(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            init_repository(
+                root,
+                {
+                    "go.mod": "module example.invalid/check\n\ngo 1.22\n",
+                    "main.go": b"package check\r\n\r\nfunc Main() {}\r\n",
+                },
+            )
+
+            result = run(
+                sys.executable,
+                str(TOOLS / "check_go.py"),
+                cwd=root,
+                env={**os.environ, "GOTOOLCHAIN": "local"},
+            )
+
+        self.assertEqual(result.returncode, 0, result.stdout)
 
     def test_excludes_generated_files_from_the_handwritten_format_gate(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

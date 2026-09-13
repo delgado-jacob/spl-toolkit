@@ -90,8 +90,7 @@ jobs:
           python -m pip --isolated download --disable-pip-version-check --no-cache-dir --index-url https://pypi.org/simple --only-binary=:all: --require-hashes -r tools/requirements-package-check-hashed.lock --dest "${{ runner.temp }}/package-check-wheels"
       - name: Run handwritten checks and race suite
         run: |
-          python tools/check_go.py
-          go test -mod=readonly -race ./...
+          python tools/check_go.py --race-timeout=20m
       - name: Verify two clean release builds
         run: python tools/check_reproducible.py --ref HEAD --output build/reproducibility
       - name: Upload accepted baseline

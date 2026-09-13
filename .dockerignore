@@ -13,6 +13,8 @@
 !cmd/server/
 !cmd/server/main.go
 
+!contracts/
+
 !docs/
 !docs/docs.go
 

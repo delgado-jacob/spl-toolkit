@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Run formatting, vet, and test checks for the canonical Go source."""
 
+import argparse
 import os
 from pathlib import Path
 import subprocess
@@ -33,17 +34,40 @@ def tracked_handwritten_go() -> list[str]:
     ]
 
 
+def unformatted_handwritten_go(names: list[str]) -> tuple[list[str], int]:
+    formatting = command(["gofmt", "-l", *names], capture=True)
+    if formatting.returncode:
+        return [], formatting.returncode
+
+    unformatted = []
+    for name in formatting.stdout.splitlines():
+        rendered = subprocess.run(
+            ["gofmt", name],
+            check=False,
+            stdout=subprocess.PIPE,
+        )
+        if rendered.returncode:
+            return [], rendered.returncode
+        source = Path(name).read_bytes().replace(b"\r\n", b"\n")
+        if source != rendered.stdout:
+            unformatted.append(name)
+    return unformatted, 0
+
+
 def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--race-timeout", default="10m", help="Go race suite timeout (default: 10m)")
+    args = parser.parse_args()
+
     try:
         handwritten = tracked_handwritten_go()
     except subprocess.CalledProcessError as error:
         return error.returncode or 1
 
     if handwritten:
-        formatting = command(["gofmt", "-l", *handwritten], capture=True)
-        if formatting.returncode:
-            return formatting.returncode
-        unformatted = formatting.stdout.splitlines()
+        unformatted, returncode = unformatted_handwritten_go(handwritten)
+        if returncode:
+            return returncode
         if unformatted:
             print("handwritten Go files need formatting:", file=sys.stderr)
             for name in unformatted:
@@ -80,7 +104,7 @@ def main() -> int:
         if vet.returncode:
             return vet.returncode
 
-    tests = command(["go", "test", "-mod=readonly", "-race", "./..."])
+    tests = command(["go", "test", "-mod=readonly", "-race", f"-timeout={args.race_timeout}", "./..."])
     return tests.returncode
 
 

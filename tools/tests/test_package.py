@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import importlib.util
-from pathlib import Path, PureWindowsPath
+from pathlib import Path, PurePosixPath, PureWindowsPath
 import platform
 import subprocess
 import sys
@@ -55,6 +55,36 @@ def test_checkout_source_and_version_are_resolved_from_repository():
 
     assert support.source_root(PYTHON_DIR) == ROOT
     assert support.read_version(PYTHON_DIR) == "0.1.1"
+
+
+def test_docker_build_context_covers_the_native_source_manifest():
+    support = load_build_support()
+    dockerfile = (ROOT / "Dockerfile").read_text(encoding="utf-8")
+    builder = dockerfile.split("\nFROM python:", 1)[0]
+    copied = {
+        source.rstrip("/")
+        for line in builder.splitlines()
+        if line.startswith("COPY ")
+        for source in line.split()[1:-1]
+    }
+    context_allowlist = {
+        line.removeprefix("!").rstrip("/")
+        for line in (ROOT / ".dockerignore").read_text(encoding="utf-8").splitlines()
+        if line.startswith("!")
+    }
+
+    missing = []
+    for relative in support.native_source_files(PYTHON_DIR / "native-source-files.txt"):
+        if not any(
+            relative == PurePosixPath(path) or PurePosixPath(path) in relative.parents
+            for path in copied
+        ) or not any(
+            relative == PurePosixPath(path) or PurePosixPath(path) in relative.parents
+            for path in context_allowlist
+        ):
+            missing.append(str(relative))
+
+    assert not missing, f"Docker build context is missing native sources: {missing}"
 
 
 def test_staged_source_and_version_are_resolved_without_checkout(tmp_path: Path):

@@ -14,6 +14,8 @@ import (
 	"testing"
 )
 
+var apiExamplePattern = regexp.MustCompile("(?s)<!-- api-example: ([a-z0-9-]+) (/query/[a-z/-]+) (valid|invalid|incomplete|legacy) -->\\r?\\n```json\\r?\\n(.*?)\\r?\\n```")
+
 func TestDialectCapabilitiesRESTStrictSelectors(t *testing.T) {
 	for _, query := range []string{"language=spl2&language=spl2", "language=spl&language=spl2", "profile=splunkd&profile=splunkd", "version=current&version=current", "extra=x", "compatibility-version=current", "language=unknown", "profile=cloud", "version=next", "language=%FF", "profile=%FF", "version=%FF", "language=%ZZ", "language=spl2;profile=splunkd"} {
 		w := serveAnalysisRequest(t, "GET", "/api/v1/capabilities?"+query, nil, "")
@@ -112,9 +114,8 @@ func TestDialectMaintainedAPIExamples(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	pattern := regexp.MustCompile("(?s)<!-- api-example: ([a-z0-9-]+) (/query/[a-z/-]+) (valid|invalid|incomplete|legacy) -->\\n```json\\n(.*?)\\n```")
-	examples := pattern.FindAllSubmatch(data, -1)
-	if len(examples) != 16 || bytes.Count(data, []byte("```json\n")) != len(examples) {
+	examples := apiExamplePattern.FindAllSubmatch(data, -1)
+	if len(examples) != 16 || bytes.Count(data, []byte("```json")) != len(examples) {
 		t.Fatalf("request marker coverage: %d", len(examples))
 	}
 	seen := map[string]bool{}
@@ -240,6 +241,18 @@ func TestDialectMaintainedAPIExamples(t *testing.T) {
 	}
 	if err = json.Unmarshal(w.Body.Bytes(), &manifest); err != nil || !reflect.DeepEqual(manifest, want) {
 		t.Fatalf("capabilities JSON mismatch: %v %s", err, w.Body)
+	}
+}
+
+func TestDialectMaintainedAPIExamplesAcceptWindowsLineEndings(t *testing.T) {
+	data, err := os.ReadFile("../../docs/api-server.md")
+	if err != nil {
+		t.Fatal(err)
+	}
+	windowsData := bytes.ReplaceAll(data, []byte("\n"), []byte("\r\n"))
+	examples := apiExamplePattern.FindAllSubmatch(windowsData, -1)
+	if len(examples) != 16 || bytes.Count(windowsData, []byte("```json")) != len(examples) {
+		t.Fatalf("request marker coverage with Windows line endings: %d", len(examples))
 	}
 }
 
