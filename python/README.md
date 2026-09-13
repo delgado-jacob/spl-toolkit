@@ -16,6 +16,23 @@ Discovery returns `data_models`, `datasets`, `lookups`, `macros`, `sources`, `so
 
 Source distributions require a local Go toolchain and C compiler. Development installs use built wheels; rebuild and reinstall the wheel after changing the Python wrapper or native Go code.
 
+## Corpus, graph, impact and document tools
+
+`SPLMapper.scan_corpus(request)`, `export_graph(request)` and `export_sarif(request)`
+accept `{"schema_version": 1, "documents": [{"id": "q", "document": {"text": "table host"}}]}`
+with an optional canonical `validation_target`. They return complete dictionaries.
+`impact_schema` accepts that document list plus `before_target`/`after_target`;
+`impact_mapping` accepts `before_rules`/`after_rules` and optional validation targets.
+`document_view` accepts a QueryDocument dictionary and returns a detached evidence
+snapshot. All calls use the owned native boundary and existing close/concurrency
+guards; no CLI subprocess or Python semantic implementation is involved.
+
+Wheels contain versioned machine schemas and the official SARIF schema with
+provenance/notices under `spl_toolkit/contracts`. Python file users can read UTF-8
+sources into QueryDocuments explicitly. The native API accepts inline snapshots
+and does not implicitly read caller filenames. See the repository's
+`examples/tooling/native.py` and `docs/tooling.md` for runnable use.
+
 ## Structured analysis
 
 ```python

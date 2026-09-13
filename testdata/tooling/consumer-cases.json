@@ -1,0 +1,9 @@
+{
+  "sources": [
+    {"path": "bad # % é.spl", "text": "eval '😀a'=", "status": "invalid"},
+    {"path": "partial # % é.spl", "text": "| mystery | table src", "status": "incomplete"}
+  ],
+  "syntax_rule": "SPL_SYNTAX_ERROR",
+  "syntax_uri": "bad%20%23%20%25%20%C3%A9.spl",
+  "syntax_region": {"startLine": 1, "startColumn": 11, "endLine": 1, "endColumn": 11}
+}

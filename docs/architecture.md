@@ -5,6 +5,18 @@ layout: page
 
 # Architecture
 
+## Corpus and editor orchestration
+
+`pkg/corpus` prepares canonical validation and aggregates immutable snapshots;
+`pkg/corpusio` and `internal/corpusfs` acquire explicitly selected local files
+with anchored no-follow handles. `pkg/graph` and `pkg/sarif` project existing
+evidence. `pkg/impact` compares canonical before/after validation/rewrite results.
+`pkg/document` exposes detached snapshots and checked evidence lookups.
+`internal/lsp` owns framed protocol/document lifecycles and UTF-16 conversion,
+delegating all analysis and binding interpretation to canonical packages.
+CLI, REST and owned native/Python adapters compose these operations without
+adding semantic engines. See [tooling](tooling.md) and [contracts](contracts.md).
+
 ## Canonical safe rewriting
 
 `pkg/rewrite` strictly prepares explicit rules and optional validation targets, then consumes the analysis-owned `PrepareRewrite` evidence, typed rendering and whole-candidate `Verify` facade. It selects against original facts, resolves simultaneous linked groups and collisions, reconstructs only declared byte edits, reparses the candidate, and applies one final publication gate. Adapters never infer aliases, implicit labels, SQL phases or source bindings themselves.

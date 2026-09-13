@@ -6,11 +6,21 @@ SPL Toolkit 0.1.1 is an offline library and command-line tool for bounded operat
 - discover data models, datasets, lookups, macros, sources, sourcetypes, and input fields;
 - validate queries against the bundled legacy grammar;
 - analyze query flow, located references, lineage, dependencies, and coverage;
+- scan dedicated query corpora, export graph/SARIF evidence, compare schema/mapping changes, and serve local editor diagnostics and highlights;
 - validate source field obligations against an offline field catalog, singly or in ordered batches;
 - preview or apply explicit source-identity rewrites with linked-edit proof, audit trails, and optional destination validation;
 - check nested declarations against local JSON Schema resources and exact compiled OCSF versions, keeping optional and category-dependent findings visible.
 
 The Go implementation is canonical. The Python package includes the native Go library, and the REST server calls the same Go APIs. Structured analysis and safe rewriting support bounded SPL and standalone SPL2 contracts under splunkd/current; SPL2 requires explicit selection. This does not provide event instance validation, expression typechecking, raw-to-data-model translation, learned mappings, SPL2 modules, or complete Splunk syntax coverage.
+
+## Developer tooling
+
+`scan`, `graph`, `impact-schema`, `impact-mapping`, `document`, and `lsp --stdio`
+reuse the same canonical engine. New corpus/export/impact/document operations
+also have native Python and stateless HTTP adapters. See the
+[tooling guide and runnable examples](docs/tooling.md) and
+[versioned machine contracts](docs/contracts.md). All operations are offline;
+impact assessment does not write query sources.
 
 ## Safe rewrite
 

@@ -23,15 +23,15 @@ runtime schema location existed when these contracts were introduced.
 | `graph.schema.json` | Graph report | |
 | `impact.schema.json` | Static comparison report | `SchemaRequest`, `MappingRequest` |
 | `document-view.schema.json` | Detached document snapshot | |
-| `lsp-configuration.schema.json` | Planned initialization options/settings object | |
+| `lsp-configuration.schema.json` | Initialization options/settings object | |
 
 For example, validate a corpus request against
 `corpus.schema.json#/$defs/Request`, not against the report root. New reports use
 integer `schema_version: 1`; their named schema establishes the report family.
-LSP configuration is a typed fixture contract for Task 9, not evidence that the
-server exists. It has optional `profile`, `version`, and inline `validation_target`.
-Omitting the target selects ordinary analysis. Notifications will wrap this object
-under `splToolkit`; that protocol envelope is outside this schema.
+LSP configuration accepts optional `profile`, `version`, and inline `validation_target`.
+Omitting the target selects ordinary analysis. The stdio server consumes this object
+as initialization options; configuration notifications wrap it under
+`settings.splToolkit`. That protocol envelope is outside this schema.
 
 ## Compatibility rules
 

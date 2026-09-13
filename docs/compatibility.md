@@ -5,6 +5,17 @@ layout: page
 
 # Compatibility
 
+## Developer tooling contracts
+
+SPL Toolkit 0.1.1 adds corpus, graph, impact and document-view report families at
+schema version 1. The local language server deliberately targets LSP 3.17 full
+synchronization, diagnostics and document highlights. SARIF targets 2.1.0 Errata
+01 with Unicode code-point columns; editor positions use UTF-16. Public source
+offsets remain UTF-8 bytes. See [contracts](contracts.md) for additive-output and
+strict-request compatibility rules, and [tooling](tooling.md) for limits and
+real-consumer recipes. The four release targets and Python 3.11+ support policy
+remain unchanged; local consumer checks do not certify the entire matrix.
+
 ## Structured analysis contract and local verification
 
 The additive [structured analysis API](API.md) uses report format integer `1` and compatibility `spl` or explicitly selected `spl2`, profile `splunkd`, and version `current`. Package version `0.1.1` and report format are separate identifiers. Empty compatibility values normalize to those defaults; unsupported selector values are rejected. Go 1.22+ and Python 3.11+ remain the source/API floors.

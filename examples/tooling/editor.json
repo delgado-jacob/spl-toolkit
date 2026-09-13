@@ -1,0 +1,7 @@
+{
+  "description": "Configure these values in your existing compatible LSP client; this is not an extension manifest.",
+  "command": "/absolute/path/to/spl-toolkit",
+  "args": ["lsp", "--stdio"],
+  "languageIds": ["spl", "spl2"],
+  "initializationOptions": {"profile": "splunkd", "version": "current"}
+}

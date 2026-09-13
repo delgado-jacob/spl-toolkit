@@ -393,6 +393,32 @@ def _release_build_environment(
     return env
 
 
+def package_tooling_content(source: Path, output: Path, version: str, epoch: int) -> None:
+    """Package reviewed documentation/examples and the complete Go build sources."""
+    def members(manifest: str) -> list[str]:
+        paths = (source / "tools" / manifest).read_text(encoding="utf-8").splitlines()
+        if not paths or paths != sorted(set(paths)):
+            raise ValueError(f"release manifest must be nonempty, unique and sorted: {manifest}")
+        for name in paths:
+            _safe_archive_name(name)
+            path = source / name
+            if path.is_symlink() or not path.is_file() or source.resolve() not in path.resolve().parents:
+                raise ValueError(f"release manifest requires a contained regular file: {name}")
+        return paths
+
+    content = members("release-content-files.txt")
+    sources = members("release-source-files.txt")
+    for name in content:
+        destination = output / name
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(source / name, destination)
+    archive_path = output / f"spl-toolkit-source-{version}.tar.gz"
+    with tarfile.open(archive_path, "w:gz") as archive:
+        for name in sources:
+            archive.add(source / name, arcname=name, recursive=False)
+    normalize_archive(archive_path, epoch)
+
+
 def build_release(source: Path, output: Path, epoch: int) -> dict[str, object]:
     source, output = source.resolve(), output.resolve()
     if not (source / "go.mod").is_file() or not (source / "VERSION").is_file():
@@ -450,6 +476,7 @@ def build_release(source: Path, output: Path, epoch: int) -> dict[str, object]:
     verify_wheel_native(wheel, native)
     normalize_archive(wheel, epoch)
     normalize_archive(sdist, epoch)
+    package_tooling_content(source, output, version, epoch)
     hashes = artifact_hashes(output)
     (output / CHECKSUM_FILE).write_text(
         "".join(f"{digest}  {name}\n" for name, digest in hashes.items()), encoding="utf-8"

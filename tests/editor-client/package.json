@@ -1,0 +1,10 @@
+{
+  "name": "spl-toolkit-consumer-acceptance",
+  "version": "0.0.1",
+  "private": true,
+  "engines": {"vscode": "^1.82.0"},
+  "activationEvents": ["onLanguage:spl", "onLanguage:spl2"],
+  "main": "./extension.js",
+  "contributes": {"languages": [{"id": "spl", "extensions": [".spl"]}, {"id": "spl2", "extensions": [".spl2"]}]},
+  "dependencies": {"vscode-languageclient": "9.0.1", "vscode-languageserver-protocol": "3.17.5"}
+}

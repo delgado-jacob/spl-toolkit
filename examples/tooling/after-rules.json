@@ -1,0 +1,1 @@
+{"schema_version":1,"rules":[{"id":"rename-host","kind":"field","source":{"name":"host"},"target":{"name":"server"}}]}
