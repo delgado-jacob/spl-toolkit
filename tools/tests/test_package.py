@@ -498,6 +498,7 @@ def test_installed_schema_fixtures_exist_before_both_suites(tmp_path: Path, monk
     monkeypatch.setattr(checker, "create_test_environment", lambda _: directory / "bin/python")
     monkeypatch.setattr(checker, "run", lambda *args, **kwargs: None)
     monkeypatch.setattr(checker, "verify_wheel_sources", lambda *args: payload_hashes)
+    monkeypatch.setattr(checker, "verify_wheel_contracts", lambda *args: {"contract": "test"})
     monkeypatch.setattr(checker.subprocess, "run", lambda *args, **kwargs: subprocess.CompletedProcess(
         args, 0, stdout=json.dumps({"installed_module": str(directory / "module.py"),
                                    "loaded_library": str(library), "native_sha256": checker.sha256(library)}) + "\n"))
@@ -543,7 +544,7 @@ def test_installed_schema_fixtures_exist_before_both_suites(tmp_path: Path, monk
     monkeypatch.setattr(checker, "_run_required_suite", suite)
     result = checker.install_and_check(wheel, directory, outside, "0.1.1", PYTHON_DIR / "requirements-dev.txt",
                                        tmp_path / "cli", tmp_path / "server", ROOT / "testdata/baseline/cases.json", ROOT, go_transport, rewrite_transport)
-    assert len(seen) == 2 and seen[0] == seen[1]
+    assert len(seen) == 3 and seen[0] == seen[1] == seen[2]
     assert result["fixture_hashes"]["schema"] == {name: checker.sha256(ROOT / "testdata/schemas" / name) for name in SCHEMA_FIXTURES}
     assert result["fixture_hashes"]["rewrite"] == {name: checker.sha256(ROOT / "testdata/rewrite" / name) for name in checker.REWRITE_FIXTURE_FILES}
     assert result["wheel_payload_hashes"] == payload_hashes
@@ -555,7 +556,8 @@ def test_schema_source_override_is_removed(monkeypatch):
     assert "SPL_SCHEMA_FIXTURES" not in checker.clean_env()
 
 
-def test_sdist_source_verification_requires_exact_handwritten_sources_and_native_test(tmp_path: Path):
+@pytest.mark.parametrize("changed_name", ["_native_src/pkg/validation/schema_validate.go", "build_support.py", "requirements-contracts-local-hashed.lock"])
+def test_sdist_source_verification_requires_exact_handwritten_sources_and_native_test(tmp_path: Path, changed_name):
     checker = load_package_checker()
     support = load_build_support()
     distribution = support.NativeDistribution({"script_name": str(PYTHON_DIR / "setup.py")})
@@ -563,7 +565,7 @@ def test_sdist_source_verification_requires_exact_handwritten_sources_and_native
     command.ensure_finalized()
     release = tmp_path / "release"
     command.make_release_tree(str(release), [])
-    for relative in ("native-source-files.txt", "spl_toolkit/mapper.py", "spl_toolkit/libspl_toolkit.h", "tests/test_native_schema_validation.py", "tests/test_native_spl2.py", "tests/test_native_rewrite.py"):
+    for relative in ("native-source-files.txt", "spl_toolkit/mapper.py", "spl_toolkit/libspl_toolkit.h", "tests/test_native_schema_validation.py", "tests/test_native_spl2.py", "tests/test_native_rewrite.py", "tests/test_native_tooling.py", "build_support.py", "MANIFEST.in", "setup.py", "pyproject.toml", "requirements-build.txt", "requirements-dev.txt", "requirements-contracts-local-hashed.lock"):
         destination = release / relative
         destination.parent.mkdir(parents=True, exist_ok=True)
         destination.write_bytes((PYTHON_DIR / relative).read_bytes())
@@ -572,7 +574,7 @@ def test_sdist_source_verification_requires_exact_handwritten_sources_and_native
     for path in (ROOT / "pkg/validation").glob("*.go"):
         if not path.name.endswith("_test.go"):
             assert hashes["_native_src/" + path.relative_to(ROOT).as_posix()] == checker.sha256(path)
-    changed = release / "_native_src/pkg/validation/schema_validate.go"
+    changed = release / changed_name
     changed.write_bytes(b"changed")
     with pytest.raises(AssertionError, match="hash"):
         checker.verify_sdist_sources(release, ROOT)

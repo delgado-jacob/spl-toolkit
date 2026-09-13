@@ -47,8 +47,13 @@ import (
 	"github.com/delgado-jacob/spl-toolkit/internal/buildinfo"
 	"github.com/delgado-jacob/spl-toolkit/internal/jsoninput"
 	"github.com/delgado-jacob/spl-toolkit/pkg/analysis"
+	"github.com/delgado-jacob/spl-toolkit/pkg/corpus"
+	"github.com/delgado-jacob/spl-toolkit/pkg/document"
+	"github.com/delgado-jacob/spl-toolkit/pkg/graph"
+	"github.com/delgado-jacob/spl-toolkit/pkg/impact"
 	"github.com/delgado-jacob/spl-toolkit/pkg/mapper"
 	"github.com/delgado-jacob/spl-toolkit/pkg/rewrite"
+	"github.com/delgado-jacob/spl-toolkit/pkg/sarif"
 	"github.com/delgado-jacob/spl-toolkit/pkg/validation"
 )
 
@@ -254,6 +259,88 @@ func spl_mapper_validate_schema_batch(mapperID C.int, requestJSON *C.char) *C.SP
 			return nil, err
 		}
 		return validation.ValidateSchemaBatch(request.Documents, request.Target)
+	})
+}
+
+//export spl_mapper_scan_corpus
+func spl_mapper_scan_corpus(mapperID C.int, requestJSON *C.char) *C.SPLResult {
+	return ownedMapperJSONResult(mapperID, func() (any, error) {
+		request, err := corpus.DecodeRequest([]byte(C.GoString(requestJSON)))
+		if err != nil {
+			return nil, err
+		}
+		return corpus.Scan(request)
+	})
+}
+
+//export spl_mapper_export_graph
+func spl_mapper_export_graph(mapperID C.int, requestJSON *C.char) *C.SPLResult {
+	return ownedMapperJSONResult(mapperID, func() (any, error) {
+		request, err := corpus.DecodeRequest([]byte(C.GoString(requestJSON)))
+		if err != nil {
+			return nil, err
+		}
+		report, err := corpus.Scan(request)
+		if err != nil {
+			return nil, err
+		}
+		return graph.Export(report)
+	})
+}
+
+//export spl_mapper_export_sarif
+func spl_mapper_export_sarif(mapperID C.int, requestJSON *C.char) *C.SPLResult {
+	return ownedMapperJSONResult(mapperID, func() (any, error) {
+		request, err := corpus.DecodeRequest([]byte(C.GoString(requestJSON)))
+		if err != nil {
+			return nil, err
+		}
+		report, err := corpus.Scan(request)
+		if err != nil {
+			return nil, err
+		}
+		return sarif.Export(report)
+	})
+}
+
+//export spl_mapper_impact_schema
+func spl_mapper_impact_schema(mapperID C.int, requestJSON *C.char) *C.SPLResult {
+	return ownedMapperJSONResult(mapperID, func() (any, error) {
+		request, err := impact.DecodeSchemaRequest([]byte(C.GoString(requestJSON)))
+		if err != nil {
+			return nil, err
+		}
+		return impact.CompareSchemas(request)
+	})
+}
+
+//export spl_mapper_impact_mapping
+func spl_mapper_impact_mapping(mapperID C.int, requestJSON *C.char) *C.SPLResult {
+	return ownedMapperJSONResult(mapperID, func() (any, error) {
+		request, err := impact.DecodeMappingRequest([]byte(C.GoString(requestJSON)))
+		if err != nil {
+			return nil, err
+		}
+		return impact.CompareMappings(request)
+	})
+}
+
+//export spl_mapper_document_view
+func spl_mapper_document_view(mapperID C.int, requestJSON *C.char) *C.SPLResult {
+	return ownedMapperJSONResult(mapperID, func() (any, error) {
+		data := []byte(C.GoString(requestJSON))
+		documents, err := validation.DecodeDocuments(append(append([]byte{'['}, data...), ']'))
+		if err != nil {
+			return nil, err
+		}
+		if len(documents) != 1 {
+			return nil, fmt.Errorf("expected exactly one query document")
+		}
+		report, err := analysis.Analyze(documents[0])
+		if err != nil {
+			return nil, err
+		}
+		return document.New(report, document.RevisionContext{ToolVersion: buildinfo.Version, ContractVersion: "1"})
 	})
 }
 

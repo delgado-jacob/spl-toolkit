@@ -167,6 +167,14 @@ class BuildPy(build_py):
         output = Path(self.build_lib) / "spl_toolkit" / native_library_name()
         build_native(source_root(setup_dir), output, read_version(setup_dir))
         (output.parent / PARSER_LICENSE).write_text(parser_attribution(setup_dir), encoding="utf-8")
+        # Canonical data is staged once from the same explicit source closure
+        # for checkout builds and standalone sdist rebuilds.
+        source = source_root(setup_dir)
+        for relative in native_source_files(setup_dir / NATIVE_SOURCE_MANIFEST):
+            if relative.parts[0] == "contracts":
+                destination = output.parent / relative
+                destination.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(source / relative, destination)
 
 
 def native_source_files(manifest: Path) -> list[Path]:

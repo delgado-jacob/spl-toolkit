@@ -30,12 +30,13 @@ SDIST_FIXED_FILES = {
     "LICENSE", "MANIFEST.in", "PARSER-LICENSE", "PKG-INFO", "README.md", "VERSION", "build_support.py",
     "native-source-files.txt", "pyproject.toml", "requirements-build.txt",
     "requirements-dev.txt", "setup.cfg", "setup.py", "spl_toolkit/__init__.py",
+    "requirements-contracts-local-hashed.lock",
     "spl_toolkit/exceptions.py", "spl_toolkit/libspl_toolkit.h", "spl_toolkit/mapper.py",
     "spl_toolkit.egg-info/PKG-INFO", "spl_toolkit.egg-info/SOURCES.txt",
     "spl_toolkit.egg-info/dependency_links.txt", "spl_toolkit.egg-info/top_level.txt",
     "tests/test_mapper.py", "tests/test_native_abi.py", "tests/test_native_mapper.py",
     "tests/test_native_analysis.py", "tests/test_native_validation.py", "tests/test_native_schema_validation.py",
-    "tests/test_native_spl2.py", "tests/test_native_rewrite.py",
+    "tests/test_native_spl2.py", "tests/test_native_rewrite.py", "tests/test_native_tooling.py",
 }
 INSTALL_SCRIPT = """
 import importlib.metadata, pathlib, sys
@@ -49,7 +50,7 @@ with SPLMapper() as mapper:
     mapper.load_mappings([{'source':'src_ip','target':'source_ip'}])
     assert mapper.map_query('search src_ip=1') == 'search source_ip=1'
 """
-NATIVE_TESTS = ("test_native_abi.py", "test_native_mapper.py", "test_native_analysis.py", "test_native_validation.py", "test_native_schema_validation.py", "test_native_spl2.py", "test_native_rewrite.py")
+NATIVE_TESTS = ("test_native_abi.py", "test_native_mapper.py", "test_native_analysis.py", "test_native_validation.py", "test_native_schema_validation.py", "test_native_spl2.py", "test_native_rewrite.py", "test_native_tooling.py")
 REWRITE_FIXTURE_FILES = ("cases.json", "conditions.json", "corpus.json", "edits.json", "example-rules.json", "forms.json", "requests.json")
 SCHEMA_FIXTURE_FILES = (
     "cases.json", "requests.json", "ocsf/edge-cases.json",
@@ -64,7 +65,7 @@ SPL2_FIXTURE_FILES = (
     "extended-commands.json", "extended-boundaries.json", "functions.json", "canonical-core.json",
     "recovery-core.json",
 )
-ACCEPTANCE_FILES = ("test_documented_cli.py", "test_surfaces.py", "test_analysis_surfaces.py", "test_validation_surfaces.py", "test_schema_surfaces.py", "test_spl2_surfaces.py", "test_rewrite_surfaces.py", "spl2_transport.py", "cli_examples.json")
+ACCEPTANCE_FILES = ("test_documented_cli.py", "test_surfaces.py", "test_analysis_surfaces.py", "test_validation_surfaces.py", "test_schema_surfaces.py", "test_spl2_surfaces.py", "test_rewrite_surfaces.py", "test_tooling_surfaces.py", "test_machine_contracts.py", "spl2_transport.py", "cli_examples.json")
 REQUIRED_PYTEST_PLUGIN = r'''\
 import json
 import os
@@ -153,6 +154,8 @@ def run(command: list[str], *, cwd: Path, env: dict[str, str] | None = None) -> 
 
 def clean_env() -> dict[str, str]:
     env = os.environ.copy()
+    for name in ("SPL_TOOLING_FIXTURES", "SPL_TOOLING_SOURCE_ROOT", "SPL_TOOLING_GO", "SPL_CONTRACT_GO"):
+        env.pop(name, None)
     for name in ("PYTHONPATH", "PYTHONHOME", "SPL_NATIVE_LIBRARY", "SPL_EXPECTED_VERSION", "SPL_SCHEMA_FIXTURES", "SPL_SPL2_FIXTURES", "SPL_SPL2_GO_REPORTS", "SPL_SPL2_GO_SHA256", "SPL_REWRITE_FIXTURES", "SPL_REWRITE_GO_REPORTS", "SPL_REWRITE_GO_SHA256", "SPL_REWRITE_EVIDENCE"):
         env.pop(name, None)
     return env
@@ -341,13 +344,32 @@ def verify_wheel_sources(wheel: Path, root: Path) -> dict[str, str]:
     return hashes
 
 
+def verify_wheel_contracts(wheel: Path, root: Path) -> dict[str, str]:
+    """Bind every canonical schema, provenance document and notice to its wheel."""
+    hashes = {}
+    with zipfile.ZipFile(wheel) as archive:
+        for source in sorted((root / "contracts").rglob("*")):
+            if not source.is_file():
+                continue
+            relative = "spl_toolkit/" + source.relative_to(root).as_posix()
+            digest = hashlib.sha256(archive.read(relative)).hexdigest()
+            if digest != sha256(source):
+                raise AssertionError(f"wheel contract hash mismatch: {relative}")
+            hashes[relative] = digest
+    if not hashes:
+        raise AssertionError("canonical contracts are missing")
+    return hashes
+
+
 def verify_sdist_sources(source: Path, root: Path) -> dict[str, str]:
     """Reject stale or incomplete native sources before an sdist wheel rebuild."""
     manifest = root / "python/native-source-files.txt"
     originals = {
         relative: root / "python" / relative for relative in (
             "native-source-files.txt", "spl_toolkit/mapper.py", "spl_toolkit/libspl_toolkit.h",
-            "tests/test_native_schema_validation.py", "tests/test_native_spl2.py", "tests/test_native_rewrite.py",
+            "build_support.py", "MANIFEST.in", "setup.py", "pyproject.toml",
+            "requirements-build.txt", "requirements-dev.txt", "requirements-contracts-local-hashed.lock",
+            "tests/test_native_schema_validation.py", "tests/test_native_spl2.py", "tests/test_native_rewrite.py", "tests/test_native_tooling.py",
         )
     }
     for relative in manifest.read_text(encoding="utf-8").splitlines():
@@ -387,6 +409,7 @@ def install_and_check(
     rewrite_transport: Path,
 ) -> dict[str, object]:
     wheel_payload_hashes = verify_wheel_sources(wheel, docs_root)
+    wheel_contract_hashes = verify_wheel_contracts(wheel, docs_root)
     python = create_test_environment(directory)
     env = clean_env()
     path_entries = [str(python.parent)]
@@ -395,7 +418,10 @@ def install_and_check(
     else:
         path_entries.extend(("/usr/bin", "/bin"))
     install_env = env | {"PATH": os.pathsep.join(path_entries)}
-    run([str(python), "-m", "pip", "install", "--disable-pip-version-check", "-r", str(requirements.resolve())], cwd=outside_checkout, env=install_env)
+    run([str(python), "-m", "pip", "install", "--disable-pip-version-check", "--no-index",
+         "--only-binary=:all:", "--require-hashes", "-r",
+         str(docs_root / "python/requirements-contracts-local-hashed.lock")], cwd=outside_checkout, env=install_env)
+    run([str(python), "-m", "pip", "install", "--disable-pip-version-check", "--no-index", "-r", str(requirements.resolve())], cwd=outside_checkout, env=install_env)
     run([str(python), "-m", "pip", "install", "--disable-pip-version-check", "--no-deps", str(wheel.resolve())], cwd=outside_checkout, env=install_env)
     controller_site = str(Path(sysconfig.get_paths()["purelib"]).resolve())
     check_script = (
@@ -422,6 +448,26 @@ def install_and_check(
     spl2_hashes = copy_spl2_fixtures(docs_root / "testdata/spl2", spl2_fixtures)
     rewrite_fixtures = outside_checkout / f"rewrite-fixtures-{directory.name}"
     rewrite_hashes = copy_rewrite_fixtures(docs_root / "testdata/rewrite", rewrite_fixtures)
+    # The unmodified machine-contract suite needs a tiny standalone Go module
+    # to emit canonical reports. No Python modules are copied into this root.
+    tooling_root = outside_checkout / f"tooling-{directory.name}"
+    tooling_source_hashes = {}
+    for relative in (docs_root / "python/native-source-files.txt").read_text().splitlines():
+        if not relative or relative.startswith("#"):
+            continue
+        source, copied = docs_root / relative, tooling_root / relative
+        copied.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source, copied)
+        tooling_source_hashes[relative] = sha256(copied)
+        if tooling_source_hashes[relative] != sha256(source):
+            raise AssertionError(f"tooling source copy mismatch: {relative}")
+    tooling_fixtures = tooling_root / "testdata/tooling"
+    tooling_fixtures.parent.mkdir(parents=True, exist_ok=True)
+    _copy_required_files(docs_root / "testdata/tooling", tooling_fixtures,
+                         ("contracts.json", "graph-cases.json", "impact-cases.json", "requests.json", "sarif-cases.json"))
+    tooling_hashes = {p.name: sha256(p) for p in tooling_fixtures.iterdir()}
+    _copy_required_files(rewrite_fixtures, tooling_root / "testdata/rewrite", ("forms.json",))
+    tooling_hashes["../rewrite/forms.json"] = sha256(tooling_root / "testdata/rewrite/forms.json")
     copied_go_transport = outside_checkout / f"spl2-go-transport-{directory.name}.json"
     shutil.copy2(go_transport, copied_go_transport)
     go_transport_hash = sha256(go_transport)
@@ -439,13 +485,20 @@ def install_and_check(
         "SPL_SCHEMA_FIXTURES": str(schema_fixtures.resolve()),
         "SPL_SPL2_FIXTURES": str(spl2_fixtures.resolve()),
         "SPL_REWRITE_FIXTURES": str(rewrite_fixtures.resolve()),
+        "SPL_TOOLING_FIXTURES": str(tooling_fixtures.resolve()),
+        "SPL_TOOLING_SOURCE_ROOT": str(tooling_root.resolve()),
+        "SPL_TOOLING_GO": shutil.which("go") or "go",
+        "SPL_CLI": str(cli.resolve()),
     }
     native_counts = _run_required_suite(
         python, installed_test_dir, outside_checkout / f"native-counts-{directory.name}.json", outside_checkout, install_env | analysis_env
     )
 
+    # Legacy installed tests intentionally have no source-root go.mod: their
+    # copied, hashed Go transport already attests the original complete source.
     acceptance_dir = outside_checkout / f"acceptance-{directory.name}"
-    _copy_required_files(docs_root / "tests" / "acceptance", acceptance_dir, ACCEPTANCE_FILES)
+    _copy_required_files(docs_root / "tests" / "acceptance", acceptance_dir,
+                         tuple(name for name in ACCEPTANCE_FILES if name != "test_machine_contracts.py"))
     fixture = outside_checkout / f"cases-{directory.name}.json"
     shutil.copy2(fixture_source, fixture)
     validation_fixture = outside_checkout / f"validation-cases-{directory.name}.json"
@@ -468,11 +521,20 @@ def install_and_check(
         "SPL_SERVER": str(server.resolve()),
         "SPL_FIXTURES": str(fixture.resolve()),
         "SPL_DOCS_ROOT": str(documentation.resolve()),
+        "SPL_CONTRACT_GO": shutil.which("go") or "go",
     }
     surface_counts = _run_required_suite(
         python, acceptance_dir, outside_checkout / f"surface-counts-{directory.name}.json",
         outside_checkout, acceptance_env,
     )
+    contract_dir = tooling_root / "tests/contracts"
+    contract_dir.parent.mkdir(parents=True, exist_ok=True)
+    _copy_required_files(docs_root / "tests/acceptance", contract_dir, ("test_machine_contracts.py",))
+    contract_counts = _run_required_suite(
+        python, contract_dir, outside_checkout / f"contract-counts-{directory.name}.json",
+        outside_checkout, acceptance_env,
+    )
+    surface_counts = {key: value + contract_counts[key] for key, value in surface_counts.items()}
     return metadata | {
         "schema_surface_evidence": json.loads(schema_evidence.read_text(encoding="utf-8")),
         "spl2_surface_evidence": json.loads(spl2_evidence.read_text(encoding="utf-8")),
@@ -480,6 +542,10 @@ def install_and_check(
         "documentation_hashes": documentation_hashes,
         "wheel_sha256": sha256(wheel),
         "wheel_payload_hashes": wheel_payload_hashes,
+        "wheel_contract_hashes": wheel_contract_hashes,
+        "tooling_source_hashes": tooling_source_hashes,
+        "tooling_fixture_hashes": tooling_hashes,
+        "machine_contract_tests": contract_counts,
         "source_header_sha256": sha256(docs_root / "python/spl_toolkit/libspl_toolkit.h"),
         "fixture_hashes": {"baseline": sha256(fixture), "analysis": sha256(analysis_fixture), "validation": sha256(validation_fixture), "schema": schema_hashes, "spl2": spl2_hashes, "rewrite": rewrite_hashes, "spl2_go_transport": go_transport_hash, "rewrite_go_transport": rewrite_transport_hash},
         "tests": {"required_native": native_counts, "surface_acceptance": surface_counts},

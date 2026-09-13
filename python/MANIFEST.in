@@ -1,6 +1,7 @@
 include build_support.py
 include requirements-build.txt
 include requirements-dev.txt
+include requirements-contracts-local-hashed.lock
 include native-source-files.txt
 include README.md
 include LICENSE

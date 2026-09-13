@@ -158,6 +158,11 @@ class SPLMapper:
         self._lib.spl_mapper_rewrite.restype = ctypes.POINTER(SPLResult)
         self._lib.spl_mapper_rewrite_batch.argtypes = [ctypes.c_int, ctypes.c_char_p]
         self._lib.spl_mapper_rewrite_batch.restype = ctypes.POINTER(SPLResult)
+        for operation in ("scan_corpus", "export_graph", "export_sarif", "impact_schema",
+                          "impact_mapping", "document_view"):
+            native = getattr(self._lib, "spl_mapper_" + operation)
+            native.argtypes = [ctypes.c_int, ctypes.c_char_p]
+            native.restype = ctypes.POINTER(SPLResult)
         self._lib.spl_mapper_capabilities.argtypes = [ctypes.c_int]
         self._lib.spl_mapper_capabilities.restype = ctypes.POINTER(SPLResult)
         self._lib.spl_mapper_capabilities_for.argtypes = [ctypes.c_int, ctypes.c_char_p]
@@ -393,6 +398,30 @@ class SPLMapper:
         if validation_target is not None:
             request["validation_target"] = validation_target
         return self._validate_fields_request(self._lib.spl_mapper_rewrite_batch, request, operation="rewrite")
+
+    def scan_corpus(self, request: dict) -> dict:
+        """Scan an inline corpus request with explicit document IDs and optional target."""
+        return self._validate_fields_request(self._lib.spl_mapper_scan_corpus, request, operation="corpus scan")
+
+    def export_graph(self, request: dict) -> dict:
+        """Export canonical graph evidence from an inline corpus request."""
+        return self._validate_fields_request(self._lib.spl_mapper_export_graph, request, operation="graph export")
+
+    def export_sarif(self, request: dict) -> dict:
+        """Export a SARIF 2.1.0 object from an inline corpus request."""
+        return self._validate_fields_request(self._lib.spl_mapper_export_sarif, request, operation="SARIF export")
+
+    def impact_schema(self, request: dict) -> dict:
+        """Compare explicit before/after targets against identical inline documents."""
+        return self._validate_fields_request(self._lib.spl_mapper_impact_schema, request, operation="schema impact")
+
+    def impact_mapping(self, request: dict) -> dict:
+        """Compare explicit before/after rule sets using canonical rewrite previews."""
+        return self._validate_fields_request(self._lib.spl_mapper_impact_mapping, request, operation="mapping impact")
+
+    def document_view(self, document: dict) -> dict:
+        """Return a detached advanced view of a canonical QueryDocument dictionary."""
+        return self._validate_fields_request(self._lib.spl_mapper_document_view, document, operation="document view")
 
     def _validate_fields_request(self, native, request, *, operation="validation") -> dict:
         with self._operation() as handle:
