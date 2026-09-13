@@ -249,10 +249,12 @@ func TestDialectMaintainedAPIExamplesAcceptWindowsLineEndings(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	windowsData := bytes.ReplaceAll(data, []byte("\n"), []byte("\r\n"))
-	examples := apiExamplePattern.FindAllSubmatch(windowsData, -1)
-	if len(examples) != 16 || bytes.Count(windowsData, []byte("```json")) != len(examples) {
-		t.Fatalf("request marker coverage with Windows line endings: %d", len(examples))
+	lfData := bytes.ReplaceAll(data, []byte("\r\n"), []byte("\n"))
+	for _, source := range [][]byte{lfData, bytes.ReplaceAll(lfData, []byte("\n"), []byte("\r\n"))} {
+		examples := apiExamplePattern.FindAllSubmatch(source, -1)
+		if len(examples) != 16 || bytes.Count(source, []byte("```json")) != len(examples) {
+			t.Fatalf("request marker coverage with Windows line endings: %d", len(examples))
+		}
 	}
 }
 
