@@ -58,8 +58,8 @@ Preserve all other users/agents' changes in the shared worktree. During this pla
 - [x] (2026-09-12 UTC) Root stable Go-only core acceptance: seven packages passed on host Go and fresh uncached official Go 1.22.12 with offline task cache; tracked tree clean.
 - [x] (2026-09-12 UTC) Task 9: local LSP lifecycle and source conversion; `d2ba9c8af35ccc2679e2b9289fff7ffa6972d1e2`, independent review APPROVE, Go1.22 race/vet, real stdio harness and independent Unicode/CRLF highlight transcripts passed.
 - [x] (2026-09-12 UTC) Task 10: CLI/HTTP operations and executable examples; `1856f801248fade7e4e30d36c610a0be4d70df7a`, independent bounded review APPROVE, exact same-provenance canonical parity, real HTTP/CLI/LSP and Go1.22 focused/race/vet passed. Pathname output publication does not prove safety under concurrent namespace changes; static aliases are protected.
-- [ ] Task 11: native Python and installed package closure; released after Task 10 review.
-- [ ] Task 12: actual editor/SARIF consumers and release evidence closure.
+- [x] (2026-09-12 UTC) Task 11: native Python and installed package closure; `6dc178a20b080a40e22455732e264e5e2ba264e0`, independent review APPROVE, direct-wheel/rebuilt-sdist each 542 native +254 acceptance, zero skips, matching native SHA. Root Python3.14 and wider platforms remain open.
+- [ ] Task 12: actual editor/SARIF consumers and release evidence closure; released after Task 11 review.
 - [ ] Root completes a stable final built/native/real-consumer window; broad review and independent exact-head acceptance close M7.
 
 
