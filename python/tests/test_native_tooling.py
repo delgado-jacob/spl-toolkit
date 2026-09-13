@@ -266,7 +266,7 @@ def test_full_go_cli_native_tooling_parity(operation, tooling_go, tmp_path):
                     "--target", write("target.json", AFTER), "--format",
                     "sarif" if operation == "export_sarif" else "json"]
     snapshots = {p: p.read_bytes() for p in tmp_path.iterdir()}
-    result = subprocess.run([str(binary), *args], capture_output=True, text=True)
+    result = subprocess.run([str(binary), *args], capture_output=True, text=True, encoding="utf-8")
     assert not result.stderr
     assert result.returncode == (0 if operation == "document_view" else 3 if operation == "impact_mapping" else 1)
     local = json.loads(result.stdout)
