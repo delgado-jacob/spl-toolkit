@@ -83,6 +83,11 @@ jobs:
           if ((& $gcc -dumpfullversion).Trim() -ne '14.2.0') { throw "expected MinGW GCC 14.2.0" }
           "CC=$gcc" | Out-File $env:GITHUB_ENV -Encoding utf8 -Append
       - run: python -m pip install --disable-pip-version-check -r python/requirements-dev.txt
+      - name: Configure isolated package-check wheelhouse
+        run: python -c "import os; from pathlib import Path; wheels=Path(os.environ['RUNNER_TEMP'])/'package-check-wheels'; wheels.mkdir(); Path(os.environ['GITHUB_ENV']).open('a',encoding='utf-8').write(f'PIP_FIND_LINKS={wheels.as_uri()}\n')"
+      - name: Provision hash-locked package-check dependencies
+        run: >-
+          python -m pip --isolated download --disable-pip-version-check --no-cache-dir --index-url https://pypi.org/simple --only-binary=:all: --require-hashes -r tools/requirements-package-check-hashed.lock --dest "${{ runner.temp }}/package-check-wheels"
       - name: Run handwritten checks and race suite
         run: |
           python tools/check_go.py
@@ -147,6 +152,11 @@ jobs:
         run: python -c "import os; from pathlib import Path; cache=Path(os.environ['RUNNER_TEMP'])/'pip-cache'; cache.mkdir(); Path(os.environ['GITHUB_ENV']).open('a',encoding='utf-8').write(f'PIP_CACHE_DIR={cache}\n')"
       - name: Install package checker dependencies
         run: python -m pip install --disable-pip-version-check -r python/requirements-build.txt
+      - name: Configure isolated package-check wheelhouse
+        run: python -c "import os; from pathlib import Path; wheels=Path(os.environ['RUNNER_TEMP'])/'package-check-wheels'; wheels.mkdir(); Path(os.environ['GITHUB_ENV']).open('a',encoding='utf-8').write(f'PIP_FIND_LINKS={wheels.as_uri()}\n')"
+      - name: Provision hash-locked package-check dependencies
+        run: >-
+          python -m pip --isolated download --disable-pip-version-check --no-cache-dir --index-url https://pypi.org/simple --only-binary=:all: --require-hashes -r tools/requirements-package-check-hashed.lock --dest "${{ runner.temp }}/package-check-wheels"
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
         with:
           name: baseline-${{ matrix.target }}

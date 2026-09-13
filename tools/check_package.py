@@ -400,7 +400,6 @@ def install_and_check(
     directory: Path,
     outside_checkout: Path,
     expected_version: str,
-    requirements: Path,
     cli: Path,
     server: Path,
     fixture_source: Path,
@@ -418,10 +417,11 @@ def install_and_check(
     else:
         path_entries.extend(("/usr/bin", "/bin"))
     install_env = env | {"PATH": os.pathsep.join(path_entries)}
+    # CI (or the local operator) provisions the reviewed wheel closure first.
+    # An absent/incomplete wheelhouse must fail without an online fallback.
     run([str(python), "-m", "pip", "install", "--disable-pip-version-check", "--no-index",
          "--only-binary=:all:", "--require-hashes", "-r",
-         str(docs_root / "python/requirements-contracts-local-hashed.lock")], cwd=outside_checkout, env=install_env)
-    run([str(python), "-m", "pip", "install", "--disable-pip-version-check", "--no-index", "-r", str(requirements.resolve())], cwd=outside_checkout, env=install_env)
+         str(docs_root / "tools/requirements-package-check-hashed.lock")], cwd=outside_checkout, env=install_env)
     run([str(python), "-m", "pip", "install", "--disable-pip-version-check", "--no-deps", str(wheel.resolve())], cwd=outside_checkout, env=install_env)
     controller_site = str(Path(sysconfig.get_paths()["purelib"]).resolve())
     check_script = (
@@ -738,7 +738,6 @@ def _check_package(
         temp = Path(temporary)
         outside = temp / "outside"
         outside.mkdir()
-        requirements = root / "python" / "requirements-dev.txt"
         if cli_path is not None and server_path is not None:
             cli, server = cli_path.resolve(), server_path.resolve()
         elif wheel_only:
@@ -751,7 +750,7 @@ def _check_package(
         run([sys.executable, str(root / "tests/acceptance/test_rewrite_surfaces.py"), "--root", str(root), "--output", str(rewrite_transport)], cwd=root, env=clean_env())
         fixture = root / "testdata" / "baseline" / "cases.json"
         evidence = install_and_check(
-            wheel, temp / "wheel-venv", outside, version, requirements,
+            wheel, temp / "wheel-venv", outside, version,
             cli, server, fixture, root, go_transport, rewrite_transport,
         )
 
@@ -769,7 +768,7 @@ def _check_package(
             inspect_wheel(source_wheel, version)
             evidence["rebuilt_sdist"] = install_and_check(
                 source_wheel, temp / "sdist-venv", outside, version,
-                source / "requirements-dev.txt", cli, server, fixture, root, go_transport, rewrite_transport,
+                cli, server, fixture, root, go_transport, rewrite_transport,
             )
             evidence["rebuilt_sdist"]["sdist_source_hashes"] = source_hashes
             check_missing_compiler(source, temp / "failed-wheel", clean_env())

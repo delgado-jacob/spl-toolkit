@@ -496,7 +496,8 @@ def test_installed_schema_fixtures_exist_before_both_suites(tmp_path: Path, monk
     payload_hashes = {"spl_toolkit/" + library.name: checker.sha256(library)}
     monkeypatch.setenv("SPL_SCHEMA_FIXTURES", "checkout-only")
     monkeypatch.setattr(checker, "create_test_environment", lambda _: directory / "bin/python")
-    monkeypatch.setattr(checker, "run", lambda *args, **kwargs: None)
+    commands = []
+    monkeypatch.setattr(checker, "run", lambda command, **kwargs: commands.append(command))
     monkeypatch.setattr(checker, "verify_wheel_sources", lambda *args: payload_hashes)
     monkeypatch.setattr(checker, "verify_wheel_contracts", lambda *args: {"contract": "test"})
     monkeypatch.setattr(checker.subprocess, "run", lambda *args, **kwargs: subprocess.CompletedProcess(
@@ -542,12 +543,17 @@ def test_installed_schema_fixtures_exist_before_both_suites(tmp_path: Path, monk
         return counts
 
     monkeypatch.setattr(checker, "_run_required_suite", suite)
-    result = checker.install_and_check(wheel, directory, outside, "0.1.1", PYTHON_DIR / "requirements-dev.txt",
+    result = checker.install_and_check(wheel, directory, outside, "0.1.1",
                                        tmp_path / "cli", tmp_path / "server", ROOT / "testdata/baseline/cases.json", ROOT, go_transport, rewrite_transport)
     assert len(seen) == 3 and seen[0] == seen[1] == seen[2]
     assert result["fixture_hashes"]["schema"] == {name: checker.sha256(ROOT / "testdata/schemas" / name) for name in SCHEMA_FIXTURES}
     assert result["fixture_hashes"]["rewrite"] == {name: checker.sha256(ROOT / "testdata/rewrite" / name) for name in checker.REWRITE_FIXTURE_FILES}
     assert result["wheel_payload_hashes"] == payload_hashes
+    dependency_installs = [command for command in commands if "pip" in command and "-r" in command]
+    assert len(dependency_installs) == 1
+    dependency_install = dependency_installs[0]
+    assert dependency_install[-1] == str(ROOT / "tools/requirements-package-check-hashed.lock")
+    assert {"--no-index", "--require-hashes", "--only-binary=:all:"} <= set(dependency_install)
 
 
 def test_schema_source_override_is_removed(monkeypatch):
