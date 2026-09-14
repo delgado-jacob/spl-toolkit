@@ -163,6 +163,15 @@ func executeSPL2SQL(result *Result, parsed *spl2ParsedDocument, refinement *sour
 		s.applyPreparedProjection(selected, "table")
 		if selectedShape {
 			s.env.open, s.env.uncertain = false, false
+			fields := map[string]requirementField{}
+			for _, selection := range selected {
+				if field, ok := s.env.requirements.fields[selection.Field.Name]; ok {
+					field.origins = append([]string{}, field.origins...)
+					fields[selection.Field.Name] = field
+				}
+			}
+			s.env.requirements.fields = fields
+			s.env.requirements.open, s.env.requirements.uncertain = false, false
 		}
 	})
 	phase(c.SqlLimitClause(), "limit", func() {})

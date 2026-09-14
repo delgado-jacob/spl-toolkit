@@ -220,6 +220,76 @@ func TestRequirementTraceDiagnosticOwnership(t *testing.T) {
 	}
 }
 
+func TestRequirementTraceRenameRemovesSource(t *testing.T) {
+	_, trace, err := analyzeRewriteWithTrace(QueryDocument{Text: "search host=x | rename host AS node | table host"}, nil, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	entry := trace.reference("pending-3")
+	if entry.reference.NormalizedName != "host" || entry.reference.Role != "read" || entry.reference.Binding != "unavailable" || entry.directExternal || entry.conditional {
+		t.Fatalf("post-rename source trace = %+v", entry)
+	}
+}
+
+func TestRequirementTraceDatasetLiteralClosesAbsentField(t *testing.T) {
+	_, trace, err := analyzeRewriteWithTrace(QueryDocument{Text: "FROM [{a:1}] | table b", Language: "spl2"}, nil, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	entry := trace.reference("pending-1")
+	if entry.reference.NormalizedName != "b" || entry.reference.Role != "read" || entry.reference.Binding != "unavailable" || entry.directExternal || entry.conditional {
+		t.Fatalf("absent dataset field trace = %+v", entry)
+	}
+}
+
+func TestRequirementTraceSQLProjectionClosesAbsentDownstreamField(t *testing.T) {
+	_, trace, err := analyzeRewriteWithTrace(QueryDocument{Text: "SELECT host FROM main | where bytes>0", Language: "spl2"}, nil, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	entry := trace.reference("pending-2")
+	if entry.reference.NormalizedName != "bytes" || entry.reference.Role != "read" || entry.reference.Binding != "unavailable" || entry.directExternal || entry.conditional {
+		t.Fatalf("post-SELECT field trace = %+v", entry)
+	}
+}
+
+func TestRequirementTraceMacroDiagnosticsOwnExactReferences(t *testing.T) {
+	const query = "| eval a=`one()`, b=`two()`"
+	_, trace, err := analyzeRewriteWithTrace(QueryDocument{Text: query}, nil, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	macroReferences := map[string]string{}
+	for _, entry := range trace.references {
+		if entry.reference.Kind == "macro" {
+			macroReferences[entry.reference.NormalizedName] = entry.reference.ID
+		}
+	}
+	wantOwners := map[string]string{"`one()`": "one", "`two()`": "two"}
+	found := 0
+	for _, entry := range trace.diagnostics {
+		if entry.diagnostic.Code != CodeDynamicReference {
+			continue
+		}
+		found++
+		span := query[entry.diagnostic.Location.Start.Offset:entry.diagnostic.Location.End.Offset]
+		name, ok := wantOwners[span]
+		if !ok {
+			t.Fatalf("unexpected macro diagnostic span %q", span)
+		}
+		if !reflect.DeepEqual(entry.pendingReferenceIDs, []string{macroReferences[name]}) {
+			t.Fatalf("macro %q diagnostic owners = %v, want %q", name, entry.pendingReferenceIDs, macroReferences[name])
+		}
+	}
+	if found != len(wantOwners) {
+		t.Fatalf("macro diagnostic count = %d, want %d: %+v", found, len(wantOwners), trace.diagnostics)
+	}
+}
+
 func TestRequirementTraceRemapsEachPendingIDOnce(t *testing.T) {
 	assertPanics := func(t *testing.T, run func()) {
 		t.Helper()

@@ -108,16 +108,6 @@ func (t *requirementTrace) reference(pendingID string) *requirementTraceReferenc
 	panic(fmt.Sprintf("requirement trace reference %q is missing", pendingID))
 }
 
-func (t *requirementTrace) linkLatestDiagnostic(code, stageID, pendingID string) {
-	for i := len(t.diagnostics) - 1; i >= 0; i-- {
-		entry := &t.diagnostics[i]
-		if entry.diagnostic.Code == code && entry.diagnostic.StageID == stageID {
-			entry.pendingReferenceIDs = uniqueIDs(entry.pendingReferenceIDs, []string{pendingID})
-			return
-		}
-	}
-}
-
 func (t *requirementTrace) syncParserDiagnostics(diagnostics []Diagnostic) {
 	for i, diagnostic := range diagnostics {
 		if i >= len(t.diagnostics) {

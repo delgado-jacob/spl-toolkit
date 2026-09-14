@@ -18,6 +18,7 @@ type semanticStage struct {
 	transitions    []Transition
 	recoveryLimit  int
 	refinement     *sourceRefinement
+	macroEvidence  map[antlr.ParserRuleContext]string
 }
 
 func normalizedName(text string) string {
@@ -142,7 +143,7 @@ func (s *semanticStage) expression(node antlr.Tree) []string {
 		}
 		return ids
 	case parser.IAnalysisMacroContext:
-		s.diagnostic(CodeDynamicReference, "macro expansion is unresolved", ctx)
+		s.macro(ctx)
 		return ids
 	case parser.IAnalysisSubqueryContext:
 		s.diagnostic(CodeUnsupportedSemantics, "subsearch result field effects are unmodeled", ctx)

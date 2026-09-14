@@ -342,6 +342,7 @@ func (s *semanticStage) applyRename(pairs []renameOperands) {
 	}
 	for _, r := range items {
 		s.env.remove(r.source)
+		s.env.requirements.remove(r.source)
 	}
 	for _, r := range items {
 		s.createAt(r.target, "rename", "rename", []string{r.input}, r.conditional)

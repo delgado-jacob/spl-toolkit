@@ -61,7 +61,7 @@ func searchCommand(s *semanticStage, node antlr.ParserRuleContext) {
 				return
 			}
 		case parser.IAnalysisMacroContext:
-			s.diagnostic(CodeDynamicReference, "macro expansion is unresolved", c)
+			s.macro(c)
 			return
 		case parser.IAnalysisSubqueryContext:
 			s.diagnostic(CodeUnsupportedSemantics, "subsearch result field effects are unmodeled", c)

@@ -263,6 +263,7 @@ func (s *spl2SemanticStage) dataset(dataset spl2.IDatasetContext) {
 		return
 	}
 	s.env.open = false
+	s.env.requirements.open = false
 	type keyValue struct {
 		target           locatedOperand
 		ids              []string

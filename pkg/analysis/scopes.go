@@ -114,8 +114,8 @@ func analyzeParsed(result *Result, parsed *parsedDocument, refinement *sourceRef
 				}
 				result.Stages[state.stage].SemanticComplete = false
 				state.env.uncertain = true
-			} else if _, macro := stageContext.(*parser.AnalysisMacroStageContext); macro {
-				state.diagnostic(CodeDynamicReference, "macro expansion is unresolved", stageContext)
+			} else if macro, ok := stageContext.(*parser.AnalysisMacroStageContext); ok {
+				state.macro(macro.AnalysisMacro())
 			} else if spec, ok := commands[command]; ok && spec.handle != nil {
 				spec.handle(state, stageContext)
 			} else {

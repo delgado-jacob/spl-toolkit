@@ -11,12 +11,27 @@ func (s *semanticStage) dependency(ctx antlr.ParserRuleContext, name, kind strin
 	if id == "" {
 		return
 	}
-	if kind == "macro" {
-		if trace := s.env.requirements.trace; trace != nil {
-			trace.linkLatestDiagnostic(CodeDynamicReference, s.result.Stages[s.stage].ID, id)
-		}
-	}
 	s.addDependency(name, kind)
+}
+
+func (s *semanticStage) macro(ctx parser.IAnalysisMacroContext) {
+	if ctx == nil || !s.sound(ctx) || ctx.AnalysisIdentifier() == nil {
+		return
+	}
+	if s.macroEvidence == nil {
+		s.macroEvidence = map[antlr.ParserRuleContext]string{}
+	}
+	if s.macroEvidence[ctx] != "" {
+		return
+	}
+	name := normalizedName(ctx.AnalysisIdentifier().GetText())
+	id := s.reference(ctx.AnalysisIdentifier(), name, "macro", "read")
+	if id == "" {
+		return
+	}
+	s.macroEvidence[ctx] = id
+	s.addDependency(name, "macro")
+	s.diagnosticAtOwned(CodeDynamicReference, "warning", "unsupported_semantics", "macro expansion is unresolved", s.parsed.source.contextLocation(ctx), true, []string{id})
 }
 func (s *semanticStage) addDependency(name, kind string) {
 	switch kind {
@@ -44,9 +59,7 @@ func (s *semanticStage) dependencies(node antlr.Tree) {
 	case parser.IAnalysisSubqueryContext:
 		return
 	case parser.IAnalysisMacroContext:
-		if s.sound(c) {
-			s.dependency(c.AnalysisIdentifier(), normalizedName(c.AnalysisIdentifier().GetText()), "macro")
-		}
+		s.macro(c)
 		return
 	case *parser.AnalysisDatamodelStageContext:
 		if !s.sound(c.AnalysisDataModelName()) {
