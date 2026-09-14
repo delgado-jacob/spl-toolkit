@@ -237,6 +237,17 @@ func TestRewriteEvidenceSQLPhases(t *testing.T) {
 		t.Fatalf("SQL proof: %+v", proof)
 	}
 }
+func TestRewriteSQLHiddenHavingPreservesVisiblePredicateEvidence(t *testing.T) {
+	s := rewriteTestSession(t, "spl2", `SELECT marker FROM main WHERE marker=1 GROUP BY marker HAVING marker=2 AND hidden=1 | lookup people marker OUTPUT label`, RewriteFactProbe{Kind: "field", Identity: rewriteName("marker")})
+	evidence := s.Evidence()
+	if evidence.Analysis.Status != Incomplete || len(evidence.Analysis.Diagnostics) != 1 || evidence.Analysis.Diagnostics[0].Code != CodeUnsupportedSemantics {
+		t.Fatalf("hidden HAVING diagnostic changed: %+v", evidence.Analysis)
+	}
+	fact := rewriteFind(t, s, "lookup", "people", 0).Facts[0]
+	if fact.LiteralComplete || fact.ReferenceState != "true" || len(fact.GuaranteedValues) != 0 || !reflect.DeepEqual(fact.ReferenceIDs, []string{"ref-2", "ref-3", "ref-4"}) {
+		t.Fatalf("hidden HAVING discarded visible predicate evidence: %+v", fact)
+	}
+}
 func TestRewriteRenderLookupAndDependencies(t *testing.T) {
 	for _, lang := range []string{"spl", "spl2"} {
 		query := `search index=main | lookup people user OUTPUT label AS display | table user`

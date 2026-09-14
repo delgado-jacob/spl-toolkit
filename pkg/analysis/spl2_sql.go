@@ -501,7 +501,8 @@ func (s *spl2SemanticStage) sqlRestrictedExpression(tree antlr.Tree, visible map
 		if len(owners) > 0 {
 			owners = owners[:1]
 		}
-		s.diagnosticAtOwned(CodeUnsupportedSemantics, "warning", "unsupported_semantics", "SQL field visibility outside selected/grouped outputs is unproved", operand.Location, true, owners)
+		s.result.Stages[s.stage].SemanticComplete = false
+		s.diagnosticAtOwnedWithRequirementIncomplete(CodeUnsupportedSemantics, "warning", "unsupported_semantics", "SQL field visibility outside selected/grouped outputs is unproved", operand.Location, owners)
 	}
 	if predicate {
 		// Persist predicate/observed-reference evidence, not the temporary field

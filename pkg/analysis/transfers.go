@@ -39,14 +39,18 @@ func (s *semanticStage) diagnosticAt(code, severity, category, message string, l
 }
 
 func (s *semanticStage) diagnosticAtOwned(code, severity, category, message string, location Location, incomplete bool, pendingReferenceIDs []string) {
-	s.appendDiagnostic(code, severity, category, message, location, incomplete, pendingReferenceIDs, true)
+	s.appendDiagnostic(code, severity, category, message, location, incomplete, incomplete, pendingReferenceIDs, true)
+}
+
+func (s *semanticStage) diagnosticAtOwnedWithRequirementIncomplete(code, severity, category, message string, location Location, pendingReferenceIDs []string) {
+	s.appendDiagnostic(code, severity, category, message, location, false, true, pendingReferenceIDs, true)
 }
 
 func (s *semanticStage) refinementDiagnosticAt(code, severity, category, message string, location Location, incomplete bool) {
-	s.appendDiagnostic(code, severity, category, message, location, incomplete, nil, false)
+	s.appendDiagnostic(code, severity, category, message, location, incomplete, false, nil, false)
 }
 
-func (s *semanticStage) appendDiagnostic(code, severity, category, message string, location Location, incomplete bool, pendingReferenceIDs []string, recordRequirement bool) {
+func (s *semanticStage) appendDiagnostic(code, severity, category, message string, location Location, incomplete, requirementIncomplete bool, pendingReferenceIDs []string, recordRequirement bool) {
 	st := &s.result.Stages[s.stage]
 	if incomplete {
 		st.SemanticComplete = false
@@ -56,10 +60,10 @@ func (s *semanticStage) appendDiagnostic(code, severity, category, message strin
 	diagnostic := Diagnostic{Code: code, Severity: severity, Category: category, Message: message, Location: location, StageID: st.ID, ScopeID: st.ScopeID}
 	s.result.Diagnostics = append(s.result.Diagnostics, diagnostic)
 	if trace := s.env.requirements.trace; recordRequirement && trace != nil {
-		if incomplete {
+		if requirementIncomplete {
 			s.env.requirements.uncertain = true
 		}
-		trace.recordDiagnostic(diagnostic, incomplete, pendingReferenceIDs, trace.nextEvent())
+		trace.recordDiagnostic(diagnostic, requirementIncomplete, pendingReferenceIDs, trace.nextEvent())
 	}
 }
 
