@@ -83,21 +83,26 @@ func (s *spl2SemanticStage) callWithExpression(c spl2.ICallContext, aggregate bo
 	switch name {
 	case "count", "dc", "distinct_count", "isnull", "isnotnull":
 		out.nonnull = out.modeled
+		out.requirementNonnull = out.modeled
 	case "coalesce":
 		out.exactNull = out.modeled
 		for _, value := range values {
 			out.nonnull = out.nonnull || value.nonnull
+			out.requirementNonnull = out.requirementNonnull || value.requirementNonnull
 			out.exactNull = out.exactNull && value.exactNull
 		}
 	case "if":
 		out.nonnull = values[1].nonnull && values[2].nonnull && out.modeled
+		out.requirementNonnull = values[1].requirementNonnull && values[2].requirementNonnull && out.modeled
 		out.exactNull = values[1].exactNull && values[2].exactNull && out.modeled
 	case "case":
 		out.nonnull = out.modeled
+		out.requirementNonnull = out.modeled
 		out.exactNull = out.modeled
 		fallback := false
 		for i := 0; i < n; i += 2 {
 			out.nonnull = out.nonnull && values[i+1].nonnull
+			out.requirementNonnull = out.requirementNonnull && values[i+1].requirementNonnull
 			out.exactNull = out.exactNull && values[i+1].exactNull
 			if values[i].truth {
 				fallback = true
@@ -105,15 +110,19 @@ func (s *spl2SemanticStage) callWithExpression(c spl2.ICallContext, aggregate bo
 			}
 		}
 		out.nonnull = out.nonnull && fallback
+		out.requirementNonnull = out.requirementNonnull && fallback
 	case "tonumber", "tostring", "mvcount": // Neither argument presence nor function spelling proves a value.
 	case "abs", "ceil", "ceiling", "floor", "round":
 		out.nonnull = out.modeled
+		out.requirementNonnull = out.modeled
 		out.domain = "number"
 		for _, value := range values {
 			out.nonnull = out.nonnull && value.nonnull && value.domain == "number"
+			out.requirementNonnull = out.requirementNonnull && value.requirementNonnull && value.domain == "number"
 		}
 	case "lower", "upper", "len", "trim", "ltrim", "rtrim", "split":
 		out.nonnull = out.modeled
+		out.requirementNonnull = out.modeled
 		out.domain = "string"
 		if name == "len" {
 			out.domain = "number"
@@ -122,16 +131,20 @@ func (s *spl2SemanticStage) callWithExpression(c spl2.ICallContext, aggregate bo
 		}
 		for _, value := range values {
 			out.nonnull = out.nonnull && value.nonnull && value.domain == "string"
+			out.requirementNonnull = out.requirementNonnull && value.requirementNonnull && value.domain == "string"
 		}
 	case "substr":
 		out.nonnull = out.modeled && values[0].nonnull && values[0].domain == "string"
+		out.requirementNonnull = out.modeled && values[0].requirementNonnull && values[0].domain == "string"
 		out.domain = "string"
 		for _, value := range values[1:] {
 			out.nonnull = out.nonnull && value.nonnull && value.domain == "number"
+			out.requirementNonnull = out.requirementNonnull && value.requirementNonnull && value.domain == "number"
 		}
 		// Aggregate operand presence does not establish empty-group/null results.
 		// Regex value semantics likewise require more than argument count.
 	}
 	out.nonnull = out.nonnull && out.modeled
+	out.requirementNonnull = out.requirementNonnull && out.modeled
 	return out
 }

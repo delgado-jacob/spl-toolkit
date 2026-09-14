@@ -78,19 +78,20 @@ func TestRequirementTraceClassifiesFieldOrigins(t *testing.T) {
 func TestRequirementEnvironmentCloneOwnsState(t *testing.T) {
 	trace := newRequirementTrace()
 	env := newEnvironmentWithRequirementTrace(trace)
-	env.requirements.fields["host"] = requirementField{source: true, origins: []string{"pending-0"}}
+	env.requirements.fields["host"] = requirementField{source: true, conditional: true, origins: []string{"pending-0"}}
 	env.requirements.removed["old"] = true
 	clone := env.clone()
 
 	clonedField := clone.requirements.fields["host"]
 	clonedField.origins[0] = "changed"
+	clonedField.conditional = false
 	clone.requirements.fields["host"] = clonedField
 	clone.requirements.removed["new"] = true
 	clone.requirements.open = false
 	clone.requirements.uncertain = true
 
 	field := env.requirements.fields["host"]
-	if !field.source || !reflect.DeepEqual(field.origins, []string{"pending-0"}) || env.requirements.removed["new"] || !env.requirements.open || env.requirements.uncertain {
+	if !field.source || !field.conditional || !reflect.DeepEqual(field.origins, []string{"pending-0"}) || env.requirements.removed["new"] || !env.requirements.open || env.requirements.uncertain {
 		t.Fatalf("clone mutation changed source sidecar: %+v", env.requirements)
 	}
 	if clone.requirements.trace != trace {
@@ -241,6 +242,49 @@ func TestRequirementTraceDatasetLiteralClosesAbsentField(t *testing.T) {
 	entry := trace.reference("pending-1")
 	if entry.reference.NormalizedName != "b" || entry.reference.Role != "read" || entry.reference.Binding != "unavailable" || entry.directExternal || entry.conditional {
 		t.Fatalf("absent dataset field trace = %+v", entry)
+	}
+}
+
+func TestRequirementTracePreservesConditionalFields(t *testing.T) {
+	for _, tc := range []struct {
+		name     string
+		document QueryDocument
+		field    string
+	}{
+		{"SPL OUTPUTNEW", QueryDocument{Text: "search user=* | lookup users user OUTPUTNEW role | table role"}, "role"},
+		{"SPL2 partial dataset field", QueryDocument{Text: "FROM [{a:1},{b:2}] | table a", Language: "spl2"}, "a"},
+		{"SPL2 deferred bin effect", QueryDocument{Text: "FROM main | eval a=host | bin a | table a", Language: "spl2"}, "a"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			result, trace, err := analyzeRewriteWithTrace(tc.document, nil, nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			var public *Reference
+			var traced *requirementTraceReference
+			for i := range result.References {
+				reference := &result.References[i]
+				if reference.NormalizedName == tc.field && reference.Role == "read" {
+					public = reference
+				}
+			}
+			for i := range trace.references {
+				entry := &trace.references[i]
+				if entry.reference.NormalizedName == tc.field && entry.reference.Role == "read" {
+					traced = entry
+				}
+			}
+			if public == nil || traced == nil {
+				t.Fatalf("missing final %s read: public=%+v trace=%+v", tc.field, result.References, trace.references)
+			}
+			if public.Binding != "indeterminate" {
+				t.Fatalf("public final read = %+v, want indeterminate", public)
+			}
+			if traced.reference.Binding != "indeterminate" || traced.directExternal || !traced.conditional {
+				t.Fatalf("query-only final read = %+v, want conditional indeterminate evidence", traced)
+			}
+		})
 	}
 }
 

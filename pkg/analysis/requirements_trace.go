@@ -31,6 +31,7 @@ type requirementTraceDiagnostic struct {
 type requirementField struct {
 	source      bool
 	unavailable bool
+	conditional bool
 	origins     []string
 }
 
@@ -214,6 +215,8 @@ func (e *requirementEnvironment) read(reference Reference) (binding string, dire
 	}
 	field, known := e.fields[name]
 	switch {
+	case known && field.conditional:
+		return classified("indeterminate", false, true)
 	case known:
 		if field.source {
 			return classified("source", true, false)
@@ -246,9 +249,18 @@ func requirementReferencePolicy(reference Reference) (directExternal, conditiona
 	}
 }
 
-func (e *requirementEnvironment) install(name string, origins []string) {
-	e.fields[name] = requirementField{origins: append([]string{}, origins...)}
+func (e *requirementEnvironment) install(name string, origins []string, conditional bool) {
+	e.fields[name] = requirementField{conditional: conditional, origins: append([]string{}, origins...)}
 	delete(e.removed, name)
+}
+
+func (e *requirementEnvironment) markConditional(name string) {
+	field, known := e.fields[name]
+	if !known {
+		return
+	}
+	field.conditional = true
+	e.fields[name] = field
 }
 
 func (e *requirementEnvironment) remove(name string) {

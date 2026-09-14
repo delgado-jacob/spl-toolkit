@@ -134,6 +134,10 @@ func (s *semanticStage) readAt(operand locatedOperand, role string) string {
 	return id
 }
 func (s *semanticStage) createAt(operand locatedOperand, role, operation string, inputs []string, conditional bool) string {
+	return s.createAtWithRequirementConditional(operand, role, operation, inputs, conditional, conditional)
+}
+
+func (s *semanticStage) createAtWithRequirementConditional(operand locatedOperand, role, operation string, inputs []string, conditional, requirementConditional bool) string {
 	name := operand.Name
 	id := s.operandReference(operand, "field", role)
 	if id == "" {
@@ -147,7 +151,7 @@ func (s *semanticStage) createAt(operand locatedOperand, role, operation string,
 		entry := trace.reference(id)
 		entry.reference.Binding = "definition"
 		entry.reference.OriginReferenceIDs = traceOrigins(trace, inputs)
-		s.env.requirements.install(name, uniqueIDs([]string{id}, entry.reference.OriginReferenceIDs))
+		s.env.requirements.install(name, uniqueIDs([]string{id}, entry.reference.OriginReferenceIDs), requirementConditional)
 	}
 	s.transitions = append(s.transitions, Transition{Operation: operation, Output: name, InputReferenceIDs: copyIDs(inputs), OutputReferenceID: id, Conditional: conditional})
 	return id
@@ -392,13 +396,17 @@ func (s *semanticStage) applyLookupOutputs(matchReferenceIDs []string, outputs [
 }
 
 func (s *semanticStage) applyAssignment(target locatedOperand, inputs []string, conditional, removeNull bool) {
+	s.applyAssignmentWithRequirementConditional(target, inputs, conditional, conditional, removeNull)
+}
+
+func (s *semanticStage) applyAssignmentWithRequirementConditional(target locatedOperand, inputs []string, conditional, requirementConditional, removeNull bool) {
 	if removeNull {
 		if target.Sound {
 			s.removeAt(target)
 		}
 		return
 	}
-	s.createAt(target, "create", "create", inputs, conditional)
+	s.createAtWithRequirementConditional(target, "create", "create", inputs, conditional, requirementConditional)
 }
 
 // Exact-null assignments and exact exclusions share non-consuming removal evidence.

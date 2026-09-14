@@ -6,9 +6,10 @@ import (
 )
 
 type spl2ExpressionEvidence struct {
-	ids                                []string
-	nonnull, exactNull, truth, modeled bool
-	domain                             string
+	ids []string
+	// requirementNonnull follows query-only bindings; nonnull may include refinement.
+	nonnull, requirementNonnull, exactNull, truth, modeled bool
+	domain                                                 string
 }
 
 func (s *spl2SemanticStage) readIdentifier(ctx antlr.ParserRuleContext, role string) string {
@@ -19,7 +20,7 @@ func (s *spl2SemanticStage) readIdentifier(ctx antlr.ParserRuleContext, role str
 	return s.readAt(o, role)
 }
 func (s *spl2SemanticStage) expression(node antlr.Tree) spl2ExpressionEvidence {
-	out := spl2ExpressionEvidence{ids: []string{}, nonnull: true, modeled: true}
+	out := spl2ExpressionEvidence{ids: []string{}, nonnull: true, requirementNonnull: true, modeled: true}
 	if node == nil {
 		return out
 	}
@@ -27,7 +28,7 @@ func (s *spl2SemanticStage) expression(node antlr.Tree) spl2ExpressionEvidence {
 	case spl2.INotExpressionContext:
 		if operator := c.LogicalNot(); operator != nil && operator.GetText() != "NOT" {
 			value := s.expression(c.NotExpression())
-			value.modeled, value.nonnull, value.exactNull, value.truth, value.domain = false, false, false, false, ""
+			value.modeled, value.nonnull, value.requirementNonnull, value.exactNull, value.truth, value.domain = false, false, false, false, false, ""
 			return value
 		}
 	case spl2.IUnaryContext:
@@ -79,6 +80,7 @@ func (s *spl2SemanticStage) expression(node antlr.Tree) spl2ExpressionEvidence {
 		}
 		s.unsupported(c, "Typed navigation or alias binding is not represented by the string-only source universe")
 		out.nonnull = false
+		out.requirementNonnull = false
 		out.exactNull = false
 		out.modeled = false
 		return out
@@ -89,15 +91,22 @@ func (s *spl2SemanticStage) expression(node antlr.Tree) spl2ExpressionEvidence {
 				out.ids = append(out.ids, id)
 				r := s.result.References[len(s.result.References)-1]
 				out.nonnull = r.Binding == "source" || r.Binding == "derived"
+				out.requirementNonnull = out.nonnull
+				if trace := s.env.requirements.trace; trace != nil {
+					entry := trace.reference(id)
+					out.requirementNonnull = entry.reference.Binding == "source" || entry.reference.Binding == "derived"
+				}
 			}
 			return out
 		}
 		out = s.expression(c.FieldTemplate())
 		out.nonnull = false
+		out.requirementNonnull = false
 		return out
 	case spl2.ILiteralContext:
 		if c.NULL() != nil {
 			out.nonnull = false
+			out.requirementNonnull = false
 			out.exactNull = true
 			return out
 		}
@@ -125,6 +134,7 @@ func (s *spl2SemanticStage) expression(node antlr.Tree) spl2ExpressionEvidence {
 		// Intact interpolation renders a string even when an operand is null.
 		// Unmodeled children still prevent a proven assignment effect.
 		out.nonnull = out.modeled && spl2IntactSyntax(c)
+		out.requirementNonnull = out.nonnull
 		return out
 	case spl2.IFieldTemplateContext:
 		s.rewriteUnprovedOperand(locatedOperand{Location: s.parsed2.source.contextLocation(c)}, "field", "dynamic_name", "dynamic_identity")
@@ -136,6 +146,7 @@ func (s *spl2SemanticStage) expression(node antlr.Tree) spl2ExpressionEvidence {
 		out.modeled = false
 		s.unsupported(c, "Computed field name is unresolved")
 		out.nonnull = false
+		out.requirementNonnull = false
 		return out
 	case spl2.IArrayContext:
 		out.domain = "array"
@@ -165,17 +176,20 @@ func (s *spl2SemanticStage) expression(node antlr.Tree) spl2ExpressionEvidence {
 		out.modeled = false
 		s.unsupported(c, "Lambda result effects are unmodeled")
 		out.nonnull = false
+		out.requirementNonnull = false
 		return out
 	case spl2.IExistsPredicateContext, spl2.ISearchLiteralContext:
 		out.modeled = false
 		s.unsupported(node.(antlr.ParserRuleContext), "Child search expression result effects are not yet modeled")
 		out.nonnull = false
+		out.requirementNonnull = false
 		return out
 	case spl2.IIdentifierContext, spl2.IObjectKeyContext, spl2.ILambdaParameterContext:
 		return out // Names/labels are read only in their owning field role.
 	case spl2.IPrimaryContext:
 		if c.LOCAL() != nil {
 			out.nonnull = false
+			out.requirementNonnull = false
 			out.modeled = false
 			return out
 		}
@@ -188,6 +202,7 @@ func (s *spl2SemanticStage) expression(node antlr.Tree) spl2ExpressionEvidence {
 	case antlr.TerminalNode:
 		if c.GetSymbol().GetTokenType() == spl2.SPL2ParserLOCAL {
 			out.nonnull = false
+			out.requirementNonnull = false
 		}
 		return out
 	}
@@ -200,6 +215,7 @@ func (s *spl2SemanticStage) expression(node antlr.Tree) spl2ExpressionEvidence {
 		out.ids = append(out.ids, value.ids...)
 		out.modeled = out.modeled && value.modeled
 		out.nonnull = out.nonnull && value.nonnull
+		out.requirementNonnull = out.requirementNonnull && value.requirementNonnull
 		parts++
 		if parts == 1 {
 			out.exactNull = value.exactNull

@@ -217,7 +217,7 @@ func (s *spl2SemanticStage) sqlUnprovedAggregateExpression(tree antlr.Tree) spl2
 		aggregate := spl2Functions[c.Identifier().GetText()].aggregate
 		out := s.callWithExpression(c, aggregate, s.sqlUnprovedAggregateExpression)
 		if !aggregate {
-			out.modeled, out.nonnull, out.exactNull, out.truth, out.domain = false, false, false, false, ""
+			out.modeled, out.nonnull, out.requirementNonnull, out.exactNull, out.truth, out.domain = false, false, false, false, false, ""
 		}
 		return out
 	}
@@ -363,7 +363,7 @@ func (s *spl2SemanticStage) prepareSQLSelection(clause spl2.ISqlSelectClauseCont
 		} else if item.aggregate {
 			s.applyAggregation([]aggregateOutput{{Target: item.target, InputReferenceIDs: item.value.ids, Conditional: !item.value.nonnull}}, nil, true)
 		} else {
-			s.applyAssignment(item.target, item.value.ids, !item.value.nonnull || collisions[item.target.Name], item.value.exactNull)
+			s.applyAssignmentWithRequirementConditional(item.target, item.value.ids, !item.value.nonnull || collisions[item.target.Name], !item.value.requirementNonnull || collisions[item.target.Name], item.value.exactNull)
 		}
 		visible[item.target.Name] = !collisions[item.target.Name]
 		if !item.value.exactNull {
@@ -455,6 +455,7 @@ func (s *spl2SemanticStage) sqlRestrictedExpression(tree antlr.Tree, visible map
 					f.Name = o.Name
 					f.Conditional = true
 					s.env.fields[o.Name] = f
+					s.env.requirements.markConditional(o.Name)
 					s.env.requirements.uncertain = true
 					hidden = append(hidden, o)
 				}

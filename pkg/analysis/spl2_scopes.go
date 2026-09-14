@@ -265,10 +265,12 @@ func (s *spl2SemanticStage) dataset(dataset spl2.IDatasetContext) {
 	s.env.open = false
 	s.env.requirements.open = false
 	type keyValue struct {
-		target           locatedOperand
-		ids              []string
-		rows             int
-		nonnull, allnull bool
+		target             locatedOperand
+		ids                []string
+		rows               int
+		nonnull            bool
+		requirementNonnull bool
+		allnull            bool
 	}
 	values := map[string]*keyValue{}
 	order := []string{}
@@ -288,19 +290,21 @@ func (s *spl2SemanticStage) dataset(dataset spl2.IDatasetContext) {
 			value := s.expression(entry.Expression())
 			v := values[key.Name]
 			if v == nil {
-				v = &keyValue{target: key, nonnull: true, allnull: true}
+				v = &keyValue{target: key, nonnull: true, requirementNonnull: true, allnull: true}
 				values[key.Name] = v
 				order = append(order, key.Name)
 			}
 			v.rows++
 			v.ids = uniqueIDs(v.ids, value.ids)
 			v.nonnull = v.nonnull && value.nonnull
+			v.requirementNonnull = v.requirementNonnull && value.requirementNonnull
 			v.allnull = v.allnull && value.exactNull
 		}
 	}
 	for _, name := range order {
 		v := values[name]
-		s.applyAssignment(v.target, v.ids, !v.nonnull || v.rows != len(rows.AllExpression()), v.allnull)
+		partial := v.rows != len(rows.AllExpression())
+		s.applyAssignmentWithRequirementConditional(v.target, v.ids, !v.nonnull || partial, !v.requirementNonnull || partial, v.allnull)
 	}
 }
 

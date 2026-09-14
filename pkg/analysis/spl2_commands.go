@@ -43,7 +43,7 @@ func (s *spl2SemanticStage) command(ctx antlr.ParserRuleContext) {
 				s.unsupported(a.FieldName(), "Computed assignment target is unresolved")
 				continue
 			}
-			s.applyAssignment(s.operand(a.FieldName().Identifier()), value.ids, !value.nonnull, value.exactNull)
+			s.applyAssignmentWithRequirementConditional(s.operand(a.FieldName().Identifier()), value.ids, !value.nonnull, !value.requirementNonnull, value.exactNull)
 		}
 	case *spl2.FieldsCommandContext:
 		selection := c.FieldSelection()
@@ -294,6 +294,7 @@ func (s *spl2SemanticStage) deferredEffects(ctx antlr.ParserRuleContext, affecte
 		if affected == nil || affected[name] {
 			field.Conditional = true
 			s.env.fields[name] = field
+			s.env.requirements.markConditional(name)
 		}
 	}
 	if generating {
@@ -439,6 +440,7 @@ func (s *spl2SemanticStage) lookup(c *spl2.LookupCommandContext) {
 			if !remoteKeys[name] {
 				field.Conditional = true
 				s.env.fields[name] = field
+				s.env.requirements.markConditional(name)
 			}
 		}
 		return
