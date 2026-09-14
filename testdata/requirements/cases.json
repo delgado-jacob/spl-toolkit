@@ -913,36 +913,6 @@
                 }
               }
             ]
-          },
-          {
-            "id": "req-3",
-            "kind": "field",
-            "identity": "other",
-            "role": "read",
-            "necessity": "required",
-            "origin": "direct",
-            "resolution": "exact",
-            "occurrences": [
-              {
-                "reference_id": "ref-5",
-                "original_name": "other",
-                "binding": "source",
-                "stage_id": "stage-3",
-                "scope_id": "scope-0",
-                "location": {
-                  "start": {
-                    "offset": 73,
-                    "line": 1,
-                    "column": 74
-                  },
-                  "end": {
-                    "offset": 78,
-                    "line": 1,
-                    "column": 79
-                  }
-                }
-              }
-            ]
           }
         ],
         "gaps": [],

@@ -128,7 +128,11 @@ func (s *semanticStage) expression(node antlr.Tree) []string {
 	switch ctx := node.(type) {
 	case parser.IAnalysisIdentifierContext:
 		if intact(ctx) {
-			id := s.read(ctx, normalizedName(ctx.GetText()), "read")
+			role := "read"
+			if s.splOwner(ctx).role == "null_test" {
+				role = "null_test"
+			}
+			id := s.read(ctx, normalizedName(ctx.GetText()), role)
 			if id != "" {
 				ids = append(ids, id)
 			}

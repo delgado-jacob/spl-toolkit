@@ -9075,7 +9075,7 @@
           "ref-0",
           "src",
           "field",
-          "read",
+          "null_test",
           "source",
           []
         ]
@@ -9085,7 +9085,7 @@
           "ref-0",
           "user",
           "field",
-          "read",
+          "null_test",
           "source",
           []
         ]
@@ -9095,12 +9095,7 @@
           "stage-0",
           "scope-0",
           "",
-          [
-            [
-              "src",
-              false
-            ]
-          ],
+          [],
           []
         ]
       ],
@@ -9109,12 +9104,7 @@
           "stage-0",
           "scope-0",
           "",
-          [
-            [
-              "user",
-              false
-            ]
-          ],
+          [],
           []
         ]
       ]

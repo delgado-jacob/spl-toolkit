@@ -680,7 +680,11 @@ func TestRewriteSPLNullInspectionBoundaries(t *testing.T) {
 						reference = ref
 					}
 				}
-				if reference.Binding != tc.binding || reference.Role != "read" || reference.Location != site.Location {
+				wantReferenceRole := "read"
+				if tc.role == "null_test" {
+					wantReferenceRole = "null_test"
+				}
+				if reference.Binding != tc.binding || reference.Role != wantReferenceRole || reference.Location != site.Location {
 					t.Errorf("ordinary null-inspection reference changed: %+v", reference)
 				}
 				if tc.binding != "source" || !tc.syntax {

@@ -331,6 +331,71 @@ func TestAnalyzeAlwaysEmbedsRequirementSet(t *testing.T) {
 	}
 }
 
+func TestAnalyzeSPLNullInspectionIsNotARequirement(t *testing.T) {
+	for _, query := range []string{
+		"| where isnull(missing)",
+		"| eval present=isnotnull(missing)",
+	} {
+		t.Run(query, func(t *testing.T) {
+			result, err := Analyze(QueryDocument{Text: query})
+			if err != nil {
+				t.Fatal(err)
+			}
+			var found *Reference
+			for i := range result.References {
+				if result.References[i].NormalizedName == "missing" {
+					found = &result.References[i]
+					break
+				}
+			}
+			if found == nil || found.Role != "null_test" || found.Binding != "source" {
+				t.Fatalf("canonical null inspection = %+v", found)
+			}
+			if len(result.Requirements.Items) != 0 {
+				t.Fatalf("null inspection became an external requirement: %+v", result.Requirements.Items)
+			}
+		})
+	}
+}
+
+func TestAnalyzeSPLNullInspectionKeepsIneligibleReads(t *testing.T) {
+	for _, tc := range []struct {
+		query    string
+		wantRead bool
+	}{
+		{"| where isnull(missing, 1)", true},
+		{"| where isnull(missing + other)", true},
+		{"| where isnull((missing))", true},
+		{"| stats isnull(missing)", true},
+		{"| where abs(value:isnull(missing))=1", true},
+		{"| where unknown(isnull(missing))=1", true},
+		{"| where searchmatch(isnull(missing))=1", true},
+		{"| where isnull(missing", false},
+		{"| where isnull(missing @)", false},
+		{"| where isnull(missing[0])", false},
+	} {
+		t.Run(tc.query, func(t *testing.T) {
+			result, err := Analyze(QueryDocument{Text: tc.query})
+			if err != nil {
+				t.Fatal(err)
+			}
+			found := false
+			for _, reference := range result.References {
+				if reference.NormalizedName != "missing" {
+					continue
+				}
+				found = true
+				if reference.Role != "read" {
+					t.Fatalf("ineligible null inspection role = %q, want read: %+v", reference.Role, reference)
+				}
+			}
+			if tc.wantRead && !found {
+				t.Fatal("ineligible null inspection lost its conservative field read")
+			}
+		})
+	}
+}
+
 func TestRequirementsMatchesEmbeddedAndIsDetached(t *testing.T) {
 	document := QueryDocument{Text: "search host=* | `expand()` | table h*", SourceID: "queries/example.spl"}
 	result, err := Analyze(document)

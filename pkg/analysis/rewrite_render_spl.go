@@ -12,6 +12,10 @@ func (s *semanticStage) rewriteSPLOwner(ctx antlr.ParserRuleContext) rewriteOwne
 	if s.result.rewrite == nil {
 		return rewriteOwner{}
 	}
+	return s.splOwner(ctx)
+}
+
+func (s *semanticStage) splOwner(ctx antlr.ParserRuleContext) rewriteOwner {
 	o := rewriteOwner{location: s.parsed.source.contextLocation(ctx)}
 	switch c := ctx.(type) {
 	case parser.IAnalysisIdentifierContext:

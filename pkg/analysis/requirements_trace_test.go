@@ -57,6 +57,8 @@ func TestRequirementTraceClassifiesFieldOrigins(t *testing.T) {
 		{"rename source", QueryDocument{Text: "search host=x | rename host AS node"}, "pending-1", "host", "read", "source", true, false, 1},
 		{"rename target", QueryDocument{Text: "search host=x | rename host AS node"}, "pending-2", "node", "rename", "definition", false, false, 2},
 		{"removal", QueryDocument{Text: "search host=x | fields - host"}, "pending-1", "host", "remove", "not_applicable", false, false, 1},
+		{"SPL null test", QueryDocument{Text: "| where isnull(absent)"}, "pending-0", "absent", "null_test", "source", false, false, 0},
+		{"SPL non-null test", QueryDocument{Text: "| eval answer=isnotnull(absent)"}, "pending-0", "absent", "null_test", "source", false, false, 0},
 		{"null test", QueryDocument{Text: "FROM main | eval answer=isnull(absent)", Language: "spl2"}, "pending-1", "absent", "null_test", "source", false, false, 1},
 		{"unavailable local field", QueryDocument{Text: "search host=x | fields - host | table host"}, "pending-2", "host", "read", "unavailable", false, false, 2},
 		{"wildcard read", QueryDocument{Text: "search src=* | table s*"}, "pending-1", "s*", "read", "indeterminate", false, true, 1},
