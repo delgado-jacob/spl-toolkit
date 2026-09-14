@@ -7,6 +7,8 @@ import (
 	"testing"
 )
 
+var _ func(*Result, *sourceRefinement, *requirementTrace) = finalizeReferences
+
 func TestRequirementTraceClassifiesFieldOrigins(t *testing.T) {
 	result, trace, err := analyzeRewriteWithTrace(QueryDocument{Text: "search src=* | eval derived=src | table src derived"}, nil, nil)
 	if err != nil {
@@ -230,6 +232,31 @@ func TestRequirementTraceRenameRemovesSource(t *testing.T) {
 	entry := trace.reference("pending-3")
 	if entry.reference.NormalizedName != "host" || entry.reference.Role != "read" || entry.reference.Binding != "unavailable" || entry.directExternal || entry.conditional {
 		t.Fatalf("post-rename source trace = %+v", entry)
+	}
+}
+
+func TestRequirementTraceConflictingRenameInvalidatesQueryOnlyFields(t *testing.T) {
+	result, trace, err := analyzeRewriteWithTrace(QueryDocument{Text: "eval a=1, b=2 | rename a AS b | table a"}, nil, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	renameState := result.Lineage[1].After
+	if len(renameState.Fields) != 0 || !renameState.Uncertain {
+		t.Fatalf("public post-rename state = %+v, want no fields and uncertain", renameState)
+	}
+	var entry *requirementTraceReference
+	for i := range trace.references {
+		candidate := &trace.references[i]
+		if candidate.reference.NormalizedName == "a" && candidate.reference.Role == "read" && candidate.reference.StageID == "stage-2" {
+			entry = candidate
+		}
+	}
+	if entry == nil {
+		t.Fatalf("missing query-only post-conflict read: %+v", trace.references)
+	}
+	if entry.reference.Binding != "indeterminate" || entry.directExternal || !entry.conditional {
+		t.Fatalf("query-only post-conflict read = %+v, want conditional indeterminate evidence", entry)
 	}
 }
 

@@ -120,7 +120,7 @@ func TestLocatedTransferEquivalence(t *testing.T) {
 				}
 				r.Lineage = append(r.Lineage, Lineage{StageID: stage.ID, ScopeID: stage.ScopeID, Before: before, After: s.env.snapshot(), Transitions: s.transitions})
 			}
-			finalizeReferences(r, refinement)
+			finalizeReferences(r, refinement, nil)
 			finalizeResult(r)
 			got := &SourceAnalysis{Result: r, Expansions: refinement.expansions}
 			if !reflect.DeepEqual(got, expected) {
@@ -175,7 +175,7 @@ func TestPreparedProjectionPreservesEvidenceAndFinalizesIDs(t *testing.T) {
 		t.Fatal("installation retained mutable caller arrays")
 	}
 	r.Lineage = []Lineage{{After: s.env.snapshot(), Transitions: s.transitions}}
-	finalizeReferences(r, nil)
+	finalizeReferences(r, nil, nil)
 	if r.References[0].ID != "ref-0" || r.References[0].NormalizedName != "alias" || r.References[1].ID != "ref-1" {
 		t.Fatal("bad final order", r.References)
 	}

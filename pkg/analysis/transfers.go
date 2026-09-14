@@ -355,9 +355,11 @@ func (s *semanticStage) applyRename(pairs []renameOperands) {
 		s.diagnosticAt(CodeUnsupportedSemantics, "warning", "unsupported_semantics", "rename has conflicting or unsupported source/destination mappings", s.result.Stages[s.stage].Location, true)
 		for name := range sources {
 			delete(s.env.fields, name)
+			delete(s.env.requirements.fields, name)
 		}
 		for name := range dests {
 			delete(s.env.fields, name)
+			delete(s.env.requirements.fields, name)
 		}
 		return
 	}

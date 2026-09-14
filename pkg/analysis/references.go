@@ -159,11 +159,7 @@ func (s *semanticStage) expression(node antlr.Tree) []string {
 	}
 	return ids
 }
-func finalizeReferences(r *Result, refinement *sourceRefinement, traces ...*requirementTrace) {
-	var trace *requirementTrace
-	if len(traces) > 0 {
-		trace = traces[0]
-	}
+func finalizeReferences(r *Result, refinement *sourceRefinement, trace *requirementTrace) {
 	sort.SliceStable(r.References, func(i, j int) bool {
 		a, b := r.References[i], r.References[j]
 		if a.Location.Start.Offset != b.Location.Start.Offset {
