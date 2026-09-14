@@ -182,7 +182,7 @@ Milestone 8 is complete when:
 
 1. Representative SPL and SPL2 documents produce equivalent standalone requirement sets through Go, CLI, REST, native/C, and Python.
 2. Every new analysis result embeds a set equal to the standalone query-only set, including inside refinement-aware reports.
-3. Source obligations, query-derived fields, query-local invalidity, conditional evidence, dynamic identities, and incomplete coverage remain distinguishable without inference from omission.
+3. Source, conditional, dynamic, and indeterminate external obligations are explicit. Derived and query-local unavailable fields are not misclassified as obligations: `Analyze` retains their canonical references, while standalone `Requirements` returns only the external-obligation projection.
 4. Provenance identities, ordering, links, diagnostics, and empty collections are deterministic and deeply detached.
 5. Current contracts, installed packages, native closure, documentation, and main CI pass their required checks while archived version-1 reports remain valid.
 6. No environment snapshot, compatibility assessment, transitive expansion, placeholder resolution, query fanout, broad language family, or `_build_plan/` runtime dependency is introduced.
