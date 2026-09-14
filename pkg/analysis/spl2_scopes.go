@@ -158,7 +158,6 @@ func (q *spl2ScopeScheduler) pipeline(sites []spl2CommandSite, env *environment,
 		}
 		if !q.result.Stages[index].SemanticComplete {
 			s.env.uncertain = true
-			s.env.requirements.uncertain = true
 		}
 		env = s.env
 		q.result.Lineage = append(q.result.Lineage, Lineage{StageID: q.result.Stages[index].ID, ScopeID: scopeID, Before: before, After: env.snapshot(), Transitions: s.transitions})

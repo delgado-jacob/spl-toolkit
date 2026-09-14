@@ -91,7 +91,6 @@ func executeSPL2SQL(result *Result, parsed *spl2ParsedDocument, refinement *sour
 		}
 		if !result.Stages[s.stage].SemanticComplete && !(name == "project" && selectedShape) {
 			s.env.uncertain = true
-			s.env.requirements.uncertain = true
 		}
 		order := len(result.Lineage)
 		st := result.Stages[s.stage]
