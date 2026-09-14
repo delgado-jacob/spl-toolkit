@@ -19,9 +19,10 @@ type locatedOperand struct {
 }
 type renameOperands struct{ Source, Target locatedOperand }
 type aggregateOutput struct {
-	Target            locatedOperand
-	InputReferenceIDs []string
-	Conditional       bool
+	Target                 locatedOperand
+	InputReferenceIDs      []string
+	Conditional            bool
+	RequirementConditional bool
 }
 type preparedSelection struct {
 	Field                 trackedField
@@ -292,10 +293,11 @@ func (s *semanticStage) applyRename(pairs []renameOperands) {
 	original := s.env
 	before := s.env.clone()
 	type rename struct {
-		source, dest string
-		target       locatedOperand
-		input        string
-		conditional  bool
+		source, dest           string
+		target                 locatedOperand
+		input                  string
+		conditional            bool
+		requirementConditional bool
 	}
 	items := []rename{}
 	sources, dests := map[string]bool{}, map[string]bool{}
@@ -326,7 +328,18 @@ func (s *semanticStage) applyRename(pairs []renameOperands) {
 		sources[src] = true
 		dests[dst] = true
 		binding := s.result.References[len(s.result.References)-1].Binding
-		items = append(items, rename{src, dst, r.Target, id, binding == "indeterminate" || binding == "unavailable"})
+		requirementBinding := binding
+		if trace := s.env.requirements.trace; trace != nil {
+			requirementBinding = trace.reference(id).reference.Binding
+		}
+		items = append(items, rename{
+			source:                 src,
+			dest:                   dst,
+			target:                 r.Target,
+			input:                  id,
+			conditional:            binding == "indeterminate" || binding == "unavailable",
+			requirementConditional: requirementBinding == "indeterminate" || requirementBinding == "unavailable",
+		})
 	}
 	s.env = before // All reads observed the snapshot; no destination was installed while reading.
 	for name := range sources {
@@ -349,7 +362,7 @@ func (s *semanticStage) applyRename(pairs []renameOperands) {
 		s.env.requirements.remove(r.source)
 	}
 	for _, r := range items {
-		s.createAt(r.target, "rename", "rename", []string{r.input}, r.conditional)
+		s.createAtWithRequirementConditional(r.target, "rename", "rename", []string{r.input}, r.conditional, r.requirementConditional)
 	}
 }
 func (s *semanticStage) applyAggregation(outputs []aggregateOutput, groups []locatedOperand, preserveInput bool) {
@@ -377,7 +390,10 @@ func (s *semanticStage) applyAggregation(outputs []aggregateOutput, groups []loc
 		s.env = output
 	}
 	for _, output := range outputs {
-		s.createAt(output.Target, "output", "aggregate", output.InputReferenceIDs, output.Conditional || !s.result.Stages[s.stage].SemanticComplete)
+		stageID := s.result.Stages[s.stage].ID
+		s.createAtWithRequirementConditional(output.Target, "output", "aggregate", output.InputReferenceIDs,
+			output.Conditional || !s.result.Stages[s.stage].SemanticComplete,
+			output.RequirementConditional || s.env.requirements.stageIncomplete(stageID))
 	}
 }
 
@@ -391,7 +407,10 @@ func (s *semanticStage) applyLookupOutputs(matchReferenceIDs []string, outputs [
 				continue
 			}
 		}
-		s.createAt(output.Target, "output", "lookup", matchReferenceIDs, output.PreserveExisting || !s.result.Stages[s.stage].SemanticComplete)
+		stageID := s.result.Stages[s.stage].ID
+		s.createAtWithRequirementConditional(output.Target, "output", "lookup", matchReferenceIDs,
+			output.PreserveExisting || !s.result.Stages[s.stage].SemanticComplete,
+			output.PreserveExisting || s.env.requirements.stageIncomplete(stageID))
 	}
 }
 

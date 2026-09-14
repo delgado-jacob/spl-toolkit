@@ -361,7 +361,12 @@ func (s *spl2SemanticStage) prepareSQLSelection(clause spl2.ISqlSelectClauseCont
 			// limitations still govern coverage, visibility and all other outputs.
 			s.createAt(item.target, "output", "aggregate", item.value.ids, false)
 		} else if item.aggregate {
-			s.applyAggregation([]aggregateOutput{{Target: item.target, InputReferenceIDs: item.value.ids, Conditional: !item.value.nonnull}}, nil, true)
+			s.applyAggregation([]aggregateOutput{{
+				Target:                 item.target,
+				InputReferenceIDs:      item.value.ids,
+				Conditional:            !item.value.nonnull,
+				RequirementConditional: !item.value.requirementNonnull,
+			}}, nil, true)
 		} else {
 			s.applyAssignmentWithRequirementConditional(item.target, item.value.ids, !item.value.nonnull || collisions[item.target.Name], !item.value.requirementNonnull || collisions[item.target.Name], item.value.exactNull)
 		}

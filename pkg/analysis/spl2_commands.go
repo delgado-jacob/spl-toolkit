@@ -407,7 +407,12 @@ func (s *spl2SemanticStage) aggregates(calls []spl2.IAggregateContext, keys []sp
 			}
 		}
 		if target.Sound {
-			outputs = append(outputs, aggregateOutput{Target: target, InputReferenceIDs: value.ids, Conditional: conditional || !value.nonnull})
+			outputs = append(outputs, aggregateOutput{
+				Target:                 target,
+				InputReferenceIDs:      value.ids,
+				Conditional:            conditional || !value.nonnull,
+				RequirementConditional: conditional || !value.requirementNonnull,
+			})
 		}
 	}
 	for _, key := range keys {

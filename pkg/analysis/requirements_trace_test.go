@@ -461,6 +461,9 @@ func TestRequirementTraceRefinementParity(t *testing.T) {
 		{"unsupported wildcard selector", QueryDocument{Text: "sort host*"}, testSourceRefinement([]string{"host"}, true, nil, false)},
 		{"dotted SPL2 names", QueryDocument{Text: `SELECT 'actor.name' FROM main`, Language: "spl2"}, testSourceRefinement([]string{"actor.name"}, true, admitted, false)},
 		{"dotted SPL2 downstream derived", QueryDocument{Text: `FROM main | eval local='actor.name' | table local`, Language: "spl2"}, testSourceRefinement([]string{"actor.name"}, true, admitted, false)},
+		{"dotted SPL2 rename output", QueryDocument{Text: `FROM main | rename 'actor.name' AS actor | table actor`, Language: "spl2"}, testSourceRefinement([]string{"actor.name"}, true, admitted, false)},
+		{"dotted SPL2 aggregate output", QueryDocument{Text: `FROM main | stats count('actor.name') AS total | table total`, Language: "spl2"}, testSourceRefinement([]string{"actor.name"}, true, admitted, false)},
+		{"dotted SPL2 lookup output", QueryDocument{Text: `FROM main | lookup users 'actor.name' OUTPUT role | table role`, Language: "spl2"}, testSourceRefinement([]string{"actor.name"}, true, admitted, false)},
 		{"dotted SPL2 downstream SPL source", QueryDocument{Text: `FROM main | eval local='actor.name' | where other=1`, Language: "spl2"}, testSourceRefinement([]string{"actor.name"}, true, admitted, false)},
 		{"dotted SPL2 downstream SQL source", QueryDocument{Text: `FROM main WHERE 'actor.name'=1 SELECT other`, Language: "spl2"}, testSourceRefinement([]string{"actor.name"}, true, admitted, false)},
 	} {
