@@ -260,6 +260,50 @@ func TestRequirementTraceConflictingRenameInvalidatesQueryOnlyFields(t *testing.
 	}
 }
 
+func TestRequirementTraceWildcardRenameInvalidatesConcreteTargets(t *testing.T) {
+	result, trace, err := analyzeRewriteWithTrace(QueryDocument{
+		Text:     `FROM [{'old_a':1,'new_a':2}] | rename 'old_*' AS 'new_*' | table new_a`,
+		Language: "spl2",
+	}, nil, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	renameState := result.Lineage[1].After
+	for _, field := range renameState.Fields {
+		if field.Name == "old_a" || field.Name == "new_a" {
+			t.Fatalf("public post-rename state retained affected field: %+v", renameState)
+		}
+	}
+	if !renameState.Uncertain {
+		t.Fatalf("public post-rename state = %+v, want uncertain invalidation", renameState)
+	}
+
+	var publicRead *Reference
+	for i := range result.References {
+		candidate := &result.References[i]
+		if candidate.NormalizedName == "new_a" && candidate.Role == "read" && candidate.StageID == "stage-2" {
+			publicRead = candidate
+		}
+	}
+	if publicRead == nil {
+		t.Fatalf("missing public post-rename read: %+v", result.References)
+	}
+	var traceRead *requirementTraceReference
+	for i := range trace.references {
+		candidate := &trace.references[i]
+		if candidate.reference.ID == publicRead.ID {
+			traceRead = candidate
+		}
+	}
+	if traceRead == nil {
+		t.Fatalf("missing query-only counterpart for public read: public=%+v trace=%+v", publicRead, trace.references)
+	}
+	if publicRead.Binding != "indeterminate" || traceRead.reference.Binding != publicRead.Binding || traceRead.directExternal || !traceRead.conditional {
+		t.Fatalf("post-rename reads diverged: public=%+v query-only=%+v", publicRead, traceRead)
+	}
+}
+
 func TestRequirementTraceDatasetLiteralClosesAbsentField(t *testing.T) {
 	_, trace, err := analyzeRewriteWithTrace(QueryDocument{Text: "FROM [{a:1}] | table b", Language: "spl2"}, nil, nil)
 	if err != nil {

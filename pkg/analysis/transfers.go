@@ -344,14 +344,19 @@ func (s *semanticStage) applyRename(pairs []renameOperands) {
 			} else {
 				requirementSources[src] = true
 			}
-			publicDests[dst] = true
 			if r.Target.Resolution == "wildcard" {
+				for name := range original.fields {
+					if wildcardMatches(dst, name) {
+						publicDests[name] = true
+					}
+				}
 				for name := range requirementOriginal.fields {
 					if wildcardMatches(dst, name) {
 						requirementDests[name] = true
 					}
 				}
 			} else {
+				publicDests[dst] = true
 				requirementDests[dst] = true
 				if len(ids) > 0 {
 					items = append(items, rename{source: src, dest: dst, target: r.Target, input: ids[0], conditional: true, requirementConditional: true})
