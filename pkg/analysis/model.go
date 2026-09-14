@@ -108,16 +108,17 @@ type Diagnostic struct {
 }
 type Result struct {
 	rewrite       *RewriteSession
-	SchemaVersion int           `json:"schema_version"`
-	Document      QueryDocument `json:"document"`
-	Status        Status        `json:"status"`
-	Coverage      Coverage      `json:"coverage"`
-	Stages        []Stage       `json:"stages"`
-	Scopes        []Scope       `json:"scopes"`
-	References    []Reference   `json:"references"`
-	Lineage       []Lineage     `json:"lineage"`
-	Dependencies  Dependencies  `json:"dependencies"`
-	Diagnostics   []Diagnostic  `json:"diagnostics"`
+	SchemaVersion int            `json:"schema_version"`
+	Document      QueryDocument  `json:"document"`
+	Status        Status         `json:"status"`
+	Coverage      Coverage       `json:"coverage"`
+	Stages        []Stage        `json:"stages"`
+	Scopes        []Scope        `json:"scopes"`
+	References    []Reference    `json:"references"`
+	Lineage       []Lineage      `json:"lineage"`
+	Dependencies  Dependencies   `json:"dependencies"`
+	Diagnostics   []Diagnostic   `json:"diagnostics"`
+	Requirements  RequirementSet `json:"requirements"`
 }
 type Capability struct {
 	Name              string   `json:"name"`

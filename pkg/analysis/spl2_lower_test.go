@@ -430,6 +430,22 @@ func TestSPL2SequentialFullState(t *testing.T) {
 	want.Dependencies.Datasets = []string{"main"}
 	want.References = []Reference{ref("ref-0", "main", "read", "stage-0", "not_applicable", 5, 9), ref("ref-1", "x", "create", "stage-1", "not_applicable", 17, 18, "ref-2"), ref("ref-2", "bytes", "read", "stage-1", "source", 19, 24), ref("ref-3", "y", "create", "stage-1", "not_applicable", 26, 27, "ref-4", "ref-1", "ref-2"), ref("ref-4", "x", "read", "stage-1", "derived", 28, 29, "ref-1", "ref-2"), ref("ref-5", "y", "read", "stage-2", "derived", 40, 41, "ref-3", "ref-4", "ref-1", "ref-2")}
 	want.Lineage = []Lineage{{StageID: "stage-0", ScopeID: "scope-0", Before: before, After: before, Transitions: []Transition{}}, {StageID: "stage-1", ScopeID: "scope-0", Before: before, After: assigned, Transitions: []Transition{{"create", "x", []string{"ref-2"}, "ref-1", false}, {"create", "y", []string{"ref-4"}, "ref-3", false}}}, {StageID: "stage-2", ScopeID: "scope-0", Before: assigned, After: after, Transitions: []Transition{{"project", "y", []string{"ref-5"}, "", false}}}}
+	want.Requirements = RequirementSet{
+		SchemaVersion: 1,
+		Query: RequirementQueryIdentity{
+			Language: "spl2", Profile: "splunkd", Version: "current",
+			QueryDigest: "sha256:159f5b7d4683ac55dd0efac524ba3ea30133c495a91e81af6c695b70d1e16afa",
+		},
+		CapabilityRevision: "sha256:c3217502697cee2595f20d2fe98b76422f837696d2861cee81e852ad142edcfc",
+		QueryStatus:        Valid,
+		Coverage:           RequirementCoverage{Complete: true, Reasons: []string{}},
+		Items: []RequirementItem{
+			{ID: "req-1", Kind: "dataset", Identity: "main", Role: "read", Necessity: "required", Origin: "direct", Resolution: "exact", Occurrences: []RequirementOccurrence{{ReferenceID: "ref-0", OriginalName: "main", Binding: "not_applicable", StageID: "stage-0", ScopeID: "scope-0", Location: loc(5, 9)}}},
+			{ID: "req-2", Kind: "field", Identity: "bytes", Role: "read", Necessity: "required", Origin: "direct", Resolution: "exact", Occurrences: []RequirementOccurrence{{ReferenceID: "ref-2", OriginalName: "bytes", Binding: "source", StageID: "stage-1", ScopeID: "scope-0", Location: loc(19, 24)}}},
+		},
+		Gaps:        []RequirementGap{},
+		Diagnostics: []Diagnostic{},
+	}
 	if !reflect.DeepEqual(got, want) {
 		g, _ := json.MarshalIndent(got, "", "  ")
 		w, _ := json.MarshalIndent(want, "", "  ")

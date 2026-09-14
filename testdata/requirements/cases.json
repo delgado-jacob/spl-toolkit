@@ -1,0 +1,2078 @@
+{
+  "version": "1",
+  "cases": [
+    {
+      "id": "empty_spl",
+      "document": {
+        "text": "eval local=1 | table local",
+        "language": "",
+        "profile": "",
+        "version": "",
+        "source_id": "requirements:empty_spl"
+      },
+      "expected": {
+        "schema_version": 1,
+        "query": {
+          "source_id": "requirements:empty_spl",
+          "language": "spl",
+          "profile": "splunkd",
+          "version": "current",
+          "query_digest": "sha256:717dea7c30929b4559dfbc5b71de621af048179bc23f2047415c0fc0b9049fc6"
+        },
+        "capability_revision": "sha256:dfb8cedde04204e0a876412fbe217e49405689b54ae7d7d8fc37bfcb7fb2335f",
+        "query_status": "valid",
+        "coverage": {
+          "complete": true,
+          "reasons": []
+        },
+        "items": [],
+        "gaps": [],
+        "diagnostics": []
+      }
+    },
+    {
+      "id": "exact_derived_spl",
+      "document": {
+        "text": "search src=* | eval derived=src | table src derived",
+        "language": "",
+        "profile": "",
+        "version": "",
+        "source_id": "requirements:exact_derived_spl"
+      },
+      "expected": {
+        "schema_version": 1,
+        "query": {
+          "source_id": "requirements:exact_derived_spl",
+          "language": "spl",
+          "profile": "splunkd",
+          "version": "current",
+          "query_digest": "sha256:33e3c69fe52d9aad632aa000d7f6dafe0f147d41c66562c50b242ec403bd95d7"
+        },
+        "capability_revision": "sha256:dfb8cedde04204e0a876412fbe217e49405689b54ae7d7d8fc37bfcb7fb2335f",
+        "query_status": "valid",
+        "coverage": {
+          "complete": true,
+          "reasons": []
+        },
+        "items": [
+          {
+            "id": "req-1",
+            "kind": "field",
+            "identity": "src",
+            "role": "filter",
+            "necessity": "required",
+            "origin": "direct",
+            "resolution": "exact",
+            "occurrences": [
+              {
+                "reference_id": "ref-0",
+                "original_name": "src",
+                "binding": "source",
+                "stage_id": "stage-0",
+                "scope_id": "scope-0",
+                "location": {
+                  "start": {
+                    "offset": 7,
+                    "line": 1,
+                    "column": 8
+                  },
+                  "end": {
+                    "offset": 10,
+                    "line": 1,
+                    "column": 11
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "id": "req-2",
+            "kind": "field",
+            "identity": "src",
+            "role": "read",
+            "necessity": "required",
+            "origin": "direct",
+            "resolution": "exact",
+            "occurrences": [
+              {
+                "reference_id": "ref-2",
+                "original_name": "src",
+                "binding": "source",
+                "stage_id": "stage-1",
+                "scope_id": "scope-0",
+                "location": {
+                  "start": {
+                    "offset": 28,
+                    "line": 1,
+                    "column": 29
+                  },
+                  "end": {
+                    "offset": 31,
+                    "line": 1,
+                    "column": 32
+                  }
+                }
+              },
+              {
+                "reference_id": "ref-3",
+                "original_name": "src",
+                "binding": "source",
+                "stage_id": "stage-2",
+                "scope_id": "scope-0",
+                "location": {
+                  "start": {
+                    "offset": 40,
+                    "line": 1,
+                    "column": 41
+                  },
+                  "end": {
+                    "offset": 43,
+                    "line": 1,
+                    "column": 44
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "gaps": [],
+        "diagnostics": []
+      }
+    },
+    {
+      "id": "indeterminate_spl",
+      "document": {
+        "text": "| mystery | table host",
+        "language": "",
+        "profile": "",
+        "version": "",
+        "source_id": "requirements:indeterminate_spl"
+      },
+      "expected": {
+        "schema_version": 1,
+        "query": {
+          "source_id": "requirements:indeterminate_spl",
+          "language": "spl",
+          "profile": "splunkd",
+          "version": "current",
+          "query_digest": "sha256:29c3b3ee729857446a9d62ca2c302c7f3f35718f30b187415d40e33492433617"
+        },
+        "capability_revision": "sha256:dfb8cedde04204e0a876412fbe217e49405689b54ae7d7d8fc37bfcb7fb2335f",
+        "query_status": "incomplete",
+        "coverage": {
+          "complete": false,
+          "reasons": [
+            "SPL_UNSUPPORTED_COMMAND",
+            "SPL_REQUIREMENT_INDETERMINATE"
+          ]
+        },
+        "items": [
+          {
+            "id": "req-1",
+            "kind": "field",
+            "identity": "host",
+            "role": "read",
+            "necessity": "conditional",
+            "origin": "direct",
+            "resolution": "exact",
+            "occurrences": [
+              {
+                "reference_id": "ref-0",
+                "original_name": "host",
+                "binding": "indeterminate",
+                "stage_id": "stage-1",
+                "scope_id": "scope-0",
+                "location": {
+                  "start": {
+                    "offset": 18,
+                    "line": 1,
+                    "column": 19
+                  },
+                  "end": {
+                    "offset": 22,
+                    "line": 1,
+                    "column": 23
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "gaps": [
+          {
+            "code": "SPL_UNSUPPORTED_COMMAND",
+            "message": "command \"mystery\" has unmodeled field effects",
+            "reference_ids": [],
+            "diagnostic_codes": [
+              "SPL_UNSUPPORTED_COMMAND"
+            ]
+          },
+          {
+            "code": "SPL_REQUIREMENT_INDETERMINATE",
+            "message": "requirement origin is indeterminate",
+            "reference_ids": [
+              "ref-0"
+            ],
+            "diagnostic_codes": []
+          }
+        ],
+        "diagnostics": [
+          {
+            "code": "SPL_UNSUPPORTED_COMMAND",
+            "severity": "warning",
+            "category": "unsupported_semantics",
+            "message": "command \"mystery\" has unmodeled field effects",
+            "location": {
+              "start": {
+                "offset": 2,
+                "line": 1,
+                "column": 3
+              },
+              "end": {
+                "offset": 9,
+                "line": 1,
+                "column": 10
+              }
+            },
+            "stage_id": "stage-0",
+            "scope_id": "scope-0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "wildcard_spl",
+      "document": {
+        "text": "search src=* | table s*",
+        "language": "",
+        "profile": "",
+        "version": "",
+        "source_id": "requirements:wildcard_spl"
+      },
+      "expected": {
+        "schema_version": 1,
+        "query": {
+          "source_id": "requirements:wildcard_spl",
+          "language": "spl",
+          "profile": "splunkd",
+          "version": "current",
+          "query_digest": "sha256:3a5857fbdb1af43d292b8f75c7a1dcebf384f34c3aaa19b7d23bc1bf67ceaf39"
+        },
+        "capability_revision": "sha256:dfb8cedde04204e0a876412fbe217e49405689b54ae7d7d8fc37bfcb7fb2335f",
+        "query_status": "incomplete",
+        "coverage": {
+          "complete": false,
+          "reasons": [
+            "SPL_UNRESOLVED_WILDCARD"
+          ]
+        },
+        "items": [
+          {
+            "id": "req-1",
+            "kind": "field",
+            "identity": "src",
+            "role": "filter",
+            "necessity": "required",
+            "origin": "direct",
+            "resolution": "exact",
+            "occurrences": [
+              {
+                "reference_id": "ref-0",
+                "original_name": "src",
+                "binding": "source",
+                "stage_id": "stage-0",
+                "scope_id": "scope-0",
+                "location": {
+                  "start": {
+                    "offset": 7,
+                    "line": 1,
+                    "column": 8
+                  },
+                  "end": {
+                    "offset": 10,
+                    "line": 1,
+                    "column": 11
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "id": "req-2",
+            "kind": "field",
+            "identity": "s*",
+            "role": "read",
+            "necessity": "conditional",
+            "origin": "direct",
+            "resolution": "wildcard",
+            "occurrences": [
+              {
+                "reference_id": "ref-1",
+                "original_name": "s*",
+                "binding": "indeterminate",
+                "stage_id": "stage-1",
+                "scope_id": "scope-0",
+                "location": {
+                  "start": {
+                    "offset": 21,
+                    "line": 1,
+                    "column": 22
+                  },
+                  "end": {
+                    "offset": 23,
+                    "line": 1,
+                    "column": 24
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "gaps": [
+          {
+            "code": "SPL_UNRESOLVED_WILDCARD",
+            "message": "wildcard \"s*\" membership is unresolved",
+            "reference_ids": [
+              "ref-1"
+            ],
+            "diagnostic_codes": [
+              "SPL_UNRESOLVED_WILDCARD"
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "code": "SPL_UNRESOLVED_WILDCARD",
+            "severity": "warning",
+            "category": "unsupported_semantics",
+            "message": "wildcard \"s*\" membership is unresolved",
+            "location": {
+              "start": {
+                "offset": 21,
+                "line": 1,
+                "column": 22
+              },
+              "end": {
+                "offset": 23,
+                "line": 1,
+                "column": 24
+              }
+            },
+            "stage_id": "stage-1",
+            "scope_id": "scope-0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "knowledge_search_spl",
+      "document": {
+        "text": "index=main source=access.log sourcetype=web",
+        "language": "",
+        "profile": "",
+        "version": "",
+        "source_id": "requirements:knowledge_search_spl"
+      },
+      "expected": {
+        "schema_version": 1,
+        "query": {
+          "source_id": "requirements:knowledge_search_spl",
+          "language": "spl",
+          "profile": "splunkd",
+          "version": "current",
+          "query_digest": "sha256:7a9765c7cd51da878bea531735f06b7f9150d2840116c2b754ca764aa9fc39c5"
+        },
+        "capability_revision": "sha256:dfb8cedde04204e0a876412fbe217e49405689b54ae7d7d8fc37bfcb7fb2335f",
+        "query_status": "valid",
+        "coverage": {
+          "complete": true,
+          "reasons": []
+        },
+        "items": [
+          {
+            "id": "req-1",
+            "kind": "index",
+            "identity": "main",
+            "role": "read",
+            "necessity": "required",
+            "origin": "direct",
+            "resolution": "exact",
+            "occurrences": [
+              {
+                "reference_id": "ref-0",
+                "original_name": "main",
+                "binding": "not_applicable",
+                "stage_id": "stage-0",
+                "scope_id": "scope-0",
+                "location": {
+                  "start": {
+                    "offset": 6,
+                    "line": 1,
+                    "column": 7
+                  },
+                  "end": {
+                    "offset": 10,
+                    "line": 1,
+                    "column": 11
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "id": "req-2",
+            "kind": "source",
+            "identity": "access.log",
+            "role": "read",
+            "necessity": "required",
+            "origin": "direct",
+            "resolution": "exact",
+            "occurrences": [
+              {
+                "reference_id": "ref-1",
+                "original_name": "access.log",
+                "binding": "not_applicable",
+                "stage_id": "stage-0",
+                "scope_id": "scope-0",
+                "location": {
+                  "start": {
+                    "offset": 18,
+                    "line": 1,
+                    "column": 19
+                  },
+                  "end": {
+                    "offset": 28,
+                    "line": 1,
+                    "column": 29
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "id": "req-3",
+            "kind": "sourcetype",
+            "identity": "web",
+            "role": "read",
+            "necessity": "required",
+            "origin": "direct",
+            "resolution": "exact",
+            "occurrences": [
+              {
+                "reference_id": "ref-2",
+                "original_name": "web",
+                "binding": "not_applicable",
+                "stage_id": "stage-0",
+                "scope_id": "scope-0",
+                "location": {
+                  "start": {
+                    "offset": 40,
+                    "line": 1,
+                    "column": 41
+                  },
+                  "end": {
+                    "offset": 43,
+                    "line": 1,
+                    "column": 44
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "gaps": [],
+        "diagnostics": []
+      }
+    },
+    {
+      "id": "lookup_spl",
+      "document": {
+        "text": "| inputlookup users | where id=1",
+        "language": "",
+        "profile": "",
+        "version": "",
+        "source_id": "requirements:lookup_spl"
+      },
+      "expected": {
+        "schema_version": 1,
+        "query": {
+          "source_id": "requirements:lookup_spl",
+          "language": "spl",
+          "profile": "splunkd",
+          "version": "current",
+          "query_digest": "sha256:0dc76923fa47fdaa30ad258c85f6308c784f76b351b6ebb4f947656044c57d5b"
+        },
+        "capability_revision": "sha256:dfb8cedde04204e0a876412fbe217e49405689b54ae7d7d8fc37bfcb7fb2335f",
+        "query_status": "valid",
+        "coverage": {
+          "complete": true,
+          "reasons": []
+        },
+        "items": [
+          {
+            "id": "req-1",
+            "kind": "lookup",
+            "identity": "users",
+            "role": "read",
+            "necessity": "required",
+            "origin": "direct",
+            "resolution": "exact",
+            "occurrences": [
+              {
+                "reference_id": "ref-0",
+                "original_name": "users",
+                "binding": "not_applicable",
+                "stage_id": "stage-0",
+                "scope_id": "scope-0",
+                "location": {
+                  "start": {
+                    "offset": 14,
+                    "line": 1,
+                    "column": 15
+                  },
+                  "end": {
+                    "offset": 19,
+                    "line": 1,
+                    "column": 20
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "id": "req-2",
+            "kind": "field",
+            "identity": "id",
+            "role": "read",
+            "necessity": "required",
+            "origin": "direct",
+            "resolution": "exact",
+            "occurrences": [
+              {
+                "reference_id": "ref-1",
+                "original_name": "id",
+                "binding": "source",
+                "stage_id": "stage-1",
+                "scope_id": "scope-0",
+                "location": {
+                  "start": {
+                    "offset": 28,
+                    "line": 1,
+                    "column": 29
+                  },
+                  "end": {
+                    "offset": 30,
+                    "line": 1,
+                    "column": 31
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "gaps": [],
+        "diagnostics": []
+      }
+    },
+    {
+      "id": "data_model_spl",
+      "document": {
+        "text": "| datamodel Web search",
+        "language": "",
+        "profile": "",
+        "version": "",
+        "source_id": "requirements:data_model_spl"
+      },
+      "expected": {
+        "schema_version": 1,
+        "query": {
+          "source_id": "requirements:data_model_spl",
+          "language": "spl",
+          "profile": "splunkd",
+          "version": "current",
+          "query_digest": "sha256:6a58c4862e1ba050d1621405b79ee40a939f30285029c7faf3ba95056f5e601c"
+        },
+        "capability_revision": "sha256:dfb8cedde04204e0a876412fbe217e49405689b54ae7d7d8fc37bfcb7fb2335f",
+        "query_status": "incomplete",
+        "coverage": {
+          "complete": false,
+          "reasons": [
+            "SPL_UNSUPPORTED_SEMANTICS"
+          ]
+        },
+        "items": [
+          {
+            "id": "req-1",
+            "kind": "data_model",
+            "identity": "Web",
+            "role": "read",
+            "necessity": "required",
+            "origin": "direct",
+            "resolution": "exact",
+            "occurrences": [
+              {
+                "reference_id": "ref-0",
+                "original_name": "Web",
+                "binding": "not_applicable",
+                "stage_id": "stage-0",
+                "scope_id": "scope-0",
+                "location": {
+                  "start": {
+                    "offset": 12,
+                    "line": 1,
+                    "column": 13
+                  },
+                  "end": {
+                    "offset": 15,
+                    "line": 1,
+                    "column": 16
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "gaps": [
+          {
+            "code": "SPL_UNSUPPORTED_SEMANTICS",
+            "message": "command \"datamodel\" has unmodeled field effects",
+            "reference_ids": [],
+            "diagnostic_codes": [
+              "SPL_UNSUPPORTED_SEMANTICS"
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "code": "SPL_UNSUPPORTED_SEMANTICS",
+            "severity": "warning",
+            "category": "unsupported_semantics",
+            "message": "command \"datamodel\" has unmodeled field effects",
+            "location": {
+              "start": {
+                "offset": 2,
+                "line": 1,
+                "column": 3
+              },
+              "end": {
+                "offset": 22,
+                "line": 1,
+                "column": 23
+              }
+            },
+            "stage_id": "stage-0",
+            "scope_id": "scope-0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "macro_spl",
+      "document": {
+        "text": "search host=web | `expand(host)` | stats count by user",
+        "language": "",
+        "profile": "",
+        "version": "",
+        "source_id": "requirements:macro_spl"
+      },
+      "expected": {
+        "schema_version": 1,
+        "query": {
+          "source_id": "requirements:macro_spl",
+          "language": "spl",
+          "profile": "splunkd",
+          "version": "current",
+          "query_digest": "sha256:361b0ab3e3c354a13d3dd203935807a6af1d558fdcea70ff4e9dcb0579c8f51d"
+        },
+        "capability_revision": "sha256:dfb8cedde04204e0a876412fbe217e49405689b54ae7d7d8fc37bfcb7fb2335f",
+        "query_status": "incomplete",
+        "coverage": {
+          "complete": false,
+          "reasons": [
+            "SPL_DYNAMIC_REFERENCE",
+            "SPL_REQUIREMENT_INDETERMINATE"
+          ]
+        },
+        "items": [
+          {
+            "id": "req-1",
+            "kind": "field",
+            "identity": "host",
+            "role": "filter",
+            "necessity": "required",
+            "origin": "direct",
+            "resolution": "exact",
+            "occurrences": [
+              {
+                "reference_id": "ref-0",
+                "original_name": "host",
+                "binding": "source",
+                "stage_id": "stage-0",
+                "scope_id": "scope-0",
+                "location": {
+                  "start": {
+                    "offset": 7,
+                    "line": 1,
+                    "column": 8
+                  },
+                  "end": {
+                    "offset": 11,
+                    "line": 1,
+                    "column": 12
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "id": "req-2",
+            "kind": "macro",
+            "identity": "expand",
+            "role": "read",
+            "necessity": "required",
+            "origin": "direct",
+            "resolution": "exact",
+            "occurrences": [
+              {
+                "reference_id": "ref-1",
+                "original_name": "expand",
+                "binding": "not_applicable",
+                "stage_id": "stage-1",
+                "scope_id": "scope-0",
+                "location": {
+                  "start": {
+                    "offset": 19,
+                    "line": 1,
+                    "column": 20
+                  },
+                  "end": {
+                    "offset": 25,
+                    "line": 1,
+                    "column": 26
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "id": "req-3",
+            "kind": "field",
+            "identity": "user",
+            "role": "group",
+            "necessity": "conditional",
+            "origin": "direct",
+            "resolution": "exact",
+            "occurrences": [
+              {
+                "reference_id": "ref-3",
+                "original_name": "user",
+                "binding": "indeterminate",
+                "stage_id": "stage-2",
+                "scope_id": "scope-0",
+                "location": {
+                  "start": {
+                    "offset": 50,
+                    "line": 1,
+                    "column": 51
+                  },
+                  "end": {
+                    "offset": 54,
+                    "line": 1,
+                    "column": 55
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "gaps": [
+          {
+            "code": "SPL_DYNAMIC_REFERENCE",
+            "message": "macro expansion is unresolved",
+            "reference_ids": [
+              "ref-1"
+            ],
+            "diagnostic_codes": [
+              "SPL_DYNAMIC_REFERENCE"
+            ]
+          },
+          {
+            "code": "SPL_REQUIREMENT_INDETERMINATE",
+            "message": "requirement origin is indeterminate",
+            "reference_ids": [
+              "ref-3"
+            ],
+            "diagnostic_codes": []
+          }
+        ],
+        "diagnostics": [
+          {
+            "code": "SPL_DYNAMIC_REFERENCE",
+            "severity": "warning",
+            "category": "unsupported_semantics",
+            "message": "macro expansion is unresolved",
+            "location": {
+              "start": {
+                "offset": 18,
+                "line": 1,
+                "column": 19
+              },
+              "end": {
+                "offset": 32,
+                "line": 1,
+                "column": 33
+              }
+            },
+            "stage_id": "stage-1",
+            "scope_id": "scope-0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "rename_remove_null_spl",
+      "document": {
+        "text": "search host=x | rename host AS node | fields - node | eval absent=isnull(other)",
+        "language": "",
+        "profile": "",
+        "version": "",
+        "source_id": "requirements:rename_remove_null_spl"
+      },
+      "expected": {
+        "schema_version": 1,
+        "query": {
+          "source_id": "requirements:rename_remove_null_spl",
+          "language": "spl",
+          "profile": "splunkd",
+          "version": "current",
+          "query_digest": "sha256:aebec667d8b0b1706562b330b062e6e29d9ef195070fc4d28ab092410cff9081"
+        },
+        "capability_revision": "sha256:dfb8cedde04204e0a876412fbe217e49405689b54ae7d7d8fc37bfcb7fb2335f",
+        "query_status": "valid",
+        "coverage": {
+          "complete": true,
+          "reasons": []
+        },
+        "items": [
+          {
+            "id": "req-1",
+            "kind": "field",
+            "identity": "host",
+            "role": "filter",
+            "necessity": "required",
+            "origin": "direct",
+            "resolution": "exact",
+            "occurrences": [
+              {
+                "reference_id": "ref-0",
+                "original_name": "host",
+                "binding": "source",
+                "stage_id": "stage-0",
+                "scope_id": "scope-0",
+                "location": {
+                  "start": {
+                    "offset": 7,
+                    "line": 1,
+                    "column": 8
+                  },
+                  "end": {
+                    "offset": 11,
+                    "line": 1,
+                    "column": 12
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "id": "req-2",
+            "kind": "field",
+            "identity": "host",
+            "role": "read",
+            "necessity": "required",
+            "origin": "direct",
+            "resolution": "exact",
+            "occurrences": [
+              {
+                "reference_id": "ref-1",
+                "original_name": "host",
+                "binding": "source",
+                "stage_id": "stage-1",
+                "scope_id": "scope-0",
+                "location": {
+                  "start": {
+                    "offset": 23,
+                    "line": 1,
+                    "column": 24
+                  },
+                  "end": {
+                    "offset": 27,
+                    "line": 1,
+                    "column": 28
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "id": "req-3",
+            "kind": "field",
+            "identity": "other",
+            "role": "read",
+            "necessity": "required",
+            "origin": "direct",
+            "resolution": "exact",
+            "occurrences": [
+              {
+                "reference_id": "ref-5",
+                "original_name": "other",
+                "binding": "source",
+                "stage_id": "stage-3",
+                "scope_id": "scope-0",
+                "location": {
+                  "start": {
+                    "offset": 73,
+                    "line": 1,
+                    "column": 74
+                  },
+                  "end": {
+                    "offset": 78,
+                    "line": 1,
+                    "column": 79
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "gaps": [],
+        "diagnostics": []
+      }
+    },
+    {
+      "id": "invalid_local_spl",
+      "document": {
+        "text": "search host=* | fields - host | table host",
+        "language": "",
+        "profile": "",
+        "version": "",
+        "source_id": "requirements:invalid_local_spl"
+      },
+      "expected": {
+        "schema_version": 1,
+        "query": {
+          "source_id": "requirements:invalid_local_spl",
+          "language": "spl",
+          "profile": "splunkd",
+          "version": "current",
+          "query_digest": "sha256:f7adcfdf9129d82ae3195685215c28928bb8f7dee31607c9e8bf43158c013b29"
+        },
+        "capability_revision": "sha256:dfb8cedde04204e0a876412fbe217e49405689b54ae7d7d8fc37bfcb7fb2335f",
+        "query_status": "invalid",
+        "coverage": {
+          "complete": true,
+          "reasons": []
+        },
+        "items": [
+          {
+            "id": "req-1",
+            "kind": "field",
+            "identity": "host",
+            "role": "filter",
+            "necessity": "required",
+            "origin": "direct",
+            "resolution": "exact",
+            "occurrences": [
+              {
+                "reference_id": "ref-0",
+                "original_name": "host",
+                "binding": "source",
+                "stage_id": "stage-0",
+                "scope_id": "scope-0",
+                "location": {
+                  "start": {
+                    "offset": 7,
+                    "line": 1,
+                    "column": 8
+                  },
+                  "end": {
+                    "offset": 11,
+                    "line": 1,
+                    "column": 12
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "gaps": [],
+        "diagnostics": [
+          {
+            "code": "SPL_UNAVAILABLE_FIELD",
+            "severity": "error",
+            "category": "unavailable_field",
+            "message": "field \"host\" is unavailable after an earlier pipeline transfer",
+            "location": {
+              "start": {
+                "offset": 38,
+                "line": 1,
+                "column": 39
+              },
+              "end": {
+                "offset": 42,
+                "line": 1,
+                "column": 43
+              }
+            },
+            "stage_id": "stage-2",
+            "scope_id": "scope-0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "syntax_incomplete_spl",
+      "document": {
+        "text": "search host=",
+        "language": "",
+        "profile": "",
+        "version": "",
+        "source_id": "requirements:syntax_incomplete_spl"
+      },
+      "expected": {
+        "schema_version": 1,
+        "query": {
+          "source_id": "requirements:syntax_incomplete_spl",
+          "language": "spl",
+          "profile": "splunkd",
+          "version": "current",
+          "query_digest": "sha256:a6d6b2c3e480e6a5fedc48fc9dd6f67a4c4955f7188ccd63475341df90c5b003"
+        },
+        "capability_revision": "sha256:dfb8cedde04204e0a876412fbe217e49405689b54ae7d7d8fc37bfcb7fb2335f",
+        "query_status": "invalid",
+        "coverage": {
+          "complete": false,
+          "reasons": [
+            "SPL_SYNTAX_ERROR"
+          ]
+        },
+        "items": [],
+        "gaps": [
+          {
+            "code": "SPL_SYNTAX_ERROR",
+            "message": "no viable alternative at input 'search host='",
+            "reference_ids": [],
+            "diagnostic_codes": [
+              "SPL_SYNTAX_ERROR"
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "code": "SPL_SYNTAX_ERROR",
+            "severity": "error",
+            "category": "syntax",
+            "message": "no viable alternative at input 'search host='",
+            "location": {
+              "start": {
+                "offset": 12,
+                "line": 1,
+                "column": 13
+              },
+              "end": {
+                "offset": 12,
+                "line": 1,
+                "column": 13
+              }
+            },
+            "stage_id": "",
+            "scope_id": ""
+          }
+        ]
+      }
+    },
+    {
+      "id": "branch_scope_spl",
+      "document": {
+        "text": "search host=x | append [ search child=y | table child ] | table host",
+        "language": "",
+        "profile": "",
+        "version": "",
+        "source_id": "requirements:branch_scope_spl"
+      },
+      "expected": {
+        "schema_version": 1,
+        "query": {
+          "source_id": "requirements:branch_scope_spl",
+          "language": "spl",
+          "profile": "splunkd",
+          "version": "current",
+          "query_digest": "sha256:11915da48f694079f9a71d70adbace4cdbd2643e480606b5711e4cce84686aed"
+        },
+        "capability_revision": "sha256:dfb8cedde04204e0a876412fbe217e49405689b54ae7d7d8fc37bfcb7fb2335f",
+        "query_status": "incomplete",
+        "coverage": {
+          "complete": false,
+          "reasons": [
+            "SPL_UNSUPPORTED_SEMANTICS"
+          ]
+        },
+        "items": [
+          {
+            "id": "req-1",
+            "kind": "field",
+            "identity": "host",
+            "role": "filter",
+            "necessity": "required",
+            "origin": "direct",
+            "resolution": "exact",
+            "occurrences": [
+              {
+                "reference_id": "ref-0",
+                "original_name": "host",
+                "binding": "source",
+                "stage_id": "stage-0",
+                "scope_id": "scope-0",
+                "location": {
+                  "start": {
+                    "offset": 7,
+                    "line": 1,
+                    "column": 8
+                  },
+                  "end": {
+                    "offset": 11,
+                    "line": 1,
+                    "column": 12
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "id": "req-2",
+            "kind": "field",
+            "identity": "child",
+            "role": "filter",
+            "necessity": "required",
+            "origin": "direct",
+            "resolution": "exact",
+            "occurrences": [
+              {
+                "reference_id": "ref-1",
+                "original_name": "child",
+                "binding": "source",
+                "stage_id": "stage-2",
+                "scope_id": "scope-1",
+                "location": {
+                  "start": {
+                    "offset": 32,
+                    "line": 1,
+                    "column": 33
+                  },
+                  "end": {
+                    "offset": 37,
+                    "line": 1,
+                    "column": 38
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "id": "req-3",
+            "kind": "field",
+            "identity": "child",
+            "role": "read",
+            "necessity": "required",
+            "origin": "direct",
+            "resolution": "exact",
+            "occurrences": [
+              {
+                "reference_id": "ref-2",
+                "original_name": "child",
+                "binding": "source",
+                "stage_id": "stage-3",
+                "scope_id": "scope-1",
+                "location": {
+                  "start": {
+                    "offset": 48,
+                    "line": 1,
+                    "column": 49
+                  },
+                  "end": {
+                    "offset": 53,
+                    "line": 1,
+                    "column": 54
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "id": "req-4",
+            "kind": "field",
+            "identity": "host",
+            "role": "read",
+            "necessity": "required",
+            "origin": "direct",
+            "resolution": "exact",
+            "occurrences": [
+              {
+                "reference_id": "ref-3",
+                "original_name": "host",
+                "binding": "source",
+                "stage_id": "stage-4",
+                "scope_id": "scope-0",
+                "location": {
+                  "start": {
+                    "offset": 64,
+                    "line": 1,
+                    "column": 65
+                  },
+                  "end": {
+                    "offset": 68,
+                    "line": 1,
+                    "column": 69
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "gaps": [
+          {
+            "code": "SPL_UNSUPPORTED_SEMANTICS",
+            "message": "command \"append\" has unmodeled field effects",
+            "reference_ids": [],
+            "diagnostic_codes": [
+              "SPL_UNSUPPORTED_SEMANTICS"
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "code": "SPL_UNSUPPORTED_SEMANTICS",
+            "severity": "warning",
+            "category": "unsupported_semantics",
+            "message": "command \"append\" has unmodeled field effects",
+            "location": {
+              "start": {
+                "offset": 16,
+                "line": 1,
+                "column": 17
+              },
+              "end": {
+                "offset": 55,
+                "line": 1,
+                "column": 56
+              }
+            },
+            "stage_id": "stage-1",
+            "scope_id": "scope-0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "unicode_crlf_spl",
+      "document": {
+        "text": "search café=\"é\"\r\n| eval local=café | table café local",
+        "language": "",
+        "profile": "",
+        "version": "",
+        "source_id": "requirements:unicode_crlf_spl"
+      },
+      "expected": {
+        "schema_version": 1,
+        "query": {
+          "source_id": "requirements:unicode_crlf_spl",
+          "language": "spl",
+          "profile": "splunkd",
+          "version": "current",
+          "query_digest": "sha256:0f6a3f7e6d0fc4840d2952a16eb30d951fa8b4394fe343f0af98c0b1908d1358"
+        },
+        "capability_revision": "sha256:dfb8cedde04204e0a876412fbe217e49405689b54ae7d7d8fc37bfcb7fb2335f",
+        "query_status": "valid",
+        "coverage": {
+          "complete": true,
+          "reasons": []
+        },
+        "items": [
+          {
+            "id": "req-1",
+            "kind": "field",
+            "identity": "café",
+            "role": "filter",
+            "necessity": "required",
+            "origin": "direct",
+            "resolution": "exact",
+            "occurrences": [
+              {
+                "reference_id": "ref-0",
+                "original_name": "café",
+                "binding": "source",
+                "stage_id": "stage-0",
+                "scope_id": "scope-0",
+                "location": {
+                  "start": {
+                    "offset": 7,
+                    "line": 1,
+                    "column": 8
+                  },
+                  "end": {
+                    "offset": 12,
+                    "line": 1,
+                    "column": 12
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "id": "req-2",
+            "kind": "field",
+            "identity": "café",
+            "role": "read",
+            "necessity": "required",
+            "origin": "direct",
+            "resolution": "exact",
+            "occurrences": [
+              {
+                "reference_id": "ref-2",
+                "original_name": "café",
+                "binding": "source",
+                "stage_id": "stage-1",
+                "scope_id": "scope-0",
+                "location": {
+                  "start": {
+                    "offset": 32,
+                    "line": 2,
+                    "column": 14
+                  },
+                  "end": {
+                    "offset": 37,
+                    "line": 2,
+                    "column": 18
+                  }
+                }
+              },
+              {
+                "reference_id": "ref-3",
+                "original_name": "café",
+                "binding": "source",
+                "stage_id": "stage-2",
+                "scope_id": "scope-0",
+                "location": {
+                  "start": {
+                    "offset": 46,
+                    "line": 2,
+                    "column": 27
+                  },
+                  "end": {
+                    "offset": 51,
+                    "line": 2,
+                    "column": 31
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "gaps": [],
+        "diagnostics": []
+      }
+    },
+    {
+      "id": "spl2_sql_dotted",
+      "document": {
+        "text": "SELECT 'actor.name' FROM main",
+        "language": "spl2",
+        "profile": "",
+        "version": "",
+        "source_id": "requirements:spl2_sql_dotted"
+      },
+      "expected": {
+        "schema_version": 1,
+        "query": {
+          "source_id": "requirements:spl2_sql_dotted",
+          "language": "spl2",
+          "profile": "splunkd",
+          "version": "current",
+          "query_digest": "sha256:47e9020c2aabad680268a48f4572eef653a4da767ad41b1a6dc5aca9f6c81855"
+        },
+        "capability_revision": "sha256:c3217502697cee2595f20d2fe98b76422f837696d2861cee81e852ad142edcfc",
+        "query_status": "valid",
+        "coverage": {
+          "complete": true,
+          "reasons": []
+        },
+        "items": [
+          {
+            "id": "req-1",
+            "kind": "field",
+            "identity": "actor.name",
+            "role": "read",
+            "necessity": "required",
+            "origin": "direct",
+            "resolution": "exact",
+            "occurrences": [
+              {
+                "reference_id": "ref-0",
+                "original_name": "'actor.name'",
+                "binding": "source",
+                "stage_id": "stage-0",
+                "scope_id": "scope-0",
+                "location": {
+                  "start": {
+                    "offset": 7,
+                    "line": 1,
+                    "column": 8
+                  },
+                  "end": {
+                    "offset": 19,
+                    "line": 1,
+                    "column": 20
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "id": "req-2",
+            "kind": "dataset",
+            "identity": "main",
+            "role": "read",
+            "necessity": "required",
+            "origin": "direct",
+            "resolution": "exact",
+            "occurrences": [
+              {
+                "reference_id": "ref-1",
+                "original_name": "main",
+                "binding": "not_applicable",
+                "stage_id": "stage-1",
+                "scope_id": "scope-0",
+                "location": {
+                  "start": {
+                    "offset": 25,
+                    "line": 1,
+                    "column": 26
+                  },
+                  "end": {
+                    "offset": 29,
+                    "line": 1,
+                    "column": 30
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "gaps": [],
+        "diagnostics": []
+      }
+    },
+    {
+      "id": "spl2_mixed_pipeline",
+      "document": {
+        "text": "FROM main | eval local=bytes | where local\u003e0 | table local",
+        "language": "spl2",
+        "profile": "",
+        "version": "",
+        "source_id": "requirements:spl2_mixed_pipeline"
+      },
+      "expected": {
+        "schema_version": 1,
+        "query": {
+          "source_id": "requirements:spl2_mixed_pipeline",
+          "language": "spl2",
+          "profile": "splunkd",
+          "version": "current",
+          "query_digest": "sha256:7f93aa83df1d910bbf99118e2489c996a1624a42a7dc17387c1ee4132f328c4e"
+        },
+        "capability_revision": "sha256:c3217502697cee2595f20d2fe98b76422f837696d2861cee81e852ad142edcfc",
+        "query_status": "valid",
+        "coverage": {
+          "complete": true,
+          "reasons": []
+        },
+        "items": [
+          {
+            "id": "req-1",
+            "kind": "dataset",
+            "identity": "main",
+            "role": "read",
+            "necessity": "required",
+            "origin": "direct",
+            "resolution": "exact",
+            "occurrences": [
+              {
+                "reference_id": "ref-0",
+                "original_name": "main",
+                "binding": "not_applicable",
+                "stage_id": "stage-0",
+                "scope_id": "scope-0",
+                "location": {
+                  "start": {
+                    "offset": 5,
+                    "line": 1,
+                    "column": 6
+                  },
+                  "end": {
+                    "offset": 9,
+                    "line": 1,
+                    "column": 10
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "id": "req-2",
+            "kind": "field",
+            "identity": "bytes",
+            "role": "read",
+            "necessity": "required",
+            "origin": "direct",
+            "resolution": "exact",
+            "occurrences": [
+              {
+                "reference_id": "ref-2",
+                "original_name": "bytes",
+                "binding": "source",
+                "stage_id": "stage-1",
+                "scope_id": "scope-0",
+                "location": {
+                  "start": {
+                    "offset": 23,
+                    "line": 1,
+                    "column": 24
+                  },
+                  "end": {
+                    "offset": 28,
+                    "line": 1,
+                    "column": 29
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "gaps": [],
+        "diagnostics": []
+      }
+    },
+    {
+      "id": "spl2_literal_invalid",
+      "document": {
+        "text": "FROM [{a:1}] | table b",
+        "language": "spl2",
+        "profile": "",
+        "version": "",
+        "source_id": "requirements:spl2_literal_invalid"
+      },
+      "expected": {
+        "schema_version": 1,
+        "query": {
+          "source_id": "requirements:spl2_literal_invalid",
+          "language": "spl2",
+          "profile": "splunkd",
+          "version": "current",
+          "query_digest": "sha256:ec8474dfb6e63d58bf18ae5413b55d59a48fc9f38b054a4ca33a4d29d70e6c65"
+        },
+        "capability_revision": "sha256:c3217502697cee2595f20d2fe98b76422f837696d2861cee81e852ad142edcfc",
+        "query_status": "invalid",
+        "coverage": {
+          "complete": true,
+          "reasons": []
+        },
+        "items": [],
+        "gaps": [],
+        "diagnostics": [
+          {
+            "code": "SPL_UNAVAILABLE_FIELD",
+            "severity": "error",
+            "category": "unavailable_field",
+            "message": "field \"b\" is unavailable after an earlier pipeline transfer",
+            "location": {
+              "start": {
+                "offset": 21,
+                "line": 1,
+                "column": 22
+              },
+              "end": {
+                "offset": 22,
+                "line": 1,
+                "column": 23
+              }
+            },
+            "stage_id": "stage-1",
+            "scope_id": "scope-0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "knowledge_composed_spl",
+      "document": {
+        "text": "index=main source=\"/var/log/a\" sourcetype=syslog | append [ | from datamodel:Network_Traffic.All_Traffic ] | append [ | datamodel Web All_Traffic search ] | append [ | tstats count FROM datamodel=Authentication.Authentication ] | inputlookup users",
+        "language": "",
+        "profile": "",
+        "version": "",
+        "source_id": "requirements:knowledge_composed_spl"
+      },
+      "expected": {
+        "schema_version": 1,
+        "query": {
+          "source_id": "requirements:knowledge_composed_spl",
+          "language": "spl",
+          "profile": "splunkd",
+          "version": "current",
+          "query_digest": "sha256:72d1806d01e2eaa01dad59014c221c050b051fcaa46bd5f417c1dcd080aa12c9"
+        },
+        "capability_revision": "sha256:dfb8cedde04204e0a876412fbe217e49405689b54ae7d7d8fc37bfcb7fb2335f",
+        "query_status": "incomplete",
+        "coverage": {
+          "complete": false,
+          "reasons": [
+            "SPL_UNSUPPORTED_SEMANTICS"
+          ]
+        },
+        "items": [
+          {
+            "id": "req-1",
+            "kind": "index",
+            "identity": "main",
+            "role": "read",
+            "necessity": "required",
+            "origin": "direct",
+            "resolution": "exact",
+            "occurrences": [
+              {
+                "reference_id": "ref-0",
+                "original_name": "main",
+                "binding": "not_applicable",
+                "stage_id": "stage-0",
+                "scope_id": "scope-0",
+                "location": {
+                  "start": {
+                    "offset": 6,
+                    "line": 1,
+                    "column": 7
+                  },
+                  "end": {
+                    "offset": 10,
+                    "line": 1,
+                    "column": 11
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "id": "req-2",
+            "kind": "source",
+            "identity": "/var/log/a",
+            "role": "read",
+            "necessity": "required",
+            "origin": "direct",
+            "resolution": "exact",
+            "occurrences": [
+              {
+                "reference_id": "ref-1",
+                "original_name": "\"/var/log/a\"",
+                "binding": "not_applicable",
+                "stage_id": "stage-0",
+                "scope_id": "scope-0",
+                "location": {
+                  "start": {
+                    "offset": 18,
+                    "line": 1,
+                    "column": 19
+                  },
+                  "end": {
+                    "offset": 30,
+                    "line": 1,
+                    "column": 31
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "id": "req-3",
+            "kind": "sourcetype",
+            "identity": "syslog",
+            "role": "read",
+            "necessity": "required",
+            "origin": "direct",
+            "resolution": "exact",
+            "occurrences": [
+              {
+                "reference_id": "ref-2",
+                "original_name": "syslog",
+                "binding": "not_applicable",
+                "stage_id": "stage-0",
+                "scope_id": "scope-0",
+                "location": {
+                  "start": {
+                    "offset": 42,
+                    "line": 1,
+                    "column": 43
+                  },
+                  "end": {
+                    "offset": 48,
+                    "line": 1,
+                    "column": 49
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "id": "req-4",
+            "kind": "data_model",
+            "identity": "Network_Traffic",
+            "role": "read",
+            "necessity": "required",
+            "origin": "direct",
+            "resolution": "exact",
+            "occurrences": [
+              {
+                "reference_id": "ref-3",
+                "original_name": "Network_Traffic",
+                "binding": "not_applicable",
+                "stage_id": "stage-2",
+                "scope_id": "scope-1",
+                "location": {
+                  "start": {
+                    "offset": 77,
+                    "line": 1,
+                    "column": 78
+                  },
+                  "end": {
+                    "offset": 92,
+                    "line": 1,
+                    "column": 93
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "id": "req-5",
+            "kind": "dataset",
+            "identity": "Network_Traffic.All_Traffic",
+            "role": "read",
+            "necessity": "required",
+            "origin": "direct",
+            "resolution": "exact",
+            "occurrences": [
+              {
+                "reference_id": "ref-4",
+                "original_name": "Network_Traffic.All_Traffic",
+                "binding": "not_applicable",
+                "stage_id": "stage-2",
+                "scope_id": "scope-1",
+                "location": {
+                  "start": {
+                    "offset": 77,
+                    "line": 1,
+                    "column": 78
+                  },
+                  "end": {
+                    "offset": 104,
+                    "line": 1,
+                    "column": 105
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "id": "req-6",
+            "kind": "data_model",
+            "identity": "Web",
+            "role": "read",
+            "necessity": "required",
+            "origin": "direct",
+            "resolution": "exact",
+            "occurrences": [
+              {
+                "reference_id": "ref-5",
+                "original_name": "Web",
+                "binding": "not_applicable",
+                "stage_id": "stage-4",
+                "scope_id": "scope-2",
+                "location": {
+                  "start": {
+                    "offset": 130,
+                    "line": 1,
+                    "column": 131
+                  },
+                  "end": {
+                    "offset": 133,
+                    "line": 1,
+                    "column": 134
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "id": "req-7",
+            "kind": "dataset",
+            "identity": "Web.All_Traffic",
+            "role": "read",
+            "necessity": "required",
+            "origin": "direct",
+            "resolution": "exact",
+            "occurrences": [
+              {
+                "reference_id": "ref-6",
+                "original_name": "All_Traffic",
+                "binding": "not_applicable",
+                "stage_id": "stage-4",
+                "scope_id": "scope-2",
+                "location": {
+                  "start": {
+                    "offset": 134,
+                    "line": 1,
+                    "column": 135
+                  },
+                  "end": {
+                    "offset": 145,
+                    "line": 1,
+                    "column": 146
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "id": "req-8",
+            "kind": "data_model",
+            "identity": "Authentication",
+            "role": "read",
+            "necessity": "required",
+            "origin": "direct",
+            "resolution": "exact",
+            "occurrences": [
+              {
+                "reference_id": "ref-7",
+                "original_name": "Authentication",
+                "binding": "not_applicable",
+                "stage_id": "stage-6",
+                "scope_id": "scope-3",
+                "location": {
+                  "start": {
+                    "offset": 196,
+                    "line": 1,
+                    "column": 197
+                  },
+                  "end": {
+                    "offset": 210,
+                    "line": 1,
+                    "column": 211
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "id": "req-9",
+            "kind": "dataset",
+            "identity": "Authentication.Authentication",
+            "role": "read",
+            "necessity": "required",
+            "origin": "direct",
+            "resolution": "exact",
+            "occurrences": [
+              {
+                "reference_id": "ref-8",
+                "original_name": "Authentication.Authentication",
+                "binding": "not_applicable",
+                "stage_id": "stage-6",
+                "scope_id": "scope-3",
+                "location": {
+                  "start": {
+                    "offset": 196,
+                    "line": 1,
+                    "column": 197
+                  },
+                  "end": {
+                    "offset": 225,
+                    "line": 1,
+                    "column": 226
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "id": "req-10",
+            "kind": "lookup",
+            "identity": "users",
+            "role": "read",
+            "necessity": "required",
+            "origin": "direct",
+            "resolution": "exact",
+            "occurrences": [
+              {
+                "reference_id": "ref-9",
+                "original_name": "users",
+                "binding": "not_applicable",
+                "stage_id": "stage-7",
+                "scope_id": "scope-0",
+                "location": {
+                  "start": {
+                    "offset": 242,
+                    "line": 1,
+                    "column": 243
+                  },
+                  "end": {
+                    "offset": 247,
+                    "line": 1,
+                    "column": 248
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "gaps": [
+          {
+            "code": "SPL_UNSUPPORTED_SEMANTICS",
+            "message": "command \"append\" has unmodeled field effects",
+            "reference_ids": [],
+            "diagnostic_codes": [
+              "SPL_UNSUPPORTED_SEMANTICS"
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "code": "SPL_UNSUPPORTED_SEMANTICS",
+            "severity": "warning",
+            "category": "unsupported_semantics",
+            "message": "command \"append\" has unmodeled field effects",
+            "location": {
+              "start": {
+                "offset": 51,
+                "line": 1,
+                "column": 52
+              },
+              "end": {
+                "offset": 106,
+                "line": 1,
+                "column": 107
+              }
+            },
+            "stage_id": "stage-1",
+            "scope_id": "scope-0"
+          },
+          {
+            "code": "SPL_UNSUPPORTED_SEMANTICS",
+            "severity": "warning",
+            "category": "unsupported_semantics",
+            "message": "command \"from\" has unmodeled field effects",
+            "location": {
+              "start": {
+                "offset": 62,
+                "line": 1,
+                "column": 63
+              },
+              "end": {
+                "offset": 104,
+                "line": 1,
+                "column": 105
+              }
+            },
+            "stage_id": "stage-2",
+            "scope_id": "scope-1"
+          },
+          {
+            "code": "SPL_UNSUPPORTED_SEMANTICS",
+            "severity": "warning",
+            "category": "unsupported_semantics",
+            "message": "command \"append\" has unmodeled field effects",
+            "location": {
+              "start": {
+                "offset": 109,
+                "line": 1,
+                "column": 110
+              },
+              "end": {
+                "offset": 154,
+                "line": 1,
+                "column": 155
+              }
+            },
+            "stage_id": "stage-3",
+            "scope_id": "scope-0"
+          },
+          {
+            "code": "SPL_UNSUPPORTED_SEMANTICS",
+            "severity": "warning",
+            "category": "unsupported_semantics",
+            "message": "command \"datamodel\" has unmodeled field effects",
+            "location": {
+              "start": {
+                "offset": 120,
+                "line": 1,
+                "column": 121
+              },
+              "end": {
+                "offset": 152,
+                "line": 1,
+                "column": 153
+              }
+            },
+            "stage_id": "stage-4",
+            "scope_id": "scope-2"
+          },
+          {
+            "code": "SPL_UNSUPPORTED_SEMANTICS",
+            "severity": "warning",
+            "category": "unsupported_semantics",
+            "message": "command \"append\" has unmodeled field effects",
+            "location": {
+              "start": {
+                "offset": 157,
+                "line": 1,
+                "column": 158
+              },
+              "end": {
+                "offset": 227,
+                "line": 1,
+                "column": 228
+              }
+            },
+            "stage_id": "stage-5",
+            "scope_id": "scope-0"
+          },
+          {
+            "code": "SPL_UNSUPPORTED_SEMANTICS",
+            "severity": "warning",
+            "category": "unsupported_semantics",
+            "message": "command \"tstats\" has unmodeled field effects",
+            "location": {
+              "start": {
+                "offset": 168,
+                "line": 1,
+                "column": 169
+              },
+              "end": {
+                "offset": 225,
+                "line": 1,
+                "column": 226
+              }
+            },
+            "stage_id": "stage-6",
+            "scope_id": "scope-3"
+          }
+        ]
+      }
+    }
+  ]
+}

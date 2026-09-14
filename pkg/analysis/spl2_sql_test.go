@@ -64,6 +64,23 @@ func TestSPL2SQLLexicalStagesAndProjectionRead(t *testing.T) {
 		{StageID: "stage-0", ScopeID: "scope-0", Before: filtered, After: evaluated, Transitions: []Transition{}, Phase: "evaluate", ExecutionOrder: &orders[2]},
 		{StageID: "stage-0", ScopeID: "scope-0", Before: evaluated, After: projected, Transitions: []Transition{{Operation: "project", Output: "host", InputReferenceIDs: []string{"ref-0"}}}, Phase: "project", ExecutionOrder: &orders[3]},
 	}
+	want.Requirements = RequirementSet{
+		SchemaVersion: 1,
+		Query: RequirementQueryIdentity{
+			Language: "spl2", Profile: "splunkd", Version: "current",
+			QueryDigest: "sha256:aeacf92af76b0a8b74aacd3863908ec66d33802ee4cf5ea0ffa80f9c9d78129f",
+		},
+		CapabilityRevision: "sha256:c3217502697cee2595f20d2fe98b76422f837696d2861cee81e852ad142edcfc",
+		QueryStatus:        Valid,
+		Coverage:           RequirementCoverage{Complete: true, Reasons: []string{}},
+		Items: []RequirementItem{
+			{ID: "req-1", Kind: "field", Identity: "host", Role: "read", Necessity: "required", Origin: "direct", Resolution: "exact", Occurrences: []RequirementOccurrence{{ReferenceID: "ref-0", OriginalName: "host", Binding: "source", StageID: "stage-0", ScopeID: "scope-0", Location: loc(7, 11)}}},
+			{ID: "req-2", Kind: "dataset", Identity: "main", Role: "read", Necessity: "required", Origin: "direct", Resolution: "exact", Occurrences: []RequirementOccurrence{{ReferenceID: "ref-1", OriginalName: "main", Binding: "not_applicable", StageID: "stage-1", ScopeID: "scope-0", Location: loc(17, 21)}}},
+			{ID: "req-3", Kind: "field", Identity: "bytes", Role: "read", Necessity: "required", Origin: "direct", Resolution: "exact", Occurrences: []RequirementOccurrence{{ReferenceID: "ref-2", OriginalName: "bytes", Binding: "source", StageID: "stage-2", ScopeID: "scope-0", Location: loc(28, 33)}}},
+		},
+		Gaps:        []RequirementGap{},
+		Diagnostics: []Diagnostic{},
+	}
 	if !reflect.DeepEqual(r, want) {
 		t.Fatalf("complete SQL report differs: %+v", r)
 	}

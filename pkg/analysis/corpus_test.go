@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"reflect"
 	"sort"
 	"strings"
 	"sync"
@@ -15,6 +16,31 @@ type corpusCase struct {
 	ID       string        `json:"id"`
 	Document QueryDocument `json:"document"`
 	Expected *Result       `json:"expected"`
+}
+
+type requirementsCorpusCase struct {
+	ID       string         `json:"id"`
+	Document QueryDocument  `json:"document"`
+	Expected RequirementSet `json:"expected"`
+}
+
+func loadRequirementsCorpus(t *testing.T) []requirementsCorpusCase {
+	t.Helper()
+	data, err := os.ReadFile("../../testdata/requirements/cases.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var corpus struct {
+		Version string                   `json:"version"`
+		Cases   []requirementsCorpusCase `json:"cases"`
+	}
+	if err := json.Unmarshal(data, &corpus); err != nil {
+		t.Fatal(err)
+	}
+	if corpus.Version != "1" || len(corpus.Cases) != 17 {
+		t.Fatalf("missing reviewed requirements corpus: version %q cases %d", corpus.Version, len(corpus.Cases))
+	}
+	return corpus.Cases
 }
 
 func loadCorpus(t *testing.T) []corpusCase {
@@ -192,6 +218,56 @@ func TestCorpusFullReports(t *testing.T) {
 			}
 			wg.Wait()
 		})
+	}
+}
+
+func TestRequirementsCorpus(t *testing.T) {
+	wantIDs := []string{
+		"empty_spl",
+		"exact_derived_spl",
+		"indeterminate_spl",
+		"wildcard_spl",
+		"knowledge_search_spl",
+		"lookup_spl",
+		"data_model_spl",
+		"macro_spl",
+		"rename_remove_null_spl",
+		"invalid_local_spl",
+		"syntax_incomplete_spl",
+		"branch_scope_spl",
+		"unicode_crlf_spl",
+		"spl2_sql_dotted",
+		"spl2_mixed_pipeline",
+		"spl2_literal_invalid",
+		"knowledge_composed_spl",
+	}
+	cases := loadRequirementsCorpus(t)
+	gotIDs := make([]string, 0, len(cases))
+	for _, c := range cases {
+		gotIDs = append(gotIDs, c.ID)
+		t.Run(c.ID, func(t *testing.T) {
+			for i := 0; i < 3; i++ {
+				got, err := Requirements(c.Document)
+				if err != nil {
+					t.Fatal(err)
+				}
+				if !reflect.DeepEqual(*got, c.Expected) {
+					gotJSON, _ := json.Marshal(got)
+					wantJSON, _ := json.Marshal(c.Expected)
+					t.Fatalf("requirements differ:\n got: %s\nwant: %s", gotJSON, wantJSON)
+				}
+				result, err := Analyze(c.Document)
+				if err != nil {
+					t.Fatal(err)
+				}
+				if !reflect.DeepEqual(result.Requirements, c.Expected) {
+					t.Fatalf("embedded requirements differ: %+v", result.Requirements)
+				}
+			}
+		})
+	}
+	if !reflect.DeepEqual(gotIDs, wantIDs) {
+		t.Fatalf("requirements corpus IDs = %v, want %v", gotIDs, wantIDs)
 	}
 }
 func assertCorpusIntegrity(t *testing.T, r *Result) {
