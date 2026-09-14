@@ -481,18 +481,21 @@ func TestRequirementTraceRefinementParity(t *testing.T) {
 		name       string
 		document   QueryDocument
 		refinement *sourceRefinement
+		renameRefs bool
 	}{
-		{"finite field list", QueryDocument{Text: "fields host* | table hostname"}, testSourceRefinement([]string{"hostname"}, true, nil, true)},
-		{"partial source universe", QueryDocument{Text: "fields host* | table hostname"}, testSourceRefinement([]string{"hostname"}, false, nil, false)},
-		{"wildcard selectors", QueryDocument{Text: "eval label=host | table *"}, testSourceRefinement([]string{"host"}, true, nil, false)},
-		{"unsupported wildcard selector", QueryDocument{Text: "sort host*"}, testSourceRefinement([]string{"host"}, true, nil, false)},
-		{"dotted SPL2 names", QueryDocument{Text: `SELECT 'actor.name' FROM main`, Language: "spl2"}, testSourceRefinement([]string{"actor.name"}, true, admitted, false)},
-		{"dotted SPL2 downstream derived", QueryDocument{Text: `FROM main | eval local='actor.name' | table local`, Language: "spl2"}, testSourceRefinement([]string{"actor.name"}, true, admitted, false)},
-		{"dotted SPL2 rename output", QueryDocument{Text: `FROM main | rename 'actor.name' AS actor | table actor`, Language: "spl2"}, testSourceRefinement([]string{"actor.name"}, true, admitted, false)},
-		{"dotted SPL2 aggregate output", QueryDocument{Text: `FROM main | stats count('actor.name') AS total | table total`, Language: "spl2"}, testSourceRefinement([]string{"actor.name"}, true, admitted, false)},
-		{"dotted SPL2 lookup output", QueryDocument{Text: `FROM main | lookup users 'actor.name' OUTPUT role | table role`, Language: "spl2"}, testSourceRefinement([]string{"actor.name"}, true, admitted, false)},
-		{"dotted SPL2 downstream SPL source", QueryDocument{Text: `FROM main | eval local='actor.name' | where other=1`, Language: "spl2"}, testSourceRefinement([]string{"actor.name"}, true, admitted, false)},
-		{"dotted SPL2 downstream SQL source", QueryDocument{Text: `FROM main WHERE 'actor.name'=1 SELECT other`, Language: "spl2"}, testSourceRefinement([]string{"actor.name"}, true, admitted, false)},
+		{"finite field list", QueryDocument{Text: "fields host* | table hostname"}, testSourceRefinement([]string{"hostname"}, true, nil, true), false},
+		{"partial source universe", QueryDocument{Text: "fields host* | table hostname"}, testSourceRefinement([]string{"hostname"}, false, nil, false), false},
+		{"wildcard selectors", QueryDocument{Text: "eval label=host | table *"}, testSourceRefinement([]string{"host"}, true, nil, false), false},
+		{"unsupported wildcard selector", QueryDocument{Text: "sort host*"}, testSourceRefinement([]string{"host"}, true, nil, false), false},
+		{"wildcard rename conflicts", QueryDocument{Text: "search alpha=1 | rename a* AS b | table alpha"}, testSourceRefinement([]string{}, true, nil, false), true},
+		{"rename existing destination", QueryDocument{Text: "search alpha=1 | fields a* | rename x AS alpha | table alpha"}, testSourceRefinement([]string{}, true, nil, false), true},
+		{"dotted SPL2 names", QueryDocument{Text: `SELECT 'actor.name' FROM main`, Language: "spl2"}, testSourceRefinement([]string{"actor.name"}, true, admitted, false), false},
+		{"dotted SPL2 downstream derived", QueryDocument{Text: `FROM main | eval local='actor.name' | table local`, Language: "spl2"}, testSourceRefinement([]string{"actor.name"}, true, admitted, false), false},
+		{"dotted SPL2 rename output", QueryDocument{Text: `FROM main | rename 'actor.name' AS actor | table actor`, Language: "spl2"}, testSourceRefinement([]string{"actor.name"}, true, admitted, false), false},
+		{"dotted SPL2 aggregate output", QueryDocument{Text: `FROM main | stats count('actor.name') AS total | table total`, Language: "spl2"}, testSourceRefinement([]string{"actor.name"}, true, admitted, false), false},
+		{"dotted SPL2 lookup output", QueryDocument{Text: `FROM main | lookup users 'actor.name' OUTPUT role | table role`, Language: "spl2"}, testSourceRefinement([]string{"actor.name"}, true, admitted, false), false},
+		{"dotted SPL2 downstream SPL source", QueryDocument{Text: `FROM main | eval local='actor.name' | where other=1`, Language: "spl2"}, testSourceRefinement([]string{"actor.name"}, true, admitted, false), false},
+		{"dotted SPL2 downstream SQL source", QueryDocument{Text: `FROM main WHERE 'actor.name'=1 SELECT other`, Language: "spl2"}, testSourceRefinement([]string{"actor.name"}, true, admitted, false), false},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			plainResult, plainTrace, err := analyzeRewriteWithTrace(tc.document, nil, nil)
@@ -506,7 +509,10 @@ func TestRequirementTraceRefinementParity(t *testing.T) {
 			plainTraceJSON := marshalRequirementTrace(t, plainTrace)
 			refinedTraceJSON := marshalRequirementTrace(t, refinedTrace)
 			if string(plainTraceJSON) != string(refinedTraceJSON) {
-				t.Fatalf("trace changed under refinement:\n plain: %s\nrefined: %s", plainTraceJSON, refinedTraceJSON)
+				t.Fatalf("trace changed under refinement:\n plain public: %+v\nrefined public: %+v\n plain: %s\nrefined: %s", plainResult.References, refinedResult.References, plainTraceJSON, refinedTraceJSON)
+			}
+			if tc.renameRefs {
+				assertReferenceListParity(t, plainResult.References, refinedResult.References)
 			}
 			plainJSON, _ := json.Marshal(plainResult)
 			refinedJSON, _ := json.Marshal(refinedResult)
@@ -514,6 +520,19 @@ func TestRequirementTraceRefinementParity(t *testing.T) {
 				t.Fatal("refinement parity row did not change the public result")
 			}
 		})
+	}
+}
+
+func assertReferenceListParity(t *testing.T, plain, refined []Reference) {
+	t.Helper()
+	if len(plain) != len(refined) {
+		t.Fatalf("public reference counts differ: plain=%+v refined=%+v", plain, refined)
+	}
+	for i := range plain {
+		a, b := plain[i], refined[i]
+		if a.ID != b.ID || a.OriginalName != b.OriginalName || a.NormalizedName != b.NormalizedName || a.Kind != b.Kind || a.Role != b.Role || a.StageID != b.StageID || a.ScopeID != b.ScopeID || a.Location != b.Location || a.Resolution != b.Resolution {
+			t.Fatalf("public reference %d changed shape: plain=%+v refined=%+v", i, a, b)
+		}
 	}
 }
 

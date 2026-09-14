@@ -4289,6 +4289,15 @@
           "end": 20
         },
         {
+          "original_name": "x",
+          "normalized_name": "x",
+          "kind": "field",
+          "role": "rename",
+          "binding": "not_applicable",
+          "start": 24,
+          "end": 25
+        },
+        {
           "original_name": "a",
           "normalized_name": "a",
           "kind": "field",
@@ -4296,6 +4305,15 @@
           "binding": "source",
           "start": 27,
           "end": 28
+        },
+        {
+          "original_name": "y",
+          "normalized_name": "y",
+          "kind": "field",
+          "role": "rename",
+          "binding": "not_applicable",
+          "start": 32,
+          "end": 33
         }
       ],
       "fields": [],
@@ -4568,6 +4586,15 @@
           "end": 20
         },
         {
+          "original_name": "x",
+          "normalized_name": "x",
+          "kind": "field",
+          "role": "rename",
+          "binding": "not_applicable",
+          "start": 24,
+          "end": 25
+        },
+        {
           "original_name": "b",
           "normalized_name": "b",
           "kind": "field",
@@ -4575,6 +4602,15 @@
           "binding": "source",
           "start": 27,
           "end": 28
+        },
+        {
+          "original_name": "x",
+          "normalized_name": "x",
+          "kind": "field",
+          "role": "rename",
+          "binding": "not_applicable",
+          "start": 32,
+          "end": 33
         }
       ],
       "fields": [],
@@ -4850,10 +4886,28 @@
           "original_name": "beta",
           "normalized_name": "beta",
           "kind": "field",
+          "role": "rename",
+          "binding": "not_applicable",
+          "start": 28,
+          "end": 32
+        },
+        {
+          "original_name": "beta",
+          "normalized_name": "beta",
+          "kind": "field",
           "role": "read",
           "binding": "source",
           "start": 34,
           "end": 38
+        },
+        {
+          "original_name": "gamma",
+          "normalized_name": "gamma",
+          "kind": "field",
+          "role": "rename",
+          "binding": "not_applicable",
+          "start": 42,
+          "end": 47
         }
       ],
       "fields": [],
@@ -5126,6 +5180,15 @@
           "end": 20
         },
         {
+          "original_name": "b",
+          "normalized_name": "b",
+          "kind": "field",
+          "role": "rename",
+          "binding": "not_applicable",
+          "start": 24,
+          "end": 25
+        },
+        {
           "original_name": "c",
           "normalized_name": "c",
           "kind": "field",
@@ -5133,6 +5196,15 @@
           "binding": "source",
           "start": 27,
           "end": 28
+        },
+        {
+          "original_name": "a",
+          "normalized_name": "a",
+          "kind": "field",
+          "role": "rename",
+          "binding": "not_applicable",
+          "start": 32,
+          "end": 33
         }
       ],
       "fields": [],
@@ -5402,6 +5474,15 @@
           "end": 22
         },
         {
+          "original_name": "x",
+          "normalized_name": "x",
+          "kind": "field",
+          "role": "rename",
+          "binding": "not_applicable",
+          "start": 26,
+          "end": 27
+        },
+        {
           "original_name": "a",
           "normalized_name": "a",
           "kind": "field",
@@ -5409,6 +5490,15 @@
           "binding": "source",
           "start": 29,
           "end": 30
+        },
+        {
+          "original_name": "y",
+          "normalized_name": "y",
+          "kind": "field",
+          "role": "rename",
+          "binding": "not_applicable",
+          "start": 34,
+          "end": 35
         }
       ],
       "fields": [],
@@ -22734,6 +22824,15 @@
           "end": 27
         },
         {
+          "original_name": "x",
+          "normalized_name": "x",
+          "kind": "field",
+          "role": "rename",
+          "binding": "not_applicable",
+          "start": 31,
+          "end": 32
+        },
+        {
           "original_name": "a",
           "normalized_name": "a",
           "kind": "field",
@@ -22741,6 +22840,15 @@
           "binding": "source",
           "start": 34,
           "end": 35
+        },
+        {
+          "original_name": "y",
+          "normalized_name": "y",
+          "kind": "field",
+          "role": "rename",
+          "binding": "not_applicable",
+          "start": 39,
+          "end": 40
         }
       ],
       "fields": [],

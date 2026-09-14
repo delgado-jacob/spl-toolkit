@@ -101,6 +101,10 @@ func (s *semanticStage) readAt(operand locatedOperand, role string) string {
 		return id
 	}
 	ref := &s.result.References[len(s.result.References)-1]
+	requirementBinding := ref.Binding
+	if trace := s.env.requirements.trace; trace != nil {
+		requirementBinding = trace.reference(id).reference.Binding
+	}
 	f, known := s.env.fields[name]
 	switch {
 	case known && !f.Conditional:
@@ -116,13 +120,23 @@ func (s *semanticStage) readAt(operand locatedOperand, role string) string {
 		}
 	case s.env.removed[name] || !s.env.open:
 		ref.Binding = "unavailable"
-		if role != "null_test" {
-			s.diagnosticAtOwned(CodeUnavailableField, "error", "unavailable_field", fmt.Sprintf("field %q is unavailable after an earlier pipeline transfer", name), operand.Location, false, []string{id})
-		}
 	default:
 		ref.Binding = "source"
 		if role != "null_test" {
 			s.env.fields[name] = trackedField{FieldBinding: FieldBinding{Name: name, OriginReferenceIDs: []string{id}}, source: true}
+		}
+	}
+	if role != "null_test" {
+		message := fmt.Sprintf("field %q is unavailable after an earlier pipeline transfer", name)
+		publicUnavailable := ref.Binding == "unavailable"
+		requirementUnavailable := requirementBinding == "unavailable"
+		switch {
+		case publicUnavailable && requirementUnavailable:
+			s.diagnosticAtOwned(CodeUnavailableField, "error", "unavailable_field", message, operand.Location, false, []string{id})
+		case publicUnavailable:
+			s.appendDiagnostic(CodeUnavailableField, "error", "unavailable_field", message, operand.Location, false, false, nil, false)
+		case requirementUnavailable:
+			s.requirementDiagnosticAt(CodeUnavailableField, "error", "unavailable_field", message, operand.Location, false, []string{id})
 		}
 	}
 	if operand.UnresolvedSource && s.refinement != nil && s.refinement.resolve != nil && ref.Binding == "source" {
@@ -295,17 +309,20 @@ func (s *semanticStage) projectedField(name string, ids []string) (trackedField,
 
 func (s *semanticStage) applyRename(pairs []renameOperands) {
 	original := s.env
+	requirementOriginal := s.env.requirements.clone()
 	before := s.env.clone()
 	type rename struct {
 		source, dest           string
 		target                 locatedOperand
 		input                  string
+		output                 string
 		conditional            bool
 		requirementConditional bool
 	}
 	items := []rename{}
-	sources, dests := map[string]bool{}, map[string]bool{}
-	conflict := false
+	publicSources, publicDests := map[string]bool{}, map[string]bool{}
+	requirementSources, requirementDests := map[string]bool{}, map[string]bool{}
+	publicConflict, requirementConflict := false, false
 	for _, r := range pairs {
 		if !r.Source.Sound || !r.Target.Sound {
 			continue
@@ -314,23 +331,51 @@ func (s *semanticStage) applyRename(pairs []renameOperands) {
 		dst := r.Target.Name
 		if r.Source.Resolution == "wildcard" || r.Target.Resolution == "wildcard" {
 			s.env = before
-			names, _ := s.selectorAt(r.Source, "read", true)
+			names, ids := s.selectorAt(r.Source, "read", true)
 			for _, name := range names {
-				sources[name] = true
+				publicSources[name] = true
 			}
-			dests[dst] = true
+			if r.Source.Resolution == "wildcard" {
+				for name := range requirementOriginal.fields {
+					if wildcardMatches(src, name) {
+						requirementSources[name] = true
+					}
+				}
+			} else {
+				requirementSources[src] = true
+			}
+			publicDests[dst] = true
+			if r.Target.Resolution == "wildcard" {
+				for name := range requirementOriginal.fields {
+					if wildcardMatches(dst, name) {
+						requirementDests[name] = true
+					}
+				}
+			} else {
+				requirementDests[dst] = true
+				if len(ids) > 0 {
+					items = append(items, rename{source: src, dest: dst, target: r.Target, input: ids[0], conditional: true, requirementConditional: true})
+				}
+			}
 			s.diagnosticAt(CodeUnsupportedSemantics, "warning", "unsupported_semantics", "wildcard rename substitution is unmodeled", Location{Start: r.Source.Location.Start, End: r.Target.Location.End}, true)
-			conflict = true
+			publicConflict = true
+			requirementConflict = true
 			continue
 		}
 		s.env = before
 		id := s.readAt(r.Source, "read")
-		_, existingDestination := original.fields[dst]
-		if sources[src] || dests[dst] || existingDestination {
-			conflict = true
+		_, publicExistingDestination := original.fields[dst]
+		_, requirementExistingDestination := requirementOriginal.fields[dst]
+		if publicSources[src] || publicDests[dst] || publicExistingDestination {
+			publicConflict = true
 		}
-		sources[src] = true
-		dests[dst] = true
+		if requirementSources[src] || requirementDests[dst] || requirementExistingDestination {
+			requirementConflict = true
+		}
+		publicSources[src] = true
+		publicDests[dst] = true
+		requirementSources[src] = true
+		requirementDests[dst] = true
 		binding := s.result.References[len(s.result.References)-1].Binding
 		requirementBinding := binding
 		if trace := s.env.requirements.trace; trace != nil {
@@ -346,30 +391,85 @@ func (s *semanticStage) applyRename(pairs []renameOperands) {
 		})
 	}
 	s.env = before // All reads observed the snapshot; no destination was installed while reading.
-	for name := range sources {
-		if dests[name] {
-			conflict = true
+	for name := range publicSources {
+		if publicDests[name] {
+			publicConflict = true
 		}
 	}
-	if conflict {
+	for name := range requirementSources {
+		if requirementDests[name] {
+			requirementConflict = true
+		}
+	}
+	message := "rename has conflicting or unsupported source/destination mappings"
+	location := s.result.Stages[s.stage].Location
+	switch {
+	case publicConflict && requirementConflict:
 		s.diagnosticAt(CodeUnsupportedSemantics, "warning", "unsupported_semantics", "rename has conflicting or unsupported source/destination mappings", s.result.Stages[s.stage].Location, true)
-		for name := range sources {
+	case publicConflict:
+		s.appendDiagnostic(CodeUnsupportedSemantics, "warning", "unsupported_semantics", message, location, true, false, nil, false)
+	case requirementConflict:
+		s.requirementDiagnosticAt(CodeUnsupportedSemantics, "warning", "unsupported_semantics", message, location, true, nil)
+	}
+	if publicConflict {
+		for name := range publicSources {
 			delete(s.env.fields, name)
+		}
+		for name := range publicDests {
+			delete(s.env.fields, name)
+		}
+		for i := range items {
+			items[i].output = s.recordRejectedRenameTarget(items[i].target, items[i].input)
+		}
+	} else {
+		for _, r := range items {
+			s.env.remove(r.source)
+		}
+		if !requirementConflict {
+			for _, r := range items {
+				s.env.requirements.remove(r.source)
+			}
+		}
+		for i := range items {
+			items[i].output = s.createAtWithRequirementConditional(items[i].target, "rename", "rename", []string{items[i].input}, items[i].conditional, items[i].requirementConditional)
+		}
+	}
+	if requirementConflict {
+		for name := range requirementSources {
 			delete(s.env.requirements.fields, name)
 		}
-		for name := range dests {
-			delete(s.env.fields, name)
+		for name := range requirementDests {
 			delete(s.env.requirements.fields, name)
 		}
 		return
 	}
-	for _, r := range items {
-		s.env.remove(r.source)
-		s.env.requirements.remove(r.source)
+	if publicConflict {
+		for _, r := range items {
+			s.env.requirements.remove(r.source)
+		}
+		for _, r := range items {
+			origins := traceOrigins(s.env.requirements.trace, []string{r.input})
+			s.env.requirements.install(r.dest, uniqueIDs([]string{r.output}, origins), r.requirementConditional)
+		}
 	}
-	for _, r := range items {
-		s.createAtWithRequirementConditional(r.target, "rename", "rename", []string{r.input}, r.conditional, r.requirementConditional)
+}
+
+// A rejected rename still contributes its located target reference so
+// refinement cannot renumber later query evidence. It does not change field or
+// rewrite state and does not emit a transition.
+func (s *semanticStage) recordRejectedRenameTarget(target locatedOperand, input string) string {
+	id := s.operandReference(target, "field", "rename")
+	if id == "" {
+		return ""
 	}
+	origins := s.origins([]string{input})
+	s.result.References[len(s.result.References)-1].OriginReferenceIDs = copyIDs(origins)
+	if trace := s.env.requirements.trace; trace != nil {
+		entry := trace.reference(id)
+		entry.reference.Binding = "definition"
+		entry.reference.OriginReferenceIDs = traceOrigins(trace, []string{input})
+	}
+	return id
 }
 func (s *semanticStage) applyAggregation(outputs []aggregateOutput, groups []locatedOperand, preserveInput bool) {
 	output := newEnvironmentWithRequirementTrace(s.env.requirements.trace)

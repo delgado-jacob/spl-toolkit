@@ -8681,6 +8681,15 @@
           "end": 25
         },
         {
+          "original_name": "machine",
+          "normalized_name": "machine",
+          "kind": "field",
+          "role": "rename",
+          "binding": "not_applicable",
+          "start": 29,
+          "end": 36
+        },
+        {
           "original_name": "server",
           "normalized_name": "server",
           "kind": "field",
@@ -8688,6 +8697,15 @@
           "binding": "source",
           "start": 38,
           "end": 44
+        },
+        {
+          "original_name": "node",
+          "normalized_name": "node",
+          "kind": "field",
+          "role": "rename",
+          "binding": "not_applicable",
+          "start": 48,
+          "end": 52
         }
       ],
       "fields": [],
@@ -8960,10 +8978,28 @@
           "original_name": "b",
           "normalized_name": "b",
           "kind": "field",
+          "role": "rename",
+          "binding": "not_applicable",
+          "start": 24,
+          "end": 25
+        },
+        {
+          "original_name": "b",
+          "normalized_name": "b",
+          "kind": "field",
           "role": "read",
           "binding": "source",
           "start": 27,
           "end": 28
+        },
+        {
+          "original_name": "c",
+          "normalized_name": "c",
+          "kind": "field",
+          "role": "rename",
+          "binding": "not_applicable",
+          "start": 32,
+          "end": 33
         }
       ],
       "fields": [],
