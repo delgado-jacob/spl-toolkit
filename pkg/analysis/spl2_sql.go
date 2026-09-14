@@ -91,6 +91,7 @@ func executeSPL2SQL(result *Result, parsed *spl2ParsedDocument, refinement *sour
 		}
 		if !result.Stages[s.stage].SemanticComplete && !(name == "project" && selectedShape) {
 			s.env.uncertain = true
+			s.env.requirements.uncertain = true
 		}
 		order := len(result.Lineage)
 		st := result.Stages[s.stage]
@@ -441,6 +442,7 @@ func (s *spl2SemanticStage) sqlProjectionEffectSound(ctx antlr.ParserRuleContext
 func (s *spl2SemanticStage) sqlRestrictedExpression(tree antlr.Tree, visible map[string]bool, predicate bool) spl2ExpressionEvidence {
 	actual := s.env
 	s.env = actual.clone()
+	hidden := []locatedOperand{}
 	var inspect func(antlr.Tree)
 	inspect = func(node antlr.Tree) {
 		switch c := node.(type) {
@@ -454,8 +456,8 @@ func (s *spl2SemanticStage) sqlRestrictedExpression(tree antlr.Tree, visible map
 					f.Name = o.Name
 					f.Conditional = true
 					s.env.fields[o.Name] = f
-					s.diagnosticAt(CodeUnsupportedSemantics, "warning", "unsupported_semantics", "SQL field visibility outside selected/grouped outputs is unproved", o.Location, false)
-					s.result.Stages[s.stage].SemanticComplete = false
+					s.env.requirements.uncertain = true
+					hidden = append(hidden, o)
 				}
 			}
 		}
@@ -476,6 +478,25 @@ func (s *spl2SemanticStage) sqlRestrictedExpression(tree antlr.Tree, visible map
 		value = s.sqlUnprovedAggregateExpression(tree)
 	} else {
 		value = s.expression(tree)
+	}
+	hiddenIDs := map[string][]string{}
+	if trace := s.env.requirements.trace; trace != nil {
+		for _, id := range value.ids {
+			entry := trace.reference(id)
+			hiddenIDs[entry.reference.NormalizedName] = append(hiddenIDs[entry.reference.NormalizedName], id)
+		}
+	}
+	for _, operand := range hidden {
+		owners := hiddenIDs[operand.Name]
+		if len(owners) > 1 {
+			hiddenIDs[operand.Name] = owners[1:]
+		} else {
+			hiddenIDs[operand.Name] = nil
+		}
+		if len(owners) > 0 {
+			owners = owners[:1]
+		}
+		s.diagnosticAtOwned(CodeUnsupportedSemantics, "warning", "unsupported_semantics", "SQL field visibility outside selected/grouped outputs is unproved", operand.Location, true, owners)
 	}
 	if predicate {
 		// Persist predicate/observed-reference evidence, not the temporary field

@@ -256,6 +256,57 @@ func TestRequirementTraceSQLProjectionClosesAbsentDownstreamField(t *testing.T) 
 	}
 }
 
+func TestRequirementTraceSPLRecoveryMirrorsUncertainty(t *testing.T) {
+	_, trace, err := analyzeRewriteWithTrace(QueryDocument{Text: "search host= | table user"}, nil, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	entry := requirementTraceReferenceByNameAndRole(t, trace, "user", "read")
+	if entry.reference.Binding != "indeterminate" || entry.directExternal || !entry.conditional {
+		t.Fatalf("post-recovery field trace = %+v", entry)
+	}
+	if trace.syntaxComplete || trace.semanticComplete {
+		t.Fatalf("recovered SPL trace completeness = syntax %t semantic %t", trace.syntaxComplete, trace.semanticComplete)
+	}
+}
+
+func TestRequirementTraceSQLHiddenFieldOwnsIncompleteEvidence(t *testing.T) {
+	_, trace, err := analyzeRewriteWithTrace(QueryDocument{Text: "SELECT marker FROM main GROUP BY marker HAVING hidden=1", Language: "spl2"}, nil, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	entry := requirementTraceReferenceByNameAndRole(t, trace, "hidden", "read")
+	if entry.reference.Binding != "indeterminate" || entry.directExternal || !entry.conditional {
+		t.Fatalf("hidden SQL field trace = %+v", entry)
+	}
+	if trace.semanticComplete {
+		t.Fatal("hidden SQL field left the query-only trace semantically complete")
+	}
+	foundOwnedEvidence := false
+	for _, diagnostic := range trace.diagnostics {
+		if diagnostic.diagnostic.Code == CodeUnsupportedSemantics && diagnostic.incomplete && reflect.DeepEqual(diagnostic.pendingReferenceIDs, []string{entry.reference.ID}) {
+			foundOwnedEvidence = true
+		}
+	}
+	if !foundOwnedEvidence {
+		t.Fatalf("hidden SQL field %q has no owned incomplete evidence: %+v", entry.reference.ID, trace.diagnostics)
+	}
+}
+
+func requirementTraceReferenceByNameAndRole(t *testing.T, trace *requirementTrace, name, role string) *requirementTraceReference {
+	t.Helper()
+	for i := range trace.references {
+		entry := &trace.references[i]
+		if entry.reference.NormalizedName == name && entry.reference.Role == role {
+			return entry
+		}
+	}
+	t.Fatalf("missing trace reference %s/%s: %+v", name, role, trace.references)
+	return nil
+}
+
 func TestRequirementTraceMacroDiagnosticsOwnExactReferences(t *testing.T) {
 	const query = "| eval a=`one()`, b=`two()`"
 	_, trace, err := analyzeRewriteWithTrace(QueryDocument{Text: query}, nil, nil)

@@ -74,6 +74,7 @@ func analyzeParsed(result *Result, parsed *parsedDocument, refinement *sourceRef
 			start := ctx.GetStart()
 			if owner, ok := tokenOwners[start.GetTokenIndex()]; !ok || owner != scopeOwners[scopeID] || start.GetTokenType() != parser.SPLLexerLBRACK {
 				environments[scopeID].uncertain = true
+				environments[scopeID].requirements.uncertain = true
 				return
 			}
 			kind := "subsearch"
@@ -99,6 +100,7 @@ func analyzeParsed(result *Result, parsed *parsedDocument, refinement *sourceRef
 			// running transfers/dependency collection against the wrong environment.
 			if owner, ok := tokenOwners[stageContext.GetStart().GetTokenIndex()]; !ok || owner != scopeOwners[scopeID] {
 				environments[scopeID].uncertain = true
+				environments[scopeID].requirements.uncertain = true
 				return
 			}
 			stageID = fmt.Sprintf("stage-%d", len(result.Stages))
@@ -114,6 +116,7 @@ func analyzeParsed(result *Result, parsed *parsedDocument, refinement *sourceRef
 				}
 				result.Stages[state.stage].SemanticComplete = false
 				state.env.uncertain = true
+				state.env.requirements.uncertain = true
 			} else if macro, ok := stageContext.(*parser.AnalysisMacroStageContext); ok {
 				state.macro(macro.AnalysisMacro())
 			} else if spec, ok := commands[command]; ok && spec.handle != nil {
@@ -131,6 +134,7 @@ func analyzeParsed(result *Result, parsed *parsedDocument, refinement *sourceRef
 			if !intact(stageContext) {
 				result.Stages[state.stage].SemanticComplete = false
 				state.env.uncertain = true
+				state.env.requirements.uncertain = true
 			}
 			environments[scopeID] = state.env
 			result.Lineage = append(result.Lineage, Lineage{StageID: stageID, ScopeID: scopeID, Before: before, After: state.env.snapshot(), Transitions: state.transitions})

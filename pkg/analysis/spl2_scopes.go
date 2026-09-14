@@ -158,6 +158,7 @@ func (q *spl2ScopeScheduler) pipeline(sites []spl2CommandSite, env *environment,
 		}
 		if !q.result.Stages[index].SemanticComplete {
 			s.env.uncertain = true
+			s.env.requirements.uncertain = true
 		}
 		env = s.env
 		q.result.Lineage = append(q.result.Lineage, Lineage{StageID: q.result.Stages[index].ID, ScopeID: scopeID, Before: before, After: env.snapshot(), Transitions: s.transitions})
@@ -277,6 +278,7 @@ func (s *spl2SemanticStage) dataset(dataset spl2.IDatasetContext) {
 		if access == nil || len(access.AllAccessPart()) != 0 || access.Primary().Object() == nil {
 			s.unsupported(row, "Dataset row shape is unproved")
 			s.env.uncertain = true
+			s.env.requirements.uncertain = true
 			continue
 		}
 		for _, entry := range access.Primary().Object().AllObjectEntry() {
