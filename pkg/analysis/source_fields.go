@@ -259,14 +259,14 @@ func (s *semanticStage) refinedSelectorAt(operand locatedOperand, role, id strin
 	matches := s.provenExpandedFields(names, bindings)
 	if !complete {
 		s.recordExpansion(id, false, matches)
-		s.diagnosticAt(CodeUnresolvedWildcard, "warning", "unsupported_semantics", fmt.Sprintf("wildcard %q membership is unresolved", pattern), operand.Location, true)
+		s.refinementDiagnosticAt(CodeUnresolvedWildcard, "warning", "unsupported_semantics", fmt.Sprintf("wildcard %q membership is unresolved", pattern), operand.Location, true)
 	} else {
 		s.recordExpansion(id, true, matches)
 		if role != "remove" {
 			ref.Binding = "source"
 			if len(matches) == 0 && s.selectorStructurallyAbsent(pattern) {
 				ref.Binding = "unavailable"
-				s.diagnosticAt(CodeUnavailableField, "error", "unavailable_field", fmt.Sprintf("wildcard %q is unavailable after an earlier pipeline transfer", pattern), operand.Location, false)
+				s.refinementDiagnosticAt(CodeUnavailableField, "error", "unavailable_field", fmt.Sprintf("wildcard %q is unavailable after an earlier pipeline transfer", pattern), operand.Location, false)
 			} else if len(matches) > 0 {
 				ref.Binding = matches[0].Binding
 				for _, match := range matches[1:] {

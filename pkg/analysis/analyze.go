@@ -35,11 +35,17 @@ func analyze(document QueryDocument, refinement *sourceRefinement) (*Result, err
 }
 
 func analyzeRewrite(document QueryDocument, refinement *sourceRefinement, rewrite *RewriteSession) (*Result, error) {
+	result, _, err := analyzeRewriteWithTrace(document, refinement, rewrite)
+	return result, err
+}
+
+func analyzeRewriteWithTrace(document QueryDocument, refinement *sourceRefinement, rewrite *RewriteSession) (*Result, *requirementTrace, error) {
 	normalized, err := normalizeDocument(document)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	result := newResult(normalized)
+	trace := newRequirementTrace()
 	result.rewrite = rewrite
 	if rewrite != nil {
 		rewrite.source = newSourceIndex(normalized.Text)
@@ -48,14 +54,18 @@ func analyzeRewrite(document QueryDocument, refinement *sourceRefinement, rewrit
 		if refinement != nil {
 			refinement.literalSourceNames = true
 		}
-		analyzeSPL2(result, parseSPL2Document(normalized.Text), refinement)
+		analyzeSPL2(result, parseSPL2Document(normalized.Text), refinement, trace)
 	} else {
 		parsed := parseDocument(normalized.Text)
 		result.Diagnostics = append(result.Diagnostics, parsed.diagnostics...)
-		analyzeParsed(result, parsed, refinement)
+		for _, diagnostic := range parsed.diagnostics {
+			trace.syntaxComplete = false
+			trace.recordDiagnostic(diagnostic, true, nil, trace.nextEvent())
+		}
+		analyzeParsed(result, parsed, refinement, trace)
 	}
 	finalizeResult(result)
-	return result, nil
+	return result, trace, nil
 }
 func finalizeResult(result *Result) {
 	sort.SliceStable(result.Diagnostics, func(i, j int) bool {

@@ -11,10 +11,14 @@ type environment struct {
 	fields          map[string]trackedField
 	removed         map[string]bool
 	open, uncertain bool
+	requirements    requirementEnvironment
 }
 
 func newEnvironment() *environment {
-	return &environment{fields: map[string]trackedField{}, removed: map[string]bool{}, open: true}
+	return newEnvironmentWithRequirementTrace(nil)
+}
+func newEnvironmentWithRequirementTrace(trace *requirementTrace) *environment {
+	return &environment{fields: map[string]trackedField{}, removed: map[string]bool{}, open: true, requirements: newRequirementEnvironment(trace)}
 }
 func copyIDs(ids []string) []string { return append([]string{}, ids...) }
 func (e *environment) snapshot() FieldState {
@@ -31,10 +35,11 @@ func (e *environment) snapshot() FieldState {
 	return s
 }
 func (e *environment) clone() *environment {
-	n := newEnvironment()
+	n := newEnvironmentWithRequirementTrace(e.requirements.trace)
 	n.rewrite = e.rewrite.clone()
 	n.open = e.open
 	n.uncertain = e.uncertain
+	n.requirements = e.requirements.clone()
 	for k, v := range e.fields {
 		v.OriginReferenceIDs = copyIDs(v.OriginReferenceIDs)
 		n.fields[k] = v

@@ -14,9 +14,13 @@ type spl2SemanticStage struct {
 	aliases map[string]bool
 }
 
-func analyzeSPL2(result *Result, parsed *spl2ParsedDocument, refinement *sourceRefinement) {
+func analyzeSPL2(result *Result, parsed *spl2ParsedDocument, refinement *sourceRefinement, trace *requirementTrace) {
 	result.Coverage.SyntaxComplete = parsed.syntaxComplete
 	result.Diagnostics = append(result.Diagnostics, parsed.diagnostics...)
+	for _, diagnostic := range parsed.diagnostics {
+		trace.syntaxComplete = false
+		trace.recordDiagnostic(diagnostic, true, nil, trace.nextEvent())
+	}
 	result.Scopes = append(result.Scopes, Scope{ID: "scope-0", Kind: "root", Location: parsed.source.location(0, len(parsed.source.positions)-1)})
 	if !parsed.syntaxComplete {
 		result.Coverage.SemanticComplete = false
@@ -29,12 +33,13 @@ func analyzeSPL2(result *Result, parsed *spl2ParsedDocument, refinement *sourceR
 		}
 	}
 	scheduler := &spl2ScopeScheduler{result: result, parsed: parsed, refinement: refinement, children: spl2ChildScopesIn(parsed, trees), executed: map[int]bool{}}
-	scheduler.pipeline(sites, newEnvironment(), map[string]bool{}, "scope-0", -1)
+	scheduler.pipeline(sites, newEnvironmentWithRequirementTrace(trace), map[string]bool{}, "scope-0", -1)
+	trace.syncParserDiagnostics(result.Diagnostics[:len(parsed.diagnostics)])
 	if len(result.Scopes) > 1 {
-		spl2FinalizeStages(result)
+		trace.remapStages(spl2FinalizeStages(result))
 	}
 
-	finalizeReferences(result, refinement)
+	finalizeReferences(result, refinement, trace)
 }
 
 func registerSPL2Stage(result *Result, location Location, command string, position int, scopeID string) int {

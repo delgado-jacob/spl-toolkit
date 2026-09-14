@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func analyzeParsed(result *Result, parsed *parsedDocument, refinement *sourceRefinement) {
+func analyzeParsed(result *Result, parsed *parsedDocument, refinement *sourceRefinement, trace *requirementTrace) {
 	root := Scope{ID: "scope-0", Kind: "root", Location: parsed.source.location(0, len(parsed.source.positions)-1)}
 	result.Scopes = append(result.Scopes, root)
 	// Recovery may leave a generic or structurally partial command context. Attribute
@@ -43,7 +43,7 @@ func analyzeParsed(result *Result, parsed *parsedDocument, refinement *sourceRef
 	unsafeBoundaries, tokenOwners := originalTokenBoundaries(parsed)
 	scopeOwners := map[string]int{root.ID: -1}
 	positions := map[string]int{}
-	environments := map[string]*environment{root.ID: newEnvironment()}
+	environments := map[string]*environment{root.ID: newEnvironmentWithRequirementTrace(trace)}
 	branchInputs := map[string]*environment{}
 	var visit func(antlr.Tree, string, string)
 	visit = func(node antlr.Tree, scopeID, stageID string) {
@@ -86,7 +86,7 @@ func analyzeParsed(result *Result, parsed *parsedDocument, refinement *sourceRef
 			child := Scope{ID: fmt.Sprintf("scope-%d", len(result.Scopes)), ParentID: scopeID, Kind: kind, StageID: stageID, Location: parsed.source.contextLocation(ctx)}
 			result.Scopes = append(result.Scopes, child)
 			scopeOwners[child.ID] = start.GetTokenIndex()
-			env := newEnvironment()
+			env := newEnvironmentWithRequirementTrace(trace)
 			if kind == "appendpipe" {
 				env = branchInputs[stageID].clone()
 			}
@@ -140,5 +140,5 @@ func analyzeParsed(result *Result, parsed *parsedDocument, refinement *sourceRef
 		}
 	}
 	visit(parsed.tree, root.ID, "")
-	finalizeReferences(result, refinement)
+	finalizeReferences(result, refinement, trace)
 }

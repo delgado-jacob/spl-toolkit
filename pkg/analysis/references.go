@@ -93,7 +93,12 @@ func (s *semanticStage) reference(ctx antlr.ParserRuleContext, name, kind, role 
 func (s *semanticStage) referenceAt(loc Location, name, kind, role, resolution string) string {
 	st := s.result.Stages[s.stage]
 	id := fmt.Sprintf("pending-%d", len(s.result.References))
-	s.result.References = append(s.result.References, Reference{ID: id, OriginalName: s.result.Document.Text[loc.Start.Offset:loc.End.Offset], NormalizedName: name, Kind: kind, Role: role, StageID: st.ID, ScopeID: st.ScopeID, Location: loc, Resolution: resolution, Binding: "not_applicable", OriginReferenceIDs: []string{}})
+	reference := Reference{ID: id, OriginalName: s.result.Document.Text[loc.Start.Offset:loc.End.Offset], NormalizedName: name, Kind: kind, Role: role, StageID: st.ID, ScopeID: st.ScopeID, Location: loc, Resolution: resolution, Binding: "not_applicable", OriginReferenceIDs: []string{}}
+	s.result.References = append(s.result.References, reference)
+	if trace := s.env.requirements.trace; trace != nil {
+		directExternal, conditional := requirementReferencePolicy(reference)
+		trace.recordReference(reference, directExternal, conditional, trace.nextEvent())
+	}
 	return id
 }
 func (s *semanticStage) read(ctx antlr.ParserRuleContext, name, role string) string {
@@ -153,7 +158,11 @@ func (s *semanticStage) expression(node antlr.Tree) []string {
 	}
 	return ids
 }
-func finalizeReferences(r *Result, refinement *sourceRefinement) {
+func finalizeReferences(r *Result, refinement *sourceRefinement, traces ...*requirementTrace) {
+	var trace *requirementTrace
+	if len(traces) > 0 {
+		trace = traces[0]
+	}
 	sort.SliceStable(r.References, func(i, j int) bool {
 		a, b := r.References[i], r.References[j]
 		if a.Location.Start.Offset != b.Location.Start.Offset {
@@ -172,6 +181,9 @@ func finalizeReferences(r *Result, refinement *sourceRefinement) {
 		ref := &r.References[i]
 		mapping[ref.ID] = fmt.Sprintf("ref-%d", i)
 		ref.ID = mapping[ref.ID]
+	}
+	if trace != nil {
+		trace.remapReferences(mapping)
 	}
 	if r.rewrite != nil {
 		r.rewrite.finalizeReferences(mapping)
@@ -201,6 +213,9 @@ func finalizeReferences(r *Result, refinement *sourceRefinement) {
 				tr.OutputReferenceID = mapping[tr.OutputReferenceID]
 			}
 		}
+	}
+	if trace != nil {
+		trace.assertReferences(r.References)
 	}
 	for _, values := range []*[]string{&r.Dependencies.Indexes, &r.Dependencies.Sources, &r.Dependencies.SourceTypes, &r.Dependencies.Lookups, &r.Dependencies.Datasets, &r.Dependencies.DataModels, &r.Dependencies.Macros} {
 		sort.Strings(*values)

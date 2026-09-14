@@ -181,7 +181,7 @@ func (q *spl2ScopeScheduler) runChildren(ctx antlr.ParserRuleContext, env *envir
 		}
 		id := fmt.Sprintf("scope-%d", len(q.result.Scopes))
 		q.result.Scopes = append(q.result.Scopes, Scope{ID: id, ParentID: scopeID, Kind: child.kind, StageID: ownerStage, Location: child.location})
-		input := newEnvironment()
+		input := newEnvironmentWithRequirementTrace(env.requirements.trace)
 		localAliases := map[string]bool{}
 		if child.input == "inherited" {
 			input = env.clone()
@@ -211,7 +211,7 @@ func spl2Within(child, owner antlr.ParserRuleContext) bool {
 // SQL is registered by lexical clauses and executed by phase. Children may run
 // between those phases, so remap lexical stage IDs once before reference IDs.
 // No-child reports retain their accepted wire values exactly.
-func spl2FinalizeStages(r *Result) {
+func spl2FinalizeStages(r *Result) map[string]string {
 	sort.SliceStable(r.Stages, func(i, j int) bool { return r.Stages[i].Location.Start.Offset < r.Stages[j].Location.Start.Offset })
 	mapping := map[string]string{}
 	for i := range r.Stages {
@@ -242,6 +242,7 @@ func spl2FinalizeStages(r *Result) {
 		order := i
 		r.Lineage[i].ExecutionOrder = &order
 	}
+	return mapping
 }
 
 // Dataset object keys define a closed local event shape. A key missing or null

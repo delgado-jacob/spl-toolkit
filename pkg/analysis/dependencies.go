@@ -7,8 +7,14 @@ import (
 )
 
 func (s *semanticStage) dependency(ctx antlr.ParserRuleContext, name, kind string) {
-	if s.reference(ctx, name, kind, "read") == "" {
+	id := s.reference(ctx, name, kind, "read")
+	if id == "" {
 		return
+	}
+	if kind == "macro" {
+		if trace := s.env.requirements.trace; trace != nil {
+			trace.linkLatestDiagnostic(CodeDynamicReference, s.result.Stages[s.stage].ID, id)
+		}
 	}
 	s.addDependency(name, kind)
 }

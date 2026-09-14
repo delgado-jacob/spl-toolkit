@@ -17,7 +17,7 @@ This file is a living execution plan. The implementing orchestrator must update 
 - [x] (2026-09-14) Read the approved Milestone 8 design specification, current source and tests, release tooling, GitHub Actions, and relevant prior milestone plans.
 - [x] (2026-09-14) Resolve the public model, single-pass refinement strategy, adapter boundaries, compatibility rules, fixture ownership, review protocol, and release procedure in this plan.
 - [x] (2026-09-14) Task 1: Added public requirement value types, digest helpers, constants, and deep-copy primitives from base `c5de9590fe41b79a8b1181f73b13b2c92e7105a5`. The first focused run failed on the missing types and `queryDigest`; later RED runs failed on the missing `capabilityRevision`, `cloneRequirementSet`, and constants. The exact focused command and the full `pkg/analysis` package passed after implementation. The completion commit is the commit containing this entry.
-- [ ] Task 2: Capture a private query-only trace in the existing analysis traversal and prove refinement cannot contaminate it.
+- [x] (2026-09-14) Task 2: Captured a private query-only trace during the existing analysis traversal. Focused RED runs exposed the missing trace API, shadow removal and projection state, null-test policy, semantic diagnostic capture, macro ownership, refinement-only diagnostic duplication, SPL2 lexical-stage remapping, child-scope trace loss, qualified catalog classification, and downstream dotted-name contamination. The focused trace suite and complete `pkg/analysis` package pass; the completion commit is the commit containing this entry.
 - [ ] Task 3: Project, embed, and expose canonical requirements and update the current analysis corpus.
 - [ ] Task 4: Propagate requirements through document snapshots and prove refinement and downstream product parity.
 - [ ] Task 5: Add CLI and REST product surfaces with exact status and transport behavior.
@@ -38,6 +38,8 @@ After that final tracked update, whole-feature review, local independent accepta
 - `pkg/analysis/transfers_test.go:transferParityWitnesses` and `pkg/rewrite/rewrite_test.go:explicitAliasReport` are independent hand-pinned full-result witnesses outside the JSON fixture directories. Both must gain hand-derived requirements when `analysis.Result` changes.
 - The primary checkout intentionally contains only the roadmap inputs listed in the landing procedure as untracked files. It is not an empty-status checkout, and previously removed legacy Markdown and text files must stay removed.
 - `CapabilitiesFor` already owns selector validation and default normalization while returning a fresh typed manifest. Task 1 could calculate capability revisions without adding a second selector path, maps, or mutable cache state.
+- Attaching the requirement environment to the existing semantic environment makes every existing `clone()` site deep-copy query-only field state while sharing only the analysis-wide trace collector. Independent SPL and SPL2 scopes still require a fresh sidecar that points to the same collector.
+- SPL2 child scopes reorder lexical stage identifiers before reference finalization. Returning the already-built private stage map from `spl2FinalizeStages` lets the trace remap its stage links before the reference invariant check; no second stage walk or public API is needed.
 
 ## Decision Log
 
@@ -53,10 +55,12 @@ After that final tracked update, whole-feature review, local independent accepta
 - **Decision:** Local independent acceptance signs off before any push and does not depend on hosted CI. After final review freezes the candidate, review, acceptance, and hosted-run results are reported out of band and do not cause tracked evidence commits. **Rationale:** The exact SHA cannot contain a record of checks that run only after that SHA exists.
 - **Decision:** Preserve the primary checkout's intentional untracked roadmap baseline exactly across landing. Require a clean tracked index and worktree, check incoming-path collisions, and compare the saved untracked list after the fast-forward. **Rationale:** An untracked roadmap file is user state, not a dirty-tree defect or permission to restore previously removed files.
 - **Decision:** Copy every slice layer in `cloneRequirementSet` with an owned empty destination. **Rationale:** This detaches coverage reasons, item occurrences, gap links, and diagnostics while keeping empty cloned collections array-valued instead of `null`.
+- **Decision:** Store `requirementEnvironment` as a private sidecar on `environment`; `environment.clone()` deep-copies its maps and origin slices while retaining the shared trace pointer. **Rationale:** Branch and scope semantics remain in the established traversal, refinement mutates only public field state, and trace code does not need a second parser, lowerer, transfer pass, or analysis call.
+- **Decision:** Let the private `spl2FinalizeStages` return its existing old-to-final stage map and use it only from `spl2_lower.go` to remap trace references and diagnostics. **Rationale:** SPL2 child scopes otherwise leave trace stage IDs stale after lexical reordering; reusing the existing map preserves single-pass ownership with a three-line private plumbing change.
 
 ## Outcomes & Retrospective
 
-Task 1 defines the exact public requirement value model, exact-text query digests, normalized typed-manifest capability revisions, the three approved requirement diagnostic codes, and deep-copy primitives. Focused tests and the complete `pkg/analysis` test suite pass. `analysis.Result` remains unchanged as required by the task boundary. Tasks 2 through 8, whole-feature review, local acceptance, hosted CI, merge, and post-merge verification remain open.
+Tasks 1 and 2 now define the public requirement value model and capture its private query-only evidence in the canonical traversal. The trace owns explicit event order and diagnostic links, remaps through the canonical reference and SPL2 stage maps, and remains byte-equivalent across finite, partial, wildcard, and dotted-name refinement cases. `analysis.Result` still has no requirements field, and projection remains unimplemented as required by the Task 2 boundary. Tasks 3 through 8, whole-feature review, local acceptance, hosted CI, merge, and post-merge verification remain open.
 
 ## User-visible behavior
 
@@ -279,24 +283,24 @@ Do not run two code-writing agents concurrently in this worktree. Review agents 
 
 **Owned files:** `pkg/analysis/requirements_trace.go`, `pkg/analysis/requirements_trace_test.go`, and minimal trace plumbing in the existing `pkg/analysis/analyze.go`, `pkg/analysis/flow.go`, `pkg/analysis/references.go`, `pkg/analysis/transfers.go`, `pkg/analysis/source_fields.go`, `pkg/analysis/dependencies.go`, `pkg/analysis/scopes.go`, and `pkg/analysis/spl2_lower.go` owners.
 
-- [ ] Add `TestRequirementTraceClassifiesFieldOrigins` for `search src=* | eval derived=src | table src derived`. Assert direct source reads are trace obligations, the derived consumer is not, and create/output references are not consuming obligations. Run it and record the missing-trace failure.
-- [ ] Add table rows to that test for rename source versus target, removals, `isnull`, unavailable local fields, wildcard reads, and an indeterminate source. Each row asserts the pending reference ID, query-only binding, direct/conditional flags, and event order.
-- [ ] Implement `newRequirementTrace`, `requirementEnvironment.clone`, and trace initialization beside the existing `environment`. Clone both environments at the same branch and scope sites.
-- [ ] Route `referenceAt`, `readAt`, create, projection, rename, aggregation, removal, and source operations through `recordReference` at the same semantic event that creates the public reference. Do not walk syntax again.
-- [ ] Add `TestRequirementTraceKnowledgeObjects` for `index=main source=access.log sourcetype=web`, `| inputlookup users`, `| datamodel Web`, and a macro. Assert exact direct objects, wildcard or dynamic states, and unresolved macro-expansion evidence.
-- [ ] Record parser and ordinary semantic diagnostics through `recordDiagnostic`, including the exact owning pending reference IDs. Add a separate refinement-only diagnostic helper that never records into the query trace.
-- [ ] Add `TestRequirementTraceDiagnosticOwnership` with a wildcard, unknown command, unsupported semantics, syntax error, and macro expansion. Assert explicit ownership and event order without comparing locations.
-- [ ] Extend the existing `finalizeReferences` mapping handoff to call `requirementTrace.remapReferences(mapping)`. Add `TestRequirementTraceRemapsEachPendingIDOnce` and assert every trace reference matches its public identity, kind, role, stage, scope, and location after remapping.
-- [ ] Add `TestRequirementTraceRefinementParity` rows for a finite field list, partial source universe, wildcard selectors, dotted SPL2 names, and resolved versus unresolved public bindings. Compare the serialized private trace from plain and refined analysis while asserting that at least one public result differs.
-- [ ] Inspect `rg -n 'Analyze\(|parseDocument|parseSPL2|analyzeRewrite|transfer' pkg/analysis/requirements_trace.go pkg/analysis/requirements.go` and confirm trace code contains no recursive analysis, parser, lowerer, transfer, or projector call.
-- [ ] Run:
+- [x] Add `TestRequirementTraceClassifiesFieldOrigins` for `search src=* | eval derived=src | table src derived`. Assert direct source reads are trace obligations, the derived consumer is not, and create/output references are not consuming obligations. Run it and record the missing-trace failure.
+- [x] Add table rows to that test for rename source versus target, removals, `isnull`, unavailable local fields, wildcard reads, and an indeterminate source. Each row asserts the pending reference ID, query-only binding, direct/conditional flags, and event order.
+- [x] Implement `newRequirementTrace`, `requirementEnvironment.clone`, and trace initialization beside the existing `environment`. Clone both environments at the same branch and scope sites.
+- [x] Route `referenceAt`, `readAt`, create, projection, rename, aggregation, removal, and source operations through `recordReference` at the same semantic event that creates the public reference. Do not walk syntax again.
+- [x] Add `TestRequirementTraceKnowledgeObjects` for `index=main source=access.log sourcetype=web`, `| inputlookup users`, `| datamodel Web`, and a macro. Assert exact direct objects, wildcard or dynamic states, and unresolved macro-expansion evidence.
+- [x] Record parser and ordinary semantic diagnostics through `recordDiagnostic`, including the exact owning pending reference IDs. Add a separate refinement-only diagnostic helper that never records into the query trace.
+- [x] Add `TestRequirementTraceDiagnosticOwnership` with a wildcard, unknown command, unsupported semantics, syntax error, and macro expansion. Assert explicit ownership and event order without comparing locations.
+- [x] Extend the existing `finalizeReferences` mapping handoff to call `requirementTrace.remapReferences(mapping)`. Add `TestRequirementTraceRemapsEachPendingIDOnce` and assert every trace reference matches its public identity, kind, role, stage, scope, and location after remapping.
+- [x] Add `TestRequirementTraceRefinementParity` rows for a finite field list, partial source universe, wildcard selectors, dotted SPL2 names, and resolved versus unresolved public bindings. Compare the serialized private trace from plain and refined analysis while asserting that at least one public result differs.
+- [x] Inspect `rg -n 'Analyze\(|parseDocument|parseSPL2|analyzeRewrite|transfer' pkg/analysis/requirements_trace.go pkg/analysis/requirements.go` and confirm trace code contains no recursive analysis, parser, lowerer, transfer, or projector call.
+- [x] Run:
 
        env GOWORK=off GOCACHE=/private/tmp/spl-toolkit-m8-gocache go test -mod=readonly ./pkg/analysis -run '^TestRequirementTrace' -count=1
        env GOWORK=off GOCACHE=/private/tmp/spl-toolkit-m8-gocache go test -mod=readonly ./pkg/analysis -count=1
        git diff --check
 
    Expected evidence is byte-equivalent query traces across refinement pairs, one traversal per case, and a green analysis package.
-- [ ] Update the administrative plan sections with Task 2 evidence, then commit with `git commit -m "feat(analysis): capture query requirement evidence"`.
+- [x] Update the administrative plan sections with Task 2 evidence, then commit with `git commit -m "feat(analysis): capture query requirement evidence"`.
 
 ## Task 3: Projection, embedding, standalone Go API, and analysis corpus
 

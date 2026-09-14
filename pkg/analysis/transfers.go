@@ -34,19 +34,58 @@ type lookupOutput struct {
 }
 
 func (s *semanticStage) diagnosticAt(code, severity, category, message string, location Location, incomplete bool) {
+	s.diagnosticAtOwned(code, severity, category, message, location, incomplete, nil)
+}
+
+func (s *semanticStage) diagnosticAtOwned(code, severity, category, message string, location Location, incomplete bool, pendingReferenceIDs []string) {
+	s.appendDiagnostic(code, severity, category, message, location, incomplete, pendingReferenceIDs, true)
+}
+
+func (s *semanticStage) refinementDiagnosticAt(code, severity, category, message string, location Location, incomplete bool) {
+	s.appendDiagnostic(code, severity, category, message, location, incomplete, nil, false)
+}
+
+func (s *semanticStage) appendDiagnostic(code, severity, category, message string, location Location, incomplete bool, pendingReferenceIDs []string, recordRequirement bool) {
 	st := &s.result.Stages[s.stage]
 	if incomplete {
 		st.SemanticComplete = false
 		s.env.uncertain = true
 		s.rewriteUncertain()
 	}
-	s.result.Diagnostics = append(s.result.Diagnostics, Diagnostic{Code: code, Severity: severity, Category: category, Message: message, Location: location, StageID: st.ID, ScopeID: st.ScopeID})
+	diagnostic := Diagnostic{Code: code, Severity: severity, Category: category, Message: message, Location: location, StageID: st.ID, ScopeID: st.ScopeID}
+	s.result.Diagnostics = append(s.result.Diagnostics, diagnostic)
+	if trace := s.env.requirements.trace; recordRequirement && trace != nil {
+		if incomplete {
+			s.env.requirements.uncertain = true
+		}
+		trace.recordDiagnostic(diagnostic, incomplete, pendingReferenceIDs, trace.nextEvent())
+	}
+}
+
+func (s *semanticStage) requirementDiagnosticAt(code, severity, category, message string, location Location, incomplete bool, pendingReferenceIDs []string) {
+	trace := s.env.requirements.trace
+	if trace == nil {
+		return
+	}
+	st := s.result.Stages[s.stage]
+	if incomplete {
+		s.env.requirements.uncertain = true
+	}
+	trace.recordDiagnostic(Diagnostic{Code: code, Severity: severity, Category: category, Message: message, Location: location, StageID: st.ID, ScopeID: st.ScopeID}, incomplete, pendingReferenceIDs, trace.nextEvent())
 }
 func (s *semanticStage) operandReference(operand locatedOperand, kind, role string) string {
 	if !operand.Sound {
 		return ""
 	}
 	id := s.referenceAt(operand.Location, operand.Name, kind, role, operand.Resolution)
+	if trace := s.env.requirements.trace; trace != nil {
+		entry := trace.reference(id)
+		if kind == "field" {
+			entry.reference.Binding, entry.directExternal, entry.conditional = s.env.requirements.read(entry.reference)
+		} else {
+			entry.directExternal, entry.conditional = requirementReferencePolicy(entry.reference)
+		}
+	}
 	s.rewriteReference(id, operand, kind, role)
 	return id
 }
@@ -73,7 +112,7 @@ func (s *semanticStage) readAt(operand locatedOperand, role string) string {
 	case s.env.removed[name] || !s.env.open:
 		ref.Binding = "unavailable"
 		if role != "null_test" {
-			s.diagnosticAt(CodeUnavailableField, "error", "unavailable_field", fmt.Sprintf("field %q is unavailable after an earlier pipeline transfer", name), operand.Location, false)
+			s.diagnosticAtOwned(CodeUnavailableField, "error", "unavailable_field", fmt.Sprintf("field %q is unavailable after an earlier pipeline transfer", name), operand.Location, false, []string{id})
 		}
 	default:
 		ref.Binding = "source"
@@ -88,7 +127,7 @@ func (s *semanticStage) readAt(operand locatedOperand, role string) string {
 			field.Conditional = true
 			s.env.fields[name] = field
 		}
-		s.diagnosticAt(CodeUnsupportedSemantics, "warning", "unsupported_semantics", "Source-name identity is not represented by the string-only source universe", operand.Location, false)
+		s.refinementDiagnosticAt(CodeUnsupportedSemantics, "warning", "unsupported_semantics", "Source-name identity is not represented by the string-only source universe", operand.Location, false)
 		s.result.Stages[s.stage].SemanticComplete = false
 	}
 	s.rewriteBinding(id, ref.Binding, nil)
@@ -104,6 +143,12 @@ func (s *semanticStage) createAt(operand locatedOperand, role, operation string,
 	origins := s.origins(inputs)
 	s.result.References[len(s.result.References)-1].OriginReferenceIDs = copyIDs(origins)
 	s.env.install(name, uniqueIDs([]string{id}, origins), conditional)
+	if trace := s.env.requirements.trace; trace != nil {
+		entry := trace.reference(id)
+		entry.reference.Binding = "definition"
+		entry.reference.OriginReferenceIDs = traceOrigins(trace, inputs)
+		s.env.requirements.install(name, uniqueIDs([]string{id}, entry.reference.OriginReferenceIDs))
+	}
 	s.transitions = append(s.transitions, Transition{Operation: operation, Output: name, InputReferenceIDs: copyIDs(inputs), OutputReferenceID: id, Conditional: conditional})
 	return id
 }
@@ -122,15 +167,20 @@ func (s *semanticStage) selectorAt(operand locatedOperand, role string, allowWil
 	}
 	command := s.result.Stages[s.stage].Command
 	if s.refinement != nil {
+		if !allowWildcard {
+			s.requirementDiagnosticAt(CodeUnsupportedSemantics, "warning", "unsupported_semantics", fmt.Sprintf("wildcard selectors for command %q are unmodeled", command), operand.Location, true, []string{id})
+		} else if s.env.requirements.open || s.env.requirements.uncertain {
+			s.requirementDiagnosticAt(CodeUnresolvedWildcard, "warning", "unsupported_semantics", fmt.Sprintf("wildcard %q membership is unresolved", name), operand.Location, true, []string{id})
+		}
 		names := s.refinedSelectorAt(operand, role, id)
 		if !allowWildcard {
-			s.diagnosticAt(CodeUnsupportedSemantics, "warning", "unsupported_semantics", fmt.Sprintf("wildcard selectors for command %q are unmodeled", command), operand.Location, true)
+			s.refinementDiagnosticAt(CodeUnsupportedSemantics, "warning", "unsupported_semantics", fmt.Sprintf("wildcard selectors for command %q are unmodeled", command), operand.Location, true)
 			return []string{}, []string{id}
 		}
 		return names, []string{id}
 	}
 	if !allowWildcard {
-		s.diagnosticAt(CodeUnsupportedSemantics, "warning", "unsupported_semantics", fmt.Sprintf("wildcard selectors for command %q are unmodeled", command), operand.Location, true)
+		s.diagnosticAtOwned(CodeUnsupportedSemantics, "warning", "unsupported_semantics", fmt.Sprintf("wildcard selectors for command %q are unmodeled", command), operand.Location, true, []string{id})
 		return []string{}, []string{id}
 	}
 	names := []string{}
@@ -145,7 +195,7 @@ func (s *semanticStage) selectorAt(operand locatedOperand, role string, allowWil
 	sort.Strings(origins)
 	ref.OriginReferenceIDs = origins
 	if s.env.open || s.env.uncertain {
-		s.diagnosticAt(CodeUnresolvedWildcard, "warning", "unsupported_semantics", fmt.Sprintf("wildcard %q membership is unresolved", name), operand.Location, true)
+		s.diagnosticAtOwned(CodeUnresolvedWildcard, "warning", "unsupported_semantics", fmt.Sprintf("wildcard %q membership is unresolved", name), operand.Location, true, []string{id})
 	}
 	return names, []string{id}
 }
@@ -156,6 +206,9 @@ func (s *semanticStage) applyProjection(selectors []locatedOperand, mode string,
 	exclude := mode == "exclude"
 	selected := []preparedSelection{}
 	if !exclude && retainKnownInternals {
+		if s.refinement != nil && s.env.requirements.open {
+			s.requirementDiagnosticAt(CodeUnsupportedSemantics, "warning", "unsupported_semantics", "fields inclusion retains internal fields with unresolved open-source membership", s.result.Stages[s.stage].Location, true, nil)
+		}
 		internalsComplete := true
 		if s.refinement != nil {
 			internalsComplete = s.retainSourceInternals()
@@ -166,7 +219,11 @@ func (s *semanticStage) applyProjection(selectors []locatedOperand, mode string,
 			}
 		}
 		if (s.env.open && s.refinement == nil) || !internalsComplete {
-			s.diagnosticAt(CodeUnsupportedSemantics, "warning", "unsupported_semantics", "fields inclusion retains internal fields with unresolved open-source membership", s.result.Stages[s.stage].Location, true)
+			if s.refinement != nil {
+				s.refinementDiagnosticAt(CodeUnsupportedSemantics, "warning", "unsupported_semantics", "fields inclusion retains internal fields with unresolved open-source membership", s.result.Stages[s.stage].Location, true)
+			} else {
+				s.diagnosticAt(CodeUnsupportedSemantics, "warning", "unsupported_semantics", "fields inclusion retains internal fields with unresolved open-source membership", s.result.Stages[s.stage].Location, true)
+			}
 		}
 	}
 	for _, operand := range selectors {
@@ -188,6 +245,7 @@ func (s *semanticStage) applyProjection(selectors []locatedOperand, mode string,
 			}
 		}
 	}
+	s.env.requirements.applyProjection(selectors, mode, retainKnownInternals, s.result.Stages[s.stage].ID)
 	if !exclude {
 		s.applyPreparedProjection(selected, mode)
 	}
@@ -290,10 +348,15 @@ func (s *semanticStage) applyRename(pairs []renameOperands) {
 	}
 }
 func (s *semanticStage) applyAggregation(outputs []aggregateOutput, groups []locatedOperand, preserveInput bool) {
-	output := newEnvironment()
+	output := newEnvironmentWithRequirementTrace(s.env.requirements.trace)
 	output.open = false
+	output.requirements.open = false
 	for _, operand := range groups {
 		names, ids := s.selectorAt(operand, "group", false)
+		if field, ok := s.env.requirements.fields[operand.Name]; ok && operand.Resolution == "exact" {
+			field.origins = append([]string{}, field.origins...)
+			output.requirements.fields[operand.Name] = field
+		}
 		for _, name := range names {
 			if field, ok := s.projectedField(name, ids); ok {
 				output.fields[name] = field
@@ -305,6 +368,7 @@ func (s *semanticStage) applyAggregation(outputs []aggregateOutput, groups []loc
 		output.rewrite = s.env.rewrite.clone()
 		output.rewriteProject(output.fields)
 		output.uncertain = !s.result.Stages[s.stage].SemanticComplete
+		output.requirements.uncertain = s.env.requirements.uncertain
 		s.env = output
 	}
 	for _, output := range outputs {
@@ -341,8 +405,11 @@ func (s *semanticStage) removeAt(operand locatedOperand) {
 	id := s.operandReference(operand, "field", "remove")
 	s.rewriteRemoval(id, operand)
 	s.env.remove(operand.Name)
+	s.env.requirements.remove(operand.Name)
 	s.transitions = append(s.transitions, Transition{Operation: "remove", Output: operand.Name, InputReferenceIDs: []string{}, OutputReferenceID: id})
 }
 
 // applySource starts an independent external dataset without carrying prior fields.
-func (s *semanticStage) applySource() { s.env = newEnvironment() }
+func (s *semanticStage) applySource() {
+	s.env = newEnvironmentWithRequirementTrace(s.env.requirements.trace)
+}
