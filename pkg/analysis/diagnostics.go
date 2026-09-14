@@ -9,4 +9,8 @@ const (
 	CodeSyntaxError          = "SPL_SYNTAX_ERROR"
 	CodeUnsupportedCommand   = "SPL_UNSUPPORTED_COMMAND"
 	CodeUnsupportedSemantics = "SPL_UNSUPPORTED_SEMANTICS"
+
+	CodeRequirementIndeterminate      = "SPL_REQUIREMENT_INDETERMINATE"
+	CodeRequirementDynamic            = "SPL_REQUIREMENT_DYNAMIC"
+	CodeRequirementCoverageIncomplete = "SPL_REQUIREMENT_COVERAGE_INCOMPLETE"
 )

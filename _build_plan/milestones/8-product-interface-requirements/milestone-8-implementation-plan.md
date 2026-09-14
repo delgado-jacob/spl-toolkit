@@ -16,7 +16,7 @@ This file is a living execution plan. The implementing orchestrator must update 
 
 - [x] (2026-09-14) Read the approved Milestone 8 design specification, current source and tests, release tooling, GitHub Actions, and relevant prior milestone plans.
 - [x] (2026-09-14) Resolve the public model, single-pass refinement strategy, adapter boundaries, compatibility rules, fixture ownership, review protocol, and release procedure in this plan.
-- [ ] Task 1: Add public requirement value types, digest helpers, constants, and deep-copy primitives with focused tests.
+- [x] (2026-09-14) Task 1: Added public requirement value types, digest helpers, constants, and deep-copy primitives from base `c5de9590fe41b79a8b1181f73b13b2c92e7105a5`. The first focused run failed on the missing types and `queryDigest`; later RED runs failed on the missing `capabilityRevision`, `cloneRequirementSet`, and constants. The exact focused command and the full `pkg/analysis` package passed after implementation. The completion commit is the commit containing this entry.
 - [ ] Task 2: Capture a private query-only trace in the existing analysis traversal and prove refinement cannot contaminate it.
 - [ ] Task 3: Project, embed, and expose canonical requirements and update the current analysis corpus.
 - [ ] Task 4: Propagate requirements through document snapshots and prove refinement and downstream product parity.
@@ -37,6 +37,7 @@ After that final tracked update, whole-feature review, local independent accepta
 - Existing current fixtures embed complete analysis results in analysis, validation, schema, and CLI acceptance data. Runtime embedding of `requirements` requires deliberate regeneration of those current goldens, but historical release evidence and receipts must remain byte-for-byte untouched.
 - `pkg/analysis/transfers_test.go:transferParityWitnesses` and `pkg/rewrite/rewrite_test.go:explicitAliasReport` are independent hand-pinned full-result witnesses outside the JSON fixture directories. Both must gain hand-derived requirements when `analysis.Result` changes.
 - The primary checkout intentionally contains only the roadmap inputs listed in the landing procedure as untracked files. It is not an empty-status checkout, and previously removed legacy Markdown and text files must stay removed.
+- `CapabilitiesFor` already owns selector validation and default normalization while returning a fresh typed manifest. Task 1 could calculate capability revisions without adding a second selector path, maps, or mutable cache state.
 
 ## Decision Log
 
@@ -51,10 +52,11 @@ After that final tracked update, whole-feature review, local independent accepta
 - **Decision:** Do not create a pull request. Push the branch, run the dispatchable workflow directly, then fast-forward and push `main` only after all local, review, acceptance, and branch-CI gates pass. **Rationale:** This follows the requested hosted workflow without adding an unrequested PR artifact.
 - **Decision:** Local independent acceptance signs off before any push and does not depend on hosted CI. After final review freezes the candidate, review, acceptance, and hosted-run results are reported out of band and do not cause tracked evidence commits. **Rationale:** The exact SHA cannot contain a record of checks that run only after that SHA exists.
 - **Decision:** Preserve the primary checkout's intentional untracked roadmap baseline exactly across landing. Require a clean tracked index and worktree, check incoming-path collisions, and compare the saved untracked list after the fast-forward. **Rationale:** An untracked roadmap file is user state, not a dirty-tree defect or permission to restore previously removed files.
+- **Decision:** Copy every slice layer in `cloneRequirementSet` with an owned empty destination. **Rationale:** This detaches coverage reasons, item occurrences, gap links, and diagnostics while keeping empty cloned collections array-valued instead of `null`.
 
 ## Outcomes & Retrospective
 
-Implementation has not started. Before final whole-feature review, replace this paragraph with the delivered behavior, implementation commit SHAs, local verification completed so far, accepted design decisions, deviations, and remaining risks. Final-review conclusions, local acceptance results, hosted run URLs, and merge results are reported out of band after the candidate is frozen; do not edit this plan or the milestone log to record them at the same SHA. Do not claim runtime or installed-package evidence that was not actually run.
+Task 1 defines the exact public requirement value model, exact-text query digests, normalized typed-manifest capability revisions, the three approved requirement diagnostic codes, and deep-copy primitives. Focused tests and the complete `pkg/analysis` test suite pass. `analysis.Result` remains unchanged as required by the task boundary. Tasks 2 through 8, whole-feature review, local acceptance, hosted CI, merge, and post-merge verification remain open.
 
 ## User-visible behavior
 
@@ -255,23 +257,23 @@ Do not run two code-writing agents concurrently in this worktree. Review agents 
 
 **Owned files:** `pkg/analysis/requirements.go`, `pkg/analysis/requirements_test.go`, and `pkg/analysis/diagnostics.go`. Do not add `Requirements` to `Result` yet.
 
-- [ ] Add `TestRequirementTypesJSONShape`. Construct a fully populated `RequirementSet`, marshal it, and assert the keys and named nested values shown in `User-visible behavior`. The first run must fail to compile because the public types do not exist.
-- [ ] Add `TestQueryDigestExactBytes` with `""`, `"café 😀"`, `"a\nb"`, and `"a\r\nb"`. Assert the digest equals `"sha256:" + hex.EncodeToString(sha256.Sum256([]byte(text))[:])` using an addressable sum variable, and assert selector-only changes do not affect it.
-- [ ] Run `env GOWORK=off GOCACHE=/private/tmp/spl-toolkit-m8-gocache go test -mod=readonly ./pkg/analysis -run 'TestRequirementTypesJSONShape|TestQueryDigestExactBytes' -count=1`. Record the missing-type/helper compile failure.
-- [ ] Define the exact public structs and `func queryDigest(text string) string`; add only enough code to pass those two tests.
-- [ ] Add `TestCapabilityRevisionUsesNormalizedTypedManifest`. Compare empty selectors with `spl/splunkd/current`, compare repeated calls, compare SPL with SPL2, and independently marshal `CapabilitiesFor(CapabilityOptions{...})` to calculate the expected digest.
-- [ ] Implement `func capabilityRevision(document QueryDocument) (string, error)` without maps, indentation, trailing newline, environment data, or cached mutable state.
-- [ ] Add `TestCloneRequirementSetOwnsNestedSlices`. Mutate cloned coverage reasons, item occurrences, gap reference IDs, gap diagnostic codes, and diagnostics, then assert the source is unchanged.
-- [ ] Add `TestRequirementSetEmptyCollectionsAreArrays`. Marshal an empty initialized set and assert `coverage.reasons`, `items`, `gaps`, and `diagnostics` are `[]`, not `null`.
-- [ ] Implement `func cloneRequirementSet(in RequirementSet) RequirementSet` and add exactly `CodeRequirementIndeterminate`, `CodeRequirementDynamic`, and `CodeRequirementCoverageIncomplete` with their approved wire strings in `pkg/analysis/diagnostics.go`.
-- [ ] Run:
+- [x] Add `TestRequirementTypesJSONShape`. Construct a fully populated `RequirementSet`, marshal it, and assert the keys and named nested values shown in `User-visible behavior`. The first run must fail to compile because the public types do not exist.
+- [x] Add `TestQueryDigestExactBytes` with `""`, `"café 😀"`, `"a\nb"`, and `"a\r\nb"`. Assert the digest equals `"sha256:" + hex.EncodeToString(sha256.Sum256([]byte(text))[:])` using an addressable sum variable, and assert selector-only changes do not affect it.
+- [x] Run `env GOWORK=off GOCACHE=/private/tmp/spl-toolkit-m8-gocache go test -mod=readonly ./pkg/analysis -run 'TestRequirementTypesJSONShape|TestQueryDigestExactBytes' -count=1`. Record the missing-type/helper compile failure.
+- [x] Define the exact public structs and `func queryDigest(text string) string`; add only enough code to pass those two tests.
+- [x] Add `TestCapabilityRevisionUsesNormalizedTypedManifest`. Compare empty selectors with `spl/splunkd/current`, compare repeated calls, compare SPL with SPL2, and independently marshal `CapabilitiesFor(CapabilityOptions{...})` to calculate the expected digest.
+- [x] Implement `func capabilityRevision(document QueryDocument) (string, error)` without maps, indentation, trailing newline, environment data, or cached mutable state.
+- [x] Add `TestCloneRequirementSetOwnsNestedSlices`. Mutate cloned coverage reasons, item occurrences, gap reference IDs, gap diagnostic codes, and diagnostics, then assert the source is unchanged.
+- [x] Add `TestRequirementSetEmptyCollectionsAreArrays`. Marshal an empty initialized set and assert `coverage.reasons`, `items`, `gaps`, and `diagnostics` are `[]`, not `null`.
+- [x] Implement `func cloneRequirementSet(in RequirementSet) RequirementSet` and add exactly `CodeRequirementIndeterminate`, `CodeRequirementDynamic`, and `CodeRequirementCoverageIncomplete` with their approved wire strings in `pkg/analysis/diagnostics.go`.
+- [x] Run:
 
        env GOWORK=off GOCACHE=/private/tmp/spl-toolkit-m8-gocache go test -mod=readonly ./pkg/analysis -run 'TestRequirementTypes|TestQueryDigest|TestCapabilityRevision|TestCloneRequirementSet' -count=1
        env GOWORK=off GOCACHE=/private/tmp/spl-toolkit-m8-gocache go test -mod=readonly ./pkg/analysis -count=1
        git diff --check
 
    Expected evidence is all tests passing and no whitespace errors.
-- [ ] Update the administrative plan sections with Task 1 evidence, then commit the owned files plus administrative updates with `git commit -m "feat(analysis): define requirement product model"`.
+- [x] Update the administrative plan sections with Task 1 evidence, then commit the owned files plus administrative updates with `git commit -m "feat(analysis): define requirement product model"`.
 
 ## Task 2: Single-pass query-only trace
 
