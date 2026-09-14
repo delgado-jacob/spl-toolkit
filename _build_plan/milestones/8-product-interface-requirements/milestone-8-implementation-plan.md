@@ -6,11 +6,11 @@
 
 **Architecture:** Extend the single analysis pass with a private query-only semantic trace that survives refinement without inheriting target-dependent facts. Project the public `RequirementSet` only after canonical reference finalization, embed it in every runtime `analysis.Result`, and expose detached copies through thin adapters. Contracts preserve archived v1 compatibility by making the new property optional when decoding stored analysis and document snapshots, while every current runtime producer emits it.
 
-**Tech Stack:** Go 1.22, Cobra, `net/http`, cgo and a stable C ABI, Python 3.11 through 3.14 with `ctypes`, JSON Schema draft 2020-12, Swag/OpenAPI generation, pytest, Go race tests, AddressSanitizer, GitHub Actions, and Claude CLI review.
+**Tech Stack:** Go 1.22, the repository's custom CLI parser, `net/http`, cgo and a stable C ABI, Python 3.11 through 3.14 with `ctypes`, JSON Schema draft 2020-12, Swag/OpenAPI generation, pytest, Go race tests, AddressSanitizer, GitHub Actions, and Claude CLI review.
 
 ---
 
-This file is a living execution plan. The implementing orchestrator must update `Progress`, `Surprises & Discoveries`, `Decision Log`, and `Outcomes & Retrospective` as work proceeds. The approved behavioral source is `_build_plan/milestones/8-product-interface-requirements/design-spec.md`; this plan restates the required behavior so implementers and reviewers must not load `_build_plan/` at runtime or from tests, package manifests, release archives, generated documentation, or installed distributions.
+This file is a living execution plan. The implementing orchestrator must update `Progress`, `Surprises & Discoveries`, `Decision Log`, and `Outcomes & Retrospective` as work proceeds. The approved behavioral source is `_build_plan/milestones/8-product-interface-requirements/design-spec.md`; this plan restates the required behavior so implementers and reviewers must not load `_build_plan/` at runtime or from tests, package manifests, release archives, generated documentation, or installed distributions. This plan and `_build_plan/milestones/8-product-interface-requirements/milestone-log.md` are administrative records and are always allowed task edits even when a task's owned-file list omits them. Finish and commit all administrative updates before final whole-feature review and freeze.
 
 ## Progress
 
@@ -24,10 +24,9 @@ This file is a living execution plan. The implementing orchestrator must update 
 - [ ] Task 6: Add C and Python product surfaces with ownership and native-memory coverage.
 - [ ] Task 7: Publish machine contracts, OpenAPI, registry, native-source, and release manifests.
 - [ ] Task 8: Add permanent documentation, cross-surface acceptance, installed-package checks, and release closure.
-- [ ] Complete independent final specification, code-quality, security, and architecture reviews, including Claude Opus, and resolve every actionable finding.
-- [ ] Complete an independent acceptance validation at the exact feature-branch head.
-- [ ] Push the feature branch, dispatch and pass GitHub Actions at the pushed SHA, fast-forward `main`, push it, and pass the `main` pipeline at the merge SHA.
-- [ ] Record final evidence and lessons in `Outcomes & Retrospective`.
+- [ ] Finish all tracked plan and milestone-log updates and commit the final administrative state before whole-feature review.
+
+After that final tracked update, whole-feature review, local independent acceptance, feature-branch CI, merge, and post-merge CI are terminal gates reported out of band. Their outcomes intentionally do not mutate these Progress checkboxes or any other tracked file after freeze.
 
 ## Surprises & Discoveries
 
@@ -36,6 +35,8 @@ This file is a living execution plan. The implementing orchestrator must update 
 - The feature branch is based on two documentation commits beyond `origin/main`. The eventual feature diff and CI `headSha` checks must include those commits, and landing must remain a fast-forward.
 - GitHub Actions does not run this repository's CI workflow on an ordinary feature-branch push. The branch pipeline must be started explicitly with `workflow_dispatch` after pushing.
 - Existing current fixtures embed complete analysis results in analysis, validation, schema, and CLI acceptance data. Runtime embedding of `requirements` requires deliberate regeneration of those current goldens, but historical release evidence and receipts must remain byte-for-byte untouched.
+- `pkg/analysis/transfers_test.go:transferParityWitnesses` and `pkg/rewrite/rewrite_test.go:explicitAliasReport` are independent hand-pinned full-result witnesses outside the JSON fixture directories. Both must gain hand-derived requirements when `analysis.Result` changes.
+- The primary checkout intentionally contains only the roadmap inputs listed in the landing procedure as untracked files. It is not an empty-status checkout, and previously removed legacy Markdown and text files must stay removed.
 
 ## Decision Log
 
@@ -48,10 +49,12 @@ This file is a living execution plan. The implementing orchestrator must update 
 - **Decision:** Add `requirements` to analysis and document-snapshot schema properties but not to their v1 `required` arrays. **Rationale:** Current producers always emit the field while archived v1 payloads remain decodable.
 - **Decision:** Run implementation serially in the shared feature worktree. Each task receives an implementer, then a specification reviewer, then a quality reviewer, with fix and rereview loops before the next task. **Rationale:** The tasks share analysis and fixture files, so concurrent writers would create unsafe overlap.
 - **Decision:** Do not create a pull request. Push the branch, run the dispatchable workflow directly, then fast-forward and push `main` only after all local, review, acceptance, and branch-CI gates pass. **Rationale:** This follows the requested hosted workflow without adding an unrequested PR artifact.
+- **Decision:** Local independent acceptance signs off before any push and does not depend on hosted CI. After final review freezes the candidate, review, acceptance, and hosted-run results are reported out of band and do not cause tracked evidence commits. **Rationale:** The exact SHA cannot contain a record of checks that run only after that SHA exists.
+- **Decision:** Preserve the primary checkout's intentional untracked roadmap baseline exactly across landing. Require a clean tracked index and worktree, check incoming-path collisions, and compare the saved untracked list after the fast-forward. **Rationale:** An untracked roadmap file is user state, not a dirty-tree defect or permission to restore previously removed files.
 
 ## Outcomes & Retrospective
 
-Implementation has not started. At completion, replace this paragraph with the delivered behavior, exact implementation and review commit SHAs, local verification results, Claude review disposition, acceptance evidence, branch and `main` GitHub Actions run URLs and conclusions, merge SHA, any deviations from this plan, and remaining follow-up work. Do not claim runtime or installed-package evidence that was not actually run.
+Implementation has not started. Before final whole-feature review, replace this paragraph with the delivered behavior, implementation commit SHAs, local verification completed so far, accepted design decisions, deviations, and remaining risks. Final-review conclusions, local acceptance results, hosted run URLs, and merge results are reported out of band after the candidate is frozen; do not edit this plan or the milestone log to record them at the same SHA. Do not claim runtime or installed-package evidence that was not actually run.
 
 ## User-visible behavior
 
@@ -211,11 +214,28 @@ type requirementEnvironment struct {
 }
 ```
 
+Use these named helper boundaries so every task and reviewer can trace ownership:
+
+```go
+func queryDigest(text string) string
+func capabilityRevision(document QueryDocument) (string, error)
+func cloneRequirementSet(in RequirementSet) RequirementSet
+func newRequirementTrace() *requirementTrace
+func (t *requirementTrace) nextEvent() int
+func (t *requirementTrace) recordReference(reference Reference, directExternal, conditional bool, eventOrdinal int)
+func (t *requirementTrace) recordDiagnostic(diagnostic Diagnostic, incomplete bool, pendingReferenceIDs []string, eventOrdinal int)
+func (t *requirementTrace) remapReferences(mapping map[string]string)
+func (e requirementEnvironment) clone() requirementEnvironment
+func projectRequirements(document QueryDocument, trace *requirementTrace) (RequirementSet, error)
+```
+
+`queryDigest` hashes `[]byte(text)` and formats `sha256:<hex>`. `capabilityRevision` normalizes selectors through `CapabilitiesFor`, marshals the returned typed manifest with `json.Marshal`, and hashes those exact bytes. `projectRequirements` consumes only the normalized document and finalized query trace. If implementation discovers that an extra argument is necessary, record the reason before changing the signature and prove the argument cannot expose target-refined evidence.
+
 `requirementTraceReference.reference.ID` remains pending until `finalizeReferences` obtains the same pending-to-public `ref-N` map used by the public result. `finalizeReferences` remaps trace references and explicit diagnostic links, then asserts that each trace reference has the same canonical identity, kind, role, location, stage, and scope as its public counterpart. Trace field state clones wherever the existing `environment` clones for branches or scopes.
 
 At each semantic event, record public and trace evidence together. Parser diagnostics seed both public diagnostics and query trace diagnostics. Normal semantic diagnostics record their `incomplete` classification and explicit pending reference owners in the trace. Refinement-only diagnostics use a separate helper and never enter the trace. The trace records baseline wildcard, indeterminate, source, field, knowledge-object, and macro-expansion uncertainty before target refinement can resolve or alter public facts.
 
-The projector runs only after reference finalization. It derives query status and completeness from the trace, builds ordered items and gaps, copies query-only diagnostics, and stores the result on `Result.Requirements`. It does not inspect AST nodes, call `Analyze`, invoke the parser, rerun transfers, or infer diagnostic ownership from locations. `Requirements(document)` calls `Analyze(document)` once and returns `cloneRequirementSet(result.Requirements)`. `document.New` uses the same deep-clone helper or an equivalent package-safe clone; mutation tests must prove every nested slice is detached.
+The projector runs only after reference finalization. It derives query status and completeness from the trace, builds ordered items and gaps, copies query-only diagnostics, and stores the result on `Result.Requirements`. It does not inspect AST nodes, call `Analyze`, invoke the parser, rerun transfers, or infer diagnostic ownership from locations. `Requirements(document)` calls `Analyze(document)` once and returns `cloneRequirementSet(result.Requirements)`. `document.New(result, context RevisionContext)` uses an equivalent package-local deep clone when it builds `Snapshot`; mutation tests must prove every nested slice is detached.
 
 ## Orchestration and review protocol
 
@@ -223,11 +243,11 @@ The orchestrator starts each implementation task only after the preceding task a
 
 For every Task 1 through Task 8:
 
-1. Record the immutable starting SHA and assign one fresh implementation agent. The agent writes the named failing test first, runs it to observe the expected failure, makes the smallest production change, reruns the focused test, then runs the task verification commands. It updates the living sections in this plan and creates the task's scoped commit.
-2. Record the implementation SHA and assign a fresh specification reviewer. The reviewer reads the approved specification and reviews `starting-sha..implementation-sha` for missing, extra, or contradictory behavior. The reviewer does not edit.
-3. Only after specification approval, assign a different fresh quality reviewer. The reviewer examines the same immutable range for correctness, robustness, deterministic behavior, error paths, security, memory ownership, architecture, test quality, and unnecessary scope. The reviewer does not edit.
-4. If either reviewer finds an actionable issue, assign a fresh fix agent with the exact findings. The fix agent uses TDD where behavior changes, makes a new scoped commit, and returns the new head. Repeat both reviews over `starting-sha..new-head` until both approve.
-5. Update `Progress`, `Surprises & Discoveries`, and `Decision Log` with evidence and accepted deviations. Release the next task only after the current range is approved.
+- [ ] Record the concrete 40-character task base SHA and assign one fresh implementation agent. The agent writes the named failing test first, runs it to observe the expected failure, makes the smallest production change, reruns the focused test, then runs the task verification commands. It updates the living sections and creates the task's scoped commit.
+- [ ] Record the concrete implementation SHA and assign a fresh specification reviewer. The reviewer reads the approved specification and reviews the exact `TASK_BASE_SHA..TASK_HEAD_SHA` range for missing, extra, or contradictory behavior. The reviewer does not edit.
+- [ ] Only after specification approval, assign a different fresh quality reviewer. The reviewer examines the same concrete immutable range for correctness, robustness, deterministic behavior, error paths, security, memory ownership, architecture, test quality, and unnecessary scope. The reviewer does not edit.
+- [ ] If either reviewer finds an actionable issue, assign a fresh fix agent with the exact findings. The fix agent uses TDD where behavior changes and makes a new scoped commit. Repeat both reviews over the original concrete base SHA through the new concrete head SHA until both approve.
+- [ ] Update `Progress`, `Surprises & Discoveries`, and `Decision Log` with evidence and accepted deviations. Release the next task only after the current range is approved.
 
 Do not run two code-writing agents concurrently in this worktree. Review agents may inspect immutable ranges concurrently only when neither writes. No agent may amend another agent's commit, rewrite history, stash user changes, or reset the worktree.
 
@@ -235,64 +255,85 @@ Do not run two code-writing agents concurrently in this worktree. Review agents 
 
 **Owned files:** `pkg/analysis/requirements.go`, `pkg/analysis/requirements_test.go`, and `pkg/analysis/diagnostics.go`. Do not add `Requirements` to `Result` yet.
 
-1. Add compile-time tests for the exact public types and JSON names above. Add table tests that hash empty text, non-ASCII UTF-8, line endings, and documents with identical text but different selectors. Assert query digests change only with exact text bytes and match `sha256:<64 lowercase hex>`.
-2. Add capability revision tests across selector aliases and repeated calls. Equivalent normalized selectors must match, materially different supported selectors must differ, and the digest must equal SHA-256 over the compact JSON bytes from the typed normalized manifest.
-3. Add `cloneRequirementSet` tests that populate every nested slice and mutate the clone's coverage reasons, item occurrences, gap reference and diagnostic code arrays, and diagnostics. The source must remain unchanged and all empty arrays must serialize as `[]` rather than `null`.
-4. Run the tests before implementation. Expected evidence is compile failure for missing requirement types and helpers. Implement the value types, digest helpers, clone helper, and exactly three new requirement diagnostic constants.
-5. Run:
+- [ ] Add `TestRequirementTypesJSONShape`. Construct a fully populated `RequirementSet`, marshal it, and assert the keys and named nested values shown in `User-visible behavior`. The first run must fail to compile because the public types do not exist.
+- [ ] Add `TestQueryDigestExactBytes` with `""`, `"café 😀"`, `"a\nb"`, and `"a\r\nb"`. Assert the digest equals `"sha256:" + hex.EncodeToString(sha256.Sum256([]byte(text))[:])` using an addressable sum variable, and assert selector-only changes do not affect it.
+- [ ] Run `env GOWORK=off GOCACHE=/private/tmp/spl-toolkit-m8-gocache go test -mod=readonly ./pkg/analysis -run 'TestRequirementTypesJSONShape|TestQueryDigestExactBytes' -count=1`. Record the missing-type/helper compile failure.
+- [ ] Define the exact public structs and `func queryDigest(text string) string`; add only enough code to pass those two tests.
+- [ ] Add `TestCapabilityRevisionUsesNormalizedTypedManifest`. Compare empty selectors with `spl/splunkd/current`, compare repeated calls, compare SPL with SPL2, and independently marshal `CapabilitiesFor(CapabilityOptions{...})` to calculate the expected digest.
+- [ ] Implement `func capabilityRevision(document QueryDocument) (string, error)` without maps, indentation, trailing newline, environment data, or cached mutable state.
+- [ ] Add `TestCloneRequirementSetOwnsNestedSlices`. Mutate cloned coverage reasons, item occurrences, gap reference IDs, gap diagnostic codes, and diagnostics, then assert the source is unchanged.
+- [ ] Add `TestRequirementSetEmptyCollectionsAreArrays`. Marshal an empty initialized set and assert `coverage.reasons`, `items`, `gaps`, and `diagnostics` are `[]`, not `null`.
+- [ ] Implement `func cloneRequirementSet(in RequirementSet) RequirementSet` and add exactly `CodeRequirementIndeterminate`, `CodeRequirementDynamic`, and `CodeRequirementCoverageIncomplete` with their approved wire strings in `pkg/analysis/diagnostics.go`.
+- [ ] Run:
 
        env GOWORK=off GOCACHE=/private/tmp/spl-toolkit-m8-gocache go test -mod=readonly ./pkg/analysis -run 'TestRequirementTypes|TestQueryDigest|TestCapabilityRevision|TestCloneRequirementSet' -count=1
        env GOWORK=off GOCACHE=/private/tmp/spl-toolkit-m8-gocache go test -mod=readonly ./pkg/analysis -count=1
        git diff --check
 
    Expected evidence is all tests passing and no whitespace errors.
-6. Commit only the owned files with `git commit -m "feat(analysis): define requirement product model"`.
+- [ ] Update the administrative plan sections with Task 1 evidence, then commit the owned files plus administrative updates with `git commit -m "feat(analysis): define requirement product model"`.
 
 ## Task 2: Single-pass query-only trace
 
-**Owned files:** `pkg/analysis/requirements_trace.go`, `pkg/analysis/requirements_trace_test.go`, and the minimal trace plumbing in `pkg/analysis/analyze.go`, `pkg/analysis/flow.go`, `pkg/analysis/references.go`, `pkg/analysis/transfers.go`, `pkg/analysis/source_fields.go`, `pkg/analysis/dependencies.go`, `pkg/analysis/scopes.go`, and `pkg/analysis/spl2_lower.go`. If an exact filename differs, locate the existing owner with `rg` and record the correction in `Surprises & Discoveries` before editing.
+**Owned files:** `pkg/analysis/requirements_trace.go`, `pkg/analysis/requirements_trace_test.go`, and minimal trace plumbing in the existing `pkg/analysis/analyze.go`, `pkg/analysis/flow.go`, `pkg/analysis/references.go`, `pkg/analysis/transfers.go`, `pkg/analysis/source_fields.go`, `pkg/analysis/dependencies.go`, `pkg/analysis/scopes.go`, and `pkg/analysis/spl2_lower.go` owners.
 
-1. Add internal tests that observe trace evidence through package-private helpers. Cover direct field reads, derived fields, rename sources and targets, removals, null tests, unavailable local fields, exact and wildcard knowledge objects, macros, syntax diagnostics, unsupported semantics, branching, subsearch scopes, and dotted SPL2 identifiers.
-2. Add paired plain and source-refined tests for field lists, partial universes, JSON Schema, OCSF, original-query rewrite, and candidate rewrite. The private trace and its finalized reference links must be identical in each pair even when public bindings or diagnostics differ.
-3. Instrument the existing traversal. Initialize one trace in the analysis context, carry a query-only environment beside public field state, clone it at the same branch and scope boundaries, and record both views at the same semantic events. Add an explicit refinement-only diagnostic path. Do not call the parser, lowerer, analyzer, or projector a second time.
-4. Extend `finalizeReferences` to remap trace pending IDs with the canonical pending-to-public map and validate correspondence. Keep diagnostic ownership as explicit pending IDs established by the owning semantic operation.
-5. Assert each private trace reference is recorded at one semantic event and receives exactly one canonical public ID. Review the implementation call graph to prove it contains no recursive `Analyze`, parser, lowerer, or transfer invocation. The first run should fail because the trace does not exist; the passing run must prove no replay was added.
-6. Run:
+- [ ] Add `TestRequirementTraceClassifiesFieldOrigins` for `search src=* | eval derived=src | table src derived`. Assert direct source reads are trace obligations, the derived consumer is not, and create/output references are not consuming obligations. Run it and record the missing-trace failure.
+- [ ] Add table rows to that test for rename source versus target, removals, `isnull`, unavailable local fields, wildcard reads, and an indeterminate source. Each row asserts the pending reference ID, query-only binding, direct/conditional flags, and event order.
+- [ ] Implement `newRequirementTrace`, `requirementEnvironment.clone`, and trace initialization beside the existing `environment`. Clone both environments at the same branch and scope sites.
+- [ ] Route `referenceAt`, `readAt`, create, projection, rename, aggregation, removal, and source operations through `recordReference` at the same semantic event that creates the public reference. Do not walk syntax again.
+- [ ] Add `TestRequirementTraceKnowledgeObjects` for `index=main source=access.log sourcetype=web`, `| inputlookup users`, `| datamodel Web`, and a macro. Assert exact direct objects, wildcard or dynamic states, and unresolved macro-expansion evidence.
+- [ ] Record parser and ordinary semantic diagnostics through `recordDiagnostic`, including the exact owning pending reference IDs. Add a separate refinement-only diagnostic helper that never records into the query trace.
+- [ ] Add `TestRequirementTraceDiagnosticOwnership` with a wildcard, unknown command, unsupported semantics, syntax error, and macro expansion. Assert explicit ownership and event order without comparing locations.
+- [ ] Extend the existing `finalizeReferences` mapping handoff to call `requirementTrace.remapReferences(mapping)`. Add `TestRequirementTraceRemapsEachPendingIDOnce` and assert every trace reference matches its public identity, kind, role, stage, scope, and location after remapping.
+- [ ] Add `TestRequirementTraceRefinementParity` rows for a finite field list, partial source universe, wildcard selectors, dotted SPL2 names, and resolved versus unresolved public bindings. Compare the serialized private trace from plain and refined analysis while asserting that at least one public result differs.
+- [ ] Inspect `rg -n 'Analyze\(|parseDocument|parseSPL2|analyzeRewrite|transfer' pkg/analysis/requirements_trace.go pkg/analysis/requirements.go` and confirm trace code contains no recursive analysis, parser, lowerer, transfer, or projector call.
+- [ ] Run:
 
-       env GOWORK=off GOCACHE=/private/tmp/spl-toolkit-m8-gocache go test -mod=readonly ./pkg/analysis -run 'TestRequirementTrace|TestRequirementTraceRefinementParity|TestRequirementTraceSinglePass' -count=1
+       env GOWORK=off GOCACHE=/private/tmp/spl-toolkit-m8-gocache go test -mod=readonly ./pkg/analysis -run '^TestRequirementTrace' -count=1
        env GOWORK=off GOCACHE=/private/tmp/spl-toolkit-m8-gocache go test -mod=readonly ./pkg/analysis -count=1
        git diff --check
 
    Expected evidence is byte-equivalent query traces across refinement pairs, one traversal per case, and a green analysis package.
-7. Commit with `git commit -m "feat(analysis): capture query requirement evidence"`.
+- [ ] Update the administrative plan sections with Task 2 evidence, then commit with `git commit -m "feat(analysis): capture query requirement evidence"`.
 
 ## Task 3: Projection, embedding, standalone Go API, and analysis corpus
 
-**Owned files:** `pkg/analysis/model.go`, `pkg/analysis/analyze.go`, `pkg/analysis/requirements.go`, `pkg/analysis/requirements_test.go`, `pkg/analysis/corpus_test.go`, `testdata/requirements/cases.json`, and `testdata/analysis/cases.json`.
+**Owned files:** `pkg/analysis/model.go`, `pkg/analysis/analyze.go`, `pkg/analysis/requirements.go`, `pkg/analysis/requirements_test.go`, `pkg/analysis/corpus_test.go`, `pkg/analysis/transfers_test.go`, `testdata/requirements/cases.json`, and `testdata/analysis/cases.json`.
 
-1. Create `testdata/requirements/cases.json` as the durable shared product fixture. Include valid, invalid, and incomplete SPL and SPL2; exact and derived fields; indeterminate and wildcard fields; direct knowledge kinds; dynamic identities; macros; removals; null tests; rename sources and targets; branching; and empty results. Expected values must be full `RequirementSet` objects, not fragments.
-2. Add projector tests for exact grouping, first-reference and occurrence ordering, `req-N` numbering, necessity folding, field inclusion and omission, knowledge-kind handling, gap codes, deduplication by code and ordered evidence links, first-seen unique coverage reasons, diagnostic ordering, query status, independent coverage, and non-nil arrays. Add a case where an invalid read-after-removal query has complete requirement coverage.
-3. Add `Requirements RequirementSet` to `Result`. Invoke the projector once at the end of canonical analysis after references and diagnostics are finalized. Ensure every return path either returns an error or a fully populated embedded value.
-4. Add `Requirements(document)` with exactly this control flow: call `Analyze(document)` once, return its error unchanged, deep-clone `result.Requirements` into a local value, and return that value's address. Add deep-detachment tests and compare its JSON bytes with the embedded `Analyze(document).Requirements` bytes for every shared fixture. The implementation contains no second call or fallback path.
-5. Update only the current `testdata/analysis/cases.json` expected results to include `requirements`. Use the existing corpus update mechanism if present; otherwise make a narrow mechanical update from current Go output and review the diff. Do not edit any historical evidence, receipts, or release archives.
-6. Run:
+- [ ] Add `TestProjectRequirementsGroupsAndOrdersOccurrences`. Supply a finalized trace with two source reads sharing `(field, host, read, exact)` and one different role. Assert two ordered items, canonical occurrence order, and IDs `req-1` and `req-2`. Run it and record the missing-projector failure.
+- [ ] Implement `projectRequirements(document QueryDocument, trace *requirementTrace) (RequirementSet, error)` through the empty-set and grouping stages only. Initialize all arrays and omit full query text.
+- [ ] Add `TestProjectRequirementsFieldPolicy` with subtests for exact source, indeterminate source, wildcard, dynamic, derived, create, output, rename source and target, remove, null test, and unavailable local references. Assert the exact inclusion, necessity, binding, resolution, and gap outcome.
+- [ ] Add `TestProjectRequirementsKnowledgePolicy` covering `index`, `source`, `sourcetype`, `dataset`, `data_model`, `lookup`, and `macro`, including exact, defensible wildcard/dynamic, gap-only dynamic, and exact macro plus expansion gap.
+- [ ] Add `TestProjectRequirementsGapOrderingAndDeduplication`. Supply duplicate diagnostic ownership evidence and assert deduplication by code plus ordered links, deterministic message selection, gap order, and first-seen unique `coverage.reasons`.
+- [ ] Add `TestProjectRequirementsStatusIndependentFromCoverage` for `search host=* | fields - host | table host`. Assert query status `invalid`, coverage complete, no external item for the unavailable local read, and no requirement gap for the local defect.
+- [ ] Add `Requirements RequirementSet` to `Result` and call the projector once after canonical references and query-only diagnostics are finalized. Add a focused empty-query test proving every successful `Analyze` path emits a non-null requirement object with array-valued collections.
+- [ ] Implement `Requirements(document)` with exactly one `Analyze(document)` call, unchanged error return, local deep clone, and pointer to the clone. Add `TestRequirementsMatchesEmbeddedAndIsDetached` for every requirement fixture.
+- [ ] Create `testdata/requirements/cases.json` with full expected sets for valid, invalid, and incomplete SPL and SPL2; exact and derived fields; indeterminate and wildcard fields; all direct knowledge kinds; dynamic identities; macros; removals; null tests; rename source and target; branch and scope evidence; dotted SPL2; non-ASCII text; and empty output.
+- [ ] Update `testdata/analysis/cases.json` with the additive runtime field. Review a mechanical before/after sample for valid, invalid, and incomplete cases; do not modify historical evidence or receipts.
+- [ ] Update the hand-pinned full-result JSON strings in `pkg/analysis/transfers_test.go` variable `transferParityWitnesses`. Preserve every pre-Milestone-8 byte except insertion of the correctly derived `requirements` member, and retain the comments that forbid runtime regeneration inside the test.
+- [ ] Run:
 
-       env GOWORK=off GOCACHE=/private/tmp/spl-toolkit-m8-gocache go test -mod=readonly ./pkg/analysis -run 'TestRequirementProjection|TestRequirements|TestAnalysisCorpus' -count=1
+       env GOWORK=off GOCACHE=/private/tmp/spl-toolkit-m8-gocache go test -mod=readonly ./pkg/analysis -run 'TestProjectRequirements|TestRequirements|TestAnalysisCorpus|TestLookupExtractionFullReportParity|TestLocatedTransferEquivalence' -count=1
        env GOWORK=off GOCACHE=/private/tmp/spl-toolkit-m8-gocache go test -mod=readonly ./pkg/analysis -count=1
        git diff --check
 
    Expected evidence is exact fixture parity, a single analysis invocation, deterministic repeat runs, and a green analysis corpus.
-7. Commit with `git commit -m "feat(analysis): project canonical query requirements"`.
+- [ ] Update the administrative plan sections with Task 3 evidence, then commit with `git commit -m "feat(analysis): project canonical query requirements"`.
 
 ## Task 4: Refinement and downstream product propagation
 
-**Owned files:** `pkg/analysis/requirements_refinement_test.go`, `pkg/analysis/source_fields_test.go`, focused existing `pkg/analysis/rewrite_*_test.go` files only when their existing assertions embed full analysis results, `pkg/document/model.go`, `pkg/document/snapshot.go`, `pkg/document/snapshot_test.go`, focused `pkg/validation/*_test.go` files, `pkg/rewrite/requirements_test.go`, `pkg/corpus/requirements_test.go`, `testdata/validation/cases.json`, and `testdata/schemas/cases.json`. Changes to production validation, rewrite, or corpus logic require a demonstrated propagation bug and a `Decision Log` entry.
+**Owned files:** `pkg/analysis/requirements_refinement_test.go`, `pkg/analysis/source_fields_test.go`, focused existing `pkg/analysis/rewrite_*_test.go` files only when their assertions embed full analysis results, `pkg/document/model.go`, `pkg/document/snapshot.go`, `pkg/document/snapshot_test.go`, focused `pkg/validation/*_test.go` files, `pkg/rewrite/rewrite_test.go`, `pkg/rewrite/requirements_test.go`, `pkg/corpus/requirements_test.go`, `pkg/graph/export_test.go`, `pkg/sarif/export_test.go`, `pkg/impact/compare_test.go`, `internal/lsp/server_test.go`, `testdata/validation/cases.json`, and `testdata/schemas/cases.json`. Changes to production validation, rewrite, corpus, graph, SARIF, impact, or LSP logic require a demonstrated propagation bug and a `Decision Log` entry.
 
-1. Add a refinement parity table that runs plain analysis and every supported field-source refinement mode for field list, partial universe, JSON Schema, OCSF, original-query rewrite, and candidate rewrite. Assert byte equality of the full embedded `requirements`, not selected fields. Include wildcard, unresolved wildcard, dotted SPL2, syntax error, and unsupported semantics.
-2. Add snapshot tests that assert `document.New(result)` copies the complete requirement set. Mutate all nested slices in the source and snapshot independently and prove no aliasing in either direction.
-3. Add field-validation and schema-validation tests that compare requirements inherited through their embedded analysis result with direct `analysis.Requirements` for the same query. Add focused propagation tests in new `pkg/rewrite/requirements_test.go` and `pkg/corpus/requirements_test.go` for the existing `*analysis.Result` fields. Confirm no requirement-specific aggregate, graph node or edge, SARIF rule, impact comparison, or LSP behavior is added.
-4. Update current validation and schema goldens that embed complete analysis results. Keep rewrite expectations unchanged unless they already store full analysis JSON; provenance strings such as `"phase":"analysis"` are not a reason to change a fixture.
-5. Run:
+- [ ] Add `TestRequirementSetFieldRefinementParity` for plain analysis, `AnalyzeWithSourceFields`, and `AnalyzeWithSourceUniverse`. Use exact, partial, wildcard, unresolved wildcard, and dotted SPL2 cases. Marshal only the embedded sets and assert byte equality.
+- [ ] Add `TestRequirementSetValidationRefinementParity` in `pkg/validation` with a field-list target, JSON Schema target, and OCSF target. Compare each report's embedded requirement set with `analysis.Requirements` for the same normalized `QueryDocument`.
+- [ ] Add `TestRequirementSetRewriteParity` in `pkg/rewrite/requirements_test.go`. Compare original and candidate analysis requirements with plain analysis of their respective normalized query texts in preview and apply modes.
+- [ ] Update `pkg/rewrite/rewrite_test.go` helper `explicitAliasReport` so both hand-built `analysis.Result` values contain exact hand-derived requirement sets. Preserve its independent full-report witness role and do not call `Analyze` from the helper.
+- [ ] Add `TestSnapshotRequirementSetDetached`. Call `document.New(result, RevisionContext{ToolVersion: "test", ContractVersion: "v1"})`, mutate every nested requirement slice on the result and snapshot in turn, and assert no alias in either direction.
+- [ ] Add `Requirements analysis.RequirementSet` to `document.Snapshot` and a package-local deep clone in `document.New`. Do not serialize through JSON to clone it.
+- [ ] Add `TestCorpusEvaluationCarriesRequirements` for the existing `corpus.Evaluation.Analysis` pointer. Assert the corpus aggregate remains unchanged and no requirement aggregate is introduced.
+- [ ] Add or extend exclusion tests proving no requirement-specific graph nodes or edges, SARIF rules, impact comparison fields, or LSP messages appear.
+- [ ] Update only the current full-result witnesses in `testdata/validation/cases.json` and `testdata/schemas/cases.json`. Inspect `pkg/rewrite/rewrite_test.go:explicitAliasReport` and all `rg -n '\*analysis\.Result|analysis\.Result{' pkg --glob '*_test.go'` hits for equivalent hand-built complete results; update only witnesses whose equality contract covers the complete runtime result.
+- [ ] Run:
 
        env GOWORK=off GOCACHE=/private/tmp/spl-toolkit-m8-gocache go test -mod=readonly ./pkg/analysis -run 'Test.*Requirement.*Refinement|Test.*Requirement.*Rewrite' -count=1
        env GOWORK=off GOCACHE=/private/tmp/spl-toolkit-m8-gocache go test -mod=readonly ./pkg/document ./pkg/validation ./pkg/rewrite ./pkg/corpus -count=1
@@ -300,17 +341,22 @@ Do not run two code-writing agents concurrently in this worktree. Review agents 
        git diff --check
 
    Expected evidence is byte-for-byte plain/refined parity and detached propagation through every existing result-bearing product.
-6. Commit with `git commit -m "feat(products): propagate canonical requirements"`.
+- [ ] Update the administrative plan sections with Task 4 evidence, then commit with `git commit -m "feat(products): propagate canonical requirements"`.
 
 ## Task 5: CLI and REST adapters
 
 **Owned files:** `cmd/analysis.go`, `cmd/analysis_test.go`, `cmd/cli.go`, `cmd/cli_test.go`, `cmd/main.go`, `pkg/api/analysis.go`, `pkg/api/analysis_test.go`, `pkg/api/server.go`, and `pkg/api/server_test.go`.
 
-1. Add failing CLI tests for positional query text, `--query`, shared selector flags including `--source-id`, JSON output, deterministic text sections, `--output`, and the exact exit table. Assert file, stdin, and batch inputs are rejected. Also assert help lists `requirements` and invalid option, output, and internal failures return `2` without partial JSON.
-2. Refactor only enough shared adapter code to prevent drift between `analyze` and `requirements`. Call `analysis.Requirements` once. Text output must always show query status and requirement coverage, then ordered items, gaps, and diagnostics without recomputing order.
-3. Add failing real-handler REST tests for valid, invalid, and incomplete SPL and SPL2; strict duplicate and unknown-field rejection; empty and malformed JSON; invalid Unicode; wrong content type; trailing JSON; unsupported selectors; and bodies at and beyond 1 MiB. Assert content outcomes are HTTP 200 and request-boundary failures are HTTP 400.
-4. Register `POST /api/v1/query/requirements` through the same server composition as other query endpoints. Reuse the strict `QueryDocument` request parser and write the `RequirementSet` directly. Assert no filesystem or network collaborator is invoked.
-5. Run:
+- [ ] Add `TestRequirementsCLIInputBoundary` with `requirements 'search host=web'`, `requirements --query 'search host=web'`, duplicate input, `--file`, `--stdin`, and `--batch`. Assert the first two succeed and unsupported acquisition modes exit `2` without a report.
+- [ ] Add `TestRequirementsCLIJSONMatchesGo` using one valid SPL and one incomplete SPL2 fixture with selectors and `--source-id`. Decode stdout and compare the complete value with `analysis.Requirements`.
+- [ ] Add `TestRequirementsCLIExitCodes` with exact rows: valid plus complete `0`, invalid `1`, incomplete query `3`, valid query plus incomplete requirement coverage `3`, invalid option `2`, output write failure `2`, and an unknown `RequirementSet.QueryStatus` passed directly to the exit helper `2`.
+- [ ] Add `func requirementsExitCode(set *analysis.RequirementSet) int` and `func formatRequirementsText(set *analysis.RequirementSet) []byte` in `cmd/analysis.go`. Text must print query status and requirement coverage separately, followed by items, gaps, and diagnostics in canonical order.
+- [ ] Register `requirements` in the custom command switch and help text. Reuse existing `parseCLIOptions`, validation, JSON writing, and `--output` behavior; do not add a third-party parser dependency.
+- [ ] Add `TestRequirementsRESTContentStatuses` against `NewServer` for valid, invalid, and incomplete SPL and SPL2. Assert HTTP 200 and full equality with `analysis.Requirements`.
+- [ ] Add `TestRequirementsRESTRejectsRequestBoundaryErrors` for duplicate and unknown members, empty and malformed JSON, invalid Unicode, wrong or missing content type, trailing JSON, unsupported selectors, and bodies over 1 MiB. Assert HTTP 400 and no partial report.
+- [ ] Implement `func (s *Server) handleRequirementsQuery(w http.ResponseWriter, r *http.Request)` by calling existing `parseAnalysisDocument`, then `analysis.Requirements`, then `writeJSONResponse`. Register only `POST /api/v1/query/requirements` through the existing middleware chain.
+- [ ] Add a server test proving GET is rejected and the handler has no file or network input path. Inspect the handler diff to confirm all classification remains in `pkg/analysis`.
+- [ ] Run:
 
        env GOWORK=off GOCACHE=/private/tmp/spl-toolkit-m8-gocache go test -mod=readonly ./cmd -run 'Test.*Requirements' -count=1
        env GOWORK=off GOCACHE=/private/tmp/spl-toolkit-m8-gocache go test -mod=readonly ./pkg/api -run 'Test.*Requirements' -count=1
@@ -318,67 +364,94 @@ Do not run two code-writing agents concurrently in this worktree. Review agents 
        git diff --check
 
    Expected evidence is exact JSON parity with the Go API, stable text, exact process exits, strict transport behavior, and no adapter-owned analysis logic.
-6. Commit with `git commit -m "feat(adapters): expose requirement CLI and REST APIs"`.
+- [ ] Update the administrative plan sections with Task 5 evidence, then commit with `git commit -m "feat(adapters): expose requirement CLI and REST APIs"`.
 
 ## Task 6: Native C ABI and Python API
 
 **Owned files:** `pkg/bindings/bindings.go`, `pkg/bindings/requirements_test.go`, `python/spl_toolkit/mapper.py`, `python/spl_toolkit/libspl_toolkit.h`, `python/tests/test_native_analysis.py`, `python/tests/test_native_requirements.py`, `python/tests/test_native_abi.py`, and `tests/native/memory.c`.
 
-1. Add failing binding tests for the `spl_mapper_requirements_query` symbol, strict `QueryDocument` JSON, valid, invalid, and incomplete results, embedded-versus-standalone parity, invalid and closed handles, malformed input errors, and repeated allocate/free cycles.
-2. Implement the C export as a thin wrapper over `analysis.Requirements` and `ownedMapperJSONResult`. Regenerate the header using `make build-shared`; copy the generated declaration into the source header only if that is the repository's established flow, then rerun generation and require no diff.
-3. Add failing Python tests for the exact keyword-only signature, selector defaults and validation, non-ASCII input, JSON parity, native error mapping, repeated and concurrent calls, close waiting for an admitted call, and unconditional `spl_result_free` on success, content failure, JSON decode failure, and raised Python exceptions.
-4. Register `argtypes` and `restype` in `_setup_function_signatures` and implement `SPLMapper.requirements_query` using the same request builder and lifecycle as `analyze_query`. Do not add a Python-side fallback or projector.
-5. Extend `tests/native/memory.c` to exercise successful and failing requirement calls in the ASAN loop, including freeing every owned result exactly once. Extend ABI export expectations in `python/tests/test_native_abi.py`.
-6. Run:
+- [ ] Add `TestRequirementsExportReturnsOwnedJSON` in `pkg/bindings/requirements_test.go`. Create a handle, call the missing export with `{"text":"search host=web"}`, decode the result, compare with `analysis.Requirements`, and free it. Record the compile failure before implementation.
+- [ ] Add `TestRequirementsExportRejectsBadDocumentsAndClosedHandles` for malformed, array, duplicate-member, unknown-member, invalid UTF-8, and closed-handle inputs. Assert an owned error and nil result, then call `spl_result_free` exactly once.
+- [ ] Implement `func spl_mapper_requirements_query(mapperID C.int, documentJSON *C.char) *C.SPLResult` using `ownedMapperJSONResult`, the same strict one-document decoder as `spl_mapper_analyze_query`, and `analysis.Requirements`.
+- [ ] Add `test_requirements_matches_canonical_fixture` in `python/tests/test_native_requirements.py` and register the native function as `[ctypes.c_int, ctypes.c_char_p] -> ctypes.POINTER(SPLResult)`. Run the test and record the missing Python method failure.
+- [ ] Implement the exact `SPLMapper.requirements_query` signature and delegate through `_validate_fields_request(..., operation="requirements")`. Do not add a Python classifier or fallback.
+- [ ] Add Python tests for defaults, all selectors, non-ASCII and NUL text, invalid selectors, lone surrogates, native error mapping, and complete parity with embedded analysis requirements.
+- [ ] Add lifecycle tests that monkeypatch JSON decoding and the native call. Assert `spl_result_free` and `_operation` cleanup on success, native content error, JSON decode error, and Python exception.
+- [ ] Add repeated, 16-worker concurrent, close-waits-for-admitted-call, invalid-handle, and closed-handle tests modeled on `python/tests/test_native_analysis.py`.
+- [ ] Extend `tests/native/memory.c` with successful and failing requirement calls inside its existing loop, and free every non-null `SPLResult` exactly once. Extend exported-symbol expectations in `python/tests/test_native_abi.py`.
+- [ ] Run `make build-shared`, copy the generated `build/libspl_toolkit.h` to `python/spl_toolkit/libspl_toolkit.h`, rerun `make build-shared`, and require `cmp build/libspl_toolkit.h python/spl_toolkit/libspl_toolkit.h` to succeed.
+- [ ] Run:
 
        env GOWORK=off GOCACHE=/private/tmp/spl-toolkit-m8-gocache go test -mod=readonly ./pkg/bindings -count=1
        make build-shared
        python3 -m pytest -q python/tests/test_native_analysis.py python/tests/test_native_requirements.py python/tests/test_native_abi.py
-       make build-shared
        cmp build/libspl_toolkit.h python/spl_toolkit/libspl_toolkit.h
        git diff --check
 
-   Expected evidence is ABI parity, exactly-once frees, concurrent-call safety, and an idempotently generated header. On Linux with GCC 13, also run the exact `native-memory` commands from `.github/workflows/ci.yml`: build the shared library with Go `-asan`, compile `tests/native/memory.c` with `-fsanitize=address`, and run with `ASAN_OPTIONS=detect_leaks=1:halt_on_error=1`. On other hosts, record that this gate is CI-only and require the exact-SHA CI `native-memory` job before acceptance.
-7. Commit with `git commit -m "feat(native): expose canonical query requirements"`.
+   Expected evidence is ABI parity, exactly-once frees, concurrent-call safety, and an idempotently generated header. On Linux with GCC 13, also run the exact `native-memory` commands from `.github/workflows/ci.yml`: build the shared library with Go `-asan`, compile `tests/native/memory.c` with `-fsanitize=address`, and run with `ASAN_OPTIONS=detect_leaks=1:halt_on_error=1`. On other hosts, record the local limitation. The hosted exact-SHA `native-memory` job is a later branch-CI gate, not a prerequisite for local independent acceptance.
+- [ ] Update the administrative plan sections with Task 6 evidence, then commit with `git commit -m "feat(native): expose canonical query requirements"`.
 
 ## Task 7: JSON Schema, OpenAPI, registries, and source manifests
 
-**Owned files:** `contracts/v1/requirements.schema.json`, `contracts/v1/shared.schema.json`, `contracts/README.md`, `tests/acceptance/test_machine_contracts.py`, `testdata/tooling/contracts.json`, `tools/update_validation_openapi.py`, its focused tests, generated `docs/docs.go`, `docs/swagger.json`, `docs/swagger.yaml`, `python/native-source-files.txt`, `tools/release-content-files.txt`, `tools/release-source-files.txt`, and manifest expectation tests that fail because of these additions.
+**Owned files:** `contracts/v1/requirements.schema.json`, `contracts/v1/shared.schema.json`, `contracts/README.md`, `tests/acceptance/test_machine_contracts.py`, `testdata/tooling/contracts.json`, `tools/update_validation_openapi.py`, `tools/tests/test_update_validation_openapi.py`, generated `docs/docs.go`, `docs/swagger.json`, `docs/swagger.yaml`, `python/native-source-files.txt`, `tools/release-content-files.txt`, `tools/release-source-files.txt`, and `tools/tests/test_release.py`.
 
-1. Add `RequirementQueryIdentity`, `RequirementCoverage`, `RequirementOccurrence`, `RequirementItem`, `RequirementGap`, and `RequirementSet` definitions to the shared v1 schema. Require every field inside a requirement set and preserve the repository's additive object-property policy. Constrain enums, `^req-[1-9][0-9]*$`, canonical reference IDs, and `^sha256:[0-9a-f]{64}$` where applicable.
-2. Add `contracts/v1/requirements.schema.json` as a root reference to the shared `RequirementSet`. Add `requirements` properties to analysis `Result` and document `Snapshot`, but leave both existing v1 required arrays unchanged. Add positive and negative contract fixtures for missing new-set fields, bad enum values, bad IDs, bad digests, unknown properties, and archived analysis and snapshot documents that omit requirements.
-3. Register the family in `tests/acceptance/test_machine_contracts.py` and document it in `contracts/README.md`. Assert the registry runs offline and resolves only repository-local `$ref` targets.
-4. Add Swag annotations or generator normalization only where needed to publish `/api/v1/query/requirements` and the exact response model. Run `make generate-docs`, inspect the operation and schemas, rerun generation, and require a clean second generation.
-5. Add every new production Go source and contract file to `python/native-source-files.txt`, `tools/release-source-files.txt`, and `tools/release-content-files.txt` according to current ownership. Never add `_build_plan/`, test-only files to runtime manifests, or requirement schema files to Python package data unless they already fall under the package's existing contract-data policy.
-6. Run:
+- [ ] Add a failing `requirements` family entry to `tests/acceptance/test_machine_contracts.py` and a minimal valid report in `testdata/tooling/contracts.json`. Run the family test and record the missing schema failure.
+- [ ] Add `analysis.RequirementQueryIdentity`, `analysis.RequirementCoverage`, `analysis.RequirementOccurrence`, `analysis.RequirementItem`, `analysis.RequirementGap`, and `analysis.RequirementSet` definitions to `contracts/v1/shared.schema.json`. Require every defined field, preserve `additionalProperties: true`, and constrain status, necessity, origin, resolution, kind, IDs, and digest formats.
+- [ ] Add `contracts/v1/requirements.schema.json` as a root reference to the shared `analysis.RequirementSet` definition.
+- [ ] Add `requirements` to the property maps for shared `analysis.Result` and `document.Snapshot`, but do not add it to either existing v1 `required` array.
+- [ ] Add negative fixtures only for missing required requirement-set fields, wrong primitive or collection types, invalid enum values, malformed `req-N` and `ref-N` IDs, and malformed digests. Do not expect an unknown output property to fail.
+- [ ] Add an explicit positive additive-property witness with an unknown top-level `RequirementSet` member and assert it validates. Add archived analysis and snapshot witnesses that omit `requirements` and assert both still validate.
+- [ ] Register local `$ref` closure and update `contracts/README.md`. Run with network disabled by the existing harness and assert no remote fetch.
+- [ ] Add the REST operation's Swag response annotation and only the minimum reconciler changes needed by `tools/update_validation_openapi.py`. Extend `tools/tests/test_update_validation_openapi.py` first.
+- [ ] Run `make generate-docs` once and inspect OpenAPI path `/query/requirements` under the existing `/api/v1` server base, `analysis.RequirementSet`, the optional analysis and snapshot properties, enums, arrays, and digests in all three generated files.
+- [ ] Snapshot that accepted first generation, rerun the generator, and compare the second generation with the snapshot:
+
+       mkdir -p /private/tmp/spl-toolkit-m8-openapi-first
+       cp docs/docs.go docs/swagger.json docs/swagger.yaml /private/tmp/spl-toolkit-m8-openapi-first/
+       make generate-docs
+       cmp /private/tmp/spl-toolkit-m8-openapi-first/docs.go docs/docs.go
+       cmp /private/tmp/spl-toolkit-m8-openapi-first/swagger.json docs/swagger.json
+       cmp /private/tmp/spl-toolkit-m8-openapi-first/swagger.yaml docs/swagger.yaml
+
+- [ ] Add `contracts/v1/requirements.schema.json`, `pkg/analysis/requirements.go`, and `pkg/analysis/requirements_trace.go` to `python/native-source-files.txt` and the release manifests according to their existing inclusion policy. Add no test or `_build_plan/` entry.
+- [ ] Extend `tools/tests/test_release.py` manifest expectations and verify the built wheel receives the new contract through the existing `native-source-files.txt` contract-copy path.
+- [ ] Run:
 
        python3 -m pytest -q tests/acceptance/test_machine_contracts.py
        python3 -m pytest -q tools/tests/test_update_validation_openapi.py tools/tests/test_release.py
-       make generate-docs
-       git diff --exit-code -- docs/docs.go docs/swagger.json docs/swagger.yaml
        git diff --check
 
    Expected evidence is offline schema validation, archived-v1 compatibility, deterministic OpenAPI, complete manifest test coverage, and no `_build_plan` path in any runtime or distribution manifest.
-7. Commit with `git commit -m "feat(contracts): publish requirement interface contracts"`.
+- [ ] Update the administrative plan sections with Task 7 evidence, then commit with `git commit -m "feat(contracts): publish requirement interface contracts"`.
 
 ## Task 8: Permanent docs, packaged acceptance, and release closure
 
-**Owned files:** `README.md`, `docs/API.md`, `docs/cli.md`, `docs/architecture.md`, `docs/compatibility.md`, `python/README.md`, `tests/acceptance/test_requirements_surfaces.py`, `tests/acceptance/cli_examples.json`, `python/tests/test_native_requirements.py`, `tools/check_package.py`, `tools/check_acceptance.py`, their focused tests, and the minimum fixture-copy and hash plumbing for `testdata/requirements/cases.json`.
+**Owned files:** `README.md`, `docs/API.md`, `docs/cli.md`, `docs/architecture.md`, `docs/compatibility.md`, `python/README.md`, `tests/acceptance/test_requirements_surfaces.py`, `tests/acceptance/cli_examples.json`, `python/tests/test_native_requirements.py`, `tools/check_package.py`, `tools/check_acceptance.py`, `tools/tests/test_package.py`, `tools/tests/test_acceptance.py`, the fixture-copy and hash plumbing for `testdata/requirements/cases.json`, and the always-allowed administrative files described above.
 
-1. Add one cross-surface acceptance suite driven by `testdata/requirements/cases.json`. For every valid, invalid, and incomplete SPL and SPL2 case, compare canonical JSON from Go, CLI, real HTTP, native C through Python, and direct Python to the expected fixture and to the embedded analysis requirements.
-2. Extend CLI examples with requirements help, positional and `--query` input, text, JSON, output-file, input rejection, and exit-code cases. Because analysis JSON now embeds requirements, update only exact current examples affected by the runtime output. Preserve all unrelated examples.
-3. Teach `tools/check_package.py` to copy the requirement fixture outside the checkout, provide a dedicated `SPL_REQUIREMENTS_FIXTURES` environment variable, hash the fixture in evidence, include the new native and acceptance tests in the source distribution, and run them against both an installed wheel and sdist. Extend its unit tests first.
-4. Teach `tools/check_acceptance.py` to require the new cross-surface and native requirement tests without weakening existing minimum counts or evidence checks. Extend its unit tests first. Installed checks must not import from the repository checkout or read `_build_plan/`.
-5. Document the operation, fields, evidence rules, exit and HTTP behavior, ABI ownership, Python signature, deterministic/offline guarantee, refinement parity, archived-v1 compatibility, and explicit exclusions in every named permanent document. State that the digests identify supplied data and are not authentication, authorization, signatures, or proof that a principal can execute a query. Do not link permanent docs to `_build_plan/`.
-6. Run focused acceptance and documentation checks:
+- [ ] Add `test_requirements_fixture_matches_go_cli_http_and_python` in `tests/acceptance/test_requirements_surfaces.py`. Drive valid, invalid, and incomplete SPL and SPL2 from `testdata/requirements/cases.json`; compare complete decoded values, allowing only JSON object-key order to differ.
+- [ ] Add real loopback-server rows for valid content, invalid content, incomplete content, malformed requests, and the 1 MiB boundary. Compare the complete response with the Go fixture.
+- [ ] Add CLI rows for help, positional and `--query`, text, JSON, `--output`, rejected file/stdin/batch modes, and exits `0`, `1`, `2`, and `3` in `tests/acceptance/cli_examples.json`.
+- [ ] Update existing current CLI example outputs that serialize a complete `analysis.Result`. Preserve all unrelated bytes and historical evidence.
+- [ ] Add failing `tools/tests/test_package.py` cases asserting the requirement fixture, new native test, and new acceptance test are copied to the out-of-checkout tooling root, named in evidence, and hashed.
+- [ ] Extend `tools/check_package.py` constants and copy logic. Set `SPL_REQUIREMENTS_FIXTURES` to an absolute copied path and run requirement tests against both installed wheel and rebuilt sdist without repository imports.
+- [ ] Add failing `tools/tests/test_acceptance.py` cases for the new required test files and evidence keys. Extend `tools/check_acceptance.py` without lowering counts, allowing skips, or weakening existing hashes.
+- [ ] Update `README.md`, `docs/API.md`, `docs/cli.md`, `docs/architecture.md`, `docs/compatibility.md`, and `python/README.md` with the full report shape, Go and Python examples, CLI and REST examples, digest rules, grouping, source versus derived policy, independent statuses, exit behavior, ABI ownership, refinement parity, additive v1 compatibility, offline boundaries, and exclusions.
+- [ ] State in permanent docs that digests identify supplied data and are not authentication, authorization, signatures, or execution permission. Add no link or runtime dependency on `_build_plan/`.
+- [ ] Complete `_build_plan/milestones/8-product-interface-requirements/milestone-log.md` and the living sections in this plan with implementation decisions, task SHAs, local test evidence gathered so far, deviations, and known local environment limits. Do not attempt to record future final-review, hosted-CI, merge, or post-merge results.
+- [ ] Run focused acceptance and documentation checks:
 
        python3 -m pytest -q tests/acceptance/test_requirements_surfaces.py
        python3 -m pytest -q tools/tests/test_package.py tools/tests/test_acceptance.py
        python3 tools/check_docs.py
-       git diff --unified=0 origin/main -- README.md docs cmd internal pkg python tools tests contracts go.mod go.sum | rg '^\+.*_build_plan'
 
-   Expected evidence is cross-surface byte parity, strict out-of-checkout fixtures, green documentation checks, and no newly added `_build_plan` reference in runtime, test, package, contract, or permanent-documentation files. Existing historical evidence and negative dependency assertions may retain their current references.
-7. Run the repository-level local gates:
+- [ ] Check for newly added `_build_plan` dependencies without treating normal `rg` no-match status as a failure and without hiding a `git diff` or `rg` execution error:
+
+       set -e
+       git diff --unified=0 origin/main -- README.md docs cmd internal pkg python tools tests contracts go.mod go.sum > /private/tmp/spl-toolkit-m8-runtime.diff
+       if rg '^\+.*_build_plan' /private/tmp/spl-toolkit-m8-runtime.diff; then exit 1; else m8_rg_status=$?; test "$m8_rg_status" -eq 1; fi
+
+   Expected evidence is no newly added `_build_plan` reference in runtime, test input, package, contract, or permanent-documentation files. Existing historical evidence and negative distribution assertions may retain their current references.
+- [ ] Run the repository-level local gates:
 
        make fmt
        git diff --check
@@ -389,17 +462,19 @@ Do not run two code-writing agents concurrently in this worktree. Review agents 
        python3 tools/check_docs.py
 
    Expected evidence is every local gate passing. The Linux GCC 13 AddressSanitizer and full multi-target evidence-aggregation gates remain mandatory exact-SHA CI checks. Record environment-limited failures precisely and do not treat CI as a silent substitute. Any deterministic source, fixture, or generated-file diff after a second run is a defect.
-8. Commit with `git commit -m "docs: complete requirement product acceptance"`.
+- [ ] Rerun generated-header and generated-OpenAPI comparisons, confirm the administrative files are final for pre-freeze execution, and commit with `git commit -m "test(acceptance): prove requirement product surfaces"`.
 
 ## Final independent review and revision gate
 
-After Task 8 is accepted, freeze `HEAD` as the candidate SHA and run four independent subagent reviews over `origin/main...HEAD`: full design-spec compliance, code quality and robustness, security and native-memory safety, and architecture and repository organization. Each reviewer must inspect source, tests, contracts, generated artifacts, package manifests, and permanent docs, and must return findings with exact file and line evidence. Reviewers do not edit.
+After Task 8 is accepted and all tracked administrative updates are committed, record `HEAD` as the provisional candidate SHA. Run four independent subagent reviews over `origin/main...HEAD`: full design-spec compliance, code quality and robustness, security and native-memory safety, and architecture and repository organization. Each reviewer must inspect source, tests, contracts, generated artifacts, package manifests, permanent docs, and the final administrative delta, and must return findings with exact file and line evidence. Reviewers do not edit.
 
 Run the available external reviewer from the feature worktree:
 
     claude --model opus --print "Review git diff origin/main...HEAD in this repository for Milestone 8 requirement-product specification compliance, correctness, robustness, security, native memory ownership, deterministic behavior, architecture, test adequacy, packaging, and documentation. Do not modify files. Return actionable findings with file and line evidence, followed by residual risks."
 
-Record its output and exit status in this plan. Do not waive a finding because it came from an external model. Validate it against the approved specification and source. For every confirmed finding, assign a fresh fix agent, require a focused regression test, create a scoped commit, then rerun all affected task reviews and all four final reviews over the new immutable head. Repeat the Claude command after material fixes. Completion requires no unresolved actionable findings; disputed findings require a concrete disposition in `Decision Log`.
+Capture its output and exit status in the orchestrator's out-of-band handoff, not in a tracked file. Do not waive a finding because it came from an external model. Validate it against the approved specification and source. For every confirmed finding, assign a fresh fix agent, require a focused regression test, create a scoped commit, bring the plan and milestone log up to date, then rerun all affected task reviews and all four final reviews. Repeat the Claude command after material fixes. Completion requires no unresolved actionable findings; report disputed findings and their concrete disposition out of band.
+
+When all reviewers approve, declare the reviewed `HEAD` the frozen candidate SHA. From that point through local acceptance, branch CI, merge, and post-merge verification, do not edit or commit the plan, milestone log, or any other tracked file. Report final review conclusions, acceptance results, hosted URLs, merge results, and post-merge results out of band. If a later gate requires a fix, explicitly unfreeze the candidate, make and review the fix, finish all administrative updates, rerun this entire final review gate, and freeze the new reviewed `HEAD`.
 
 Reviewers must explicitly confirm:
 
@@ -412,7 +487,7 @@ Reviewers must explicitly confirm:
 
 ## Independent acceptance validation
 
-Assign a fresh acceptance agent that did not implement or review the feature. Give it the frozen candidate SHA, this plan's user-visible behavior, and the approved design spec. It must begin from a clean worktree, run the shared requirement fixture across Go, CLI text and JSON, a real HTTP server, native C, Python, installed wheel, and installed sdist, and independently inspect the machine contracts and permanent docs.
+Assign a fresh acceptance agent that did not implement or review the feature. Give it the frozen candidate SHA, this plan's user-visible behavior, and the approved design spec. It must begin from the clean feature worktree, run the shared requirement fixture across Go, CLI text and JSON, a real HTTP server, native C, Python, installed wheel, and installed sdist, and independently inspect the machine contracts and permanent docs. This is a local pre-push gate. It must finish and sign off without waiting for GitHub Actions.
 
 The acceptance agent runs at minimum:
 
@@ -424,55 +499,101 @@ The acceptance agent runs at minimum:
     python3 -m pytest -q tools/tests/test_package.py tools/tests/test_acceptance.py tools/tests/test_release.py
     python3 tools/check_docs.py
 
-It must also manually sample at least one valid, one invalid, and one incomplete SPL and SPL2 case and report response JSON, CLI exit, HTTP status, native/Python parity, and requirement coverage. The acceptance agent must confirm that the candidate's exact-SHA CI `native-memory` job and aggregate acceptance job pass before signing off. Acceptance fails on any unexplained skip, dirty generated artifact, checkout-relative installed-package read, or unverified required surface. Fix failures through the same fresh fix, specification review, quality review, final review, and reacceptance loop.
+It must also manually sample at least one valid, one invalid, and one incomplete SPL and SPL2 case and report response JSON, CLI exit, HTTP status, native/Python parity, and requirement coverage. On a non-Linux host, it records the local GCC 13 AddressSanitizer limitation without failing local signoff; the hosted `native-memory` job remains a later branch-CI gate. Acceptance fails on any unexplained skip other than that known platform limitation, dirty generated artifact, checkout-relative installed-package read, or unverified required surface. Report the signoff out of band and do not edit tracked files. A failure unfreezes the candidate and restarts the fix, task review, administrative update, final whole-feature review, freeze, and local acceptance sequence.
 
 ## Branch CI, fast-forward merge, and post-merge verification
 
 Only after all local, review, Claude, and acceptance gates pass:
 
-1. Confirm the worktree is clean and record the exact candidate SHA:
+- [ ] Confirm the feature worktree is clean and bind the frozen SHA:
 
        git status --short
        git diff --check origin/main...HEAD
-       git rev-parse HEAD
+       m8_candidate_sha="$(git rev-parse HEAD)"
+       git rev-parse HEAD > /private/tmp/spl-toolkit-m8-candidate-sha.txt
 
-   Expected evidence is empty status and diff-check output. If the living plan received final evidence after the last code commit, commit only that plan update as `docs: record milestone 8 acceptance evidence`, rerun the documentation and manifest checks, and freeze the new SHA.
-2. Push the feature branch without force:
+   Expected evidence is empty status and diff-check output. Do not make another tracked edit or evidence commit after this point.
+- [ ] Push the feature branch without force:
 
        git push -u origin codex/milestone-8-product-interface-requirements
+       test "$(git ls-remote origin refs/heads/codex/milestone-8-product-interface-requirements | cut -f1)" = "$(cat /private/tmp/spl-toolkit-m8-candidate-sha.txt)"
 
-3. Dispatch CI because ordinary feature pushes do not trigger the workflow:
+- [ ] Dispatch CI because ordinary feature pushes do not trigger the workflow. Query by the frozen commit so an older run cannot be mistaken for evidence:
 
+       m8_candidate_sha="$(cat /private/tmp/spl-toolkit-m8-candidate-sha.txt)"
        gh workflow run .github/workflows/ci.yml --ref codex/milestone-8-product-interface-requirements
-       m8_run_id="$(gh run list --workflow ci.yml --branch codex/milestone-8-product-interface-requirements --event workflow_dispatch --limit 1 --json databaseId --jq '.[0].databaseId')"
+       m8_run_id="$(gh run list --workflow ci.yml --branch codex/milestone-8-product-interface-requirements --commit "$m8_candidate_sha" --event workflow_dispatch --limit 1 --json databaseId --jq '.[0].databaseId')"
+       test -n "$m8_run_id"
        gh run watch "$m8_run_id" --exit-status
        gh run view "$m8_run_id" --json url,headSha,conclusion,event,workflowName
 
-   Verify `headSha` equals the pushed `git rev-parse HEAD`, `event` is `workflow_dispatch`, and `conclusion` is `success`. A successful run at another SHA is not evidence. Diagnose failures from job logs, fix them on the branch, repeat all affected reviews and acceptance, push, and dispatch a new run.
-4. Inspect the primary checkout without modifying user work:
+   If the first `gh run list` is empty because dispatch registration is delayed, repeat only that list command until it returns the run; do not dispatch a duplicate. Verify `headSha` equals `$m8_candidate_sha`, `event` is `workflow_dispatch`, and `conclusion` is `success`. A successful run at another SHA is not evidence. This hosted gate is later than local acceptance and does not retroactively change its signoff.
+- [ ] If branch CI fails, report the run out of band, unfreeze the candidate, fix it on the branch, update administrative records before review, rerun affected task reviews, final whole-feature reviews, local independent acceptance, push, and dispatch a new exact-SHA run. Never edit tracked files merely to record a hosted result.
+- [ ] Inspect the primary checkout's tracked state and branch without treating intentional untracked roadmap inputs as an error:
 
-       git -C /Users/jmdelgad/repos/spl-toolkit status --short --branch
+       git -C /Users/jmdelgad/repos/spl-toolkit diff --quiet
+       git -C /Users/jmdelgad/repos/spl-toolkit diff --cached --quiet
+       test "$(git -C /Users/jmdelgad/repos/spl-toolkit rev-parse --abbrev-ref HEAD)" = "main"
+       git -C /Users/jmdelgad/repos/spl-toolkit ls-files --others --exclude-standard > /private/tmp/spl-toolkit-m8-primary-untracked-before.txt
+       LC_ALL=C sort -o /private/tmp/spl-toolkit-m8-primary-untracked-before.txt /private/tmp/spl-toolkit-m8-primary-untracked-before.txt
+
+       python3 -c 'from pathlib import Path; actual=set(Path("/private/tmp/spl-toolkit-m8-primary-untracked-before.txt").read_text().splitlines()); expected={"CLAUDE.md","_build_plan/prd.md","_build_plan/prd.html","_build_plan/milestones/8-product-interface-requirements/prompt.md","_build_plan/milestones/9-language-capability-ledger/prompt.md","_build_plan/milestones/10-broad-spl-semantics/prompt.md","_build_plan/milestones/11-broad-spl2-semantics/prompt.md","_build_plan/milestones/12-knowledge-object-closure/prompt.md","_build_plan/milestones/13-environment-snapshot-contracts/prompt.md","_build_plan/milestones/14-live-splunk-exporter/prompt.md","_build_plan/milestones/15-compatibility-assessment/prompt.md","_build_plan/milestones/16-safe-resolution-fanout/prompt.md","_build_plan/milestones/17-detection-ci-ai-evidence/prompt.md"}; assert actual == expected, f"untracked baseline mismatch: missing={sorted(expected-actual)!r} extra={sorted(actual-expected)!r}"'
+
+   The branch must be `main`, both tracked diff commands must exit `0`, and the saved untracked list must contain exactly `CLAUDE.md`, `_build_plan/prd.md`, `_build_plan/prd.html`, and one `prompt.md` in each existing Milestone 8 through Milestone 17 prompt directory:
+
+       _build_plan/milestones/8-product-interface-requirements/prompt.md
+       _build_plan/milestones/9-language-capability-ledger/prompt.md
+       _build_plan/milestones/10-broad-spl-semantics/prompt.md
+       _build_plan/milestones/11-broad-spl2-semantics/prompt.md
+       _build_plan/milestones/12-knowledge-object-closure/prompt.md
+       _build_plan/milestones/13-environment-snapshot-contracts/prompt.md
+       _build_plan/milestones/14-live-splunk-exporter/prompt.md
+       _build_plan/milestones/15-compatibility-assessment/prompt.md
+       _build_plan/milestones/16-safe-resolution-fanout/prompt.md
+       _build_plan/milestones/17-detection-ci-ai-evidence/prompt.md
+
+   Stop and coordinate if any other untracked file exists or any listed file is absent. In particular, do not restore the legacy untracked Markdown or text files that the user intentionally removed.
+- [ ] Fetch and prove fast-forward ancestry:
+
        git -C /Users/jmdelgad/repos/spl-toolkit fetch origin
-       git -C /Users/jmdelgad/repos/spl-toolkit rev-parse --abbrev-ref HEAD
        git -C /Users/jmdelgad/repos/spl-toolkit merge-base --is-ancestor origin/main codex/milestone-8-product-interface-requirements
 
-   Stop and coordinate if it is dirty, not on `main`, or `origin/main` is not an ancestor. Do not stash, reset, rebase, or overwrite user changes.
-5. Fast-forward and push `main`:
+   Stop if `origin/main` is not an ancestor. Do not stash, reset, rebase, restore, or overwrite user files.
+- [ ] Compare the incoming tracked tree against the exact untracked baseline and require no path collision:
 
+       git -C /Users/jmdelgad/repos/spl-toolkit ls-tree -r --name-only codex/milestone-8-product-interface-requirements > /private/tmp/spl-toolkit-m8-incoming-tracked.txt
+       LC_ALL=C sort -o /private/tmp/spl-toolkit-m8-incoming-tracked.txt /private/tmp/spl-toolkit-m8-incoming-tracked.txt
+       comm -12 /private/tmp/spl-toolkit-m8-primary-untracked-before.txt /private/tmp/spl-toolkit-m8-incoming-tracked.txt > /private/tmp/spl-toolkit-m8-untracked-collisions.txt
+       test ! -s /private/tmp/spl-toolkit-m8-untracked-collisions.txt
+
+   Both Git path lists are lexically ordered. If a collision appears, stop before merge and coordinate with the user; do not move or delete the untracked file.
+- [ ] Fast-forward and push `main`:
+
+       m8_candidate_sha="$(cat /private/tmp/spl-toolkit-m8-candidate-sha.txt)"
        git -C /Users/jmdelgad/repos/spl-toolkit merge --ff-only codex/milestone-8-product-interface-requirements
+       test "$(git -C /Users/jmdelgad/repos/spl-toolkit rev-parse HEAD)" = "$m8_candidate_sha"
        git -C /Users/jmdelgad/repos/spl-toolkit push origin main
 
-   Record the merge SHA, which must equal the accepted feature SHA.
-6. Watch the automatically triggered `main` push workflow at that exact SHA:
+   The merge SHA must equal `$m8_candidate_sha`. Do not include, remove, restore, or modify any untracked roadmap input.
+- [ ] Immediately verify tracked cleanliness and exact preservation of the untracked baseline:
 
-       m8_main_run_id="$(gh run list --workflow ci.yml --branch main --event push --limit 1 --json databaseId --jq '.[0].databaseId')"
+       git -C /Users/jmdelgad/repos/spl-toolkit diff --quiet
+       git -C /Users/jmdelgad/repos/spl-toolkit diff --cached --quiet
+       git -C /Users/jmdelgad/repos/spl-toolkit ls-files --others --exclude-standard > /private/tmp/spl-toolkit-m8-primary-untracked-after.txt
+       LC_ALL=C sort -o /private/tmp/spl-toolkit-m8-primary-untracked-after.txt /private/tmp/spl-toolkit-m8-primary-untracked-after.txt
+       cmp /private/tmp/spl-toolkit-m8-primary-untracked-before.txt /private/tmp/spl-toolkit-m8-primary-untracked-after.txt
+
+- [ ] Watch the automatically triggered `main` push workflow at that exact SHA:
+
+       m8_candidate_sha="$(cat /private/tmp/spl-toolkit-m8-candidate-sha.txt)"
+       m8_main_run_id="$(gh run list --workflow ci.yml --branch main --commit "$m8_candidate_sha" --event push --limit 1 --json databaseId --jq '.[0].databaseId')"
+       test -n "$m8_main_run_id"
        gh run watch "$m8_main_run_id" --exit-status
        gh run view "$m8_main_run_id" --json url,headSha,conclusion,event,workflowName
        git -C /Users/jmdelgad/repos/spl-toolkit fetch origin
        git -C /Users/jmdelgad/repos/spl-toolkit rev-parse HEAD origin/main
-       git -C /Users/jmdelgad/repos/spl-toolkit status --short --branch
 
-   Verify the run `headSha` and both local and remote `main` SHAs equal the accepted SHA, the conclusion is `success`, and the primary checkout is clean. Record the run URL and outcome in `Outcomes & Retrospective`.
+   If the first list is empty, repeat only the list command. Verify the run `headSha` and both local and remote `main` SHAs equal `$m8_candidate_sha`, the event is `push`, and the conclusion is `success`. Report branch and main run URLs, conclusions, merge SHA, and preserved-untracked evidence out of band. Do not edit a tracked file to record them.
 
 ## Acceptance criteria
 
@@ -481,7 +602,7 @@ Milestone 8 is complete only when all of the following are evidenced at the land
 1. Plain and every supported refinement path produce byte-identical `RequirementSet` values from a single parse, lower, and semantic traversal.
 2. Field and knowledge-object classification, ordering, grouping, gaps, diagnostics, digests, status, and coverage match the shared fixture for valid, invalid, and incomplete SPL and SPL2.
 3. Go, CLI, REST, C, Python, document snapshot, validation, and schema products expose identical canonical requirement content with exact boundary semantics and detached ownership.
-4. The v1 requirement schema is strict, current analysis and snapshot schemas expose the property without invalidating archived payloads, OpenAPI is reproducible, and offline contract validation passes.
+4. The v1 requirement schema requires all defined members and exact types while preserving the existing additive `additionalProperties: true` policy; current analysis and snapshot schemas expose the property without invalidating archived payloads, OpenAPI is reproducible, and offline contract validation passes.
 5. Wheel and sdist checks run outside the checkout, include and hash the requirement fixture, exercise the real native library, and do not depend on `_build_plan/`.
 6. Permanent docs, source manifests, content manifests, and release manifests are complete; historical evidence is unchanged; local gates, independent reviews, Claude Opus review, independent acceptance, feature-branch CI, and post-merge `main` CI all pass at the exact accepted SHA.
 
@@ -491,10 +612,10 @@ All generators, fixture updates, formatters, and manifest checks must be safe to
 
 If a focused test fails, retain the failing command and first relevant error in `Surprises & Discoveries`, fix the smallest owning layer, and rerun the focused command before broadening. If generated output drifts, regenerate from its authoritative source, never hand-edit a generated artifact. If a native or installed-package check fails after a partial build, rerun the repository's build target rather than copying ad hoc libraries into the package.
 
-If an implementation agent leaves uncommitted changes, the orchestrator inspects and assigns ownership before continuing. Do not reset or discard them. If a review or CI fix changes behavior, reopen both specification and quality review for the complete task range and rerun acceptance. If branch CI fails after push, add new commits and push normally; never force-push. If `main` advances before landing, stop and re-evaluate ancestry and the plan rather than rebasing or merging silently. If the primary checkout is dirty, stop and ask the user to resolve it.
+If an implementation agent leaves uncommitted changes, the orchestrator inspects and assigns ownership before continuing. Do not reset or discard them. If a review or CI fix changes behavior, unfreeze the candidate, reopen both specification and quality review for the complete task range, finish administrative updates, rerun final review, and rerun local acceptance. If branch CI fails after push, add new commits and push normally; never force-push. If `main` advances before landing, stop and re-evaluate ancestry rather than rebasing or merging silently. If the primary checkout has tracked/index changes, an unexpected untracked file, a missing roadmap input, or an incoming collision, stop and ask the user to resolve it. Do not treat the expected untracked roadmap baseline as dirty, and do not restore the legacy Markdown or text files the user removed.
 
 The analysis fixture, requirement fixture, generated OpenAPI, generated header, contract registry, native source manifest, and release manifests are authoritative checkpoints. Compare them before and after recovery to distinguish a stale build from a semantic change.
 
 ## Plan revision note
 
-Created on 2026-09-14 from the approved Milestone 8 design specification and the repository state at `8029a44`. The plan fixes the public types, query-only trace boundary, serial subagent review gates, exact adapters and contracts, packaging and acceptance evidence, and no-PR fast-forward release procedure. Update this note whenever execution changes a public shape, task boundary, verification command, or landing procedure, and explain why in `Decision Log`.
+Created on 2026-09-14 from the approved Milestone 8 design specification and the repository state at `8029a44`. Revised after independent review to add checkbox-sized TDD actions and named helpers, include hand-pinned full-result witnesses, preserve additive output contracts, make OpenAPI and no-dependency checks executable, separate local acceptance from hosted CI, eliminate evidence SHA self-reference, and preserve the primary checkout's exact untracked roadmap baseline during landing. Update this note before final whole-feature review whenever execution changes a public shape, task boundary, verification command, or landing procedure, and explain why in `Decision Log`. After freeze, report terminal outcomes out of band rather than editing this file.
