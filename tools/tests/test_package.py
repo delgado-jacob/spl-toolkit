@@ -422,16 +422,24 @@ def test_installed_requirement_inputs_are_copied_and_hashed(tmp_path: Path, monk
     assert "test_requirements_surfaces.py" in checker.ACCEPTANCE_FILES
 
     native = tmp_path / "native"
-    checker._copy_required_files(ROOT / "python/tests", native, checker.NATIVE_TESTS)
+    native_hashes = checker._copy_required_files(ROOT / "python/tests", native, checker.NATIVE_TESTS)
     assert (native / "test_native_requirements.py").read_bytes() == (
         ROOT / "python/tests/test_native_requirements.py"
     ).read_bytes()
+    assert native_hashes["test_native_requirements.py"] == checker.sha256(
+        ROOT / "python/tests/test_native_requirements.py"
+    )
 
     acceptance = tmp_path / "acceptance"
-    checker._copy_required_files(ROOT / "tests/acceptance", acceptance, checker.ACCEPTANCE_FILES)
+    acceptance_hashes = checker._copy_required_files(
+        ROOT / "tests/acceptance", acceptance, checker.ACCEPTANCE_FILES
+    )
     assert (acceptance / "test_requirements_surfaces.py").read_bytes() == (
         ROOT / "tests/acceptance/test_requirements_surfaces.py"
     ).read_bytes()
+    assert acceptance_hashes["test_requirements_surfaces.py"] == checker.sha256(
+        ROOT / "tests/acceptance/test_requirements_surfaces.py"
+    )
 
     monkeypatch.setenv("SPL_REQUIREMENTS_FIXTURES", "checkout-only")
     assert "SPL_REQUIREMENTS_FIXTURES" not in checker.clean_env()
@@ -455,6 +463,33 @@ def test_requirement_fixture_copy_rejects_missing_or_changed_input(tmp_path: Pat
     monkeypatch.setattr(checker.shutil, "copy2", corrupt)
     with pytest.raises(AssertionError, match="hash"):
         checker.copy_requirements_fixtures(ROOT / "testdata/requirements", tmp_path / "changed")
+
+
+@pytest.mark.parametrize(
+    ("source", "names", "changed_name"),
+    [
+        (ROOT / "python/tests", ("test_native_requirements.py",), "test_native_requirements.py"),
+        (
+            ROOT / "tests/acceptance",
+            ("test_requirements_surfaces.py",),
+            "test_requirements_surfaces.py",
+        ),
+    ],
+)
+def test_required_test_copy_rejects_changed_requirement_test(
+    tmp_path: Path, monkeypatch, source: Path, names: tuple[str, ...], changed_name: str
+):
+    checker = load_package_checker()
+    real_copy = checker.shutil.copy2
+
+    def corrupt(original, destination):
+        real_copy(original, destination)
+        if Path(destination).name == changed_name:
+            Path(destination).write_bytes(b"changed")
+
+    monkeypatch.setattr(checker.shutil, "copy2", corrupt)
+    with pytest.raises(AssertionError, match=changed_name):
+        checker._copy_required_files(source, tmp_path / "copy", names)
 
 
 def test_installed_runner_removes_source_injection(monkeypatch):
@@ -636,6 +671,18 @@ def test_installed_schema_fixtures_exist_before_both_suites(tmp_path: Path, monk
     assert result["fixture_hashes"]["requirements"] == checker.sha256(
         ROOT / "testdata/requirements/cases.json"
     )
+    assert result["required_test_hashes"] == {
+        "native": {
+            "test_native_requirements.py": checker.sha256(
+                ROOT / "python/tests/test_native_requirements.py"
+            )
+        },
+        "acceptance": {
+            "test_requirements_surfaces.py": checker.sha256(
+                ROOT / "tests/acceptance/test_requirements_surfaces.py"
+            )
+        },
+    }
     assert result["wheel_payload_hashes"] == payload_hashes
     dependency_installs = [command for command in commands if "pip" in command and "-r" in command]
     assert len(dependency_installs) == 1

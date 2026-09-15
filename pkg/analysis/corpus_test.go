@@ -37,7 +37,7 @@ func loadRequirementsCorpus(t *testing.T) []requirementsCorpusCase {
 	if err := json.Unmarshal(data, &corpus); err != nil {
 		t.Fatal(err)
 	}
-	if corpus.Version != "1" || len(corpus.Cases) != 17 {
+	if corpus.Version != "1" || len(corpus.Cases) != 18 {
 		t.Fatalf("missing reviewed requirements corpus: version %q cases %d", corpus.Version, len(corpus.Cases))
 	}
 	return corpus.Cases
@@ -240,11 +240,18 @@ func TestRequirementsCorpus(t *testing.T) {
 		"spl2_mixed_pipeline",
 		"spl2_literal_invalid",
 		"knowledge_composed_spl",
+		"spl2_unsupported_function",
 	}
 	cases := loadRequirementsCorpus(t)
 	gotIDs := make([]string, 0, len(cases))
+	statusMatrix := make(map[string]bool)
 	for _, c := range cases {
 		gotIDs = append(gotIDs, c.ID)
+		language := c.Document.Language
+		if language == "" {
+			language = "spl"
+		}
+		statusMatrix[language+"/"+string(c.Expected.QueryStatus)] = true
 		t.Run(c.ID, func(t *testing.T) {
 			for i := 0; i < 3; i++ {
 				got, err := Requirements(c.Document)
@@ -268,6 +275,13 @@ func TestRequirementsCorpus(t *testing.T) {
 	}
 	if !reflect.DeepEqual(gotIDs, wantIDs) {
 		t.Fatalf("requirements corpus IDs = %v, want %v", gotIDs, wantIDs)
+	}
+	for _, language := range []string{"spl", "spl2"} {
+		for _, status := range []Status{Valid, Invalid, Incomplete} {
+			if !statusMatrix[language+"/"+string(status)] {
+				t.Errorf("requirements corpus lacks %s %s case", language, status)
+			}
+		}
 	}
 }
 func assertCorpusIntegrity(t *testing.T, r *Result) {

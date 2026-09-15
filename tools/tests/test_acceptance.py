@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import copy
+import hashlib
 import json
 from pathlib import Path
 
@@ -106,11 +107,23 @@ def passing_records() -> list[dict]:
                     "example-corpus-missing-file.json", "../rewrite/forms.json",
                 )},
                 "machine_contract_tests": {"collected": 10, "passed": 10, "failed": 0, "skipped": 0},
+                "required_test_hashes": {
+                    "native": {"test_native_requirements.py": (
+                        hashlib.sha256(
+                            (ROOT / "python/tests/test_native_requirements.py").read_bytes()
+                        ).hexdigest()
+                    )},
+                    "acceptance": {"test_requirements_surfaces.py": (
+                        hashlib.sha256(
+                            (ROOT / "tests/acceptance/test_requirements_surfaces.py").read_bytes()
+                        ).hexdigest()
+                    )},
+                },
                 "fixture_hashes": {"requirements": HASH},
                 "requirements_surface_evidence": {
                     "schema_version": 1,
                     "fixture_sha256": HASH,
-                    "corpus_cases": 17,
+                    "corpus_cases": 18,
                     "dense_cases": 4,
                     "concurrent_calls": 16,
                     "long_sparse_cases": 2,
@@ -181,7 +194,7 @@ def test_installed_evidence_requires_requirement_surfaces_and_bound_fixture_hash
     original = passing_records()
     index = next(i for i, record in enumerate(original) if record["kind"] == "installed-wheel")
 
-    for field in ("fixture_hashes", "requirements_surface_evidence"):
+    for field in ("fixture_hashes", "requirements_surface_evidence", "required_test_hashes"):
         records = copy.deepcopy(original)
         del records[index][field]
         assert any(f"missing fields: {field}" in error for error in validate_records(records, SHA))
@@ -196,6 +209,13 @@ def test_installed_evidence_requires_requirement_surfaces_and_bound_fixture_hash
     errors = validate_records(records, SHA)
     assert any("test_native_requirements.py" in error for error in errors)
     assert any("test_requirements_surfaces.py" in error for error in errors)
+
+    records = copy.deepcopy(original)
+    records[index]["required_test_hashes"]["native"]["test_native_requirements.py"] = "d" * 64
+    records[index]["required_test_hashes"]["acceptance"]["test_requirements_surfaces.py"] = "e" * 64
+    errors = validate_records(records, SHA)
+    assert any("test_native_requirements.py" in error and "current source" in error for error in errors)
+    assert any("test_requirements_surfaces.py" in error and "current source" in error for error in errors)
 
 
 def test_missing_arm64_is_not_complete():

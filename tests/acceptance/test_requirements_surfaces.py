@@ -145,7 +145,15 @@ def requirement_fixture_path() -> Path:
 @pytest.fixture(scope="session")
 def requirement_cases() -> list[dict]:
     data = json.loads(requirement_fixture_path().read_text(encoding="utf-8"))
-    assert data["version"] == "1" and len(data["cases"]) == 17
+    assert data["version"] == "1" and len(data["cases"]) == 18
+    assert {
+        (case["document"].get("language") or "spl", case["expected"]["query_status"])
+        for case in data["cases"]
+    } >= {
+        (language, status)
+        for language in ("spl", "spl2")
+        for status in ("valid", "invalid", "incomplete")
+    }
     return data["cases"]
 
 

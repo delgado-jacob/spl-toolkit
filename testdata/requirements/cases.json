@@ -2043,6 +2043,128 @@
           }
         ]
       }
+    },
+    {
+      "id": "spl2_unsupported_function",
+      "document": {
+        "text": "FROM main | where unknown_fn(a)",
+        "language": "spl2",
+        "profile": "",
+        "version": "",
+        "source_id": "requirements:spl2_unsupported_function"
+      },
+      "expected": {
+        "schema_version": 1,
+        "query": {
+          "source_id": "requirements:spl2_unsupported_function",
+          "language": "spl2",
+          "profile": "splunkd",
+          "version": "current",
+          "query_digest": "sha256:7aae70e1d32ac71295d1b11903013a78c022729f1d95d8f5104e4a2efcbd59b1"
+        },
+        "capability_revision": "sha256:c3217502697cee2595f20d2fe98b76422f837696d2861cee81e852ad142edcfc",
+        "query_status": "incomplete",
+        "coverage": {
+          "complete": false,
+          "reasons": [
+            "SPL_UNSUPPORTED_FUNCTION"
+          ]
+        },
+        "items": [
+          {
+            "id": "req-1",
+            "kind": "dataset",
+            "identity": "main",
+            "role": "read",
+            "necessity": "required",
+            "origin": "direct",
+            "resolution": "exact",
+            "occurrences": [
+              {
+                "reference_id": "ref-0",
+                "original_name": "main",
+                "binding": "not_applicable",
+                "stage_id": "stage-0",
+                "scope_id": "scope-0",
+                "location": {
+                  "start": {
+                    "offset": 5,
+                    "line": 1,
+                    "column": 6
+                  },
+                  "end": {
+                    "offset": 9,
+                    "line": 1,
+                    "column": 10
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "id": "req-2",
+            "kind": "field",
+            "identity": "a",
+            "role": "read",
+            "necessity": "required",
+            "origin": "direct",
+            "resolution": "exact",
+            "occurrences": [
+              {
+                "reference_id": "ref-1",
+                "original_name": "a",
+                "binding": "source",
+                "stage_id": "stage-1",
+                "scope_id": "scope-0",
+                "location": {
+                  "start": {
+                    "offset": 29,
+                    "line": 1,
+                    "column": 30
+                  },
+                  "end": {
+                    "offset": 30,
+                    "line": 1,
+                    "column": 31
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "gaps": [
+          {
+            "code": "SPL_UNSUPPORTED_FUNCTION",
+            "message": "function \"unknown_fn\" has unmodeled semantics",
+            "reference_ids": [],
+            "diagnostic_codes": [
+              "SPL_UNSUPPORTED_FUNCTION"
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "code": "SPL_UNSUPPORTED_FUNCTION",
+            "severity": "warning",
+            "category": "unsupported_semantics",
+            "message": "function \"unknown_fn\" has unmodeled semantics",
+            "location": {
+              "start": {
+                "offset": 18,
+                "line": 1,
+                "column": 19
+              },
+              "end": {
+                "offset": 31,
+                "line": 1,
+                "column": 32
+              }
+            },
+            "stage_id": "stage-1",
+            "scope_id": "scope-0"
+          }
+        ]
+      }
     }
   ]
 }

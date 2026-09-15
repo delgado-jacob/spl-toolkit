@@ -196,13 +196,21 @@ def create_test_environment(directory: Path) -> Path:
     return venv_python(directory)
 
 
-def _copy_required_files(source: Path, destination: Path, names: tuple[str, ...]) -> None:
+def _copy_required_files(source: Path, destination: Path, names: tuple[str, ...]) -> dict[str, str]:
     destination.mkdir()
+    hashes = {}
     for name in names:
         path = source / name
         if not path.is_file():
             raise FileNotFoundError(f"required test input is missing: {path}")
-        shutil.copy2(path, destination / name)
+        expected = sha256(path)
+        copied = destination / name
+        shutil.copy2(path, copied)
+        actual = sha256(copied)
+        if actual != expected:
+            raise AssertionError(f"required test hash mismatch: {name}")
+        hashes[name] = actual
+    return hashes
 
 
 def copy_schema_fixtures(source: Path, destination: Path) -> dict[str, str]:
@@ -456,7 +464,9 @@ def install_and_check(
         raise AssertionError("loaded native library hash differs from wheel payload")
 
     installed_test_dir = outside_checkout / f"tests-{directory.name}"
-    _copy_required_files(docs_root / "python" / "tests", installed_test_dir, NATIVE_TESTS)
+    native_test_hashes = _copy_required_files(
+        docs_root / "python" / "tests", installed_test_dir, NATIVE_TESTS
+    )
     analysis_fixture = outside_checkout / f"analysis-cases-{directory.name}.json"
     shutil.copy2(docs_root / "testdata" / "analysis" / "cases.json", analysis_fixture)
     requirements_fixtures = outside_checkout / f"requirements-fixtures-{directory.name}"
@@ -521,8 +531,10 @@ def install_and_check(
     # Legacy installed tests intentionally have no source-root go.mod: their
     # copied, hashed Go transport already attests the original complete source.
     acceptance_dir = outside_checkout / f"acceptance-{directory.name}"
-    _copy_required_files(docs_root / "tests" / "acceptance", acceptance_dir,
-                         tuple(name for name in ACCEPTANCE_FILES if name != "test_machine_contracts.py"))
+    acceptance_test_hashes = _copy_required_files(
+        docs_root / "tests" / "acceptance", acceptance_dir,
+        tuple(name for name in ACCEPTANCE_FILES if name != "test_machine_contracts.py"),
+    )
     fixture = outside_checkout / f"cases-{directory.name}.json"
     shutil.copy2(fixture_source, fixture)
     validation_fixture = outside_checkout / f"validation-cases-{directory.name}.json"
@@ -578,6 +590,16 @@ def install_and_check(
         "tests": {"required_native": native_counts, "surface_acceptance": surface_counts},
         "required_test_files": {"native": list(NATIVE_TESTS),
                                 "acceptance": [name for name in ACCEPTANCE_FILES if name.startswith("test_") and name.endswith(".py")]},
+        "required_test_hashes": {
+            "native": {
+                "test_native_requirements.py": native_test_hashes["test_native_requirements.py"]
+            },
+            "acceptance": {
+                "test_requirements_surfaces.py": acceptance_test_hashes[
+                    "test_requirements_surfaces.py"
+                ]
+            },
+        },
         "cli_examples": "passed",
         "surface_parity": "passed",
         "version_agreement": "passed",

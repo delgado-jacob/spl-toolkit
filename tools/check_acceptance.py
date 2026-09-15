@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 from pathlib import Path, PurePosixPath
 import re
@@ -24,6 +25,19 @@ REQUIRED_TEST_FILES = {
     "acceptance": {"test_documented_cli.py", "test_surfaces.py", "test_analysis_surfaces.py",
                    "test_requirements_surfaces.py", "test_validation_surfaces.py", "test_schema_surfaces.py",
                    "test_spl2_surfaces.py", "test_rewrite_surfaces.py"},
+}
+REQUIRED_TEST_HASH_PATHS = {
+    "native": {"test_native_requirements.py": ROOT / "python/tests/test_native_requirements.py"},
+    "acceptance": {
+        "test_requirements_surfaces.py": ROOT / "tests/acceptance/test_requirements_surfaces.py"
+    },
+}
+REQUIRED_TEST_HASHES = {
+    suite: {
+        name: hashlib.sha256(path.read_bytes()).hexdigest()
+        for name, path in paths.items()
+    }
+    for suite, paths in REQUIRED_TEST_HASH_PATHS.items()
 }
 REQUIREMENTS_EVIDENCE_FIELDS = {
     "schema_version", "fixture_sha256", "corpus_cases", "dense_cases",
@@ -55,6 +69,7 @@ KIND_FIELDS = {
         "target", "architecture", "python_version", "python_runtime", "wheel_sha256", "venv_prefix",
         "installed_module", "package_version", "native_version", "tests",
         "cli_examples", "surface_parity", "version_agreement", "required_test_files",
+        "required_test_hashes",
         "wheel_contract_hashes", "tooling_source_hashes", "tooling_fixture_hashes",
         "machine_contract_tests", "fixture_hashes", "requirements_surface_evidence",
     },
@@ -152,6 +167,27 @@ def _validate_hash_map(value: object, expected: set[str], field: str,
         errors.append(f"{label}: {field} contains an invalid SHA-256")
 
 
+def _validate_required_test_hashes(record: dict, errors: list[str], label: str) -> None:
+    value = record.get("required_test_hashes")
+    if not isinstance(value, dict) or set(value) != set(REQUIRED_TEST_HASHES):
+        errors.append(f"{label}: required_test_hashes must contain native and acceptance")
+        return
+    for suite, expected in REQUIRED_TEST_HASHES.items():
+        hashes = value[suite]
+        if not isinstance(hashes, dict) or set(hashes) != set(expected):
+            errors.append(f"{label}: required_test_hashes {suite} has incorrect paths")
+            continue
+        for name, digest in hashes.items():
+            if not isinstance(digest, str) or not HASH_RE.fullmatch(digest):
+                errors.append(
+                    f"{label}: required_test_hashes {suite}/{name} has an invalid SHA-256"
+                )
+            elif digest != expected[name]:
+                errors.append(
+                    f"{label}: required_test_hashes {suite}/{name} differs from current source"
+                )
+
+
 def _validate_requirements_evidence(record: dict, errors: list[str], label: str) -> None:
     fixture_hashes = record.get("fixture_hashes")
     if not isinstance(fixture_hashes, dict):
@@ -170,7 +206,7 @@ def _validate_requirements_evidence(record: dict, errors: list[str], label: str)
     if evidence.get("fixture_sha256") != requirement_hash:
         errors.append(f"{label}: requirements fixture hash differs from surface evidence")
     minimums = {
-        "corpus_cases": 17,
+        "corpus_cases": 18,
         "dense_cases": 4,
         "concurrent_calls": 16,
         "long_sparse_cases": 2,
@@ -350,6 +386,7 @@ def validate_records(records: list[dict], source_sha: str) -> list[str]:
                     errors.append(f"{label}: {gate} must be passed")
             _validate_counts(record, errors, label)
             _validate_requirements_evidence(record, errors, label)
+            _validate_required_test_hashes(record, errors, label)
             for field, expected in (
                 ("wheel_contract_hashes", WHEEL_CONTRACT_KEYS),
                 ("tooling_source_hashes", TOOLING_SOURCE_KEYS),
