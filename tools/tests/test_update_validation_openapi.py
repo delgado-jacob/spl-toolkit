@@ -7,6 +7,8 @@ import sys
 import tempfile
 import unittest
 
+import jsonschema
+from referencing import Registry, Resource
 import yaml
 
 
@@ -307,6 +309,93 @@ class ValidationOpenAPITests(unittest.TestCase):
             before = {p.name: p.read_bytes() for p in root.iterdir()}
             self.assertEqual(self.run_script(root).returncode, 0)
             self.assertEqual(before, {p.name: p.read_bytes() for p in root.iterdir()})
+
+    def test_requirement_diagnostics_match_canonical_draft_2020_12_contract(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self.fixture(root)
+            result = self.run_script(root)
+            self.assertEqual(result.returncode, 0, result.stderr)
+
+            spec = json.loads((root / "swagger.json").read_text())
+            schemas = spec["components"]["schemas"]
+            shared_path = SCRIPT.parents[1] / "contracts/v1/shared.schema.json"
+            requirements_path = SCRIPT.parents[1] / "contracts/v1/requirements.schema.json"
+            shared = json.loads(shared_path.read_text())
+            requirements = json.loads(requirements_path.read_text())
+            registry = Registry().with_resources((
+                (shared["$id"], Resource.from_contents(shared)),
+                (requirements["$id"], Resource.from_contents(requirements)),
+            ))
+            canonical = jsonschema.Draft202012Validator(requirements, registry=registry)
+            openapi_schema = copy.deepcopy(spec)
+            openapi_schema["$schema"] = "https://json-schema.org/draft/2020-12/schema"
+            openapi_schema["$ref"] = "#/components/schemas/analysis.RequirementSet"
+            openapi = jsonschema.Draft202012Validator(openapi_schema)
+
+            authored = json.loads(
+                (SCRIPT.parents[1] / "testdata/tooling/contracts.json").read_text()
+            )
+            minimal = copy.deepcopy(next(
+                case["instance"] for case in authored["cases"]
+                if case["id"] == "requirements-minimal"
+            ))
+            minimal["diagnostics"] = [{
+                "code": "SPL_TEST",
+                "severity": "warning",
+                "category": "semantic",
+                "message": "test diagnostic",
+                "location": {
+                    "start": {"offset": 0, "line": 1, "column": 1},
+                    "end": {"offset": 4, "line": 1, "column": 5},
+                },
+                "stage_id": "stage-0",
+                "scope_id": "scope-0",
+            }]
+
+            cases = [("valid", minimal, True)]
+            for member in ("code", "severity", "category", "message", "location", "stage_id", "scope_id"):
+                invalid = copy.deepcopy(minimal)
+                del invalid["diagnostics"][0][member]
+                cases.append((f"missing diagnostic {member}", invalid, False))
+            for member in ("start", "end"):
+                invalid = copy.deepcopy(minimal)
+                del invalid["diagnostics"][0]["location"][member]
+                cases.append((f"missing location {member}", invalid, False))
+            for member in ("offset", "line", "column"):
+                invalid = copy.deepcopy(minimal)
+                del invalid["diagnostics"][0]["location"]["start"][member]
+                cases.append((f"missing position {member}", invalid, False))
+            invalid = copy.deepcopy(minimal)
+            invalid["diagnostics"][0]["severity"] = "notice"
+            cases.append(("invalid severity", invalid, False))
+            for member, value in (("offset", -1), ("line", 0), ("column", 0)):
+                invalid = copy.deepcopy(minimal)
+                invalid["diagnostics"][0]["location"]["start"][member] = value
+                cases.append((f"invalid position {member}", invalid, False))
+
+            for label, instance, accepted in cases:
+                with self.subTest(label=label):
+                    self.assertEqual(canonical.is_valid(instance), accepted)
+                    self.assertEqual(openapi.is_valid(instance), accepted)
+
+            self.assertEqual(
+                schemas["analysis.Diagnostic"]["required"],
+                ["code", "severity", "category", "message", "location", "stage_id", "scope_id"],
+            )
+            self.assertEqual(
+                schemas["analysis.Diagnostic"]["properties"]["severity"]["enum"],
+                ["error", "warning", "info"],
+            )
+            self.assertEqual(schemas["analysis.Location"]["required"], ["start", "end"])
+            self.assertEqual(
+                schemas["analysis.Position"]["required"], ["offset", "line", "column"]
+            )
+            self.assertEqual(
+                {key: schemas["analysis.Position"]["properties"][key]["minimum"]
+                 for key in ("offset", "line", "column")},
+                {"offset": 0, "line": 1, "column": 1},
+            )
 
     def test_unexpected_shape_fails_without_writes(self):
         for failure in ("missing schema", "template mismatch", "yaml mismatch", "catalog type drift", "rewrite identity drift"):

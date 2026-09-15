@@ -63,6 +63,13 @@ def add_tooling(spec):
         "analysis.RequirementGap",
         "analysis.RequirementSet",
     )
+    for name in ("analysis.Position", "analysis.Location", "analysis.Diagnostic"):
+        generated = schemas.get(name)
+        canonical = shared["$defs"][name]
+        if (not isinstance(generated, dict) or generated.get("type") != "object"
+                or set(generated.get("properties", {})) != set(canonical["properties"])):
+            raise ValueError(f"unexpected pinned analysis dependency shape: {name}")
+        schemas[name] = convert(canonical, preserve_analysis=True)
     for name in requirement_names:
         generated = schemas.get(name)
         canonical = shared["$defs"][name]

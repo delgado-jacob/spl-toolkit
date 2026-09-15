@@ -92,6 +92,7 @@ components:
           uniqueItems: false
       type: object
     analysis.Diagnostic:
+      additionalProperties: true
       properties:
         category:
           type: string
@@ -104,9 +105,21 @@ components:
         scope_id:
           type: string
         severity:
+          enum:
+          - error
+          - warning
+          - info
           type: string
         stage_id:
           type: string
+      required:
+      - code
+      - severity
+      - category
+      - message
+      - location
+      - stage_id
+      - scope_id
       type: object
     analysis.FieldBinding:
       properties:
@@ -158,20 +171,32 @@ components:
           uniqueItems: false
       type: object
     analysis.Location:
+      additionalProperties: true
       properties:
         end:
           $ref: '#/components/schemas/analysis.Position'
         start:
           $ref: '#/components/schemas/analysis.Position'
+      required:
+      - start
+      - end
       type: object
     analysis.Position:
+      additionalProperties: true
       properties:
         column:
+          minimum: 1
           type: integer
         line:
+          minimum: 1
           type: integer
         offset:
+          minimum: 0
           type: integer
+      required:
+      - offset
+      - line
+      - column
       type: object
     analysis.QueryDocument:
       properties:

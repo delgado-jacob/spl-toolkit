@@ -16,7 +16,6 @@ import pytest
 
 import tools.release as release
 import tools.check_reproducible as reproducible
-import tools.check_package as package_check
 from tools.check_reproducible import compare_artifacts
 from tools.release import artifact_hashes, normalize_archive, parser_attribution, require_python_archives, verify_wheel_native
 
