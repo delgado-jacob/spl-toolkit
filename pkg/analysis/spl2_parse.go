@@ -69,7 +69,7 @@ func (l *spl2SyntaxListener) SyntaxError(recognizer antlr.Recognizer, offending 
 	}
 	diagnostic := Diagnostic{Code: CodeSyntaxError, Severity: "error", Category: "syntax", Message: msg, Location: s.location(start, end)}
 	if lexical && l.tracker != nil {
-		l.tracker.consume(diagnostic.Location)
+		l.tracker.consumeLexerError(diagnostic.Location)
 	}
 	l.parsed.diagnostics = append(l.parsed.diagnostics, diagnostic)
 	if _, ok := e.(*antlr.NoViableAltException); ok {

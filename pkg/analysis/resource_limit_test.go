@@ -72,6 +72,100 @@ func TestSPL2LexerWorkBudgetCountsErrorsBeforeReturnedToken(t *testing.T) {
 	})
 }
 
+func TestSPLLexerWorkBudgetAbortsConsecutiveErrorStorm(t *testing.T) {
+	prefix, _ := lexerBoundaryQueriesAt(t, "spl", lexerWorkLimit-1)
+	query := prefix + strings.Repeat("\x00", 32*1024)
+	source := newSourceIndex(query)
+	parsed := &parsedDocument{source: source, diagnostics: []Diagnostic{}}
+	tracker := &lexerWorkTracker{}
+	observer := &countingSyntaxErrorListener{DefaultErrorListener: antlr.NewDefaultErrorListener()}
+	listener := &syntaxListener{DefaultErrorListener: antlr.NewDefaultErrorListener(), parsed: parsed, tracker: tracker}
+	lexer := parser.NewSPLLexer(&analysisInputStream{InputStream: antlr.NewInputStream(query)})
+	lexer.RemoveErrorListeners()
+	lexer.AddErrorListener(observer)
+	lexer.AddErrorListener(listener)
+	preflightLexer(lexer, tracker, source)
+
+	assertErrorStormStoppedAtFirstOmitted(t, query, prefix, tracker, observer.calls, lexer.GetInputStream().Index(), parsed.diagnostics)
+	assertSingleResourceLimitLocation(t, mustAnalyzeDocument(t, QueryDocument{Text: query}), *tracker.resourceLimit)
+}
+
+func TestSPL2LexerWorkBudgetAbortsConsecutiveErrorStormBeforeClosureInspection(t *testing.T) {
+	prefix, _ := lexerBoundaryQueriesAt(t, "spl2", lexerWorkLimit-1)
+	query := prefix + strings.Repeat("\x00", 32*1024) + `"`
+	source := newSourceIndex(query)
+	parsed := &spl2ParsedDocument{source: source, diagnostics: []Diagnostic{}}
+	tracker := &lexerWorkTracker{}
+	observer := &countingSyntaxErrorListener{DefaultErrorListener: antlr.NewDefaultErrorListener()}
+	listener := &spl2SyntaxListener{DefaultErrorListener: antlr.NewDefaultErrorListener(), parsed: parsed, tracker: tracker}
+	lexer := spl2.NewSPL2Lexer(antlr.NewInputStream(query))
+	lexer.RemoveErrorListeners()
+	lexer.AddErrorListener(observer)
+	lexer.AddErrorListener(listener)
+	parsed.tokens = preflightLexer(lexer, tracker, source)
+
+	assertErrorStormStoppedAtFirstOmitted(t, query, prefix, tracker, observer.calls, lexer.GetInputStream().Index(), parsed.diagnostics)
+	if len(parsed.lexicalErrors) != 1 || parsed.literalClosureDiagnostic() != nil {
+		t.Fatalf("post-limit SPL2 evidence survived: lexical=%+v closure=%+v", parsed.lexicalErrors, parsed.literalClosureDiagnostic())
+	}
+	result := mustAnalyzeDocument(t, QueryDocument{Text: query, Language: "spl2"})
+	assertSingleResourceLimitLocation(t, result, *tracker.resourceLimit)
+}
+
+type countingSyntaxErrorListener struct {
+	*antlr.DefaultErrorListener
+	calls int
+}
+
+func (l *countingSyntaxErrorListener) SyntaxError(antlr.Recognizer, interface{}, int, int, string, antlr.RecognitionException) {
+	l.calls++
+}
+
+type panickingLexer struct {
+	antlr.Lexer
+	value any
+}
+
+func (l *panickingLexer) NextToken() antlr.Token {
+	panic(l.value)
+}
+
+func TestLexerWorkLimiterRepanicsUnrelatedValues(t *testing.T) {
+	marker := &struct{ value int }{value: 1}
+	lexer := parser.NewSPLLexer(antlr.NewInputStream(""))
+	limiter := &lexerWorkLimiter{
+		Lexer:   &panickingLexer{Lexer: lexer, value: marker},
+		tracker: &lexerWorkTracker{},
+		source:  newSourceIndex(""),
+	}
+	defer func() {
+		if recovered := recover(); recovered != marker {
+			t.Fatalf("recovered panic = %#v, want original marker", recovered)
+		}
+	}()
+	limiter.NextToken()
+	t.Fatal("unrelated panic was swallowed")
+}
+
+func assertErrorStormStoppedAtFirstOmitted(t *testing.T, query, prefix string, tracker *lexerWorkTracker, calls, inputIndex int, diagnostics []Diagnostic) {
+	t.Helper()
+	firstError := len([]rune(prefix))
+	omittedError := firstError + 1
+	want := newSourceIndex(query).location(omittedError, omittedError+1)
+	if tracker.units != lexerWorkLimit || tracker.resourceLimit == nil || *tracker.resourceLimit != want {
+		t.Fatalf("resource tracker = units %d location %+v, want units %d location %+v", tracker.units, tracker.resourceLimit, lexerWorkLimit, want)
+	}
+	if calls != 2 {
+		t.Fatalf("lexer inspected %d errors, want the admitted error and first omitted error only", calls)
+	}
+	if inputIndex != omittedError {
+		t.Fatalf("lexer input index = %d, want first omitted error index %d", inputIndex, omittedError)
+	}
+	if len(diagnostics) != 1 || diagnostics[0].Location != newSourceIndex(query).location(firstError, firstError+1) {
+		t.Fatalf("ordinary lexer diagnostics = %+v, want only the admitted error", diagnostics)
+	}
+}
+
 func TestLexerWorkBudgetEOFErrorUsesClampedRange(t *testing.T) {
 	text := "x"
 	parsed := &parsedDocument{source: newSourceIndex(text), diagnostics: []Diagnostic{}}
@@ -79,7 +173,15 @@ func TestLexerWorkBudgetEOFErrorUsesClampedRange(t *testing.T) {
 	listener := &syntaxListener{DefaultErrorListener: antlr.NewDefaultErrorListener(), parsed: parsed, tracker: tracker}
 	lexer := parser.NewSPLLexer(antlr.NewInputStream(text))
 	lexer.GetInputStream().Seek(len([]rune(text)))
-	listener.SyntaxError(lexer, nil, 1, 1, "EOF lexer error", nil)
+	func() {
+		defer func() {
+			if recovered := recover(); recovered != lexerWorkLimitAbortSignal {
+				t.Fatalf("recovered panic = %#v, want lexer work abort", recovered)
+			}
+		}()
+		listener.SyntaxError(lexer, nil, 1, 1, "EOF lexer error", nil)
+		t.Fatal("rejected EOF lexer error did not abort")
+	}()
 
 	want := parsed.source.location(len([]rune(text)), len([]rune(text))+1)
 	if tracker.resourceLimit == nil || *tracker.resourceLimit != want || want.Start != want.End {

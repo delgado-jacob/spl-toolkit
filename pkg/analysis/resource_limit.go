@@ -14,6 +14,10 @@ type lexerWorkTracker struct {
 	resourceLimit *Location
 }
 
+type lexerWorkLimitAbort struct{ marker byte }
+
+var lexerWorkLimitAbortSignal = &lexerWorkLimitAbort{marker: 1}
+
 func (t *lexerWorkTracker) consume(location Location) bool {
 	if t.resourceLimit != nil {
 		return false
@@ -27,14 +31,30 @@ func (t *lexerWorkTracker) consume(location Location) bool {
 	return true
 }
 
+func (t *lexerWorkTracker) consumeLexerError(location Location) {
+	if !t.consume(location) {
+		panic(lexerWorkLimitAbortSignal)
+	}
+}
+
 type lexerWorkLimiter struct {
 	antlr.Lexer
 	tracker *lexerWorkTracker
 	source  *sourceIndex
 }
 
-func (l *lexerWorkLimiter) NextToken() antlr.Token {
-	token := l.Lexer.NextToken()
+func (l *lexerWorkLimiter) NextToken() (token antlr.Token) {
+	defer func() {
+		recovered := recover()
+		if recovered == nil {
+			return
+		}
+		if recovered != lexerWorkLimitAbortSignal {
+			panic(recovered)
+		}
+		token = resourceLimitEOF(l.Lexer.GetInputStream().Index())
+	}()
+	token = l.Lexer.NextToken()
 	if l.tracker.resourceLimit != nil {
 		return resourceLimitEOF(token.GetStart())
 	}

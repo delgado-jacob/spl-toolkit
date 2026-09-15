@@ -36,7 +36,7 @@ func (l *syntaxListener) SyntaxError(recognizer antlr.Recognizer, offendingSymbo
 	}
 	location := s.location(start, end)
 	if _, lexical := recognizer.(antlr.Lexer); lexical && l.tracker != nil {
-		l.tracker.consume(location)
+		l.tracker.consumeLexerError(location)
 	}
 	l.parsed.diagnostics = append(l.parsed.diagnostics, Diagnostic{Code: CodeSyntaxError, Severity: "error", Category: "syntax", Message: msg, Location: location})
 }
