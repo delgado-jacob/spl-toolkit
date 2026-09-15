@@ -5276,7 +5276,8 @@
             "coverage": {
               "complete": false,
               "reasons": [
-                "SPL_UNRESOLVED_WILDCARD"
+                "SPL_UNRESOLVED_WILDCARD",
+                "SPL_REQUIREMENT_DYNAMIC"
               ]
             },
             "items": [
@@ -5353,14 +5354,12 @@
                 ]
               },
               {
-                "code": "SPL_UNRESOLVED_WILDCARD",
-                "message": "wildcard \"total*\" membership is unresolved",
+                "code": "SPL_REQUIREMENT_DYNAMIC",
+                "message": "dynamic requirement identity is unresolved",
                 "reference_ids": [
                   "ref-2"
                 ],
-                "diagnostic_codes": [
-                  "SPL_UNRESOLVED_WILDCARD"
-                ]
+                "diagnostic_codes": []
               }
             ],
             "diagnostics": [
@@ -5382,26 +5381,6 @@
                   }
                 },
                 "stage_id": "stage-0",
-                "scope_id": "scope-0"
-              },
-              {
-                "code": "SPL_UNRESOLVED_WILDCARD",
-                "severity": "warning",
-                "category": "unsupported_semantics",
-                "message": "wildcard \"total*\" membership is unresolved",
-                "location": {
-                  "start": {
-                    "offset": 39,
-                    "line": 1,
-                    "column": 40
-                  },
-                  "end": {
-                    "offset": 45,
-                    "line": 1,
-                    "column": 46
-                  }
-                },
-                "stage_id": "stage-2",
                 "scope_id": "scope-0"
               }
             ]
