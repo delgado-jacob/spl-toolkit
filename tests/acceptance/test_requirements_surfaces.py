@@ -11,6 +11,7 @@ from pathlib import Path
 import signal
 import subprocess
 import sys
+import tempfile
 import threading
 import time
 from urllib.error import HTTPError
@@ -232,19 +233,76 @@ def _reap_helper(
     child: subprocess.Popen,
     terminate_timeout: float,
     kill_timeout: float,
-) -> tuple[bool, bool, bool]:
+    stdout: str | bytes | None = "",
+    stderr: str | bytes | None = "",
+) -> tuple[bool, bool, bool, str, str]:
     terminated = False
     killed = False
     if child.poll() is None:
         child.terminate()
         terminated = True
-        try:
-            child.wait(timeout=terminate_timeout)
-        except subprocess.TimeoutExpired:
+    try:
+        final_stdout, final_stderr = child.communicate(timeout=terminate_timeout)
+        stdout = _merge_process_output(stdout, final_stdout)
+        stderr = _merge_process_output(stderr, final_stderr)
+    except subprocess.TimeoutExpired as error:
+        stdout = _merge_process_output(stdout, error.stdout)
+        stderr = _merge_process_output(stderr, error.stderr)
+        if child.poll() is None:
             child.kill()
             killed = True
-            child.wait(timeout=kill_timeout)
-    return terminated, killed, child.poll() is not None
+        try:
+            final_stdout, final_stderr = child.communicate(timeout=kill_timeout)
+            stdout = _merge_process_output(stdout, final_stdout)
+            stderr = _merge_process_output(stderr, final_stderr)
+        except subprocess.TimeoutExpired as kill_error:
+            stdout = _merge_process_output(stdout, kill_error.stdout)
+            stderr = _merge_process_output(stderr, kill_error.stderr)
+            if child.poll() is None:
+                child.kill()
+            try:
+                child.wait(timeout=kill_timeout)
+            except subprocess.TimeoutExpired:
+                pass
+            for pipe in (child.stdin, child.stdout, child.stderr):
+                if pipe is not None:
+                    pipe.close()
+    return terminated, killed, child.poll() is not None, stdout, stderr
+
+
+def _merge_process_output(
+    captured: str | bytes | None, completed: str | bytes | None
+) -> str:
+    def text(value: str | bytes | None) -> str:
+        if value is None:
+            return ""
+        if isinstance(value, bytes):
+            return value.decode("utf-8", errors="replace")
+        return value
+
+    captured_text = text(captured)
+    completed_text = text(completed)
+    if not captured_text or completed_text.startswith(captured_text):
+        return completed_text
+    if not completed_text:
+        return captured_text
+    overlap = min(len(captured_text), len(completed_text))
+    while overlap and not captured_text.endswith(completed_text[:overlap]):
+        overlap -= 1
+    return captured_text + completed_text[overlap:]
+
+
+def _wait_for_helper_ready(
+    child: subprocess.Popen, ready_path: Path, timeout: float
+) -> bool:
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        if ready_path.is_file():
+            return True
+        if child.poll() is not None:
+            return False
+        time.sleep(0.01)
+    return ready_path.is_file()
 
 
 def run_native_helper(
@@ -253,6 +311,7 @@ def run_native_helper(
     timeout: float,
     terminate_timeout: float = 5,
     kill_timeout: float = 5,
+    ready_timeout: float = 20,
 ) -> dict:
     args = [sys.executable, str(Path(__file__).resolve()), "--requirements-native-helper"]
     child = subprocess.Popen(
@@ -265,22 +324,50 @@ def run_native_helper(
     )
     stdout = ""
     stderr = ""
+    ready = False
+    ready_directory = (
+        tempfile.TemporaryDirectory(prefix="spl-native-helper-ready-")
+        if request.get("mode") == "hang"
+        else None
+    )
     try:
         try:
-            stdout, stderr = child.communicate(
-                json.dumps(request, ensure_ascii=False), timeout=timeout
+            helper_request = dict(request)
+            if ready_directory is not None:
+                ready_path = Path(ready_directory.name) / "ready"
+                helper_request["_ready_path"] = str(ready_path)
+                assert child.stdin is not None
+                child.stdin.write(json.dumps(helper_request, ensure_ascii=False))
+                child.stdin.close()
+                child.stdin = None
+                ready = _wait_for_helper_ready(child, ready_path, ready_timeout)
+                if not ready:
+                    terminated, killed, reaped, stdout, stderr = _reap_helper(
+                        child, terminate_timeout, kill_timeout
+                    )
+                    raise AssertionError(
+                        f"native helper was not ready after {ready_timeout}s "
+                        f"{_helper_context(request)} exit={child.returncode} "
+                        f"terminated={terminated} killed={killed} reaped={reaped} "
+                        f"stderr={stderr!r}"
+                    )
+                stdout, stderr = child.communicate(timeout=timeout)
+            else:
+                stdout, stderr = child.communicate(
+                    json.dumps(helper_request, ensure_ascii=False), timeout=timeout
+                )
+        except subprocess.TimeoutExpired as error:
+            terminated, killed, reaped, stdout, stderr = _reap_helper(
+                child,
+                terminate_timeout,
+                kill_timeout,
+                error.stdout,
+                error.stderr,
             )
-        except subprocess.TimeoutExpired:
-            terminated, killed, reaped = _reap_helper(
-                child, terminate_timeout, kill_timeout
-            )
-            if child.stdout is not None:
-                stdout = child.stdout.read()
-            if child.stderr is not None:
-                stderr = child.stderr.read()
             raise AssertionError(
                 f"native helper timed out after {timeout}s {_helper_context(request)} "
-                f"exit={child.returncode} terminated={terminated} killed={killed} "
+                f"ready={ready} exit={child.returncode} "
+                f"terminated={terminated} killed={killed} "
                 f"reaped={reaped} stderr={stderr!r}"
             ) from None
 
@@ -300,6 +387,8 @@ def run_native_helper(
     finally:
         if child.poll() is None:
             _reap_helper(child, terminate_timeout, kill_timeout)
+        if ready_directory is not None:
+            ready_directory.cleanup()
 
 
 class _NativeFreeTracker:
@@ -364,8 +453,16 @@ def _native_helper_execute(request: dict) -> dict:
     if mode == "fail":
         raise RuntimeError("simulated native helper failure")
     if mode == "hang":
+        time.sleep(request.get("test_ready_delay", 0))
         if os.name != "nt":
             signal.signal(signal.SIGTERM, signal.SIG_IGN)
+        ready_path = request.get("_ready_path")
+        if not ready_path:
+            raise ValueError("native helper hang mode requires a ready path")
+        Path(ready_path).write_text("ready\n", encoding="utf-8")
+        if message := request.get("test_stderr"):
+            sys.stderr.write(message + "\n")
+            sys.stderr.flush()
         time.sleep(3600)
         raise AssertionError("unreachable")
     if mode not in {"serial", "concurrent"}:
@@ -915,6 +1012,30 @@ def test_dense_native_helper_is_bounded_and_owned(special_documents):
         )
     if os.name != "nt":
         assert "killed=True" in str(error.value)
+
+
+def test_native_helper_timeout_preserves_early_stderr():
+    message = "early native helper stderr"
+    with pytest.raises(AssertionError) as error:
+        run_native_helper(
+            {"mode": "hang", "test_stderr": message},
+            timeout=0.05,
+            terminate_timeout=0.05,
+            kill_timeout=1,
+        )
+    assert str(error.value).count(message) == 1
+
+
+def test_native_helper_timeout_starts_after_ready():
+    started = time.monotonic()
+    with pytest.raises(AssertionError, match="ready=True"):
+        run_native_helper(
+            {"mode": "hang", "test_ready_delay": 0.2},
+            timeout=0.05,
+            terminate_timeout=0.05,
+            kill_timeout=1,
+        )
+    assert time.monotonic() - started >= 0.2
 
 
 if __name__ == "__main__":
