@@ -147,6 +147,22 @@ func TestLexerWorkLimiterRepanicsUnrelatedValues(t *testing.T) {
 	t.Fatal("unrelated panic was swallowed")
 }
 
+func TestLexerWorkLimiterRepanicsAbortSentinelWithoutRecordedLimit(t *testing.T) {
+	lexer := parser.NewSPLLexer(antlr.NewInputStream(""))
+	limiter := &lexerWorkLimiter{
+		Lexer:   &panickingLexer{Lexer: lexer, value: lexerWorkLimitAbortSignal},
+		tracker: &lexerWorkTracker{},
+		source:  newSourceIndex(""),
+	}
+	defer func() {
+		if recovered := recover(); recovered != lexerWorkLimitAbortSignal {
+			t.Fatalf("recovered panic = %#v, want original lexer work abort", recovered)
+		}
+	}()
+	limiter.NextToken()
+	t.Fatal("unowned lexer work abort was swallowed")
+}
+
 func assertErrorStormStoppedAtFirstOmitted(t *testing.T, query, prefix string, tracker *lexerWorkTracker, calls, inputIndex int, diagnostics []Diagnostic) {
 	t.Helper()
 	firstError := len([]rune(prefix))

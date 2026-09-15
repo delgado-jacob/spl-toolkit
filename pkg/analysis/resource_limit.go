@@ -49,7 +49,7 @@ func (l *lexerWorkLimiter) NextToken() (token antlr.Token) {
 		if recovered == nil {
 			return
 		}
-		if recovered != lexerWorkLimitAbortSignal {
+		if recovered != lexerWorkLimitAbortSignal || l.tracker == nil || l.tracker.resourceLimit == nil {
 			panic(recovered)
 		}
 		token = resourceLimitEOF(l.Lexer.GetInputStream().Index())
