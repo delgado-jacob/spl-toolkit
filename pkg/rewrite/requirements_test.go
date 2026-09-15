@@ -1,6 +1,7 @@
 package rewrite
 
 import (
+	"encoding/json"
 	"reflect"
 	"strings"
 	"testing"
@@ -86,83 +87,158 @@ func TestRewriteResourceLimitNoOp(t *testing.T) {
 			if got.OriginalAnalysis == nil || got.CandidateAnalysis == nil || got.OriginalAnalysis == got.CandidateAnalysis || !reflect.DeepEqual(*got.OriginalAnalysis, original) || !reflect.DeepEqual(*got.CandidateAnalysis, original) {
 				t.Fatalf("bounded analyses differ:\noriginal=%+v\ncandidate=%+v\nwant=%+v", got.OriginalAnalysis, got.CandidateAnalysis, original)
 			}
-			assertResourceAnalysesDetached(t, request, got)
+			assertResourceAnalysesDetached(t, got)
 		})
 	}
 }
 
-func assertResourceAnalysesDetached(t *testing.T, request Request, got *Result) {
+func TestResourceLimitedRewriteUsesCachedEvidenceAfterCandidateFormation(t *testing.T) {
+	text := strings.Repeat("a ", 4097)
+	rules := []Rule{{ID: "limited", Kind: "field", Source: conditionIdentity("a"), Target: conditionIdentity("b")}}
+	pending, err := formCandidate(
+		analysis.QueryDocument{Text: text, SourceID: "cached-limited"},
+		rules,
+		conditionProbes(rules),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !resourceLimited(pending) {
+		t.Fatal("expected resource-limited candidate formation")
+	}
+
+	want := cloneAnalysisForTest(t, &pending.originalEvidence.Analysis)
+	pending.original = nil
+	if !resourceLimited(pending) {
+		t.Fatal("resource-limit detection consulted the rewrite session instead of cached state")
+	}
+	got := finishResourceLimitedRewrite(pending, Preview, rules)
+	if !reflect.DeepEqual(got.OriginalAnalysis, want) || !reflect.DeepEqual(got.CandidateAnalysis, want) {
+		t.Fatalf("resource-limited result did not reuse cached evidence:\noriginal=%+v\ncandidate=%+v\nwant=%+v", got.OriginalAnalysis, got.CandidateAnalysis, want)
+	}
+	assertResourceAnalysesDetached(t, got)
+}
+
+func assertResourceAnalysesDetached(t *testing.T, got *Result) {
 	t.Helper()
+	wantOriginal := cloneAnalysisForTest(t, got.OriginalAnalysis)
 	wantCandidate := cloneAnalysisForTest(t, got.CandidateAnalysis)
-	mutateAnalysisCollections(got.OriginalAnalysis)
+	mutateAnalysisCollections(got.OriginalAnalysis, "original-mutated")
 	if !reflect.DeepEqual(got.CandidateAnalysis, wantCandidate) {
 		t.Fatal("original analysis mutation leaked into candidate analysis")
 	}
 
-	fresh := requireRewrite(t, request)
-	wantOriginal := cloneAnalysisForTest(t, fresh.OriginalAnalysis)
-	mutateAnalysisCollections(fresh.CandidateAnalysis)
-	if !reflect.DeepEqual(fresh.OriginalAnalysis, wantOriginal) {
+	mutatedOriginal := cloneAnalysisForTest(t, got.OriginalAnalysis)
+	mutateAnalysisCollections(got.CandidateAnalysis, "candidate-mutated")
+	if !reflect.DeepEqual(got.OriginalAnalysis, mutatedOriginal) {
 		t.Fatal("candidate analysis mutation leaked into original analysis")
+	}
+	if reflect.DeepEqual(got.OriginalAnalysis, wantOriginal) || reflect.DeepEqual(got.CandidateAnalysis, wantCandidate) {
+		t.Fatal("detachment proof did not mutate both analyses")
 	}
 }
 
 func cloneAnalysisForTest(t *testing.T, result *analysis.Result) *analysis.Result {
 	t.Helper()
-	clone := *result
-	clone.Coverage.Reasons = append([]string{}, result.Coverage.Reasons...)
-	clone.Stages = append([]analysis.Stage{}, result.Stages...)
-	clone.Scopes = append([]analysis.Scope{}, result.Scopes...)
-	clone.References = append([]analysis.Reference{}, result.References...)
-	clone.Lineage = append([]analysis.Lineage{}, result.Lineage...)
-	clone.Dependencies.Indexes = append([]string{}, result.Dependencies.Indexes...)
-	clone.Dependencies.Sources = append([]string{}, result.Dependencies.Sources...)
-	clone.Dependencies.SourceTypes = append([]string{}, result.Dependencies.SourceTypes...)
-	clone.Dependencies.Datasets = append([]string{}, result.Dependencies.Datasets...)
-	clone.Dependencies.Lookups = append([]string{}, result.Dependencies.Lookups...)
-	clone.Dependencies.DataModels = append([]string{}, result.Dependencies.DataModels...)
-	clone.Dependencies.Macros = append([]string{}, result.Dependencies.Macros...)
-	clone.Diagnostics = append([]analysis.Diagnostic{}, result.Diagnostics...)
-	clone.Requirements = cloneRequirementSetForTest(result.Requirements)
+	data, err := json.Marshal(result)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var clone analysis.Result
+	if err := json.Unmarshal(data, &clone); err != nil {
+		t.Fatal(err)
+	}
 	return &clone
 }
 
-func cloneRequirementSetForTest(in analysis.RequirementSet) analysis.RequirementSet {
-	out := in
-	out.Coverage.Reasons = append([]string{}, in.Coverage.Reasons...)
-	out.Items = append([]analysis.RequirementItem{}, in.Items...)
-	for i := range out.Items {
-		out.Items[i].Occurrences = append([]analysis.RequirementOccurrence{}, in.Items[i].Occurrences...)
+func mutateStringCollection(values *[]string, marker string) {
+	if len(*values) == 0 {
+		*values = append(*values, marker)
+		return
 	}
-	out.Gaps = append([]analysis.RequirementGap{}, in.Gaps...)
-	for i := range out.Gaps {
-		out.Gaps[i].ReferenceIDs = append([]string{}, in.Gaps[i].ReferenceIDs...)
-		out.Gaps[i].DiagnosticCodes = append([]string{}, in.Gaps[i].DiagnosticCodes...)
-	}
-	out.Diagnostics = append([]analysis.Diagnostic{}, in.Diagnostics...)
-	return out
+	(*values)[0] = marker
 }
 
-func mutateAnalysisCollections(result *analysis.Result) {
-	result.Coverage.Reasons = append(result.Coverage.Reasons, "mutated")
-	result.Stages = append(result.Stages, analysis.Stage{ID: "mutated"})
-	result.Scopes = append(result.Scopes, analysis.Scope{ID: "mutated"})
-	result.References = append(result.References, analysis.Reference{ID: "mutated", OriginReferenceIDs: []string{"mutated"}})
-	result.Lineage = append(result.Lineage, analysis.Lineage{StageID: "mutated", Before: analysis.FieldState{Fields: []analysis.FieldBinding{{Name: "mutated", OriginReferenceIDs: []string{"mutated"}}}, Removed: []string{"mutated"}}, After: analysis.FieldState{Fields: []analysis.FieldBinding{}, Removed: []string{}}, Transitions: []analysis.Transition{{InputReferenceIDs: []string{"mutated"}}}})
-	result.Dependencies.Indexes = append(result.Dependencies.Indexes, "mutated")
-	result.Dependencies.Sources = append(result.Dependencies.Sources, "mutated")
-	result.Dependencies.SourceTypes = append(result.Dependencies.SourceTypes, "mutated")
-	result.Dependencies.Datasets = append(result.Dependencies.Datasets, "mutated")
-	result.Dependencies.Lookups = append(result.Dependencies.Lookups, "mutated")
-	result.Dependencies.DataModels = append(result.Dependencies.DataModels, "mutated")
-	result.Dependencies.Macros = append(result.Dependencies.Macros, "mutated")
-	result.Diagnostics = append(result.Diagnostics, analysis.Diagnostic{Code: "mutated"})
-	result.Requirements.Coverage.Reasons = append(result.Requirements.Coverage.Reasons, "mutated")
-	result.Requirements.Items = append(result.Requirements.Items, analysis.RequirementItem{ID: "mutated", Occurrences: []analysis.RequirementOccurrence{{ReferenceID: "mutated"}}})
-	for i := range result.Requirements.Gaps {
-		result.Requirements.Gaps[i].ReferenceIDs = append(result.Requirements.Gaps[i].ReferenceIDs, "mutated")
-		result.Requirements.Gaps[i].DiagnosticCodes = append(result.Requirements.Gaps[i].DiagnosticCodes, "mutated")
+func mutateFieldState(state *analysis.FieldState, marker string) {
+	if len(state.Fields) == 0 {
+		state.Fields = append(state.Fields, analysis.FieldBinding{Name: marker + "-field", OriginReferenceIDs: []string{marker + "-field-origin"}})
+	} else {
+		state.Fields[0].Name = marker + "-field"
+		mutateStringCollection(&state.Fields[0].OriginReferenceIDs, marker+"-field-origin")
 	}
-	result.Requirements.Gaps = append(result.Requirements.Gaps, analysis.RequirementGap{Code: "mutated", ReferenceIDs: []string{"mutated"}, DiagnosticCodes: []string{"mutated"}})
-	result.Requirements.Diagnostics = append(result.Requirements.Diagnostics, analysis.Diagnostic{Code: "mutated"})
+	mutateStringCollection(&state.Removed, marker+"-removed")
+}
+
+func mutateAnalysisCollections(result *analysis.Result, marker string) {
+	mutateStringCollection(&result.Coverage.Reasons, marker+"-coverage")
+	if len(result.Stages) == 0 {
+		result.Stages = append(result.Stages, analysis.Stage{ID: marker + "-stage"})
+	} else {
+		result.Stages[0].ID = marker + "-stage"
+	}
+	if len(result.Scopes) == 0 {
+		result.Scopes = append(result.Scopes, analysis.Scope{ID: marker + "-scope"})
+	} else {
+		result.Scopes[0].ID = marker + "-scope"
+	}
+	if len(result.References) == 0 {
+		result.References = append(result.References, analysis.Reference{ID: marker + "-reference", OriginReferenceIDs: []string{marker + "-origin"}})
+	} else {
+		result.References[0].ID = marker + "-reference"
+		mutateStringCollection(&result.References[0].OriginReferenceIDs, marker+"-origin")
+	}
+	if len(result.Lineage) == 0 {
+		result.Lineage = append(result.Lineage, analysis.Lineage{
+			StageID:     marker + "-lineage",
+			Transitions: []analysis.Transition{{InputReferenceIDs: []string{marker + "-transition"}}},
+		})
+	}
+	lineage := &result.Lineage[0]
+	lineage.StageID = marker + "-lineage"
+	mutateFieldState(&lineage.Before, marker+"-before")
+	mutateFieldState(&lineage.After, marker+"-after")
+	if len(lineage.Transitions) == 0 {
+		lineage.Transitions = append(lineage.Transitions, analysis.Transition{InputReferenceIDs: []string{marker + "-transition"}})
+	} else {
+		mutateStringCollection(&lineage.Transitions[0].InputReferenceIDs, marker+"-transition")
+	}
+	mutateStringCollection(&result.Dependencies.Indexes, marker+"-index")
+	mutateStringCollection(&result.Dependencies.Sources, marker+"-source")
+	mutateStringCollection(&result.Dependencies.SourceTypes, marker+"-sourcetype")
+	mutateStringCollection(&result.Dependencies.Datasets, marker+"-dataset")
+	mutateStringCollection(&result.Dependencies.Lookups, marker+"-lookup")
+	mutateStringCollection(&result.Dependencies.DataModels, marker+"-data-model")
+	mutateStringCollection(&result.Dependencies.Macros, marker+"-macro")
+	if len(result.Diagnostics) == 0 {
+		result.Diagnostics = append(result.Diagnostics, analysis.Diagnostic{Code: marker + "-diagnostic"})
+	} else {
+		result.Diagnostics[0].Code = marker + "-diagnostic"
+	}
+	mutateStringCollection(&result.Requirements.Coverage.Reasons, marker+"-requirement-coverage")
+	if len(result.Requirements.Items) == 0 {
+		result.Requirements.Items = append(result.Requirements.Items, analysis.RequirementItem{ID: marker + "-item", Occurrences: []analysis.RequirementOccurrence{{ReferenceID: marker + "-occurrence"}}})
+	} else {
+		result.Requirements.Items[0].ID = marker + "-item"
+		if len(result.Requirements.Items[0].Occurrences) == 0 {
+			result.Requirements.Items[0].Occurrences = append(result.Requirements.Items[0].Occurrences, analysis.RequirementOccurrence{ReferenceID: marker + "-occurrence"})
+		} else {
+			result.Requirements.Items[0].Occurrences[0].ReferenceID = marker + "-occurrence"
+		}
+	}
+	if len(result.Requirements.Gaps) == 0 {
+		result.Requirements.Gaps = append(result.Requirements.Gaps, analysis.RequirementGap{
+			Code:            marker + "-gap",
+			ReferenceIDs:    []string{marker + "-gap-reference"},
+			DiagnosticCodes: []string{marker + "-gap-diagnostic"},
+		})
+	} else {
+		result.Requirements.Gaps[0].Code = marker + "-gap"
+		mutateStringCollection(&result.Requirements.Gaps[0].ReferenceIDs, marker+"-gap-reference")
+		mutateStringCollection(&result.Requirements.Gaps[0].DiagnosticCodes, marker+"-gap-diagnostic")
+	}
+	if len(result.Requirements.Diagnostics) == 0 {
+		result.Requirements.Diagnostics = append(result.Requirements.Diagnostics, analysis.Diagnostic{Code: marker + "-requirement-diagnostic"})
+	} else {
+		result.Requirements.Diagnostics[0].Code = marker + "-requirement-diagnostic"
+	}
 }

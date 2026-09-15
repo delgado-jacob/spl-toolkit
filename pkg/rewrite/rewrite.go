@@ -1,6 +1,8 @@
 package rewrite
 
 import (
+	"encoding/json"
+
 	"github.com/delgado-jacob/spl-toolkit/pkg/analysis"
 	"github.com/delgado-jacob/spl-toolkit/pkg/validation"
 )
@@ -36,8 +38,10 @@ func Rewrite(request Request) (*Result, error) {
 }
 
 type pendingRewrite struct {
-	original  *analysis.RewriteSession
-	candidate *rewriteCandidate
+	original         *analysis.RewriteSession
+	originalEvidence analysis.RewriteEvidence
+	candidate        *rewriteCandidate
+	resourceLimited  bool
 }
 
 func formCandidate(document analysis.QueryDocument, rules []Rule, probes []analysis.RewriteFactProbe) (*pendingRewrite, error) {
@@ -45,19 +49,26 @@ func formCandidate(document analysis.QueryDocument, rules []Rule, probes []analy
 	if err != nil {
 		return nil, err
 	}
-	if resourceLimitedAnalysis(original.Evidence().Analysis) {
-		return &pendingRewrite{original: original}, nil
+	evidence := original.Evidence()
+	pending := &pendingRewrite{
+		original:         original,
+		originalEvidence: evidence,
+		resourceLimited:  resourceLimitedAnalysis(evidence.Analysis),
 	}
-	selection := selectRules(rules, probes, original.Evidence())
+	if pending.resourceLimited {
+		return pending, nil
+	}
+	selection := selectRules(rules, probes, evidence)
 	candidate, err := buildCandidate(original, rules, probes, selection)
 	if err != nil {
 		return nil, err
 	}
-	return &pendingRewrite{original: original, candidate: candidate}, nil
+	pending.candidate = candidate
+	return pending, nil
 }
 
 func resourceLimited(pending *pendingRewrite) bool {
-	return pending != nil && pending.original != nil && pending.candidate == nil && resourceLimitedAnalysis(pending.original.Evidence().Analysis)
+	return pending != nil && pending.resourceLimited
 }
 
 func resourceLimitedAnalysis(result analysis.Result) bool {
@@ -70,8 +81,8 @@ func resourceLimitedAnalysis(result analysis.Result) bool {
 }
 
 func finishResourceLimitedRewrite(pending *pendingRewrite, mode Mode, rules []Rule) *Result {
-	original := pending.original.Evidence().Analysis
-	candidate := pending.original.Evidence().Analysis
+	original := pending.originalEvidence.Analysis
+	candidate := detachedAnalysis(original)
 	evaluations := make([]RuleEvaluation, len(rules))
 	for i, rule := range rules {
 		evaluations[i] = RuleEvaluation{
@@ -101,6 +112,13 @@ func finishResourceLimitedRewrite(pending *pendingRewrite, mode Mode, rules []Ru
 		OriginalAnalysis:  &original,
 		CandidateAnalysis: &candidate,
 	}
+}
+
+func detachedAnalysis(result analysis.Result) analysis.Result {
+	data, _ := json.Marshal(result)
+	var clone analysis.Result
+	_ = json.Unmarshal(data, &clone)
+	return clone
 }
 
 func rewriteValidationError(err error) error {
