@@ -477,6 +477,7 @@ func (s *semanticStage) recordRejectedRenameTarget(target locatedOperand, input 
 	return id
 }
 func (s *semanticStage) applyAggregation(outputs []aggregateOutput, groups []locatedOperand, preserveInput bool) {
+	stageID := s.result.Stages[s.stage].ID
 	output := newEnvironmentWithRequirementTrace(s.env.requirements.trace)
 	output.open = false
 	output.requirements.open = false
@@ -497,11 +498,10 @@ func (s *semanticStage) applyAggregation(outputs []aggregateOutput, groups []loc
 		output.rewrite = s.env.rewrite.clone()
 		output.rewriteProject(output.fields)
 		output.uncertain = !s.result.Stages[s.stage].SemanticComplete
-		output.requirements.uncertain = s.env.requirements.uncertain
+		output.requirements.uncertain = s.env.requirements.stageIncomplete(stageID)
 		s.env = output
 	}
 	for _, output := range outputs {
-		stageID := s.result.Stages[s.stage].ID
 		s.createAtWithRequirementConditional(output.Target, "output", "aggregate", output.InputReferenceIDs,
 			output.Conditional || !s.result.Stages[s.stage].SemanticComplete,
 			output.RequirementConditional || s.env.requirements.stageIncomplete(stageID))

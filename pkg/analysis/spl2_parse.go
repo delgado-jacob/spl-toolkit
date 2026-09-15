@@ -55,6 +55,8 @@ type spl2SyntaxListener struct {
 	tracker *lexerWorkTracker
 }
 
+type spl2ParserFactory func(antlr.TokenStream) *spl2.SPL2Parser
+
 func (l *spl2SyntaxListener) SyntaxError(recognizer antlr.Recognizer, offending interface{}, line, column int, msg string, e antlr.RecognitionException) {
 	s := l.parsed.source
 	start, end := len(s.positions)-1, len(s.positions)-1
@@ -91,6 +93,10 @@ func (l *spl2SyntaxListener) SyntaxError(recognizer antlr.Recognizer, offending 
 	}
 }
 func parseSPL2Document(text string) *spl2ParsedDocument {
+	return parseSPL2DocumentWithParserFactory(text, spl2.NewSPL2Parser)
+}
+
+func parseSPL2DocumentWithParserFactory(text string, newParser spl2ParserFactory) *spl2ParsedDocument {
 	parsed := &spl2ParsedDocument{source: newSourceIndex(text), diagnostics: []Diagnostic{}}
 	tracker := &lexerWorkTracker{}
 	listener := &spl2SyntaxListener{DefaultErrorListener: antlr.NewDefaultErrorListener(), parsed: parsed, tracker: tracker}
@@ -107,7 +113,7 @@ func parseSPL2Document(text string) *spl2ParsedDocument {
 		parsed.resourceLimit = tracker.resourceLimit
 		return parsed
 	}
-	parser := spl2.NewSPL2Parser(parsed.tokens)
+	parser := newParser(parsed.tokens)
 	parser.RemoveErrorListeners()
 	parser.AddErrorListener(listener)
 	parsed.tree = parser.Query()

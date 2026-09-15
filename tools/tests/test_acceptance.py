@@ -106,7 +106,7 @@ def passing_records() -> list[dict]:
                     "sarif-cases.json", "example-corpus.json", "example-target.json",
                     "example-corpus-missing-file.json", "../rewrite/forms.json",
                 )},
-                "machine_contract_tests": {"collected": 10, "passed": 10, "failed": 0, "skipped": 0},
+                "machine_contract_tests": {"collected": 13, "passed": 13, "failed": 0, "skipped": 0},
                 "required_test_hashes": {
                     "native": {"test_native_requirements.py": (
                         hashlib.sha256(
@@ -176,6 +176,22 @@ def test_installed_contract_evidence_cannot_be_missing_or_malformed():
         assert any(f"{field} contains an invalid SHA-256" in error for error in validate_records(records, SHA))
         del records[index][field][first]
         assert any(f"{field} has incorrect paths" in error for error in validate_records(records, SHA))
+
+
+def test_machine_contract_evidence_below_current_floor_is_rejected():
+    records = passing_records()
+    for record in records:
+        if record["kind"] == "installed-wheel":
+            record["machine_contract_tests"] = {
+                "collected": 12,
+                "passed": 12,
+                "failed": 0,
+                "skipped": 0,
+            }
+    assert any(
+        "machine_contract_tests must all pass" in error
+        for error in validate_records(records, SHA)
+    )
 
 
 def test_installed_evidence_cannot_omit_spl2_surface_suite():

@@ -178,6 +178,21 @@ def run_cli(cli: Path, operation: str, document: dict) -> tuple[int, dict, bytes
     return completed.returncode, json.loads(completed.stdout), completed.stdout.rstrip(b"\n")
 
 
+def expected_requirements_exit(requirements: dict) -> int:
+    status = requirements.get("query_status")
+    coverage = requirements.get("coverage")
+    if status == "invalid":
+        return 1
+    if status == "incomplete":
+        return 3
+    if status == "valid" and isinstance(coverage, dict):
+        if coverage.get("complete") is False:
+            return 3
+        if coverage.get("complete") is True:
+            return 0
+    return 2
+
+
 def post_raw(server: str, operation: str, payload: bytes) -> tuple[int, dict, bytes]:
     request = Request(
         server + "/query/" + operation,
@@ -536,7 +551,7 @@ def requirement_fixture_path() -> Path:
 @pytest.fixture(scope="session")
 def requirement_cases() -> list[dict]:
     data = json.loads(requirement_fixture_path().read_text(encoding="utf-8"))
-    assert data["version"] == "1" and len(data["cases"]) == 18
+    assert data["version"] == "1" and len(data["cases"]) == 19
     assert {
         (case["document"].get("language") or "spl", case["expected"]["query_status"])
         for case in data["cases"]
@@ -794,7 +809,7 @@ def test_requirements_fixture_matches_go_cli_http_and_python(
             requirement_status, http_requirements, _ = post_document(server_url, "requirements", document)
 
             assert analysis_exit == EXITS[go["analysis"]["status"]]
-            assert requirement_exit == EXITS[go["requirements"]["query_status"]]
+            assert requirement_exit == expected_requirements_exit(go["requirements"])
             assert analysis_status == requirement_status == 200
             assert py_analysis == c_analysis == cli_analysis == http_analysis == go["analysis"]
             assert py_requirements == c_requirements == cli_requirements == http_requirements == go["requirements"]
@@ -960,6 +975,18 @@ def test_portable_cli_resource_limit_query(cli_path):
             else:
                 assert_resource_limit(None, value, document)
                 assert len(encoded) <= 4096
+
+
+def test_requirements_cli_exit_accounts_for_incomplete_coverage(cli_path):
+    document = {
+        "text": "search key=1 | lookup users key OUTPUTNEW a | table a | where a=1",
+        "source_id": "requirements-valid-incomplete-coverage.spl",
+    }
+    exit_code, requirements, _ = run_cli(cli_path, "requirements", document)
+    assert requirements["query_status"] == "valid"
+    assert requirements["coverage"]["complete"] is False
+    assert expected_requirements_exit(requirements) == 3
+    assert exit_code == 3
 
 
 def test_dense_resource_limit_oracle_is_exact(go_reports, special_documents):

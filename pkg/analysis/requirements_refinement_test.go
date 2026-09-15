@@ -21,6 +21,8 @@ func TestRequirementSetFieldRefinementParity(t *testing.T) {
 		{name: "wildcard finite", document: analysis.QueryDocument{Text: "fields host* | table hostname"}, universe: analysis.SourceUniverse{Fields: []string{"hostname"}, Complete: true}},
 		{name: "unresolved wildcard", document: analysis.QueryDocument{Text: "| mystery | table host*"}, universe: analysis.SourceUniverse{Fields: []string{"hostname"}, Complete: false}},
 		{name: "dotted SPL2", document: analysis.QueryDocument{Text: "FROM main SELECT actor.user.name", Language: "spl2"}, universe: analysis.SourceUniverse{Fields: []string{"actor.user.name"}, Complete: false}},
+		{name: "SPL2 recovered diagnostic prefix", document: analysis.QueryDocument{Text: "FROM main | foobar | stats c=count() BY host | eval y=other", Language: "spl2"}, universe: analysis.SourceUniverse{Fields: []string{"host", "other"}, Complete: true}},
+		{name: "aggregation closes prior uncertainty", document: analysis.QueryDocument{Text: "search index=main | foobar | stats count by host | eval y=other"}, universe: analysis.SourceUniverse{Fields: []string{"host", "other"}, Complete: true}},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {

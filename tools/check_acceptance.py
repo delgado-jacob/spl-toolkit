@@ -17,7 +17,7 @@ CONFIG = json.loads((ROOT / "tools" / "release-env.json").read_text(encoding="ut
 TARGETS = CONFIG["targets"]
 PYTHON_VERSIONS = tuple(CONFIG["test_python"])
 EXPECTED_COUNTS = {"required_native": 11, "surface_acceptance": 6}
-EXPECTED_MACHINE_CONTRACT_COUNT = 10
+EXPECTED_MACHINE_CONTRACT_COUNT = 13
 REQUIRED_TEST_FILES = {
     "native": {"test_native_abi.py", "test_native_mapper.py", "test_native_analysis.py",
                "test_native_validation.py", "test_native_schema_validation.py", "test_native_spl2.py",

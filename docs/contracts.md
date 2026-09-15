@@ -6,9 +6,10 @@ layout: page
 # Machine contracts
 
 The [contract registry](../contracts/README.md) lists every v1 schema and request
-entry point. It covers QueryDocument, capabilities, analysis, field-list and
-JSON Schema/OCSF validation, rewrite, corpus, manifest, graph, impact, advanced
-document view and LSP configuration. Python wheels include these schemas under
+entry point. It covers QueryDocument, capabilities, analysis, direct query
+requirements, field-list and JSON Schema/OCSF validation, rewrite, corpus,
+manifest, graph, impact, advanced document view and LSP configuration. Python
+wheels include these schemas under
 `spl_toolkit/contracts`; source/release artifacts retain their provenance and
 third-party notices. The product version remains 0.1.1.
 

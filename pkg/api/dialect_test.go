@@ -115,7 +115,7 @@ func TestDialectMaintainedAPIExamples(t *testing.T) {
 		t.Fatal(err)
 	}
 	examples := apiExamplePattern.FindAllSubmatch(data, -1)
-	if len(examples) != 16 || bytes.Count(data, []byte("```json")) != len(examples) {
+	if len(examples) != 17 || bytes.Count(data, []byte("```json")) != len(examples) {
 		t.Fatalf("request marker coverage: %d", len(examples))
 	}
 	seen := map[string]bool{}
@@ -144,6 +144,16 @@ func TestDialectMaintainedAPIExamples(t *testing.T) {
 					t.Fatal(e)
 				}
 				want = report
+			case "/query/requirements":
+				var doc analysis.QueryDocument
+				if err := json.Unmarshal(body, &doc); err != nil {
+					t.Fatal(err)
+				}
+				requirements, e := analysis.Requirements(doc)
+				if e != nil {
+					t.Fatal(e)
+				}
+				want = requirements
 			case "/query/validate-fields":
 				request, e := validation.DecodeRequest(body)
 				if e != nil {
@@ -221,7 +231,11 @@ func TestDialectMaintainedAPIExamples(t *testing.T) {
 			if !reflect.DeepEqual(gotJSON, wantJSON) {
 				t.Fatalf("canonical JSON mismatch: %s", w.Body)
 			}
-			if status != "legacy" && gotJSON.(map[string]any)["status"] != status {
+			statusKey := "status"
+			if route == "/query/requirements" {
+				statusKey = "query_status"
+			}
+			if status != "legacy" && gotJSON.(map[string]any)[statusKey] != status {
 				t.Fatalf("documented content status %s: %s", status, w.Body)
 			}
 		})
@@ -252,7 +266,7 @@ func TestDialectMaintainedAPIExamplesAcceptWindowsLineEndings(t *testing.T) {
 	lfData := bytes.ReplaceAll(data, []byte("\r\n"), []byte("\n"))
 	for _, source := range [][]byte{lfData, bytes.ReplaceAll(lfData, []byte("\n"), []byte("\r\n"))} {
 		examples := apiExamplePattern.FindAllSubmatch(source, -1)
-		if len(examples) != 16 || bytes.Count(source, []byte("```json")) != len(examples) {
+		if len(examples) != 17 || bytes.Count(source, []byte("```json")) != len(examples) {
 			t.Fatalf("request marker coverage with Windows line endings: %d", len(examples))
 		}
 	}

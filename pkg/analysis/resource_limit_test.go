@@ -36,6 +36,44 @@ func TestSPL2LexerWorkBudgetExactAndPlusOne(t *testing.T) {
 	assertResourceLimitedResult(t, result, plusOne, rawLexerTokens(t, "spl2", plusOne)[lexerWorkLimit])
 }
 
+func TestSPLParserFactoryRunsOnlyAfterLexerAdmission(t *testing.T) {
+	exact, plusOne := lexerBoundaryQueries(t, "spl")
+	calls := 0
+	factory := func(tokens antlr.TokenStream) *parser.SPLParser {
+		calls++
+		return parser.NewSPLParser(tokens)
+	}
+
+	parsed := parseDocumentWithParserFactory(exact, factory)
+	if parsed.resourceLimit != nil || parsed.tree == nil || calls != 1 {
+		t.Fatalf("exact-limit parse = resource %v tree %T factory calls %d, want admitted tree and one call", parsed.resourceLimit, parsed.tree, calls)
+	}
+	calls = 0
+	parsed = parseDocumentWithParserFactory(plusOne, factory)
+	if parsed.resourceLimit == nil || parsed.tree != nil || calls != 0 {
+		t.Fatalf("plus-one parse = resource %v tree %T factory calls %d, want resource limit and zero calls", parsed.resourceLimit, parsed.tree, calls)
+	}
+}
+
+func TestSPL2ParserFactoryRunsOnlyAfterLexerAdmission(t *testing.T) {
+	exact, plusOne := lexerBoundaryQueries(t, "spl2")
+	calls := 0
+	factory := func(tokens antlr.TokenStream) *spl2.SPL2Parser {
+		calls++
+		return spl2.NewSPL2Parser(tokens)
+	}
+
+	parsed := parseSPL2DocumentWithParserFactory(exact, factory)
+	if parsed.resourceLimit != nil || parsed.tree == nil || calls != 1 {
+		t.Fatalf("exact-limit parse = resource %v tree %T factory calls %d, want admitted tree and one call", parsed.resourceLimit, parsed.tree, calls)
+	}
+	calls = 0
+	parsed = parseSPL2DocumentWithParserFactory(plusOne, factory)
+	if parsed.resourceLimit == nil || parsed.tree != nil || calls != 0 {
+		t.Fatalf("plus-one parse = resource %v tree %T factory calls %d, want resource limit and zero calls", parsed.resourceLimit, parsed.tree, calls)
+	}
+}
+
 func TestSPLLexerWorkBudgetCountsErrorsBeforeReturnedToken(t *testing.T) {
 	prefix, _ := lexerBoundaryQueriesAt(t, "spl", lexerWorkLimit-1)
 

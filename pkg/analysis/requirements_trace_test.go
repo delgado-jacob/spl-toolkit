@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"reflect"
 	"sort"
+	"strings"
 	"testing"
 )
 
@@ -418,6 +419,133 @@ func TestRequirementTraceSPLRecoveryMirrorsUncertainty(t *testing.T) {
 	}
 	if trace.syntaxComplete || trace.semanticComplete {
 		t.Fatalf("recovered SPL trace completeness = syntax %t semantic %t", trace.syntaxComplete, trace.semanticComplete)
+	}
+}
+
+func TestSPL2RecoveryRequirementsRetainEveryQueryDiagnostic(t *testing.T) {
+	const query = "FROM main | foobar | stats c=count() BY host | eval y=other"
+	result, trace, err := analyzeRewriteWithTrace(QueryDocument{Text: query, Language: "spl2"}, nil, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	wantDiagnostics := []struct {
+		code, severity, category, message string
+		start, end                        int
+		stage                             string
+	}{
+		{CodeUnsupportedSemantics, "warning", "unsupported_semantics", "Standalone command effects are unproved", 12, 18, "stage-1"},
+		{CodeUnsupportedSemantics, "warning", "unsupported_semantics", "Standalone command syntax and effects are unproved", 12, 18, "stage-1"},
+		{CodeUnsupportedSemantics, "warning", "unsupported_semantics", "Standalone command effects are unproved", 21, 44, "stage-2"},
+		{CodeUnsupportedSemantics, "warning", "unsupported", "Unproved command option retains incomplete syntax coverage", 27, 34, "stage-2"},
+		{CodeSyntaxError, "error", "syntax", "", 34, 35, "stage-2"},
+	}
+	if result.Status != Invalid || result.Requirements.QueryStatus != Invalid {
+		t.Fatalf("status = analysis %q requirements %q, want invalid/invalid", result.Status, result.Requirements.QueryStatus)
+	}
+	if len(result.Diagnostics) != len(wantDiagnostics) {
+		t.Fatalf("analysis diagnostics = %d, want %d: %+v", len(result.Diagnostics), len(wantDiagnostics), result.Diagnostics)
+	}
+	for i, want := range wantDiagnostics {
+		got := result.Diagnostics[i]
+		if got.Code != want.code || got.Severity != want.severity || got.Category != want.category || got.Location != newSourceIndex(query).location(want.start, want.end) || got.StageID != want.stage || got.ScopeID != "scope-0" {
+			t.Errorf("diagnostic %d = %+v, want code=%q severity=%q category=%q range=%d:%d stage=%q", i, got, want.code, want.severity, want.category, want.start, want.end, want.stage)
+		}
+		if want.message != "" && got.Message != want.message {
+			t.Errorf("diagnostic %d message = %q, want %q", i, got.Message, want.message)
+		}
+		if want.code == CodeSyntaxError && !strings.HasPrefix(got.Message, "extraneous input '('") {
+			t.Errorf("syntax diagnostic message = %q", got.Message)
+		}
+	}
+	if !reflect.DeepEqual(result.Requirements.Diagnostics, result.Diagnostics) {
+		t.Fatalf("requirement diagnostics differ from plain analysis:\nanalysis=%+v\nrequirements=%+v", result.Diagnostics, result.Requirements.Diagnostics)
+	}
+	standalone, err := Requirements(QueryDocument{Text: query, Language: "spl2"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(standalone, &result.Requirements) {
+		t.Fatalf("standalone requirements differ from embedded requirements:\nstandalone=%+v\nembedded=%+v", standalone, result.Requirements)
+	}
+	wantGapCodes := []string{CodeUnsupportedSemantics, CodeSyntaxError, CodeRequirementIndeterminate}
+	gotGapCodes := make([]string, len(result.Requirements.Gaps))
+	for i, gap := range result.Requirements.Gaps {
+		gotGapCodes[i] = gap.Code
+	}
+	if !reflect.DeepEqual(gotGapCodes, wantGapCodes) {
+		t.Fatalf("requirement gaps = %q, want %q: %+v", gotGapCodes, wantGapCodes, result.Requirements.Gaps)
+	}
+
+	wantTraceOrder := []struct {
+		code, message string
+		event         int
+	}{
+		{CodeUnsupportedSemantics, "Standalone command syntax and effects are unproved", 0},
+		{CodeSyntaxError, "", 1},
+		{CodeUnsupportedSemantics, "Unproved command option retains incomplete syntax coverage", 2},
+		{CodeUnsupportedSemantics, "Standalone command effects are unproved", 4},
+		{CodeUnsupportedSemantics, "Standalone command effects are unproved", 5},
+	}
+	if len(trace.diagnostics) != len(wantTraceOrder) {
+		t.Fatalf("trace diagnostics = %d, want %d: %+v", len(trace.diagnostics), len(wantTraceOrder), trace.diagnostics)
+	}
+	for i, want := range wantTraceOrder {
+		got := trace.diagnostics[i]
+		if got.diagnostic.Code != want.code || !got.incomplete || len(got.pendingReferenceIDs) != 0 || got.eventOrdinal != want.event {
+			t.Errorf("trace diagnostic %d = %+v, want code=%q incomplete=true owners=[] event=%d", i, got, want.code, want.event)
+		}
+		if want.message != "" && got.diagnostic.Message != want.message {
+			t.Errorf("trace diagnostic %d message = %q, want %q", i, got.diagnostic.Message, want.message)
+		}
+	}
+}
+
+func TestAggregationClosesQueryOnlyUncertaintyAtCurrentStage(t *testing.T) {
+	const query = "search index=main | foobar | stats count by host | eval y=other"
+	result, trace, err := analyzeRewriteWithTrace(QueryDocument{Text: query}, nil, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	host := requirementTraceReferenceByNameAndRole(t, trace, "host", "group")
+	if host.reference.Binding != "indeterminate" || host.directExternal || !host.conditional {
+		t.Fatalf("group field trace = %+v, want conditional indeterminate", host)
+	}
+	other := requirementTraceReferenceByNameAndRole(t, trace, "other", "read")
+	if other.reference.Binding != "unavailable" || other.directExternal || other.conditional {
+		t.Fatalf("post-aggregation field trace = %+v, want unavailable", other)
+	}
+	if result.Status != Invalid || result.Requirements.QueryStatus != Invalid {
+		t.Fatalf("status = analysis %q requirements %q, want invalid/invalid", result.Status, result.Requirements.QueryStatus)
+	}
+	standalone, err := Requirements(QueryDocument{Text: query})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(standalone, &result.Requirements) {
+		t.Fatalf("standalone requirements differ from embedded requirements:\nstandalone=%+v\nembedded=%+v", standalone, result.Requirements)
+	}
+	foundUnavailable := false
+	for _, diagnostic := range result.Requirements.Diagnostics {
+		if diagnostic.Code == CodeUnavailableField && diagnostic.Location == newSourceIndex(query).location(58, 63) {
+			foundUnavailable = true
+		}
+	}
+	if !foundUnavailable {
+		t.Fatalf("requirements omitted unavailable-field diagnostic: %+v", result.Requirements.Diagnostics)
+	}
+	for _, item := range result.Requirements.Items {
+		if item.Kind == "field" && item.Identity == "other" {
+			t.Fatalf("unavailable local field became an external requirement: %+v", item)
+		}
+	}
+	for _, gap := range result.Requirements.Gaps {
+		for _, referenceID := range gap.ReferenceIDs {
+			if referenceID == other.reference.ID {
+				t.Fatalf("unavailable local field became an indeterminate gap: %+v", gap)
+			}
+		}
 	}
 }
 

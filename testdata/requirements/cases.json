@@ -2165,6 +2165,226 @@
           }
         ]
       }
+    },
+    {
+      "id": "spl2_recovered_diagnostics",
+      "document": {
+        "text": "FROM main | foobar | stats c=count() BY host | eval y=other",
+        "language": "spl2",
+        "profile": "",
+        "version": "",
+        "source_id": "requirements:spl2_recovered_diagnostics"
+      },
+      "expected": {
+        "schema_version": 1,
+        "query": {
+          "source_id": "requirements:spl2_recovered_diagnostics",
+          "language": "spl2",
+          "profile": "splunkd",
+          "version": "current",
+          "query_digest": "sha256:61bb24feb65f02a444364327bcde4a82de12768740787a22de424947a797ef54"
+        },
+        "capability_revision": "sha256:c3217502697cee2595f20d2fe98b76422f837696d2861cee81e852ad142edcfc",
+        "query_status": "invalid",
+        "coverage": {
+          "complete": false,
+          "reasons": [
+            "SPL_UNSUPPORTED_SEMANTICS",
+            "SPL_SYNTAX_ERROR",
+            "SPL_REQUIREMENT_INDETERMINATE"
+          ]
+        },
+        "items": [
+          {
+            "id": "req-1",
+            "kind": "dataset",
+            "identity": "main",
+            "role": "read",
+            "necessity": "required",
+            "origin": "direct",
+            "resolution": "exact",
+            "occurrences": [
+              {
+                "reference_id": "ref-0",
+                "original_name": "main",
+                "binding": "not_applicable",
+                "stage_id": "stage-0",
+                "scope_id": "scope-0",
+                "location": {
+                  "start": {
+                    "offset": 5,
+                    "line": 1,
+                    "column": 6
+                  },
+                  "end": {
+                    "offset": 9,
+                    "line": 1,
+                    "column": 10
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "id": "req-2",
+            "kind": "field",
+            "identity": "other",
+            "role": "read",
+            "necessity": "conditional",
+            "origin": "direct",
+            "resolution": "exact",
+            "occurrences": [
+              {
+                "reference_id": "ref-2",
+                "original_name": "other",
+                "binding": "indeterminate",
+                "stage_id": "stage-3",
+                "scope_id": "scope-0",
+                "location": {
+                  "start": {
+                    "offset": 54,
+                    "line": 1,
+                    "column": 55
+                  },
+                  "end": {
+                    "offset": 59,
+                    "line": 1,
+                    "column": 60
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "gaps": [
+          {
+            "code": "SPL_UNSUPPORTED_SEMANTICS",
+            "message": "Standalone command syntax and effects are unproved",
+            "reference_ids": [],
+            "diagnostic_codes": [
+              "SPL_UNSUPPORTED_SEMANTICS"
+            ]
+          },
+          {
+            "code": "SPL_SYNTAX_ERROR",
+            "message": "extraneous input '(' expecting {DISTINCT, HAVING, GROUPBY, ORDER, ORDERBY, LIMIT, OFFSET, ASC, DESC, 'by', JOIN, INNER, LEFT, OUTER, ON, EXISTS, 'index', 'as', 'rename', 'stats', 'eventstats', 'streamstats', 'lookup', 'sort', 'dedup', 'head', 'reverse', 'BY', 'OUTPUT', 'OUTPUTNEW', 'allnum', 'delim', 'partitions', 'span', 'current', 'reset', 'before', 'after', 'onchange', 'window', 'keepempty', 'consecutive', 'keeplast', 'while', 'auto', 'ip', 'num', 'str', 'TERM', 'CASE', 'earliest', 'latest', '_index_earliest', '_index_latest', 'timeformat', 'starttime', 'endtime', 'now', 'append', 'appendpipe', 'appendcols', 'union', 'if', 'elseif', 'else', 'bin', 'spath', 'loadjob', 'tstats', 'mstats', 'timechart', 'timewrap', 'makemv', 'mvexpand', 'mvcombine', 'fillnull', 'right', 'run_in_preview', 'max', 'bins', 'minspan', 'start', 'end', 'aligntime', FIELD, MAX_MATCH, OFFSET_FIELD, MODE, SED, 'input', 'path', 'output', 'aggregates', 'predicate', 'byfields', 'datamodel_name', 'sep', 'format', 'partial', 'cont', 'fixedrange', 'agg', 'usenull', 'useother', 'nullstr', 'otherstr', 'align', 'tokenizer', 'value', 'type', SQUOTE, LOG_SPAN, IDENTIFIER}",
+            "reference_ids": [],
+            "diagnostic_codes": [
+              "SPL_SYNTAX_ERROR"
+            ]
+          },
+          {
+            "code": "SPL_REQUIREMENT_INDETERMINATE",
+            "message": "requirement origin is indeterminate",
+            "reference_ids": [
+              "ref-2"
+            ],
+            "diagnostic_codes": []
+          }
+        ],
+        "diagnostics": [
+          {
+            "code": "SPL_UNSUPPORTED_SEMANTICS",
+            "severity": "warning",
+            "category": "unsupported_semantics",
+            "message": "Standalone command effects are unproved",
+            "location": {
+              "start": {
+                "offset": 12,
+                "line": 1,
+                "column": 13
+              },
+              "end": {
+                "offset": 18,
+                "line": 1,
+                "column": 19
+              }
+            },
+            "stage_id": "stage-1",
+            "scope_id": "scope-0"
+          },
+          {
+            "code": "SPL_UNSUPPORTED_SEMANTICS",
+            "severity": "warning",
+            "category": "unsupported_semantics",
+            "message": "Standalone command syntax and effects are unproved",
+            "location": {
+              "start": {
+                "offset": 12,
+                "line": 1,
+                "column": 13
+              },
+              "end": {
+                "offset": 18,
+                "line": 1,
+                "column": 19
+              }
+            },
+            "stage_id": "stage-1",
+            "scope_id": "scope-0"
+          },
+          {
+            "code": "SPL_UNSUPPORTED_SEMANTICS",
+            "severity": "warning",
+            "category": "unsupported_semantics",
+            "message": "Standalone command effects are unproved",
+            "location": {
+              "start": {
+                "offset": 21,
+                "line": 1,
+                "column": 22
+              },
+              "end": {
+                "offset": 44,
+                "line": 1,
+                "column": 45
+              }
+            },
+            "stage_id": "stage-2",
+            "scope_id": "scope-0"
+          },
+          {
+            "code": "SPL_UNSUPPORTED_SEMANTICS",
+            "severity": "warning",
+            "category": "unsupported",
+            "message": "Unproved command option retains incomplete syntax coverage",
+            "location": {
+              "start": {
+                "offset": 27,
+                "line": 1,
+                "column": 28
+              },
+              "end": {
+                "offset": 34,
+                "line": 1,
+                "column": 35
+              }
+            },
+            "stage_id": "stage-2",
+            "scope_id": "scope-0"
+          },
+          {
+            "code": "SPL_SYNTAX_ERROR",
+            "severity": "error",
+            "category": "syntax",
+            "message": "extraneous input '(' expecting {DISTINCT, HAVING, GROUPBY, ORDER, ORDERBY, LIMIT, OFFSET, ASC, DESC, 'by', JOIN, INNER, LEFT, OUTER, ON, EXISTS, 'index', 'as', 'rename', 'stats', 'eventstats', 'streamstats', 'lookup', 'sort', 'dedup', 'head', 'reverse', 'BY', 'OUTPUT', 'OUTPUTNEW', 'allnum', 'delim', 'partitions', 'span', 'current', 'reset', 'before', 'after', 'onchange', 'window', 'keepempty', 'consecutive', 'keeplast', 'while', 'auto', 'ip', 'num', 'str', 'TERM', 'CASE', 'earliest', 'latest', '_index_earliest', '_index_latest', 'timeformat', 'starttime', 'endtime', 'now', 'append', 'appendpipe', 'appendcols', 'union', 'if', 'elseif', 'else', 'bin', 'spath', 'loadjob', 'tstats', 'mstats', 'timechart', 'timewrap', 'makemv', 'mvexpand', 'mvcombine', 'fillnull', 'right', 'run_in_preview', 'max', 'bins', 'minspan', 'start', 'end', 'aligntime', FIELD, MAX_MATCH, OFFSET_FIELD, MODE, SED, 'input', 'path', 'output', 'aggregates', 'predicate', 'byfields', 'datamodel_name', 'sep', 'format', 'partial', 'cont', 'fixedrange', 'agg', 'usenull', 'useother', 'nullstr', 'otherstr', 'align', 'tokenizer', 'value', 'type', SQUOTE, LOG_SPAN, IDENTIFIER}",
+            "location": {
+              "start": {
+                "offset": 34,
+                "line": 1,
+                "column": 35
+              },
+              "end": {
+                "offset": 35,
+                "line": 1,
+                "column": 36
+              }
+            },
+            "stage_id": "stage-2",
+            "scope_id": "scope-0"
+          }
+        ]
+      }
     }
   ]
 }

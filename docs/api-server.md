@@ -21,6 +21,7 @@ Routes are under `/api/v1`:
 | POST | `/query/discover` | seven-category discovery |
 | POST | `/query/validate` | legacy SPL syntax validation |
 | POST | `/query/analyze` | canonical SPL/SPL2 analysis |
+| POST | `/query/requirements` | canonical direct query requirements |
 | GET | `/capabilities` | selected canonical capability manifest |
 | POST | `/query/validate-fields` | canonical local field validation |
 | POST | `/query/validate-fields/batch` | ordered local field validation batch |
@@ -84,6 +85,15 @@ The full report includes SQL lineage `phase` and `execution_order`, with lexical
 ```
 
 Modules/declarations and known wrong-profile constructs carry located `SPL_UNSUPPORTED_MODULE` and `SPL_PROFILE_MISMATCH` findings with incomplete coverage. Unknown standalone syntax remains incomplete.
+
+`POST /api/v1/query/requirements` accepts the same strict query document and returns its canonical direct requirements without environment metadata, knowledge-object expansion, or compatibility proof:
+
+<!-- api-example: requirements-direct /query/requirements valid -->
+```json
+{"text":"search host=web | table host","source_id":"requirements-example"}
+```
+
+Valid, invalid, and incomplete content returns HTTP 200. Input errors return 400.
 
 `GET /api/v1/capabilities?language=spl2&profile=splunkd&version=current` returns the selected manifest, including `documentation_snapshot` for SPL2. The only query parameters are `language`, `profile`, and `version`; omitted or empty values use defaults. Unknown parameters/values, malformed encodings/Unicode, and duplicate or conflicting keys return 400, including repeated equal values. With no selectors it returns the unchanged SPL manifest. Query body/source identity are not capability selectors.
 
