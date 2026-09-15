@@ -125,6 +125,8 @@ The Python method uses the same keyword-only `language`, `profile`, `version`, a
 
 The CLI mirrors the existing `analyze` input boundary: one positional or `--query` value, compatibility selectors, optional `--source-id`, `--format text|json`, and optional `--output`. Milestone 8 does not add batch, file, or stdin input to either command. Text output prints query status and requirement coverage separately, followed by items, gaps, and diagnostics.
 
+Portable CLI resource-limit acceptance uses the compact deterministic query `strings.Repeat("a ", 4097)`, or its byte-identical fixture equivalent. It contains 4,097 identifier tokens, is 8,194 ASCII bytes and UTF-16 code units, and exceeds the 4,096-unit lexer work budget while remaining well below the Windows 32,767 UTF-16 command-line boundary. The 64 KiB and 256 KiB dense fixtures and the 300,000-byte long-sparse fixture do not travel through CLI argv. They remain mandatory through Go, HTTP, raw C, Python, an installed wheel, and a rebuilt sdist, whose body, stdin, or in-process transports admit those sizes. This operating-system argv constraint is a transport-only test constraint. It does not lower or otherwise change the canonical 4,096-unit analyzer budget, and it does not authorize file, stdin, or batch input for either CLI command.
+
 CLI exit codes are:
 
 | Code | Meaning |
@@ -139,6 +141,8 @@ An over-budget query follows the existing successful content paths for both oper
 REST uses the existing strict query-document decoder, content-type policy, middleware, and 1 MiB body limit. Valid, invalid, and incomplete content returns HTTP 200 with the canonical set. Malformed JSON, invalid Unicode, duplicate or unknown properties, and unsupported selectors return HTTP 400. No server-side file or network access is introduced.
 
 Native and Python preserve existing mapper-handle admission, operation guards, owned-result allocation, UTF-8 behavior, error propagation, and finally-based freeing. Adapters perform no requirement classification or gap construction. Full report parity ignores only JSON object-key order.
+
+Dense raw-C and Python acceptance runs in helper subprocesses rather than the pytest parent. The parent sends the complete probe request through stdin, applies an explicit timeout, captures the structured result, and always reaps the helper. A timeout or abnormal exit fails acceptance after the parent terminates the helper and, if necessary, kills and reaps it. The helper retains the same complete-value equality checks, exactly-once `spl_result_free` checks, mapper ownership checks, repeated calls, and concurrent-call checks as the in-process API contract.
 
 ## Propagation through existing reports
 
@@ -190,12 +194,23 @@ Cross-surface acceptance submits representative valid, invalid, and incomplete S
 - `Analyze(...).Requirements` equals `Requirements(...)` for the same document.
 - CLI text fields and all four exit outcomes.
 - HTTP content outcomes versus request failures, strict Unicode handling, and body limits.
-- Over-budget parity across every surface, including CLI exit `3`, REST HTTP 200 below the 1 MiB body boundary, owned native and Python success, and concurrent 64 KiB and 256 KiB dense inputs.
+- Over-budget parity through the compact 4,097-identifier CLI fixture, including CLI exit `3`, and through the 64 KiB and 256 KiB dense fixtures for Go, REST below the 1 MiB body boundary, raw C, Python, installed wheel, and rebuilt sdist. The same non-CLI surfaces admit the 300,000-byte long-sparse fixture. Dense native and Python probes, including concurrency, use the stdin-fed helper-subprocess boundary described above.
 - For the ASCII dense 64 KiB and 256 KiB fixtures, serialized `RequirementSet` output no larger than 4,096 bytes and serialized `Result` output no larger than the full query byte length plus 4,096 bytes, stable across repeated and concurrent runs.
 - Invalid and closed native handles, owned-result freeing, repeated calls, and concurrent calls.
 - Direct-wheel and rebuilt-sdist installations outside the checkout with no source-path injection.
 - Positive and negative JSON Schema instances for the new contract and compatibility checks for archived analysis v1 reports.
 - OpenAPI regeneration idempotence, native header/source closure, documentation checks, release-content closure, and absence of `_build_plan/` from runtime and package inputs.
+
+The dense-fixture assertion is an exact semantic oracle. Cross-surface equality alone is insufficient. For the exact 64 KiB, or 65,536-byte, and 256 KiB fixtures it requires `schema_version: 1` on the analysis and requirement reports; the full normalized document with the supplied text and source ID plus `profile: splunkd` and `version: current`; the complete normalized requirement query identity; and the exact capability revision. Source IDs are `dense-spl-65536.spl`, `dense-spl-262144.spl`, `dense-spl2-65536.spl`, and `dense-spl2-262144.spl`. SPL uses capability revision `sha256:dfb8cedde04204e0a876412fbe217e49405689b54ae7d7d8fc37bfcb7fb2335f`. SPL2 uses `sha256:c3217502697cee2595f20d2fe98b76422f837696d2861cee81e852ad142edcfc`. The exact query digests are:
+
+- SPL, 64 KiB: `sha256:4ef76589e31ca84b778eb3e15f8cd320319dd03746fff5bf7ba21ba66865dace`.
+- SPL, 256 KiB: `sha256:64ec67a0b6bcecae397863ac2b0336f8c59fa39cadb134fd2757b3d68b66e502`.
+- SPL2, 64 KiB: `sha256:c5b1c0ba7bc519bde8181f7b8469f84fb4a04e35e16cc37d027a67a3477fcf3b`.
+- SPL2, 256 KiB: `sha256:ad99be139221b8721e1d2319d4be832e2df915731a1f33e45444320a9115c445`.
+
+The analysis dependency object has exactly the keys `indexes`, `sources`, `source_types`, `data_models`, `lookups`, `macros`, and `datasets`, each mapped to an empty array. Analysis status and requirement query status are `incomplete`; analysis syntax and semantic coverage are false; requirement coverage is false; and both coverage reason arrays contain only `SPL_ANALYSIS_RESOURCE_LIMIT`. Stages, scopes, references, lineage, requirement items, and all dependency values are empty arrays. The analysis embeds the exact standalone requirement set.
+
+Each dense result contains exactly one diagnostic. It has code `SPL_ANALYSIS_RESOURCE_LIMIT`, severity `warning`, category `resource_limit`, message `analysis stopped before parser prediction after reaching the 4,096-unit lexer work limit`, and empty stage and scope IDs. Both dense sizes use the same first-omitted location for their language. SPL uses start `{offset: 7026, line: 1, column: 7027}` and end `{offset: 7027, line: 1, column: 7028}`. SPL2 uses start `{offset: 7564, line: 1, column: 7565}` and end `{offset: 7565, line: 1, column: 7566}`. The requirement report contains that same diagnostic and exactly one gap with code `SPL_ANALYSIS_RESOURCE_LIMIT`, message `requirement coverage is incomplete because analysis exceeded the 4,096-unit lexer work limit`, empty `reference_ids`, and `diagnostic_codes: ["SPL_ANALYSIS_RESOURCE_LIMIT"]`. No partial evidence is permitted.
 
 Run the established Go 1.22 floor checks, current-Go formatting, vet and race checks, native source tests, package isolation suites, contract validator, documentation checks, and the repository's main CI pipeline. Green local tests do not substitute for the requested main pipeline result.
 
@@ -205,14 +220,22 @@ Update the repository README, `docs/API.md`, `docs/cli.md`, `docs/architecture.m
 
 Permanent documentation and tests must not link to or load this design file. User-facing limits must state that requirements are direct and query-only, dynamic or unsupported behavior remains incomplete, no knowledge-object expansion occurs, and a requirement set does not prove environment compatibility or runtime execution.
 
+## Decision and deviation history
+
+On 2026-09-15, Task 8 quality review replaced the original uniform dense-payload surface matrix. Passing 64 KiB and 256 KiB queries directly in CLI argv is not portable to Windows, whose command-line boundary is 32,767 UTF-16 code units. Adding file, stdin, or batch input would change the approved CLI contract. The corrected design therefore keeps the public CLI contract and proves its resource-limit content path with the compact 4,097-identifier, 8,194-code-unit query, while retaining the full dense and long-sparse matrix on transports that admit those payloads. This is a test-transport deviation only; the analyzer still enforces one 4,096-unit lexer budget on every canonical analysis call.
+
+The same review found that dense acceptance compared surfaces and checked only part of the resource-limit shape. The corrected design pins schema versions, normalized identity, capability revisions, query digests, dependency keys, the complete diagnostic and gap, exact omitted ranges, and absence of partial evidence so a shared adapter defect cannot become its own oracle.
+
+The review also found that raw native calls ran inside the pytest process, including thread-pool probes. A native crash or hang could therefore terminate or strand the acceptance runner before it reported which boundary failed. The corrected design moves dense raw-C and Python probes into stdin-fed helper subprocesses with parent-enforced timeouts and clean termination while preserving equality, allocation, free, handle, and concurrency assertions.
+
 ## Acceptance criteria
 
 Milestone 8 is complete when:
 
-1. Representative SPL and SPL2 documents produce equivalent standalone requirement sets through Go, CLI, REST, native/C, and Python.
+1. Representative SPL and SPL2 documents produce equivalent standalone requirement sets through Go, CLI, REST, native/C, and Python. Portable resource-limit acceptance uses the compact 4,097-identifier query for CLI and the full 64 KiB, 256 KiB, and 300,000-byte long-sparse fixtures for Go, REST, raw C, Python, installed wheel, and rebuilt sdist.
 2. Every new analysis result embeds a set equal to the standalone query-only set, including inside refinement-aware reports.
 3. Source, conditional, dynamic, and indeterminate external obligations are explicit. Derived and query-local unavailable fields are not misclassified as obligations: `Analyze` retains their canonical references, while standalone `Requirements` returns only the external-obligation projection.
 4. Provenance identities, ordering, links, diagnostics, and empty collections are deterministic and deeply detached.
 5. Current contracts, installed packages, native closure, documentation, and main CI pass their required checks while archived version-1 reports remain valid.
-6. Canonical SPL and SPL2 parsing stops before parser construction or prediction on work unit 4,097 and returns the exact bounded incomplete report through every surface. Exact-limit, lexer-error ordering, SPL2 closure, range, sparse-input, 64 KiB, 256 KiB, deterministic-output, and concurrent adversarial checks pass without partial canonical evidence. For the two ASCII dense acceptance fixtures, the serialized requirement set is at most 4,096 bytes and the serialized analysis result is at most the full query byte length plus 4,096 bytes.
+6. Canonical SPL and SPL2 parsing stops before parser construction or prediction on work unit 4,097 and returns the exact bounded incomplete report through each applicable transport. Exact-limit, compact portable CLI, lexer-error ordering, SPL2 closure, range, sparse-input, 64 KiB, 256 KiB, deterministic-output, and concurrent adversarial checks pass without partial canonical evidence. Dense Python and raw-C probes run in stdin-fed helper subprocesses with parent timeouts and clean termination. For the two ASCII dense acceptance fixtures, the serialized requirement set is at most 4,096 bytes and the serialized analysis result is at most the full query byte length plus 4,096 bytes.
 7. No environment snapshot, compatibility assessment, transitive expansion, placeholder resolution, query fanout, broad language family, universal serialized-result bound, or `_build_plan/` runtime dependency is introduced.
