@@ -61,6 +61,25 @@ type RequirementSet struct {
 	Diagnostics        []Diagnostic             `json:"diagnostics"`
 }
 
+type requirementOwnedDiagnosticKey struct {
+	referenceID string
+	code        string
+}
+
+type requirementGapKey struct {
+	code                string
+	referenceCount      int
+	referenceIDs        string
+	diagnosticCodeCount int
+	diagnosticCodes     string
+}
+
+type requirementProjectionIndex struct {
+	ownedDiagnostics map[requirementOwnedDiagnosticKey]struct{}
+	seenGaps         map[requirementGapKey]struct{}
+	seenReasons      map[string]struct{}
+}
+
 func queryDigest(text string) string {
 	sum := sha256.Sum256([]byte(text))
 	return "sha256:" + hex.EncodeToString(sum[:])
@@ -109,6 +128,65 @@ func Requirements(document QueryDocument) (*RequirementSet, error) {
 	return &set, nil
 }
 
+func newRequirementProjectionIndex(trace *requirementTrace) *requirementProjectionIndex {
+	index := &requirementProjectionIndex{
+		ownedDiagnostics: map[requirementOwnedDiagnosticKey]struct{}{},
+		seenGaps:         map[requirementGapKey]struct{}{},
+		seenReasons:      map[string]struct{}{},
+	}
+	for _, diagnostic := range trace.diagnostics {
+		if !diagnostic.incomplete {
+			continue
+		}
+		for _, referenceID := range diagnostic.pendingReferenceIDs {
+			index.ownedDiagnostics[requirementOwnedDiagnosticKey{referenceID: referenceID, code: diagnostic.diagnostic.Code}] = struct{}{}
+		}
+	}
+	return index
+}
+
+func (i *requirementProjectionIndex) hasOwnedDiagnostic(referenceID, code string) bool {
+	_, found := i.ownedDiagnostics[requirementOwnedDiagnosticKey{referenceID: referenceID, code: code}]
+	return found
+}
+
+func (i *requirementProjectionIndex) appendGap(set *RequirementSet, gap RequirementGap) {
+	key := requirementGapKey{
+		code:                gap.Code,
+		referenceCount:      len(gap.ReferenceIDs),
+		referenceIDs:        orderedStringSliceKey(gap.ReferenceIDs),
+		diagnosticCodeCount: len(gap.DiagnosticCodes),
+		diagnosticCodes:     orderedStringSliceKey(gap.DiagnosticCodes),
+	}
+	if _, found := i.seenGaps[key]; found {
+		return
+	}
+	i.seenGaps[key] = struct{}{}
+	set.Gaps = append(set.Gaps, gap)
+	set.Coverage.Complete = false
+	if _, found := i.seenReasons[gap.Code]; found {
+		return
+	}
+	i.seenReasons[gap.Code] = struct{}{}
+	set.Coverage.Reasons = append(set.Coverage.Reasons, gap.Code)
+}
+
+func orderedStringSliceKey(values []string) string {
+	if len(values) < 2 {
+		if len(values) == 1 {
+			return values[0]
+		}
+		return ""
+	}
+	var key strings.Builder
+	for _, value := range values {
+		key.WriteString(strconv.Itoa(len(value)))
+		key.WriteByte(':')
+		key.WriteString(value)
+	}
+	return key.String()
+}
+
 func projectRequirements(document QueryDocument, trace *requirementTrace) (RequirementSet, error) {
 	revision, err := capabilityRevision(document)
 	if err != nil {
@@ -140,6 +218,7 @@ func projectRequirements(document QueryDocument, trace *requirementTrace) (Requi
 	}
 	groups := map[groupKey]int{}
 	gapCandidates := []gapCandidate{}
+	index := newRequirementProjectionIndex(trace)
 	references := append([]requirementTraceReference{}, trace.references...)
 	sort.SliceStable(references, func(i, j int) bool {
 		a, b := references[i].reference, references[j].reference
@@ -207,7 +286,7 @@ func projectRequirements(document QueryDocument, trace *requirementTrace) (Requi
 			if reference.Resolution == "wildcard" || reference.Resolution == "dynamic" {
 				code = CodeRequirementDynamic
 				message = "dynamic requirement identity is unresolved"
-				if traceHasOwnedDiagnostic(trace, reference.ID, CodeUnresolvedWildcard) {
+				if index.hasOwnedDiagnostic(reference.ID, CodeUnresolvedWildcard) {
 					continue
 				}
 			}
@@ -246,10 +325,10 @@ func projectRequirements(document QueryDocument, trace *requirementTrace) (Requi
 	})
 	sort.SliceStable(gapCandidates, func(i, j int) bool { return gapCandidates[i].eventOrdinal < gapCandidates[j].eventOrdinal })
 	for _, candidate := range gapCandidates {
-		appendRequirementGap(&set, candidate.gap)
+		index.appendGap(&set, candidate.gap)
 	}
 	if (!trace.syntaxComplete || !trace.semanticComplete) && len(set.Gaps) == 0 {
-		appendRequirementGap(&set, RequirementGap{
+		index.appendGap(&set, RequirementGap{
 			Code:            CodeRequirementCoverageIncomplete,
 			Message:         "requirement coverage is incomplete",
 			ReferenceIDs:    []string{},
@@ -260,48 +339,6 @@ func projectRequirements(document QueryDocument, trace *requirementTrace) (Requi
 		set.QueryStatus = Incomplete
 	}
 	return set, nil
-}
-
-func traceHasOwnedDiagnostic(trace *requirementTrace, referenceID, code string) bool {
-	for _, diagnostic := range trace.diagnostics {
-		if !diagnostic.incomplete || diagnostic.diagnostic.Code != code {
-			continue
-		}
-		for _, owner := range diagnostic.pendingReferenceIDs {
-			if owner == referenceID {
-				return true
-			}
-		}
-	}
-	return false
-}
-
-func appendRequirementGap(set *RequirementSet, gap RequirementGap) {
-	for _, existing := range set.Gaps {
-		if existing.Code == gap.Code && stringSlicesEqual(existing.ReferenceIDs, gap.ReferenceIDs) && stringSlicesEqual(existing.DiagnosticCodes, gap.DiagnosticCodes) {
-			return
-		}
-	}
-	set.Gaps = append(set.Gaps, gap)
-	set.Coverage.Complete = false
-	for _, reason := range set.Coverage.Reasons {
-		if reason == gap.Code {
-			return
-		}
-	}
-	set.Coverage.Reasons = append(set.Coverage.Reasons, gap.Code)
-}
-
-func stringSlicesEqual(left, right []string) bool {
-	if len(left) != len(right) {
-		return false
-	}
-	for i := range left {
-		if left[i] != right[i] {
-			return false
-		}
-	}
-	return true
 }
 
 func canonicalReferenceOrdinal(id string) (int, bool) {

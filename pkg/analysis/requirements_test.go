@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"reflect"
 	"testing"
 )
@@ -257,6 +258,58 @@ func TestProjectRequirementsGapOrderingAndDeduplication(t *testing.T) {
 			t.Fatalf("fallback coverage = %+v", got.Coverage)
 		}
 	})
+}
+
+func TestRequirementProjectionIndexUsesExactEvidenceKeys(t *testing.T) {
+	trace := newRequirementTrace()
+	trace.recordDiagnostic(Diagnostic{Code: CodeUnresolvedWildcard}, true, []string{"ref-0", "ref-2"}, trace.nextEvent())
+	trace.recordDiagnostic(Diagnostic{Code: CodeUnresolvedWildcard}, false, []string{"ref-1"}, trace.nextEvent())
+	trace.recordDiagnostic(Diagnostic{Code: CodeDynamicReference}, true, []string{"ref-0"}, trace.nextEvent())
+
+	index := newRequirementProjectionIndex(trace)
+	for _, tc := range []struct {
+		referenceID string
+		code        string
+		want        bool
+	}{
+		{"ref-0", CodeUnresolvedWildcard, true},
+		{"ref-2", CodeUnresolvedWildcard, true},
+		{"ref-1", CodeUnresolvedWildcard, false},
+		{"ref-0", CodeDynamicReference, true},
+		{"ref-2", CodeDynamicReference, false},
+	} {
+		if got := index.hasOwnedDiagnostic(tc.referenceID, tc.code); got != tc.want {
+			t.Errorf("owned diagnostic (%q, %q) = %t, want %t", tc.referenceID, tc.code, got, tc.want)
+		}
+	}
+
+	set := RequirementSet{
+		Coverage: RequirementCoverage{Complete: true, Reasons: []string{}},
+		Gaps:     []RequirementGap{},
+	}
+	first := RequirementGap{Code: "gap-a", Message: "first message", ReferenceIDs: []string{"ref-0", "ref-1"}, DiagnosticCodes: []string{"diag-0", "diag-1"}}
+	index.appendGap(&set, first)
+	duplicate := first
+	duplicate.Message = "later message"
+	index.appendGap(&set, duplicate)
+	reversedReferences := first
+	reversedReferences.ReferenceIDs = []string{"ref-1", "ref-0"}
+	index.appendGap(&set, reversedReferences)
+	reversedDiagnostics := first
+	reversedDiagnostics.DiagnosticCodes = []string{"diag-1", "diag-0"}
+	index.appendGap(&set, reversedDiagnostics)
+	index.appendGap(&set, RequirementGap{Code: "gap-b", Message: "second reason", ReferenceIDs: []string{}, DiagnosticCodes: []string{}})
+	index.appendGap(&set, RequirementGap{Code: "gap-b", Message: "empty reference identity", ReferenceIDs: []string{""}, DiagnosticCodes: []string{}})
+
+	if len(set.Gaps) != 5 {
+		t.Fatalf("gaps = %+v, want five exact evidence keys", set.Gaps)
+	}
+	if set.Gaps[0].Message != first.Message {
+		t.Fatalf("first gap message = %q, want %q", set.Gaps[0].Message, first.Message)
+	}
+	if got, want := set.Coverage.Reasons, []string{"gap-a", "gap-b"}; !reflect.DeepEqual(got, want) {
+		t.Fatalf("coverage reasons = %v, want %v", got, want)
+	}
 }
 
 func TestProjectRequirementsStatusIndependentFromCoverage(t *testing.T) {
@@ -716,5 +769,43 @@ func TestRequirementDiagnosticCodes(t *testing.T) {
 	}
 	if !reflect.DeepEqual(got, want) {
 		t.Fatalf("requirement diagnostic codes = %q, want %q", got, want)
+	}
+}
+
+func BenchmarkProjectRequirementsWildcardGapScaling(b *testing.B) {
+	for _, size := range []int{128, 1024, 8192} {
+		b.Run(fmt.Sprintf("references_%d", size), func(b *testing.B) {
+			trace := newRequirementTrace()
+			for i := 0; i < size; i++ {
+				reference := testRequirementReference(
+					fmt.Sprintf("ref-%d", i),
+					"field",
+					fmt.Sprintf("field_%d*", i),
+					"read",
+					"indeterminate",
+					"wildcard",
+					i,
+				)
+				trace.recordReference(reference, false, true, trace.nextEvent())
+				trace.recordDiagnostic(Diagnostic{
+					Code:     CodeUnresolvedWildcard,
+					Severity: "warning",
+					Message:  "wildcard field membership is unresolved",
+					Location: reference.Location,
+					StageID:  reference.StageID,
+					ScopeID:  reference.ScopeID,
+				}, true, []string{reference.ID}, trace.nextEvent())
+			}
+
+			document := QueryDocument{Text: "benchmark", Language: "spl", Profile: "splunkd", Version: "current"}
+			b.ReportAllocs()
+			b.ReportMetric(float64(size), "references/op")
+			b.ResetTimer()
+			for i := 0; i < b.N; i++ {
+				if _, err := projectRequirements(document, trace); err != nil {
+					b.Fatal(err)
+				}
+			}
+		})
 	}
 }
