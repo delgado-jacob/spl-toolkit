@@ -56,6 +56,7 @@ func formCandidate(document analysis.QueryDocument, rules []Rule, probes []analy
 	}
 	if pending.resourceLimited {
 		pending.originalEvidence = evidence
+		pending.original = nil
 		return pending, nil
 	}
 	selection := selectRules(rules, probes, evidence)

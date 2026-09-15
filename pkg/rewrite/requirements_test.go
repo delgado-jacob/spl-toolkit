@@ -106,9 +106,11 @@ func TestResourceLimitedRewriteUsesCachedEvidenceAfterCandidateFormation(t *test
 	if !resourceLimited(pending) {
 		t.Fatal("expected resource-limited candidate formation")
 	}
+	if pending.original != nil {
+		t.Fatal("resource-limited pending rewrite retained the original rewrite session")
+	}
 
 	want := cloneAnalysisForTest(t, &pending.originalEvidence.Analysis)
-	pending.original = nil
 	if !resourceLimited(pending) {
 		t.Fatal("resource-limit detection consulted the rewrite session instead of cached state")
 	}
