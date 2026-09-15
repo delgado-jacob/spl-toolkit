@@ -317,7 +317,147 @@
             "data_models": [],
             "macros": []
           },
-          "diagnostics": []
+          "diagnostics": [],
+          "requirements": {
+            "schema_version": 1,
+            "query": {
+              "source_id": "exact_nested_optional",
+              "language": "spl",
+              "profile": "splunkd",
+              "version": "current",
+              "query_digest": "sha256:c309cc43bf5d6d1979a3de60bb992a43e55ef2073a8ae06d8c4a51af95d8043b"
+            },
+            "capability_revision": "sha256:dfb8cedde04204e0a876412fbe217e49405689b54ae7d7d8fc37bfcb7fb2335f",
+            "query_status": "valid",
+            "coverage": {
+              "complete": true,
+              "reasons": []
+            },
+            "items": [
+              {
+                "id": "req-1",
+                "kind": "field",
+                "identity": "Host",
+                "role": "filter",
+                "necessity": "required",
+                "origin": "direct",
+                "resolution": "exact",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-0",
+                    "original_name": "Host",
+                    "binding": "source",
+                    "stage_id": "stage-0",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 7,
+                        "line": 1,
+                        "column": 8
+                      },
+                      "end": {
+                        "offset": 11,
+                        "line": 1,
+                        "column": 12
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "req-2",
+                "kind": "field",
+                "identity": "host",
+                "role": "filter",
+                "necessity": "required",
+                "origin": "direct",
+                "resolution": "exact",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-1",
+                    "original_name": "host",
+                    "binding": "source",
+                    "stage_id": "stage-0",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 14,
+                        "line": 1,
+                        "column": 15
+                      },
+                      "end": {
+                        "offset": 18,
+                        "line": 1,
+                        "column": 19
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "req-3",
+                "kind": "field",
+                "identity": "user.name",
+                "role": "filter",
+                "necessity": "required",
+                "origin": "direct",
+                "resolution": "exact",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-2",
+                    "original_name": "'user.name'",
+                    "binding": "source",
+                    "stage_id": "stage-0",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 21,
+                        "line": 1,
+                        "column": 22
+                      },
+                      "end": {
+                        "offset": 32,
+                        "line": 1,
+                        "column": 33
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "req-4",
+                "kind": "field",
+                "identity": "optional",
+                "role": "read",
+                "necessity": "required",
+                "origin": "direct",
+                "resolution": "exact",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-3",
+                    "original_name": "optional",
+                    "binding": "source",
+                    "stage_id": "stage-1",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 43,
+                        "line": 1,
+                        "column": 44
+                      },
+                      "end": {
+                        "offset": 51,
+                        "line": 1,
+                        "column": 52
+                      }
+                    }
+                  }
+                ]
+              }
+            ],
+            "gaps": [],
+            "diagnostics": []
+          }
         },
         "status": "valid",
         "coverage": {
@@ -571,7 +711,87 @@
             "data_models": [],
             "macros": []
           },
-          "diagnostics": []
+          "diagnostics": [],
+          "requirements": {
+            "schema_version": 1,
+            "query": {
+              "source_id": "nested_no_parent",
+              "language": "spl",
+              "profile": "splunkd",
+              "version": "current",
+              "query_digest": "sha256:9daf242ab932bc1bae69d7f9e1be6c52888574d2e11fca92eb82553b38954fee"
+            },
+            "capability_revision": "sha256:dfb8cedde04204e0a876412fbe217e49405689b54ae7d7d8fc37bfcb7fb2335f",
+            "query_status": "valid",
+            "coverage": {
+              "complete": true,
+              "reasons": []
+            },
+            "items": [
+              {
+                "id": "req-1",
+                "kind": "field",
+                "identity": "user",
+                "role": "read",
+                "necessity": "required",
+                "origin": "direct",
+                "resolution": "exact",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-0",
+                    "original_name": "user",
+                    "binding": "source",
+                    "stage_id": "stage-0",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 6,
+                        "line": 1,
+                        "column": 7
+                      },
+                      "end": {
+                        "offset": 10,
+                        "line": 1,
+                        "column": 11
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "req-2",
+                "kind": "field",
+                "identity": "user.name",
+                "role": "read",
+                "necessity": "required",
+                "origin": "direct",
+                "resolution": "exact",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-1",
+                    "original_name": "user.name",
+                    "binding": "source",
+                    "stage_id": "stage-0",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 11,
+                        "line": 1,
+                        "column": 12
+                      },
+                      "end": {
+                        "offset": 20,
+                        "line": 1,
+                        "column": 21
+                      }
+                    }
+                  }
+                ]
+              }
+            ],
+            "gaps": [],
+            "diagnostics": []
+          }
         },
         "status": "invalid",
         "coverage": {
@@ -780,7 +1000,57 @@
             "data_models": [],
             "macros": []
           },
-          "diagnostics": []
+          "diagnostics": [],
+          "requirements": {
+            "schema_version": 1,
+            "query": {
+              "source_id": "nested_no_child",
+              "language": "spl",
+              "profile": "splunkd",
+              "version": "current",
+              "query_digest": "sha256:163f028df26132f5da1c7ecc7cefa3742dbe70deebd74b4edf5667a65985024e"
+            },
+            "capability_revision": "sha256:dfb8cedde04204e0a876412fbe217e49405689b54ae7d7d8fc37bfcb7fb2335f",
+            "query_status": "valid",
+            "coverage": {
+              "complete": true,
+              "reasons": []
+            },
+            "items": [
+              {
+                "id": "req-1",
+                "kind": "field",
+                "identity": "user.name",
+                "role": "read",
+                "necessity": "required",
+                "origin": "direct",
+                "resolution": "exact",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-0",
+                    "original_name": "user.name",
+                    "binding": "source",
+                    "stage_id": "stage-0",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 6,
+                        "line": 1,
+                        "column": 7
+                      },
+                      "end": {
+                        "offset": 15,
+                        "line": 1,
+                        "column": 16
+                      }
+                    }
+                  }
+                ]
+              }
+            ],
+            "gaps": [],
+            "diagnostics": []
+          }
         },
         "status": "invalid",
         "coverage": {
@@ -1060,7 +1330,26 @@
             "data_models": [],
             "macros": []
           },
-          "diagnostics": []
+          "diagnostics": [],
+          "requirements": {
+            "schema_version": 1,
+            "query": {
+              "source_id": "empty_derived",
+              "language": "spl",
+              "profile": "splunkd",
+              "version": "current",
+              "query_digest": "sha256:c8fb5a3ada1a49f85e01071c260d590d4df28edc4f90f986fd26033d7d577c95"
+            },
+            "capability_revision": "sha256:dfb8cedde04204e0a876412fbe217e49405689b54ae7d7d8fc37bfcb7fb2335f",
+            "query_status": "valid",
+            "coverage": {
+              "complete": true,
+              "reasons": []
+            },
+            "items": [],
+            "gaps": [],
+            "diagnostics": []
+          }
         },
         "status": "valid",
         "coverage": {
@@ -1231,7 +1520,57 @@
             "data_models": [],
             "macros": []
           },
-          "diagnostics": []
+          "diagnostics": [],
+          "requirements": {
+            "schema_version": 1,
+            "query": {
+              "source_id": "missing",
+              "language": "spl",
+              "profile": "splunkd",
+              "version": "current",
+              "query_digest": "sha256:57f59d49b1cc4a55b95ec999eb1602c3e0b26aeb4ea37814b6a379aa8362bc03"
+            },
+            "capability_revision": "sha256:dfb8cedde04204e0a876412fbe217e49405689b54ae7d7d8fc37bfcb7fb2335f",
+            "query_status": "valid",
+            "coverage": {
+              "complete": true,
+              "reasons": []
+            },
+            "items": [
+              {
+                "id": "req-1",
+                "kind": "field",
+                "identity": "missing",
+                "role": "filter",
+                "necessity": "required",
+                "origin": "direct",
+                "resolution": "exact",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-0",
+                    "original_name": "missing",
+                    "binding": "source",
+                    "stage_id": "stage-0",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 7,
+                        "line": 1,
+                        "column": 8
+                      },
+                      "end": {
+                        "offset": 14,
+                        "line": 1,
+                        "column": 15
+                      }
+                    }
+                  }
+                ]
+              }
+            ],
+            "gaps": [],
+            "diagnostics": []
+          }
         },
         "status": "invalid",
         "coverage": {
@@ -1407,7 +1746,91 @@
             "data_models": [],
             "macros": []
           },
-          "diagnostics": []
+          "diagnostics": [],
+          "requirements": {
+            "schema_version": 1,
+            "query": {
+              "source_id": "empty_inclusion",
+              "language": "spl",
+              "profile": "splunkd",
+              "version": "current",
+              "query_digest": "sha256:2fb36db83f3491deac0943d95f508a7aff9348a3d8b01c9612cb989ddbf2568d"
+            },
+            "capability_revision": "sha256:dfb8cedde04204e0a876412fbe217e49405689b54ae7d7d8fc37bfcb7fb2335f",
+            "query_status": "incomplete",
+            "coverage": {
+              "complete": false,
+              "reasons": [
+                "SPL_UNRESOLVED_WILDCARD"
+              ]
+            },
+            "items": [
+              {
+                "id": "req-1",
+                "kind": "field",
+                "identity": "host*",
+                "role": "read",
+                "necessity": "conditional",
+                "origin": "direct",
+                "resolution": "wildcard",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-0",
+                    "original_name": "host*",
+                    "binding": "indeterminate",
+                    "stage_id": "stage-0",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 6,
+                        "line": 1,
+                        "column": 7
+                      },
+                      "end": {
+                        "offset": 11,
+                        "line": 1,
+                        "column": 12
+                      }
+                    }
+                  }
+                ]
+              }
+            ],
+            "gaps": [
+              {
+                "code": "SPL_UNRESOLVED_WILDCARD",
+                "message": "wildcard \"host*\" membership is unresolved",
+                "reference_ids": [
+                  "ref-0"
+                ],
+                "diagnostic_codes": [
+                  "SPL_UNRESOLVED_WILDCARD"
+                ]
+              }
+            ],
+            "diagnostics": [
+              {
+                "code": "SPL_UNRESOLVED_WILDCARD",
+                "severity": "warning",
+                "category": "unsupported_semantics",
+                "message": "wildcard \"host*\" membership is unresolved",
+                "location": {
+                  "start": {
+                    "offset": 6,
+                    "line": 1,
+                    "column": 7
+                  },
+                  "end": {
+                    "offset": 11,
+                    "line": 1,
+                    "column": 12
+                  }
+                },
+                "stage_id": "stage-0",
+                "scope_id": "scope-0"
+              }
+            ]
+          }
         },
         "status": "invalid",
         "coverage": {
@@ -1587,7 +2010,60 @@
             "data_models": [],
             "macros": []
           },
-          "diagnostics": []
+          "diagnostics": [],
+          "requirements": {
+            "schema_version": 1,
+            "query": {
+              "source_id": "empty_removal",
+              "language": "spl",
+              "profile": "splunkd",
+              "version": "current",
+              "query_digest": "sha256:cecdb58a2c45a636f5f34a6b45f008b428da49ae7d59a4afb6abc6743f7cfb45"
+            },
+            "capability_revision": "sha256:dfb8cedde04204e0a876412fbe217e49405689b54ae7d7d8fc37bfcb7fb2335f",
+            "query_status": "incomplete",
+            "coverage": {
+              "complete": false,
+              "reasons": [
+                "SPL_UNRESOLVED_WILDCARD"
+              ]
+            },
+            "items": [],
+            "gaps": [
+              {
+                "code": "SPL_UNRESOLVED_WILDCARD",
+                "message": "wildcard \"absent*\" membership is unresolved",
+                "reference_ids": [
+                  "ref-0"
+                ],
+                "diagnostic_codes": [
+                  "SPL_UNRESOLVED_WILDCARD"
+                ]
+              }
+            ],
+            "diagnostics": [
+              {
+                "code": "SPL_UNRESOLVED_WILDCARD",
+                "severity": "warning",
+                "category": "unsupported_semantics",
+                "message": "wildcard \"absent*\" membership is unresolved",
+                "location": {
+                  "start": {
+                    "offset": 8,
+                    "line": 1,
+                    "column": 9
+                  },
+                  "end": {
+                    "offset": 15,
+                    "line": 1,
+                    "column": 16
+                  }
+                },
+                "stage_id": "stage-0",
+                "scope_id": "scope-0"
+              }
+            ]
+          }
         },
         "status": "valid",
         "coverage": {
@@ -1835,7 +2311,91 @@
               "stage_id": "stage-1",
               "scope_id": "scope-0"
             }
-          ]
+          ],
+          "requirements": {
+            "schema_version": 1,
+            "query": {
+              "source_id": "removed_wildcard",
+              "language": "spl",
+              "profile": "splunkd",
+              "version": "current",
+              "query_digest": "sha256:e7d3de65ab614911860a51f1507462ce7edbf2e7008c99040c7fa6fbc1b0b15e"
+            },
+            "capability_revision": "sha256:dfb8cedde04204e0a876412fbe217e49405689b54ae7d7d8fc37bfcb7fb2335f",
+            "query_status": "incomplete",
+            "coverage": {
+              "complete": false,
+              "reasons": [
+                "SPL_UNRESOLVED_WILDCARD"
+              ]
+            },
+            "items": [
+              {
+                "id": "req-1",
+                "kind": "field",
+                "identity": "host*",
+                "role": "read",
+                "necessity": "conditional",
+                "origin": "direct",
+                "resolution": "wildcard",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-1",
+                    "original_name": "host*",
+                    "binding": "indeterminate",
+                    "stage_id": "stage-1",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 21,
+                        "line": 1,
+                        "column": 22
+                      },
+                      "end": {
+                        "offset": 26,
+                        "line": 1,
+                        "column": 27
+                      }
+                    }
+                  }
+                ]
+              }
+            ],
+            "gaps": [
+              {
+                "code": "SPL_UNRESOLVED_WILDCARD",
+                "message": "wildcard \"host*\" membership is unresolved",
+                "reference_ids": [
+                  "ref-1"
+                ],
+                "diagnostic_codes": [
+                  "SPL_UNRESOLVED_WILDCARD"
+                ]
+              }
+            ],
+            "diagnostics": [
+              {
+                "code": "SPL_UNRESOLVED_WILDCARD",
+                "severity": "warning",
+                "category": "unsupported_semantics",
+                "message": "wildcard \"host*\" membership is unresolved",
+                "location": {
+                  "start": {
+                    "offset": 21,
+                    "line": 1,
+                    "column": 22
+                  },
+                  "end": {
+                    "offset": 26,
+                    "line": 1,
+                    "column": 27
+                  }
+                },
+                "stage_id": "stage-1",
+                "scope_id": "scope-0"
+              }
+            ]
+          }
         },
         "status": "invalid",
         "coverage": {
@@ -2190,7 +2750,130 @@
               "stage_id": "stage-2",
               "scope_id": "scope-0"
             }
-          ]
+          ],
+          "requirements": {
+            "schema_version": 1,
+            "query": {
+              "source_id": "removed_absent",
+              "language": "spl",
+              "profile": "splunkd",
+              "version": "current",
+              "query_digest": "sha256:0a5d3723bfdb098bf4aaedf764401756dda82b8abd8949506fd82491347ff221"
+            },
+            "capability_revision": "sha256:dfb8cedde04204e0a876412fbe217e49405689b54ae7d7d8fc37bfcb7fb2335f",
+            "query_status": "incomplete",
+            "coverage": {
+              "complete": false,
+              "reasons": [
+                "SPL_UNRESOLVED_WILDCARD",
+                "SPL_REQUIREMENT_INDETERMINATE"
+              ]
+            },
+            "items": [
+              {
+                "id": "req-1",
+                "kind": "field",
+                "identity": "missing",
+                "role": "filter",
+                "necessity": "required",
+                "origin": "direct",
+                "resolution": "exact",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-0",
+                    "original_name": "missing",
+                    "binding": "source",
+                    "stage_id": "stage-0",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 7,
+                        "line": 1,
+                        "column": 8
+                      },
+                      "end": {
+                        "offset": 14,
+                        "line": 1,
+                        "column": 15
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "req-2",
+                "kind": "field",
+                "identity": "missing",
+                "role": "read",
+                "necessity": "conditional",
+                "origin": "direct",
+                "resolution": "exact",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-2",
+                    "original_name": "missing",
+                    "binding": "indeterminate",
+                    "stage_id": "stage-2",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 41,
+                        "line": 1,
+                        "column": 42
+                      },
+                      "end": {
+                        "offset": 48,
+                        "line": 1,
+                        "column": 49
+                      }
+                    }
+                  }
+                ]
+              }
+            ],
+            "gaps": [
+              {
+                "code": "SPL_UNRESOLVED_WILDCARD",
+                "message": "wildcard \"miss*\" membership is unresolved",
+                "reference_ids": [
+                  "ref-1"
+                ],
+                "diagnostic_codes": [
+                  "SPL_UNRESOLVED_WILDCARD"
+                ]
+              },
+              {
+                "code": "SPL_REQUIREMENT_INDETERMINATE",
+                "message": "requirement origin is indeterminate",
+                "reference_ids": [
+                  "ref-2"
+                ],
+                "diagnostic_codes": []
+              }
+            ],
+            "diagnostics": [
+              {
+                "code": "SPL_UNRESOLVED_WILDCARD",
+                "severity": "warning",
+                "category": "unsupported_semantics",
+                "message": "wildcard \"miss*\" membership is unresolved",
+                "location": {
+                  "start": {
+                    "offset": 27,
+                    "line": 1,
+                    "column": 28
+                  },
+                  "end": {
+                    "offset": 32,
+                    "line": 1,
+                    "column": 33
+                  }
+                },
+                "stage_id": "stage-1",
+                "scope_id": "scope-0"
+              }
+            ]
+          }
         },
         "status": "invalid",
         "coverage": {
@@ -2482,7 +3165,98 @@
             "data_models": [],
             "macros": []
           },
-          "diagnostics": []
+          "diagnostics": [],
+          "requirements": {
+            "schema_version": 1,
+            "query": {
+              "source_id": "absent_not_structural",
+              "language": "spl",
+              "profile": "splunkd",
+              "version": "current",
+              "query_digest": "sha256:d03a81fc89de76aa8a94efd87d81bc7e1a8128f0546c8158a8a08f118b03d846"
+            },
+            "capability_revision": "sha256:dfb8cedde04204e0a876412fbe217e49405689b54ae7d7d8fc37bfcb7fb2335f",
+            "query_status": "valid",
+            "coverage": {
+              "complete": false,
+              "reasons": [
+                "SPL_REQUIREMENT_DYNAMIC"
+              ]
+            },
+            "items": [
+              {
+                "id": "req-1",
+                "kind": "field",
+                "identity": "missing",
+                "role": "read",
+                "necessity": "required",
+                "origin": "direct",
+                "resolution": "exact",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-0",
+                    "original_name": "missing",
+                    "binding": "source",
+                    "stage_id": "stage-0",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 6,
+                        "line": 1,
+                        "column": 7
+                      },
+                      "end": {
+                        "offset": 13,
+                        "line": 1,
+                        "column": 14
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "req-2",
+                "kind": "field",
+                "identity": "*",
+                "role": "read",
+                "necessity": "conditional",
+                "origin": "direct",
+                "resolution": "wildcard",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-1",
+                    "original_name": "*",
+                    "binding": "indeterminate",
+                    "stage_id": "stage-1",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 22,
+                        "line": 1,
+                        "column": 23
+                      },
+                      "end": {
+                        "offset": 23,
+                        "line": 1,
+                        "column": 24
+                      }
+                    }
+                  }
+                ]
+              }
+            ],
+            "gaps": [
+              {
+                "code": "SPL_REQUIREMENT_DYNAMIC",
+                "message": "dynamic requirement identity is unresolved",
+                "reference_ids": [
+                  "ref-1"
+                ],
+                "diagnostic_codes": []
+              }
+            ],
+            "diagnostics": []
+          }
         },
         "status": "invalid",
         "coverage": {
@@ -2723,7 +3497,91 @@
             "data_models": [],
             "macros": []
           },
-          "diagnostics": []
+          "diagnostics": [],
+          "requirements": {
+            "schema_version": 1,
+            "query": {
+              "source_id": "all_optional",
+              "language": "spl",
+              "profile": "splunkd",
+              "version": "current",
+              "query_digest": "sha256:7884936722e705dac02e780289bee979958567ef3661e908303def546460e295"
+            },
+            "capability_revision": "sha256:dfb8cedde04204e0a876412fbe217e49405689b54ae7d7d8fc37bfcb7fb2335f",
+            "query_status": "incomplete",
+            "coverage": {
+              "complete": false,
+              "reasons": [
+                "SPL_UNRESOLVED_WILDCARD"
+              ]
+            },
+            "items": [
+              {
+                "id": "req-1",
+                "kind": "field",
+                "identity": "opt*",
+                "role": "read",
+                "necessity": "conditional",
+                "origin": "direct",
+                "resolution": "wildcard",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-0",
+                    "original_name": "opt*",
+                    "binding": "indeterminate",
+                    "stage_id": "stage-0",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 6,
+                        "line": 1,
+                        "column": 7
+                      },
+                      "end": {
+                        "offset": 10,
+                        "line": 1,
+                        "column": 11
+                      }
+                    }
+                  }
+                ]
+              }
+            ],
+            "gaps": [
+              {
+                "code": "SPL_UNRESOLVED_WILDCARD",
+                "message": "wildcard \"opt*\" membership is unresolved",
+                "reference_ids": [
+                  "ref-0"
+                ],
+                "diagnostic_codes": [
+                  "SPL_UNRESOLVED_WILDCARD"
+                ]
+              }
+            ],
+            "diagnostics": [
+              {
+                "code": "SPL_UNRESOLVED_WILDCARD",
+                "severity": "warning",
+                "category": "unsupported_semantics",
+                "message": "wildcard \"opt*\" membership is unresolved",
+                "location": {
+                  "start": {
+                    "offset": 6,
+                    "line": 1,
+                    "column": 7
+                  },
+                  "end": {
+                    "offset": 10,
+                    "line": 1,
+                    "column": 11
+                  }
+                },
+                "stage_id": "stage-0",
+                "scope_id": "scope-0"
+              }
+            ]
+          }
         },
         "status": "valid",
         "coverage": {
@@ -2929,7 +3787,91 @@
             "data_models": [],
             "macros": []
           },
-          "diagnostics": []
+          "diagnostics": [],
+          "requirements": {
+            "schema_version": 1,
+            "query": {
+              "source_id": "ordinary_optional",
+              "language": "spl",
+              "profile": "splunkd",
+              "version": "current",
+              "query_digest": "sha256:2fb36db83f3491deac0943d95f508a7aff9348a3d8b01c9612cb989ddbf2568d"
+            },
+            "capability_revision": "sha256:dfb8cedde04204e0a876412fbe217e49405689b54ae7d7d8fc37bfcb7fb2335f",
+            "query_status": "incomplete",
+            "coverage": {
+              "complete": false,
+              "reasons": [
+                "SPL_UNRESOLVED_WILDCARD"
+              ]
+            },
+            "items": [
+              {
+                "id": "req-1",
+                "kind": "field",
+                "identity": "host*",
+                "role": "read",
+                "necessity": "conditional",
+                "origin": "direct",
+                "resolution": "wildcard",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-0",
+                    "original_name": "host*",
+                    "binding": "indeterminate",
+                    "stage_id": "stage-0",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 6,
+                        "line": 1,
+                        "column": 7
+                      },
+                      "end": {
+                        "offset": 11,
+                        "line": 1,
+                        "column": 12
+                      }
+                    }
+                  }
+                ]
+              }
+            ],
+            "gaps": [
+              {
+                "code": "SPL_UNRESOLVED_WILDCARD",
+                "message": "wildcard \"host*\" membership is unresolved",
+                "reference_ids": [
+                  "ref-0"
+                ],
+                "diagnostic_codes": [
+                  "SPL_UNRESOLVED_WILDCARD"
+                ]
+              }
+            ],
+            "diagnostics": [
+              {
+                "code": "SPL_UNRESOLVED_WILDCARD",
+                "severity": "warning",
+                "category": "unsupported_semantics",
+                "message": "wildcard \"host*\" membership is unresolved",
+                "location": {
+                  "start": {
+                    "offset": 6,
+                    "line": 1,
+                    "column": 7
+                  },
+                  "end": {
+                    "offset": 11,
+                    "line": 1,
+                    "column": 12
+                  }
+                },
+                "stage_id": "stage-0",
+                "scope_id": "scope-0"
+              }
+            ]
+          }
         },
         "status": "valid",
         "coverage": {
@@ -3263,7 +4205,121 @@
             "data_models": [],
             "macros": []
           },
-          "diagnostics": []
+          "diagnostics": [],
+          "requirements": {
+            "schema_version": 1,
+            "query": {
+              "source_id": "mixed_bindings",
+              "language": "spl",
+              "profile": "splunkd",
+              "version": "current",
+              "query_digest": "sha256:9032ad6554098ba11b0e91c838b7065434e8de5f08a03120dae5137e75af49eb"
+            },
+            "capability_revision": "sha256:dfb8cedde04204e0a876412fbe217e49405689b54ae7d7d8fc37bfcb7fb2335f",
+            "query_status": "incomplete",
+            "coverage": {
+              "complete": false,
+              "reasons": [
+                "SPL_UNRESOLVED_WILDCARD"
+              ]
+            },
+            "items": [
+              {
+                "id": "req-1",
+                "kind": "field",
+                "identity": "host",
+                "role": "read",
+                "necessity": "required",
+                "origin": "direct",
+                "resolution": "exact",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-1",
+                    "original_name": "host",
+                    "binding": "source",
+                    "stage_id": "stage-0",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 11,
+                        "line": 1,
+                        "column": 12
+                      },
+                      "end": {
+                        "offset": 15,
+                        "line": 1,
+                        "column": 16
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "req-2",
+                "kind": "field",
+                "identity": "*",
+                "role": "read",
+                "necessity": "conditional",
+                "origin": "direct",
+                "resolution": "wildcard",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-2",
+                    "original_name": "*",
+                    "binding": "indeterminate",
+                    "stage_id": "stage-1",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 24,
+                        "line": 1,
+                        "column": 25
+                      },
+                      "end": {
+                        "offset": 25,
+                        "line": 1,
+                        "column": 26
+                      }
+                    }
+                  }
+                ]
+              }
+            ],
+            "gaps": [
+              {
+                "code": "SPL_UNRESOLVED_WILDCARD",
+                "message": "wildcard \"*\" membership is unresolved",
+                "reference_ids": [
+                  "ref-2"
+                ],
+                "diagnostic_codes": [
+                  "SPL_UNRESOLVED_WILDCARD"
+                ]
+              }
+            ],
+            "diagnostics": [
+              {
+                "code": "SPL_UNRESOLVED_WILDCARD",
+                "severity": "warning",
+                "category": "unsupported_semantics",
+                "message": "wildcard \"*\" membership is unresolved",
+                "location": {
+                  "start": {
+                    "offset": 24,
+                    "line": 1,
+                    "column": 25
+                  },
+                  "end": {
+                    "offset": 25,
+                    "line": 1,
+                    "column": 26
+                  }
+                },
+                "stage_id": "stage-1",
+                "scope_id": "scope-0"
+              }
+            ]
+          }
         },
         "status": "valid",
         "coverage": {
@@ -3553,7 +4609,136 @@
               "stage_id": "stage-1",
               "scope_id": "scope-0"
             }
-          ]
+          ],
+          "requirements": {
+            "schema_version": 1,
+            "query": {
+              "source_id": "closed",
+              "language": "spl",
+              "profile": "splunkd",
+              "version": "current",
+              "query_digest": "sha256:297bba93424ba030ddbfdb781cc349040161b58eac822bb510ee0288d440494f"
+            },
+            "capability_revision": "sha256:dfb8cedde04204e0a876412fbe217e49405689b54ae7d7d8fc37bfcb7fb2335f",
+            "query_status": "incomplete",
+            "coverage": {
+              "complete": false,
+              "reasons": [
+                "SPL_UNSUPPORTED_SEMANTICS",
+                "SPL_REQUIREMENT_INDETERMINATE"
+              ]
+            },
+            "items": [
+              {
+                "id": "req-1",
+                "kind": "field",
+                "identity": "host",
+                "role": "read",
+                "necessity": "conditional",
+                "origin": "direct",
+                "resolution": "exact",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-0",
+                    "original_name": "host",
+                    "binding": "indeterminate",
+                    "stage_id": "stage-0",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 7,
+                        "line": 1,
+                        "column": 8
+                      },
+                      "end": {
+                        "offset": 11,
+                        "line": 1,
+                        "column": 12
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "req-2",
+                "kind": "field",
+                "identity": "user",
+                "role": "read",
+                "necessity": "conditional",
+                "origin": "direct",
+                "resolution": "exact",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-1",
+                    "original_name": "user",
+                    "binding": "indeterminate",
+                    "stage_id": "stage-1",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 20,
+                        "line": 1,
+                        "column": 21
+                      },
+                      "end": {
+                        "offset": 24,
+                        "line": 1,
+                        "column": 25
+                      }
+                    }
+                  }
+                ]
+              }
+            ],
+            "gaps": [
+              {
+                "code": "SPL_UNSUPPORTED_SEMANTICS",
+                "message": "fields inclusion retains internal fields with unresolved open-source membership",
+                "reference_ids": [],
+                "diagnostic_codes": [
+                  "SPL_UNSUPPORTED_SEMANTICS"
+                ]
+              },
+              {
+                "code": "SPL_REQUIREMENT_INDETERMINATE",
+                "message": "requirement origin is indeterminate",
+                "reference_ids": [
+                  "ref-0"
+                ],
+                "diagnostic_codes": []
+              },
+              {
+                "code": "SPL_REQUIREMENT_INDETERMINATE",
+                "message": "requirement origin is indeterminate",
+                "reference_ids": [
+                  "ref-1"
+                ],
+                "diagnostic_codes": []
+              }
+            ],
+            "diagnostics": [
+              {
+                "code": "SPL_UNSUPPORTED_SEMANTICS",
+                "severity": "warning",
+                "category": "unsupported_semantics",
+                "message": "fields inclusion retains internal fields with unresolved open-source membership",
+                "location": {
+                  "start": {
+                    "offset": 0,
+                    "line": 1,
+                    "column": 1
+                  },
+                  "end": {
+                    "offset": 11,
+                    "line": 1,
+                    "column": 12
+                  }
+                },
+                "stage_id": "stage-0",
+                "scope_id": "scope-0"
+              }
+            ]
+          }
         },
         "status": "invalid",
         "coverage": {
@@ -3858,7 +5043,136 @@
             "data_models": [],
             "macros": []
           },
-          "diagnostics": []
+          "diagnostics": [],
+          "requirements": {
+            "schema_version": 1,
+            "query": {
+              "source_id": "internal",
+              "language": "spl",
+              "profile": "splunkd",
+              "version": "current",
+              "query_digest": "sha256:b7a03197540491f1e23034b4d6c8133cd59c67874aed008e8d3f681db037a0bb"
+            },
+            "capability_revision": "sha256:dfb8cedde04204e0a876412fbe217e49405689b54ae7d7d8fc37bfcb7fb2335f",
+            "query_status": "incomplete",
+            "coverage": {
+              "complete": false,
+              "reasons": [
+                "SPL_UNSUPPORTED_SEMANTICS",
+                "SPL_REQUIREMENT_INDETERMINATE"
+              ]
+            },
+            "items": [
+              {
+                "id": "req-1",
+                "kind": "field",
+                "identity": "host",
+                "role": "read",
+                "necessity": "conditional",
+                "origin": "direct",
+                "resolution": "exact",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-0",
+                    "original_name": "host",
+                    "binding": "indeterminate",
+                    "stage_id": "stage-0",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 7,
+                        "line": 1,
+                        "column": 8
+                      },
+                      "end": {
+                        "offset": 11,
+                        "line": 1,
+                        "column": 12
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "req-2",
+                "kind": "field",
+                "identity": "_time",
+                "role": "read",
+                "necessity": "conditional",
+                "origin": "direct",
+                "resolution": "exact",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-1",
+                    "original_name": "_time",
+                    "binding": "indeterminate",
+                    "stage_id": "stage-1",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 20,
+                        "line": 1,
+                        "column": 21
+                      },
+                      "end": {
+                        "offset": 25,
+                        "line": 1,
+                        "column": 26
+                      }
+                    }
+                  }
+                ]
+              }
+            ],
+            "gaps": [
+              {
+                "code": "SPL_UNSUPPORTED_SEMANTICS",
+                "message": "fields inclusion retains internal fields with unresolved open-source membership",
+                "reference_ids": [],
+                "diagnostic_codes": [
+                  "SPL_UNSUPPORTED_SEMANTICS"
+                ]
+              },
+              {
+                "code": "SPL_REQUIREMENT_INDETERMINATE",
+                "message": "requirement origin is indeterminate",
+                "reference_ids": [
+                  "ref-0"
+                ],
+                "diagnostic_codes": []
+              },
+              {
+                "code": "SPL_REQUIREMENT_INDETERMINATE",
+                "message": "requirement origin is indeterminate",
+                "reference_ids": [
+                  "ref-1"
+                ],
+                "diagnostic_codes": []
+              }
+            ],
+            "diagnostics": [
+              {
+                "code": "SPL_UNSUPPORTED_SEMANTICS",
+                "severity": "warning",
+                "category": "unsupported_semantics",
+                "message": "fields inclusion retains internal fields with unresolved open-source membership",
+                "location": {
+                  "start": {
+                    "offset": 0,
+                    "line": 1,
+                    "column": 1
+                  },
+                  "end": {
+                    "offset": 11,
+                    "line": 1,
+                    "column": 12
+                  }
+                },
+                "stage_id": "stage-0",
+                "scope_id": "scope-0"
+              }
+            ]
+          }
         },
         "status": "valid",
         "coverage": {
@@ -4221,7 +5535,136 @@
               "stage_id": "stage-2",
               "scope_id": "scope-0"
             }
-          ]
+          ],
+          "requirements": {
+            "schema_version": 1,
+            "query": {
+              "source_id": "internal_removed",
+              "language": "spl",
+              "profile": "splunkd",
+              "version": "current",
+              "query_digest": "sha256:d5b064d31be75d06985ee57c43f9f5afe037b8adbead7f9e760c513a382d2374"
+            },
+            "capability_revision": "sha256:dfb8cedde04204e0a876412fbe217e49405689b54ae7d7d8fc37bfcb7fb2335f",
+            "query_status": "incomplete",
+            "coverage": {
+              "complete": false,
+              "reasons": [
+                "SPL_UNSUPPORTED_SEMANTICS",
+                "SPL_REQUIREMENT_INDETERMINATE"
+              ]
+            },
+            "items": [
+              {
+                "id": "req-1",
+                "kind": "field",
+                "identity": "host",
+                "role": "read",
+                "necessity": "conditional",
+                "origin": "direct",
+                "resolution": "exact",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-1",
+                    "original_name": "host",
+                    "binding": "indeterminate",
+                    "stage_id": "stage-1",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 23,
+                        "line": 1,
+                        "column": 24
+                      },
+                      "end": {
+                        "offset": 27,
+                        "line": 1,
+                        "column": 28
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "req-2",
+                "kind": "field",
+                "identity": "_time",
+                "role": "read",
+                "necessity": "conditional",
+                "origin": "direct",
+                "resolution": "exact",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-2",
+                    "original_name": "_time",
+                    "binding": "indeterminate",
+                    "stage_id": "stage-2",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 36,
+                        "line": 1,
+                        "column": 37
+                      },
+                      "end": {
+                        "offset": 41,
+                        "line": 1,
+                        "column": 42
+                      }
+                    }
+                  }
+                ]
+              }
+            ],
+            "gaps": [
+              {
+                "code": "SPL_UNSUPPORTED_SEMANTICS",
+                "message": "fields inclusion retains internal fields with unresolved open-source membership",
+                "reference_ids": [],
+                "diagnostic_codes": [
+                  "SPL_UNSUPPORTED_SEMANTICS"
+                ]
+              },
+              {
+                "code": "SPL_REQUIREMENT_INDETERMINATE",
+                "message": "requirement origin is indeterminate",
+                "reference_ids": [
+                  "ref-1"
+                ],
+                "diagnostic_codes": []
+              },
+              {
+                "code": "SPL_REQUIREMENT_INDETERMINATE",
+                "message": "requirement origin is indeterminate",
+                "reference_ids": [
+                  "ref-2"
+                ],
+                "diagnostic_codes": []
+              }
+            ],
+            "diagnostics": [
+              {
+                "code": "SPL_UNSUPPORTED_SEMANTICS",
+                "severity": "warning",
+                "category": "unsupported_semantics",
+                "message": "fields inclusion retains internal fields with unresolved open-source membership",
+                "location": {
+                  "start": {
+                    "offset": 16,
+                    "line": 1,
+                    "column": 17
+                  },
+                  "end": {
+                    "offset": 27,
+                    "line": 1,
+                    "column": 28
+                  }
+                },
+                "stage_id": "stage-1",
+                "scope_id": "scope-0"
+              }
+            ]
+          }
         },
         "status": "invalid",
         "coverage": {
@@ -4510,7 +5953,120 @@
               "stage_id": "stage-1",
               "scope_id": "scope-0"
             }
-          ]
+          ],
+          "requirements": {
+            "schema_version": 1,
+            "query": {
+              "source_id": "unknown_command",
+              "language": "spl",
+              "profile": "splunkd",
+              "version": "current",
+              "query_digest": "sha256:fbe4fb3e3c49115b7552c59005a629d2c6ca274ade9f6f8b607d7c815f67ca09"
+            },
+            "capability_revision": "sha256:dfb8cedde04204e0a876412fbe217e49405689b54ae7d7d8fc37bfcb7fb2335f",
+            "query_status": "incomplete",
+            "coverage": {
+              "complete": false,
+              "reasons": [
+                "SPL_UNSUPPORTED_COMMAND",
+                "SPL_UNRESOLVED_WILDCARD"
+              ]
+            },
+            "items": [
+              {
+                "id": "req-1",
+                "kind": "field",
+                "identity": "host*",
+                "role": "read",
+                "necessity": "conditional",
+                "origin": "direct",
+                "resolution": "wildcard",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-0",
+                    "original_name": "host*",
+                    "binding": "indeterminate",
+                    "stage_id": "stage-1",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 18,
+                        "line": 1,
+                        "column": 19
+                      },
+                      "end": {
+                        "offset": 23,
+                        "line": 1,
+                        "column": 24
+                      }
+                    }
+                  }
+                ]
+              }
+            ],
+            "gaps": [
+              {
+                "code": "SPL_UNSUPPORTED_COMMAND",
+                "message": "command \"mystery\" has unmodeled field effects",
+                "reference_ids": [],
+                "diagnostic_codes": [
+                  "SPL_UNSUPPORTED_COMMAND"
+                ]
+              },
+              {
+                "code": "SPL_UNRESOLVED_WILDCARD",
+                "message": "wildcard \"host*\" membership is unresolved",
+                "reference_ids": [
+                  "ref-0"
+                ],
+                "diagnostic_codes": [
+                  "SPL_UNRESOLVED_WILDCARD"
+                ]
+              }
+            ],
+            "diagnostics": [
+              {
+                "code": "SPL_UNSUPPORTED_COMMAND",
+                "severity": "warning",
+                "category": "unsupported_semantics",
+                "message": "command \"mystery\" has unmodeled field effects",
+                "location": {
+                  "start": {
+                    "offset": 2,
+                    "line": 1,
+                    "column": 3
+                  },
+                  "end": {
+                    "offset": 9,
+                    "line": 1,
+                    "column": 10
+                  }
+                },
+                "stage_id": "stage-0",
+                "scope_id": "scope-0"
+              },
+              {
+                "code": "SPL_UNRESOLVED_WILDCARD",
+                "severity": "warning",
+                "category": "unsupported_semantics",
+                "message": "wildcard \"host*\" membership is unresolved",
+                "location": {
+                  "start": {
+                    "offset": 18,
+                    "line": 1,
+                    "column": 19
+                  },
+                  "end": {
+                    "offset": 23,
+                    "line": 1,
+                    "column": 24
+                  }
+                },
+                "stage_id": "stage-1",
+                "scope_id": "scope-0"
+              }
+            ]
+          }
         },
         "status": "incomplete",
         "coverage": {
@@ -4891,7 +6447,136 @@
               "stage_id": "stage-0",
               "scope_id": "scope-0"
             }
-          ]
+          ],
+          "requirements": {
+            "schema_version": 1,
+            "query": {
+              "source_id": "unknown_function",
+              "language": "spl",
+              "profile": "splunkd",
+              "version": "current",
+              "query_digest": "sha256:10885e2b511ec5536770ed8b347f14d950b1528a4e4372861fd4cf6bfba5ad6c"
+            },
+            "capability_revision": "sha256:dfb8cedde04204e0a876412fbe217e49405689b54ae7d7d8fc37bfcb7fb2335f",
+            "query_status": "incomplete",
+            "coverage": {
+              "complete": false,
+              "reasons": [
+                "SPL_UNSUPPORTED_FUNCTION",
+                "SPL_REQUIREMENT_INDETERMINATE"
+              ]
+            },
+            "items": [
+              {
+                "id": "req-1",
+                "kind": "field",
+                "identity": "host",
+                "role": "read",
+                "necessity": "conditional",
+                "origin": "direct",
+                "resolution": "exact",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-1",
+                    "original_name": "host",
+                    "binding": "indeterminate",
+                    "stage_id": "stage-0",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 17,
+                        "line": 1,
+                        "column": 18
+                      },
+                      "end": {
+                        "offset": 21,
+                        "line": 1,
+                        "column": 22
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "req-2",
+                "kind": "field",
+                "identity": "out",
+                "role": "read",
+                "necessity": "conditional",
+                "origin": "direct",
+                "resolution": "exact",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-2",
+                    "original_name": "out",
+                    "binding": "indeterminate",
+                    "stage_id": "stage-1",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 31,
+                        "line": 1,
+                        "column": 32
+                      },
+                      "end": {
+                        "offset": 34,
+                        "line": 1,
+                        "column": 35
+                      }
+                    }
+                  }
+                ]
+              }
+            ],
+            "gaps": [
+              {
+                "code": "SPL_UNSUPPORTED_FUNCTION",
+                "message": "function \"mystery\" is unsupported",
+                "reference_ids": [],
+                "diagnostic_codes": [
+                  "SPL_UNSUPPORTED_FUNCTION"
+                ]
+              },
+              {
+                "code": "SPL_REQUIREMENT_INDETERMINATE",
+                "message": "requirement origin is indeterminate",
+                "reference_ids": [
+                  "ref-1"
+                ],
+                "diagnostic_codes": []
+              },
+              {
+                "code": "SPL_REQUIREMENT_INDETERMINATE",
+                "message": "requirement origin is indeterminate",
+                "reference_ids": [
+                  "ref-2"
+                ],
+                "diagnostic_codes": []
+              }
+            ],
+            "diagnostics": [
+              {
+                "code": "SPL_UNSUPPORTED_FUNCTION",
+                "severity": "warning",
+                "category": "unsupported_semantics",
+                "message": "function \"mystery\" is unsupported",
+                "location": {
+                  "start": {
+                    "offset": 9,
+                    "line": 1,
+                    "column": 10
+                  },
+                  "end": {
+                    "offset": 22,
+                    "line": 1,
+                    "column": 23
+                  }
+                },
+                "stage_id": "stage-0",
+                "scope_id": "scope-0"
+              }
+            ]
+          }
         },
         "status": "incomplete",
         "coverage": {
@@ -5314,7 +6999,151 @@
               "stage_id": "stage-1",
               "scope_id": "scope-0"
             }
-          ]
+          ],
+          "requirements": {
+            "schema_version": 1,
+            "query": {
+              "source_id": "macro",
+              "language": "spl",
+              "profile": "splunkd",
+              "version": "current",
+              "query_digest": "sha256:0e72a970c43440920b33ffdaaba531ca5b10af4229e7393b7d349b31925c3d19"
+            },
+            "capability_revision": "sha256:dfb8cedde04204e0a876412fbe217e49405689b54ae7d7d8fc37bfcb7fb2335f",
+            "query_status": "incomplete",
+            "coverage": {
+              "complete": false,
+              "reasons": [
+                "SPL_DYNAMIC_REFERENCE"
+              ]
+            },
+            "items": [
+              {
+                "id": "req-1",
+                "kind": "field",
+                "identity": "host",
+                "role": "filter",
+                "necessity": "required",
+                "origin": "direct",
+                "resolution": "exact",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-0",
+                    "original_name": "host",
+                    "binding": "source",
+                    "stage_id": "stage-0",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 7,
+                        "line": 1,
+                        "column": 8
+                      },
+                      "end": {
+                        "offset": 11,
+                        "line": 1,
+                        "column": 12
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "req-2",
+                "kind": "macro",
+                "identity": "expand",
+                "role": "read",
+                "necessity": "required",
+                "origin": "direct",
+                "resolution": "exact",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-1",
+                    "original_name": "expand",
+                    "binding": "not_applicable",
+                    "stage_id": "stage-1",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 17,
+                        "line": 1,
+                        "column": 18
+                      },
+                      "end": {
+                        "offset": 23,
+                        "line": 1,
+                        "column": 24
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "req-3",
+                "kind": "field",
+                "identity": "host",
+                "role": "read",
+                "necessity": "required",
+                "origin": "direct",
+                "resolution": "exact",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-2",
+                    "original_name": "host",
+                    "binding": "source",
+                    "stage_id": "stage-2",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 33,
+                        "line": 1,
+                        "column": 34
+                      },
+                      "end": {
+                        "offset": 37,
+                        "line": 1,
+                        "column": 38
+                      }
+                    }
+                  }
+                ]
+              }
+            ],
+            "gaps": [
+              {
+                "code": "SPL_DYNAMIC_REFERENCE",
+                "message": "macro expansion is unresolved",
+                "reference_ids": [
+                  "ref-1"
+                ],
+                "diagnostic_codes": [
+                  "SPL_DYNAMIC_REFERENCE"
+                ]
+              }
+            ],
+            "diagnostics": [
+              {
+                "code": "SPL_DYNAMIC_REFERENCE",
+                "severity": "warning",
+                "category": "unsupported_semantics",
+                "message": "macro expansion is unresolved",
+                "location": {
+                  "start": {
+                    "offset": 16,
+                    "line": 1,
+                    "column": 17
+                  },
+                  "end": {
+                    "offset": 24,
+                    "line": 1,
+                    "column": 25
+                  }
+                },
+                "stage_id": "stage-1",
+                "scope_id": "scope-0"
+              }
+            ]
+          }
         },
         "status": "incomplete",
         "coverage": {
@@ -5712,7 +7541,151 @@
               "stage_id": "stage-1",
               "scope_id": "scope-0"
             }
-          ]
+          ],
+          "requirements": {
+            "schema_version": 1,
+            "query": {
+              "source_id": "lookup",
+              "language": "spl",
+              "profile": "splunkd",
+              "version": "current",
+              "query_digest": "sha256:71e0b43a394d70413627535bf244c1a8e2a77c405b1b34728631adbc7a8517ef"
+            },
+            "capability_revision": "sha256:dfb8cedde04204e0a876412fbe217e49405689b54ae7d7d8fc37bfcb7fb2335f",
+            "query_status": "incomplete",
+            "coverage": {
+              "complete": false,
+              "reasons": [
+                "SPL_UNRESOLVED_WILDCARD"
+              ]
+            },
+            "items": [
+              {
+                "id": "req-1",
+                "kind": "lookup",
+                "identity": "assets",
+                "role": "read",
+                "necessity": "required",
+                "origin": "direct",
+                "resolution": "exact",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-0",
+                    "original_name": "assets",
+                    "binding": "not_applicable",
+                    "stage_id": "stage-0",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 7,
+                        "line": 1,
+                        "column": 8
+                      },
+                      "end": {
+                        "offset": 13,
+                        "line": 1,
+                        "column": 14
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "req-2",
+                "kind": "field",
+                "identity": "host",
+                "role": "read",
+                "necessity": "required",
+                "origin": "direct",
+                "resolution": "exact",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-1",
+                    "original_name": "host",
+                    "binding": "source",
+                    "stage_id": "stage-0",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 14,
+                        "line": 1,
+                        "column": 15
+                      },
+                      "end": {
+                        "offset": 18,
+                        "line": 1,
+                        "column": 19
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "req-3",
+                "kind": "field",
+                "identity": "lab*",
+                "role": "read",
+                "necessity": "conditional",
+                "origin": "direct",
+                "resolution": "wildcard",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-3",
+                    "original_name": "lab*",
+                    "binding": "indeterminate",
+                    "stage_id": "stage-1",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 43,
+                        "line": 1,
+                        "column": 44
+                      },
+                      "end": {
+                        "offset": 47,
+                        "line": 1,
+                        "column": 48
+                      }
+                    }
+                  }
+                ]
+              }
+            ],
+            "gaps": [
+              {
+                "code": "SPL_UNRESOLVED_WILDCARD",
+                "message": "wildcard \"lab*\" membership is unresolved",
+                "reference_ids": [
+                  "ref-3"
+                ],
+                "diagnostic_codes": [
+                  "SPL_UNRESOLVED_WILDCARD"
+                ]
+              }
+            ],
+            "diagnostics": [
+              {
+                "code": "SPL_UNRESOLVED_WILDCARD",
+                "severity": "warning",
+                "category": "unsupported_semantics",
+                "message": "wildcard \"lab*\" membership is unresolved",
+                "location": {
+                  "start": {
+                    "offset": 43,
+                    "line": 1,
+                    "column": 44
+                  },
+                  "end": {
+                    "offset": 47,
+                    "line": 1,
+                    "column": 48
+                  }
+                },
+                "stage_id": "stage-1",
+                "scope_id": "scope-0"
+              }
+            ]
+          }
         },
         "status": "incomplete",
         "coverage": {
@@ -6300,7 +8273,210 @@
               "stage_id": "stage-3",
               "scope_id": "scope-0"
             }
-          ]
+          ],
+          "requirements": {
+            "schema_version": 1,
+            "query": {
+              "source_id": "independent_scope",
+              "language": "spl",
+              "profile": "splunkd",
+              "version": "current",
+              "query_digest": "sha256:f537cf00a18f90c8710ec7f76d2662f44275cbb1693eaf8da3d3b437f50ab224"
+            },
+            "capability_revision": "sha256:dfb8cedde04204e0a876412fbe217e49405689b54ae7d7d8fc37bfcb7fb2335f",
+            "query_status": "incomplete",
+            "coverage": {
+              "complete": false,
+              "reasons": [
+                "SPL_UNSUPPORTED_SEMANTICS",
+                "SPL_UNRESOLVED_WILDCARD"
+              ]
+            },
+            "items": [
+              {
+                "id": "req-1",
+                "kind": "field",
+                "identity": "host",
+                "role": "read",
+                "necessity": "required",
+                "origin": "direct",
+                "resolution": "exact",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-1",
+                    "original_name": "host",
+                    "binding": "source",
+                    "stage_id": "stage-0",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 11,
+                        "line": 1,
+                        "column": 12
+                      },
+                      "end": {
+                        "offset": 15,
+                        "line": 1,
+                        "column": 16
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "req-2",
+                "kind": "field",
+                "identity": "*",
+                "role": "read",
+                "necessity": "conditional",
+                "origin": "direct",
+                "resolution": "wildcard",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-2",
+                    "original_name": "*",
+                    "binding": "indeterminate",
+                    "stage_id": "stage-2",
+                    "scope_id": "scope-1",
+                    "location": {
+                      "start": {
+                        "offset": 33,
+                        "line": 1,
+                        "column": 34
+                      },
+                      "end": {
+                        "offset": 34,
+                        "line": 1,
+                        "column": 35
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "req-3",
+                "kind": "field",
+                "identity": "lab*",
+                "role": "read",
+                "necessity": "conditional",
+                "origin": "direct",
+                "resolution": "wildcard",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-3",
+                    "original_name": "lab*",
+                    "binding": "indeterminate",
+                    "stage_id": "stage-3",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 45,
+                        "line": 1,
+                        "column": 46
+                      },
+                      "end": {
+                        "offset": 49,
+                        "line": 1,
+                        "column": 50
+                      }
+                    }
+                  }
+                ]
+              }
+            ],
+            "gaps": [
+              {
+                "code": "SPL_UNSUPPORTED_SEMANTICS",
+                "message": "command \"append\" has unmodeled field effects",
+                "reference_ids": [],
+                "diagnostic_codes": [
+                  "SPL_UNSUPPORTED_SEMANTICS"
+                ]
+              },
+              {
+                "code": "SPL_UNRESOLVED_WILDCARD",
+                "message": "wildcard \"*\" membership is unresolved",
+                "reference_ids": [
+                  "ref-2"
+                ],
+                "diagnostic_codes": [
+                  "SPL_UNRESOLVED_WILDCARD"
+                ]
+              },
+              {
+                "code": "SPL_UNRESOLVED_WILDCARD",
+                "message": "wildcard \"lab*\" membership is unresolved",
+                "reference_ids": [
+                  "ref-3"
+                ],
+                "diagnostic_codes": [
+                  "SPL_UNRESOLVED_WILDCARD"
+                ]
+              }
+            ],
+            "diagnostics": [
+              {
+                "code": "SPL_UNSUPPORTED_SEMANTICS",
+                "severity": "warning",
+                "category": "unsupported_semantics",
+                "message": "command \"append\" has unmodeled field effects",
+                "location": {
+                  "start": {
+                    "offset": 18,
+                    "line": 1,
+                    "column": 19
+                  },
+                  "end": {
+                    "offset": 36,
+                    "line": 1,
+                    "column": 37
+                  }
+                },
+                "stage_id": "stage-1",
+                "scope_id": "scope-0"
+              },
+              {
+                "code": "SPL_UNRESOLVED_WILDCARD",
+                "severity": "warning",
+                "category": "unsupported_semantics",
+                "message": "wildcard \"*\" membership is unresolved",
+                "location": {
+                  "start": {
+                    "offset": 33,
+                    "line": 1,
+                    "column": 34
+                  },
+                  "end": {
+                    "offset": 34,
+                    "line": 1,
+                    "column": 35
+                  }
+                },
+                "stage_id": "stage-2",
+                "scope_id": "scope-1"
+              },
+              {
+                "code": "SPL_UNRESOLVED_WILDCARD",
+                "severity": "warning",
+                "category": "unsupported_semantics",
+                "message": "wildcard \"lab*\" membership is unresolved",
+                "location": {
+                  "start": {
+                    "offset": 45,
+                    "line": 1,
+                    "column": 46
+                  },
+                  "end": {
+                    "offset": 49,
+                    "line": 1,
+                    "column": 50
+                  }
+                },
+                "stage_id": "stage-3",
+                "scope_id": "scope-0"
+              }
+            ]
+          }
         },
         "status": "incomplete",
         "coverage": {
@@ -6750,7 +8926,128 @@
               "stage_id": "stage-1",
               "scope_id": "scope-0"
             }
-          ]
+          ],
+          "requirements": {
+            "schema_version": 1,
+            "query": {
+              "source_id": "inherited_scope",
+              "language": "spl",
+              "profile": "splunkd",
+              "version": "current",
+              "query_digest": "sha256:734b9f185b21b278285113a96570b38abdc3b3b7b1a43d711b905c0809e900f7"
+            },
+            "capability_revision": "sha256:dfb8cedde04204e0a876412fbe217e49405689b54ae7d7d8fc37bfcb7fb2335f",
+            "query_status": "incomplete",
+            "coverage": {
+              "complete": false,
+              "reasons": [
+                "SPL_UNSUPPORTED_SEMANTICS",
+                "SPL_REQUIREMENT_DYNAMIC"
+              ]
+            },
+            "items": [
+              {
+                "id": "req-1",
+                "kind": "field",
+                "identity": "host",
+                "role": "read",
+                "necessity": "required",
+                "origin": "direct",
+                "resolution": "exact",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-0",
+                    "original_name": "host",
+                    "binding": "source",
+                    "stage_id": "stage-0",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 6,
+                        "line": 1,
+                        "column": 7
+                      },
+                      "end": {
+                        "offset": 10,
+                        "line": 1,
+                        "column": 11
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "req-2",
+                "kind": "field",
+                "identity": "*",
+                "role": "read",
+                "necessity": "conditional",
+                "origin": "direct",
+                "resolution": "wildcard",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-1",
+                    "original_name": "*",
+                    "binding": "indeterminate",
+                    "stage_id": "stage-2",
+                    "scope_id": "scope-1",
+                    "location": {
+                      "start": {
+                        "offset": 32,
+                        "line": 1,
+                        "column": 33
+                      },
+                      "end": {
+                        "offset": 33,
+                        "line": 1,
+                        "column": 34
+                      }
+                    }
+                  }
+                ]
+              }
+            ],
+            "gaps": [
+              {
+                "code": "SPL_UNSUPPORTED_SEMANTICS",
+                "message": "command \"appendpipe\" has unmodeled field effects",
+                "reference_ids": [],
+                "diagnostic_codes": [
+                  "SPL_UNSUPPORTED_SEMANTICS"
+                ]
+              },
+              {
+                "code": "SPL_REQUIREMENT_DYNAMIC",
+                "message": "dynamic requirement identity is unresolved",
+                "reference_ids": [
+                  "ref-1"
+                ],
+                "diagnostic_codes": []
+              }
+            ],
+            "diagnostics": [
+              {
+                "code": "SPL_UNSUPPORTED_SEMANTICS",
+                "severity": "warning",
+                "category": "unsupported_semantics",
+                "message": "command \"appendpipe\" has unmodeled field effects",
+                "location": {
+                  "start": {
+                    "offset": 13,
+                    "line": 1,
+                    "column": 14
+                  },
+                  "end": {
+                    "offset": 35,
+                    "line": 1,
+                    "column": 36
+                  }
+                },
+                "stage_id": "stage-1",
+                "scope_id": "scope-0"
+              }
+            ]
+          }
         },
         "status": "incomplete",
         "coverage": {
@@ -6903,7 +9200,58 @@
               "stage_id": "",
               "scope_id": ""
             }
-          ]
+          ],
+          "requirements": {
+            "schema_version": 1,
+            "query": {
+              "source_id": "syntax_empty",
+              "language": "spl",
+              "profile": "splunkd",
+              "version": "current",
+              "query_digest": "sha256:36a9e7f1c95b82ffb99743e0c5c4ce95d83c9a430aac59f84ef3cbfab6145068"
+            },
+            "capability_revision": "sha256:dfb8cedde04204e0a876412fbe217e49405689b54ae7d7d8fc37bfcb7fb2335f",
+            "query_status": "invalid",
+            "coverage": {
+              "complete": false,
+              "reasons": [
+                "SPL_SYNTAX_ERROR"
+              ]
+            },
+            "items": [],
+            "gaps": [
+              {
+                "code": "SPL_SYNTAX_ERROR",
+                "message": "mismatched input '\u003cEOF\u003e' expecting {'+', '-', '*', '/', '%', '^', 'NOT', '|', '(', '[', ':', '@', '`', '.', INIT_COMMAND, STD_COMMAND_AND_FUNCTION, STD_COMMAND, MODIFIER_AND_FUNCTION, 'now', FUNCTION, TIME, NUMBER, STRING, QUOTED_IDENTIFIER, IDENTIFIER}",
+                "reference_ids": [],
+                "diagnostic_codes": [
+                  "SPL_SYNTAX_ERROR"
+                ]
+              }
+            ],
+            "diagnostics": [
+              {
+                "code": "SPL_SYNTAX_ERROR",
+                "severity": "error",
+                "category": "syntax",
+                "message": "mismatched input '\u003cEOF\u003e' expecting {'+', '-', '*', '/', '%', '^', 'NOT', '|', '(', '[', ':', '@', '`', '.', INIT_COMMAND, STD_COMMAND_AND_FUNCTION, STD_COMMAND, MODIFIER_AND_FUNCTION, 'now', FUNCTION, TIME, NUMBER, STRING, QUOTED_IDENTIFIER, IDENTIFIER}",
+                "location": {
+                  "start": {
+                    "offset": 1,
+                    "line": 1,
+                    "column": 2
+                  },
+                  "end": {
+                    "offset": 1,
+                    "line": 1,
+                    "column": 2
+                  }
+                },
+                "stage_id": "",
+                "scope_id": ""
+              }
+            ]
+          }
         },
         "status": "invalid",
         "coverage": {
@@ -7269,7 +9617,181 @@
             "data_models": [],
             "macros": []
           },
-          "diagnostics": []
+          "diagnostics": [],
+          "requirements": {
+            "schema_version": 1,
+            "query": {
+              "source_id": "unicode_crlf",
+              "language": "spl",
+              "profile": "splunkd",
+              "version": "current",
+              "query_digest": "sha256:98cc9f995e3baa9e344016a31f28ca8afc67004fc8b50e14284a5674c190a18d"
+            },
+            "capability_revision": "sha256:dfb8cedde04204e0a876412fbe217e49405689b54ae7d7d8fc37bfcb7fb2335f",
+            "query_status": "incomplete",
+            "coverage": {
+              "complete": false,
+              "reasons": [
+                "SPL_UNRESOLVED_WILDCARD"
+              ]
+            },
+            "items": [
+              {
+                "id": "req-1",
+                "kind": "field",
+                "identity": "café",
+                "role": "read",
+                "necessity": "required",
+                "origin": "direct",
+                "resolution": "exact",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-1",
+                    "original_name": "'café'",
+                    "binding": "source",
+                    "stage_id": "stage-0",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 11,
+                        "line": 1,
+                        "column": 12
+                      },
+                      "end": {
+                        "offset": 18,
+                        "line": 1,
+                        "column": 18
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "req-2",
+                "kind": "field",
+                "identity": "café*",
+                "role": "read",
+                "necessity": "conditional",
+                "origin": "direct",
+                "resolution": "wildcard",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-2",
+                    "original_name": "'café'*",
+                    "binding": "indeterminate",
+                    "stage_id": "stage-1",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 28,
+                        "line": 2,
+                        "column": 9
+                      },
+                      "end": {
+                        "offset": 36,
+                        "line": 2,
+                        "column": 16
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "req-3",
+                "kind": "field",
+                "identity": "lab*",
+                "role": "read",
+                "necessity": "conditional",
+                "origin": "direct",
+                "resolution": "wildcard",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-3",
+                    "original_name": "lab*",
+                    "binding": "indeterminate",
+                    "stage_id": "stage-1",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 37,
+                        "line": 2,
+                        "column": 17
+                      },
+                      "end": {
+                        "offset": 41,
+                        "line": 2,
+                        "column": 21
+                      }
+                    }
+                  }
+                ]
+              }
+            ],
+            "gaps": [
+              {
+                "code": "SPL_UNRESOLVED_WILDCARD",
+                "message": "wildcard \"café*\" membership is unresolved",
+                "reference_ids": [
+                  "ref-2"
+                ],
+                "diagnostic_codes": [
+                  "SPL_UNRESOLVED_WILDCARD"
+                ]
+              },
+              {
+                "code": "SPL_UNRESOLVED_WILDCARD",
+                "message": "wildcard \"lab*\" membership is unresolved",
+                "reference_ids": [
+                  "ref-3"
+                ],
+                "diagnostic_codes": [
+                  "SPL_UNRESOLVED_WILDCARD"
+                ]
+              }
+            ],
+            "diagnostics": [
+              {
+                "code": "SPL_UNRESOLVED_WILDCARD",
+                "severity": "warning",
+                "category": "unsupported_semantics",
+                "message": "wildcard \"café*\" membership is unresolved",
+                "location": {
+                  "start": {
+                    "offset": 28,
+                    "line": 2,
+                    "column": 9
+                  },
+                  "end": {
+                    "offset": 36,
+                    "line": 2,
+                    "column": 16
+                  }
+                },
+                "stage_id": "stage-1",
+                "scope_id": "scope-0"
+              },
+              {
+                "code": "SPL_UNRESOLVED_WILDCARD",
+                "severity": "warning",
+                "category": "unsupported_semantics",
+                "message": "wildcard \"lab*\" membership is unresolved",
+                "location": {
+                  "start": {
+                    "offset": 37,
+                    "line": 2,
+                    "column": 17
+                  },
+                  "end": {
+                    "offset": 41,
+                    "line": 2,
+                    "column": 21
+                  }
+                },
+                "stage_id": "stage-1",
+                "scope_id": "scope-0"
+              }
+            ]
+          }
         },
         "status": "valid",
         "coverage": {
@@ -7623,7 +10145,128 @@
               "stage_id": "stage-1",
               "scope_id": "scope-0"
             }
-          ]
+          ],
+          "requirements": {
+            "schema_version": 1,
+            "query": {
+              "source_id": "invalid_incomplete",
+              "language": "spl",
+              "profile": "splunkd",
+              "version": "current",
+              "query_digest": "sha256:ee9f9e1e52a4e5f8655f33b0d39271d88a74e45a1095fa917c211dc336ed707e"
+            },
+            "capability_revision": "sha256:dfb8cedde04204e0a876412fbe217e49405689b54ae7d7d8fc37bfcb7fb2335f",
+            "query_status": "incomplete",
+            "coverage": {
+              "complete": false,
+              "reasons": [
+                "SPL_UNSUPPORTED_COMMAND",
+                "SPL_REQUIREMENT_INDETERMINATE"
+              ]
+            },
+            "items": [
+              {
+                "id": "req-1",
+                "kind": "field",
+                "identity": "missing",
+                "role": "filter",
+                "necessity": "required",
+                "origin": "direct",
+                "resolution": "exact",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-0",
+                    "original_name": "missing",
+                    "binding": "source",
+                    "stage_id": "stage-0",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 7,
+                        "line": 1,
+                        "column": 8
+                      },
+                      "end": {
+                        "offset": 14,
+                        "line": 1,
+                        "column": 15
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "req-2",
+                "kind": "field",
+                "identity": "host",
+                "role": "read",
+                "necessity": "conditional",
+                "origin": "direct",
+                "resolution": "exact",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-1",
+                    "original_name": "host",
+                    "binding": "indeterminate",
+                    "stage_id": "stage-2",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 35,
+                        "line": 1,
+                        "column": 36
+                      },
+                      "end": {
+                        "offset": 39,
+                        "line": 1,
+                        "column": 40
+                      }
+                    }
+                  }
+                ]
+              }
+            ],
+            "gaps": [
+              {
+                "code": "SPL_UNSUPPORTED_COMMAND",
+                "message": "command \"mystery\" has unmodeled field effects",
+                "reference_ids": [],
+                "diagnostic_codes": [
+                  "SPL_UNSUPPORTED_COMMAND"
+                ]
+              },
+              {
+                "code": "SPL_REQUIREMENT_INDETERMINATE",
+                "message": "requirement origin is indeterminate",
+                "reference_ids": [
+                  "ref-1"
+                ],
+                "diagnostic_codes": []
+              }
+            ],
+            "diagnostics": [
+              {
+                "code": "SPL_UNSUPPORTED_COMMAND",
+                "severity": "warning",
+                "category": "unsupported_semantics",
+                "message": "command \"mystery\" has unmodeled field effects",
+                "location": {
+                  "start": {
+                    "offset": 19,
+                    "line": 1,
+                    "column": 20
+                  },
+                  "end": {
+                    "offset": 26,
+                    "line": 1,
+                    "column": 27
+                  }
+                },
+                "stage_id": "stage-1",
+                "scope_id": "scope-0"
+              }
+            ]
+          }
         },
         "status": "invalid",
         "coverage": {
@@ -7992,7 +10635,57 @@
             "data_models": [],
             "macros": []
           },
-          "diagnostics": []
+          "diagnostics": [],
+          "requirements": {
+            "schema_version": 1,
+            "query": {
+              "source_id": "rename",
+              "language": "spl",
+              "profile": "splunkd",
+              "version": "current",
+              "query_digest": "sha256:3665e5d3fb2eed9d90f0771bd90bd6aee506c9e2b721673c9ff289f91f743b13"
+            },
+            "capability_revision": "sha256:dfb8cedde04204e0a876412fbe217e49405689b54ae7d7d8fc37bfcb7fb2335f",
+            "query_status": "valid",
+            "coverage": {
+              "complete": true,
+              "reasons": []
+            },
+            "items": [
+              {
+                "id": "req-1",
+                "kind": "field",
+                "identity": "host",
+                "role": "read",
+                "necessity": "required",
+                "origin": "direct",
+                "resolution": "exact",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-0",
+                    "original_name": "host",
+                    "binding": "source",
+                    "stage_id": "stage-0",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 7,
+                        "line": 1,
+                        "column": 8
+                      },
+                      "end": {
+                        "offset": 11,
+                        "line": 1,
+                        "column": 12
+                      }
+                    }
+                  }
+                ]
+              }
+            ],
+            "gaps": [],
+            "diagnostics": []
+          }
         },
         "status": "valid",
         "coverage": {

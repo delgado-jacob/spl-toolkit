@@ -16,6 +16,9 @@ func Rewrite(request Request) (*Result, error) {
 	if err != nil {
 		return nil, err
 	}
+	if resourceLimited(pending) {
+		return finishResourceLimitedRewrite(pending, prepared.Mode, prepared.Rules), nil
+	}
 	var report *CandidateValidation
 	if target := prepared.ValidationTarget; target != nil {
 		document := pending.candidate.Session.Evidence().Analysis.Document
@@ -42,12 +45,62 @@ func formCandidate(document analysis.QueryDocument, rules []Rule, probes []analy
 	if err != nil {
 		return nil, err
 	}
+	if resourceLimitedAnalysis(original.Evidence().Analysis) {
+		return &pendingRewrite{original: original}, nil
+	}
 	selection := selectRules(rules, probes, original.Evidence())
 	candidate, err := buildCandidate(original, rules, probes, selection)
 	if err != nil {
 		return nil, err
 	}
 	return &pendingRewrite{original: original, candidate: candidate}, nil
+}
+
+func resourceLimited(pending *pendingRewrite) bool {
+	return pending != nil && pending.original != nil && pending.candidate == nil && resourceLimitedAnalysis(pending.original.Evidence().Analysis)
+}
+
+func resourceLimitedAnalysis(result analysis.Result) bool {
+	for _, diagnostic := range result.Diagnostics {
+		if diagnostic.Code == analysis.CodeAnalysisResourceLimit {
+			return true
+		}
+	}
+	return false
+}
+
+func finishResourceLimitedRewrite(pending *pendingRewrite, mode Mode, rules []Rule) *Result {
+	original := pending.original.Evidence().Analysis
+	candidate := pending.original.Evidence().Analysis
+	evaluations := make([]RuleEvaluation, len(rules))
+	for i, rule := range rules {
+		evaluations[i] = RuleEvaluation{
+			RuleID:       rule.ID,
+			Outcome:      "skipped",
+			Reason:       ReasonPostVerificationFailed,
+			ReferenceIDs: []string{},
+		}
+	}
+	return &Result{
+		SchemaVersion: 1,
+		Document:      original.Document,
+		Mode:          mode,
+		Status:        analysis.Incomplete,
+		Coverage: Coverage{
+			SyntaxComplete:   false,
+			SemanticComplete: false,
+			RewriteComplete:  false,
+			Reasons:          []string{analysis.CodeAnalysisResourceLimit, ReasonPostVerificationFailed},
+		},
+		OriginalText:      original.Document.Text,
+		CandidateText:     original.Document.Text,
+		Text:              original.Document.Text,
+		Committed:         false,
+		Changes:           []Change{},
+		RuleEvaluations:   evaluations,
+		OriginalAnalysis:  &original,
+		CandidateAnalysis: &candidate,
+	}
 }
 
 func rewriteValidationError(err error) error {

@@ -229,7 +229,117 @@
             "data_models": [],
             "macros": []
           },
-          "diagnostics": []
+          "diagnostics": [],
+          "requirements": {
+            "schema_version": 1,
+            "query": {
+              "source_id": "closed",
+              "language": "spl",
+              "profile": "splunkd",
+              "version": "current",
+              "query_digest": "sha256:a380e125910bc80a7ead226e151bda4c122128e6ed80e81e0f4bf66da0d16236"
+            },
+            "capability_revision": "sha256:dfb8cedde04204e0a876412fbe217e49405689b54ae7d7d8fc37bfcb7fb2335f",
+            "query_status": "valid",
+            "coverage": {
+              "complete": true,
+              "reasons": []
+            },
+            "items": [
+              {
+                "id": "req-1",
+                "kind": "field",
+                "identity": "host",
+                "role": "read",
+                "necessity": "required",
+                "origin": "direct",
+                "resolution": "exact",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-0",
+                    "original_name": "host",
+                    "binding": "source",
+                    "stage_id": "stage-0",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 6,
+                        "line": 1,
+                        "column": 7
+                      },
+                      "end": {
+                        "offset": 10,
+                        "line": 1,
+                        "column": 11
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "req-2",
+                "kind": "field",
+                "identity": "optional",
+                "role": "read",
+                "necessity": "required",
+                "origin": "direct",
+                "resolution": "exact",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-1",
+                    "original_name": "optional",
+                    "binding": "source",
+                    "stage_id": "stage-0",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 11,
+                        "line": 1,
+                        "column": 12
+                      },
+                      "end": {
+                        "offset": 19,
+                        "line": 1,
+                        "column": 20
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "req-3",
+                "kind": "field",
+                "identity": "absent",
+                "role": "read",
+                "necessity": "required",
+                "origin": "direct",
+                "resolution": "exact",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-2",
+                    "original_name": "absent",
+                    "binding": "source",
+                    "stage_id": "stage-0",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 20,
+                        "line": 1,
+                        "column": 21
+                      },
+                      "end": {
+                        "offset": 26,
+                        "line": 1,
+                        "column": 27
+                      }
+                    }
+                  }
+                ]
+              }
+            ],
+            "gaps": [],
+            "diagnostics": []
+          }
         },
         "status": "invalid",
         "coverage": {
@@ -567,7 +677,87 @@
             "data_models": [],
             "macros": []
           },
-          "diagnostics": []
+          "diagnostics": [],
+          "requirements": {
+            "schema_version": 1,
+            "query": {
+              "source_id": "nested",
+              "language": "spl",
+              "profile": "splunkd",
+              "version": "current",
+              "query_digest": "sha256:18732b2c241999e2e2200ccd8cc85d7570520b43e751685c5da82323226af5a3"
+            },
+            "capability_revision": "sha256:dfb8cedde04204e0a876412fbe217e49405689b54ae7d7d8fc37bfcb7fb2335f",
+            "query_status": "valid",
+            "coverage": {
+              "complete": true,
+              "reasons": []
+            },
+            "items": [
+              {
+                "id": "req-1",
+                "kind": "field",
+                "identity": "user.name",
+                "role": "read",
+                "necessity": "required",
+                "origin": "direct",
+                "resolution": "exact",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-0",
+                    "original_name": "user.name",
+                    "binding": "source",
+                    "stage_id": "stage-0",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 6,
+                        "line": 1,
+                        "column": 7
+                      },
+                      "end": {
+                        "offset": 15,
+                        "line": 1,
+                        "column": 16
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "req-2",
+                "kind": "field",
+                "identity": "user.absent",
+                "role": "read",
+                "necessity": "required",
+                "origin": "direct",
+                "resolution": "exact",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-1",
+                    "original_name": "user.absent",
+                    "binding": "source",
+                    "stage_id": "stage-0",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 16,
+                        "line": 1,
+                        "column": 17
+                      },
+                      "end": {
+                        "offset": 27,
+                        "line": 1,
+                        "column": 28
+                      }
+                    }
+                  }
+                ]
+              }
+            ],
+            "gaps": [],
+            "diagnostics": []
+          }
         },
         "status": "invalid",
         "coverage": {
@@ -906,7 +1096,87 @@
             "data_models": [],
             "macros": []
           },
-          "diagnostics": []
+          "diagnostics": [],
+          "requirements": {
+            "schema_version": 1,
+            "query": {
+              "source_id": "open",
+              "language": "spl",
+              "profile": "splunkd",
+              "version": "current",
+              "query_digest": "sha256:499ab416bb038e970cbfa87f1551929a4343180fa358a251e989854668b5ec9e"
+            },
+            "capability_revision": "sha256:dfb8cedde04204e0a876412fbe217e49405689b54ae7d7d8fc37bfcb7fb2335f",
+            "query_status": "valid",
+            "coverage": {
+              "complete": true,
+              "reasons": []
+            },
+            "items": [
+              {
+                "id": "req-1",
+                "kind": "field",
+                "identity": "host",
+                "role": "read",
+                "necessity": "required",
+                "origin": "direct",
+                "resolution": "exact",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-0",
+                    "original_name": "host",
+                    "binding": "source",
+                    "stage_id": "stage-0",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 6,
+                        "line": 1,
+                        "column": 7
+                      },
+                      "end": {
+                        "offset": 10,
+                        "line": 1,
+                        "column": 11
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "req-2",
+                "kind": "field",
+                "identity": "vendor.name",
+                "role": "read",
+                "necessity": "required",
+                "origin": "direct",
+                "resolution": "exact",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-1",
+                    "original_name": "vendor.name",
+                    "binding": "source",
+                    "stage_id": "stage-0",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 11,
+                        "line": 1,
+                        "column": 12
+                      },
+                      "end": {
+                        "offset": 22,
+                        "line": 1,
+                        "column": 23
+                      }
+                    }
+                  }
+                ]
+              }
+            ],
+            "gaps": [],
+            "diagnostics": []
+          }
         },
         "status": "valid",
         "coverage": {
@@ -1197,7 +1467,87 @@
             "data_models": [],
             "macros": []
           },
-          "diagnostics": []
+          "diagnostics": [],
+          "requirements": {
+            "schema_version": 1,
+            "query": {
+              "source_id": "pattern",
+              "language": "spl",
+              "profile": "splunkd",
+              "version": "current",
+              "query_digest": "sha256:7fbf52ece07aab967bee908d3337e65f2c0d172b12e3b1aba476542c162b5583"
+            },
+            "capability_revision": "sha256:dfb8cedde04204e0a876412fbe217e49405689b54ae7d7d8fc37bfcb7fb2335f",
+            "query_status": "valid",
+            "coverage": {
+              "complete": true,
+              "reasons": []
+            },
+            "items": [
+              {
+                "id": "req-1",
+                "kind": "field",
+                "identity": "x_name",
+                "role": "read",
+                "necessity": "required",
+                "origin": "direct",
+                "resolution": "exact",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-0",
+                    "original_name": "x_name",
+                    "binding": "source",
+                    "stage_id": "stage-0",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 6,
+                        "line": 1,
+                        "column": 7
+                      },
+                      "end": {
+                        "offset": 12,
+                        "line": 1,
+                        "column": 13
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "req-2",
+                "kind": "field",
+                "identity": "absent",
+                "role": "read",
+                "necessity": "required",
+                "origin": "direct",
+                "resolution": "exact",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-1",
+                    "original_name": "absent",
+                    "binding": "source",
+                    "stage_id": "stage-0",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 13,
+                        "line": 1,
+                        "column": 14
+                      },
+                      "end": {
+                        "offset": 19,
+                        "line": 1,
+                        "column": 20
+                      }
+                    }
+                  }
+                ]
+              }
+            ],
+            "gaps": [],
+            "diagnostics": []
+          }
         },
         "status": "invalid",
         "coverage": {
@@ -1496,7 +1846,87 @@
             "data_models": [],
             "macros": []
           },
-          "diagnostics": []
+          "diagnostics": [],
+          "requirements": {
+            "schema_version": 1,
+            "query": {
+              "source_id": "ref",
+              "language": "spl",
+              "profile": "splunkd",
+              "version": "current",
+              "query_digest": "sha256:e797618593aec3f7b0fce87f23a31312f805c6797f945ac8e00cb67e9874e6ff"
+            },
+            "capability_revision": "sha256:dfb8cedde04204e0a876412fbe217e49405689b54ae7d7d8fc37bfcb7fb2335f",
+            "query_status": "valid",
+            "coverage": {
+              "complete": true,
+              "reasons": []
+            },
+            "items": [
+              {
+                "id": "req-1",
+                "kind": "field",
+                "identity": "host",
+                "role": "read",
+                "necessity": "required",
+                "origin": "direct",
+                "resolution": "exact",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-0",
+                    "original_name": "host",
+                    "binding": "source",
+                    "stage_id": "stage-0",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 6,
+                        "line": 1,
+                        "column": 7
+                      },
+                      "end": {
+                        "offset": 10,
+                        "line": 1,
+                        "column": 11
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "req-2",
+                "kind": "field",
+                "identity": "absent",
+                "role": "read",
+                "necessity": "required",
+                "origin": "direct",
+                "resolution": "exact",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-1",
+                    "original_name": "absent",
+                    "binding": "source",
+                    "stage_id": "stage-0",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 11,
+                        "line": 1,
+                        "column": 12
+                      },
+                      "end": {
+                        "offset": 17,
+                        "line": 1,
+                        "column": 18
+                      }
+                    }
+                  }
+                ]
+              }
+            ],
+            "gaps": [],
+            "diagnostics": []
+          }
         },
         "status": "invalid",
         "coverage": {
@@ -1781,7 +2211,57 @@
             "data_models": [],
             "macros": []
           },
-          "diagnostics": []
+          "diagnostics": [],
+          "requirements": {
+            "schema_version": 1,
+            "query": {
+              "source_id": "allof",
+              "language": "spl",
+              "profile": "splunkd",
+              "version": "current",
+              "query_digest": "sha256:dec9b7d42cc4ec1f78a5d07bb9c4dc811fe44a59b453152059944d247215caff"
+            },
+            "capability_revision": "sha256:dfb8cedde04204e0a876412fbe217e49405689b54ae7d7d8fc37bfcb7fb2335f",
+            "query_status": "valid",
+            "coverage": {
+              "complete": true,
+              "reasons": []
+            },
+            "items": [
+              {
+                "id": "req-1",
+                "kind": "field",
+                "identity": "other",
+                "role": "read",
+                "necessity": "required",
+                "origin": "direct",
+                "resolution": "exact",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-0",
+                    "original_name": "other",
+                    "binding": "source",
+                    "stage_id": "stage-0",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 6,
+                        "line": 1,
+                        "column": 7
+                      },
+                      "end": {
+                        "offset": 11,
+                        "line": 1,
+                        "column": 12
+                      }
+                    }
+                  }
+                ]
+              }
+            ],
+            "gaps": [],
+            "diagnostics": []
+          }
         },
         "status": "invalid",
         "coverage": {
@@ -2045,7 +2525,57 @@
             "data_models": [],
             "macros": []
           },
-          "diagnostics": []
+          "diagnostics": [],
+          "requirements": {
+            "schema_version": 1,
+            "query": {
+              "source_id": "anyof",
+              "language": "spl",
+              "profile": "splunkd",
+              "version": "current",
+              "query_digest": "sha256:07d8ebc4ab21d5cacb9568c63b159591ea33432c36560ec5eb0106df6c8c08b1"
+            },
+            "capability_revision": "sha256:dfb8cedde04204e0a876412fbe217e49405689b54ae7d7d8fc37bfcb7fb2335f",
+            "query_status": "valid",
+            "coverage": {
+              "complete": true,
+              "reasons": []
+            },
+            "items": [
+              {
+                "id": "req-1",
+                "kind": "field",
+                "identity": "host",
+                "role": "read",
+                "necessity": "required",
+                "origin": "direct",
+                "resolution": "exact",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-0",
+                    "original_name": "host",
+                    "binding": "source",
+                    "stage_id": "stage-0",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 6,
+                        "line": 1,
+                        "column": 7
+                      },
+                      "end": {
+                        "offset": 10,
+                        "line": 1,
+                        "column": 11
+                      }
+                    }
+                  }
+                ]
+              }
+            ],
+            "gaps": [],
+            "diagnostics": []
+          }
         },
         "status": "incomplete",
         "coverage": {
@@ -2314,7 +2844,57 @@
             "data_models": [],
             "macros": []
           },
-          "diagnostics": []
+          "diagnostics": [],
+          "requirements": {
+            "schema_version": 1,
+            "query": {
+              "source_id": "oneof",
+              "language": "spl",
+              "profile": "splunkd",
+              "version": "current",
+              "query_digest": "sha256:07d8ebc4ab21d5cacb9568c63b159591ea33432c36560ec5eb0106df6c8c08b1"
+            },
+            "capability_revision": "sha256:dfb8cedde04204e0a876412fbe217e49405689b54ae7d7d8fc37bfcb7fb2335f",
+            "query_status": "valid",
+            "coverage": {
+              "complete": true,
+              "reasons": []
+            },
+            "items": [
+              {
+                "id": "req-1",
+                "kind": "field",
+                "identity": "host",
+                "role": "read",
+                "necessity": "required",
+                "origin": "direct",
+                "resolution": "exact",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-0",
+                    "original_name": "host",
+                    "binding": "source",
+                    "stage_id": "stage-0",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 6,
+                        "line": 1,
+                        "column": 7
+                      },
+                      "end": {
+                        "offset": 10,
+                        "line": 1,
+                        "column": 11
+                      }
+                    }
+                  }
+                ]
+              }
+            ],
+            "gaps": [],
+            "diagnostics": []
+          }
         },
         "status": "incomplete",
         "coverage": {
@@ -2585,7 +3165,57 @@
             "data_models": [],
             "macros": []
           },
-          "diagnostics": []
+          "diagnostics": [],
+          "requirements": {
+            "schema_version": 1,
+            "query": {
+              "source_id": "unsupported",
+              "language": "spl",
+              "profile": "splunkd",
+              "version": "current",
+              "query_digest": "sha256:07d8ebc4ab21d5cacb9568c63b159591ea33432c36560ec5eb0106df6c8c08b1"
+            },
+            "capability_revision": "sha256:dfb8cedde04204e0a876412fbe217e49405689b54ae7d7d8fc37bfcb7fb2335f",
+            "query_status": "valid",
+            "coverage": {
+              "complete": true,
+              "reasons": []
+            },
+            "items": [
+              {
+                "id": "req-1",
+                "kind": "field",
+                "identity": "host",
+                "role": "read",
+                "necessity": "required",
+                "origin": "direct",
+                "resolution": "exact",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-0",
+                    "original_name": "host",
+                    "binding": "source",
+                    "stage_id": "stage-0",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 6,
+                        "line": 1,
+                        "column": 7
+                      },
+                      "end": {
+                        "offset": 10,
+                        "line": 1,
+                        "column": 11
+                      }
+                    }
+                  }
+                ]
+              }
+            ],
+            "gaps": [],
+            "diagnostics": []
+          }
         },
         "status": "incomplete",
         "coverage": {
@@ -2820,7 +3450,57 @@
             "data_models": [],
             "macros": []
           },
-          "diagnostics": []
+          "diagnostics": [],
+          "requirements": {
+            "schema_version": 1,
+            "query": {
+              "source_id": "array",
+              "language": "spl",
+              "profile": "splunkd",
+              "version": "current",
+              "query_digest": "sha256:ec7a90eae5a06d252fab091457e87ff09de2f6e48911c32e2f66fb11c4cf4e49"
+            },
+            "capability_revision": "sha256:dfb8cedde04204e0a876412fbe217e49405689b54ae7d7d8fc37bfcb7fb2335f",
+            "query_status": "valid",
+            "coverage": {
+              "complete": true,
+              "reasons": []
+            },
+            "items": [
+              {
+                "id": "req-1",
+                "kind": "field",
+                "identity": "items.name",
+                "role": "read",
+                "necessity": "required",
+                "origin": "direct",
+                "resolution": "exact",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-0",
+                    "original_name": "items.name",
+                    "binding": "source",
+                    "stage_id": "stage-0",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 6,
+                        "line": 1,
+                        "column": 7
+                      },
+                      "end": {
+                        "offset": 16,
+                        "line": 1,
+                        "column": 17
+                      }
+                    }
+                  }
+                ]
+              }
+            ],
+            "gaps": [],
+            "diagnostics": []
+          }
         },
         "status": "incomplete",
         "coverage": {
@@ -3139,7 +3819,26 @@
             "data_models": [],
             "macros": []
           },
-          "diagnostics": []
+          "diagnostics": [],
+          "requirements": {
+            "schema_version": 1,
+            "query": {
+              "source_id": "derived",
+              "language": "spl",
+              "profile": "splunkd",
+              "version": "current",
+              "query_digest": "sha256:3c9bae6e64ba4386971f14a663eae991a5a270d1d528e250d09685f00ee87eab"
+            },
+            "capability_revision": "sha256:dfb8cedde04204e0a876412fbe217e49405689b54ae7d7d8fc37bfcb7fb2335f",
+            "query_status": "valid",
+            "coverage": {
+              "complete": true,
+              "reasons": []
+            },
+            "items": [],
+            "gaps": [],
+            "diagnostics": []
+          }
         },
         "status": "valid",
         "coverage": {
@@ -3316,7 +4015,60 @@
             "data_models": [],
             "macros": []
           },
-          "diagnostics": []
+          "diagnostics": [],
+          "requirements": {
+            "schema_version": 1,
+            "query": {
+              "source_id": "removal",
+              "language": "spl",
+              "profile": "splunkd",
+              "version": "current",
+              "query_digest": "sha256:cecdb58a2c45a636f5f34a6b45f008b428da49ae7d59a4afb6abc6743f7cfb45"
+            },
+            "capability_revision": "sha256:dfb8cedde04204e0a876412fbe217e49405689b54ae7d7d8fc37bfcb7fb2335f",
+            "query_status": "incomplete",
+            "coverage": {
+              "complete": false,
+              "reasons": [
+                "SPL_UNRESOLVED_WILDCARD"
+              ]
+            },
+            "items": [],
+            "gaps": [
+              {
+                "code": "SPL_UNRESOLVED_WILDCARD",
+                "message": "wildcard \"absent*\" membership is unresolved",
+                "reference_ids": [
+                  "ref-0"
+                ],
+                "diagnostic_codes": [
+                  "SPL_UNRESOLVED_WILDCARD"
+                ]
+              }
+            ],
+            "diagnostics": [
+              {
+                "code": "SPL_UNRESOLVED_WILDCARD",
+                "severity": "warning",
+                "category": "unsupported_semantics",
+                "message": "wildcard \"absent*\" membership is unresolved",
+                "location": {
+                  "start": {
+                    "offset": 8,
+                    "line": 1,
+                    "column": 9
+                  },
+                  "end": {
+                    "offset": 15,
+                    "line": 1,
+                    "column": 16
+                  }
+                },
+                "stage_id": "stage-0",
+                "scope_id": "scope-0"
+              }
+            ]
+          }
         },
         "status": "valid",
         "coverage": {
@@ -3564,7 +4316,47 @@
               "stage_id": "stage-1",
               "scope_id": "scope-0"
             }
-          ]
+          ],
+          "requirements": {
+            "schema_version": 1,
+            "query": {
+              "source_id": "structural",
+              "language": "spl",
+              "profile": "splunkd",
+              "version": "current",
+              "query_digest": "sha256:f3c846bd6cbebcdc8132d2a213cada659d8809eb8ffdfcbb4c5f948d6042ac7d"
+            },
+            "capability_revision": "sha256:dfb8cedde04204e0a876412fbe217e49405689b54ae7d7d8fc37bfcb7fb2335f",
+            "query_status": "invalid",
+            "coverage": {
+              "complete": true,
+              "reasons": []
+            },
+            "items": [],
+            "gaps": [],
+            "diagnostics": [
+              {
+                "code": "SPL_UNAVAILABLE_FIELD",
+                "severity": "error",
+                "category": "unavailable_field",
+                "message": "field \"host\" is unavailable after an earlier pipeline transfer",
+                "location": {
+                  "start": {
+                    "offset": 21,
+                    "line": 1,
+                    "column": 22
+                  },
+                  "end": {
+                    "offset": 25,
+                    "line": 1,
+                    "column": 26
+                  }
+                },
+                "stage_id": "stage-1",
+                "scope_id": "scope-0"
+              }
+            ]
+          }
         },
         "status": "invalid",
         "coverage": {
@@ -3907,7 +4699,91 @@
               "stage_id": "stage-1",
               "scope_id": "scope-0"
             }
-          ]
+          ],
+          "requirements": {
+            "schema_version": 1,
+            "query": {
+              "source_id": "partial",
+              "language": "spl",
+              "profile": "splunkd",
+              "version": "current",
+              "query_digest": "sha256:c866f84e914ffd917be48b336db287ab339d2323f6caa84a35b1b23763719c6e"
+            },
+            "capability_revision": "sha256:dfb8cedde04204e0a876412fbe217e49405689b54ae7d7d8fc37bfcb7fb2335f",
+            "query_status": "incomplete",
+            "coverage": {
+              "complete": false,
+              "reasons": [
+                "SPL_UNRESOLVED_WILDCARD"
+              ]
+            },
+            "items": [
+              {
+                "id": "req-1",
+                "kind": "field",
+                "identity": "*",
+                "role": "read",
+                "necessity": "conditional",
+                "origin": "direct",
+                "resolution": "wildcard",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-1",
+                    "original_name": "*",
+                    "binding": "indeterminate",
+                    "stage_id": "stage-1",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 21,
+                        "line": 1,
+                        "column": 22
+                      },
+                      "end": {
+                        "offset": 22,
+                        "line": 1,
+                        "column": 23
+                      }
+                    }
+                  }
+                ]
+              }
+            ],
+            "gaps": [
+              {
+                "code": "SPL_UNRESOLVED_WILDCARD",
+                "message": "wildcard \"*\" membership is unresolved",
+                "reference_ids": [
+                  "ref-1"
+                ],
+                "diagnostic_codes": [
+                  "SPL_UNRESOLVED_WILDCARD"
+                ]
+              }
+            ],
+            "diagnostics": [
+              {
+                "code": "SPL_UNRESOLVED_WILDCARD",
+                "severity": "warning",
+                "category": "unsupported_semantics",
+                "message": "wildcard \"*\" membership is unresolved",
+                "location": {
+                  "start": {
+                    "offset": 21,
+                    "line": 1,
+                    "column": 22
+                  },
+                  "end": {
+                    "offset": 22,
+                    "line": 1,
+                    "column": 23
+                  }
+                },
+                "stage_id": "stage-1",
+                "scope_id": "scope-0"
+              }
+            ]
+          }
         },
         "status": "incomplete",
         "coverage": {
@@ -4385,7 +5261,151 @@
               "stage_id": "stage-0",
               "scope_id": "scope-0"
             }
-          ]
+          ],
+          "requirements": {
+            "schema_version": 1,
+            "query": {
+              "source_id": "partial_recovery",
+              "language": "spl",
+              "profile": "splunkd",
+              "version": "current",
+              "query_digest": "sha256:bb2b2aaaed62e48dd2f51ab17a2244b13e915f682283d70243655e398e647ea0"
+            },
+            "capability_revision": "sha256:dfb8cedde04204e0a876412fbe217e49405689b54ae7d7d8fc37bfcb7fb2335f",
+            "query_status": "incomplete",
+            "coverage": {
+              "complete": false,
+              "reasons": [
+                "SPL_UNRESOLVED_WILDCARD"
+              ]
+            },
+            "items": [
+              {
+                "id": "req-1",
+                "kind": "field",
+                "identity": "*",
+                "role": "read",
+                "necessity": "conditional",
+                "origin": "direct",
+                "resolution": "wildcard",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-0",
+                    "original_name": "*",
+                    "binding": "indeterminate",
+                    "stage_id": "stage-0",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 6,
+                        "line": 1,
+                        "column": 7
+                      },
+                      "end": {
+                        "offset": 7,
+                        "line": 1,
+                        "column": 8
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "req-2",
+                "kind": "field",
+                "identity": "total*",
+                "role": "read",
+                "necessity": "conditional",
+                "origin": "direct",
+                "resolution": "wildcard",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-2",
+                    "original_name": "total*",
+                    "binding": "indeterminate",
+                    "stage_id": "stage-2",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 39,
+                        "line": 1,
+                        "column": 40
+                      },
+                      "end": {
+                        "offset": 45,
+                        "line": 1,
+                        "column": 46
+                      }
+                    }
+                  }
+                ]
+              }
+            ],
+            "gaps": [
+              {
+                "code": "SPL_UNRESOLVED_WILDCARD",
+                "message": "wildcard \"*\" membership is unresolved",
+                "reference_ids": [
+                  "ref-0"
+                ],
+                "diagnostic_codes": [
+                  "SPL_UNRESOLVED_WILDCARD"
+                ]
+              },
+              {
+                "code": "SPL_UNRESOLVED_WILDCARD",
+                "message": "wildcard \"total*\" membership is unresolved",
+                "reference_ids": [
+                  "ref-2"
+                ],
+                "diagnostic_codes": [
+                  "SPL_UNRESOLVED_WILDCARD"
+                ]
+              }
+            ],
+            "diagnostics": [
+              {
+                "code": "SPL_UNRESOLVED_WILDCARD",
+                "severity": "warning",
+                "category": "unsupported_semantics",
+                "message": "wildcard \"*\" membership is unresolved",
+                "location": {
+                  "start": {
+                    "offset": 6,
+                    "line": 1,
+                    "column": 7
+                  },
+                  "end": {
+                    "offset": 7,
+                    "line": 1,
+                    "column": 8
+                  }
+                },
+                "stage_id": "stage-0",
+                "scope_id": "scope-0"
+              },
+              {
+                "code": "SPL_UNRESOLVED_WILDCARD",
+                "severity": "warning",
+                "category": "unsupported_semantics",
+                "message": "wildcard \"total*\" membership is unresolved",
+                "location": {
+                  "start": {
+                    "offset": 39,
+                    "line": 1,
+                    "column": 40
+                  },
+                  "end": {
+                    "offset": 45,
+                    "line": 1,
+                    "column": 46
+                  }
+                },
+                "stage_id": "stage-2",
+                "scope_id": "scope-0"
+              }
+            ]
+          }
         },
         "status": "incomplete",
         "coverage": {
@@ -4847,7 +5867,137 @@
               "stage_id": "stage-2",
               "scope_id": "scope-0"
             }
-          ]
+          ],
+          "requirements": {
+            "schema_version": 1,
+            "query": {
+              "source_id": "unknown_recovery",
+              "language": "spl",
+              "profile": "splunkd",
+              "version": "current",
+              "query_digest": "sha256:7ca3f59b2037a682792e6ed54fd6aa253a6373359b07e885d0837a6b52fa0fa8"
+            },
+            "capability_revision": "sha256:dfb8cedde04204e0a876412fbe217e49405689b54ae7d7d8fc37bfcb7fb2335f",
+            "query_status": "incomplete",
+            "coverage": {
+              "complete": false,
+              "reasons": [
+                "SPL_UNSUPPORTED_COMMAND",
+                "SPL_REQUIREMENT_INDETERMINATE",
+                "SPL_REQUIREMENT_DYNAMIC"
+              ]
+            },
+            "items": [
+              {
+                "id": "req-1",
+                "kind": "field",
+                "identity": "host",
+                "role": "read",
+                "necessity": "conditional",
+                "origin": "direct",
+                "resolution": "exact",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-0",
+                    "original_name": "host",
+                    "binding": "indeterminate",
+                    "stage_id": "stage-1",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 18,
+                        "line": 1,
+                        "column": 19
+                      },
+                      "end": {
+                        "offset": 22,
+                        "line": 1,
+                        "column": 23
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "req-2",
+                "kind": "field",
+                "identity": "*",
+                "role": "read",
+                "necessity": "conditional",
+                "origin": "direct",
+                "resolution": "wildcard",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-1",
+                    "original_name": "*",
+                    "binding": "indeterminate",
+                    "stage_id": "stage-2",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 31,
+                        "line": 1,
+                        "column": 32
+                      },
+                      "end": {
+                        "offset": 32,
+                        "line": 1,
+                        "column": 33
+                      }
+                    }
+                  }
+                ]
+              }
+            ],
+            "gaps": [
+              {
+                "code": "SPL_UNSUPPORTED_COMMAND",
+                "message": "command \"mystery\" has unmodeled field effects",
+                "reference_ids": [],
+                "diagnostic_codes": [
+                  "SPL_UNSUPPORTED_COMMAND"
+                ]
+              },
+              {
+                "code": "SPL_REQUIREMENT_INDETERMINATE",
+                "message": "requirement origin is indeterminate",
+                "reference_ids": [
+                  "ref-0"
+                ],
+                "diagnostic_codes": []
+              },
+              {
+                "code": "SPL_REQUIREMENT_DYNAMIC",
+                "message": "dynamic requirement identity is unresolved",
+                "reference_ids": [
+                  "ref-1"
+                ],
+                "diagnostic_codes": []
+              }
+            ],
+            "diagnostics": [
+              {
+                "code": "SPL_UNSUPPORTED_COMMAND",
+                "severity": "warning",
+                "category": "unsupported_semantics",
+                "message": "command \"mystery\" has unmodeled field effects",
+                "location": {
+                  "start": {
+                    "offset": 2,
+                    "line": 1,
+                    "column": 3
+                  },
+                  "end": {
+                    "offset": 9,
+                    "line": 1,
+                    "column": 10
+                  }
+                },
+                "stage_id": "stage-0",
+                "scope_id": "scope-0"
+              }
+            ]
+          }
         },
         "status": "incomplete",
         "coverage": {
@@ -5201,7 +6351,89 @@
               "stage_id": "stage-1",
               "scope_id": "scope-0"
             }
-          ]
+          ],
+          "requirements": {
+            "schema_version": 1,
+            "query": {
+              "source_id": "invalid_incomplete",
+              "language": "spl",
+              "profile": "splunkd",
+              "version": "current",
+              "query_digest": "sha256:98b93c23395081d46c52f38e77b99511510ae43a7243c3be29a19dbf940fec3c"
+            },
+            "capability_revision": "sha256:dfb8cedde04204e0a876412fbe217e49405689b54ae7d7d8fc37bfcb7fb2335f",
+            "query_status": "incomplete",
+            "coverage": {
+              "complete": false,
+              "reasons": [
+                "SPL_UNSUPPORTED_COMMAND"
+              ]
+            },
+            "items": [
+              {
+                "id": "req-1",
+                "kind": "field",
+                "identity": "absent",
+                "role": "filter",
+                "necessity": "required",
+                "origin": "direct",
+                "resolution": "exact",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-0",
+                    "original_name": "absent",
+                    "binding": "source",
+                    "stage_id": "stage-0",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 7,
+                        "line": 1,
+                        "column": 8
+                      },
+                      "end": {
+                        "offset": 13,
+                        "line": 1,
+                        "column": 14
+                      }
+                    }
+                  }
+                ]
+              }
+            ],
+            "gaps": [
+              {
+                "code": "SPL_UNSUPPORTED_COMMAND",
+                "message": "command \"mystery\" has unmodeled field effects",
+                "reference_ids": [],
+                "diagnostic_codes": [
+                  "SPL_UNSUPPORTED_COMMAND"
+                ]
+              }
+            ],
+            "diagnostics": [
+              {
+                "code": "SPL_UNSUPPORTED_COMMAND",
+                "severity": "warning",
+                "category": "unsupported_semantics",
+                "message": "command \"mystery\" has unmodeled field effects",
+                "location": {
+                  "start": {
+                    "offset": 18,
+                    "line": 1,
+                    "column": 19
+                  },
+                  "end": {
+                    "offset": 30,
+                    "line": 1,
+                    "column": 31
+                  }
+                },
+                "stage_id": "stage-1",
+                "scope_id": "scope-0"
+              }
+            ]
+          }
         },
         "status": "invalid",
         "coverage": {
@@ -5395,7 +6627,58 @@
               "stage_id": "",
               "scope_id": ""
             }
-          ]
+          ],
+          "requirements": {
+            "schema_version": 1,
+            "query": {
+              "source_id": "syntax_invalid",
+              "language": "spl",
+              "profile": "splunkd",
+              "version": "current",
+              "query_digest": "sha256:36a9e7f1c95b82ffb99743e0c5c4ce95d83c9a430aac59f84ef3cbfab6145068"
+            },
+            "capability_revision": "sha256:dfb8cedde04204e0a876412fbe217e49405689b54ae7d7d8fc37bfcb7fb2335f",
+            "query_status": "invalid",
+            "coverage": {
+              "complete": false,
+              "reasons": [
+                "SPL_SYNTAX_ERROR"
+              ]
+            },
+            "items": [],
+            "gaps": [
+              {
+                "code": "SPL_SYNTAX_ERROR",
+                "message": "mismatched input '\u003cEOF\u003e' expecting {'+', '-', '*', '/', '%', '^', 'NOT', '|', '(', '[', ':', '@', '`', '.', INIT_COMMAND, STD_COMMAND_AND_FUNCTION, STD_COMMAND, MODIFIER_AND_FUNCTION, 'now', FUNCTION, TIME, NUMBER, STRING, QUOTED_IDENTIFIER, IDENTIFIER}",
+                "reference_ids": [],
+                "diagnostic_codes": [
+                  "SPL_SYNTAX_ERROR"
+                ]
+              }
+            ],
+            "diagnostics": [
+              {
+                "code": "SPL_SYNTAX_ERROR",
+                "severity": "error",
+                "category": "syntax",
+                "message": "mismatched input '\u003cEOF\u003e' expecting {'+', '-', '*', '/', '%', '^', 'NOT', '|', '(', '[', ':', '@', '`', '.', INIT_COMMAND, STD_COMMAND_AND_FUNCTION, STD_COMMAND, MODIFIER_AND_FUNCTION, 'now', FUNCTION, TIME, NUMBER, STRING, QUOTED_IDENTIFIER, IDENTIFIER}",
+                "location": {
+                  "start": {
+                    "offset": 1,
+                    "line": 1,
+                    "column": 2
+                  },
+                  "end": {
+                    "offset": 1,
+                    "line": 1,
+                    "column": 2
+                  }
+                },
+                "stage_id": "",
+                "scope_id": ""
+              }
+            ]
+          }
         },
         "status": "invalid",
         "coverage": {
@@ -5730,7 +7013,87 @@
             "data_models": [],
             "macros": []
           },
-          "diagnostics": []
+          "diagnostics": [],
+          "requirements": {
+            "schema_version": 1,
+            "query": {
+              "source_id": "unicode_crlf",
+              "language": "spl",
+              "profile": "splunkd",
+              "version": "current",
+              "query_digest": "sha256:660210d62d43fcacf9f2c35ac0f838e945b8244caefe75808f1c37e4f2e630b6"
+            },
+            "capability_revision": "sha256:dfb8cedde04204e0a876412fbe217e49405689b54ae7d7d8fc37bfcb7fb2335f",
+            "query_status": "valid",
+            "coverage": {
+              "complete": true,
+              "reasons": []
+            },
+            "items": [
+              {
+                "id": "req-1",
+                "kind": "field",
+                "identity": "café",
+                "role": "read",
+                "necessity": "required",
+                "origin": "direct",
+                "resolution": "exact",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-1",
+                    "original_name": "'café'",
+                    "binding": "source",
+                    "stage_id": "stage-0",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 11,
+                        "line": 1,
+                        "column": 12
+                      },
+                      "end": {
+                        "offset": 18,
+                        "line": 1,
+                        "column": 18
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "req-2",
+                "kind": "field",
+                "identity": "missing",
+                "role": "read",
+                "necessity": "required",
+                "origin": "direct",
+                "resolution": "exact",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-2",
+                    "original_name": "missing",
+                    "binding": "source",
+                    "stage_id": "stage-1",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 28,
+                        "line": 2,
+                        "column": 9
+                      },
+                      "end": {
+                        "offset": 35,
+                        "line": 2,
+                        "column": 16
+                      }
+                    }
+                  }
+                ]
+              }
+            ],
+            "gaps": [],
+            "diagnostics": []
+          }
         },
         "status": "invalid",
         "coverage": {
@@ -5980,7 +7343,91 @@
             "data_models": [],
             "macros": []
           },
-          "diagnostics": []
+          "diagnostics": [],
+          "requirements": {
+            "schema_version": 1,
+            "query": {
+              "source_id": "empty_selector",
+              "language": "spl",
+              "profile": "splunkd",
+              "version": "current",
+              "query_digest": "sha256:4f8686f997d241251d1f4d2ed9397e3e1b872cdf926b3ddfbcd0022986ddac42"
+            },
+            "capability_revision": "sha256:dfb8cedde04204e0a876412fbe217e49405689b54ae7d7d8fc37bfcb7fb2335f",
+            "query_status": "incomplete",
+            "coverage": {
+              "complete": false,
+              "reasons": [
+                "SPL_UNRESOLVED_WILDCARD"
+              ]
+            },
+            "items": [
+              {
+                "id": "req-1",
+                "kind": "field",
+                "identity": "absent*",
+                "role": "read",
+                "necessity": "conditional",
+                "origin": "direct",
+                "resolution": "wildcard",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-0",
+                    "original_name": "absent*",
+                    "binding": "indeterminate",
+                    "stage_id": "stage-0",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 6,
+                        "line": 1,
+                        "column": 7
+                      },
+                      "end": {
+                        "offset": 13,
+                        "line": 1,
+                        "column": 14
+                      }
+                    }
+                  }
+                ]
+              }
+            ],
+            "gaps": [
+              {
+                "code": "SPL_UNRESOLVED_WILDCARD",
+                "message": "wildcard \"absent*\" membership is unresolved",
+                "reference_ids": [
+                  "ref-0"
+                ],
+                "diagnostic_codes": [
+                  "SPL_UNRESOLVED_WILDCARD"
+                ]
+              }
+            ],
+            "diagnostics": [
+              {
+                "code": "SPL_UNRESOLVED_WILDCARD",
+                "severity": "warning",
+                "category": "unsupported_semantics",
+                "message": "wildcard \"absent*\" membership is unresolved",
+                "location": {
+                  "start": {
+                    "offset": 6,
+                    "line": 1,
+                    "column": 7
+                  },
+                  "end": {
+                    "offset": 13,
+                    "line": 1,
+                    "column": 14
+                  }
+                },
+                "stage_id": "stage-0",
+                "scope_id": "scope-0"
+              }
+            ]
+          }
         },
         "status": "invalid",
         "coverage": {
@@ -6315,7 +7762,91 @@
             "data_models": [],
             "macros": []
           },
-          "diagnostics": []
+          "diagnostics": [],
+          "requirements": {
+            "schema_version": 1,
+            "query": {
+              "source_id": "mixed_requirements",
+              "language": "spl",
+              "profile": "splunkd",
+              "version": "current",
+              "query_digest": "sha256:c866f84e914ffd917be48b336db287ab339d2323f6caa84a35b1b23763719c6e"
+            },
+            "capability_revision": "sha256:dfb8cedde04204e0a876412fbe217e49405689b54ae7d7d8fc37bfcb7fb2335f",
+            "query_status": "incomplete",
+            "coverage": {
+              "complete": false,
+              "reasons": [
+                "SPL_UNRESOLVED_WILDCARD"
+              ]
+            },
+            "items": [
+              {
+                "id": "req-1",
+                "kind": "field",
+                "identity": "*",
+                "role": "read",
+                "necessity": "conditional",
+                "origin": "direct",
+                "resolution": "wildcard",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-1",
+                    "original_name": "*",
+                    "binding": "indeterminate",
+                    "stage_id": "stage-1",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 21,
+                        "line": 1,
+                        "column": 22
+                      },
+                      "end": {
+                        "offset": 22,
+                        "line": 1,
+                        "column": 23
+                      }
+                    }
+                  }
+                ]
+              }
+            ],
+            "gaps": [
+              {
+                "code": "SPL_UNRESOLVED_WILDCARD",
+                "message": "wildcard \"*\" membership is unresolved",
+                "reference_ids": [
+                  "ref-1"
+                ],
+                "diagnostic_codes": [
+                  "SPL_UNRESOLVED_WILDCARD"
+                ]
+              }
+            ],
+            "diagnostics": [
+              {
+                "code": "SPL_UNRESOLVED_WILDCARD",
+                "severity": "warning",
+                "category": "unsupported_semantics",
+                "message": "wildcard \"*\" membership is unresolved",
+                "location": {
+                  "start": {
+                    "offset": 21,
+                    "line": 1,
+                    "column": 22
+                  },
+                  "end": {
+                    "offset": 22,
+                    "line": 1,
+                    "column": 23
+                  }
+                },
+                "stage_id": "stage-1",
+                "scope_id": "scope-0"
+              }
+            ]
+          }
         },
         "status": "valid",
         "coverage": {
@@ -6568,7 +8099,57 @@
             "data_models": [],
             "macros": []
           },
-          "diagnostics": []
+          "diagnostics": [],
+          "requirements": {
+            "schema_version": 1,
+            "query": {
+              "source_id": "unresolved_ref",
+              "language": "spl",
+              "profile": "splunkd",
+              "version": "current",
+              "query_digest": "sha256:07d8ebc4ab21d5cacb9568c63b159591ea33432c36560ec5eb0106df6c8c08b1"
+            },
+            "capability_revision": "sha256:dfb8cedde04204e0a876412fbe217e49405689b54ae7d7d8fc37bfcb7fb2335f",
+            "query_status": "valid",
+            "coverage": {
+              "complete": true,
+              "reasons": []
+            },
+            "items": [
+              {
+                "id": "req-1",
+                "kind": "field",
+                "identity": "host",
+                "role": "read",
+                "necessity": "required",
+                "origin": "direct",
+                "resolution": "exact",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-0",
+                    "original_name": "host",
+                    "binding": "source",
+                    "stage_id": "stage-0",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 6,
+                        "line": 1,
+                        "column": 7
+                      },
+                      "end": {
+                        "offset": 10,
+                        "line": 1,
+                        "column": 11
+                      }
+                    }
+                  }
+                ]
+              }
+            ],
+            "gaps": [],
+            "diagnostics": []
+          }
         },
         "status": "incomplete",
         "coverage": {
@@ -6878,7 +8459,117 @@
             "data_models": [],
             "macros": []
           },
-          "diagnostics": []
+          "diagnostics": [],
+          "requirements": {
+            "schema_version": 1,
+            "query": {
+              "source_id": "ocsf_base",
+              "language": "spl",
+              "profile": "splunkd",
+              "version": "current",
+              "query_digest": "sha256:56bc7929e8433c35662582c8d12b7efcb03cfec2687042236c4190fdb05ca0bf"
+            },
+            "capability_revision": "sha256:dfb8cedde04204e0a876412fbe217e49405689b54ae7d7d8fc37bfcb7fb2335f",
+            "query_status": "valid",
+            "coverage": {
+              "complete": true,
+              "reasons": []
+            },
+            "items": [
+              {
+                "id": "req-1",
+                "kind": "field",
+                "identity": "time",
+                "role": "read",
+                "necessity": "required",
+                "origin": "direct",
+                "resolution": "exact",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-0",
+                    "original_name": "time",
+                    "binding": "source",
+                    "stage_id": "stage-0",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 6,
+                        "line": 1,
+                        "column": 7
+                      },
+                      "end": {
+                        "offset": 10,
+                        "line": 1,
+                        "column": 11
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "req-2",
+                "kind": "field",
+                "identity": "actor.user.name",
+                "role": "read",
+                "necessity": "required",
+                "origin": "direct",
+                "resolution": "exact",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-1",
+                    "original_name": "actor.user.name",
+                    "binding": "source",
+                    "stage_id": "stage-0",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 11,
+                        "line": 1,
+                        "column": 12
+                      },
+                      "end": {
+                        "offset": 26,
+                        "line": 1,
+                        "column": 27
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "req-3",
+                "kind": "field",
+                "identity": "unmapped.vendor_field",
+                "role": "read",
+                "necessity": "required",
+                "origin": "direct",
+                "resolution": "exact",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-2",
+                    "original_name": "unmapped.vendor_field",
+                    "binding": "source",
+                    "stage_id": "stage-0",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 27,
+                        "line": 1,
+                        "column": 28
+                      },
+                      "end": {
+                        "offset": 48,
+                        "line": 1,
+                        "column": 49
+                      }
+                    }
+                  }
+                ]
+              }
+            ],
+            "gaps": [],
+            "diagnostics": []
+          }
         },
         "status": "valid",
         "coverage": {
@@ -7291,7 +8982,57 @@
             "data_models": [],
             "macros": []
           },
-          "diagnostics": []
+          "diagnostics": [],
+          "requirements": {
+            "schema_version": 1,
+            "query": {
+              "source_id": "ocsf_windows",
+              "language": "spl",
+              "profile": "splunkd",
+              "version": "current",
+              "query_digest": "sha256:cc519393cd0ad18fa2361cd0cfdcb6054ab4b6ef7ccc0ff333cd3569a008fbce"
+            },
+            "capability_revision": "sha256:dfb8cedde04204e0a876412fbe217e49405689b54ae7d7d8fc37bfcb7fb2335f",
+            "query_status": "valid",
+            "coverage": {
+              "complete": true,
+              "reasons": []
+            },
+            "items": [
+              {
+                "id": "req-1",
+                "kind": "field",
+                "identity": "time",
+                "role": "read",
+                "necessity": "required",
+                "origin": "direct",
+                "resolution": "exact",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-0",
+                    "original_name": "time",
+                    "binding": "source",
+                    "stage_id": "stage-0",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 6,
+                        "line": 1,
+                        "column": 7
+                      },
+                      "end": {
+                        "offset": 10,
+                        "line": 1,
+                        "column": 11
+                      }
+                    }
+                  }
+                ]
+              }
+            ],
+            "gaps": [],
+            "diagnostics": []
+          }
         },
         "status": "valid",
         "coverage": {
@@ -7564,7 +9305,87 @@
             "data_models": [],
             "macros": []
           },
-          "diagnostics": []
+          "diagnostics": [],
+          "requirements": {
+            "schema_version": 1,
+            "query": {
+              "source_id": "ocsf_profiles",
+              "language": "spl",
+              "profile": "splunkd",
+              "version": "current",
+              "query_digest": "sha256:79b483419fab2d5bfd376d04abe9df2cfceba05d7de61dced768b181d0c91c17"
+            },
+            "capability_revision": "sha256:dfb8cedde04204e0a876412fbe217e49405689b54ae7d7d8fc37bfcb7fb2335f",
+            "query_status": "valid",
+            "coverage": {
+              "complete": true,
+              "reasons": []
+            },
+            "items": [
+              {
+                "id": "req-1",
+                "kind": "field",
+                "identity": "cloud",
+                "role": "read",
+                "necessity": "required",
+                "origin": "direct",
+                "resolution": "exact",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-0",
+                    "original_name": "cloud",
+                    "binding": "source",
+                    "stage_id": "stage-0",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 6,
+                        "line": 1,
+                        "column": 7
+                      },
+                      "end": {
+                        "offset": 11,
+                        "line": 1,
+                        "column": 12
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "req-2",
+                "kind": "field",
+                "identity": "time_dt",
+                "role": "read",
+                "necessity": "required",
+                "origin": "direct",
+                "resolution": "exact",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-1",
+                    "original_name": "time_dt",
+                    "binding": "source",
+                    "stage_id": "stage-0",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 12,
+                        "line": 1,
+                        "column": 13
+                      },
+                      "end": {
+                        "offset": 19,
+                        "line": 1,
+                        "column": 20
+                      }
+                    }
+                  }
+                ]
+              }
+            ],
+            "gaps": [],
+            "diagnostics": []
+          }
         },
         "status": "valid",
         "coverage": {
@@ -7934,7 +9755,87 @@
             "data_models": [],
             "macros": []
           },
-          "diagnostics": []
+          "diagnostics": [],
+          "requirements": {
+            "schema_version": 1,
+            "query": {
+              "source_id": "ocsf_category",
+              "language": "spl",
+              "profile": "splunkd",
+              "version": "current",
+              "query_digest": "sha256:c95f06b740eb12c01c33e02ec9500469802cb47ef637d9dd453f931b5ee5da1b"
+            },
+            "capability_revision": "sha256:dfb8cedde04204e0a876412fbe217e49405689b54ae7d7d8fc37bfcb7fb2335f",
+            "query_status": "valid",
+            "coverage": {
+              "complete": true,
+              "reasons": []
+            },
+            "items": [
+              {
+                "id": "req-1",
+                "kind": "field",
+                "identity": "time",
+                "role": "read",
+                "necessity": "required",
+                "origin": "direct",
+                "resolution": "exact",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-0",
+                    "original_name": "time",
+                    "binding": "source",
+                    "stage_id": "stage-0",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 6,
+                        "line": 1,
+                        "column": 7
+                      },
+                      "end": {
+                        "offset": 10,
+                        "line": 1,
+                        "column": 11
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "req-2",
+                "kind": "field",
+                "identity": "group",
+                "role": "read",
+                "necessity": "required",
+                "origin": "direct",
+                "resolution": "exact",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-1",
+                    "original_name": "group",
+                    "binding": "source",
+                    "stage_id": "stage-0",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 11,
+                        "line": 1,
+                        "column": 12
+                      },
+                      "end": {
+                        "offset": 16,
+                        "line": 1,
+                        "column": 17
+                      }
+                    }
+                  }
+                ]
+              }
+            ],
+            "gaps": [],
+            "diagnostics": []
+          }
         },
         "status": "incomplete",
         "coverage": {
@@ -8439,7 +10340,87 @@
             "data_models": [],
             "macros": []
           },
-          "diagnostics": []
+          "diagnostics": [],
+          "requirements": {
+            "schema_version": 1,
+            "query": {
+              "source_id": "ocsf_requiredness",
+              "language": "spl",
+              "profile": "splunkd",
+              "version": "current",
+              "query_digest": "sha256:fb660deb4f202bbc7d974194f9d1b3be93136ccb1954498ec3f37de52ffcecfa"
+            },
+            "capability_revision": "sha256:dfb8cedde04204e0a876412fbe217e49405689b54ae7d7d8fc37bfcb7fb2335f",
+            "query_status": "valid",
+            "coverage": {
+              "complete": true,
+              "reasons": []
+            },
+            "items": [
+              {
+                "id": "req-1",
+                "kind": "field",
+                "identity": "profiled",
+                "role": "read",
+                "necessity": "required",
+                "origin": "direct",
+                "resolution": "exact",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-0",
+                    "original_name": "profiled",
+                    "binding": "source",
+                    "stage_id": "stage-0",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 6,
+                        "line": 1,
+                        "column": 7
+                      },
+                      "end": {
+                        "offset": 14,
+                        "line": 1,
+                        "column": 15
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "req-2",
+                "kind": "field",
+                "identity": "recommended",
+                "role": "read",
+                "necessity": "required",
+                "origin": "direct",
+                "resolution": "exact",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-1",
+                    "original_name": "recommended",
+                    "binding": "source",
+                    "stage_id": "stage-0",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 15,
+                        "line": 1,
+                        "column": 16
+                      },
+                      "end": {
+                        "offset": 26,
+                        "line": 1,
+                        "column": 27
+                      }
+                    }
+                  }
+                ]
+              }
+            ],
+            "gaps": [],
+            "diagnostics": []
+          }
         },
         "status": "incomplete",
         "coverage": {
@@ -8800,7 +10781,87 @@
             "data_models": [],
             "macros": []
           },
-          "diagnostics": []
+          "diagnostics": [],
+          "requirements": {
+            "schema_version": 1,
+            "query": {
+              "source_id": "ocsf_inheritance",
+              "language": "spl",
+              "profile": "splunkd",
+              "version": "current",
+              "query_digest": "sha256:da9810759718d25743ee50de9dd5dc300c77b39a2f5820ff6c33ddb9ae84d293"
+            },
+            "capability_revision": "sha256:dfb8cedde04204e0a876412fbe217e49405689b54ae7d7d8fc37bfcb7fb2335f",
+            "query_status": "valid",
+            "coverage": {
+              "complete": true,
+              "reasons": []
+            },
+            "items": [
+              {
+                "id": "req-1",
+                "kind": "field",
+                "identity": "time",
+                "role": "read",
+                "necessity": "required",
+                "origin": "direct",
+                "resolution": "exact",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-0",
+                    "original_name": "time",
+                    "binding": "source",
+                    "stage_id": "stage-0",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 6,
+                        "line": 1,
+                        "column": 7
+                      },
+                      "end": {
+                        "offset": 10,
+                        "line": 1,
+                        "column": 11
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "req-2",
+                "kind": "field",
+                "identity": "absent",
+                "role": "read",
+                "necessity": "required",
+                "origin": "direct",
+                "resolution": "exact",
+                "occurrences": [
+                  {
+                    "reference_id": "ref-1",
+                    "original_name": "absent",
+                    "binding": "source",
+                    "stage_id": "stage-0",
+                    "scope_id": "scope-0",
+                    "location": {
+                      "start": {
+                        "offset": 11,
+                        "line": 1,
+                        "column": 12
+                      },
+                      "end": {
+                        "offset": 17,
+                        "line": 1,
+                        "column": 18
+                      }
+                    }
+                  }
+                ]
+              }
+            ],
+            "gaps": [],
+            "diagnostics": []
+          }
         },
         "status": "incomplete",
         "coverage": {

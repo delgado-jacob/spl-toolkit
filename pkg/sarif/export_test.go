@@ -113,6 +113,32 @@ func TestSARIFRuleAndArtifactIndices(t *testing.T) {
 	}
 }
 
+func TestSARIFExcludesRequirementSpecificRules(t *testing.T) {
+	entry := analyzed("requirements-only", "table host*", corpus.Origin{Kind: "inline"})
+	entry.Evaluation.Analysis.Requirements = analysis.RequirementSet{
+		SchemaVersion: 1,
+		Coverage:      analysis.RequirementCoverage{Reasons: []string{"REQ_ONLY"}},
+		Items:         []analysis.RequirementItem{},
+		Gaps:          []analysis.RequirementGap{{Code: "REQ_ONLY", ReferenceIDs: []string{}, DiagnosticCodes: []string{"REQ_ONLY"}}},
+		Diagnostics:   []analysis.Diagnostic{{Code: "REQ_ONLY", Severity: "warning", Category: "requirements", Message: "requirements only"}},
+	}
+	got, err := Export(report(entry))
+	if err != nil {
+		t.Fatal(err)
+	}
+	run := got.Runs[0]
+	if len(run.Tool.Driver.Rules) != 0 || len(run.Results) != 0 {
+		t.Fatalf("requirement-specific SARIF projection introduced: %+v", run)
+	}
+	encoded, err := json.Marshal(got)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(string(encoded), "REQ_ONLY") {
+		t.Fatalf("requirement-only evidence leaked into SARIF: %s", encoded)
+	}
+}
+
 func TestSARIFURIsAndUnicode(t *testing.T) {
 	c := loadCases(t)
 	root := corpus.Origin{Kind: "file", BaseURI: c.WindowsRoot, RelativePath: c.RelativePath}

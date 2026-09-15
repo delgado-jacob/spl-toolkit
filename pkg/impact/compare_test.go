@@ -162,6 +162,31 @@ func TestImpactEmptyCollectionsAreArrays(t *testing.T) {
 	}
 }
 
+func TestImpactExcludesRequirementSpecificComparisonFields(t *testing.T) {
+	prepared, err := PrepareSchemas(fieldTarget("host"), fieldTarget("host"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	report, err := prepared.Compare(impactInput("table host*"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, entry := range report.Entries {
+		for _, delta := range entry.Deltas {
+			if strings.Contains(strings.ToLower(delta.Category), "requirement") {
+				t.Fatalf("requirement-specific impact delta introduced: %+v", delta)
+			}
+		}
+	}
+	for _, typ := range []reflect.Type{reflect.TypeOf(Report{}), reflect.TypeOf(ImpactEntry{}), reflect.TypeOf(EvidenceDelta{})} {
+		for _, field := range reflect.VisibleFields(typ) {
+			if strings.Contains(strings.ToLower(field.Name), "requirement") {
+				t.Fatalf("requirement-specific impact field introduced: %s.%s", typ.Name(), field.Name)
+			}
+		}
+	}
+}
+
 func TestAmbiguousAlignmentWithoutOutcomeDeltaIsIndeterminate(t *testing.T) {
 	classification, reasons := classify(nil, true, false, Alignment{Ambiguous: []string{"before:ref-0"}})
 	if classification != Indeterminate || len(reasons) == 0 {

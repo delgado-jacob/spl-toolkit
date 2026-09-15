@@ -39,8 +39,25 @@ func New(result *analysis.Result, context RevisionContext) (*Snapshot, error) {
 		Lineage:       cloneLineage(result.Lineage),
 		Dependencies:  cloneDependencies(result.Dependencies),
 		Diagnostics:   append([]analysis.Diagnostic{}, result.Diagnostics...),
+		Requirements:  cloneRequirementSet(result.Requirements),
 	}
 	return view, nil
+}
+
+func cloneRequirementSet(in analysis.RequirementSet) analysis.RequirementSet {
+	out := in
+	out.Coverage.Reasons = append([]string{}, in.Coverage.Reasons...)
+	out.Items = append([]analysis.RequirementItem{}, in.Items...)
+	for i := range out.Items {
+		out.Items[i].Occurrences = append([]analysis.RequirementOccurrence{}, in.Items[i].Occurrences...)
+	}
+	out.Gaps = append([]analysis.RequirementGap{}, in.Gaps...)
+	for i := range out.Gaps {
+		out.Gaps[i].ReferenceIDs = append([]string{}, in.Gaps[i].ReferenceIDs...)
+		out.Gaps[i].DiagnosticCodes = append([]string{}, in.Gaps[i].DiagnosticCodes...)
+	}
+	out.Diagnostics = append([]analysis.Diagnostic{}, in.Diagnostics...)
+	return out
 }
 
 func sourceHash(text string) string {

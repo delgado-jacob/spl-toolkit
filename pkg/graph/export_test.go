@@ -103,6 +103,24 @@ func TestGraphEndpointIntegrity(t *testing.T) {
 	}
 }
 
+func TestGraphExcludesRequirementSpecificProjection(t *testing.T) {
+	report := scanCase(t, "mixed")
+	got, err := Export(report)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, node := range got.Nodes {
+		if strings.Contains(strings.ToLower(node.Kind), "requirement") || strings.Contains(node.ReportPointer, "/requirements") {
+			t.Fatalf("requirement-specific graph node introduced: %+v", node)
+		}
+	}
+	for _, edge := range got.Edges {
+		if strings.Contains(strings.ToLower(edge.Relation), "requirement") || strings.Contains(edge.ReportPointer, "/requirements") {
+			t.Fatalf("requirement-specific graph edge introduced: %+v", edge)
+		}
+	}
+}
+
 func pointerExists(t *testing.T, value any, ptr string) bool {
 	t.Helper()
 	raw, err := json.Marshal(value)

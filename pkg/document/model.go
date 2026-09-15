@@ -28,16 +28,17 @@ type RevisionContext struct {
 // canonical logical position. Lineage retains explicit phase and execution
 // order instead of inferring either from source order.
 type Snapshot struct {
-	SchemaVersion int                    `json:"schema_version"`
-	Revision      RevisionContext        `json:"revision"`
-	SourceHash    string                 `json:"source_hash"`
-	Document      analysis.QueryDocument `json:"document"`
-	Status        analysis.Status        `json:"status"`
-	Coverage      analysis.Coverage      `json:"coverage"`
-	Stages        []analysis.Stage       `json:"stages"`
-	Scopes        []analysis.Scope       `json:"scopes"`
-	References    []analysis.Reference   `json:"references"`
-	Lineage       []analysis.Lineage     `json:"lineage"`
-	Dependencies  analysis.Dependencies  `json:"dependencies"`
-	Diagnostics   []analysis.Diagnostic  `json:"diagnostics"`
+	SchemaVersion int                     `json:"schema_version"`
+	Revision      RevisionContext         `json:"revision"`
+	SourceHash    string                  `json:"source_hash"`
+	Document      analysis.QueryDocument  `json:"document"`
+	Status        analysis.Status         `json:"status"`
+	Coverage      analysis.Coverage       `json:"coverage"`
+	Stages        []analysis.Stage        `json:"stages"`
+	Scopes        []analysis.Scope        `json:"scopes"`
+	References    []analysis.Reference    `json:"references"`
+	Lineage       []analysis.Lineage      `json:"lineage"`
+	Dependencies  analysis.Dependencies   `json:"dependencies"`
+	Diagnostics   []analysis.Diagnostic   `json:"diagnostics"`
+	Requirements  analysis.RequirementSet `json:"requirements"`
 }

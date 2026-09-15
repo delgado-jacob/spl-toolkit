@@ -50,6 +50,56 @@ func TestSnapshotDetachedMutation(t *testing.T) {
 	}
 }
 
+func TestSnapshotRequirementSetDetached(t *testing.T) {
+	document := analysis.QueryDocument{Text: "search host=x | table host* | `expand_me`", SourceID: "requirements"}
+	result, err := analysis.Analyze(document)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want, err := analysis.Analyze(document)
+	if err != nil {
+		t.Fatal(err)
+	}
+	snapshot, err := New(result, RevisionContext{ToolVersion: "test", ContractVersion: "v1"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(snapshot.Requirements, result.Requirements) {
+		t.Fatalf("snapshot requirements differ: got %+v want %+v", snapshot.Requirements, result.Requirements)
+	}
+	if len(result.Requirements.Items) == 0 || len(result.Requirements.Items[0].Occurrences) == 0 || len(result.Requirements.Gaps) == 0 || len(result.Requirements.Gaps[0].DiagnosticCodes) == 0 || len(result.Requirements.Diagnostics) == 0 {
+		t.Fatalf("detachment fixture lacks nested requirement evidence: %+v", result.Requirements)
+	}
+
+	mutateSnapshotRequirements(&result.Requirements)
+	if !reflect.DeepEqual(snapshot.Requirements, want.Requirements) {
+		t.Fatal("analysis requirement mutation leaked into snapshot")
+	}
+
+	fresh, err := analysis.Analyze(document)
+	if err != nil {
+		t.Fatal(err)
+	}
+	freshSnapshot, err := New(fresh, RevisionContext{ToolVersion: "test", ContractVersion: "v1"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	mutateSnapshotRequirements(&freshSnapshot.Requirements)
+	if !reflect.DeepEqual(fresh.Requirements, want.Requirements) {
+		t.Fatal("snapshot requirement mutation leaked into analysis")
+	}
+}
+
+func mutateSnapshotRequirements(set *analysis.RequirementSet) {
+	set.Coverage.Reasons[0] = "mutated"
+	set.Items[0].Identity = "mutated"
+	set.Items[0].Occurrences[0].OriginalName = "mutated"
+	set.Gaps[0].Code = "mutated"
+	set.Gaps[0].ReferenceIDs = append(set.Gaps[0].ReferenceIDs, "mutated")
+	set.Gaps[0].DiagnosticCodes[0] = "mutated"
+	set.Diagnostics[0].Code = "mutated"
+}
+
 func TestOverlappingReferenceLookup(t *testing.T) {
 	view, err := New(&analysis.Result{
 		Document: analysis.QueryDocument{Text: "abc"},

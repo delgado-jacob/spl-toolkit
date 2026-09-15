@@ -6,12 +6,50 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"strings"
 	"sync"
 	"testing"
 
 	"github.com/delgado-jacob/spl-toolkit/pkg/analysis"
 	"github.com/delgado-jacob/spl-toolkit/pkg/validation"
 )
+
+func TestRewriteBatchResourceLimit(t *testing.T) {
+	limitedText := strings.Repeat("a ", 4097)
+	request := BatchRequest{
+		SchemaVersion: 1,
+		Mode:          Apply,
+		Documents: []analysis.QueryDocument{
+			{Text: "table src", SourceID: "admitted"},
+			{Text: "eval =", SourceID: "invalid"},
+			{Text: limitedText, SourceID: "limited"},
+		},
+		Rules:            rewriteRequest("").Rules,
+		ValidationTarget: &ValidationTarget{Kind: "field_list", Catalog: &validation.FieldCatalog{Fields: []string{"user"}}},
+	}
+	got, err := RewriteBatch(request)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got.SchemaVersion != 1 || got.Status != analysis.Invalid || len(got.Reports) != len(request.Documents) {
+		t.Fatalf("batch resource shape or status: %+v", got)
+	}
+	for i, report := range got.Reports {
+		if report.Document.SourceID != request.Documents[i].SourceID {
+			t.Errorf("report %d reordered: got %q want %q", i, report.Document.SourceID, request.Documents[i].SourceID)
+		}
+	}
+	if !got.Reports[0].Committed || got.Reports[0].Text != "table user" || got.Reports[0].CandidateValidation == nil {
+		t.Fatalf("admitted report changed: %+v", got.Reports[0])
+	}
+	if got.Reports[1].Status != analysis.Invalid || got.Reports[1].Committed || got.Reports[1].CandidateValidation == nil {
+		t.Fatalf("invalid report changed: %+v", got.Reports[1])
+	}
+	wantLimited := requireRewrite(t, Request{SchemaVersion: 1, Mode: Apply, Document: request.Documents[2], Rules: request.Rules, ValidationTarget: request.ValidationTarget})
+	if !reflect.DeepEqual(got.Reports[2], wantLimited) || got.Reports[2].CandidateValidation != nil {
+		t.Fatalf("resource report differs from exact single no-op:\nbatch=%+v\nsingle=%+v", got.Reports[2], wantLimited)
+	}
+}
 
 // Returning early on syntax damage or reordering by dialect loses valid results.
 func TestRewriteBatchOrderAndAtomicErrors(t *testing.T) {

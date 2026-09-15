@@ -108,13 +108,13 @@ func explicitAliasReport(mode Mode) *Result {
 	}
 	analyses := make([]*analysis.Result, 2)
 	for i, expected := range []struct {
-		text, name string
-		ends       [3]int
-		starts     [3]int
-		refs       [4][2]int
+		text, name, digest string
+		ends               [3]int
+		starts             [3]int
+		refs               [4][2]int
 	}{
-		{"search src=x | stats sum(src) AS total | table total", "src", [3]int{12, 38, 52}, [3]int{0, 15, 41}, [4][2]int{{7, 10}, {25, 28}, {33, 38}, {47, 52}}},
-		{"search user=x | stats sum(user) AS total | table total", "user", [3]int{13, 40, 54}, [3]int{0, 16, 43}, [4][2]int{{7, 11}, {26, 30}, {35, 40}, {49, 54}}},
+		{"search src=x | stats sum(src) AS total | table total", "src", "sha256:bf7f94f7e98b4ee7bdd32070fa2f2738ebb75df11ceb5bd9ade0a30d64fae951", [3]int{12, 38, 52}, [3]int{0, 15, 41}, [4][2]int{{7, 10}, {25, 28}, {33, 38}, {47, 52}}},
+		{"search user=x | stats sum(user) AS total | table total", "user", "sha256:40e312d04c889b1fb1e8ef4f8996b5efe32606abd72ced915c8c0c3c15ee678b", [3]int{13, 40, 54}, [3]int{0, 16, 43}, [4][2]int{{7, 11}, {26, 30}, {35, 40}, {49, 54}}},
 	} {
 		empty := analysis.FieldState{Fields: []analysis.FieldBinding{}, Removed: []string{}, Open: true}
 		source := analysis.FieldState{Fields: []analysis.FieldBinding{{Name: expected.name, OriginReferenceIDs: []string{"ref-0"}}}, Removed: []string{}, Open: true}
@@ -140,6 +140,21 @@ func explicitAliasReport(mode Mode) *Result {
 				{StageID: "stage-2", ScopeID: "scope-0", Before: total, After: total, Transitions: []analysis.Transition{{Operation: "project", Output: "total", InputReferenceIDs: []string{"ref-3"}}}},
 			},
 			Dependencies: analysis.Dependencies{Indexes: []string{}, Sources: []string{}, SourceTypes: []string{}, Datasets: []string{}, Lookups: []string{}, DataModels: []string{}, Macros: []string{}}, Diagnostics: []analysis.Diagnostic{},
+			Requirements: analysis.RequirementSet{
+				SchemaVersion: 1,
+				Query: analysis.RequirementQueryIdentity{
+					SourceID: "source.spl", Language: "spl", Profile: "splunkd", Version: "current", QueryDigest: expected.digest,
+				},
+				CapabilityRevision: "sha256:dfb8cedde04204e0a876412fbe217e49405689b54ae7d7d8fc37bfcb7fb2335f",
+				QueryStatus:        analysis.Valid,
+				Coverage:           analysis.RequirementCoverage{Complete: true, Reasons: []string{}},
+				Items: []analysis.RequirementItem{
+					{ID: "req-1", Kind: "field", Identity: expected.name, Role: "filter", Necessity: "required", Origin: "direct", Resolution: "exact", Occurrences: []analysis.RequirementOccurrence{{ReferenceID: "ref-0", OriginalName: expected.name, Binding: "source", StageID: "stage-0", ScopeID: "scope-0", Location: loc(expected.refs[0][0], expected.refs[0][1])}}},
+					{ID: "req-2", Kind: "field", Identity: expected.name, Role: "read", Necessity: "required", Origin: "direct", Resolution: "exact", Occurrences: []analysis.RequirementOccurrence{{ReferenceID: "ref-1", OriginalName: expected.name, Binding: "source", StageID: "stage-1", ScopeID: "scope-0", Location: loc(expected.refs[1][0], expected.refs[1][1])}}},
+				},
+				Gaps:        []analysis.RequirementGap{},
+				Diagnostics: []analysis.Diagnostic{},
+			},
 		}
 	}
 	a0, b0, a1, b1, alias, consumer := loc(7, 10), loc(7, 11), loc(25, 28), loc(26, 30), loc(33, 38), loc(47, 52)

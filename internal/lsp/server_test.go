@@ -155,6 +155,17 @@ func TestFullSyncDocumentGenerations(t *testing.T) {
 	}
 }
 
+func TestLSPExcludesRequirementSpecificMessages(t *testing.T) {
+	c := newClient(t, canonicalAnalysis)
+	c.init()
+	c.open(1, "table host*")
+	message := c.recv()
+	encoded := string(message["params"])
+	if strings.Contains(encoded, `"requirements"`) || strings.Contains(encoded, "SPL_REQUIREMENT_") {
+		t.Fatalf("requirement-specific payload entered LSP diagnostics: %s", encoded)
+	}
+}
+
 // The analyzer barrier makes obsolete publication observable without sleeps.
 func TestStaleDiagnosticsSuppressed(t *testing.T) {
 	entered := make(chan string, 4)
