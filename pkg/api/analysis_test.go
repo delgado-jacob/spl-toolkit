@@ -222,3 +222,153 @@ func TestAnalysisOpenAPIDocument(t *testing.T) {
 		t.Errorf("analyze response does not reference canonical report: %s", raw)
 	}
 }
+
+func TestRequirementsRESTContentStatuses(t *testing.T) {
+	for _, test := range []struct {
+		document analysis.QueryDocument
+		status   analysis.Status
+	}{
+		{document: analysis.QueryDocument{Text: "search host=web", Language: "spl", SourceID: "valid-spl"}, status: analysis.Valid},
+		{document: analysis.QueryDocument{Text: "search host=* | fields - host | table host", Language: "spl", SourceID: "invalid-spl"}, status: analysis.Invalid},
+		{document: analysis.QueryDocument{Text: "search host=web | mystery", Language: "spl", SourceID: "incomplete-spl"}, status: analysis.Incomplete},
+		{document: analysis.QueryDocument{Text: "FROM main | table host", Language: "spl2", SourceID: "valid-spl2"}, status: analysis.Valid},
+		{document: analysis.QueryDocument{Text: "FROM [{a:1}] | table b", Language: "spl2", SourceID: "invalid-spl2"}, status: analysis.Invalid},
+		{document: analysis.QueryDocument{Text: "FROM main | mystery", Language: "spl2", SourceID: "incomplete-spl2"}, status: analysis.Incomplete},
+	} {
+		test := test
+		document := test.document
+		t.Run(document.SourceID, func(t *testing.T) {
+			body, err := json.Marshal(document)
+			if err != nil {
+				t.Fatal(err)
+			}
+			response := serveAnalysisRequest(t, http.MethodPost, "/api/v1/query/requirements", body, "application/json; charset=utf-8")
+			if response.Code != http.StatusOK {
+				t.Fatalf("status=%d body=%s", response.Code, response.Body.Bytes())
+			}
+			var got analysis.RequirementSet
+			if err := json.Unmarshal(response.Body.Bytes(), &got); err != nil {
+				t.Fatal(err)
+			}
+			want, err := analysis.Requirements(document)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if !reflect.DeepEqual(&got, want) {
+				t.Fatalf("requirement set mismatch\ngot:  %#v\nwant: %#v", &got, want)
+			}
+			if got.QueryStatus != test.status {
+				t.Fatalf("query status=%q, want %q", got.QueryStatus, test.status)
+			}
+		})
+	}
+}
+
+func TestRequirementsRESTRejectsRequestBoundaryErrors(t *testing.T) {
+	invalidText := append([]byte(`{"text":"`), 0xff)
+	invalidText = append(invalidText, []byte(`"}`)...)
+	overLimit := append([]byte(`{"text":"`), bytes.Repeat([]byte("a"), (1<<20)+1)...)
+	overLimit = append(overLimit, []byte(`"}`)...)
+
+	for _, test := range []struct {
+		name        string
+		body        []byte
+		contentType string
+	}{
+		{name: "duplicate member", body: []byte(`{"text":"search a=1","text":"search b=2"}`), contentType: "application/json"},
+		{name: "unknown member", body: []byte(`{"text":"search a=1","extra":true}`), contentType: "application/json"},
+		{name: "file member", body: []byte(`{"text":"search a=1","file":"query.spl"}`), contentType: "application/json"},
+		{name: "network member", body: []byte(`{"text":"search a=1","url":"https://example.invalid/query.spl"}`), contentType: "application/json"},
+		{name: "empty", body: nil, contentType: "application/json"},
+		{name: "malformed", body: []byte(`{"text":`), contentType: "application/json"},
+		{name: "null", body: []byte(`null`), contentType: "application/json"},
+		{name: "invalid unicode", body: invalidText, contentType: "application/json"},
+		{name: "wrong content type", body: []byte(`{"text":"search a=1"}`), contentType: "text/plain"},
+		{name: "missing content type", body: []byte(`{"text":"search a=1"}`)},
+		{name: "trailing JSON", body: []byte(`{"text":"search a=1"} {}`), contentType: "application/json"},
+		{name: "unsupported language", body: []byte(`{"text":"search a=1","language":"unknown"}`), contentType: "application/json"},
+		{name: "unsupported profile", body: []byte(`{"text":"search a=1","profile":"cloud"}`), contentType: "application/json"},
+		{name: "unsupported version", body: []byte(`{"text":"search a=1","version":"9.4"}`), contentType: "application/json"},
+		{name: "body too large", body: overLimit, contentType: "application/json"},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			response := serveAnalysisRequest(t, http.MethodPost, "/api/v1/query/requirements", test.body, test.contentType)
+			if response.Code != http.StatusBadRequest {
+				t.Fatalf("status=%d body=%s", response.Code, response.Body.Bytes())
+			}
+			var got map[string]json.RawMessage
+			if err := json.Unmarshal(response.Body.Bytes(), &got); err != nil {
+				t.Fatalf("decode error response: %v\n%s", err, response.Body.Bytes())
+			}
+			if _, ok := got["error"]; !ok {
+				t.Fatalf("missing error response: %s", response.Body.Bytes())
+			}
+			for _, key := range []string{"schema_version", "query", "query_status", "coverage", "items", "gaps", "diagnostics"} {
+				if _, ok := got[key]; ok {
+					t.Fatalf("partial requirement report contains %q: %s", key, response.Body.Bytes())
+				}
+			}
+		})
+	}
+}
+
+func TestRequirementsRESTLexerBudgetParity(t *testing.T) {
+	for _, language := range []string{"spl", "spl2"} {
+		language := language
+		t.Run(language, func(t *testing.T) {
+			exact := strings.Repeat("x ", 2048)
+			for _, test := range []struct {
+				name          string
+				text          string
+				resourceLimit bool
+			}{
+				{name: "exact", text: exact},
+				{name: "plus one", text: exact + "x", resourceLimit: true},
+				{name: "long sparse", text: `search note="` + strings.Repeat("a", 64*1024) + `"`},
+			} {
+				t.Run(test.name, func(t *testing.T) {
+					document := analysis.QueryDocument{Text: test.text, Language: language, Profile: "splunkd", Version: "current", SourceID: "adapter-budget"}
+					body, err := json.Marshal(document)
+					if err != nil {
+						t.Fatal(err)
+					}
+
+					for _, operation := range []string{"analyze", "requirements"} {
+						response := serveAnalysisRequest(t, http.MethodPost, "/api/v1/query/"+operation, body, "application/json")
+						if response.Code != http.StatusOK {
+							t.Fatalf("%s status=%d body=%s", operation, response.Code, response.Body.Bytes())
+						}
+						if operation == "analyze" {
+							var got analysis.Result
+							if err := json.Unmarshal(response.Body.Bytes(), &got); err != nil {
+								t.Fatal(err)
+							}
+							want, err := analysis.Analyze(document)
+							if err != nil || !reflect.DeepEqual(&got, want) {
+								t.Fatalf("analyze parity: err=%v", err)
+							}
+							gotLimit := len(got.Diagnostics) == 1 && got.Diagnostics[0].Code == analysis.CodeAnalysisResourceLimit
+							if gotLimit != test.resourceLimit {
+								t.Fatalf("analyze resource limit=%t, want %t", gotLimit, test.resourceLimit)
+							}
+							continue
+						}
+
+						var got analysis.RequirementSet
+						if err := json.Unmarshal(response.Body.Bytes(), &got); err != nil {
+							t.Fatal(err)
+						}
+						want, err := analysis.Requirements(document)
+						if err != nil || !reflect.DeepEqual(&got, want) {
+							t.Fatalf("requirements parity: err=%v", err)
+						}
+						gotLimit := len(got.Diagnostics) == 1 && got.Diagnostics[0].Code == analysis.CodeAnalysisResourceLimit
+						if gotLimit != test.resourceLimit {
+							t.Fatalf("requirements resource limit=%t, want %t", gotLimit, test.resourceLimit)
+						}
+					}
+				})
+			}
+		})
+	}
+}

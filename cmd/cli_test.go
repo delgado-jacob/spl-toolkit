@@ -269,3 +269,43 @@ func TestCLIBinaryProcessExitCodes(t *testing.T) {
 		})
 	}
 }
+
+func TestRequirementsCLIBinaryProcessExitCodes(t *testing.T) {
+	name := "spl-toolkit"
+	if runtime.GOOS == "windows" {
+		name += ".exe"
+	}
+	binary := filepath.Join(t.TempDir(), name)
+	build := exec.Command(filepath.Join(runtime.GOROOT(), "bin", "go"), "build", "-mod=readonly", "-o", binary, ".")
+	build.Dir = "."
+	if output, err := build.CombinedOutput(); err != nil {
+		t.Fatalf("build CLI: %v\n%s", err, output)
+	}
+
+	for _, test := range []struct {
+		name string
+		args []string
+		want int
+	}{
+		{name: "valid", args: []string{"requirements", "--query", "search host=web", "--format", "json"}, want: 0},
+		{name: "invalid", args: []string{"requirements", "--query", "search host=* | fields - host | table host", "--format", "json"}, want: 1},
+		{name: "incomplete", args: []string{"requirements", "--query", "search host=web | mystery", "--format", "json"}, want: 3},
+		{name: "request error", args: []string{"requirements", "--unknown"}, want: 2},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			command := exec.Command(binary, test.args...)
+			err := command.Run()
+			got := 0
+			if err != nil {
+				var exitErr *exec.ExitError
+				if !errors.As(err, &exitErr) {
+					t.Fatal(err)
+				}
+				got = exitErr.ExitCode()
+			}
+			if got != test.want {
+				t.Fatalf("exit=%d, want %d", got, test.want)
+			}
+		})
+	}
+}

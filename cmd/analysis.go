@@ -20,6 +20,25 @@ func analysisStatusExitCode(status analysis.Status) int {
 	}
 }
 
+func requirementsExitCode(set *analysis.RequirementSet) int {
+	if set == nil {
+		return 2
+	}
+	switch set.QueryStatus {
+	case analysis.Invalid:
+		return 1
+	case analysis.Incomplete:
+		return 3
+	case analysis.Valid:
+		if !set.Coverage.Complete {
+			return 3
+		}
+		return 0
+	default:
+		return 2
+	}
+}
+
 func formatAnalysisText(report *analysis.Result) []byte {
 	var payload strings.Builder
 	fmt.Fprintf(&payload, "Status: %s\n", report.Status)
@@ -47,6 +66,54 @@ func formatAnalysisText(report *analysis.Result) []byte {
 			formatAnalysisLocation(diagnostic.Location), diagnostic.Message)
 	}
 	return []byte(payload.String())
+}
+
+func formatRequirementsText(set *analysis.RequirementSet) []byte {
+	var payload strings.Builder
+	fmt.Fprintf(&payload, "Query status: %s\n", set.QueryStatus)
+	fmt.Fprintf(&payload, "Requirement coverage: %s\n", coverageLabel(set.Coverage.Complete))
+	if len(set.Coverage.Reasons) > 0 {
+		fmt.Fprintf(&payload, "Coverage reasons: %s\n", strings.Join(set.Coverage.Reasons, ", "))
+	}
+	payload.WriteString("Items:\n")
+	if len(set.Items) == 0 {
+		payload.WriteString("  (none)\n")
+	}
+	for _, item := range set.Items {
+		fmt.Fprintf(&payload, "  - %s %s/%s %q (%s, %s, %s)\n",
+			item.ID, item.Kind, item.Role, item.Identity,
+			item.Necessity, item.Origin, item.Resolution)
+		for _, occurrence := range item.Occurrences {
+			fmt.Fprintf(&payload, "    occurrence %s %q (%s) stage=%s scope=%s @ %s\n",
+				occurrence.ReferenceID, occurrence.OriginalName, occurrence.Binding,
+				occurrence.StageID, occurrence.ScopeID, formatAnalysisLocation(occurrence.Location))
+		}
+	}
+	payload.WriteString("Gaps:\n")
+	if len(set.Gaps) == 0 {
+		payload.WriteString("  (none)\n")
+	}
+	for _, gap := range set.Gaps {
+		fmt.Fprintf(&payload, "  - %s: %s (references: %s; diagnostics: %s)\n",
+			gap.Code, gap.Message, joinedRequirementEvidence(gap.ReferenceIDs), joinedRequirementEvidence(gap.DiagnosticCodes))
+	}
+	payload.WriteString("Diagnostics:\n")
+	if len(set.Diagnostics) == 0 {
+		payload.WriteString("  (none)\n")
+	}
+	for _, diagnostic := range set.Diagnostics {
+		fmt.Fprintf(&payload, "  - %s [%s/%s] @ %s: %s\n",
+			diagnostic.Code, diagnostic.Severity, diagnostic.Category,
+			formatAnalysisLocation(diagnostic.Location), diagnostic.Message)
+	}
+	return []byte(payload.String())
+}
+
+func joinedRequirementEvidence(values []string) string {
+	if len(values) == 0 {
+		return "(none)"
+	}
+	return strings.Join(values, ", ")
 }
 
 func coverageLabel(complete bool) string {

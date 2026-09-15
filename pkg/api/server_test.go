@@ -664,3 +664,45 @@ func TestMapperCaching(t *testing.T) {
 		t.Errorf("Cached response differs from original")
 	}
 }
+
+func TestRequirementsRouteMethodMiddlewareAndInputIsolation(t *testing.T) {
+	server := NewServer()
+
+	get := httptest.NewRecorder()
+	server.Handler().ServeHTTP(get, httptest.NewRequest(http.MethodGet, "/api/v1/query/requirements", nil))
+	if get.Code != http.StatusMethodNotAllowed {
+		t.Fatalf("GET status=%d body=%s", get.Code, get.Body.Bytes())
+	}
+
+	for _, key := range []string{"file", "url"} {
+		body := []byte(`{"text":"search host=web","` + key + `":"ignored"}`)
+		request := httptest.NewRequest(http.MethodPost, "/api/v1/query/requirements", bytes.NewReader(body))
+		request.Header.Set("Content-Type", "application/json")
+		response := httptest.NewRecorder()
+		server.Handler().ServeHTTP(response, request)
+		if response.Code != http.StatusBadRequest {
+			t.Fatalf("%s input status=%d body=%s", key, response.Code, response.Body.Bytes())
+		}
+	}
+
+	request := httptest.NewRequest(http.MethodPost, "/api/v1/query/requirements", bytes.NewReader([]byte(`{"text":"search host=web"}`)))
+	request.Header.Set("Content-Type", "application/json")
+	response := httptest.NewRecorder()
+	server.Handler().ServeHTTP(response, request)
+	if response.Code != http.StatusOK {
+		t.Fatalf("POST status=%d body=%s", response.Code, response.Body.Bytes())
+	}
+	for key, want := range map[string]string{
+		"Content-Type":           "application/json",
+		"X-Content-Type-Options": "nosniff",
+		"X-Frame-Options":        "DENY",
+		"Referrer-Policy":        "no-referrer",
+	} {
+		if got := response.Header().Get(key); got != want {
+			t.Errorf("%s=%q, want %q", key, got, want)
+		}
+	}
+	if response.Header().Get("X-Request-ID") == "" {
+		t.Error("middleware did not add X-Request-ID")
+	}
+}

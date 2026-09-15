@@ -87,7 +87,7 @@ func runCLIWithInput(args []string, stdin io.Reader, stdout, stderr io.Writer) i
 		return runRewriteCLI(args[1:], stdin, stdout, stderr)
 	case "scan", "graph", "impact-schema", "impact-mapping", "lsp", "document":
 		return runToolingCLI(command, args[1:], stdin, stdout, stderr)
-	case "map", "discover", "validate", "analyze", "capabilities":
+	case "map", "discover", "validate", "analyze", "requirements", "capabilities":
 		return runQueryCommand(command, args[1:], stdout, stderr)
 	default:
 		return writeCLIError(stderr, "text", fmt.Sprintf("unknown command %q", command), 2)
@@ -200,7 +200,7 @@ func analysisOptionMayBeEmpty(command, name string) bool {
 	case "language", "profile", "compatibility-version":
 		return true
 	case "query", "source-id":
-		return command == "analyze" || command == "validate-fields" || command == "validate-schema" || command == "rewrite"
+		return command == "analyze" || command == "requirements" || command == "validate-fields" || command == "validate-schema" || command == "rewrite"
 	default:
 		return false
 	}
@@ -276,7 +276,7 @@ func setCLIOption(options *cliOptions, name, value string) error {
 }
 
 func validateCLIOptions(command string, options cliOptions) error {
-	if command != "analyze" && options.hasSourceID {
+	if command != "analyze" && command != "requirements" && options.hasSourceID {
 		return fmt.Errorf("%s does not accept --source-id", command)
 	}
 	if command == "map" || command == "discover" || command == "validate" {
@@ -313,6 +313,13 @@ func validateCLIOptions(command string, options cliOptions) error {
 		}
 		if !options.hasQuery {
 			return fmt.Errorf("analyze requires a query")
+		}
+	case "requirements":
+		if options.hasConfig {
+			return fmt.Errorf("requirements does not accept --config")
+		}
+		if !options.hasQuery {
+			return fmt.Errorf("requirements requires a query")
 		}
 	case "capabilities":
 		if options.hasConfig || options.hasQuery {
@@ -379,6 +386,20 @@ func computeCLIResult(command string, options cliOptions) ([]byte, int, error) {
 			return payload, code, err
 		}
 		return formatAnalysisText(report), code, nil
+	case "requirements":
+		set, err := analysis.Requirements(analysis.QueryDocument{
+			Text: options.query, Language: options.language, Profile: options.profile,
+			Version: options.compatibilityVersion, SourceID: options.sourceID,
+		})
+		if err != nil {
+			return nil, 2, err
+		}
+		code := requirementsExitCode(set)
+		if options.format == "json" {
+			payload, _, err := marshalCLILine(set)
+			return payload, code, err
+		}
+		return formatRequirementsText(set), code, nil
 	case "capabilities":
 		manifest, err := analysis.CapabilitiesFor(analysis.CapabilityOptions{Language: options.language, Profile: options.profile, Version: options.compatibilityVersion})
 		if err != nil {

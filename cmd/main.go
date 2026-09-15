@@ -24,6 +24,7 @@ Commands:
   discover [query]  Discover query information
   validate [query]  Validate query syntax or --config
   analyze [query]   Analyze field availability, lineage, and coverage
+  requirements [query]  Report direct external query requirements
   validate-fields   Validate fields against a local catalog
   validate-schema   Validate fields against local JSON Schema or OCSF
   rewrite           Safely preview or apply explicit rewrite rules
@@ -31,19 +32,19 @@ Commands:
   demo              Run demonstration examples
   help              Show this help message
 
-Options for map, discover, validate, analyze, validate-fields, validate-schema, rewrite, and capabilities:
+Options for map, discover, validate, analyze, requirements, validate-fields, validate-schema, rewrite, and capabilities:
   --format FORMAT   Output format: text or json (default: text)
   --output FILE     Write the result to a file (including analysis diagnostics)
   --help            Show this help message
   --query QUERY     Supply the query as an option (not capabilities)
   --config FILE     Mapping configuration (map and validate only)
 
-Compatibility selectors (analyze, capabilities, and single-query validation):
+Compatibility selectors (analyze, requirements, capabilities, and single-query validation):
   --language LANG                  spl or spl2 (default: spl)
   --profile PROFILE                Execution profile (default: splunkd)
   --compatibility-version VERSION  Compatibility version (default: current)
   --source-id ID                   Source identifier (document operations only)
-analyze and capabilities accept language/profile/version selectors.
+analyze, requirements, and capabilities accept language/profile/version selectors.
 Legacy map/discover/validate reject spl2; use analyze, structured validation, or rewrite where its capability form is supported.
 Empty compatibility selectors use defaults; unknown selectors are input errors.
 
@@ -77,7 +78,7 @@ Additional rewrite options:
 Rewrite also accepts the shared query inputs and optional schema/OCSF target options.
 Choose at most one --fields, --schema, or --ocsf-catalog target family.
 
-Analyze, validate-fields, validate-schema, and rewrite exit codes: 0 valid, 1 invalid content, 3 incomplete analysis.
+Analyze, requirements, validate-fields, validate-schema, and rewrite exit codes: 0 valid, 1 invalid content, 3 incomplete analysis or requirement coverage.
 Request or output errors exit 2. Invalid and incomplete reports are still emitted.
 `, buildinfo.Version)
 	return err

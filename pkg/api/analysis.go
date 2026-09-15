@@ -33,6 +33,21 @@ func (s *Server) handleAnalyzeQuery(w http.ResponseWriter, r *http.Request) {
 	s.writeJSONResponse(w, http.StatusOK, report)
 }
 
+// handleRequirementsQuery returns the canonical direct query requirements.
+func (s *Server) handleRequirementsQuery(w http.ResponseWriter, r *http.Request) {
+	document, err := parseAnalysisDocument(w, r)
+	if err != nil {
+		s.writeErrorResponse(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	set, err := analysis.Requirements(document)
+	if err != nil {
+		s.writeErrorResponse(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	s.writeJSONResponse(w, http.StatusOK, set)
+}
+
 // handleCapabilities returns the canonical analysis capability manifest.
 // @Summary Get analysis capabilities
 // @Description Select the canonical capability manifest including language, profile, compatibility version, commands, functions, limitations, and optional pinned documentation_snapshot. Only language/profile/version query parameters are accepted; duplicate keys are rejected even when equal.
