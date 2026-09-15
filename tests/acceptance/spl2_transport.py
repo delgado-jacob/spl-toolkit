@@ -6,7 +6,7 @@ import os
 from pathlib import Path
 import subprocess
 
-REPORT_KEYS = {"schema_version", "document", "status", "coverage", "stages", "scopes", "references", "lineage", "dependencies", "diagnostics"}
+REPORT_KEYS = {"schema_version", "document", "status", "coverage", "stages", "scopes", "references", "lineage", "dependencies", "diagnostics", "requirements"}
 
 
 def digest(path):
@@ -48,6 +48,7 @@ def load_transport(path, fixtures, expected_sha256, source_root=None):
         assert report["document"] == expected, "wrong normalized Query Document"
         assert report["schema_version"] == 1 and report["status"] in {"valid", "invalid", "incomplete"}
         assert set(report["coverage"]) == {"syntax_complete", "semantic_complete", "reasons"}
+        assert isinstance(report["requirements"], dict), "truncated Go requirements"
         for key in ("stages", "scopes", "references", "lineage", "diagnostics"):
             assert isinstance(report[key], list), f"truncated Go {key}"
         reports[identity] = report

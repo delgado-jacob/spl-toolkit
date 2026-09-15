@@ -26,6 +26,9 @@ def evidence(tmp_path):
     report = {"schema_version": 1, "document": {"profile": "splunkd", "version": "current", "source_id": ""} | document,
               "status": "incomplete", "coverage": {"syntax_complete": True, "semantic_complete": False, "reasons": []},
               "stages": [], "scopes": [], "references": [], "lineage": [], "diagnostics": [],
+              "requirements": {"schema_version": 1, "query": {}, "capability_revision": "sha256:" + "0" * 64,
+                               "query_status": "incomplete", "coverage": {"complete": False, "reasons": []},
+                               "items": [], "gaps": [], "diagnostics": []},
               "dependencies": {k: [] for k in ("indexes", "sources", "source_types", "datasets", "lookups", "data_models", "macros")}}
     artifact = {"schema_version": 1, "kind": "spl2-go-transport", "conformance_credit": 0,
                 "source_hashes": {"pkg/analysis/core.go": sha(source / "pkg/analysis/core.go")},

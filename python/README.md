@@ -56,6 +56,37 @@ Capabilities separate syntax from semantic support and list limitations and func
 
 Legacy discovery and mapping retain their own contracts. Flat `input_fields` does not encode flow, scope, or completeness and is not guaranteed to match structured classifications. New consumers should use reference roles/bindings and status/coverage. The [API reference](https://github.com/delgado-jacob/spl-toolkit/blob/main/docs/API.md) describes every surface and the supported forms; this package does not perform event instance validation or SPL2 modules.
 
+## Query requirements
+
+```python
+from spl_toolkit import SPLMapper
+
+with SPLMapper() as mapper:
+    requirements = mapper.requirements_query(
+        "search index=main host=web | eval label=host | table label",
+        language="spl", profile="splunkd", version="current",
+        source_id="example.spl",
+    )
+    assert requirements == mapper.analyze_query(
+        "search index=main host=web | eval label=host | table label",
+        language="spl", profile="splunkd", version="current",
+        source_id="example.spl",
+    )["requirements"]
+    print(requirements["query_status"], requirements["coverage"]["complete"])
+```
+
+`requirements_query(query, *, language='spl', profile='splunkd', version='current', source_id='')` returns the complete canonical `RequirementSet` dictionary. It contains integer `schema_version: 1`, query identity and digest, capability revision, query status, requirement coverage, ordered items, gaps, and diagnostics. Item occurrences retain reference, spelling, binding, stage, scope, and exact source location. Every collection remains a list when empty.
+
+Items group occurrences by kind, normalized identity, consuming role, and resolution. Source-bound consumers and direct knowledge-object references can be required. Indeterminate, wildcard, and dynamic consumers are conditional and produce gaps. Fields created by the query, rename targets, removals, null tests, and query-local unavailable fields are not external obligations. Requirement coverage is independent of query status, so inspect both values.
+
+Validation and rewrite can refine their public analysis against a supplied target, but their embedded requirements remain equal to plain query-only analysis of the same normalized document. The operation does not expand knowledge objects, read environment metadata or event data, assess compatibility, resolve placeholders, generate variants, or execute the query.
+
+`query_digest` is SHA-256 over the exact valid UTF-8 query bytes. It excludes source ID and compatibility selectors and performs no whitespace or line-ending normalization. `capability_revision` identifies the compact normalized capability manifest. Both use `sha256:<64 lowercase hex>`. They identify supplied data and are not authentication, authorization, signatures, environment compatibility, or execution permission.
+
+Canonical analysis admits at most 4,096 lexer work units. A query that would consume unit 4,097 returns a successful dictionary with incomplete status and coverage, one `SPL_ANALYSIS_RESOURCE_LIMIT` diagnostic and gap, the full-text digest, and no partial requirement evidence. Long sparse input remains admitted when it stays within the work budget. Preview, apply, and batch rewrite return an incomplete no-op for a resource-limited original; apply never commits. The [API reference](https://github.com/delgado-jacob/spl-toolkit/blob/main/docs/API.md#canonical-lexer-work-boundary) defines exact ordering, SPL2 closure accounting, messages, half-open ranges, and the fixture-specific response-size checks.
+
+The method uses the owned native call `spl_mapper_requirements_query`. Mapper admission and close guards match the other operations, and the wrapper releases every returned `SPLResult` with `spl_result_free`, including decoding and native error paths. Repeated calls return detached Python values.
+
 ## Safe rewrite
 
 ```python

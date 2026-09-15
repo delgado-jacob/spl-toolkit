@@ -3,6 +3,7 @@
 from concurrent.futures import ThreadPoolExecutor
 from copy import deepcopy
 import ctypes
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -99,6 +100,34 @@ def expected_search(mode, language="spl"):
         empty = {"fields": [], "removed": [], "open": True, "uncertain": False}
         source = {"fields": [{"name": name, "origin_reference_ids": ["ref-0"], "conditional": False}],
                   "removed": [], "open": True, "uncertain": False}
+        reference_location = location(7, end - 2)
+        requirements = {
+            "schema_version": 1,
+            "query": {
+                "source_id": document["source_id"],
+                "language": language,
+                "profile": "splunkd",
+                "version": "current",
+                "query_digest": "sha256:" + hashlib.sha256(text.encode()).hexdigest(),
+            },
+            "capability_revision": {
+                "spl": "sha256:dfb8cedde04204e0a876412fbe217e49405689b54ae7d7d8fc37bfcb7fb2335f",
+                "spl2": "sha256:c3217502697cee2595f20d2fe98b76422f837696d2861cee81e852ad142edcfc",
+            }[language],
+            "query_status": "valid",
+            "coverage": {"complete": True, "reasons": []},
+            "items": [{
+                "id": "req-1", "kind": "field", "identity": name,
+                "role": "filter" if language == "spl" else "read",
+                "necessity": "required", "origin": "direct", "resolution": "exact",
+                "occurrences": [{
+                    "reference_id": "ref-0", "original_name": name, "binding": "source",
+                    "stage_id": "stage-0", "scope_id": "scope-0", "location": reference_location,
+                }],
+            }],
+            "gaps": [],
+            "diagnostics": [],
+        }
         analyses.append({
             "schema_version": 1, "document": document, "status": "valid",
             "coverage": {"syntax_complete": True, "semantic_complete": True, "reasons": []},
@@ -106,11 +135,12 @@ def expected_search(mode, language="spl"):
                         "location": location(0, end), "semantic_complete": True}],
             "scopes": [{"id": "scope-0", "parent_id": "", "kind": "root", "stage_id": "", "location": location(0, end)}],
             "references": [{"id": "ref-0", "original_name": name, "normalized_name": name, "kind": "field",
-                            "role": "filter" if language == "spl" else "read", "stage_id": "stage-0", "scope_id": "scope-0", "location": location(7, end - 2),
+                            "role": "filter" if language == "spl" else "read", "stage_id": "stage-0", "scope_id": "scope-0", "location": reference_location,
                             "resolution": "exact", "binding": "source", "origin_reference_ids": []}],
             "lineage": [{"stage_id": "stage-0", "scope_id": "scope-0", "before": empty, "after": source, "transitions": []}],
             "dependencies": {k: [] for k in ("indexes", "sources", "source_types", "datasets", "lookups", "data_models", "macros")},
             "diagnostics": [],
+            "requirements": requirements,
         })
     committed = mode == "apply"
     return {

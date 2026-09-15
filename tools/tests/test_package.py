@@ -415,6 +415,48 @@ def test_installed_surface_suite_requires_analysis_parity(tmp_path: Path):
     assert (destination / "test_analysis_surfaces.py").read_bytes() == (ROOT / "tests/acceptance/test_analysis_surfaces.py").read_bytes()
 
 
+def test_installed_requirement_inputs_are_copied_and_hashed(tmp_path: Path, monkeypatch):
+    checker = load_package_checker()
+    assert "test_native_requirements.py" in checker.NATIVE_TESTS
+    assert "tests/test_native_requirements.py" in checker.SDIST_FIXED_FILES
+    assert "test_requirements_surfaces.py" in checker.ACCEPTANCE_FILES
+
+    native = tmp_path / "native"
+    checker._copy_required_files(ROOT / "python/tests", native, checker.NATIVE_TESTS)
+    assert (native / "test_native_requirements.py").read_bytes() == (
+        ROOT / "python/tests/test_native_requirements.py"
+    ).read_bytes()
+
+    acceptance = tmp_path / "acceptance"
+    checker._copy_required_files(ROOT / "tests/acceptance", acceptance, checker.ACCEPTANCE_FILES)
+    assert (acceptance / "test_requirements_surfaces.py").read_bytes() == (
+        ROOT / "tests/acceptance/test_requirements_surfaces.py"
+    ).read_bytes()
+
+    monkeypatch.setenv("SPL_REQUIREMENTS_FIXTURES", "checkout-only")
+    assert "SPL_REQUIREMENTS_FIXTURES" not in checker.clean_env()
+    fixtures = tmp_path / "requirements"
+    hashes = checker.copy_requirements_fixtures(ROOT / "testdata/requirements", fixtures)
+    assert hashes == {"cases.json": checker.sha256(ROOT / "testdata/requirements/cases.json")}
+    assert (fixtures / "cases.json").read_bytes() == (ROOT / "testdata/requirements/cases.json").read_bytes()
+
+
+def test_requirement_fixture_copy_rejects_missing_or_changed_input(tmp_path: Path, monkeypatch):
+    checker = load_package_checker()
+    with pytest.raises(FileNotFoundError):
+        checker.copy_requirements_fixtures(tmp_path / "missing", tmp_path / "copy")
+
+    real_copy = checker.shutil.copy2
+
+    def corrupt(source, destination):
+        real_copy(source, destination)
+        Path(destination).write_bytes(b"changed")
+
+    monkeypatch.setattr(checker.shutil, "copy2", corrupt)
+    with pytest.raises(AssertionError, match="hash"):
+        checker.copy_requirements_fixtures(ROOT / "testdata/requirements", tmp_path / "changed")
+
+
 def test_installed_runner_removes_source_injection(monkeypatch):
     checker = load_package_checker()
     names = ("PYTHONPATH", "PYTHONHOME", "SPL_NATIVE_LIBRARY", "SPL_EXPECTED_VERSION")
@@ -560,10 +602,19 @@ def test_installed_schema_fixtures_exist_before_both_suites(tmp_path: Path, monk
         assert rewrite.is_absolute() and rewrite.is_relative_to(outside) and not rewrite.is_relative_to(ROOT)
         for relative in checker.REWRITE_FIXTURE_FILES:
             assert (rewrite / relative).read_bytes() == (ROOT / "testdata/rewrite" / relative).read_bytes()
+        requirements = Path(env["SPL_REQUIREMENTS_FIXTURES"])
+        assert requirements.is_absolute() and requirements.is_file()
+        assert requirements.is_relative_to(outside)
+        assert not requirements.is_relative_to(ROOT)
+        assert requirements.read_bytes() == (ROOT / "testdata/requirements/cases.json").read_bytes()
+        requirement_go_root = Path(env["SPL_REQUIREMENTS_GO_ROOT"])
+        assert requirement_go_root.is_absolute() and requirement_go_root.is_relative_to(outside)
+        assert (requirement_go_root / "go.mod").read_bytes() == (ROOT / "go.mod").read_bytes()
         if "SPL_SCHEMA_EVIDENCE" in env:
             Path(env["SPL_SCHEMA_EVIDENCE"]).write_text("{}")
             Path(env["SPL_SPL2_EVIDENCE"]).write_text("{}")
             Path(env["SPL_REWRITE_EVIDENCE"]).write_text("{}")
+            Path(env["SPL_REQUIREMENTS_EVIDENCE"]).write_text("{}")
             copied_rewrite = Path(env["SPL_REWRITE_GO_REPORTS"])
             assert copied_rewrite.is_relative_to(outside) and copied_rewrite.read_bytes() == rewrite_transport.read_bytes()
             assert env["SPL_REWRITE_GO_SHA256"] == checker.sha256(rewrite_transport)
@@ -582,6 +633,9 @@ def test_installed_schema_fixtures_exist_before_both_suites(tmp_path: Path, monk
     assert len(seen) == 3 and seen[0] == seen[1] == seen[2]
     assert result["fixture_hashes"]["schema"] == {name: checker.sha256(ROOT / "testdata/schemas" / name) for name in SCHEMA_FIXTURES}
     assert result["fixture_hashes"]["rewrite"] == {name: checker.sha256(ROOT / "testdata/rewrite" / name) for name in checker.REWRITE_FIXTURE_FILES}
+    assert result["fixture_hashes"]["requirements"] == checker.sha256(
+        ROOT / "testdata/requirements/cases.json"
+    )
     assert result["wheel_payload_hashes"] == payload_hashes
     dependency_installs = [command for command in commands if "pip" in command and "-r" in command]
     assert len(dependency_installs) == 1
@@ -605,7 +659,7 @@ def test_sdist_source_verification_requires_exact_handwritten_sources_and_native
     command.ensure_finalized()
     release = tmp_path / "release"
     command.make_release_tree(str(release), [])
-    for relative in ("native-source-files.txt", "spl_toolkit/mapper.py", "spl_toolkit/libspl_toolkit.h", "tests/test_native_schema_validation.py", "tests/test_native_spl2.py", "tests/test_native_rewrite.py", "tests/test_native_tooling.py", "build_support.py", "MANIFEST.in", "setup.py", "pyproject.toml", "requirements-build.txt", "requirements-dev.txt", "requirements-contracts-local-hashed.lock"):
+    for relative in ("native-source-files.txt", "spl_toolkit/mapper.py", "spl_toolkit/libspl_toolkit.h", "tests/test_native_schema_validation.py", "tests/test_native_spl2.py", "tests/test_native_rewrite.py", "tests/test_native_requirements.py", "tests/test_native_tooling.py", "build_support.py", "MANIFEST.in", "setup.py", "pyproject.toml", "requirements-build.txt", "requirements-dev.txt", "requirements-contracts-local-hashed.lock"):
         destination = release / relative
         destination.parent.mkdir(parents=True, exist_ok=True)
         destination.write_bytes((PYTHON_DIR / relative).read_bytes())

@@ -19,9 +19,15 @@ EXPECTED_COUNTS = {"required_native": 11, "surface_acceptance": 6}
 EXPECTED_MACHINE_CONTRACT_COUNT = 10
 REQUIRED_TEST_FILES = {
     "native": {"test_native_abi.py", "test_native_mapper.py", "test_native_analysis.py",
-               "test_native_validation.py", "test_native_schema_validation.py", "test_native_spl2.py", "test_native_rewrite.py"},
+               "test_native_validation.py", "test_native_schema_validation.py", "test_native_spl2.py",
+               "test_native_rewrite.py", "test_native_requirements.py"},
     "acceptance": {"test_documented_cli.py", "test_surfaces.py", "test_analysis_surfaces.py",
-                   "test_validation_surfaces.py", "test_schema_surfaces.py", "test_spl2_surfaces.py", "test_rewrite_surfaces.py"},
+                   "test_requirements_surfaces.py", "test_validation_surfaces.py", "test_schema_surfaces.py",
+                   "test_spl2_surfaces.py", "test_rewrite_surfaces.py"},
+}
+REQUIREMENTS_EVIDENCE_FIELDS = {
+    "schema_version", "fixture_sha256", "corpus_cases", "dense_cases",
+    "concurrent_calls", "long_sparse_cases", "request_error_cases",
 }
 HASH_RE = re.compile(r"^[0-9a-f]{64}$")
 SHA_RE = re.compile(r"^[0-9a-f]{40}$")
@@ -50,7 +56,7 @@ KIND_FIELDS = {
         "installed_module", "package_version", "native_version", "tests",
         "cli_examples", "surface_parity", "version_agreement", "required_test_files",
         "wheel_contract_hashes", "tooling_source_hashes", "tooling_fixture_hashes",
-        "machine_contract_tests",
+        "machine_contract_tests", "fixture_hashes", "requirements_surface_evidence",
     },
     "go-floor": {"go_version"},
     "native-memory": {"compiler", "sanitizer"},
@@ -144,6 +150,35 @@ def _validate_hash_map(value: object, expected: set[str], field: str,
         return
     if any(not isinstance(digest, str) or not HASH_RE.fullmatch(digest) for digest in value.values()):
         errors.append(f"{label}: {field} contains an invalid SHA-256")
+
+
+def _validate_requirements_evidence(record: dict, errors: list[str], label: str) -> None:
+    fixture_hashes = record.get("fixture_hashes")
+    if not isinstance(fixture_hashes, dict):
+        errors.append(f"{label}: fixture_hashes must be an object")
+        return
+    requirement_hash = fixture_hashes.get("requirements")
+    if not isinstance(requirement_hash, str) or not HASH_RE.fullmatch(requirement_hash):
+        errors.append(f"{label}: requirements fixture hash must be a lowercase SHA-256")
+
+    evidence = record.get("requirements_surface_evidence")
+    if not isinstance(evidence, dict) or set(evidence) != REQUIREMENTS_EVIDENCE_FIELDS:
+        errors.append(f"{label}: requirements_surface_evidence has incorrect fields")
+        return
+    if evidence.get("schema_version") != 1:
+        errors.append(f"{label}: requirements_surface_evidence schema_version must be 1")
+    if evidence.get("fixture_sha256") != requirement_hash:
+        errors.append(f"{label}: requirements fixture hash differs from surface evidence")
+    minimums = {
+        "corpus_cases": 17,
+        "dense_cases": 4,
+        "concurrent_calls": 16,
+        "long_sparse_cases": 2,
+        "request_error_cases": 3,
+    }
+    for field, minimum in minimums.items():
+        if type(evidence.get(field)) is not int or evidence[field] < minimum:
+            errors.append(f"{label}: requirements_surface_evidence {field} is below {minimum}")
 
 
 def _normalized_architecture(value: object) -> str:
@@ -314,6 +349,7 @@ def validate_records(records: list[dict], source_sha: str) -> list[str]:
                 if record.get(gate) != "passed":
                     errors.append(f"{label}: {gate} must be passed")
             _validate_counts(record, errors, label)
+            _validate_requirements_evidence(record, errors, label)
             for field, expected in (
                 ("wheel_contract_hashes", WHEEL_CONTRACT_KEYS),
                 ("tooling_source_hashes", TOOLING_SOURCE_KEYS),

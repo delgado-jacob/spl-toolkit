@@ -6,6 +6,7 @@ SPL Toolkit 0.1.1 is an offline library and command-line tool for bounded operat
 - discover data models, datasets, lookups, macros, sources, sourcetypes, and input fields;
 - validate queries against the bundled legacy grammar;
 - analyze query flow, located references, lineage, dependencies, and coverage;
+- report direct external query requirements with source evidence and explicit gaps;
 - scan dedicated query corpora, export graph/SARIF evidence, compare schema/mapping changes, and serve local editor diagnostics and highlights;
 - validate source field obligations against an offline field catalog, singly or in ordered batches;
 - preview or apply explicit source-identity rewrites with linked-edit proof, audit trails, and optional destination validation;
@@ -36,6 +37,14 @@ spl-toolkit capabilities --format json
 Analysis emits report format `1` with original source, located references, scope/stage IDs, lineage, dependencies, diagnostics, and explicit coverage. Exit codes are 0 valid, 1 invalid, 3 incomplete, and 2 usage/options/I/O errors. Structural validity does not prove external schema membership or successful Splunk execution. Go, native Python, CLI, and REST share the canonical report.
 
 See the [structured analysis API](docs/API.md) for Go/Python examples, REST routes, exact UTF-8 byte and Unicode column coordinates, supported forms, and migration from flat discovery. See [compatibility](docs/compatibility.md) for the distinction between local analysis verification and released platform evidence.
+
+## Query requirements
+
+`analysis.Requirements` projects the direct external fields and knowledge objects visible in an SPL or standalone SPL2 query. Every `analysis.Result` also embeds the same `requirements` value. The report separates `query_status` from requirement `coverage`, groups repeated occurrences by identity and consuming role, and records dynamic, wildcard, unsupported, or indeterminate evidence as gaps. Source-bound consuming fields can be requirements; fields created by the query, rename targets, removals, null tests, and query-local unavailable fields are not external obligations.
+
+The operation is deterministic and offline. It does not expand knowledge objects, inspect events or environment metadata, assess compatibility, resolve placeholders, generate query variants, or execute queries. Query and capability digests identify the submitted data and selected capability contract. They are not authentication, authorization, signatures, or execution permission.
+
+Use [`spl-toolkit requirements`](docs/cli.md#query-requirements), `POST /api/v1/query/requirements`, `SPLMapper.requirements_query(...)`, or the canonical Go API. See the [requirement report contract](docs/API.md#query-requirements) for the complete shape, examples, status rules, 4,096-unit lexer work boundary, and native ownership contract.
 
 ## Field-list validation
 

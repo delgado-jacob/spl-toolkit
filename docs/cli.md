@@ -81,6 +81,76 @@ Content reports use exit 0 for valid, 1 for invalid, and 3 for incomplete. Malfo
 
 Legacy `map`, `discover`, and `validate` accept only the default SPL compatibility contract. Explicit `--language spl2` returns exit 2 with `unsupported_dialect_for_operation` and guidance to `analyze` or structured validation. Use `rewrite` for local, rule-driven SPL or SPL2 rewrites, and inspect `capabilities` for the selected dialect's supported rewrite forms and limitations; support is not universal. Default legacy success and error formats are retained.
 
+## Query requirements
+
+`requirements` reports direct external field and knowledge-object obligations from canonical query-only analysis. It accepts exactly one positional or `--query` value, the analysis compatibility selectors, optional `--source-id`, `--format text|json`, and optional `--output`. It does not accept file, stdin, or batch input.
+
+<!-- cli-example: requirements-json -->
+```bash
+spl-toolkit requirements --query 'search index=main host=web | eval label=host | table label' --source-id example.spl --format json
+```
+
+The JSON value contains query and capability identities, query status, requirement coverage, ordered items, gaps, and diagnostics. Repeated occurrences are grouped by kind, normalized identity, consuming role, and resolution. Source-bound consumers can be requirements; fields created by the query and non-consuming definitions are omitted.
+
+<!-- cli-example: requirements-spl2-text -->
+```bash
+spl-toolkit requirements --language spl2 --profile splunkd --compatibility-version current --source-id sql-example --query 'SELECT host FROM main WHERE bytes>0'
+```
+
+A positional query is equivalent to `--query`:
+
+<!-- cli-example: requirements-positional -->
+```bash
+spl-toolkit requirements 'search host=web'
+```
+
+`--output` writes the complete report and leaves standard output empty:
+
+<!-- cli-example: requirements-output -->
+```bash
+spl-toolkit requirements --query 'search host=web' --format json --output requirements.json
+```
+
+The command rejects the query acquisition modes reserved for validation and rewrite:
+
+<!-- cli-example: requirements-reject-file -->
+```bash
+spl-toolkit requirements --file query.spl
+```
+
+<!-- cli-example: requirements-reject-stdin -->
+```bash
+spl-toolkit requirements --stdin
+```
+
+<!-- cli-example: requirements-reject-batch -->
+```bash
+spl-toolkit requirements --batch queries.json
+```
+
+Invalid and incomplete content still emits its JSON report before returning the content exit:
+
+<!-- cli-example: requirements-invalid -->
+```bash
+spl-toolkit requirements --query 'search host=* | fields - host | table host' --format json
+```
+
+<!-- cli-example: requirements-incomplete -->
+```bash
+spl-toolkit requirements --query 'search host=web | mystery' --format json
+```
+
+Text output prints `Query status` and `Requirement coverage` independently, followed by items, occurrences, gaps, and diagnostics. JSON output is the full canonical `RequirementSet`. Both forms write the content report before returning its status:
+
+| Exit | Meaning |
+|---|---|
+| 0 | Query valid and requirement coverage complete |
+| 1 | Query status invalid |
+| 3 | Query status incomplete or requirement coverage incomplete |
+| 2 | Request, option, output, or internal failure |
+
+Canonical analysis admits at most 4,096 lexer work units. A query that would consume unit 4,097 still emits an incomplete report and exits 3. It has one `SPL_ANALYSIS_RESOURCE_LIMIT` diagnostic and gap and no partial requirement evidence. Long sparse input remains eligible for ordinary analysis when it stays within the work-unit boundary. See the [API contract](API.md#canonical-lexer-work-boundary) for ordering, SPL2 closure accounting, exact messages and locations, and rewrite behavior.
+
 ## Local field validation
 
 `validate-fields` checks the canonical field obligations against a local catalog. It requires `--fields FILE` and exactly one positional/`--query` value, `--file FILE`, `--stdin`, or `--batch FILE`. The legacy `validate` command retains its syntax/configuration behavior.

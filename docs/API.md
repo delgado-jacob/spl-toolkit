@@ -36,12 +36,96 @@ func main() {
 
 `analysis.Analyze(document) (*analysis.Result, error)` returns query diagnostics inside the report. Invalid options or invalid source encoding return an error. `analysis.Capabilities()` returns a fresh `analysis.CapabilityManifest`. Public types contain no parser internals.
 
+## Query requirements
+
+Every new `analysis.Result` includes a non-optional `requirements` member. Use the standalone operation when the rest of the analysis report is not needed:
+
+```go
+package main
+
+import (
+    "encoding/json"
+    "log"
+    "os"
+
+    "github.com/delgado-jacob/spl-toolkit/pkg/analysis"
+)
+
+func main() {
+    requirements, err := analysis.Requirements(analysis.QueryDocument{
+        Text:     "search index=main host=web | eval label=host | table label",
+        SourceID: "example.spl",
+    })
+    if err != nil {
+        log.Fatal(err)
+    }
+    if err := json.NewEncoder(os.Stdout).Encode(requirements); err != nil {
+        log.Fatal(err)
+    }
+}
+```
+
+`analysis.Requirements(document) (*analysis.RequirementSet, error)` performs one canonical analysis pass and returns a deeply detached copy of that pass's embedded set. Mutating the standalone set, an analysis result, or a document snapshot does not alter another returned value or the selected capability manifest.
+
+### Report shape
+
+`RequirementSet` is a report family with integer `schema_version: 1` and these required members:
+
+| Member | Shape and meaning |
+|---|---|
+| `query` | `source_id`, normalized `language`, `profile`, `version`, and `query_digest` |
+| `capability_revision` | Digest of the selected normalized capability manifest |
+| `query_status` | `valid`, `invalid`, or `incomplete` from query-only analysis |
+| `coverage` | `complete` plus an ordered `reasons` array |
+| `items` | Ordered direct requirement items |
+| `gaps` | Ordered explanations for incomplete requirement discovery |
+| `diagnostics` | Detached canonical query-only diagnostics |
+
+Each item has `id`, `kind`, `identity`, `role`, `necessity`, `origin`, `resolution`, and `occurrences`. IDs are `req-N`; necessity is `required` or `conditional`; origin is `direct`; and resolution records the canonical `exact`, `wildcard`, or `dynamic` state. Initial knowledge-object kinds are `index`, `source`, `sourcetype`, `dataset`, `data_model`, `lookup`, and `macro`. Each occurrence has `reference_id`, `original_name`, query-only `binding`, `stage_id`, `scope_id`, and `location`.
+
+Each gap has `code`, `message`, ordered `reference_ids`, and ordered `diagnostic_codes`. Diagnostic fields are `code`, `severity`, `category`, `message`, `location`, `stage_id`, and `scope_id`. Locations use the source-indexed half-open ranges described below. Every collection is an array, including when empty. The standalone set omits full query text; occurrences retain the spelling and range for their evidence.
+
+Items group by `(kind, identity, role, resolution)`, so the same identity used in different roles remains separate. Groups follow the first canonical reference occurrence, then explicit start offset, end offset, kind, role, identity, and resolution tie-breakers. Occurrences remain in canonical reference order. One definite direct occurrence makes the group required; a group with only conditional evidence remains conditional.
+
+Exact source-bound consuming fields are direct requirements. Indeterminate, wildcard, and dynamic consumers are conditional and produce gaps. Query-derived fields remain in the parent analysis but are omitted from requirements. Create and output definitions, rename targets, removals, null tests, and query-local unavailable fields are also omitted. A rename source can still be required because it is a source-bound read. Exact direct knowledge-object references are required; wildcard or dynamic identities are conditional when the analyzer can state a defensible identity. The operation does not expand a macro, lookup, data model, dataset, or other knowledge object to infer transitive requirements.
+
+`query_status` and requirement coverage answer different questions. A fully understood query-local error can produce `query_status: invalid` and `coverage.complete: true`. Syntax or semantic uncertainty, an indeterminate origin, or wildcard or dynamic evidence makes requirement coverage incomplete. Gaps retain canonical diagnostic codes when those diagnostics own the limitation and deduplicate by code plus exact ordered evidence links. `coverage.reasons` contains the first occurrence of each gap code in gap order. Requirement-specific codes are `SPL_REQUIREMENT_INDETERMINATE`, `SPL_REQUIREMENT_DYNAMIC`, and the fallback `SPL_REQUIREMENT_COVERAGE_INCOMPLETE`.
+
+Field-list, JSON Schema, OCSF, and rewrite validation may refine public bindings, wildcard membership, diagnostics, and coverage against a supplied target. Their embedded requirement set remains byte-equivalent to plain analysis of the same normalized document, apart from JSON object-key order at transport boundaries. Requirements use query-only evidence and do not treat the supplied target as an environment fact.
+
+Requirements describe direct obligations visible in the submitted query. Extraction does not load an environment snapshot, inspect event data, expand knowledge-object definitions, validate environment compatibility, resolve placeholders, generate query variants, or add SPL or SPL2 language coverage. Dynamic and unsupported behavior remains incomplete. A requirement set does not prove that an environment satisfies an obligation or that Splunk will execute the query.
+
+### Digests and trust boundary
+
+Both digests use `sha256:<64 lowercase hex>`. `query_digest` is SHA-256 over the exact valid UTF-8 query-text bytes. It excludes source ID, language, profile, and compatibility version. Query text is not whitespace-normalized, repaired, or line-ending-normalized.
+
+`capability_revision` is SHA-256 over compact Go `encoding/json` output for the fully normalized typed `CapabilityManifest`, without indentation or a trailing newline. It covers language, profile, version, documentation snapshot, commands, functions, limitations, and the rewrite manifest when present. It excludes environment state and later corpus evidence.
+
+These digests identify supplied data. They are not authentication, authorization, signatures, proof of environment compatibility, or permission to execute a query.
+
+### Canonical lexer work boundary
+
+Canonical SPL and SPL2 analysis admits at most 4,096 lexer work units before parser construction or prediction. Within each lexer call, real lexer errors consume units in listener occurrence order before that call's returned non-EOF token. The token then consumes one unit. EOF does not count. The event that would consume unit 4,097 is the first omitted event, and analysis stops without emitting partial stages, scopes, references, lineage, dependencies, items, or other requirement evidence.
+
+SPL2 performs unmatched-literal-mode closure inspection only after reaching EOF within the work budget and before constructing a parser. Its single synthetic unterminated-literal error follows the last non-EOF token and precedes EOF, and it consumes one unit. If it would consume unit 4,097, the omitted-event location is the earliest unmatched opener. Closure inspection does not run after an earlier token or real lexer-error overflow.
+
+The resource-limited analysis is a successful content result with `status: incomplete`. Both analysis coverage flags are false and `coverage.reasons` is exactly `["SPL_ANALYSIS_RESOURCE_LIMIT"]`. The normalized document and full text remain present. Stages, scopes, references, lineage, and every dependency collection are empty arrays. Its only diagnostic has code `SPL_ANALYSIS_RESOURCE_LIMIT`, severity `warning`, category `resource_limit`, empty stage and scope IDs, and message `analysis stopped before parser prediction after reaching the 4,096-unit lexer work limit`.
+
+The embedded and standalone requirement set has `query_status: incomplete`, incomplete coverage with the same sole reason, no items, and one gap. The gap has the same code, message `requirement coverage is incomplete because analysis exceeded the 4,096-unit lexer work limit`, no reference IDs, and `diagnostic_codes: ["SPL_ANALYSIS_RESOURCE_LIMIT"]`. Its diagnostics array contains the analysis diagnostic, and its query digest covers the full submitted text.
+
+Omitted-event locations are half-open source ranges. A returned token uses `[token.Start, token.Stop+1)`, clamped by the source index. A real lexer error uses `[lexer input index, lexer input index+1)`, clamped so an EOF error is `[len,len)`. The SPL2 synthetic closure error uses the earliest unmatched opener's `[Start, Stop+1)` range.
+
+Resource-limited preview, apply, and batch rewrites stop after normalized request preparation and original analysis. They do not select rules, build or validate a candidate, or run verification. Each affected report has `schema_version: 1`, the normalized document, the requested mode, `status: incomplete`, and false syntax, semantic, and rewrite coverage. It is a no-op: `original_text`, `candidate_text`, and `text` equal the full normalized input; `committed` is false; `changes` is empty; `coverage.validation` and `candidate_validation` are omitted; and coverage reasons are exactly `["SPL_ANALYSIS_RESOURCE_LIMIT", "post_verification_failed"]`. Original analysis is the limited result. Candidate analysis is a detached equal copy made without another analysis pass. Each prepared rule receives a `skipped` evaluation with reason `post_verification_failed`, empty reference IDs, and no location or condition. Preview and apply differ only by mode, and apply never commits. Batch preserves report order and existing status precedence.
+
+The lexer boundary limits work rather than source bytes. Long sparse input remains admitted if it stays within 4,096 units. Acceptance checks require specific ASCII dense 64 KiB and 256 KiB fixtures to serialize a `RequirementSet` in at most 4,096 bytes and an analysis `Result` in at most the full query byte length plus 4,096 bytes. Those fixture checks are not universal byte guarantees: arbitrary query text can expand under JSON escaping, and admitted input can amplify inherited lineage evidence.
+
 ## CLI
 
 See [CLI usage](cli.md) for command conventions and existing operations.
 
 ```bash
 spl-toolkit analyze --query 'search src=1 | eval a=src, b=a+1 | table b' --source-id example.spl --format json
+spl-toolkit requirements --query 'search index=main host=web | eval label=host | table label' --source-id example.spl --format json
 spl-toolkit analyze --query 'search src=1 | fields - src | where src>1' --format json
 spl-toolkit analyze --query 'search src=1 | mystery x' --format json
 spl-toolkit capabilities --format json
@@ -49,14 +133,14 @@ spl-toolkit capabilities --format json
 
 These analysis examples return `valid`/0, `invalid`/1, and `incomplete`/3 respectively. The invalid example reports `SPL_UNAVAILABLE_FIELD`; the incomplete example preserves the `src` finding and reports `SPL_UNSUPPORTED_COMMAND`.
 
-| Exit | Meaning for `analyze` |
+| Exit | Meaning for `analyze` and `requirements` |
 |---|---|
-| 0 | Valid within the selected analysis contract |
-| 1 | Invalid syntax or a proven unavailable field |
-| 3 | Incomplete syntax/semantic coverage without a proven error |
+| 0 | Query valid and, for `requirements`, requirement coverage complete |
+| 1 | Query status invalid |
+| 3 | Query status incomplete or requirement coverage incomplete |
 | 2 | Usage, options, or I/O error |
 
-The report is written before returning its content status. `--output report.json` writes to a file. `--format text` presents status, coverage, located references, and diagnostics; `--format json` emits the direct canonical report. A positional query is also supported. `--language spl` (the default) or `--language spl2`, `--profile splunkd`, and `--compatibility-version current` select the delivered standalone contracts. `capabilities` supports text/JSON and `--output`, with exit 0 on success and 2 on usage/I/O errors. Existing commands retain their exit behavior.
+The report is written before returning its content status. `--output report.json` writes to a file. Analysis text presents status, coverage, located references, and diagnostics. Requirements text presents query status and requirement coverage separately, followed by items, gaps, and diagnostics. `--format json` emits the direct canonical report. A positional query is also supported. Neither operation accepts file, stdin, or batch input. `--language spl` (the default) or `--language spl2`, `--profile splunkd`, and `--compatibility-version current` select the delivered standalone contracts. `capabilities` supports text/JSON and `--output`, with exit 0 on success and 2 on usage/I/O errors. Existing commands retain their exit behavior.
 
 ## Python
 
@@ -70,10 +154,18 @@ with SPLMapper() as mapper:
         source_id="example.spl",
     )
     print(report["status"])
+    requirements = mapper.requirements_query(
+        "search src=1 | eval a=src, b=a+1 | table b",
+        language="spl", profile="splunkd", version="current",
+        source_id="example.spl",
+    )
+    print(requirements["query_status"], requirements["coverage"]["complete"])
     capabilities = mapper.capabilities()
 ```
 
-Both methods return dictionaries. `analyze_query` accepts keyword-only `language='spl'`, `profile='splunkd'`, `version='current'`, and `source_id=''`. Invalid/incomplete queries return reports; invalid document options or encoding raise `SPLMapperError`. Operations on a closed mapper raise `MapperNotFoundError`. Use a context manager or call `close()`; the wrapper frees every owned native result even when decoding fails.
+All three methods return dictionaries. `analyze_query` and `requirements_query` accept keyword-only `language='spl'`, `profile='splunkd'`, `version='current'`, and `source_id=''`. Invalid or incomplete queries return reports; invalid document options or encoding raise `SPLMapperError`. Operations on a closed mapper raise `MapperNotFoundError`. Use a context manager or call `close()`; the wrapper frees every owned native result even when decoding fails.
+
+Direct C callers pass the strict query-document JSON object to `spl_mapper_requirements_query(int mapperID, char* documentJSON)`. Every non-null return is an owned `SPLResult*`, including handle and request errors, and must be released exactly once with `spl_result_free`. The result JSON contains the complete `RequirementSet`. Mapper admission, close synchronization, UTF-8 rejection, and error ownership match `spl_mapper_analyze_query`.
 
 ## REST
 
@@ -83,10 +175,13 @@ Start the server with `PORT=8080 ./build/spl-toolkit-server`. Send the Query Doc
 curl -sS http://localhost:8080/api/v1/query/analyze \
   -H 'Content-Type: application/json' \
   -d '{"text":"search src=1 | eval a=src, b=a+1 | table b","source_id":"example.spl"}'
+curl -sS http://localhost:8080/api/v1/query/requirements \
+  -H 'Content-Type: application/json' \
+  -d '{"text":"search index=main host=web | eval label=host | table label","source_id":"example.spl"}'
 curl -sS http://localhost:8080/api/v1/capabilities
 ```
 
-`POST /api/v1/query/analyze` returns HTTP 200 with the direct report for all three query statuses. The following is an excerpt of the first response; the complete response also contains stages, scopes, references, lineage, dependencies, and diagnostics:
+`POST /api/v1/query/analyze` returns HTTP 200 with the direct report for all three query statuses. `POST /api/v1/query/requirements` does the same for the canonical `RequirementSet`, including resource-limited content. The following is an excerpt of the first response; the complete response also contains stages, scopes, references, lineage, dependencies, diagnostics, and requirements:
 
 ```json
 {
@@ -103,7 +198,7 @@ curl -sS http://localhost:8080/api/v1/capabilities
 }
 ```
 
-`GET /api/v1/capabilities` returns the direct capability manifest. Malformed JSON, invalid Unicode, and unsupported options return HTTP 400 transport errors instead of analysis reports. Existing JSON content-type, 1 MiB request-body limit, and middleware protections apply. See [REST server usage](api-server.md) for deployment and legacy endpoints.
+`GET /api/v1/capabilities` returns the direct capability manifest. Malformed JSON, invalid Unicode, duplicate or unknown properties, trailing JSON, and unsupported options return HTTP 400 transport errors instead of analysis reports. The existing JSON content-type policy, 1 MiB request-body limit, and middleware protections apply. Query processing opens no server-side file or network resource. See [REST server usage](api-server.md) for deployment and legacy endpoints.
 
 ## Document, positions, and report format
 

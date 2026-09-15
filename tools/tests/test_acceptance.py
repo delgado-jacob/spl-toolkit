@@ -106,15 +106,27 @@ def passing_records() -> list[dict]:
                     "example-corpus-missing-file.json", "../rewrite/forms.json",
                 )},
                 "machine_contract_tests": {"collected": 10, "passed": 10, "failed": 0, "skipped": 0},
+                "fixture_hashes": {"requirements": HASH},
+                "requirements_surface_evidence": {
+                    "schema_version": 1,
+                    "fixture_sha256": HASH,
+                    "corpus_cases": 17,
+                    "dense_cases": 4,
+                    "concurrent_calls": 16,
+                    "long_sparse_cases": 2,
+                    "request_error_cases": 3,
+                },
                 "tests": {
                     "required_native": {"collected": 11, "passed": 11, "failed": 0, "skipped": 0},
                     "surface_acceptance": {"collected": 6, "passed": 6, "failed": 0, "skipped": 0},
                 },
                 "required_test_files": {
                     "native": ["test_native_abi.py", "test_native_mapper.py", "test_native_analysis.py",
-                               "test_native_validation.py", "test_native_schema_validation.py", "test_native_spl2.py", "test_native_rewrite.py"],
+                               "test_native_validation.py", "test_native_schema_validation.py", "test_native_spl2.py",
+                               "test_native_rewrite.py", "test_native_requirements.py"],
                     "acceptance": ["test_documented_cli.py", "test_surfaces.py", "test_analysis_surfaces.py",
-                                   "test_validation_surfaces.py", "test_schema_surfaces.py", "test_spl2_surfaces.py", "test_rewrite_surfaces.py"],
+                                   "test_validation_surfaces.py", "test_schema_surfaces.py", "test_spl2_surfaces.py",
+                                   "test_rewrite_surfaces.py", "test_requirements_surfaces.py"],
                 },
                 "cli_examples": "passed", "surface_parity": "passed", "version_agreement": "passed",
             })
@@ -163,6 +175,27 @@ def test_installed_evidence_cannot_omit_spl2_surface_suite():
                        "test_validation_surfaces.py", "test_schema_surfaces.py"],
     }
     assert any("missing required suite test_spl2_surfaces.py" in error for error in validate_records(records, SHA))
+
+
+def test_installed_evidence_requires_requirement_surfaces_and_bound_fixture_hash():
+    original = passing_records()
+    index = next(i for i, record in enumerate(original) if record["kind"] == "installed-wheel")
+
+    for field in ("fixture_hashes", "requirements_surface_evidence"):
+        records = copy.deepcopy(original)
+        del records[index][field]
+        assert any(f"missing fields: {field}" in error for error in validate_records(records, SHA))
+
+    records = copy.deepcopy(original)
+    records[index]["requirements_surface_evidence"]["fixture_sha256"] = "c" * 64
+    assert any("requirements fixture hash" in error for error in validate_records(records, SHA))
+
+    records = copy.deepcopy(original)
+    records[index]["required_test_files"]["native"].remove("test_native_requirements.py")
+    records[index]["required_test_files"]["acceptance"].remove("test_requirements_surfaces.py")
+    errors = validate_records(records, SHA)
+    assert any("test_native_requirements.py" in error for error in errors)
+    assert any("test_requirements_surfaces.py" in error for error in errors)
 
 
 def test_missing_arm64_is_not_complete():

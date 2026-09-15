@@ -312,6 +312,8 @@ def test_rewrite_required_documented_example(mode, cli_path, rewrite_go_reports)
     expected = deepcopy(rewrite_go_reports["reports"][case["id"]])
     for document in (expected["document"], expected["original_analysis"]["document"], expected["candidate_analysis"]["document"]):
         document["source_id"] = ""
+    for analysis in (expected["original_analysis"], expected["candidate_analysis"]):
+        analysis["requirements"]["query"]["source_id"] = ""
     assert json.loads(result.stdout) == expected
 
 

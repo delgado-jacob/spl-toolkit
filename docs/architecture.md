@@ -17,6 +17,18 @@ delegating all analysis and binding interpretation to canonical packages.
 CLI, REST and owned native/Python adapters compose these operations without
 adding semantic engines. See [tooling](tooling.md) and [contracts](contracts.md).
 
+## Canonical requirements and parser admission
+
+`pkg/analysis` owns both structured analysis and direct query requirements. `Analyze` normalizes the query document, preflights bounded lexer work, runs the selected SPL or SPL2 parser only after admission, and finalizes canonical references and diagnostics. A deterministic projector then creates `Result.Requirements` from analysis-owned evidence. `Requirements` performs one `Analyze` call and returns a deeply detached copy of that embedded set. It does not parse again, replay field transfers, or classify text spans.
+
+Refinement-aware analysis keeps a private query-only requirement trace beside its public evidence. Field-list, JSON Schema, OCSF, and rewrite validation may refine public binding, wildcard, diagnostic, or coverage conclusions against a supplied target. The projector consumes the query-only trace, so the embedded set remains equal to plain analysis of the same normalized document. Final reference IDs are shared, and indexed pending-reference and incomplete-stage records preserve deterministic ordering without repeated linear searches.
+
+Requirement items represent direct external obligations. Source-bound consuming fields and direct knowledge-object references can become items. Derived fields and non-consuming definitions remain analysis evidence but are not requirements. Adapters do not add environment state, expand knowledge objects, resolve placeholders, assess compatibility, generate variants, or execute queries. Query and capability digests identify supplied values and are not security credentials, signatures, authorization decisions, or execution permission.
+
+Lexer admission allows 4,096 work units. Real errors from one lexer call are counted in listener order before the returned non-EOF token; EOF does not count. SPL2 closure inspection runs after admitted EOF and accounts for its synthetic unterminated-literal error before parser construction. The first event that would consume unit 4,097 records the omitted source range and returns the canonical incomplete resource-limit result before parser prediction. Long sparse documents remain admitted when they stay within the work budget.
+
+Every newly produced analysis result carries its requirements. Existing validation, rewrite, corpus, and impact reports inherit that member where they already serialize an analysis result. `pkg/document` deep-copies it into detached snapshots. This addition creates no requirement-specific graph or SARIF projection, corpus aggregate, impact comparison logic, or LSP behavior.
+
 ## Canonical safe rewriting
 
 `pkg/rewrite` strictly prepares explicit rules and optional validation targets, then consumes the analysis-owned `PrepareRewrite` evidence, typed rendering and whole-candidate `Verify` facade. It selects against original facts, resolves simultaneous linked groups and collisions, reconstructs only declared byte edits, reparses the candidate, and applies one final publication gate. Adapters never infer aliases, implicit labels, SQL phases or source bindings themselves.
@@ -33,7 +45,7 @@ REST handlers ─────┼──> Go mapper/parser
 Python ctypes ─> C ABI ┘
 ```
 
-The native C boundary keeps the existing exported operation signatures and result layouts. It owns mapper handles in a synchronized registry, and callers free returned results through the matching exported free functions. Python packages that boundary with the native library, checks native/package version agreement, and provides deterministic `close()` and context-manager lifecycle.
+The native C boundary keeps the existing exported operation signatures and result layouts. It owns mapper handles in a synchronized registry, and callers free returned results through the matching exported free functions. `spl_mapper_requirements_query` returns an owned `SPLResult`, including for request or handle errors; callers release it with `spl_result_free`. Python packages that boundary with the native library, checks native/package version agreement, and provides deterministic `close()` and context-manager lifecycle.
 
 REST mapping configurations are request-scoped and may be cached by configuration content. Concurrent callers with different configurations remain isolated. A global fallback mapper remains for compatibility; its mutation endpoint is disabled by default.
 

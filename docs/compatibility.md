@@ -26,6 +26,22 @@ Go 1.22.12 targeted packages pass locally using `-ldflags=-linkmode=external`. O
 
 These checks establish local analysis acceptance only. The historical release matrix below predates structured analysis and does not establish analysis acceptance on its other platforms or Python versions. No new cross-platform release or external Splunk-runtime conformance is claimed. Analysis deliberately reports incomplete coverage for the unsupported forms documented in the API reference.
 
+## Query requirements contract
+
+The additive [query requirements API](API.md#query-requirements) uses report format integer `1` and the existing SPL or explicit standalone SPL2 compatibility selectors. Current runtime analysis and document-snapshot reports always emit `requirements`. The version-1 analysis and snapshot schemas allow this property without adding it to their `required` arrays, so archived version-1 payloads that predate requirements still validate. The standalone requirement schema requires its complete shape. Consumers must continue to tolerate additive output properties under the version-1 policy.
+
+For one normalized document, standalone requirements and the requirements embedded in plain analysis, field-list or schema refinement, rewrite analysis, and document snapshots contain the same query-only value. CLI, REST, C, and Python serialize that canonical Go value without reclassification; only JSON object-key order is immaterial. Query status and requirement coverage are independent, so consumers must inspect both. An invalid query can have complete requirement coverage, while a valid query with dynamic or indeterminate obligations can have incomplete requirement coverage.
+
+The C export `spl_mapper_requirements_query` follows the existing owned-result ABI. A non-null `SPLResult*`, including an error result, must be released exactly once with `spl_result_free`. Python uses the same mapper admission and close synchronization and frees the native result after decoding on success or failure.
+
+Canonical parsing admits 4,096 lexer work units for SPL and SPL2 before parser construction or prediction. Real lexer errors precede the token returned by the same call, and that non-EOF token follows them in the count. SPL2 unmatched-literal closure accounting follows the last admitted token and precedes EOF. Unit 4,097 is omitted, and its exact half-open location is reported. The [API reference](API.md#canonical-lexer-work-boundary) records the canonical diagnostic and gap messages, token, lexer-error, and SPL2 opener range rules, the bounded incomplete report, and the resource-limited rewrite no-op contract.
+
+Resource exhaustion is a successful content outcome. Go and native/Python return owned values without an API error, CLI emits the report and exits 3, and REST returns HTTP 200. The REST transport boundary remains separate: a request body larger than 1 MiB returns HTTP 400 before analysis. Long sparse input remains admitted when it stays within the lexer work budget.
+
+Acceptance checks bind two ASCII dense fixtures, 64 KiB and 256 KiB, to a serialized `RequirementSet` no larger than 4,096 bytes and a serialized analysis `Result` no larger than the query bytes plus 4,096 bytes. These are fixture-specific checks, not universal byte guarantees. JSON escaping can expand arbitrary text, and an admitted document can amplify inherited lineage evidence below the lexer budget.
+
+Requirement extraction is deterministic and offline. It reads no path, URL, environment variable, event data, credential, or global registry. It does not expand knowledge objects, resolve placeholders, assess an environment, generate query variants, or execute a query. Query and capability digests identify supplied data; they are not authentication, authorization, signatures, compatibility approval, or execution permission.
+
 ## Field-list validation local verification
 
 Field-list validation uses the same `spl` / `splunkd` / `current` compatibility defaults and integer report format `1`. Go, CLI, native Python, and REST compare all 26 shared validation reports exactly, including nested names, optional metadata, derived fields, removal, wildcard matches, conditional uncertainty, Unicode locations, and incomplete/error precedence. Batch reports preserve input order. Declaration optionality is valid equivalence; it does not assert event presence or override structural availability.
