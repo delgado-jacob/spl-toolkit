@@ -151,6 +151,8 @@ Text output prints `Query status` and `Requirement coverage` independently, foll
 
 Canonical analysis admits at most 4,096 lexer work units. A query that would consume unit 4,097 still emits an incomplete report and exits 3. It has one `SPL_ANALYSIS_RESOURCE_LIMIT` diagnostic and gap and no partial requirement evidence. Long sparse input remains eligible for ordinary analysis when it stays within the work-unit boundary. See the [API contract](API.md#canonical-lexer-work-boundary) for ordering, SPL2 closure accounting, exact messages and locations, and rewrite behavior.
 
+Portable CLI acceptance uses a compact 4,097-work-unit query because operating systems can reject large process command lines before the CLI starts. The 64 KiB and 256 KiB resource-limit fixtures run through non-argv interfaces instead. This transport constraint does not change the analyzer budget or add file, stdin, or batch input: `analyze` and `requirements` still accept one positional or `--query` value.
+
 ## Local field validation
 
 `validate-fields` checks the canonical field obligations against a local catalog. It requires `--fields FILE` and exactly one positional/`--query` value, `--file FILE`, `--stdin`, or `--batch FILE`. The legacy `validate` command retains its syntax/configuration behavior.
