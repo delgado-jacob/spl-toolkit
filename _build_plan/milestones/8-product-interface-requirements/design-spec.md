@@ -125,7 +125,7 @@ The Python method uses the same keyword-only `language`, `profile`, `version`, a
 
 The CLI mirrors the existing `analyze` input boundary: one positional or `--query` value, compatibility selectors, optional `--source-id`, `--format text|json`, and optional `--output`. Milestone 8 does not add batch, file, or stdin input to either command. Text output prints query status and requirement coverage separately, followed by items, gaps, and diagnostics.
 
-Portable CLI resource-limit acceptance uses the compact deterministic query `strings.Repeat("a ", 4097)`, or its byte-identical fixture equivalent. It contains 4,097 identifier tokens, is 8,194 ASCII bytes and UTF-16 code units, and exceeds the 4,096-unit lexer work budget while remaining well below the Windows 32,767 UTF-16 command-line boundary. The 64 KiB and 256 KiB dense fixtures and the 300,000-byte long-sparse fixture do not travel through CLI argv. They remain mandatory through Go, HTTP, raw C, Python, an installed wheel, and a rebuilt sdist, whose body, stdin, or in-process transports admit those sizes. This operating-system argv constraint is a transport-only test constraint. It does not lower or otherwise change the canonical 4,096-unit analyzer budget, and it does not authorize file, stdin, or batch input for either CLI command.
+Portable CLI resource-limit acceptance uses the compact deterministic query `strings.Repeat("a ", 2048) + "a"`, or its byte-identical fixture equivalent. It contains 2,049 identifier tokens and 2,048 hidden whitespace tokens, for exactly 4,097 lexer work units. It is exactly 4,097 ASCII bytes and UTF-16 code units, well below the Windows 32,767 UTF-16 command-line boundary. The 64 KiB and 256 KiB dense fixtures and the 300,000-byte long-sparse fixture do not travel through CLI argv. They remain mandatory through Go, HTTP, raw C, Python, an installed wheel, and a rebuilt sdist, whose body, stdin, or in-process transports admit those sizes. This operating-system argv constraint is a transport-only test constraint. It does not lower or otherwise change the canonical 4,096-unit analyzer budget, and it does not authorize file, stdin, or batch input for either CLI command.
 
 CLI exit codes are:
 
@@ -194,7 +194,7 @@ Cross-surface acceptance submits representative valid, invalid, and incomplete S
 - `Analyze(...).Requirements` equals `Requirements(...)` for the same document.
 - CLI text fields and all four exit outcomes.
 - HTTP content outcomes versus request failures, strict Unicode handling, and body limits.
-- Over-budget parity through the compact 4,097-identifier CLI fixture, including CLI exit `3`, and through the 64 KiB and 256 KiB dense fixtures for Go, REST below the 1 MiB body boundary, raw C, Python, installed wheel, and rebuilt sdist. The same non-CLI surfaces admit the 300,000-byte long-sparse fixture. Dense native and Python probes, including concurrency, use the stdin-fed helper-subprocess boundary described above.
+- Over-budget parity through the compact 4,097-work-unit CLI fixture, including CLI exit `3`, and through the 64 KiB and 256 KiB dense fixtures for Go, REST below the 1 MiB body boundary, raw C, Python, installed wheel, and rebuilt sdist. The same non-CLI surfaces admit the 300,000-byte long-sparse fixture. Dense native and Python probes, including concurrency, use the stdin-fed helper-subprocess boundary described above.
 - For the ASCII dense 64 KiB and 256 KiB fixtures, serialized `RequirementSet` output no larger than 4,096 bytes and serialized `Result` output no larger than the full query byte length plus 4,096 bytes, stable across repeated and concurrent runs.
 - Invalid and closed native handles, owned-result freeing, repeated calls, and concurrent calls.
 - Direct-wheel and rebuilt-sdist installations outside the checkout with no source-path injection.
@@ -222,7 +222,7 @@ Permanent documentation and tests must not link to or load this design file. Use
 
 ## Decision and deviation history
 
-On 2026-09-15, Task 8 quality review replaced the original uniform dense-payload surface matrix. Passing 64 KiB and 256 KiB queries directly in CLI argv is not portable to Windows, whose command-line boundary is 32,767 UTF-16 code units. Adding file, stdin, or batch input would change the approved CLI contract. The corrected design therefore keeps the public CLI contract and proves its resource-limit content path with the compact 4,097-identifier, 8,194-code-unit query, while retaining the full dense and long-sparse matrix on transports that admit those payloads. This is a test-transport deviation only; the analyzer still enforces one 4,096-unit lexer budget on every canonical analysis call.
+On 2026-09-15, Task 8 quality review replaced the original uniform dense-payload surface matrix. Passing 64 KiB and 256 KiB queries directly in CLI argv is not portable to Windows, whose command-line boundary is 32,767 UTF-16 code units. Adding file, stdin, or batch input would change the approved CLI contract. The corrected design therefore keeps the public CLI contract and proves its resource-limit content path with the compact 4,097-work-unit, 4,097-code-unit query, while retaining the full dense and long-sparse matrix on transports that admit those payloads. This is a test-transport deviation only; the analyzer still enforces one 4,096-unit lexer budget on every canonical analysis call.
 
 The same review found that dense acceptance compared surfaces and checked only part of the resource-limit shape. The corrected design pins schema versions, normalized identity, capability revisions, query digests, dependency keys, the complete diagnostic and gap, exact omitted ranges, and absence of partial evidence so a shared adapter defect cannot become its own oracle.
 
@@ -232,7 +232,7 @@ The review also found that raw native calls ran inside the pytest process, inclu
 
 Milestone 8 is complete when:
 
-1. Representative SPL and SPL2 documents produce equivalent standalone requirement sets through Go, CLI, REST, native/C, and Python. Portable resource-limit acceptance uses the compact 4,097-identifier query for CLI and the full 64 KiB, 256 KiB, and 300,000-byte long-sparse fixtures for Go, REST, raw C, Python, installed wheel, and rebuilt sdist.
+1. Representative SPL and SPL2 documents produce equivalent standalone requirement sets through Go, CLI, REST, native/C, and Python. Portable resource-limit acceptance uses the compact 4,097-work-unit query for CLI and the full 64 KiB, 256 KiB, and 300,000-byte long-sparse fixtures for Go, REST, raw C, Python, installed wheel, and rebuilt sdist.
 2. Every new analysis result embeds a set equal to the standalone query-only set, including inside refinement-aware reports.
 3. Source, conditional, dynamic, and indeterminate external obligations are explicit. Derived and query-local unavailable fields are not misclassified as obligations: `Analyze` retains their canonical references, while standalone `Requirements` returns only the external-obligation projection.
 4. Provenance identities, ordering, links, diagnostics, and empty collections are deterministic and deeply detached.
