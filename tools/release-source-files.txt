@@ -23,6 +23,7 @@ contracts/v1/impact.schema.json
 contracts/v1/lsp-configuration.schema.json
 contracts/v1/manifest.schema.json
 contracts/v1/query-document.schema.json
+contracts/v1/requirements.schema.json
 contracts/v1/rewrite.schema.json
 contracts/v1/schema-validation.schema.json
 contracts/v1/shared.schema.json
@@ -96,6 +97,8 @@ pkg/analysis/options.go
 pkg/analysis/parse.go
 pkg/analysis/recovery.go
 pkg/analysis/references.go
+pkg/analysis/requirements.go
+pkg/analysis/requirements_trace.go
 pkg/analysis/rewrite_correspondence.go
 pkg/analysis/rewrite_evidence.go
 pkg/analysis/rewrite_facts.go

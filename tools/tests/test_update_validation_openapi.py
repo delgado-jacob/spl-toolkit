@@ -67,6 +67,36 @@ class ValidationOpenAPITests(unittest.TestCase):
         document = {"type": "object", "properties": {key: {"type": "string"} for key in ("text", "language", "profile", "version", "source_id")}}
         catalog = {"type": "object", "properties": {"fields": {"type": "array", "items": {"type": "string"}}, "optional_fields": {"type": "array", "items": {"type": "string"}}, "identity": {"type": "string"}, "version": {"type": "string"}}}
         schemas = {"api.AnalysisRequest": copy.deepcopy(document), "analysis.QueryDocument": document, "validation.FieldCatalog": catalog, "unrelated": {"type": "string", "description": "retain me"}}
+        schemas["analysis.Position"] = {"type": "object", "properties": {key: {"type": "integer"} for key in ("offset", "line", "column")}}
+        schemas["analysis.Location"] = {"type": "object", "properties": {key: {"$ref": "#/components/schemas/analysis.Position"} for key in ("start", "end")}}
+        schemas["analysis.Diagnostic"] = {"type": "object", "properties": {
+            **{key: {"type": "string"} for key in ("code", "severity", "category", "message", "stage_id", "scope_id")},
+            "location": {"$ref": "#/components/schemas/analysis.Location"}}}
+        schemas["analysis.RequirementQueryIdentity"] = {"type": "object", "properties": {key: {"type": "string"} for key in ("source_id", "language", "profile", "version", "query_digest")}}
+        schemas["analysis.RequirementCoverage"] = {"type": "object", "properties": {
+            "complete": {"type": "boolean"}, "reasons": {"type": "array", "items": {"type": "string"}, "uniqueItems": False}}}
+        schemas["analysis.RequirementOccurrence"] = {"type": "object", "properties": {
+            **{key: {"type": "string"} for key in ("reference_id", "original_name", "binding", "stage_id", "scope_id")},
+            "location": {"$ref": "#/components/schemas/analysis.Location"}}}
+        schemas["analysis.RequirementItem"] = {"type": "object", "properties": {
+            **{key: {"type": "string"} for key in ("id", "kind", "identity", "role", "necessity", "origin", "resolution")},
+            "occurrences": {"type": "array", "items": {"$ref": "#/components/schemas/analysis.RequirementOccurrence"}, "uniqueItems": False}}}
+        schemas["analysis.RequirementGap"] = {"type": "object", "properties": {
+            "code": {"type": "string"}, "message": {"type": "string"},
+            "reference_ids": {"type": "array", "items": {"type": "string"}, "uniqueItems": False},
+            "diagnostic_codes": {"type": "array", "items": {"type": "string"}, "uniqueItems": False}}}
+        schemas["analysis.RequirementSet"] = {"type": "object", "properties": {
+            "schema_version": {"type": "integer"},
+            "query": {"$ref": "#/components/schemas/analysis.RequirementQueryIdentity"},
+            "capability_revision": {"type": "string"}, "query_status": {"type": "string"},
+            "coverage": {"$ref": "#/components/schemas/analysis.RequirementCoverage"},
+            "items": {"type": "array", "items": {"$ref": "#/components/schemas/analysis.RequirementItem"}, "uniqueItems": False},
+            "gaps": {"type": "array", "items": {"$ref": "#/components/schemas/analysis.RequirementGap"}, "uniqueItems": False},
+            "diagnostics": {"type": "array", "items": {"$ref": "#/components/schemas/analysis.Diagnostic"}, "uniqueItems": False}}}
+        for name in ("analysis.Result", "document.Snapshot"):
+            schemas[name] = {"type": "object", "properties": {
+                "schema_version": {"type": "integer"},
+                "requirements": {"$ref": "#/components/schemas/analysis.RequirementSet"}}}
         for name, key in (("Request", "document"), ("BatchRequest", "documents")):
             value = {"$ref": "#/components/schemas/analysis.QueryDocument"}
             if key == "documents":
@@ -95,7 +125,11 @@ class ValidationOpenAPITests(unittest.TestCase):
         schemas["analysis.RewriteCapabilityForm"] = {"type": "object", "properties": {"kind": {"type": "string"}, "role": {"type": "string"}, "identity_forms": {"type": "array", "items": {"type": "string"}, "uniqueItems": False}, "supported": {"type": "boolean"}, "limitations": {"type": "array", "items": {"type": "string"}, "uniqueItems": False}}}
         schemas["analysis.RewriteCapabilityManifest"] = {"type": "object", "properties": {"schema_version": {"type": "integer"}, "forms": {"type": "array", "items": {"$ref": "#/components/schemas/analysis.RewriteCapabilityForm"}, "uniqueItems": False}}}
         schemas["analysis.CapabilityManifest"] = {"type": "object", "properties": {"rewrite": {"$ref": "#/components/schemas/analysis.RewriteCapabilityManifest"}, "schema_version": {"type": "integer"}, "language": {"type": "string"}, "profile": {"type": "string"}, "version": {"type": "string"}, "documentation_snapshot": {"type": "string"}, "commands": {"type": "array", "items": {"type": "object"}}, "functions": {"type": "array", "items": {"type": "object"}}}}
-        spec = {"openapi": "3.1.0", "components": {"schemas": schemas}, "paths": {"/unrelated": {}}}
+        spec = {"openapi": "3.1.0", "components": {"schemas": schemas}, "paths": {
+            "/unrelated": {},
+            "/query/requirements": {"post": {"responses": {"200": {"content": {"application/json": {
+                "schema": {"$ref": "#/components/schemas/analysis.RequirementSet"}}}}}}},
+        }}
         (root / "swagger.json").write_text(json.dumps(spec), encoding="utf-8")
         (root / "swagger.yaml").write_text(yaml.safe_dump(spec), encoding="utf-8")
         (root / "docs.go").write_text('package docs\nconst docTemplate = `{\n    "components": ' + json.dumps(spec["components"]) + ',\n    "paths": ' + json.dumps(spec["paths"]) + ',\n    "info": {"title": "{{.Title}}"}\n}`\n', encoding="utf-8")
@@ -230,6 +264,46 @@ class ValidationOpenAPITests(unittest.TestCase):
             self.assertTrue(self.schema_accepts(schemas, "api.RewriteBatchRequest", batch))
             self.assertEqual(schemas["analysis.CapabilityManifest"]["properties"]["rewrite"], {"$ref": "#/components/schemas/analysis.RewriteCapabilityManifest", "description": "Optional rewrite support for this selected dialect; inspect each form rather than assuming universal support."})
             self.assertEqual(schemas["analysis.RewriteCapabilityManifest"]["required"], ["schema_version", "forms"])
+            before = {p.name: p.read_bytes() for p in root.iterdir()}
+            self.assertEqual(self.run_script(root).returncode, 0)
+            self.assertEqual(before, {p.name: p.read_bytes() for p in root.iterdir()})
+
+    def test_requirement_reports_are_exact_and_existing_v1_embedding_is_optional(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self.fixture(root)
+            result = self.run_script(root)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            spec = json.loads((root / "swagger.json").read_text())
+            schemas = spec["components"]["schemas"]
+            required = {
+                "analysis.RequirementQueryIdentity": ["source_id", "language", "profile", "version", "query_digest"],
+                "analysis.RequirementCoverage": ["complete", "reasons"],
+                "analysis.RequirementOccurrence": ["reference_id", "original_name", "binding", "stage_id", "scope_id", "location"],
+                "analysis.RequirementItem": ["id", "kind", "identity", "role", "necessity", "origin", "resolution", "occurrences"],
+                "analysis.RequirementGap": ["code", "message", "reference_ids", "diagnostic_codes"],
+                "analysis.RequirementSet": ["schema_version", "query", "capability_revision", "query_status", "coverage", "items", "gaps", "diagnostics"],
+            }
+            for name, members in required.items():
+                self.assertEqual(schemas[name]["required"], members)
+                self.assertIs(schemas[name]["additionalProperties"], True)
+            self.assertEqual(schemas["analysis.RequirementSet"]["properties"]["schema_version"], {"type": "integer", "const": 1})
+            self.assertEqual(schemas["analysis.RequirementSet"]["properties"]["query_status"]["enum"], ["valid", "invalid", "incomplete"])
+            self.assertEqual(schemas["analysis.RequirementItem"]["properties"]["kind"]["enum"], ["field", "index", "source", "sourcetype", "dataset", "data_model", "lookup", "macro"])
+            self.assertEqual(schemas["analysis.RequirementItem"]["properties"]["necessity"]["enum"], ["required", "conditional"])
+            self.assertEqual(schemas["analysis.RequirementItem"]["properties"]["origin"], {"const": "direct"})
+            self.assertEqual(schemas["analysis.RequirementItem"]["properties"]["resolution"]["enum"], ["exact", "wildcard", "dynamic"])
+            self.assertEqual(schemas["analysis.RequirementItem"]["properties"]["id"]["pattern"], "^req-[1-9][0-9]*$")
+            self.assertEqual(schemas["analysis.RequirementOccurrence"]["properties"]["reference_id"]["pattern"], "^ref-(0|[1-9][0-9]*)$")
+            self.assertEqual(schemas["analysis.RequirementOccurrence"]["properties"]["location"], {"$ref": "#/components/schemas/analysis.Location"})
+            self.assertEqual(schemas["analysis.RequirementSet"]["properties"]["capability_revision"]["pattern"], "^sha256:[0-9a-f]{64}$")
+            self.assertEqual(schemas["analysis.RequirementQueryIdentity"]["properties"]["query_digest"]["pattern"], "^sha256:[0-9a-f]{64}$")
+            self.assertEqual(schemas["analysis.RequirementSet"]["properties"]["diagnostics"]["items"], {"$ref": "#/components/schemas/analysis.Diagnostic"})
+            for name in ("analysis.Result", "tooling.document.Snapshot"):
+                self.assertEqual(schemas[name]["properties"]["requirements"], {"$ref": "#/components/schemas/analysis.RequirementSet"})
+                self.assertNotIn("requirements", schemas[name].get("required", []))
+            response = spec["paths"]["/query/requirements"]["post"]["responses"]["200"]
+            self.assertEqual(response["content"]["application/json"]["schema"], {"$ref": "#/components/schemas/analysis.RequirementSet"})
             before = {p.name: p.read_bytes() for p in root.iterdir()}
             self.assertEqual(self.run_script(root).returncode, 0)
             self.assertEqual(before, {p.name: p.read_bytes() for p in root.iterdir()})

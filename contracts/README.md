@@ -15,6 +15,7 @@ runtime schema location existed when these contracts were introduced.
 | `query-document.schema.json` | Strict query input; only `text` required | `Normalized` (all five emitted fields) |
 | `capabilities.schema.json` | Per-dialect capability manifest | |
 | `analysis.schema.json` | Canonical analysis result | |
+| `requirements.schema.json` | Canonical direct query requirements | |
 | `field-validation.schema.json` | Field-list validation report | `Request`, `BatchRequest`, `BatchReport`, `Catalog` |
 | `schema-validation.schema.json` | JSON Schema or OCSF field-validation report | `Request`, `BatchRequest`, `BatchReport`, `Target` |
 | `rewrite.schema.json` | Rewrite result | `Request`, `BatchRequest`, `BatchReport`, `RuleSet`, `Rule`, `ValidationTarget` |
@@ -41,6 +42,11 @@ cannot substitute for a required union member or permit conflicting known member
 Adding a value to an explicitly closed enum, removing required output fields, or
 changing their meaning requires a new contract version. Strings without an enum
 (for example diagnostic codes and explanatory reasons) remain extensible.
+Every member defined by the requirement-set schema is required, and its query and
+capability digests use `sha256:` followed by 64 lowercase hexadecimal characters.
+The `requirements` property remains optional in the analysis and document-view v1
+schemas so archived reports produced before this property existed continue to
+validate. Current producers always emit it.
 
 Strict canonical and new request objects reject unknown members, wrong types,
 null optional objects, and conflicting selectors. Query selectors accept their

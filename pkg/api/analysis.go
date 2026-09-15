@@ -34,6 +34,15 @@ func (s *Server) handleAnalyzeQuery(w http.ResponseWriter, r *http.Request) {
 }
 
 // handleRequirementsQuery returns the canonical direct query requirements.
+// @Summary Report direct external query requirements
+// @Description Strict query document requiring text, with optional language (spl or spl2), profile (splunkd), version (current), and source_id strings. Empty selectors use defaults spl/splunkd/current. Preserve text and identity exactly. Reject null, duplicate or unknown members, malformed Unicode, and trailing JSON. Body limit is 1 MiB. Return canonical query identity, capability revision, query status, requirement coverage, direct items, gaps, and diagnostics; all content statuses use 200.
+// @Tags query
+// @Accept json
+// @Produce json
+// @Param request body AnalysisRequest true "Query document"
+// @Success 200 {object} analysis.RequirementSet "Canonical requirements for valid, invalid, and incomplete queries"
+// @Failure 400 {object} ErrorResponse "Malformed JSON or unsupported document options"
+// @Router /query/requirements [post]
 func (s *Server) handleRequirementsQuery(w http.ResponseWriter, r *http.Request) {
 	document, err := parseAnalysisDocument(w, r)
 	if err != nil {

@@ -10,6 +10,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import re
 import subprocess
 from urllib.parse import urljoin
 
@@ -20,7 +21,7 @@ from referencing.exceptions import NoSuchResource, Unresolvable
 
 ROOT = Path(__file__).resolve().parents[2]
 CONTRACTS = ROOT / "contracts"
-FAMILIES = ("query-document", "capabilities", "analysis", "field-validation",
+FAMILIES = ("query-document", "capabilities", "analysis", "requirements", "field-validation",
             "schema-validation", "rewrite", "corpus", "manifest", "graph",
             "impact", "document-view", "lsp-configuration")
 
@@ -143,6 +144,7 @@ import (
  "encoding/json"
  "fmt"
  "os"
+ "strings"
  "github.com/delgado-jacob/spl-toolkit/pkg/analysis"
  "github.com/delgado-jacob/spl-toolkit/pkg/validation"
  "github.com/delgado-jacob/spl-toolkit/pkg/rewrite"
@@ -175,6 +177,10 @@ func main() {
  c:=must(corpus.Scan(corpus.Request{SchemaVersion:1,Documents:[]corpus.RequestDocument{{ID:"q",Document:d}}}))
  imp:=must(impact.DecodeSchemaRequest([]byte(`{"schema_version":1,"documents":[{"id":"q","document":{"text":"search host=web | table host"}}],"before_target":{"kind":"field_list","catalog":{"fields":["host"]}},"after_target":{"kind":"field_list","catalog":{"fields":[]}}}`)))
  m:=map[string]any{"query-document":a.Document,"analysis":a,"field-validation":f,"schema-validation":s,"rewrite":r,"rewrite-validated":cv,"capabilities":analysis.Capabilities(),"corpus":c,"graph":must(graph.Export(c)),"impact":must(impact.CompareSchemas(imp)),"document-view":must(document.New(a,document.RevisionContext{ToolVersion:"0.1.1",ContractVersion:"1"})),"sarif":must(sarif.Export(c))}
+ m["requirements"]=must(analysis.Requirements(d))
+ limitedDocument:=analysis.QueryDocument{Text:strings.Repeat("x ",2048)+"x"}
+ m["resource-analysis"]=must(analysis.Analyze(limitedDocument))
+ m["resource-requirements"]=must(analysis.Requirements(limitedDocument))
  m["spl2-analysis"]=must(analysis.Analyze(analysis.QueryDocument{Text:"from main | where host=\"web\" | select host",Language:"spl2"}))
  m["spl2-capabilities"]=must(analysis.CapabilitiesFor(analysis.CapabilityOptions{Language:"spl2"}))
  m["unsupported"]=must(analysis.Analyze(analysis.QueryDocument{Text:"search host=web | mystery host"}))
@@ -246,6 +252,174 @@ def test_emitted_semantics_and_legacy_wire(schemas, emitted):
     assert not errors(schemas, "rewrite", emitted["rewrite-validated"])
     assert emitted["rewrite-validated"]["candidate_validation"]["field_list"]["target"] == {
         "kind": "field_list", "identity": "", "version": ""}
+
+
+def test_requirement_contract_and_additive_v1_compatibility(schemas, emitted):
+    requirement_set = emitted["requirements"]
+    assert not errors(schemas, "requirements", requirement_set)
+    assert not errors(schemas, "analysis", emitted["analysis"])
+    assert not errors(schemas, "document-view", emitted["document-view"])
+
+    additive = copy.deepcopy(requirement_set)
+    additive["future_annotation"] = {"arbitrary": [None, True, 3]}
+    assert not errors(schemas, "requirements", additive)
+
+    archived_analysis = copy.deepcopy(emitted["analysis"])
+    del archived_analysis["requirements"]
+    assert not errors(schemas, "analysis", archived_analysis)
+    archived_snapshot = copy.deepcopy(emitted["document-view"])
+    del archived_snapshot["requirements"]
+    assert not errors(schemas, "document-view", archived_snapshot)
+
+
+def test_resource_limit_contracts(schemas, emitted):
+    diagnostic_message = (
+        "analysis stopped before parser prediction after reaching the "
+        "4,096-unit lexer work limit"
+    )
+    gap_message = (
+        "requirement coverage is incomplete because analysis exceeded the "
+        "4,096-unit lexer work limit"
+    )
+    analysis_report = emitted["resource-analysis"]
+    requirement_set = emitted["resource-requirements"]
+
+    assert not errors(schemas, "analysis", analysis_report)
+    assert not errors(schemas, "requirements", requirement_set)
+    assert analysis_report["status"] == "incomplete"
+    assert analysis_report["coverage"] == {
+        "syntax_complete": False,
+        "semantic_complete": False,
+        "reasons": ["SPL_ANALYSIS_RESOURCE_LIMIT"],
+    }
+    for member in ("stages", "scopes", "references", "lineage"):
+        assert analysis_report[member] == []
+    assert all(value == [] for value in analysis_report["dependencies"].values())
+    assert len(analysis_report["diagnostics"]) == 1
+    diagnostic = analysis_report["diagnostics"][0]
+    assert (diagnostic["code"], diagnostic["category"], diagnostic["severity"],
+            diagnostic["message"]) == (
+        "SPL_ANALYSIS_RESOURCE_LIMIT", "resource_limit", "warning", diagnostic_message)
+
+    assert requirement_set["query_status"] == "incomplete"
+    assert requirement_set["coverage"] == {
+        "complete": False,
+        "reasons": ["SPL_ANALYSIS_RESOURCE_LIMIT"],
+    }
+    assert requirement_set["items"] == []
+    assert requirement_set["gaps"] == [{
+        "code": "SPL_ANALYSIS_RESOURCE_LIMIT",
+        "message": gap_message,
+        "reference_ids": [],
+        "diagnostic_codes": ["SPL_ANALYSIS_RESOURCE_LIMIT"],
+    }]
+    assert requirement_set["diagnostics"] == [diagnostic]
+    assert re.fullmatch(r"sha256:[0-9a-f]{64}", requirement_set["query"]["query_digest"])
+    assert re.fullmatch(r"sha256:[0-9a-f]{64}", requirement_set["capability_revision"])
+
+
+def test_requirement_required_types_enums_ids_and_digests(schemas, emitted):
+    complete = emitted["requirements"]
+    limited = emitted["resource-requirements"]
+
+    for member in ("schema_version", "query", "capability_revision", "query_status",
+                   "coverage", "items", "gaps", "diagnostics"):
+        invalid = copy.deepcopy(complete)
+        del invalid[member]
+        assert errors(schemas, "requirements", invalid), member
+    for member in ("source_id", "language", "profile", "version", "query_digest"):
+        invalid = copy.deepcopy(complete)
+        del invalid["query"][member]
+        assert errors(schemas, "requirements", invalid), member
+    for member in ("complete", "reasons"):
+        invalid = copy.deepcopy(complete)
+        del invalid["coverage"][member]
+        assert errors(schemas, "requirements", invalid), member
+
+    item = complete["items"][0]
+    for member in ("id", "kind", "identity", "role", "necessity", "origin",
+                   "resolution", "occurrences"):
+        invalid = copy.deepcopy(complete)
+        del invalid["items"][0][member]
+        assert errors(schemas, "requirements", invalid), member
+    for member in ("reference_id", "original_name", "binding", "stage_id", "scope_id",
+                   "location"):
+        invalid = copy.deepcopy(complete)
+        del invalid["items"][0]["occurrences"][0][member]
+        assert errors(schemas, "requirements", invalid), member
+    for member in ("code", "message", "reference_ids", "diagnostic_codes"):
+        invalid = copy.deepcopy(limited)
+        del invalid["gaps"][0][member]
+        assert errors(schemas, "requirements", invalid), member
+
+    for member, value in (
+        ("schema_version", "1"), ("query", []), ("capability_revision", 1),
+        ("query_status", 1), ("coverage", []), ("items", {}), ("gaps", {}),
+        ("diagnostics", {}),
+    ):
+        invalid = copy.deepcopy(complete)
+        invalid[member] = value
+        assert errors(schemas, "requirements", invalid), member
+    nested_types = (
+        (("query", "source_id"), 1), (("coverage", "complete"), "true"),
+        (("coverage", "reasons"), {}), (("items", 0, "identity"), 1),
+        (("items", 0, "occurrences"), {}),
+        (("items", 0, "occurrences", 0, "location"), []),
+        (("gaps", 0, "reference_ids"), {}),
+        (("gaps", 0, "diagnostic_codes"), {}),
+    )
+    for path, value in nested_types:
+        invalid = copy.deepcopy(complete if path[0] != "gaps" else limited)
+        target = invalid
+        for component in path[:-1]:
+            target = target[component]
+        target[path[-1]] = value
+        assert errors(schemas, "requirements", invalid), path
+
+    for member, value in (
+        ("query_status", "unknown"),
+        ("items.0.kind", "command"),
+        ("items.0.necessity", "optional"),
+        ("items.0.origin", "inferred"),
+        ("items.0.resolution", "unresolved"),
+    ):
+        invalid = copy.deepcopy(complete)
+        target = invalid
+        parts = member.split(".")
+        for component in parts[:-1]:
+            target = target[int(component)] if component.isdigit() else target[component]
+        target[parts[-1]] = value
+        assert errors(schemas, "requirements", invalid), member
+    for member, value in (("language", "sql"), ("profile", "cloud"), ("version", "latest")):
+        invalid = copy.deepcopy(complete)
+        invalid["query"][member] = value
+        assert errors(schemas, "requirements", invalid), member
+
+    for path, value in (
+        (("items", 0, "id"), "req-0"),
+        (("items", 0, "occurrences", 0, "reference_id"), "ref-x"),
+        (("items", 0, "occurrences", 0, "reference_id"), "ref-00"),
+    ):
+        invalid = copy.deepcopy(complete)
+        target = invalid
+        for component in path[:-1]:
+            target = target[component]
+        target[path[-1]] = value
+        assert errors(schemas, "requirements", invalid), path
+    invalid = copy.deepcopy(limited)
+    invalid["gaps"][0]["reference_ids"] = ["reference-1"]
+    assert errors(schemas, "requirements", invalid)
+
+    for member in ("query.query_digest", "capability_revision"):
+        for digest in ("sha256:abc", "sha256:" + "A" * 64, "0" * 64):
+            invalid = copy.deepcopy(complete)
+            if member.startswith("query."):
+                invalid["query"][member.split(".")[1]] = digest
+            else:
+                invalid[member] = digest
+            assert errors(schemas, "requirements", invalid), (member, digest)
+
+    assert item["id"].startswith("req-")
 
 
 def test_duplicate_keys_rejected_by_actual_decoders(emitter):

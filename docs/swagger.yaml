@@ -214,6 +214,178 @@ components:
         stage_id:
           type: string
       type: object
+    analysis.RequirementCoverage:
+      additionalProperties: true
+      properties:
+        complete:
+          type: boolean
+        reasons:
+          items:
+            type: string
+          type: array
+      required:
+      - complete
+      - reasons
+      type: object
+    analysis.RequirementGap:
+      additionalProperties: true
+      properties:
+        code:
+          type: string
+        diagnostic_codes:
+          items:
+            type: string
+          type: array
+        message:
+          type: string
+        reference_ids:
+          items:
+            pattern: ^ref-(0|[1-9][0-9]*)$
+            type: string
+          type: array
+      required:
+      - code
+      - message
+      - reference_ids
+      - diagnostic_codes
+      type: object
+    analysis.RequirementItem:
+      additionalProperties: true
+      properties:
+        id:
+          pattern: ^req-[1-9][0-9]*$
+          type: string
+        identity:
+          type: string
+        kind:
+          enum:
+          - field
+          - index
+          - source
+          - sourcetype
+          - dataset
+          - data_model
+          - lookup
+          - macro
+          type: string
+        necessity:
+          enum:
+          - required
+          - conditional
+          type: string
+        occurrences:
+          items:
+            $ref: '#/components/schemas/analysis.RequirementOccurrence'
+          type: array
+        origin:
+          const: direct
+        resolution:
+          enum:
+          - exact
+          - wildcard
+          - dynamic
+          type: string
+        role:
+          type: string
+      required:
+      - id
+      - kind
+      - identity
+      - role
+      - necessity
+      - origin
+      - resolution
+      - occurrences
+      type: object
+    analysis.RequirementOccurrence:
+      additionalProperties: true
+      properties:
+        binding:
+          type: string
+        location:
+          $ref: '#/components/schemas/analysis.Location'
+        original_name:
+          type: string
+        reference_id:
+          pattern: ^ref-(0|[1-9][0-9]*)$
+          type: string
+        scope_id:
+          type: string
+        stage_id:
+          type: string
+      required:
+      - reference_id
+      - original_name
+      - binding
+      - stage_id
+      - scope_id
+      - location
+      type: object
+    analysis.RequirementQueryIdentity:
+      additionalProperties: true
+      properties:
+        language:
+          enum:
+          - spl
+          - spl2
+          type: string
+        profile:
+          const: splunkd
+        query_digest:
+          pattern: ^sha256:[0-9a-f]{64}$
+          type: string
+        source_id:
+          type: string
+        version:
+          const: current
+      required:
+      - source_id
+      - language
+      - profile
+      - version
+      - query_digest
+      type: object
+    analysis.RequirementSet:
+      additionalProperties: true
+      properties:
+        capability_revision:
+          pattern: ^sha256:[0-9a-f]{64}$
+          type: string
+        coverage:
+          $ref: '#/components/schemas/analysis.RequirementCoverage'
+        diagnostics:
+          items:
+            $ref: '#/components/schemas/analysis.Diagnostic'
+          type: array
+        gaps:
+          items:
+            $ref: '#/components/schemas/analysis.RequirementGap'
+          type: array
+        items:
+          items:
+            $ref: '#/components/schemas/analysis.RequirementItem'
+          type: array
+        query:
+          $ref: '#/components/schemas/analysis.RequirementQueryIdentity'
+        query_status:
+          enum:
+          - valid
+          - invalid
+          - incomplete
+          type: string
+        schema_version:
+          const: 1
+          type: integer
+      required:
+      - schema_version
+      - query
+      - capability_revision
+      - query_status
+      - coverage
+      - items
+      - gaps
+      - diagnostics
+      type: object
     analysis.Result:
       properties:
         coverage:
@@ -237,6 +409,8 @@ components:
             $ref: '#/components/schemas/analysis.Reference'
           type: array
           uniqueItems: false
+        requirements:
+          $ref: '#/components/schemas/analysis.RequirementSet'
         schema_version:
           type: integer
         scopes:
@@ -2082,6 +2256,8 @@ components:
           items:
             $ref: '#/components/schemas/tooling.analysis.Reference'
           type: array
+        requirements:
+          $ref: '#/components/schemas/analysis.RequirementSet'
         schema_version:
           const: 1
           type: integer
@@ -2604,6 +2780,8 @@ components:
           items:
             $ref: '#/components/schemas/tooling.analysis.Reference'
           type: array
+        requirements:
+          $ref: '#/components/schemas/analysis.RequirementSet'
         revision:
           $ref: '#/components/schemas/tooling.document.RevisionContext'
         schema_version:
@@ -4648,6 +4826,38 @@ paths:
                 $ref: '#/components/schemas/api.ErrorResponse'
           description: Internal server error
       summary: Map fields in an SPL query
+      tags:
+      - query
+  /query/requirements:
+    post:
+      description: Strict query document requiring text, with optional language (spl
+        or spl2), profile (splunkd), version (current), and source_id strings. Empty
+        selectors use defaults spl/splunkd/current. Preserve text and identity exactly.
+        Reject null, duplicate or unknown members, malformed Unicode, and trailing
+        JSON. Body limit is 1 MiB. Return canonical query identity, capability revision,
+        query status, requirement coverage, direct items, gaps, and diagnostics; all
+        content statuses use 200.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/api.AnalysisRequest'
+        description: Query document
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/analysis.RequirementSet'
+          description: Canonical requirements for valid, invalid, and incomplete queries
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api.ErrorResponse'
+          description: Malformed JSON or unsupported document options
+      summary: Report direct external query requirements
       tags:
       - query
   /query/rewrite:

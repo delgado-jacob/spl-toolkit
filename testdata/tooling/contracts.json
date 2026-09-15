@@ -51,6 +51,30 @@
       }
     },
     {
+      "id": "requirements-minimal",
+      "family": "requirements",
+      "valid": true,
+      "instance": {
+        "schema_version": 1,
+        "query": {
+          "source_id": "",
+          "language": "spl",
+          "profile": "splunkd",
+          "version": "current",
+          "query_digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        "capability_revision": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+        "query_status": "valid",
+        "coverage": {
+          "complete": true,
+          "reasons": []
+        },
+        "items": [],
+        "gaps": [],
+        "diagnostics": []
+      }
+    },
+    {
       "id": "corpus-request",
       "family": "corpus",
       "definition": "Request",

@@ -14,6 +14,7 @@ contracts/v1/impact.schema.json
 contracts/v1/lsp-configuration.schema.json
 contracts/v1/manifest.schema.json
 contracts/v1/query-document.schema.json
+contracts/v1/requirements.schema.json
 contracts/v1/rewrite.schema.json
 contracts/v1/schema-validation.schema.json
 contracts/v1/shared.schema.json

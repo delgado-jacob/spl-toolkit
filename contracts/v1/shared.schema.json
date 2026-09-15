@@ -432,6 +432,241 @@
       ],
       "additionalProperties": true
     },
+    "analysis.RequirementQueryIdentity": {
+      "type": "object",
+      "properties": {
+        "source_id": {
+          "type": "string"
+        },
+        "language": {
+          "type": "string",
+          "enum": [
+            "spl",
+            "spl2"
+          ]
+        },
+        "profile": {
+          "const": "splunkd"
+        },
+        "version": {
+          "const": "current"
+        },
+        "query_digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        }
+      },
+      "required": [
+        "source_id",
+        "language",
+        "profile",
+        "version",
+        "query_digest"
+      ],
+      "additionalProperties": true
+    },
+    "analysis.RequirementCoverage": {
+      "type": "object",
+      "properties": {
+        "complete": {
+          "type": "boolean"
+        },
+        "reasons": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "complete",
+        "reasons"
+      ],
+      "additionalProperties": true
+    },
+    "analysis.RequirementOccurrence": {
+      "type": "object",
+      "properties": {
+        "reference_id": {
+          "type": "string",
+          "pattern": "^ref-(0|[1-9][0-9]*)$"
+        },
+        "original_name": {
+          "type": "string"
+        },
+        "binding": {
+          "type": "string"
+        },
+        "stage_id": {
+          "type": "string"
+        },
+        "scope_id": {
+          "type": "string"
+        },
+        "location": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.Location"
+        }
+      },
+      "required": [
+        "reference_id",
+        "original_name",
+        "binding",
+        "stage_id",
+        "scope_id",
+        "location"
+      ],
+      "additionalProperties": true
+    },
+    "analysis.RequirementItem": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^req-[1-9][0-9]*$"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "field",
+            "index",
+            "source",
+            "sourcetype",
+            "dataset",
+            "data_model",
+            "lookup",
+            "macro"
+          ]
+        },
+        "identity": {
+          "type": "string"
+        },
+        "role": {
+          "type": "string"
+        },
+        "necessity": {
+          "type": "string",
+          "enum": [
+            "required",
+            "conditional"
+          ]
+        },
+        "origin": {
+          "const": "direct"
+        },
+        "resolution": {
+          "type": "string",
+          "enum": [
+            "exact",
+            "wildcard",
+            "dynamic"
+          ]
+        },
+        "occurrences": {
+          "type": "array",
+          "items": {
+            "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.RequirementOccurrence"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "identity",
+        "role",
+        "necessity",
+        "origin",
+        "resolution",
+        "occurrences"
+      ],
+      "additionalProperties": true
+    },
+    "analysis.RequirementGap": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        },
+        "reference_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^ref-(0|[1-9][0-9]*)$"
+          }
+        },
+        "diagnostic_codes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "code",
+        "message",
+        "reference_ids",
+        "diagnostic_codes"
+      ],
+      "additionalProperties": true
+    },
+    "analysis.RequirementSet": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "type": "integer",
+          "const": 1
+        },
+        "query": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.RequirementQueryIdentity"
+        },
+        "capability_revision": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "query_status": {
+          "type": "string",
+          "enum": [
+            "valid",
+            "invalid",
+            "incomplete"
+          ]
+        },
+        "coverage": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.RequirementCoverage"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.RequirementItem"
+          }
+        },
+        "gaps": {
+          "type": "array",
+          "items": {
+            "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.RequirementGap"
+          }
+        },
+        "diagnostics": {
+          "type": "array",
+          "items": {
+            "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.Diagnostic"
+          }
+        }
+      },
+      "required": [
+        "schema_version",
+        "query",
+        "capability_revision",
+        "query_status",
+        "coverage",
+        "items",
+        "gaps",
+        "diagnostics"
+      ],
+      "additionalProperties": true
+    },
     "analysis.Result": {
       "type": "object",
       "properties": {
@@ -485,6 +720,9 @@
           "items": {
             "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.Diagnostic"
           }
+        },
+        "requirements": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.RequirementSet"
         }
       },
       "required": [
@@ -3298,6 +3536,9 @@
           "items": {
             "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.Diagnostic"
           }
+        },
+        "requirements": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.RequirementSet"
         }
       },
       "required": [

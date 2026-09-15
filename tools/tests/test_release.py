@@ -15,12 +15,58 @@ import pytest
 
 import tools.release as release
 import tools.check_reproducible as reproducible
+import tools.check_package as package_check
 from tools.check_reproducible import compare_artifacts
 from tools.release import artifact_hashes, normalize_archive, parser_attribution, require_python_archives, verify_wheel_native
 
 
 EPOCH = 1788652800
 ROOT = Path(__file__).resolve().parents[2]
+
+
+def test_requirement_contract_and_sources_are_release_inputs():
+    expected = {
+        "contracts/v1/requirements.schema.json",
+        "pkg/analysis/requirements.go",
+        "pkg/analysis/requirements_trace.go",
+    }
+    native = set((ROOT / "python/native-source-files.txt").read_text(encoding="utf-8").splitlines())
+    content = set((ROOT / "tools/release-content-files.txt").read_text(encoding="utf-8").splitlines())
+    sources = set((ROOT / "tools/release-source-files.txt").read_text(encoding="utf-8").splitlines())
+
+    assert expected <= native
+    assert expected <= sources
+    assert "contracts/v1/requirements.schema.json" in content
+    assert not expected.intersection({line for line in content if line.startswith("pkg/")})
+    for entries in (native, content, sources):
+        assert not any(line.startswith(("tests/", "_build_plan/")) for line in entries)
+
+
+def test_requirement_contract_reaches_wheel_through_native_source_manifest(tmp_path: Path):
+    contracts = [Path(line) for line in (ROOT / "python/native-source-files.txt").read_text(encoding="utf-8").splitlines()
+                 if line.startswith("contracts/")]
+    wheel = tmp_path / "requirements.whl"
+    with zipfile.ZipFile(wheel, "w") as archive:
+        for relative in contracts:
+            archive.write(ROOT / relative, "spl_toolkit/" + relative.as_posix())
+
+    hashes = package_check.verify_wheel_contracts(wheel, ROOT)
+    name = "spl_toolkit/contracts/v1/requirements.schema.json"
+    assert hashes[name] == package_check.sha256(ROOT / "contracts/v1/requirements.schema.json")
+
+
+def test_requirement_release_manifests_package_exact_inputs(tmp_path: Path):
+    release.package_tooling_content(ROOT, tmp_path, "0.1.1", EPOCH)
+
+    contract = Path("contracts/v1/requirements.schema.json")
+    assert (tmp_path / contract).read_bytes() == (ROOT / contract).read_bytes()
+    with tarfile.open(tmp_path / "spl-toolkit-source-0.1.1.tar.gz", "r:gz") as archive:
+        names = set(archive.getnames())
+    assert {
+        contract.as_posix(),
+        "pkg/analysis/requirements.go",
+        "pkg/analysis/requirements_trace.go",
+    } <= names
 
 
 def _write_wheel(path: Path, stamp: tuple[int, int, int, int, int, int], payload: bytes) -> None:

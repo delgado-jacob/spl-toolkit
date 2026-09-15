@@ -25,17 +25,28 @@ def add_tooling(spec):
     schemas = spec["components"]["schemas"]
     needed = set()
 
-    def convert(value):
+    def convert(value, *, preserve_analysis=False):
         if isinstance(value, list):
-            return [convert(item) for item in value]
+            return [convert(item, preserve_analysis=preserve_analysis) for item in value]
         if not isinstance(value, dict):
             return value
-        result = {key: convert(item) for key, item in value.items()}
+        result = {
+            key: convert(item, preserve_analysis=preserve_analysis)
+            for key, item in value.items()
+        }
         if "$ref" in result:
             ref = result["$ref"]
             if not ref.startswith(origin):
                 raise ValueError("unexpected external tooling contract reference")
             name = ref.removeprefix(origin)
+            if name.startswith("analysis.Requirement"):
+                result["$ref"] = PREFIX + name
+                return result
+            if preserve_analysis and name.startswith("analysis."):
+                if name not in schemas:
+                    raise ValueError(f"missing generated analysis dependency: {name}")
+                result["$ref"] = PREFIX + name
+                return result
             needed.add(name)
             result["$ref"] = PREFIX + "tooling." + name
         return result
@@ -43,6 +54,32 @@ def add_tooling(spec):
     def reference(name):
         needed.add(name)
         return {"$ref": PREFIX + "tooling." + name}
+
+    requirement_names = (
+        "analysis.RequirementQueryIdentity",
+        "analysis.RequirementCoverage",
+        "analysis.RequirementOccurrence",
+        "analysis.RequirementItem",
+        "analysis.RequirementGap",
+        "analysis.RequirementSet",
+    )
+    for name in requirement_names:
+        generated = schemas.get(name)
+        canonical = shared["$defs"][name]
+        if (not isinstance(generated, dict) or generated.get("type") != "object"
+                or set(generated.get("properties", {})) != set(canonical["properties"])):
+            raise ValueError(f"unexpected pinned requirement schema shape: {name}")
+        schemas[name] = convert(canonical, preserve_analysis=True)
+    requirement_ref = {"$ref": PREFIX + "analysis.RequirementSet"}
+    for name in ("analysis.Result",):
+        generated = schemas.get(name)
+        if (not isinstance(generated, dict)
+                or generated.get("properties", {}).get("requirements") != requirement_ref
+                or "requirements" in generated.get("required", [])):
+            raise ValueError(f"unexpected optional requirement embedding: {name}")
+    response = spec.get("paths", {}).get("/query/requirements", {}).get("post", {}).get("responses", {}).get("200", {})
+    if response.get("content", {}).get("application/json", {}).get("schema") != requirement_ref:
+        raise ValueError("unexpected requirements response schema")
 
     for route, request, report in (
         ("corpus/scan", "corpus.Request", "corpus.Report"),
@@ -70,6 +107,11 @@ def add_tooling(spec):
         name = sorted(needed - visited)[0]
         schemas["tooling." + name] = convert(shared["$defs"][name])
         visited.add(name)
+    snapshot = schemas.get("tooling.document.Snapshot")
+    if (not isinstance(snapshot, dict)
+            or snapshot.get("properties", {}).get("requirements") != requirement_ref
+            or "requirements" in snapshot.get("required", [])):
+        raise ValueError("unexpected optional requirement embedding: tooling.document.Snapshot")
 
 
 def update(directory: Path) -> None:
