@@ -118,13 +118,29 @@ func (t *requirementTrace) reference(pendingID string) *requirementTraceReferenc
 }
 
 func (t *requirementTrace) syncParserDiagnostics(diagnostics []Diagnostic) {
+	if t.incompleteStageIDs == nil {
+		t.rebuildIncompleteStageIndex()
+	}
+	rebuildIndex := false
 	for i, diagnostic := range diagnostics {
 		if i >= len(t.diagnostics) {
 			break
 		}
-		t.diagnostics[i].diagnostic = diagnostic
+		entry := &t.diagnostics[i]
+		oldStageID := entry.diagnostic.StageID
+		entry.diagnostic = diagnostic
+		if !entry.incomplete || oldStageID == diagnostic.StageID {
+			continue
+		}
+		if oldStageID == "" && diagnostic.StageID != "" {
+			t.incompleteStageIDs[diagnostic.StageID] = struct{}{}
+			continue
+		}
+		rebuildIndex = true
 	}
-	t.rebuildIncompleteStageIndex()
+	if rebuildIndex {
+		t.rebuildIncompleteStageIndex()
+	}
 }
 
 func (t *requirementTrace) remapStages(mapping map[string]string) {
@@ -142,7 +158,11 @@ func (t *requirementTrace) remapStages(mapping map[string]string) {
 }
 
 func (t *requirementTrace) rebuildIncompleteStageIndex() {
-	t.incompleteStageIDs = map[string]struct{}{}
+	if t.incompleteStageIDs == nil {
+		t.incompleteStageIDs = map[string]struct{}{}
+	} else {
+		clear(t.incompleteStageIDs)
+	}
 	for _, diagnostic := range t.diagnostics {
 		if diagnostic.incomplete && diagnostic.diagnostic.StageID != "" {
 			t.incompleteStageIDs[diagnostic.diagnostic.StageID] = struct{}{}

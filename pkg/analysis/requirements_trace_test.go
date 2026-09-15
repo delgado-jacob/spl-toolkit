@@ -21,31 +21,53 @@ func TestRequirementTraceIndexesStaySynchronized(t *testing.T) {
 		t.Fatalf("pending reference index returned %p, want %p", got, &trace.references[0])
 	}
 
-	diagnostic := Diagnostic{Code: CodeUnsupportedSemantics}
-	trace.recordDiagnostic(diagnostic, true, []string{"pending-0"}, trace.nextEvent())
+	diagnostics := []Diagnostic{{Code: CodeUnsupportedSemantics}, {Code: CodeSyntaxError}}
+	for _, diagnostic := range diagnostics {
+		trace.recordDiagnostic(diagnostic, true, []string{"pending-0"}, trace.nextEvent())
+	}
 	if environment := newRequirementEnvironment(trace); environment.stageIncomplete("stage-pending") {
 		t.Fatal("stage was indexed before parser diagnostic synchronization")
 	}
+	indexPointer := reflect.ValueOf(trace.incompleteStageIDs).Pointer()
 	diagnosticCount := len(trace.diagnostics)
 	nextOrdinal := trace.nextOrdinal
 	eventOrdinals := make([]int, len(trace.diagnostics))
 	for i := range trace.diagnostics {
 		eventOrdinals[i] = trace.diagnostics[i].eventOrdinal
 	}
-	trace.syncParserDiagnostics([]Diagnostic{{Code: CodeUnsupportedSemantics, StageID: "stage-pending"}})
-	if len(trace.diagnostics) != diagnosticCount || trace.nextOrdinal != nextOrdinal {
-		t.Fatalf("parser diagnostic synchronization changed trace cardinality or ordinal state: diagnostics=%d want=%d next=%d want=%d", len(trace.diagnostics), diagnosticCount, trace.nextOrdinal, nextOrdinal)
-	}
-	for i := range trace.diagnostics {
-		if trace.diagnostics[i].eventOrdinal != eventOrdinals[i] {
-			t.Fatalf("parser diagnostic synchronization changed event ordinal %d from %d to %d", i, eventOrdinals[i], trace.diagnostics[i].eventOrdinal)
+	assertStable := func() {
+		t.Helper()
+		if len(trace.diagnostics) != diagnosticCount || trace.nextOrdinal != nextOrdinal {
+			t.Fatalf("parser diagnostic synchronization changed trace cardinality or ordinal state: diagnostics=%d want=%d next=%d want=%d", len(trace.diagnostics), diagnosticCount, trace.nextOrdinal, nextOrdinal)
+		}
+		if got := reflect.ValueOf(trace.incompleteStageIDs).Pointer(); got != indexPointer {
+			t.Fatalf("parser diagnostic synchronization replaced the incomplete-stage index: got %x want %x", got, indexPointer)
+		}
+		for i := range trace.diagnostics {
+			if trace.diagnostics[i].eventOrdinal != eventOrdinals[i] {
+				t.Fatalf("parser diagnostic synchronization changed event ordinal %d from %d to %d", i, eventOrdinals[i], trace.diagnostics[i].eventOrdinal)
+			}
 		}
 	}
+	trace.syncParserDiagnostics([]Diagnostic{{Code: CodeUnsupportedSemantics, StageID: "stage-pending"}, {Code: CodeSyntaxError, StageID: "stage-pending"}})
+	assertStable()
 	environment := newRequirementEnvironment(trace)
 	clone := environment.clone()
 	if !environment.stageIncomplete("stage-pending") || !clone.stageIncomplete("stage-pending") {
 		t.Fatal("environment clone lost shared incomplete-stage index")
 	}
+	trace.syncParserDiagnostics([]Diagnostic{{Code: CodeUnsupportedSemantics}, {Code: CodeSyntaxError, StageID: "stage-pending"}})
+	assertStable()
+	if !environment.stageIncomplete("stage-pending") || !clone.stageIncomplete("stage-pending") {
+		t.Fatal("clearing one of two diagnostic owners removed a still-incomplete stage")
+	}
+	trace.syncParserDiagnostics(diagnostics)
+	assertStable()
+	if environment.stageIncomplete("stage-pending") || clone.stageIncomplete("stage-pending") {
+		t.Fatal("clearing the final diagnostic owner retained a complete stage")
+	}
+	trace.syncParserDiagnostics([]Diagnostic{{Code: CodeUnsupportedSemantics, StageID: "stage-pending"}, {Code: CodeSyntaxError, StageID: "stage-pending"}})
+	assertStable()
 
 	trace.remapReferences(map[string]string{"pending-0": "ref-0"})
 	if got := trace.reference("pending-0"); got.reference.ID != "ref-0" {
