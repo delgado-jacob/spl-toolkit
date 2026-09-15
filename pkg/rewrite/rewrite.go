@@ -51,11 +51,11 @@ func formCandidate(document analysis.QueryDocument, rules []Rule, probes []analy
 	}
 	evidence := original.Evidence()
 	pending := &pendingRewrite{
-		original:         original,
-		originalEvidence: evidence,
-		resourceLimited:  resourceLimitedAnalysis(evidence.Analysis),
+		original:        original,
+		resourceLimited: resourceLimitedAnalysis(evidence.Analysis),
 	}
 	if pending.resourceLimited {
+		pending.originalEvidence = evidence
 		return pending, nil
 	}
 	selection := selectRules(rules, probes, evidence)

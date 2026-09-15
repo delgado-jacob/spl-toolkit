@@ -67,7 +67,7 @@ func TestSnapshotRequirementSetDetached(t *testing.T) {
 	if !reflect.DeepEqual(snapshot.Requirements, result.Requirements) {
 		t.Fatalf("snapshot requirements differ: got %+v want %+v", snapshot.Requirements, result.Requirements)
 	}
-	if len(result.Requirements.Items) == 0 || len(result.Requirements.Items[0].Occurrences) == 0 || len(result.Requirements.Gaps) == 0 || len(result.Requirements.Gaps[0].DiagnosticCodes) == 0 || len(result.Requirements.Diagnostics) == 0 {
+	if len(result.Requirements.Items) == 0 || len(result.Requirements.Items[0].Occurrences) == 0 || len(result.Requirements.Gaps) == 0 || len(result.Requirements.Gaps[0].ReferenceIDs) == 0 || len(result.Requirements.Gaps[0].DiagnosticCodes) == 0 || len(result.Requirements.Diagnostics) == 0 {
 		t.Fatalf("detachment fixture lacks nested requirement evidence: %+v", result.Requirements)
 	}
 
@@ -95,7 +95,7 @@ func mutateSnapshotRequirements(set *analysis.RequirementSet) {
 	set.Items[0].Identity = "mutated"
 	set.Items[0].Occurrences[0].OriginalName = "mutated"
 	set.Gaps[0].Code = "mutated"
-	set.Gaps[0].ReferenceIDs = append(set.Gaps[0].ReferenceIDs, "mutated")
+	set.Gaps[0].ReferenceIDs[0] = "mutated"
 	set.Gaps[0].DiagnosticCodes[0] = "mutated"
 	set.Diagnostics[0].Code = "mutated"
 }

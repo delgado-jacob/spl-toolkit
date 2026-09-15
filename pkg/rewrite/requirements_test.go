@@ -119,6 +119,24 @@ func TestResourceLimitedRewriteUsesCachedEvidenceAfterCandidateFormation(t *test
 	assertResourceAnalysesDetached(t, got)
 }
 
+func TestOrdinaryRewriteDoesNotRetainDetachedOriginalEvidence(t *testing.T) {
+	rules := []Rule{{ID: "ordinary", Kind: "field", Source: conditionIdentity("src"), Target: conditionIdentity("user")}}
+	pending, err := formCandidate(
+		analysis.QueryDocument{Text: "search src=x | table src", SourceID: "ordinary"},
+		rules,
+		conditionProbes(rules),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if resourceLimited(pending) || pending.candidate == nil {
+		t.Fatal("expected an ordinary rewrite candidate")
+	}
+	if !reflect.DeepEqual(pending.originalEvidence, analysis.RewriteEvidence{}) {
+		t.Fatal("ordinary pending rewrite retained detached original evidence")
+	}
+}
+
 func assertResourceAnalysesDetached(t *testing.T, got *Result) {
 	t.Helper()
 	wantOriginal := cloneAnalysisForTest(t, got.OriginalAnalysis)
