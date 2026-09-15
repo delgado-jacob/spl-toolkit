@@ -54,9 +54,16 @@ func analyzeRewriteWithTrace(document QueryDocument, refinement *sourceRefinemen
 		if refinement != nil {
 			refinement.literalSourceNames = true
 		}
-		analyzeSPL2(result, parseSPL2Document(normalized.Text), refinement, trace)
+		parsed := parseSPL2Document(normalized.Text)
+		if parsed.resourceLimit != nil {
+			return resourceLimitedAnalysis(normalized, *parsed.resourceLimit)
+		}
+		analyzeSPL2(result, parsed, refinement, trace)
 	} else {
 		parsed := parseDocument(normalized.Text)
+		if parsed.resourceLimit != nil {
+			return resourceLimitedAnalysis(normalized, *parsed.resourceLimit)
+		}
 		result.Diagnostics = append(result.Diagnostics, parsed.diagnostics...)
 		for _, diagnostic := range parsed.diagnostics {
 			trace.syntaxComplete = false

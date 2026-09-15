@@ -6,11 +6,13 @@ import (
 )
 
 type requirementTrace struct {
-	references       []requirementTraceReference
-	diagnostics      []requirementTraceDiagnostic
-	syntaxComplete   bool
-	semanticComplete bool
-	nextOrdinal      int
+	references              []requirementTraceReference
+	diagnostics             []requirementTraceDiagnostic
+	pendingReferenceIndexes map[string]int
+	incompleteStageIDs      map[string]struct{}
+	syntaxComplete          bool
+	semanticComplete        bool
+	nextOrdinal             int
 }
 
 type requirementTraceReference struct {
@@ -45,10 +47,12 @@ type requirementEnvironment struct {
 
 func newRequirementTrace() *requirementTrace {
 	return &requirementTrace{
-		references:       []requirementTraceReference{},
-		diagnostics:      []requirementTraceDiagnostic{},
-		syntaxComplete:   true,
-		semanticComplete: true,
+		references:              []requirementTraceReference{},
+		diagnostics:             []requirementTraceDiagnostic{},
+		pendingReferenceIndexes: map[string]int{},
+		incompleteStageIDs:      map[string]struct{}{},
+		syntaxComplete:          true,
+		semanticComplete:        true,
 	}
 }
 
@@ -59,6 +63,7 @@ func (t *requirementTrace) nextEvent() int {
 }
 
 func (t *requirementTrace) recordReference(reference Reference, directExternal, conditional bool, eventOrdinal int) {
+	index := len(t.references)
 	t.references = append(t.references, requirementTraceReference{
 		pendingID:      reference.ID,
 		reference:      cloneTraceReference(reference),
@@ -66,11 +71,15 @@ func (t *requirementTrace) recordReference(reference Reference, directExternal, 
 		conditional:    conditional,
 		eventOrdinal:   eventOrdinal,
 	})
+	t.pendingReferenceIndexes[reference.ID] = index
 }
 
 func (t *requirementTrace) recordDiagnostic(diagnostic Diagnostic, incomplete bool, pendingReferenceIDs []string, eventOrdinal int) {
 	if incomplete {
 		t.semanticComplete = false
+		if diagnostic.StageID != "" {
+			t.incompleteStageIDs[diagnostic.StageID] = struct{}{}
+		}
 	}
 	t.diagnostics = append(t.diagnostics, requirementTraceDiagnostic{
 		diagnostic:          diagnostic,
@@ -101,10 +110,9 @@ func (t *requirementTrace) remapReferences(mapping map[string]string) {
 }
 
 func (t *requirementTrace) reference(pendingID string) *requirementTraceReference {
-	for i := range t.references {
-		if t.references[i].pendingID == pendingID {
-			return &t.references[i]
-		}
+	index, ok := t.pendingReferenceIndexes[pendingID]
+	if ok && index >= 0 && index < len(t.references) && t.references[index].pendingID == pendingID {
+		return &t.references[index]
 	}
 	panic(fmt.Sprintf("requirement trace reference %q is missing", pendingID))
 }
@@ -112,10 +120,11 @@ func (t *requirementTrace) reference(pendingID string) *requirementTraceReferenc
 func (t *requirementTrace) syncParserDiagnostics(diagnostics []Diagnostic) {
 	for i, diagnostic := range diagnostics {
 		if i >= len(t.diagnostics) {
-			return
+			break
 		}
 		t.diagnostics[i].diagnostic = diagnostic
 	}
+	t.rebuildIncompleteStageIndex()
 }
 
 func (t *requirementTrace) remapStages(mapping map[string]string) {
@@ -127,6 +136,16 @@ func (t *requirementTrace) remapStages(mapping map[string]string) {
 	for i := range t.diagnostics {
 		if id := t.diagnostics[i].diagnostic.StageID; id != "" {
 			t.diagnostics[i].diagnostic.StageID = mapping[id]
+		}
+	}
+	t.rebuildIncompleteStageIndex()
+}
+
+func (t *requirementTrace) rebuildIncompleteStageIndex() {
+	t.incompleteStageIDs = map[string]struct{}{}
+	for _, diagnostic := range t.diagnostics {
+		if diagnostic.incomplete && diagnostic.diagnostic.StageID != "" {
+			t.incompleteStageIDs[diagnostic.diagnostic.StageID] = struct{}{}
 		}
 	}
 }
@@ -272,12 +291,8 @@ func (e *requirementEnvironment) stageIncomplete(stageID string) bool {
 	if e.trace == nil {
 		return false
 	}
-	for _, diagnostic := range e.trace.diagnostics {
-		if diagnostic.incomplete && diagnostic.diagnostic.StageID == stageID {
-			return true
-		}
-	}
-	return false
+	_, incomplete := e.trace.incompleteStageIDs[stageID]
+	return incomplete
 }
 
 func (e *requirementEnvironment) applyProjection(selectors []locatedOperand, mode string, retainKnownInternals bool, stageID string) {

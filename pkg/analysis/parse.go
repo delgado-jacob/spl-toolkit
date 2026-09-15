@@ -12,14 +12,16 @@ type analysisInputStream struct{ *antlr.InputStream }
 func (*analysisInputStream) SPLAnalysisSyntax() bool { return true }
 
 type parsedDocument struct {
-	tokens      *antlr.CommonTokenStream
-	tree        parser.IAnalysisQueryContext
-	source      *sourceIndex
-	diagnostics []Diagnostic
+	tokens        *antlr.CommonTokenStream
+	tree          parser.IAnalysisQueryContext
+	source        *sourceIndex
+	diagnostics   []Diagnostic
+	resourceLimit *Location
 }
 type syntaxListener struct {
 	*antlr.DefaultErrorListener
-	parsed *parsedDocument
+	parsed  *parsedDocument
+	tracker *lexerWorkTracker
 }
 
 func (l *syntaxListener) SyntaxError(recognizer antlr.Recognizer, offendingSymbol interface{}, line, column int, msg string, e antlr.RecognitionException) {
@@ -32,15 +34,24 @@ func (l *syntaxListener) SyntaxError(recognizer antlr.Recognizer, offendingSymbo
 		start = lexer.GetInputStream().Index()
 		end = start + 1
 	}
-	l.parsed.diagnostics = append(l.parsed.diagnostics, Diagnostic{Code: CodeSyntaxError, Severity: "error", Category: "syntax", Message: msg, Location: s.location(start, end)})
+	location := s.location(start, end)
+	if _, lexical := recognizer.(antlr.Lexer); lexical && l.tracker != nil {
+		l.tracker.consume(location)
+	}
+	l.parsed.diagnostics = append(l.parsed.diagnostics, Diagnostic{Code: CodeSyntaxError, Severity: "error", Category: "syntax", Message: msg, Location: location})
 }
 func parseDocument(text string) *parsedDocument {
 	parsed := &parsedDocument{source: newSourceIndex(text), diagnostics: []Diagnostic{}}
-	listener := &syntaxListener{DefaultErrorListener: antlr.NewDefaultErrorListener(), parsed: parsed}
+	tracker := &lexerWorkTracker{}
+	listener := &syntaxListener{DefaultErrorListener: antlr.NewDefaultErrorListener(), parsed: parsed, tracker: tracker}
 	lexer := parser.NewSPLLexer(&analysisInputStream{InputStream: antlr.NewInputStream(text)})
 	lexer.RemoveErrorListeners()
 	lexer.AddErrorListener(listener)
-	parsed.tokens = antlr.NewCommonTokenStream(lexer, antlr.TokenDefaultChannel)
+	parsed.tokens = preflightLexer(lexer, tracker, parsed.source)
+	if tracker.resourceLimit != nil {
+		parsed.resourceLimit = tracker.resourceLimit
+		return parsed
+	}
 	p := parser.NewSPLParser(parsed.tokens)
 	p.RemoveErrorListeners()
 	p.AddErrorListener(listener)

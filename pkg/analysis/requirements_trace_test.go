@@ -9,6 +9,39 @@ import (
 
 var _ func(*Result, *sourceRefinement, *requirementTrace) = finalizeReferences
 
+var _ map[string]int = newRequirementTrace().pendingReferenceIndexes
+var _ map[string]struct{} = newRequirementTrace().incompleteStageIDs
+
+func TestRequirementTraceIndexesStaySynchronized(t *testing.T) {
+	trace := newRequirementTrace()
+	reference := Reference{ID: "pending-0", StageID: "stage-pending", OriginReferenceIDs: []string{}}
+	trace.recordReference(reference, true, false, trace.nextEvent())
+	if got := trace.reference("pending-0"); got != &trace.references[0] {
+		t.Fatalf("pending reference index returned %p, want %p", got, &trace.references[0])
+	}
+
+	diagnostic := Diagnostic{Code: CodeUnsupportedSemantics}
+	trace.recordDiagnostic(diagnostic, true, []string{"pending-0"}, trace.nextEvent())
+	if environment := newRequirementEnvironment(trace); environment.stageIncomplete("stage-pending") {
+		t.Fatal("stage was indexed before parser diagnostic synchronization")
+	}
+	trace.syncParserDiagnostics([]Diagnostic{{Code: CodeUnsupportedSemantics, StageID: "stage-pending"}})
+	environment := newRequirementEnvironment(trace)
+	clone := environment.clone()
+	if !environment.stageIncomplete("stage-pending") || !clone.stageIncomplete("stage-pending") {
+		t.Fatal("environment clone lost shared incomplete-stage index")
+	}
+
+	trace.remapReferences(map[string]string{"pending-0": "ref-0"})
+	if got := trace.reference("pending-0"); got.reference.ID != "ref-0" {
+		t.Fatalf("pending reference index was not synchronized through remapping: %+v", got)
+	}
+	trace.remapStages(map[string]string{"stage-pending": "stage-0"})
+	if environment.stageIncomplete("stage-pending") || !environment.stageIncomplete("stage-0") || !clone.stageIncomplete("stage-0") {
+		t.Fatalf("incomplete-stage index was not remapped: %+v", trace.incompleteStageIDs)
+	}
+}
+
 func TestRequirementTraceClassifiesFieldOrigins(t *testing.T) {
 	result, trace, err := analyzeRewriteWithTrace(QueryDocument{Text: "search src=* | eval derived=src | table src derived"}, nil, nil)
 	if err != nil {

@@ -306,9 +306,13 @@ func projectRequirements(document QueryDocument, trace *requirementTrace) (Requi
 		if !entry.incomplete {
 			continue
 		}
+		message := entry.diagnostic.Message
+		if entry.diagnostic.Code == CodeAnalysisResourceLimit {
+			message = requirementResourceLimitMessage
+		}
 		gapCandidates = append(gapCandidates, gapCandidate{RequirementGap{
 			Code:            entry.diagnostic.Code,
-			Message:         entry.diagnostic.Message,
+			Message:         message,
 			ReferenceIDs:    append([]string{}, entry.pendingReferenceIDs...),
 			DiagnosticCodes: []string{entry.diagnostic.Code},
 		}, entry.eventOrdinal})

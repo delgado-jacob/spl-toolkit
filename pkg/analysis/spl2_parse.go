@@ -19,6 +19,7 @@ type spl2ParsedDocument struct {
 	syntax           *spl2SyntaxNode
 	syntaxComplete   bool
 	semanticComplete bool
+	resourceLimit    *Location
 }
 
 // Private prediction provenance permits a narrowly proved recovery site to
@@ -50,7 +51,8 @@ func spl2ExpectsSelectOrNewline(expected *antlr.IntervalSet) bool {
 
 type spl2SyntaxListener struct {
 	*antlr.DefaultErrorListener
-	parsed *spl2ParsedDocument
+	parsed  *spl2ParsedDocument
+	tracker *lexerWorkTracker
 }
 
 func (l *spl2SyntaxListener) SyntaxError(recognizer antlr.Recognizer, offending interface{}, line, column int, msg string, e antlr.RecognitionException) {
@@ -66,6 +68,9 @@ func (l *spl2SyntaxListener) SyntaxError(recognizer antlr.Recognizer, offending 
 		end = start + 1
 	}
 	diagnostic := Diagnostic{Code: CodeSyntaxError, Severity: "error", Category: "syntax", Message: msg, Location: s.location(start, end)}
+	if lexical && l.tracker != nil {
+		l.tracker.consume(diagnostic.Location)
+	}
 	l.parsed.diagnostics = append(l.parsed.diagnostics, diagnostic)
 	if _, ok := e.(*antlr.NoViableAltException); ok {
 		if parser, ok := recognizer.(antlr.Parser); ok {
@@ -87,16 +92,29 @@ func (l *spl2SyntaxListener) SyntaxError(recognizer antlr.Recognizer, offending 
 }
 func parseSPL2Document(text string) *spl2ParsedDocument {
 	parsed := &spl2ParsedDocument{source: newSourceIndex(text), diagnostics: []Diagnostic{}}
-	listener := &spl2SyntaxListener{DefaultErrorListener: antlr.NewDefaultErrorListener(), parsed: parsed}
+	tracker := &lexerWorkTracker{}
+	listener := &spl2SyntaxListener{DefaultErrorListener: antlr.NewDefaultErrorListener(), parsed: parsed, tracker: tracker}
 	lexer := spl2.NewSPL2Lexer(antlr.NewInputStream(text))
 	lexer.RemoveErrorListeners()
 	lexer.AddErrorListener(listener)
-	parsed.tokens = antlr.NewCommonTokenStream(lexer, antlr.TokenDefaultChannel)
+	parsed.tokens = preflightLexer(lexer, tracker, parsed.source)
+	if tracker.resourceLimit != nil {
+		parsed.resourceLimit = tracker.resourceLimit
+		return parsed
+	}
+	closure := parsed.literalClosureDiagnostic()
+	if closure != nil && !tracker.consume(closure.Location) {
+		parsed.resourceLimit = tracker.resourceLimit
+		return parsed
+	}
 	parser := spl2.NewSPL2Parser(parsed.tokens)
 	parser.RemoveErrorListeners()
 	parser.AddErrorListener(listener)
 	parsed.tree = parser.Query()
-	parsed.inspectLiteralClosure()
+	if closure != nil {
+		parsed.diagnostics = append(parsed.diagnostics, *closure)
+		parsed.lexicalErrors = append(parsed.lexicalErrors, *closure)
+	}
 	parsed.syntaxComplete = len(parsed.diagnostics) == 0
 	parsed.syntax = spl2TreeFacts(parsed.tree, parsed.source, parser.RuleNames, parser.SymbolicNames)
 	parsed.inspectSyntax(parsed.tree, 0)
@@ -106,8 +124,7 @@ func parseSPL2Document(text string) *spl2ParsedDocument {
 // EOF does not necessarily emit a lexer error from an open literal mode. Replay
 // only its original opener/end tokens; text, escapes and raw strings are opaque,
 // and literals inside interpolation nest without closing their owning literal.
-func (p *spl2ParsedDocument) inspectLiteralClosure() {
-	p.tokens.Fill()
+func (p *spl2ParsedDocument) literalClosureDiagnostic() *Diagnostic {
 	type literal struct {
 		opener antlr.Token
 		end    int
@@ -129,10 +146,9 @@ func (p *spl2ParsedDocument) inspectLiteralClosure() {
 		}
 	}
 	if len(stack) == 0 {
-		return
+		return nil
 	}
 	opener := stack[0].opener
 	diagnostic := Diagnostic{Code: CodeSyntaxError, Severity: "error", Category: "syntax", Message: "Unterminated literal", Location: p.source.location(opener.GetStart(), opener.GetStop()+1)}
-	p.diagnostics = append(p.diagnostics, diagnostic)
-	p.lexicalErrors = append(p.lexicalErrors, diagnostic)
+	return &diagnostic
 }
