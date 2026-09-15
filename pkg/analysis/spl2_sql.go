@@ -165,8 +165,7 @@ func executeSPL2SQL(result *Result, parsed *spl2ParsedDocument, refinement *sour
 			s.env.open, s.env.uncertain = false, false
 			fields := map[string]requirementField{}
 			for _, selection := range selected {
-				if field, ok := s.env.requirements.fields[selection.Field.Name]; ok {
-					field.origins = append([]string{}, field.origins...)
+				if field, ok := s.env.requirements.exactProjection(selection.Field.Name, selection.InputReferenceIDs); ok {
 					fields[selection.Field.Name] = field
 				}
 			}

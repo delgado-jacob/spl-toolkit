@@ -228,6 +228,7 @@ func (s *semanticStage) selectorAt(operand locatedOperand, role string, allowWil
 func (s *semanticStage) applyProjection(selectors []locatedOperand, mode string, retainKnownInternals bool) {
 	exclude := mode == "exclude"
 	selected := []preparedSelection{}
+	requirementReferenceIDs := make([][]string, len(selectors))
 	if !exclude && retainKnownInternals {
 		if s.refinement != nil && s.env.requirements.open {
 			s.requirementDiagnosticAt(CodeUnsupportedSemantics, "warning", "unsupported_semantics", "fields inclusion retains internal fields with unresolved open-source membership", s.result.Stages[s.stage].Location, true, nil)
@@ -249,7 +250,7 @@ func (s *semanticStage) applyProjection(selectors []locatedOperand, mode string,
 			}
 		}
 	}
-	for _, operand := range selectors {
+	for i, operand := range selectors {
 		if exclude && operand.Resolution != "wildcard" {
 			s.removeAt(operand)
 			continue
@@ -259,6 +260,7 @@ func (s *semanticStage) applyProjection(selectors []locatedOperand, mode string,
 			role = "remove"
 		}
 		names, ids := s.selectorAt(operand, role, true)
+		requirementReferenceIDs[i] = copyIDs(ids)
 		for _, name := range names {
 			if exclude {
 				s.env.remove(name)
@@ -268,7 +270,7 @@ func (s *semanticStage) applyProjection(selectors []locatedOperand, mode string,
 			}
 		}
 	}
-	s.env.requirements.applyProjection(selectors, mode, retainKnownInternals, s.result.Stages[s.stage].ID)
+	s.env.requirements.applyProjection(selectors, requirementReferenceIDs, mode, retainKnownInternals, s.result.Stages[s.stage].ID)
 	if !exclude {
 		s.applyPreparedProjection(selected, mode)
 	}
@@ -483,9 +485,10 @@ func (s *semanticStage) applyAggregation(outputs []aggregateOutput, groups []loc
 	output.requirements.open = false
 	for _, operand := range groups {
 		names, ids := s.selectorAt(operand, "group", false)
-		if field, ok := s.env.requirements.fields[operand.Name]; ok && operand.Resolution == "exact" {
-			field.origins = append([]string{}, field.origins...)
-			output.requirements.fields[operand.Name] = field
+		if operand.Resolution == "exact" {
+			if field, ok := s.env.requirements.exactProjection(operand.Name, ids); ok {
+				output.requirements.fields[operand.Name] = field
+			}
 		}
 		for _, name := range names {
 			if field, ok := s.projectedField(name, ids); ok {

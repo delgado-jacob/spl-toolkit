@@ -142,6 +142,180 @@ func TestRequirementEnvironmentCloneOwnsState(t *testing.T) {
 	}
 }
 
+func TestRequirementEnvironmentExactProjectionClonesOrSynthesizesConditionalField(t *testing.T) {
+	trace := newRequirementTrace()
+	trace.recordReference(Reference{
+		ID:                 "pending-origin",
+		NormalizedName:     "host",
+		Kind:               "field",
+		Role:               "read",
+		Resolution:         "exact",
+		Binding:            "source",
+		OriginReferenceIDs: []string{},
+	}, true, false, trace.nextEvent())
+	trace.recordReference(Reference{
+		ID:                 "pending-select",
+		NormalizedName:     "host",
+		Kind:               "field",
+		Role:               "read",
+		Resolution:         "exact",
+		Binding:            "indeterminate",
+		OriginReferenceIDs: []string{"pending-origin"},
+	}, false, true, trace.nextEvent())
+
+	environment := newRequirementEnvironment(trace)
+	environment.fields["existing"] = requirementField{source: true, origins: []string{"pending-origin"}}
+	existing, ok := environment.exactProjection("existing", nil)
+	if !ok || !existing.source || existing.conditional || !reflect.DeepEqual(existing.origins, []string{"pending-origin"}) {
+		t.Fatalf("existing exact projection = %+v, %t", existing, ok)
+	}
+	existing.origins[0] = "changed"
+	if got := environment.fields["existing"].origins; !reflect.DeepEqual(got, []string{"pending-origin"}) {
+		t.Fatalf("projected existing origins alias environment state: %v", got)
+	}
+
+	synthesized, ok := environment.exactProjection("host", []string{"pending-select"})
+	if !ok || synthesized.source || !synthesized.conditional || !reflect.DeepEqual(synthesized.origins, []string{"pending-select", "pending-origin"}) {
+		t.Fatalf("synthesized exact projection = %+v, %t", synthesized, ok)
+	}
+	synthesized.origins[1] = "changed"
+	if got := trace.reference("pending-select").reference.OriginReferenceIDs; !reflect.DeepEqual(got, []string{"pending-origin"}) {
+		t.Fatalf("synthesized origins alias trace evidence: %v", got)
+	}
+
+	for _, reference := range []Reference{
+		{ID: "pending-wildcard", NormalizedName: "host", Kind: "field", Role: "read", Resolution: "wildcard", Binding: "indeterminate", OriginReferenceIDs: []string{}},
+		{ID: "pending-dynamic", NormalizedName: "host", Kind: "field", Role: "read", Resolution: "dynamic", Binding: "indeterminate", OriginReferenceIDs: []string{}},
+		{ID: "pending-unavailable", NormalizedName: "host", Kind: "field", Role: "read", Resolution: "exact", Binding: "unavailable", OriginReferenceIDs: []string{}},
+		{ID: "pending-null-test", NormalizedName: "host", Kind: "field", Role: "null_test", Resolution: "exact", Binding: "indeterminate", OriginReferenceIDs: []string{}},
+		{ID: "pending-unrelated", NormalizedName: "other", Kind: "field", Role: "read", Resolution: "exact", Binding: "indeterminate", OriginReferenceIDs: []string{}},
+	} {
+		trace.recordReference(reference, false, reference.Binding == "indeterminate", trace.nextEvent())
+		if field, ok := environment.exactProjection("host", []string{reference.ID}); ok {
+			t.Errorf("%s evidence synthesized field: %+v", reference.ID, field)
+		}
+	}
+
+	environment.uncertain = true
+	before := len(environment.fields)
+	binding, direct, conditional := environment.read(Reference{ID: "pending-read", NormalizedName: "speculative", Kind: "field", Role: "read", Resolution: "exact"})
+	if binding != "indeterminate" || direct || !conditional {
+		t.Fatalf("uncertain read = %q, %t, %t", binding, direct, conditional)
+	}
+	if len(environment.fields) != before {
+		t.Fatalf("uncertain read installed speculative field: %+v", environment.fields)
+	}
+}
+
+func TestConditionalExactProjectionPreservesQueryOnlyFields(t *testing.T) {
+	for _, tc := range []struct {
+		name       string
+		document   QueryDocument
+		wantByRole map[string]int
+	}{
+		{
+			name:       "SPL table then eval",
+			document:   QueryDocument{Text: "search index=main | foobar | table host | eval y=host"},
+			wantByRole: map[string]int{"read": 2},
+		},
+		{
+			name:       "SPL aggregation then table",
+			document:   QueryDocument{Text: "search index=main | foobar | stats count by host | table host"},
+			wantByRole: map[string]int{"group": 1, "read": 1},
+		},
+		{
+			name:       "SPL2 SQL select then eval",
+			document:   QueryDocument{Text: "FROM main WHERE unknown_fn(a) SELECT host | eval y=host", Language: "spl2"},
+			wantByRole: map[string]int{"read": 2},
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			result, trace, err := analyzeRewriteWithTrace(tc.document, nil, nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if result.Status != Incomplete || result.Requirements.QueryStatus != Incomplete {
+				t.Fatalf("status = analysis %q requirements %q, want incomplete/incomplete", result.Status, result.Requirements.QueryStatus)
+			}
+			for _, diagnostic := range result.Requirements.Diagnostics {
+				if diagnostic.Code == CodeUnavailableField {
+					t.Fatalf("conditional projected field produced private unavailable diagnostic: %+v", diagnostic)
+				}
+			}
+
+			traceByID := map[string]requirementTraceReference{}
+			for _, entry := range trace.references {
+				traceByID[entry.reference.ID] = entry
+			}
+			for role, wantCount := range tc.wantByRole {
+				wantReferenceIDs := []string{}
+				for _, reference := range result.References {
+					if reference.Kind != "field" || reference.NormalizedName != "host" || reference.Role != role {
+						continue
+					}
+					wantReferenceIDs = append(wantReferenceIDs, reference.ID)
+					if reference.Binding != "indeterminate" {
+						t.Errorf("public %s reference = %+v, want indeterminate", role, reference)
+					}
+					entry := traceByID[reference.ID]
+					if entry.reference.Binding != "indeterminate" || entry.directExternal || !entry.conditional {
+						t.Errorf("query-only %s reference = %+v, want conditional indeterminate", role, entry)
+					}
+				}
+				if len(wantReferenceIDs) != wantCount {
+					t.Fatalf("%s host references = %v, want %d", role, wantReferenceIDs, wantCount)
+				}
+
+				var item *RequirementItem
+				for i := range result.Requirements.Items {
+					candidate := &result.Requirements.Items[i]
+					if candidate.Kind == "field" && candidate.Identity == "host" && candidate.Role == role {
+						item = candidate
+					}
+				}
+				if item == nil || item.Necessity != "conditional" || item.Resolution != "exact" || len(item.Occurrences) != wantCount {
+					t.Fatalf("%s requirement item = %+v, want %d conditional exact occurrences", role, item, wantCount)
+				}
+				gotReferenceIDs := []string{}
+				for _, occurrence := range item.Occurrences {
+					gotReferenceIDs = append(gotReferenceIDs, occurrence.ReferenceID)
+					if occurrence.Binding != "indeterminate" {
+						t.Errorf("%s occurrence = %+v, want indeterminate", role, occurrence)
+					}
+				}
+				if !reflect.DeepEqual(gotReferenceIDs, wantReferenceIDs) {
+					t.Errorf("%s occurrence references = %v, want %v", role, gotReferenceIDs, wantReferenceIDs)
+				}
+			}
+
+			for name, refined := range map[string]func() (*Result, error){
+				"fields": func() (*Result, error) {
+					got, err := AnalyzeWithSourceFields(tc.document, []string{"a", "host"})
+					if err != nil {
+						return nil, err
+					}
+					return got.Result, nil
+				},
+				"universe": func() (*Result, error) {
+					got, err := AnalyzeWithSourceUniverse(tc.document, SourceUniverse{Fields: []string{"a", "host"}, Complete: true})
+					if err != nil {
+						return nil, err
+					}
+					return got.Result, nil
+				},
+			} {
+				got, err := refined()
+				if err != nil {
+					t.Fatal(err)
+				}
+				if !reflect.DeepEqual(got.Requirements, result.Requirements) {
+					t.Errorf("requirements changed under %s refinement:\nplain=%+v\nrefined=%+v", name, result.Requirements, got.Requirements)
+				}
+			}
+		})
+	}
+}
+
 func TestRequirementTraceKnowledgeObjects(t *testing.T) {
 	for _, tc := range []struct {
 		name     string

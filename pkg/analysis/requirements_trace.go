@@ -295,7 +295,33 @@ func (e *requirementEnvironment) stageIncomplete(stageID string) bool {
 	return incomplete
 }
 
-func (e *requirementEnvironment) applyProjection(selectors []locatedOperand, mode string, retainKnownInternals bool, stageID string) {
+func (e *requirementEnvironment) exactProjection(name string, referenceIDs []string) (requirementField, bool) {
+	if field, ok := e.fields[name]; ok {
+		field.origins = append([]string{}, field.origins...)
+		return field, true
+	}
+	if e.trace == nil {
+		return requirementField{}, false
+	}
+	matching := []string{}
+	for _, id := range referenceIDs {
+		if id == "" {
+			continue
+		}
+		entry := e.trace.reference(id)
+		reference := entry.reference
+		if reference.Kind != "field" || reference.NormalizedName != name || reference.Resolution != "exact" || reference.Binding != "indeterminate" || !entry.conditional || reference.Role == "null_test" {
+			continue
+		}
+		matching = append(matching, id)
+	}
+	if len(matching) == 0 {
+		return requirementField{}, false
+	}
+	return requirementField{conditional: true, origins: traceOrigins(e.trace, matching)}, true
+}
+
+func (e *requirementEnvironment) applyProjection(selectors []locatedOperand, referenceIDs [][]string, mode string, retainKnownInternals bool, stageID string) {
 	if mode == "exclude" {
 		for _, selector := range selectors {
 			if selector.Resolution != "wildcard" {
@@ -318,7 +344,7 @@ func (e *requirementEnvironment) applyProjection(selectors []locatedOperand, mod
 			}
 		}
 	}
-	for _, selector := range selectors {
+	for i, selector := range selectors {
 		if selector.Resolution == "wildcard" {
 			for name, field := range e.fields {
 				if wildcardMatches(selector.Name, name) {
@@ -327,7 +353,11 @@ func (e *requirementEnvironment) applyProjection(selectors []locatedOperand, mod
 			}
 			continue
 		}
-		if field, ok := e.fields[selector.Name]; ok {
+		var ids []string
+		if i < len(referenceIDs) {
+			ids = referenceIDs[i]
+		}
+		if field, ok := e.exactProjection(selector.Name, ids); ok {
 			selected[selector.Name] = field
 		}
 	}
