@@ -58,6 +58,7 @@ func executeSPL2SQL(result *Result, parsed *spl2ParsedDocument, refinement *sour
 			}
 		}
 	}
+	scheduler.syncParserDiagnostics()
 	s := &spl2SemanticStage{semanticStage: &semanticStage{result: result, env: env, refinement: refinement}, parsed2: parsed, aliases: aliases}
 	phase := func(ctx antlr.ParserRuleContext, name string, run func()) {
 		if ctx == nil {
@@ -91,6 +92,9 @@ func executeSPL2SQL(result *Result, parsed *spl2ParsedDocument, refinement *sour
 		}
 		if !result.Stages[s.stage].SemanticComplete && !(name == "project" && selectedShape) {
 			s.env.uncertain = true
+		}
+		if s.env.requirements.stageIncomplete(result.Stages[s.stage].ID) && !(name == "project" && selectedShape) {
+			s.env.requirements.uncertain = true
 		}
 		order := len(result.Lineage)
 		st := result.Stages[s.stage]

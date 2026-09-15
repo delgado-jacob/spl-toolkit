@@ -26,7 +26,21 @@ func TestRequirementTraceIndexesStaySynchronized(t *testing.T) {
 	if environment := newRequirementEnvironment(trace); environment.stageIncomplete("stage-pending") {
 		t.Fatal("stage was indexed before parser diagnostic synchronization")
 	}
+	diagnosticCount := len(trace.diagnostics)
+	nextOrdinal := trace.nextOrdinal
+	eventOrdinals := make([]int, len(trace.diagnostics))
+	for i := range trace.diagnostics {
+		eventOrdinals[i] = trace.diagnostics[i].eventOrdinal
+	}
 	trace.syncParserDiagnostics([]Diagnostic{{Code: CodeUnsupportedSemantics, StageID: "stage-pending"}})
+	if len(trace.diagnostics) != diagnosticCount || trace.nextOrdinal != nextOrdinal {
+		t.Fatalf("parser diagnostic synchronization changed trace cardinality or ordinal state: diagnostics=%d want=%d next=%d want=%d", len(trace.diagnostics), diagnosticCount, trace.nextOrdinal, nextOrdinal)
+	}
+	for i := range trace.diagnostics {
+		if trace.diagnostics[i].eventOrdinal != eventOrdinals[i] {
+			t.Fatalf("parser diagnostic synchronization changed event ordinal %d from %d to %d", i, eventOrdinals[i], trace.diagnostics[i].eventOrdinal)
+		}
+	}
 	environment := newRequirementEnvironment(trace)
 	clone := environment.clone()
 	if !environment.stageIncomplete("stage-pending") || !clone.stageIncomplete("stage-pending") {
@@ -40,6 +54,207 @@ func TestRequirementTraceIndexesStaySynchronized(t *testing.T) {
 	trace.remapStages(map[string]string{"stage-pending": "stage-0"})
 	if environment.stageIncomplete("stage-pending") || !environment.stageIncomplete("stage-0") || !clone.stageIncomplete("stage-0") {
 		t.Fatalf("incomplete-stage index was not remapped: %+v", trace.incompleteStageIDs)
+	}
+}
+
+func TestSPL2ParserDamageSynchronizesRequirementStateBeforeDownstreamTransfers(t *testing.T) {
+	tests := []struct {
+		name            string
+		query           string
+		syntaxStage     string
+		downstreamStage string
+		nested          bool
+	}{
+		{
+			name:            "recovered eventstats",
+			query:           "FROM main | eventstats count() by host | where a=1",
+			syntaxStage:     "stage-1",
+			downstreamStage: "stage-2",
+		},
+		{
+			name:            "recovered table field list",
+			query:           "FROM main | table host user | where a=1",
+			syntaxStage:     "stage-1",
+			downstreamStage: "stage-2",
+		},
+		{
+			name:            "nested scope stage remap",
+			query:           "FROM main | append [FROM child] | table host user | where a=1",
+			syntaxStage:     "stage-3",
+			downstreamStage: "stage-4",
+			nested:          true,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			document := QueryDocument{Text: tc.query, Language: "spl2"}
+			result, trace, err := analyzeRewriteWithTrace(document, nil, nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if result.Status != Invalid || result.Requirements.QueryStatus != Invalid {
+				t.Fatalf("status = analysis %q requirements %q, want invalid/invalid", result.Status, result.Requirements.QueryStatus)
+			}
+
+			var syntax *Diagnostic
+			for i := range result.Diagnostics {
+				diagnostic := &result.Diagnostics[i]
+				if diagnostic.Code == CodeSyntaxError {
+					if syntax != nil {
+						t.Fatalf("multiple syntax diagnostics: %+v", result.Diagnostics)
+					}
+					syntax = diagnostic
+				}
+			}
+			if syntax == nil || syntax.StageID != tc.syntaxStage || syntax.ScopeID != "scope-0" {
+				t.Fatalf("syntax diagnostic = %+v, want stage=%q scope=scope-0", syntax, tc.syntaxStage)
+			}
+			if !reflect.DeepEqual(result.Requirements.Diagnostics, result.Diagnostics) {
+				t.Fatalf("query-only diagnostics diverged from plain analysis:\nanalysis=%+v\nrequirements=%+v", result.Diagnostics, result.Requirements.Diagnostics)
+			}
+			for _, diagnostic := range result.Requirements.Diagnostics {
+				if diagnostic.Code == CodeUnavailableField {
+					t.Fatalf("parser damage produced a private unavailable-field diagnostic: %+v", diagnostic)
+				}
+			}
+
+			var public *Reference
+			for i := range result.References {
+				reference := &result.References[i]
+				if reference.Kind == "field" && reference.NormalizedName == "a" && reference.Role == "read" {
+					public = reference
+				}
+			}
+			private := requirementTraceReferenceByNameAndRole(t, trace, "a", "read")
+			if public == nil || public.Binding != "indeterminate" || public.StageID != tc.downstreamStage || public.ScopeID != "scope-0" {
+				t.Fatalf("downstream public reference = %+v, want indeterminate at %s/scope-0", public, tc.downstreamStage)
+			}
+			if private.reference.ID != public.ID || private.reference.Binding != "indeterminate" || private.reference.StageID != tc.downstreamStage || private.reference.ScopeID != "scope-0" || private.directExternal || !private.conditional {
+				t.Fatalf("downstream query-only reference = %+v, want conditional indeterminate counterpart to %+v", private, public)
+			}
+
+			var item *RequirementItem
+			for i := range result.Requirements.Items {
+				candidate := &result.Requirements.Items[i]
+				if candidate.Kind == "field" && candidate.Identity == "a" && candidate.Role == "read" {
+					item = candidate
+				}
+			}
+			if item == nil || item.Necessity != "conditional" || item.Resolution != "exact" || len(item.Occurrences) != 1 {
+				t.Fatalf("downstream requirement item = %+v, want one conditional exact occurrence", item)
+			}
+			occurrence := item.Occurrences[0]
+			if occurrence.ReferenceID != public.ID || occurrence.Binding != "indeterminate" || occurrence.StageID != tc.downstreamStage || occurrence.ScopeID != "scope-0" {
+				t.Fatalf("downstream requirement occurrence = %+v, want final stage/scope and indeterminate binding", occurrence)
+			}
+
+			gapKeys := map[string]bool{}
+			foundDownstreamGap := false
+			for _, gap := range result.Requirements.Gaps {
+				keyBytes, err := json.Marshal(struct {
+					Code            string
+					ReferenceIDs    []string
+					DiagnosticCodes []string
+				}{gap.Code, gap.ReferenceIDs, gap.DiagnosticCodes})
+				if err != nil {
+					t.Fatal(err)
+				}
+				key := string(keyBytes)
+				if gapKeys[key] {
+					t.Fatalf("duplicate requirement gap key %s: %+v", key, result.Requirements.Gaps)
+				}
+				gapKeys[key] = true
+				if gap.Code == CodeRequirementIndeterminate && reflect.DeepEqual(gap.ReferenceIDs, []string{public.ID}) {
+					foundDownstreamGap = true
+				}
+			}
+			if !foundDownstreamGap {
+				t.Fatalf("downstream conditional reference has no exact indeterminate gap: %+v", result.Requirements.Gaps)
+			}
+
+			if tc.nested {
+				assertSPL2RequirementStageRemapIntegrity(t, result, trace)
+				child := requirementTraceReferenceByNameAndRole(t, trace, "child", "read")
+				if child.reference.Kind != "dataset" || child.reference.StageID != "stage-2" || child.reference.ScopeID != "scope-1" {
+					t.Fatalf("nested dataset trace lost final stage/scope: %+v", child)
+				}
+				return
+			}
+
+			standalone, err := Requirements(document)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if !reflect.DeepEqual(standalone, &result.Requirements) {
+				t.Fatalf("standalone requirements differ from plain analysis:\nstandalone=%+v\nplain=%+v", standalone, result.Requirements)
+			}
+			refined := map[string]func() (*Result, error){
+				"field list": func() (*Result, error) {
+					got, err := AnalyzeWithSourceFields(document, []string{"a", "host", "user"})
+					if err != nil {
+						return nil, err
+					}
+					return got.Result, nil
+				},
+				"complete universe": func() (*Result, error) {
+					got, err := AnalyzeWithSourceUniverse(document, SourceUniverse{Fields: []string{"a", "host", "user"}, Complete: true})
+					if err != nil {
+						return nil, err
+					}
+					return got.Result, nil
+				},
+				"partial universe": func() (*Result, error) {
+					got, err := AnalyzeWithSourceUniverse(document, SourceUniverse{Fields: []string{"host"}, Complete: false})
+					if err != nil {
+						return nil, err
+					}
+					return got.Result, nil
+				},
+			}
+			for name, run := range refined {
+				got, err := run()
+				if err != nil {
+					t.Fatal(err)
+				}
+				if !reflect.DeepEqual(got.Requirements, result.Requirements) {
+					t.Errorf("requirements changed under %s refinement:\nplain=%+v\nrefined=%+v", name, result.Requirements, got.Requirements)
+				}
+			}
+		})
+	}
+}
+
+func assertSPL2RequirementStageRemapIntegrity(t *testing.T, result *Result, trace *requirementTrace) {
+	t.Helper()
+	stages := map[string]string{}
+	for _, stage := range result.Stages {
+		if stages[stage.ID] != "" {
+			t.Fatalf("duplicate finalized stage ID %q: %+v", stage.ID, result.Stages)
+		}
+		stages[stage.ID] = stage.ScopeID
+	}
+	assertOwner := func(kind, id, scope string) {
+		t.Helper()
+		if id == "" || stages[id] != scope {
+			t.Fatalf("%s owner %q/%q is not a finalized stage: %+v", kind, id, scope, result.Stages)
+		}
+	}
+	for _, reference := range result.References {
+		assertOwner("public reference", reference.StageID, reference.ScopeID)
+	}
+	for _, entry := range trace.references {
+		assertOwner("query-only reference", entry.reference.StageID, entry.reference.ScopeID)
+	}
+	for _, diagnostic := range result.Requirements.Diagnostics {
+		if diagnostic.StageID != "" {
+			assertOwner("requirement diagnostic", diagnostic.StageID, diagnostic.ScopeID)
+		}
+	}
+	for _, item := range result.Requirements.Items {
+		for _, occurrence := range item.Occurrences {
+			assertOwner("requirement occurrence", occurrence.StageID, occurrence.ScopeID)
+		}
 	}
 }
 

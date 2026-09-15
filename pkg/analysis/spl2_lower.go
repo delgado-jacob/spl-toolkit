@@ -33,9 +33,9 @@ func analyzeSPL2(result *Result, parsed *spl2ParsedDocument, refinement *sourceR
 			trees = append(trees, site.context)
 		}
 	}
-	scheduler := &spl2ScopeScheduler{result: result, parsed: parsed, refinement: refinement, children: spl2ChildScopesIn(parsed, trees), executed: map[int]bool{}}
+	scheduler := &spl2ScopeScheduler{result: result, parsed: parsed, refinement: refinement, trace: trace, initialDiagnosticCount: initialDiagnosticCount, children: spl2ChildScopesIn(parsed, trees), executed: map[int]bool{}}
 	scheduler.pipeline(sites, newEnvironmentWithRequirementTrace(trace), map[string]bool{}, "scope-0", -1)
-	trace.syncParserDiagnostics(result.Diagnostics[:initialDiagnosticCount])
+	scheduler.syncParserDiagnostics()
 	if len(result.Scopes) > 1 {
 		trace.remapStages(spl2FinalizeStages(result))
 	}

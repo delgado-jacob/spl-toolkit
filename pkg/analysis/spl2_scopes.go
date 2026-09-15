@@ -76,11 +76,21 @@ func spl2ChildScopesIn(p *spl2ParsedDocument, trees []antlr.Tree) []spl2ChildSco
 // owns its copied input; unknown merge semantics never install its outputs in
 // the parent. References are finalized only after every scheduled scope.
 type spl2ScopeScheduler struct {
-	result     *Result
-	parsed     *spl2ParsedDocument
-	refinement *sourceRefinement
-	children   []spl2ChildScope
-	executed   map[int]bool
+	result                 *Result
+	parsed                 *spl2ParsedDocument
+	refinement             *sourceRefinement
+	trace                  *requirementTrace
+	initialDiagnosticCount int
+	children               []spl2ChildScope
+	executed               map[int]bool
+}
+
+// Stage registration assigns parser-recovery diagnostics to their canonical
+// owners. Keep the query-only copies and incomplete-stage index current before
+// field transfers consume that ownership. Synchronization changes neither
+// diagnostic cardinality nor semantic event order.
+func (q *spl2ScopeScheduler) syncParserDiagnostics() {
+	q.trace.syncParserDiagnostics(q.result.Diagnostics[:q.initialDiagnosticCount])
 }
 
 func spl2PipelineContexts(tree antlr.Tree) []antlr.ParserRuleContext {
@@ -118,6 +128,7 @@ func (q *spl2ScopeScheduler) pipeline(sites []spl2CommandSite, env *environment,
 		}
 		location, command := site.location, site.command
 		index := registerSPL2Stage(q.result, location, command, position, scopeID)
+		q.syncParserDiagnostics()
 		position++
 		s := &spl2SemanticStage{semanticStage: &semanticStage{result: q.result, stage: index, env: env, transitions: []Transition{}, refinement: q.refinement}, parsed2: q.parsed, aliases: aliases}
 		before := env.snapshot()
@@ -158,6 +169,9 @@ func (q *spl2ScopeScheduler) pipeline(sites []spl2CommandSite, env *environment,
 		}
 		if !q.result.Stages[index].SemanticComplete {
 			s.env.uncertain = true
+		}
+		if s.env.requirements.stageIncomplete(q.result.Stages[index].ID) {
+			s.env.requirements.uncertain = true
 		}
 		env = s.env
 		q.result.Lineage = append(q.result.Lineage, Lineage{StageID: q.result.Stages[index].ID, ScopeID: scopeID, Before: before, After: env.snapshot(), Transitions: s.transitions})
