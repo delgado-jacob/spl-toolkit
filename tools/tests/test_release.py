@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import gzip
 import hashlib
+import importlib.util
 import io
 import json
 from pathlib import Path
@@ -42,17 +43,32 @@ def test_requirement_contract_and_sources_are_release_inputs():
         assert not any(line.startswith(("tests/", "_build_plan/")) for line in entries)
 
 
-def test_requirement_contract_reaches_wheel_through_native_source_manifest(tmp_path: Path):
-    contracts = [Path(line) for line in (ROOT / "python/native-source-files.txt").read_text(encoding="utf-8").splitlines()
-                 if line.startswith("contracts/")]
-    wheel = tmp_path / "requirements.whl"
-    with zipfile.ZipFile(wheel, "w") as archive:
-        for relative in contracts:
-            archive.write(ROOT / relative, "spl_toolkit/" + relative.as_posix())
+def test_requirement_contract_reaches_wheel_through_native_source_manifest(tmp_path: Path, monkeypatch):
+    spec = importlib.util.spec_from_file_location(
+        "spl_toolkit_release_build_support", ROOT / "python/build_support.py"
+    )
+    assert spec and spec.loader
+    support = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(support)
 
-    hashes = package_check.verify_wheel_contracts(wheel, ROOT)
-    name = "spl_toolkit/contracts/v1/requirements.schema.json"
-    assert hashes[name] == package_check.sha256(ROOT / "contracts/v1/requirements.schema.json")
+    distribution = support.NativeDistribution({"script_name": str(ROOT / "python/setup.py")})
+    command = support.BuildPy(distribution)
+    command.initialize_options()
+    command.build_lib = str(tmp_path / "build")
+
+    monkeypatch.setattr(support.build_py, "run", lambda _command: None)
+
+    def stage_native_stub(_source: Path, output: Path, _version: str) -> None:
+        output.parent.mkdir(parents=True, exist_ok=True)
+        output.write_bytes(b"native")
+
+    monkeypatch.setattr(support, "build_native", stage_native_stub)
+    monkeypatch.setattr(support, "parser_attribution", lambda _setup_dir: "parser attribution\n")
+    command.run()
+
+    relative = Path("contracts/v1/requirements.schema.json")
+    staged = Path(command.build_lib) / "spl_toolkit" / relative
+    assert staged.read_bytes() == (ROOT / relative).read_bytes()
 
 
 def test_requirement_release_manifests_package_exact_inputs(tmp_path: Path):
