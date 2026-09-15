@@ -51,6 +51,60 @@ func TestRewriteBatchResourceLimit(t *testing.T) {
 	}
 }
 
+func TestRewriteBatchAllResourceLimitedSkipsDestinationValidation(t *testing.T) {
+	for _, target := range []*ValidationTarget{
+		{Kind: "field_list", Catalog: &validation.FieldCatalog{Fields: []string{"user"}}},
+		schemaRewriteTarget(`true`),
+	} {
+		t.Run(target.Kind, func(t *testing.T) {
+			request := BatchRequest{
+				SchemaVersion: 1,
+				Mode:          Apply,
+				Documents: []analysis.QueryDocument{
+					{Text: strings.Repeat("a ", 4097), SourceID: "limited-spl"},
+					{Text: strings.Repeat("b ", 2048) + "b", Language: "spl2", SourceID: "limited-spl2"},
+				},
+				Rules:            rewriteRequest("").Rules,
+				ValidationTarget: target,
+			}
+			validatorCalls := 0
+			got, err := rewriteBatch(request, formCandidate,
+				func(documents []analysis.QueryDocument, catalog validation.FieldCatalog) (*validation.BatchReport, error) {
+					validatorCalls++
+					t.Fatalf("field-list validator called for all-resource-limited batch: documents=%+v catalog=%+v", documents, catalog)
+					return nil, errors.New("unreachable field-list validation")
+				},
+				func(documents []analysis.QueryDocument, schema validation.SchemaTarget) (*validation.SchemaBatchReport, error) {
+					validatorCalls++
+					t.Fatalf("schema validator called for all-resource-limited batch: documents=%+v schema=%+v", documents, schema)
+					return nil, errors.New("unreachable schema validation")
+				})
+			if err != nil || got == nil || validatorCalls != 0 {
+				t.Fatalf("all-resource-limited batch: got=%+v err=%v validator_calls=%d", got, err, validatorCalls)
+			}
+			if got.SchemaVersion != 1 || got.Status != analysis.Incomplete || len(got.Reports) != len(request.Documents) {
+				t.Fatalf("all-resource-limited batch shape or status: %+v", got)
+			}
+			for i, document := range request.Documents {
+				if got.Reports[i].Document.SourceID != document.SourceID {
+					t.Fatalf("report %d reordered: got %q want %q", i, got.Reports[i].Document.SourceID, document.SourceID)
+				}
+				want := requireRewrite(t, Request{
+					SchemaVersion:    request.SchemaVersion,
+					Mode:             request.Mode,
+					Document:         document,
+					Rules:            request.Rules,
+					ValidationTarget: request.ValidationTarget,
+				})
+				if !reflect.DeepEqual(got.Reports[i], want) {
+					t.Fatalf("report %d differs from canonical single resource-limited no-op:\nbatch=%+v\nsingle=%+v", i, got.Reports[i], want)
+				}
+				assertResourceAnalysesDetached(t, got.Reports[i])
+			}
+		})
+	}
+}
+
 // Returning early on syntax damage or reordering by dialect loses valid results.
 func TestRewriteBatchOrderAndAtomicErrors(t *testing.T) {
 	request := BatchRequest{SchemaVersion: 1, Mode: Apply, Rules: rewriteRequest("").Rules,
