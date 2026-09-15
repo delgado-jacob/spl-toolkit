@@ -30,6 +30,7 @@ def test_requirement_contract_and_sources_are_release_inputs():
         "contracts/v1/requirements.schema.json",
         "pkg/analysis/requirements.go",
         "pkg/analysis/requirements_trace.go",
+        "pkg/analysis/resource_limit.go",
     }
     native = set((ROOT / "python/native-source-files.txt").read_text(encoding="utf-8").splitlines())
     content = set((ROOT / "tools/release-content-files.txt").read_text(encoding="utf-8").splitlines())
@@ -71,6 +72,47 @@ def test_requirement_contract_reaches_wheel_through_native_source_manifest(tmp_p
     assert staged.read_bytes() == (ROOT / relative).read_bytes()
 
 
+def test_staged_sdist_native_source_closure_compiles_through_build_py(
+    tmp_path: Path, monkeypatch
+):
+    spec = importlib.util.spec_from_file_location(
+        "spl_toolkit_release_build_support", ROOT / "python/build_support.py"
+    )
+    assert spec and spec.loader
+    support = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(support)
+
+    checkout_distribution = support.NativeDistribution(
+        {"script_name": str(ROOT / "python/setup.py")}
+    )
+    source_command = support.SourceDistribution(checkout_distribution)
+    source_command.ensure_finalized()
+    staged = tmp_path / "spl_toolkit-0.1.1"
+    monkeypatch.chdir(ROOT / "python")
+    source_command.make_release_tree(
+        str(staged), ["build_support.py", "native-source-files.txt", "setup.py"]
+    )
+
+    staged_distribution = support.NativeDistribution(
+        {"script_name": str(staged / "setup.py")}
+    )
+    build_command = support.BuildPy(staged_distribution)
+    build_command.initialize_options()
+    build_command.build_lib = str(tmp_path / "build")
+    monkeypatch.setattr(support.build_py, "run", lambda _command: None)
+    monkeypatch.setenv("GOWORK", "off")
+    monkeypatch.setenv("GOPROXY", "off")
+    monkeypatch.setenv("GOSUMDB", "off")
+    monkeypatch.setenv("GOCACHE", str(tmp_path / "go-cache"))
+    monkeypatch.setenv("GOTMPDIR", str(tmp_path / "go-tmp"))
+
+    build_command.run()
+
+    native = Path(build_command.build_lib) / "spl_toolkit" / support.native_library_name()
+    assert native.is_file()
+    assert native.with_suffix(".h").is_file()
+
+
 def test_requirement_release_manifests_package_exact_inputs(tmp_path: Path):
     release.package_tooling_content(ROOT, tmp_path, "0.1.1", EPOCH)
 
@@ -82,6 +124,7 @@ def test_requirement_release_manifests_package_exact_inputs(tmp_path: Path):
         contract.as_posix(),
         "pkg/analysis/requirements.go",
         "pkg/analysis/requirements_trace.go",
+        "pkg/analysis/resource_limit.go",
     } <= names
 
 
