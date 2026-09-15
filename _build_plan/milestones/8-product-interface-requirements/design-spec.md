@@ -15,7 +15,7 @@ The requirement set describes direct external obligations visible in the submitt
 
 ## Architecture
 
-Canonical SPL or SPL2 analysis performs its existing parse, field-flow, dependency, reference, diagnostic, coverage, and status work. After reference IDs and query-only analysis evidence are final, a deterministic projector builds the requirement set. The projector consumes canonical evidence. It does not parse query text, replay field transfers, or guess identities from source spans.
+Canonical SPL or SPL2 analysis first normalizes the query document and enforces a shared lexer work budget before parser prediction. Documents admitted by that boundary perform the existing parse, field-flow, dependency, reference, diagnostic, coverage, and status work. After reference IDs and query-only analysis evidence are final, a deterministic projector builds the requirement set. The projector consumes canonical evidence. It does not parse query text, replay field transfers, or guess identities from source spans.
 
 `analysis.Result` always contains a non-optional `Requirements` value. `analysis.Requirements(document)` performs one canonical analysis pass and returns a deeply detached copy of the set embedded in that pass. Calling `Analyze` gives callers meaning and requirements together without repeated work.
 
@@ -23,9 +23,19 @@ Canonical SPL or SPL2 analysis performs its existing parse, field-flow, dependen
 
 Some existing operations call `AnalyzeWithSourceFields` or `AnalyzeWithSourceUniverse`. Field-list validation, schema validation, and rewrite proof may refine public reference bindings, wildcard membership, diagnostics, and coverage using a caller-supplied target. Milestone 8 requirements must remain a function of the query and selected language capability contract only.
 
-The analysis pass therefore maintains a private requirement trace alongside its public refinement-aware evidence. The trace records the complete query-only consuming references, diagnostics, status inputs, and completeness inputs before source-universe admission changes them. Reference finalization remaps trace links to the same final `ref-N` identifiers used by the public result. The projector uses this trace, not target-refined conclusions.
+The analysis pass therefore maintains a private requirement trace alongside its public refinement-aware evidence. The trace records the complete query-only consuming references, diagnostics, status inputs, and completeness inputs before source-universe admission changes them. Reference finalization remaps trace links to the same final `ref-N` identifiers used by the public result. Pending-reference lookup and incomplete-stage membership use O(1) indexes that remain synchronized through recording, remapping, and completeness updates; environment clones retain access to the shared trace indexes. The projector uses this trace, not target-refined conclusions.
 
 For plain `Analyze`, trace evidence and public analysis evidence coincide. For validation and rewrite analysis, the embedded requirement set must be byte-equivalent to the set from plain analysis of the same normalized query. It excludes refinement-target diagnostics and proofs. This trace is a projection feed within the existing traversal, not a second parser or semantic engine.
+
+### Bounded canonical lexer work
+
+Each canonical analysis pass admits at most 4,096 lexer work units. Every non-EOF lexer token counts as one unit, and every lexer error counts as one unit, for both SPL and SPL2. EOF does not count. The analyzer detects the event that would consume unit 4,097 before parser prediction, records that first omitted token or lexer error location, and stops. It emits no partial stages, scopes, references, lineage, dependencies, or requirements evidence from the abandoned parse.
+
+An over-budget normalized document is a content outcome rather than an API error. Go `Analyze` returns a non-nil `analysis.Result` and a nil error. The result retains the normalized document and full supplied text, uses `status: incomplete`, sets both `coverage.syntax_complete` and `coverage.semantic_complete` to false, and has `coverage.reasons: ["SPL_ANALYSIS_RESOURCE_LIMIT"]`. Stages, scopes, references, and lineage are initialized empty arrays. Every dependency collection is an initialized empty array. The result contains exactly one diagnostic with code `SPL_ANALYSIS_RESOURCE_LIMIT`, severity `warning`, category `resource_limit`, a stable message, empty stage and scope IDs, and the exact location of the first omitted token or lexer error.
+
+The embedded requirement set is fully initialized. Its query and capability identities are the same values a normally admitted document would receive, including a `query_digest` over the full supplied text. It uses `query_status: incomplete`, `coverage.complete: false`, and `coverage.reasons: ["SPL_ANALYSIS_RESOURCE_LIMIT"]`. Its items are empty. It has exactly one gap with code `SPL_ANALYSIS_RESOURCE_LIMIT`, no reference IDs, and `diagnostic_codes: ["SPL_ANALYSIS_RESOURCE_LIMIT"]`. Its diagnostics array contains the same single diagnostic as the analysis result. Every collection remains array-valued when empty. Go `Requirements` returns a detached copy of that set and a nil error.
+
+The 4,096-unit value matches the existing schema projection and enumeration budgets and is supported by the security-review measurements recorded in the implementation plan. It bounds canonical parsing for every product surface. It is not a universal serialized-result bound: a document below the lexer budget can still amplify inherited lineage evidence. Long sparse input remains admitted when it stays within the work budget.
 
 ## Requirement report contract
 
@@ -120,6 +130,8 @@ CLI exit codes are:
 | 2 | Request, option, output, or internal failure |
 | 3 | Query status incomplete or requirement coverage incomplete |
 
+An over-budget query follows the existing successful content paths for both operations. The `analyze` and `requirements` CLI commands emit their canonical values and exit `3`. Their REST routes return HTTP 200. Native/C returns owned successful `SPLResult` values, and Python returns the decoded successful values through its owned native-result paths. The existing REST request boundary remains separate: a body larger than 1 MiB returns HTTP 400 before analysis.
+
 REST uses the existing strict query-document decoder, content-type policy, middleware, and 1 MiB body limit. Valid, invalid, and incomplete content returns HTTP 200 with the canonical set. Malformed JSON, invalid Unicode, duplicate or unknown properties, and unsupported selectors return HTTP 400. No server-side file or network access is introduced.
 
 Native and Python preserve existing mapper-handle admission, operation guards, owned-result allocation, UTF-8 behavior, error propagation, and finally-based freeing. Adapters perform no requirement classification or gap construction. Full report parity ignores only JSON object-key order.
@@ -142,7 +154,9 @@ Update the contract registry, OpenAPI output, native header and source manifests
 
 Requirement extraction is deterministic and offline. It accepts only the query document already admitted by analysis. It opens no path, follows no URL, reads no environment variable, consults no global registry, executes no query, and stores no credential or event data.
 
-The REST route retains bounded request handling and strict decoding. Native and Python retain existing memory ownership and concurrency guards. Capability and query digests identify supplied data; they are not authentication, authorization, signatures, or proof that a principal can execute a query.
+The REST route retains bounded request handling and strict decoding. Canonical analysis additionally limits lexer work to 4,096 non-EOF tokens and lexer errors across SPL and SPL2, before parser prediction. Native and Python retain existing memory ownership and concurrency guards. Capability and query digests identify supplied data; they are not authentication, authorization, signatures, or proof that a principal can execute a query.
+
+The bound responds to an adversarial dense-wildcard measurement. At the pre-Milestone-8 commit `f02009d`, a 65,533-byte query took 5.28 seconds, used 203 MB, and serialized 12.8 MB of JSON. At `d1db37c`, the same query took 5.65 seconds, used 317 MB, and serialized 27.0 MB of JSON, including 14.2 MB of requirements. A 256 KiB query exceeded 60 seconds. These measurements justify stopping canonical parsing at a fixed lexer-work boundary while keeping the 1 MiB REST transport limit unchanged.
 
 ## Testing and verification
 
@@ -155,6 +169,9 @@ Durable requirement fixtures live outside `_build_plan/`. Core tests cover:
 - An invalid query with complete requirement coverage.
 - SPL2 SQL, mixed pipelines, and dotted source identities.
 - Unicode and CRLF locations, exact query digests, stable and distinct capability revisions, deterministic ordering, empty arrays, deep detachment, and concurrent calls.
+- Exact 4,096-unit admission and 4,097-unit rejection for SPL and SPL2, with lexer errors counted as work units.
+- The full-text digest, first-omitted-event location, deterministic JSON, single diagnostic and gap, empty canonical evidence, long sparse admission, and an end-to-end dense adversarial benchmark.
+- O(1) pending-reference and incomplete-stage indexes that preserve existing trace order, environment-clone behavior, remapping, and serialized output.
 
 Refinement-isolation tests compare byte-equivalent embedded `RequirementSet` values for plain analysis, field-list refinement, partial source-universe refinement, JSON Schema and OCSF validation, and original or candidate rewrite analysis of the same normalized query. The cases must include wildcard selectors and dotted SPL2 source identities. No test may obtain this parity by running a second query analysis inside the implementation.
 
@@ -163,6 +180,7 @@ Cross-surface acceptance submits representative valid, invalid, and incomplete S
 - `Analyze(...).Requirements` equals `Requirements(...)` for the same document.
 - CLI text fields and all four exit outcomes.
 - HTTP content outcomes versus request failures, strict Unicode handling, and body limits.
+- Over-budget parity across every surface, including CLI exit `3`, REST HTTP 200 below the 1 MiB body boundary, owned native and Python success, and concurrent 64 KiB and 256 KiB dense inputs.
 - Invalid and closed native handles, owned-result freeing, repeated calls, and concurrent calls.
 - Direct-wheel and rebuilt-sdist installations outside the checkout with no source-path injection.
 - Positive and negative JSON Schema instances for the new contract and compatibility checks for archived analysis v1 reports.
@@ -185,4 +203,5 @@ Milestone 8 is complete when:
 3. Source, conditional, dynamic, and indeterminate external obligations are explicit. Derived and query-local unavailable fields are not misclassified as obligations: `Analyze` retains their canonical references, while standalone `Requirements` returns only the external-obligation projection.
 4. Provenance identities, ordering, links, diagnostics, and empty collections are deterministic and deeply detached.
 5. Current contracts, installed packages, native closure, documentation, and main CI pass their required checks while archived version-1 reports remain valid.
-6. No environment snapshot, compatibility assessment, transitive expansion, placeholder resolution, query fanout, broad language family, or `_build_plan/` runtime dependency is introduced.
+6. Canonical SPL and SPL2 parsing stops before parser prediction on work unit 4,097 and returns the exact bounded incomplete report through every surface. Exact-limit, lexer-error, sparse-input, 64 KiB, 256 KiB, deterministic-output, and concurrent adversarial checks pass without partial canonical evidence.
+7. No environment snapshot, compatibility assessment, transitive expansion, placeholder resolution, query fanout, broad language family, universal serialized-result bound, or `_build_plan/` runtime dependency is introduced.
