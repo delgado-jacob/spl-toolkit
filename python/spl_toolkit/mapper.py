@@ -146,6 +146,8 @@ class SPLMapper:
         # Owned canonical JSON results
         self._lib.spl_mapper_analyze_query.argtypes = [ctypes.c_int, ctypes.c_char_p]
         self._lib.spl_mapper_analyze_query.restype = ctypes.POINTER(SPLResult)
+        self._lib.spl_mapper_requirements_query.argtypes = [ctypes.c_int, ctypes.c_char_p]
+        self._lib.spl_mapper_requirements_query.restype = ctypes.POINTER(SPLResult)
         self._lib.spl_mapper_validate_fields.argtypes = [ctypes.c_int, ctypes.c_char_p]
         self._lib.spl_mapper_validate_fields.restype = ctypes.POINTER(SPLResult)
         self._lib.spl_mapper_validate_fields_batch.argtypes = [ctypes.c_int, ctypes.c_char_p]
@@ -347,6 +349,21 @@ class SPLMapper:
                 return json.loads(pointer.contents.result.decode("utf-8"))
             finally:
                 self._lib.spl_result_free(pointer)
+
+    def requirements_query(
+        self,
+        query: str,
+        *,
+        language: str = "spl",
+        profile: str = "splunkd",
+        version: str = "current",
+        source_id: str = "",
+    ) -> dict[str, Any]:
+        """Return the canonical direct requirements for a query document."""
+        document = {"text": query, "language": language, "profile": profile,
+                    "version": version, "source_id": source_id}
+        return self._validate_fields_request(
+            self._lib.spl_mapper_requirements_query, document, operation="requirements")
 
     def validate_fields(self, query, catalog, *, language='spl', profile='splunkd',
                         version='current', source_id='') -> dict:

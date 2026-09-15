@@ -66,6 +66,8 @@ def _library() -> ctypes.CDLL:
     lib.spl_mapper_load_mappings.restype = ctypes.c_void_p
     lib.spl_mapper_map_query.argtypes = [ctypes.c_int, ctypes.c_char_p]
     lib.spl_mapper_map_query.restype = ctypes.POINTER(SPLResult)
+    lib.spl_mapper_requirements_query.argtypes = [ctypes.c_int, ctypes.c_char_p]
+    lib.spl_mapper_requirements_query.restype = ctypes.POINTER(SPLResult)
     lib.spl_result_free.argtypes = [ctypes.POINTER(SPLResult)]
     lib.spl_result_free.restype = None
     lib.spl_toolkit_version.argtypes = []
@@ -171,11 +173,26 @@ def _standalone_error_ownership() -> None:
         lib.spl_mapper_free(handle)
 
 
+def _requirements_symbol_and_ownership() -> None:
+    lib = _library()
+    handle = lib.spl_mapper_new()
+    assert handle > 0
+    try:
+        result = lib.spl_mapper_requirements_query(handle, b'{"text":"search host=web"}')
+        try:
+            assert result and not result.contents.error and result.contents.result
+        finally:
+            lib.spl_result_free(result)
+    finally:
+        lib.spl_mapper_free(handle)
+
+
 CASES = {
     "complete-arrays": _complete_arrays,
     "repeated-empty": _repeated_and_empty_arrays,
     "invalid-cleanup": _invalid_handle_and_cleanup,
     "standalone-error": _standalone_error_ownership,
+    "requirements-symbol": _requirements_symbol_and_ownership,
     "version": _version_identity,
 }
 

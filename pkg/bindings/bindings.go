@@ -179,15 +179,34 @@ func spl_mapper_map_query_with_context(mapperID C.int, query *C.char, contextJSO
 //export spl_mapper_analyze_query
 func spl_mapper_analyze_query(mapperID C.int, documentJSON *C.char) *C.SPLResult {
 	return ownedMapperJSONResult(mapperID, func() (any, error) {
-		documents, err := validation.DecodeDocuments([]byte("[" + C.GoString(documentJSON) + "]"))
+		document, err := decodeAnalysisDocument(documentJSON)
 		if err != nil {
 			return nil, err
 		}
-		if len(documents) != 1 {
-			return nil, fmt.Errorf("expected one query document")
-		}
-		return analysis.Analyze(documents[0])
+		return analysis.Analyze(document)
 	})
+}
+
+//export spl_mapper_requirements_query
+func spl_mapper_requirements_query(mapperID C.int, documentJSON *C.char) *C.SPLResult {
+	return ownedMapperJSONResult(mapperID, func() (any, error) {
+		document, err := decodeAnalysisDocument(documentJSON)
+		if err != nil {
+			return nil, err
+		}
+		return analysis.Requirements(document)
+	})
+}
+
+func decodeAnalysisDocument(documentJSON *C.char) (analysis.QueryDocument, error) {
+	documents, err := validation.DecodeDocuments([]byte("[" + C.GoString(documentJSON) + "]"))
+	if err != nil {
+		return analysis.QueryDocument{}, err
+	}
+	if len(documents) != 1 {
+		return analysis.QueryDocument{}, fmt.Errorf("expected one query document")
+	}
+	return documents[0], nil
 }
 
 // ownedMapperJSONResult retains an admitted mapper and returns one owned result,

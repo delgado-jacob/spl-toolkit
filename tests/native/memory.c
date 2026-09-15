@@ -37,6 +37,13 @@ int main(void) {
         malformed = spl_mapper_rewrite_batch(handle, "{\"schema_version\":1,\"documents\":[],\"rules\":[]}");
         assert(malformed && malformed->error && !malformed->result);
         spl_result_free(malformed);
+        SPLResult *requirements = spl_mapper_requirements_query(handle, "{\"text\":\"search host=web\"}");
+        assert(requirements && !requirements->error && requirements->result);
+        assert(strstr(requirements->result, "\"query_status\":\"valid\"") != NULL);
+        spl_result_free(requirements);
+        malformed = spl_mapper_requirements_query(handle, NULL);
+        assert(malformed && malformed->error && !malformed->result);
+        spl_result_free(malformed);
         spl_mapper_free(handle);
         SPLResult *closed = spl_mapper_map_query(handle, "search src_ip=1");
         assert(closed && closed->error);
@@ -45,6 +52,9 @@ int main(void) {
         assert(closed && closed->error && !closed->result);
         spl_result_free(closed);
         closed = spl_mapper_rewrite_batch(handle, NULL);
+        assert(closed && closed->error && !closed->result);
+        spl_result_free(closed);
+        closed = spl_mapper_requirements_query(handle, "{\"text\":\"search host=web\"}");
         assert(closed && closed->error && !closed->result);
         spl_result_free(closed);
         spl_mapper_free(handle);
