@@ -671,6 +671,9 @@ def test_installed_schema_fixtures_exist_before_both_suites(tmp_path: Path, monk
     assert result["fixture_hashes"]["requirements"] == checker.sha256(
         ROOT / "testdata/requirements/cases.json"
     )
+    assert result["documentation_hashes"]["python/README.md"] == checker.sha256(
+        ROOT / "python/README.md"
+    )
     assert result["required_test_hashes"] == {
         "native": {
             "test_native_requirements.py": checker.sha256(
@@ -759,8 +762,9 @@ def test_package_copies_documentation_closure_outside_checkout(tmp_path: Path):
     checker = load_package_checker()
     destination = tmp_path / "docs-root"
     hashes = checker.copy_documentation(ROOT, destination)
-    expected = {"README.md", "docs/cli.md", "docs/spl2.md"}
+    expected = {"README.md", "docs/cli.md", "docs/spl2.md", "python/README.md"}
     assert expected <= hashes.keys()
+    assert hashes["python/README.md"] == checker.sha256(ROOT / "python/README.md")
     assert all((destination / name).read_bytes() == (ROOT / name).read_bytes() for name in hashes)
     assert (destination / "python/examples/basic_usage.py").read_bytes() == (ROOT / "python/examples/basic_usage.py").read_bytes()
     assert not (destination / "python/spl_toolkit").exists()

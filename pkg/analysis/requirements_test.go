@@ -159,6 +159,23 @@ func TestProjectRequirementsKnowledgePolicy(t *testing.T) {
 		}
 	})
 
+	t.Run("owned dynamic diagnostic", func(t *testing.T) {
+		trace := newRequirementTrace()
+		reference := testRequirementReference("ref-0", "lookup", "$lookup$", "read", "not_applicable", "dynamic", 0)
+		trace.recordReference(reference, false, true, trace.nextEvent())
+		trace.recordDiagnostic(Diagnostic{Code: CodeDynamicReference, Severity: "warning", Category: "unsupported_semantics", Message: "dynamic lookup reference is unresolved", Location: reference.Location, StageID: reference.StageID, ScopeID: reference.ScopeID}, true, []string{"ref-0"}, trace.nextEvent())
+		got := mustProjectRequirements(t, trace)
+		if len(got.Items) != 1 || got.Items[0].Necessity != "conditional" || got.Items[0].Resolution != "dynamic" {
+			t.Fatalf("items = %+v", got.Items)
+		}
+		if len(got.Gaps) != 1 || got.Gaps[0].Code != CodeDynamicReference || !reflect.DeepEqual(got.Gaps[0].DiagnosticCodes, []string{CodeDynamicReference}) || !reflect.DeepEqual(got.Gaps[0].ReferenceIDs, []string{"ref-0"}) {
+			t.Fatalf("gaps = %+v", got.Gaps)
+		}
+		if got.Coverage.Complete || !reflect.DeepEqual(got.Coverage.Reasons, []string{CodeDynamicReference}) {
+			t.Fatalf("coverage = %+v", got.Coverage)
+		}
+	})
+
 	t.Run("defensible dynamic identity", func(t *testing.T) {
 		trace := newRequirementTrace()
 		reference := testRequirementReference("ref-0", "lookup", "$lookup$", "read", "not_applicable", "dynamic", 0)

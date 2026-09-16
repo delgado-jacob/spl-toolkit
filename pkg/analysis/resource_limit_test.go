@@ -388,7 +388,10 @@ func TestAnalysisLexerWorkBudgetAdmitsLongSparseInput(t *testing.T) {
 		{language: "spl2", base: "FROM main"},
 	} {
 		t.Run(tc.language, func(t *testing.T) {
-			query := tc.base + strings.Repeat(" ", 300_000)
+			query := tc.base + strings.Repeat(" ", 300_000-len([]byte(tc.base)))
+			if got := len([]byte(query)); got != 300_000 {
+				t.Fatalf("sparse fixture has %d bytes, want 300000", got)
+			}
 			if got := len(rawLexerTokens(t, tc.language, query)); got > lexerWorkLimit {
 				t.Fatalf("sparse fixture has %d units", got)
 			}

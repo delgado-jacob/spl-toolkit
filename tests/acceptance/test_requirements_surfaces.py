@@ -574,16 +574,32 @@ def special_documents() -> list[dict]:
         for language in ("spl", "spl2")
         for size in (65_536, 256 * 1024)
     ]
-    sparse = [
-        {
-            "text": ("FROM main" if language == "spl2" else "search host=x")
-            + " " * 300_000,
-            "language": language,
-            "source_id": f"sparse-{language}.spl",
-        }
-        for language in ("spl", "spl2")
-    ]
+    sparse = []
+    for language in ("spl", "spl2"):
+        base = "FROM main" if language == "spl2" else "search host=x"
+        text = base + " " * (300_000 - len(base.encode("utf-8")))
+        assert len(text.encode("utf-8")) == 300_000
+        sparse.append(
+            {
+                "text": text,
+                "language": language,
+                "source_id": f"sparse-{language}.spl",
+            }
+        )
     return dense + sparse
+
+
+def test_sparse_requirement_documents_are_exactly_300000_bytes(special_documents):
+    sparse = [
+        document
+        for document in special_documents
+        if document["source_id"].startswith("sparse-")
+    ]
+    assert {document["source_id"] for document in sparse} == {
+        "sparse-spl.spl",
+        "sparse-spl2.spl",
+    }
+    assert all(len(document["text"].encode("utf-8")) == 300_000 for document in sparse)
 
 
 @pytest.fixture(scope="session")

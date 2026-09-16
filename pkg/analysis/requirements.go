@@ -286,7 +286,11 @@ func projectRequirements(document QueryDocument, trace *requirementTrace) (Requi
 			if reference.Resolution == "wildcard" || reference.Resolution == "dynamic" {
 				code = CodeRequirementDynamic
 				message = "dynamic requirement identity is unresolved"
-				if index.hasOwnedDiagnostic(reference.ID, CodeUnresolvedWildcard) {
+				ownedCode := CodeUnresolvedWildcard
+				if reference.Resolution == "dynamic" {
+					ownedCode = CodeDynamicReference
+				}
+				if index.hasOwnedDiagnostic(reference.ID, ownedCode) {
 					continue
 				}
 			}

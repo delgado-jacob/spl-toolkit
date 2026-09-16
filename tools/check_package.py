@@ -273,10 +273,21 @@ def copy_rewrite_fixtures(source: Path, destination: Path) -> dict[str, str]:
 
 def copy_documentation(source: Path, destination: Path) -> dict[str, str]:
     """Bind the maintained docs that the installed CLI example harness reads."""
-    paths = [source / "README.md", source / "python/examples/basic_usage.py"] + sorted(
+    paths = [
+        source / "README.md",
+        source / "python/README.md",
+        source / "python/examples/basic_usage.py",
+    ] + sorted(
         path for path in (source / "docs").rglob("*.md") if "superpowers" not in path.parts
     )
-    required = {"README.md", "docs/cli.md", "docs/spl2.md", "docs/rewrite.md", "python/examples/basic_usage.py"}
+    required = {
+        "README.md",
+        "docs/cli.md",
+        "docs/spl2.md",
+        "docs/rewrite.md",
+        "python/README.md",
+        "python/examples/basic_usage.py",
+    }
     names = {path.relative_to(source).as_posix() for path in paths}
     if not required <= names:
         raise FileNotFoundError(f"missing maintained documentation: {sorted(required - names)}")
