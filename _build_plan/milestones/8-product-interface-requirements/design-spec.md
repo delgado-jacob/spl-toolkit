@@ -216,6 +216,22 @@ Each dense result contains exactly one diagnostic. It has code `SPL_ANALYSIS_RES
 
 Run the established Go 1.22 floor checks, current-Go formatting, vet and race checks, native source tests, package isolation suites, contract validator, documentation checks, and the repository's main CI pipeline. Green local tests do not substitute for the requested main pipeline result.
 
+## Deferred fidelity defect
+
+The release behavior is the production analyzer at `de296da4093e37eae67d953792ba4be6517dca83`. Later planning commits do not change that code. Its SPL2 structural-reference remediation keeps a per-name snapshot of uncertainty so an adjacent quoted atomic field such as `'actor.name'` remains distinct from grammar-level navigation such as `actor.name`. The snapshot does not record whether a different incomplete event occurred before a later same-name quoted read.
+
+The exact known reproductions are:
+
+- `FROM main | eval x=actor.name+foo(1)+'actor.name'`, where an unsupported function occurs between the structural and quoted reads.
+- `FROM main | eval x=actor.name+other.value+'actor.name'`, where a different structural navigation occurs between them.
+- `FROM main AS actor WHERE actor.name=1 SELECT 'actor.name'`, where the structural read occurs in the SQL filter phase and the quoted read occurs in the later select phase.
+
+In these already-incomplete reports, the stale snapshot can classify the final quoted occurrence as `source`, make the grouped requirement item `required`, and install ordinary field state for the quoted name. That classification is too optimistic within the incomplete evidence. It does not make the report or requirement coverage complete: the existing structural, unsupported-function, different-name, or SQL-phase diagnostics and gaps remain, `status` and `query_status` remain `incomplete`, and requirement coverage remains false.
+
+This defect has no false-complete, security, resource, data-loss, ABI, or package impact. It changes no parser admission bound, execution behavior, stored data, public signature, serialized schema, native ownership rule, or distribution content. The authored requirement corpus remains exactly 20 cases, with `testdata/requirements/cases.json` SHA-256 `663387c481472dee92a5478296f98b28c89101785293648e2c21176f2eee2ba0`.
+
+Milestone 8 delivery is blocked by a material error in a normal supported query, false completeness, a security, resource, or data-loss defect, or a break in a published surface. A rare fidelity defect that occurs only inside an already-incomplete report is recorded for later correction and does not block this milestone. The cause-aware generation design in the living implementation plan remains future guidance and is not part of Milestone 8 acceptance.
+
 ## Permanent documentation
 
 Update the repository README, `docs/API.md`, `docs/cli.md`, `docs/architecture.md`, compatibility guidance, and Python README. The documentation must show both operations, the complete report shape, Go and Python examples, CLI and REST examples, digest rules, item grouping, source versus derived behavior, independent query and coverage statuses, exit behavior, and the milestone's exclusions.
@@ -230,13 +246,15 @@ The same review found that dense acceptance compared surfaces and checked only p
 
 The review also found that raw native calls ran inside the pytest process, including thread-pool probes. A native crash or hang could therefore terminate or strand the acceptance runner before it reported which boundary failed. The corrected design moves dense raw-C and Python probes into stdin-fed helper subprocesses with parent-enforced timeouts and clean termination while preserving equality, allocation, free, handle, and concurrency assertions.
 
+On 2026-09-16, three independent reviews confirmed the stale structural-snapshot reproductions recorded above. Scope review classified them as a deferred fidelity defect because every reproduction is already incomplete and retains the diagnostic evidence that prevents false completeness. The release-blocker threshold is limited to material errors in normal supported queries, false completeness, security, resource, or data-loss defects, and published-surface breaks. The production analyzer at `de296da4093e37eae67d953792ba4be6517dca83` remains the release behavior; no cause-aware tracker is required for Milestone 8.
+
 ## Acceptance criteria
 
 Milestone 8 is complete when:
 
 1. Representative SPL and SPL2 documents produce equivalent standalone requirement sets through Go, CLI, REST, native/C, and Python. Portable resource-limit acceptance uses the compact 4,097-work-unit query for CLI and the full 64 KiB, 256 KiB, and 300,000-byte long-sparse fixtures for Go, REST, raw C, Python, installed wheel, and rebuilt sdist.
 2. Every new analysis result embeds a set equal to the standalone query-only set, including inside refinement-aware reports.
-3. Source, conditional, dynamic, and indeterminate external obligations are explicit. Derived and query-local unavailable fields are not misclassified as obligations: `Analyze` retains their canonical references, while standalone `Requirements` returns only the external-obligation projection.
+3. Source, conditional, dynamic, and indeterminate external obligations are explicit. Derived and query-local unavailable fields are not misclassified as obligations: `Analyze` retains their canonical references, while standalone `Requirements` returns only the external-obligation projection. The documented stale structural-snapshot edge is the accepted deferred exception because it remains visibly incomplete.
 4. Provenance identities, ordering, links, diagnostics, and empty collections are deterministic and deeply detached.
 5. Current contracts, installed packages, native closure, documentation, and main CI pass their required checks while archived version-1 reports remain valid.
 6. Canonical SPL and SPL2 parsing stops before parser construction or prediction on work unit 4,097 and returns the exact bounded incomplete report through each applicable transport. Exact-limit, compact portable CLI, lexer-error ordering, SPL2 closure, range, sparse-input, 64 KiB, 256 KiB, deterministic-output, and concurrent adversarial checks pass without partial canonical evidence. Dense Python and raw-C probes run in stdin-fed helper subprocesses with parent timeouts and clean termination. For the two ASCII dense acceptance fixtures, the serialized requirement set is at most 4,096 bytes and the serialized analysis result is at most the full query byte length plus 4,096 bytes.
