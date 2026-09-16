@@ -37,7 +37,7 @@ func loadRequirementsCorpus(t *testing.T) []requirementsCorpusCase {
 	if err := json.Unmarshal(data, &corpus); err != nil {
 		t.Fatal(err)
 	}
-	if corpus.Version != "1" || len(corpus.Cases) != 19 {
+	if corpus.Version != "1" || len(corpus.Cases) != 20 {
 		t.Fatalf("missing reviewed requirements corpus: version %q cases %d", corpus.Version, len(corpus.Cases))
 	}
 	return corpus.Cases
@@ -242,6 +242,7 @@ func TestRequirementsCorpus(t *testing.T) {
 		"knowledge_composed_spl",
 		"spl2_unsupported_function",
 		"spl2_recovered_diagnostics",
+		"spl2_structural_navigation",
 	}
 	cases := loadRequirementsCorpus(t)
 	gotIDs := make([]string, 0, len(cases))

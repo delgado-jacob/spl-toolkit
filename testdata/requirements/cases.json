@@ -2385,6 +2385,169 @@
           }
         ]
       }
+    },
+    {
+      "id": "spl2_structural_navigation",
+      "document": {
+        "text": "FROM main | eval x=actor.name",
+        "language": "spl2",
+        "profile": "",
+        "version": "",
+        "source_id": "requirements:spl2_structural_navigation"
+      },
+      "expected": {
+        "schema_version": 1,
+        "query": {
+          "source_id": "requirements:spl2_structural_navigation",
+          "language": "spl2",
+          "profile": "splunkd",
+          "version": "current",
+          "query_digest": "sha256:3589d041f66a6ea04d9cc7a845fe665e98248a73b1853ce798a8b9f7027291b4"
+        },
+        "capability_revision": "sha256:c3217502697cee2595f20d2fe98b76422f837696d2861cee81e852ad142edcfc",
+        "query_status": "incomplete",
+        "coverage": {
+          "complete": false,
+          "reasons": [
+            "SPL_REQUIREMENT_INDETERMINATE",
+            "SPL_UNSUPPORTED_SEMANTICS"
+          ]
+        },
+        "items": [
+          {
+            "id": "req-1",
+            "kind": "dataset",
+            "identity": "main",
+            "role": "read",
+            "necessity": "required",
+            "origin": "direct",
+            "resolution": "exact",
+            "occurrences": [
+              {
+                "reference_id": "ref-0",
+                "original_name": "main",
+                "binding": "not_applicable",
+                "stage_id": "stage-0",
+                "scope_id": "scope-0",
+                "location": {
+                  "start": {
+                    "offset": 5,
+                    "line": 1,
+                    "column": 6
+                  },
+                  "end": {
+                    "offset": 9,
+                    "line": 1,
+                    "column": 10
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "id": "req-2",
+            "kind": "field",
+            "identity": "actor",
+            "role": "read",
+            "necessity": "required",
+            "origin": "direct",
+            "resolution": "exact",
+            "occurrences": [
+              {
+                "reference_id": "ref-2",
+                "original_name": "actor",
+                "binding": "source",
+                "stage_id": "stage-1",
+                "scope_id": "scope-0",
+                "location": {
+                  "start": {
+                    "offset": 19,
+                    "line": 1,
+                    "column": 20
+                  },
+                  "end": {
+                    "offset": 24,
+                    "line": 1,
+                    "column": 25
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "id": "req-3",
+            "kind": "field",
+            "identity": "actor.name",
+            "role": "read",
+            "necessity": "conditional",
+            "origin": "direct",
+            "resolution": "exact",
+            "occurrences": [
+              {
+                "reference_id": "ref-3",
+                "original_name": "actor.name",
+                "binding": "indeterminate",
+                "stage_id": "stage-1",
+                "scope_id": "scope-0",
+                "location": {
+                  "start": {
+                    "offset": 19,
+                    "line": 1,
+                    "column": 20
+                  },
+                  "end": {
+                    "offset": 29,
+                    "line": 1,
+                    "column": 30
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "gaps": [
+          {
+            "code": "SPL_REQUIREMENT_INDETERMINATE",
+            "message": "requirement origin is indeterminate",
+            "reference_ids": [
+              "ref-3"
+            ],
+            "diagnostic_codes": []
+          },
+          {
+            "code": "SPL_UNSUPPORTED_SEMANTICS",
+            "message": "Typed navigation or alias binding is not represented by the string-only source universe",
+            "reference_ids": [
+              "ref-3"
+            ],
+            "diagnostic_codes": [
+              "SPL_UNSUPPORTED_SEMANTICS"
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "code": "SPL_UNSUPPORTED_SEMANTICS",
+            "severity": "warning",
+            "category": "unsupported_semantics",
+            "message": "Typed navigation or alias binding is not represented by the string-only source universe",
+            "location": {
+              "start": {
+                "offset": 19,
+                "line": 1,
+                "column": 20
+              },
+              "end": {
+                "offset": 29,
+                "line": 1,
+                "column": 30
+              }
+            },
+            "stage_id": "stage-1",
+            "scope_id": "scope-0"
+          }
+        ]
+      }
     }
   ]
 }

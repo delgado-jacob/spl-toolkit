@@ -21,6 +21,9 @@ func TestRequirementSetFieldRefinementParity(t *testing.T) {
 		{name: "wildcard finite", document: analysis.QueryDocument{Text: "fields host* | table hostname"}, universe: analysis.SourceUniverse{Fields: []string{"hostname"}, Complete: true}},
 		{name: "unresolved wildcard", document: analysis.QueryDocument{Text: "| mystery | table host*"}, universe: analysis.SourceUniverse{Fields: []string{"hostname"}, Complete: false}},
 		{name: "dotted SPL2", document: analysis.QueryDocument{Text: "FROM main SELECT actor.user.name", Language: "spl2"}, universe: analysis.SourceUniverse{Fields: []string{"actor.user.name"}, Complete: false}},
+		{name: "structural SPL2 navigation", document: analysis.QueryDocument{Text: "FROM main | eval x=actor.user.name", Language: "spl2"}, universe: analysis.SourceUniverse{Fields: []string{"actor", "actor.user.name"}, Complete: true}},
+		{name: "mixed quoted and structural SPL2", document: analysis.QueryDocument{Text: "FROM main | eval x='actor.name'+actor.name", Language: "spl2"}, universe: analysis.SourceUniverse{Fields: []string{"actor", "actor.name"}, Complete: false}},
+		{name: "pipeline join qualified operands", document: analysis.QueryDocument{Text: "FROM main | join left=L right=R where L.id=R.uid [FROM other | table uid]", Language: "spl2"}, universe: analysis.SourceUniverse{Fields: []string{"L.id", "R.uid", "uid"}, Complete: true}},
 		{name: "SPL2 recovered diagnostic prefix", document: analysis.QueryDocument{Text: "FROM main | foobar | stats c=count() BY host | eval y=other", Language: "spl2"}, universe: analysis.SourceUniverse{Fields: []string{"host", "other"}, Complete: true}},
 		{name: "aggregation closes prior uncertainty", document: analysis.QueryDocument{Text: "search index=main | foobar | stats count by host | eval y=other"}, universe: analysis.SourceUniverse{Fields: []string{"host", "other"}, Complete: true}},
 	}

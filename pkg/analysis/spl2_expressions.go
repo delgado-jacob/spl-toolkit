@@ -1,6 +1,8 @@
 package analysis
 
 import (
+	"strings"
+
 	"github.com/antlr4-go/antlr/v4"
 	"github.com/delgado-jacob/spl-toolkit/parser/spl2"
 )
@@ -16,6 +18,13 @@ func (s *spl2SemanticStage) readIdentifier(ctx antlr.ParserRuleContext, role str
 	o := s.operand(ctx)
 	if !o.Sound {
 		return ""
+	}
+	if snapshot, found := s.structuralUncertainty[o.Name]; found && strings.HasPrefix(ctx.GetText(), "'") {
+		publicUncertain, requirementUncertain := s.env.uncertain, s.env.requirements.uncertain
+		s.env.uncertain, s.env.requirements.uncertain = snapshot.public, snapshot.requirements
+		id := s.readAt(o, role)
+		s.env.uncertain, s.env.requirements.uncertain = publicUncertain, requirementUncertain
+		return id
 	}
 	return s.readAt(o, role)
 }
@@ -63,6 +72,7 @@ func (s *spl2SemanticStage) expression(node antlr.Tree) spl2ExpressionEvidence {
 				out.ids = append(out.ids, e.ids...)
 			}
 		}
+		referenceIDs := []string{}
 		if field := base.FieldName(); field != nil && field.Identifier() != nil {
 			name := s.operand(field.Identifier()).Name
 			for _, part := range c.AllAccessPart() {
@@ -72,13 +82,17 @@ func (s *spl2SemanticStage) expression(node antlr.Tree) spl2ExpressionEvidence {
 					name += "[]"
 				}
 			}
-			id := s.operandReference(locatedOperand{Name: name, Location: s.parsed2.source.contextLocation(c), Resolution: "exact", Sound: spl2IntactSyntax(c), rewrite: s.rewriteNavigation(c)}, "field", "read")
+			id := s.structuralFieldReference(locatedOperand{Name: name, Location: s.parsed2.source.contextLocation(c), Resolution: "exact", Sound: spl2IntactSyntax(c), rewrite: s.rewriteNavigation(c)})
 			if id != "" {
-				s.result.References[len(s.result.References)-1].Binding = "indeterminate"
 				out.ids = append(out.ids, id)
+				referenceIDs = append(referenceIDs, id)
 			}
 		}
-		s.unsupported(c, "Typed navigation or alias binding is not represented by the string-only source universe")
+		if len(referenceIDs) == 0 {
+			s.unsupported(c, "Typed navigation or alias binding is not represented by the string-only source universe")
+		} else {
+			s.unsupportedStructuralReference(c, s.result.References[len(s.result.References)-1].NormalizedName, "Typed navigation or alias binding is not represented by the string-only source universe", referenceIDs)
+		}
 		out.nonnull = false
 		out.requirementNonnull = false
 		out.exactNull = false

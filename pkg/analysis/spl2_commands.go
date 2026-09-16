@@ -168,8 +168,8 @@ func (s *spl2SemanticStage) command(ctx antlr.ParserRuleContext) {
 		s.operandReference(o, "search_job", "read")
 		s.unsupported(c, "External job output fields are unproved")
 	case *spl2.JoinCommandContext:
-		s.joinPredicateIntentions(c.SqlJoinPredicate())
-		s.unsupported(c, "Join output merge and qualified input binding are unproved")
+		ids := s.joinPredicateIntentions(c.SqlJoinPredicate())
+		s.unsupportedOwned(c, "Join output merge and qualified input binding are unproved", ids)
 	case *spl2.BinCommandContext:
 		input := s.operand(c.Identifier(0))
 		s.readAt(input, "read")
@@ -240,9 +240,10 @@ func (s *spl2SemanticStage) command(ctx antlr.ParserRuleContext) {
 	}
 }
 
-func (s *spl2SemanticStage) joinPredicateIntentions(predicate spl2.ISqlJoinPredicateContext) {
+func (s *spl2SemanticStage) joinPredicateIntentions(predicate spl2.ISqlJoinPredicateContext) []string {
+	ids := []string{}
 	if predicate == nil {
-		return
+		return ids
 	}
 	for _, equality := range predicate.AllSqlJoinEquality() {
 		for _, field := range equality.AllSqlJoinField() {
@@ -254,11 +255,12 @@ func (s *spl2SemanticStage) joinPredicateIntentions(predicate spl2.ISqlJoinPredi
 				continue
 			}
 			o := locatedOperand{Name: left.Name + "." + right.Name, Location: s.parsed2.source.contextLocation(field), Resolution: "exact", Sound: true}
-			if s.operandReference(o, "field", "read") != "" {
-				s.result.References[len(s.result.References)-1].Binding = "indeterminate"
+			if id := s.structuralFieldReference(o); id != "" {
+				ids = append(ids, id)
 			}
 		}
 	}
+	return ids
 }
 
 // A real target token cannot prove an effect from a damaged RHS or rejected

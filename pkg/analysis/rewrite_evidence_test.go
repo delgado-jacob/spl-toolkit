@@ -76,6 +76,49 @@ func TestRewriteEvidenceSPL2(t *testing.T) {
 		t.Fatalf("atomic tstats owner: %+v", model)
 	}
 }
+
+func TestRewriteEvidenceSPL2StructuralNavigationIsIndeterminateAndRefused(t *testing.T) {
+	query := `FROM main | eval x=actor.name`
+	s := rewriteTestSession(t, "spl2", query)
+	var site *rewriteSite
+	for _, candidate := range s.sites {
+		if reflect.DeepEqual(candidate.public.Identity.Path, []string{"actor", "name"}) {
+			if site != nil {
+				t.Fatalf("duplicate structural rewrite sites: %+v", s.Evidence().Sites)
+			}
+			site = candidate
+		}
+	}
+	if site == nil {
+		t.Fatalf("missing structural rewrite site: %+v", s.Evidence().Sites)
+	}
+	var reference *Reference
+	for i := range s.result.References {
+		if s.result.References[i].ID == site.public.ReferenceID {
+			reference = &s.result.References[i]
+		}
+	}
+	if reference == nil || reference.Binding != "indeterminate" || site.binding != "indeterminate" || site.public.Eligibility != "ineligible" || site.public.BindingID != "" {
+		t.Fatalf("structural rewrite binding: reference=%+v site=%+v private_binding=%q", reference, site.public, site.binding)
+	}
+	if !reflect.DeepEqual(site.inputs, reference.OriginReferenceIDs) {
+		t.Fatalf("structural rewrite origins: inputs=%v reference=%v", site.inputs, reference.OriginReferenceIDs)
+	}
+	foundOwnerLimitation := false
+	for _, limitation := range site.public.Limitations {
+		foundOwnerLimitation = foundOwnerLimitation || limitation.Code == "unproved_owner"
+	}
+	if !foundOwnerLimitation {
+		t.Fatalf("structural rewrite site lost owner refusal: %+v", site.public)
+	}
+	rendering, err := s.Render([]RewriteReplacement{{SiteID: site.public.ID, Target: rewriteName("account.name")}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(rendering.Edits()) != 0 || len(rendering.Requirements()) != 1 || len(rendering.Requirements()[0].Limitations) != 1 || rendering.Requirements()[0].Limitations[0].Code != "binding_not_source" {
+		t.Fatalf("structural rewrite was not refused: edits=%+v requirements=%+v", rendering.Edits(), rendering.Requirements())
+	}
+}
 func TestRewriteEvidenceLexicalControls(t *testing.T) {
 	for _, language := range []string{"spl", "spl2"} {
 		query := `search index=main | eval x="user" | lookup user remote AS user OUTPUT label AS display | table user`

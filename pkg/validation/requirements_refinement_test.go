@@ -40,6 +40,28 @@ func TestRequirementSetValidationRefinementParity(t *testing.T) {
 			},
 		},
 		{
+			name:     "JSON Schema structural SPL2",
+			document: analysis.QueryDocument{Text: "FROM main | eval x=actor.user.name", Language: "spl2"},
+			validate: func(document analysis.QueryDocument) (*analysis.Result, error) {
+				report, err := ValidateSchema(document, SchemaTarget{Kind: "json_schema", Schema: json.RawMessage(`{"type":"object","properties":{"actor":true,"actor.user.name":true},"additionalProperties":false}`)})
+				if err != nil {
+					return nil, err
+				}
+				return report.Analysis, nil
+			},
+		},
+		{
+			name:     "field-list pipeline join qualified operands",
+			document: analysis.QueryDocument{Text: "FROM main | join left=L right=R where L.id=R.uid [FROM other | table uid]", Language: "spl2"},
+			validate: func(document analysis.QueryDocument) (*analysis.Result, error) {
+				report, err := Validate(document, FieldCatalog{Fields: []string{"L.id", "R.uid", "uid"}, Identity: "fields", Version: "1"})
+				if err != nil {
+					return nil, err
+				}
+				return report.Analysis, nil
+			},
+		},
+		{
 			name:     "OCSF exact",
 			document: analysis.QueryDocument{Text: "table time"},
 			validate: func(document analysis.QueryDocument) (*analysis.Result, error) {
