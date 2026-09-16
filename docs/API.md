@@ -137,7 +137,7 @@ These analysis examples return `valid`/0, `invalid`/1, and `incomplete`/3 respec
 |---|---|
 | 0 | Query valid and, for `requirements`, requirement coverage complete |
 | 1 | Query status invalid |
-| 3 | Query status incomplete or requirement coverage incomplete |
+| 3 | Query status incomplete or, for `requirements`, requirement coverage incomplete |
 | 2 | Request, option, output, or internal failure |
 
 The report is written before returning its content status. `--output report.json` writes to a file. Analysis text presents status, coverage, located references, and diagnostics. Requirements text presents query status and requirement coverage separately, followed by items, gaps, and diagnostics. `--format json` emits the direct canonical report. A positional query is also supported. Neither operation accepts file, stdin, or batch input. `--language spl` (the default) or `--language spl2`, `--profile splunkd`, and `--compatibility-version current` select the delivered standalone contracts. `capabilities` supports text/JSON and `--output`, with exit 0 on success and 2 on usage/I/O errors. Existing commands retain their exit behavior.
