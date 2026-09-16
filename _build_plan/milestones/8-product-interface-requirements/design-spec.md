@@ -127,7 +127,7 @@ The CLI mirrors the existing `analyze` input boundary: one positional or `--quer
 
 Portable CLI resource-limit acceptance uses the compact deterministic query `strings.Repeat("a ", 2048) + "a"`, or its byte-identical fixture equivalent. It contains 2,049 identifier tokens and 2,048 hidden whitespace tokens, for exactly 4,097 lexer work units. It is exactly 4,097 ASCII bytes and UTF-16 code units, well below the Windows 32,767 UTF-16 command-line boundary. The 64 KiB and 256 KiB dense fixtures and the 300,000-byte long-sparse fixture do not travel through CLI argv. They remain mandatory through Go, HTTP, raw C, Python, an installed wheel, and a rebuilt sdist, whose body, stdin, or in-process transports admit those sizes. This operating-system argv constraint is a transport-only test constraint. It does not lower or otherwise change the canonical 4,096-unit analyzer budget, and it does not authorize file, stdin, or batch input for either CLI command.
 
-CLI exit codes are:
+The `requirements` CLI exit codes are:
 
 | Code | Meaning |
 |---|---|
@@ -135,6 +135,8 @@ CLI exit codes are:
 | 1 | Query status invalid |
 | 2 | Request, option, output, or internal failure |
 | 3 | Query status incomplete or requirement coverage incomplete |
+
+The existing `analyze` command retains status-only process exits, so a valid analysis with incomplete embedded requirement coverage exits `0`; an over-budget analysis still exits `3` because its `analysis.Status` is `incomplete`.
 
 An over-budget query follows the existing successful content paths for both operations. The `analyze` and `requirements` CLI commands emit their canonical values and exit `3`. Their REST routes return HTTP 200. Native/C returns owned successful `SPLResult` values, and Python returns the decoded successful values through its owned native-result paths. The existing REST request boundary remains separate: a body larger than 1 MiB returns HTTP 400 before analysis.
 
