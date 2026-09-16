@@ -78,7 +78,8 @@ Additional rewrite options:
 Rewrite also accepts the shared query inputs and optional schema/OCSF target options.
 Choose at most one --fields, --schema, or --ocsf-catalog target family.
 
-Analyze, requirements, validate-fields, validate-schema, and rewrite exit codes: 0 valid, 1 invalid content, 3 incomplete analysis or requirement coverage.
+Analyze, validate-fields, validate-schema, and rewrite use status-only exits: 0 valid, 1 invalid content, 3 incomplete analysis.
+Requirements uses coverage-aware exits: 0 valid with complete requirement coverage, 1 invalid content, 3 incomplete analysis or requirement coverage.
 Request or output errors exit 2. Invalid and incomplete reports are still emitted.
 `, buildinfo.Version)
 	return err

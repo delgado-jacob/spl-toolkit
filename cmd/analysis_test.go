@@ -225,6 +225,17 @@ func TestRequirementsCLIInputBoundary(t *testing.T) {
 	if code != 0 || stderr != "" || !strings.Contains(stdout, "requirements [query]") {
 		t.Fatalf("help: code=%d stdout=%q stderr=%q", code, stdout, stderr)
 	}
+	for _, clause := range []string{
+		"Analyze, validate-fields, validate-schema, and rewrite use status-only exits: 0 valid, 1 invalid content, 3 incomplete analysis.",
+		"Requirements uses coverage-aware exits: 0 valid with complete requirement coverage, 1 invalid content, 3 incomplete analysis or requirement coverage.",
+	} {
+		if !strings.Contains(stdout, clause) {
+			t.Errorf("help missing command-specific exit clause %q", clause)
+		}
+	}
+	if strings.Contains(stdout, "Analyze, requirements") {
+		t.Errorf("help still groups analyze with coverage-aware requirements exits: %q", stdout)
+	}
 }
 
 func TestRequirementsCLIJSONMatchesGo(t *testing.T) {

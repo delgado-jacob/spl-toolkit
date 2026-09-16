@@ -131,7 +131,7 @@ spl-toolkit analyze --query 'search src=1 | mystery x' --format json
 spl-toolkit capabilities --format json
 ```
 
-These analysis examples return `valid`/0, `invalid`/1, and `incomplete`/3 respectively. The invalid example reports `SPL_UNAVAILABLE_FIELD`; the incomplete example preserves the `src` finding and reports `SPL_UNSUPPORTED_COMMAND`.
+The three `analyze` examples return `valid`/0, `invalid`/1, and `incomplete`/3 respectively. The invalid example reports `SPL_UNAVAILABLE_FIELD`; the incomplete example preserves the `src` finding and reports `SPL_UNSUPPORTED_COMMAND`.
 
 | Exit | Meaning for `analyze` and `requirements` |
 |---|---|

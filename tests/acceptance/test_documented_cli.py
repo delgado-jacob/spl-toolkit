@@ -62,6 +62,20 @@ def test_documented_cli_examples(cli_path: Path, tmp_path: Path) -> None:
             assert destination.read_bytes() == expected["content"].encode("utf-8"), case["id"]
 
 
+def test_help_distinguishes_status_and_coverage_exits(cli_path: Path) -> None:
+    completed = subprocess.run(
+        [str(cli_path), "help"],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    assert completed.returncode == 0
+    assert completed.stderr == ""
+    assert "Analyze, validate-fields, validate-schema, and rewrite use status-only exits: 0 valid, 1 invalid content, 3 incomplete analysis." in completed.stdout
+    assert "Requirements uses coverage-aware exits: 0 valid with complete requirement coverage, 1 invalid content, 3 incomplete analysis or requirement coverage." in completed.stdout
+    assert "Analyze, requirements" not in completed.stdout
+
+
 def test_documentation_example_coverage() -> None:
     root = absolute_env_path("SPL_DOCS_ROOT")
     manifest = json.loads((Path(__file__).with_name("cli_examples.json")).read_text(encoding="utf-8"))
