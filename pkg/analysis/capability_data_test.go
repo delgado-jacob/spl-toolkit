@@ -190,6 +190,218 @@ func TestDecodeCapabilityAssetsRejectsMalformedInput(t *testing.T) {
 	}
 }
 
+func TestDecodeCapabilityAssetsRejectsMalformedObservations(t *testing.T) {
+	ledger, corpus := validCapabilityAssets(t)
+	tests := []struct {
+		name    string
+		mutate  func(*CapabilityEvidence)
+		wantErr bool
+	}{
+		{name: "valid representative"},
+		{
+			name: "positive syntax marked incomplete",
+			mutate: func(evidence *CapabilityEvidence) {
+				evidence.Observations.Syntax.Complete = false
+			},
+			wantErr: true,
+		},
+		{
+			name: "syntax diagnostic without code",
+			mutate: func(evidence *CapabilityEvidence) {
+				evidence.Observations.Syntax.Diagnostics[0].Code = ""
+			},
+			wantErr: true,
+		},
+		{
+			name: "semantics with unknown status",
+			mutate: func(evidence *CapabilityEvidence) {
+				evidence.Observations.Semantics.Status = "mystery"
+			},
+			wantErr: true,
+		},
+		{
+			name: "positive semantics with invalid status",
+			mutate: func(evidence *CapabilityEvidence) {
+				evidence.Observations.Semantics.Status = Invalid
+			},
+			wantErr: true,
+		},
+		{
+			name: "positive semantics marked incomplete",
+			mutate: func(evidence *CapabilityEvidence) {
+				evidence.Observations.Semantics.Complete = false
+			},
+			wantErr: true,
+		},
+		{
+			name: "semantics without typed facts",
+			mutate: func(evidence *CapabilityEvidence) {
+				observation := evidence.Observations.Semantics
+				observation.Stages = nil
+				observation.References = nil
+				observation.Dependencies = nil
+				observation.Transitions = nil
+				observation.Diagnostics = nil
+			},
+			wantErr: true,
+		},
+		{
+			name: "semantics stage without command",
+			mutate: func(evidence *CapabilityEvidence) {
+				evidence.Observations.Semantics.Stages[0].Command = ""
+			},
+			wantErr: true,
+		},
+		{
+			name: "positive semantics with incomplete stage",
+			mutate: func(evidence *CapabilityEvidence) {
+				evidence.Observations.Semantics.Stages[0].SemanticComplete = false
+			},
+			wantErr: true,
+		},
+		{
+			name: "semantics reference without binding",
+			mutate: func(evidence *CapabilityEvidence) {
+				evidence.Observations.Semantics.References[0].Binding = ""
+			},
+			wantErr: true,
+		},
+		{
+			name: "semantics reference without location",
+			mutate: func(evidence *CapabilityEvidence) {
+				evidence.Observations.Semantics.References[0].Location = Location{}
+			},
+			wantErr: true,
+		},
+		{
+			name: "semantics dependency without name",
+			mutate: func(evidence *CapabilityEvidence) {
+				evidence.Observations.Semantics.Dependencies[0].Name = ""
+			},
+			wantErr: true,
+		},
+		{
+			name: "semantics transition without output",
+			mutate: func(evidence *CapabilityEvidence) {
+				evidence.Observations.Semantics.Transitions[0].Output = ""
+			},
+			wantErr: true,
+		},
+		{
+			name: "semantics diagnostic without location",
+			mutate: func(evidence *CapabilityEvidence) {
+				evidence.Observations.Semantics.Diagnostics[0].Location = Location{}
+			},
+			wantErr: true,
+		},
+		{
+			name: "requirements with unknown status",
+			mutate: func(evidence *CapabilityEvidence) {
+				evidence.Observations.Requirements.QueryStatus = "mystery"
+			},
+			wantErr: true,
+		},
+		{
+			name: "positive requirements marked incomplete",
+			mutate: func(evidence *CapabilityEvidence) {
+				evidence.Observations.Requirements.Complete = false
+			},
+			wantErr: true,
+		},
+		{
+			name: "requirements without typed content",
+			mutate: func(evidence *CapabilityEvidence) {
+				evidence.Observations.Requirements.Items = nil
+				evidence.Observations.Requirements.GapCodes = nil
+			},
+			wantErr: true,
+		},
+		{
+			name: "requirement item without identity",
+			mutate: func(evidence *CapabilityEvidence) {
+				evidence.Observations.Requirements.Items[0].Identity = ""
+			},
+			wantErr: true,
+		},
+		{
+			name: "blank requirement gap code",
+			mutate: func(evidence *CapabilityEvidence) {
+				evidence.Observations.Requirements.GapCodes = []string{" "}
+			},
+			wantErr: true,
+		},
+		{
+			name: "complete requirements with a gap",
+			mutate: func(evidence *CapabilityEvidence) {
+				evidence.Observations.Requirements.GapCodes = []string{"TEST"}
+			},
+			wantErr: true,
+		},
+		{
+			name: "lint diagnostic without category",
+			mutate: func(evidence *CapabilityEvidence) {
+				evidence.Observations.Linting.Diagnostics[0].Category = ""
+			},
+			wantErr: true,
+		},
+		{
+			name: "lint diagnostic without location",
+			mutate: func(evidence *CapabilityEvidence) {
+				evidence.Observations.Linting.Diagnostics[0].Location = Location{}
+			},
+			wantErr: true,
+		},
+		{
+			name: "safe rewrite with unknown status",
+			mutate: func(evidence *CapabilityEvidence) {
+				evidence.Observations.SafeRewriting.Status = "mystery"
+			},
+			wantErr: true,
+		},
+		{
+			name: "positive safe rewrite marked incomplete",
+			mutate: func(evidence *CapabilityEvidence) {
+				evidence.Observations.SafeRewriting.RewriteComplete = false
+			},
+			wantErr: true,
+		},
+		{
+			name: "safe rewrite without text",
+			mutate: func(evidence *CapabilityEvidence) {
+				evidence.Observations.SafeRewriting.Text = ""
+			},
+			wantErr: true,
+		},
+		{
+			name: "safe rewrite with blank reason",
+			mutate: func(evidence *CapabilityEvidence) {
+				evidence.Observations.SafeRewriting.CoverageReasons = []string{" "}
+			},
+			wantErr: true,
+		},
+		{
+			name: "committed rewrite differs from candidate",
+			mutate: func(evidence *CapabilityEvidence) {
+				evidence.Observations.SafeRewriting.CandidateText = "search index=other"
+			},
+			wantErr: true,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			candidateCorpus := append([]byte(nil), corpus...)
+			if tc.mutate != nil {
+				candidateCorpus = mutateCapabilityEvidence(t, candidateCorpus, tc.mutate)
+			}
+			_, _, err := decodeCapabilityAssets(ledger, candidateCorpus)
+			if (err != nil) != tc.wantErr {
+				t.Fatalf("decodeCapabilityAssets() error = %v, wantErr %t", err, tc.wantErr)
+			}
+		})
+	}
+}
+
 func TestValidateCapabilityClaims(t *testing.T) {
 	record := validCapabilityRecord()
 	evidence := map[string]CapabilityEvidence{
@@ -372,6 +584,40 @@ func TestDecodeCapabilityAssetsRequiresEveryKindPerLanguage(t *testing.T) {
 			}
 		})
 	}
+
+	t.Run("empty bundle", func(t *testing.T) {
+		ledger := mustJSON(t, capabilityLedgerFile{SchemaVersion: 1, Records: []CapabilityRecord{}})
+		corpus := mustJSON(t, capabilityCorpusFile{SchemaVersion: 1, Cases: []CapabilityEvidence{}})
+		if _, _, err := decodeCapabilityAssets(ledger, corpus); err == nil {
+			t.Fatal("empty capability bundle was accepted")
+		}
+	})
+
+	for _, language := range []string{"spl", "spl2"} {
+		t.Run(language+" only", func(t *testing.T) {
+			var fullLedger capabilityLedgerFile
+			mustUnmarshal(t, ledgerJSON, &fullLedger)
+			var records []CapabilityRecord
+			for _, record := range fullLedger.Records {
+				if record.Language == language {
+					records = append(records, record)
+				}
+			}
+			var fullCorpus capabilityCorpusFile
+			mustUnmarshal(t, corpusJSON, &fullCorpus)
+			var cases []CapabilityEvidence
+			for _, evidence := range fullCorpus.Cases {
+				if evidence.Document.Language == language {
+					cases = append(cases, evidence)
+				}
+			}
+			ledger := mustJSON(t, capabilityLedgerFile{SchemaVersion: 1, Records: records})
+			corpus := mustJSON(t, capabilityCorpusFile{SchemaVersion: 1, Cases: cases})
+			if _, _, err := decodeCapabilityAssets(ledger, corpus); err == nil {
+				t.Fatalf("%s-only capability bundle was accepted", language)
+			}
+		})
+	}
 }
 
 func TestCapabilityDataCanonicalOrder(t *testing.T) {
@@ -483,10 +729,10 @@ func TestCapabilityDataClonesAreDeep(t *testing.T) {
 		t.Fatal("evidence clone changed an authored empty slice to nil")
 	}
 	evidenceClone.Observations.Semantics.Stages[0].Command = "mutated"
-	evidenceClone.Observations.Requirements.GapCodes[0] = "mutated"
+	evidenceClone.Observations.Requirements.Items[0].Identity = "mutated"
 	evidenceClone.RewriteRequest[0] = '['
 	if evidence.Observations.Semantics.Stages[0].Command == "mutated" ||
-		evidence.Observations.Requirements.GapCodes[0] == "mutated" ||
+		evidence.Observations.Requirements.Items[0].Identity == "mutated" ||
 		evidence.RewriteRequest[0] == '[' {
 		t.Fatal("evidence clone aliases nested authored data")
 	}
@@ -575,6 +821,10 @@ func validCapabilityEvidenceForLanguage(id string, classification CapabilityEvid
 			End:   Position{Offset: 6, Line: 1, Column: 7},
 		},
 	}
+	gapCodes := []string{"TEST"}
+	if classification == CapabilityEvidencePositive {
+		gapCodes = []string{}
+	}
 	return CapabilityEvidence{
 		ID:             id,
 		Classification: classification,
@@ -591,7 +841,7 @@ func validCapabilityEvidenceForLanguage(id string, classification CapabilityEvid
 				Status:       classificationStatus(classification),
 				Complete:     classification == CapabilityEvidencePositive,
 				Stages:       []CapabilityStageExpectation{{Command: "search", SemanticComplete: classification == CapabilityEvidencePositive}},
-				References:   []CapabilityReferenceExpectation{{NormalizedName: "main", Kind: "index", Role: "read", Resolution: "exact", Binding: "source"}},
+				References:   []CapabilityReferenceExpectation{{NormalizedName: "main", Kind: "index", Role: "read", Resolution: "exact", Binding: "source", Location: diagnostic.Location}},
 				Dependencies: []CapabilityDependencyExpectation{{Kind: "index", Name: "main"}},
 				Transitions:  []CapabilityTransitionExpectation{{Operation: "read", Output: "main"}},
 				Diagnostics:  []CapabilityDiagnosticExpectation{diagnostic},
@@ -600,7 +850,7 @@ func validCapabilityEvidenceForLanguage(id string, classification CapabilityEvid
 				QueryStatus: classificationStatus(classification),
 				Complete:    classification == CapabilityEvidencePositive,
 				Items:       []CapabilityRequirementExpectation{{Kind: "index", Identity: "main", Role: "read", Necessity: "required", Resolution: "exact"}},
-				GapCodes:    []string{"TEST"},
+				GapCodes:    gapCodes,
 			},
 			Linting:       &CapabilityLintingObservation{Diagnostics: []CapabilityDiagnosticExpectation{diagnostic}},
 			SafeRewriting: &CapabilityRewriteObservation{Status: classificationStatus(classification), Committed: true, RewriteComplete: classification == CapabilityEvidencePositive, Text: "search index=main", CandidateText: "search index=main", CoverageReasons: []string{"TEST"}, ChangeReasons: []string{"TEST"}, RuleEvaluationReasons: []string{"TEST"}},
@@ -638,6 +888,14 @@ func mutateRecord(t *testing.T, ledger, corpus []byte, mutate func(*CapabilityRe
 	mustUnmarshal(t, ledger, &file)
 	mutate(&file.Records[0])
 	return mustJSON(t, file), corpus
+}
+
+func mutateCapabilityEvidence(t *testing.T, corpus []byte, mutate func(*CapabilityEvidence)) []byte {
+	t.Helper()
+	var file capabilityCorpusFile
+	mustUnmarshal(t, corpus, &file)
+	mutate(&file.Cases[0])
+	return mustJSON(t, file)
 }
 
 func replaceJSON(t *testing.T, raw []byte, key string, value any, additions ...any) []byte {
