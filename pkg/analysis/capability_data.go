@@ -310,8 +310,8 @@ func validateCapabilityClaim(dimension string, record CapabilityRecord, claim Ca
 		if err := validateCapabilityEvidenceObservation(evidence, dimension); err != nil {
 			return fmt.Errorf("evidence %q has invalid %s observation: %w", evidenceID, dimension, err)
 		}
-		if dimension == "linting" && evidence.Classification == CapabilityEvidenceNegative {
-			if err := validateExactLintingDiagnostics(evidence.Observations.Linting.Diagnostics); err != nil {
+		if claim.State == CapabilitySupported && dimension == "linting" && evidence.Classification == CapabilityEvidenceNegative {
+			if err := validateExactLintingDiagnostics(evidence.Document, evidence.Observations.Linting.Diagnostics); err != nil {
 				return fmt.Errorf("negative evidence %q has no exact linting diagnostic observation: %w", evidenceID, err)
 			}
 		}
@@ -387,17 +387,14 @@ func validateCapabilityEvidenceObservation(evidence CapabilityEvidence, dimensio
 		if positive && !observation.Complete {
 			return fmt.Errorf("positive syntax evidence must be complete")
 		}
-		return validateCapabilityDiagnostics(observation.Diagnostics, false)
+		return validateCapabilityDiagnostics(evidence.Document, observation.Diagnostics, false)
 	case "semantics":
 		observation := evidence.Observations.Semantics
 		if err := validateCapabilityStatus(observation.Status); err != nil {
 			return err
 		}
-		if observation.Complete != (observation.Status == Valid) {
-			return fmt.Errorf("semantic completeness must agree with status")
-		}
-		if positive && (observation.Status != Valid || !observation.Complete) {
-			return fmt.Errorf("positive semantics evidence must be valid and complete")
+		if positive && !observation.Complete {
+			return fmt.Errorf("positive semantics evidence must be complete")
 		}
 		if len(observation.Stages)+len(observation.References)+len(observation.Dependencies)+len(observation.Transitions)+len(observation.Diagnostics) == 0 {
 			return fmt.Errorf("at least one typed semantic fact is required")
@@ -414,7 +411,7 @@ func validateCapabilityEvidenceObservation(evidence CapabilityEvidence, dimensio
 			if err := requireCapabilityFields("reference", reference.NormalizedName, reference.Kind, reference.Role, reference.Resolution, reference.Binding); err != nil {
 				return fmt.Errorf("reference %d: %w", i, err)
 			}
-			if err := validateCapabilityLocation(reference.Location); err != nil {
+			if err := validateCapabilityLocation(evidence.Document, reference.Location); err != nil {
 				return fmt.Errorf("reference %d: %w", i, err)
 			}
 		}
@@ -428,17 +425,14 @@ func validateCapabilityEvidenceObservation(evidence CapabilityEvidence, dimensio
 				return fmt.Errorf("transition %d: %w", i, err)
 			}
 		}
-		return validateCapabilityDiagnostics(observation.Diagnostics, false)
+		return validateCapabilityDiagnostics(evidence.Document, observation.Diagnostics, false)
 	case "requirements":
 		observation := evidence.Observations.Requirements
 		if err := validateCapabilityStatus(observation.QueryStatus); err != nil {
 			return err
 		}
-		if observation.Complete != (observation.QueryStatus == Valid) {
-			return fmt.Errorf("requirements completeness must agree with status")
-		}
-		if positive && (observation.QueryStatus != Valid || !observation.Complete) {
-			return fmt.Errorf("positive requirements evidence must be valid and complete")
+		if positive && !observation.Complete {
+			return fmt.Errorf("positive requirements evidence must be complete")
 		}
 		if len(observation.Items)+len(observation.GapCodes) == 0 {
 			return fmt.Errorf("at least one typed requirement fact is required")
@@ -453,17 +447,14 @@ func validateCapabilityEvidenceObservation(evidence CapabilityEvidence, dimensio
 		}
 		return validateNonemptyStrings("gap code", observation.GapCodes)
 	case "linting":
-		return validateCapabilityDiagnostics(evidence.Observations.Linting.Diagnostics, true)
+		return validateCapabilityDiagnostics(evidence.Document, evidence.Observations.Linting.Diagnostics, false)
 	case "safe_rewriting":
 		observation := evidence.Observations.SafeRewriting
 		if err := validateCapabilityStatus(observation.Status); err != nil {
 			return err
 		}
-		if observation.RewriteComplete != (observation.Status == Valid) {
-			return fmt.Errorf("rewrite completeness must agree with status")
-		}
-		if positive && (observation.Status != Valid || !observation.RewriteComplete) {
-			return fmt.Errorf("positive rewrite evidence must be valid and complete")
+		if positive && !observation.RewriteComplete {
+			return fmt.Errorf("positive rewrite evidence must be complete")
 		}
 		if strings.TrimSpace(observation.Text) == "" || strings.TrimSpace(observation.CandidateText) == "" {
 			return fmt.Errorf("rewrite observation requires text and candidate_text")
@@ -507,30 +498,46 @@ func requireCapabilityFields(label string, values ...string) error {
 	return nil
 }
 
-func validateExactLintingDiagnostics(diagnostics []CapabilityDiagnosticExpectation) error {
-	return validateCapabilityDiagnostics(diagnostics, true)
+func validateExactLintingDiagnostics(document QueryDocument, diagnostics []CapabilityDiagnosticExpectation) error {
+	return validateCapabilityDiagnostics(document, diagnostics, true)
 }
 
-func validateCapabilityDiagnostics(diagnostics []CapabilityDiagnosticExpectation, required bool) error {
+func validateCapabilityDiagnostics(document QueryDocument, diagnostics []CapabilityDiagnosticExpectation, required bool) error {
 	if required && len(diagnostics) == 0 {
 		return fmt.Errorf("at least one diagnostic is required")
 	}
 	for i, diagnostic := range diagnostics {
-		if strings.TrimSpace(diagnostic.Code) == "" || strings.TrimSpace(diagnostic.Category) == "" || strings.TrimSpace(diagnostic.Severity) == "" {
+		if strings.TrimSpace(diagnostic.Code) == "" || strings.TrimSpace(diagnostic.Category) == "" {
 			return fmt.Errorf("diagnostic %d requires code, category, and severity", i)
 		}
-		if err := validateCapabilityLocation(diagnostic.Location); err != nil {
+		switch diagnostic.Severity {
+		case "error", "warning", "info":
+		default:
+			return fmt.Errorf("diagnostic %d has unsupported severity %q", i, diagnostic.Severity)
+		}
+		if err := validateCapabilityLocation(document, diagnostic.Location); err != nil {
 			return fmt.Errorf("diagnostic %d: %w", i, err)
 		}
 	}
 	return nil
 }
 
-func validateCapabilityLocation(location Location) error {
-	if location.Start.Offset < 0 || location.Start.Line <= 0 || location.Start.Column <= 0 ||
-		location.End.Offset <= location.Start.Offset || location.End.Line < location.Start.Line || location.End.Column <= 0 ||
-		(location.End.Line == location.Start.Line && location.End.Column <= location.Start.Column) {
-		return fmt.Errorf("complete nonempty source location is required")
+func validateCapabilityLocation(document QueryDocument, location Location) error {
+	index := newSourceIndex(document.Text)
+	startIndex, endIndex := -1, -1
+	for i, position := range index.positions {
+		if position == location.Start {
+			startIndex = i
+		}
+		if position == location.End {
+			endIndex = i
+		}
+	}
+	if startIndex < 0 || endIndex < 0 {
+		return fmt.Errorf("source location must use canonical document coordinates")
+	}
+	if endIndex < startIndex {
+		return fmt.Errorf("source location end precedes start")
 	}
 	return nil
 }

@@ -220,11 +220,11 @@ func TestDecodeCapabilityAssetsRejectsMalformedObservations(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "positive semantics with invalid status",
+			name: "complete semantic and requirements observations with invalid overall status",
 			mutate: func(evidence *CapabilityEvidence) {
 				evidence.Observations.Semantics.Status = Invalid
+				evidence.Observations.Requirements.QueryStatus = Invalid
 			},
-			wantErr: true,
 		},
 		{
 			name: "positive semantics marked incomplete",
@@ -352,6 +352,65 @@ func TestDecodeCapabilityAssetsRejectsMalformedObservations(t *testing.T) {
 			wantErr: true,
 		},
 		{
+			name: "positive linting observation without diagnostics",
+			mutate: func(evidence *CapabilityEvidence) {
+				evidence.Observations.Linting.Diagnostics = nil
+			},
+		},
+		{
+			name: "diagnostic with unknown severity",
+			mutate: func(evidence *CapabilityEvidence) {
+				evidence.Observations.Syntax.Diagnostics[0].Severity = "mystery"
+			},
+			wantErr: true,
+		},
+		{
+			name: "diagnostic location beyond document",
+			mutate: func(evidence *CapabilityEvidence) {
+				evidence.Observations.Syntax.Diagnostics[0].Location.End = Position{Offset: 99, Line: 1, Column: 100}
+			},
+			wantErr: true,
+		},
+		{
+			name: "diagnostic location with incoherent column",
+			mutate: func(evidence *CapabilityEvidence) {
+				evidence.Observations.Syntax.Diagnostics[0].Location.Start.Column = 2
+			},
+			wantErr: true,
+		},
+		{
+			name: "diagnostic location with reversed range",
+			mutate: func(evidence *CapabilityEvidence) {
+				evidence.Observations.Syntax.Diagnostics[0].Location = Location{
+					Start: Position{Offset: 6, Line: 1, Column: 7},
+					End:   Position{Offset: 0, Line: 1, Column: 1},
+				}
+			},
+			wantErr: true,
+		},
+		{
+			name: "canonical zero length locations in empty document",
+			mutate: func(evidence *CapabilityEvidence) {
+				evidence.Document.Text = ""
+				location := Location{
+					Start: Position{Offset: 0, Line: 1, Column: 1},
+					End:   Position{Offset: 0, Line: 1, Column: 1},
+				}
+				for i := range evidence.Observations.Syntax.Diagnostics {
+					evidence.Observations.Syntax.Diagnostics[i].Location = location
+				}
+				for i := range evidence.Observations.Semantics.Diagnostics {
+					evidence.Observations.Semantics.Diagnostics[i].Location = location
+				}
+				for i := range evidence.Observations.Semantics.References {
+					evidence.Observations.Semantics.References[i].Location = location
+				}
+				for i := range evidence.Observations.Linting.Diagnostics {
+					evidence.Observations.Linting.Diagnostics[i].Location = location
+				}
+			},
+		},
+		{
 			name: "safe rewrite with unknown status",
 			mutate: func(evidence *CapabilityEvidence) {
 				evidence.Observations.SafeRewriting.Status = "mystery"
@@ -364,6 +423,12 @@ func TestDecodeCapabilityAssetsRejectsMalformedObservations(t *testing.T) {
 				evidence.Observations.SafeRewriting.RewriteComplete = false
 			},
 			wantErr: true,
+		},
+		{
+			name: "complete rewrite observation with incomplete overall status",
+			mutate: func(evidence *CapabilityEvidence) {
+				evidence.Observations.SafeRewriting.Status = Incomplete
+			},
 		},
 		{
 			name: "safe rewrite without text",
@@ -442,6 +507,17 @@ func TestValidateCapabilityClaims(t *testing.T) {
 			mutate: func(evidence map[string]CapabilityEvidence) {
 				item := evidence["negative"]
 				item.Observations.Linting = nil
+				evidence["negative"] = item
+			},
+			wantErr: true,
+		},
+		{
+			name:      "supported linting by negative case without diagnostics",
+			dimension: "linting",
+			claim:     CapabilityClaim{State: CapabilitySupported, EvidenceIDs: []string{"negative"}},
+			mutate: func(evidence map[string]CapabilityEvidence) {
+				item := evidence["negative"]
+				item.Observations.Linting.Diagnostics = nil
 				evidence["negative"] = item
 			},
 			wantErr: true,
