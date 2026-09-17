@@ -222,14 +222,58 @@ func TestValidateCapabilityClaims(t *testing.T) {
 		{name: "unassessed", dimension: "safe_rewriting", claim: CapabilityClaim{State: CapabilityUnassessed}},
 		{name: "unassessed with evidence", dimension: "safe_rewriting", claim: CapabilityClaim{State: CapabilityUnassessed, EvidenceIDs: []string{"positive"}}, wantErr: true},
 		{name: "unassessed with limitation", dimension: "safe_rewriting", claim: CapabilityClaim{State: CapabilityUnassessed, Limitations: []string{"unknown"}}, wantErr: true},
-		{name: "negative linting case with exact observation", dimension: "linting", claim: CapabilityClaim{State: CapabilityUnsupported, EvidenceIDs: []string{"negative"}, Limitations: []string{"rejected"}}},
+		{name: "supported linting by negative case with exact observation", dimension: "linting", claim: CapabilityClaim{State: CapabilitySupported, EvidenceIDs: []string{"negative"}}},
 		{
-			name:      "negative linting case without exact observation",
+			name:      "supported linting by negative case without exact observation",
 			dimension: "linting",
-			claim:     CapabilityClaim{State: CapabilityUnsupported, EvidenceIDs: []string{"negative"}, Limitations: []string{"rejected"}},
+			claim:     CapabilityClaim{State: CapabilitySupported, EvidenceIDs: []string{"negative"}},
 			mutate: func(evidence map[string]CapabilityEvidence) {
 				item := evidence["negative"]
 				item.Observations.Linting = nil
+				evidence["negative"] = item
+			},
+			wantErr: true,
+		},
+		{
+			name:      "negative linting diagnostic without code",
+			dimension: "linting",
+			claim:     CapabilityClaim{State: CapabilitySupported, EvidenceIDs: []string{"negative"}},
+			mutate: func(evidence map[string]CapabilityEvidence) {
+				item := evidence["negative"]
+				item.Observations.Linting.Diagnostics[0].Code = ""
+				evidence["negative"] = item
+			},
+			wantErr: true,
+		},
+		{
+			name:      "negative linting diagnostic without category",
+			dimension: "linting",
+			claim:     CapabilityClaim{State: CapabilitySupported, EvidenceIDs: []string{"negative"}},
+			mutate: func(evidence map[string]CapabilityEvidence) {
+				item := evidence["negative"]
+				item.Observations.Linting.Diagnostics[0].Category = ""
+				evidence["negative"] = item
+			},
+			wantErr: true,
+		},
+		{
+			name:      "negative linting diagnostic without severity",
+			dimension: "linting",
+			claim:     CapabilityClaim{State: CapabilitySupported, EvidenceIDs: []string{"negative"}},
+			mutate: func(evidence map[string]CapabilityEvidence) {
+				item := evidence["negative"]
+				item.Observations.Linting.Diagnostics[0].Severity = ""
+				evidence["negative"] = item
+			},
+			wantErr: true,
+		},
+		{
+			name:      "negative linting diagnostic without complete location",
+			dimension: "linting",
+			claim:     CapabilityClaim{State: CapabilitySupported, EvidenceIDs: []string{"negative"}},
+			mutate: func(evidence map[string]CapabilityEvidence) {
+				item := evidence["negative"]
+				item.Observations.Linting.Diagnostics[0].Location = Location{}
 				evidence["negative"] = item
 			},
 			wantErr: true,
@@ -307,39 +351,116 @@ func TestCapabilitySummaryUsesStrictDenominator(t *testing.T) {
 	}
 }
 
-func TestCapabilityDataCanonicalOrder(t *testing.T) {
-	first := validCapabilityRecord()
-	first.ID = "record-a"
-	first.Name = "alpha"
-	second := cloneCapabilityRecord(first)
-	second.ID = "record-b"
-	second.Name = "beta"
-	positive := validCapabilityEvidence("positive", CapabilityEvidencePositive)
-	secondEvidence := cloneCapabilityEvidence(positive)
-	secondEvidence.ID = "positive-b"
-	secondEvidence.Document.SourceID = "capability:positive-b"
-	second.Dimensions = claimsReferencing("positive-b")
-
-	tests := []struct {
-		name     string
-		records  []CapabilityRecord
-		evidence []CapabilityEvidence
-		wantErr  bool
-	}{
-		{name: "canonical", records: []CapabilityRecord{first, second}, evidence: []CapabilityEvidence{positive, secondEvidence}},
-		{name: "records out of order", records: []CapabilityRecord{second, first}, evidence: []CapabilityEvidence{positive, secondEvidence}, wantErr: true},
-		{name: "evidence out of order", records: []CapabilityRecord{first, second}, evidence: []CapabilityEvidence{secondEvidence, positive}, wantErr: true},
+func TestDecodeCapabilityAssetsRequiresEveryKindPerLanguage(t *testing.T) {
+	ledgerJSON, corpusJSON := validCapabilityAssets(t)
+	if _, _, err := decodeCapabilityAssets(ledgerJSON, corpusJSON); err != nil {
+		t.Fatalf("valid capability assets failed: %v", err)
 	}
 
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			ledger := mustJSON(t, capabilityLedgerFile{SchemaVersion: 1, Records: tc.records})
-			corpus := mustJSON(t, capabilityCorpusFile{SchemaVersion: 1, Cases: tc.evidence})
-			_, _, err := decodeCapabilityAssets(ledger, corpus)
-			if (err != nil) != tc.wantErr {
-				t.Fatalf("decodeCapabilityAssets() error = %v, wantErr %t", err, tc.wantErr)
+	for _, language := range []string{"spl", "spl2"} {
+		t.Run(language, func(t *testing.T) {
+			var ledger capabilityLedgerFile
+			mustUnmarshal(t, ledgerJSON, &ledger)
+			for i, record := range ledger.Records {
+				if record.Language == language && record.Kind == "command" {
+					ledger.Records = append(ledger.Records[:i], ledger.Records[i+1:]...)
+					break
+				}
+			}
+			if _, _, err := decodeCapabilityAssets(mustJSON(t, ledger), corpusJSON); err == nil {
+				t.Fatalf("ledger missing the command kind for %s was accepted", language)
 			}
 		})
+	}
+}
+
+func TestCapabilityDataCanonicalOrder(t *testing.T) {
+	recordOrder := []struct {
+		name        string
+		left, right CapabilityRecord
+	}{
+		{
+			name:  "language precedes every lower key",
+			left:  CapabilityRecord{Language: "spl", Profile: "z", Kind: "z", Name: "z", Form: "z", ID: "z"},
+			right: CapabilityRecord{Language: "spl2", Profile: "a", Kind: "a", Name: "a", Form: "a", ID: "a"},
+		},
+		{
+			name:  "profile precedes kind name form and ID",
+			left:  CapabilityRecord{Language: "spl", Profile: "a", Kind: "z", Name: "z", Form: "z", ID: "z"},
+			right: CapabilityRecord{Language: "spl", Profile: "b", Kind: "a", Name: "a", Form: "a", ID: "a"},
+		},
+		{
+			name:  "kind precedes name form and ID",
+			left:  CapabilityRecord{Language: "spl", Profile: "splunkd", Kind: "command", Name: "z", Form: "z", ID: "z"},
+			right: CapabilityRecord{Language: "spl", Profile: "splunkd", Kind: "function", Name: "a", Form: "a", ID: "a"},
+		},
+		{
+			name:  "name precedes form and ID",
+			left:  CapabilityRecord{Language: "spl", Profile: "splunkd", Kind: "command", Name: "alpha", Form: "z", ID: "z"},
+			right: CapabilityRecord{Language: "spl", Profile: "splunkd", Kind: "command", Name: "beta", Form: "a", ID: "a"},
+		},
+		{
+			name:  "form precedes ID",
+			left:  CapabilityRecord{Language: "spl", Profile: "splunkd", Kind: "command", Name: "search", Form: "alpha", ID: "z"},
+			right: CapabilityRecord{Language: "spl", Profile: "splunkd", Kind: "command", Name: "search", Form: "beta", ID: "a"},
+		},
+		{
+			name:  "ID is the final key",
+			left:  CapabilityRecord{Language: "spl", Profile: "splunkd", Kind: "command", Name: "search", Form: "basic", ID: "a"},
+			right: CapabilityRecord{Language: "spl", Profile: "splunkd", Kind: "command", Name: "search", Form: "basic", ID: "b"},
+		},
+	}
+	for _, tc := range recordOrder {
+		t.Run(tc.name, func(t *testing.T) {
+			if compareCapabilityRecords(tc.left, tc.right) >= 0 || compareCapabilityRecords(tc.right, tc.left) <= 0 {
+				t.Fatalf("record comparison ignored %s", tc.name)
+			}
+		})
+	}
+
+	evidenceOrder := []struct {
+		name        string
+		left, right CapabilityEvidence
+	}{
+		{
+			name:  "document language precedes profile and ID",
+			left:  CapabilityEvidence{ID: "z", Document: QueryDocument{Language: "spl", Profile: "z"}},
+			right: CapabilityEvidence{ID: "a", Document: QueryDocument{Language: "spl2", Profile: "a"}},
+		},
+		{
+			name:  "document profile precedes ID",
+			left:  CapabilityEvidence{ID: "z", Document: QueryDocument{Language: "spl", Profile: "a"}},
+			right: CapabilityEvidence{ID: "a", Document: QueryDocument{Language: "spl", Profile: "b"}},
+		},
+		{
+			name:  "evidence ID is the final key",
+			left:  CapabilityEvidence{ID: "a", Document: QueryDocument{Language: "spl", Profile: "splunkd"}},
+			right: CapabilityEvidence{ID: "b", Document: QueryDocument{Language: "spl", Profile: "splunkd"}},
+		},
+	}
+	for _, tc := range evidenceOrder {
+		t.Run(tc.name, func(t *testing.T) {
+			if compareCapabilityEvidence(tc.left, tc.right) >= 0 || compareCapabilityEvidence(tc.right, tc.left) <= 0 {
+				t.Fatalf("evidence comparison ignored %s", tc.name)
+			}
+		})
+	}
+
+	ledgerJSON, corpusJSON := validCapabilityAssets(t)
+	if _, _, err := decodeCapabilityAssets(ledgerJSON, corpusJSON); err != nil {
+		t.Fatalf("canonical capability data failed: %v", err)
+	}
+	var ledger capabilityLedgerFile
+	mustUnmarshal(t, ledgerJSON, &ledger)
+	ledger.Records[0], ledger.Records[1] = ledger.Records[1], ledger.Records[0]
+	if _, _, err := decodeCapabilityAssets(mustJSON(t, ledger), corpusJSON); err == nil {
+		t.Fatal("out-of-order capability records were accepted")
+	}
+	var corpus capabilityCorpusFile
+	mustUnmarshal(t, corpusJSON, &corpus)
+	corpus.Cases[0], corpus.Cases[1] = corpus.Cases[1], corpus.Cases[0]
+	if _, _, err := decodeCapabilityAssets(ledgerJSON, mustJSON(t, corpus)); err == nil {
+		t.Fatal("out-of-order capability evidence was accepted")
 	}
 }
 
@@ -373,8 +494,43 @@ func TestCapabilityDataClonesAreDeep(t *testing.T) {
 
 func validCapabilityAssets(t *testing.T) ([]byte, []byte) {
 	t.Helper()
-	return mustJSON(t, capabilityLedgerFile{SchemaVersion: 1, Records: []CapabilityRecord{validCapabilityRecord()}}),
-		mustJSON(t, capabilityCorpusFile{SchemaVersion: 1, Cases: []CapabilityEvidence{validCapabilityEvidence("positive", CapabilityEvidencePositive)}})
+	return mustJSON(t, capabilityLedgerFile{SchemaVersion: 1, Records: validCapabilityRecords()}),
+		mustJSON(t, capabilityCorpusFile{SchemaVersion: 1, Cases: []CapabilityEvidence{
+			validCapabilityEvidenceForLanguage("positive-spl", CapabilityEvidencePositive, "spl"),
+			validCapabilityEvidenceForLanguage("positive-spl2", CapabilityEvidencePositive, "spl2"),
+		}})
+}
+
+func validCapabilityRecords() []CapabilityRecord {
+	kinds := []string{
+		"annotation",
+		"command",
+		"dataset",
+		"expression",
+		"function",
+		"lexical_form",
+		"macro",
+		"module",
+		"namespace",
+		"pipeline",
+		"profile_form",
+		"subsearch",
+		"variable",
+	}
+	records := make([]CapabilityRecord, 0, len(kinds)*2)
+	for _, language := range []string{"spl", "spl2"} {
+		for _, kind := range kinds {
+			record := validCapabilityRecord()
+			record.ID = language + "-" + kind
+			record.Language = language
+			record.Kind = kind
+			record.Name = kind
+			record.Form = "default"
+			record.Dimensions = claimsReferencing("positive-" + language)
+			records = append(records, record)
+		}
+	}
+	return records
 }
 
 func validCapabilityRecord() CapabilityRecord {
@@ -406,13 +562,25 @@ func claimsReferencing(id string) CapabilityDimensions {
 }
 
 func validCapabilityEvidence(id string, classification CapabilityEvidenceClassification) CapabilityEvidence {
-	diagnostic := CapabilityDiagnosticExpectation{Code: "TEST", Category: "test", Severity: "warning"}
+	return validCapabilityEvidenceForLanguage(id, classification, "spl")
+}
+
+func validCapabilityEvidenceForLanguage(id string, classification CapabilityEvidenceClassification, language string) CapabilityEvidence {
+	diagnostic := CapabilityDiagnosticExpectation{
+		Code:     "TEST",
+		Category: "test",
+		Severity: "warning",
+		Location: Location{
+			Start: Position{Offset: 0, Line: 1, Column: 1},
+			End:   Position{Offset: 6, Line: 1, Column: 7},
+		},
+	}
 	return CapabilityEvidence{
 		ID:             id,
 		Classification: classification,
 		Document: QueryDocument{
 			Text:     "search index=main",
-			Language: "spl",
+			Language: language,
 			Profile:  "splunkd",
 			Version:  "current",
 			SourceID: "capability:" + id,

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"sort"
 	"strings"
 )
 
@@ -152,6 +153,7 @@ func validateCapabilityAssets(ledger capabilityLedgerFile, corpus capabilityCorp
 	}
 
 	recordIDs := make(map[string]struct{}, len(ledger.Records))
+	recordKindsByLanguage := make(map[string]map[string]struct{}, 2)
 	referencedEvidence := make(map[string]struct{}, len(corpus.Cases))
 	for i, record := range ledger.Records {
 		if err := validateCapabilityRecord(record, evidenceByID, referencedEvidence); err != nil {
@@ -161,6 +163,13 @@ func validateCapabilityAssets(ledger capabilityLedgerFile, corpus capabilityCorp
 			return fmt.Errorf("duplicate record ID %q", record.ID)
 		}
 		recordIDs[record.ID] = struct{}{}
+		if recordKindsByLanguage[record.Language] == nil {
+			recordKindsByLanguage[record.Language] = make(map[string]struct{}, len(capabilityRecordKinds))
+		}
+		recordKindsByLanguage[record.Language][record.Kind] = struct{}{}
+	}
+	if err := validateCapabilityKindCoverage(recordKindsByLanguage); err != nil {
+		return err
 	}
 	if err := validateCapabilityRecordOrder(ledger.Records); err != nil {
 		return err
@@ -168,6 +177,26 @@ func validateCapabilityAssets(ledger capabilityLedgerFile, corpus capabilityCorp
 	for _, evidence := range corpus.Cases {
 		if _, referenced := referencedEvidence[evidence.ID]; !referenced {
 			return fmt.Errorf("evidence %q is not referenced by a capability claim", evidence.ID)
+		}
+	}
+	return nil
+}
+
+func validateCapabilityKindCoverage(kindsByLanguage map[string]map[string]struct{}) error {
+	for _, language := range []string{"spl", "spl2"} {
+		present, languageExists := kindsByLanguage[language]
+		if !languageExists {
+			continue
+		}
+		missing := make([]string, 0, len(capabilityRecordKinds)-len(present))
+		for kind := range capabilityRecordKinds {
+			if _, exists := present[kind]; !exists {
+				missing = append(missing, kind)
+			}
+		}
+		if len(missing) != 0 {
+			sort.Strings(missing)
+			return fmt.Errorf("language %q is missing record kinds: %s", language, strings.Join(missing, ", "))
 		}
 	}
 	return nil
@@ -278,19 +307,22 @@ func validateCapabilityClaim(dimension string, record CapabilityRecord, claim Ca
 		if !capabilityEvidenceHasObservation(evidence, dimension) {
 			return fmt.Errorf("evidence %q has no %s observation", evidenceID, dimension)
 		}
-		if dimension == "linting" && evidence.Classification == CapabilityEvidenceNegative && len(evidence.Observations.Linting.Diagnostics) == 0 {
-			return fmt.Errorf("negative evidence %q has no exact linting diagnostic observation", evidenceID)
+		if dimension == "linting" && evidence.Classification == CapabilityEvidenceNegative {
+			if err := validateExactLintingDiagnostics(evidence.Observations.Linting.Diagnostics); err != nil {
+				return fmt.Errorf("negative evidence %q has no exact linting diagnostic observation: %w", evidenceID, err)
+			}
 		}
 		classifications[evidence.Classification] = true
 	}
 
 	switch claim.State {
 	case CapabilitySupported:
-		if len(claim.EvidenceIDs) == 0 || !classifications[CapabilityEvidencePositive] {
-			return fmt.Errorf("supported claim requires positive evidence")
+		negativeLintEvidence := dimension == "linting" && classifications[CapabilityEvidenceNegative]
+		if len(claim.EvidenceIDs) == 0 || (!classifications[CapabilityEvidencePositive] && !negativeLintEvidence) {
+			return fmt.Errorf("supported claim requires positive evidence or exact negative linting evidence")
 		}
-		if classifications[CapabilityEvidenceNegative] || classifications[CapabilityEvidenceIncomplete] {
-			return fmt.Errorf("supported claim accepts only positive evidence")
+		if (classifications[CapabilityEvidenceNegative] && dimension != "linting") || classifications[CapabilityEvidenceIncomplete] {
+			return fmt.Errorf("supported claim accepts only positive evidence except for exact negative linting evidence")
 		}
 	case CapabilityPartial:
 		if len(claim.Limitations) == 0 {
@@ -322,6 +354,23 @@ func validateCapabilityClaim(dimension string, record CapabilityRecord, claim Ca
 	case CapabilityUnassessed:
 		if len(claim.EvidenceIDs) != 0 || len(claim.Limitations) != 0 {
 			return fmt.Errorf("unassessed claim must have empty evidence and limitations")
+		}
+	}
+	return nil
+}
+
+func validateExactLintingDiagnostics(diagnostics []CapabilityDiagnosticExpectation) error {
+	if len(diagnostics) == 0 {
+		return fmt.Errorf("at least one diagnostic is required")
+	}
+	for i, diagnostic := range diagnostics {
+		if strings.TrimSpace(diagnostic.Code) == "" || strings.TrimSpace(diagnostic.Category) == "" || strings.TrimSpace(diagnostic.Severity) == "" {
+			return fmt.Errorf("diagnostic %d requires code, category, and severity", i)
+		}
+		location := diagnostic.Location
+		if location.Start.Offset < 0 || location.Start.Line <= 0 || location.Start.Column <= 0 ||
+			location.End.Offset <= location.Start.Offset || location.End.Line <= 0 || location.End.Column <= 0 {
+			return fmt.Errorf("diagnostic %d requires a complete nonempty source location", i)
 		}
 	}
 	return nil
@@ -396,22 +445,24 @@ func compareCapabilityRecords(left, right CapabilityRecord) int {
 
 func validateCapabilityEvidenceOrder(cases []CapabilityEvidence) error {
 	for i := 1; i < len(cases); i++ {
-		previous, current := cases[i-1], cases[i]
-		comparison := 0
-		for _, values := range [][2]string{
-			{previous.Document.Language, current.Document.Language},
-			{previous.Document.Profile, current.Document.Profile},
-			{previous.ID, current.ID},
-		} {
-			if comparison = strings.Compare(values[0], values[1]); comparison != 0 {
-				break
-			}
-		}
-		if comparison >= 0 {
+		if compareCapabilityEvidence(cases[i-1], cases[i]) >= 0 {
 			return fmt.Errorf("capability evidence is not in canonical order at indexes %d and %d", i-1, i)
 		}
 	}
 	return nil
+}
+
+func compareCapabilityEvidence(left, right CapabilityEvidence) int {
+	for _, values := range [][2]string{
+		{left.Document.Language, right.Document.Language},
+		{left.Document.Profile, right.Document.Profile},
+		{left.ID, right.ID},
+	} {
+		if comparison := strings.Compare(values[0], values[1]); comparison != 0 {
+			return comparison
+		}
+	}
+	return 0
 }
 
 func summarizeCapabilityRecords(records []CapabilityRecord) CapabilitySummary {
