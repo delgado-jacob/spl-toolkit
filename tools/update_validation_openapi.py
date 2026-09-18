@@ -139,7 +139,16 @@ def update(directory: Path) -> None:
             raise ValueError(f"unexpected pinned schema shape: {name}")
         return schema
 
-    document = copy.deepcopy(shape("analysis.QueryDocument", ("text", "language", "profile", "version", "source_id")))
+    shared_path = Path(__file__).resolve().parents[1] / "contracts/v1/shared.schema.json"
+    shared = json.loads(shared_path.read_text(encoding="utf-8"))
+    generated_document = shape("analysis.QueryDocument", ("text", "language", "profile", "version", "source_id"))
+    if generated_document == shared["$defs"]["analysis.QueryDocument"]:
+        document = {
+            "type": "object",
+            "properties": {key: {"type": "string"} for key in generated_document["properties"]},
+        }
+    else:
+        document = copy.deepcopy(generated_document)
     if any(value != {"type": "string"} for value in document["properties"].values()):
         raise ValueError("unexpected pinned query document property shape")
     document.update(required=["text"], additionalProperties=False)
@@ -329,8 +338,6 @@ def update(directory: Path) -> None:
     capability.update(required=["schema_version", "forms"])
     capability["properties"]["schema_version"] = {"type": "integer", "const": 1}
 
-    shared_path = Path(__file__).resolve().parents[1] / "contracts/v1/shared.schema.json"
-    shared = json.loads(shared_path.read_text(encoding="utf-8"))
     shared_origin = shared["$id"] + "#/$defs/"
 
     def capability_contract(value):
@@ -350,6 +357,8 @@ def update(directory: Path) -> None:
         return result
 
     capability_names = (
+        "analysis.QueryDocument",
+        "analysis.Capability",
         "analysis.CapabilityClaim",
         "analysis.CapabilityDimensions",
         "analysis.CapabilityProvenance",

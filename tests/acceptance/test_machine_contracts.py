@@ -697,6 +697,38 @@ def test_capability_evidence_observation_definitions_are_strict(schemas):
     assert shared_errors(schemas, "analysis.CapabilityEvidenceObservations", observations)
 
 
+def test_capability_claim_state_boundaries_and_semantics_nonempty(schemas):
+    valid_claims = (
+        {"state": "supported", "evidence_ids": ["positive"], "limitations": []},
+        {"state": "partial", "evidence_ids": ["positive", "incomplete"], "limitations": ["gap"]},
+        {"state": "unsupported", "evidence_ids": ["negative"], "limitations": ["gap"]},
+        {"state": "not_applicable", "evidence_ids": [], "limitations": ["not applicable"]},
+        {"state": "unassessed", "evidence_ids": [], "limitations": []},
+    )
+    for claim in valid_claims:
+        assert not shared_errors(schemas, "analysis.CapabilityClaim", claim), claim
+
+    invalid_claims = (
+        {"state": "supported", "evidence_ids": [], "limitations": []},
+        {"state": "partial", "evidence_ids": ["positive"], "limitations": ["gap"]},
+        {"state": "partial", "evidence_ids": ["positive", "incomplete"], "limitations": []},
+        {"state": "unsupported", "evidence_ids": [], "limitations": ["gap"]},
+        {"state": "unsupported", "evidence_ids": ["negative"], "limitations": []},
+        {"state": "not_applicable", "evidence_ids": ["positive"], "limitations": ["not applicable"]},
+        {"state": "not_applicable", "evidence_ids": [], "limitations": []},
+        {"state": "unassessed", "evidence_ids": ["positive"], "limitations": []},
+        {"state": "unassessed", "evidence_ids": [], "limitations": ["unknown"]},
+    )
+    for claim in invalid_claims:
+        assert shared_errors(schemas, "analysis.CapabilityClaim", claim), claim
+
+    empty_semantics = {
+        "status": "valid", "complete": True, "stages": [], "references": [],
+        "dependencies": [], "transitions": [], "diagnostics": [],
+    }
+    assert shared_errors(schemas, "analysis.CapabilitySemanticsObservation", empty_semantics)
+
+
 def test_capability_evidence_rewrite_request_is_the_runtime_wrapper(schemas):
     rule = {
         "id": "rename-host", "kind": "field",

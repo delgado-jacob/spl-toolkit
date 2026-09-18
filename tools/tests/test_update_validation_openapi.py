@@ -48,6 +48,10 @@ class ValidationOpenAPITests(unittest.TestCase):
                 return False
             if "anyOf" in schema and not any(valid(branch, value) for branch in schema["anyOf"]):
                 return False
+            if "allOf" in schema and not all(valid(branch, value) for branch in schema["allOf"]):
+                return False
+            if "if" in schema and valid(schema["if"], value) and not valid(schema.get("then", {}), value):
+                return False
             if "not" in schema and valid(schema["not"], value):
                 return False
             if isinstance(value, dict):
@@ -60,6 +64,8 @@ class ValidationOpenAPITests(unittest.TestCase):
                     return False
             if isinstance(value, list):
                 if len(value) < schema.get("minItems", 0):
+                    return False
+                if len(value) > schema.get("maxItems", sys.maxsize):
                     return False
                 if "items" in schema and any(not valid(schema["items"], item) for item in value):
                     return False
@@ -133,6 +139,10 @@ class ValidationOpenAPITests(unittest.TestCase):
             schemas["api." + name] = {"type": "object", "properties": {"schema_version": {"type": "integer"}, "mode": {"type": "string"}, key: value, "rules": {"type": "array", "items": {"$ref": "#/components/schemas/api.RewriteRule"}, "uniqueItems": False}, "validation_target": {"type": "object"}}}
         schemas["analysis.RewriteCapabilityForm"] = {"type": "object", "properties": {"kind": {"type": "string"}, "role": {"type": "string"}, "identity_forms": {"type": "array", "items": {"type": "string"}, "uniqueItems": False}, "supported": {"type": "boolean"}, "limitations": {"type": "array", "items": {"type": "string"}, "uniqueItems": False}}}
         schemas["analysis.RewriteCapabilityManifest"] = {"type": "object", "properties": {"schema_version": {"type": "integer"}, "forms": {"type": "array", "items": {"$ref": "#/components/schemas/analysis.RewriteCapabilityForm"}, "uniqueItems": False}}}
+        schemas["analysis.Capability"] = {"type": "object", "properties": {
+            "name": {"type": "string"}, "syntax_supported": {"type": "boolean"},
+            "semantic_supported": {"type": "boolean"},
+            "limitations": {"type": "array", "items": {"type": "string"}, "uniqueItems": False}}}
         schemas["analysis.CapabilityClaim"] = {"type": "object", "properties": {
             "state": {"type": "string"},
             "evidence_ids": {"type": "array", "items": {"type": "string"}, "uniqueItems": False},
@@ -231,7 +241,11 @@ class ValidationOpenAPITests(unittest.TestCase):
             self.assertEqual(result.returncode, 0, result.stderr)
             spec = json.loads((root / "swagger.json").read_text())
             schemas = spec["components"]["schemas"]
-            self.assertEqual(schemas["analysis.QueryDocument"], original["components"]["schemas"]["analysis.QueryDocument"])
+            self.assertNotEqual(schemas["analysis.QueryDocument"], original["components"]["schemas"]["analysis.QueryDocument"])
+            self.assertEqual(
+                schemas["analysis.QueryDocument"]["required"],
+                ["text", "language", "profile", "version", "source_id"],
+            )
             self.assertEqual(schemas["validation.OCSFSelection"], original["components"]["schemas"]["validation.OCSFSelection"])
             self.assertEqual(schemas["unrelated"], original["components"]["schemas"]["unrelated"])
             self.assertEqual(spec["paths"]["/unrelated"], original["paths"]["/unrelated"])
@@ -392,6 +406,28 @@ class ValidationOpenAPITests(unittest.TestCase):
             self.assertIs(observations["additionalProperties"], False)
             self.assertEqual(schemas["analysis.CapabilityClaim"]["properties"]["state"]["enum"],
                              ["supported", "partial", "unsupported", "not_applicable", "unassessed"])
+            valid_claims = (
+                {"state": "supported", "evidence_ids": ["positive"], "limitations": []},
+                {"state": "partial", "evidence_ids": ["positive", "incomplete"], "limitations": ["gap"]},
+                {"state": "unsupported", "evidence_ids": ["negative"], "limitations": ["gap"]},
+                {"state": "not_applicable", "evidence_ids": [], "limitations": ["not applicable"]},
+                {"state": "unassessed", "evidence_ids": [], "limitations": []},
+            )
+            for claim in valid_claims:
+                self.assertTrue(self.schema_accepts(schemas, "analysis.CapabilityClaim", claim), claim)
+            invalid_claims = (
+                {"state": "supported", "evidence_ids": [], "limitations": []},
+                {"state": "partial", "evidence_ids": ["positive"], "limitations": ["gap"]},
+                {"state": "partial", "evidence_ids": ["positive", "incomplete"], "limitations": []},
+                {"state": "unsupported", "evidence_ids": [], "limitations": ["gap"]},
+                {"state": "unsupported", "evidence_ids": ["negative"], "limitations": []},
+                {"state": "not_applicable", "evidence_ids": ["positive"], "limitations": ["not applicable"]},
+                {"state": "not_applicable", "evidence_ids": [], "limitations": []},
+                {"state": "unassessed", "evidence_ids": ["positive"], "limitations": []},
+                {"state": "unassessed", "evidence_ids": [], "limitations": ["unknown"]},
+            )
+            for claim in invalid_claims:
+                self.assertFalse(self.schema_accepts(schemas, "analysis.CapabilityClaim", claim), claim)
             self.assertEqual(schemas["analysis.CapabilityRecord"]["properties"]["kind"]["enum"],
                              ["command", "function", "expression", "lexical_form", "pipeline", "subsearch", "dataset", "macro", "module", "namespace", "variable", "annotation", "profile_form"])
             self.assertEqual(schemas["analysis.CapabilityProvenance"]["properties"]["source_family"]["enum"],
@@ -410,6 +446,12 @@ class ValidationOpenAPITests(unittest.TestCase):
             for name in ("analysis.CapabilitySemanticsObservation", "analysis.CapabilityRequirementsObservation", "analysis.CapabilityRewriteObservation"):
                 member = "query_status" if name.endswith("RequirementsObservation") else "status"
                 self.assertEqual(schemas[name]["properties"][member]["enum"], ["valid", "invalid", "incomplete"])
+            empty_semantics = {
+                "status": "valid", "complete": True, "stages": [], "references": [],
+                "dependencies": [], "transitions": [], "diagnostics": [],
+            }
+            self.assertFalse(self.schema_accepts(
+                schemas, "analysis.CapabilitySemanticsObservation", empty_semantics))
             wrapper = schemas["analysis.CapabilityEvidenceRewriteRequest"]
             self.assertEqual(wrapper["properties"]["schema_version"], {"type": "integer", "const": 1})
             self.assertEqual(wrapper["properties"]["mode"], {"type": "string", "enum": ["preview", "apply"]})
@@ -439,6 +481,26 @@ class ValidationOpenAPITests(unittest.TestCase):
                 "commands": [], "functions": [],
             }
             self.assertTrue(self.schema_accepts(schemas, "analysis.CapabilityManifest", archived))
+            self.assertFalse(self.schema_accepts(
+                schemas, "analysis.CapabilityManifest", {**archived, "commands": [{}]}))
+            document = {
+                "text": "search host=web", "language": "spl", "profile": "splunkd",
+                "version": "current", "source_id": "evidence-1",
+            }
+            self.assertTrue(self.schema_accepts(schemas, "analysis.QueryDocument", document))
+            self.assertFalse(self.schema_accepts(schemas, "analysis.QueryDocument", {}))
+            for member, value in (("language", "sql"), ("profile", "cloud"), ("version", "latest")):
+                self.assertFalse(self.schema_accepts(
+                    schemas, "analysis.QueryDocument", {**document, member: value}), member)
+            self.assertFalse(self.schema_accepts(schemas, "analysis.CapabilityEvidence", {}))
+            evidence = {
+                "id": "syntax-positive", "classification": "positive", "document": document,
+                "observations": {"syntax": {"complete": True, "diagnostics": []}},
+                "provenance": {"source_family": "toolkit", "note": "test"},
+            }
+            self.assertTrue(self.schema_accepts(schemas, "analysis.CapabilityEvidence", evidence))
+            self.assertFalse(self.schema_accepts(
+                schemas, "analysis.CapabilityEvidence", {**evidence, "document": {}}))
             self.assertEqual(set(schemas["analysis.CapabilityStateCounts"]["properties"]),
                              {"applicable", "covered", "supported", "partial", "unsupported", "not_applicable", "unassessed"})
             before = {p.name: p.read_bytes() for p in root.iterdir()}

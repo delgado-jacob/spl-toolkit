@@ -854,6 +854,72 @@
         "evidence_ids",
         "limitations"
       ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "state": { "const": "supported" }
+            }
+          },
+          "then": {
+            "properties": {
+              "evidence_ids": { "minItems": 1 }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "state": { "const": "partial" }
+            }
+          },
+          "then": {
+            "properties": {
+              "evidence_ids": { "minItems": 2 },
+              "limitations": { "minItems": 1 }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "state": { "const": "unsupported" }
+            }
+          },
+          "then": {
+            "properties": {
+              "evidence_ids": { "minItems": 1 },
+              "limitations": { "minItems": 1 }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "state": { "const": "not_applicable" }
+            }
+          },
+          "then": {
+            "properties": {
+              "evidence_ids": { "maxItems": 0 },
+              "limitations": { "minItems": 1 }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "state": { "const": "unassessed" }
+            }
+          },
+          "then": {
+            "properties": {
+              "evidence_ids": { "maxItems": 0 },
+              "limitations": { "maxItems": 0 }
+            }
+          }
+        }
+      ],
       "additionalProperties": false
     },
     "analysis.CapabilityDimensions": {
@@ -1236,6 +1302,13 @@
         "dependencies",
         "transitions",
         "diagnostics"
+      ],
+      "anyOf": [
+        { "properties": { "stages": { "minItems": 1 } } },
+        { "properties": { "references": { "minItems": 1 } } },
+        { "properties": { "dependencies": { "minItems": 1 } } },
+        { "properties": { "transitions": { "minItems": 1 } } },
+        { "properties": { "diagnostics": { "minItems": 1 } } }
       ],
       "additionalProperties": false
     },
