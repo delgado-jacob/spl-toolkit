@@ -1,11 +1,11 @@
-# What's new in the app
+## What's new in the app
 
 - Capability manifests now explain five evidence-backed dimensions and five explicit states.
 - SPL reports 68 records with 67 evidence cases. SPL2 reports 98 records with 108 evidence cases.
 - Summary counts use strict denominators and publish no percentage or composite score.
 - Parser registration, syntax coverage, lint evidence, and safe-rewrite evidence remain separate claims.
 
-# What was built
+## What was built
 
 Documentation now describes the ledger on every public capability surface:
 
@@ -29,7 +29,7 @@ The semantic `capability_revision` includes schema version, selectors, documenta
 
 The corpus establishes static local toolkit behavior. It does not establish live Splunk execution, runtime equivalence, environment compatibility, authorization, deployment, publication, or upstream support.
 
-# Decisions made during implementation
+## Decisions made during implementation
 
 The user authorized one deviation from a model that would infer syntax coverage from parser registration: grammar registration is modeled separately. `grammar_registered` records local parser ownership and never adds evidence-backed coverage.
 
@@ -39,13 +39,13 @@ Linting uses its own evidence boundary. Parser, semantic, and validation diagnos
 
 Legacy `commands` and `functions` remain compatibility projections. Consumers that need evidence-backed decisions use `records`, `summary`, and `evidence`.
 
-# What the next milestone needs to know
+## What the next milestone needs to know
 
 Task 9 must run and record the final source, package, and cross-surface gates. It must verify exact counts, semantic revisions, tagged version propagation, generated contracts, and evidence parity from the final commit. Hosted CI, publication, deployment, live runtime execution, and upstream acceptance remain unverified.
 
 Task 9 may update this log with final verified commands and results. It must preserve the distinction between local source checks, packaged-artifact checks, hosted CI, publication, deployment, live Splunk execution, and upstream support.
 
-# Deviations from the PRD and why
+## Deviations from the PRD and why
 
 Grammar registration is reported separately from evidence-backed syntax coverage. This prevents a registered parser rule from receiving coverage credit without reviewed positive evidence. The SPL2 `spl1` form remains registered for local parsing while its disputed embedded-body syntax stays unsupported in the ledger.
 
