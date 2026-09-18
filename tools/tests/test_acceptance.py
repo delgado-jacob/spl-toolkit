@@ -7,6 +7,8 @@ import hashlib
 import json
 from pathlib import Path
 
+import pytest
+
 from tools.check_acceptance import load_records, validate_records
 
 
@@ -20,6 +22,17 @@ TARGETS = {
     "windows-amd64": "x86_64",
 }
 PYTHONS = ("3.11.9", "3.12.10", "3.13.7", "3.14.0")
+REQUIRED_TEST_HASH_PATHS = {
+    "native": {
+        "test_native_requirements.py": ROOT / "python/tests/test_native_requirements.py",
+        "test_native_analysis.py": ROOT / "python/tests/test_native_analysis.py",
+        "test_native_spl2.py": ROOT / "python/tests/test_native_spl2.py",
+    },
+    "acceptance": {
+        "test_requirements_surfaces.py": ROOT / "tests/acceptance/test_requirements_surfaces.py",
+        "test_analysis_surfaces.py": ROOT / "tests/acceptance/test_analysis_surfaces.py",
+    },
+}
 
 
 def release_environment(target: str, architecture: str) -> dict:
@@ -98,7 +111,8 @@ def passing_records() -> list[dict]:
                     for path in (ROOT / "contracts").rglob("*") if path.is_file()
                 },
                 "tooling_source_hashes": {
-                    line: HASH for line in (ROOT / "python/native-source-files.txt").read_text().splitlines()
+                    line: hashlib.sha256((ROOT / line).read_bytes()).hexdigest()
+                    for line in (ROOT / "python/native-source-files.txt").read_text().splitlines()
                     if line and not line.startswith("#")
                 },
                 "tooling_fixture_hashes": {name: HASH for name in (
@@ -108,16 +122,11 @@ def passing_records() -> list[dict]:
                 )},
                 "machine_contract_tests": {"collected": 13, "passed": 13, "failed": 0, "skipped": 0},
                 "required_test_hashes": {
-                    "native": {"test_native_requirements.py": (
-                        hashlib.sha256(
-                            (ROOT / "python/tests/test_native_requirements.py").read_bytes()
-                        ).hexdigest()
-                    )},
-                    "acceptance": {"test_requirements_surfaces.py": (
-                        hashlib.sha256(
-                            (ROOT / "tests/acceptance/test_requirements_surfaces.py").read_bytes()
-                        ).hexdigest()
-                    )},
+                    suite: {
+                        name: hashlib.sha256(path.read_bytes()).hexdigest()
+                        for name, path in paths.items()
+                    }
+                    for suite, paths in REQUIRED_TEST_HASH_PATHS.items()
                 },
                 "fixture_hashes": {"requirements": HASH},
                 "requirements_surface_evidence": {
@@ -243,6 +252,47 @@ def test_installed_evidence_requires_requirement_surfaces_and_bound_fixture_hash
     errors = validate_records(records, SHA)
     assert any("test_native_requirements.py" in error and "current source" in error for error in errors)
     assert any("test_requirements_surfaces.py" in error and "current source" in error for error in errors)
+
+
+@pytest.mark.parametrize("suite", ["native", "acceptance"])
+@pytest.mark.parametrize("failure", ["missing", "stale", "extra", "malformed"])
+def test_required_test_hash_closure_fails_closed(suite: str, failure: str):
+    records = passing_records()
+    installed = next(record for record in records if record["kind"] == "installed-wheel")
+    hashes = installed["required_test_hashes"][suite]
+    name = next(iter(hashes))
+    if failure == "missing":
+        del hashes[name]
+    elif failure == "stale":
+        hashes[name] = "d" * 64
+    elif failure == "extra":
+        hashes["unexpected.py"] = HASH
+    else:
+        hashes[name] = "not-a-sha256"
+
+    errors = validate_records(records, SHA)
+
+    assert any("required_test_hashes" in error for error in errors)
+
+
+@pytest.mark.parametrize("failure", ["missing", "stale", "extra", "malformed"])
+def test_capability_source_hash_closure_fails_closed(failure: str):
+    records = passing_records()
+    installed = next(record for record in records if record["kind"] == "installed-wheel")
+    hashes = installed["tooling_source_hashes"]
+    name = "pkg/analysis/capabilitydata/ledger.json"
+    if failure == "missing":
+        del hashes[name]
+    elif failure == "stale":
+        hashes[name] = "d" * 64
+    elif failure == "extra":
+        hashes["pkg/analysis/capabilitydata/unexpected.json"] = HASH
+    else:
+        hashes[name] = "not-a-sha256"
+
+    errors = validate_records(records, SHA)
+
+    assert any("tooling_source_hashes" in error for error in errors)
 
 
 def test_missing_arm64_is_not_complete():

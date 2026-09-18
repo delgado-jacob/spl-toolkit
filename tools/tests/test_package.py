@@ -15,6 +15,12 @@ import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
 PYTHON_DIR = ROOT / "python"
+CAPABILITY_SOURCE_FILES = {
+    "pkg/analysis/capability_model.go",
+    "pkg/analysis/capability_data.go",
+    "pkg/analysis/capabilitydata/ledger.json",
+    "pkg/analysis/capabilitydata/corpus.json",
+}
 
 
 def test_installed_wheel_job_bootstraps_package_checker_dependencies():
@@ -392,6 +398,16 @@ def test_release_tree_contains_complete_analysis_and_validation_source_closure(t
         assert (release / "_native_src" / path.relative_to(ROOT)).read_bytes() == path.read_bytes()
 
 
+def test_native_source_manifest_contains_capability_ledger_closure():
+    manifest = {
+        line
+        for line in (PYTHON_DIR / "native-source-files.txt").read_text(encoding="utf-8").splitlines()
+        if line and not line.startswith("#")
+    }
+
+    assert CAPABILITY_SOURCE_FILES <= manifest
+
+
 def test_installed_native_suite_includes_analysis(tmp_path: Path):
     checker = load_package_checker()
     destination = tmp_path / "tests"
@@ -727,12 +743,21 @@ def test_installed_schema_fixtures_exist_before_both_suites(tmp_path: Path, monk
         "native": {
             "test_native_requirements.py": checker.sha256(
                 ROOT / "python/tests/test_native_requirements.py"
-            )
+            ),
+            "test_native_analysis.py": checker.sha256(
+                ROOT / "python/tests/test_native_analysis.py"
+            ),
+            "test_native_spl2.py": checker.sha256(
+                ROOT / "python/tests/test_native_spl2.py"
+            ),
         },
         "acceptance": {
             "test_requirements_surfaces.py": checker.sha256(
                 ROOT / "tests/acceptance/test_requirements_surfaces.py"
-            )
+            ),
+            "test_analysis_surfaces.py": checker.sha256(
+                ROOT / "tests/acceptance/test_analysis_surfaces.py"
+            ),
         },
     }
     assert result["wheel_payload_hashes"] == payload_hashes
@@ -758,7 +783,7 @@ def test_sdist_source_verification_requires_exact_handwritten_sources_and_native
     command.ensure_finalized()
     release = tmp_path / "release"
     command.make_release_tree(str(release), [])
-    for relative in ("native-source-files.txt", "spl_toolkit/mapper.py", "spl_toolkit/libspl_toolkit.h", "tests/test_native_schema_validation.py", "tests/test_native_spl2.py", "tests/test_native_rewrite.py", "tests/test_native_requirements.py", "tests/test_native_tooling.py", "build_support.py", "MANIFEST.in", "setup.py", "pyproject.toml", "requirements-build.txt", "requirements-dev.txt", "requirements-contracts-local-hashed.lock"):
+    for relative in ("native-source-files.txt", "spl_toolkit/mapper.py", "spl_toolkit/libspl_toolkit.h", "tests/test_native_analysis.py", "tests/test_native_schema_validation.py", "tests/test_native_spl2.py", "tests/test_native_rewrite.py", "tests/test_native_requirements.py", "tests/test_native_tooling.py", "build_support.py", "MANIFEST.in", "setup.py", "pyproject.toml", "requirements-build.txt", "requirements-dev.txt", "requirements-contracts-local-hashed.lock"):
         destination = release / relative
         destination.parent.mkdir(parents=True, exist_ok=True)
         destination.write_bytes((PYTHON_DIR / relative).read_bytes())

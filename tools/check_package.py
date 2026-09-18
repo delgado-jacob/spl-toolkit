@@ -404,7 +404,7 @@ def verify_sdist_sources(source: Path, root: Path) -> dict[str, str]:
             "native-source-files.txt", "spl_toolkit/mapper.py", "spl_toolkit/libspl_toolkit.h",
             "build_support.py", "MANIFEST.in", "setup.py", "pyproject.toml",
             "requirements-build.txt", "requirements-dev.txt", "requirements-contracts-local-hashed.lock",
-            "tests/test_native_schema_validation.py", "tests/test_native_spl2.py", "tests/test_native_rewrite.py",
+            "tests/test_native_analysis.py", "tests/test_native_schema_validation.py", "tests/test_native_spl2.py", "tests/test_native_rewrite.py",
             "tests/test_native_requirements.py", "tests/test_native_tooling.py",
         )
     }
@@ -604,12 +604,19 @@ def install_and_check(
                                 "acceptance": [name for name in ACCEPTANCE_FILES if name.startswith("test_") and name.endswith(".py")]},
         "required_test_hashes": {
             "native": {
-                "test_native_requirements.py": native_test_hashes["test_native_requirements.py"]
+                name: native_test_hashes[name]
+                for name in (
+                    "test_native_requirements.py",
+                    "test_native_analysis.py",
+                    "test_native_spl2.py",
+                )
             },
             "acceptance": {
-                "test_requirements_surfaces.py": acceptance_test_hashes[
-                    "test_requirements_surfaces.py"
-                ]
+                name: acceptance_test_hashes[name]
+                for name in (
+                    "test_requirements_surfaces.py",
+                    "test_analysis_surfaces.py",
+                )
             },
         },
         "cli_examples": "passed",

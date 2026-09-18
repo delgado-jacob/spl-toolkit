@@ -27,9 +27,14 @@ REQUIRED_TEST_FILES = {
                    "test_spl2_surfaces.py", "test_rewrite_surfaces.py"},
 }
 REQUIRED_TEST_HASH_PATHS = {
-    "native": {"test_native_requirements.py": ROOT / "python/tests/test_native_requirements.py"},
+    "native": {
+        "test_native_requirements.py": ROOT / "python/tests/test_native_requirements.py",
+        "test_native_analysis.py": ROOT / "python/tests/test_native_analysis.py",
+        "test_native_spl2.py": ROOT / "python/tests/test_native_spl2.py",
+    },
     "acceptance": {
-        "test_requirements_surfaces.py": ROOT / "tests/acceptance/test_requirements_surfaces.py"
+        "test_requirements_surfaces.py": ROOT / "tests/acceptance/test_requirements_surfaces.py",
+        "test_analysis_surfaces.py": ROOT / "tests/acceptance/test_analysis_surfaces.py",
     },
 }
 REQUIRED_TEST_HASHES = {
@@ -49,8 +54,9 @@ WHEEL_CONTRACT_KEYS = {
     "spl_toolkit/" + path.relative_to(ROOT).as_posix()
     for path in (ROOT / "contracts").rglob("*") if path.is_file()
 }
-TOOLING_SOURCE_KEYS = {
-    line for line in (ROOT / "python/native-source-files.txt").read_text(encoding="utf-8").splitlines()
+TOOLING_SOURCE_HASHES = {
+    line: hashlib.sha256((ROOT / line).read_bytes()).hexdigest()
+    for line in (ROOT / "python/native-source-files.txt").read_text(encoding="utf-8").splitlines()
     if line and not line.startswith("#")
 }
 TOOLING_FIXTURE_KEYS = {
@@ -158,13 +164,19 @@ def _validate_counts(record: dict, errors: list[str], label: str) -> None:
             errors.append(f"{label}: {suite} has skipped tests")
 
 
-def _validate_hash_map(value: object, expected: set[str], field: str,
+def _validate_hash_map(value: object, expected: set[str] | dict[str, str], field: str,
                        errors: list[str], label: str) -> None:
-    if not isinstance(value, dict) or set(value) != expected:
+    expected_paths = set(expected)
+    if not isinstance(value, dict) or set(value) != expected_paths:
         errors.append(f"{label}: {field} has incorrect paths")
         return
     if any(not isinstance(digest, str) or not HASH_RE.fullmatch(digest) for digest in value.values()):
         errors.append(f"{label}: {field} contains an invalid SHA-256")
+        return
+    if isinstance(expected, dict):
+        for name, digest in value.items():
+            if digest != expected[name]:
+                errors.append(f"{label}: {field} {name} differs from current source")
 
 
 def _validate_required_test_hashes(record: dict, errors: list[str], label: str) -> None:
@@ -389,7 +401,7 @@ def validate_records(records: list[dict], source_sha: str) -> list[str]:
             _validate_required_test_hashes(record, errors, label)
             for field, expected in (
                 ("wheel_contract_hashes", WHEEL_CONTRACT_KEYS),
-                ("tooling_source_hashes", TOOLING_SOURCE_KEYS),
+                ("tooling_source_hashes", TOOLING_SOURCE_HASHES),
                 ("tooling_fixture_hashes", TOOLING_FIXTURE_KEYS),
             ):
                 _validate_hash_map(record.get(field), expected, field, errors, label)

@@ -22,6 +22,12 @@ from tools.release import artifact_hashes, normalize_archive, parser_attribution
 
 EPOCH = 1788652800
 ROOT = Path(__file__).resolve().parents[2]
+CAPABILITY_SOURCE_FILES = {
+    "pkg/analysis/capability_model.go",
+    "pkg/analysis/capability_data.go",
+    "pkg/analysis/capabilitydata/ledger.json",
+    "pkg/analysis/capabilitydata/corpus.json",
+}
 
 
 def test_requirement_contract_and_sources_are_release_inputs():
@@ -41,6 +47,16 @@ def test_requirement_contract_and_sources_are_release_inputs():
     assert not expected.intersection({line for line in content if line.startswith("pkg/")})
     for entries in (native, content, sources):
         assert not any(line.startswith(("tests/", "_build_plan/")) for line in entries)
+
+
+def test_capability_ledger_files_are_release_source_inputs_only():
+    native = set((ROOT / "python/native-source-files.txt").read_text(encoding="utf-8").splitlines())
+    content = set((ROOT / "tools/release-content-files.txt").read_text(encoding="utf-8").splitlines())
+    sources = set((ROOT / "tools/release-source-files.txt").read_text(encoding="utf-8").splitlines())
+
+    assert CAPABILITY_SOURCE_FILES <= native
+    assert CAPABILITY_SOURCE_FILES <= sources
+    assert not CAPABILITY_SOURCE_FILES.intersection(content)
 
 
 def test_requirement_contract_reaches_wheel_through_native_source_manifest(tmp_path: Path, monkeypatch):
@@ -91,6 +107,8 @@ def test_staged_sdist_native_source_closure_compiles_through_build_py(
     source_command.make_release_tree(
         str(staged), ["build_support.py", "native-source-files.txt", "setup.py"]
     )
+    for relative in CAPABILITY_SOURCE_FILES:
+        assert (staged / "_native_src" / relative).read_bytes() == (ROOT / relative).read_bytes()
 
     staged_distribution = support.NativeDistribution(
         {"script_name": str(staged / "setup.py")}

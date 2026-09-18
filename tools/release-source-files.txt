@@ -53,6 +53,7 @@ grammar/SPL2Parser.g4
 grammar/SPLLexer.g4
 grammar/SPLParser.g4
 internal/buildinfo/version.go
+internal/capabilityselector/selector.go
 internal/corpusfs/open.go
 internal/corpusfs/open_unix.go
 internal/corpusfs/open_unsupported.go
@@ -87,6 +88,10 @@ parser/splparser_listener.go
 parser/splparser_visitor.go
 pkg/analysis/analyze.go
 pkg/analysis/capabilities.go
+pkg/analysis/capability_data.go
+pkg/analysis/capability_model.go
+pkg/analysis/capabilitydata/corpus.json
+pkg/analysis/capabilitydata/ledger.json
 pkg/analysis/commands.go
 pkg/analysis/dependencies.go
 pkg/analysis/diagnostics.go
