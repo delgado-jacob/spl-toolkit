@@ -343,7 +343,10 @@ def update(directory: Path) -> None:
             ref = result["$ref"]
             if not ref.startswith(shared_origin):
                 raise ValueError("unexpected external capability contract reference")
-            result["$ref"] = PREFIX + ref.removeprefix(shared_origin)
+            name = ref.removeprefix(shared_origin)
+            if name == "rewrite.Rule":
+                name = "tooling.rewrite.Rule"
+            result["$ref"] = PREFIX + name
         return result
 
     capability_names = (
@@ -371,6 +374,9 @@ def update(directory: Path) -> None:
         canonical = shared["$defs"][name]
         shape(name, tuple(canonical["properties"]))
         schemas[name] = capability_contract(canonical)
+
+    evidence_request = "analysis.CapabilityEvidenceRewriteRequest"
+    schemas[evidence_request] = capability_contract(shared["$defs"][evidence_request])
 
     canonical_manifest = shared["$defs"]["analysis.CapabilityManifest"]
     shape("analysis.CapabilityManifest", tuple(canonical_manifest["properties"]))

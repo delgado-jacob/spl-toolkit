@@ -81,6 +81,7 @@ def errors(schemas, family, instance, definition=None):
 
 
 CAPABILITY_DIMENSIONS = ("syntax", "semantics", "requirements", "linting", "safe_rewriting")
+FORBIDDEN_CAPABILITY_SCORE_KEYS = {"percent", "percentage", "score", "composite_score"}
 
 
 def capability_ledger_consistency_errors(manifest):
@@ -109,6 +110,20 @@ def capability_ledger_consistency_errors(manifest):
     if manifest["summary"] != expected:
         failures.append("summary does not match records")
     return failures
+
+
+def forbidden_capability_score_paths(value, path=()):
+    found = []
+    if isinstance(value, dict):
+        for key, child in value.items():
+            child_path = path + (key,)
+            if key in FORBIDDEN_CAPABILITY_SCORE_KEYS:
+                found.append(child_path)
+            found.extend(forbidden_capability_score_paths(child, child_path))
+    elif isinstance(value, list):
+        for index, child in enumerate(value):
+            found.extend(forbidden_capability_score_paths(child, path + (index,)))
+    return found
 
 
 def shared_errors(schemas, definition, instance):
@@ -532,6 +547,7 @@ def test_capability_ledger_contract_and_additive_v1_compatibility(schemas, emitt
         assert not capability_ledger_consistency_errors(manifest)
         assert set(manifest["summary"]) == set(CAPABILITY_DIMENSIONS)
         assert manifest["toolkit_version"]
+        assert not forbidden_capability_score_paths(manifest)
 
         archived = {
             member: copy.deepcopy(manifest[member])
@@ -614,6 +630,14 @@ def test_capability_ledger_contract_and_additive_v1_compatibility(schemas, emitt
     assert not errors(schemas, "capabilities", registration_only)
     assert not capability_ledger_consistency_errors(registration_only)
 
+    for path in (("score",), ("composite_score",), ("summary", "syntax", "percentage")):
+        scored = copy.deepcopy(manifest)
+        target = scored
+        for component in path[:-1]:
+            target = target[component]
+        target[path[-1]] = 100
+        assert path in forbidden_capability_score_paths(scored)
+
 
 def test_capability_evidence_observation_definitions_are_strict(schemas):
     location = {
@@ -671,6 +695,53 @@ def test_capability_evidence_observation_definitions_are_strict(schemas):
     assert shared_errors(schemas, "analysis.CapabilityEvidenceObservations", {})
     observations["future_field"] = True
     assert shared_errors(schemas, "analysis.CapabilityEvidenceObservations", observations)
+
+
+def test_capability_evidence_rewrite_request_is_the_runtime_wrapper(schemas):
+    rule = {
+        "id": "rename-host", "kind": "field",
+        "source": {"name": "host"}, "target": {"name": "server"},
+    }
+    request = {"schema_version": 1, "mode": "preview", "rules": [rule]}
+    assert not shared_errors(schemas, "analysis.CapabilityEvidenceRewriteRequest", request)
+
+    invalid_cases = {
+        "wrong version": {**request, "schema_version": 2},
+        "unknown key": {**request, "document": {"text": "search host=web"}},
+        "missing rules": {"schema_version": 1, "mode": "preview"},
+        "bad mode": {**request, "mode": "commit"},
+        "bad rule": {**request, "rules": [{**rule, "kind": "command"}]},
+    }
+    for name, invalid in invalid_cases.items():
+        assert shared_errors(schemas, "analysis.CapabilityEvidenceRewriteRequest", invalid), name
+
+
+def test_capability_evidence_reuses_public_diagnostic_and_requirement_enums(schemas):
+    location = {
+        "start": {"offset": 0, "line": 1, "column": 1},
+        "end": {"offset": 1, "line": 1, "column": 2},
+    }
+    diagnostic = {
+        "code": "SPL_TEST", "category": "semantic", "severity": "warning",
+        "location": location,
+    }
+    requirement = {
+        "kind": "field", "identity": "host", "role": "search_field",
+        "necessity": "required", "resolution": "exact",
+    }
+    assert not shared_errors(schemas, "analysis.CapabilityDiagnosticExpectation", diagnostic)
+    assert not shared_errors(schemas, "analysis.CapabilityRequirementExpectation", requirement)
+
+    for value in ("fatal", "notice"):
+        invalid = copy.deepcopy(diagnostic)
+        invalid["severity"] = value
+        assert shared_errors(schemas, "analysis.CapabilityDiagnosticExpectation", invalid), value
+    for member, value in (
+        ("kind", "command"), ("necessity", "optional"), ("resolution", "unresolved"),
+    ):
+        invalid = copy.deepcopy(requirement)
+        invalid[member] = value
+        assert shared_errors(schemas, "analysis.CapabilityRequirementExpectation", invalid), member
 
 
 def test_eager_reference_closure_rejects_unused_bad_resources(schemas):

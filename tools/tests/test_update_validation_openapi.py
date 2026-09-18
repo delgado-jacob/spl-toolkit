@@ -379,6 +379,7 @@ class ValidationOpenAPITests(unittest.TestCase):
                 "analysis.CapabilityRequirementsObservation": ["query_status", "complete", "items", "gap_codes"],
                 "analysis.CapabilityLintingObservation": ["diagnostics"],
                 "analysis.CapabilityRewriteObservation": ["status", "committed", "rewrite_complete", "text", "candidate_text", "coverage_reasons", "change_reasons", "rule_evaluation_reasons"],
+                "analysis.CapabilityEvidenceRewriteRequest": ["schema_version", "rules"],
                 "analysis.CapabilityEvidence": ["id", "classification", "document", "observations", "provenance"],
             }
             for name, members in required.items():
@@ -397,9 +398,39 @@ class ValidationOpenAPITests(unittest.TestCase):
                              ["toolkit", "spl2", "splunk_analytics", "security_detection"])
             self.assertEqual(schemas["analysis.CapabilityEvidence"]["properties"]["classification"]["enum"],
                              ["positive", "negative", "incomplete"])
+            self.assertEqual(
+                schemas["analysis.CapabilityDiagnosticExpectation"]["properties"]["severity"],
+                {"$ref": "#/components/schemas/analysis.Diagnostic/properties/severity"},
+            )
+            for member in ("kind", "necessity", "resolution"):
+                self.assertEqual(
+                    schemas["analysis.CapabilityRequirementExpectation"]["properties"][member],
+                    {"$ref": f"#/components/schemas/analysis.RequirementItem/properties/{member}"},
+                )
             for name in ("analysis.CapabilitySemanticsObservation", "analysis.CapabilityRequirementsObservation", "analysis.CapabilityRewriteObservation"):
                 member = "query_status" if name.endswith("RequirementsObservation") else "status"
                 self.assertEqual(schemas[name]["properties"][member]["enum"], ["valid", "invalid", "incomplete"])
+            wrapper = schemas["analysis.CapabilityEvidenceRewriteRequest"]
+            self.assertEqual(wrapper["properties"]["schema_version"], {"type": "integer", "const": 1})
+            self.assertEqual(wrapper["properties"]["mode"], {"type": "string", "enum": ["preview", "apply"]})
+            self.assertEqual(wrapper["properties"]["rules"], {
+                "type": "array", "items": {"$ref": "#/components/schemas/tooling.rewrite.Rule"},
+            })
+            self.assertEqual(
+                schemas["analysis.CapabilityEvidence"]["properties"]["rewrite_request"],
+                {"$ref": "#/components/schemas/analysis.CapabilityEvidenceRewriteRequest"},
+            )
+            rule = {"id": "rename-host", "kind": "field", "source": {"name": "host"}, "target": {"name": "server"}}
+            request = {"schema_version": 1, "mode": "preview", "rules": [rule]}
+            self.assertTrue(self.schema_accepts(schemas, "analysis.CapabilityEvidenceRewriteRequest", request))
+            for invalid in (
+                {**request, "schema_version": 2},
+                {**request, "document": {"text": "search host=web"}},
+                {"schema_version": 1, "mode": "preview"},
+                {**request, "mode": "commit"},
+                {**request, "rules": [{**rule, "kind": "command"}]},
+            ):
+                self.assertFalse(self.schema_accepts(schemas, "analysis.CapabilityEvidenceRewriteRequest", invalid), invalid)
             for member in ("toolkit_version", "records", "summary", "evidence"):
                 self.assertIn(member, schemas["analysis.CapabilityManifest"]["properties"])
                 self.assertNotIn(member, schemas["analysis.CapabilityManifest"].get("required", []))

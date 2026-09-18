@@ -66,8 +66,7 @@ components:
         location:
           $ref: '#/components/schemas/analysis.Location'
         severity:
-          minLength: 1
-          type: string
+          $ref: '#/components/schemas/analysis.Diagnostic/properties/severity'
       required:
       - code
       - category
@@ -113,7 +112,7 @@ components:
         provenance:
           $ref: '#/components/schemas/analysis.CapabilityProvenance'
         rewrite_request:
-          type: object
+          $ref: '#/components/schemas/analysis.CapabilityEvidenceRewriteRequest'
       required:
       - id
       - classification
@@ -141,6 +140,25 @@ components:
           $ref: '#/components/schemas/analysis.CapabilitySemanticsObservation'
         syntax:
           $ref: '#/components/schemas/analysis.CapabilitySyntaxObservation'
+      type: object
+    analysis.CapabilityEvidenceRewriteRequest:
+      additionalProperties: false
+      properties:
+        mode:
+          enum:
+          - preview
+          - apply
+          type: string
+        rules:
+          items:
+            $ref: '#/components/schemas/tooling.rewrite.Rule'
+          type: array
+        schema_version:
+          const: 1
+          type: integer
+      required:
+      - schema_version
+      - rules
       type: object
     analysis.CapabilityLintingObservation:
       additionalProperties: false
@@ -309,14 +327,11 @@ components:
           minLength: 1
           type: string
         kind:
-          minLength: 1
-          type: string
+          $ref: '#/components/schemas/analysis.RequirementItem/properties/kind'
         necessity:
-          minLength: 1
-          type: string
+          $ref: '#/components/schemas/analysis.RequirementItem/properties/necessity'
         resolution:
-          minLength: 1
-          type: string
+          $ref: '#/components/schemas/analysis.RequirementItem/properties/resolution'
         role:
           minLength: 1
           type: string

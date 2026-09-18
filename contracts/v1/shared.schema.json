@@ -1060,8 +1060,7 @@
           "minLength": 1
         },
         "severity": {
-          "type": "string",
-          "minLength": 1
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.Diagnostic/properties/severity"
         },
         "location": {
           "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.Location"
@@ -1244,8 +1243,7 @@
       "type": "object",
       "properties": {
         "kind": {
-          "type": "string",
-          "minLength": 1
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.RequirementItem/properties/kind"
         },
         "identity": {
           "type": "string",
@@ -1256,12 +1254,10 @@
           "minLength": 1
         },
         "necessity": {
-          "type": "string",
-          "minLength": 1
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.RequirementItem/properties/necessity"
         },
         "resolution": {
-          "type": "string",
-          "minLength": 1
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.RequirementItem/properties/resolution"
         }
       },
       "required": [
@@ -1403,6 +1399,33 @@
       "minProperties": 1,
       "additionalProperties": false
     },
+    "analysis.CapabilityEvidenceRewriteRequest": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "type": "integer",
+          "const": 1
+        },
+        "mode": {
+          "type": "string",
+          "enum": [
+            "preview",
+            "apply"
+          ]
+        },
+        "rules": {
+          "type": "array",
+          "items": {
+            "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/rewrite.Rule"
+          }
+        }
+      },
+      "required": [
+        "schema_version",
+        "rules"
+      ],
+      "additionalProperties": false
+    },
     "analysis.CapabilityEvidence": {
       "type": "object",
       "properties": {
@@ -1425,7 +1448,7 @@
           "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.CapabilityEvidenceObservations"
         },
         "rewrite_request": {
-          "type": "object"
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.CapabilityEvidenceRewriteRequest"
         },
         "provenance": {
           "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.CapabilityProvenance"
