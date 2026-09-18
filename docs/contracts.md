@@ -52,8 +52,9 @@ the actual supported forms and restrictions.
 Capability records have five separately reported and independently evidenced
 dimensions: syntax, semantics, requirements, linting and safe rewriting. Each is
 supported, partial, unsupported, not applicable or unassessed. Summary counts are
-exact integers with these identities: applicable equals supported plus partial plus
-unassessed; record count equals applicable plus not applicable; covered equals
+exact integers with these identities:
+`applicable = supported + partial + unsupported + unassessed`; record count equals
+applicable plus not applicable; covered equals
 supported. Partial and unsupported claims do not receive covered credit. The
 contract defines no percentage or composite score.
 
