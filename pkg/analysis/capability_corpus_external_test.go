@@ -9,6 +9,7 @@ import (
 	"slices"
 	"strings"
 	"testing"
+	"unicode/utf8"
 
 	"github.com/delgado-jacob/spl-toolkit/pkg/analysis"
 	"github.com/delgado-jacob/spl-toolkit/pkg/rewrite"
@@ -128,13 +129,17 @@ func TestCapabilityRewriteEvidencePreservesSchemaVersion(t *testing.T) {
 
 func TestCapabilityRewriteRequestWrapperRejectsMalformedJSON(t *testing.T) {
 	for name, raw := range map[string]json.RawMessage{
-		"invalid syntax":           json.RawMessage(`{"schema_version":1`),
-		"unknown property":         json.RawMessage(`{"schema_version":1,"mode":"preview","rules":[],"unexpected":true}`),
-		"trailing JSON value":      json.RawMessage(`{"schema_version":1,"mode":"preview","rules":[]} {}`),
-		"duplicate schema version": json.RawMessage(`{"schema_version":1,"schema_version":1,"mode":"preview","rules":[]}`),
-		"duplicate rules":          json.RawMessage(`{"schema_version":1,"mode":"preview","rules":[],"rules":[]}`),
-		"missing schema version":   json.RawMessage(`{"mode":"preview","rules":[]}`),
-		"missing rules":            json.RawMessage(`{"schema_version":1,"mode":"preview"}`),
+		"invalid syntax":            json.RawMessage(`{"schema_version":1`),
+		"unknown property":          json.RawMessage(`{"schema_version":1,"mode":"preview","rules":[],"unexpected":true}`),
+		"trailing JSON value":       json.RawMessage(`{"schema_version":1,"mode":"preview","rules":[]} {}`),
+		"duplicate schema version":  json.RawMessage(`{"schema_version":1,"schema_version":1,"mode":"preview","rules":[]}`),
+		"duplicate rules":           json.RawMessage(`{"schema_version":1,"mode":"preview","rules":[],"rules":[]}`),
+		"missing schema version":    json.RawMessage(`{"mode":"preview","rules":[]}`),
+		"missing rules":             json.RawMessage(`{"schema_version":1,"mode":"preview"}`),
+		"null mode":                 json.RawMessage(`{"schema_version":1,"mode":null,"rules":[]}`),
+		"null rules":                json.RawMessage(`{"schema_version":1,"mode":"preview","rules":null}`),
+		"duplicate nested rule key": json.RawMessage(`{"schema_version":1,"rules":[{"id":"first","id":"second","kind":"field","source":{"name":"old"},"target":{"name":"new"}}]}`),
+		"lone surrogate escape":     json.RawMessage(`{"schema_version":1,"rules":[{"id":"\ud800","kind":"field","source":{"name":"old"},"target":{"name":"new"}}]}`),
 	} {
 		t.Run(name, func(t *testing.T) {
 			if request, err := decodeCapabilityRewriteRequest(raw); err == nil {
@@ -303,6 +308,12 @@ func compareRewrite(evidence analysis.CapabilityEvidence, expected analysis.Capa
 }
 
 func decodeCapabilityRewriteRequest(raw json.RawMessage) (capabilityRewriteRequest, error) {
+	if err := validateCapabilityRewriteUnicode(raw); err != nil {
+		return capabilityRewriteRequest{}, err
+	}
+	if err := validateCapabilityJSONDuplicates(raw); err != nil {
+		return capabilityRewriteRequest{}, err
+	}
 	decoder := json.NewDecoder(bytes.NewReader(raw))
 	start, err := decoder.Token()
 	if err != nil {
@@ -312,6 +323,7 @@ func decodeCapabilityRewriteRequest(raw json.RawMessage) (capabilityRewriteReque
 		return capabilityRewriteRequest{}, fmt.Errorf("expected an object")
 	}
 	seen := make(map[string]bool, 3)
+	fields := make(map[string]json.RawMessage, 3)
 	for decoder.More() {
 		token, err := decoder.Token()
 		if err != nil {
@@ -329,6 +341,7 @@ func decodeCapabilityRewriteRequest(raw json.RawMessage) (capabilityRewriteReque
 		if err := decoder.Decode(&value); err != nil {
 			return capabilityRewriteRequest{}, fmt.Errorf("invalid property %q: %w", key, err)
 		}
+		fields[key] = value
 	}
 	if _, err := decoder.Token(); err != nil {
 		return capabilityRewriteRequest{}, err
@@ -345,12 +358,129 @@ func decodeCapabilityRewriteRequest(raw json.RawMessage) (capabilityRewriteReque
 			return capabilityRewriteRequest{}, fmt.Errorf("missing property %q", required)
 		}
 	}
+	for _, present := range []string{"mode", "rules"} {
+		if value, found := fields[present]; found && bytes.Equal(bytes.TrimSpace(value), []byte("null")) {
+			return capabilityRewriteRequest{}, fmt.Errorf("property %q must not be null", present)
+		}
+	}
 	typed := json.NewDecoder(bytes.NewReader(raw))
 	typed.DisallowUnknownFields()
 	if err := typed.Decode(&request); err != nil {
 		return capabilityRewriteRequest{}, err
 	}
 	return request, nil
+}
+
+func validateCapabilityJSONDuplicates(raw []byte) error {
+	decoder := json.NewDecoder(bytes.NewReader(raw))
+	if err := validateCapabilityJSONValue(decoder); err != nil {
+		return err
+	}
+	if err := decoder.Decode(&struct{}{}); err != io.EOF {
+		if err == nil {
+			return fmt.Errorf("expected exactly one JSON value")
+		}
+		return fmt.Errorf("trailing data: %w", err)
+	}
+	return nil
+}
+
+func validateCapabilityJSONValue(decoder *json.Decoder) error {
+	token, err := decoder.Token()
+	if err != nil {
+		return err
+	}
+	delim, composite := token.(json.Delim)
+	if !composite {
+		return nil
+	}
+	switch delim {
+	case '{':
+		seen := make(map[string]bool)
+		for decoder.More() {
+			keyToken, err := decoder.Token()
+			if err != nil {
+				return err
+			}
+			key := keyToken.(string)
+			if seen[key] {
+				return fmt.Errorf("duplicate property %q", key)
+			}
+			seen[key] = true
+			if err := validateCapabilityJSONValue(decoder); err != nil {
+				return err
+			}
+		}
+	case '[':
+		for decoder.More() {
+			if err := validateCapabilityJSONValue(decoder); err != nil {
+				return err
+			}
+		}
+	default:
+		return fmt.Errorf("unexpected JSON delimiter %q", delim)
+	}
+	_, err = decoder.Token()
+	return err
+}
+
+func validateCapabilityRewriteUnicode(raw []byte) error {
+	if !utf8.Valid(raw) {
+		return fmt.Errorf("request body is not valid UTF-8")
+	}
+	inString := false
+	for i := 0; i < len(raw); i++ {
+		switch raw[i] {
+		case '"':
+			inString = !inString
+		case '\\':
+			if !inString || i+1 >= len(raw) {
+				continue
+			}
+			if raw[i+1] != 'u' {
+				i++
+				continue
+			}
+			value, ok := capabilityUnicodeEscapeValue(raw, i)
+			if !ok {
+				continue
+			}
+			switch {
+			case value >= 0xd800 && value <= 0xdbff:
+				low, paired := capabilityUnicodeEscapeValue(raw, i+6)
+				if !paired || low < 0xdc00 || low > 0xdfff {
+					return fmt.Errorf("request body contains an unpaired UTF-16 surrogate escape at byte %d", i)
+				}
+				i += 11
+			case value >= 0xdc00 && value <= 0xdfff:
+				return fmt.Errorf("request body contains an unpaired UTF-16 surrogate escape at byte %d", i)
+			default:
+				i += 5
+			}
+		}
+	}
+	return nil
+}
+
+func capabilityUnicodeEscapeValue(raw []byte, start int) (uint16, bool) {
+	if start < 0 || start+6 > len(raw) || raw[start] != '\\' || raw[start+1] != 'u' {
+		return 0, false
+	}
+	var value uint16
+	for _, digit := range raw[start+2 : start+6] {
+		value <<= 4
+		switch {
+		case digit >= '0' && digit <= '9':
+			value |= uint16(digit - '0')
+		case digit >= 'a' && digit <= 'f':
+			value |= uint16(digit-'a') + 10
+		case digit >= 'A' && digit <= 'F':
+			value |= uint16(digit-'A') + 10
+		default:
+			return 0, false
+		}
+	}
+	return value, true
 }
 
 func assertClaimEvidence(t *testing.T, recordID string, dimension capabilityDimension, evidenceByID map[string]analysis.CapabilityEvidence, executions map[string]evidenceExecution) {
