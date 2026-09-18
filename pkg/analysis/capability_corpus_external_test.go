@@ -329,7 +329,9 @@ func validateRewriteEvidenceCase(key string, evidence analysis.CapabilityEvidenc
 		return fmt.Errorf("advertised rewrite form %q evidence %q request=%+v, want schema_version 1, apply mode, and one rule", key, evidence.ID, request)
 	}
 	rule := request.Rules[0]
-	if rule.Kind != check.Kind || !rewriteFixtureIdentityEquals(rule.Source, source, check.Role) || !rewriteFixtureIdentityEquals(rule.Target, target, "") {
+	sourcePath := check.Role == "navigation" && check.Language == "spl2"
+	targetPath := check.Role == "navigation" && check.Language == "spl"
+	if rule.Kind != check.Kind || !rewriteFixtureIdentityEquals(rule.Source, source, sourcePath) || !rewriteFixtureIdentityEquals(rule.Target, target, targetPath) {
 		return fmt.Errorf("advertised rewrite form %q evidence %q rule=%+v, want kind=%q source=%q target=%q", key, evidence.ID, rule, check.Kind, source, target)
 	}
 	observation := evidence.Observations.SafeRewriting
@@ -339,8 +341,6 @@ func validateRewriteEvidenceCase(key string, evidence analysis.CapabilityEvidenc
 	wantText, wantCommitted, wantComplete := query, false, false
 	if check.Supported {
 		wantText, wantCommitted, wantComplete = check.Positive.Candidate, true, true
-	} else if check.Negative.Reason == "no_match" {
-		wantComplete = true
 	}
 	if observation.Committed != wantCommitted || observation.RewriteComplete != wantComplete || observation.Text != wantText || observation.CandidateText != wantText {
 		return fmt.Errorf("advertised rewrite form %q evidence %q result=%+v, want committed=%t complete=%t text=%q", key, evidence.ID, *observation, wantCommitted, wantComplete, wantText)
@@ -349,7 +349,7 @@ func validateRewriteEvidenceCase(key string, evidence analysis.CapabilityEvidenc
 		return fmt.Errorf("advertised rewrite form %q evidence %q result has no refusal reason %q", key, evidence.ID, check.Negative.Reason)
 	}
 	result := executeEvidence(evidence).dimensions["safe_rewriting"]
-	if !result.passed || (check.Supported && result.refused) {
+	if !result.passed || result.refused == check.Supported {
 		return fmt.Errorf("advertised rewrite form %q evidence %q did not prove its boundary: expected=%s actual=%s", key, evidence.ID, result.expected, result.actual)
 	}
 	return nil
@@ -359,8 +359,8 @@ func rewriteCapabilityKey(language, kind, role string) string {
 	return language + "/" + kind + "/" + role
 }
 
-func rewriteFixtureIdentityEquals(identity rewrite.Identity, name, role string) bool {
-	if role == "navigation" {
+func rewriteFixtureIdentityEquals(identity rewrite.Identity, name string, path bool) bool {
+	if path {
 		return identity.Name == nil && slices.Equal(identity.Path, strings.Split(name, "."))
 	}
 	return identity.Name != nil && *identity.Name == name && len(identity.Path) == 0

@@ -150,10 +150,13 @@ func TestRewriteCapabilityMatrix(t *testing.T) {
 				}
 			}
 			source := conditionIdentity(n.Source)
-			if c.Role == "navigation" {
+			target := conditionIdentity(n.Target)
+			if c.Role == "navigation" && c.Language == "spl2" {
 				source = Identity{Path: []string{"actor", "name"}}
+			} else if c.Role == "navigation" {
+				target = Identity{Path: strings.Split(n.Target, ".")}
 			}
-			r := requireRewrite(t, Request{SchemaVersion: 1, Mode: Apply, Document: analysis.QueryDocument{Text: n.Query, Language: c.Language, SourceID: c.ID + "-negative"}, Rules: []Rule{{ID: "matrix", Kind: c.Kind, Source: source, Target: conditionIdentity(n.Target)}}})
+			r := requireRewrite(t, Request{SchemaVersion: 1, Mode: Apply, Document: analysis.QueryDocument{Text: n.Query, Language: c.Language, SourceID: c.ID + "-negative"}, Rules: []Rule{{ID: "matrix", Kind: c.Kind, Source: source, Target: target}}})
 			if r.Committed || r.Text != n.Query || r.CandidateText != n.Query {
 				t.Fatal("negative context changed")
 			}

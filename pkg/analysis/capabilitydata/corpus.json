@@ -1051,15 +1051,19 @@
       },
       "observations": {
         "safe_rewriting": {
-          "status": "valid",
+          "status": "incomplete",
           "committed": false,
-          "rewrite_complete": true,
+          "rewrite_complete": false,
           "text": "search index=main | where actor.name=1",
           "candidate_text": "search index=main | where actor.name=1",
-          "coverage_reasons": [],
-          "change_reasons": [],
+          "coverage_reasons": [
+            "target_not_renderable"
+          ],
+          "change_reasons": [
+            "target_not_renderable"
+          ],
           "rule_evaluation_reasons": [
-            "no_match"
+            "matched"
           ]
         }
       },
@@ -1071,13 +1075,13 @@
             "id": "capability",
             "kind": "field",
             "source": {
-              "path": [
-                "actor",
-                "name"
-              ]
+              "name": "actor.name"
             },
             "target": {
-              "name": "user"
+              "path": [
+                "user",
+                "name"
+              ]
             }
           }
         ]

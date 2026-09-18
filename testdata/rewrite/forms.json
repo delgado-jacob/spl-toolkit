@@ -376,8 +376,8 @@
       "negative": {
         "query": "search index=main | where actor.name=1",
         "source": "actor.name",
-        "target": "user",
-        "reason": "no_match"
+        "target": "user.name",
+        "reason": "target_not_renderable"
       }
     },
     {
