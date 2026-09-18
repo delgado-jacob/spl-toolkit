@@ -47,8 +47,22 @@ def raw_native_capabilities(mapper: SPLMapper, language: str) -> dict:
         mapper._lib.spl_result_free(pointer)
 
 
-def expected_toolkit_version(mapper: SPLMapper) -> str:
-    return EXPECTED_VERSION or (__version__ if __version__ != "dev" else mapper.native_version)
+def source_tree_version() -> str | None:
+    for root in Path(__file__).resolve().parents:
+        version_file = root / "VERSION"
+        if (root / "go.mod").is_file() and version_file.is_file():
+            version = version_file.read_text(encoding="utf-8").strip()
+            assert version
+            return version
+    return None
+
+
+def expected_toolkit_version(_mapper: SPLMapper) -> str:
+    expected = EXPECTED_VERSION or source_tree_version()
+    if expected:
+        return expected
+    assert __version__ != "dev", "expected tagged version is unavailable outside a source tree"
+    return __version__
 
 
 def assert_capability_ledger_is_self_consistent(manifest: dict, language: str, expected_version: str) -> None:

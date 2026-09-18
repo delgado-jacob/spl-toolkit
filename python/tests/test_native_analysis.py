@@ -29,8 +29,22 @@ def corpus():
     return data["cases"]
 
 
-def expected_toolkit_version(mapper):
-    return EXPECTED_VERSION or (__version__ if __version__ != "dev" else mapper.native_version)
+def source_tree_version():
+    for root in Path(__file__).resolve().parents:
+        version_file = root / "VERSION"
+        if (root / "go.mod").is_file() and version_file.is_file():
+            version = version_file.read_text(encoding="utf-8").strip()
+            assert version
+            return version
+    return None
+
+
+def expected_toolkit_version(_mapper):
+    expected = EXPECTED_VERSION or source_tree_version()
+    if expected:
+        return expected
+    assert __version__ != "dev", "expected tagged version is unavailable outside a source tree"
+    return __version__
 
 
 def assert_complete_capability_manifest(manifest, language, expected_version):

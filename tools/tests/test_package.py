@@ -8,6 +8,7 @@ import platform
 import subprocess
 import sys
 import json
+from types import SimpleNamespace
 
 import pytest
 
@@ -448,6 +449,18 @@ def test_copied_capability_tests_do_not_require_checkout_version(tmp_path: Path)
         text=True,
     )
     assert completed.returncode == 0, completed.stderr
+
+
+def test_source_capability_version_is_independent_of_package_and_native(monkeypatch):
+    monkeypatch.syspath_prepend(str(ROOT / "python"))
+    path = ROOT / "python/tests/test_native_analysis.py"
+    spec = importlib.util.spec_from_file_location("source_native_analysis", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    monkeypatch.setattr(module, "EXPECTED_VERSION", None)
+    monkeypatch.setattr(module, "__version__", "dev")
+
+    assert module.expected_toolkit_version(SimpleNamespace(native_version="changed")) == "0.1.1"
 
 
 def test_installed_requirement_inputs_are_copied_and_hashed(tmp_path: Path, monkeypatch):
