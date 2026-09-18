@@ -72,6 +72,22 @@ strings, arrays/objects, lambdas, SQL clauses, child queries and command-specifi
 options. Dedicated syntax is distinct from complete field effects. The capability
 manifest classifies all 53 inventory entries, and lists form and held limitations.
 
+The evidence ledger is more granular than that legacy inventory projection. The
+current SPL2 manifest has 98 form records and 108 evidence cases. Syntax has 69
+supported, 19 unsupported and 10 unassessed records. Semantics has 50 supported,
+38 unsupported and 10 unassessed records. Requirements and linting are 98
+unassessed. Safe rewriting has 1 unsupported and 97 unassessed. Supported is the
+only state counted as covered; partial, unsupported and unassessed remain in the
+applicable denominator. Not-applicable records are outside that denominator. No
+composite score is produced.
+
+`grammar_registered` is separate from evidence-backed syntax coverage. In
+particular, `spl2.command.spl1.quoted-pipeline` has grammar registration because
+the parser owns the form, but its syntax claim is unsupported and receives zero
+covered syntax credit. Its cited incomplete case preserves the H10 embedded-body
+boundary. Analysis findings also do not count as lint evidence; linting remains
+unassessed until exact lint observations are reviewed.
+
 Approved ordinary forms of `search`, `from`, `eval`, `where`, `fields`, `table`,
 `rename`, `stats`, `eventstats`, `streamstats`, `lookup`, `sort`, `dedup`, `head`,
 `reverse` and `select` have modeled field effects. These include sequential eval
@@ -227,6 +243,12 @@ It identifies the durable V1 source/design, original IDs/candidates/source links
 inventory and hold projection. It is not a downloaded-page-body hash or the
 mutable current corpus. The default SPL manifest omits it. Runtime execution
 does not read `_build_plan` or retrieve documentation.
+
+Record and evidence IDs retain their exact reviewed scope. Broadening a form
+requires a new ID unless a reviewed scope correction establishes that the old
+boundary was wrong. The embedded corpus proves static local toolkit behavior. It
+does not prove live Splunk execution, runtime equivalence, environment
+compatibility, authorization or upstream Splunk support.
 
 The [compatibility record](compatibility.md) distinguishes local verification
 from release-platform, interpreter and live/operator acceptance. No local corpus,

@@ -114,6 +114,22 @@ The selected capability manifest's additive `rewrite` member contains
 `identity_forms`, `supported` and `limitations`. A supported role still requires
 the actual operand's source binding, rendering and whole-candidate proof.
 
+The ledger's `safe_rewriting` dimension is an evidence claim per language form,
+not a projection of `rewrite.forms[].supported`. It uses the same supported,
+partial, unsupported, not-applicable and unassessed states as syntax, semantics,
+requirements and linting. Supported alone contributes to `covered`; applicable
+equals supported plus partial plus unsupported plus unassessed, and total records
+equal applicable plus not applicable. The current SPL summary is 1 unsupported
+and 67 unassessed; SPL2 is 1 unsupported and 97 unassessed. These exact counts do
+not form a score or percentage.
+
+Evidence IDs bind a claim to typed local requests and observations. A broader
+rewrite form gets a new ID unless a reviewed scope correction changes the
+original boundary. Grammar registration and analysis diagnostics do not provide
+safe-rewrite or lint coverage. The corpus establishes static local toolkit
+behavior only, not live Splunk execution, runtime equivalence, environment
+compatibility, authorization or upstream support.
+
 Exact search/expression/selector atoms, rename inputs, null-inspection operands
 and proven lookup-local inputs can map. Explicit eval/rename/SQL/lookup outputs
 and downstream derived aliases remain fixed. Lookup catalogs are independent of

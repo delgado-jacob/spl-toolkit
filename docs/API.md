@@ -99,7 +99,7 @@ Requirements describe direct obligations visible in the submitted query. Extract
 
 Both digests use `sha256:<64 lowercase hex>`. `query_digest` is SHA-256 over the exact valid UTF-8 query-text bytes. It excludes source ID, language, profile, and compatibility version. Query text is not whitespace-normalized, repaired, or line-ending-normalized.
 
-`capability_revision` is SHA-256 over compact Go `encoding/json` output for the fully normalized typed `CapabilityManifest`, without indentation or a trailing newline. It covers language, profile, version, documentation snapshot, commands, functions, limitations, and the rewrite manifest when present. It excludes environment state and later corpus evidence.
+`capability_revision` is SHA-256 over compact Go `encoding/json` output for the normalized semantic capability payload, without indentation or a trailing newline. It includes `schema_version`, the language/profile/version selectors, `documentation_snapshot` when present, the legacy `commands` and `functions` projections, `rewrite`, `records`, `summary`, and `evidence`. Of the fields in the emitted manifest, only `toolkit_version` is excluded. A source Go build may therefore report `toolkit_version: "dev"` while tagged CLI, server, native, and packaged surfaces report the exact `VERSION`; both retain the same semantic revision when their capability payloads match.
 
 These digests identify supplied data. They are not authentication, authorization, signatures, proof of environment compatibility, or permission to execute a query.
 
@@ -242,7 +242,26 @@ source-first validation, all-null removal, phase ownership and exclusions.
 
 `valid` means no proven structural error and complete analysis for the supported forms. It does not assert that fields exist in an external schema, that a dependency exists on a Splunk instance, or that Splunk will execute a query successfully. `invalid` takes precedence over incomplete coverage when syntax errors or provably unavailable fields occur. Partial trustworthy findings survive neighboring unsupported or damaged stages; later supported stages cannot erase earlier coverage gaps. Read both `status` and `coverage`.
 
-The capability manifest has integer `schema_version: 1`, `language`, `profile`, `version`, `commands`, and `functions`. Each entry has `name`, `syntax_supported`, `semantic_supported`, and `limitations`. Semantic support applies to the listed forms, not every option of that command. Use the runtime manifest for exact function arities and supported contexts. The following bullets describe the default SPL contract; the [standalone SPL2 contract](spl2.md) defines its separate grammar, positional core, SQL phases, null inspection and held boundaries.
+The capability manifest has integer `schema_version: 1`, selectors, `toolkit_version`, legacy `commands` and `functions` projections, `records`, `summary`, and `evidence`, plus optional `documentation_snapshot` and `rewrite`. Each record identifies one language/profile/kind/name/form and reports five dimensions: `syntax`, `semantics`, `requirements`, `linting`, and `safe_rewriting`. Every dimension has one of five states:
+
+- `supported` has the required evidence and contributes to `covered`.
+- `partial` has positive and incomplete evidence plus an explicit limitation. It does not contribute to `covered`.
+- `unsupported` has negative or incomplete evidence plus an explicit limitation. It does not contribute to `covered`.
+- `not_applicable` has no evidence and gives a reason outside the denominator.
+- `unassessed` has no evidence or limitation and remains inside the denominator.
+
+For every dimension, `applicable = supported + partial + unsupported + unassessed`, `record count = applicable + not_applicable`, and `covered = supported`. The API publishes integer counts only. It has no percentage, weighted total, or composite score. Current exact summaries are:
+
+| Language | Records | Evidence cases | Syntax | Semantics | Requirements | Linting | Safe rewriting |
+|---|---:|---:|---|---|---|---|---|
+| SPL | 68 | 67 | 57 supported, 1 unsupported, 10 unassessed | 49 supported, 9 unsupported, 10 unassessed | 68 unassessed | 68 unassessed | 1 unsupported, 67 unassessed |
+| SPL2 | 98 | 108 | 69 supported, 19 unsupported, 10 unassessed | 50 supported, 38 unsupported, 10 unassessed | 98 unassessed | 98 unassessed | 1 unsupported, 97 unassessed |
+
+Evidence IDs resolve to typed local documents, observations, classifications, and provenance in the same manifest. Record and evidence IDs remain stable for the exact reviewed scope. A broadened form receives a new ID unless a reviewed scope correction establishes that the original ID was wrong. `grammar_registered` records parser registration only and never adds coverage. For example, SPL2 record `spl2.command.spl1.quoted-pipeline` has `grammar_registered: true`, but its syntax state is `unsupported`, so it contributes zero covered syntax. Linting is equally separate: analysis diagnostics do not become lint evidence. Both current manifests leave the full linting denominator unassessed.
+
+The legacy `commands` and `functions` members remain compatibility projections. Their `syntax_supported` field can reflect grammar registration and must not be read as evidence-backed syntax coverage. Use `records`, `summary`, and `evidence` for ledger decisions. Semantic support applies only to the listed forms, not every option of a command. The following bullets describe the default SPL contract; the [standalone SPL2 contract](spl2.md) defines its separate grammar, positional core, SQL phases, null inspection and held boundaries.
+
+The evidence corpus proves deterministic, static behavior of this local toolkit build. It does not prove live Splunk execution, runtime equivalence, environment compatibility, authorization, or upstream product support.
 
 - Search predicates treat bare right-hand values as literals; `where`/`eval` expression identifiers are reads. Index/source/sourcetype selectors are dependencies.
 - Eval assignments resolve left-to-right, with self-assignment reading the prior binding. Ordinary non-overlapping rename sources resolve before the stage. Chains, swaps, duplicate claims, and collisions remain incomplete.

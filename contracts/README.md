@@ -48,6 +48,23 @@ The `requirements` property remains optional in the analysis and document-view v
 schemas so archived reports produced before this property existed continue to
 validate. Current producers always emit it.
 
+The capability schema retains the legacy command/function projections and adds
+the evidence ledger. Each record requires syntax, semantics, requirements,
+linting and safe-rewriting claims with one of five states: supported, partial,
+unsupported, not applicable or unassessed. Summary integers obey three identities:
+applicable equals supported plus partial plus unsupported plus unassessed; record
+count equals applicable plus not applicable; covered equals supported. Percentages,
+weighted totals and composite scores are outside the contract.
+
+Evidence IDs must resolve to typed cases in the same manifest. Stable IDs retain
+the exact reviewed scope; a broadened form receives a new ID unless a reviewed
+scope correction changes the original boundary. `grammar_registered` is a parser
+fact independent of syntax coverage. Linting likewise requires its own evidence.
+The current manifests contain 68 SPL records with 67 evidence cases and 98 SPL2
+records with 108 evidence cases. These cases establish static local toolkit
+behavior only, not live Splunk execution, runtime equivalence, environment
+compatibility, authorization or upstream support.
+
 Strict canonical and new request objects reject unknown members, wrong types,
 null optional objects, and conflicting selectors. Query selectors accept their
 existing empty-string defaults (`spl`, `splunkd`, `current`); normalized output
