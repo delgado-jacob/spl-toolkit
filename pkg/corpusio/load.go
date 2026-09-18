@@ -9,6 +9,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
+	"github.com/delgado-jacob/spl-toolkit/internal/capabilityselector"
 	"github.com/delgado-jacob/spl-toolkit/internal/corpusfs"
 	"github.com/delgado-jacob/spl-toolkit/pkg/analysis"
 	"github.com/delgado-jacob/spl-toolkit/pkg/corpus"
@@ -56,11 +57,11 @@ func validateManifest(m Manifest) (Manifest, error) {
 				}
 			}
 		}
-		c, err := analysis.CapabilitiesFor(analysis.CapabilityOptions{Language: e.Language, Profile: e.Profile, Version: e.Version})
+		selectors, err := capabilityselector.Normalize(e.Language, e.Profile, e.Version)
 		if err != nil {
 			return Manifest{}, inputError("document %d options: %v", i, err)
 		}
-		e.Language, e.Profile, e.Version = c.Language, c.Profile, c.Version
+		e.Language, e.Profile, e.Version = selectors.Language, selectors.Profile, selectors.Version
 	}
 	return m, nil
 }

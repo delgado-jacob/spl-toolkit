@@ -68,6 +68,16 @@ func decodeCapabilityAssets(ledgerJSON, corpusJSON []byte) ([]CapabilityRecord, 
 	if err := validateCapabilityAssets(ledger, corpus); err != nil {
 		return nil, nil, err
 	}
+	for i := range corpus.Cases {
+		if len(corpus.Cases[i].RewriteRequest) == 0 {
+			continue
+		}
+		var compact bytes.Buffer
+		if err := json.Compact(&compact, corpus.Cases[i].RewriteRequest); err != nil {
+			return nil, nil, fmt.Errorf("compact capability evidence %q rewrite request: %w", corpus.Cases[i].ID, err)
+		}
+		corpus.Cases[i].RewriteRequest = json.RawMessage(compact.Bytes())
+	}
 	return ledger.Records, corpus.Cases, nil
 }
 

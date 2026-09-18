@@ -7,8 +7,8 @@ import (
 	"sort"
 	"unicode/utf8"
 
+	"github.com/delgado-jacob/spl-toolkit/internal/capabilityselector"
 	"github.com/delgado-jacob/spl-toolkit/internal/corpusfs"
-	"github.com/delgado-jacob/spl-toolkit/pkg/analysis"
 	"github.com/delgado-jacob/spl-toolkit/pkg/corpus"
 )
 
@@ -110,10 +110,10 @@ func discover(root *corpusfs.Dir, uri string, readDirectory directoryReader) (co
 			if lang == "" {
 				continue
 			}
-			c, _ := analysis.CapabilitiesFor(analysis.CapabilityOptions{Language: lang})
+			selectors, _ := capabilityselector.Normalize(lang, "", "")
 			// Read relative to the held containing directory, not the root pathname.
 			name := e.Name
-			item := loadedEntry(ManifestEntry{ID: p, Path: &name, Language: c.Language, Profile: c.Profile, Version: c.Version, SourceID: p}, dir, uri)
+			item := loadedEntry(ManifestEntry{ID: p, Path: &name, Language: selectors.Language, Profile: selectors.Profile, Version: selectors.Version, SourceID: p}, dir, uri)
 			item.Origin.RelativePath = p
 			if item.Failure != nil {
 				item.Failure.Path = p

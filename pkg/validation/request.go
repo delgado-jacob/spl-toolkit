@@ -8,6 +8,7 @@ import (
 	"io"
 	"unicode/utf8"
 
+	"github.com/delgado-jacob/spl-toolkit/internal/capabilityselector"
 	"github.com/delgado-jacob/spl-toolkit/internal/jsoninput"
 	"github.com/delgado-jacob/spl-toolkit/pkg/analysis"
 )
@@ -112,11 +113,11 @@ func array(data []byte) ([]json.RawMessage, error) {
 }
 
 func normalizeDocument(doc analysis.QueryDocument) (analysis.QueryDocument, error) {
-	manifest, err := analysis.CapabilitiesFor(analysis.CapabilityOptions{Language: doc.Language, Profile: doc.Profile, Version: doc.Version})
+	selection, err := capabilityselector.Normalize(doc.Language, doc.Profile, doc.Version)
 	if err != nil {
 		return doc, inputError("%v", err)
 	}
-	doc.Language, doc.Profile, doc.Version = manifest.Language, manifest.Profile, manifest.Version
+	doc.Language, doc.Profile, doc.Version = selection.Language, selection.Profile, selection.Version
 	if !utf8.ValidString(doc.Text) || !utf8.ValidString(doc.SourceID) {
 		return doc, inputError("document text and source_id must be valid UTF-8")
 	}

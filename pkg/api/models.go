@@ -9,8 +9,8 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/delgado-jacob/spl-toolkit/internal/capabilityselector"
 	"github.com/delgado-jacob/spl-toolkit/internal/jsoninput"
-	"github.com/delgado-jacob/spl-toolkit/pkg/analysis"
 	"github.com/delgado-jacob/spl-toolkit/pkg/mapper"
 	"github.com/delgado-jacob/spl-toolkit/pkg/validation"
 )
@@ -299,11 +299,11 @@ func validateLoadMappingsRequest(req *LoadMappingsRequest) []ValidationError {
 // validateLegacyDialect selects the canonical compatibility contract before any
 // fixed-SPL mapper runs. Legacy response models remain unchanged.
 func validateLegacyDialect(language, profile, version string) error {
-	manifest, err := analysis.CapabilitiesFor(analysis.CapabilityOptions{Language: language, Profile: profile, Version: version})
+	selectors, err := capabilityselector.Normalize(language, profile, version)
 	if err != nil {
 		return err
 	}
-	if manifest.Language == "spl2" {
+	if selectors.Language == "spl2" {
 		return fmt.Errorf("unsupported_dialect_for_operation: legacy operations support SPL only; use /query/analyze, /query/validate-fields, /query/validate-schema, or /query/rewrite for SPL2 where the selected capability manifest marks the requested rewrite form supported")
 	}
 	return nil

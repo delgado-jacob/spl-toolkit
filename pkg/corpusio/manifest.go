@@ -9,8 +9,8 @@ import (
 	"path"
 	"strings"
 
+	"github.com/delgado-jacob/spl-toolkit/internal/capabilityselector"
 	"github.com/delgado-jacob/spl-toolkit/internal/jsoninput"
-	"github.com/delgado-jacob/spl-toolkit/pkg/analysis"
 )
 
 type Manifest struct {
@@ -179,7 +179,7 @@ func DecodeManifest(data []byte) (Manifest, error) {
 				return Manifest{}, fmt.Errorf("document %d requires language for extension", i)
 			}
 		}
-		selectors, err := analysis.CapabilitiesFor(analysis.CapabilityOptions{Language: entry.Language, Profile: entry.Profile, Version: entry.Version})
+		selectors, err := capabilityselector.Normalize(entry.Language, entry.Profile, entry.Version)
 		if err != nil {
 			return Manifest{}, fmt.Errorf("document %d options: %w", i, err)
 		}

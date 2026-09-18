@@ -3,8 +3,45 @@ package corpus
 import (
 	"testing"
 
+	"github.com/delgado-jacob/spl-toolkit/internal/buildinfo"
 	"github.com/delgado-jacob/spl-toolkit/pkg/analysis"
 )
+
+func TestAnalysisRevisionMatchesCanonicalManifestPayload(t *testing.T) {
+	for _, language := range []string{"spl", "spl2"} {
+		document := analysis.QueryDocument{Text: "search user=alice", Language: language, Profile: "splunkd", Version: "current"}
+		manifest, err := analysis.CapabilitiesFor(analysis.CapabilityOptions{Language: language, Profile: "splunkd", Version: "current"})
+		if err != nil {
+			t.Fatal(err)
+		}
+		want, err := digestJSON([]any{"analysis-revision-v1", SourceHash(document.Text), manifest.Language, manifest.Profile, manifest.Version, buildinfo.Version, "analysis-report-v1", manifest})
+		if err != nil {
+			t.Fatal(err)
+		}
+		got, err := AnalysisRevision(document)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if got != want {
+			t.Fatalf("%s analysis revision = %q, want %q", language, got, want)
+		}
+	}
+}
+
+func TestAnalysisRevisionDoesNotCloneCapabilityManifest(t *testing.T) {
+	document := analysis.QueryDocument{Text: "search user=alice", Language: "spl2", Profile: "splunkd", Version: "current"}
+	if _, err := AnalysisRevision(document); err != nil {
+		t.Fatal(err)
+	}
+	allocations := testing.AllocsPerRun(20, func() {
+		if _, err := AnalysisRevision(document); err != nil {
+			panic(err)
+		}
+	})
+	if allocations > 50 {
+		t.Fatalf("AnalysisRevision allocated %.0f objects; capability manifests must not be cloned per document", allocations)
+	}
+}
 
 func TestRevisionIncludesTargetContent(t *testing.T) {
 	doc := analysis.QueryDocument{Text: "search user=alice"}

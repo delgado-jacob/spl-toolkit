@@ -145,27 +145,31 @@ func Capabilities() CapabilityManifest {
 
 // CapabilitiesFor validates selectors and returns a fresh available manifest.
 func CapabilitiesFor(options CapabilityOptions) (CapabilityManifest, error) {
-	normalized, err := normalizeSelectors(options)
+	_, contract, err := lookupCapabilityContract(options)
 	if err != nil {
 		return CapabilityManifest{}, err
-	}
-	contract, found := capabilityCatalog[normalized]
-	if !found {
-		return CapabilityManifest{}, fmt.Errorf("capability contract is unavailable for language %q, profile %q, version %q", normalized.Language, normalized.Profile, normalized.Version)
 	}
 	return cloneCapabilityManifest(contract.manifest), nil
 }
 
 func capabilityRevisionFor(options CapabilityOptions) (string, error) {
-	normalized, err := normalizeSelectors(options)
+	_, contract, err := lookupCapabilityContract(options)
 	if err != nil {
 		return "", err
 	}
+	return contract.revision, nil
+}
+
+func lookupCapabilityContract(options CapabilityOptions) (CapabilityOptions, capabilityContract, error) {
+	normalized, err := normalizeSelectors(options)
+	if err != nil {
+		return CapabilityOptions{}, capabilityContract{}, err
+	}
 	contract, found := capabilityCatalog[normalized]
 	if !found {
-		return "", fmt.Errorf("capability contract is unavailable for language %q, profile %q, version %q", normalized.Language, normalized.Profile, normalized.Version)
+		return CapabilityOptions{}, capabilityContract{}, fmt.Errorf("capability contract is unavailable for language %q, profile %q, version %q", normalized.Language, normalized.Profile, normalized.Version)
 	}
-	return contract.revision, nil
+	return normalized, contract, nil
 }
 
 func cloneCapabilityManifest(manifest CapabilityManifest) CapabilityManifest {

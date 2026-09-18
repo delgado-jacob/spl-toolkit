@@ -44,6 +44,26 @@ func TestCapabilitiesPublishCanonicalLedger(t *testing.T) {
 	}
 }
 
+func TestCapabilitiesSurviveJSONRoundTrip(t *testing.T) {
+	for _, options := range []CapabilityOptions{{}, {Language: "spl2"}} {
+		manifest, err := CapabilitiesFor(options)
+		if err != nil {
+			t.Fatal(err)
+		}
+		encoded, err := json.Marshal(manifest)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var decoded CapabilityManifest
+		if err := json.Unmarshal(encoded, &decoded); err != nil {
+			t.Fatal(err)
+		}
+		if !reflect.DeepEqual(decoded, manifest) {
+			t.Fatal("capability manifest changed across its JSON wire representation")
+		}
+	}
+}
+
 func TestCapabilitiesPreserveLegacyProjection(t *testing.T) {
 	spl2, err := CapabilitiesFor(CapabilityOptions{Language: "spl2"})
 	if err != nil {

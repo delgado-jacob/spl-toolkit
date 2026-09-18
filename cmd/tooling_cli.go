@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/delgado-jacob/spl-toolkit/internal/buildinfo"
+	"github.com/delgado-jacob/spl-toolkit/internal/capabilityselector"
 	"github.com/delgado-jacob/spl-toolkit/internal/lsp"
 	"github.com/delgado-jacob/spl-toolkit/pkg/analysis"
 	"github.com/delgado-jacob/spl-toolkit/pkg/corpus"
@@ -131,7 +132,7 @@ func runToolingCLI(command string, args []string, stdin io.Reader, stdout, stder
 		if _, err = corpus.Prepare(corpus.ScanOptions{ValidationTarget: target}); err != nil {
 			return fail(err)
 		}
-		if _, err = analysis.CapabilitiesFor(analysis.CapabilityOptions{Profile: opts.Profile, Version: opts.Version}); err != nil {
+		if _, err = capabilityselector.Normalize("", opts.Profile, opts.Version); err != nil {
 			return fail(err)
 		}
 		err = lsp.Serve(context.Background(), stdin, stdout, stderr, opts)

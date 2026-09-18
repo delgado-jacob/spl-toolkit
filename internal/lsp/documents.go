@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/delgado-jacob/spl-toolkit/internal/capabilityselector"
 	"github.com/delgado-jacob/spl-toolkit/pkg/analysis"
 	"github.com/delgado-jacob/spl-toolkit/pkg/corpus"
 )
@@ -49,12 +50,12 @@ func prepareConfiguration(raw []byte) (configuration, error) {
 			return configuration{}, fmt.Errorf("%s: %w", key, err)
 		}
 	}
-	m, err := analysis.CapabilitiesFor(analysis.CapabilityOptions{Profile: o.Profile, Version: o.Version})
+	selectors, err := capabilityselector.Normalize("", o.Profile, o.Version)
 	if err != nil {
 		return configuration{}, err
 	}
-	o.Profile = m.Profile
-	o.Version = m.Version
+	o.Profile = selectors.Profile
+	o.Version = selectors.Version
 	p, err := corpus.Prepare(corpus.ScanOptions{ValidationTarget: o.ValidationTarget})
 	return configuration{o, p}, err
 }
