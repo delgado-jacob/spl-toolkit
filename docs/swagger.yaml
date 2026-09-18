@@ -14,32 +14,525 @@ components:
         syntax_supported:
           type: boolean
       type: object
+    analysis.CapabilityClaim:
+      additionalProperties: false
+      properties:
+        evidence_ids:
+          items:
+            minLength: 1
+            type: string
+          type: array
+          uniqueItems: true
+        limitations:
+          items:
+            minLength: 1
+            type: string
+          type: array
+        state:
+          enum:
+          - supported
+          - partial
+          - unsupported
+          - not_applicable
+          - unassessed
+          type: string
+      required:
+      - state
+      - evidence_ids
+      - limitations
+      type: object
+    analysis.CapabilityDependencyExpectation:
+      additionalProperties: false
+      properties:
+        kind:
+          minLength: 1
+          type: string
+        name:
+          minLength: 1
+          type: string
+      required:
+      - kind
+      - name
+      type: object
+    analysis.CapabilityDiagnosticExpectation:
+      additionalProperties: false
+      properties:
+        category:
+          minLength: 1
+          type: string
+        code:
+          minLength: 1
+          type: string
+        location:
+          $ref: '#/components/schemas/analysis.Location'
+        severity:
+          minLength: 1
+          type: string
+      required:
+      - code
+      - category
+      - severity
+      - location
+      type: object
+    analysis.CapabilityDimensions:
+      additionalProperties: false
+      properties:
+        linting:
+          $ref: '#/components/schemas/analysis.CapabilityClaim'
+        requirements:
+          $ref: '#/components/schemas/analysis.CapabilityClaim'
+        safe_rewriting:
+          $ref: '#/components/schemas/analysis.CapabilityClaim'
+        semantics:
+          $ref: '#/components/schemas/analysis.CapabilityClaim'
+        syntax:
+          $ref: '#/components/schemas/analysis.CapabilityClaim'
+      required:
+      - syntax
+      - semantics
+      - requirements
+      - linting
+      - safe_rewriting
+      type: object
+    analysis.CapabilityEvidence:
+      additionalProperties: false
+      properties:
+        classification:
+          enum:
+          - positive
+          - negative
+          - incomplete
+          type: string
+        document:
+          $ref: '#/components/schemas/analysis.QueryDocument'
+        id:
+          minLength: 1
+          type: string
+        observations:
+          $ref: '#/components/schemas/analysis.CapabilityEvidenceObservations'
+        provenance:
+          $ref: '#/components/schemas/analysis.CapabilityProvenance'
+        rewrite_request:
+          type: object
+      required:
+      - id
+      - classification
+      - document
+      - observations
+      - provenance
+      type: object
+    analysis.CapabilityEvidenceClassification:
+      type: string
+      x-enum-varnames:
+      - CapabilityEvidencePositive
+      - CapabilityEvidenceNegative
+      - CapabilityEvidenceIncomplete
+    analysis.CapabilityEvidenceObservations:
+      additionalProperties: false
+      minProperties: 1
+      properties:
+        linting:
+          $ref: '#/components/schemas/analysis.CapabilityLintingObservation'
+        requirements:
+          $ref: '#/components/schemas/analysis.CapabilityRequirementsObservation'
+        safe_rewriting:
+          $ref: '#/components/schemas/analysis.CapabilityRewriteObservation'
+        semantics:
+          $ref: '#/components/schemas/analysis.CapabilitySemanticsObservation'
+        syntax:
+          $ref: '#/components/schemas/analysis.CapabilitySyntaxObservation'
+      type: object
+    analysis.CapabilityLintingObservation:
+      additionalProperties: false
+      properties:
+        diagnostics:
+          items:
+            $ref: '#/components/schemas/analysis.CapabilityDiagnosticExpectation'
+          type: array
+      required:
+      - diagnostics
+      type: object
     analysis.CapabilityManifest:
+      additionalProperties: true
       properties:
         commands:
           items:
             $ref: '#/components/schemas/analysis.Capability'
           type: array
-          uniqueItems: false
         documentation_snapshot:
           type: string
+        evidence:
+          items:
+            $ref: '#/components/schemas/analysis.CapabilityEvidence'
+          type: array
         functions:
           items:
             $ref: '#/components/schemas/analysis.Capability'
           type: array
-          uniqueItems: false
         language:
+          enum:
+          - spl
+          - spl2
           type: string
         profile:
-          type: string
+          const: splunkd
+        records:
+          items:
+            $ref: '#/components/schemas/analysis.CapabilityRecord'
+          type: array
         rewrite:
           $ref: '#/components/schemas/analysis.RewriteCapabilityManifest'
           description: Optional rewrite support for this selected dialect; inspect
             each form rather than assuming universal support.
         schema_version:
+          const: 1
           type: integer
-        version:
+        summary:
+          $ref: '#/components/schemas/analysis.CapabilitySummary'
+        toolkit_version:
+          minLength: 1
           type: string
+        version:
+          const: current
+      required:
+      - schema_version
+      - language
+      - profile
+      - version
+      - commands
+      - functions
+      type: object
+    analysis.CapabilityProvenance:
+      additionalProperties: false
+      properties:
+        note:
+          minLength: 1
+          type: string
+        reference:
+          type: string
+        source_family:
+          enum:
+          - toolkit
+          - spl2
+          - splunk_analytics
+          - security_detection
+          type: string
+      required:
+      - source_family
+      - note
+      type: object
+    analysis.CapabilityRecord:
+      additionalProperties: false
+      properties:
+        dimensions:
+          $ref: '#/components/schemas/analysis.CapabilityDimensions'
+        form:
+          minLength: 1
+          type: string
+        grammar_registered:
+          description: Local parser registration fact; independent of syntax coverage.
+          type: boolean
+        id:
+          minLength: 1
+          type: string
+        kind:
+          enum:
+          - command
+          - function
+          - expression
+          - lexical_form
+          - pipeline
+          - subsearch
+          - dataset
+          - macro
+          - module
+          - namespace
+          - variable
+          - annotation
+          - profile_form
+          type: string
+        language:
+          enum:
+          - spl
+          - spl2
+          type: string
+        name:
+          minLength: 1
+          type: string
+        profile:
+          const: splunkd
+        provenance:
+          $ref: '#/components/schemas/analysis.CapabilityProvenance'
+      required:
+      - id
+      - language
+      - profile
+      - kind
+      - name
+      - form
+      - grammar_registered
+      - provenance
+      - dimensions
+      type: object
+    analysis.CapabilityReferenceExpectation:
+      additionalProperties: false
+      properties:
+        binding:
+          minLength: 1
+          type: string
+        kind:
+          minLength: 1
+          type: string
+        location:
+          $ref: '#/components/schemas/analysis.Location'
+        normalized_name:
+          minLength: 1
+          type: string
+        resolution:
+          minLength: 1
+          type: string
+        role:
+          minLength: 1
+          type: string
+      required:
+      - normalized_name
+      - kind
+      - role
+      - resolution
+      - binding
+      - location
+      type: object
+    analysis.CapabilityRequirementExpectation:
+      additionalProperties: false
+      properties:
+        identity:
+          minLength: 1
+          type: string
+        kind:
+          minLength: 1
+          type: string
+        necessity:
+          minLength: 1
+          type: string
+        resolution:
+          minLength: 1
+          type: string
+        role:
+          minLength: 1
+          type: string
+      required:
+      - kind
+      - identity
+      - role
+      - necessity
+      - resolution
+      type: object
+    analysis.CapabilityRequirementsObservation:
+      additionalProperties: false
+      properties:
+        complete:
+          type: boolean
+        gap_codes:
+          items:
+            minLength: 1
+            type: string
+          type: array
+        items:
+          items:
+            $ref: '#/components/schemas/analysis.CapabilityRequirementExpectation'
+          type: array
+        query_status:
+          enum:
+          - valid
+          - invalid
+          - incomplete
+          type: string
+      required:
+      - query_status
+      - complete
+      - items
+      - gap_codes
+      type: object
+    analysis.CapabilityRewriteObservation:
+      additionalProperties: false
+      properties:
+        candidate_text:
+          type: string
+        change_reasons:
+          items:
+            minLength: 1
+            type: string
+          type: array
+        committed:
+          type: boolean
+        coverage_reasons:
+          items:
+            minLength: 1
+            type: string
+          type: array
+        rewrite_complete:
+          type: boolean
+        rule_evaluation_reasons:
+          items:
+            minLength: 1
+            type: string
+          type: array
+        status:
+          enum:
+          - valid
+          - invalid
+          - incomplete
+          type: string
+        text:
+          type: string
+      required:
+      - status
+      - committed
+      - rewrite_complete
+      - text
+      - candidate_text
+      - coverage_reasons
+      - change_reasons
+      - rule_evaluation_reasons
+      type: object
+    analysis.CapabilitySemanticsObservation:
+      additionalProperties: false
+      properties:
+        complete:
+          type: boolean
+        dependencies:
+          items:
+            $ref: '#/components/schemas/analysis.CapabilityDependencyExpectation'
+          type: array
+        diagnostics:
+          items:
+            $ref: '#/components/schemas/analysis.CapabilityDiagnosticExpectation'
+          type: array
+        references:
+          items:
+            $ref: '#/components/schemas/analysis.CapabilityReferenceExpectation'
+          type: array
+        stages:
+          items:
+            $ref: '#/components/schemas/analysis.CapabilityStageExpectation'
+          type: array
+        status:
+          enum:
+          - valid
+          - invalid
+          - incomplete
+          type: string
+        transitions:
+          items:
+            $ref: '#/components/schemas/analysis.CapabilityTransitionExpectation'
+          type: array
+      required:
+      - status
+      - complete
+      - stages
+      - references
+      - dependencies
+      - transitions
+      - diagnostics
+      type: object
+    analysis.CapabilityStageExpectation:
+      additionalProperties: false
+      properties:
+        command:
+          minLength: 1
+          type: string
+        semantic_complete:
+          type: boolean
+      required:
+      - command
+      - semantic_complete
+      type: object
+    analysis.CapabilityState:
+      type: string
+      x-enum-varnames:
+      - CapabilitySupported
+      - CapabilityPartial
+      - CapabilityUnsupported
+      - CapabilityNotApplicable
+      - CapabilityUnassessed
+    analysis.CapabilityStateCounts:
+      additionalProperties: false
+      properties:
+        applicable:
+          minimum: 0
+          type: integer
+        covered:
+          minimum: 0
+          type: integer
+        not_applicable:
+          minimum: 0
+          type: integer
+        partial:
+          minimum: 0
+          type: integer
+        supported:
+          minimum: 0
+          type: integer
+        unassessed:
+          minimum: 0
+          type: integer
+        unsupported:
+          minimum: 0
+          type: integer
+      required:
+      - applicable
+      - covered
+      - supported
+      - partial
+      - unsupported
+      - not_applicable
+      - unassessed
+      type: object
+    analysis.CapabilitySummary:
+      additionalProperties: false
+      properties:
+        linting:
+          $ref: '#/components/schemas/analysis.CapabilityStateCounts'
+        requirements:
+          $ref: '#/components/schemas/analysis.CapabilityStateCounts'
+        safe_rewriting:
+          $ref: '#/components/schemas/analysis.CapabilityStateCounts'
+        semantics:
+          $ref: '#/components/schemas/analysis.CapabilityStateCounts'
+        syntax:
+          $ref: '#/components/schemas/analysis.CapabilityStateCounts'
+      required:
+      - syntax
+      - semantics
+      - requirements
+      - linting
+      - safe_rewriting
+      type: object
+    analysis.CapabilitySyntaxObservation:
+      additionalProperties: false
+      properties:
+        complete:
+          type: boolean
+        diagnostics:
+          items:
+            $ref: '#/components/schemas/analysis.CapabilityDiagnosticExpectation'
+          type: array
+      required:
+      - complete
+      - diagnostics
+      type: object
+    analysis.CapabilityTransitionExpectation:
+      additionalProperties: false
+      properties:
+        operation:
+          minLength: 1
+          type: string
+        output:
+          minLength: 1
+          type: string
+      required:
+      - operation
+      - output
       type: object
     analysis.Coverage:
       properties:
@@ -4410,9 +4903,11 @@ paths:
   /capabilities:
     get:
       description: Select the canonical capability manifest including language, profile,
-        compatibility version, commands, functions, limitations, and optional pinned
-        documentation_snapshot. Only language/profile/version query parameters are
-        accepted; duplicate keys are rejected even when equal.
+        compatibility version, toolkit version, per-dimension coverage counts, capability
+        records, cited evidence, and retained command, function, rewrite, limitation,
+        and optional pinned documentation_snapshot projections. Grammar registration
+        remains separate from syntax coverage. Only language/profile/version query
+        parameters are accepted; duplicate keys are rejected even when equal.
       parameters:
       - description: 'Query language: spl (default) or spl2; empty uses default'
         in: query

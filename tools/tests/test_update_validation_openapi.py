@@ -16,6 +16,13 @@ SCRIPT = Path(__file__).resolve().parents[1] / "update_validation_openapi.py"
 
 
 class ValidationOpenAPITests(unittest.TestCase):
+    def test_capability_rewrite_evidence_declares_openapi_object_shape(self):
+        source = (SCRIPT.parents[1] / "pkg/analysis/capability_model.go").read_text(encoding="utf-8")
+        self.assertRegex(
+            source,
+            r'RewriteRequest\s+json\.RawMessage\s+`json:"rewrite_request,omitempty" swaggertype:"object"`',
+        )
+
     def schema_accepts(self, schemas, name, instance):
         def valid(schema, value):
             if "$ref" in schema:
@@ -126,7 +133,83 @@ class ValidationOpenAPITests(unittest.TestCase):
             schemas["api." + name] = {"type": "object", "properties": {"schema_version": {"type": "integer"}, "mode": {"type": "string"}, key: value, "rules": {"type": "array", "items": {"$ref": "#/components/schemas/api.RewriteRule"}, "uniqueItems": False}, "validation_target": {"type": "object"}}}
         schemas["analysis.RewriteCapabilityForm"] = {"type": "object", "properties": {"kind": {"type": "string"}, "role": {"type": "string"}, "identity_forms": {"type": "array", "items": {"type": "string"}, "uniqueItems": False}, "supported": {"type": "boolean"}, "limitations": {"type": "array", "items": {"type": "string"}, "uniqueItems": False}}}
         schemas["analysis.RewriteCapabilityManifest"] = {"type": "object", "properties": {"schema_version": {"type": "integer"}, "forms": {"type": "array", "items": {"$ref": "#/components/schemas/analysis.RewriteCapabilityForm"}, "uniqueItems": False}}}
-        schemas["analysis.CapabilityManifest"] = {"type": "object", "properties": {"rewrite": {"$ref": "#/components/schemas/analysis.RewriteCapabilityManifest"}, "schema_version": {"type": "integer"}, "language": {"type": "string"}, "profile": {"type": "string"}, "version": {"type": "string"}, "documentation_snapshot": {"type": "string"}, "commands": {"type": "array", "items": {"type": "object"}}, "functions": {"type": "array", "items": {"type": "object"}}}}
+        schemas["analysis.CapabilityClaim"] = {"type": "object", "properties": {
+            "state": {"type": "string"},
+            "evidence_ids": {"type": "array", "items": {"type": "string"}, "uniqueItems": False},
+            "limitations": {"type": "array", "items": {"type": "string"}, "uniqueItems": False}}}
+        schemas["analysis.CapabilityDimensions"] = {"type": "object", "properties": {
+            key: {"$ref": "#/components/schemas/analysis.CapabilityClaim"}
+            for key in ("syntax", "semantics", "requirements", "linting", "safe_rewriting")}}
+        schemas["analysis.CapabilityProvenance"] = {"type": "object", "properties": {
+            key: {"type": "string"} for key in ("source_family", "reference", "note")}}
+        schemas["analysis.CapabilityRecord"] = {"type": "object", "properties": {
+            **{key: {"type": "string"} for key in ("id", "language", "profile", "kind", "name", "form")},
+            "grammar_registered": {"type": "boolean"},
+            "provenance": {"$ref": "#/components/schemas/analysis.CapabilityProvenance"},
+            "dimensions": {"$ref": "#/components/schemas/analysis.CapabilityDimensions"}}}
+        schemas["analysis.CapabilityStateCounts"] = {"type": "object", "properties": {
+            key: {"type": "integer"} for key in (
+                "applicable", "covered", "supported", "partial", "unsupported",
+                "not_applicable", "unassessed")}}
+        schemas["analysis.CapabilitySummary"] = {"type": "object", "properties": {
+            key: {"$ref": "#/components/schemas/analysis.CapabilityStateCounts"}
+            for key in ("syntax", "semantics", "requirements", "linting", "safe_rewriting")}}
+        schemas["analysis.CapabilityDiagnosticExpectation"] = {"type": "object", "properties": {
+            **{key: {"type": "string"} for key in ("code", "category", "severity")},
+            "location": {"$ref": "#/components/schemas/analysis.Location"}}}
+        schemas["analysis.CapabilitySyntaxObservation"] = {"type": "object", "properties": {
+            "complete": {"type": "boolean"}, "diagnostics": {"type": "array", "items": {"$ref": "#/components/schemas/analysis.CapabilityDiagnosticExpectation"}}}}
+        schemas["analysis.CapabilityStageExpectation"] = {"type": "object", "properties": {
+            "command": {"type": "string"}, "semantic_complete": {"type": "boolean"}}}
+        schemas["analysis.CapabilityReferenceExpectation"] = {"type": "object", "properties": {
+            **{key: {"type": "string"} for key in ("normalized_name", "kind", "role", "resolution", "binding")},
+            "location": {"$ref": "#/components/schemas/analysis.Location"}}}
+        schemas["analysis.CapabilityDependencyExpectation"] = {"type": "object", "properties": {
+            "kind": {"type": "string"}, "name": {"type": "string"}}}
+        schemas["analysis.CapabilityTransitionExpectation"] = {"type": "object", "properties": {
+            "operation": {"type": "string"}, "output": {"type": "string"}}}
+        schemas["analysis.CapabilitySemanticsObservation"] = {"type": "object", "properties": {
+            "status": {"type": "string"}, "complete": {"type": "boolean"},
+            "stages": {"type": "array", "items": {"$ref": "#/components/schemas/analysis.CapabilityStageExpectation"}},
+            "references": {"type": "array", "items": {"$ref": "#/components/schemas/analysis.CapabilityReferenceExpectation"}},
+            "dependencies": {"type": "array", "items": {"$ref": "#/components/schemas/analysis.CapabilityDependencyExpectation"}},
+            "transitions": {"type": "array", "items": {"$ref": "#/components/schemas/analysis.CapabilityTransitionExpectation"}},
+            "diagnostics": {"type": "array", "items": {"$ref": "#/components/schemas/analysis.CapabilityDiagnosticExpectation"}}}}
+        schemas["analysis.CapabilityRequirementExpectation"] = {"type": "object", "properties": {
+            key: {"type": "string"} for key in ("kind", "identity", "role", "necessity", "resolution")}}
+        schemas["analysis.CapabilityRequirementsObservation"] = {"type": "object", "properties": {
+            "query_status": {"type": "string"}, "complete": {"type": "boolean"},
+            "items": {"type": "array", "items": {"$ref": "#/components/schemas/analysis.CapabilityRequirementExpectation"}},
+            "gap_codes": {"type": "array", "items": {"type": "string"}}}}
+        schemas["analysis.CapabilityLintingObservation"] = {"type": "object", "properties": {
+            "diagnostics": {"type": "array", "items": {"$ref": "#/components/schemas/analysis.CapabilityDiagnosticExpectation"}}}}
+        schemas["analysis.CapabilityRewriteObservation"] = {"type": "object", "properties": {
+            **{key: {"type": "string"} for key in ("status", "text", "candidate_text")},
+            **{key: {"type": "boolean"} for key in ("committed", "rewrite_complete")},
+            **{key: {"type": "array", "items": {"type": "string"}} for key in (
+                "coverage_reasons", "change_reasons", "rule_evaluation_reasons")}}}
+        schemas["analysis.CapabilityEvidenceObservations"] = {"type": "object", "properties": {
+            "syntax": {"$ref": "#/components/schemas/analysis.CapabilitySyntaxObservation"},
+            "semantics": {"$ref": "#/components/schemas/analysis.CapabilitySemanticsObservation"},
+            "requirements": {"$ref": "#/components/schemas/analysis.CapabilityRequirementsObservation"},
+            "linting": {"$ref": "#/components/schemas/analysis.CapabilityLintingObservation"},
+            "safe_rewriting": {"$ref": "#/components/schemas/analysis.CapabilityRewriteObservation"}}}
+        schemas["analysis.CapabilityEvidence"] = {"type": "object", "properties": {
+            "id": {"type": "string"}, "classification": {"type": "string"},
+            "document": {"$ref": "#/components/schemas/analysis.QueryDocument"},
+            "observations": {"$ref": "#/components/schemas/analysis.CapabilityEvidenceObservations"},
+            "rewrite_request": {},
+            "provenance": {"$ref": "#/components/schemas/analysis.CapabilityProvenance"}}}
+        schemas["analysis.CapabilityManifest"] = {"type": "object", "properties": {
+            "rewrite": {"$ref": "#/components/schemas/analysis.RewriteCapabilityManifest"},
+            "schema_version": {"type": "integer"}, "language": {"type": "string"},
+            "profile": {"type": "string"}, "version": {"type": "string"},
+            "toolkit_version": {"type": "string"}, "documentation_snapshot": {"type": "string"},
+            "commands": {"type": "array", "items": {"type": "object"}},
+            "functions": {"type": "array", "items": {"type": "object"}},
+            "records": {"type": "array", "items": {"$ref": "#/components/schemas/analysis.CapabilityRecord"}},
+            "summary": {"$ref": "#/components/schemas/analysis.CapabilitySummary"},
+            "evidence": {"type": "array", "items": {"$ref": "#/components/schemas/analysis.CapabilityEvidence"}}}}
         spec = {"openapi": "3.1.0", "components": {"schemas": schemas}, "paths": {
             "/unrelated": {},
             "/query/requirements": {"post": {"responses": {"200": {"content": {"application/json": {
@@ -266,6 +349,67 @@ class ValidationOpenAPITests(unittest.TestCase):
             self.assertTrue(self.schema_accepts(schemas, "api.RewriteBatchRequest", batch))
             self.assertEqual(schemas["analysis.CapabilityManifest"]["properties"]["rewrite"], {"$ref": "#/components/schemas/analysis.RewriteCapabilityManifest", "description": "Optional rewrite support for this selected dialect; inspect each form rather than assuming universal support."})
             self.assertEqual(schemas["analysis.RewriteCapabilityManifest"]["required"], ["schema_version", "forms"])
+            before = {p.name: p.read_bytes() for p in root.iterdir()}
+            self.assertEqual(self.run_script(root).returncode, 0)
+            self.assertEqual(before, {p.name: p.read_bytes() for p in root.iterdir()})
+
+    def test_capability_ledger_shapes_are_strict_and_optional(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self.fixture(root)
+            result = self.run_script(root)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            schemas = json.loads((root / "swagger.json").read_text())["components"]["schemas"]
+
+            required = {
+                "analysis.CapabilityClaim": ["state", "evidence_ids", "limitations"],
+                "analysis.CapabilityDimensions": ["syntax", "semantics", "requirements", "linting", "safe_rewriting"],
+                "analysis.CapabilityProvenance": ["source_family", "note"],
+                "analysis.CapabilityRecord": ["id", "language", "profile", "kind", "name", "form", "grammar_registered", "provenance", "dimensions"],
+                "analysis.CapabilityStateCounts": ["applicable", "covered", "supported", "partial", "unsupported", "not_applicable", "unassessed"],
+                "analysis.CapabilitySummary": ["syntax", "semantics", "requirements", "linting", "safe_rewriting"],
+                "analysis.CapabilityDiagnosticExpectation": ["code", "category", "severity", "location"],
+                "analysis.CapabilitySyntaxObservation": ["complete", "diagnostics"],
+                "analysis.CapabilityStageExpectation": ["command", "semantic_complete"],
+                "analysis.CapabilityReferenceExpectation": ["normalized_name", "kind", "role", "resolution", "binding", "location"],
+                "analysis.CapabilityDependencyExpectation": ["kind", "name"],
+                "analysis.CapabilityTransitionExpectation": ["operation", "output"],
+                "analysis.CapabilitySemanticsObservation": ["status", "complete", "stages", "references", "dependencies", "transitions", "diagnostics"],
+                "analysis.CapabilityRequirementExpectation": ["kind", "identity", "role", "necessity", "resolution"],
+                "analysis.CapabilityRequirementsObservation": ["query_status", "complete", "items", "gap_codes"],
+                "analysis.CapabilityLintingObservation": ["diagnostics"],
+                "analysis.CapabilityRewriteObservation": ["status", "committed", "rewrite_complete", "text", "candidate_text", "coverage_reasons", "change_reasons", "rule_evaluation_reasons"],
+                "analysis.CapabilityEvidence": ["id", "classification", "document", "observations", "provenance"],
+            }
+            for name, members in required.items():
+                self.assertEqual(schemas[name]["required"], members)
+                self.assertIs(schemas[name]["additionalProperties"], False)
+
+            observations = schemas["analysis.CapabilityEvidenceObservations"]
+            self.assertEqual(observations["minProperties"], 1)
+            self.assertNotIn("required", observations)
+            self.assertIs(observations["additionalProperties"], False)
+            self.assertEqual(schemas["analysis.CapabilityClaim"]["properties"]["state"]["enum"],
+                             ["supported", "partial", "unsupported", "not_applicable", "unassessed"])
+            self.assertEqual(schemas["analysis.CapabilityRecord"]["properties"]["kind"]["enum"],
+                             ["command", "function", "expression", "lexical_form", "pipeline", "subsearch", "dataset", "macro", "module", "namespace", "variable", "annotation", "profile_form"])
+            self.assertEqual(schemas["analysis.CapabilityProvenance"]["properties"]["source_family"]["enum"],
+                             ["toolkit", "spl2", "splunk_analytics", "security_detection"])
+            self.assertEqual(schemas["analysis.CapabilityEvidence"]["properties"]["classification"]["enum"],
+                             ["positive", "negative", "incomplete"])
+            for name in ("analysis.CapabilitySemanticsObservation", "analysis.CapabilityRequirementsObservation", "analysis.CapabilityRewriteObservation"):
+                member = "query_status" if name.endswith("RequirementsObservation") else "status"
+                self.assertEqual(schemas[name]["properties"][member]["enum"], ["valid", "invalid", "incomplete"])
+            for member in ("toolkit_version", "records", "summary", "evidence"):
+                self.assertIn(member, schemas["analysis.CapabilityManifest"]["properties"])
+                self.assertNotIn(member, schemas["analysis.CapabilityManifest"].get("required", []))
+            archived = {
+                "schema_version": 1, "language": "spl", "profile": "splunkd", "version": "current",
+                "commands": [], "functions": [],
+            }
+            self.assertTrue(self.schema_accepts(schemas, "analysis.CapabilityManifest", archived))
+            self.assertEqual(set(schemas["analysis.CapabilityStateCounts"]["properties"]),
+                             {"applicable", "covered", "supported", "partial", "unsupported", "not_applicable", "unassessed"})
             before = {p.name: p.read_bytes() for p in root.iterdir()}
             self.assertEqual(self.run_script(root).returncode, 0)
             self.assertEqual(before, {p.name: p.read_bytes() for p in root.iterdir()})

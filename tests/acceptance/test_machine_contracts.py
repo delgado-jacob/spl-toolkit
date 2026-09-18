@@ -80,6 +80,44 @@ def errors(schemas, family, instance, definition=None):
     return list(validator.iter_errors(instance))  # Never short-circuit the iterator.
 
 
+CAPABILITY_DIMENSIONS = ("syntax", "semantics", "requirements", "linting", "safe_rewriting")
+
+
+def capability_ledger_consistency_errors(manifest):
+    failures = []
+    evidence_ids = {item["id"] for item in manifest["evidence"]}
+    for record in manifest["records"]:
+        for dimension in CAPABILITY_DIMENSIONS:
+            for evidence_id in record["dimensions"][dimension]["evidence_ids"]:
+                if evidence_id not in evidence_ids:
+                    failures.append(f"{record['id']} {dimension} references missing evidence {evidence_id}")
+
+    expected = {}
+    for dimension in CAPABILITY_DIMENSIONS:
+        counts = {
+            "applicable": 0, "covered": 0, "supported": 0, "partial": 0,
+            "unsupported": 0, "not_applicable": 0, "unassessed": 0,
+        }
+        for record in manifest["records"]:
+            state = record["dimensions"][dimension]["state"]
+            counts[state] += 1
+            if state != "not_applicable":
+                counts["applicable"] += 1
+            if state == "supported":
+                counts["covered"] += 1
+        expected[dimension] = counts
+    if manifest["summary"] != expected:
+        failures.append("summary does not match records")
+    return failures
+
+
+def shared_errors(schemas, definition, instance):
+    validator = schemas["shared.schema.json"]
+    validator = validator.evolve(
+        schema={"$ref": validator.schema["$id"] + "#/$defs/" + definition})
+    return list(validator.iter_errors(instance))
+
+
 def test_published_contracts_and_offline_closure(schemas):
     assert len(schemas) >= len(FAMILIES) + 1
     with pytest.raises(NoSuchResource):
@@ -485,6 +523,154 @@ def test_capabilities_match_accepted_dialect_forms(emitted):
     unknown = next(c for c in emitted["unknown-corpus"]["command_coverage"] if c["command"] == "mystery")
     assert (unknown["declared"], unknown["syntax_supported"], unknown["semantic_supported"]) == (False, False, False)
     assert emitted["unknown-corpus"]["status"] == "incomplete"
+
+
+def test_capability_ledger_contract_and_additive_v1_compatibility(schemas, emitted):
+    for key in ("capabilities", "spl2-capabilities"):
+        manifest = emitted[key]
+        assert not errors(schemas, "capabilities", manifest)
+        assert not capability_ledger_consistency_errors(manifest)
+        assert set(manifest["summary"]) == set(CAPABILITY_DIMENSIONS)
+        assert manifest["toolkit_version"]
+
+        archived = {
+            member: copy.deepcopy(manifest[member])
+            for member in ("schema_version", "language", "profile", "version", "commands", "functions")
+        }
+        if "rewrite" in manifest:
+            archived["rewrite"] = copy.deepcopy(manifest["rewrite"])
+        if "documentation_snapshot" in manifest:
+            archived["documentation_snapshot"] = manifest["documentation_snapshot"]
+        assert not errors(schemas, "capabilities", archived)
+
+        for member, value in (
+            ("toolkit_version", 1), ("records", {}), ("summary", []), ("evidence", {}),
+        ):
+            invalid = copy.deepcopy(manifest)
+            invalid[member] = value
+            assert errors(schemas, "capabilities", invalid), (key, member)
+
+    manifest = copy.deepcopy(emitted["capabilities"])
+    for path, value in (
+        (("records", 0, "language"), "sql"),
+        (("records", 0, "profile"), "cloud"),
+        (("records", 0, "kind"), "operator"),
+        (("records", 0, "dimensions", "syntax", "state"), "complete"),
+        (("records", 0, "provenance", "source_family"), "unknown"),
+        (("evidence", 0, "classification"), "unknown"),
+    ):
+        invalid = copy.deepcopy(manifest)
+        target = invalid
+        for component in path[:-1]:
+            target = target[component]
+        target[path[-1]] = value
+        assert errors(schemas, "capabilities", invalid), path
+
+    for path in (
+        ("records", 0, "id"),
+        ("records", 0, "grammar_registered"),
+        ("records", 0, "dimensions", "syntax", "state"),
+        ("records", 0, "provenance", "source_family"),
+        ("summary", "syntax", "applicable"),
+        ("evidence", 0, "observations"),
+    ):
+        invalid = copy.deepcopy(manifest)
+        target = invalid
+        for component in path[:-1]:
+            target = target[component]
+        del target[path[-1]]
+        assert errors(schemas, "capabilities", invalid), path
+
+    for path in (
+        ("records", 0),
+        ("records", 0, "dimensions", "syntax"),
+        ("records", 0, "provenance"),
+        ("summary", "syntax"),
+        ("evidence", 0),
+        ("evidence", 0, "observations"),
+    ):
+        invalid = copy.deepcopy(manifest)
+        target = invalid
+        for component in path:
+            target = target[component]
+        target["future_field"] = True
+        assert errors(schemas, "capabilities", invalid), path
+
+    for forbidden in ("percent", "score"):
+        invalid = copy.deepcopy(manifest)
+        invalid["summary"]["syntax"][forbidden] = 100
+        assert errors(schemas, "capabilities", invalid), forbidden
+
+    dangling = copy.deepcopy(manifest)
+    dangling["records"][0]["dimensions"]["syntax"]["evidence_ids"] = ["missing-evidence"]
+    assert capability_ledger_consistency_errors(dangling)
+
+    mismatched = copy.deepcopy(manifest)
+    mismatched["summary"]["syntax"]["supported"] += 1
+    assert capability_ledger_consistency_errors(mismatched)
+
+    registration_only = copy.deepcopy(manifest)
+    registration_only["records"][0]["grammar_registered"] = not registration_only["records"][0]["grammar_registered"]
+    assert not errors(schemas, "capabilities", registration_only)
+    assert not capability_ledger_consistency_errors(registration_only)
+
+
+def test_capability_evidence_observation_definitions_are_strict(schemas):
+    location = {
+        "start": {"offset": 0, "line": 1, "column": 1},
+        "end": {"offset": 1, "line": 1, "column": 2},
+    }
+    diagnostic = {
+        "code": "SPL_TEST", "category": "semantic", "severity": "warning",
+        "location": location,
+    }
+    definitions = {
+        "analysis.CapabilityDiagnosticExpectation": diagnostic,
+        "analysis.CapabilitySyntaxObservation": {"complete": True, "diagnostics": [diagnostic]},
+        "analysis.CapabilityStageExpectation": {"command": "search", "semantic_complete": True},
+        "analysis.CapabilityReferenceExpectation": {
+            "normalized_name": "host", "kind": "field", "role": "search_field",
+            "resolution": "exact", "binding": "source", "location": location,
+        },
+        "analysis.CapabilityDependencyExpectation": {"kind": "index", "name": "main"},
+        "analysis.CapabilityTransitionExpectation": {"operation": "create", "output": "host"},
+        "analysis.CapabilitySemanticsObservation": {
+            "status": "valid", "complete": True,
+            "stages": [{"command": "search", "semantic_complete": True}],
+            "references": [], "dependencies": [], "transitions": [], "diagnostics": [],
+        },
+        "analysis.CapabilityRequirementExpectation": {
+            "kind": "field", "identity": "host", "role": "search_field",
+            "necessity": "required", "resolution": "exact",
+        },
+        "analysis.CapabilityRequirementsObservation": {
+            "query_status": "valid", "complete": True,
+            "items": [{"kind": "field", "identity": "host", "role": "search_field",
+                       "necessity": "required", "resolution": "exact"}],
+            "gap_codes": [],
+        },
+        "analysis.CapabilityLintingObservation": {"diagnostics": [diagnostic]},
+        "analysis.CapabilityRewriteObservation": {
+            "status": "valid", "committed": True, "rewrite_complete": True,
+            "text": "search host=web", "candidate_text": "search host=web",
+            "coverage_reasons": [], "change_reasons": [], "rule_evaluation_reasons": [],
+        },
+    }
+    for definition, instance in definitions.items():
+        assert not shared_errors(schemas, definition, instance), definition
+        extra = copy.deepcopy(instance)
+        extra["future_field"] = True
+        assert shared_errors(schemas, definition, extra), definition
+        for member in instance:
+            missing = copy.deepcopy(instance)
+            del missing[member]
+            assert shared_errors(schemas, definition, missing), (definition, member)
+
+    observations = {"syntax": definitions["analysis.CapabilitySyntaxObservation"]}
+    assert not shared_errors(schemas, "analysis.CapabilityEvidenceObservations", observations)
+    assert shared_errors(schemas, "analysis.CapabilityEvidenceObservations", {})
+    observations["future_field"] = True
+    assert shared_errors(schemas, "analysis.CapabilityEvidenceObservations", observations)
 
 
 def test_eager_reference_closure_rejects_unused_bad_resources(schemas):

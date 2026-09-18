@@ -160,7 +160,7 @@ type CapabilityEvidence struct {
 	Classification CapabilityEvidenceClassification `json:"classification"`
 	Document       QueryDocument                    `json:"document"`
 	Observations   CapabilityEvidenceObservations   `json:"observations"`
-	RewriteRequest json.RawMessage                  `json:"rewrite_request,omitempty"`
+	RewriteRequest json.RawMessage                  `json:"rewrite_request,omitempty" swaggertype:"object"`
 	Provenance     CapabilityProvenance             `json:"provenance"`
 }
 

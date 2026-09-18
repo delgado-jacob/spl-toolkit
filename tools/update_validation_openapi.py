@@ -328,9 +328,54 @@ def update(directory: Path) -> None:
     capability = shape("analysis.RewriteCapabilityManifest", ("schema_version", "forms"))
     capability.update(required=["schema_version", "forms"])
     capability["properties"]["schema_version"] = {"type": "integer", "const": 1}
-    manifest = schemas.get("analysis.CapabilityManifest")
-    if not isinstance(manifest, dict) or "rewrite" not in manifest.get("properties", {}):
-        raise ValueError("optional rewrite capability missing from selected manifest")
+
+    shared_path = Path(__file__).resolve().parents[1] / "contracts/v1/shared.schema.json"
+    shared = json.loads(shared_path.read_text(encoding="utf-8"))
+    shared_origin = shared["$id"] + "#/$defs/"
+
+    def capability_contract(value):
+        if isinstance(value, list):
+            return [capability_contract(item) for item in value]
+        if not isinstance(value, dict):
+            return value
+        result = {key: capability_contract(item) for key, item in value.items()}
+        if "$ref" in result:
+            ref = result["$ref"]
+            if not ref.startswith(shared_origin):
+                raise ValueError("unexpected external capability contract reference")
+            result["$ref"] = PREFIX + ref.removeprefix(shared_origin)
+        return result
+
+    capability_names = (
+        "analysis.CapabilityClaim",
+        "analysis.CapabilityDimensions",
+        "analysis.CapabilityProvenance",
+        "analysis.CapabilityRecord",
+        "analysis.CapabilityStateCounts",
+        "analysis.CapabilitySummary",
+        "analysis.CapabilityDiagnosticExpectation",
+        "analysis.CapabilitySyntaxObservation",
+        "analysis.CapabilityStageExpectation",
+        "analysis.CapabilityReferenceExpectation",
+        "analysis.CapabilityDependencyExpectation",
+        "analysis.CapabilityTransitionExpectation",
+        "analysis.CapabilitySemanticsObservation",
+        "analysis.CapabilityRequirementExpectation",
+        "analysis.CapabilityRequirementsObservation",
+        "analysis.CapabilityLintingObservation",
+        "analysis.CapabilityRewriteObservation",
+        "analysis.CapabilityEvidenceObservations",
+        "analysis.CapabilityEvidence",
+    )
+    for name in capability_names:
+        canonical = shared["$defs"][name]
+        shape(name, tuple(canonical["properties"]))
+        schemas[name] = capability_contract(canonical)
+
+    canonical_manifest = shared["$defs"]["analysis.CapabilityManifest"]
+    shape("analysis.CapabilityManifest", tuple(canonical_manifest["properties"]))
+    schemas["analysis.CapabilityManifest"] = capability_contract(canonical_manifest)
+    manifest = schemas["analysis.CapabilityManifest"]
     manifest["properties"]["rewrite"] = {
         "$ref": PREFIX + "analysis.RewriteCapabilityManifest",
         "description": "Optional rewrite support for this selected dialect; inspect each form rather than assuming universal support."}

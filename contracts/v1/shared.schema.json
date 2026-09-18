@@ -820,6 +820,626 @@
       ],
       "additionalProperties": true
     },
+    "analysis.CapabilityClaim": {
+      "type": "object",
+      "properties": {
+        "state": {
+          "type": "string",
+          "enum": [
+            "supported",
+            "partial",
+            "unsupported",
+            "not_applicable",
+            "unassessed"
+          ]
+        },
+        "evidence_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "limitations": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "required": [
+        "state",
+        "evidence_ids",
+        "limitations"
+      ],
+      "additionalProperties": false
+    },
+    "analysis.CapabilityDimensions": {
+      "type": "object",
+      "properties": {
+        "syntax": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.CapabilityClaim"
+        },
+        "semantics": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.CapabilityClaim"
+        },
+        "requirements": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.CapabilityClaim"
+        },
+        "linting": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.CapabilityClaim"
+        },
+        "safe_rewriting": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.CapabilityClaim"
+        }
+      },
+      "required": [
+        "syntax",
+        "semantics",
+        "requirements",
+        "linting",
+        "safe_rewriting"
+      ],
+      "additionalProperties": false
+    },
+    "analysis.CapabilityProvenance": {
+      "type": "object",
+      "properties": {
+        "source_family": {
+          "type": "string",
+          "enum": [
+            "toolkit",
+            "spl2",
+            "splunk_analytics",
+            "security_detection"
+          ]
+        },
+        "reference": {
+          "type": "string"
+        },
+        "note": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "source_family",
+        "note"
+      ],
+      "additionalProperties": false
+    },
+    "analysis.CapabilityRecord": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "language": {
+          "type": "string",
+          "enum": [
+            "spl",
+            "spl2"
+          ]
+        },
+        "profile": {
+          "const": "splunkd"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "command",
+            "function",
+            "expression",
+            "lexical_form",
+            "pipeline",
+            "subsearch",
+            "dataset",
+            "macro",
+            "module",
+            "namespace",
+            "variable",
+            "annotation",
+            "profile_form"
+          ]
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "form": {
+          "type": "string",
+          "minLength": 1
+        },
+        "grammar_registered": {
+          "type": "boolean",
+          "description": "Local parser registration fact; independent of syntax coverage."
+        },
+        "provenance": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.CapabilityProvenance"
+        },
+        "dimensions": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.CapabilityDimensions"
+        }
+      },
+      "required": [
+        "id",
+        "language",
+        "profile",
+        "kind",
+        "name",
+        "form",
+        "grammar_registered",
+        "provenance",
+        "dimensions"
+      ],
+      "additionalProperties": false
+    },
+    "analysis.CapabilityStateCounts": {
+      "type": "object",
+      "properties": {
+        "applicable": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "covered": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "supported": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "partial": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "unsupported": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "not_applicable": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "unassessed": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "applicable",
+        "covered",
+        "supported",
+        "partial",
+        "unsupported",
+        "not_applicable",
+        "unassessed"
+      ],
+      "additionalProperties": false
+    },
+    "analysis.CapabilitySummary": {
+      "type": "object",
+      "properties": {
+        "syntax": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.CapabilityStateCounts"
+        },
+        "semantics": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.CapabilityStateCounts"
+        },
+        "requirements": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.CapabilityStateCounts"
+        },
+        "linting": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.CapabilityStateCounts"
+        },
+        "safe_rewriting": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.CapabilityStateCounts"
+        }
+      },
+      "required": [
+        "syntax",
+        "semantics",
+        "requirements",
+        "linting",
+        "safe_rewriting"
+      ],
+      "additionalProperties": false
+    },
+    "analysis.CapabilityDiagnosticExpectation": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string",
+          "minLength": 1
+        },
+        "category": {
+          "type": "string",
+          "minLength": 1
+        },
+        "severity": {
+          "type": "string",
+          "minLength": 1
+        },
+        "location": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.Location"
+        }
+      },
+      "required": [
+        "code",
+        "category",
+        "severity",
+        "location"
+      ],
+      "additionalProperties": false
+    },
+    "analysis.CapabilitySyntaxObservation": {
+      "type": "object",
+      "properties": {
+        "complete": {
+          "type": "boolean"
+        },
+        "diagnostics": {
+          "type": "array",
+          "items": {
+            "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.CapabilityDiagnosticExpectation"
+          }
+        }
+      },
+      "required": [
+        "complete",
+        "diagnostics"
+      ],
+      "additionalProperties": false
+    },
+    "analysis.CapabilityStageExpectation": {
+      "type": "object",
+      "properties": {
+        "command": {
+          "type": "string",
+          "minLength": 1
+        },
+        "semantic_complete": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "command",
+        "semantic_complete"
+      ],
+      "additionalProperties": false
+    },
+    "analysis.CapabilityReferenceExpectation": {
+      "type": "object",
+      "properties": {
+        "normalized_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "type": "string",
+          "minLength": 1
+        },
+        "role": {
+          "type": "string",
+          "minLength": 1
+        },
+        "resolution": {
+          "type": "string",
+          "minLength": 1
+        },
+        "binding": {
+          "type": "string",
+          "minLength": 1
+        },
+        "location": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.Location"
+        }
+      },
+      "required": [
+        "normalized_name",
+        "kind",
+        "role",
+        "resolution",
+        "binding",
+        "location"
+      ],
+      "additionalProperties": false
+    },
+    "analysis.CapabilityDependencyExpectation": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "kind",
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "analysis.CapabilityTransitionExpectation": {
+      "type": "object",
+      "properties": {
+        "operation": {
+          "type": "string",
+          "minLength": 1
+        },
+        "output": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "operation",
+        "output"
+      ],
+      "additionalProperties": false
+    },
+    "analysis.CapabilitySemanticsObservation": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "valid",
+            "invalid",
+            "incomplete"
+          ]
+        },
+        "complete": {
+          "type": "boolean"
+        },
+        "stages": {
+          "type": "array",
+          "items": {
+            "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.CapabilityStageExpectation"
+          }
+        },
+        "references": {
+          "type": "array",
+          "items": {
+            "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.CapabilityReferenceExpectation"
+          }
+        },
+        "dependencies": {
+          "type": "array",
+          "items": {
+            "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.CapabilityDependencyExpectation"
+          }
+        },
+        "transitions": {
+          "type": "array",
+          "items": {
+            "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.CapabilityTransitionExpectation"
+          }
+        },
+        "diagnostics": {
+          "type": "array",
+          "items": {
+            "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.CapabilityDiagnosticExpectation"
+          }
+        }
+      },
+      "required": [
+        "status",
+        "complete",
+        "stages",
+        "references",
+        "dependencies",
+        "transitions",
+        "diagnostics"
+      ],
+      "additionalProperties": false
+    },
+    "analysis.CapabilityRequirementExpectation": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "minLength": 1
+        },
+        "identity": {
+          "type": "string",
+          "minLength": 1
+        },
+        "role": {
+          "type": "string",
+          "minLength": 1
+        },
+        "necessity": {
+          "type": "string",
+          "minLength": 1
+        },
+        "resolution": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "kind",
+        "identity",
+        "role",
+        "necessity",
+        "resolution"
+      ],
+      "additionalProperties": false
+    },
+    "analysis.CapabilityRequirementsObservation": {
+      "type": "object",
+      "properties": {
+        "query_status": {
+          "type": "string",
+          "enum": [
+            "valid",
+            "invalid",
+            "incomplete"
+          ]
+        },
+        "complete": {
+          "type": "boolean"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.CapabilityRequirementExpectation"
+          }
+        },
+        "gap_codes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "required": [
+        "query_status",
+        "complete",
+        "items",
+        "gap_codes"
+      ],
+      "additionalProperties": false
+    },
+    "analysis.CapabilityLintingObservation": {
+      "type": "object",
+      "properties": {
+        "diagnostics": {
+          "type": "array",
+          "items": {
+            "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.CapabilityDiagnosticExpectation"
+          }
+        }
+      },
+      "required": [
+        "diagnostics"
+      ],
+      "additionalProperties": false
+    },
+    "analysis.CapabilityRewriteObservation": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "valid",
+            "invalid",
+            "incomplete"
+          ]
+        },
+        "committed": {
+          "type": "boolean"
+        },
+        "rewrite_complete": {
+          "type": "boolean"
+        },
+        "text": {
+          "type": "string"
+        },
+        "candidate_text": {
+          "type": "string"
+        },
+        "coverage_reasons": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "change_reasons": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "rule_evaluation_reasons": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "required": [
+        "status",
+        "committed",
+        "rewrite_complete",
+        "text",
+        "candidate_text",
+        "coverage_reasons",
+        "change_reasons",
+        "rule_evaluation_reasons"
+      ],
+      "additionalProperties": false
+    },
+    "analysis.CapabilityEvidenceObservations": {
+      "type": "object",
+      "properties": {
+        "syntax": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.CapabilitySyntaxObservation"
+        },
+        "semantics": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.CapabilitySemanticsObservation"
+        },
+        "requirements": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.CapabilityRequirementsObservation"
+        },
+        "linting": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.CapabilityLintingObservation"
+        },
+        "safe_rewriting": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.CapabilityRewriteObservation"
+        }
+      },
+      "minProperties": 1,
+      "additionalProperties": false
+    },
+    "analysis.CapabilityEvidence": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "classification": {
+          "type": "string",
+          "enum": [
+            "positive",
+            "negative",
+            "incomplete"
+          ]
+        },
+        "document": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.QueryDocument"
+        },
+        "observations": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.CapabilityEvidenceObservations"
+        },
+        "rewrite_request": {
+          "type": "object"
+        },
+        "provenance": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.CapabilityProvenance"
+        }
+      },
+      "required": [
+        "id",
+        "classification",
+        "document",
+        "observations",
+        "provenance"
+      ],
+      "additionalProperties": false
+    },
     "analysis.CapabilityManifest": {
       "type": "object",
       "properties": {
@@ -843,6 +1463,10 @@
         "version": {
           "const": "current"
         },
+        "toolkit_version": {
+          "type": "string",
+          "minLength": 1
+        },
         "documentation_snapshot": {
           "type": "string"
         },
@@ -856,6 +1480,21 @@
           "type": "array",
           "items": {
             "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.Capability"
+          }
+        },
+        "records": {
+          "type": "array",
+          "items": {
+            "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.CapabilityRecord"
+          }
+        },
+        "summary": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.CapabilitySummary"
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.CapabilityEvidence"
           }
         }
       },

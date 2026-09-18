@@ -75,6 +75,19 @@
       }
     },
     {
+      "id": "capabilities-archived-v1",
+      "family": "capabilities",
+      "valid": true,
+      "instance": {
+        "schema_version": 1,
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "commands": [],
+        "functions": []
+      }
+    },
+    {
       "id": "corpus-request",
       "family": "corpus",
       "definition": "Request",
