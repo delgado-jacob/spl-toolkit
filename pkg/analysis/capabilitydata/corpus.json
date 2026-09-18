@@ -1041,7 +1041,7 @@
     },
     {
       "id": "spl.field.navigation.rewrite",
-      "classification": "incomplete",
+      "classification": "negative",
       "document": {
         "text": "search index=main | where actor.name=1",
         "language": "spl",
@@ -1051,19 +1051,15 @@
       },
       "observations": {
         "safe_rewriting": {
-          "status": "incomplete",
+          "status": "valid",
           "committed": false,
-          "rewrite_complete": false,
+          "rewrite_complete": true,
           "text": "search index=main | where actor.name=1",
           "candidate_text": "search index=main | where actor.name=1",
-          "coverage_reasons": [
-            "target_not_renderable"
-          ],
-          "change_reasons": [
-            "target_not_renderable"
-          ],
+          "coverage_reasons": [],
+          "change_reasons": [],
           "rule_evaluation_reasons": [
-            "matched"
+            "no_match"
           ]
         }
       },
@@ -1075,13 +1071,13 @@
             "id": "capability",
             "kind": "field",
             "source": {
-              "name": "actor.name"
-            },
-            "target": {
               "path": [
-                "user",
+                "actor",
                 "name"
               ]
+            },
+            "target": {
+              "name": "user"
             }
           }
         ]

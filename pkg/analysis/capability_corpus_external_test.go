@@ -307,6 +307,8 @@ func validateRewriteEvidenceCase(key string, evidence analysis.CapabilityEvidenc
 	if check.Supported {
 		query, source, target = check.Positive.Query, check.Positive.Source, check.Positive.Target
 		wantClassification = analysis.CapabilityEvidencePositive
+	} else if check.Negative.Reason == "no_match" {
+		wantClassification = analysis.CapabilityEvidenceNegative
 	}
 	if evidence.Classification != wantClassification {
 		return fmt.Errorf("advertised rewrite form %q evidence %q classification=%q, want %q", key, evidence.ID, evidence.Classification, wantClassification)
@@ -329,9 +331,8 @@ func validateRewriteEvidenceCase(key string, evidence analysis.CapabilityEvidenc
 		return fmt.Errorf("advertised rewrite form %q evidence %q request=%+v, want schema_version 1, apply mode, and one rule", key, evidence.ID, request)
 	}
 	rule := request.Rules[0]
-	sourcePath := check.Role == "navigation" && check.Language == "spl2"
-	targetPath := check.Role == "navigation" && check.Language == "spl"
-	if rule.Kind != check.Kind || !rewriteFixtureIdentityEquals(rule.Source, source, sourcePath) || !rewriteFixtureIdentityEquals(rule.Target, target, targetPath) {
+	sourcePath := check.Role == "navigation"
+	if rule.Kind != check.Kind || !rewriteFixtureIdentityEquals(rule.Source, source, sourcePath) || !rewriteFixtureIdentityEquals(rule.Target, target, false) {
 		return fmt.Errorf("advertised rewrite form %q evidence %q rule=%+v, want kind=%q source=%q target=%q", key, evidence.ID, rule, check.Kind, source, target)
 	}
 	observation := evidence.Observations.SafeRewriting
@@ -341,15 +342,21 @@ func validateRewriteEvidenceCase(key string, evidence analysis.CapabilityEvidenc
 	wantText, wantCommitted, wantComplete := query, false, false
 	if check.Supported {
 		wantText, wantCommitted, wantComplete = check.Positive.Candidate, true, true
+	} else if wantClassification == analysis.CapabilityEvidenceNegative {
+		wantComplete = true
 	}
 	if observation.Committed != wantCommitted || observation.RewriteComplete != wantComplete || observation.Text != wantText || observation.CandidateText != wantText {
 		return fmt.Errorf("advertised rewrite form %q evidence %q result=%+v, want committed=%t complete=%t text=%q", key, evidence.ID, *observation, wantCommitted, wantComplete, wantText)
 	}
-	if !check.Supported && !slices.Contains(observation.CoverageReasons, check.Negative.Reason) && !slices.Contains(observation.ChangeReasons, check.Negative.Reason) && !slices.Contains(observation.RuleEvaluationReasons, check.Negative.Reason) {
+	if wantClassification == analysis.CapabilityEvidenceNegative && (len(observation.CoverageReasons) != 0 || len(observation.ChangeReasons) != 0 || !slices.Equal(observation.RuleEvaluationReasons, []string{"no_match"})) {
+		return fmt.Errorf("advertised rewrite form %q evidence %q result=%+v, want exact no-match boundary", key, evidence.ID, *observation)
+	}
+	if wantClassification == analysis.CapabilityEvidenceIncomplete && !slices.Contains(observation.CoverageReasons, check.Negative.Reason) && !slices.Contains(observation.ChangeReasons, check.Negative.Reason) && !slices.Contains(observation.RuleEvaluationReasons, check.Negative.Reason) {
 		return fmt.Errorf("advertised rewrite form %q evidence %q result has no refusal reason %q", key, evidence.ID, check.Negative.Reason)
 	}
 	result := executeEvidence(evidence).dimensions["safe_rewriting"]
-	if !result.passed || result.refused == check.Supported {
+	wantRefused := wantClassification == analysis.CapabilityEvidenceIncomplete
+	if !result.passed || result.refused != wantRefused {
 		return fmt.Errorf("advertised rewrite form %q evidence %q did not prove its boundary: expected=%s actual=%s", key, evidence.ID, result.expected, result.actual)
 	}
 	return nil
