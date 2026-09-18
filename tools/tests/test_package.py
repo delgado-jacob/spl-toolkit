@@ -415,6 +415,41 @@ def test_installed_surface_suite_requires_analysis_parity(tmp_path: Path):
     assert (destination / "test_analysis_surfaces.py").read_bytes() == (ROOT / "tests/acceptance/test_analysis_surfaces.py").read_bytes()
 
 
+def test_copied_capability_tests_do_not_require_checkout_version(tmp_path: Path):
+    isolated = tmp_path / "isolated"
+    isolated.mkdir()
+    for source in (
+        ROOT / "python/tests/test_native_analysis.py",
+        ROOT / "python/tests/test_native_spl2.py",
+        ROOT / "tests/acceptance/test_analysis_surfaces.py",
+        ROOT / "tests/acceptance/test_surfaces.py",
+    ):
+        (isolated / source.name).write_bytes(source.read_bytes())
+
+    script = (
+        "import sys; "
+        f"sys.path[:0] = [{str(isolated)!r}, {str(ROOT / 'python')!r}]; "
+        "import test_native_analysis, test_native_spl2, test_analysis_surfaces; "
+        "assert test_native_analysis.EXPECTED_VERSION == "
+        "test_native_spl2.EXPECTED_VERSION == "
+        "test_analysis_surfaces.EXPECTED_VERSION == '9.9.9'"
+    )
+    completed = subprocess.run(
+        [sys.executable, "-I", "-X", "utf8", "-c", script],
+        cwd=isolated,
+        env={
+            "PATH": str(Path(sys.executable).parent),
+            "PYTHONDONTWRITEBYTECODE": "1",
+            "SPL_EXPECTED_VERSION": "9.9.9",
+            "SPL_SPL2_FIXTURES": str((ROOT / "testdata/spl2").resolve()),
+        },
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    assert completed.returncode == 0, completed.stderr
+
+
 def test_installed_requirement_inputs_are_copied_and_hashed(tmp_path: Path, monkeypatch):
     checker = load_package_checker()
     assert "test_native_requirements.py" in checker.NATIVE_TESTS
@@ -624,6 +659,7 @@ def test_installed_schema_fixtures_exist_before_both_suites(tmp_path: Path, monk
     counts = {"collected": 1, "passed": 1, "failed": 0, "skipped": 0}
 
     def suite(python, tests, result, cwd, env):
+        assert env["SPL_EXPECTED_VERSION"] == "0.1.1"
         fixtures = Path(env["SPL_SCHEMA_FIXTURES"])
         assert fixtures.is_absolute() and fixtures.is_relative_to(outside)
         assert not fixtures.is_relative_to(ROOT)

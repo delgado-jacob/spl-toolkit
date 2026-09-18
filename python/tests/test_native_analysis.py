@@ -9,11 +9,11 @@ import time
 
 import pytest
 
-from spl_toolkit import SPLMapper, SPLMapperError
+from spl_toolkit import SPLMapper, SPLMapperError, __version__
 from spl_toolkit.exceptions import MapperNotFoundError
 
 
-VERSION = (Path(__file__).resolve().parents[2] / "VERSION").read_text(encoding="utf-8").strip()
+EXPECTED_VERSION = os.environ.get("SPL_EXPECTED_VERSION")
 CAPABILITY_DIMENSIONS = ("syntax", "semantics", "requirements", "linting", "safe_rewriting")
 CAPABILITY_COUNTS = {"applicable", "covered", "supported", "partial", "unsupported", "not_applicable", "unassessed"}
 
@@ -29,11 +29,15 @@ def corpus():
     return data["cases"]
 
 
-def assert_complete_capability_manifest(manifest, language):
+def expected_toolkit_version(mapper):
+    return EXPECTED_VERSION or (__version__ if __version__ != "dev" else mapper.native_version)
+
+
+def assert_complete_capability_manifest(manifest, language, expected_version):
     required = {"rewrite", "schema_version", "language", "profile", "version", "toolkit_version",
                 "commands", "functions", "records", "summary", "evidence"}
     assert required <= manifest.keys()
-    assert manifest["toolkit_version"] == VERSION
+    assert manifest["toolkit_version"] == expected_version
     assert (manifest["language"], manifest["profile"], manifest["version"]) == (language, "splunkd", "current")
     assert set(manifest["summary"]) == set(CAPABILITY_DIMENSIONS)
     assert all(set(manifest["summary"][name]) == CAPABILITY_COUNTS for name in CAPABILITY_DIMENSIONS)
@@ -126,7 +130,7 @@ def test_c_analysis_preserves_valid_unicode_escapes(payload, text):
 def test_capabilities_are_owned_fresh_json():
     with SPLMapper(**mapper_kwargs()) as mapper:
         manifest = mapper.capabilities()
-        assert_complete_capability_manifest(manifest, "spl")
+        assert_complete_capability_manifest(manifest, "spl", expected_toolkit_version(mapper))
         assert type(manifest["schema_version"]) is int and manifest["schema_version"] == 1
         assert (manifest["language"], manifest["profile"], manifest["version"]) == ("spl", "splunkd", "current")
         assert any(c["name"] == "eval" and c["semantic_supported"] for c in manifest["commands"])

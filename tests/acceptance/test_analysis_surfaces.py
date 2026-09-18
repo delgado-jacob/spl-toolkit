@@ -15,7 +15,7 @@ from urllib.request import Request, urlopen
 
 import pytest
 
-from spl_toolkit import SPLMapper
+from spl_toolkit import SPLMapper, __version__
 from test_surfaces import (
     cli_path,
     get_json,
@@ -25,7 +25,7 @@ from test_surfaces import (
 )
 
 
-VERSION = (Path(__file__).resolve().parents[2] / "VERSION").read_text(encoding="utf-8").strip()
+EXPECTED_VERSION = os.environ.get("SPL_EXPECTED_VERSION")
 CAPABILITY_DIMENSIONS = ("syntax", "semantics", "requirements", "linting", "safe_rewriting")
 CAPABILITY_STATES = ("supported", "partial", "unsupported", "not_applicable", "unassessed")
 
@@ -47,8 +47,12 @@ def raw_native_capabilities(mapper: SPLMapper, language: str) -> dict:
         mapper._lib.spl_result_free(pointer)
 
 
-def assert_capability_ledger_is_self_consistent(manifest: dict, language: str) -> None:
-    assert manifest["toolkit_version"] == VERSION
+def expected_toolkit_version(mapper: SPLMapper) -> str:
+    return EXPECTED_VERSION or (__version__ if __version__ != "dev" else mapper.native_version)
+
+
+def assert_capability_ledger_is_self_consistent(manifest: dict, language: str, expected_version: str) -> None:
+    assert manifest["toolkit_version"] == expected_version
     assert (manifest["language"], manifest["profile"], manifest["version"]) == (language, "splunkd", "current")
     assert manifest["records"] and manifest["evidence"]
     assert set(manifest["summary"]) == set(CAPABILITY_DIMENSIONS)
@@ -113,10 +117,11 @@ def test_analysis_full_report_parity(analysis_cases: list[dict], cli_path: Path,
 
 def test_analysis_capabilities_parity(cli_path: Path, server_url: str) -> None:
     with SPLMapper(**mapper_kwargs()) as mapper:
+        expected_version = expected_toolkit_version(mapper)
         for language in ("spl", "spl2"):
             expected = mapper.capabilities(language=language, profile="splunkd", version="current")
             assert raw_native_capabilities(mapper, language) == expected
-            assert_capability_ledger_is_self_consistent(expected, language)
+            assert_capability_ledger_is_self_consistent(expected, language, expected_version)
             assert type(expected["schema_version"]) is int and expected["schema_version"] == 1
             assert expected["commands"] and expected["functions"] and expected["rewrite"]["forms"]
 

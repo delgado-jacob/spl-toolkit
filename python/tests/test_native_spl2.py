@@ -10,7 +10,7 @@ import time
 
 import pytest
 
-from spl_toolkit import SPLMapper, SPLMapperError
+from spl_toolkit import SPLMapper, SPLMapperError, __version__
 from spl_toolkit.exceptions import MapperNotFoundError
 
 FIXTURES = Path(os.environ['SPL_SPL2_FIXTURES'])
@@ -20,7 +20,7 @@ SNAPSHOT = 'spl2-provenance-v1:sha256:3345cf5712b1bdbf467d1651784fdb8bccc5968050
 TARGET = {'kind': 'json_schema', 'schema': {'type': 'object', 'properties': {'host': True, 'value': True},
           'required': ['host', 'value'], 'additionalProperties': False}}
 CATALOG = {'fields': ['host', 'value']}
-VERSION = (Path(__file__).resolve().parents[2] / 'VERSION').read_text(encoding='utf-8').strip()
+EXPECTED_VERSION = os.environ.get('SPL_EXPECTED_VERSION')
 CAPABILITY_DIMENSIONS = ('syntax', 'semantics', 'requirements', 'linting', 'safe_rewriting')
 CAPABILITY_COUNTS = {'applicable', 'covered', 'supported', 'partial', 'unsupported', 'not_applicable', 'unassessed'}
 
@@ -43,11 +43,15 @@ def native_json(mapper, operation, payload, *, reject=False, handle=None):
         mapper._lib.spl_result_free(pointer)
 
 
-def assert_complete_capability_manifest(manifest, language):
+def expected_toolkit_version(mapper):
+    return EXPECTED_VERSION or (__version__ if __version__ != 'dev' else mapper.native_version)
+
+
+def assert_complete_capability_manifest(manifest, language, expected_version):
     required = {'rewrite', 'schema_version', 'language', 'profile', 'version', 'toolkit_version',
                 'commands', 'functions', 'records', 'summary', 'evidence'}
     assert required <= manifest.keys()
-    assert manifest['toolkit_version'] == VERSION
+    assert manifest['toolkit_version'] == expected_version
     assert (manifest['language'], manifest['profile'], manifest['version']) == (language, 'splunkd', 'current')
     assert set(manifest['summary']) == set(CAPABILITY_DIMENSIONS)
     assert all(set(manifest['summary'][name]) == CAPABILITY_COUNTS for name in CAPABILITY_DIMENSIONS)
@@ -67,7 +71,8 @@ def assert_complete_capability_manifest(manifest, language):
 def test_capability_selectors_preserve_defaults_and_snapshot():
     with SPLMapper(**mapper_kwargs()) as mapper:
         original = mapper.capabilities()
-        assert_complete_capability_manifest(original, 'spl')
+        expected_version = expected_toolkit_version(mapper)
+        assert_complete_capability_manifest(original, 'spl', expected_version)
         assert original == mapper.capabilities(language='', profile='', version='')
         assert original == native_json(mapper, 'capabilities_for', b'{}')
         pointer = mapper._lib.spl_mapper_capabilities(mapper._mapper_id)
@@ -78,7 +83,7 @@ def test_capability_selectors_preserve_defaults_and_snapshot():
             mapper._lib.spl_result_free(pointer)
         assert 'documentation_snapshot' not in original
         manifest = mapper.capabilities(language='spl2')
-        assert_complete_capability_manifest(manifest, 'spl2')
+        assert_complete_capability_manifest(manifest, 'spl2', expected_version)
         assert manifest['documentation_snapshot'] == SNAPSHOT
         assert manifest['language'] == 'spl2'
         assert any(c['name'] == 'from' and c['semantic_supported'] for c in manifest['commands'])
