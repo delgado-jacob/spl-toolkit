@@ -64,7 +64,7 @@ Built and cross-surface gates:
 
 The 12 approved design completion criteria map to passing evidence in design order:
 
-1. The curated ledger represents every required construct kind for SPL and SPL2. `pkg/analysis/capabilitydata/ledger.json` and `TestCapabilityLedgerCoversEveryKindPerLanguage` passed. The built CLI reported 85 SPL records and 112 SPL2 records.
+1. The curated ledger represents every required construct kind for SPL and SPL2. `pkg/analysis/capabilitydata/ledger.json` and `TestCapabilityLedgerCoversEveryKindPerLanguage` passed. The built CLI reported 86 SPL records and 114 SPL2 records.
 2. Every record has five explicit support states, one for each of syntax, semantics, requirements, linting, and safe rewriting. `TestEmbeddedCapabilityAssetsAreStructurallyValid`, the strict `decodeCapabilityAssets` path, and `test_capability_ledger_shapes_are_strict_and_optional` passed.
 3. Every `supported`, `partial`, and `unsupported` claim cites passing local evidence for its exact dimension and form. `TestValidateCapabilityClaims` and the external `TestCapabilityEvidenceCorpus` execution passed against `pkg/analysis/capabilitydata/ledger.json` and `pkg/analysis/capabilitydata/corpus.json`.
 4. Every `not_applicable` claim has a reason and no evidence citation. The `not applicable` cases in `TestValidateCapabilityClaims` and the strict capability-claim schema checks in `test_capability_claim_state_boundaries_and_semantics_nonempty` passed.
