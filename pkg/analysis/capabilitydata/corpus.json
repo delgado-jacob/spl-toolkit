@@ -1223,7 +1223,7 @@
           "complete": false,
           "stages": [
             {
-              "command": "macro",
+              "command": "search",
               "semantic_complete": false
             }
           ],
@@ -1731,9 +1731,9 @@
               "severity": "error",
               "location": {
                 "start": {
-                  "offset": 0,
+                  "offset": 13,
                   "line": 1,
-                  "column": 1
+                  "column": 14
                 },
                 "end": {
                   "offset": 13,
@@ -1763,9 +1763,9 @@
               "severity": "error",
               "location": {
                 "start": {
-                  "offset": 0,
+                  "offset": 13,
                   "line": 1,
-                  "column": 1
+                  "column": 14
                 },
                 "end": {
                   "offset": 13,
@@ -1785,7 +1785,7 @@
     },
     {
       "id": "spl.splunkd.baseline.rewrite",
-      "classification": "incomplete",
+      "classification": "negative",
       "document": {
         "text": "search index=",
         "language": "spl",
@@ -1795,18 +1795,17 @@
       },
       "observations": {
         "safe_rewriting": {
-          "status": "incomplete",
+          "status": "invalid",
           "committed": false,
           "rewrite_complete": false,
           "text": "search index=",
           "candidate_text": "search index=",
           "coverage_reasons": [
-            "CAPABILITY_INCOMPLETE"
+            "SPL_SYNTAX_ERROR",
+            "post_verification_failed"
           ],
           "change_reasons": [],
-          "rule_evaluation_reasons": [
-            "NO_PROVED_SAFE_EDIT"
-          ]
+          "rule_evaluation_reasons": []
         }
       },
       "rewrite_request": {
@@ -2930,7 +2929,7 @@
       },
       "observations": {
         "semantics": {
-          "status": "incomplete",
+          "status": "invalid",
           "complete": false,
           "stages": [
             {
@@ -3218,7 +3217,7 @@
       },
       "observations": {
         "semantics": {
-          "status": "incomplete",
+          "status": "invalid",
           "complete": false,
           "stages": [
             {
@@ -3452,7 +3451,7 @@
       },
       "observations": {
         "semantics": {
-          "status": "incomplete",
+          "status": "invalid",
           "complete": false,
           "stages": [
             {
@@ -4460,7 +4459,7 @@
       },
       "observations": {
         "semantics": {
-          "status": "incomplete",
+          "status": "invalid",
           "complete": false,
           "stages": [
             {
@@ -4730,7 +4729,7 @@
       },
       "observations": {
         "semantics": {
-          "status": "incomplete",
+          "status": "invalid",
           "complete": false,
           "stages": [
             {
@@ -5062,9 +5061,9 @@
               "severity": "error",
               "location": {
                 "start": {
-                  "offset": 0,
+                  "offset": 12,
                   "line": 1,
-                  "column": 1
+                  "column": 13
                 },
                 "end": {
                   "offset": 19,
@@ -5094,9 +5093,9 @@
               "severity": "error",
               "location": {
                 "start": {
-                  "offset": 0,
+                  "offset": 12,
                   "line": 1,
-                  "column": 1
+                  "column": 13
                 },
                 "end": {
                   "offset": 19,
@@ -5116,7 +5115,7 @@
     },
     {
       "id": "spl2.splunkd.baseline.rewrite",
-      "classification": "incomplete",
+      "classification": "negative",
       "document": {
         "text": "FROM main | decrypt",
         "language": "spl2",
@@ -5126,18 +5125,18 @@
       },
       "observations": {
         "safe_rewriting": {
-          "status": "incomplete",
+          "status": "invalid",
           "committed": false,
           "rewrite_complete": false,
           "text": "FROM main | decrypt",
           "candidate_text": "FROM main | decrypt",
           "coverage_reasons": [
-            "CAPABILITY_INCOMPLETE"
+            "SPL_PROFILE_MISMATCH",
+            "SPL_UNSUPPORTED_SEMANTICS",
+            "post_verification_failed"
           ],
           "change_reasons": [],
-          "rule_evaluation_reasons": [
-            "NO_PROVED_SAFE_EDIT"
-          ]
+          "rule_evaluation_reasons": []
         }
       },
       "rewrite_request": {
@@ -5469,7 +5468,7 @@
       },
       "observations": {
         "semantics": {
-          "status": "incomplete",
+          "status": "invalid",
           "complete": false,
           "stages": [
             {
@@ -5493,7 +5492,7 @@
       "id": "spl2.timewrap.span.positive",
       "classification": "positive",
       "document": {
-        "text": "FROM main | timewrap 1day",
+        "text": "FROM main | timechart count() | timewrap 2day",
         "language": "spl2",
         "profile": "splunkd",
         "version": "current",

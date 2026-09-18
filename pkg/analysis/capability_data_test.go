@@ -185,6 +185,105 @@ func TestCapabilityGrammarRegistrationDoesNotAddSyntaxCoverage(t *testing.T) {
 	t.Fatal("SPL2 spl1 capability record is missing")
 }
 
+func TestEmbeddedCapabilityReviewedFacts(t *testing.T) {
+	_, cases, err := loadEmbeddedCapabilityData()
+	if err != nil {
+		t.Fatalf("load embedded capability data: %v", err)
+	}
+	evidenceByID := make(map[string]CapabilityEvidence, len(cases))
+	for _, evidence := range cases {
+		evidenceByID[evidence.ID] = evidence
+	}
+	evidence := func(id string) CapabilityEvidence {
+		t.Helper()
+		got, ok := evidenceByID[id]
+		if !ok {
+			t.Fatalf("capability evidence %q is missing", id)
+		}
+		return got
+	}
+
+	for _, id := range []string{
+		"spl.splunkd.baseline.rewrite",
+		"spl2.splunkd.baseline.rewrite",
+	} {
+		got := evidence(id)
+		if got.Classification != CapabilityEvidenceNegative || got.Observations.SafeRewriting == nil {
+			t.Fatalf("%s is not an authored negative rewrite boundary: %+v", id, got)
+		}
+		if got.Observations.SafeRewriting.Status != Invalid {
+			t.Errorf("%s rewrite status = %q, want %q", id, got.Observations.SafeRewriting.Status, Invalid)
+		}
+		if len(got.Observations.SafeRewriting.ChangeReasons) != 0 || len(got.Observations.SafeRewriting.RuleEvaluationReasons) != 0 {
+			t.Errorf("%s records nonexistent rewrite or rule evaluations: %+v", id, got.Observations.SafeRewriting)
+		}
+	}
+	if got := evidence("spl.splunkd.baseline.rewrite").Observations.SafeRewriting.CoverageReasons; !slices.Equal(got, []string{"SPL_SYNTAX_ERROR", "post_verification_failed"}) {
+		t.Errorf("SPL rewrite coverage reasons = %v", got)
+	}
+	if got := evidence("spl2.splunkd.baseline.rewrite").Observations.SafeRewriting.CoverageReasons; !slices.Equal(got, []string{"SPL_PROFILE_MISMATCH", "SPL_UNSUPPORTED_SEMANTICS", "post_verification_failed"}) {
+		t.Errorf("SPL2 rewrite coverage reasons = %v", got)
+	}
+
+	for _, id := range []string{
+		"spl2.decrypt.profile-mismatch.incomplete",
+		"spl2.fillnull.field-list.incomplete",
+		"spl2.if.subpipe.incomplete",
+		"spl2.ocsf.profile-mismatch.incomplete",
+		"spl2.route.profile-mismatch.incomplete",
+		"spl2.timewrap.span.incomplete",
+	} {
+		got := evidence(id)
+		if got.Observations.Semantics == nil || got.Observations.Semantics.Status != Invalid {
+			t.Errorf("%s semantic status is not invalid: %+v", id, got.Observations.Semantics)
+		}
+	}
+
+	macro := evidence("spl.macro.exact-invocation.incomplete")
+	if got := macro.Observations.Semantics.Stages; len(got) != 1 || got[0].Command != "search" || got[0].SemanticComplete {
+		t.Errorf("macro invocation stages = %+v, want incomplete search stage", got)
+	}
+
+	for _, check := range []struct {
+		id          string
+		startOffset int
+		startColumn int
+		endOffset   int
+		endColumn   int
+	}{
+		{id: "spl.splunkd.baseline.negative", startOffset: 13, startColumn: 14, endOffset: 13, endColumn: 14},
+		{id: "spl2.splunkd.baseline.negative", startOffset: 12, startColumn: 13, endOffset: 19, endColumn: 20},
+	} {
+		got := evidence(check.id)
+		for surface, diagnostics := range map[string][]CapabilityDiagnosticExpectation{
+			"syntax":    got.Observations.Syntax.Diagnostics,
+			"semantics": got.Observations.Semantics.Diagnostics,
+		} {
+			if len(diagnostics) != 1 {
+				t.Errorf("%s %s diagnostics = %+v, want one", check.id, surface, diagnostics)
+				continue
+			}
+			location := diagnostics[0].Location
+			if location.Start.Offset != check.startOffset || location.Start.Line != 1 || location.Start.Column != check.startColumn ||
+				location.End.Offset != check.endOffset || location.End.Line != 1 || location.End.Column != check.endColumn {
+				t.Errorf("%s %s diagnostic location = %+v", check.id, surface, location)
+			}
+		}
+	}
+
+	timewrap := evidence("spl2.timewrap.span.positive")
+	if timewrap.Document.Text != "FROM main | timechart count() | timewrap 2day" {
+		t.Fatalf("timewrap positive witness = %q", timewrap.Document.Text)
+	}
+	result, err := Analyze(timewrap.Document)
+	if err != nil {
+		t.Fatalf("analyze timewrap positive witness: %v", err)
+	}
+	if !result.Coverage.SyntaxComplete || result.Status == Invalid {
+		t.Fatalf("timewrap positive witness status = %q, syntax complete = %v", result.Status, result.Coverage.SyntaxComplete)
+	}
+}
+
 func TestCapabilityEvidenceIsReferenced(t *testing.T) {
 	records, cases, err := loadEmbeddedCapabilityData()
 	if err != nil {
