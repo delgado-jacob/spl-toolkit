@@ -179,3 +179,30 @@ func TestSPL2CapabilitiesDocumentationSnapshot(t *testing.T) {
 		}
 	}
 }
+
+func TestSPL2CapabilitiesGrammarRegistrationCompatibility(t *testing.T) {
+	manifest, err := CapabilitiesFor(CapabilityOptions{Language: "spl2"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	var record *CapabilityRecord
+	for i := range manifest.Records {
+		candidate := &manifest.Records[i]
+		if candidate.Kind == "command" && candidate.Name == "spl1" {
+			record = candidate
+			break
+		}
+	}
+	if record == nil || !record.GrammarRegistered || record.Dimensions.Syntax.State != CapabilityUnsupported {
+		t.Fatalf("SPL2 spl1 authored grammar fact changed: %+v", record)
+	}
+	for _, command := range manifest.Commands {
+		if command.Name == "spl1" {
+			if !command.SyntaxSupported {
+				t.Fatalf("SPL2 spl1 grammar registration was not preserved in legacy projection: %+v", command)
+			}
+			return
+		}
+	}
+	t.Fatal("SPL2 spl1 command is missing from legacy projection")
+}

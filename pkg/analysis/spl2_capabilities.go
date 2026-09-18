@@ -1,42 +1,12 @@
 package analysis
 
 import (
-	"fmt"
-	"sort"
 	"strings"
 )
 
 // This is the auditor-pinned V1 source/design, original ID/candidate/source-link,
 // inventory and hold projection, not downloaded pages or the mutable corpus.
 const spl2DocumentationSnapshot = "spl2-provenance-v1:sha256:3345cf5712b1bdbf467d1651784fdb8bccc596805038da0d54e7a123384e3a4e"
-
-func spl2Capabilities() CapabilityManifest {
-	m := CapabilityManifest{Rewrite: rewriteCapabilities("spl2"), SchemaVersion: 1, Language: "spl2", Profile: "splunkd", Version: "current", DocumentationSnapshot: spl2DocumentationSnapshot, Commands: []Capability{}, Functions: []Capability{}}
-	for _, entry := range spl2CommandInventory {
-		limits := []string{entry.limitation}
-		limits = append(limits, spl2FormLimitations(entry.name)...)
-		m.Commands = append(m.Commands, Capability{Name: entry.name, SyntaxSupported: entry.syntax, SemanticSupported: entry.semantic, Limitations: limits})
-	}
-	for name, spec := range spl2Functions {
-		limit := fmt.Sprintf("%d to %d positional arguments", spec.min, spec.max)
-		if spec.max < 0 {
-			limit = fmt.Sprintf("at least %d positional arguments", spec.min)
-		}
-		if name == "case" {
-			limit += " in condition/value pairs"
-		}
-		if spec.aggregate {
-			limit += "; aggregate context only"
-		} else {
-			limit += "; expression context only"
-		}
-		limit += "; conditional availability follows expression evidence; named arguments remain incomplete"
-		m.Functions = append(m.Functions, Capability{Name: name, SyntaxSupported: true, SemanticSupported: true, Limitations: append([]string{limit}, spl2FormLimitations("function:"+name)...)})
-	}
-	sort.Slice(m.Commands, func(i, j int) bool { return m.Commands[i].Name < m.Commands[j].Name })
-	sort.Slice(m.Functions, func(i, j int) bool { return m.Functions[i].Name < m.Functions[j].Name })
-	return m
-}
 
 type spl2CapabilityEntry struct {
 	name             string

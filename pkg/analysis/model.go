@@ -143,9 +143,13 @@ type CapabilityManifest struct {
 	Language              string                     `json:"language"`
 	Profile               string                     `json:"profile"`
 	Version               string                     `json:"version"`
+	ToolkitVersion        string                     `json:"toolkit_version"`
 	DocumentationSnapshot string                     `json:"documentation_snapshot,omitempty"`
 	Commands              []Capability               `json:"commands"`
 	Functions             []Capability               `json:"functions"`
+	Records               []CapabilityRecord         `json:"records"`
+	Summary               CapabilitySummary          `json:"summary"`
+	Evidence              []CapabilityEvidence       `json:"evidence"`
 }
 
 // CapabilityOptions selects an available language compatibility contract.

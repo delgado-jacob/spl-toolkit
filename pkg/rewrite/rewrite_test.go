@@ -145,7 +145,7 @@ func explicitAliasReport(mode Mode) *Result {
 				Query: analysis.RequirementQueryIdentity{
 					SourceID: "source.spl", Language: "spl", Profile: "splunkd", Version: "current", QueryDigest: expected.digest,
 				},
-				CapabilityRevision: "sha256:dfb8cedde04204e0a876412fbe217e49405689b54ae7d7d8fc37bfcb7fb2335f",
+				CapabilityRevision: "sha256:1e6c75800f843931ec517dba27f3baa5af928a8a908d97dd1c62513e2ea24d31",
 				QueryStatus:        analysis.Valid,
 				Coverage:           analysis.RequirementCoverage{Complete: true, Reasons: []string{}},
 				Items: []analysis.RequirementItem{

@@ -436,7 +436,7 @@ func TestSPL2SequentialFullState(t *testing.T) {
 			Language: "spl2", Profile: "splunkd", Version: "current",
 			QueryDigest: "sha256:159f5b7d4683ac55dd0efac524ba3ea30133c495a91e81af6c695b70d1e16afa",
 		},
-		CapabilityRevision: "sha256:c3217502697cee2595f20d2fe98b76422f837696d2861cee81e852ad142edcfc",
+		CapabilityRevision: "sha256:0203cbeec2e0fd484080b1f512582a1c8bdc4bc541fb73ac42c013060695f84c",
 		QueryStatus:        Valid,
 		Coverage:           RequirementCoverage{Complete: true, Reasons: []string{}},
 		Items: []RequirementItem{

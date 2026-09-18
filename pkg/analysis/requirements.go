@@ -3,7 +3,6 @@ package analysis
 import (
 	"crypto/sha256"
 	"encoding/hex"
-	"encoding/json"
 	"fmt"
 	"sort"
 	"strconv"
@@ -86,20 +85,11 @@ func queryDigest(text string) string {
 }
 
 func capabilityRevision(document QueryDocument) (string, error) {
-	manifest, err := CapabilitiesFor(CapabilityOptions{
+	return capabilityRevisionFor(CapabilityOptions{
 		Language: document.Language,
 		Profile:  document.Profile,
 		Version:  document.Version,
 	})
-	if err != nil {
-		return "", err
-	}
-	encoded, err := json.Marshal(manifest)
-	if err != nil {
-		return "", err
-	}
-	sum := sha256.Sum256(encoded)
-	return "sha256:" + hex.EncodeToString(sum[:]), nil
 }
 
 func cloneRequirementSet(in RequirementSet) RequirementSet {

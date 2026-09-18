@@ -62,6 +62,25 @@ func assertNoNull(t *testing.T, v any) {
 		}
 	}
 }
+
+func TestAnalysisCollectionsAreInitialized(t *testing.T) {
+	for _, options := range []CapabilityOptions{{}, {Language: "spl2"}} {
+		manifest, err := CapabilitiesFor(options)
+		if err != nil {
+			t.Fatal(err)
+		}
+		encoded, err := json.Marshal(manifest)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var decoded any
+		if err := json.Unmarshal(encoded, &decoded); err != nil {
+			t.Fatal(err)
+		}
+		assertNoNull(t, decoded)
+	}
+}
+
 func TestDocumentUnsupportedOptions(t *testing.T) {
 	for _, tc := range []struct {
 		doc  QueryDocument

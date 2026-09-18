@@ -683,7 +683,7 @@ func TestCapabilityRevisionUsesNormalizedTypedManifest(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		encoded, err := json.Marshal(manifest)
+		encoded, err := json.Marshal(capabilityRevisionPayloadFor(manifest))
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -695,6 +695,55 @@ func TestCapabilityRevisionUsesNormalizedTypedManifest(t *testing.T) {
 		}
 		if got != want {
 			t.Errorf("capabilityRevision(%+v) = %q, want %q", document, got, want)
+		}
+
+		manifest.ToolkitVersion = "mutation-must-not-affect-semantic-revision"
+		toolkitOnly, err := json.Marshal(capabilityRevisionPayloadFor(manifest))
+		if err != nil {
+			t.Fatal(err)
+		}
+		toolkitOnlySum := sha256.Sum256(toolkitOnly)
+		if toolkitOnlyRevision := "sha256:" + hex.EncodeToString(toolkitOnlySum[:]); toolkitOnlyRevision != want {
+			t.Errorf("toolkit-only mutation changed revision from %q to %q", want, toolkitOnlyRevision)
+		}
+
+		manifest.Records[0].Dimensions.Syntax.Limitations = append(manifest.Records[0].Dimensions.Syntax.Limitations, "mutated claim")
+		claimMutation, err := json.Marshal(capabilityRevisionPayloadFor(manifest))
+		if err != nil {
+			t.Fatal(err)
+		}
+		claimSum := sha256.Sum256(claimMutation)
+		if claimRevision := "sha256:" + hex.EncodeToString(claimSum[:]); claimRevision == want {
+			t.Error("record claim mutation did not change semantic revision")
+		}
+
+		evidenceManifest, err := CapabilitiesFor(CapabilityOptions{
+			Language: document.Language,
+			Profile:  document.Profile,
+			Version:  document.Version,
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+		mutatedEvidence := false
+		for i := range evidenceManifest.Evidence {
+			semantics := evidenceManifest.Evidence[i].Observations.Semantics
+			if semantics != nil && len(semantics.Stages) != 0 {
+				semantics.Stages[0].Command = "mutated evidence"
+				mutatedEvidence = true
+				break
+			}
+		}
+		if !mutatedEvidence {
+			t.Fatal("selected manifest has no semantic observation to mutate")
+		}
+		evidenceMutation, err := json.Marshal(capabilityRevisionPayloadFor(evidenceManifest))
+		if err != nil {
+			t.Fatal(err)
+		}
+		evidenceSum := sha256.Sum256(evidenceMutation)
+		if evidenceRevision := "sha256:" + hex.EncodeToString(evidenceSum[:]); evidenceRevision == want {
+			t.Error("evidence mutation did not change semantic revision")
 		}
 	}
 

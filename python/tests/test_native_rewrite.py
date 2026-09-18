@@ -111,8 +111,8 @@ def expected_search(mode, language="spl"):
                 "query_digest": "sha256:" + hashlib.sha256(text.encode()).hexdigest(),
             },
             "capability_revision": {
-                "spl": "sha256:dfb8cedde04204e0a876412fbe217e49405689b54ae7d7d8fc37bfcb7fb2335f",
-                "spl2": "sha256:c3217502697cee2595f20d2fe98b76422f837696d2861cee81e852ad142edcfc",
+                "spl": "sha256:1e6c75800f843931ec517dba27f3baa5af928a8a908d97dd1c62513e2ea24d31",
+                "spl2": "sha256:0203cbeec2e0fd484080b1f512582a1c8bdc4bc541fb73ac42c013060695f84c",
             }[language],
             "query_status": "valid",
             "coverage": {"complete": True, "reasons": []},
