@@ -3,8 +3,207 @@ package analysis
 import (
 	"encoding/json"
 	"fmt"
+	"slices"
+	"sort"
 	"testing"
 )
+
+func TestEmbeddedCapabilityAssetsAreStructurallyValid(t *testing.T) {
+	records, cases, err := loadEmbeddedCapabilityData()
+	if err != nil {
+		t.Fatalf("load embedded capability data: %v", err)
+	}
+	if len(records) == 0 || len(cases) == 0 {
+		t.Fatalf("embedded capability data must not be empty: records=%d cases=%d", len(records), len(cases))
+	}
+	var authored struct {
+		Records []map[string]json.RawMessage `json:"records"`
+	}
+	if err := json.Unmarshal(embeddedCapabilityLedger, &authored); err != nil {
+		t.Fatalf("inspect embedded capability ledger: %v", err)
+	}
+	for i, record := range authored.Records {
+		raw, present := record["grammar_registered"]
+		var registered bool
+		if !present || json.Unmarshal(raw, &registered) != nil {
+			t.Errorf("embedded capability record %d lacks an explicit boolean grammar_registered value", i)
+		}
+	}
+}
+
+func TestCapabilityLedgerCoversEveryKindPerLanguage(t *testing.T) {
+	records, _, err := loadEmbeddedCapabilityData()
+	if err != nil {
+		t.Fatalf("load embedded capability data: %v", err)
+	}
+	for _, language := range []string{"spl", "spl2"} {
+		kinds := make(map[string]bool, len(capabilityRecordKinds))
+		for _, record := range records {
+			if record.Language == language {
+				kinds[record.Kind] = true
+			}
+		}
+		for kind := range capabilityRecordKinds {
+			if !kinds[kind] {
+				t.Errorf("%s ledger has no %s record", language, kind)
+			}
+		}
+	}
+}
+
+func TestCapabilityLedgerCoversLegacyInventory(t *testing.T) {
+	records, _, err := loadEmbeddedCapabilityData()
+	if err != nil {
+		t.Fatalf("load embedded capability data: %v", err)
+	}
+
+	actualNames := func(language, kind string) []string {
+		set := map[string]bool{}
+		for _, record := range records {
+			if record.Language == language && record.Kind == kind {
+				set[record.Name] = true
+			}
+		}
+		names := make([]string, 0, len(set))
+		for name := range set {
+			names = append(names, name)
+		}
+		sort.Strings(names)
+		return names
+	}
+	wantSPLCommands := make([]string, 0, len(commands))
+	for name := range commands {
+		wantSPLCommands = append(wantSPLCommands, name)
+	}
+	sort.Strings(wantSPLCommands)
+	wantSPLFunctions := make([]string, 0, len(functions))
+	for name := range functions {
+		wantSPLFunctions = append(wantSPLFunctions, name)
+	}
+	sort.Strings(wantSPLFunctions)
+	wantSPL2Commands := make([]string, 0, len(spl2CommandInventory))
+	for _, entry := range spl2CommandInventory {
+		wantSPL2Commands = append(wantSPL2Commands, entry.name)
+	}
+	sort.Strings(wantSPL2Commands)
+	wantSPL2Functions := make([]string, 0, len(spl2Functions))
+	for name := range spl2Functions {
+		wantSPL2Functions = append(wantSPL2Functions, name)
+	}
+	sort.Strings(wantSPL2Functions)
+
+	for _, check := range []struct {
+		language string
+		kind     string
+		want     []string
+	}{
+		{language: "spl", kind: "command", want: wantSPLCommands},
+		{language: "spl", kind: "function", want: wantSPLFunctions},
+		{language: "spl2", kind: "command", want: wantSPL2Commands},
+		{language: "spl2", kind: "function", want: wantSPL2Functions},
+	} {
+		if got := actualNames(check.language, check.kind); !slices.Equal(got, check.want) {
+			t.Errorf("%s %s names = %v, want %v", check.language, check.kind, got, check.want)
+		}
+	}
+
+	legacy := []CapabilityManifest{Capabilities()}
+	spl2Legacy, err := CapabilitiesFor(CapabilityOptions{Language: "spl2"})
+	if err != nil {
+		t.Fatalf("load SPL2 legacy capabilities: %v", err)
+	}
+	legacy = append(legacy, spl2Legacy)
+	for _, manifest := range legacy {
+		for kind, capabilities := range map[string][]Capability{
+			"command":  manifest.Commands,
+			"function": manifest.Functions,
+		} {
+			for _, capability := range capabilities {
+				var grammarRegistered, semanticSupported bool
+				var limitations []string
+				seenLimitations := map[string]bool{}
+				for _, record := range records {
+					if record.Language != manifest.Language || record.Kind != kind || record.Name != capability.Name {
+						continue
+					}
+					grammarRegistered = grammarRegistered || record.GrammarRegistered
+					semanticSupported = semanticSupported || record.Dimensions.Semantics.State == CapabilitySupported
+					for _, dimension := range capabilityDimensionClaims(record.Dimensions) {
+						for _, limitation := range dimension.claim.Limitations {
+							if !seenLimitations[limitation] {
+								seenLimitations[limitation] = true
+								limitations = append(limitations, limitation)
+							}
+						}
+					}
+				}
+				if grammarRegistered != capability.SyntaxSupported || semanticSupported != capability.SemanticSupported {
+					t.Errorf("%s %s %s support = grammar:%v semantics:%v, want syntax:%v semantics:%v", manifest.Language, kind, capability.Name, grammarRegistered, semanticSupported, capability.SyntaxSupported, capability.SemanticSupported)
+				}
+				if !slices.Equal(limitations, capability.Limitations) {
+					t.Errorf("%s %s %s limitations = %v, want %v", manifest.Language, kind, capability.Name, limitations, capability.Limitations)
+				}
+			}
+		}
+	}
+}
+
+func TestCapabilityGrammarRegistrationDoesNotAddSyntaxCoverage(t *testing.T) {
+	records, cases, err := loadEmbeddedCapabilityData()
+	if err != nil {
+		t.Fatalf("load embedded capability data: %v", err)
+	}
+	evidenceByID := make(map[string]CapabilityEvidence, len(cases))
+	for _, evidence := range cases {
+		evidenceByID[evidence.ID] = evidence
+	}
+	for _, record := range records {
+		if record.ID != "spl2.command.spl1.quoted-pipeline" {
+			continue
+		}
+		if !record.GrammarRegistered {
+			t.Fatal("SPL2 spl1 grammar registration was not authored")
+		}
+		if record.Dimensions.Syntax.State != CapabilityUnsupported {
+			t.Fatalf("SPL2 spl1 syntax state = %q, want %q", record.Dimensions.Syntax.State, CapabilityUnsupported)
+		}
+		if len(record.Dimensions.Syntax.EvidenceIDs) == 0 {
+			t.Fatal("SPL2 spl1 syntax boundary has no evidence")
+		}
+		for _, evidenceID := range record.Dimensions.Syntax.EvidenceIDs {
+			evidence := evidenceByID[evidenceID]
+			if evidence.Classification != CapabilityEvidenceIncomplete || evidence.Observations.Syntax == nil || evidence.Observations.Syntax.Complete {
+				t.Fatalf("SPL2 spl1 syntax evidence %q is not an honest incomplete observation: %+v", evidenceID, evidence)
+			}
+		}
+		summary := summarizeCapabilityRecords([]CapabilityRecord{record})
+		if summary.Syntax.Covered != 0 || summary.Syntax.Unsupported != 1 {
+			t.Fatalf("grammar registration added syntax coverage: %+v", summary.Syntax)
+		}
+		return
+	}
+	t.Fatal("SPL2 spl1 capability record is missing")
+}
+
+func TestCapabilityEvidenceIsReferenced(t *testing.T) {
+	records, cases, err := loadEmbeddedCapabilityData()
+	if err != nil {
+		t.Fatalf("load embedded capability data: %v", err)
+	}
+	references := make(map[string]int, len(cases))
+	for _, record := range records {
+		for _, dimension := range capabilityDimensionClaims(record.Dimensions) {
+			for _, evidenceID := range dimension.claim.EvidenceIDs {
+				references[evidenceID]++
+			}
+		}
+	}
+	for _, evidence := range cases {
+		if references[evidence.ID] == 0 {
+			t.Errorf("evidence %q is not referenced", evidence.ID)
+		}
+	}
+}
 
 func TestDecodeCapabilityAssetsRejectsMalformedInput(t *testing.T) {
 	ledger, corpus := validCapabilityAssets(t)
@@ -101,6 +300,16 @@ func TestDecodeCapabilityAssetsRejectsMalformedInput(t *testing.T) {
 			name: "unknown record kind",
 			mutate: func(ledger, corpus []byte) ([]byte, []byte) {
 				return mutateRecord(t, ledger, corpus, func(record *CapabilityRecord) { record.Kind = "clause" })
+			},
+		},
+		{
+			name: "invalid grammar registration type",
+			mutate: func(ledger, corpus []byte) ([]byte, []byte) {
+				var file map[string]any
+				mustUnmarshal(t, ledger, &file)
+				records := file["records"].([]any)
+				records[0].(map[string]any)["grammar_registered"] = "yes"
+				return mustJSON(t, file), corpus
 			},
 		},
 		{
@@ -788,8 +997,12 @@ func TestCapabilityDataCanonicalOrder(t *testing.T) {
 
 func TestCapabilityDataClonesAreDeep(t *testing.T) {
 	record := validCapabilityRecord()
+	record.GrammarRegistered = true
 	record.Dimensions.Syntax.Limitations = []string{}
 	recordClone := cloneCapabilityRecord(record)
+	if !recordClone.GrammarRegistered {
+		t.Fatal("record clone dropped grammar registration")
+	}
 	if recordClone.Dimensions.Syntax.Limitations == nil {
 		t.Fatal("record clone changed an authored empty slice to nil")
 	}

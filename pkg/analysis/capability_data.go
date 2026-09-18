@@ -2,12 +2,23 @@ package analysis
 
 import (
 	"bytes"
+	_ "embed"
 	"encoding/json"
 	"fmt"
 	"io"
 	"sort"
 	"strings"
 )
+
+//go:embed capabilitydata/ledger.json
+var embeddedCapabilityLedger []byte
+
+//go:embed capabilitydata/corpus.json
+var embeddedCapabilityCorpus []byte
+
+func loadEmbeddedCapabilityData() ([]CapabilityRecord, []CapabilityEvidence, error) {
+	return decodeCapabilityAssets(embeddedCapabilityLedger, embeddedCapabilityCorpus)
+}
 
 type capabilityLedgerFile struct {
 	SchemaVersion int                `json:"schema_version"`

@@ -27,14 +27,16 @@ type CapabilityDimensions struct {
 }
 
 type CapabilityRecord struct {
-	ID         string               `json:"id"`
-	Language   string               `json:"language"`
-	Profile    string               `json:"profile"`
-	Kind       string               `json:"kind"`
-	Name       string               `json:"name"`
-	Form       string               `json:"form"`
-	Provenance CapabilityProvenance `json:"provenance"`
-	Dimensions CapabilityDimensions `json:"dimensions"`
+	ID       string `json:"id"`
+	Language string `json:"language"`
+	Profile  string `json:"profile"`
+	Kind     string `json:"kind"`
+	Name     string `json:"name"`
+	Form     string `json:"form"`
+	// GrammarRegistered records a local parser registration fact, not syntax coverage.
+	GrammarRegistered bool                 `json:"grammar_registered"`
+	Provenance        CapabilityProvenance `json:"provenance"`
+	Dimensions        CapabilityDimensions `json:"dimensions"`
 }
 
 type CapabilityStateCounts struct {

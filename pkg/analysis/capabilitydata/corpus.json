@@ -1,0 +1,5911 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "id": "spl.abs.one-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "search index=main | eval out=abs(field)",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.abs.one-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "eval",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl.append.append-subsearch.incomplete",
+      "classification": "incomplete",
+      "document": {
+        "text": "search index=main | append [ search index=archive ]",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.append.append-subsearch.incomplete"
+      },
+      "observations": {
+        "semantics": {
+          "status": "incomplete",
+          "complete": false,
+          "stages": [
+            {
+              "command": "append",
+              "semantic_complete": false
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Conservative local boundary with incomplete coverage."
+      }
+    },
+    {
+      "id": "spl.append.append-subsearch.positive",
+      "classification": "positive",
+      "document": {
+        "text": "search index=main | append [ search index=archive ]",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.append.append-subsearch.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl.appendpipe.appendpipe-subsearch.incomplete",
+      "classification": "incomplete",
+      "document": {
+        "text": "search index=main | appendpipe [ stats count ]",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.appendpipe.appendpipe-subsearch.incomplete"
+      },
+      "observations": {
+        "semantics": {
+          "status": "incomplete",
+          "complete": false,
+          "stages": [
+            {
+              "command": "appendpipe",
+              "semantic_complete": false
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Conservative local boundary with incomplete coverage."
+      }
+    },
+    {
+      "id": "spl.appendpipe.appendpipe-subsearch.positive",
+      "classification": "positive",
+      "document": {
+        "text": "search index=main | appendpipe [ stats count ]",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.appendpipe.appendpipe-subsearch.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl.avg.one-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "search index=main | stats avg(field)",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.avg.one-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "stats",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl.case.two-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "search index=main | eval out=case(true,1)",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.case.two-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "eval",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl.ceil.one-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "search index=main | eval out=ceil(field)",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.ceil.one-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "eval",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl.ceiling.one-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "search index=main | eval out=ceiling(field)",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.ceiling.one-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "eval",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl.coalesce.two-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "search index=main | eval out=coalesce(field,fallback)",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.coalesce.two-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "eval",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl.count.zero-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "search index=main | stats count",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.count.zero-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "stats",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl.datamodel.exact-model-dataset.incomplete",
+      "classification": "incomplete",
+      "document": {
+        "text": "datamodel Authentication Authentication",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.datamodel.exact-model-dataset.incomplete"
+      },
+      "observations": {
+        "semantics": {
+          "status": "incomplete",
+          "complete": false,
+          "stages": [
+            {
+              "command": "datamodel",
+              "semantic_complete": false
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Conservative local boundary with incomplete coverage."
+      }
+    },
+    {
+      "id": "spl.datamodel.exact-model-dataset.positive",
+      "classification": "positive",
+      "document": {
+        "text": "datamodel Authentication Authentication",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.datamodel.exact-model-dataset.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl.dc.one-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "search index=main | stats dc(field)",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.dc.one-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "stats",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl.dedup.exact-field-list.positive",
+      "classification": "positive",
+      "document": {
+        "text": "search index=main | dedup user",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.dedup.exact-field-list.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "dedup",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl.distinct_count.one-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "search index=main | stats distinct_count(field)",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.distinct_count.one-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "stats",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl.eval.exact-assignment.positive",
+      "classification": "positive",
+      "document": {
+        "text": "search index=main | eval out=abs(value)",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.eval.exact-assignment.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "eval",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl.eventstats.aggregate-call.positive",
+      "classification": "positive",
+      "document": {
+        "text": "search index=main | eventstats count",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.eventstats.aggregate-call.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "eventstats",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl.fields.exact-field-list.positive",
+      "classification": "positive",
+      "document": {
+        "text": "search user=x | fields - user",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.fields.exact-field-list.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "fields",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl.first.one-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "search index=main | stats first(field)",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.first.one-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "stats",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl.floor.one-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "search index=main | eval out=floor(field)",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.floor.one-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "eval",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl.from.exact-dataset.incomplete",
+      "classification": "incomplete",
+      "document": {
+        "text": "from datamodel:Authentication.Authentication",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.from.exact-dataset.incomplete"
+      },
+      "observations": {
+        "semantics": {
+          "status": "incomplete",
+          "complete": false,
+          "stages": [
+            {
+              "command": "from",
+              "semantic_complete": false
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Conservative local boundary with incomplete coverage."
+      }
+    },
+    {
+      "id": "spl.from.exact-dataset.positive",
+      "classification": "positive",
+      "document": {
+        "text": "from datamodel:Authentication.Authentication",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.from.exact-dataset.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl.head.numeric-limit.positive",
+      "classification": "positive",
+      "document": {
+        "text": "search index=main | head 1",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.head.numeric-limit.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "head",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl.if.three-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "search index=main | eval out=if(true,1,0)",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.if.three-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "eval",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl.inputlookup.exact-lookup.positive",
+      "classification": "positive",
+      "document": {
+        "text": "inputlookup users.csv",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.inputlookup.exact-lookup.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "inputlookup",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl.isnotnull.one-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "search index=main | eval out=isnotnull(field)",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.isnotnull.one-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "eval",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl.isnull.one-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "search index=main | eval out=isnull(field)",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.isnull.one-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "eval",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl.join.field-subsearch.incomplete",
+      "classification": "incomplete",
+      "document": {
+        "text": "search index=main | join user [ search index=archive ]",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.join.field-subsearch.incomplete"
+      },
+      "observations": {
+        "semantics": {
+          "status": "incomplete",
+          "complete": false,
+          "stages": [
+            {
+              "command": "join",
+              "semantic_complete": false
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Conservative local boundary with incomplete coverage."
+      }
+    },
+    {
+      "id": "spl.join.field-subsearch.positive",
+      "classification": "positive",
+      "document": {
+        "text": "search index=main | join user [ search index=archive ]",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.join.field-subsearch.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl.last.one-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "search index=main | stats last(field)",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.last.one-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "stats",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl.len.one-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "search index=main | eval out=len(field)",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.len.one-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "eval",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl.list.one-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "search index=main | stats list(field)",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.list.one-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "stats",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl.lookup.exact-input-output.positive",
+      "classification": "positive",
+      "document": {
+        "text": "search index=main | lookup users user OUTPUT name",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.lookup.exact-input-output.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "lookup",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl.lower.one-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "search index=main | eval out=lower(field)",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.lower.one-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "eval",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl.ltrim.one-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "search index=main | eval out=ltrim(field)",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.ltrim.one-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "eval",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl.macro.exact-invocation.incomplete",
+      "classification": "incomplete",
+      "document": {
+        "text": "`example`",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.macro.exact-invocation.incomplete"
+      },
+      "observations": {
+        "semantics": {
+          "status": "incomplete",
+          "complete": false,
+          "stages": [
+            {
+              "command": "macro",
+              "semantic_complete": false
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Conservative local boundary with incomplete coverage."
+      }
+    },
+    {
+      "id": "spl.macro.exact-invocation.positive",
+      "classification": "positive",
+      "document": {
+        "text": "`example`",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.macro.exact-invocation.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl.match.two-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "search index=main | eval out=match(field,\"x\")",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.match.two-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "eval",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl.max.one-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "search index=main | stats max(field)",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.max.one-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "stats",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl.min.one-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "search index=main | stats min(field)",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.min.one-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "stats",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl.mvcount.one-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "search index=main | eval out=mvcount(field)",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.mvcount.one-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "eval",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl.rename.exact-pair.positive",
+      "classification": "positive",
+      "document": {
+        "text": "search index=main | rename user AS actor",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.rename.exact-pair.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "rename",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl.replace.three-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "search index=main | eval out=replace(field,\"x\",\"y\")",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.replace.three-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "eval",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl.round.one-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "search index=main | eval out=round(field)",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.round.one-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "eval",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl.rtrim.one-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "search index=main | eval out=rtrim(field)",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.rtrim.one-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "eval",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl.search.typed-selector.positive",
+      "classification": "positive",
+      "document": {
+        "text": "search index=main",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.search.typed-selector.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "search",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl.searchmatch.one-positional.incomplete",
+      "classification": "incomplete",
+      "document": {
+        "text": "search index=main | eval out=searchmatch(field)",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.searchmatch.one-positional.incomplete"
+      },
+      "observations": {
+        "semantics": {
+          "status": "incomplete",
+          "complete": false,
+          "stages": [
+            {
+              "command": "eval",
+              "semantic_complete": false
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Conservative local boundary with incomplete coverage."
+      }
+    },
+    {
+      "id": "spl.searchmatch.one-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "search index=main | eval out=searchmatch(field)",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.searchmatch.one-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl.sort.exact-field.positive",
+      "classification": "positive",
+      "document": {
+        "text": "search index=main | sort user",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.sort.exact-field.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "sort",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl.split.two-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "search index=main | eval out=split(field,\":\")",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.split.two-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "eval",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl.splunkd.baseline.negative",
+      "classification": "negative",
+      "document": {
+        "text": "search index=",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.splunkd.baseline.negative"
+      },
+      "observations": {
+        "syntax": {
+          "complete": false,
+          "diagnostics": [
+            {
+              "code": "SPL_SYNTAX_ERROR",
+              "category": "syntax",
+              "severity": "error",
+              "location": {
+                "start": {
+                  "offset": 0,
+                  "line": 1,
+                  "column": 1
+                },
+                "end": {
+                  "offset": 13,
+                  "line": 1,
+                  "column": 14
+                }
+              }
+            }
+          ]
+        },
+        "semantics": {
+          "status": "invalid",
+          "complete": false,
+          "stages": [
+            {
+              "command": "search",
+              "semantic_complete": false
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": [
+            {
+              "code": "SPL_SYNTAX_ERROR",
+              "category": "syntax",
+              "severity": "error",
+              "location": {
+                "start": {
+                  "offset": 0,
+                  "line": 1,
+                  "column": 1
+                },
+                "end": {
+                  "offset": 13,
+                  "line": 1,
+                  "column": 14
+                }
+              }
+            }
+          ]
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Definite invalid boundary for the selected profile."
+      }
+    },
+    {
+      "id": "spl.splunkd.baseline.rewrite",
+      "classification": "incomplete",
+      "document": {
+        "text": "search index=",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.splunkd.baseline.rewrite"
+      },
+      "observations": {
+        "safe_rewriting": {
+          "status": "incomplete",
+          "committed": false,
+          "rewrite_complete": false,
+          "text": "search index=",
+          "candidate_text": "search index=",
+          "coverage_reasons": [
+            "CAPABILITY_INCOMPLETE"
+          ],
+          "change_reasons": [],
+          "rule_evaluation_reasons": [
+            "NO_PROVED_SAFE_EDIT"
+          ]
+        }
+      },
+      "rewrite_request": {
+        "schema_version": 1,
+        "mode": "preview",
+        "rules": []
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Incomplete case records an explicit rewrite refusal."
+      }
+    },
+    {
+      "id": "spl.stats.aggregate-call.positive",
+      "classification": "positive",
+      "document": {
+        "text": "search index=main | stats count",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.stats.aggregate-call.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "stats",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl.streamstats.aggregate-call.positive",
+      "classification": "positive",
+      "document": {
+        "text": "search index=main | streamstats count",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.streamstats.aggregate-call.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "streamstats",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl.substr.two-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "search index=main | eval out=substr(field,1)",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.substr.two-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "eval",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl.sum.one-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "search index=main | stats sum(field)",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.sum.one-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "stats",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl.table.exact-field-list.positive",
+      "classification": "positive",
+      "document": {
+        "text": "search index=main | table user",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.table.exact-field-list.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "table",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl.tail.numeric-limit.positive",
+      "classification": "positive",
+      "document": {
+        "text": "search index=main | tail 1",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.tail.numeric-limit.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "tail",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl.tonumber.one-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "search index=main | eval out=tonumber(field)",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.tonumber.one-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "eval",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl.tostring.one-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "search index=main | eval out=tostring(field)",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.tostring.one-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "eval",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl.trim.one-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "search index=main | eval out=trim(field)",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.trim.one-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "eval",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl.tstats.exact-model-dataset.incomplete",
+      "classification": "incomplete",
+      "document": {
+        "text": "tstats count FROM datamodel=Authentication.Authentication",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.tstats.exact-model-dataset.incomplete"
+      },
+      "observations": {
+        "semantics": {
+          "status": "incomplete",
+          "complete": false,
+          "stages": [
+            {
+              "command": "tstats",
+              "semantic_complete": false
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Conservative local boundary with incomplete coverage."
+      }
+    },
+    {
+      "id": "spl.tstats.exact-model-dataset.positive",
+      "classification": "positive",
+      "document": {
+        "text": "tstats count FROM datamodel=Authentication.Authentication",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.tstats.exact-model-dataset.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl.upper.one-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "search index=main | eval out=upper(field)",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.upper.one-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "eval",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl.values.one-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "search index=main | stats values(field)",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.values.one-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "stats",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl.where.predicate.positive",
+      "classification": "positive",
+      "document": {
+        "text": "search index=main | where isnotnull(user)",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.where.predicate.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "where",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl2.abs.one-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "FROM main | eval out=abs(field)",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.abs.one-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "eval",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl2.addinfo.bare-command.incomplete",
+      "classification": "incomplete",
+      "document": {
+        "text": "FROM main | addinfo",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.addinfo.bare-command.incomplete"
+      },
+      "observations": {
+        "semantics": {
+          "status": "incomplete",
+          "complete": false,
+          "stages": [
+            {
+              "command": "addinfo",
+              "semantic_complete": false
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        },
+        "syntax": {
+          "complete": false,
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Conservative local boundary with incomplete coverage."
+      }
+    },
+    {
+      "id": "spl2.append.subsearch.incomplete",
+      "classification": "incomplete",
+      "document": {
+        "text": "FROM main | append [FROM archive]",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.append.subsearch.incomplete"
+      },
+      "observations": {
+        "semantics": {
+          "status": "incomplete",
+          "complete": false,
+          "stages": [
+            {
+              "command": "append",
+              "semantic_complete": false
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Conservative local boundary with incomplete coverage."
+      }
+    },
+    {
+      "id": "spl2.append.subsearch.positive",
+      "classification": "positive",
+      "document": {
+        "text": "FROM main | append [FROM archive]",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.append.subsearch.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl2.appendcols.subsearch.incomplete",
+      "classification": "incomplete",
+      "document": {
+        "text": "FROM main | appendcols [FROM archive]",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.appendcols.subsearch.incomplete"
+      },
+      "observations": {
+        "semantics": {
+          "status": "incomplete",
+          "complete": false,
+          "stages": [
+            {
+              "command": "appendcols",
+              "semantic_complete": false
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Conservative local boundary with incomplete coverage."
+      }
+    },
+    {
+      "id": "spl2.appendcols.subsearch.positive",
+      "classification": "positive",
+      "document": {
+        "text": "FROM main | appendcols [FROM archive]",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.appendcols.subsearch.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl2.appendpipe.subpipe.incomplete",
+      "classification": "incomplete",
+      "document": {
+        "text": "FROM main | appendpipe [fields host]",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.appendpipe.subpipe.incomplete"
+      },
+      "observations": {
+        "semantics": {
+          "status": "incomplete",
+          "complete": false,
+          "stages": [
+            {
+              "command": "appendpipe",
+              "semantic_complete": false
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Conservative local boundary with incomplete coverage."
+      }
+    },
+    {
+      "id": "spl2.appendpipe.subpipe.positive",
+      "classification": "positive",
+      "document": {
+        "text": "FROM main | appendpipe [fields host]",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.appendpipe.subpipe.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl2.avg.one-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "FROM main | stats avg(field) AS out",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.avg.one-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "stats",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl2.bin.span-field.incomplete",
+      "classification": "incomplete",
+      "document": {
+        "text": "FROM main | bin span=15m _time",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.bin.span-field.incomplete"
+      },
+      "observations": {
+        "semantics": {
+          "status": "incomplete",
+          "complete": false,
+          "stages": [
+            {
+              "command": "bin",
+              "semantic_complete": false
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Conservative local boundary with incomplete coverage."
+      }
+    },
+    {
+      "id": "spl2.bin.span-field.positive",
+      "classification": "positive",
+      "document": {
+        "text": "FROM main | bin span=15m _time",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.bin.span-field.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl2.branch.bare-command.incomplete",
+      "classification": "incomplete",
+      "document": {
+        "text": "FROM main | branch",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.branch.bare-command.incomplete"
+      },
+      "observations": {
+        "semantics": {
+          "status": "incomplete",
+          "complete": false,
+          "stages": [
+            {
+              "command": "branch",
+              "semantic_complete": false
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        },
+        "syntax": {
+          "complete": false,
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Conservative local boundary with incomplete coverage."
+      }
+    },
+    {
+      "id": "spl2.case.two-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "FROM main | eval out=case(true,1)",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.case.two-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "eval",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl2.ceil.one-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "FROM main | eval out=ceil(field)",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.ceil.one-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "eval",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl2.ceiling.one-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "FROM main | eval out=ceiling(field)",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.ceiling.one-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "eval",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl2.coalesce.two-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "FROM main | eval out=coalesce(field,fallback)",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.coalesce.two-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "eval",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl2.convert.bare-command.incomplete",
+      "classification": "incomplete",
+      "document": {
+        "text": "FROM main | convert",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.convert.bare-command.incomplete"
+      },
+      "observations": {
+        "semantics": {
+          "status": "incomplete",
+          "complete": false,
+          "stages": [
+            {
+              "command": "convert",
+              "semantic_complete": false
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        },
+        "syntax": {
+          "complete": false,
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Conservative local boundary with incomplete coverage."
+      }
+    },
+    {
+      "id": "spl2.count.zero-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "FROM main | stats count()",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.count.zero-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "stats",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl2.dc.one-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "FROM main | stats dc(field) AS out",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.dc.one-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "stats",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl2.decrypt.profile-mismatch.incomplete",
+      "classification": "incomplete",
+      "document": {
+        "text": "FROM main | decrypt",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.decrypt.profile-mismatch.incomplete"
+      },
+      "observations": {
+        "semantics": {
+          "status": "incomplete",
+          "complete": false,
+          "stages": [
+            {
+              "command": "decrypt",
+              "semantic_complete": false
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        },
+        "syntax": {
+          "complete": false,
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Conservative local boundary with incomplete coverage."
+      }
+    },
+    {
+      "id": "spl2.dedup.exact-field-list.positive",
+      "classification": "positive",
+      "document": {
+        "text": "FROM main | dedup host",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.dedup.exact-field-list.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "dedup",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl2.distinct_count.one-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "FROM main | stats distinct_count(field) AS out",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.distinct_count.one-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "stats",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl2.eval.exact-assignment.positive",
+      "classification": "positive",
+      "document": {
+        "text": "FROM main | eval out=abs(bytes)",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.eval.exact-assignment.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "eval",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl2.eventstats.aggregate-call.positive",
+      "classification": "positive",
+      "document": {
+        "text": "FROM main | eventstats count()",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.eventstats.aggregate-call.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "eventstats",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl2.expand.bare-command.incomplete",
+      "classification": "incomplete",
+      "document": {
+        "text": "FROM main | expand",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.expand.bare-command.incomplete"
+      },
+      "observations": {
+        "semantics": {
+          "status": "incomplete",
+          "complete": false,
+          "stages": [
+            {
+              "command": "expand",
+              "semantic_complete": false
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        },
+        "syntax": {
+          "complete": false,
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Conservative local boundary with incomplete coverage."
+      }
+    },
+    {
+      "id": "spl2.fields.exact-field-list.positive",
+      "classification": "positive",
+      "document": {
+        "text": "FROM main | fields - host",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.fields.exact-field-list.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "fields",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl2.fieldsummary.bare-command.incomplete",
+      "classification": "incomplete",
+      "document": {
+        "text": "FROM main | fieldsummary",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.fieldsummary.bare-command.incomplete"
+      },
+      "observations": {
+        "semantics": {
+          "status": "incomplete",
+          "complete": false,
+          "stages": [
+            {
+              "command": "fieldsummary",
+              "semantic_complete": false
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        },
+        "syntax": {
+          "complete": false,
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Conservative local boundary with incomplete coverage."
+      }
+    },
+    {
+      "id": "spl2.fillnull.field-list.incomplete",
+      "classification": "incomplete",
+      "document": {
+        "text": "FROM main | fillnull value=0 bytes",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.fillnull.field-list.incomplete"
+      },
+      "observations": {
+        "semantics": {
+          "status": "incomplete",
+          "complete": false,
+          "stages": [
+            {
+              "command": "fillnull",
+              "semantic_complete": false
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Conservative local boundary with incomplete coverage."
+      }
+    },
+    {
+      "id": "spl2.fillnull.field-list.positive",
+      "classification": "positive",
+      "document": {
+        "text": "FROM main | fillnull value=\"0\" host,user",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.fillnull.field-list.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl2.first.one-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "FROM main | stats first(field) AS out",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.first.one-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "stats",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl2.flatten.bare-command.incomplete",
+      "classification": "incomplete",
+      "document": {
+        "text": "FROM main | flatten",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.flatten.bare-command.incomplete"
+      },
+      "observations": {
+        "semantics": {
+          "status": "incomplete",
+          "complete": false,
+          "stages": [
+            {
+              "command": "flatten",
+              "semantic_complete": false
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        },
+        "syntax": {
+          "complete": false,
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Conservative local boundary with incomplete coverage."
+      }
+    },
+    {
+      "id": "spl2.floor.one-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "FROM main | eval out=floor(field)",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.floor.one-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "eval",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl2.from.dataset.positive",
+      "classification": "positive",
+      "document": {
+        "text": "FROM main",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.from.dataset.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "from",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl2.head.numeric-limit.positive",
+      "classification": "positive",
+      "document": {
+        "text": "FROM main | head 1",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.head.numeric-limit.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "head",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl2.if.subpipe.incomplete",
+      "classification": "incomplete",
+      "document": {
+        "text": "FROM main | if true [fields host]",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.if.subpipe.incomplete"
+      },
+      "observations": {
+        "semantics": {
+          "status": "incomplete",
+          "complete": false,
+          "stages": [
+            {
+              "command": "if",
+              "semantic_complete": false
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Conservative local boundary with incomplete coverage."
+      }
+    },
+    {
+      "id": "spl2.if.subpipe.positive",
+      "classification": "positive",
+      "document": {
+        "text": "FROM main | if (true) [fields host]",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.if.subpipe.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl2.if.three-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "FROM main | eval out=if(true,1,0)",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.if.three-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "eval",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl2.into.bare-command.incomplete",
+      "classification": "incomplete",
+      "document": {
+        "text": "FROM main | into",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.into.bare-command.incomplete"
+      },
+      "observations": {
+        "semantics": {
+          "status": "incomplete",
+          "complete": false,
+          "stages": [
+            {
+              "command": "into",
+              "semantic_complete": false
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        },
+        "syntax": {
+          "complete": false,
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Conservative local boundary with incomplete coverage."
+      }
+    },
+    {
+      "id": "spl2.iplocation.bare-command.incomplete",
+      "classification": "incomplete",
+      "document": {
+        "text": "FROM main | iplocation",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.iplocation.bare-command.incomplete"
+      },
+      "observations": {
+        "semantics": {
+          "status": "incomplete",
+          "complete": false,
+          "stages": [
+            {
+              "command": "iplocation",
+              "semantic_complete": false
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        },
+        "syntax": {
+          "complete": false,
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Conservative local boundary with incomplete coverage."
+      }
+    },
+    {
+      "id": "spl2.isnotnull.one-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "FROM main | eval out=isnotnull(field)",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.isnotnull.one-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "eval",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl2.isnull.one-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "FROM main | eval out=isnull(field)",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.isnull.one-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "eval",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl2.join.qualified-subsearch.incomplete",
+      "classification": "incomplete",
+      "document": {
+        "text": "FROM main | join left=L right=R where L.id=R.id [FROM other]",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.join.qualified-subsearch.incomplete"
+      },
+      "observations": {
+        "semantics": {
+          "status": "incomplete",
+          "complete": false,
+          "stages": [
+            {
+              "command": "join",
+              "semantic_complete": false
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Conservative local boundary with incomplete coverage."
+      }
+    },
+    {
+      "id": "spl2.join.qualified-subsearch.positive",
+      "classification": "positive",
+      "document": {
+        "text": "FROM main | join left=L right=R where L.id=R.id [FROM other]",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.join.qualified-subsearch.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl2.last.one-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "FROM main | stats last(field) AS out",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.last.one-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "stats",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl2.len.one-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "FROM main | eval out=len(field)",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.len.one-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "eval",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl2.list.one-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "FROM main | stats list(field) AS out",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.list.one-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "stats",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl2.loadjob.search-id.incomplete",
+      "classification": "incomplete",
+      "document": {
+        "text": "loadjob 1780123000.5",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.loadjob.search-id.incomplete"
+      },
+      "observations": {
+        "semantics": {
+          "status": "incomplete",
+          "complete": false,
+          "stages": [
+            {
+              "command": "loadjob",
+              "semantic_complete": false
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Conservative local boundary with incomplete coverage."
+      }
+    },
+    {
+      "id": "spl2.loadjob.search-id.positive",
+      "classification": "positive",
+      "document": {
+        "text": "loadjob 1780123000.5",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.loadjob.search-id.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl2.lookup.exact-input-output.positive",
+      "classification": "positive",
+      "document": {
+        "text": "FROM main | lookup users uid AS user OUTPUT name",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.lookup.exact-input-output.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "lookup",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl2.lower.one-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "FROM main | eval out=lower(field)",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.lower.one-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "eval",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl2.ltrim.one-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "FROM main | eval out=ltrim(field)",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.ltrim.one-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "eval",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl2.makemv.delimited-field.incomplete",
+      "classification": "incomplete",
+      "document": {
+        "text": "FROM main | makemv delim=\":\" labels",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.makemv.delimited-field.incomplete"
+      },
+      "observations": {
+        "semantics": {
+          "status": "incomplete",
+          "complete": false,
+          "stages": [
+            {
+              "command": "makemv",
+              "semantic_complete": false
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Conservative local boundary with incomplete coverage."
+      }
+    },
+    {
+      "id": "spl2.makemv.delimited-field.positive",
+      "classification": "positive",
+      "document": {
+        "text": "FROM main | makemv delim=\":\" labels",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.makemv.delimited-field.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl2.makeresults.bare-command.incomplete",
+      "classification": "incomplete",
+      "document": {
+        "text": "makeresults",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.makeresults.bare-command.incomplete"
+      },
+      "observations": {
+        "semantics": {
+          "status": "incomplete",
+          "complete": false,
+          "stages": [
+            {
+              "command": "makeresults",
+              "semantic_complete": false
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Conservative local boundary with incomplete coverage."
+      }
+    },
+    {
+      "id": "spl2.makeresults.bare-command.positive",
+      "classification": "positive",
+      "document": {
+        "text": "makeresults",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.makeresults.bare-command.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl2.match.two-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "FROM main | eval out=match(field,\"x\")",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.match.two-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "eval",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl2.max.one-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "FROM main | stats max(field) AS out",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.max.one-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "stats",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl2.min.one-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "FROM main | stats min(field) AS out",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.min.one-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "stats",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl2.mstats.aggregate-list.incomplete",
+      "classification": "incomplete",
+      "document": {
+        "text": "mstats aggregates=[avg('cpu.load')]",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.mstats.aggregate-list.incomplete"
+      },
+      "observations": {
+        "semantics": {
+          "status": "incomplete",
+          "complete": false,
+          "stages": [
+            {
+              "command": "mstats",
+              "semantic_complete": false
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Conservative local boundary with incomplete coverage."
+      }
+    },
+    {
+      "id": "spl2.mstats.aggregate-list.positive",
+      "classification": "positive",
+      "document": {
+        "text": "mstats aggregates=[avg('cpu.load')]",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.mstats.aggregate-list.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl2.mvcombine.delimited-field.incomplete",
+      "classification": "incomplete",
+      "document": {
+        "text": "FROM main | mvcombine delim=\";\" account",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.mvcombine.delimited-field.incomplete"
+      },
+      "observations": {
+        "semantics": {
+          "status": "incomplete",
+          "complete": false,
+          "stages": [
+            {
+              "command": "mvcombine",
+              "semantic_complete": false
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Conservative local boundary with incomplete coverage."
+      }
+    },
+    {
+      "id": "spl2.mvcombine.delimited-field.positive",
+      "classification": "positive",
+      "document": {
+        "text": "FROM main | mvcombine delim=\";\" account",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.mvcombine.delimited-field.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl2.mvcount.one-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "FROM main | eval out=mvcount(field)",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.mvcount.one-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "eval",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl2.mvexpand.limited-field.incomplete",
+      "classification": "incomplete",
+      "document": {
+        "text": "FROM main | mvexpand limit=2 tokens",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.mvexpand.limited-field.incomplete"
+      },
+      "observations": {
+        "semantics": {
+          "status": "incomplete",
+          "complete": false,
+          "stages": [
+            {
+              "command": "mvexpand",
+              "semantic_complete": false
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Conservative local boundary with incomplete coverage."
+      }
+    },
+    {
+      "id": "spl2.mvexpand.limited-field.positive",
+      "classification": "positive",
+      "document": {
+        "text": "FROM main | mvexpand limit=2 tokens",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.mvexpand.limited-field.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl2.nomv.bare-command.incomplete",
+      "classification": "incomplete",
+      "document": {
+        "text": "FROM main | nomv",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.nomv.bare-command.incomplete"
+      },
+      "observations": {
+        "semantics": {
+          "status": "incomplete",
+          "complete": false,
+          "stages": [
+            {
+              "command": "nomv",
+              "semantic_complete": false
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        },
+        "syntax": {
+          "complete": false,
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Conservative local boundary with incomplete coverage."
+      }
+    },
+    {
+      "id": "spl2.ocsf.profile-mismatch.incomplete",
+      "classification": "incomplete",
+      "document": {
+        "text": "FROM main | ocsf",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.ocsf.profile-mismatch.incomplete"
+      },
+      "observations": {
+        "semantics": {
+          "status": "incomplete",
+          "complete": false,
+          "stages": [
+            {
+              "command": "ocsf",
+              "semantic_complete": false
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        },
+        "syntax": {
+          "complete": false,
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Conservative local boundary with incomplete coverage."
+      }
+    },
+    {
+      "id": "spl2.rename.exact-pair.positive",
+      "classification": "positive",
+      "document": {
+        "text": "FROM main | rename host AS server",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.rename.exact-pair.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "rename",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl2.replace.bare-command.incomplete",
+      "classification": "incomplete",
+      "document": {
+        "text": "FROM main | replace",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.replace.bare-command.incomplete"
+      },
+      "observations": {
+        "semantics": {
+          "status": "incomplete",
+          "complete": false,
+          "stages": [
+            {
+              "command": "replace",
+              "semantic_complete": false
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        },
+        "syntax": {
+          "complete": false,
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Conservative local boundary with incomplete coverage."
+      }
+    },
+    {
+      "id": "spl2.replace.three-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "FROM main | eval out=replace(field,\"x\",\"y\")",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.replace.three-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "eval",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl2.reverse.bare-command.positive",
+      "classification": "positive",
+      "document": {
+        "text": "FROM main | reverse",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.reverse.bare-command.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "reverse",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl2.rex.field-regex.incomplete",
+      "classification": "incomplete",
+      "document": {
+        "text": "FROM main | rex field=message /(?<tag>red)/",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.rex.field-regex.incomplete"
+      },
+      "observations": {
+        "semantics": {
+          "status": "incomplete",
+          "complete": false,
+          "stages": [
+            {
+              "command": "rex",
+              "semantic_complete": false
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Conservative local boundary with incomplete coverage."
+      }
+    },
+    {
+      "id": "spl2.rex.field-regex.positive",
+      "classification": "positive",
+      "document": {
+        "text": "FROM main | rex field=message /(?<tag>red)/",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.rex.field-regex.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl2.round.one-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "FROM main | eval out=round(field)",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.round.one-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "eval",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl2.route.profile-mismatch.incomplete",
+      "classification": "incomplete",
+      "document": {
+        "text": "FROM main | route output",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.route.profile-mismatch.incomplete"
+      },
+      "observations": {
+        "semantics": {
+          "status": "incomplete",
+          "complete": false,
+          "stages": [
+            {
+              "command": "route",
+              "semantic_complete": false
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        },
+        "syntax": {
+          "complete": false,
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Conservative local boundary with incomplete coverage."
+      }
+    },
+    {
+      "id": "spl2.rtrim.one-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "FROM main | eval out=rtrim(field)",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.rtrim.one-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "eval",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl2.search.predicate.positive",
+      "classification": "positive",
+      "document": {
+        "text": "FROM main | search host=\"web\"",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.search.predicate.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "search",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl2.select.projection.positive",
+      "classification": "positive",
+      "document": {
+        "text": "FROM main SELECT host",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.select.projection.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "select",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl2.sort.exact-field.positive",
+      "classification": "positive",
+      "document": {
+        "text": "FROM main | sort host",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.sort.exact-field.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "sort",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl2.spath.input-output-path.incomplete",
+      "classification": "incomplete",
+      "document": {
+        "text": "FROM main | spath input=payload output=name path=\"actor.name\"",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.spath.input-output-path.incomplete"
+      },
+      "observations": {
+        "semantics": {
+          "status": "incomplete",
+          "complete": false,
+          "stages": [
+            {
+              "command": "spath",
+              "semantic_complete": false
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Conservative local boundary with incomplete coverage."
+      }
+    },
+    {
+      "id": "spl2.spath.input-output-path.positive",
+      "classification": "positive",
+      "document": {
+        "text": "FROM main | spath input=payload output=name path=\"actor.name\"",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.spath.input-output-path.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl2.spl1.quoted-pipeline.incomplete",
+      "classification": "incomplete",
+      "document": {
+        "text": "FROM main | spl1 \"stats count by host\"",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.spl1.quoted-pipeline.incomplete"
+      },
+      "observations": {
+        "semantics": {
+          "status": "incomplete",
+          "complete": false,
+          "stages": [
+            {
+              "command": "spl1",
+              "semantic_complete": false
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        },
+        "syntax": {
+          "complete": false,
+          "diagnostics": [
+            {
+              "code": "SPL_UNSUPPORTED_SEMANTICS",
+              "category": "unsupported",
+              "severity": "warning",
+              "location": {
+                "start": {
+                  "offset": 12,
+                  "line": 1,
+                  "column": 13
+                },
+                "end": {
+                  "offset": 38,
+                  "line": 1,
+                  "column": 39
+                }
+              }
+            }
+          ]
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Conservative local boundary with incomplete coverage."
+      }
+    },
+    {
+      "id": "spl2.split.two-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "FROM main | eval out=split(field,\":\")",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.split.two-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "eval",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl2.splunkd.baseline.negative",
+      "classification": "negative",
+      "document": {
+        "text": "FROM main | decrypt",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.splunkd.baseline.negative"
+      },
+      "observations": {
+        "syntax": {
+          "complete": false,
+          "diagnostics": [
+            {
+              "code": "SPL_PROFILE_MISMATCH",
+              "category": "compatibility",
+              "severity": "error",
+              "location": {
+                "start": {
+                  "offset": 0,
+                  "line": 1,
+                  "column": 1
+                },
+                "end": {
+                  "offset": 19,
+                  "line": 1,
+                  "column": 20
+                }
+              }
+            }
+          ]
+        },
+        "semantics": {
+          "status": "invalid",
+          "complete": false,
+          "stages": [
+            {
+              "command": "decrypt",
+              "semantic_complete": false
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": [
+            {
+              "code": "SPL_PROFILE_MISMATCH",
+              "category": "compatibility",
+              "severity": "error",
+              "location": {
+                "start": {
+                  "offset": 0,
+                  "line": 1,
+                  "column": 1
+                },
+                "end": {
+                  "offset": 19,
+                  "line": 1,
+                  "column": 20
+                }
+              }
+            }
+          ]
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Definite invalid boundary for the selected profile."
+      }
+    },
+    {
+      "id": "spl2.splunkd.baseline.rewrite",
+      "classification": "incomplete",
+      "document": {
+        "text": "FROM main | decrypt",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.splunkd.baseline.rewrite"
+      },
+      "observations": {
+        "safe_rewriting": {
+          "status": "incomplete",
+          "committed": false,
+          "rewrite_complete": false,
+          "text": "FROM main | decrypt",
+          "candidate_text": "FROM main | decrypt",
+          "coverage_reasons": [
+            "CAPABILITY_INCOMPLETE"
+          ],
+          "change_reasons": [],
+          "rule_evaluation_reasons": [
+            "NO_PROVED_SAFE_EDIT"
+          ]
+        }
+      },
+      "rewrite_request": {
+        "schema_version": 1,
+        "mode": "preview",
+        "rules": []
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Incomplete case records an explicit rewrite refusal."
+      }
+    },
+    {
+      "id": "spl2.stats.aggregate-call.positive",
+      "classification": "positive",
+      "document": {
+        "text": "FROM main | stats count()",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.stats.aggregate-call.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "stats",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl2.streamstats.aggregate-call.positive",
+      "classification": "positive",
+      "document": {
+        "text": "FROM main | streamstats count()",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.streamstats.aggregate-call.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "streamstats",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl2.substr.two-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "FROM main | eval out=substr(field,1)",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.substr.two-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "eval",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl2.sum.one-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "FROM main | stats sum(field) AS out",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.sum.one-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "stats",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl2.table.exact-field-list.positive",
+      "classification": "positive",
+      "document": {
+        "text": "FROM main | table host",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.table.exact-field-list.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "table",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl2.tags.bare-command.incomplete",
+      "classification": "incomplete",
+      "document": {
+        "text": "FROM main | tags",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.tags.bare-command.incomplete"
+      },
+      "observations": {
+        "semantics": {
+          "status": "incomplete",
+          "complete": false,
+          "stages": [
+            {
+              "command": "tags",
+              "semantic_complete": false
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        },
+        "syntax": {
+          "complete": false,
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Conservative local boundary with incomplete coverage."
+      }
+    },
+    {
+      "id": "spl2.thru.bare-command.incomplete",
+      "classification": "incomplete",
+      "document": {
+        "text": "FROM main | thru",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.thru.bare-command.incomplete"
+      },
+      "observations": {
+        "semantics": {
+          "status": "incomplete",
+          "complete": false,
+          "stages": [
+            {
+              "command": "thru",
+              "semantic_complete": false
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        },
+        "syntax": {
+          "complete": false,
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Conservative local boundary with incomplete coverage."
+      }
+    },
+    {
+      "id": "spl2.timechart.aggregate-call.incomplete",
+      "classification": "incomplete",
+      "document": {
+        "text": "FROM main | timechart avg(bytes)",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.timechart.aggregate-call.incomplete"
+      },
+      "observations": {
+        "semantics": {
+          "status": "incomplete",
+          "complete": false,
+          "stages": [
+            {
+              "command": "timechart",
+              "semantic_complete": false
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Conservative local boundary with incomplete coverage."
+      }
+    },
+    {
+      "id": "spl2.timechart.aggregate-call.positive",
+      "classification": "positive",
+      "document": {
+        "text": "FROM main | timechart avg(bytes)",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.timechart.aggregate-call.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl2.timewrap.span.incomplete",
+      "classification": "incomplete",
+      "document": {
+        "text": "FROM main | timewrap 1day",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.timewrap.span.incomplete"
+      },
+      "observations": {
+        "semantics": {
+          "status": "incomplete",
+          "complete": false,
+          "stages": [
+            {
+              "command": "timewrap",
+              "semantic_complete": false
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Conservative local boundary with incomplete coverage."
+      }
+    },
+    {
+      "id": "spl2.timewrap.span.positive",
+      "classification": "positive",
+      "document": {
+        "text": "FROM main | timewrap 1day",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.timewrap.span.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl2.tonumber.one-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "FROM main | eval out=tonumber(field)",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.tonumber.one-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "eval",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl2.tostring.one-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "FROM main | eval out=tostring(field)",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.tostring.one-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "eval",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl2.trim.one-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "FROM main | eval out=trim(field)",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.trim.one-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "eval",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl2.tstats.aggregate-list.incomplete",
+      "classification": "incomplete",
+      "document": {
+        "text": "tstats aggregates=[count()]",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.tstats.aggregate-list.incomplete"
+      },
+      "observations": {
+        "semantics": {
+          "status": "incomplete",
+          "complete": false,
+          "stages": [
+            {
+              "command": "tstats",
+              "semantic_complete": false
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Conservative local boundary with incomplete coverage."
+      }
+    },
+    {
+      "id": "spl2.tstats.aggregate-list.positive",
+      "classification": "positive",
+      "document": {
+        "text": "tstats aggregates=[count()]",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.tstats.aggregate-list.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl2.typer.bare-command.incomplete",
+      "classification": "incomplete",
+      "document": {
+        "text": "FROM main | typer",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.typer.bare-command.incomplete"
+      },
+      "observations": {
+        "semantics": {
+          "status": "incomplete",
+          "complete": false,
+          "stages": [
+            {
+              "command": "typer",
+              "semantic_complete": false
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        },
+        "syntax": {
+          "complete": false,
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Conservative local boundary with incomplete coverage."
+      }
+    },
+    {
+      "id": "spl2.union.dataset.incomplete",
+      "classification": "incomplete",
+      "document": {
+        "text": "FROM main | union other",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.union.dataset.incomplete"
+      },
+      "observations": {
+        "semantics": {
+          "status": "incomplete",
+          "complete": false,
+          "stages": [
+            {
+              "command": "union",
+              "semantic_complete": false
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Conservative local boundary with incomplete coverage."
+      }
+    },
+    {
+      "id": "spl2.union.dataset.positive",
+      "classification": "positive",
+      "document": {
+        "text": "FROM main | union other",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.union.dataset.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl2.untable.bare-command.incomplete",
+      "classification": "incomplete",
+      "document": {
+        "text": "FROM main | untable",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.untable.bare-command.incomplete"
+      },
+      "observations": {
+        "semantics": {
+          "status": "incomplete",
+          "complete": false,
+          "stages": [
+            {
+              "command": "untable",
+              "semantic_complete": false
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        },
+        "syntax": {
+          "complete": false,
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Conservative local boundary with incomplete coverage."
+      }
+    },
+    {
+      "id": "spl2.upper.one-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "FROM main | eval out=upper(field)",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.upper.one-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "eval",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl2.values.one-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "FROM main | stats values(field) AS out",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.values.one-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "stats",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl2.where.predicate.positive",
+      "classification": "positive",
+      "document": {
+        "text": "FROM main | where host=\"web\"",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.where.predicate.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "where",
+              "semantic_complete": true
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "spl2",
+        "reference": "pkg/analysis",
+        "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    }
+  ]
+}
