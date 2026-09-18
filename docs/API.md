@@ -254,8 +254,8 @@ For every dimension, `applicable = supported + partial + unsupported + unassesse
 
 | Language | Records | Evidence cases | Syntax | Semantics | Requirements | Linting | Safe rewriting |
 |---|---:|---:|---|---|---|---|---|
-| SPL | 85 | 84 | 57 supported, 1 unsupported, 27 unassessed | 49 supported, 9 unsupported, 27 unassessed | 85 unassessed | 85 unassessed | 17 supported, 1 unsupported, 67 unassessed |
-| SPL2 | 112 | 122 | 69 supported, 19 unsupported, 24 unassessed | 50 supported, 38 unsupported, 24 unassessed | 112 unassessed | 112 unassessed | 14 supported, 1 unsupported, 97 unassessed |
+| SPL | 86 | 85 | 57 supported, 1 unsupported, 28 unassessed | 49 supported, 9 unsupported, 28 unassessed | 86 unassessed | 86 unassessed | 17 supported, 2 unsupported, 67 unassessed |
+| SPL2 | 114 | 124 | 69 supported, 19 unsupported, 26 unassessed | 50 supported, 38 unsupported, 26 unassessed | 114 unassessed | 114 unassessed | 14 supported, 3 unsupported, 97 unassessed |
 
 Evidence IDs resolve to typed local documents, observations, classifications, and provenance in the same manifest. Record and evidence IDs remain stable for the exact reviewed scope. A broadened form receives a new ID unless a reviewed scope correction establishes that the original ID was wrong. `grammar_registered` records parser registration only and never adds coverage. For example, SPL2 record `spl2.command.spl1.quoted-pipeline` has `grammar_registered: true`, but its syntax state is `unsupported`, so it contributes zero covered syntax. Linting is equally separate: analysis diagnostics do not become lint evidence. Both current manifests leave the full linting denominator unassessed.
 

@@ -120,7 +120,7 @@ partial, unsupported, not-applicable and unassessed states as syntax, semantics,
 requirements and linting. Supported alone contributes to `covered`; applicable
 equals supported plus partial plus unsupported plus unassessed, and total records
 equal applicable plus not applicable. The current SPL summary is 17 supported,
-1 unsupported and 67 unassessed; SPL2 is 14 supported, 1 unsupported and 97
+2 unsupported and 67 unassessed; SPL2 is 14 supported, 3 unsupported and 97
 unassessed. These exact counts do
 not form a score or percentage.
 

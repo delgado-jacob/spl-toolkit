@@ -1,8 +1,8 @@
 ## What's new in the app
 
 - Capability manifests now explain five evidence-backed dimensions and five explicit states.
-- SPL reports 85 records with 84 evidence cases. SPL2 reports 112 records with 122 evidence cases.
-- The 31 advertised supported rewrite forms now have canonical ledger records and executable rewrite evidence.
+- SPL reports 86 records with 85 evidence cases. SPL2 reports 114 records with 124 evidence cases.
+- All 34 advertised rewrite forms now have canonical ledger records and executable success or boundary evidence.
 - Summary counts use strict denominators and publish no percentage or composite score.
 - Parser registration, syntax coverage, lint evidence, and safe-rewrite evidence remain separate claims.
 
@@ -44,7 +44,7 @@ Legacy `commands` and `functions` remain compatibility projections. Consumers th
 
 ### Final local acceptance
 
-Task 9 ran against commit `5662b7870f791077b33384ca70fb9aa34f5bd763` on macOS arm64 on 2026-09-18. Final review later found that the rewrite compatibility projection was checked against its fixture but not against the canonical ledger. The correction added 31 supported rewrite records and independently replayed evidence cases.
+Task 9 ran against commit `5662b7870f791077b33384ca70fb9aa34f5bd763` on macOS arm64 on 2026-09-18. Final review later found that the rewrite compatibility projection was checked against its fixture but not against the canonical ledger. The correction added exact records and independently replayed evidence for all 31 supported forms and three unsupported boundaries.
 
 Correction validation passed `env GOWORK=off go test ./... -count=1`, the 297-test native/CLI/HTTP acceptance selection, `python3 -m pytest -q tools/tests` with 283 tests and 59 subtests, all 17 documentation pages, and `git diff --check`. The offline `make python-test` package gate passed for both the direct wheel and rebuilt-sdist wheel, each with 562 native tests, 257 cross-surface tests, and 18 tooling tests. The semantic revisions changed to the values recorded below.
 
@@ -70,7 +70,7 @@ The 12 approved design completion criteria map to passing evidence in design ord
 4. Every `not_applicable` claim has a reason and no evidence citation. The `not applicable` cases in `TestValidateCapabilityClaims` and the strict capability-claim schema checks in `test_capability_claim_state_boundaries_and_semantics_nonempty` passed.
 5. Every `unassessed` claim remains visibly unassessed and contributes no covered credit. `TestValidateCapabilityClaims`, `TestCapabilitySummaryUsesStrictDenominator`, and `test_capability_ledger_contract_and_additive_v1_compatibility` passed. Current SPL and SPL2 manifests report every linting record as unassessed.
 6. Positive, negative, and incomplete corpus cases have stable IDs. `pkg/analysis/capabilitydata/corpus.json`, `TestCapabilityDataCanonicalOrder`, `TestDecodeCapabilityAssetsRejectsMalformedInput`, `TestDecodeCapabilityAssetsRejectsMalformedObservations`, and `TestCapabilityEvidenceCorpus` passed.
-7. JSON and text reports show exact, reproducible per-dimension counts for the tagged toolkit version. The built CLI reported `toolkit_version: 0.1.1`, 85 SPL records with 84 evidence cases, and 112 SPL2 records with 122 evidence cases. `TestCapabilitiesCLIFormatsAndOutput`, `TestCapabilitiesCLITextIsCanonicalAndComplete`, `TestCapabilitySummaryUsesStrictDenominator`, `TestCapabilitiesPublishCanonicalLedger`, and `test_source_capability_version_is_independent_of_package_and_native` passed.
+7. JSON and text reports show exact, reproducible per-dimension counts for the tagged toolkit version. The built CLI reported `toolkit_version: 0.1.1`, 86 SPL records with 85 evidence cases, and 114 SPL2 records with 124 evidence cases. `TestCapabilitiesCLIFormatsAndOutput`, `TestCapabilitiesCLITextIsCanonicalAndComplete`, `TestCapabilitySummaryUsesStrictDenominator`, `TestCapabilitiesPublishCanonicalLedger`, and `test_source_capability_version_is_independent_of_package_and_native` passed.
 8. Users can follow each evidence-bearing claim to the corresponding compact corpus case. `TestCapabilitiesPublishCanonicalLedger` verified that each selected claim ID resolves within the returned evidence, `TestCapabilityEvidenceIsReferenced` verified the corpus-to-claim relationship, and `TestCapabilityEvidenceCorpus` replayed those compact cases.
 9. Go, CLI, REST, native C, and Python return equivalent canonical values. `TestDialectCapabilitiesCLIHTTPParity`, `TestCapabilitiesRESTMatchesKernel`, `TestCapabilitiesBindingsReturnCompleteCanonicalOwnedManifests`, and `test_analysis_capabilities_parity` passed.
 10. Existing capability consumers retain their command/function compatibility fields. `TestCapabilitiesPreserveLegacyProjection` passed for exact legacy values. The `capabilities-archived-v1` artifact in `testdata/tooling/contracts.json` and `test_capability_ledger_contract_and_additive_v1_compatibility` passed for archived v1 compatibility.

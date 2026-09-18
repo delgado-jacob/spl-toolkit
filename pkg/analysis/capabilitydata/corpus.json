@@ -1040,6 +1040,55 @@
       }
     },
     {
+      "id": "spl.field.navigation.rewrite",
+      "classification": "incomplete",
+      "document": {
+        "text": "search index=main | where actor.name=1",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.field.navigation.rewrite"
+      },
+      "observations": {
+        "safe_rewriting": {
+          "status": "valid",
+          "committed": false,
+          "rewrite_complete": true,
+          "text": "search index=main | where actor.name=1",
+          "candidate_text": "search index=main | where actor.name=1",
+          "coverage_reasons": [],
+          "change_reasons": [],
+          "rule_evaluation_reasons": [
+            "no_match"
+          ]
+        }
+      },
+      "rewrite_request": {
+        "schema_version": 1,
+        "mode": "apply",
+        "rules": [
+          {
+            "id": "capability",
+            "kind": "field",
+            "source": {
+              "path": [
+                "actor",
+                "name"
+              ]
+            },
+            "target": {
+              "name": "user"
+            }
+          }
+        ]
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "testdata/rewrite/forms.json",
+        "note": "Advertised unsupported safe rewrite form replayed through the local rewrite API."
+      }
+    },
+    {
       "id": "spl.field.null-test.rewrite",
       "classification": "positive",
       "document": {
@@ -4108,6 +4157,56 @@
       }
     },
     {
+      "id": "spl2.field.implicit-output.rewrite",
+      "classification": "incomplete",
+      "document": {
+        "text": "FROM main | stats sum(bytes) | table 'sum(bytes)'",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.field.implicit-output.rewrite"
+      },
+      "observations": {
+        "safe_rewriting": {
+          "status": "incomplete",
+          "committed": false,
+          "rewrite_complete": false,
+          "text": "FROM main | stats sum(bytes) | table 'sum(bytes)'",
+          "candidate_text": "FROM main | stats sum(bytes) | table 'sum(bytes)'",
+          "coverage_reasons": [
+            "linked_edit_unproven"
+          ],
+          "change_reasons": [
+            "linked_edit_unproven"
+          ],
+          "rule_evaluation_reasons": [
+            "matched"
+          ]
+        }
+      },
+      "rewrite_request": {
+        "schema_version": 1,
+        "mode": "apply",
+        "rules": [
+          {
+            "id": "capability",
+            "kind": "field",
+            "source": {
+              "name": "bytes"
+            },
+            "target": {
+              "name": "octets"
+            }
+          }
+        ]
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "testdata/rewrite/forms.json",
+        "note": "Advertised unsupported safe rewrite form replayed through the local rewrite API."
+      }
+    },
+    {
       "id": "spl2.field.lookup-dual.rewrite",
       "classification": "positive",
       "document": {
@@ -4201,6 +4300,58 @@
         "source_family": "toolkit",
         "reference": "testdata/rewrite/forms.json",
         "note": "Advertised safe rewrite form replayed through the local rewrite API."
+      }
+    },
+    {
+      "id": "spl2.field.navigation.rewrite",
+      "classification": "incomplete",
+      "document": {
+        "text": "FROM main | where actor.name=1",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.field.navigation.rewrite"
+      },
+      "observations": {
+        "safe_rewriting": {
+          "status": "incomplete",
+          "committed": false,
+          "rewrite_complete": false,
+          "text": "FROM main | where actor.name=1",
+          "candidate_text": "FROM main | where actor.name=1",
+          "coverage_reasons": [
+            "SPL_UNSUPPORTED_SEMANTICS",
+            "unsupported_reference"
+          ],
+          "change_reasons": [],
+          "rule_evaluation_reasons": [
+            "unsupported_reference"
+          ]
+        }
+      },
+      "rewrite_request": {
+        "schema_version": 1,
+        "mode": "apply",
+        "rules": [
+          {
+            "id": "capability",
+            "kind": "field",
+            "source": {
+              "path": [
+                "actor",
+                "name"
+              ]
+            },
+            "target": {
+              "name": "user"
+            }
+          }
+        ]
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "testdata/rewrite/forms.json",
+        "note": "Advertised unsupported safe rewrite form replayed through the local rewrite API."
       }
     },
     {

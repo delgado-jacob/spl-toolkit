@@ -83,6 +83,7 @@ type rewriteCapabilityCheck struct {
 	Role      string                     `json:"role"`
 	Supported bool                       `json:"supported"`
 	Positive  *rewriteCapabilityPositive `json:"positive"`
+	Negative  rewriteCapabilityNegative  `json:"negative"`
 }
 
 type rewriteCapabilityPositive struct {
@@ -90,6 +91,13 @@ type rewriteCapabilityPositive struct {
 	Source    string `json:"source"`
 	Target    string `json:"target"`
 	Candidate string `json:"candidate"`
+}
+
+type rewriteCapabilityNegative struct {
+	Query  string `json:"query"`
+	Source string `json:"source"`
+	Target string `json:"target"`
+	Reason string `json:"reason"`
 }
 
 func TestCapabilityEvidenceCorpus(t *testing.T) {
@@ -127,7 +135,7 @@ func TestCapabilityEvidenceCorpus(t *testing.T) {
 	}
 }
 
-func TestAdvertisedSupportedRewriteFormsHaveLedgerEvidence(t *testing.T) {
+func TestAdvertisedRewriteFormsHaveLedgerEvidence(t *testing.T) {
 	fixture := loadRewriteCapabilityFixture(t)
 	manifests := make([]analysis.CapabilityManifest, 0, 2)
 	for _, language := range []string{"spl", "spl2"} {
@@ -141,7 +149,7 @@ func TestAdvertisedSupportedRewriteFormsHaveLedgerEvidence(t *testing.T) {
 		}
 		manifests = append(manifests, manifest)
 	}
-	if err := validateAdvertisedSupportedRewriteEvidence(manifests, fixture); err != nil {
+	if err := validateAdvertisedRewriteEvidence(manifests, fixture); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -160,7 +168,7 @@ func TestAdvertisedSupportedRewriteEvidenceRejectsSwappedForms(t *testing.T) {
 		}
 		manifests = append(manifests, manifest)
 	}
-	if err := validateAdvertisedSupportedRewriteEvidence(manifests, fixture); err != nil {
+	if err := validateAdvertisedRewriteEvidence(manifests, fixture); err != nil {
 		t.Fatalf("valid rewrite evidence was rejected before swap: %v", err)
 	}
 	manifest := &manifests[0]
@@ -182,7 +190,7 @@ func TestAdvertisedSupportedRewriteEvidenceRejectsSwappedForms(t *testing.T) {
 	}
 	expression.Dimensions.SafeRewriting.EvidenceIDs, search.Dimensions.SafeRewriting.EvidenceIDs =
 		search.Dimensions.SafeRewriting.EvidenceIDs, expression.Dimensions.SafeRewriting.EvidenceIDs
-	err := validateAdvertisedSupportedRewriteEvidence(manifests, fixture)
+	err := validateAdvertisedRewriteEvidence(manifests, fixture)
 	if err == nil {
 		t.Fatal("swapped rewrite evidence IDs were accepted")
 	}
@@ -204,18 +212,18 @@ func loadRewriteCapabilityFixture(t *testing.T) rewriteCapabilityFixture {
 	return fixture
 }
 
-func validateAdvertisedSupportedRewriteEvidence(manifests []analysis.CapabilityManifest, fixture rewriteCapabilityFixture) error {
+func validateAdvertisedRewriteEvidence(manifests []analysis.CapabilityManifest, fixture rewriteCapabilityFixture) error {
 	checksByKey := make(map[string]rewriteCapabilityCheck)
 	for _, check := range fixture.Checks {
-		if !check.Supported {
-			continue
-		}
 		key := rewriteCapabilityKey(check.Language, check.Kind, check.Role)
-		if check.Positive == nil {
+		if check.Supported && check.Positive == nil {
 			return fmt.Errorf("supported rewrite fixture %q has no positive case", key)
 		}
+		if !check.Supported && (check.Positive != nil || check.Negative.Query == "" || check.Negative.Reason == "") {
+			return fmt.Errorf("unsupported rewrite fixture %q has no exact refusal case", key)
+		}
 		if _, exists := checksByKey[key]; exists {
-			return fmt.Errorf("supported rewrite fixture %q is duplicated", key)
+			return fmt.Errorf("rewrite fixture %q is duplicated", key)
 		}
 		checksByKey[key] = check
 	}
@@ -231,13 +239,13 @@ func validateAdvertisedSupportedRewriteEvidence(manifests []analysis.CapabilityM
 			evidenceByID[evidence.ID] = evidence
 		}
 		for _, form := range manifest.Rewrite.Forms {
-			if !form.Supported {
-				continue
-			}
 			key := rewriteCapabilityKey(manifest.Language, form.Kind, form.Role)
 			check, found := checksByKey[key]
 			if !found {
-				return fmt.Errorf("advertised supported rewrite form %q has no compatibility fixture", key)
+				return fmt.Errorf("advertised rewrite form %q has no compatibility fixture", key)
+			}
+			if check.Supported != form.Supported {
+				return fmt.Errorf("advertised rewrite form %q support=%t, fixture support=%t", key, form.Supported, check.Supported)
 			}
 			seenForms[key] = true
 
@@ -252,26 +260,30 @@ func validateAdvertisedSupportedRewriteEvidence(manifests []analysis.CapabilityM
 				}
 			}
 			if len(matches) != 1 {
-				return fmt.Errorf("advertised supported rewrite form %q has %d canonical ledger records, want 1", key, len(matches))
+				return fmt.Errorf("advertised rewrite form %q has %d canonical ledger records, want 1", key, len(matches))
 			}
 			claim := matches[0].Dimensions.SafeRewriting
-			if claim.State != analysis.CapabilitySupported {
-				return fmt.Errorf("advertised supported rewrite form %q has safe_rewriting state %q, want supported", key, claim.State)
+			wantState := analysis.CapabilityUnsupported
+			if form.Supported {
+				wantState = analysis.CapabilitySupported
+			}
+			if claim.State != wantState {
+				return fmt.Errorf("advertised rewrite form %q has safe_rewriting state %q, want %q", key, claim.State, wantState)
 			}
 			if !slices.Equal(claim.Limitations, form.Limitations) {
-				return fmt.Errorf("advertised supported rewrite form %q limitations=%v, ledger limitations=%v", key, form.Limitations, claim.Limitations)
+				return fmt.Errorf("advertised rewrite form %q limitations=%v, ledger limitations=%v", key, form.Limitations, claim.Limitations)
 			}
 			if len(claim.EvidenceIDs) != 1 {
-				return fmt.Errorf("advertised supported rewrite form %q has %d evidence cases, want 1", key, len(claim.EvidenceIDs))
+				return fmt.Errorf("advertised rewrite form %q has %d evidence cases, want 1", key, len(claim.EvidenceIDs))
 			}
 			evidenceID := claim.EvidenceIDs[0]
 			if owner, exists := evidenceOwners[evidenceID]; exists {
-				return fmt.Errorf("advertised supported rewrite forms %q and %q share evidence %q", owner, key, evidenceID)
+				return fmt.Errorf("advertised rewrite forms %q and %q share evidence %q", owner, key, evidenceID)
 			}
 			evidenceOwners[evidenceID] = key
 			evidence, found := evidenceByID[evidenceID]
 			if !found {
-				return fmt.Errorf("advertised supported rewrite form %q cites missing evidence %q", key, evidenceID)
+				return fmt.Errorf("advertised rewrite form %q cites missing evidence %q", key, evidenceID)
 			}
 			if err := validateRewriteEvidenceCase(key, evidence, check); err != nil {
 				return err
@@ -280,51 +292,65 @@ func validateAdvertisedSupportedRewriteEvidence(manifests []analysis.CapabilityM
 	}
 	for key := range checksByKey {
 		if !seenForms[key] {
-			return fmt.Errorf("supported rewrite fixture %q has no advertised form", key)
+			return fmt.Errorf("rewrite fixture %q has no advertised form", key)
 		}
 	}
 	if len(evidenceOwners) != len(seenForms) {
-		return fmt.Errorf("supported rewrite forms have %d distinct evidence cases, want %d", len(evidenceOwners), len(seenForms))
+		return fmt.Errorf("rewrite forms have %d distinct evidence cases, want %d", len(evidenceOwners), len(seenForms))
 	}
 	return nil
 }
 
 func validateRewriteEvidenceCase(key string, evidence analysis.CapabilityEvidence, check rewriteCapabilityCheck) error {
-	positive := check.Positive
-	if evidence.Classification != analysis.CapabilityEvidencePositive {
-		return fmt.Errorf("advertised supported rewrite form %q evidence %q classification=%q, want positive", key, evidence.ID, evidence.Classification)
+	query, source, target := check.Negative.Query, check.Negative.Source, check.Negative.Target
+	wantClassification := analysis.CapabilityEvidenceIncomplete
+	if check.Supported {
+		query, source, target = check.Positive.Query, check.Positive.Source, check.Positive.Target
+		wantClassification = analysis.CapabilityEvidencePositive
+	}
+	if evidence.Classification != wantClassification {
+		return fmt.Errorf("advertised rewrite form %q evidence %q classification=%q, want %q", key, evidence.ID, evidence.Classification, wantClassification)
 	}
 	wantDocument := analysis.QueryDocument{
-		Text:     positive.Query,
+		Text:     query,
 		Language: check.Language,
 		Profile:  "splunkd",
 		Version:  "current",
 		SourceID: "capability:" + evidence.ID,
 	}
 	if evidence.Document != wantDocument {
-		return fmt.Errorf("advertised supported rewrite form %q evidence %q document=%+v, want %+v", key, evidence.ID, evidence.Document, wantDocument)
+		return fmt.Errorf("advertised rewrite form %q evidence %q document=%+v, want %+v", key, evidence.ID, evidence.Document, wantDocument)
 	}
 	request, err := decodeCapabilityRewriteRequest(evidence.RewriteRequest)
 	if err != nil {
-		return fmt.Errorf("advertised supported rewrite form %q evidence %q rewrite request: %w", key, evidence.ID, err)
+		return fmt.Errorf("advertised rewrite form %q evidence %q rewrite request: %w", key, evidence.ID, err)
 	}
 	if request.SchemaVersion != 1 || request.Mode != rewrite.Apply || len(request.Rules) != 1 {
-		return fmt.Errorf("advertised supported rewrite form %q evidence %q request=%+v, want schema_version 1, apply mode, and one rule", key, evidence.ID, request)
+		return fmt.Errorf("advertised rewrite form %q evidence %q request=%+v, want schema_version 1, apply mode, and one rule", key, evidence.ID, request)
 	}
 	rule := request.Rules[0]
-	if rule.Kind != check.Kind || !rewriteIdentityEquals(rule.Source, positive.Source) || !rewriteIdentityEquals(rule.Target, positive.Target) {
-		return fmt.Errorf("advertised supported rewrite form %q evidence %q rule=%+v, want kind=%q source=%q target=%q", key, evidence.ID, rule, check.Kind, positive.Source, positive.Target)
+	if rule.Kind != check.Kind || !rewriteFixtureIdentityEquals(rule.Source, source, check.Role) || !rewriteFixtureIdentityEquals(rule.Target, target, "") {
+		return fmt.Errorf("advertised rewrite form %q evidence %q rule=%+v, want kind=%q source=%q target=%q", key, evidence.ID, rule, check.Kind, source, target)
 	}
 	observation := evidence.Observations.SafeRewriting
 	if observation == nil {
-		return fmt.Errorf("advertised supported rewrite form %q evidence %q has no safe_rewriting observation", key, evidence.ID)
+		return fmt.Errorf("advertised rewrite form %q evidence %q has no safe_rewriting observation", key, evidence.ID)
 	}
-	if !observation.Committed || !observation.RewriteComplete || observation.Text != positive.Candidate || observation.CandidateText != positive.Candidate {
-		return fmt.Errorf("advertised supported rewrite form %q evidence %q result=%+v, want completed result %q", key, evidence.ID, *observation, positive.Candidate)
+	wantText, wantCommitted, wantComplete := query, false, false
+	if check.Supported {
+		wantText, wantCommitted, wantComplete = check.Positive.Candidate, true, true
+	} else if check.Negative.Reason == "no_match" {
+		wantComplete = true
+	}
+	if observation.Committed != wantCommitted || observation.RewriteComplete != wantComplete || observation.Text != wantText || observation.CandidateText != wantText {
+		return fmt.Errorf("advertised rewrite form %q evidence %q result=%+v, want committed=%t complete=%t text=%q", key, evidence.ID, *observation, wantCommitted, wantComplete, wantText)
+	}
+	if !check.Supported && !slices.Contains(observation.CoverageReasons, check.Negative.Reason) && !slices.Contains(observation.ChangeReasons, check.Negative.Reason) && !slices.Contains(observation.RuleEvaluationReasons, check.Negative.Reason) {
+		return fmt.Errorf("advertised rewrite form %q evidence %q result has no refusal reason %q", key, evidence.ID, check.Negative.Reason)
 	}
 	result := executeEvidence(evidence).dimensions["safe_rewriting"]
-	if !result.passed || result.refused {
-		return fmt.Errorf("advertised supported rewrite form %q evidence %q did not prove a completed rewrite: expected=%s actual=%s", key, evidence.ID, result.expected, result.actual)
+	if !result.passed || (check.Supported && result.refused) {
+		return fmt.Errorf("advertised rewrite form %q evidence %q did not prove its boundary: expected=%s actual=%s", key, evidence.ID, result.expected, result.actual)
 	}
 	return nil
 }
@@ -333,7 +359,10 @@ func rewriteCapabilityKey(language, kind, role string) string {
 	return language + "/" + kind + "/" + role
 }
 
-func rewriteIdentityEquals(identity rewrite.Identity, name string) bool {
+func rewriteFixtureIdentityEquals(identity rewrite.Identity, name, role string) bool {
+	if role == "navigation" {
+		return identity.Name == nil && slices.Equal(identity.Path, strings.Split(name, "."))
+	}
 	return identity.Name != nil && *identity.Name == name && len(identity.Path) == 0
 }
 

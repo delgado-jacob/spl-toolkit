@@ -1758,6 +1758,51 @@
       }
     },
     {
+      "id": "spl.expression.field.navigation-rewrite",
+      "language": "spl",
+      "profile": "splunkd",
+      "kind": "expression",
+      "name": "field",
+      "form": "navigation",
+      "grammar_registered": false,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "testdata/rewrite/forms.json",
+        "note": "Advertised safe rewrite boundary with local executable evidence."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "semantics": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "requirements": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "linting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "unsupported",
+          "evidence_ids": [
+            "spl.field.navigation.rewrite"
+          ],
+          "limitations": [
+            "Navigated and alias-qualified identities have no canonical source binding proof."
+          ]
+        }
+      }
+    },
+    {
       "id": "spl.expression.field.null-test-rewrite",
       "language": "spl",
       "profile": "splunkd",
@@ -7258,6 +7303,51 @@
       }
     },
     {
+      "id": "spl2.expression.field.implicit-output-rewrite",
+      "language": "spl2",
+      "profile": "splunkd",
+      "kind": "expression",
+      "name": "field",
+      "form": "implicit_output",
+      "grammar_registered": false,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "testdata/rewrite/forms.json",
+        "note": "Advertised safe rewrite boundary with local executable evidence."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "semantics": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "requirements": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "linting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "unsupported",
+          "evidence_ids": [
+            "spl2.field.implicit-output.rewrite"
+          ],
+          "limitations": [
+            "Only canonical implicit labels and all required consumers may change together; SPL2 changed labels remain unproved."
+          ]
+        }
+      }
+    },
+    {
       "id": "spl2.expression.field.lookup-dual-rewrite",
       "language": "spl2",
       "profile": "splunkd",
@@ -7343,6 +7433,51 @@
           ],
           "limitations": [
             "Requires an exact source binding; explicit aliases, wildcard selectors and indeterminate operands remain fixed."
+          ]
+        }
+      }
+    },
+    {
+      "id": "spl2.expression.field.navigation-rewrite",
+      "language": "spl2",
+      "profile": "splunkd",
+      "kind": "expression",
+      "name": "field",
+      "form": "navigation",
+      "grammar_registered": false,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "testdata/rewrite/forms.json",
+        "note": "Advertised safe rewrite boundary with local executable evidence."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "semantics": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "requirements": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "linting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "unsupported",
+          "evidence_ids": [
+            "spl2.field.navigation.rewrite"
+          ],
+          "limitations": [
+            "Navigated and alias-qualified identities have no canonical source binding proof."
           ]
         }
       }
