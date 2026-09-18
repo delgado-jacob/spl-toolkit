@@ -119,8 +119,9 @@ not a projection of `rewrite.forms[].supported`. It uses the same supported,
 partial, unsupported, not-applicable and unassessed states as syntax, semantics,
 requirements and linting. Supported alone contributes to `covered`; applicable
 equals supported plus partial plus unsupported plus unassessed, and total records
-equal applicable plus not applicable. The current SPL summary is 1 unsupported
-and 67 unassessed; SPL2 is 1 unsupported and 97 unassessed. These exact counts do
+equal applicable plus not applicable. The current SPL summary is 17 supported,
+1 unsupported and 67 unassessed; SPL2 is 14 supported, 1 unsupported and 97
+unassessed. These exact counts do
 not form a score or percentage.
 
 Evidence IDs bind a claim to typed local requests and observations. A broader

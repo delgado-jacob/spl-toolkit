@@ -60,8 +60,10 @@ Evidence IDs must resolve to typed cases in the same manifest. Stable IDs retain
 the exact reviewed scope; a broadened form receives a new ID unless a reviewed
 scope correction changes the original boundary. `grammar_registered` is a parser
 fact independent of syntax coverage. Linting likewise requires its own evidence.
-The current manifests contain 68 SPL records with 67 evidence cases and 98 SPL2
-records with 108 evidence cases. These cases establish static local toolkit
+The current manifests contain 85 SPL records with 84 evidence cases and 112 SPL2
+records with 122 evidence cases. Safe rewriting has 17 supported, 1 unsupported
+and 67 unassessed SPL records; SPL2 has 14 supported, 1 unsupported and 97
+unassessed records. These cases establish static local toolkit
 behavior only, not live Splunk execution, runtime equivalence, environment
 compatibility, authorization or upstream support.
 
