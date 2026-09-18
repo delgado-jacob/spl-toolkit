@@ -39,11 +39,44 @@ Linting uses its own evidence boundary. Parser, semantic, and validation diagnos
 
 Legacy `commands` and `functions` remain compatibility projections. Consumers that need evidence-backed decisions use `records`, `summary`, and `evidence`.
 
-## What the next milestone needs to know
+## Final local acceptance
 
-Task 9 must run and record the final source, package, and cross-surface gates. It must verify exact counts, semantic revisions, tagged version propagation, generated contracts, and evidence parity from the final commit. Hosted CI, publication, deployment, live runtime execution, and upstream acceptance remain unverified.
+Task 9 ran against commit `5662b7870f791077b33384ca70fb9aa34f5bd763` on macOS arm64 on 2026-09-18. No implementation correction was required.
 
-Task 9 may update this log with final verified commands and results. It must preserve the distinction between local source checks, packaged-artifact checks, hosted CI, publication, deployment, live Splunk execution, and upstream support.
+Source and tooling gates:
+
+- `env GOWORK=off GOCACHE=/private/tmp/spl-toolkit-m9-gocache go test -mod=readonly ./pkg/analysis ./pkg/rewrite -run 'Test.*(Capabilit|Ledger|Evidence)' -count=1` passed both packages.
+- `python3 tools/check_go.py --race-timeout=20m` passed after an approved retry outside the sandbox. The first attempt stopped before testing because the sandbox denied access to the default Go cache. The passing run reported 16 tested packages and 9 packages with no test files.
+- `python3 -m pytest -q tools/tests` passed 283 tests and 59 subtests. Pytest reported the existing `jsonschema` deprecation warning and a sandbox-blocked cache write; neither warning changed the result.
+- `python3 tools/check_docs.py` passed all 17 documentation pages.
+
+Built and cross-surface gates:
+
+- `make build-all` built the CLI, server, and native shared library.
+- With `PYTHONPATH`, `SPL_NATIVE_LIBRARY`, `SPL_CLI`, `SPL_SERVER`, `SPL_ANALYSIS_FIXTURES`, and `SPL_SPL2_FIXTURES` bound to absolute paths under this worktree, `python3 -m pytest -q python/tests/test_native_analysis.py python/tests/test_native_spl2.py tests/acceptance/test_analysis_surfaces.py tests/acceptance/test_machine_contracts.py` passed 170 tests. The passing run used an approved sandbox exception for the local HTTP server.
+- The repository's hash-pinned package-check wheelhouse was provisioned under `/private/tmp`. With `PIP_FIND_LINKS`, `PIP_NO_INDEX=1`, `PIP_CONFIG_FILE=/dev/null`, and a writable Go cache, `make python-test` ended with `package acceptance passed`. Both the directly built wheel and the wheel rebuilt from the sdist passed 562 native tests, 257 cross-surface tests, and 18 tooling tests, for 1,674 passing pytest results across the two artifacts.
+- `git diff --check` passed. `git status --short` was empty before this log update.
+
+Acceptance criteria map:
+
+- `pkg/analysis/capabilitydata/ledger.json` and `pkg/analysis/capabilitydata/corpus.json` contain the reviewed local records and evidence. `TestCapabilityLedgerCoversEveryKindPerLanguage`, `TestCapabilityEvidenceIsReferenced`, and `TestCapabilityEvidenceCorpus` passed.
+- The built CLI reported 68 SPL records with 67 evidence cases and 98 SPL2 records with 108 evidence cases. `TestCapabilitySummaryUsesStrictDenominator` and `test_capability_ledger_contract_and_additive_v1_compatibility` passed; no percentage, score, or composite score is published.
+- `TestCapabilityGrammarRegistrationDoesNotAddSyntaxCoverage` passed for the registered but unsupported SPL2 `spl1` quoted-pipeline form. Current SPL and SPL2 manifests report every linting record as unassessed.
+- SPL and SPL2 semantic revisions are `sha256:1e6c75800f843931ec517dba27f3baa5af928a8a908d97dd1c62513e2ea24d31` and `sha256:0203cbeec2e0fd484080b1f512582a1c8bdc4bc541fb73ac42c013060695f84c`. `TestCapabilityRevisionUsesNormalizedTypedManifest` and `TestAnalysisRevisionMatchesCanonicalManifestPayload` passed.
+- The CLI manifests reported `toolkit_version: 0.1.1`. `TestCapabilitiesPublishCanonicalLedger`, `test_source_capability_version_is_independent_of_package_and_native`, `test_analysis_capabilities_parity`, and the installed package gate passed, covering source `dev` isolation and tagged CLI, server, native, and wheel propagation.
+- `TestCapabilitiesPreserveLegacyProjection` passed for the exact legacy `commands` and `functions` projections. `TestDialectCapabilitiesCLIHTTPParity`, `TestCapabilitiesRESTMatchesKernel`, `TestCapabilitiesBindingsReturnCompleteCanonicalOwnedManifests`, and `test_analysis_capabilities_parity` passed for existing CLI, HTTP, C, and Python surfaces.
+- The full `main..HEAD` review found no parser or grammar change, no new endpoint, CLI command, C export, or Python method, no runtime external checkout, network, live Splunk, Git, or worktree read, no adapter classification, and no historical `docs/evidence` refresh. Production ledger and corpus data are compiled through `go:embed`.
+- Generated OpenAPI changes are paired with `tools/update_validation_openapi.py` and its tests. `test_capability_ledger_shapes_are_strict_and_optional`, `test_capability_rewrite_evidence_declares_openapi_object_shape`, and the semantic JSON/YAML/docs.go reconciliation check passed.
+
+The following gates remain separate and unverified:
+
+- Hosted CI.
+- Cross-platform wheel jobs.
+- ASan.
+- Merge readiness.
+- Publication.
+- Deployment.
+- Live Splunk execution and runtime equivalence.
 
 ## Deviations from the PRD and why
 
@@ -55,4 +88,4 @@ Verified during Task 8:
 - `SPL_CLI="$PWD/build/spl-toolkit" SPL_DOCS_ROOT="$PWD" python -m pytest tests/acceptance/test_documented_cli.py -q` passed 3 tests. Pytest reported the existing `jsonschema` deprecation warning and could not write its cache under the worktree; neither warning changed the test result.
 - Final diff review found changes only in the 11 documentation files listed above and this milestone log. `git diff --check` passed.
 
-Task 9 final gates are pending. This log does not claim hosted CI, artifact publication, deployment, live Splunk runtime equivalence, environment compatibility, authorization, or upstream support.
+Task 9 final local acceptance passed. The unverified gates above are not implied by local source, package, or cross-surface results.
