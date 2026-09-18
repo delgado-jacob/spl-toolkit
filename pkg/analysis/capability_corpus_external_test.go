@@ -128,15 +128,26 @@ func TestCapabilityRewriteEvidencePreservesSchemaVersion(t *testing.T) {
 
 func TestCapabilityRewriteRequestWrapperRejectsMalformedJSON(t *testing.T) {
 	for name, raw := range map[string]json.RawMessage{
-		"invalid syntax":      json.RawMessage(`{"schema_version":1`),
-		"unknown property":    json.RawMessage(`{"schema_version":1,"mode":"preview","rules":[],"unexpected":true}`),
-		"trailing JSON value": json.RawMessage(`{"schema_version":1,"mode":"preview","rules":[]} {}`),
+		"invalid syntax":           json.RawMessage(`{"schema_version":1`),
+		"unknown property":         json.RawMessage(`{"schema_version":1,"mode":"preview","rules":[],"unexpected":true}`),
+		"trailing JSON value":      json.RawMessage(`{"schema_version":1,"mode":"preview","rules":[]} {}`),
+		"duplicate schema version": json.RawMessage(`{"schema_version":1,"schema_version":1,"mode":"preview","rules":[]}`),
+		"duplicate rules":          json.RawMessage(`{"schema_version":1,"mode":"preview","rules":[],"rules":[]}`),
+		"missing schema version":   json.RawMessage(`{"mode":"preview","rules":[]}`),
+		"missing rules":            json.RawMessage(`{"schema_version":1,"mode":"preview"}`),
 	} {
 		t.Run(name, func(t *testing.T) {
 			if request, err := decodeCapabilityRewriteRequest(raw); err == nil {
 				t.Fatalf("record=<wrapper> evidence=<malformed> dimension=safe_rewriting expected=request rejection actual=%+v", request)
 			}
 		})
+	}
+}
+
+func TestCapabilityRewriteRequestWrapperAllowsMissingMode(t *testing.T) {
+	request, err := decodeCapabilityRewriteRequest(json.RawMessage(`{"schema_version":1,"rules":[]}`))
+	if err != nil || request.Mode != "" {
+		t.Fatalf("record=<wrapper> evidence=<mode-default> dimension=safe_rewriting expected=optional mode actual=request=%+v error=%v", request, err)
 	}
 }
 
@@ -293,16 +304,51 @@ func compareRewrite(evidence analysis.CapabilityEvidence, expected analysis.Capa
 
 func decodeCapabilityRewriteRequest(raw json.RawMessage) (capabilityRewriteRequest, error) {
 	decoder := json.NewDecoder(bytes.NewReader(raw))
-	decoder.DisallowUnknownFields()
-	var request capabilityRewriteRequest
-	if err := decoder.Decode(&request); err != nil {
+	start, err := decoder.Token()
+	if err != nil {
 		return capabilityRewriteRequest{}, err
 	}
+	if start != json.Delim('{') {
+		return capabilityRewriteRequest{}, fmt.Errorf("expected an object")
+	}
+	seen := make(map[string]bool, 3)
+	for decoder.More() {
+		token, err := decoder.Token()
+		if err != nil {
+			return capabilityRewriteRequest{}, err
+		}
+		key := token.(string)
+		if seen[key] {
+			return capabilityRewriteRequest{}, fmt.Errorf("duplicate property %q", key)
+		}
+		seen[key] = true
+		if key != "schema_version" && key != "mode" && key != "rules" {
+			return capabilityRewriteRequest{}, fmt.Errorf("unknown property %q", key)
+		}
+		var value json.RawMessage
+		if err := decoder.Decode(&value); err != nil {
+			return capabilityRewriteRequest{}, fmt.Errorf("invalid property %q: %w", key, err)
+		}
+	}
+	if _, err := decoder.Token(); err != nil {
+		return capabilityRewriteRequest{}, err
+	}
+	var request capabilityRewriteRequest
 	if err := decoder.Decode(&struct{}{}); err != io.EOF {
 		if err == nil {
 			return capabilityRewriteRequest{}, fmt.Errorf("expected exactly one JSON value")
 		}
 		return capabilityRewriteRequest{}, fmt.Errorf("trailing data: %w", err)
+	}
+	for _, required := range []string{"schema_version", "rules"} {
+		if !seen[required] {
+			return capabilityRewriteRequest{}, fmt.Errorf("missing property %q", required)
+		}
+	}
+	typed := json.NewDecoder(bytes.NewReader(raw))
+	typed.DisallowUnknownFields()
+	if err := typed.Decode(&request); err != nil {
+		return capabilityRewriteRequest{}, err
 	}
 	return request, nil
 }
