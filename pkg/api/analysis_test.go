@@ -186,6 +186,22 @@ func TestCapabilitiesRESTMatchesKernel(t *testing.T) {
 	if want := analysis.Capabilities(); !reflect.DeepEqual(got, want) {
 		t.Fatalf("manifest mismatch\ngot:  %#v\nwant: %#v", got, want)
 	}
+	if got.ToolkitVersion == "" || len(got.Records) == 0 || len(got.Evidence) == 0 {
+		t.Fatalf("incomplete manifest: toolkit=%q records=%d evidence=%d", got.ToolkitVersion, len(got.Records), len(got.Evidence))
+	}
+	got.Records[0].Dimensions.Syntax.EvidenceIDs = append(got.Records[0].Dimensions.Syntax.EvidenceIDs, "mutated")
+	got.Evidence[0].ID = "mutated"
+	response = serveAnalysisRequest(t, http.MethodGet, "/api/v1/capabilities", nil, "")
+	var fresh analysis.CapabilityManifest
+	if response.Code != http.StatusOK {
+		t.Fatalf("fresh status=%d body=%s", response.Code, response.Body.Bytes())
+	}
+	if err := json.Unmarshal(response.Body.Bytes(), &fresh); err != nil {
+		t.Fatal(err)
+	}
+	if want := analysis.Capabilities(); !reflect.DeepEqual(fresh, want) {
+		t.Fatalf("manifest mutation escaped into a later response\ngot:  %#v\nwant: %#v", fresh, want)
+	}
 }
 
 func TestAnalysisOpenAPIDocument(t *testing.T) {

@@ -256,6 +256,19 @@ func TestDialectMaintainedAPIExamples(t *testing.T) {
 	if err = json.Unmarshal(w.Body.Bytes(), &manifest); err != nil || !reflect.DeepEqual(manifest, want) {
 		t.Fatalf("capabilities JSON mismatch: %v %s", err, w.Body)
 	}
+	if manifest.ToolkitVersion == "" || len(manifest.Records) == 0 || len(manifest.Evidence) == 0 {
+		t.Fatalf("incomplete SPL2 manifest: toolkit=%q records=%d evidence=%d", manifest.ToolkitVersion, len(manifest.Records), len(manifest.Evidence))
+	}
+	manifest.Records[0].Dimensions.Syntax.Limitations = append(manifest.Records[0].Dimensions.Syntax.Limitations, "mutated")
+	manifest.Evidence[0].ID = "mutated"
+	fresh := serveAnalysisRequest(t, "GET", query, nil, "")
+	var freshManifest analysis.CapabilityManifest
+	if fresh.Code != 200 {
+		t.Fatal(fresh.Code, fresh.Body)
+	}
+	if err = json.Unmarshal(fresh.Body.Bytes(), &freshManifest); err != nil || !reflect.DeepEqual(freshManifest, want) {
+		t.Fatalf("SPL2 manifest mutation escaped into a later response: %v %s", err, fresh.Body)
+	}
 }
 
 func TestDialectMaintainedAPIExamplesAcceptWindowsLineEndings(t *testing.T) {

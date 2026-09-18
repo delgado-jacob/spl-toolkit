@@ -13,6 +13,11 @@ from spl_toolkit import SPLMapper, SPLMapperError
 from spl_toolkit.exceptions import MapperNotFoundError
 
 
+VERSION = (Path(__file__).resolve().parents[2] / "VERSION").read_text(encoding="utf-8").strip()
+CAPABILITY_DIMENSIONS = ("syntax", "semantics", "requirements", "linting", "safe_rewriting")
+CAPABILITY_COUNTS = {"applicable", "covered", "supported", "partial", "unsupported", "not_applicable", "unassessed"}
+
+
 def mapper_kwargs():
     return {"library_path": os.environ["SPL_NATIVE_LIBRARY"]} if "SPL_NATIVE_LIBRARY" in os.environ else {}
 
@@ -22,6 +27,27 @@ def corpus():
     data = json.loads(path.read_text(encoding="utf-8"))
     assert data["version"] == "1" and data["cases"]
     return data["cases"]
+
+
+def assert_complete_capability_manifest(manifest, language):
+    required = {"rewrite", "schema_version", "language", "profile", "version", "toolkit_version",
+                "commands", "functions", "records", "summary", "evidence"}
+    assert required <= manifest.keys()
+    assert manifest["toolkit_version"] == VERSION
+    assert (manifest["language"], manifest["profile"], manifest["version"]) == (language, "splunkd", "current")
+    assert set(manifest["summary"]) == set(CAPABILITY_DIMENSIONS)
+    assert all(set(manifest["summary"][name]) == CAPABILITY_COUNTS for name in CAPABILITY_DIMENSIONS)
+    assert manifest["records"] and manifest["evidence"]
+    for record in manifest["records"]:
+        assert set(record) == {"id", "language", "profile", "kind", "name", "form", "grammar_registered", "provenance", "dimensions"}
+        assert set(record["dimensions"]) == set(CAPABILITY_DIMENSIONS)
+        assert all(set(record["dimensions"][name]) == {"state", "evidence_ids", "limitations"}
+                   for name in CAPABILITY_DIMENSIONS)
+    for item in manifest["evidence"]:
+        assert {"id", "classification", "document", "observations", "provenance"} <= item.keys()
+        assert set(item["document"]) == {"text", "language", "profile", "version", "source_id"}
+        assert set(item["observations"]) <= set(CAPABILITY_DIMENSIONS)
+        assert item["observations"]
 
 
 def test_analysis_matches_every_canonical_report():
@@ -100,6 +126,7 @@ def test_c_analysis_preserves_valid_unicode_escapes(payload, text):
 def test_capabilities_are_owned_fresh_json():
     with SPLMapper(**mapper_kwargs()) as mapper:
         manifest = mapper.capabilities()
+        assert_complete_capability_manifest(manifest, "spl")
         assert type(manifest["schema_version"]) is int and manifest["schema_version"] == 1
         assert (manifest["language"], manifest["profile"], manifest["version"]) == ("spl", "splunkd", "current")
         assert any(c["name"] == "eval" and c["semantic_supported"] for c in manifest["commands"])
@@ -112,6 +139,8 @@ def test_capabilities_are_owned_fresh_json():
             finally:
                 mapper._lib.spl_result_free(pointer)
         mapper.capabilities()["commands"].clear()
+        mapper.capabilities()["records"][0]["dimensions"]["syntax"]["evidence_ids"].append("mutated")
+        mapper.capabilities()["evidence"][0]["id"] = "mutated"
         assert mapper.capabilities() == manifest
 
 

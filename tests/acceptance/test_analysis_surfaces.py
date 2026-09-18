@@ -7,6 +7,7 @@ Only JSON object key order is ignored; no report values are normalized here.
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 import subprocess
 from urllib.error import HTTPError
@@ -24,6 +25,61 @@ from test_surfaces import (
 )
 
 
+VERSION = (Path(__file__).resolve().parents[2] / "VERSION").read_text(encoding="utf-8").strip()
+CAPABILITY_DIMENSIONS = ("syntax", "semantics", "requirements", "linting", "safe_rewriting")
+CAPABILITY_STATES = ("supported", "partial", "unsupported", "not_applicable", "unassessed")
+
+
+def mapper_kwargs() -> dict[str, str]:
+    return {"library_path": str(required_absolute_path("SPL_NATIVE_LIBRARY"))} if "SPL_NATIVE_LIBRARY" in os.environ else {}
+
+
+def raw_native_capabilities(mapper: SPLMapper, language: str) -> dict:
+    if language == "spl":
+        pointer = mapper._lib.spl_mapper_capabilities(mapper._mapper_id)
+    else:
+        options = json.dumps({"language": language, "profile": "splunkd", "version": "current"}).encode()
+        pointer = mapper._lib.spl_mapper_capabilities_for(mapper._mapper_id, options)
+    try:
+        assert pointer and not pointer.contents.error
+        return json.loads(pointer.contents.result)
+    finally:
+        mapper._lib.spl_result_free(pointer)
+
+
+def assert_capability_ledger_is_self_consistent(manifest: dict, language: str) -> None:
+    assert manifest["toolkit_version"] == VERSION
+    assert (manifest["language"], manifest["profile"], manifest["version"]) == (language, "splunkd", "current")
+    assert manifest["records"] and manifest["evidence"]
+    assert set(manifest["summary"]) == set(CAPABILITY_DIMENSIONS)
+
+    recomputed = {
+        dimension: {
+            "applicable": 0, "covered": 0, "supported": 0, "partial": 0,
+            "unsupported": 0, "not_applicable": 0, "unassessed": 0,
+        }
+        for dimension in CAPABILITY_DIMENSIONS
+    }
+    cited = set()
+    for record in manifest["records"]:
+        assert record["language"] == language and record["profile"] == "splunkd"
+        assert set(record["dimensions"]) == set(CAPABILITY_DIMENSIONS)
+        for dimension in CAPABILITY_DIMENSIONS:
+            claim = record["dimensions"][dimension]
+            state = claim["state"]
+            assert state in CAPABILITY_STATES
+            recomputed[dimension][state] += 1
+            if state != "not_applicable":
+                recomputed[dimension]["applicable"] += 1
+            if state == "supported":
+                recomputed[dimension]["covered"] += 1
+            cited.update(claim["evidence_ids"])
+    assert recomputed == manifest["summary"]
+    evidence_ids = {item["id"] for item in manifest["evidence"]}
+    assert len(evidence_ids) == len(manifest["evidence"])
+    assert cited <= evidence_ids
+
+
 @pytest.fixture(scope="session")
 def analysis_cases() -> list[dict]:
     path = required_absolute_path("SPL_ANALYSIS_FIXTURES")
@@ -33,7 +89,7 @@ def analysis_cases() -> list[dict]:
 
 
 def test_analysis_full_report_parity(analysis_cases: list[dict], cli_path: Path, server_url: str) -> None:
-    with SPLMapper() as mapper:
+    with SPLMapper(**mapper_kwargs()) as mapper:
         for case in analysis_cases:
             document = case["document"]
             options = {key: value for key, value in document.items() if key != "text"}
@@ -56,18 +112,23 @@ def test_analysis_full_report_parity(analysis_cases: list[dict], cli_path: Path,
 
 
 def test_analysis_capabilities_parity(cli_path: Path, server_url: str) -> None:
-    with SPLMapper() as mapper:
-        expected = mapper.capabilities()
-    assert type(expected["schema_version"]) is int and expected["schema_version"] == 1
-    assert (expected["language"], expected["profile"], expected["version"]) == ("spl", "splunkd", "current")
-    assert expected["commands"] and expected["functions"]
-    assert get_json(server_url + "/capabilities") == expected
-    completed = subprocess.run(
-        [str(cli_path), "capabilities", "--format", "json"],
-        capture_output=True, text=True, check=False,
-    )
-    assert (completed.returncode, completed.stderr) == (0, "")
-    assert json.loads(completed.stdout) == expected
+    with SPLMapper(**mapper_kwargs()) as mapper:
+        for language in ("spl", "spl2"):
+            expected = mapper.capabilities(language=language, profile="splunkd", version="current")
+            assert raw_native_capabilities(mapper, language) == expected
+            assert_capability_ledger_is_self_consistent(expected, language)
+            assert type(expected["schema_version"]) is int and expected["schema_version"] == 1
+            assert expected["commands"] and expected["functions"] and expected["rewrite"]["forms"]
+
+            url = server_url + "/capabilities?language=" + language + "&profile=splunkd&version=current"
+            assert get_json(url) == expected
+            completed = subprocess.run(
+                [str(cli_path), "capabilities", "--language", language, "--profile", "splunkd",
+                 "--compatibility-version", "current", "--format", "json"],
+                capture_output=True, text=True, check=False,
+            )
+            assert (completed.returncode, completed.stderr) == (0, "")
+            assert json.loads(completed.stdout) == expected
 
 
 @pytest.mark.parametrize("payload", [
@@ -89,7 +150,7 @@ def test_analysis_http_rejects_lossy_unicode(server_url: str, payload: bytes) ->
 @pytest.mark.parametrize("query", ['search host="😀"', 'search host="\\ud800"'])
 def test_analysis_http_valid_unicode_controls(server_url: str, query: str) -> None:
     document = {"text": query, "source_id": "é😀.spl"}
-    with SPLMapper() as mapper:
+    with SPLMapper(**mapper_kwargs()) as mapper:
         expected = mapper.analyze_query(query, source_id=document["source_id"])
     # post_json emits escaped non-BMP pairs and escaped literal backslashes.
     status, actual = post_json(server_url, "/query/analyze", document)

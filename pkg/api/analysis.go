@@ -59,7 +59,7 @@ func (s *Server) handleRequirementsQuery(w http.ResponseWriter, r *http.Request)
 
 // handleCapabilities returns the canonical analysis capability manifest.
 // @Summary Get analysis capabilities
-// @Description Select the canonical capability manifest including language, profile, compatibility version, commands, functions, limitations, and optional pinned documentation_snapshot. Only language/profile/version query parameters are accepted; duplicate keys are rejected even when equal.
+// @Description Select the canonical capability manifest including language, profile, compatibility version, toolkit version, per-dimension coverage counts, capability records, cited evidence, and retained command, function, rewrite, limitation, and optional pinned documentation_snapshot projections. Grammar registration remains separate from syntax coverage. Only language/profile/version query parameters are accepted; duplicate keys are rejected even when equal.
 // @Tags query
 // @Produce json
 // @Param language query string false "Query language: spl (default) or spl2; empty uses default" Enums(,spl,spl2)

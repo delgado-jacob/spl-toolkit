@@ -249,7 +249,8 @@ func TestCapabilitiesTextExposesOptionalRewriteManifest(t *testing.T) {
 		t.Fatal("missing test precondition")
 	}
 	got := string(formatCapabilitiesText(manifest))
-	if !strings.Contains(got, "Rewrite forms:\n") || !strings.Contains(got, "field/expression_atom: supported=true") || !strings.Contains(got, "field/navigation: supported=false") {
+	if !strings.Contains(got, "Rewrite forms:\n") || !strings.Contains(got, "field/expression_atom: supported=true") || !strings.Contains(got, "field/navigation: supported=false") ||
+		!strings.Contains(got, " safe_rewriting=") || !strings.Contains(got, "Commands:\n") || !strings.Contains(got, "Functions:\n") {
 		t.Fatalf("rewrite capability omitted from text:\n%s", got)
 	}
 }

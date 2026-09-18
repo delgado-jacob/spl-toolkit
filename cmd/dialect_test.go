@@ -52,12 +52,26 @@ func TestDialectCapabilitiesCLIHTTPParity(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
+			if want.ToolkitVersion == "" || len(want.Records) == 0 || len(want.Evidence) == 0 {
+				t.Fatalf("incomplete canonical manifest: toolkit=%q records=%d evidence=%d", want.ToolkitVersion, len(want.Records), len(want.Evidence))
+			}
 			code, out, stderr := runCLITest("capabilities", "--language="+language, "--profile=splunkd", "--compatibility-version=current", "--format=json")
 			if code != 0 || stderr != "" {
 				t.Fatalf("code=%d stderr=%s", code, stderr)
 			}
 			dialectJSONEqual(t, []byte(out), want)
 			dialectJSONEqual(t, dialectHTTP(t, "GET", "/capabilities?language="+language+"&profile=splunkd&version=current", nil), want)
+			var detached analysis.CapabilityManifest
+			if err := json.Unmarshal([]byte(out), &detached); err != nil {
+				t.Fatal(err)
+			}
+			detached.Records[0].Dimensions.Syntax.EvidenceIDs = append(detached.Records[0].Dimensions.Syntax.EvidenceIDs, "mutated")
+			detached.Evidence[0].ID = "mutated"
+			code, out, stderr = runCLITest("capabilities", "--language="+language, "--profile=splunkd", "--compatibility-version=current", "--format=json")
+			if code != 0 || stderr != "" {
+				t.Fatalf("fresh call: code=%d stderr=%s", code, stderr)
+			}
+			dialectJSONEqual(t, []byte(out), want)
 			if language == "spl2" {
 				if want.DocumentationSnapshot == "" {
 					t.Fatal("missing documentation snapshot")

@@ -20,6 +20,9 @@ SNAPSHOT = 'spl2-provenance-v1:sha256:3345cf5712b1bdbf467d1651784fdb8bccc5968050
 TARGET = {'kind': 'json_schema', 'schema': {'type': 'object', 'properties': {'host': True, 'value': True},
           'required': ['host', 'value'], 'additionalProperties': False}}
 CATALOG = {'fields': ['host', 'value']}
+VERSION = (Path(__file__).resolve().parents[2] / 'VERSION').read_text(encoding='utf-8').strip()
+CAPABILITY_DIMENSIONS = ('syntax', 'semantics', 'requirements', 'linting', 'safe_rewriting')
+CAPABILITY_COUNTS = {'applicable', 'covered', 'supported', 'partial', 'unsupported', 'not_applicable', 'unassessed'}
 
 
 def mapper_kwargs():
@@ -40,9 +43,31 @@ def native_json(mapper, operation, payload, *, reject=False, handle=None):
         mapper._lib.spl_result_free(pointer)
 
 
+def assert_complete_capability_manifest(manifest, language):
+    required = {'rewrite', 'schema_version', 'language', 'profile', 'version', 'toolkit_version',
+                'commands', 'functions', 'records', 'summary', 'evidence'}
+    assert required <= manifest.keys()
+    assert manifest['toolkit_version'] == VERSION
+    assert (manifest['language'], manifest['profile'], manifest['version']) == (language, 'splunkd', 'current')
+    assert set(manifest['summary']) == set(CAPABILITY_DIMENSIONS)
+    assert all(set(manifest['summary'][name]) == CAPABILITY_COUNTS for name in CAPABILITY_DIMENSIONS)
+    assert manifest['records'] and manifest['evidence']
+    for record in manifest['records']:
+        assert set(record) == {'id', 'language', 'profile', 'kind', 'name', 'form', 'grammar_registered', 'provenance', 'dimensions'}
+        assert set(record['dimensions']) == set(CAPABILITY_DIMENSIONS)
+        assert all(set(record['dimensions'][name]) == {'state', 'evidence_ids', 'limitations'}
+                   for name in CAPABILITY_DIMENSIONS)
+    for item in manifest['evidence']:
+        assert {'id', 'classification', 'document', 'observations', 'provenance'} <= item.keys()
+        assert set(item['document']) == {'text', 'language', 'profile', 'version', 'source_id'}
+        assert set(item['observations']) <= set(CAPABILITY_DIMENSIONS)
+        assert item['observations']
+
+
 def test_capability_selectors_preserve_defaults_and_snapshot():
     with SPLMapper(**mapper_kwargs()) as mapper:
         original = mapper.capabilities()
+        assert_complete_capability_manifest(original, 'spl')
         assert original == mapper.capabilities(language='', profile='', version='')
         assert original == native_json(mapper, 'capabilities_for', b'{}')
         pointer = mapper._lib.spl_mapper_capabilities(mapper._mapper_id)
@@ -53,11 +78,14 @@ def test_capability_selectors_preserve_defaults_and_snapshot():
             mapper._lib.spl_result_free(pointer)
         assert 'documentation_snapshot' not in original
         manifest = mapper.capabilities(language='spl2')
+        assert_complete_capability_manifest(manifest, 'spl2')
         assert manifest['documentation_snapshot'] == SNAPSHOT
         assert manifest['language'] == 'spl2'
         assert any(c['name'] == 'from' and c['semantic_supported'] for c in manifest['commands'])
         assert manifest == native_json(mapper, 'capabilities_for', b'{"language":"spl2"}')
         mapper.capabilities(language='spl2')['commands'].clear()
+        mapper.capabilities(language='spl2')['records'][0]['dimensions']['syntax']['limitations'].append('mutated')
+        mapper.capabilities(language='spl2')['evidence'][0]['id'] = 'mutated'
         assert mapper.capabilities(language='spl2') == manifest
 
 

@@ -438,3 +438,92 @@ func TestCapabilitiesCLIFormatsAndOutput(t *testing.T) {
 		}
 	}
 }
+
+func TestCapabilitiesCLITextIsCanonicalAndComplete(t *testing.T) {
+	manifest := analysis.CapabilityManifest{
+		Rewrite: &analysis.RewriteCapabilityManifest{SchemaVersion: 1, Forms: []analysis.RewriteCapabilityForm{
+			{Kind: "field", Role: "expression_atom", IdentityForms: []string{"atom"}, Supported: true, Limitations: []string{"exact binding only"}},
+		}},
+		SchemaVersion:  1,
+		Language:       "spl2",
+		Profile:        "splunkd",
+		Version:        "current",
+		ToolkitVersion: "9.9.9",
+		Commands: []analysis.Capability{
+			{Name: "eval", SyntaxSupported: true, SemanticSupported: true, Limitations: []string{"legacy command limit"}},
+		},
+		Functions: []analysis.Capability{
+			{Name: "lower", SyntaxSupported: true, SemanticSupported: true, Limitations: []string{"legacy function limit"}},
+		},
+		Records: []analysis.CapabilityRecord{
+			{
+				ID: "rec-z", Language: "spl2", Profile: "splunkd", Kind: "function", Name: "lower", Form: "call",
+				GrammarRegistered: true,
+				Dimensions: analysis.CapabilityDimensions{
+					Syntax:        analysis.CapabilityClaim{State: analysis.CapabilitySupported, EvidenceIDs: []string{"ev-z"}, Limitations: []string{}},
+					Semantics:     analysis.CapabilityClaim{State: analysis.CapabilityPartial, EvidenceIDs: []string{"ev-z"}, Limitations: []string{"dynamic names remain incomplete"}},
+					Requirements:  analysis.CapabilityClaim{State: analysis.CapabilitySupported, EvidenceIDs: []string{"ev-z"}, Limitations: []string{}},
+					Linting:       analysis.CapabilityClaim{State: analysis.CapabilityNotApplicable, EvidenceIDs: []string{}, Limitations: []string{}},
+					SafeRewriting: analysis.CapabilityClaim{State: analysis.CapabilityUnsupported, EvidenceIDs: []string{"ev-a"}, Limitations: []string{"calls are fixed"}},
+				},
+			},
+			{
+				ID: "rec-a", Language: "spl2", Profile: "splunkd", Kind: "command", Name: "eval", Form: "assignment",
+				GrammarRegistered: false,
+				Dimensions: analysis.CapabilityDimensions{
+					Syntax:        analysis.CapabilityClaim{State: analysis.CapabilityUnsupported, EvidenceIDs: []string{"ev-a"}, Limitations: []string{"grammar deferred"}},
+					Semantics:     analysis.CapabilityClaim{State: analysis.CapabilityUnassessed, EvidenceIDs: []string{}, Limitations: []string{}},
+					Requirements:  analysis.CapabilityClaim{State: analysis.CapabilityPartial, EvidenceIDs: []string{"ev-z", "ev-a"}, Limitations: []string{"wildcards unresolved"}},
+					Linting:       analysis.CapabilityClaim{State: analysis.CapabilitySupported, EvidenceIDs: []string{"ev-a"}, Limitations: []string{}},
+					SafeRewriting: analysis.CapabilityClaim{State: analysis.CapabilityNotApplicable, EvidenceIDs: []string{}, Limitations: []string{}},
+				},
+			},
+		},
+		Summary: analysis.CapabilitySummary{
+			Syntax:        analysis.CapabilityStateCounts{Applicable: 2, Covered: 1, Supported: 1, Unsupported: 1},
+			Semantics:     analysis.CapabilityStateCounts{Applicable: 2, Partial: 1, Unassessed: 1},
+			Requirements:  analysis.CapabilityStateCounts{Applicable: 2, Covered: 1, Supported: 1, Partial: 1},
+			Linting:       analysis.CapabilityStateCounts{Applicable: 1, Covered: 1, Supported: 1, NotApplicable: 1},
+			SafeRewriting: analysis.CapabilityStateCounts{Applicable: 1, Unsupported: 1, NotApplicable: 1},
+		},
+		Evidence: []analysis.CapabilityEvidence{
+			{ID: "ev-z", Classification: analysis.CapabilityEvidenceIncomplete, Document: analysis.QueryDocument{Text: "FROM z", Language: "spl2", Profile: "splunkd", Version: "current", SourceID: "z.spl2"}},
+			{ID: "ev-a", Classification: analysis.CapabilityEvidenceNegative, Document: analysis.QueryDocument{Text: "FROM a", Language: "spl2", Profile: "splunkd", Version: "current", SourceID: "a.spl2"}},
+		},
+	}
+
+	want := "Schema version: 1\n" +
+		"Language: spl2\n" +
+		"Profile: splunkd\n" +
+		"Compatibility version: current\n" +
+		"Toolkit version: 9.9.9\n" +
+		"Coverage counts:\n" +
+		"  Syntax: applicable=2 covered=1 supported=1 partial=0 unsupported=1 not_applicable=0 unassessed=0\n" +
+		"  Semantics: applicable=2 covered=0 supported=0 partial=1 unsupported=0 not_applicable=0 unassessed=1\n" +
+		"  Requirements: applicable=2 covered=1 supported=1 partial=1 unsupported=0 not_applicable=0 unassessed=0\n" +
+		"  Linting: applicable=1 covered=1 supported=1 partial=0 unsupported=0 not_applicable=1 unassessed=0\n" +
+		"  Safe rewriting: applicable=1 covered=0 supported=0 partial=0 unsupported=1 not_applicable=1 unassessed=0\n" +
+		"Records:\n" +
+		"  command:\n" +
+		"    - eval/assignment [rec-a]: grammar_registered=false syntax=unsupported semantics=unassessed requirements=partial linting=supported safe_rewriting=not_applicable\n" +
+		"      syntax: evidence=ev-a; limitations=grammar deferred\n" +
+		"      requirements: evidence=ev-z,ev-a; limitations=wildcards unresolved\n" +
+		"  function:\n" +
+		"    - lower/call [rec-z]: grammar_registered=true syntax=supported semantics=partial requirements=supported linting=not_applicable safe_rewriting=unsupported\n" +
+		"      semantics: evidence=ev-z; limitations=dynamic names remain incomplete\n" +
+		"      safe_rewriting: evidence=ev-a; limitations=calls are fixed\n" +
+		"Evidence:\n" +
+		"  - ev-a [negative]: spl2/splunkd/current source=\"a.spl2\" query=\"FROM a\"\n" +
+		"  - ev-z [incomplete]: spl2/splunkd/current source=\"z.spl2\" query=\"FROM z\"\n" +
+		"Rewrite schema version: 1\n" +
+		"Rewrite forms:\n" +
+		"  - field/expression_atom: supported=true identities=atom (exact binding only)\n" +
+		"Commands:\n" +
+		"  - eval: syntax=true semantic=true (legacy command limit)\n" +
+		"Functions:\n" +
+		"  - lower: syntax=true semantic=true (legacy function limit)\n"
+
+	if got := string(formatCapabilitiesText(manifest)); got != want {
+		t.Fatalf("capability text mismatch\ngot:\n%s\nwant:\n%s", got, want)
+	}
+}
