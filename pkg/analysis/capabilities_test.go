@@ -155,7 +155,7 @@ func TestCapabilitiesReturnDetachedLedger(t *testing.T) {
 	}
 }
 
-func TestCapabilitiesRewriteFormsHaveAuthoredSafeRewritingRecords(t *testing.T) {
+func TestCapabilitiesRewriteFormsMatchCompatibilityFixture(t *testing.T) {
 	var fixture struct {
 		Checks []struct {
 			Language  string `json:"language"`
@@ -171,13 +171,13 @@ func TestCapabilitiesRewriteFormsHaveAuthoredSafeRewritingRecords(t *testing.T) 
 	if err := json.Unmarshal(raw, &fixture); err != nil {
 		t.Fatal(err)
 	}
-	authored := make(map[string]bool, len(fixture.Checks))
+	fixtureSupport := make(map[string]bool, len(fixture.Checks))
 	for _, check := range fixture.Checks {
 		key := check.Language + "/" + check.Kind + "/" + check.Role
-		if _, duplicate := authored[key]; duplicate {
-			t.Fatalf("duplicate authored safe_rewriting record %q", key)
+		if _, duplicate := fixtureSupport[key]; duplicate {
+			t.Fatalf("duplicate rewrite compatibility fixture %q", key)
 		}
-		authored[key] = check.Supported
+		fixtureSupport[key] = check.Supported
 	}
 	advertised := 0
 	for _, options := range []CapabilityOptions{{}, {Language: "spl2"}} {
@@ -190,19 +190,19 @@ func TestCapabilitiesRewriteFormsHaveAuthoredSafeRewritingRecords(t *testing.T) 
 		}
 		for _, form := range manifest.Rewrite.Forms {
 			key := manifest.Language + "/" + form.Kind + "/" + form.Role
-			supported, found := authored[key]
+			supported, found := fixtureSupport[key]
 			if !found {
-				t.Errorf("advertised rewrite form %q has no authored safe_rewriting record", key)
+				t.Errorf("advertised rewrite form %q has no compatibility fixture", key)
 				continue
 			}
 			if supported != form.Supported {
-				t.Errorf("advertised rewrite form %q support=%t, authored support=%t", key, form.Supported, supported)
+				t.Errorf("advertised rewrite form %q support=%t, fixture support=%t", key, form.Supported, supported)
 			}
 			advertised++
 		}
 	}
-	if advertised != len(authored) {
-		t.Errorf("advertised %d rewrite forms, found %d authored safe_rewriting records", advertised, len(authored))
+	if advertised != len(fixtureSupport) {
+		t.Errorf("advertised %d rewrite forms, found %d compatibility fixtures", advertised, len(fixtureSupport))
 	}
 }
 

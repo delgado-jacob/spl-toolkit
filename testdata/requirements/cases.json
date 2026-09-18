@@ -19,7 +19,7 @@
           "version": "current",
           "query_digest": "sha256:717dea7c30929b4559dfbc5b71de621af048179bc23f2047415c0fc0b9049fc6"
         },
-        "capability_revision": "sha256:1e6c75800f843931ec517dba27f3baa5af928a8a908d97dd1c62513e2ea24d31",
+        "capability_revision": "sha256:6523957df628c21f1b707f97bc75111c8fefa6576dce88e28948fa95cb85422a",
         "query_status": "valid",
         "coverage": {
           "complete": true,
@@ -48,7 +48,7 @@
           "version": "current",
           "query_digest": "sha256:33e3c69fe52d9aad632aa000d7f6dafe0f147d41c66562c50b242ec403bd95d7"
         },
-        "capability_revision": "sha256:1e6c75800f843931ec517dba27f3baa5af928a8a908d97dd1c62513e2ea24d31",
+        "capability_revision": "sha256:6523957df628c21f1b707f97bc75111c8fefa6576dce88e28948fa95cb85422a",
         "query_status": "valid",
         "coverage": {
           "complete": true,
@@ -157,7 +157,7 @@
           "version": "current",
           "query_digest": "sha256:29c3b3ee729857446a9d62ca2c302c7f3f35718f30b187415d40e33492433617"
         },
-        "capability_revision": "sha256:1e6c75800f843931ec517dba27f3baa5af928a8a908d97dd1c62513e2ea24d31",
+        "capability_revision": "sha256:6523957df628c21f1b707f97bc75111c8fefa6576dce88e28948fa95cb85422a",
         "query_status": "incomplete",
         "coverage": {
           "complete": false,
@@ -258,7 +258,7 @@
           "version": "current",
           "query_digest": "sha256:3a5857fbdb1af43d292b8f75c7a1dcebf384f34c3aaa19b7d23bc1bf67ceaf39"
         },
-        "capability_revision": "sha256:1e6c75800f843931ec517dba27f3baa5af928a8a908d97dd1c62513e2ea24d31",
+        "capability_revision": "sha256:6523957df628c21f1b707f97bc75111c8fefa6576dce88e28948fa95cb85422a",
         "query_status": "incomplete",
         "coverage": {
           "complete": false,
@@ -382,7 +382,7 @@
           "version": "current",
           "query_digest": "sha256:7a9765c7cd51da878bea531735f06b7f9150d2840116c2b754ca764aa9fc39c5"
         },
-        "capability_revision": "sha256:1e6c75800f843931ec517dba27f3baa5af928a8a908d97dd1c62513e2ea24d31",
+        "capability_revision": "sha256:6523957df628c21f1b707f97bc75111c8fefa6576dce88e28948fa95cb85422a",
         "query_status": "valid",
         "coverage": {
           "complete": true,
@@ -502,7 +502,7 @@
           "version": "current",
           "query_digest": "sha256:0dc76923fa47fdaa30ad258c85f6308c784f76b351b6ebb4f947656044c57d5b"
         },
-        "capability_revision": "sha256:1e6c75800f843931ec517dba27f3baa5af928a8a908d97dd1c62513e2ea24d31",
+        "capability_revision": "sha256:6523957df628c21f1b707f97bc75111c8fefa6576dce88e28948fa95cb85422a",
         "query_status": "valid",
         "coverage": {
           "complete": true,
@@ -592,7 +592,7 @@
           "version": "current",
           "query_digest": "sha256:6a58c4862e1ba050d1621405b79ee40a939f30285029c7faf3ba95056f5e601c"
         },
-        "capability_revision": "sha256:1e6c75800f843931ec517dba27f3baa5af928a8a908d97dd1c62513e2ea24d31",
+        "capability_revision": "sha256:6523957df628c21f1b707f97bc75111c8fefa6576dce88e28948fa95cb85422a",
         "query_status": "incomplete",
         "coverage": {
           "complete": false,
@@ -684,7 +684,7 @@
           "version": "current",
           "query_digest": "sha256:361b0ab3e3c354a13d3dd203935807a6af1d558fdcea70ff4e9dcb0579c8f51d"
         },
-        "capability_revision": "sha256:1e6c75800f843931ec517dba27f3baa5af928a8a908d97dd1c62513e2ea24d31",
+        "capability_revision": "sha256:6523957df628c21f1b707f97bc75111c8fefa6576dce88e28948fa95cb85422a",
         "query_status": "incomplete",
         "coverage": {
           "complete": false,
@@ -847,7 +847,7 @@
           "version": "current",
           "query_digest": "sha256:aebec667d8b0b1706562b330b062e6e29d9ef195070fc4d28ab092410cff9081"
         },
-        "capability_revision": "sha256:1e6c75800f843931ec517dba27f3baa5af928a8a908d97dd1c62513e2ea24d31",
+        "capability_revision": "sha256:6523957df628c21f1b707f97bc75111c8fefa6576dce88e28948fa95cb85422a",
         "query_status": "valid",
         "coverage": {
           "complete": true,
@@ -937,7 +937,7 @@
           "version": "current",
           "query_digest": "sha256:f7adcfdf9129d82ae3195685215c28928bb8f7dee31607c9e8bf43158c013b29"
         },
-        "capability_revision": "sha256:1e6c75800f843931ec517dba27f3baa5af928a8a908d97dd1c62513e2ea24d31",
+        "capability_revision": "sha256:6523957df628c21f1b707f97bc75111c8fefa6576dce88e28948fa95cb85422a",
         "query_status": "invalid",
         "coverage": {
           "complete": true,
@@ -1018,7 +1018,7 @@
           "version": "current",
           "query_digest": "sha256:a6d6b2c3e480e6a5fedc48fc9dd6f67a4c4955f7188ccd63475341df90c5b003"
         },
-        "capability_revision": "sha256:1e6c75800f843931ec517dba27f3baa5af928a8a908d97dd1c62513e2ea24d31",
+        "capability_revision": "sha256:6523957df628c21f1b707f97bc75111c8fefa6576dce88e28948fa95cb85422a",
         "query_status": "invalid",
         "coverage": {
           "complete": false,
@@ -1079,7 +1079,7 @@
           "version": "current",
           "query_digest": "sha256:11915da48f694079f9a71d70adbace4cdbd2643e480606b5711e4cce84686aed"
         },
-        "capability_revision": "sha256:1e6c75800f843931ec517dba27f3baa5af928a8a908d97dd1c62513e2ea24d31",
+        "capability_revision": "sha256:6523957df628c21f1b707f97bc75111c8fefa6576dce88e28948fa95cb85422a",
         "query_status": "incomplete",
         "coverage": {
           "complete": false,
@@ -1261,7 +1261,7 @@
           "version": "current",
           "query_digest": "sha256:0f6a3f7e6d0fc4840d2952a16eb30d951fa8b4394fe343f0af98c0b1908d1358"
         },
-        "capability_revision": "sha256:1e6c75800f843931ec517dba27f3baa5af928a8a908d97dd1c62513e2ea24d31",
+        "capability_revision": "sha256:6523957df628c21f1b707f97bc75111c8fefa6576dce88e28948fa95cb85422a",
         "query_status": "valid",
         "coverage": {
           "complete": true,
@@ -1370,7 +1370,7 @@
           "version": "current",
           "query_digest": "sha256:47e9020c2aabad680268a48f4572eef653a4da767ad41b1a6dc5aca9f6c81855"
         },
-        "capability_revision": "sha256:0203cbeec2e0fd484080b1f512582a1c8bdc4bc541fb73ac42c013060695f84c",
+        "capability_revision": "sha256:e256889ee8dcce9e8b6beb903d5a2d6f2fec5475050c7ece7896d8d4856e8738",
         "query_status": "valid",
         "coverage": {
           "complete": true,
@@ -1460,7 +1460,7 @@
           "version": "current",
           "query_digest": "sha256:7f93aa83df1d910bbf99118e2489c996a1624a42a7dc17387c1ee4132f328c4e"
         },
-        "capability_revision": "sha256:0203cbeec2e0fd484080b1f512582a1c8bdc4bc541fb73ac42c013060695f84c",
+        "capability_revision": "sha256:e256889ee8dcce9e8b6beb903d5a2d6f2fec5475050c7ece7896d8d4856e8738",
         "query_status": "valid",
         "coverage": {
           "complete": true,
@@ -1550,7 +1550,7 @@
           "version": "current",
           "query_digest": "sha256:ec8474dfb6e63d58bf18ae5413b55d59a48fc9f38b054a4ca33a4d29d70e6c65"
         },
-        "capability_revision": "sha256:0203cbeec2e0fd484080b1f512582a1c8bdc4bc541fb73ac42c013060695f84c",
+        "capability_revision": "sha256:e256889ee8dcce9e8b6beb903d5a2d6f2fec5475050c7ece7896d8d4856e8738",
         "query_status": "invalid",
         "coverage": {
           "complete": true,
@@ -1600,7 +1600,7 @@
           "version": "current",
           "query_digest": "sha256:72d1806d01e2eaa01dad59014c221c050b051fcaa46bd5f417c1dcd080aa12c9"
         },
-        "capability_revision": "sha256:1e6c75800f843931ec517dba27f3baa5af928a8a908d97dd1c62513e2ea24d31",
+        "capability_revision": "sha256:6523957df628c21f1b707f97bc75111c8fefa6576dce88e28948fa95cb85422a",
         "query_status": "incomplete",
         "coverage": {
           "complete": false,
@@ -2062,7 +2062,7 @@
           "version": "current",
           "query_digest": "sha256:7aae70e1d32ac71295d1b11903013a78c022729f1d95d8f5104e4a2efcbd59b1"
         },
-        "capability_revision": "sha256:0203cbeec2e0fd484080b1f512582a1c8bdc4bc541fb73ac42c013060695f84c",
+        "capability_revision": "sha256:e256889ee8dcce9e8b6beb903d5a2d6f2fec5475050c7ece7896d8d4856e8738",
         "query_status": "incomplete",
         "coverage": {
           "complete": false,
@@ -2184,7 +2184,7 @@
           "version": "current",
           "query_digest": "sha256:61bb24feb65f02a444364327bcde4a82de12768740787a22de424947a797ef54"
         },
-        "capability_revision": "sha256:0203cbeec2e0fd484080b1f512582a1c8bdc4bc541fb73ac42c013060695f84c",
+        "capability_revision": "sha256:e256889ee8dcce9e8b6beb903d5a2d6f2fec5475050c7ece7896d8d4856e8738",
         "query_status": "invalid",
         "coverage": {
           "complete": false,
@@ -2404,7 +2404,7 @@
           "version": "current",
           "query_digest": "sha256:3589d041f66a6ea04d9cc7a845fe665e98248a73b1853ce798a8b9f7027291b4"
         },
-        "capability_revision": "sha256:0203cbeec2e0fd484080b1f512582a1c8bdc4bc541fb73ac42c013060695f84c",
+        "capability_revision": "sha256:e256889ee8dcce9e8b6beb903d5a2d6f2fec5475050c7ece7896d8d4856e8738",
         "query_status": "incomplete",
         "coverage": {
           "complete": false,

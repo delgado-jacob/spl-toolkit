@@ -107,6 +107,66 @@ func TestCapabilityEvidenceCorpus(t *testing.T) {
 	}
 }
 
+func TestAdvertisedSupportedRewriteFormsHaveLedgerEvidence(t *testing.T) {
+	for _, language := range []string{"spl", "spl2"} {
+		manifest, err := analysis.CapabilitiesFor(analysis.CapabilityOptions{
+			Language: language,
+			Profile:  "splunkd",
+			Version:  "current",
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if manifest.Rewrite == nil {
+			t.Fatalf("%s rewrite compatibility projection is missing", language)
+		}
+
+		evidenceByID := make(map[string]analysis.CapabilityEvidence, len(manifest.Evidence))
+		for _, evidence := range manifest.Evidence {
+			evidenceByID[evidence.ID] = evidence
+		}
+		for _, form := range manifest.Rewrite.Forms {
+			if !form.Supported {
+				continue
+			}
+			wantKind := "dataset"
+			if form.Kind == "field" {
+				wantKind = "expression"
+			}
+			var matches []analysis.CapabilityRecord
+			for _, record := range manifest.Records {
+				if record.Kind == wantKind && record.Name == form.Kind && record.Form == form.Role {
+					matches = append(matches, record)
+				}
+			}
+			key := language + "/" + form.Kind + "/" + form.Role
+			if len(matches) != 1 {
+				t.Errorf("advertised supported rewrite form %q has %d canonical ledger records, want 1", key, len(matches))
+				continue
+			}
+			claim := matches[0].Dimensions.SafeRewriting
+			if claim.State != analysis.CapabilitySupported || len(claim.EvidenceIDs) == 0 {
+				t.Errorf("advertised supported rewrite form %q has safe_rewriting claim %+v", key, claim)
+				continue
+			}
+			if !slices.Equal(claim.Limitations, form.Limitations) {
+				t.Errorf("advertised supported rewrite form %q limitations=%v, ledger limitations=%v", key, form.Limitations, claim.Limitations)
+			}
+			for _, evidenceID := range claim.EvidenceIDs {
+				evidence, found := evidenceByID[evidenceID]
+				if !found {
+					t.Errorf("advertised supported rewrite form %q cites missing evidence %q", key, evidenceID)
+					continue
+				}
+				result := executeEvidence(evidence).dimensions["safe_rewriting"]
+				if !result.passed || result.refused {
+					t.Errorf("advertised supported rewrite form %q evidence %q did not prove a completed rewrite: expected=%s actual=%s", key, evidenceID, result.expected, result.actual)
+				}
+			}
+		}
+	}
+}
+
 func TestCapabilityRewriteEvidencePreservesSchemaVersion(t *testing.T) {
 	manifest := analysis.Capabilities()
 	for _, evidence := range manifest.Evidence {

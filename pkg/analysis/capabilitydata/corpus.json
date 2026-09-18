@@ -362,6 +362,106 @@
       }
     },
     {
+      "id": "spl.data-model.catalog-atom.rewrite",
+      "classification": "positive",
+      "document": {
+        "text": "datamodel Traffic All",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.data-model.catalog-atom.rewrite"
+      },
+      "observations": {
+        "safe_rewriting": {
+          "status": "incomplete",
+          "committed": true,
+          "rewrite_complete": true,
+          "text": "datamodel Network All",
+          "candidate_text": "datamodel Network All",
+          "coverage_reasons": [
+            "SPL_UNSUPPORTED_SEMANTICS"
+          ],
+          "change_reasons": [
+            "matched"
+          ],
+          "rule_evaluation_reasons": [
+            "matched"
+          ]
+        }
+      },
+      "rewrite_request": {
+        "schema_version": 1,
+        "mode": "apply",
+        "rules": [
+          {
+            "id": "capability",
+            "kind": "data_model",
+            "source": {
+              "name": "Traffic"
+            },
+            "target": {
+              "name": "Network"
+            }
+          }
+        ]
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "testdata/rewrite/forms.json",
+        "note": "Advertised safe rewrite form replayed through the local rewrite API."
+      }
+    },
+    {
+      "id": "spl.data-model.catalog-component.rewrite",
+      "classification": "positive",
+      "document": {
+        "text": "from datamodel:Traffic.All",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.data-model.catalog-component.rewrite"
+      },
+      "observations": {
+        "safe_rewriting": {
+          "status": "incomplete",
+          "committed": true,
+          "rewrite_complete": true,
+          "text": "from datamodel:Network.All",
+          "candidate_text": "from datamodel:Network.All",
+          "coverage_reasons": [
+            "SPL_UNSUPPORTED_SEMANTICS"
+          ],
+          "change_reasons": [
+            "matched"
+          ],
+          "rule_evaluation_reasons": [
+            "matched"
+          ]
+        }
+      },
+      "rewrite_request": {
+        "schema_version": 1,
+        "mode": "apply",
+        "rules": [
+          {
+            "id": "capability",
+            "kind": "data_model",
+            "source": {
+              "name": "Traffic"
+            },
+            "target": {
+              "name": "Network"
+            }
+          }
+        ]
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "testdata/rewrite/forms.json",
+        "note": "Advertised safe rewrite form replayed through the local rewrite API."
+      }
+    },
+    {
       "id": "spl.datamodel.exact-model-dataset.incomplete",
       "classification": "incomplete",
       "document": {
@@ -413,6 +513,156 @@
         "source_family": "toolkit",
         "reference": "pkg/analysis",
         "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl.dataset.catalog-atom.rewrite",
+      "classification": "positive",
+      "document": {
+        "text": "from main",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.dataset.catalog-atom.rewrite"
+      },
+      "observations": {
+        "safe_rewriting": {
+          "status": "incomplete",
+          "committed": true,
+          "rewrite_complete": true,
+          "text": "from archive",
+          "candidate_text": "from archive",
+          "coverage_reasons": [
+            "SPL_UNSUPPORTED_SEMANTICS"
+          ],
+          "change_reasons": [
+            "matched"
+          ],
+          "rule_evaluation_reasons": [
+            "matched"
+          ]
+        }
+      },
+      "rewrite_request": {
+        "schema_version": 1,
+        "mode": "apply",
+        "rules": [
+          {
+            "id": "capability",
+            "kind": "dataset",
+            "source": {
+              "name": "main"
+            },
+            "target": {
+              "name": "archive"
+            }
+          }
+        ]
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "testdata/rewrite/forms.json",
+        "note": "Advertised safe rewrite form replayed through the local rewrite API."
+      }
+    },
+    {
+      "id": "spl.dataset.catalog-component.rewrite",
+      "classification": "positive",
+      "document": {
+        "text": "datamodel Traffic 'All'",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.dataset.catalog-component.rewrite"
+      },
+      "observations": {
+        "safe_rewriting": {
+          "status": "incomplete",
+          "committed": true,
+          "rewrite_complete": true,
+          "text": "datamodel Traffic 'Flows'",
+          "candidate_text": "datamodel Traffic 'Flows'",
+          "coverage_reasons": [
+            "SPL_UNSUPPORTED_SEMANTICS"
+          ],
+          "change_reasons": [
+            "matched"
+          ],
+          "rule_evaluation_reasons": [
+            "matched"
+          ]
+        }
+      },
+      "rewrite_request": {
+        "schema_version": 1,
+        "mode": "apply",
+        "rules": [
+          {
+            "id": "capability",
+            "kind": "dataset",
+            "source": {
+              "name": "Traffic.All"
+            },
+            "target": {
+              "name": "Traffic.Flows"
+            }
+          }
+        ]
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "testdata/rewrite/forms.json",
+        "note": "Advertised safe rewrite form replayed through the local rewrite API."
+      }
+    },
+    {
+      "id": "spl.dataset.qualified-dataset.rewrite",
+      "classification": "positive",
+      "document": {
+        "text": "from datamodel:Traffic.All",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.dataset.qualified-dataset.rewrite"
+      },
+      "observations": {
+        "safe_rewriting": {
+          "status": "incomplete",
+          "committed": true,
+          "rewrite_complete": true,
+          "text": "from datamodel:Traffic.Flows",
+          "candidate_text": "from datamodel:Traffic.Flows",
+          "coverage_reasons": [
+            "SPL_UNSUPPORTED_SEMANTICS"
+          ],
+          "change_reasons": [
+            "matched"
+          ],
+          "rule_evaluation_reasons": [
+            "matched"
+          ]
+        }
+      },
+      "rewrite_request": {
+        "schema_version": 1,
+        "mode": "apply",
+        "rules": [
+          {
+            "id": "capability",
+            "kind": "dataset",
+            "source": {
+              "name": "Traffic.All"
+            },
+            "target": {
+              "name": "Traffic.Flows"
+            }
+          }
+        ]
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "testdata/rewrite/forms.json",
+        "note": "Advertised safe rewrite form replayed through the local rewrite API."
       }
     },
     {
@@ -593,6 +843,392 @@
         "source_family": "toolkit",
         "reference": "pkg/analysis",
         "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl.field.expression-atom.rewrite",
+      "classification": "positive",
+      "document": {
+        "text": "search index=main | where user=1",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.field.expression-atom.rewrite"
+      },
+      "observations": {
+        "safe_rewriting": {
+          "status": "valid",
+          "committed": true,
+          "rewrite_complete": true,
+          "text": "search index=main | where account=1",
+          "candidate_text": "search index=main | where account=1",
+          "coverage_reasons": [],
+          "change_reasons": [
+            "matched"
+          ],
+          "rule_evaluation_reasons": [
+            "matched"
+          ]
+        }
+      },
+      "rewrite_request": {
+        "schema_version": 1,
+        "mode": "apply",
+        "rules": [
+          {
+            "id": "capability",
+            "kind": "field",
+            "source": {
+              "name": "user"
+            },
+            "target": {
+              "name": "account"
+            }
+          }
+        ]
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "testdata/rewrite/forms.json",
+        "note": "Advertised safe rewrite form replayed through the local rewrite API."
+      }
+    },
+    {
+      "id": "spl.field.implicit-output.rewrite",
+      "classification": "positive",
+      "document": {
+        "text": "stats sum(src) | table 'sum(src)'",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.field.implicit-output.rewrite"
+      },
+      "observations": {
+        "safe_rewriting": {
+          "status": "valid",
+          "committed": true,
+          "rewrite_complete": true,
+          "text": "stats sum(user) | table 'sum(user)'",
+          "candidate_text": "stats sum(user) | table 'sum(user)'",
+          "coverage_reasons": [],
+          "change_reasons": [
+            "matched",
+            "matched"
+          ],
+          "rule_evaluation_reasons": [
+            "matched",
+            "linked"
+          ]
+        }
+      },
+      "rewrite_request": {
+        "schema_version": 1,
+        "mode": "apply",
+        "rules": [
+          {
+            "id": "capability",
+            "kind": "field",
+            "source": {
+              "name": "src"
+            },
+            "target": {
+              "name": "user"
+            }
+          }
+        ]
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "testdata/rewrite/forms.json",
+        "note": "Advertised safe rewrite form replayed through the local rewrite API."
+      }
+    },
+    {
+      "id": "spl.field.lookup-dual.rewrite",
+      "classification": "positive",
+      "document": {
+        "text": "search index=main | lookup people user OUTPUT label",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.field.lookup-dual.rewrite"
+      },
+      "observations": {
+        "safe_rewriting": {
+          "status": "valid",
+          "committed": true,
+          "rewrite_complete": true,
+          "text": "search index=main | lookup people user AS account OUTPUT label",
+          "candidate_text": "search index=main | lookup people user AS account OUTPUT label",
+          "coverage_reasons": [],
+          "change_reasons": [
+            "matched"
+          ],
+          "rule_evaluation_reasons": [
+            "matched"
+          ]
+        }
+      },
+      "rewrite_request": {
+        "schema_version": 1,
+        "mode": "apply",
+        "rules": [
+          {
+            "id": "capability",
+            "kind": "field",
+            "source": {
+              "name": "user"
+            },
+            "target": {
+              "name": "account"
+            }
+          }
+        ]
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "testdata/rewrite/forms.json",
+        "note": "Advertised safe rewrite form replayed through the local rewrite API."
+      }
+    },
+    {
+      "id": "spl.field.lookup-local.rewrite",
+      "classification": "positive",
+      "document": {
+        "text": "search index=main | lookup people remote AS user OUTPUT label",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.field.lookup-local.rewrite"
+      },
+      "observations": {
+        "safe_rewriting": {
+          "status": "valid",
+          "committed": true,
+          "rewrite_complete": true,
+          "text": "search index=main | lookup people remote AS account OUTPUT label",
+          "candidate_text": "search index=main | lookup people remote AS account OUTPUT label",
+          "coverage_reasons": [],
+          "change_reasons": [
+            "matched"
+          ],
+          "rule_evaluation_reasons": [
+            "matched"
+          ]
+        }
+      },
+      "rewrite_request": {
+        "schema_version": 1,
+        "mode": "apply",
+        "rules": [
+          {
+            "id": "capability",
+            "kind": "field",
+            "source": {
+              "name": "user"
+            },
+            "target": {
+              "name": "account"
+            }
+          }
+        ]
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "testdata/rewrite/forms.json",
+        "note": "Advertised safe rewrite form replayed through the local rewrite API."
+      }
+    },
+    {
+      "id": "spl.field.null-test.rewrite",
+      "classification": "positive",
+      "document": {
+        "text": "search index=main | where isnull(user)",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.field.null-test.rewrite"
+      },
+      "observations": {
+        "safe_rewriting": {
+          "status": "valid",
+          "committed": true,
+          "rewrite_complete": true,
+          "text": "search index=main | where isnull(account)",
+          "candidate_text": "search index=main | where isnull(account)",
+          "coverage_reasons": [],
+          "change_reasons": [
+            "matched"
+          ],
+          "rule_evaluation_reasons": [
+            "matched"
+          ]
+        }
+      },
+      "rewrite_request": {
+        "schema_version": 1,
+        "mode": "apply",
+        "rules": [
+          {
+            "id": "capability",
+            "kind": "field",
+            "source": {
+              "name": "user"
+            },
+            "target": {
+              "name": "account"
+            }
+          }
+        ]
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "testdata/rewrite/forms.json",
+        "note": "Advertised safe rewrite form replayed through the local rewrite API."
+      }
+    },
+    {
+      "id": "spl.field.rename-input.rewrite",
+      "classification": "positive",
+      "document": {
+        "text": "search index=main | rename user AS owner",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.field.rename-input.rewrite"
+      },
+      "observations": {
+        "safe_rewriting": {
+          "status": "valid",
+          "committed": true,
+          "rewrite_complete": true,
+          "text": "search index=main | rename account AS owner",
+          "candidate_text": "search index=main | rename account AS owner",
+          "coverage_reasons": [],
+          "change_reasons": [
+            "matched"
+          ],
+          "rule_evaluation_reasons": [
+            "matched"
+          ]
+        }
+      },
+      "rewrite_request": {
+        "schema_version": 1,
+        "mode": "apply",
+        "rules": [
+          {
+            "id": "capability",
+            "kind": "field",
+            "source": {
+              "name": "user"
+            },
+            "target": {
+              "name": "account"
+            }
+          }
+        ]
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "testdata/rewrite/forms.json",
+        "note": "Advertised safe rewrite form replayed through the local rewrite API."
+      }
+    },
+    {
+      "id": "spl.field.search-field.rewrite",
+      "classification": "positive",
+      "document": {
+        "text": "search user=1",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.field.search-field.rewrite"
+      },
+      "observations": {
+        "safe_rewriting": {
+          "status": "valid",
+          "committed": true,
+          "rewrite_complete": true,
+          "text": "search account=1",
+          "candidate_text": "search account=1",
+          "coverage_reasons": [],
+          "change_reasons": [
+            "matched"
+          ],
+          "rule_evaluation_reasons": [
+            "matched"
+          ]
+        }
+      },
+      "rewrite_request": {
+        "schema_version": 1,
+        "mode": "apply",
+        "rules": [
+          {
+            "id": "capability",
+            "kind": "field",
+            "source": {
+              "name": "user"
+            },
+            "target": {
+              "name": "account"
+            }
+          }
+        ]
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "testdata/rewrite/forms.json",
+        "note": "Advertised safe rewrite form replayed through the local rewrite API."
+      }
+    },
+    {
+      "id": "spl.field.selector-atom.rewrite",
+      "classification": "positive",
+      "document": {
+        "text": "search index=main | table user",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.field.selector-atom.rewrite"
+      },
+      "observations": {
+        "safe_rewriting": {
+          "status": "valid",
+          "committed": true,
+          "rewrite_complete": true,
+          "text": "search index=main | table account",
+          "candidate_text": "search index=main | table account",
+          "coverage_reasons": [],
+          "change_reasons": [
+            "matched"
+          ],
+          "rule_evaluation_reasons": [
+            "matched"
+          ]
+        }
+      },
+      "rewrite_request": {
+        "schema_version": 1,
+        "mode": "apply",
+        "rules": [
+          {
+            "id": "capability",
+            "kind": "field",
+            "source": {
+              "name": "user"
+            },
+            "target": {
+              "name": "account"
+            }
+          }
+        ]
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "testdata/rewrite/forms.json",
+        "note": "Advertised safe rewrite form replayed through the local rewrite API."
       }
     },
     {
@@ -827,6 +1463,54 @@
         "source_family": "toolkit",
         "reference": "pkg/analysis",
         "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl.index.search-value.rewrite",
+      "classification": "positive",
+      "document": {
+        "text": "search index=main",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.index.search-value.rewrite"
+      },
+      "observations": {
+        "safe_rewriting": {
+          "status": "valid",
+          "committed": true,
+          "rewrite_complete": true,
+          "text": "search index=archive",
+          "candidate_text": "search index=archive",
+          "coverage_reasons": [],
+          "change_reasons": [
+            "matched"
+          ],
+          "rule_evaluation_reasons": [
+            "matched"
+          ]
+        }
+      },
+      "rewrite_request": {
+        "schema_version": 1,
+        "mode": "apply",
+        "rules": [
+          {
+            "id": "capability",
+            "kind": "index",
+            "source": {
+              "name": "main"
+            },
+            "target": {
+              "name": "archive"
+            }
+          }
+        ]
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "testdata/rewrite/forms.json",
+        "note": "Advertised safe rewrite form replayed through the local rewrite API."
       }
     },
     {
@@ -1097,6 +1781,54 @@
         "source_family": "toolkit",
         "reference": "pkg/analysis",
         "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl.lookup.catalog-atom.rewrite",
+      "classification": "positive",
+      "document": {
+        "text": "inputlookup people",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.lookup.catalog-atom.rewrite"
+      },
+      "observations": {
+        "safe_rewriting": {
+          "status": "valid",
+          "committed": true,
+          "rewrite_complete": true,
+          "text": "inputlookup archive",
+          "candidate_text": "inputlookup archive",
+          "coverage_reasons": [],
+          "change_reasons": [
+            "matched"
+          ],
+          "rule_evaluation_reasons": [
+            "matched"
+          ]
+        }
+      },
+      "rewrite_request": {
+        "schema_version": 1,
+        "mode": "apply",
+        "rules": [
+          {
+            "id": "capability",
+            "kind": "lookup",
+            "source": {
+              "name": "people"
+            },
+            "target": {
+              "name": "archive"
+            }
+          }
+        ]
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "testdata/rewrite/forms.json",
+        "note": "Advertised safe rewrite form replayed through the local rewrite API."
       }
     },
     {
@@ -1673,6 +2405,102 @@
         "source_family": "toolkit",
         "reference": "pkg/analysis",
         "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl.source.search-value.rewrite",
+      "classification": "positive",
+      "document": {
+        "text": "search source=main",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.source.search-value.rewrite"
+      },
+      "observations": {
+        "safe_rewriting": {
+          "status": "valid",
+          "committed": true,
+          "rewrite_complete": true,
+          "text": "search source=archive",
+          "candidate_text": "search source=archive",
+          "coverage_reasons": [],
+          "change_reasons": [
+            "matched"
+          ],
+          "rule_evaluation_reasons": [
+            "matched"
+          ]
+        }
+      },
+      "rewrite_request": {
+        "schema_version": 1,
+        "mode": "apply",
+        "rules": [
+          {
+            "id": "capability",
+            "kind": "source",
+            "source": {
+              "name": "main"
+            },
+            "target": {
+              "name": "archive"
+            }
+          }
+        ]
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "testdata/rewrite/forms.json",
+        "note": "Advertised safe rewrite form replayed through the local rewrite API."
+      }
+    },
+    {
+      "id": "spl.sourcetype.search-value.rewrite",
+      "classification": "positive",
+      "document": {
+        "text": "search sourcetype=main",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.sourcetype.search-value.rewrite"
+      },
+      "observations": {
+        "safe_rewriting": {
+          "status": "valid",
+          "committed": true,
+          "rewrite_complete": true,
+          "text": "search sourcetype=archive",
+          "candidate_text": "search sourcetype=archive",
+          "coverage_reasons": [],
+          "change_reasons": [
+            "matched"
+          ],
+          "rule_evaluation_reasons": [
+            "matched"
+          ]
+        }
+      },
+      "rewrite_request": {
+        "schema_version": 1,
+        "mode": "apply",
+        "rules": [
+          {
+            "id": "capability",
+            "kind": "sourcetype",
+            "source": {
+              "name": "main"
+            },
+            "target": {
+              "name": "archive"
+            }
+          }
+        ]
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "testdata/rewrite/forms.json",
+        "note": "Advertised safe rewrite form replayed through the local rewrite API."
       }
     },
     {
@@ -2352,6 +3180,10 @@
         "source_id": "capability:spl2.addinfo.bare-command.incomplete"
       },
       "observations": {
+        "syntax": {
+          "complete": false,
+          "diagnostics": []
+        },
         "semantics": {
           "status": "incomplete",
           "complete": false,
@@ -2364,10 +3196,6 @@
           "references": [],
           "dependencies": [],
           "transitions": [],
-          "diagnostics": []
-        },
-        "syntax": {
-          "complete": false,
           "diagnostics": []
         }
       },
@@ -2640,6 +3468,10 @@
         "source_id": "capability:spl2.branch.bare-command.incomplete"
       },
       "observations": {
+        "syntax": {
+          "complete": false,
+          "diagnostics": []
+        },
         "semantics": {
           "status": "incomplete",
           "complete": false,
@@ -2652,10 +3484,6 @@
           "references": [],
           "dependencies": [],
           "transitions": [],
-          "diagnostics": []
-        },
-        "syntax": {
-          "complete": false,
           "diagnostics": []
         }
       },
@@ -2820,6 +3648,10 @@
         "source_id": "capability:spl2.convert.bare-command.incomplete"
       },
       "observations": {
+        "syntax": {
+          "complete": false,
+          "diagnostics": []
+        },
         "semantics": {
           "status": "incomplete",
           "complete": false,
@@ -2832,10 +3664,6 @@
           "references": [],
           "dependencies": [],
           "transitions": [],
-          "diagnostics": []
-        },
-        "syntax": {
-          "complete": false,
           "diagnostics": []
         }
       },
@@ -2879,6 +3707,104 @@
         "source_family": "spl2",
         "reference": "pkg/analysis",
         "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl2.data-model.quoted-catalog-atom.rewrite",
+      "classification": "positive",
+      "document": {
+        "text": "tstats aggregates=[count()] datamodel_name='Traffic.All'",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.data-model.quoted-catalog-atom.rewrite"
+      },
+      "observations": {
+        "safe_rewriting": {
+          "status": "incomplete",
+          "committed": true,
+          "rewrite_complete": true,
+          "text": "tstats aggregates=[count()] datamodel_name='Network.Flow'",
+          "candidate_text": "tstats aggregates=[count()] datamodel_name='Network.Flow'",
+          "coverage_reasons": [
+            "SPL_UNSUPPORTED_SEMANTICS"
+          ],
+          "change_reasons": [
+            "matched"
+          ],
+          "rule_evaluation_reasons": [
+            "matched"
+          ]
+        }
+      },
+      "rewrite_request": {
+        "schema_version": 1,
+        "mode": "apply",
+        "rules": [
+          {
+            "id": "capability",
+            "kind": "data_model",
+            "source": {
+              "name": "Traffic.All"
+            },
+            "target": {
+              "name": "Network.Flow"
+            }
+          }
+        ]
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "testdata/rewrite/forms.json",
+        "note": "Advertised safe rewrite form replayed through the local rewrite API."
+      }
+    },
+    {
+      "id": "spl2.dataset.catalog-atom.rewrite",
+      "classification": "positive",
+      "document": {
+        "text": "FROM main",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.dataset.catalog-atom.rewrite"
+      },
+      "observations": {
+        "safe_rewriting": {
+          "status": "valid",
+          "committed": true,
+          "rewrite_complete": true,
+          "text": "FROM archive",
+          "candidate_text": "FROM archive",
+          "coverage_reasons": [],
+          "change_reasons": [
+            "matched"
+          ],
+          "rule_evaluation_reasons": [
+            "matched"
+          ]
+        }
+      },
+      "rewrite_request": {
+        "schema_version": 1,
+        "mode": "apply",
+        "rules": [
+          {
+            "id": "capability",
+            "kind": "dataset",
+            "source": {
+              "name": "main"
+            },
+            "target": {
+              "name": "archive"
+            }
+          }
+        ]
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "testdata/rewrite/forms.json",
+        "note": "Advertised safe rewrite form replayed through the local rewrite API."
       }
     },
     {
@@ -2928,6 +3854,10 @@
         "source_id": "capability:spl2.decrypt.profile-mismatch.incomplete"
       },
       "observations": {
+        "syntax": {
+          "complete": false,
+          "diagnostics": []
+        },
         "semantics": {
           "status": "invalid",
           "complete": false,
@@ -2940,10 +3870,6 @@
           "references": [],
           "dependencies": [],
           "transitions": [],
-          "diagnostics": []
-        },
-        "syntax": {
-          "complete": false,
           "diagnostics": []
         }
       },
@@ -3108,6 +4034,10 @@
         "source_id": "capability:spl2.expand.bare-command.incomplete"
       },
       "observations": {
+        "syntax": {
+          "complete": false,
+          "diagnostics": []
+        },
         "semantics": {
           "status": "incomplete",
           "complete": false,
@@ -3121,16 +4051,348 @@
           "dependencies": [],
           "transitions": [],
           "diagnostics": []
-        },
-        "syntax": {
-          "complete": false,
-          "diagnostics": []
         }
       },
       "provenance": {
         "source_family": "spl2",
         "reference": "pkg/analysis",
         "note": "Conservative local boundary with incomplete coverage."
+      }
+    },
+    {
+      "id": "spl2.field.expression-atom.rewrite",
+      "classification": "positive",
+      "document": {
+        "text": "FROM main | where user=1",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.field.expression-atom.rewrite"
+      },
+      "observations": {
+        "safe_rewriting": {
+          "status": "valid",
+          "committed": true,
+          "rewrite_complete": true,
+          "text": "FROM main | where account=1",
+          "candidate_text": "FROM main | where account=1",
+          "coverage_reasons": [],
+          "change_reasons": [
+            "matched"
+          ],
+          "rule_evaluation_reasons": [
+            "matched"
+          ]
+        }
+      },
+      "rewrite_request": {
+        "schema_version": 1,
+        "mode": "apply",
+        "rules": [
+          {
+            "id": "capability",
+            "kind": "field",
+            "source": {
+              "name": "user"
+            },
+            "target": {
+              "name": "account"
+            }
+          }
+        ]
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "testdata/rewrite/forms.json",
+        "note": "Advertised safe rewrite form replayed through the local rewrite API."
+      }
+    },
+    {
+      "id": "spl2.field.lookup-dual.rewrite",
+      "classification": "positive",
+      "document": {
+        "text": "FROM main | lookup people user OUTPUT label",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.field.lookup-dual.rewrite"
+      },
+      "observations": {
+        "safe_rewriting": {
+          "status": "valid",
+          "committed": true,
+          "rewrite_complete": true,
+          "text": "FROM main | lookup people user AS account OUTPUT label",
+          "candidate_text": "FROM main | lookup people user AS account OUTPUT label",
+          "coverage_reasons": [],
+          "change_reasons": [
+            "matched"
+          ],
+          "rule_evaluation_reasons": [
+            "matched"
+          ]
+        }
+      },
+      "rewrite_request": {
+        "schema_version": 1,
+        "mode": "apply",
+        "rules": [
+          {
+            "id": "capability",
+            "kind": "field",
+            "source": {
+              "name": "user"
+            },
+            "target": {
+              "name": "account"
+            }
+          }
+        ]
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "testdata/rewrite/forms.json",
+        "note": "Advertised safe rewrite form replayed through the local rewrite API."
+      }
+    },
+    {
+      "id": "spl2.field.lookup-local.rewrite",
+      "classification": "positive",
+      "document": {
+        "text": "FROM main | lookup people remote AS user OUTPUT label",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.field.lookup-local.rewrite"
+      },
+      "observations": {
+        "safe_rewriting": {
+          "status": "valid",
+          "committed": true,
+          "rewrite_complete": true,
+          "text": "FROM main | lookup people remote AS account OUTPUT label",
+          "candidate_text": "FROM main | lookup people remote AS account OUTPUT label",
+          "coverage_reasons": [],
+          "change_reasons": [
+            "matched"
+          ],
+          "rule_evaluation_reasons": [
+            "matched"
+          ]
+        }
+      },
+      "rewrite_request": {
+        "schema_version": 1,
+        "mode": "apply",
+        "rules": [
+          {
+            "id": "capability",
+            "kind": "field",
+            "source": {
+              "name": "user"
+            },
+            "target": {
+              "name": "account"
+            }
+          }
+        ]
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "testdata/rewrite/forms.json",
+        "note": "Advertised safe rewrite form replayed through the local rewrite API."
+      }
+    },
+    {
+      "id": "spl2.field.null-test.rewrite",
+      "classification": "positive",
+      "document": {
+        "text": "FROM main | where isnull(user)",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.field.null-test.rewrite"
+      },
+      "observations": {
+        "safe_rewriting": {
+          "status": "valid",
+          "committed": true,
+          "rewrite_complete": true,
+          "text": "FROM main | where isnull(account)",
+          "candidate_text": "FROM main | where isnull(account)",
+          "coverage_reasons": [],
+          "change_reasons": [
+            "matched"
+          ],
+          "rule_evaluation_reasons": [
+            "matched"
+          ]
+        }
+      },
+      "rewrite_request": {
+        "schema_version": 1,
+        "mode": "apply",
+        "rules": [
+          {
+            "id": "capability",
+            "kind": "field",
+            "source": {
+              "name": "user"
+            },
+            "target": {
+              "name": "account"
+            }
+          }
+        ]
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "testdata/rewrite/forms.json",
+        "note": "Advertised safe rewrite form replayed through the local rewrite API."
+      }
+    },
+    {
+      "id": "spl2.field.rename-input.rewrite",
+      "classification": "positive",
+      "document": {
+        "text": "FROM main | rename user AS owner",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.field.rename-input.rewrite"
+      },
+      "observations": {
+        "safe_rewriting": {
+          "status": "valid",
+          "committed": true,
+          "rewrite_complete": true,
+          "text": "FROM main | rename account AS owner",
+          "candidate_text": "FROM main | rename account AS owner",
+          "coverage_reasons": [],
+          "change_reasons": [
+            "matched"
+          ],
+          "rule_evaluation_reasons": [
+            "matched"
+          ]
+        }
+      },
+      "rewrite_request": {
+        "schema_version": 1,
+        "mode": "apply",
+        "rules": [
+          {
+            "id": "capability",
+            "kind": "field",
+            "source": {
+              "name": "user"
+            },
+            "target": {
+              "name": "account"
+            }
+          }
+        ]
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "testdata/rewrite/forms.json",
+        "note": "Advertised safe rewrite form replayed through the local rewrite API."
+      }
+    },
+    {
+      "id": "spl2.field.search-field.rewrite",
+      "classification": "positive",
+      "document": {
+        "text": "search user=1",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.field.search-field.rewrite"
+      },
+      "observations": {
+        "safe_rewriting": {
+          "status": "valid",
+          "committed": true,
+          "rewrite_complete": true,
+          "text": "search account=1",
+          "candidate_text": "search account=1",
+          "coverage_reasons": [],
+          "change_reasons": [
+            "matched"
+          ],
+          "rule_evaluation_reasons": [
+            "matched"
+          ]
+        }
+      },
+      "rewrite_request": {
+        "schema_version": 1,
+        "mode": "apply",
+        "rules": [
+          {
+            "id": "capability",
+            "kind": "field",
+            "source": {
+              "name": "user"
+            },
+            "target": {
+              "name": "account"
+            }
+          }
+        ]
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "testdata/rewrite/forms.json",
+        "note": "Advertised safe rewrite form replayed through the local rewrite API."
+      }
+    },
+    {
+      "id": "spl2.field.selector-atom.rewrite",
+      "classification": "positive",
+      "document": {
+        "text": "FROM main | table user",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.field.selector-atom.rewrite"
+      },
+      "observations": {
+        "safe_rewriting": {
+          "status": "valid",
+          "committed": true,
+          "rewrite_complete": true,
+          "text": "FROM main | table account",
+          "candidate_text": "FROM main | table account",
+          "coverage_reasons": [],
+          "change_reasons": [
+            "matched"
+          ],
+          "rule_evaluation_reasons": [
+            "matched"
+          ]
+        }
+      },
+      "rewrite_request": {
+        "schema_version": 1,
+        "mode": "apply",
+        "rules": [
+          {
+            "id": "capability",
+            "kind": "field",
+            "source": {
+              "name": "user"
+            },
+            "target": {
+              "name": "account"
+            }
+          }
+        ]
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "testdata/rewrite/forms.json",
+        "note": "Advertised safe rewrite form replayed through the local rewrite API."
       }
     },
     {
@@ -3180,6 +4442,10 @@
         "source_id": "capability:spl2.fieldsummary.bare-command.incomplete"
       },
       "observations": {
+        "syntax": {
+          "complete": false,
+          "diagnostics": []
+        },
         "semantics": {
           "status": "incomplete",
           "complete": false,
@@ -3192,10 +4458,6 @@
           "references": [],
           "dependencies": [],
           "transitions": [],
-          "diagnostics": []
-        },
-        "syntax": {
-          "complete": false,
           "diagnostics": []
         }
       },
@@ -3306,6 +4568,10 @@
         "source_id": "capability:spl2.flatten.bare-command.incomplete"
       },
       "observations": {
+        "syntax": {
+          "complete": false,
+          "diagnostics": []
+        },
         "semantics": {
           "status": "incomplete",
           "complete": false,
@@ -3318,10 +4584,6 @@
           "references": [],
           "dependencies": [],
           "transitions": [],
-          "diagnostics": []
-        },
-        "syntax": {
-          "complete": false,
           "diagnostics": []
         }
       },
@@ -3530,6 +4792,104 @@
       }
     },
     {
+      "id": "spl2.index.metric-value.rewrite",
+      "classification": "positive",
+      "document": {
+        "text": "tstats aggregates=[count()] predicate=(index=main)",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.index.metric-value.rewrite"
+      },
+      "observations": {
+        "safe_rewriting": {
+          "status": "incomplete",
+          "committed": true,
+          "rewrite_complete": true,
+          "text": "tstats aggregates=[count()] predicate=(index=\"archive\")",
+          "candidate_text": "tstats aggregates=[count()] predicate=(index=\"archive\")",
+          "coverage_reasons": [
+            "SPL_UNSUPPORTED_SEMANTICS"
+          ],
+          "change_reasons": [
+            "matched"
+          ],
+          "rule_evaluation_reasons": [
+            "matched"
+          ]
+        }
+      },
+      "rewrite_request": {
+        "schema_version": 1,
+        "mode": "apply",
+        "rules": [
+          {
+            "id": "capability",
+            "kind": "index",
+            "source": {
+              "name": "main"
+            },
+            "target": {
+              "name": "archive"
+            }
+          }
+        ]
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "testdata/rewrite/forms.json",
+        "note": "Advertised safe rewrite form replayed through the local rewrite API."
+      }
+    },
+    {
+      "id": "spl2.index.search-value.rewrite",
+      "classification": "positive",
+      "document": {
+        "text": "search index=main",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.index.search-value.rewrite"
+      },
+      "observations": {
+        "safe_rewriting": {
+          "status": "valid",
+          "committed": true,
+          "rewrite_complete": true,
+          "text": "search index=archive",
+          "candidate_text": "search index=archive",
+          "coverage_reasons": [],
+          "change_reasons": [
+            "matched"
+          ],
+          "rule_evaluation_reasons": [
+            "matched"
+          ]
+        }
+      },
+      "rewrite_request": {
+        "schema_version": 1,
+        "mode": "apply",
+        "rules": [
+          {
+            "id": "capability",
+            "kind": "index",
+            "source": {
+              "name": "main"
+            },
+            "target": {
+              "name": "archive"
+            }
+          }
+        ]
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "testdata/rewrite/forms.json",
+        "note": "Advertised safe rewrite form replayed through the local rewrite API."
+      }
+    },
+    {
       "id": "spl2.into.bare-command.incomplete",
       "classification": "incomplete",
       "document": {
@@ -3540,6 +4900,10 @@
         "source_id": "capability:spl2.into.bare-command.incomplete"
       },
       "observations": {
+        "syntax": {
+          "complete": false,
+          "diagnostics": []
+        },
         "semantics": {
           "status": "incomplete",
           "complete": false,
@@ -3552,10 +4916,6 @@
           "references": [],
           "dependencies": [],
           "transitions": [],
-          "diagnostics": []
-        },
-        "syntax": {
-          "complete": false,
           "diagnostics": []
         }
       },
@@ -3576,6 +4936,10 @@
         "source_id": "capability:spl2.iplocation.bare-command.incomplete"
       },
       "observations": {
+        "syntax": {
+          "complete": false,
+          "diagnostics": []
+        },
         "semantics": {
           "status": "incomplete",
           "complete": false,
@@ -3588,10 +4952,6 @@
           "references": [],
           "dependencies": [],
           "transitions": [],
-          "diagnostics": []
-        },
-        "syntax": {
-          "complete": false,
           "diagnostics": []
         }
       },
@@ -3887,6 +5247,54 @@
         "source_family": "spl2",
         "reference": "pkg/analysis",
         "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl2.lookup.catalog-atom.rewrite",
+      "classification": "positive",
+      "document": {
+        "text": "FROM main | lookup people user OUTPUT label",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.lookup.catalog-atom.rewrite"
+      },
+      "observations": {
+        "safe_rewriting": {
+          "status": "valid",
+          "committed": true,
+          "rewrite_complete": true,
+          "text": "FROM main | lookup archive user OUTPUT label",
+          "candidate_text": "FROM main | lookup archive user OUTPUT label",
+          "coverage_reasons": [],
+          "change_reasons": [
+            "matched"
+          ],
+          "rule_evaluation_reasons": [
+            "matched"
+          ]
+        }
+      },
+      "rewrite_request": {
+        "schema_version": 1,
+        "mode": "apply",
+        "rules": [
+          {
+            "id": "capability",
+            "kind": "lookup",
+            "source": {
+              "name": "people"
+            },
+            "target": {
+              "name": "archive"
+            }
+          }
+        ]
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "testdata/rewrite/forms.json",
+        "note": "Advertised safe rewrite form replayed through the local rewrite API."
       }
     },
     {
@@ -4422,6 +5830,10 @@
         "source_id": "capability:spl2.nomv.bare-command.incomplete"
       },
       "observations": {
+        "syntax": {
+          "complete": false,
+          "diagnostics": []
+        },
         "semantics": {
           "status": "incomplete",
           "complete": false,
@@ -4434,10 +5846,6 @@
           "references": [],
           "dependencies": [],
           "transitions": [],
-          "diagnostics": []
-        },
-        "syntax": {
-          "complete": false,
           "diagnostics": []
         }
       },
@@ -4458,6 +5866,10 @@
         "source_id": "capability:spl2.ocsf.profile-mismatch.incomplete"
       },
       "observations": {
+        "syntax": {
+          "complete": false,
+          "diagnostics": []
+        },
         "semantics": {
           "status": "invalid",
           "complete": false,
@@ -4470,10 +5882,6 @@
           "references": [],
           "dependencies": [],
           "transitions": [],
-          "diagnostics": []
-        },
-        "syntax": {
-          "complete": false,
           "diagnostics": []
         }
       },
@@ -4530,6 +5938,10 @@
         "source_id": "capability:spl2.replace.bare-command.incomplete"
       },
       "observations": {
+        "syntax": {
+          "complete": false,
+          "diagnostics": []
+        },
         "semantics": {
           "status": "incomplete",
           "complete": false,
@@ -4542,10 +5954,6 @@
           "references": [],
           "dependencies": [],
           "transitions": [],
-          "diagnostics": []
-        },
-        "syntax": {
-          "complete": false,
           "diagnostics": []
         }
       },
@@ -4728,6 +6136,10 @@
         "source_id": "capability:spl2.route.profile-mismatch.incomplete"
       },
       "observations": {
+        "syntax": {
+          "complete": false,
+          "diagnostics": []
+        },
         "semantics": {
           "status": "invalid",
           "complete": false,
@@ -4740,10 +6152,6 @@
           "references": [],
           "dependencies": [],
           "transitions": [],
-          "diagnostics": []
-        },
-        "syntax": {
-          "complete": false,
           "diagnostics": []
         }
       },
@@ -4898,6 +6306,102 @@
       }
     },
     {
+      "id": "spl2.source.search-value.rewrite",
+      "classification": "positive",
+      "document": {
+        "text": "search source=main",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.source.search-value.rewrite"
+      },
+      "observations": {
+        "safe_rewriting": {
+          "status": "valid",
+          "committed": true,
+          "rewrite_complete": true,
+          "text": "search source=archive",
+          "candidate_text": "search source=archive",
+          "coverage_reasons": [],
+          "change_reasons": [
+            "matched"
+          ],
+          "rule_evaluation_reasons": [
+            "matched"
+          ]
+        }
+      },
+      "rewrite_request": {
+        "schema_version": 1,
+        "mode": "apply",
+        "rules": [
+          {
+            "id": "capability",
+            "kind": "source",
+            "source": {
+              "name": "main"
+            },
+            "target": {
+              "name": "archive"
+            }
+          }
+        ]
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "testdata/rewrite/forms.json",
+        "note": "Advertised safe rewrite form replayed through the local rewrite API."
+      }
+    },
+    {
+      "id": "spl2.sourcetype.search-value.rewrite",
+      "classification": "positive",
+      "document": {
+        "text": "search sourcetype=main",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.sourcetype.search-value.rewrite"
+      },
+      "observations": {
+        "safe_rewriting": {
+          "status": "valid",
+          "committed": true,
+          "rewrite_complete": true,
+          "text": "search sourcetype=archive",
+          "candidate_text": "search sourcetype=archive",
+          "coverage_reasons": [],
+          "change_reasons": [
+            "matched"
+          ],
+          "rule_evaluation_reasons": [
+            "matched"
+          ]
+        }
+      },
+      "rewrite_request": {
+        "schema_version": 1,
+        "mode": "apply",
+        "rules": [
+          {
+            "id": "capability",
+            "kind": "sourcetype",
+            "source": {
+              "name": "main"
+            },
+            "target": {
+              "name": "archive"
+            }
+          }
+        ]
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "testdata/rewrite/forms.json",
+        "note": "Advertised safe rewrite form replayed through the local rewrite API."
+      }
+    },
+    {
       "id": "spl2.spath.input-output-path.incomplete",
       "classification": "incomplete",
       "document": {
@@ -4962,20 +6466,6 @@
         "source_id": "capability:spl2.spl1.quoted-pipeline.incomplete"
       },
       "observations": {
-        "semantics": {
-          "status": "incomplete",
-          "complete": false,
-          "stages": [
-            {
-              "command": "spl1",
-              "semantic_complete": false
-            }
-          ],
-          "references": [],
-          "dependencies": [],
-          "transitions": [],
-          "diagnostics": []
-        },
         "syntax": {
           "complete": false,
           "diagnostics": [
@@ -4997,6 +6487,20 @@
               }
             }
           ]
+        },
+        "semantics": {
+          "status": "incomplete",
+          "complete": false,
+          "stages": [
+            {
+              "command": "spl1",
+              "semantic_complete": false
+            }
+          ],
+          "references": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
         }
       },
       "provenance": {
@@ -5341,6 +6845,10 @@
         "source_id": "capability:spl2.tags.bare-command.incomplete"
       },
       "observations": {
+        "syntax": {
+          "complete": false,
+          "diagnostics": []
+        },
         "semantics": {
           "status": "incomplete",
           "complete": false,
@@ -5353,10 +6861,6 @@
           "references": [],
           "dependencies": [],
           "transitions": [],
-          "diagnostics": []
-        },
-        "syntax": {
-          "complete": false,
           "diagnostics": []
         }
       },
@@ -5377,6 +6881,10 @@
         "source_id": "capability:spl2.thru.bare-command.incomplete"
       },
       "observations": {
+        "syntax": {
+          "complete": false,
+          "diagnostics": []
+        },
         "semantics": {
           "status": "incomplete",
           "complete": false,
@@ -5389,10 +6897,6 @@
           "references": [],
           "dependencies": [],
           "transitions": [],
-          "diagnostics": []
-        },
-        "syntax": {
-          "complete": false,
           "diagnostics": []
         }
       },
@@ -5683,6 +7187,10 @@
         "source_id": "capability:spl2.typer.bare-command.incomplete"
       },
       "observations": {
+        "syntax": {
+          "complete": false,
+          "diagnostics": []
+        },
         "semantics": {
           "status": "incomplete",
           "complete": false,
@@ -5695,10 +7203,6 @@
           "references": [],
           "dependencies": [],
           "transitions": [],
-          "diagnostics": []
-        },
-        "syntax": {
-          "complete": false,
           "diagnostics": []
         }
       },
@@ -5773,6 +7277,10 @@
         "source_id": "capability:spl2.untable.bare-command.incomplete"
       },
       "observations": {
+        "syntax": {
+          "complete": false,
+          "diagnostics": []
+        },
         "semantics": {
           "status": "incomplete",
           "complete": false,
@@ -5785,10 +7293,6 @@
           "references": [],
           "dependencies": [],
           "transitions": [],
-          "diagnostics": []
-        },
-        "syntax": {
-          "complete": false,
           "diagnostics": []
         }
       },

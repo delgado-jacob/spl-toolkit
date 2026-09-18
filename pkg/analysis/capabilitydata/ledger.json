@@ -1091,6 +1091,96 @@
       }
     },
     {
+      "id": "spl.dataset.data-model.catalog-atom-rewrite",
+      "language": "spl",
+      "profile": "splunkd",
+      "kind": "dataset",
+      "name": "data_model",
+      "form": "catalog_atom",
+      "grammar_registered": false,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "testdata/rewrite/forms.json",
+        "note": "Advertised safe rewrite form with local executable evidence."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "semantics": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "requirements": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "linting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl.data-model.catalog-atom.rewrite"
+          ],
+          "limitations": [
+            "Exact model token."
+          ]
+        }
+      }
+    },
+    {
+      "id": "spl.dataset.data-model.catalog-component-rewrite",
+      "language": "spl",
+      "profile": "splunkd",
+      "kind": "dataset",
+      "name": "data_model",
+      "form": "catalog_component",
+      "grammar_registered": false,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "testdata/rewrite/forms.json",
+        "note": "Advertised safe rewrite form with local executable evidence."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "semantics": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "requirements": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "linting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl.data-model.catalog-component.rewrite"
+          ],
+          "limitations": [
+            "Original qualified owner, prefix and quote boundaries are retained."
+          ]
+        }
+      }
+    },
+    {
       "id": "spl.dataset.dataset.baseline",
       "language": "spl",
       "profile": "splunkd",
@@ -1132,6 +1222,321 @@
       }
     },
     {
+      "id": "spl.dataset.dataset.catalog-atom-rewrite",
+      "language": "spl",
+      "profile": "splunkd",
+      "kind": "dataset",
+      "name": "dataset",
+      "form": "catalog_atom",
+      "grammar_registered": false,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "testdata/rewrite/forms.json",
+        "note": "Advertised safe rewrite form with local executable evidence."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "semantics": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "requirements": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "linting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl.dataset.catalog-atom.rewrite"
+          ],
+          "limitations": [
+            "Named external dependency, independent of columns and source aliases."
+          ]
+        }
+      }
+    },
+    {
+      "id": "spl.dataset.dataset.catalog-component-rewrite",
+      "language": "spl",
+      "profile": "splunkd",
+      "kind": "dataset",
+      "name": "dataset",
+      "form": "catalog_component",
+      "grammar_registered": false,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "testdata/rewrite/forms.json",
+        "note": "Advertised safe rewrite form with local executable evidence."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "semantics": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "requirements": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "linting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl.dataset.catalog-component.rewrite"
+          ],
+          "limitations": [
+            "Dataset component keeps its model prefix; linked model normalization is explicit."
+          ]
+        }
+      }
+    },
+    {
+      "id": "spl.dataset.dataset.qualified-dataset-rewrite",
+      "language": "spl",
+      "profile": "splunkd",
+      "kind": "dataset",
+      "name": "dataset",
+      "form": "qualified_dataset",
+      "grammar_registered": false,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "testdata/rewrite/forms.json",
+        "note": "Advertised safe rewrite form with local executable evidence."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "semantics": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "requirements": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "linting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl.dataset.qualified-dataset.rewrite"
+          ],
+          "limitations": [
+            "Compatible overlapping proposals co-render; conflicts and backslashes remain refused."
+          ]
+        }
+      }
+    },
+    {
+      "id": "spl.dataset.index.search-value-rewrite",
+      "language": "spl",
+      "profile": "splunkd",
+      "kind": "dataset",
+      "name": "index",
+      "form": "search_value",
+      "grammar_registered": false,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "testdata/rewrite/forms.json",
+        "note": "Advertised safe rewrite form with local executable evidence."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "semantics": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "requirements": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "linting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl.index.search-value.rewrite"
+          ],
+          "limitations": [
+            "Typed exact static search values only; patterns, interpolation and uncertain decoding remain held."
+          ]
+        }
+      }
+    },
+    {
+      "id": "spl.dataset.lookup.catalog-atom-rewrite",
+      "language": "spl",
+      "profile": "splunkd",
+      "kind": "dataset",
+      "name": "lookup",
+      "form": "catalog_atom",
+      "grammar_registered": false,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "testdata/rewrite/forms.json",
+        "note": "Advertised safe rewrite form with local executable evidence."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "semantics": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "requirements": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "linting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl.lookup.catalog-atom.rewrite"
+          ],
+          "limitations": [
+            "Named external dependency, independent of columns and source aliases."
+          ]
+        }
+      }
+    },
+    {
+      "id": "spl.dataset.source.search-value-rewrite",
+      "language": "spl",
+      "profile": "splunkd",
+      "kind": "dataset",
+      "name": "source",
+      "form": "search_value",
+      "grammar_registered": false,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "testdata/rewrite/forms.json",
+        "note": "Advertised safe rewrite form with local executable evidence."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "semantics": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "requirements": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "linting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl.source.search-value.rewrite"
+          ],
+          "limitations": [
+            "Typed exact static search values only; patterns, interpolation and uncertain decoding remain held."
+          ]
+        }
+      }
+    },
+    {
+      "id": "spl.dataset.sourcetype.search-value-rewrite",
+      "language": "spl",
+      "profile": "splunkd",
+      "kind": "dataset",
+      "name": "sourcetype",
+      "form": "search_value",
+      "grammar_registered": false,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "testdata/rewrite/forms.json",
+        "note": "Advertised safe rewrite form with local executable evidence."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "semantics": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "requirements": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "linting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl.sourcetype.search-value.rewrite"
+          ],
+          "limitations": [
+            "Typed exact static search values only; patterns, interpolation and uncertain decoding remain held."
+          ]
+        }
+      }
+    },
+    {
       "id": "spl.expression.expression.baseline",
       "language": "spl",
       "profile": "splunkd",
@@ -1169,6 +1574,366 @@
           "state": "unassessed",
           "evidence_ids": [],
           "limitations": []
+        }
+      }
+    },
+    {
+      "id": "spl.expression.field.expression-atom-rewrite",
+      "language": "spl",
+      "profile": "splunkd",
+      "kind": "expression",
+      "name": "field",
+      "form": "expression_atom",
+      "grammar_registered": false,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "testdata/rewrite/forms.json",
+        "note": "Advertised safe rewrite form with local executable evidence."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "semantics": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "requirements": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "linting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl.field.expression-atom.rewrite"
+          ],
+          "limitations": [
+            "Requires an exact source binding; explicit aliases, wildcard selectors and indeterminate operands remain fixed."
+          ]
+        }
+      }
+    },
+    {
+      "id": "spl.expression.field.implicit-output-rewrite",
+      "language": "spl",
+      "profile": "splunkd",
+      "kind": "expression",
+      "name": "field",
+      "form": "implicit_output",
+      "grammar_registered": false,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "testdata/rewrite/forms.json",
+        "note": "Advertised safe rewrite form with local executable evidence."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "semantics": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "requirements": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "linting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl.field.implicit-output.rewrite"
+          ],
+          "limitations": [
+            "Only canonical implicit labels and all required consumers may change together; SPL2 changed labels remain unproved."
+          ]
+        }
+      }
+    },
+    {
+      "id": "spl.expression.field.lookup-dual-rewrite",
+      "language": "spl",
+      "profile": "splunkd",
+      "kind": "expression",
+      "name": "field",
+      "form": "lookup_dual",
+      "grammar_registered": false,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "testdata/rewrite/forms.json",
+        "note": "Advertised safe rewrite form with local executable evidence."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "semantics": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "requirements": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "linting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl.field.lookup-dual.rewrite"
+          ],
+          "limitations": [
+            "Requires an exact source binding; explicit aliases, wildcard selectors and indeterminate operands remain fixed."
+          ]
+        }
+      }
+    },
+    {
+      "id": "spl.expression.field.lookup-local-rewrite",
+      "language": "spl",
+      "profile": "splunkd",
+      "kind": "expression",
+      "name": "field",
+      "form": "lookup_local",
+      "grammar_registered": false,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "testdata/rewrite/forms.json",
+        "note": "Advertised safe rewrite form with local executable evidence."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "semantics": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "requirements": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "linting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl.field.lookup-local.rewrite"
+          ],
+          "limitations": [
+            "Requires an exact source binding; explicit aliases, wildcard selectors and indeterminate operands remain fixed."
+          ]
+        }
+      }
+    },
+    {
+      "id": "spl.expression.field.null-test-rewrite",
+      "language": "spl",
+      "profile": "splunkd",
+      "kind": "expression",
+      "name": "field",
+      "form": "null_test",
+      "grammar_registered": false,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "testdata/rewrite/forms.json",
+        "note": "Advertised safe rewrite form with local executable evidence."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "semantics": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "requirements": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "linting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl.field.null-test.rewrite"
+          ],
+          "limitations": [
+            "Requires an exact source binding; explicit aliases, wildcard selectors and indeterminate operands remain fixed."
+          ]
+        }
+      }
+    },
+    {
+      "id": "spl.expression.field.rename-input-rewrite",
+      "language": "spl",
+      "profile": "splunkd",
+      "kind": "expression",
+      "name": "field",
+      "form": "rename_input",
+      "grammar_registered": false,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "testdata/rewrite/forms.json",
+        "note": "Advertised safe rewrite form with local executable evidence."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "semantics": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "requirements": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "linting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl.field.rename-input.rewrite"
+          ],
+          "limitations": [
+            "Requires an exact source binding; explicit aliases, wildcard selectors and indeterminate operands remain fixed."
+          ]
+        }
+      }
+    },
+    {
+      "id": "spl.expression.field.search-field-rewrite",
+      "language": "spl",
+      "profile": "splunkd",
+      "kind": "expression",
+      "name": "field",
+      "form": "search_field",
+      "grammar_registered": false,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "testdata/rewrite/forms.json",
+        "note": "Advertised safe rewrite form with local executable evidence."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "semantics": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "requirements": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "linting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl.field.search-field.rewrite"
+          ],
+          "limitations": [
+            "Requires an exact source binding; explicit aliases, wildcard selectors and indeterminate operands remain fixed."
+          ]
+        }
+      }
+    },
+    {
+      "id": "spl.expression.field.selector-atom-rewrite",
+      "language": "spl",
+      "profile": "splunkd",
+      "kind": "expression",
+      "name": "field",
+      "form": "selector_atom",
+      "grammar_registered": false,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "testdata/rewrite/forms.json",
+        "note": "Advertised safe rewrite form with local executable evidence."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "semantics": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "requirements": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "linting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl.field.selector-atom.rewrite"
+          ],
+          "limitations": [
+            "Requires an exact source binding; explicit aliases, wildcard selectors and indeterminate operands remain fixed."
+          ]
         }
       }
     },
@@ -6051,6 +6816,51 @@
       }
     },
     {
+      "id": "spl2.dataset.data-model.quoted-catalog-atom-rewrite",
+      "language": "spl2",
+      "profile": "splunkd",
+      "kind": "dataset",
+      "name": "data_model",
+      "form": "quoted_catalog_atom",
+      "grammar_registered": false,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "testdata/rewrite/forms.json",
+        "note": "Advertised safe rewrite form with local executable evidence."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "semantics": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "requirements": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "linting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.data-model.quoted-catalog-atom.rewrite"
+          ],
+          "limitations": [
+            "Existing atomic tstats datamodel_name token; affected effects remain subject to proof."
+          ]
+        }
+      }
+    },
+    {
       "id": "spl2.dataset.dataset.baseline",
       "language": "spl2",
       "profile": "splunkd",
@@ -6092,6 +6902,276 @@
       }
     },
     {
+      "id": "spl2.dataset.dataset.catalog-atom-rewrite",
+      "language": "spl2",
+      "profile": "splunkd",
+      "kind": "dataset",
+      "name": "dataset",
+      "form": "catalog_atom",
+      "grammar_registered": false,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "testdata/rewrite/forms.json",
+        "note": "Advertised safe rewrite form with local executable evidence."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "semantics": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "requirements": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "linting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.dataset.catalog-atom.rewrite"
+          ],
+          "limitations": [
+            "Named external dependency, independent of columns and source aliases."
+          ]
+        }
+      }
+    },
+    {
+      "id": "spl2.dataset.index.metric-value-rewrite",
+      "language": "spl2",
+      "profile": "splunkd",
+      "kind": "dataset",
+      "name": "index",
+      "form": "metric_value",
+      "grammar_registered": false,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "testdata/rewrite/forms.json",
+        "note": "Advertised safe rewrite form with local executable evidence."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "semantics": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "requirements": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "linting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.index.metric-value.rewrite"
+          ],
+          "limitations": [
+            "Only intact command-owned bare-index equality with a proven static value."
+          ]
+        }
+      }
+    },
+    {
+      "id": "spl2.dataset.index.search-value-rewrite",
+      "language": "spl2",
+      "profile": "splunkd",
+      "kind": "dataset",
+      "name": "index",
+      "form": "search_value",
+      "grammar_registered": false,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "testdata/rewrite/forms.json",
+        "note": "Advertised safe rewrite form with local executable evidence."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "semantics": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "requirements": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "linting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.index.search-value.rewrite"
+          ],
+          "limitations": [
+            "Typed exact static search values only; patterns, interpolation and uncertain decoding remain held."
+          ]
+        }
+      }
+    },
+    {
+      "id": "spl2.dataset.lookup.catalog-atom-rewrite",
+      "language": "spl2",
+      "profile": "splunkd",
+      "kind": "dataset",
+      "name": "lookup",
+      "form": "catalog_atom",
+      "grammar_registered": false,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "testdata/rewrite/forms.json",
+        "note": "Advertised safe rewrite form with local executable evidence."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "semantics": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "requirements": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "linting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.lookup.catalog-atom.rewrite"
+          ],
+          "limitations": [
+            "Named external dependency, independent of columns and source aliases."
+          ]
+        }
+      }
+    },
+    {
+      "id": "spl2.dataset.source.search-value-rewrite",
+      "language": "spl2",
+      "profile": "splunkd",
+      "kind": "dataset",
+      "name": "source",
+      "form": "search_value",
+      "grammar_registered": false,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "testdata/rewrite/forms.json",
+        "note": "Advertised safe rewrite form with local executable evidence."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "semantics": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "requirements": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "linting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.source.search-value.rewrite"
+          ],
+          "limitations": [
+            "Typed exact static search values only; patterns, interpolation and uncertain decoding remain held."
+          ]
+        }
+      }
+    },
+    {
+      "id": "spl2.dataset.sourcetype.search-value-rewrite",
+      "language": "spl2",
+      "profile": "splunkd",
+      "kind": "dataset",
+      "name": "sourcetype",
+      "form": "search_value",
+      "grammar_registered": false,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "testdata/rewrite/forms.json",
+        "note": "Advertised safe rewrite form with local executable evidence."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "semantics": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "requirements": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "linting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.sourcetype.search-value.rewrite"
+          ],
+          "limitations": [
+            "Typed exact static search values only; patterns, interpolation and uncertain decoding remain held."
+          ]
+        }
+      }
+    },
+    {
       "id": "spl2.expression.expression.baseline",
       "language": "spl2",
       "profile": "splunkd",
@@ -6129,6 +7209,321 @@
           "state": "unassessed",
           "evidence_ids": [],
           "limitations": []
+        }
+      }
+    },
+    {
+      "id": "spl2.expression.field.expression-atom-rewrite",
+      "language": "spl2",
+      "profile": "splunkd",
+      "kind": "expression",
+      "name": "field",
+      "form": "expression_atom",
+      "grammar_registered": false,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "testdata/rewrite/forms.json",
+        "note": "Advertised safe rewrite form with local executable evidence."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "semantics": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "requirements": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "linting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.field.expression-atom.rewrite"
+          ],
+          "limitations": [
+            "Requires an exact source binding; explicit aliases, wildcard selectors and indeterminate operands remain fixed."
+          ]
+        }
+      }
+    },
+    {
+      "id": "spl2.expression.field.lookup-dual-rewrite",
+      "language": "spl2",
+      "profile": "splunkd",
+      "kind": "expression",
+      "name": "field",
+      "form": "lookup_dual",
+      "grammar_registered": false,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "testdata/rewrite/forms.json",
+        "note": "Advertised safe rewrite form with local executable evidence."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "semantics": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "requirements": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "linting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.field.lookup-dual.rewrite"
+          ],
+          "limitations": [
+            "Requires an exact source binding; explicit aliases, wildcard selectors and indeterminate operands remain fixed."
+          ]
+        }
+      }
+    },
+    {
+      "id": "spl2.expression.field.lookup-local-rewrite",
+      "language": "spl2",
+      "profile": "splunkd",
+      "kind": "expression",
+      "name": "field",
+      "form": "lookup_local",
+      "grammar_registered": false,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "testdata/rewrite/forms.json",
+        "note": "Advertised safe rewrite form with local executable evidence."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "semantics": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "requirements": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "linting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.field.lookup-local.rewrite"
+          ],
+          "limitations": [
+            "Requires an exact source binding; explicit aliases, wildcard selectors and indeterminate operands remain fixed."
+          ]
+        }
+      }
+    },
+    {
+      "id": "spl2.expression.field.null-test-rewrite",
+      "language": "spl2",
+      "profile": "splunkd",
+      "kind": "expression",
+      "name": "field",
+      "form": "null_test",
+      "grammar_registered": false,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "testdata/rewrite/forms.json",
+        "note": "Advertised safe rewrite form with local executable evidence."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "semantics": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "requirements": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "linting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.field.null-test.rewrite"
+          ],
+          "limitations": [
+            "Requires an exact source binding; explicit aliases, wildcard selectors and indeterminate operands remain fixed."
+          ]
+        }
+      }
+    },
+    {
+      "id": "spl2.expression.field.rename-input-rewrite",
+      "language": "spl2",
+      "profile": "splunkd",
+      "kind": "expression",
+      "name": "field",
+      "form": "rename_input",
+      "grammar_registered": false,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "testdata/rewrite/forms.json",
+        "note": "Advertised safe rewrite form with local executable evidence."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "semantics": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "requirements": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "linting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.field.rename-input.rewrite"
+          ],
+          "limitations": [
+            "Requires an exact source binding; explicit aliases, wildcard selectors and indeterminate operands remain fixed."
+          ]
+        }
+      }
+    },
+    {
+      "id": "spl2.expression.field.search-field-rewrite",
+      "language": "spl2",
+      "profile": "splunkd",
+      "kind": "expression",
+      "name": "field",
+      "form": "search_field",
+      "grammar_registered": false,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "testdata/rewrite/forms.json",
+        "note": "Advertised safe rewrite form with local executable evidence."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "semantics": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "requirements": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "linting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.field.search-field.rewrite"
+          ],
+          "limitations": [
+            "Requires an exact source binding; explicit aliases, wildcard selectors and indeterminate operands remain fixed."
+          ]
+        }
+      }
+    },
+    {
+      "id": "spl2.expression.field.selector-atom-rewrite",
+      "language": "spl2",
+      "profile": "splunkd",
+      "kind": "expression",
+      "name": "field",
+      "form": "selector_atom",
+      "grammar_registered": false,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "testdata/rewrite/forms.json",
+        "note": "Advertised safe rewrite form with local executable evidence."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "semantics": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "requirements": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "linting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.field.selector-atom.rewrite"
+          ],
+          "limitations": [
+            "Requires an exact source binding; explicit aliases, wildcard selectors and indeterminate operands remain fixed."
+          ]
         }
       }
     },

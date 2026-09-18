@@ -1,7 +1,8 @@
 ## What's new in the app
 
 - Capability manifests now explain five evidence-backed dimensions and five explicit states.
-- SPL reports 68 records with 67 evidence cases. SPL2 reports 98 records with 108 evidence cases.
+- SPL reports 85 records with 84 evidence cases. SPL2 reports 112 records with 122 evidence cases.
+- The 31 advertised supported rewrite forms now have canonical ledger records and executable rewrite evidence.
 - Summary counts use strict denominators and publish no percentage or composite score.
 - Parser registration, syntax coverage, lint evidence, and safe-rewrite evidence remain separate claims.
 
@@ -43,7 +44,9 @@ Legacy `commands` and `functions` remain compatibility projections. Consumers th
 
 ### Final local acceptance
 
-Task 9 ran against commit `5662b7870f791077b33384ca70fb9aa34f5bd763` on macOS arm64 on 2026-09-18. No implementation correction was required.
+Task 9 ran against commit `5662b7870f791077b33384ca70fb9aa34f5bd763` on macOS arm64 on 2026-09-18. Final review later found that the rewrite compatibility projection was checked against its fixture but not against the canonical ledger. The correction added 31 supported rewrite records and independently replayed evidence cases.
+
+Correction validation passed `env GOWORK=off go test ./... -count=1`, the 297-test native/CLI/HTTP acceptance selection, `python3 -m pytest -q tools/tests` with 283 tests and 59 subtests, all 17 documentation pages, and `git diff --check`. The offline `make python-test` package gate passed for both the direct wheel and rebuilt-sdist wheel, each with 562 native tests, 257 cross-surface tests, and 18 tooling tests. The semantic revisions changed to the values recorded below.
 
 Source and tooling gates:
 
@@ -61,20 +64,20 @@ Built and cross-surface gates:
 
 The 12 approved design completion criteria map to passing evidence in design order:
 
-1. The curated ledger represents every required construct kind for SPL and SPL2. `pkg/analysis/capabilitydata/ledger.json` and `TestCapabilityLedgerCoversEveryKindPerLanguage` passed. The built CLI reported 68 SPL records and 98 SPL2 records.
+1. The curated ledger represents every required construct kind for SPL and SPL2. `pkg/analysis/capabilitydata/ledger.json` and `TestCapabilityLedgerCoversEveryKindPerLanguage` passed. The built CLI reported 85 SPL records and 112 SPL2 records.
 2. Every record has five explicit support states, one for each of syntax, semantics, requirements, linting, and safe rewriting. `TestEmbeddedCapabilityAssetsAreStructurallyValid`, the strict `decodeCapabilityAssets` path, and `test_capability_ledger_shapes_are_strict_and_optional` passed.
 3. Every `supported`, `partial`, and `unsupported` claim cites passing local evidence for its exact dimension and form. `TestValidateCapabilityClaims` and the external `TestCapabilityEvidenceCorpus` execution passed against `pkg/analysis/capabilitydata/ledger.json` and `pkg/analysis/capabilitydata/corpus.json`.
 4. Every `not_applicable` claim has a reason and no evidence citation. The `not applicable` cases in `TestValidateCapabilityClaims` and the strict capability-claim schema checks in `test_capability_claim_state_boundaries_and_semantics_nonempty` passed.
 5. Every `unassessed` claim remains visibly unassessed and contributes no covered credit. `TestValidateCapabilityClaims`, `TestCapabilitySummaryUsesStrictDenominator`, and `test_capability_ledger_contract_and_additive_v1_compatibility` passed. Current SPL and SPL2 manifests report every linting record as unassessed.
 6. Positive, negative, and incomplete corpus cases have stable IDs. `pkg/analysis/capabilitydata/corpus.json`, `TestCapabilityDataCanonicalOrder`, `TestDecodeCapabilityAssetsRejectsMalformedInput`, `TestDecodeCapabilityAssetsRejectsMalformedObservations`, and `TestCapabilityEvidenceCorpus` passed.
-7. JSON and text reports show exact, reproducible per-dimension counts for the tagged toolkit version. The built CLI reported `toolkit_version: 0.1.1`, 68 SPL records with 67 evidence cases, and 98 SPL2 records with 108 evidence cases. `TestCapabilitiesCLIFormatsAndOutput`, `TestCapabilitiesCLITextIsCanonicalAndComplete`, `TestCapabilitySummaryUsesStrictDenominator`, `TestCapabilitiesPublishCanonicalLedger`, and `test_source_capability_version_is_independent_of_package_and_native` passed.
+7. JSON and text reports show exact, reproducible per-dimension counts for the tagged toolkit version. The built CLI reported `toolkit_version: 0.1.1`, 85 SPL records with 84 evidence cases, and 112 SPL2 records with 122 evidence cases. `TestCapabilitiesCLIFormatsAndOutput`, `TestCapabilitiesCLITextIsCanonicalAndComplete`, `TestCapabilitySummaryUsesStrictDenominator`, `TestCapabilitiesPublishCanonicalLedger`, and `test_source_capability_version_is_independent_of_package_and_native` passed.
 8. Users can follow each evidence-bearing claim to the corresponding compact corpus case. `TestCapabilitiesPublishCanonicalLedger` verified that each selected claim ID resolves within the returned evidence, `TestCapabilityEvidenceIsReferenced` verified the corpus-to-claim relationship, and `TestCapabilityEvidenceCorpus` replayed those compact cases.
 9. Go, CLI, REST, native C, and Python return equivalent canonical values. `TestDialectCapabilitiesCLIHTTPParity`, `TestCapabilitiesRESTMatchesKernel`, `TestCapabilitiesBindingsReturnCompleteCanonicalOwnedManifests`, and `test_analysis_capabilities_parity` passed.
 10. Existing capability consumers retain their command/function compatibility fields. `TestCapabilitiesPreserveLegacyProjection` passed for exact legacy values. The `capabilities-archived-v1` artifact in `testdata/tooling/contracts.json` and `test_capability_ledger_contract_and_additive_v1_compatibility` passed for archived v1 compatibility.
 11. The machine contract, OpenAPI, documentation, source package, and installed package checks pass. `test_capability_ledger_contract_and_additive_v1_compatibility`, `test_capability_ledger_shapes_are_strict_and_optional`, the semantic JSON/YAML/docs.go reconciliation check, `python3 tools/check_docs.py`, `test_native_source_manifest_contains_capability_ledger_closure`, `test_capability_ledger_files_are_release_source_inputs_only`, `test_copied_capability_tests_do_not_require_checkout_version`, and `make python-test` passed. `python3 tools/check_docs.py` validated the 17 Markdown pages under `docs/`. The `main..HEAD` diff review covered the other maintained documents listed above and this milestone log, and `git diff --check` passed. The package gate checked both the built wheel and the wheel rebuilt from the sdist.
 12. No external repository, live service, query execution, or later-milestone feature is required. Production ledger and corpus data are compiled through `go:embed`; the installed-package checks run outside the checkout. The full `main..HEAD` review found no runtime external checkout, network, live Splunk, Git, or worktree read, no parser or grammar change, no new endpoint, CLI command, C export, or Python method, and no adapter classification or historical `docs/evidence` refresh.
 
-Separate contract checks verified that `capability_revision` includes the typed semantic contract and excludes only `toolkit_version`. SPL and SPL2 revisions are `sha256:1e6c75800f843931ec517dba27f3baa5af928a8a908d97dd1c62513e2ea24d31` and `sha256:0203cbeec2e0fd484080b1f512582a1c8bdc4bc541fb73ac42c013060695f84c`; `TestCapabilityRevisionUsesNormalizedTypedManifest` and `TestAnalysisRevisionMatchesCanonicalManifestPayload` passed. `TestCapabilityGrammarRegistrationDoesNotAddSyntaxCoverage` separately verified that parser registration adds no evidence-backed coverage.
+Separate contract checks verified that `capability_revision` includes the typed semantic contract and excludes only `toolkit_version`. SPL and SPL2 revisions are `sha256:6523957df628c21f1b707f97bc75111c8fefa6576dce88e28948fa95cb85422a` and `sha256:e256889ee8dcce9e8b6beb903d5a2d6f2fec5475050c7ece7896d8d4856e8738`; `TestCapabilityRevisionUsesNormalizedTypedManifest` and `TestAnalysisRevisionMatchesCanonicalManifestPayload` passed. `TestCapabilityGrammarRegistrationDoesNotAddSyntaxCoverage` separately verified that parser registration adds no evidence-backed coverage.
 
 The following gates remain separate and unverified:
 

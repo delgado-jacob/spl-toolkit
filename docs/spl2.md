@@ -73,10 +73,10 @@ options. Dedicated syntax is distinct from complete field effects. The capabilit
 manifest classifies all 53 inventory entries, and lists form and held limitations.
 
 The evidence ledger is more granular than that legacy inventory projection. The
-current SPL2 manifest has 98 form records and 108 evidence cases. Syntax has 69
-supported, 19 unsupported and 10 unassessed records. Semantics has 50 supported,
-38 unsupported and 10 unassessed records. Requirements and linting are 98
-unassessed. Safe rewriting has 1 unsupported and 97 unassessed. Supported is the
+current SPL2 manifest has 112 form records and 122 evidence cases. Syntax has 69
+supported, 19 unsupported and 24 unassessed records. Semantics has 50 supported,
+38 unsupported and 24 unassessed records. Requirements and linting are 112
+unassessed. Safe rewriting has 14 supported, 1 unsupported, and 97 unassessed. Supported is the
 only state counted as covered; partial, unsupported and unassessed remain in the
 applicable denominator. Not-applicable records are outside that denominator. No
 composite score is produced.

@@ -63,7 +63,7 @@ The same ID keeps the same reviewed scope; a broadened form uses a new ID unless
 a reviewed scope correction changes the original boundary. `grammar_registered`
 records parser registration separately from syntax coverage, and ordinary parser
 or semantic diagnostics do not count as lint evidence. Current exact totals are
-68 SPL records with 67 evidence cases and 98 SPL2 records with 108 evidence cases.
+85 SPL records with 84 evidence cases and 112 SPL2 records with 122 evidence cases.
 The corpus establishes static local toolkit behavior only, not live Splunk
 execution, runtime equivalence, environment compatibility, authorization or
 upstream support.
