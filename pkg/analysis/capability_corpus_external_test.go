@@ -1,8 +1,10 @@
 package analysis_test
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"reflect"
 	"slices"
 	"strings"
@@ -63,6 +65,12 @@ type rewriteFacts struct {
 	RuleEvaluationReasons []string
 }
 
+type capabilityRewriteRequest struct {
+	SchemaVersion int            `json:"schema_version"`
+	Mode          rewrite.Mode   `json:"mode"`
+	Rules         []rewrite.Rule `json:"rules"`
+}
+
 func TestCapabilityEvidenceCorpus(t *testing.T) {
 	manifests := make([]analysis.CapabilityManifest, 0, 2)
 	for _, language := range []string{"spl", "spl2"} {
@@ -95,6 +103,40 @@ func TestCapabilityEvidenceCorpus(t *testing.T) {
 				assertClaimEvidence(t, record.ID, dimension, evidenceByID, executions)
 			}
 		}
+	}
+}
+
+func TestCapabilityRewriteEvidencePreservesSchemaVersion(t *testing.T) {
+	manifest := analysis.Capabilities()
+	for _, evidence := range manifest.Evidence {
+		if evidence.ID != "spl.splunkd.baseline.rewrite" {
+			continue
+		}
+		evidence.RewriteRequest = json.RawMessage(`{"schema_version":2,"mode":"preview","rules":[]}`)
+		request, err := decodeCapabilityRewriteRequest(evidence.RewriteRequest)
+		if err != nil || request.SchemaVersion != 2 {
+			t.Fatalf("record=spl.profile_form.splunkd.baseline evidence=%s dimension=safe_rewriting expected=decoded schema_version 2 actual=request=%+v error=%v", evidence.ID, request, err)
+		}
+		result := compareRewrite(evidence, *evidence.Observations.SafeRewriting)
+		if result.passed || !strings.Contains(result.actual, "schema_version must be integer 1") {
+			t.Fatalf("record=spl.profile_form.splunkd.baseline evidence=%s dimension=safe_rewriting expected=raw schema_version 2 rejected actual=%s", evidence.ID, result.actual)
+		}
+		return
+	}
+	t.Fatal("record=spl.profile_form.splunkd.baseline evidence=spl.splunkd.baseline.rewrite dimension=safe_rewriting expected=selected regression evidence actual=missing")
+}
+
+func TestCapabilityRewriteRequestWrapperRejectsMalformedJSON(t *testing.T) {
+	for name, raw := range map[string]json.RawMessage{
+		"invalid syntax":      json.RawMessage(`{"schema_version":1`),
+		"unknown property":    json.RawMessage(`{"schema_version":1,"mode":"preview","rules":[],"unexpected":true}`),
+		"trailing JSON value": json.RawMessage(`{"schema_version":1,"mode":"preview","rules":[]} {}`),
+	} {
+		t.Run(name, func(t *testing.T) {
+			if request, err := decodeCapabilityRewriteRequest(raw); err == nil {
+				t.Fatalf("record=<wrapper> evidence=<malformed> dimension=safe_rewriting expected=request rejection actual=%+v", request)
+			}
+		})
 	}
 }
 
@@ -208,15 +250,12 @@ func compareRequirements(expected analysis.CapabilityRequirementsObservation, se
 }
 
 func compareRewrite(evidence analysis.CapabilityEvidence, expected analysis.CapabilityRewriteObservation) evidenceDimensionResult {
-	var request struct {
-		Mode  rewrite.Mode   `json:"mode"`
-		Rules []rewrite.Rule `json:"rules"`
-	}
-	if err := json.Unmarshal(evidence.RewriteRequest, &request); err != nil {
+	request, err := decodeCapabilityRewriteRequest(evidence.RewriteRequest)
+	if err != nil {
 		return evidenceDimensionResult{expected: formatValue(expected), actual: fmt.Sprintf("decode rewrite request: %v", err)}
 	}
 	result, err := rewrite.Rewrite(rewrite.Request{
-		SchemaVersion: 1,
+		SchemaVersion: request.SchemaVersion,
 		Mode:          request.Mode,
 		Document:      evidence.Document,
 		Rules:         request.Rules,
@@ -250,6 +289,22 @@ func compareRewrite(evidence analysis.CapabilityEvidence, expected analysis.Capa
 		actual:   formatValue(actual),
 		refused:  !result.Coverage.RewriteComplete,
 	}
+}
+
+func decodeCapabilityRewriteRequest(raw json.RawMessage) (capabilityRewriteRequest, error) {
+	decoder := json.NewDecoder(bytes.NewReader(raw))
+	decoder.DisallowUnknownFields()
+	var request capabilityRewriteRequest
+	if err := decoder.Decode(&request); err != nil {
+		return capabilityRewriteRequest{}, err
+	}
+	if err := decoder.Decode(&struct{}{}); err != io.EOF {
+		if err == nil {
+			return capabilityRewriteRequest{}, fmt.Errorf("expected exactly one JSON value")
+		}
+		return capabilityRewriteRequest{}, fmt.Errorf("trailing data: %w", err)
+	}
+	return request, nil
 }
 
 func assertClaimEvidence(t *testing.T, recordID string, dimension capabilityDimension, evidenceByID map[string]analysis.CapabilityEvidence, executions map[string]evidenceExecution) {
