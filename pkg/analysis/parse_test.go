@@ -481,6 +481,50 @@ func TestParseMilestone10HeldForms(t *testing.T) {
 		}
 	})
 
+	t.Run("tstats numeric-only span preserves following group and outer sibling", func(t *testing.T) {
+		p := parseDocument(`| tstats count BY _time span=5 host | table safe`)
+		if len(p.diagnostics) != 0 {
+			t.Fatalf("numeric-only tstats span diagnostics = %+v", p.diagnostics)
+		}
+		outer := p.tree.AnalysisPipeline().AllAnalysisStage()
+		if len(outer) != 2 {
+			t.Fatalf("outer stages = %d", len(outer))
+		}
+		tstats, ok := outer[0].(*parser.AnalysisTstatsStageContext)
+		if !ok || tstats.AnalysisTstats() == nil || tstats.AnalysisTstats().AnalysisTstatsGroup() == nil {
+			t.Fatalf("tstats context = %T %q", outer[0], outer[0].GetText())
+		}
+		items := tstats.AnalysisTstats().AnalysisTstatsGroup().AllAnalysisTstatsGroupItem()
+		if len(items) != 2 || items[0].AnalysisIdentifier().GetText() != "_time" || items[1].AnalysisIdentifier().GetText() != "host" || items[1].AnalysisTstatsSpanOption() != nil {
+			t.Fatalf("group context = %q", tstats.AnalysisTstats().AnalysisTstatsGroup().GetText())
+		}
+		span := items[0].AnalysisTstatsSpanOption()
+		if span == nil || span.AnalysisUnitOptionValue() == nil || span.AnalysisUnitOptionValue().GetText() != "5" || span.AnalysisUnitOptionValue().AnalysisUnitSuffix() != nil {
+			t.Fatalf("span context = %v", span)
+		}
+		if _, ok := outer[1].(*parser.AnalysisFieldsStageContext); !ok || outer[1].GetText() != "tablesafe" {
+			t.Fatalf("outer sibling stage = %T %q", outer[1], outer[1].GetText())
+		}
+	})
+
+	t.Run("bin numeric-only span preserves input and outer sibling", func(t *testing.T) {
+		p := parseDocument(`| bin span=5 _time | table safe`)
+		if len(p.diagnostics) != 0 {
+			t.Fatalf("numeric-only bin span diagnostics = %+v", p.diagnostics)
+		}
+		outer := p.tree.AnalysisPipeline().AllAnalysisStage()
+		if len(outer) != 2 {
+			t.Fatalf("outer stages = %d", len(outer))
+		}
+		bin, ok := outer[0].(*parser.AnalysisBinStageContext)
+		if !ok || bin.AnalysisBin() == nil || len(bin.AnalysisBin().AllAnalysisBinOption()) != 1 || bin.AnalysisBin().AnalysisBinOption(0).AnalysisUnitOptionValue() == nil || bin.AnalysisBin().AnalysisBinOption(0).AnalysisUnitOptionValue().GetText() != "5" || bin.AnalysisBin().AnalysisBinOption(0).AnalysisUnitOptionValue().AnalysisUnitSuffix() != nil || bin.AnalysisBin().AnalysisIdentifier() == nil || bin.AnalysisBin().AnalysisIdentifier().GetText() != "_time" {
+			t.Fatalf("bin context = %T %q", outer[0], outer[0].GetText())
+		}
+		if _, ok := outer[1].(*parser.AnalysisFieldsStageContext); !ok || outer[1].GetText() != "tablesafe" {
+			t.Fatalf("outer sibling stage = %T %q", outer[1], outer[1].GetText())
+		}
+	})
+
 	t.Run("append missing option value preserves child and outer sibling", func(t *testing.T) {
 		p := parseDocument(`| append maxout= [ search * ] | table safe`)
 		if len(p.diagnostics) == 0 {

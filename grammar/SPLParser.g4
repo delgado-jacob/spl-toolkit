@@ -198,8 +198,9 @@ analysisBranch : analysisBranchOption* analysisSubquery;
 analysisBranchOption : analysisIdentifier EQ (analysisInvalidOptionValue | analysisOptionValue | analysisMissingOptionValue);
 analysisOptionValue : analysisLiteral | analysisIdentifier;
 analysisUnitOptionValue
-    : NUMBER {p.analysisTokensAdjacent()}? analysisUnitSuffix
-    | analysisLiteral
+    : NUMBER ({p.analysisTokensAdjacent()}? analysisUnitSuffix)?
+    | STRING
+    | TIME
     | analysisIdentifier
     ;
 analysisUnitSuffix
