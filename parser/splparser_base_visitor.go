@@ -323,6 +323,22 @@ func (v *BaseSPLParserVisitor) VisitAnalysisOptionValue(ctx *AnalysisOptionValue
 	return v.VisitChildren(ctx)
 }
 
+func (v *BaseSPLParserVisitor) VisitAnalysisUnitOptionValue(ctx *AnalysisUnitOptionValueContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisTimeUnit(ctx *AnalysisTimeUnitContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisInvalidOptionValue(ctx *AnalysisInvalidOptionValueContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisMissingOptionValue(ctx *AnalysisMissingOptionValueContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
 func (v *BaseSPLParserVisitor) VisitAnalysisDataModelName(ctx *AnalysisDataModelNameContext) interface{} {
 	return v.VisitChildren(ctx)
 }

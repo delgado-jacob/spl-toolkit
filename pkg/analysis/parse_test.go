@@ -173,7 +173,7 @@ func TestParseMilestone10CommandContexts(t *testing.T) {
 				if len(body.AllAnalysisTstatsOption()) != 1 || len(body.AllAnalysisAggregate()) != 2 || body.AnalysisTstatsFrom() == nil || body.AnalysisTstatsWhere() == nil || body.AnalysisTstatsGroup() == nil {
 					t.Fatalf("incomplete tstats context: %s", body.GetText())
 				}
-				if len(body.AnalysisTstatsGroup().AllAnalysisTstatsGroupItem()) != 2 || body.AnalysisTstatsGroup().AnalysisTstatsGroupItem(1).AnalysisTstatsSpanOption() == nil {
+				if len(body.AnalysisTstatsGroup().AllAnalysisTstatsGroupItem()) != 2 || body.AnalysisTstatsGroup().AnalysisTstatsGroupItem(1).AnalysisTstatsSpanOption() == nil || body.AnalysisTstatsGroup().AnalysisTstatsGroupItem(1).AnalysisTstatsSpanOption().GetText() != "span=5m" {
 					t.Fatalf("group context: %s", body.AnalysisTstatsGroup().GetText())
 				}
 			},
@@ -187,7 +187,7 @@ func TestParseMilestone10CommandContexts(t *testing.T) {
 					t.Fatalf("stage = %T", stage)
 				}
 				body := ctx.AnalysisTstats()
-				if len(body.AllAnalysisAggregate()) != 2 || body.AnalysisTstatsGroup() == nil || len(body.AnalysisTstatsGroup().AllAnalysisTstatsGroupItem()) != 2 || body.AnalysisTstatsGroup().AnalysisTstatsGroupItem(1).AnalysisTstatsSpanOption() == nil {
+				if len(body.AllAnalysisAggregate()) != 2 || body.AnalysisTstatsGroup() == nil || len(body.AnalysisTstatsGroup().AllAnalysisTstatsGroupItem()) != 2 || body.AnalysisTstatsGroup().AnalysisTstatsGroupItem(1).AnalysisTstatsSpanOption() == nil || body.AnalysisTstatsGroup().AnalysisTstatsGroupItem(1).AnalysisTstatsSpanOption().GetText() != "span=5m" {
 					t.Fatalf("comma-omitted tstats context: %s", body.GetText())
 				}
 			},
@@ -325,20 +325,61 @@ func TestParseMilestone10CommandContexts(t *testing.T) {
 }
 
 func TestParseMilestone10HeldForms(t *testing.T) {
-	for _, q := range []string{
-		`| tstats prestats=true ` + "`summariesonly`" + ` PREFIX(user) BY user`,
-		`| fillnull value="unknown"`,
-		`| rex mode=sed field=_raw "s/a/b/g"`,
-		`| spath input=_raw`,
+	for _, tc := range []struct {
+		name, query string
+		assert      func(*testing.T, parser.IAnalysisStageContext)
+	}{
+		{
+			name:  "tstats exact macro context",
+			query: `| tstats prestats=true ` + "`summariesonly`" + ` PREFIX(user) BY user`,
+			assert: func(t *testing.T, stage parser.IAnalysisStageContext) {
+				ctx, ok := stage.(*parser.AnalysisTstatsStageContext)
+				if !ok || ctx.AnalysisTstats() == nil || ctx.AnalysisTstats().AnalysisMacro() == nil || ctx.AnalysisTstats().AnalysisMacro().GetText() != "`summariesonly`" {
+					t.Fatalf("tstats macro context = %T %q", stage, stage.GetText())
+				}
+			},
+		},
+		{
+			name:  "fillnull all-fields form",
+			query: `| fillnull value="unknown"`,
+			assert: func(t *testing.T, stage parser.IAnalysisStageContext) {
+				ctx, ok := stage.(*parser.AnalysisFillnullStageContext)
+				if !ok || ctx.AnalysisFillnull() == nil || ctx.AnalysisFillnull().AnalysisFillnullValueOption() == nil || len(ctx.AnalysisFillnull().AllAnalysisIdentifier()) != 0 {
+					t.Fatalf("fillnull context = %T %q", stage, stage.GetText())
+				}
+			},
+		},
+		{
+			name:  "rex sed mode and field contexts",
+			query: `| rex mode=sed field=_raw "s/a/b/g"`,
+			assert: func(t *testing.T, stage parser.IAnalysisStageContext) {
+				ctx, ok := stage.(*parser.AnalysisRexStageContext)
+				if !ok || ctx.AnalysisRex() == nil || len(ctx.AnalysisRex().AllAnalysisRexModeOption()) != 1 || len(ctx.AnalysisRex().AllAnalysisRexFieldOption()) != 1 || ctx.AnalysisRex().AnalysisRexModeOption(0).GetText() != "mode=sed" || ctx.AnalysisRex().AnalysisRexFieldOption(0).GetText() != "field=_raw" {
+					t.Fatalf("rex contexts = %T %q", stage, stage.GetText())
+				}
+			},
+		},
+		{
+			name:  "spath input present path and output absent",
+			query: `| spath input=_raw`,
+			assert: func(t *testing.T, stage parser.IAnalysisStageContext) {
+				ctx, ok := stage.(*parser.AnalysisSpathStageContext)
+				if !ok || ctx.AnalysisSpath() == nil || len(ctx.AnalysisSpath().AllAnalysisSpathInputOption()) != 1 || len(ctx.AnalysisSpath().AnalysisSpathInputOption(0).AllAnalysisIdentifier()) != 2 || ctx.AnalysisSpath().AnalysisSpathInputOption(0).AnalysisIdentifier(1).GetText() != "_raw" || len(ctx.AnalysisSpath().AllAnalysisSpathPathOption()) != 0 || len(ctx.AnalysisSpath().AllAnalysisSpathOutputOption()) != 0 {
+					t.Fatalf("spath contexts = %T %q", stage, stage.GetText())
+				}
+			},
+		},
 	} {
-		t.Run(q, func(t *testing.T) {
-			p := parseDocument(q)
+		t.Run(tc.name, func(t *testing.T) {
+			p := parseDocument(tc.query)
 			if len(p.diagnostics) != 0 {
 				t.Fatalf("held form lost typed syntax: %+v", p.diagnostics)
 			}
-			if _, opaque := p.tree.AnalysisPipeline().AnalysisStage(0).(*parser.AnalysisOpaqueStageContext); opaque {
+			stage := p.tree.AnalysisPipeline().AnalysisStage(0)
+			if _, opaque := stage.(*parser.AnalysisOpaqueStageContext); opaque {
 				t.Fatal("held form fell back to opaque stage")
 			}
+			tc.assert(t, stage)
 		})
 	}
 
@@ -361,6 +402,90 @@ func TestParseMilestone10HeldForms(t *testing.T) {
 			}
 		})
 	}
+
+	for _, tc := range []struct {
+		name, query string
+	}{
+		{"tstats unrelated option rejects adjacent unit-like suffix", `| tstats summariesonly=5garbage count | table safe`},
+		{"append unrelated option rejects adjacent unit-like suffix", `| append maxout=5garbage [ search * ] | table safe`},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			p := parseDocument(tc.query)
+			if len(p.diagnostics) == 0 {
+				t.Fatal("unrelated option accepted number plus arbitrary identifier")
+			}
+			outer := p.tree.AnalysisPipeline().AllAnalysisStage()
+			if len(outer) != 2 {
+				t.Fatalf("outer stages = %d", len(outer))
+			}
+			if _, ok := outer[1].(*parser.AnalysisFieldsStageContext); !ok || outer[1].GetText() != "tablesafe" {
+				t.Fatalf("outer sibling stage = %T %q", outer[1], outer[1].GetText())
+			}
+		})
+	}
+
+	t.Run("append missing option value preserves child and outer sibling", func(t *testing.T) {
+		p := parseDocument(`| append maxout= [ search * ] | table safe`)
+		if len(p.diagnostics) == 0 {
+			t.Fatal("missing branch option value accepted")
+		}
+		outer := p.tree.AnalysisPipeline().AllAnalysisStage()
+		if len(outer) != 2 {
+			t.Fatalf("outer stages = %d", len(outer))
+		}
+		branch, ok := outer[0].(*parser.AnalysisBranchStageContext)
+		if !ok || branch.AnalysisBranch() == nil || len(branch.AnalysisBranch().AllAnalysisBranchOption()) != 1 || branch.AnalysisBranch().AnalysisBranchOption(0).AnalysisOptionValue() != nil || branch.AnalysisBranch().AnalysisSubquery() == nil {
+			t.Fatalf("branch context = %T %q", outer[0], outer[0].GetText())
+		}
+		child := branch.AnalysisBranch().AnalysisSubquery().AnalysisPipeline().AnalysisInitialStage().AnalysisStage()
+		if _, ok := child.(*parser.AnalysisSearchStageContext); !ok || child.GetText() != "search*" {
+			t.Fatalf("child stage = %T %q", child, child.GetText())
+		}
+		if _, ok := outer[1].(*parser.AnalysisFieldsStageContext); !ok || outer[1].GetText() != "tablesafe" {
+			t.Fatalf("outer sibling stage = %T %q", outer[1], outer[1].GetText())
+		}
+	})
+
+	t.Run("spath missing output value preserves outer sibling", func(t *testing.T) {
+		p := parseDocument(`| spath input=_raw output= | table safe`)
+		if len(p.diagnostics) == 0 {
+			t.Fatal("missing spath output accepted")
+		}
+		outer := p.tree.AnalysisPipeline().AllAnalysisStage()
+		if len(outer) != 2 {
+			t.Fatalf("outer stages = %d", len(outer))
+		}
+		spath, ok := outer[0].(*parser.AnalysisSpathStageContext)
+		if !ok || spath.AnalysisSpath() == nil || len(spath.AnalysisSpath().AllAnalysisSpathInputOption()) != 1 || len(spath.AnalysisSpath().AllAnalysisSpathOutputOption()) != 1 || spath.AnalysisSpath().AnalysisSpathOutputOption(0).AnalysisIdentifier() != nil {
+			t.Fatalf("spath context = %T %q", outer[0], outer[0].GetText())
+		}
+		if _, ok := outer[1].(*parser.AnalysisFieldsStageContext); !ok || outer[1].GetText() != "tablesafe" {
+			t.Fatalf("outer sibling stage = %T %q", outer[1], outer[1].GetText())
+		}
+	})
+
+	t.Run("nested spath missing output preserves closing bracket and outer sibling", func(t *testing.T) {
+		p := parseDocument(`| append [ spath output= ] | table safe`)
+		if len(p.diagnostics) == 0 {
+			t.Fatal("missing nested spath output accepted")
+		}
+		outer := p.tree.AnalysisPipeline().AllAnalysisStage()
+		if len(outer) != 2 {
+			t.Fatalf("outer stages = %d", len(outer))
+		}
+		branch, ok := outer[0].(*parser.AnalysisBranchStageContext)
+		if !ok || branch.AnalysisBranch() == nil || branch.AnalysisBranch().AnalysisSubquery() == nil {
+			t.Fatalf("branch context = %T %q", outer[0], outer[0].GetText())
+		}
+		child := branch.AnalysisBranch().AnalysisSubquery().AnalysisPipeline().AnalysisInitialStage().AnalysisStage()
+		spath, ok := child.(*parser.AnalysisSpathStageContext)
+		if !ok || spath.AnalysisSpath() == nil || len(spath.AnalysisSpath().AllAnalysisSpathOutputOption()) != 1 || spath.AnalysisSpath().AnalysisSpathOutputOption(0).AnalysisIdentifier() != nil {
+			t.Fatalf("child stage = %T %q", child, child.GetText())
+		}
+		if _, ok := outer[1].(*parser.AnalysisFieldsStageContext); !ok || outer[1].GetText() != "tablesafe" {
+			t.Fatalf("outer sibling stage = %T %q", outer[1], outer[1].GetText())
+		}
+	})
 
 	t.Run("damaged child remains isolated", func(t *testing.T) {
 		p := parseDocument(`search root=* | append [ search child=* | mystery good $ | stats count BY child ] | table root`)

@@ -244,6 +244,18 @@ type SPLParserListener interface {
 	// EnterAnalysisOptionValue is called when entering the analysisOptionValue production.
 	EnterAnalysisOptionValue(c *AnalysisOptionValueContext)
 
+	// EnterAnalysisUnitOptionValue is called when entering the analysisUnitOptionValue production.
+	EnterAnalysisUnitOptionValue(c *AnalysisUnitOptionValueContext)
+
+	// EnterAnalysisTimeUnit is called when entering the analysisTimeUnit production.
+	EnterAnalysisTimeUnit(c *AnalysisTimeUnitContext)
+
+	// EnterAnalysisInvalidOptionValue is called when entering the analysisInvalidOptionValue production.
+	EnterAnalysisInvalidOptionValue(c *AnalysisInvalidOptionValueContext)
+
+	// EnterAnalysisMissingOptionValue is called when entering the analysisMissingOptionValue production.
+	EnterAnalysisMissingOptionValue(c *AnalysisMissingOptionValueContext)
+
 	// EnterAnalysisDataModelName is called when entering the analysisDataModelName production.
 	EnterAnalysisDataModelName(c *AnalysisDataModelNameContext)
 
@@ -621,6 +633,18 @@ type SPLParserListener interface {
 
 	// ExitAnalysisOptionValue is called when exiting the analysisOptionValue production.
 	ExitAnalysisOptionValue(c *AnalysisOptionValueContext)
+
+	// ExitAnalysisUnitOptionValue is called when exiting the analysisUnitOptionValue production.
+	ExitAnalysisUnitOptionValue(c *AnalysisUnitOptionValueContext)
+
+	// ExitAnalysisTimeUnit is called when exiting the analysisTimeUnit production.
+	ExitAnalysisTimeUnit(c *AnalysisTimeUnitContext)
+
+	// ExitAnalysisInvalidOptionValue is called when exiting the analysisInvalidOptionValue production.
+	ExitAnalysisInvalidOptionValue(c *AnalysisInvalidOptionValueContext)
+
+	// ExitAnalysisMissingOptionValue is called when exiting the analysisMissingOptionValue production.
+	ExitAnalysisMissingOptionValue(c *AnalysisMissingOptionValueContext)
 
 	// ExitAnalysisDataModelName is called when exiting the analysisDataModelName production.
 	ExitAnalysisDataModelName(c *AnalysisDataModelNameContext)

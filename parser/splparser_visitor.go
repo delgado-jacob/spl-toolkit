@@ -244,6 +244,18 @@ type SPLParserVisitor interface {
 	// Visit a parse tree produced by SPLParser#analysisOptionValue.
 	VisitAnalysisOptionValue(ctx *AnalysisOptionValueContext) interface{}
 
+	// Visit a parse tree produced by SPLParser#analysisUnitOptionValue.
+	VisitAnalysisUnitOptionValue(ctx *AnalysisUnitOptionValueContext) interface{}
+
+	// Visit a parse tree produced by SPLParser#analysisTimeUnit.
+	VisitAnalysisTimeUnit(ctx *AnalysisTimeUnitContext) interface{}
+
+	// Visit a parse tree produced by SPLParser#analysisInvalidOptionValue.
+	VisitAnalysisInvalidOptionValue(ctx *AnalysisInvalidOptionValueContext) interface{}
+
+	// Visit a parse tree produced by SPLParser#analysisMissingOptionValue.
+	VisitAnalysisMissingOptionValue(ctx *AnalysisMissingOptionValueContext) interface{}
+
 	// Visit a parse tree produced by SPLParser#analysisDataModelName.
 	VisitAnalysisDataModelName(ctx *AnalysisDataModelNameContext) interface{}
 

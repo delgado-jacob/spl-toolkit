@@ -169,35 +169,49 @@ analysisStage
 analysisTstats
     : analysisTstatsOption* analysisMacro? analysisAggregate ({!p.analysisCommandIs("from", "where", "by")}? COMMA? analysisAggregate)* analysisTstatsFrom? analysisTstatsWhere? analysisTstatsGroup?
     ;
-analysisTstatsOption : analysisIdentifier EQ analysisOptionValue;
+analysisTstatsOption : analysisIdentifier EQ (analysisInvalidOptionValue | analysisOptionValue | analysisMissingOptionValue);
 analysisTstatsGroup : BY analysisTstatsGroupItem (COMMA? analysisTstatsGroupItem)*;
 analysisTstatsGroupItem : analysisIdentifier analysisTstatsSpanOption?;
-analysisTstatsSpanOption : {p.analysisCommandIs("span")}? analysisIdentifier EQ analysisOptionValue;
+analysisTstatsSpanOption : {p.analysisCommandIs("span")}? analysisIdentifier EQ (analysisUnitOptionValue | analysisInvalidOptionValue | analysisMissingOptionValue);
 analysisFillnull : analysisFillnullValueOption? (analysisIdentifier (COMMA? analysisIdentifier)*)?;
-analysisFillnullValueOption : {p.analysisCommandIs("value")}? analysisIdentifier EQ analysisLiteral;
+analysisFillnullValueOption : {p.analysisCommandIs("value")}? analysisIdentifier EQ (analysisInvalidOptionValue | analysisLiteral | analysisMissingOptionValue);
 analysisRex : (analysisRexFieldOption | analysisRexMaxMatchOption | analysisRexOffsetFieldOption | analysisRexModeOption)* STRING;
-analysisRexFieldOption : {p.analysisCommandIs("field")}? analysisIdentifier EQ analysisIdentifier;
-analysisRexMaxMatchOption : {p.analysisCommandIs("max_match")}? analysisIdentifier EQ analysisLiteral;
-analysisRexOffsetFieldOption : {p.analysisCommandIs("offset_field")}? analysisIdentifier EQ analysisIdentifier;
-analysisRexModeOption : {p.analysisCommandIs("mode")}? analysisIdentifier EQ analysisIdentifier;
+analysisRexFieldOption : {p.analysisCommandIs("field")}? analysisIdentifier EQ (analysisInvalidOptionValue | analysisIdentifier | analysisMissingOptionValue);
+analysisRexMaxMatchOption : {p.analysisCommandIs("max_match")}? analysisIdentifier EQ (analysisInvalidOptionValue | analysisLiteral | analysisMissingOptionValue);
+analysisRexOffsetFieldOption : {p.analysisCommandIs("offset_field")}? analysisIdentifier EQ (analysisInvalidOptionValue | analysisIdentifier | analysisMissingOptionValue);
+analysisRexModeOption : {p.analysisCommandIs("mode")}? analysisIdentifier EQ (analysisInvalidOptionValue | analysisIdentifier | analysisMissingOptionValue);
 analysisSpath : (analysisSpathInputOption | analysisSpathPathOption | analysisSpathOutputOption)*;
-analysisSpathInputOption : {p.analysisCommandIs("input")}? analysisIdentifier EQ analysisIdentifier;
-analysisSpathPathOption : {p.analysisCommandIs("path")}? analysisIdentifier EQ analysisOptionValue;
-analysisSpathOutputOption : {p.analysisCommandIs("output")}? OUTPUT EQ analysisIdentifier;
+analysisSpathInputOption : {p.analysisCommandIs("input")}? analysisIdentifier EQ (analysisInvalidOptionValue | analysisIdentifier | analysisMissingOptionValue);
+analysisSpathPathOption : {p.analysisCommandIs("path")}? analysisIdentifier EQ (analysisInvalidOptionValue | analysisOptionValue | analysisMissingOptionValue);
+analysisSpathOutputOption : {p.analysisCommandIs("output")}? OUTPUT EQ (analysisInvalidOptionValue | analysisIdentifier | analysisMissingOptionValue);
 analysisBin : analysisBinOption* analysisIdentifier analysisAlias?;
-analysisBinOption : analysisIdentifier EQ analysisOptionValue;
+analysisBinOption
+    : {p.analysisCommandIs("span", "minspan")}? analysisIdentifier EQ (analysisUnitOptionValue | analysisInvalidOptionValue | analysisMissingOptionValue)
+    | {!p.analysisCommandIs("span", "minspan")}? analysisIdentifier EQ (analysisInvalidOptionValue | analysisOptionValue | analysisMissingOptionValue)
+    ;
 analysisRegex : (analysisIdentifier (EQ | NE))? STRING;
 analysisMvexpand : analysisIdentifier analysisMvexpandOption*;
-analysisMvexpandOption : analysisIdentifier EQ analysisOptionValue;
+analysisMvexpandOption : analysisIdentifier EQ (analysisInvalidOptionValue | analysisOptionValue | analysisMissingOptionValue);
 analysisJoin : analysisJoinOption* analysisIdentifier (COMMA? analysisIdentifier)* analysisSubquery;
-analysisJoinOption : analysisIdentifier EQ analysisOptionValue;
+analysisJoinOption : analysisIdentifier EQ (analysisInvalidOptionValue | analysisOptionValue | analysisMissingOptionValue);
 analysisBranch : analysisBranchOption* analysisSubquery;
-analysisBranchOption : analysisIdentifier EQ analysisOptionValue;
-analysisOptionValue
-    : STRING
-    | TIME
-    | NUMBER ({p.analysisTokensAdjacent()}? analysisIdentifier)?
+analysisBranchOption : analysisIdentifier EQ (analysisInvalidOptionValue | analysisOptionValue | analysisMissingOptionValue);
+analysisOptionValue : analysisLiteral | analysisIdentifier;
+analysisUnitOptionValue
+    : NUMBER {p.analysisTokensAdjacent()}? analysisTimeUnit
+    | analysisLiteral
     | analysisIdentifier
+    ;
+analysisTimeUnit
+    : {p.analysisCommandIs("s", "m", "h", "d", "w", "y", "q", "w0", "w1", "w2", "w3", "w4", "w5", "w6", "w7", "qtr", "mon", "week", "year", "quarter")}? analysisIdentifier
+    ;
+analysisInvalidOptionValue
+    : NUMBER {p.analysisTokensAdjacent()}? analysisIdentifier
+      {p.NotifyErrorListeners("invalid option value", p.GetTokenStream().LT(-1), nil)}
+    ;
+analysisMissingOptionValue
+    : {p.GetTokenStream().LA(1) == SPLParserPIPE || p.GetTokenStream().LA(1) == SPLParserLBRACK || p.GetTokenStream().LA(1) == SPLParserRBRACK || p.GetTokenStream().LA(1) == antlr.TokenEOF}?
+      {p.NotifyErrorListeners("missing option value", p.GetCurrentToken(), nil)}
     ;
 // Catalog roles are established here; qualified names remain single lexer tokens.
 analysisDataModelName : analysisCatalogName;

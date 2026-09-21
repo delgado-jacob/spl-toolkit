@@ -502,6 +502,34 @@ func (s *BaseSPLParserListener) EnterAnalysisOptionValue(ctx *AnalysisOptionValu
 // ExitAnalysisOptionValue is called when production analysisOptionValue is exited.
 func (s *BaseSPLParserListener) ExitAnalysisOptionValue(ctx *AnalysisOptionValueContext) {}
 
+// EnterAnalysisUnitOptionValue is called when production analysisUnitOptionValue is entered.
+func (s *BaseSPLParserListener) EnterAnalysisUnitOptionValue(ctx *AnalysisUnitOptionValueContext) {}
+
+// ExitAnalysisUnitOptionValue is called when production analysisUnitOptionValue is exited.
+func (s *BaseSPLParserListener) ExitAnalysisUnitOptionValue(ctx *AnalysisUnitOptionValueContext) {}
+
+// EnterAnalysisTimeUnit is called when production analysisTimeUnit is entered.
+func (s *BaseSPLParserListener) EnterAnalysisTimeUnit(ctx *AnalysisTimeUnitContext) {}
+
+// ExitAnalysisTimeUnit is called when production analysisTimeUnit is exited.
+func (s *BaseSPLParserListener) ExitAnalysisTimeUnit(ctx *AnalysisTimeUnitContext) {}
+
+// EnterAnalysisInvalidOptionValue is called when production analysisInvalidOptionValue is entered.
+func (s *BaseSPLParserListener) EnterAnalysisInvalidOptionValue(ctx *AnalysisInvalidOptionValueContext) {
+}
+
+// ExitAnalysisInvalidOptionValue is called when production analysisInvalidOptionValue is exited.
+func (s *BaseSPLParserListener) ExitAnalysisInvalidOptionValue(ctx *AnalysisInvalidOptionValueContext) {
+}
+
+// EnterAnalysisMissingOptionValue is called when production analysisMissingOptionValue is entered.
+func (s *BaseSPLParserListener) EnterAnalysisMissingOptionValue(ctx *AnalysisMissingOptionValueContext) {
+}
+
+// ExitAnalysisMissingOptionValue is called when production analysisMissingOptionValue is exited.
+func (s *BaseSPLParserListener) ExitAnalysisMissingOptionValue(ctx *AnalysisMissingOptionValueContext) {
+}
+
 // EnterAnalysisDataModelName is called when production analysisDataModelName is entered.
 func (s *BaseSPLParserListener) EnterAnalysisDataModelName(ctx *AnalysisDataModelNameContext) {}
 
