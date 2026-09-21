@@ -162,7 +162,7 @@ func TestParseMilestone10CommandContexts(t *testing.T) {
 		assert      func(*testing.T, parser.IAnalysisStageContext)
 	}{
 		{
-			name:  "tstats unicode quoted fields whitespace and span",
+			name:  "tstats comma-present aggregates and groups with unicode quoted fields whitespace and span",
 			query: "| tstats summariesonly=true count AS total,\r\n\t sum('octets') AS 'sómme' FROM datamodel=Network_Traffic.All_Traffic WHERE All_Traffic.action=\"allowed\" BY 'hôte',\t_time span=5m",
 			assert: func(t *testing.T, stage parser.IAnalysisStageContext) {
 				ctx, ok := stage.(*parser.AnalysisTstatsStageContext)
@@ -179,8 +179,32 @@ func TestParseMilestone10CommandContexts(t *testing.T) {
 			},
 		},
 		{
-			name:  "fillnull optional commas",
+			name:  "tstats comma-omitted aggregates and groups",
+			query: `| tstats count AS total sum(bytes) AS octets BY host _time span=5m`,
+			assert: func(t *testing.T, stage parser.IAnalysisStageContext) {
+				ctx, ok := stage.(*parser.AnalysisTstatsStageContext)
+				if !ok || ctx.AnalysisTstats() == nil {
+					t.Fatalf("stage = %T", stage)
+				}
+				body := ctx.AnalysisTstats()
+				if len(body.AllAnalysisAggregate()) != 2 || body.AnalysisTstatsGroup() == nil || len(body.AnalysisTstatsGroup().AllAnalysisTstatsGroupItem()) != 2 || body.AnalysisTstatsGroup().AnalysisTstatsGroupItem(1).AnalysisTstatsSpanOption() == nil {
+					t.Fatalf("comma-omitted tstats context: %s", body.GetText())
+				}
+			},
+		},
+		{
+			name:  "fillnull comma-present fields",
 			query: `| fillnull value="unknown" café, 'display name'`,
+			assert: func(t *testing.T, stage parser.IAnalysisStageContext) {
+				ctx, ok := stage.(*parser.AnalysisFillnullStageContext)
+				if !ok || ctx.AnalysisFillnull() == nil || ctx.AnalysisFillnull().AnalysisFillnullValueOption() == nil || len(ctx.AnalysisFillnull().AllAnalysisIdentifier()) != 2 {
+					t.Fatalf("stage = %T %s", stage, stage.GetText())
+				}
+			},
+		},
+		{
+			name:  "fillnull comma-omitted fields",
+			query: `| fillnull value="unknown" café 'display name'`,
 			assert: func(t *testing.T, stage parser.IAnalysisStageContext) {
 				ctx, ok := stage.(*parser.AnalysisFillnullStageContext)
 				if !ok || ctx.AnalysisFillnull() == nil || ctx.AnalysisFillnull().AnalysisFillnullValueOption() == nil || len(ctx.AnalysisFillnull().AllAnalysisIdentifier()) != 2 {
@@ -239,7 +263,7 @@ func TestParseMilestone10CommandContexts(t *testing.T) {
 			},
 		},
 		{
-			name:  "join exact keys and nested branch",
+			name:  "join comma-present exact keys and nested branch",
 			query: `| join type=left user,'tenant id' [ search child=* | append [ search nested=* ] ]`,
 			assert: func(t *testing.T, stage parser.IAnalysisStageContext) {
 				ctx, ok := stage.(*parser.AnalysisJoinStageContext)
@@ -252,6 +276,16 @@ func TestParseMilestone10CommandContexts(t *testing.T) {
 				}
 				if _, ok := childStages[0].(*parser.AnalysisBranchStageContext); !ok {
 					t.Fatalf("nested stage = %T", childStages[0])
+				}
+			},
+		},
+		{
+			name:  "join comma-omitted exact keys",
+			query: `| join type=left user 'tenant id' [ search child=* ]`,
+			assert: func(t *testing.T, stage parser.IAnalysisStageContext) {
+				ctx, ok := stage.(*parser.AnalysisJoinStageContext)
+				if !ok || len(ctx.AnalysisJoin().AllAnalysisJoinOption()) != 1 || len(ctx.AnalysisJoin().AllAnalysisIdentifier()) != 2 || ctx.AnalysisJoin().AnalysisSubquery() == nil {
+					t.Fatalf("stage = %T %s", stage, stage.GetText())
 				}
 			},
 		},
