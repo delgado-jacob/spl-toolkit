@@ -309,6 +309,20 @@
       },
       "held_boundaries": [
         {"command": "join", "occurrence": 0, "required_gap_codes": ["SPL_UNSUPPORTED_SEMANTICS"]}
+      ],
+      "branch_scope_expectations": [
+        {
+          "branch": {"command": "join", "occurrence": 0},
+          "parent_scope_kind": "root",
+          "child_scope_kind": "join",
+          "child_stages": [
+            {"command": "search", "occurrence": 1},
+            {"command": "table", "occurrence": 0}
+          ],
+          "downstream_stages": [
+            {"command": "table", "occurrence": 1}
+          ]
+        }
       ]
     },
     {
@@ -337,6 +351,20 @@
       },
       "held_boundaries": [
         {"command": "append", "occurrence": 0, "required_gap_codes": ["SPL_UNSUPPORTED_SEMANTICS"]}
+      ],
+      "branch_scope_expectations": [
+        {
+          "branch": {"command": "append", "occurrence": 0},
+          "parent_scope_kind": "root",
+          "child_scope_kind": "append",
+          "child_stages": [
+            {"command": "search", "occurrence": 1},
+            {"command": "table", "occurrence": 0}
+          ],
+          "downstream_stages": [
+            {"command": "table", "occurrence": 1}
+          ]
+        }
       ]
     },
     {
@@ -364,6 +392,19 @@
       },
       "held_boundaries": [
         {"command": "appendpipe", "occurrence": 0, "required_gap_codes": ["SPL_UNSUPPORTED_SEMANTICS"]}
+      ],
+      "branch_scope_expectations": [
+        {
+          "branch": {"command": "appendpipe", "occurrence": 0},
+          "parent_scope_kind": "root",
+          "child_scope_kind": "appendpipe",
+          "child_stages": [
+            {"command": "stats", "occurrence": 0}
+          ],
+          "downstream_stages": [
+            {"command": "table", "occurrence": 0}
+          ]
+        }
       ]
     },
     {

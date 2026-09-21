@@ -27,20 +27,34 @@ type detectionImpactBaseline struct {
 }
 
 type detectionImpactCorpusCase struct {
-	ID                 string                        `json:"id"`
-	Query              string                        `json:"query"`
-	SourceFamily       string                        `json:"source_family"`
-	SelectionRationale string                        `json:"selection_rationale"`
-	Targets            []detectionImpactTargetStage  `json:"targets"`
-	Expected           detectionImpactExpectedFacts  `json:"expected"`
-	HeldBoundaries     []detectionImpactHeldBoundary `json:"held_boundaries"`
+	ID                      string                                  `json:"id"`
+	Query                   string                                  `json:"query"`
+	SourceFamily            string                                  `json:"source_family"`
+	SelectionRationale      string                                  `json:"selection_rationale"`
+	Targets                 []detectionImpactTargetStage            `json:"targets"`
+	Expected                detectionImpactExpectedFacts            `json:"expected"`
+	HeldBoundaries          []detectionImpactHeldBoundary           `json:"held_boundaries"`
+	BranchScopeExpectations []detectionImpactBranchScopeExpectation `json:"branch_scope_expectations,omitempty"`
 }
 
 type detectionImpactTargetStage struct {
 	Command          string `json:"command"`
 	Occurrence       int    `json:"occurrence"`
-	SyntaxComplete   bool   `json:"syntax_complete"`
-	SemanticComplete bool   `json:"semantic_complete"`
+	SyntaxComplete   *bool  `json:"syntax_complete"`
+	SemanticComplete *bool  `json:"semantic_complete"`
+}
+
+type detectionImpactStageSelector struct {
+	Command    string `json:"command"`
+	Occurrence int    `json:"occurrence"`
+}
+
+type detectionImpactBranchScopeExpectation struct {
+	Branch           detectionImpactStageSelector   `json:"branch"`
+	ParentScopeKind  string                         `json:"parent_scope_kind"`
+	ChildScopeKind   string                         `json:"child_scope_kind"`
+	ChildStages      []detectionImpactStageSelector `json:"child_stages"`
+	DownstreamStages []detectionImpactStageSelector `json:"downstream_stages"`
 }
 
 type detectionImpactExpectedFacts struct {
@@ -85,6 +99,7 @@ func TestDetectionImpactCorpusBaseline(t *testing.T) {
 func TestDetectionImpactCorpusImproves(t *testing.T) {
 	manifest := loadDetectionImpactManifest(t)
 	results := analyzeDetectionImpactCorpus(t, manifest)
+	assertDetectionImpactSelectors(t, manifest, results)
 	allExpectedFactsPresent := true
 
 	for i, corpusCase := range manifest.Cases {
@@ -93,11 +108,11 @@ func TestDetectionImpactCorpusImproves(t *testing.T) {
 			target := target
 			if !t.Run(corpusCase.ID+"/target/"+detectionImpactSelectorName(target.Command, target.Occurrence), func(t *testing.T) {
 				stage := resolveDetectionImpactStage(t, result, target.Command, target.Occurrence)
-				if actual := detectionImpactStageSyntaxComplete(result, stage); actual != target.SyntaxComplete {
-					t.Errorf("target syntax_complete = %t, want %t", actual, target.SyntaxComplete)
+				if actual := detectionImpactStageSyntaxComplete(result, stage); actual != *target.SyntaxComplete {
+					t.Errorf("target syntax_complete = %t, want %t", actual, *target.SyntaxComplete)
 				}
-				if stage.SemanticComplete != target.SemanticComplete {
-					t.Errorf("target semantic_complete = %t, want %t", stage.SemanticComplete, target.SemanticComplete)
+				if stage.SemanticComplete != *target.SemanticComplete {
+					t.Errorf("target semantic_complete = %t, want %t", stage.SemanticComplete, *target.SemanticComplete)
 				}
 			}) {
 				allExpectedFactsPresent = false
@@ -141,23 +156,113 @@ func TestDetectionImpactCorpusImproves(t *testing.T) {
 	}
 }
 
+func TestDetectionImpactManifestRequiresTargetCompletenessProperties(t *testing.T) {
+	data, err := os.ReadFile("../../testdata/analysis/detection-impact.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, test := range []struct {
+		name, property string
+		remove         []byte
+	}{
+		{name: "syntax", property: "syntax_complete", remove: []byte(`"syntax_complete": true, `)},
+		{name: "semantic", property: "semantic_complete", remove: []byte(`, "semantic_complete": true`)},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			modified := bytes.Replace(data, test.remove, nil, 1)
+			if bytes.Equal(modified, data) {
+				t.Fatalf("fixture does not contain removable %s property", test.property)
+			}
+			_, err := decodeDetectionImpactManifest(modified)
+			if err == nil || !strings.Contains(err.Error(), `omits required `+test.property) {
+				t.Fatalf("missing %s error = %v", test.property, err)
+			}
+		})
+	}
+}
+
+func TestDetectionImpactBranchScopeAssertionsRejectBrokenOwnership(t *testing.T) {
+	manifest := loadDetectionImpactManifest(t)
+	results := analyzeDetectionImpactCorpus(t, manifest)
+	checked := 0
+	for i, corpusCase := range manifest.Cases {
+		for _, expectation := range corpusCase.BranchScopeExpectations {
+			checked++
+			expectation := expectation
+			result := results[i]
+			name := corpusCase.ID + "/" + detectionImpactSelectorName(expectation.Branch.Command, expectation.Branch.Occurrence)
+			t.Run(name+"/flattened_child", func(t *testing.T) {
+				mutated := cloneDetectionImpactScopeResult(result)
+				branch, _ := findDetectionImpactStage(mutated, expectation.Branch.Command, expectation.Branch.Occurrence)
+				child := expectation.ChildStages[0]
+				setDetectionImpactStageScope(t, mutated, child, branch.ScopeID)
+				if err := validateDetectionImpactBranchScope(mutated, expectation); err == nil || !strings.Contains(err.Error(), "child stage") {
+					t.Fatalf("flattened child error = %v", err)
+				}
+			})
+			t.Run(name+"/wrong_owner", func(t *testing.T) {
+				mutated := cloneDetectionImpactScopeResult(result)
+				child, _ := findDetectionImpactStage(mutated, expectation.ChildStages[0].Command, expectation.ChildStages[0].Occurrence)
+				for scopeIndex := range mutated.Scopes {
+					if mutated.Scopes[scopeIndex].ID == child.ScopeID {
+						mutated.Scopes[scopeIndex].StageID = "stage-wrong-owner"
+					}
+				}
+				if err := validateDetectionImpactBranchScope(mutated, expectation); err == nil || !strings.Contains(err.Error(), "owned by") {
+					t.Fatalf("wrong owner error = %v", err)
+				}
+			})
+			t.Run(name+"/downstream_in_child", func(t *testing.T) {
+				mutated := cloneDetectionImpactScopeResult(result)
+				child, _ := findDetectionImpactStage(mutated, expectation.ChildStages[0].Command, expectation.ChildStages[0].Occurrence)
+				setDetectionImpactStageScope(t, mutated, expectation.DownstreamStages[0], child.ScopeID)
+				if err := validateDetectionImpactBranchScope(mutated, expectation); err == nil || !strings.Contains(err.Error(), "downstream stage") {
+					t.Fatalf("downstream scope error = %v", err)
+				}
+			})
+		}
+	}
+	if checked != 3 {
+		t.Fatalf("checked %d branch-scope expectations, want 3", checked)
+	}
+}
+
 func loadDetectionImpactManifest(t *testing.T) detectionImpactManifest {
 	t.Helper()
 	data, err := os.ReadFile("../../testdata/analysis/detection-impact.json")
 	if err != nil {
 		t.Fatal(err)
 	}
+	manifest, err := decodeDetectionImpactManifest(data)
+	if err != nil {
+		t.Fatal(err)
+	}
+	validateDetectionImpactManifest(t, manifest)
+	return manifest
+}
+
+func decodeDetectionImpactManifest(data []byte) (detectionImpactManifest, error) {
 	decoder := json.NewDecoder(bytes.NewReader(data))
 	decoder.DisallowUnknownFields()
 	var manifest detectionImpactManifest
 	if err := decoder.Decode(&manifest); err != nil {
-		t.Fatal(err)
+		return detectionImpactManifest{}, err
 	}
 	if err := decoder.Decode(&struct{}{}); err != io.EOF {
-		t.Fatalf("detection-impact manifest has trailing JSON: %v", err)
+		return detectionImpactManifest{}, fmt.Errorf("detection-impact manifest has trailing JSON: %v", err)
 	}
-	validateDetectionImpactManifest(t, manifest)
-	return manifest
+	for _, corpusCase := range manifest.Cases {
+		for _, target := range corpusCase.Targets {
+			selector := detectionImpactSelectorName(target.Command, target.Occurrence)
+			if target.SyntaxComplete == nil {
+				return detectionImpactManifest{}, fmt.Errorf("case %q target %s omits required syntax_complete", corpusCase.ID, selector)
+			}
+			if target.SemanticComplete == nil {
+				return detectionImpactManifest{}, fmt.Errorf("case %q target %s omits required semantic_complete", corpusCase.ID, selector)
+			}
+		}
+	}
+	return manifest, nil
 }
 
 func validateDetectionImpactManifest(t *testing.T, manifest detectionImpactManifest) {
@@ -191,7 +296,7 @@ func validateDetectionImpactManifest(t *testing.T, manifest detectionImpactManif
 		seenTargets := map[string]bool{}
 		for _, target := range corpusCase.Targets {
 			key := detectionImpactSelectorName(target.Command, target.Occurrence)
-			if target.Command == "" || target.Occurrence < 0 || seenTargets[key] {
+			if target.Command == "" || target.Occurrence < 0 || target.SyntaxComplete == nil || target.SemanticComplete == nil || seenTargets[key] {
 				t.Fatalf("case %q has invalid or duplicate target %q", corpusCase.ID, key)
 			}
 			seenTargets[key] = true
@@ -205,6 +310,7 @@ func validateDetectionImpactManifest(t *testing.T, manifest detectionImpactManif
 			seenBoundaries[key] = true
 		}
 		validateDetectionImpactExpectedFacts(t, corpusCase.ID, facts)
+		validateDetectionImpactBranchScopeExpectations(t, corpusCase)
 	}
 }
 
@@ -252,6 +358,37 @@ func validateDetectionImpactExpectedFacts(t *testing.T, caseID string, facts det
 	}
 }
 
+func validateDetectionImpactBranchScopeExpectations(t *testing.T, corpusCase detectionImpactCorpusCase) {
+	t.Helper()
+	required := map[string]bool{}
+	for _, target := range corpusCase.Targets {
+		switch target.Command {
+		case "join", "append", "appendpipe":
+			required[detectionImpactSelectorName(target.Command, target.Occurrence)] = true
+		}
+	}
+	seen := map[string]bool{}
+	for _, expectation := range corpusCase.BranchScopeExpectations {
+		key := detectionImpactSelectorName(expectation.Branch.Command, expectation.Branch.Occurrence)
+		if !required[key] || expectation.Branch.Command == "" || expectation.Branch.Occurrence < 0 || expectation.ParentScopeKind == "" || expectation.ChildScopeKind == "" || len(expectation.ChildStages) == 0 || len(expectation.DownstreamStages) == 0 || seen[key] {
+			t.Fatalf("case %q has invalid or duplicate branch-scope expectation %q", corpusCase.ID, key)
+		}
+		seen[key] = true
+		for _, group := range [][]detectionImpactStageSelector{expectation.ChildStages, expectation.DownstreamStages} {
+			for _, selector := range group {
+				if selector.Command == "" || selector.Occurrence < 0 {
+					t.Fatalf("case %q branch %q has invalid stage selector %+v", corpusCase.ID, key, selector)
+				}
+			}
+		}
+	}
+	for key := range required {
+		if !seen[key] {
+			t.Fatalf("case %q omits branch-scope expectation %q", corpusCase.ID, key)
+		}
+	}
+}
+
 func detectionImpactDigest(cases []detectionImpactCorpusCase) string {
 	hash := sha256.New()
 	var queryLength [8]byte
@@ -287,7 +424,98 @@ func assertDetectionImpactSelectors(t *testing.T, manifest detectionImpactManife
 		for _, boundary := range corpusCase.HeldBoundaries {
 			resolveDetectionImpactStage(t, results[i], boundary.Command, boundary.Occurrence)
 		}
+		for _, expectation := range corpusCase.BranchScopeExpectations {
+			if err := validateDetectionImpactBranchScope(results[i], expectation); err != nil {
+				t.Errorf("case %q: %v", corpusCase.ID, err)
+			}
+		}
 	}
+}
+
+func validateDetectionImpactBranchScope(result *Result, expectation detectionImpactBranchScopeExpectation) error {
+	branch, found := findDetectionImpactStage(result, expectation.Branch.Command, expectation.Branch.Occurrence)
+	if !found {
+		return fmt.Errorf("branch stage %s does not resolve", detectionImpactSelectorName(expectation.Branch.Command, expectation.Branch.Occurrence))
+	}
+	parentScope, found := findDetectionImpactScope(result, branch.ScopeID)
+	if !found {
+		return fmt.Errorf("branch stage %s references missing parent scope %q", branch.ID, branch.ScopeID)
+	}
+	if parentScope.Kind != expectation.ParentScopeKind {
+		return fmt.Errorf("branch stage %s parent scope kind = %q, want %q", branch.ID, parentScope.Kind, expectation.ParentScopeKind)
+	}
+
+	childStages := make([]Stage, 0, len(expectation.ChildStages))
+	for _, selector := range expectation.ChildStages {
+		stage, found := findDetectionImpactStage(result, selector.Command, selector.Occurrence)
+		if !found {
+			return fmt.Errorf("child stage %s does not resolve", detectionImpactSelectorName(selector.Command, selector.Occurrence))
+		}
+		childStages = append(childStages, stage)
+	}
+	childScopeID := childStages[0].ScopeID
+	if childScopeID == branch.ScopeID {
+		return fmt.Errorf("child stage %s was flattened into branch parent scope %q", childStages[0].ID, branch.ScopeID)
+	}
+	for _, stage := range childStages[1:] {
+		if stage.ScopeID != childScopeID {
+			return fmt.Errorf("child stage %s scope = %q, want shared child scope %q", stage.ID, stage.ScopeID, childScopeID)
+		}
+	}
+	childScope, found := findDetectionImpactScope(result, childScopeID)
+	if !found {
+		return fmt.Errorf("child stage %s references missing scope %q", childStages[0].ID, childScopeID)
+	}
+	if childScope.ParentID != branch.ScopeID {
+		return fmt.Errorf("child scope %q parent = %q, want branch parent scope %q", childScope.ID, childScope.ParentID, branch.ScopeID)
+	}
+	if childScope.StageID != branch.ID {
+		return fmt.Errorf("child scope %q is owned by %q, want branch stage %q", childScope.ID, childScope.StageID, branch.ID)
+	}
+	if childScope.Kind != expectation.ChildScopeKind {
+		return fmt.Errorf("child scope %q kind = %q, want %q", childScope.ID, childScope.Kind, expectation.ChildScopeKind)
+	}
+	for _, selector := range expectation.DownstreamStages {
+		stage, found := findDetectionImpactStage(result, selector.Command, selector.Occurrence)
+		if !found {
+			return fmt.Errorf("downstream stage %s does not resolve", detectionImpactSelectorName(selector.Command, selector.Occurrence))
+		}
+		if stage.ScopeID != branch.ScopeID {
+			return fmt.Errorf("downstream stage %s scope = %q, want branch parent scope %q", stage.ID, stage.ScopeID, branch.ScopeID)
+		}
+	}
+	return nil
+}
+
+func findDetectionImpactScope(result *Result, scopeID string) (Scope, bool) {
+	for _, scope := range result.Scopes {
+		if scope.ID == scopeID {
+			return scope, true
+		}
+	}
+	return Scope{}, false
+}
+
+func cloneDetectionImpactScopeResult(result *Result) *Result {
+	clone := *result
+	clone.Stages = append([]Stage{}, result.Stages...)
+	clone.Scopes = append([]Scope{}, result.Scopes...)
+	return &clone
+}
+
+func setDetectionImpactStageScope(t *testing.T, result *Result, selector detectionImpactStageSelector, scopeID string) {
+	t.Helper()
+	stage, found := findDetectionImpactStage(result, selector.Command, selector.Occurrence)
+	if !found {
+		t.Fatalf("stage %s does not resolve", detectionImpactSelectorName(selector.Command, selector.Occurrence))
+	}
+	for stageIndex := range result.Stages {
+		if result.Stages[stageIndex].ID == stage.ID {
+			result.Stages[stageIndex].ScopeID = scopeID
+			return
+		}
+	}
+	t.Fatalf("stage %q disappeared", stage.ID)
 }
 
 func resolveDetectionImpactStage(t *testing.T, result *Result, command string, occurrence int) Stage {
