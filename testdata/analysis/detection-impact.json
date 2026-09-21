@@ -1,0 +1,398 @@
+{
+  "version": "1",
+  "baseline_digest": "sha256:63aa3e808bad38edd3b0c6935c0f7e9ceb9d8f68e133866ba33ca0ce553954e1",
+  "baseline": {
+    "syntax_complete_cases": 12,
+    "semantic_complete_target_stages": 1,
+    "nonmacro_gap_count": 35
+  },
+  "cases": [
+    {
+      "id": "tstats_basic",
+      "query": "| tstats count AS total FROM datamodel=Network_Traffic.All_Traffic WHERE All_Traffic.action=\"allowed\" BY All_Traffic.src",
+      "source_family": "tstats",
+      "selection_rationale": "Exercises the highest-impact data-model aggregate form with an exact predicate, grouping field, and alias.",
+      "targets": [
+        {"command": "tstats", "occurrence": 0, "syntax_complete": true, "semantic_complete": true}
+      ],
+      "expected": {
+        "required_normalized_reference_names": ["Network_Traffic", "Network_Traffic.All_Traffic", "All_Traffic.action", "All_Traffic.src", "total"],
+        "required_dependency_pairs": [
+          {"kind": "data_model", "name": "Network_Traffic"},
+          {"kind": "dataset", "name": "Network_Traffic.All_Traffic"}
+        ],
+        "required_transition_targets": ["All_Traffic.src", "total"],
+        "required_requirement_pairs": [
+          {"kind": "data_model", "name": "Network_Traffic"},
+          {"kind": "dataset", "name": "Network_Traffic.All_Traffic"},
+          {"kind": "field", "name": "All_Traffic.action"},
+          {"kind": "field", "name": "All_Traffic.src"}
+        ],
+        "required_gap_codes": [],
+        "required_stage_facts": [
+          {"command": "tstats", "occurrence": 0, "required_normalized_reference_names": ["Network_Traffic", "Network_Traffic.All_Traffic", "All_Traffic.action", "All_Traffic.src", "total"], "required_transition_targets": ["All_Traffic.src", "total"], "required_requirement_pairs": [{"kind": "data_model", "name": "Network_Traffic"}, {"kind": "dataset", "name": "Network_Traffic.All_Traffic"}, {"kind": "field", "name": "All_Traffic.action"}, {"kind": "field", "name": "All_Traffic.src"}]}
+        ]
+      },
+      "held_boundaries": []
+    },
+    {
+      "id": "tstats_macro",
+      "query": "| tstats `summariesonly` count FROM datamodel=Authentication.Authentication BY Authentication.user",
+      "source_family": "tstats_macro",
+      "selection_rationale": "Proves that an inline option macro remains an exact dependency and gap while sibling tstats facts survive.",
+      "targets": [
+        {"command": "tstats", "occurrence": 0, "syntax_complete": true, "semantic_complete": false}
+      ],
+      "expected": {
+        "required_normalized_reference_names": ["summariesonly", "Authentication", "Authentication.Authentication", "Authentication.user", "count"],
+        "required_dependency_pairs": [
+          {"kind": "macro", "name": "summariesonly"},
+          {"kind": "data_model", "name": "Authentication"},
+          {"kind": "dataset", "name": "Authentication.Authentication"}
+        ],
+        "required_transition_targets": ["Authentication.user", "count"],
+        "required_requirement_pairs": [
+          {"kind": "macro", "name": "summariesonly"},
+          {"kind": "data_model", "name": "Authentication"},
+          {"kind": "dataset", "name": "Authentication.Authentication"},
+          {"kind": "field", "name": "Authentication.user"}
+        ],
+        "required_gap_codes": ["SPL_DYNAMIC_REFERENCE"],
+        "required_stage_facts": [
+          {"command": "tstats", "occurrence": 0, "required_normalized_reference_names": ["summariesonly", "Authentication", "Authentication.Authentication", "Authentication.user", "count"], "required_transition_targets": ["Authentication.user", "count"], "required_requirement_pairs": [{"kind": "macro", "name": "summariesonly"}, {"kind": "data_model", "name": "Authentication"}, {"kind": "dataset", "name": "Authentication.Authentication"}, {"kind": "field", "name": "Authentication.user"}]}
+        ]
+      },
+      "held_boundaries": [
+        {"command": "tstats", "occurrence": 0, "required_gap_codes": ["SPL_DYNAMIC_REFERENCE"]}
+      ]
+    },
+    {
+      "id": "fillnull_exact",
+      "query": "| makeresults | eval user=null(), allowed=like(action,\"allow%\") | fillnull value=\"unknown\" user action | where true()",
+      "source_family": "fillnull_and_eval_functions",
+      "selection_rationale": "Combines exact fill targets with null, like, and true so their facts must compose across adjacent stages.",
+      "targets": [
+        {"command": "eval", "occurrence": 0, "syntax_complete": true, "semantic_complete": true},
+        {"command": "fillnull", "occurrence": 0, "syntax_complete": true, "semantic_complete": true},
+        {"command": "where", "occurrence": 0, "syntax_complete": true, "semantic_complete": true}
+      ],
+      "expected": {
+        "required_normalized_reference_names": ["user", "allowed", "action"],
+        "required_dependency_pairs": [],
+        "required_transition_targets": ["user", "allowed", "action"],
+        "required_requirement_pairs": [
+          {"kind": "field", "name": "action"}
+        ],
+        "required_gap_codes": ["SPL_UNSUPPORTED_COMMAND"],
+        "required_stage_facts": [
+          {"command": "eval", "occurrence": 0, "required_normalized_reference_names": ["user", "allowed", "action"], "required_transition_targets": ["user", "allowed"], "required_requirement_pairs": [{"kind": "field", "name": "action"}]},
+          {"command": "fillnull", "occurrence": 0, "required_normalized_reference_names": ["user", "action"], "required_transition_targets": ["user", "action"], "required_requirement_pairs": [{"kind": "field", "name": "action"}]}
+        ]
+      },
+      "held_boundaries": [
+        {"command": "makeresults", "occurrence": 0, "required_gap_codes": ["SPL_UNSUPPORTED_COMMAND"]}
+      ]
+    },
+    {
+      "id": "fillnull_all",
+      "query": "| makeresults | eval user=null() | fillnull value=\"unknown\"",
+      "source_family": "fillnull_all_fields",
+      "selection_rationale": "Covers the no-field-list form without claiming a closed output universe.",
+      "targets": [
+        {"command": "eval", "occurrence": 0, "syntax_complete": true, "semantic_complete": true},
+        {"command": "fillnull", "occurrence": 0, "syntax_complete": true, "semantic_complete": true}
+      ],
+      "expected": {
+        "required_normalized_reference_names": ["user"],
+        "required_dependency_pairs": [],
+        "required_transition_targets": ["user"],
+        "required_requirement_pairs": [],
+        "required_gap_codes": ["SPL_UNSUPPORTED_COMMAND"],
+        "required_stage_facts": [
+          {"command": "eval", "occurrence": 0, "required_normalized_reference_names": ["user"], "required_transition_targets": ["user"], "required_requirement_pairs": []},
+          {"command": "fillnull", "occurrence": 0, "required_normalized_reference_names": [], "required_transition_targets": [], "required_requirement_pairs": []}
+        ]
+      },
+      "held_boundaries": [
+        {"command": "makeresults", "occurrence": 0, "required_gap_codes": ["SPL_UNSUPPORTED_COMMAND"]}
+      ]
+    },
+    {
+      "id": "rex_spath",
+      "query": "| makeresults | rex field=_raw \"user=(?<user>[^ ]+)\" | spath input=_raw path=event.id output=event_id | table user event_id",
+      "source_family": "rex_and_spath",
+      "selection_rationale": "Exercises conditional named-capture and explicit path outputs followed by a stable sibling projection.",
+      "targets": [
+        {"command": "rex", "occurrence": 0, "syntax_complete": true, "semantic_complete": true},
+        {"command": "spath", "occurrence": 0, "syntax_complete": true, "semantic_complete": true}
+      ],
+      "expected": {
+        "required_normalized_reference_names": ["_raw", "user", "event_id"],
+        "required_dependency_pairs": [],
+        "required_transition_targets": ["user", "event_id"],
+        "required_requirement_pairs": [
+          {"kind": "field", "name": "_raw"}
+        ],
+        "required_gap_codes": ["SPL_UNSUPPORTED_COMMAND"],
+        "required_stage_facts": [
+          {"command": "rex", "occurrence": 0, "required_normalized_reference_names": ["_raw", "user"], "required_transition_targets": ["user"], "required_requirement_pairs": [{"kind": "field", "name": "_raw"}]},
+          {"command": "spath", "occurrence": 0, "required_normalized_reference_names": ["_raw", "event_id"], "required_transition_targets": ["event_id"], "required_requirement_pairs": [{"kind": "field", "name": "_raw"}]},
+          {"command": "table", "occurrence": 0, "required_normalized_reference_names": ["user", "event_id"], "required_transition_targets": ["user", "event_id"], "required_requirement_pairs": []}
+        ]
+      },
+      "held_boundaries": [
+        {"command": "makeresults", "occurrence": 0, "required_gap_codes": ["SPL_UNSUPPORTED_COMMAND"]}
+      ]
+    },
+    {
+      "id": "rex_spath_held",
+      "query": "| makeresults | rex mode=sed field=_raw \"s/a/b/g\" | spath input=_raw",
+      "source_family": "rex_spath_boundaries",
+      "selection_rationale": "Keeps sed rewriting and spath auto-extraction explicitly incomplete while preserving their exact input reads.",
+      "targets": [
+        {"command": "rex", "occurrence": 0, "syntax_complete": true, "semantic_complete": false},
+        {"command": "spath", "occurrence": 0, "syntax_complete": true, "semantic_complete": false}
+      ],
+      "expected": {
+        "required_normalized_reference_names": ["_raw"],
+        "required_dependency_pairs": [],
+        "required_transition_targets": [],
+        "required_requirement_pairs": [
+          {"kind": "field", "name": "_raw"}
+        ],
+        "required_gap_codes": ["SPL_UNSUPPORTED_COMMAND", "SPL_UNSUPPORTED_SEMANTICS"],
+        "required_stage_facts": [
+          {"command": "rex", "occurrence": 0, "required_normalized_reference_names": ["_raw"], "required_transition_targets": [], "required_requirement_pairs": [{"kind": "field", "name": "_raw"}]},
+          {"command": "spath", "occurrence": 0, "required_normalized_reference_names": ["_raw"], "required_transition_targets": [], "required_requirement_pairs": [{"kind": "field", "name": "_raw"}]}
+        ]
+      },
+      "held_boundaries": [
+        {"command": "makeresults", "occurrence": 0, "required_gap_codes": ["SPL_UNSUPPORTED_COMMAND"]},
+        {"command": "rex", "occurrence": 0, "required_gap_codes": ["SPL_UNSUPPORTED_SEMANTICS"]},
+        {"command": "spath", "occurrence": 0, "required_gap_codes": ["SPL_UNSUPPORTED_SEMANTICS"]}
+      ]
+    },
+    {
+      "id": "field_filters",
+      "query": "| makeresults | bin span=5m _time AS bucket_time | bucket bytes | regex user!=\"^svc_\" | mvexpand values",
+      "source_family": "field_shaping_filters",
+      "selection_rationale": "Composes both bin spellings, an exact regex filter, and multivalue expansion in one field-flow case.",
+      "targets": [
+        {"command": "bin", "occurrence": 0, "syntax_complete": true, "semantic_complete": true},
+        {"command": "bucket", "occurrence": 0, "syntax_complete": true, "semantic_complete": true},
+        {"command": "regex", "occurrence": 0, "syntax_complete": true, "semantic_complete": true},
+        {"command": "mvexpand", "occurrence": 0, "syntax_complete": true, "semantic_complete": true}
+      ],
+      "expected": {
+        "required_normalized_reference_names": ["_time", "bucket_time", "bytes", "user", "values"],
+        "required_dependency_pairs": [],
+        "required_transition_targets": ["bucket_time", "bytes"],
+        "required_requirement_pairs": [
+          {"kind": "field", "name": "_time"},
+          {"kind": "field", "name": "bytes"},
+          {"kind": "field", "name": "user"},
+          {"kind": "field", "name": "values"}
+        ],
+        "required_gap_codes": ["SPL_UNSUPPORTED_COMMAND"],
+        "required_stage_facts": [
+          {"command": "bin", "occurrence": 0, "required_normalized_reference_names": ["_time", "bucket_time"], "required_transition_targets": ["bucket_time"], "required_requirement_pairs": [{"kind": "field", "name": "_time"}]},
+          {"command": "bucket", "occurrence": 0, "required_normalized_reference_names": ["bytes"], "required_transition_targets": ["bytes"], "required_requirement_pairs": [{"kind": "field", "name": "bytes"}]},
+          {"command": "regex", "occurrence": 0, "required_normalized_reference_names": ["user"], "required_transition_targets": [], "required_requirement_pairs": [{"kind": "field", "name": "user"}]},
+          {"command": "mvexpand", "occurrence": 0, "required_normalized_reference_names": ["values"], "required_transition_targets": [], "required_requirement_pairs": [{"kind": "field", "name": "values"}]}
+        ]
+      },
+      "held_boundaries": [
+        {"command": "makeresults", "occurrence": 0, "required_gap_codes": ["SPL_UNSUPPORTED_COMMAND"]}
+      ]
+    },
+    {
+      "id": "multivalue_functions",
+      "query": "| makeresults | eval picked=mvindex(values,0), found=mvfind(values,\"error\") | table picked found",
+      "source_family": "multivalue_functions",
+      "selection_rationale": "Exercises both selected multivalue functions and preserves their projected sibling outputs.",
+      "targets": [
+        {"command": "eval", "occurrence": 0, "syntax_complete": true, "semantic_complete": true}
+      ],
+      "expected": {
+        "required_normalized_reference_names": ["values", "picked", "found"],
+        "required_dependency_pairs": [],
+        "required_transition_targets": ["picked", "found"],
+        "required_requirement_pairs": [
+          {"kind": "field", "name": "values"}
+        ],
+        "required_gap_codes": ["SPL_UNSUPPORTED_COMMAND"],
+        "required_stage_facts": [
+          {"command": "eval", "occurrence": 0, "required_normalized_reference_names": ["values", "picked", "found"], "required_transition_targets": ["picked", "found"], "required_requirement_pairs": [{"kind": "field", "name": "values"}]},
+          {"command": "table", "occurrence": 0, "required_normalized_reference_names": ["picked", "found"], "required_transition_targets": ["picked", "found"], "required_requirement_pairs": []}
+        ]
+      },
+      "held_boundaries": [
+        {"command": "makeresults", "occurrence": 0, "required_gap_codes": ["SPL_UNSUPPORTED_COMMAND"]}
+      ]
+    },
+    {
+      "id": "time_functions",
+      "query": "| makeresults | eval cutoff=relative_time(now(),\"-24h@h\"), label=strftime(_time,\"%F\") | table cutoff label",
+      "source_family": "time_functions",
+      "selection_rationale": "Composes now, relative_time, and strftime while preserving the exact _time read and projected outputs.",
+      "targets": [
+        {"command": "eval", "occurrence": 0, "syntax_complete": true, "semantic_complete": true}
+      ],
+      "expected": {
+        "required_normalized_reference_names": ["cutoff", "label", "_time"],
+        "required_dependency_pairs": [],
+        "required_transition_targets": ["cutoff", "label"],
+        "required_requirement_pairs": [
+          {"kind": "field", "name": "_time"}
+        ],
+        "required_gap_codes": ["SPL_UNSUPPORTED_COMMAND"],
+        "required_stage_facts": [
+          {"command": "eval", "occurrence": 0, "required_normalized_reference_names": ["cutoff", "label", "_time"], "required_transition_targets": ["cutoff", "label"], "required_requirement_pairs": [{"kind": "field", "name": "_time"}]},
+          {"command": "table", "occurrence": 0, "required_normalized_reference_names": ["cutoff", "label"], "required_transition_targets": ["cutoff", "label"], "required_requirement_pairs": []}
+        ]
+      },
+      "held_boundaries": [
+        {"command": "makeresults", "occurrence": 0, "required_gap_codes": ["SPL_UNSUPPORTED_COMMAND"]}
+      ]
+    },
+    {
+      "id": "aggregate_functions",
+      "query": "| makeresults | stats earliest(_time) AS first_seen latest(_time) AS last_seen stdev(bytes) AS spread BY user",
+      "source_family": "aggregate_functions",
+      "selection_rationale": "Exercises all selected aggregate functions with exact aliases and a grouping field.",
+      "targets": [
+        {"command": "stats", "occurrence": 0, "syntax_complete": true, "semantic_complete": true}
+      ],
+      "expected": {
+        "required_normalized_reference_names": ["_time", "first_seen", "last_seen", "bytes", "spread", "user"],
+        "required_dependency_pairs": [],
+        "required_transition_targets": ["user", "first_seen", "last_seen", "spread"],
+        "required_requirement_pairs": [
+          {"kind": "field", "name": "_time"},
+          {"kind": "field", "name": "bytes"},
+          {"kind": "field", "name": "user"}
+        ],
+        "required_gap_codes": ["SPL_UNSUPPORTED_COMMAND"],
+        "required_stage_facts": [
+          {"command": "stats", "occurrence": 0, "required_normalized_reference_names": ["_time", "first_seen", "last_seen", "bytes", "spread", "user"], "required_transition_targets": ["user", "first_seen", "last_seen", "spread"], "required_requirement_pairs": [{"kind": "field", "name": "_time"}, {"kind": "field", "name": "bytes"}, {"kind": "field", "name": "user"}]}
+        ]
+      },
+      "held_boundaries": [
+        {"command": "makeresults", "occurrence": 0, "required_gap_codes": ["SPL_UNSUPPORTED_COMMAND"]}
+      ]
+    },
+    {
+      "id": "join_branch",
+      "query": "search root=* | join user [ search child=* | table user child ] | table root user",
+      "source_family": "join_branch",
+      "selection_rationale": "Requires the exact parent join-key read while preserving child-scope and downstream projection facts.",
+      "targets": [
+        {"command": "join", "occurrence": 0, "syntax_complete": true, "semantic_complete": false}
+      ],
+      "expected": {
+        "required_normalized_reference_names": ["root", "user", "child"],
+        "required_dependency_pairs": [],
+        "required_transition_targets": ["user", "child", "root"],
+        "required_requirement_pairs": [
+          {"kind": "field", "name": "root"},
+          {"kind": "field", "name": "user"},
+          {"kind": "field", "name": "child"}
+        ],
+        "required_gap_codes": ["SPL_UNSUPPORTED_SEMANTICS"],
+        "required_stage_facts": [
+          {"command": "search", "occurrence": 0, "required_normalized_reference_names": ["root"], "required_transition_targets": [], "required_requirement_pairs": [{"kind": "field", "name": "root"}]},
+          {"command": "join", "occurrence": 0, "required_normalized_reference_names": ["user"], "required_transition_targets": [], "required_requirement_pairs": [{"kind": "field", "name": "user"}]},
+          {"command": "search", "occurrence": 1, "required_normalized_reference_names": ["child"], "required_transition_targets": [], "required_requirement_pairs": [{"kind": "field", "name": "child"}]},
+          {"command": "table", "occurrence": 0, "required_normalized_reference_names": ["user", "child"], "required_transition_targets": ["user", "child"], "required_requirement_pairs": [{"kind": "field", "name": "user"}, {"kind": "field", "name": "child"}]},
+          {"command": "table", "occurrence": 1, "required_normalized_reference_names": ["root", "user"], "required_transition_targets": ["root", "user"], "required_requirement_pairs": [{"kind": "field", "name": "root"}, {"kind": "field", "name": "user"}]}
+        ]
+      },
+      "held_boundaries": [
+        {"command": "join", "occurrence": 0, "required_gap_codes": ["SPL_UNSUPPORTED_SEMANTICS"]}
+      ]
+    },
+    {
+      "id": "append_branch",
+      "query": "search root=* | append [ search child=* | table child ] | table root child",
+      "source_family": "append_branch",
+      "selection_rationale": "Preserves child references and the known parent binding without claiming a complete merged field set.",
+      "targets": [
+        {"command": "append", "occurrence": 0, "syntax_complete": true, "semantic_complete": false}
+      ],
+      "expected": {
+        "required_normalized_reference_names": ["root", "child"],
+        "required_dependency_pairs": [],
+        "required_transition_targets": ["child", "root"],
+        "required_requirement_pairs": [
+          {"kind": "field", "name": "root"},
+          {"kind": "field", "name": "child"}
+        ],
+        "required_gap_codes": ["SPL_UNSUPPORTED_SEMANTICS"],
+        "required_stage_facts": [
+          {"command": "search", "occurrence": 0, "required_normalized_reference_names": ["root"], "required_transition_targets": [], "required_requirement_pairs": [{"kind": "field", "name": "root"}]},
+          {"command": "search", "occurrence": 1, "required_normalized_reference_names": ["child"], "required_transition_targets": [], "required_requirement_pairs": [{"kind": "field", "name": "child"}]},
+          {"command": "table", "occurrence": 0, "required_normalized_reference_names": ["child"], "required_transition_targets": ["child"], "required_requirement_pairs": [{"kind": "field", "name": "child"}]},
+          {"command": "table", "occurrence": 1, "required_normalized_reference_names": ["root", "child"], "required_transition_targets": ["root", "child"], "required_requirement_pairs": [{"kind": "field", "name": "root"}, {"kind": "field", "name": "child"}]}
+        ]
+      },
+      "held_boundaries": [
+        {"command": "append", "occurrence": 0, "required_gap_codes": ["SPL_UNSUPPORTED_SEMANTICS"]}
+      ]
+    },
+    {
+      "id": "appendpipe_branch",
+      "query": "search root=* | eval local=root | appendpipe [ stats count BY local ] | table local count",
+      "source_family": "appendpipe_branch",
+      "selection_rationale": "Preserves parent-derived input and child aggregation facts across the incomplete branch merge.",
+      "targets": [
+        {"command": "appendpipe", "occurrence": 0, "syntax_complete": true, "semantic_complete": false}
+      ],
+      "expected": {
+        "required_normalized_reference_names": ["root", "local", "count"],
+        "required_dependency_pairs": [],
+        "required_transition_targets": ["local", "count"],
+        "required_requirement_pairs": [
+          {"kind": "field", "name": "root"}
+        ],
+        "required_gap_codes": ["SPL_UNSUPPORTED_SEMANTICS"],
+        "required_stage_facts": [
+          {"command": "search", "occurrence": 0, "required_normalized_reference_names": ["root"], "required_transition_targets": [], "required_requirement_pairs": [{"kind": "field", "name": "root"}]},
+          {"command": "eval", "occurrence": 0, "required_normalized_reference_names": ["local", "root"], "required_transition_targets": ["local"], "required_requirement_pairs": [{"kind": "field", "name": "root"}]},
+          {"command": "stats", "occurrence": 0, "required_normalized_reference_names": ["count", "local"], "required_transition_targets": ["local", "count"], "required_requirement_pairs": []},
+          {"command": "table", "occurrence": 0, "required_normalized_reference_names": ["local", "count"], "required_transition_targets": ["local", "count"], "required_requirement_pairs": []}
+        ]
+      },
+      "held_boundaries": [
+        {"command": "appendpipe", "occurrence": 0, "required_gap_codes": ["SPL_UNSUPPORTED_SEMANTICS"]}
+      ]
+    },
+    {
+      "id": "macro_sibling",
+      "query": "`source_macro` | stats count BY user",
+      "source_family": "source_macro_with_sibling",
+      "selection_rationale": "Keeps unresolved macro expansion visible while proving the following aggregation retains sound facts.",
+      "targets": [
+        {"command": "stats", "occurrence": 0, "syntax_complete": true, "semantic_complete": true}
+      ],
+      "expected": {
+        "required_normalized_reference_names": ["source_macro", "count", "user"],
+        "required_dependency_pairs": [
+          {"kind": "macro", "name": "source_macro"}
+        ],
+        "required_transition_targets": ["user", "count"],
+        "required_requirement_pairs": [
+          {"kind": "macro", "name": "source_macro"},
+          {"kind": "field", "name": "user"}
+        ],
+        "required_gap_codes": ["SPL_DYNAMIC_REFERENCE"],
+        "required_stage_facts": [
+          {"command": "search", "occurrence": 0, "required_normalized_reference_names": ["source_macro"], "required_transition_targets": [], "required_requirement_pairs": [{"kind": "macro", "name": "source_macro"}]},
+          {"command": "stats", "occurrence": 0, "required_normalized_reference_names": ["count", "user"], "required_transition_targets": ["user", "count"], "required_requirement_pairs": [{"kind": "field", "name": "user"}]}
+        ]
+      },
+      "held_boundaries": [
+        {"command": "search", "occurrence": 0, "required_gap_codes": ["SPL_DYNAMIC_REFERENCE"]}
+      ]
+    }
+  ]
+}
