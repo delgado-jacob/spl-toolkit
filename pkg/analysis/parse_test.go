@@ -424,6 +424,63 @@ func TestParseMilestone10HeldForms(t *testing.T) {
 		})
 	}
 
+	t.Run("bin invalid unit suffix preserves input and outer sibling", func(t *testing.T) {
+		p := parseDocument(`| bin span=5garbage _time | table safe`)
+		foundInvalidValue := false
+		for _, diagnostic := range p.diagnostics {
+			foundInvalidValue = foundInvalidValue || diagnostic.Message == "invalid option value"
+		}
+		if !foundInvalidValue {
+			t.Fatalf("invalid bin unit suffix diagnostics = %+v", p.diagnostics)
+		}
+		outer := p.tree.AnalysisPipeline().AllAnalysisStage()
+		if len(outer) != 2 {
+			t.Fatalf("outer stages = %d", len(outer))
+		}
+		bin, ok := outer[0].(*parser.AnalysisBinStageContext)
+		if !ok || bin.AnalysisBin() == nil || len(bin.AnalysisBin().AllAnalysisBinOption()) != 1 || bin.AnalysisBin().AnalysisBinOption(0).AnalysisUnitOptionValue() == nil || bin.AnalysisBin().AnalysisBinOption(0).AnalysisUnitOptionValue().GetText() != "5garbage" || bin.AnalysisBin().AnalysisIdentifier() == nil || bin.AnalysisBin().AnalysisIdentifier().GetText() != "_time" {
+			t.Fatalf("bin context = %T %q", outer[0], outer[0].GetText())
+		}
+		if _, ok := outer[1].(*parser.AnalysisFieldsStageContext); !ok || outer[1].GetText() != "tablesafe" {
+			t.Fatalf("outer sibling stage = %T %q", outer[1], outer[1].GetText())
+		}
+	})
+
+	t.Run("tstats invalid span suffix preserves later groups and outer sibling", func(t *testing.T) {
+		p := parseDocument(`| tstats count BY _time span=5garbage host region | table safe`)
+		foundInvalidValue := false
+		for _, diagnostic := range p.diagnostics {
+			foundInvalidValue = foundInvalidValue || diagnostic.Message == "invalid option value"
+		}
+		if !foundInvalidValue {
+			t.Fatalf("invalid tstats span suffix diagnostics = %+v", p.diagnostics)
+		}
+		outer := p.tree.AnalysisPipeline().AllAnalysisStage()
+		if len(outer) != 2 {
+			t.Fatalf("outer stages = %d", len(outer))
+		}
+		tstats, ok := outer[0].(*parser.AnalysisTstatsStageContext)
+		if !ok || tstats.AnalysisTstats() == nil || tstats.AnalysisTstats().AnalysisTstatsGroup() == nil {
+			t.Fatalf("tstats context = %T %q", outer[0], outer[0].GetText())
+		}
+		items := tstats.AnalysisTstats().AnalysisTstatsGroup().AllAnalysisTstatsGroupItem()
+		if len(items) != 3 {
+			t.Fatalf("group items = %d, text = %q", len(items), tstats.AnalysisTstats().AnalysisTstatsGroup().GetText())
+		}
+		for i, want := range []string{"_time", "host", "region"} {
+			if items[i].AnalysisIdentifier() == nil || items[i].AnalysisIdentifier().GetText() != want {
+				t.Fatalf("group item %d = %q, want %q", i, items[i].GetText(), want)
+			}
+		}
+		span := items[0].AnalysisTstatsSpanOption()
+		if span == nil || span.AnalysisUnitOptionValue() == nil || span.AnalysisUnitOptionValue().GetText() != "5garbage" {
+			t.Fatalf("span context = %v", span)
+		}
+		if _, ok := outer[1].(*parser.AnalysisFieldsStageContext); !ok || outer[1].GetText() != "tablesafe" {
+			t.Fatalf("outer sibling stage = %T %q", outer[1], outer[1].GetText())
+		}
+	})
+
 	t.Run("append missing option value preserves child and outer sibling", func(t *testing.T) {
 		p := parseDocument(`| append maxout= [ search * ] | table safe`)
 		if len(p.diagnostics) == 0 {
@@ -481,6 +538,63 @@ func TestParseMilestone10HeldForms(t *testing.T) {
 		spath, ok := child.(*parser.AnalysisSpathStageContext)
 		if !ok || spath.AnalysisSpath() == nil || len(spath.AnalysisSpath().AllAnalysisSpathOutputOption()) != 1 || spath.AnalysisSpath().AnalysisSpathOutputOption(0).AnalysisIdentifier() != nil {
 			t.Fatalf("child stage = %T %q", child, child.GetText())
+		}
+		if _, ok := outer[1].(*parser.AnalysisFieldsStageContext); !ok || outer[1].GetText() != "tablesafe" {
+			t.Fatalf("outer sibling stage = %T %q", outer[1], outer[1].GetText())
+		}
+	})
+
+	t.Run("join missing key preserves child and outer sibling", func(t *testing.T) {
+		p := parseDocument(`| join type= [ search * ] | table safe`)
+		foundMissingKey := false
+		for _, diagnostic := range p.diagnostics {
+			foundMissingKey = foundMissingKey || diagnostic.Message == "missing join key"
+		}
+		if !foundMissingKey {
+			t.Fatalf("missing join key diagnostics = %+v", p.diagnostics)
+		}
+		outer := p.tree.AnalysisPipeline().AllAnalysisStage()
+		if len(outer) != 2 {
+			t.Fatalf("outer stages = %d", len(outer))
+		}
+		join, ok := outer[0].(*parser.AnalysisJoinStageContext)
+		if !ok || join.AnalysisJoin() == nil || len(join.AnalysisJoin().AllAnalysisJoinOption()) != 1 || len(join.AnalysisJoin().AllAnalysisIdentifier()) != 0 || join.AnalysisJoin().AnalysisSubquery() == nil {
+			t.Fatalf("join context = %T %q", outer[0], outer[0].GetText())
+		}
+		child := join.AnalysisJoin().AnalysisSubquery().AnalysisPipeline().AnalysisInitialStage().AnalysisStage()
+		if _, ok := child.(*parser.AnalysisSearchStageContext); !ok || child.GetText() != "search*" {
+			t.Fatalf("child stage = %T %q", child, child.GetText())
+		}
+		if _, ok := outer[1].(*parser.AnalysisFieldsStageContext); !ok || outer[1].GetText() != "tablesafe" {
+			t.Fatalf("outer sibling stage = %T %q", outer[1], outer[1].GetText())
+		}
+	})
+
+	t.Run("nested join missing key preserves both subqueries and outer sibling", func(t *testing.T) {
+		p := parseDocument(`| append [ join type= [ search * ] ] | table safe`)
+		foundMissingKey := false
+		for _, diagnostic := range p.diagnostics {
+			foundMissingKey = foundMissingKey || diagnostic.Message == "missing join key"
+		}
+		if !foundMissingKey {
+			t.Fatalf("missing nested join key diagnostics = %+v", p.diagnostics)
+		}
+		outer := p.tree.AnalysisPipeline().AllAnalysisStage()
+		if len(outer) != 2 {
+			t.Fatalf("outer stages = %d", len(outer))
+		}
+		branch, ok := outer[0].(*parser.AnalysisBranchStageContext)
+		if !ok || branch.AnalysisBranch() == nil || branch.AnalysisBranch().AnalysisSubquery() == nil {
+			t.Fatalf("branch context = %T %q", outer[0], outer[0].GetText())
+		}
+		joinStage := branch.AnalysisBranch().AnalysisSubquery().AnalysisPipeline().AnalysisInitialStage().AnalysisStage()
+		join, ok := joinStage.(*parser.AnalysisJoinStageContext)
+		if !ok || join.AnalysisJoin() == nil || len(join.AnalysisJoin().AllAnalysisIdentifier()) != 0 || join.AnalysisJoin().AnalysisSubquery() == nil {
+			t.Fatalf("join child = %T %q", joinStage, joinStage.GetText())
+		}
+		search := join.AnalysisJoin().AnalysisSubquery().AnalysisPipeline().AnalysisInitialStage().AnalysisStage()
+		if _, ok := search.(*parser.AnalysisSearchStageContext); !ok || search.GetText() != "search*" {
+			t.Fatalf("search child = %T %q", search, search.GetText())
 		}
 		if _, ok := outer[1].(*parser.AnalysisFieldsStageContext); !ok || outer[1].GetText() != "tablesafe" {
 			t.Fatalf("outer sibling stage = %T %q", outer[1], outer[1].GetText())

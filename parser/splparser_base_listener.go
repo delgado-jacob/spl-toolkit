@@ -508,11 +508,11 @@ func (s *BaseSPLParserListener) EnterAnalysisUnitOptionValue(ctx *AnalysisUnitOp
 // ExitAnalysisUnitOptionValue is called when production analysisUnitOptionValue is exited.
 func (s *BaseSPLParserListener) ExitAnalysisUnitOptionValue(ctx *AnalysisUnitOptionValueContext) {}
 
-// EnterAnalysisTimeUnit is called when production analysisTimeUnit is entered.
-func (s *BaseSPLParserListener) EnterAnalysisTimeUnit(ctx *AnalysisTimeUnitContext) {}
+// EnterAnalysisUnitSuffix is called when production analysisUnitSuffix is entered.
+func (s *BaseSPLParserListener) EnterAnalysisUnitSuffix(ctx *AnalysisUnitSuffixContext) {}
 
-// ExitAnalysisTimeUnit is called when production analysisTimeUnit is exited.
-func (s *BaseSPLParserListener) ExitAnalysisTimeUnit(ctx *AnalysisTimeUnitContext) {}
+// ExitAnalysisUnitSuffix is called when production analysisUnitSuffix is exited.
+func (s *BaseSPLParserListener) ExitAnalysisUnitSuffix(ctx *AnalysisUnitSuffixContext) {}
 
 // EnterAnalysisInvalidOptionValue is called when production analysisInvalidOptionValue is entered.
 func (s *BaseSPLParserListener) EnterAnalysisInvalidOptionValue(ctx *AnalysisInvalidOptionValueContext) {
@@ -529,6 +529,12 @@ func (s *BaseSPLParserListener) EnterAnalysisMissingOptionValue(ctx *AnalysisMis
 // ExitAnalysisMissingOptionValue is called when production analysisMissingOptionValue is exited.
 func (s *BaseSPLParserListener) ExitAnalysisMissingOptionValue(ctx *AnalysisMissingOptionValueContext) {
 }
+
+// EnterAnalysisMissingJoinKey is called when production analysisMissingJoinKey is entered.
+func (s *BaseSPLParserListener) EnterAnalysisMissingJoinKey(ctx *AnalysisMissingJoinKeyContext) {}
+
+// ExitAnalysisMissingJoinKey is called when production analysisMissingJoinKey is exited.
+func (s *BaseSPLParserListener) ExitAnalysisMissingJoinKey(ctx *AnalysisMissingJoinKeyContext) {}
 
 // EnterAnalysisDataModelName is called when production analysisDataModelName is entered.
 func (s *BaseSPLParserListener) EnterAnalysisDataModelName(ctx *AnalysisDataModelNameContext) {}

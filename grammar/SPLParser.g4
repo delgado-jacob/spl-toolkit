@@ -172,7 +172,7 @@ analysisTstats
 analysisTstatsOption : analysisIdentifier EQ (analysisInvalidOptionValue | analysisOptionValue | analysisMissingOptionValue);
 analysisTstatsGroup : BY analysisTstatsGroupItem (COMMA? analysisTstatsGroupItem)*;
 analysisTstatsGroupItem : analysisIdentifier analysisTstatsSpanOption?;
-analysisTstatsSpanOption : {p.analysisCommandIs("span")}? analysisIdentifier EQ (analysisUnitOptionValue | analysisInvalidOptionValue | analysisMissingOptionValue);
+analysisTstatsSpanOption : {p.analysisCommandIs("span")}? analysisIdentifier EQ (analysisUnitOptionValue | analysisMissingOptionValue);
 analysisFillnull : analysisFillnullValueOption? (analysisIdentifier (COMMA? analysisIdentifier)*)?;
 analysisFillnullValueOption : {p.analysisCommandIs("value")}? analysisIdentifier EQ (analysisInvalidOptionValue | analysisLiteral | analysisMissingOptionValue);
 analysisRex : (analysisRexFieldOption | analysisRexMaxMatchOption | analysisRexOffsetFieldOption | analysisRexModeOption)* STRING;
@@ -186,24 +186,32 @@ analysisSpathPathOption : {p.analysisCommandIs("path")}? analysisIdentifier EQ (
 analysisSpathOutputOption : {p.analysisCommandIs("output")}? OUTPUT EQ (analysisInvalidOptionValue | analysisIdentifier | analysisMissingOptionValue);
 analysisBin : analysisBinOption* analysisIdentifier analysisAlias?;
 analysisBinOption
-    : {p.analysisCommandIs("span", "minspan")}? analysisIdentifier EQ (analysisUnitOptionValue | analysisInvalidOptionValue | analysisMissingOptionValue)
+    : {p.analysisCommandIs("span", "minspan")}? analysisIdentifier EQ (analysisUnitOptionValue | analysisMissingOptionValue)
     | {!p.analysisCommandIs("span", "minspan")}? analysisIdentifier EQ (analysisInvalidOptionValue | analysisOptionValue | analysisMissingOptionValue)
     ;
 analysisRegex : (analysisIdentifier (EQ | NE))? STRING;
 analysisMvexpand : analysisIdentifier analysisMvexpandOption*;
 analysisMvexpandOption : analysisIdentifier EQ (analysisInvalidOptionValue | analysisOptionValue | analysisMissingOptionValue);
-analysisJoin : analysisJoinOption* analysisIdentifier (COMMA? analysisIdentifier)* analysisSubquery;
+analysisJoin : analysisJoinOption* (analysisMissingJoinKey | analysisIdentifier (COMMA? analysisIdentifier)*) analysisSubquery;
 analysisJoinOption : analysisIdentifier EQ (analysisInvalidOptionValue | analysisOptionValue | analysisMissingOptionValue);
 analysisBranch : analysisBranchOption* analysisSubquery;
 analysisBranchOption : analysisIdentifier EQ (analysisInvalidOptionValue | analysisOptionValue | analysisMissingOptionValue);
 analysisOptionValue : analysisLiteral | analysisIdentifier;
 analysisUnitOptionValue
-    : NUMBER {p.analysisTokensAdjacent()}? analysisTimeUnit
+    : NUMBER {p.analysisTokensAdjacent()}? analysisUnitSuffix
     | analysisLiteral
     | analysisIdentifier
     ;
-analysisTimeUnit
-    : {p.analysisCommandIs("s", "m", "h", "d", "w", "y", "q", "w0", "w1", "w2", "w3", "w4", "w5", "w6", "w7", "qtr", "mon", "week", "year", "quarter")}? analysisIdentifier
+analysisUnitSuffix
+    : analysisIdentifier
+      {
+unit := p.GetTokenStream().LT(-1)
+switch strings.ToLower(unit.GetText()) {
+case "s", "m", "h", "d", "w", "y", "q", "w0", "w1", "w2", "w3", "w4", "w5", "w6", "w7", "qtr", "mon", "week", "year", "quarter":
+default:
+    p.NotifyErrorListeners("invalid option value", unit, nil)
+}
+}
     ;
 analysisInvalidOptionValue
     : NUMBER {p.analysisTokensAdjacent()}? analysisIdentifier
@@ -212,6 +220,10 @@ analysisInvalidOptionValue
 analysisMissingOptionValue
     : {p.GetTokenStream().LA(1) == SPLParserPIPE || p.GetTokenStream().LA(1) == SPLParserLBRACK || p.GetTokenStream().LA(1) == SPLParserRBRACK || p.GetTokenStream().LA(1) == antlr.TokenEOF}?
       {p.NotifyErrorListeners("missing option value", p.GetCurrentToken(), nil)}
+    ;
+analysisMissingJoinKey
+    : {p.GetTokenStream().LA(1) == SPLParserLBRACK}?
+      {p.NotifyErrorListeners("missing join key", p.GetCurrentToken(), nil)}
     ;
 // Catalog roles are established here; qualified names remain single lexer tokens.
 analysisDataModelName : analysisCatalogName;

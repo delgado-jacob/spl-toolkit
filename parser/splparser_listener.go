@@ -247,14 +247,17 @@ type SPLParserListener interface {
 	// EnterAnalysisUnitOptionValue is called when entering the analysisUnitOptionValue production.
 	EnterAnalysisUnitOptionValue(c *AnalysisUnitOptionValueContext)
 
-	// EnterAnalysisTimeUnit is called when entering the analysisTimeUnit production.
-	EnterAnalysisTimeUnit(c *AnalysisTimeUnitContext)
+	// EnterAnalysisUnitSuffix is called when entering the analysisUnitSuffix production.
+	EnterAnalysisUnitSuffix(c *AnalysisUnitSuffixContext)
 
 	// EnterAnalysisInvalidOptionValue is called when entering the analysisInvalidOptionValue production.
 	EnterAnalysisInvalidOptionValue(c *AnalysisInvalidOptionValueContext)
 
 	// EnterAnalysisMissingOptionValue is called when entering the analysisMissingOptionValue production.
 	EnterAnalysisMissingOptionValue(c *AnalysisMissingOptionValueContext)
+
+	// EnterAnalysisMissingJoinKey is called when entering the analysisMissingJoinKey production.
+	EnterAnalysisMissingJoinKey(c *AnalysisMissingJoinKeyContext)
 
 	// EnterAnalysisDataModelName is called when entering the analysisDataModelName production.
 	EnterAnalysisDataModelName(c *AnalysisDataModelNameContext)
@@ -637,14 +640,17 @@ type SPLParserListener interface {
 	// ExitAnalysisUnitOptionValue is called when exiting the analysisUnitOptionValue production.
 	ExitAnalysisUnitOptionValue(c *AnalysisUnitOptionValueContext)
 
-	// ExitAnalysisTimeUnit is called when exiting the analysisTimeUnit production.
-	ExitAnalysisTimeUnit(c *AnalysisTimeUnitContext)
+	// ExitAnalysisUnitSuffix is called when exiting the analysisUnitSuffix production.
+	ExitAnalysisUnitSuffix(c *AnalysisUnitSuffixContext)
 
 	// ExitAnalysisInvalidOptionValue is called when exiting the analysisInvalidOptionValue production.
 	ExitAnalysisInvalidOptionValue(c *AnalysisInvalidOptionValueContext)
 
 	// ExitAnalysisMissingOptionValue is called when exiting the analysisMissingOptionValue production.
 	ExitAnalysisMissingOptionValue(c *AnalysisMissingOptionValueContext)
+
+	// ExitAnalysisMissingJoinKey is called when exiting the analysisMissingJoinKey production.
+	ExitAnalysisMissingJoinKey(c *AnalysisMissingJoinKeyContext)
 
 	// ExitAnalysisDataModelName is called when exiting the analysisDataModelName production.
 	ExitAnalysisDataModelName(c *AnalysisDataModelNameContext)

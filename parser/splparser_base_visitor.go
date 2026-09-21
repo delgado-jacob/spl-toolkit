@@ -327,7 +327,7 @@ func (v *BaseSPLParserVisitor) VisitAnalysisUnitOptionValue(ctx *AnalysisUnitOpt
 	return v.VisitChildren(ctx)
 }
 
-func (v *BaseSPLParserVisitor) VisitAnalysisTimeUnit(ctx *AnalysisTimeUnitContext) interface{} {
+func (v *BaseSPLParserVisitor) VisitAnalysisUnitSuffix(ctx *AnalysisUnitSuffixContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
@@ -336,6 +336,10 @@ func (v *BaseSPLParserVisitor) VisitAnalysisInvalidOptionValue(ctx *AnalysisInva
 }
 
 func (v *BaseSPLParserVisitor) VisitAnalysisMissingOptionValue(ctx *AnalysisMissingOptionValueContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisMissingJoinKey(ctx *AnalysisMissingJoinKeyContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
