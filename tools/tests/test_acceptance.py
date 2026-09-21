@@ -5,10 +5,12 @@ from __future__ import annotations
 import copy
 import hashlib
 import json
+import subprocess
 from pathlib import Path
 
 import pytest
 
+from tools import check_acceptance
 from tools.check_acceptance import load_records, validate_records
 
 
@@ -163,6 +165,39 @@ def passing_records() -> list[dict]:
 
 def test_complete_current_evidence_passes():
     assert validate_records(passing_records(), SHA) == []
+
+
+def test_exact_source_hash_inputs_are_stable_in_windows_checkout(tmp_path: Path):
+    relative_paths = set(check_acceptance.TOOLING_SOURCE_HASHES)
+    relative_paths.update(
+        path.relative_to(ROOT).as_posix()
+        for paths in check_acceptance.REQUIRED_TEST_HASH_PATHS.values()
+        for path in paths.values()
+    )
+    checkout = tmp_path / "autocrlf"
+    checkout.mkdir()
+    subprocess.run(
+        [
+            "git", "-c", "core.autocrlf=true", "checkout-index", "--force", "--stdin",
+            f"--prefix={checkout.resolve()}/",
+        ],
+        cwd=ROOT,
+        input="".join(f"{path}\n" for path in sorted(relative_paths)),
+        check=True,
+        text=True,
+    )
+
+    mismatches = {}
+    for path in sorted(relative_paths):
+        canonical = hashlib.sha256((ROOT / path).read_bytes()).hexdigest()
+        windows_checkout = hashlib.sha256((checkout / path).read_bytes()).hexdigest()
+        if windows_checkout != canonical:
+            mismatches[path] = {
+                "canonical": canonical,
+                "windows_checkout": windows_checkout,
+            }
+
+    assert mismatches == {}
 
 
 def test_installed_contract_evidence_cannot_be_missing_or_malformed():

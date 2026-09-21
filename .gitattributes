@@ -1,3 +1,13 @@
 contracts/sarif/sarif-schema-2.1.0.json text eol=lf
+go.mod text eol=lf
+go.sum text eol=lf
+contracts/** text eol=lf
+internal/**/*.go text eol=lf
+parser/**/*.go text eol=lf
+pkg/**/*.go text eol=lf
+pkg/analysis/capabilitydata/*.json text eol=lf
 python/tests/test_native_requirements.py text eol=lf
+python/tests/test_native_analysis.py text eol=lf
+python/tests/test_native_spl2.py text eol=lf
 tests/acceptance/test_requirements_surfaces.py text eol=lf
+tests/acceptance/test_analysis_surfaces.py text eol=lf
