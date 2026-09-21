@@ -154,9 +154,50 @@ analysisStage
     | {p.analysisCommandIs("inputlookup")}? analysisCommandName analysisOption* analysisCatalogName #AnalysisInputlookupStage
     | {p.analysisCommandIs("datamodel")}? analysisCommandName analysisDataModelName analysisDataModelDataset? analysisArgument* #AnalysisDatamodelStage
     | {p.analysisCommandIs("from")}? analysisCommandName analysisFromDataset #AnalysisFromStage
-    | {p.analysisCommandIs("tstats")}? analysisCommandName analysisOption* analysisAggregate (COMMA? analysisAggregate)* analysisTstatsFrom? analysisTstatsWhere? analysisGroup? #AnalysisTstatsStage
+    | {p.analysisCommandIs("tstats")}? analysisCommandName analysisTstats #AnalysisTstatsStage
+    | {p.analysisCommandIs("fillnull")}? analysisCommandName analysisFillnull #AnalysisFillnullStage
+    | {p.analysisCommandIs("rex")}? analysisCommandName analysisRex #AnalysisRexStage
+    | {p.analysisCommandIs("spath")}? analysisCommandName analysisSpath #AnalysisSpathStage
+    | {p.analysisCommandIs("bin", "bucket")}? analysisCommandName analysisBin #AnalysisBinStage
+    | {p.analysisCommandIs("regex")}? analysisCommandName analysisRegex #AnalysisRegexStage
+    | {p.analysisCommandIs("mvexpand")}? analysisCommandName analysisMvexpand #AnalysisMvexpandStage
+    | {p.analysisCommandIs("join")}? analysisCommandName analysisJoin #AnalysisJoinStage
+    | {p.analysisCommandIs("append", "appendpipe")}? analysisCommandName analysisBranch #AnalysisBranchStage
     | analysisMacro #AnalysisMacroStage
-    | {!p.analysisCommandIs("search", "where", "eval", "rename", "fields", "table", "stats", "eventstats", "streamstats", "lookup", "sort", "dedup", "head", "tail", "inputlookup", "datamodel", "from", "tstats")}? analysisCommandName analysisArgument* #AnalysisOpaqueStage
+    | {!p.analysisCommandIs("search", "where", "eval", "rename", "fields", "table", "stats", "eventstats", "streamstats", "lookup", "sort", "dedup", "head", "tail", "inputlookup", "datamodel", "from", "tstats", "fillnull", "rex", "spath", "bin", "bucket", "regex", "mvexpand", "join", "append", "appendpipe")}? analysisCommandName analysisArgument* #AnalysisOpaqueStage
+    ;
+analysisTstats
+    : analysisTstatsOption* analysisMacro? analysisAggregate ({!p.analysisCommandIs("from", "where", "by")}? COMMA? analysisAggregate)* analysisTstatsFrom? analysisTstatsWhere? analysisTstatsGroup?
+    ;
+analysisTstatsOption : analysisIdentifier EQ analysisOptionValue;
+analysisTstatsGroup : BY analysisTstatsGroupItem (COMMA? analysisTstatsGroupItem)*;
+analysisTstatsGroupItem : analysisIdentifier analysisTstatsSpanOption?;
+analysisTstatsSpanOption : {p.analysisCommandIs("span")}? analysisIdentifier EQ analysisOptionValue;
+analysisFillnull : analysisFillnullValueOption? (analysisIdentifier (COMMA? analysisIdentifier)*)?;
+analysisFillnullValueOption : {p.analysisCommandIs("value")}? analysisIdentifier EQ analysisLiteral;
+analysisRex : (analysisRexFieldOption | analysisRexMaxMatchOption | analysisRexOffsetFieldOption | analysisRexModeOption)* STRING;
+analysisRexFieldOption : {p.analysisCommandIs("field")}? analysisIdentifier EQ analysisIdentifier;
+analysisRexMaxMatchOption : {p.analysisCommandIs("max_match")}? analysisIdentifier EQ analysisLiteral;
+analysisRexOffsetFieldOption : {p.analysisCommandIs("offset_field")}? analysisIdentifier EQ analysisIdentifier;
+analysisRexModeOption : {p.analysisCommandIs("mode")}? analysisIdentifier EQ analysisIdentifier;
+analysisSpath : (analysisSpathInputOption | analysisSpathPathOption | analysisSpathOutputOption)*;
+analysisSpathInputOption : {p.analysisCommandIs("input")}? analysisIdentifier EQ analysisIdentifier;
+analysisSpathPathOption : {p.analysisCommandIs("path")}? analysisIdentifier EQ analysisOptionValue;
+analysisSpathOutputOption : {p.analysisCommandIs("output")}? OUTPUT EQ analysisIdentifier;
+analysisBin : analysisBinOption* analysisIdentifier analysisAlias?;
+analysisBinOption : analysisIdentifier EQ analysisOptionValue;
+analysisRegex : (analysisIdentifier (EQ | NE))? STRING;
+analysisMvexpand : analysisIdentifier analysisMvexpandOption*;
+analysisMvexpandOption : analysisIdentifier EQ analysisOptionValue;
+analysisJoin : analysisJoinOption* analysisIdentifier (COMMA? analysisIdentifier)* analysisSubquery;
+analysisJoinOption : analysisIdentifier EQ analysisOptionValue;
+analysisBranch : analysisBranchOption* analysisSubquery;
+analysisBranchOption : analysisIdentifier EQ analysisOptionValue;
+analysisOptionValue
+    : STRING
+    | TIME
+    | NUMBER ({p.analysisTokensAdjacent()}? analysisIdentifier)?
+    | analysisIdentifier
     ;
 // Catalog roles are established here; qualified names remain single lexer tokens.
 analysisDataModelName : analysisCatalogName;

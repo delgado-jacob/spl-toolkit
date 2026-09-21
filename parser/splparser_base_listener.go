@@ -278,6 +278,54 @@ func (s *BaseSPLParserListener) EnterAnalysisTstatsStage(ctx *AnalysisTstatsStag
 // ExitAnalysisTstatsStage is called when production AnalysisTstatsStage is exited.
 func (s *BaseSPLParserListener) ExitAnalysisTstatsStage(ctx *AnalysisTstatsStageContext) {}
 
+// EnterAnalysisFillnullStage is called when production AnalysisFillnullStage is entered.
+func (s *BaseSPLParserListener) EnterAnalysisFillnullStage(ctx *AnalysisFillnullStageContext) {}
+
+// ExitAnalysisFillnullStage is called when production AnalysisFillnullStage is exited.
+func (s *BaseSPLParserListener) ExitAnalysisFillnullStage(ctx *AnalysisFillnullStageContext) {}
+
+// EnterAnalysisRexStage is called when production AnalysisRexStage is entered.
+func (s *BaseSPLParserListener) EnterAnalysisRexStage(ctx *AnalysisRexStageContext) {}
+
+// ExitAnalysisRexStage is called when production AnalysisRexStage is exited.
+func (s *BaseSPLParserListener) ExitAnalysisRexStage(ctx *AnalysisRexStageContext) {}
+
+// EnterAnalysisSpathStage is called when production AnalysisSpathStage is entered.
+func (s *BaseSPLParserListener) EnterAnalysisSpathStage(ctx *AnalysisSpathStageContext) {}
+
+// ExitAnalysisSpathStage is called when production AnalysisSpathStage is exited.
+func (s *BaseSPLParserListener) ExitAnalysisSpathStage(ctx *AnalysisSpathStageContext) {}
+
+// EnterAnalysisBinStage is called when production AnalysisBinStage is entered.
+func (s *BaseSPLParserListener) EnterAnalysisBinStage(ctx *AnalysisBinStageContext) {}
+
+// ExitAnalysisBinStage is called when production AnalysisBinStage is exited.
+func (s *BaseSPLParserListener) ExitAnalysisBinStage(ctx *AnalysisBinStageContext) {}
+
+// EnterAnalysisRegexStage is called when production AnalysisRegexStage is entered.
+func (s *BaseSPLParserListener) EnterAnalysisRegexStage(ctx *AnalysisRegexStageContext) {}
+
+// ExitAnalysisRegexStage is called when production AnalysisRegexStage is exited.
+func (s *BaseSPLParserListener) ExitAnalysisRegexStage(ctx *AnalysisRegexStageContext) {}
+
+// EnterAnalysisMvexpandStage is called when production AnalysisMvexpandStage is entered.
+func (s *BaseSPLParserListener) EnterAnalysisMvexpandStage(ctx *AnalysisMvexpandStageContext) {}
+
+// ExitAnalysisMvexpandStage is called when production AnalysisMvexpandStage is exited.
+func (s *BaseSPLParserListener) ExitAnalysisMvexpandStage(ctx *AnalysisMvexpandStageContext) {}
+
+// EnterAnalysisJoinStage is called when production AnalysisJoinStage is entered.
+func (s *BaseSPLParserListener) EnterAnalysisJoinStage(ctx *AnalysisJoinStageContext) {}
+
+// ExitAnalysisJoinStage is called when production AnalysisJoinStage is exited.
+func (s *BaseSPLParserListener) ExitAnalysisJoinStage(ctx *AnalysisJoinStageContext) {}
+
+// EnterAnalysisBranchStage is called when production AnalysisBranchStage is entered.
+func (s *BaseSPLParserListener) EnterAnalysisBranchStage(ctx *AnalysisBranchStageContext) {}
+
+// ExitAnalysisBranchStage is called when production AnalysisBranchStage is exited.
+func (s *BaseSPLParserListener) ExitAnalysisBranchStage(ctx *AnalysisBranchStageContext) {}
+
 // EnterAnalysisMacroStage is called when production AnalysisMacroStage is entered.
 func (s *BaseSPLParserListener) EnterAnalysisMacroStage(ctx *AnalysisMacroStageContext) {}
 
@@ -289,6 +337,170 @@ func (s *BaseSPLParserListener) EnterAnalysisOpaqueStage(ctx *AnalysisOpaqueStag
 
 // ExitAnalysisOpaqueStage is called when production AnalysisOpaqueStage is exited.
 func (s *BaseSPLParserListener) ExitAnalysisOpaqueStage(ctx *AnalysisOpaqueStageContext) {}
+
+// EnterAnalysisTstats is called when production analysisTstats is entered.
+func (s *BaseSPLParserListener) EnterAnalysisTstats(ctx *AnalysisTstatsContext) {}
+
+// ExitAnalysisTstats is called when production analysisTstats is exited.
+func (s *BaseSPLParserListener) ExitAnalysisTstats(ctx *AnalysisTstatsContext) {}
+
+// EnterAnalysisTstatsOption is called when production analysisTstatsOption is entered.
+func (s *BaseSPLParserListener) EnterAnalysisTstatsOption(ctx *AnalysisTstatsOptionContext) {}
+
+// ExitAnalysisTstatsOption is called when production analysisTstatsOption is exited.
+func (s *BaseSPLParserListener) ExitAnalysisTstatsOption(ctx *AnalysisTstatsOptionContext) {}
+
+// EnterAnalysisTstatsGroup is called when production analysisTstatsGroup is entered.
+func (s *BaseSPLParserListener) EnterAnalysisTstatsGroup(ctx *AnalysisTstatsGroupContext) {}
+
+// ExitAnalysisTstatsGroup is called when production analysisTstatsGroup is exited.
+func (s *BaseSPLParserListener) ExitAnalysisTstatsGroup(ctx *AnalysisTstatsGroupContext) {}
+
+// EnterAnalysisTstatsGroupItem is called when production analysisTstatsGroupItem is entered.
+func (s *BaseSPLParserListener) EnterAnalysisTstatsGroupItem(ctx *AnalysisTstatsGroupItemContext) {}
+
+// ExitAnalysisTstatsGroupItem is called when production analysisTstatsGroupItem is exited.
+func (s *BaseSPLParserListener) ExitAnalysisTstatsGroupItem(ctx *AnalysisTstatsGroupItemContext) {}
+
+// EnterAnalysisTstatsSpanOption is called when production analysisTstatsSpanOption is entered.
+func (s *BaseSPLParserListener) EnterAnalysisTstatsSpanOption(ctx *AnalysisTstatsSpanOptionContext) {}
+
+// ExitAnalysisTstatsSpanOption is called when production analysisTstatsSpanOption is exited.
+func (s *BaseSPLParserListener) ExitAnalysisTstatsSpanOption(ctx *AnalysisTstatsSpanOptionContext) {}
+
+// EnterAnalysisFillnull is called when production analysisFillnull is entered.
+func (s *BaseSPLParserListener) EnterAnalysisFillnull(ctx *AnalysisFillnullContext) {}
+
+// ExitAnalysisFillnull is called when production analysisFillnull is exited.
+func (s *BaseSPLParserListener) ExitAnalysisFillnull(ctx *AnalysisFillnullContext) {}
+
+// EnterAnalysisFillnullValueOption is called when production analysisFillnullValueOption is entered.
+func (s *BaseSPLParserListener) EnterAnalysisFillnullValueOption(ctx *AnalysisFillnullValueOptionContext) {
+}
+
+// ExitAnalysisFillnullValueOption is called when production analysisFillnullValueOption is exited.
+func (s *BaseSPLParserListener) ExitAnalysisFillnullValueOption(ctx *AnalysisFillnullValueOptionContext) {
+}
+
+// EnterAnalysisRex is called when production analysisRex is entered.
+func (s *BaseSPLParserListener) EnterAnalysisRex(ctx *AnalysisRexContext) {}
+
+// ExitAnalysisRex is called when production analysisRex is exited.
+func (s *BaseSPLParserListener) ExitAnalysisRex(ctx *AnalysisRexContext) {}
+
+// EnterAnalysisRexFieldOption is called when production analysisRexFieldOption is entered.
+func (s *BaseSPLParserListener) EnterAnalysisRexFieldOption(ctx *AnalysisRexFieldOptionContext) {}
+
+// ExitAnalysisRexFieldOption is called when production analysisRexFieldOption is exited.
+func (s *BaseSPLParserListener) ExitAnalysisRexFieldOption(ctx *AnalysisRexFieldOptionContext) {}
+
+// EnterAnalysisRexMaxMatchOption is called when production analysisRexMaxMatchOption is entered.
+func (s *BaseSPLParserListener) EnterAnalysisRexMaxMatchOption(ctx *AnalysisRexMaxMatchOptionContext) {
+}
+
+// ExitAnalysisRexMaxMatchOption is called when production analysisRexMaxMatchOption is exited.
+func (s *BaseSPLParserListener) ExitAnalysisRexMaxMatchOption(ctx *AnalysisRexMaxMatchOptionContext) {
+}
+
+// EnterAnalysisRexOffsetFieldOption is called when production analysisRexOffsetFieldOption is entered.
+func (s *BaseSPLParserListener) EnterAnalysisRexOffsetFieldOption(ctx *AnalysisRexOffsetFieldOptionContext) {
+}
+
+// ExitAnalysisRexOffsetFieldOption is called when production analysisRexOffsetFieldOption is exited.
+func (s *BaseSPLParserListener) ExitAnalysisRexOffsetFieldOption(ctx *AnalysisRexOffsetFieldOptionContext) {
+}
+
+// EnterAnalysisRexModeOption is called when production analysisRexModeOption is entered.
+func (s *BaseSPLParserListener) EnterAnalysisRexModeOption(ctx *AnalysisRexModeOptionContext) {}
+
+// ExitAnalysisRexModeOption is called when production analysisRexModeOption is exited.
+func (s *BaseSPLParserListener) ExitAnalysisRexModeOption(ctx *AnalysisRexModeOptionContext) {}
+
+// EnterAnalysisSpath is called when production analysisSpath is entered.
+func (s *BaseSPLParserListener) EnterAnalysisSpath(ctx *AnalysisSpathContext) {}
+
+// ExitAnalysisSpath is called when production analysisSpath is exited.
+func (s *BaseSPLParserListener) ExitAnalysisSpath(ctx *AnalysisSpathContext) {}
+
+// EnterAnalysisSpathInputOption is called when production analysisSpathInputOption is entered.
+func (s *BaseSPLParserListener) EnterAnalysisSpathInputOption(ctx *AnalysisSpathInputOptionContext) {}
+
+// ExitAnalysisSpathInputOption is called when production analysisSpathInputOption is exited.
+func (s *BaseSPLParserListener) ExitAnalysisSpathInputOption(ctx *AnalysisSpathInputOptionContext) {}
+
+// EnterAnalysisSpathPathOption is called when production analysisSpathPathOption is entered.
+func (s *BaseSPLParserListener) EnterAnalysisSpathPathOption(ctx *AnalysisSpathPathOptionContext) {}
+
+// ExitAnalysisSpathPathOption is called when production analysisSpathPathOption is exited.
+func (s *BaseSPLParserListener) ExitAnalysisSpathPathOption(ctx *AnalysisSpathPathOptionContext) {}
+
+// EnterAnalysisSpathOutputOption is called when production analysisSpathOutputOption is entered.
+func (s *BaseSPLParserListener) EnterAnalysisSpathOutputOption(ctx *AnalysisSpathOutputOptionContext) {
+}
+
+// ExitAnalysisSpathOutputOption is called when production analysisSpathOutputOption is exited.
+func (s *BaseSPLParserListener) ExitAnalysisSpathOutputOption(ctx *AnalysisSpathOutputOptionContext) {
+}
+
+// EnterAnalysisBin is called when production analysisBin is entered.
+func (s *BaseSPLParserListener) EnterAnalysisBin(ctx *AnalysisBinContext) {}
+
+// ExitAnalysisBin is called when production analysisBin is exited.
+func (s *BaseSPLParserListener) ExitAnalysisBin(ctx *AnalysisBinContext) {}
+
+// EnterAnalysisBinOption is called when production analysisBinOption is entered.
+func (s *BaseSPLParserListener) EnterAnalysisBinOption(ctx *AnalysisBinOptionContext) {}
+
+// ExitAnalysisBinOption is called when production analysisBinOption is exited.
+func (s *BaseSPLParserListener) ExitAnalysisBinOption(ctx *AnalysisBinOptionContext) {}
+
+// EnterAnalysisRegex is called when production analysisRegex is entered.
+func (s *BaseSPLParserListener) EnterAnalysisRegex(ctx *AnalysisRegexContext) {}
+
+// ExitAnalysisRegex is called when production analysisRegex is exited.
+func (s *BaseSPLParserListener) ExitAnalysisRegex(ctx *AnalysisRegexContext) {}
+
+// EnterAnalysisMvexpand is called when production analysisMvexpand is entered.
+func (s *BaseSPLParserListener) EnterAnalysisMvexpand(ctx *AnalysisMvexpandContext) {}
+
+// ExitAnalysisMvexpand is called when production analysisMvexpand is exited.
+func (s *BaseSPLParserListener) ExitAnalysisMvexpand(ctx *AnalysisMvexpandContext) {}
+
+// EnterAnalysisMvexpandOption is called when production analysisMvexpandOption is entered.
+func (s *BaseSPLParserListener) EnterAnalysisMvexpandOption(ctx *AnalysisMvexpandOptionContext) {}
+
+// ExitAnalysisMvexpandOption is called when production analysisMvexpandOption is exited.
+func (s *BaseSPLParserListener) ExitAnalysisMvexpandOption(ctx *AnalysisMvexpandOptionContext) {}
+
+// EnterAnalysisJoin is called when production analysisJoin is entered.
+func (s *BaseSPLParserListener) EnterAnalysisJoin(ctx *AnalysisJoinContext) {}
+
+// ExitAnalysisJoin is called when production analysisJoin is exited.
+func (s *BaseSPLParserListener) ExitAnalysisJoin(ctx *AnalysisJoinContext) {}
+
+// EnterAnalysisJoinOption is called when production analysisJoinOption is entered.
+func (s *BaseSPLParserListener) EnterAnalysisJoinOption(ctx *AnalysisJoinOptionContext) {}
+
+// ExitAnalysisJoinOption is called when production analysisJoinOption is exited.
+func (s *BaseSPLParserListener) ExitAnalysisJoinOption(ctx *AnalysisJoinOptionContext) {}
+
+// EnterAnalysisBranch is called when production analysisBranch is entered.
+func (s *BaseSPLParserListener) EnterAnalysisBranch(ctx *AnalysisBranchContext) {}
+
+// ExitAnalysisBranch is called when production analysisBranch is exited.
+func (s *BaseSPLParserListener) ExitAnalysisBranch(ctx *AnalysisBranchContext) {}
+
+// EnterAnalysisBranchOption is called when production analysisBranchOption is entered.
+func (s *BaseSPLParserListener) EnterAnalysisBranchOption(ctx *AnalysisBranchOptionContext) {}
+
+// ExitAnalysisBranchOption is called when production analysisBranchOption is exited.
+func (s *BaseSPLParserListener) ExitAnalysisBranchOption(ctx *AnalysisBranchOptionContext) {}
+
+// EnterAnalysisOptionValue is called when production analysisOptionValue is entered.
+func (s *BaseSPLParserListener) EnterAnalysisOptionValue(ctx *AnalysisOptionValueContext) {}
+
+// ExitAnalysisOptionValue is called when production analysisOptionValue is exited.
+func (s *BaseSPLParserListener) ExitAnalysisOptionValue(ctx *AnalysisOptionValueContext) {}
 
 // EnterAnalysisDataModelName is called when production analysisDataModelName is entered.
 func (s *BaseSPLParserListener) EnterAnalysisDataModelName(ctx *AnalysisDataModelNameContext) {}

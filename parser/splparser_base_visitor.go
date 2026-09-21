@@ -179,11 +179,147 @@ func (v *BaseSPLParserVisitor) VisitAnalysisTstatsStage(ctx *AnalysisTstatsStage
 	return v.VisitChildren(ctx)
 }
 
+func (v *BaseSPLParserVisitor) VisitAnalysisFillnullStage(ctx *AnalysisFillnullStageContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisRexStage(ctx *AnalysisRexStageContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisSpathStage(ctx *AnalysisSpathStageContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisBinStage(ctx *AnalysisBinStageContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisRegexStage(ctx *AnalysisRegexStageContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisMvexpandStage(ctx *AnalysisMvexpandStageContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisJoinStage(ctx *AnalysisJoinStageContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisBranchStage(ctx *AnalysisBranchStageContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
 func (v *BaseSPLParserVisitor) VisitAnalysisMacroStage(ctx *AnalysisMacroStageContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
 func (v *BaseSPLParserVisitor) VisitAnalysisOpaqueStage(ctx *AnalysisOpaqueStageContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisTstats(ctx *AnalysisTstatsContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisTstatsOption(ctx *AnalysisTstatsOptionContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisTstatsGroup(ctx *AnalysisTstatsGroupContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisTstatsGroupItem(ctx *AnalysisTstatsGroupItemContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisTstatsSpanOption(ctx *AnalysisTstatsSpanOptionContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisFillnull(ctx *AnalysisFillnullContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisFillnullValueOption(ctx *AnalysisFillnullValueOptionContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisRex(ctx *AnalysisRexContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisRexFieldOption(ctx *AnalysisRexFieldOptionContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisRexMaxMatchOption(ctx *AnalysisRexMaxMatchOptionContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisRexOffsetFieldOption(ctx *AnalysisRexOffsetFieldOptionContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisRexModeOption(ctx *AnalysisRexModeOptionContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisSpath(ctx *AnalysisSpathContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisSpathInputOption(ctx *AnalysisSpathInputOptionContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisSpathPathOption(ctx *AnalysisSpathPathOptionContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisSpathOutputOption(ctx *AnalysisSpathOutputOptionContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisBin(ctx *AnalysisBinContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisBinOption(ctx *AnalysisBinOptionContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisRegex(ctx *AnalysisRegexContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisMvexpand(ctx *AnalysisMvexpandContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisMvexpandOption(ctx *AnalysisMvexpandOptionContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisJoin(ctx *AnalysisJoinContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisJoinOption(ctx *AnalysisJoinOptionContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisBranch(ctx *AnalysisBranchContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisBranchOption(ctx *AnalysisBranchOptionContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPLParserVisitor) VisitAnalysisOptionValue(ctx *AnalysisOptionValueContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 

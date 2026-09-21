@@ -136,11 +136,113 @@ type SPLParserListener interface {
 	// EnterAnalysisTstatsStage is called when entering the AnalysisTstatsStage production.
 	EnterAnalysisTstatsStage(c *AnalysisTstatsStageContext)
 
+	// EnterAnalysisFillnullStage is called when entering the AnalysisFillnullStage production.
+	EnterAnalysisFillnullStage(c *AnalysisFillnullStageContext)
+
+	// EnterAnalysisRexStage is called when entering the AnalysisRexStage production.
+	EnterAnalysisRexStage(c *AnalysisRexStageContext)
+
+	// EnterAnalysisSpathStage is called when entering the AnalysisSpathStage production.
+	EnterAnalysisSpathStage(c *AnalysisSpathStageContext)
+
+	// EnterAnalysisBinStage is called when entering the AnalysisBinStage production.
+	EnterAnalysisBinStage(c *AnalysisBinStageContext)
+
+	// EnterAnalysisRegexStage is called when entering the AnalysisRegexStage production.
+	EnterAnalysisRegexStage(c *AnalysisRegexStageContext)
+
+	// EnterAnalysisMvexpandStage is called when entering the AnalysisMvexpandStage production.
+	EnterAnalysisMvexpandStage(c *AnalysisMvexpandStageContext)
+
+	// EnterAnalysisJoinStage is called when entering the AnalysisJoinStage production.
+	EnterAnalysisJoinStage(c *AnalysisJoinStageContext)
+
+	// EnterAnalysisBranchStage is called when entering the AnalysisBranchStage production.
+	EnterAnalysisBranchStage(c *AnalysisBranchStageContext)
+
 	// EnterAnalysisMacroStage is called when entering the AnalysisMacroStage production.
 	EnterAnalysisMacroStage(c *AnalysisMacroStageContext)
 
 	// EnterAnalysisOpaqueStage is called when entering the AnalysisOpaqueStage production.
 	EnterAnalysisOpaqueStage(c *AnalysisOpaqueStageContext)
+
+	// EnterAnalysisTstats is called when entering the analysisTstats production.
+	EnterAnalysisTstats(c *AnalysisTstatsContext)
+
+	// EnterAnalysisTstatsOption is called when entering the analysisTstatsOption production.
+	EnterAnalysisTstatsOption(c *AnalysisTstatsOptionContext)
+
+	// EnterAnalysisTstatsGroup is called when entering the analysisTstatsGroup production.
+	EnterAnalysisTstatsGroup(c *AnalysisTstatsGroupContext)
+
+	// EnterAnalysisTstatsGroupItem is called when entering the analysisTstatsGroupItem production.
+	EnterAnalysisTstatsGroupItem(c *AnalysisTstatsGroupItemContext)
+
+	// EnterAnalysisTstatsSpanOption is called when entering the analysisTstatsSpanOption production.
+	EnterAnalysisTstatsSpanOption(c *AnalysisTstatsSpanOptionContext)
+
+	// EnterAnalysisFillnull is called when entering the analysisFillnull production.
+	EnterAnalysisFillnull(c *AnalysisFillnullContext)
+
+	// EnterAnalysisFillnullValueOption is called when entering the analysisFillnullValueOption production.
+	EnterAnalysisFillnullValueOption(c *AnalysisFillnullValueOptionContext)
+
+	// EnterAnalysisRex is called when entering the analysisRex production.
+	EnterAnalysisRex(c *AnalysisRexContext)
+
+	// EnterAnalysisRexFieldOption is called when entering the analysisRexFieldOption production.
+	EnterAnalysisRexFieldOption(c *AnalysisRexFieldOptionContext)
+
+	// EnterAnalysisRexMaxMatchOption is called when entering the analysisRexMaxMatchOption production.
+	EnterAnalysisRexMaxMatchOption(c *AnalysisRexMaxMatchOptionContext)
+
+	// EnterAnalysisRexOffsetFieldOption is called when entering the analysisRexOffsetFieldOption production.
+	EnterAnalysisRexOffsetFieldOption(c *AnalysisRexOffsetFieldOptionContext)
+
+	// EnterAnalysisRexModeOption is called when entering the analysisRexModeOption production.
+	EnterAnalysisRexModeOption(c *AnalysisRexModeOptionContext)
+
+	// EnterAnalysisSpath is called when entering the analysisSpath production.
+	EnterAnalysisSpath(c *AnalysisSpathContext)
+
+	// EnterAnalysisSpathInputOption is called when entering the analysisSpathInputOption production.
+	EnterAnalysisSpathInputOption(c *AnalysisSpathInputOptionContext)
+
+	// EnterAnalysisSpathPathOption is called when entering the analysisSpathPathOption production.
+	EnterAnalysisSpathPathOption(c *AnalysisSpathPathOptionContext)
+
+	// EnterAnalysisSpathOutputOption is called when entering the analysisSpathOutputOption production.
+	EnterAnalysisSpathOutputOption(c *AnalysisSpathOutputOptionContext)
+
+	// EnterAnalysisBin is called when entering the analysisBin production.
+	EnterAnalysisBin(c *AnalysisBinContext)
+
+	// EnterAnalysisBinOption is called when entering the analysisBinOption production.
+	EnterAnalysisBinOption(c *AnalysisBinOptionContext)
+
+	// EnterAnalysisRegex is called when entering the analysisRegex production.
+	EnterAnalysisRegex(c *AnalysisRegexContext)
+
+	// EnterAnalysisMvexpand is called when entering the analysisMvexpand production.
+	EnterAnalysisMvexpand(c *AnalysisMvexpandContext)
+
+	// EnterAnalysisMvexpandOption is called when entering the analysisMvexpandOption production.
+	EnterAnalysisMvexpandOption(c *AnalysisMvexpandOptionContext)
+
+	// EnterAnalysisJoin is called when entering the analysisJoin production.
+	EnterAnalysisJoin(c *AnalysisJoinContext)
+
+	// EnterAnalysisJoinOption is called when entering the analysisJoinOption production.
+	EnterAnalysisJoinOption(c *AnalysisJoinOptionContext)
+
+	// EnterAnalysisBranch is called when entering the analysisBranch production.
+	EnterAnalysisBranch(c *AnalysisBranchContext)
+
+	// EnterAnalysisBranchOption is called when entering the analysisBranchOption production.
+	EnterAnalysisBranchOption(c *AnalysisBranchOptionContext)
+
+	// EnterAnalysisOptionValue is called when entering the analysisOptionValue production.
+	EnterAnalysisOptionValue(c *AnalysisOptionValueContext)
 
 	// EnterAnalysisDataModelName is called when entering the analysisDataModelName production.
 	EnterAnalysisDataModelName(c *AnalysisDataModelNameContext)
@@ -412,11 +514,113 @@ type SPLParserListener interface {
 	// ExitAnalysisTstatsStage is called when exiting the AnalysisTstatsStage production.
 	ExitAnalysisTstatsStage(c *AnalysisTstatsStageContext)
 
+	// ExitAnalysisFillnullStage is called when exiting the AnalysisFillnullStage production.
+	ExitAnalysisFillnullStage(c *AnalysisFillnullStageContext)
+
+	// ExitAnalysisRexStage is called when exiting the AnalysisRexStage production.
+	ExitAnalysisRexStage(c *AnalysisRexStageContext)
+
+	// ExitAnalysisSpathStage is called when exiting the AnalysisSpathStage production.
+	ExitAnalysisSpathStage(c *AnalysisSpathStageContext)
+
+	// ExitAnalysisBinStage is called when exiting the AnalysisBinStage production.
+	ExitAnalysisBinStage(c *AnalysisBinStageContext)
+
+	// ExitAnalysisRegexStage is called when exiting the AnalysisRegexStage production.
+	ExitAnalysisRegexStage(c *AnalysisRegexStageContext)
+
+	// ExitAnalysisMvexpandStage is called when exiting the AnalysisMvexpandStage production.
+	ExitAnalysisMvexpandStage(c *AnalysisMvexpandStageContext)
+
+	// ExitAnalysisJoinStage is called when exiting the AnalysisJoinStage production.
+	ExitAnalysisJoinStage(c *AnalysisJoinStageContext)
+
+	// ExitAnalysisBranchStage is called when exiting the AnalysisBranchStage production.
+	ExitAnalysisBranchStage(c *AnalysisBranchStageContext)
+
 	// ExitAnalysisMacroStage is called when exiting the AnalysisMacroStage production.
 	ExitAnalysisMacroStage(c *AnalysisMacroStageContext)
 
 	// ExitAnalysisOpaqueStage is called when exiting the AnalysisOpaqueStage production.
 	ExitAnalysisOpaqueStage(c *AnalysisOpaqueStageContext)
+
+	// ExitAnalysisTstats is called when exiting the analysisTstats production.
+	ExitAnalysisTstats(c *AnalysisTstatsContext)
+
+	// ExitAnalysisTstatsOption is called when exiting the analysisTstatsOption production.
+	ExitAnalysisTstatsOption(c *AnalysisTstatsOptionContext)
+
+	// ExitAnalysisTstatsGroup is called when exiting the analysisTstatsGroup production.
+	ExitAnalysisTstatsGroup(c *AnalysisTstatsGroupContext)
+
+	// ExitAnalysisTstatsGroupItem is called when exiting the analysisTstatsGroupItem production.
+	ExitAnalysisTstatsGroupItem(c *AnalysisTstatsGroupItemContext)
+
+	// ExitAnalysisTstatsSpanOption is called when exiting the analysisTstatsSpanOption production.
+	ExitAnalysisTstatsSpanOption(c *AnalysisTstatsSpanOptionContext)
+
+	// ExitAnalysisFillnull is called when exiting the analysisFillnull production.
+	ExitAnalysisFillnull(c *AnalysisFillnullContext)
+
+	// ExitAnalysisFillnullValueOption is called when exiting the analysisFillnullValueOption production.
+	ExitAnalysisFillnullValueOption(c *AnalysisFillnullValueOptionContext)
+
+	// ExitAnalysisRex is called when exiting the analysisRex production.
+	ExitAnalysisRex(c *AnalysisRexContext)
+
+	// ExitAnalysisRexFieldOption is called when exiting the analysisRexFieldOption production.
+	ExitAnalysisRexFieldOption(c *AnalysisRexFieldOptionContext)
+
+	// ExitAnalysisRexMaxMatchOption is called when exiting the analysisRexMaxMatchOption production.
+	ExitAnalysisRexMaxMatchOption(c *AnalysisRexMaxMatchOptionContext)
+
+	// ExitAnalysisRexOffsetFieldOption is called when exiting the analysisRexOffsetFieldOption production.
+	ExitAnalysisRexOffsetFieldOption(c *AnalysisRexOffsetFieldOptionContext)
+
+	// ExitAnalysisRexModeOption is called when exiting the analysisRexModeOption production.
+	ExitAnalysisRexModeOption(c *AnalysisRexModeOptionContext)
+
+	// ExitAnalysisSpath is called when exiting the analysisSpath production.
+	ExitAnalysisSpath(c *AnalysisSpathContext)
+
+	// ExitAnalysisSpathInputOption is called when exiting the analysisSpathInputOption production.
+	ExitAnalysisSpathInputOption(c *AnalysisSpathInputOptionContext)
+
+	// ExitAnalysisSpathPathOption is called when exiting the analysisSpathPathOption production.
+	ExitAnalysisSpathPathOption(c *AnalysisSpathPathOptionContext)
+
+	// ExitAnalysisSpathOutputOption is called when exiting the analysisSpathOutputOption production.
+	ExitAnalysisSpathOutputOption(c *AnalysisSpathOutputOptionContext)
+
+	// ExitAnalysisBin is called when exiting the analysisBin production.
+	ExitAnalysisBin(c *AnalysisBinContext)
+
+	// ExitAnalysisBinOption is called when exiting the analysisBinOption production.
+	ExitAnalysisBinOption(c *AnalysisBinOptionContext)
+
+	// ExitAnalysisRegex is called when exiting the analysisRegex production.
+	ExitAnalysisRegex(c *AnalysisRegexContext)
+
+	// ExitAnalysisMvexpand is called when exiting the analysisMvexpand production.
+	ExitAnalysisMvexpand(c *AnalysisMvexpandContext)
+
+	// ExitAnalysisMvexpandOption is called when exiting the analysisMvexpandOption production.
+	ExitAnalysisMvexpandOption(c *AnalysisMvexpandOptionContext)
+
+	// ExitAnalysisJoin is called when exiting the analysisJoin production.
+	ExitAnalysisJoin(c *AnalysisJoinContext)
+
+	// ExitAnalysisJoinOption is called when exiting the analysisJoinOption production.
+	ExitAnalysisJoinOption(c *AnalysisJoinOptionContext)
+
+	// ExitAnalysisBranch is called when exiting the analysisBranch production.
+	ExitAnalysisBranch(c *AnalysisBranchContext)
+
+	// ExitAnalysisBranchOption is called when exiting the analysisBranchOption production.
+	ExitAnalysisBranchOption(c *AnalysisBranchOptionContext)
+
+	// ExitAnalysisOptionValue is called when exiting the analysisOptionValue production.
+	ExitAnalysisOptionValue(c *AnalysisOptionValueContext)
 
 	// ExitAnalysisDataModelName is called when exiting the analysisDataModelName production.
 	ExitAnalysisDataModelName(c *AnalysisDataModelNameContext)

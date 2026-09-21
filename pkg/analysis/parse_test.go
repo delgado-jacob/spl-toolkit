@@ -68,35 +68,327 @@ func TestParseInvalidAndRecovery(t *testing.T) {
 	}
 }
 func TestParseTypedContexts(t *testing.T) {
-	p := parseDocument(`search host=web | eval x=if(user=host,1,2), y=3 | lookup people uid AS user OUTPUT name AS display | stats sum(x) AS total BY user`)
-	counts := map[string]int{}
-	var walk func(antlr.Tree)
-	walk = func(n antlr.Tree) {
-		switch ctx := n.(type) {
-		case *parser.AnalysisAssignmentContext:
-			counts["assignment"]++
-		case *parser.AnalysisFunctionCallContext:
-			counts["function"]++
-		case *parser.AnalysisComparisonContext:
-			if ctx.AnalysisComparisonOperator() != nil {
-				counts["comparison"]++
+	for _, tc := range []struct {
+		name, query string
+		want        map[string]int
+	}{
+		{
+			name:  "existing typed expressions",
+			query: `search host=web | eval x=if(user=host,1,2), y=3 | lookup people uid AS user OUTPUT name AS display | stats sum(x) AS total BY user`,
+			want:  map[string]int{"assignment": 2, "function": 2, "comparison": 1, "alias": 3, "output": 1, "group": 1},
+		},
+		{
+			name: "milestone 10 command operands",
+			query: `| tstats summariesonly=true sum(bytes) AS total FROM datamodel=Web.Events WHERE user="café" BY 'hôte', _time span=5m
+| fillnull value="unknown" user,'display name'
+| rex field=_raw max_match=2 offset_field=offsets "(?<name>.+)"
+| spath input=_raw path="event.id" output=event_id
+| bin span=5m _time AS bucket_time
+| regex user!="^svc_"
+| mvexpand values limit=3
+| join type=left user,'tenant id' [ search child=* ]
+| append maxout=100 [ search child=* ]
+| appendpipe run_in_preview=true [ stats count ]`,
+			want: map[string]int{
+				"tstats": 1, "tstats-option": 1, "tstats-group": 1,
+				"fillnull": 1, "rex": 1, "spath": 1, "bin": 1, "regex": 1,
+				"mvexpand": 1, "join": 1, "branch": 2,
+			},
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			p := parseDocument(tc.query)
+			if len(p.diagnostics) != 0 {
+				t.Fatal(p.diagnostics)
 			}
-		case *parser.AnalysisAliasContext:
-			counts["alias"]++
-		case *parser.AnalysisOutputContext:
-			counts["output"]++
-		case *parser.AnalysisGroupContext:
-			counts["group"]++
-		}
-		for i := 0; i < n.GetChildCount(); i++ {
-			walk(n.GetChild(i))
-		}
+			counts := map[string]int{}
+			var walk func(antlr.Tree)
+			walk = func(n antlr.Tree) {
+				switch ctx := n.(type) {
+				case *parser.AnalysisAssignmentContext:
+					counts["assignment"]++
+				case *parser.AnalysisFunctionCallContext:
+					counts["function"]++
+				case *parser.AnalysisComparisonContext:
+					if ctx.AnalysisComparisonOperator() != nil {
+						counts["comparison"]++
+					}
+				case *parser.AnalysisAliasContext:
+					counts["alias"]++
+				case *parser.AnalysisOutputContext:
+					counts["output"]++
+				case *parser.AnalysisGroupContext:
+					counts["group"]++
+				case *parser.AnalysisTstatsContext:
+					counts["tstats"]++
+				case *parser.AnalysisTstatsOptionContext:
+					counts["tstats-option"]++
+				case *parser.AnalysisTstatsGroupContext:
+					counts["tstats-group"]++
+				case *parser.AnalysisFillnullContext:
+					counts["fillnull"]++
+				case *parser.AnalysisRexContext:
+					counts["rex"]++
+				case *parser.AnalysisSpathContext:
+					counts["spath"]++
+				case *parser.AnalysisBinContext:
+					counts["bin"]++
+				case *parser.AnalysisRegexContext:
+					counts["regex"]++
+				case *parser.AnalysisMvexpandContext:
+					counts["mvexpand"]++
+				case *parser.AnalysisJoinContext:
+					counts["join"]++
+				case *parser.AnalysisBranchContext:
+					counts["branch"]++
+				}
+				for i := 0; i < n.GetChildCount(); i++ {
+					walk(n.GetChild(i))
+				}
+			}
+			walk(p.tree)
+			for kind, want := range tc.want {
+				if counts[kind] != want {
+					t.Fatalf("%s count = %d want %d", kind, counts[kind], want)
+				}
+			}
+		})
 	}
-	walk(p.tree)
-	for k, want := range map[string]int{"assignment": 2, "function": 2, "comparison": 1, "alias": 3, "output": 1, "group": 1} {
-		if counts[k] != want {
-			t.Fatalf("%s count = %d want %d", k, counts[k], want)
+}
+
+func TestParseMilestone10CommandContexts(t *testing.T) {
+	for _, tc := range []struct {
+		name, query string
+		assert      func(*testing.T, parser.IAnalysisStageContext)
+	}{
+		{
+			name:  "tstats unicode quoted fields whitespace and span",
+			query: "| tstats summariesonly=true count AS total,\r\n\t sum('octets') AS 'sómme' FROM datamodel=Network_Traffic.All_Traffic WHERE All_Traffic.action=\"allowed\" BY 'hôte',\t_time span=5m",
+			assert: func(t *testing.T, stage parser.IAnalysisStageContext) {
+				ctx, ok := stage.(*parser.AnalysisTstatsStageContext)
+				if !ok || ctx.AnalysisTstats() == nil {
+					t.Fatalf("stage = %T", stage)
+				}
+				body := ctx.AnalysisTstats()
+				if len(body.AllAnalysisTstatsOption()) != 1 || len(body.AllAnalysisAggregate()) != 2 || body.AnalysisTstatsFrom() == nil || body.AnalysisTstatsWhere() == nil || body.AnalysisTstatsGroup() == nil {
+					t.Fatalf("incomplete tstats context: %s", body.GetText())
+				}
+				if len(body.AnalysisTstatsGroup().AllAnalysisTstatsGroupItem()) != 2 || body.AnalysisTstatsGroup().AnalysisTstatsGroupItem(1).AnalysisTstatsSpanOption() == nil {
+					t.Fatalf("group context: %s", body.AnalysisTstatsGroup().GetText())
+				}
+			},
+		},
+		{
+			name:  "fillnull optional commas",
+			query: `| fillnull value="unknown" café, 'display name'`,
+			assert: func(t *testing.T, stage parser.IAnalysisStageContext) {
+				ctx, ok := stage.(*parser.AnalysisFillnullStageContext)
+				if !ok || ctx.AnalysisFillnull() == nil || ctx.AnalysisFillnull().AnalysisFillnullValueOption() == nil || len(ctx.AnalysisFillnull().AllAnalysisIdentifier()) != 2 {
+					t.Fatalf("stage = %T %s", stage, stage.GetText())
+				}
+			},
+		},
+		{
+			name:  "rex typed slots",
+			query: `| rex field='raw field' max_match=2 offset_field='offset list' "(?<café>.+)"`,
+			assert: func(t *testing.T, stage parser.IAnalysisStageContext) {
+				ctx, ok := stage.(*parser.AnalysisRexStageContext)
+				if !ok || len(ctx.AnalysisRex().AllAnalysisRexFieldOption()) != 1 || len(ctx.AnalysisRex().AllAnalysisRexMaxMatchOption()) != 1 || len(ctx.AnalysisRex().AllAnalysisRexOffsetFieldOption()) != 1 || ctx.AnalysisRex().STRING() == nil {
+					t.Fatalf("stage = %T %s", stage, stage.GetText())
+				}
+			},
+		},
+		{
+			name:  "spath typed slots",
+			query: `| spath input='raw payload' path="event.id" output='event id'`,
+			assert: func(t *testing.T, stage parser.IAnalysisStageContext) {
+				ctx, ok := stage.(*parser.AnalysisSpathStageContext)
+				if !ok || len(ctx.AnalysisSpath().AllAnalysisSpathInputOption()) != 1 || len(ctx.AnalysisSpath().AllAnalysisSpathPathOption()) != 1 || len(ctx.AnalysisSpath().AllAnalysisSpathOutputOption()) != 1 {
+					t.Fatalf("stage = %T %s", stage, stage.GetText())
+				}
+			},
+		},
+		{
+			name:  "bin literal option and alias",
+			query: `| bin span=5m 'event time' AS 'bucket time'`,
+			assert: func(t *testing.T, stage parser.IAnalysisStageContext) {
+				ctx, ok := stage.(*parser.AnalysisBinStageContext)
+				if !ok || len(ctx.AnalysisBin().AllAnalysisBinOption()) != 1 || ctx.AnalysisBin().AnalysisAlias() == nil {
+					t.Fatalf("stage = %T %s", stage, stage.GetText())
+				}
+			},
+		},
+		{
+			name:  "regex exact field",
+			query: `| regex 'user name'!="^svc_"`,
+			assert: func(t *testing.T, stage parser.IAnalysisStageContext) {
+				ctx, ok := stage.(*parser.AnalysisRegexStageContext)
+				if !ok || ctx.AnalysisRegex().AnalysisIdentifier() == nil || ctx.AnalysisRegex().NE() == nil || ctx.AnalysisRegex().STRING() == nil {
+					t.Fatalf("stage = %T %s", stage, stage.GetText())
+				}
+			},
+		},
+		{
+			name:  "mvexpand exact field and option",
+			query: `| mvexpand 'tag list' limit=3`,
+			assert: func(t *testing.T, stage parser.IAnalysisStageContext) {
+				ctx, ok := stage.(*parser.AnalysisMvexpandStageContext)
+				if !ok || len(ctx.AnalysisMvexpand().AllAnalysisMvexpandOption()) != 1 {
+					t.Fatalf("stage = %T %s", stage, stage.GetText())
+				}
+			},
+		},
+		{
+			name:  "join exact keys and nested branch",
+			query: `| join type=left user,'tenant id' [ search child=* | append [ search nested=* ] ]`,
+			assert: func(t *testing.T, stage parser.IAnalysisStageContext) {
+				ctx, ok := stage.(*parser.AnalysisJoinStageContext)
+				if !ok || len(ctx.AnalysisJoin().AllAnalysisJoinOption()) != 1 || len(ctx.AnalysisJoin().AllAnalysisIdentifier()) != 2 || ctx.AnalysisJoin().AnalysisSubquery() == nil {
+					t.Fatalf("stage = %T %s", stage, stage.GetText())
+				}
+				childStages := ctx.AnalysisJoin().AnalysisSubquery().AnalysisPipeline().AllAnalysisStage()
+				if len(childStages) != 1 {
+					t.Fatalf("nested child stages = %d", len(childStages))
+				}
+				if _, ok := childStages[0].(*parser.AnalysisBranchStageContext); !ok {
+					t.Fatalf("nested stage = %T", childStages[0])
+				}
+			},
+		},
+		{
+			name:  "append option and subquery",
+			query: `| append maxout=100 [ search child=* ]`,
+			assert: func(t *testing.T, stage parser.IAnalysisStageContext) {
+				ctx, ok := stage.(*parser.AnalysisBranchStageContext)
+				if !ok || len(ctx.AnalysisBranch().AllAnalysisBranchOption()) != 1 || ctx.AnalysisBranch().AnalysisSubquery() == nil {
+					t.Fatalf("stage = %T %s", stage, stage.GetText())
+				}
+			},
+		},
+		{
+			name:  "appendpipe option and subquery",
+			query: `| appendpipe run_in_preview=true [ stats count ]`,
+			assert: func(t *testing.T, stage parser.IAnalysisStageContext) {
+				ctx, ok := stage.(*parser.AnalysisBranchStageContext)
+				if !ok || len(ctx.AnalysisBranch().AllAnalysisBranchOption()) != 1 || ctx.AnalysisBranch().AnalysisSubquery() == nil {
+					t.Fatalf("stage = %T %s", stage, stage.GetText())
+				}
+			},
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			p := parseDocument(tc.query)
+			if len(p.diagnostics) != 0 {
+				t.Fatal(p.diagnostics)
+			}
+			stages := p.tree.AnalysisPipeline().AllAnalysisStage()
+			if len(stages) != 1 {
+				t.Fatalf("top-level stages = %d", len(stages))
+			}
+			tc.assert(t, stages[0])
+		})
+	}
+}
+
+func TestParseMilestone10HeldForms(t *testing.T) {
+	for _, q := range []string{
+		`| tstats prestats=true ` + "`summariesonly`" + ` PREFIX(user) BY user`,
+		`| fillnull value="unknown"`,
+		`| rex mode=sed field=_raw "s/a/b/g"`,
+		`| spath input=_raw`,
+	} {
+		t.Run(q, func(t *testing.T) {
+			p := parseDocument(q)
+			if len(p.diagnostics) != 0 {
+				t.Fatalf("held form lost typed syntax: %+v", p.diagnostics)
+			}
+			if _, opaque := p.tree.AnalysisPipeline().AnalysisStage(0).(*parser.AnalysisOpaqueStageContext); opaque {
+				t.Fatal("held form fell back to opaque stage")
+			}
+		})
+	}
+
+	for _, q := range []string{
+		`| tstats summariesonly= count`,
+		`| rex field= "(?<x>.)"`,
+		`| spath input=_raw output=`,
+		`| bin span= _time`,
+		`| mvexpand values limit=`,
+		`| join type= [ search * ]`,
+		`| append maxout= [ search * ]`,
+	} {
+		t.Run("malformed "+q, func(t *testing.T) {
+			p := parseDocument(q)
+			if len(p.diagnostics) == 0 {
+				t.Fatal("malformed option accepted")
+			}
+			if _, opaque := p.tree.AnalysisPipeline().AnalysisStage(0).(*parser.AnalysisOpaqueStageContext); opaque {
+				t.Fatal("malformed modeled command fell back to opaque stage")
+			}
+		})
+	}
+
+	t.Run("damaged child remains isolated", func(t *testing.T) {
+		p := parseDocument(`search root=* | append [ search child=* | mystery good $ | stats count BY child ] | table root`)
+		if len(p.diagnostics) == 0 {
+			t.Fatal("damaged child was accepted")
 		}
+		outer := p.tree.AnalysisPipeline().AllAnalysisStage()
+		if len(outer) != 2 {
+			for i, stage := range outer {
+				t.Logf("outer stage %d: %T %q", i, stage, stage.GetText())
+			}
+			t.Fatalf("outer stages = %d", len(outer))
+		}
+		branch, ok := outer[0].(*parser.AnalysisBranchStageContext)
+		if !ok {
+			t.Fatalf("branch stage = %T", outer[0])
+		}
+		child := branch.AnalysisBranch().AnalysisSubquery().AnalysisPipeline().AllAnalysisStage()
+		if len(child) != 2 {
+			t.Fatalf("child stages = %d", len(child))
+		}
+		if _, ok := child[1].(*parser.AnalysisStatsStageContext); !ok {
+			t.Fatalf("recovered child stage = %T", child[1])
+		}
+		if _, ok := outer[1].(*parser.AnalysisFieldsStageContext); !ok {
+			t.Fatalf("outer sibling stage = %T", outer[1])
+		}
+	})
+}
+
+func TestParseMilestone10LegacyEntryPoint(t *testing.T) {
+	// These exact trees were captured through Query before regenerating the
+	// analysis-only rules. They bind mapper behavior to the pre-change parser.
+	for _, tc := range []struct {
+		query, tree string
+	}{
+		{
+			query: `search src_ip=1 dst_ip=2`,
+			tree:  `(query (initCommand search (operation (id src_ip) = (expression (value 1))) (operation (id dst_ip) = (expression (value 2)))) <EOF>)`,
+		},
+		{
+			query: `search host=web | eval result=lower(user) | stats count BY result`,
+			tree:  `(query (initCommand search (operation (id host) = (expression (value (id web))))) | (nextCommand (command eval) (operation (id result) = (expression (function lower) ( (expression (value (id user))) )))) | (nextCommand (command stats) (operation (expression (value (id (function count))))) (operation BY (id result))) <EOF>)`,
+		},
+		{
+			query: `| tstats count from datamodel=Web by Web.status`,
+			tree:  `(query (initCommand | tstats (operation (expression (value (id (function count))))) (operation (expression (value (id (command from))))) (operation (id (command datamodel)) = (expression (value (id Web)))) (operation by (id Web.status))) <EOF>)`,
+		},
+	} {
+		t.Run(tc.query, func(t *testing.T) {
+			lexer := parser.NewSPLLexer(antlr.NewInputStream(tc.query))
+			tokens := antlr.NewCommonTokenStream(lexer, antlr.TokenDefaultChannel)
+			legacy := parser.NewSPLParser(tokens)
+			tree := legacy.Query()
+			if got := tree.ToStringTree(legacy.GetRuleNames(), legacy); got != tc.tree {
+				t.Fatalf("legacy tree changed\ngot:  %s\nwant: %s", got, tc.tree)
+			}
+			mapped, err := mapper.New().MapQuery(tc.query)
+			if err != nil || mapped != tc.query {
+				t.Fatalf("legacy mapper = %q, %v", mapped, err)
+			}
+		})
 	}
 }
 func TestParseLegacyTokenMeaning(t *testing.T) {

@@ -136,11 +136,113 @@ type SPLParserVisitor interface {
 	// Visit a parse tree produced by SPLParser#AnalysisTstatsStage.
 	VisitAnalysisTstatsStage(ctx *AnalysisTstatsStageContext) interface{}
 
+	// Visit a parse tree produced by SPLParser#AnalysisFillnullStage.
+	VisitAnalysisFillnullStage(ctx *AnalysisFillnullStageContext) interface{}
+
+	// Visit a parse tree produced by SPLParser#AnalysisRexStage.
+	VisitAnalysisRexStage(ctx *AnalysisRexStageContext) interface{}
+
+	// Visit a parse tree produced by SPLParser#AnalysisSpathStage.
+	VisitAnalysisSpathStage(ctx *AnalysisSpathStageContext) interface{}
+
+	// Visit a parse tree produced by SPLParser#AnalysisBinStage.
+	VisitAnalysisBinStage(ctx *AnalysisBinStageContext) interface{}
+
+	// Visit a parse tree produced by SPLParser#AnalysisRegexStage.
+	VisitAnalysisRegexStage(ctx *AnalysisRegexStageContext) interface{}
+
+	// Visit a parse tree produced by SPLParser#AnalysisMvexpandStage.
+	VisitAnalysisMvexpandStage(ctx *AnalysisMvexpandStageContext) interface{}
+
+	// Visit a parse tree produced by SPLParser#AnalysisJoinStage.
+	VisitAnalysisJoinStage(ctx *AnalysisJoinStageContext) interface{}
+
+	// Visit a parse tree produced by SPLParser#AnalysisBranchStage.
+	VisitAnalysisBranchStage(ctx *AnalysisBranchStageContext) interface{}
+
 	// Visit a parse tree produced by SPLParser#AnalysisMacroStage.
 	VisitAnalysisMacroStage(ctx *AnalysisMacroStageContext) interface{}
 
 	// Visit a parse tree produced by SPLParser#AnalysisOpaqueStage.
 	VisitAnalysisOpaqueStage(ctx *AnalysisOpaqueStageContext) interface{}
+
+	// Visit a parse tree produced by SPLParser#analysisTstats.
+	VisitAnalysisTstats(ctx *AnalysisTstatsContext) interface{}
+
+	// Visit a parse tree produced by SPLParser#analysisTstatsOption.
+	VisitAnalysisTstatsOption(ctx *AnalysisTstatsOptionContext) interface{}
+
+	// Visit a parse tree produced by SPLParser#analysisTstatsGroup.
+	VisitAnalysisTstatsGroup(ctx *AnalysisTstatsGroupContext) interface{}
+
+	// Visit a parse tree produced by SPLParser#analysisTstatsGroupItem.
+	VisitAnalysisTstatsGroupItem(ctx *AnalysisTstatsGroupItemContext) interface{}
+
+	// Visit a parse tree produced by SPLParser#analysisTstatsSpanOption.
+	VisitAnalysisTstatsSpanOption(ctx *AnalysisTstatsSpanOptionContext) interface{}
+
+	// Visit a parse tree produced by SPLParser#analysisFillnull.
+	VisitAnalysisFillnull(ctx *AnalysisFillnullContext) interface{}
+
+	// Visit a parse tree produced by SPLParser#analysisFillnullValueOption.
+	VisitAnalysisFillnullValueOption(ctx *AnalysisFillnullValueOptionContext) interface{}
+
+	// Visit a parse tree produced by SPLParser#analysisRex.
+	VisitAnalysisRex(ctx *AnalysisRexContext) interface{}
+
+	// Visit a parse tree produced by SPLParser#analysisRexFieldOption.
+	VisitAnalysisRexFieldOption(ctx *AnalysisRexFieldOptionContext) interface{}
+
+	// Visit a parse tree produced by SPLParser#analysisRexMaxMatchOption.
+	VisitAnalysisRexMaxMatchOption(ctx *AnalysisRexMaxMatchOptionContext) interface{}
+
+	// Visit a parse tree produced by SPLParser#analysisRexOffsetFieldOption.
+	VisitAnalysisRexOffsetFieldOption(ctx *AnalysisRexOffsetFieldOptionContext) interface{}
+
+	// Visit a parse tree produced by SPLParser#analysisRexModeOption.
+	VisitAnalysisRexModeOption(ctx *AnalysisRexModeOptionContext) interface{}
+
+	// Visit a parse tree produced by SPLParser#analysisSpath.
+	VisitAnalysisSpath(ctx *AnalysisSpathContext) interface{}
+
+	// Visit a parse tree produced by SPLParser#analysisSpathInputOption.
+	VisitAnalysisSpathInputOption(ctx *AnalysisSpathInputOptionContext) interface{}
+
+	// Visit a parse tree produced by SPLParser#analysisSpathPathOption.
+	VisitAnalysisSpathPathOption(ctx *AnalysisSpathPathOptionContext) interface{}
+
+	// Visit a parse tree produced by SPLParser#analysisSpathOutputOption.
+	VisitAnalysisSpathOutputOption(ctx *AnalysisSpathOutputOptionContext) interface{}
+
+	// Visit a parse tree produced by SPLParser#analysisBin.
+	VisitAnalysisBin(ctx *AnalysisBinContext) interface{}
+
+	// Visit a parse tree produced by SPLParser#analysisBinOption.
+	VisitAnalysisBinOption(ctx *AnalysisBinOptionContext) interface{}
+
+	// Visit a parse tree produced by SPLParser#analysisRegex.
+	VisitAnalysisRegex(ctx *AnalysisRegexContext) interface{}
+
+	// Visit a parse tree produced by SPLParser#analysisMvexpand.
+	VisitAnalysisMvexpand(ctx *AnalysisMvexpandContext) interface{}
+
+	// Visit a parse tree produced by SPLParser#analysisMvexpandOption.
+	VisitAnalysisMvexpandOption(ctx *AnalysisMvexpandOptionContext) interface{}
+
+	// Visit a parse tree produced by SPLParser#analysisJoin.
+	VisitAnalysisJoin(ctx *AnalysisJoinContext) interface{}
+
+	// Visit a parse tree produced by SPLParser#analysisJoinOption.
+	VisitAnalysisJoinOption(ctx *AnalysisJoinOptionContext) interface{}
+
+	// Visit a parse tree produced by SPLParser#analysisBranch.
+	VisitAnalysisBranch(ctx *AnalysisBranchContext) interface{}
+
+	// Visit a parse tree produced by SPLParser#analysisBranchOption.
+	VisitAnalysisBranchOption(ctx *AnalysisBranchOptionContext) interface{}
+
+	// Visit a parse tree produced by SPLParser#analysisOptionValue.
+	VisitAnalysisOptionValue(ctx *AnalysisOptionValueContext) interface{}
 
 	// Visit a parse tree produced by SPLParser#analysisDataModelName.
 	VisitAnalysisDataModelName(ctx *AnalysisDataModelNameContext) interface{}
