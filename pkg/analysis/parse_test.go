@@ -645,6 +645,45 @@ func TestParseMilestone10HeldForms(t *testing.T) {
 		}
 	})
 
+	t.Run("incomplete search reports the missing value at eof", func(t *testing.T) {
+		p := parseDocument(`search host=`)
+		if len(p.diagnostics) != 1 || p.diagnostics[0].Message != "no viable alternative at input 'search host='" || p.diagnostics[0].Location.Start.Offset != 12 || p.diagnostics[0].Location.End.Offset != 12 {
+			t.Fatalf("incomplete search diagnostics = %+v", p.diagnostics)
+		}
+		initial := p.tree.AnalysisPipeline().AnalysisInitialStage()
+		if initial == nil || initial.AnalysisStage() == nil {
+			t.Fatal("missing initial search stage")
+		}
+		if _, ok := initial.AnalysisStage().(*parser.AnalysisSearchStageContext); !ok {
+			t.Fatalf("search stage = %T %q", initial.AnalysisStage(), initial.AnalysisStage().GetText())
+		}
+	})
+
+	t.Run("damaged eval preserves following stats stage", func(t *testing.T) {
+		p := parseDocument(`search host=web | eval broken= | stats count by user`)
+		if len(p.diagnostics) == 0 {
+			t.Fatal("damaged eval accepted")
+		}
+		initial := p.tree.AnalysisPipeline().AnalysisInitialStage()
+		if initial == nil || initial.AnalysisStage() == nil {
+			t.Fatal("missing initial search stage")
+		}
+		if _, ok := initial.AnalysisStage().(*parser.AnalysisSearchStageContext); !ok {
+			t.Fatalf("search stage = %T %q", initial.AnalysisStage(), initial.AnalysisStage().GetText())
+		}
+		stages := p.tree.AnalysisPipeline().AllAnalysisStage()
+		if len(stages) != 2 {
+			t.Fatalf("sibling stages = %d, diagnostics = %+v", len(stages), p.diagnostics)
+		}
+		if _, ok := stages[0].(*parser.AnalysisEvalStageContext); !ok {
+			t.Fatalf("eval stage = %T %q", stages[0], stages[0].GetText())
+		}
+		stats, ok := stages[1].(*parser.AnalysisStatsStageContext)
+		if !ok || stats.AnalysisGroup() == nil || len(stats.AnalysisGroup().AnalysisFieldList().AllAnalysisSelector()) != 1 || stats.AnalysisGroup().AnalysisFieldList().AnalysisSelector(0).GetText() != "user" {
+			t.Fatalf("stats stage = %T %q", stages[1], stages[1].GetText())
+		}
+	})
+
 	t.Run("damaged child remains isolated", func(t *testing.T) {
 		p := parseDocument(`search root=* | append [ search child=* | mystery good $ | stats count BY child ] | table root`)
 		if len(p.diagnostics) == 0 {

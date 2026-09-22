@@ -47,6 +47,19 @@ func (p *SPLParser) analysisIsCommand() bool {
     kind := p.GetTokenStream().LA(1)
     return kind == SPLParserINIT_COMMAND || kind == SPLParserSTD_COMMAND || kind == SPLParserSTD_COMMAND_AND_FUNCTION
 }
+func (p *SPLParser) analysisReportMissingOperand() {
+    start := p.GetCurrentToken()
+    for context := p.GetParserRuleContext(); context != nil; {
+        if stage, ok := context.(IAnalysisStageContext); ok {
+            start = stage.GetStart()
+            break
+        }
+        parent, ok := context.GetParent().(antlr.ParserRuleContext)
+        if !ok { break }
+        context = parent
+    }
+    p.GetErrorHandler().ReportError(p, antlr.NewNoViableAltException(p, p.GetTokenStream(), start, p.GetCurrentToken(), nil, p.GetParserRuleContext()))
+}
 }
 
 query
@@ -226,6 +239,10 @@ analysisMissingJoinKey
     : {p.GetTokenStream().LA(1) == SPLParserLBRACK}?
       {p.NotifyErrorListeners("missing join key", p.GetCurrentToken(), nil)}
     ;
+analysisMissingOperand
+    : {p.GetTokenStream().LA(1) == SPLParserPIPE || p.GetTokenStream().LA(1) == SPLParserRBRACK || p.GetTokenStream().LA(1) == antlr.TokenEOF}?
+      {p.analysisReportMissingOperand()}
+    ;
 // Catalog roles are established here; qualified names remain single lexer tokens.
 analysisDataModelName : analysisCatalogName;
 analysisDataModelDataset : {!p.analysisCommandIs("search", "flat", "acceleration_search", "search_string", "flat_string", "acceleration_search_string")}? analysisCatalogName;
@@ -237,7 +254,7 @@ analysisSortField : (ADD | SUB)? analysisSelector;
 analysisLimit : NUMBER;
 analysisOption : analysisIdentifier EQ (analysisLiteral | analysisIdentifier);
 analysisCatalogName : analysisIdentifier | STRING;
-analysisAssignment : analysisIdentifier EQ analysisExpression;
+analysisAssignment : analysisIdentifier EQ (analysisExpression | analysisMissingOperand);
 analysisRename : analysisSelector analysisAlias;
 analysisAlias : AS analysisIdentifier;
 analysisFieldList : analysisSelector (COMMA? analysisSelector)*;
@@ -262,7 +279,7 @@ analysisSearch : analysisSearchAnd (OR analysisSearchAnd)*;
 analysisSearchAnd : analysisSearchUnary (AND? analysisSearchUnary)*;
 analysisSearchUnary : NOT analysisSearchUnary | analysisSearchTerm;
 analysisSearchTerm
-    : analysisIdentifier analysisComparisonOperator analysisSearchValue
+    : analysisIdentifier analysisComparisonOperator (analysisSearchValue | analysisMissingOperand)
     | analysisIdentifier IN LPAREN analysisSearchValue (COMMA analysisSearchValue)* RPAREN
     | LPAREN analysisSearch RPAREN
     | analysisMacro

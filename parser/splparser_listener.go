@@ -259,6 +259,9 @@ type SPLParserListener interface {
 	// EnterAnalysisMissingJoinKey is called when entering the analysisMissingJoinKey production.
 	EnterAnalysisMissingJoinKey(c *AnalysisMissingJoinKeyContext)
 
+	// EnterAnalysisMissingOperand is called when entering the analysisMissingOperand production.
+	EnterAnalysisMissingOperand(c *AnalysisMissingOperandContext)
+
 	// EnterAnalysisDataModelName is called when entering the analysisDataModelName production.
 	EnterAnalysisDataModelName(c *AnalysisDataModelNameContext)
 
@@ -651,6 +654,9 @@ type SPLParserListener interface {
 
 	// ExitAnalysisMissingJoinKey is called when exiting the analysisMissingJoinKey production.
 	ExitAnalysisMissingJoinKey(c *AnalysisMissingJoinKeyContext)
+
+	// ExitAnalysisMissingOperand is called when exiting the analysisMissingOperand production.
+	ExitAnalysisMissingOperand(c *AnalysisMissingOperandContext)
 
 	// ExitAnalysisDataModelName is called when exiting the analysisDataModelName production.
 	ExitAnalysisDataModelName(c *AnalysisDataModelNameContext)

@@ -536,6 +536,12 @@ func (s *BaseSPLParserListener) EnterAnalysisMissingJoinKey(ctx *AnalysisMissing
 // ExitAnalysisMissingJoinKey is called when production analysisMissingJoinKey is exited.
 func (s *BaseSPLParserListener) ExitAnalysisMissingJoinKey(ctx *AnalysisMissingJoinKeyContext) {}
 
+// EnterAnalysisMissingOperand is called when production analysisMissingOperand is entered.
+func (s *BaseSPLParserListener) EnterAnalysisMissingOperand(ctx *AnalysisMissingOperandContext) {}
+
+// ExitAnalysisMissingOperand is called when production analysisMissingOperand is exited.
+func (s *BaseSPLParserListener) ExitAnalysisMissingOperand(ctx *AnalysisMissingOperandContext) {}
+
 // EnterAnalysisDataModelName is called when production analysisDataModelName is entered.
 func (s *BaseSPLParserListener) EnterAnalysisDataModelName(ctx *AnalysisDataModelNameContext) {}
 

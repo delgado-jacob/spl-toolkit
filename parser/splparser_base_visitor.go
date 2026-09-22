@@ -343,6 +343,10 @@ func (v *BaseSPLParserVisitor) VisitAnalysisMissingJoinKey(ctx *AnalysisMissingJ
 	return v.VisitChildren(ctx)
 }
 
+func (v *BaseSPLParserVisitor) VisitAnalysisMissingOperand(ctx *AnalysisMissingOperandContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
 func (v *BaseSPLParserVisitor) VisitAnalysisDataModelName(ctx *AnalysisDataModelNameContext) interface{} {
 	return v.VisitChildren(ctx)
 }

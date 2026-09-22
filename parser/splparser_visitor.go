@@ -259,6 +259,9 @@ type SPLParserVisitor interface {
 	// Visit a parse tree produced by SPLParser#analysisMissingJoinKey.
 	VisitAnalysisMissingJoinKey(ctx *AnalysisMissingJoinKeyContext) interface{}
 
+	// Visit a parse tree produced by SPLParser#analysisMissingOperand.
+	VisitAnalysisMissingOperand(ctx *AnalysisMissingOperandContext) interface{}
+
 	// Visit a parse tree produced by SPLParser#analysisDataModelName.
 	VisitAnalysisDataModelName(ctx *AnalysisDataModelNameContext) interface{}
 
