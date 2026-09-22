@@ -231,7 +231,10 @@ func binCommand(s *semanticStage, node antlr.ParserRuleContext) {
 		switch name {
 		case "span", "minspan":
 			value := option.AnalysisUnitOptionValue()
-			literal = value != nil && value.NUMBER() != nil && s.sound(value)
+			if value != nil && value.NUMBER() != nil && s.sound(value) {
+				magnitude := value.NUMBER().GetText()
+				literal = strings.ContainsAny(magnitude, "123456789") && (value.AnalysisUnitSuffix() == nil || !strings.Contains(magnitude, "."))
+			}
 		case "bins":
 			value := option.AnalysisOptionValue()
 			if value != nil && value.AnalysisLiteral() != nil && value.AnalysisLiteral().NUMBER() != nil && s.sound(value.AnalysisLiteral()) {
@@ -432,6 +435,8 @@ func scanRexNamedCaptures(pattern string) ([]rexCapture, bool) {
 				continue
 			}
 			nameStart = i + 3
+		case runes[i+2] == '\'':
+			return nil, false
 		case runes[i+2] == 'P':
 			if i+3 >= len(runes) {
 				return nil, false

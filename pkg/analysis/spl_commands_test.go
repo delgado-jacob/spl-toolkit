@@ -467,6 +467,21 @@ func TestRexSemantics(t *testing.T) {
 		assertFieldCommandReference(t, result, "where", "payload", "read", "source", "exact")
 	})
 
+	t.Run("unsupported quoted capture opener is held", func(t *testing.T) {
+		result := analyzeFieldCommand(t, `search payload=* | rex field=payload "(?'name'x)" | where name="x"`)
+		assertFieldCommandIncomplete(t, result, "rex", `"(?'name'x)"`)
+		assertFieldCommandReference(t, result, "rex", "payload", "read", "source", "exact")
+		if fieldCommandHasReference(result, "rex", "name", "output") {
+			t.Fatalf("unsupported rex capture syntax published name: %+v", result.References)
+		}
+		assertFieldCommandReference(t, result, "where", "name", "read", "indeterminate", "exact")
+		for _, field := range fieldCommandLineage(t, result, "rex").After.Fields {
+			if field.Name == "name" {
+				t.Fatalf("unsupported rex capture installed name: %+v", fieldCommandLineage(t, result, "rex").After)
+			}
+		}
+	})
+
 	t.Run("dynamic input does not install the wildcard spelling", func(t *testing.T) {
 		result := analyzeFieldCommand(t, `search user=* | rex field='user*' "(?<capture>x)" | where 'user*'="x"`)
 		assertFieldCommandIncomplete(t, result, "rex", `field='user*'`)
@@ -485,6 +500,7 @@ func TestRexNamedCaptures(t *testing.T) {
 		ok      bool
 	}{
 		{name: "incomplete Python opener", pattern: `(?P`, ok: false},
+		{name: "unsupported quoted capture opener", pattern: `(?'name'x)`, ok: false},
 		{name: "Python named backreference", pattern: `(?P<name>x)(?P=name)`, want: []string{"name"}, ok: true},
 		{name: "leading literal closing bracket", pattern: `[](?<fake>)](?<real>x)`, want: []string{"real"}, ok: true},
 		{name: "second caret is a class member", pattern: `[^^](?<real>x)`, want: []string{"real"}, ok: true},
@@ -603,6 +619,38 @@ func TestBinAndBucketSemantics(t *testing.T) {
 		assertFieldCommandReference(t, result, "where", "bytes", "read", "source", "exact")
 		if fieldCommandHasReference(result, "bucket", "band", "create") {
 			t.Fatalf("dynamic bucket minspan applied a false alias: %+v", result.References)
+		}
+	})
+
+	t.Run("positive fractional span without a unit remains supported", func(t *testing.T) {
+		result := analyzeFieldCommand(t, `search bytes=* | bin span=0.5 bytes AS band | where band>0`)
+		assertFieldCommandComplete(t, result, "bin")
+		assertFieldCommandReference(t, result, "bin", "bytes", "read", "source", "exact")
+		assertFieldCommandReference(t, result, "where", "band", "read", "derived", "exact")
+	})
+
+	t.Run("invalid span magnitudes retain only the input", func(t *testing.T) {
+		for _, tc := range []struct {
+			name, option string
+		}{
+			{name: "zero span", option: "span=0"},
+			{name: "zero minspan", option: "minspan=0"},
+			{name: "fractional span with unit", option: "span=0.5m"},
+		} {
+			t.Run(tc.name, func(t *testing.T) {
+				result := analyzeFieldCommand(t, `search bytes=* | bin `+tc.option+` bytes AS band | where bytes>0`)
+				assertFieldCommandIncomplete(t, result, "bin", tc.option)
+				assertFieldCommandReference(t, result, "bin", "bytes", "read", "source", "exact")
+				assertFieldCommandReference(t, result, "where", "bytes", "read", "source", "exact")
+				if fieldCommandHasReference(result, "bin", "band", "create") {
+					t.Fatalf("invalid %s applied a false alias: %+v", tc.option, result.References)
+				}
+				for _, transition := range fieldCommandLineage(t, result, "bin").Transitions {
+					if transition.Output == "band" {
+						t.Fatalf("invalid %s published a derived transition: %+v", tc.option, transition)
+					}
+				}
+			})
 		}
 	})
 
