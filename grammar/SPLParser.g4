@@ -249,9 +249,23 @@ analysisUnitSuffix
       {
 unit := p.GetTokenStream().LT(-1)
 switch strings.ToLower(unit.GetText()) {
-case "s", "m", "h", "d", "w", "y", "q", "w0", "w1", "w2", "w3", "w4", "w5", "w6", "w7", "qtr", "mon", "week", "year", "quarter":
+case "us", "ms", "cs", "ds",
+    "s", "sec", "secs", "second", "seconds",
+    "m", "min", "mins", "minute", "minutes",
+    "h", "hr", "hrs", "hour", "hours",
+    "d", "day", "days",
+    "w", "week", "weeks", "w0", "w1", "w2", "w3", "w4", "w5", "w6", "w7",
+    "mon", "month", "months",
+    "q", "qtr", "qtrs", "quarter", "quarters",
+    "y", "yr", "yrs", "year", "years":
 default:
-    p.NotifyErrorListeners("invalid option value", unit, nil)
+    text := strings.ToLower(unit.GetText())
+    base := strings.TrimPrefix(text, "log")
+    validLog := strings.HasPrefix(text, "log") &&
+        (base == "" || (strings.Trim(base, "0123456789.") == "" && strings.Count(base, ".") <= 1 && !strings.HasPrefix(base, ".") && !strings.HasSuffix(base, ".")))
+    if !validLog {
+        p.NotifyErrorListeners("invalid option value", unit, nil)
+    }
 }
 }
     ;

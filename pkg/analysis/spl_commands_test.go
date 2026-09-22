@@ -411,6 +411,9 @@ func TestTstatsSpanDomain(t *testing.T) {
 	for _, tc := range []struct {
 		name, span string
 	}{
+		{name: "subsecond unit", span: "5ms"},
+		{name: "logarithmic form", span: "2log10"},
+		{name: "unsupported week unit", span: "5w"},
 		{name: "quoted garbage", span: `"garbage"`},
 		{name: "zero", span: "0"},
 		{name: "fractional unit duration", span: "0.5m"},
@@ -446,6 +449,123 @@ func TestTstatsSpanDomain(t *testing.T) {
 			assertTstatsDiagnosticLocation(t, result, CodeUnsupportedSemantics, "span="+tc.span)
 		})
 	}
+}
+
+func TestClassicSPLSpanSpellings(t *testing.T) {
+	t.Run("bin models documented unit aliases", func(t *testing.T) {
+		for _, span := range []string{
+			"5sec", "5secs", "5second", "5seconds",
+			"5min", "5mins", "5minute", "5minutes",
+			"5hr", "5hrs", "5hour", "5hours",
+			"5day", "5days",
+			"5month", "5months",
+		} {
+			t.Run(span, func(t *testing.T) {
+				result := analyzeFieldCommand(t, `search _time=* | bin span=`+span+` _time AS bucket | where bucket>0`)
+				assertFieldCommandComplete(t, result, "bin")
+				assertFieldCommandReference(t, result, "bin", "_time", "read", "source", "exact")
+				assertFieldCommandReference(t, result, "where", "bucket", "read", "derived", "exact")
+			})
+		}
+	})
+
+	t.Run("bin models subsecond units", func(t *testing.T) {
+		for _, span := range []string{"5us", "5ms", "5cs", "5ds"} {
+			t.Run(span, func(t *testing.T) {
+				result := analyzeFieldCommand(t, `search _time=* | bin span=`+span+` _time AS bucket | where bucket>0`)
+				assertFieldCommandComplete(t, result, "bin")
+				assertFieldCommandReference(t, result, "bin", "_time", "read", "source", "exact")
+				assertFieldCommandReference(t, result, "where", "bucket", "read", "derived", "exact")
+			})
+		}
+	})
+
+	t.Run("bin holds recognized units outside its timescale domain", func(t *testing.T) {
+		for _, span := range []string{"5w", "5q", "5y"} {
+			t.Run(span, func(t *testing.T) {
+				result := analyzeFieldCommand(t, `search bytes=* | bin span=`+span+` bytes AS band | where bytes>0`)
+				assertFieldCommandIncomplete(t, result, "bin", "span="+span)
+				if !result.Coverage.SyntaxComplete {
+					t.Fatalf("span %q became a syntax error: %+v", span, result.Diagnostics)
+				}
+				assertFieldCommandReference(t, result, "bin", "bytes", "read", "source", "exact")
+				assertFieldCommandReference(t, result, "where", "bytes", "read", "source", "exact")
+				if fieldCommandHasReference(result, "bin", "band", "create") {
+					t.Fatalf("held span %q published an alias: %+v", span, result.References)
+				}
+			})
+		}
+	})
+
+	t.Run("bin holds invalid subsecond magnitudes", func(t *testing.T) {
+		for _, span := range []string{"3ms", "1000ms"} {
+			t.Run(span, func(t *testing.T) {
+				result := analyzeFieldCommand(t, `search bytes=* | bin span=`+span+` bytes AS band | where bytes>0`)
+				assertFieldCommandIncomplete(t, result, "bin", "span="+span)
+				if !result.Coverage.SyntaxComplete {
+					t.Fatalf("span %q became a syntax error: %+v", span, result.Diagnostics)
+				}
+				assertFieldCommandReference(t, result, "bin", "bytes", "read", "source", "exact")
+				assertFieldCommandReference(t, result, "where", "bytes", "read", "source", "exact")
+				if fieldCommandHasReference(result, "bin", "band", "create") {
+					t.Fatalf("held span %q published an alias: %+v", span, result.References)
+				}
+			})
+		}
+	})
+
+	t.Run("bin models logarithmic spans", func(t *testing.T) {
+		for _, span := range []string{"log10", "2log10"} {
+			t.Run(span, func(t *testing.T) {
+				result := analyzeFieldCommand(t, `search bytes=* | bin span=`+span+` bytes AS band | where band>0`)
+				assertFieldCommandComplete(t, result, "bin")
+				assertFieldCommandReference(t, result, "bin", "bytes", "read", "source", "exact")
+				assertFieldCommandReference(t, result, "where", "band", "read", "derived", "exact")
+			})
+		}
+	})
+
+	t.Run("bin holds logarithmic minspan", func(t *testing.T) {
+		result := analyzeFieldCommand(t, `search bytes=* | bin minspan=2log10 bytes AS band | where bytes>0`)
+		assertFieldCommandIncomplete(t, result, "bin", "minspan=2log10")
+		if !result.Coverage.SyntaxComplete {
+			t.Fatalf("logarithmic minspan became a syntax error: %+v", result.Diagnostics)
+		}
+		assertFieldCommandReference(t, result, "bin", "bytes", "read", "source", "exact")
+		assertFieldCommandReference(t, result, "where", "bytes", "read", "source", "exact")
+		if fieldCommandHasReference(result, "bin", "band", "create") {
+			t.Fatalf("logarithmic minspan published an alias: %+v", result.References)
+		}
+	})
+
+	t.Run("tstats models documented unit aliases", func(t *testing.T) {
+		for _, span := range []string{
+			"5sec", "5secs", "5second", "5seconds",
+			"5min", "5mins", "5minute", "5minutes",
+			"5hr", "5hrs", "5hour", "5hours",
+			"5day", "5days",
+			"5month", "5months",
+		} {
+			t.Run(span, func(t *testing.T) {
+				result, err := Analyze(QueryDocument{Text: `| tstats count FROM datamodel=Model.Dataset BY _time span=` + span})
+				if err != nil {
+					t.Fatal(err)
+				}
+				if result.Status != Valid || !result.Coverage.SyntaxComplete || !result.Coverage.SemanticComplete || !result.Stages[0].SemanticComplete || len(result.Diagnostics) != 0 {
+					t.Fatalf("span %q completeness = status %q coverage %+v stages %+v diagnostics %+v", span, result.Status, result.Coverage, result.Stages, result.Diagnostics)
+				}
+				wantReferences := []string{
+					"count=>count:field:output:not_applicable:exact",
+					"Model=>Model:data_model:read:not_applicable:exact",
+					"Model.Dataset=>Model.Dataset:dataset:read:not_applicable:exact",
+					"_time=>_time:field:group:source:exact",
+				}
+				if got := tstatsReferenceFacts(result.References); !reflect.DeepEqual(got, wantReferences) {
+					t.Fatalf("span %q references\n got: %q\nwant: %q", span, got, wantReferences)
+				}
+			})
+		}
+	})
 }
 
 func TestTstatsQuotedWildcardAggregateHeld(t *testing.T) {

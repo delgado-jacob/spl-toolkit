@@ -270,11 +270,7 @@ func binCommand(s *semanticStage, node antlr.ParserRuleContext) {
 		literal := false
 		switch name {
 		case "span", "minspan":
-			value := option.AnalysisUnitOptionValue()
-			if value != nil && value.NUMBER() != nil && s.sound(value) {
-				magnitude := value.NUMBER().GetText()
-				literal = strings.ContainsAny(magnitude, "123456789") && (value.AnalysisUnitSuffix() == nil || !strings.Contains(magnitude, "."))
-			}
+			literal = s.binSpanModeled(name, option.AnalysisUnitOptionValue())
 		case "bins":
 			value := option.AnalysisOptionValue()
 			if value != nil && value.AnalysisLiteral() != nil && value.AnalysisLiteral().NUMBER() != nil && s.sound(value.AnalysisLiteral()) {
@@ -316,6 +312,74 @@ func binCommand(s *semanticStage, node antlr.ParserRuleContext) {
 	if modeled {
 		s.applyAssignment(target, nonemptyReferenceIDs(inputID), false, false)
 	}
+}
+
+func (s *semanticStage) binSpanModeled(option string, value parser.IAnalysisUnitOptionValueContext) bool {
+	if value == nil || !s.sound(value) {
+		return false
+	}
+	if classicLogSpan(value.GetText()) {
+		return option == "span"
+	}
+	if value.NUMBER() == nil {
+		return false
+	}
+	magnitude := value.NUMBER().GetText()
+	if !positiveNumber(magnitude) {
+		return false
+	}
+	unit := value.AnalysisUnitSuffix()
+	if unit == nil {
+		return true
+	}
+	if strings.Contains(magnitude, ".") {
+		return false
+	}
+	count, err := strconv.ParseUint(magnitude, 10, 64)
+	if err != nil || count == 0 {
+		return false
+	}
+	switch strings.ToLower(unit.GetText()) {
+	case "s", "sec", "secs", "second", "seconds",
+		"m", "min", "mins", "minute", "minutes",
+		"h", "hr", "hrs", "hour", "hours",
+		"d", "day", "days",
+		"mon", "month", "months":
+		return true
+	case "us":
+		return count < 1_000_000 && 1_000_000%count == 0
+	case "ms":
+		return count < 1_000 && 1_000%count == 0
+	case "cs":
+		return count < 100 && 100%count == 0
+	case "ds":
+		return count < 10 && 10%count == 0
+	default:
+		return false
+	}
+}
+
+func classicLogSpan(text string) bool {
+	text = strings.ToLower(text)
+	separator := strings.Index(text, "log")
+	if separator < 0 {
+		return false
+	}
+	coefficientText, baseText := text[:separator], text[separator+len("log"):]
+	if coefficientText == "" {
+		coefficientText = "1"
+	}
+	if baseText == "" {
+		baseText = "10"
+	}
+	coefficient, coefficientErr := strconv.ParseFloat(coefficientText, 64)
+	base, baseErr := strconv.ParseFloat(baseText, 64)
+	return coefficientErr == nil && baseErr == nil && base > 1 && coefficient >= 1 && coefficient < base
+}
+
+func positiveNumber(text string) bool {
+	value, err := strconv.ParseFloat(text, 64)
+	return err == nil && value > 0
 }
 
 func regexCommand(s *semanticStage, node antlr.ParserRuleContext) {

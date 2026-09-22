@@ -161,7 +161,26 @@ func (s *semanticStage) tstatsSpanModeled(group string, value parser.IAnalysisUn
 		return false
 	}
 	magnitude := value.NUMBER().GetText()
-	return strings.ContainsAny(magnitude, "123456789") && (value.AnalysisUnitSuffix() == nil || !strings.Contains(magnitude, "."))
+	if !positiveNumber(magnitude) {
+		return false
+	}
+	unit := value.AnalysisUnitSuffix()
+	if unit == nil {
+		return true
+	}
+	if strings.Contains(magnitude, ".") {
+		return false
+	}
+	switch strings.ToLower(unit.GetText()) {
+	case "s", "sec", "secs", "second", "seconds",
+		"m", "min", "mins", "minute", "minutes",
+		"h", "hr", "hrs", "hour", "hours",
+		"d", "day", "days",
+		"mon", "month", "months":
+		return true
+	default:
+		return false
+	}
 }
 
 func (s *semanticStage) tstatsAggregate(aggregate parser.IAnalysisAggregateContext) (*aggregateOutput, bool) {
