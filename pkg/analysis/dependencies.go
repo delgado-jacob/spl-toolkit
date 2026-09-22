@@ -84,12 +84,6 @@ func (s *semanticStage) dependencies(node antlr.Tree) {
 	case parser.IAnalysisFromDatasetContext:
 		s.qualifiedCatalog(c, true)
 		return
-	case parser.IAnalysisTstatsWhereContext:
-		s.searchDependencies(c.AnalysisSearch())
-		return
-	case parser.IAnalysisTstatsFromContext:
-		s.qualifiedCatalog(c.AnalysisDataModelName(), false)
-		return
 	}
 	for i := 0; i < node.GetChildCount(); i++ {
 		s.dependencies(node.GetChild(i))
@@ -134,23 +128,5 @@ func (s *semanticStage) qualifiedCatalog(ctx antlr.ParserRuleContext, from bool)
 		datasetID := s.referenceAt(s.parsed.source.location(start, start+len([]rune(content))), content, "dataset", "read", "exact")
 		s.rewriteReference(datasetID, locatedOperand{Name: content, Location: s.parsed.source.location(start, start+len([]rune(content))), Resolution: "exact", Sound: true, rewrite: rewriteOwner{role: "qualified_dataset", location: s.parsed.source.contextLocation(ctx), component: true}}, "dataset", "read")
 		s.addDependency(content, "dataset")
-	}
-}
-
-func (s *semanticStage) searchDependencies(node antlr.Tree) {
-	if term, ok := node.(parser.IAnalysisSearchTermContext); ok && term.AnalysisIdentifier() != nil {
-		kind := strings.ToLower(normalizedName(term.AnalysisIdentifier().GetText()))
-		if s.sound(term) && (kind == "index" || kind == "source" || kind == "sourcetype") {
-			for _, value := range term.AllAnalysisSearchValue() {
-				s.dependency(value, normalizedName(value.GetText()), kind)
-			}
-		}
-		return
-	}
-	if _, child := node.(parser.IAnalysisSubqueryContext); child {
-		return
-	}
-	for i := 0; i < node.GetChildCount(); i++ {
-		s.searchDependencies(node.GetChild(i))
 	}
 }

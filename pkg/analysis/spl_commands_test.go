@@ -83,6 +83,14 @@ func TestTstatsSemantics(t *testing.T) {
 			transitions:  []string{"aggregate:count::ref-0:false"},
 		},
 		{
+			name:         "case insensitive boolean options",
+			query:        `| tstats SuMmArIeSoNlY=TRUE LOCAL=FaLsE include_reduced_buckets=tRuE allow_old_summaries=FALSE prestats=FaLsE append=fAlSe count`,
+			references:   []string{"count=>count:field:output:not_applicable:exact"},
+			dependencies: empty(),
+			fields:       []string{"count:false:ref-0"},
+			transitions:  []string{"aggregate:count::ref-0:false"},
+		},
+		{
 			name:         "grouping",
 			query:        `| tstats sum(bytes) AS total BY host user`,
 			references:   []string{"bytes=>bytes:field:read:source:exact", "total=>total:field:output:not_applicable:exact", "host=>host:field:group:source:exact", "user=>user:field:group:source:exact"},
@@ -130,16 +138,17 @@ func TestTstatsSemantics(t *testing.T) {
 
 func TestTstatsPartialBoundaries(t *testing.T) {
 	tests := []struct {
-		name             string
-		query            string
-		diagnosticCode   string
-		diagnosticSource string
-		references       []string
-		fields           []string
-		transitions      []string
-		dataModels       []string
-		datasets         []string
-		macros           []string
+		name              string
+		query             string
+		diagnosticCode    string
+		diagnosticSource  string
+		diagnosticMessage string
+		references        []string
+		fields            []string
+		transitions       []string
+		dataModels        []string
+		datasets          []string
+		macros            []string
 	}{
 		{
 			name:             "inline macro",
@@ -163,6 +172,16 @@ func TestTstatsPartialBoundaries(t *testing.T) {
 			transitions:      []string{"project:host:ref-4::true"},
 			dataModels:       []string{"Authentication"},
 			datasets:         []string{"Authentication.Authentication"},
+		},
+		{
+			name:              "mixed-case prestats true",
+			query:             `| tstats PrEsTaTs=TrUe sum(bytes) AS total WHERE action=allowed BY host`,
+			diagnosticCode:    CodeUnsupportedSemantics,
+			diagnosticSource:  "PrEsTaTs=TrUe",
+			diagnosticMessage: "tstats result-shape option is unmodeled when true",
+			references:        []string{"bytes=>bytes:field:read:source:exact", "action=>action:field:filter:source:exact", "host=>host:field:group:source:exact"},
+			fields:            []string{"host:true:ref-2"},
+			transitions:       []string{"project:host:ref-2::true"},
 		},
 		{
 			name:             "wildcard grouping",
@@ -199,6 +218,16 @@ func TestTstatsPartialBoundaries(t *testing.T) {
 			references:       []string{"count=>count:field:output:not_applicable:exact", "host=>host:field:group:source:exact"},
 			fields:           []string{"count:true:ref-0", "host:true:ref-1"},
 			transitions:      []string{"project:host:ref-1::true", "aggregate:count::ref-0:true"},
+		},
+		{
+			name:              "mixed-case append true",
+			query:             `| tstats ApPeNd=TrUe count BY host`,
+			diagnosticCode:    CodeUnsupportedSemantics,
+			diagnosticSource:  "ApPeNd=TrUe",
+			diagnosticMessage: "tstats result-shape option is unmodeled when true",
+			references:        []string{"count=>count:field:output:not_applicable:exact", "host=>host:field:group:source:exact"},
+			fields:            []string{"count:true:ref-0", "host:true:ref-1"},
+			transitions:       []string{"project:host:ref-1::true", "aggregate:count::ref-0:true"},
 		},
 		{
 			name:             "malformed options",
@@ -243,7 +272,33 @@ func TestTstatsPartialBoundaries(t *testing.T) {
 				t.Fatalf("dependencies = %+v", result.Dependencies)
 			}
 			assertTstatsDiagnosticLocation(t, result, tc.diagnosticCode, tc.diagnosticSource)
+			if tc.diagnosticMessage != "" {
+				assertTstatsDiagnosticMessage(t, result, tc.diagnosticCode, tc.diagnosticSource, tc.diagnosticMessage)
+			}
 		})
+	}
+}
+
+func TestTstatsCombinedBoundariesRetainRequiredWhere(t *testing.T) {
+	query := `| tstats mystery=true count FROM datamodel="Auth.*" WHERE action=allowed BY host`
+	result, err := Analyze(QueryDocument{Text: query})
+	if err != nil {
+		t.Fatal(err)
+	}
+	wantReferences := []string{
+		"count=>count:field:output:not_applicable:exact",
+		"action=>action:field:filter:source:exact",
+		"host=>host:field:group:source:exact",
+	}
+	if got := tstatsReferenceFacts(result.References); !reflect.DeepEqual(got, wantReferences) {
+		t.Fatalf("combined-boundary references\n got: %q\nwant: %q", got, wantReferences)
+	}
+	wantRequirements := []string{
+		"req-1:field:action:filter:required:exact:ref-1:action:source",
+		"req-2:field:host:group:required:exact:ref-2:host:source",
+	}
+	if got := tstatsRequirementFacts(result.Requirements.Items); !reflect.DeepEqual(got, wantRequirements) {
+		t.Fatalf("combined-boundary requirements\n got: %q\nwant: %q", got, wantRequirements)
 	}
 }
 
@@ -283,4 +338,17 @@ func assertTstatsDiagnosticLocation(t *testing.T, result *Result, code, source s
 		return
 	}
 	t.Fatalf("missing diagnostic %s in %+v", code, result.Diagnostics)
+}
+
+func assertTstatsDiagnosticMessage(t *testing.T, result *Result, code, source, message string) {
+	t.Helper()
+	for _, diagnostic := range result.Diagnostics {
+		if diagnostic.Code != code || diagnostic.Message != message {
+			continue
+		}
+		if got := result.Document.Text[diagnostic.Location.Start.Offset:diagnostic.Location.End.Offset]; got == source {
+			return
+		}
+	}
+	t.Fatalf("missing diagnostic %s with source %q and message %q in %+v", code, source, message, result.Diagnostics)
 }

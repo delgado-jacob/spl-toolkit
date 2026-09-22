@@ -41,11 +41,10 @@ func tstatsCommand(s *semanticStage, node antlr.ParserRuleContext) {
 		}
 	}
 	if from := ctx.AnalysisTstatsFrom(); from != nil && from.AnalysisDataModelName() != nil {
-		complete := s.result.Stages[s.stage].SemanticComplete
 		s.qualifiedCatalog(from.AnalysisDataModelName(), false)
-		if complete && !s.result.Stages[s.stage].SemanticComplete {
-			s.applySource()
-		}
+		// FROM establishes the generating source even when an earlier boundary has
+		// already made the stage incomplete or this catalog identity is dynamic.
+		s.applySource()
 	}
 	if where := ctx.AnalysisTstatsWhere(); where != nil && where.AnalysisSearch() != nil {
 		complete := s.result.Stages[s.stage].SemanticComplete
@@ -106,10 +105,11 @@ func (s *semanticStage) tstatsOption(ctx parser.IAnalysisTstatsOptionContext) st
 		if value == nil || value.AnalysisIdentifier() == nil {
 			return false, false
 		}
-		switch value.AnalysisIdentifier().GetText() {
-		case "true":
+		raw := value.AnalysisIdentifier().GetText()
+		switch {
+		case strings.EqualFold(raw, "true"):
 			return true, true
-		case "false":
+		case strings.EqualFold(raw, "false"):
 			return false, true
 		default:
 			return false, false
