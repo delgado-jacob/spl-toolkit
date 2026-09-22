@@ -218,7 +218,7 @@ def _validate_requirements_evidence(record: dict, errors: list[str], label: str)
     if evidence.get("fixture_sha256") != requirement_hash:
         errors.append(f"{label}: requirements fixture hash differs from surface evidence")
     minimums = {
-        "corpus_cases": 20,
+        "corpus_cases": 24,
         "dense_cases": 4,
         "concurrent_calls": 16,
         "long_sparse_cases": 2,

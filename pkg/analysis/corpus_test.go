@@ -37,7 +37,7 @@ func loadRequirementsCorpus(t *testing.T) []requirementsCorpusCase {
 	if err := json.Unmarshal(data, &corpus); err != nil {
 		t.Fatal(err)
 	}
-	if corpus.Version != "1" || len(corpus.Cases) != 20 {
+	if corpus.Version != "1" || len(corpus.Cases) != 24 {
 		t.Fatalf("missing reviewed requirements corpus: version %q cases %d", corpus.Version, len(corpus.Cases))
 	}
 	return corpus.Cases
@@ -56,7 +56,7 @@ func loadCorpus(t *testing.T) []corpusCase {
 	if err := json.Unmarshal(data, &corpus); err != nil {
 		t.Fatal(err)
 	}
-	if corpus.Version != "1" || len(corpus.Cases) != 34 {
+	if corpus.Version != "1" || len(corpus.Cases) != 38 {
 		t.Fatal("missing reviewed corpus", corpus.Version, len(corpus.Cases))
 	}
 	return corpus.Cases
@@ -84,16 +84,16 @@ func TestCorpusSemanticReview(t *testing.T) {
 		"wildcard_open":             {Incomplete, "a1,a*", "a1", 2, 1, false, true},
 		"unknown_function":          {Incomplete, "host,out,host", "host,out", 2, 1, true, true},
 		"macro":                     {Incomplete, "host,expand,count,user", "count,user", 3, 1, false, false},
-		"join_scope":                {Incomplete, "root,child,local,child,local", "root", 5, 2, true, true},
+		"join_scope":                {Incomplete, "root,id,child,local,child,local", "id,root", 5, 2, true, true},
 		"appendpipe_scope":          {Incomplete, "root,local,root,local,local,local", "local,root", 6, 2, true, true},
 		"partial_recovery":          {Invalid, "host,good,host,count,user", "count,user", 3, 1, false, false},
 		"invalid_precedence":        {Invalid, "a,a,a", "", 4, 1, true, true},
-		"dependencies":              {Incomplete, "main,/var/log/a,syslog,Network_Traffic,Network_Traffic.All_Traffic,Web,Web.All_Traffic,Authentication,Authentication.Authentication,users", "", 8, 4, true, false},
+		"dependencies":              {Incomplete, "main,/var/log/a,syslog,Network_Traffic,Network_Traffic.All_Traffic,Web,Web.All_Traffic,count,Authentication,Authentication.Authentication,users", "", 8, 4, true, false},
 		"saved_dataset":             {Incomplete, "savedsearch:Daily", "", 1, 1, true, true},
 		"quoted_asterisk":           {Valid, "a*,a*", "a*", 2, 1, true, false},
 		"wildcard_exclusion_closed": {Valid, "a1,a2,keep,a1,a2,keep,a*,z*", "keep", 3, 1, false, false},
 		"wildcard_exclusion_open":   {Incomplete, "a1,keep,a*,z*", "keep", 2, 1, true, true},
-		"malformed_child_scope":     {Invalid, "host,good", "host", 3, 1, true, true},
+		"malformed_child_scope":     {Invalid, "host,child,good,child,good", "host", 5, 2, true, true},
 		"quoted_projection":         {Incomplete, "a*,ab,a*", "a*,ab", 2, 1, false, true},
 		"implicit_aggregate":        {Valid, "bytes,sum(bytes),bytes", "sum(bytes)", 2, 1, false, false},
 		"exact_after_unknown":       {Invalid, "a,a,missing", "a", 4, 1, false, false},
@@ -108,6 +108,10 @@ func TestCorpusSemanticReview(t *testing.T) {
 		"quoted_fragment_prefix_exclusion": {Invalid, "ab,a*,ab", "", 3, 1, false, false},
 		"quoted_fragment_suffix_inclusion": {Valid, "first name,*name,first name", "first name", 3, 1, false, false},
 		"quoted_fragment_suffix_exclusion": {Invalid, "first name,*name,first name", "", 3, 1, false, false},
+		"tstats_basic":                     {Valid, "total,Network_Traffic,Network_Traffic.All_Traffic,All_Traffic.action,All_Traffic.src", "All_Traffic.src,total", 1, 1, false, false},
+		"field_commands":                   {Valid, "action,_raw,_raw,user,_raw,event_id,missing,missing,_time,bucket_time,action,values,user,event_id,missing,bucket_time,action,values", "action,bucket_time,event_id,missing,user,values", 8, 1, false, false},
+		"selected_functions":               {Valid, "values,_time,bytes,user,action,picked,values,found,values,cutoff,label,_time,allowed,action,empty,keep,cutoff,first_seen,_time,last_seen,bytes,spread,user,user,first_seen,last_seen,spread", "first_seen,last_seen,spread,user", 4, 1, false, false},
+		"branch_macro_boundaries":          {Incomplete, "parent,child,child,local,child,child_macro,parent", "parent", 6, 2, true, true},
 	}
 	for _, c := range loadCorpus(t) {
 		t.Run(c.ID, func(t *testing.T) {
@@ -243,6 +247,10 @@ func TestRequirementsCorpus(t *testing.T) {
 		"spl2_unsupported_function",
 		"spl2_recovered_diagnostics",
 		"spl2_structural_navigation",
+		"tstats_basic_spl",
+		"field_commands_spl",
+		"selected_functions_spl",
+		"branch_macro_boundaries_spl",
 	}
 	cases := loadRequirementsCorpus(t)
 	gotIDs := make([]string, 0, len(cases))

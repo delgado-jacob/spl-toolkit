@@ -487,7 +487,7 @@
             "version": "current",
             "query_digest": "sha256:606d095823891cf28ca6f922badc99e47ff228d9bec6821cc08647bfbd24d7a8"
           },
-          "capability_revision": "sha256:4824cd3df03aef27ae9375eb2298faffce0ffd4216396cec58954ce369f65f47",
+          "capability_revision": "sha256:08901c84ac8c420f59ddb86168c534f0e83484c05d3c8a81078a716c878a1733",
           "query_status": "valid",
           "coverage": {
             "complete": true,
@@ -908,7 +908,7 @@
             "version": "current",
             "query_digest": "sha256:bd9f640974bfb6ac5966d0f11666413219e687032e9580c26dcdf6f304c16c05"
           },
-          "capability_revision": "sha256:4824cd3df03aef27ae9375eb2298faffce0ffd4216396cec58954ce369f65f47",
+          "capability_revision": "sha256:08901c84ac8c420f59ddb86168c534f0e83484c05d3c8a81078a716c878a1733",
           "query_status": "valid",
           "coverage": {
             "complete": true,
@@ -1535,7 +1535,7 @@
             "version": "current",
             "query_digest": "sha256:aa33f7498fa609dfc17c9bf05cde79980c05d9257265da567b29dd746d2120a9"
           },
-          "capability_revision": "sha256:4824cd3df03aef27ae9375eb2298faffce0ffd4216396cec58954ce369f65f47",
+          "capability_revision": "sha256:08901c84ac8c420f59ddb86168c534f0e83484c05d3c8a81078a716c878a1733",
           "query_status": "valid",
           "coverage": {
             "complete": true,
@@ -2432,7 +2432,7 @@
             "version": "current",
             "query_digest": "sha256:7407cb104f5af9edc138543a9cfb28f224d10afcd35dc7626fc6ca5e0bc6b96b"
           },
-          "capability_revision": "sha256:4824cd3df03aef27ae9375eb2298faffce0ffd4216396cec58954ce369f65f47",
+          "capability_revision": "sha256:08901c84ac8c420f59ddb86168c534f0e83484c05d3c8a81078a716c878a1733",
           "query_status": "valid",
           "coverage": {
             "complete": true,
@@ -3187,7 +3187,7 @@
             "version": "current",
             "query_digest": "sha256:afef392af14fbe30836ffad452e556f0f9c6f6e73242b0e64ee167cece6d49ba"
           },
-          "capability_revision": "sha256:4824cd3df03aef27ae9375eb2298faffce0ffd4216396cec58954ce369f65f47",
+          "capability_revision": "sha256:08901c84ac8c420f59ddb86168c534f0e83484c05d3c8a81078a716c878a1733",
           "query_status": "valid",
           "coverage": {
             "complete": true,
@@ -3869,7 +3869,7 @@
             "version": "current",
             "query_digest": "sha256:290bce413e66458f761458531a871955267db9cf4ee074923db52b54cd4bb1a8"
           },
-          "capability_revision": "sha256:4824cd3df03aef27ae9375eb2298faffce0ffd4216396cec58954ce369f65f47",
+          "capability_revision": "sha256:08901c84ac8c420f59ddb86168c534f0e83484c05d3c8a81078a716c878a1733",
           "query_status": "valid",
           "coverage": {
             "complete": false,
@@ -4231,7 +4231,7 @@
             "version": "current",
             "query_digest": "sha256:0dc76923fa47fdaa30ad258c85f6308c784f76b351b6ebb4f947656044c57d5b"
           },
-          "capability_revision": "sha256:4824cd3df03aef27ae9375eb2298faffce0ffd4216396cec58954ce369f65f47",
+          "capability_revision": "sha256:08901c84ac8c420f59ddb86168c534f0e83484c05d3c8a81078a716c878a1733",
           "query_status": "valid",
           "coverage": {
             "complete": true,
@@ -4736,7 +4736,7 @@
             "version": "current",
             "query_digest": "sha256:8587774ff6c8be65f8e435851771f42f5660f0ca5e1df3d330220b22d04e41c8"
           },
-          "capability_revision": "sha256:4824cd3df03aef27ae9375eb2298faffce0ffd4216396cec58954ce369f65f47",
+          "capability_revision": "sha256:08901c84ac8c420f59ddb86168c534f0e83484c05d3c8a81078a716c878a1733",
           "query_status": "valid",
           "coverage": {
             "complete": false,
@@ -5038,7 +5038,7 @@
             "version": "current",
             "query_digest": "sha256:d82bde149df6590a4fee6bb80004fa036fbc25904427dcbc1d88bbb6ab508b3f"
           },
-          "capability_revision": "sha256:4824cd3df03aef27ae9375eb2298faffce0ffd4216396cec58954ce369f65f47",
+          "capability_revision": "sha256:08901c84ac8c420f59ddb86168c534f0e83484c05d3c8a81078a716c878a1733",
           "query_status": "incomplete",
           "coverage": {
             "complete": false,
@@ -5429,7 +5429,7 @@
             "version": "current",
             "query_digest": "sha256:f0b943f8a3989985e26185941ac9b6bef1fb82e669dc7dcd8b842ded7a332ead"
           },
-          "capability_revision": "sha256:4824cd3df03aef27ae9375eb2298faffce0ffd4216396cec58954ce369f65f47",
+          "capability_revision": "sha256:08901c84ac8c420f59ddb86168c534f0e83484c05d3c8a81078a716c878a1733",
           "query_status": "incomplete",
           "coverage": {
             "complete": false,
@@ -5896,7 +5896,7 @@
             "version": "current",
             "query_digest": "sha256:361b0ab3e3c354a13d3dd203935807a6af1d558fdcea70ff4e9dcb0579c8f51d"
           },
-          "capability_revision": "sha256:4824cd3df03aef27ae9375eb2298faffce0ffd4216396cec58954ce369f65f47",
+          "capability_revision": "sha256:08901c84ac8c420f59ddb86168c534f0e83484c05d3c8a81078a716c878a1733",
           "query_status": "incomplete",
           "coverage": {
             "complete": false,
@@ -6230,6 +6230,30 @@
           },
           {
             "id": "ref-1",
+            "original_name": "id",
+            "normalized_name": "id",
+            "kind": "field",
+            "role": "read",
+            "stage_id": "stage-1",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 21,
+                "line": 1,
+                "column": 22
+              },
+              "end": {
+                "offset": 23,
+                "line": 1,
+                "column": 24
+              }
+            },
+            "resolution": "exact",
+            "binding": "source",
+            "origin_reference_ids": []
+          },
+          {
+            "id": "ref-2",
             "original_name": "child",
             "normalized_name": "child",
             "kind": "field",
@@ -6253,7 +6277,7 @@
             "origin_reference_ids": []
           },
           {
-            "id": "ref-2",
+            "id": "ref-3",
             "original_name": "local",
             "normalized_name": "local",
             "kind": "field",
@@ -6275,12 +6299,12 @@
             "resolution": "exact",
             "binding": "not_applicable",
             "origin_reference_ids": [
-              "ref-3",
-              "ref-1"
+              "ref-4",
+              "ref-2"
             ]
           },
           {
-            "id": "ref-3",
+            "id": "ref-4",
             "original_name": "child",
             "normalized_name": "child",
             "kind": "field",
@@ -6302,11 +6326,11 @@
             "resolution": "exact",
             "binding": "source",
             "origin_reference_ids": [
-              "ref-1"
+              "ref-2"
             ]
           },
           {
-            "id": "ref-4",
+            "id": "ref-5",
             "original_name": "local",
             "normalized_name": "local",
             "kind": "field",
@@ -6376,6 +6400,13 @@
             "after": {
               "fields": [
                 {
+                  "name": "id",
+                  "origin_reference_ids": [
+                    "ref-1"
+                  ],
+                  "conditional": false
+                },
+                {
                   "name": "root",
                   "origin_reference_ids": [
                     "ref-0"
@@ -6403,7 +6434,7 @@
                 {
                   "name": "child",
                   "origin_reference_ids": [
-                    "ref-1"
+                    "ref-2"
                   ],
                   "conditional": false
                 }
@@ -6422,7 +6453,7 @@
                 {
                   "name": "child",
                   "origin_reference_ids": [
-                    "ref-1"
+                    "ref-2"
                   ],
                   "conditional": false
                 }
@@ -6436,16 +6467,16 @@
                 {
                   "name": "child",
                   "origin_reference_ids": [
-                    "ref-1"
+                    "ref-2"
                   ],
                   "conditional": false
                 },
                 {
                   "name": "local",
                   "origin_reference_ids": [
-                    "ref-2",
                     "ref-3",
-                    "ref-1"
+                    "ref-4",
+                    "ref-2"
                   ],
                   "conditional": false
                 }
@@ -6459,9 +6490,9 @@
                 "operation": "create",
                 "output": "local",
                 "input_reference_ids": [
-                  "ref-3"
+                  "ref-4"
                 ],
-                "output_reference_id": "ref-2",
+                "output_reference_id": "ref-3",
                 "conditional": false
               }
             ]
@@ -6471,6 +6502,13 @@
             "scope_id": "scope-0",
             "before": {
               "fields": [
+                {
+                  "name": "id",
+                  "origin_reference_ids": [
+                    "ref-1"
+                  ],
+                  "conditional": false
+                },
                 {
                   "name": "root",
                   "origin_reference_ids": [
@@ -6485,6 +6523,13 @@
             },
             "after": {
               "fields": [
+                {
+                  "name": "id",
+                  "origin_reference_ids": [
+                    "ref-1"
+                  ],
+                  "conditional": false
+                },
                 {
                   "name": "root",
                   "origin_reference_ids": [
@@ -6540,7 +6585,7 @@
             "version": "current",
             "query_digest": "sha256:43b2e1f9bd041dd8df40d0175ff07e0e546dec827b727389887121eba1926daa"
           },
-          "capability_revision": "sha256:4824cd3df03aef27ae9375eb2298faffce0ffd4216396cec58954ce369f65f47",
+          "capability_revision": "sha256:08901c84ac8c420f59ddb86168c534f0e83484c05d3c8a81078a716c878a1733",
           "query_status": "incomplete",
           "coverage": {
             "complete": false,
@@ -6583,6 +6628,36 @@
             {
               "id": "req-2",
               "kind": "field",
+              "identity": "id",
+              "role": "read",
+              "necessity": "required",
+              "origin": "direct",
+              "resolution": "exact",
+              "occurrences": [
+                {
+                  "reference_id": "ref-1",
+                  "original_name": "id",
+                  "binding": "source",
+                  "stage_id": "stage-1",
+                  "scope_id": "scope-0",
+                  "location": {
+                    "start": {
+                      "offset": 21,
+                      "line": 1,
+                      "column": 22
+                    },
+                    "end": {
+                      "offset": 23,
+                      "line": 1,
+                      "column": 24
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "id": "req-3",
+              "kind": "field",
               "identity": "child",
               "role": "filter",
               "necessity": "required",
@@ -6590,7 +6665,7 @@
               "resolution": "exact",
               "occurrences": [
                 {
-                  "reference_id": "ref-1",
+                  "reference_id": "ref-2",
                   "original_name": "child",
                   "binding": "source",
                   "stage_id": "stage-2",
@@ -6611,7 +6686,7 @@
               ]
             },
             {
-              "id": "req-3",
+              "id": "req-4",
               "kind": "field",
               "identity": "child",
               "role": "read",
@@ -6620,7 +6695,7 @@
               "resolution": "exact",
               "occurrences": [
                 {
-                  "reference_id": "ref-3",
+                  "reference_id": "ref-4",
                   "original_name": "child",
                   "binding": "source",
                   "stage_id": "stage-3",
@@ -6641,7 +6716,7 @@
               ]
             },
             {
-              "id": "req-4",
+              "id": "req-5",
               "kind": "field",
               "identity": "local",
               "role": "read",
@@ -6650,7 +6725,7 @@
               "resolution": "exact",
               "occurrences": [
                 {
-                  "reference_id": "ref-4",
+                  "reference_id": "ref-5",
                   "original_name": "local",
                   "binding": "indeterminate",
                   "stage_id": "stage-4",
@@ -6684,7 +6759,7 @@
               "code": "SPL_REQUIREMENT_INDETERMINATE",
               "message": "requirement origin is indeterminate",
               "reference_ids": [
-                "ref-4"
+                "ref-5"
               ],
               "diagnostic_codes": []
             }
@@ -7377,7 +7452,7 @@
             "version": "current",
             "query_digest": "sha256:10b5a1f05c26209c7a60d068be0304c771035308458d8f949a9a2daed30a3967"
           },
-          "capability_revision": "sha256:4824cd3df03aef27ae9375eb2298faffce0ffd4216396cec58954ce369f65f47",
+          "capability_revision": "sha256:08901c84ac8c420f59ddb86168c534f0e83484c05d3c8a81078a716c878a1733",
           "query_status": "incomplete",
           "coverage": {
             "complete": false,
@@ -7899,7 +7974,7 @@
             "version": "current",
             "query_digest": "sha256:35a235019244bfd8ca20ca015aff403a2e2701178202342f551aa33fc79b672d"
           },
-          "capability_revision": "sha256:4824cd3df03aef27ae9375eb2298faffce0ffd4216396cec58954ce369f65f47",
+          "capability_revision": "sha256:08901c84ac8c420f59ddb86168c534f0e83484c05d3c8a81078a716c878a1733",
           "query_status": "invalid",
           "coverage": {
             "complete": false,
@@ -8406,7 +8481,7 @@
             "version": "current",
             "query_digest": "sha256:bf6754cc5a8e6429d5fdc40d91a667a05a914e277242842d4c95a026e19641ec"
           },
-          "capability_revision": "sha256:4824cd3df03aef27ae9375eb2298faffce0ffd4216396cec58954ce369f65f47",
+          "capability_revision": "sha256:08901c84ac8c420f59ddb86168c534f0e83484c05d3c8a81078a716c878a1733",
           "query_status": "invalid",
           "coverage": {
             "complete": false,
@@ -8659,7 +8734,7 @@
                 "column": 226
               }
             },
-            "semantic_complete": false
+            "semantic_complete": true
           },
           {
             "id": "stage-7",
@@ -8926,6 +9001,30 @@
           },
           {
             "id": "ref-7",
+            "original_name": "count",
+            "normalized_name": "count",
+            "kind": "field",
+            "role": "output",
+            "stage_id": "stage-6",
+            "scope_id": "scope-3",
+            "location": {
+              "start": {
+                "offset": 175,
+                "line": 1,
+                "column": 176
+              },
+              "end": {
+                "offset": 180,
+                "line": 1,
+                "column": 181
+              }
+            },
+            "resolution": "exact",
+            "binding": "not_applicable",
+            "origin_reference_ids": []
+          },
+          {
+            "id": "ref-8",
             "original_name": "Authentication",
             "normalized_name": "Authentication",
             "kind": "data_model",
@@ -8949,7 +9048,7 @@
             "origin_reference_ids": []
           },
           {
-            "id": "ref-8",
+            "id": "ref-9",
             "original_name": "Authentication.Authentication",
             "normalized_name": "Authentication.Authentication",
             "kind": "dataset",
@@ -8973,7 +9072,7 @@
             "origin_reference_ids": []
           },
           {
-            "id": "ref-9",
+            "id": "ref-10",
             "original_name": "users",
             "normalized_name": "users",
             "kind": "lookup",
@@ -9110,12 +9209,28 @@
               "uncertain": false
             },
             "after": {
-              "fields": [],
+              "fields": [
+                {
+                  "name": "count",
+                  "origin_reference_ids": [
+                    "ref-7"
+                  ],
+                  "conditional": false
+                }
+              ],
               "removed": [],
-              "open": true,
-              "uncertain": true
+              "open": false,
+              "uncertain": false
             },
-            "transitions": []
+            "transitions": [
+              {
+                "operation": "aggregate",
+                "output": "count",
+                "input_reference_ids": [],
+                "output_reference_id": "ref-7",
+                "conditional": false
+              }
+            ]
           },
           {
             "stage_id": "stage-7",
@@ -9260,26 +9375,6 @@
             },
             "stage_id": "stage-5",
             "scope_id": "scope-0"
-          },
-          {
-            "code": "SPL_UNSUPPORTED_SEMANTICS",
-            "severity": "warning",
-            "category": "unsupported_semantics",
-            "message": "command \"tstats\" has unmodeled field effects",
-            "location": {
-              "start": {
-                "offset": 168,
-                "line": 1,
-                "column": 169
-              },
-              "end": {
-                "offset": 225,
-                "line": 1,
-                "column": 226
-              }
-            },
-            "stage_id": "stage-6",
-            "scope_id": "scope-3"
           }
         ],
         "requirements": {
@@ -9291,7 +9386,7 @@
             "version": "current",
             "query_digest": "sha256:72d1806d01e2eaa01dad59014c221c050b051fcaa46bd5f417c1dcd080aa12c9"
           },
-          "capability_revision": "sha256:4824cd3df03aef27ae9375eb2298faffce0ffd4216396cec58954ce369f65f47",
+          "capability_revision": "sha256:08901c84ac8c420f59ddb86168c534f0e83484c05d3c8a81078a716c878a1733",
           "query_status": "incomplete",
           "coverage": {
             "complete": false,
@@ -9520,7 +9615,7 @@
               "resolution": "exact",
               "occurrences": [
                 {
-                  "reference_id": "ref-7",
+                  "reference_id": "ref-8",
                   "original_name": "Authentication",
                   "binding": "not_applicable",
                   "stage_id": "stage-6",
@@ -9550,7 +9645,7 @@
               "resolution": "exact",
               "occurrences": [
                 {
-                  "reference_id": "ref-8",
+                  "reference_id": "ref-9",
                   "original_name": "Authentication.Authentication",
                   "binding": "not_applicable",
                   "stage_id": "stage-6",
@@ -9580,7 +9675,7 @@
               "resolution": "exact",
               "occurrences": [
                 {
-                  "reference_id": "ref-9",
+                  "reference_id": "ref-10",
                   "original_name": "users",
                   "binding": "not_applicable",
                   "stage_id": "stage-7",
@@ -9711,26 +9806,6 @@
               },
               "stage_id": "stage-5",
               "scope_id": "scope-0"
-            },
-            {
-              "code": "SPL_UNSUPPORTED_SEMANTICS",
-              "severity": "warning",
-              "category": "unsupported_semantics",
-              "message": "command \"tstats\" has unmodeled field effects",
-              "location": {
-                "start": {
-                  "offset": 168,
-                  "line": 1,
-                  "column": 169
-                },
-                "end": {
-                  "offset": 225,
-                  "line": 1,
-                  "column": 226
-                }
-              },
-              "stage_id": "stage-6",
-              "scope_id": "scope-3"
             }
           ]
         }
@@ -9890,7 +9965,7 @@
             "version": "current",
             "query_digest": "sha256:18e5d21acfe1dbf6368a151955a1c085d606a92eec15c329c34a9e91f33809f2"
           },
-          "capability_revision": "sha256:4824cd3df03aef27ae9375eb2298faffce0ffd4216396cec58954ce369f65f47",
+          "capability_revision": "sha256:08901c84ac8c420f59ddb86168c534f0e83484c05d3c8a81078a716c878a1733",
           "query_status": "incomplete",
           "coverage": {
             "complete": false,
@@ -10188,7 +10263,7 @@
             "version": "current",
             "query_digest": "sha256:4ad270f94eed54b4266d1ac05a0bb3e5e7085daa8f0701f3752c772191b4ab24"
           },
-          "capability_revision": "sha256:4824cd3df03aef27ae9375eb2298faffce0ffd4216396cec58954ce369f65f47",
+          "capability_revision": "sha256:08901c84ac8c420f59ddb86168c534f0e83484c05d3c8a81078a716c878a1733",
           "query_status": "valid",
           "coverage": {
             "complete": true,
@@ -10454,7 +10529,7 @@
             "version": "current",
             "query_digest": "sha256:cd79b7f200b60208a9c2c1f9a2eacb8046b6ed0b37e625ce8f3d365f5cd360e5"
           },
-          "capability_revision": "sha256:4824cd3df03aef27ae9375eb2298faffce0ffd4216396cec58954ce369f65f47",
+          "capability_revision": "sha256:08901c84ac8c420f59ddb86168c534f0e83484c05d3c8a81078a716c878a1733",
           "query_status": "valid",
           "coverage": {
             "complete": true,
@@ -10924,7 +10999,7 @@
             "version": "current",
             "query_digest": "sha256:1c31ea90720b5d5137276cc3d1942caa0430caeea2d45af4ffde811fddea9eba"
           },
-          "capability_revision": "sha256:4824cd3df03aef27ae9375eb2298faffce0ffd4216396cec58954ce369f65f47",
+          "capability_revision": "sha256:08901c84ac8c420f59ddb86168c534f0e83484c05d3c8a81078a716c878a1733",
           "query_status": "invalid",
           "coverage": {
             "complete": false,
@@ -11635,7 +11710,7 @@
             "version": "current",
             "query_digest": "sha256:ec04f50efe88f524280f1ed60915e3df42d14e73dcfa2de8048bf54b4e258e9b"
           },
-          "capability_revision": "sha256:4824cd3df03aef27ae9375eb2298faffce0ffd4216396cec58954ce369f65f47",
+          "capability_revision": "sha256:08901c84ac8c420f59ddb86168c534f0e83484c05d3c8a81078a716c878a1733",
           "query_status": "valid",
           "coverage": {
             "complete": true,
@@ -12190,7 +12265,7 @@
             "version": "current",
             "query_digest": "sha256:48d58fae50d85249bc94c38a86ce84bbac9ca863e979b4bfa2f4f9b9c71c8e0b"
           },
-          "capability_revision": "sha256:4824cd3df03aef27ae9375eb2298faffce0ffd4216396cec58954ce369f65f47",
+          "capability_revision": "sha256:08901c84ac8c420f59ddb86168c534f0e83484c05d3c8a81078a716c878a1733",
           "query_status": "incomplete",
           "coverage": {
             "complete": false,
@@ -12652,7 +12727,7 @@
             "version": "current",
             "query_digest": "sha256:9ea83f10279ad25f33a82bf6a3ea41a61b9e64da6ac6867e3a80a9478a88eb75"
           },
-          "capability_revision": "sha256:4824cd3df03aef27ae9375eb2298faffce0ffd4216396cec58954ce369f65f47",
+          "capability_revision": "sha256:08901c84ac8c420f59ddb86168c534f0e83484c05d3c8a81078a716c878a1733",
           "query_status": "incomplete",
           "coverage": {
             "complete": false,
@@ -12787,15 +12862,53 @@
                 "column": 19
               },
               "end": {
-                "offset": 41,
+                "offset": 70,
                 "line": 1,
-                "column": 42
+                "column": 71
               }
             },
             "semantic_complete": false
           },
           {
             "id": "stage-2",
+            "command": "search",
+            "position": 0,
+            "scope_id": "scope-1",
+            "location": {
+              "start": {
+                "offset": 27,
+                "line": 1,
+                "column": 28
+              },
+              "end": {
+                "offset": 41,
+                "line": 1,
+                "column": 42
+              }
+            },
+            "semantic_complete": true
+          },
+          {
+            "id": "stage-3",
+            "command": "eval",
+            "position": 1,
+            "scope_id": "scope-1",
+            "location": {
+              "start": {
+                "offset": 44,
+                "line": 1,
+                "column": 45
+              },
+              "end": {
+                "offset": 68,
+                "line": 1,
+                "column": 69
+              }
+            },
+            "semantic_complete": false
+          },
+          {
+            "id": "stage-4",
             "command": "where",
             "position": 2,
             "scope_id": "scope-0",
@@ -12832,6 +12945,24 @@
                 "column": 86
               }
             }
+          },
+          {
+            "id": "scope-1",
+            "parent_id": "scope-0",
+            "kind": "append",
+            "stage_id": "stage-1",
+            "location": {
+              "start": {
+                "offset": 25,
+                "line": 1,
+                "column": 26
+              },
+              "end": {
+                "offset": 70,
+                "line": 1,
+                "column": 71
+              }
+            }
           }
         ],
         "references": [
@@ -12861,11 +12992,88 @@
           },
           {
             "id": "ref-1",
+            "original_name": "child",
+            "normalized_name": "child",
+            "kind": "field",
+            "role": "filter",
+            "stage_id": "stage-2",
+            "scope_id": "scope-1",
+            "location": {
+              "start": {
+                "offset": 34,
+                "line": 1,
+                "column": 35
+              },
+              "end": {
+                "offset": 39,
+                "line": 1,
+                "column": 40
+              }
+            },
+            "resolution": "exact",
+            "binding": "source",
+            "origin_reference_ids": []
+          },
+          {
+            "id": "ref-2",
+            "original_name": "good",
+            "normalized_name": "good",
+            "kind": "field",
+            "role": "create",
+            "stage_id": "stage-3",
+            "scope_id": "scope-1",
+            "location": {
+              "start": {
+                "offset": 49,
+                "line": 1,
+                "column": 50
+              },
+              "end": {
+                "offset": 53,
+                "line": 1,
+                "column": 54
+              }
+            },
+            "resolution": "exact",
+            "binding": "not_applicable",
+            "origin_reference_ids": [
+              "ref-3",
+              "ref-1"
+            ]
+          },
+          {
+            "id": "ref-3",
+            "original_name": "child",
+            "normalized_name": "child",
+            "kind": "field",
+            "role": "read",
+            "stage_id": "stage-3",
+            "scope_id": "scope-1",
+            "location": {
+              "start": {
+                "offset": 54,
+                "line": 1,
+                "column": 55
+              },
+              "end": {
+                "offset": 59,
+                "line": 1,
+                "column": 60
+              }
+            },
+            "resolution": "exact",
+            "binding": "source",
+            "origin_reference_ids": [
+              "ref-1"
+            ]
+          },
+          {
+            "id": "ref-4",
             "original_name": "good",
             "normalized_name": "good",
             "kind": "field",
             "role": "read",
-            "stage_id": "stage-2",
+            "stage_id": "stage-4",
             "scope_id": "scope-0",
             "location": {
               "start": {
@@ -12945,6 +13153,83 @@
           },
           {
             "stage_id": "stage-2",
+            "scope_id": "scope-1",
+            "before": {
+              "fields": [],
+              "removed": [],
+              "open": true,
+              "uncertain": false
+            },
+            "after": {
+              "fields": [
+                {
+                  "name": "child",
+                  "origin_reference_ids": [
+                    "ref-1"
+                  ],
+                  "conditional": false
+                }
+              ],
+              "removed": [],
+              "open": true,
+              "uncertain": false
+            },
+            "transitions": []
+          },
+          {
+            "stage_id": "stage-3",
+            "scope_id": "scope-1",
+            "before": {
+              "fields": [
+                {
+                  "name": "child",
+                  "origin_reference_ids": [
+                    "ref-1"
+                  ],
+                  "conditional": false
+                }
+              ],
+              "removed": [],
+              "open": true,
+              "uncertain": false
+            },
+            "after": {
+              "fields": [
+                {
+                  "name": "child",
+                  "origin_reference_ids": [
+                    "ref-1"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "good",
+                  "origin_reference_ids": [
+                    "ref-2",
+                    "ref-3",
+                    "ref-1"
+                  ],
+                  "conditional": false
+                }
+              ],
+              "removed": [],
+              "open": true,
+              "uncertain": true
+            },
+            "transitions": [
+              {
+                "operation": "create",
+                "output": "good",
+                "input_reference_ids": [
+                  "ref-3"
+                ],
+                "output_reference_id": "ref-2",
+                "conditional": false
+              }
+            ]
+          },
+          {
+            "stage_id": "stage-4",
             "scope_id": "scope-0",
             "before": {
               "fields": [
@@ -12991,26 +13276,6 @@
             "code": "SPL_SYNTAX_ERROR",
             "severity": "error",
             "category": "syntax",
-            "message": "no viable alternative at input 'append [ search child=1 | eval good=child, broken= ]'",
-            "location": {
-              "start": {
-                "offset": 69,
-                "line": 1,
-                "column": 70
-              },
-              "end": {
-                "offset": 70,
-                "line": 1,
-                "column": 71
-              }
-            },
-            "stage_id": "",
-            "scope_id": ""
-          },
-          {
-            "code": "SPL_SYNTAX_ERROR",
-            "severity": "error",
-            "category": "syntax",
             "message": "no viable alternative at input 'eval good=child, broken= ]'",
             "location": {
               "start": {
@@ -13037,7 +13302,7 @@
             "version": "current",
             "query_digest": "sha256:cfa240ea22c8e11bf78672aee294ada89d9bcab866530d110822a92b55f3b196"
           },
-          "capability_revision": "sha256:4824cd3df03aef27ae9375eb2298faffce0ffd4216396cec58954ce369f65f47",
+          "capability_revision": "sha256:08901c84ac8c420f59ddb86168c534f0e83484c05d3c8a81078a716c878a1733",
           "query_status": "invalid",
           "coverage": {
             "complete": false,
@@ -13080,6 +13345,66 @@
             {
               "id": "req-2",
               "kind": "field",
+              "identity": "child",
+              "role": "filter",
+              "necessity": "required",
+              "origin": "direct",
+              "resolution": "exact",
+              "occurrences": [
+                {
+                  "reference_id": "ref-1",
+                  "original_name": "child",
+                  "binding": "source",
+                  "stage_id": "stage-2",
+                  "scope_id": "scope-1",
+                  "location": {
+                    "start": {
+                      "offset": 34,
+                      "line": 1,
+                      "column": 35
+                    },
+                    "end": {
+                      "offset": 39,
+                      "line": 1,
+                      "column": 40
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "id": "req-3",
+              "kind": "field",
+              "identity": "child",
+              "role": "read",
+              "necessity": "required",
+              "origin": "direct",
+              "resolution": "exact",
+              "occurrences": [
+                {
+                  "reference_id": "ref-3",
+                  "original_name": "child",
+                  "binding": "source",
+                  "stage_id": "stage-3",
+                  "scope_id": "scope-1",
+                  "location": {
+                    "start": {
+                      "offset": 54,
+                      "line": 1,
+                      "column": 55
+                    },
+                    "end": {
+                      "offset": 59,
+                      "line": 1,
+                      "column": 60
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "id": "req-4",
+              "kind": "field",
               "identity": "good",
               "role": "read",
               "necessity": "conditional",
@@ -13087,10 +13412,10 @@
               "resolution": "exact",
               "occurrences": [
                 {
-                  "reference_id": "ref-1",
+                  "reference_id": "ref-4",
                   "original_name": "good",
                   "binding": "indeterminate",
-                  "stage_id": "stage-2",
+                  "stage_id": "stage-4",
                   "scope_id": "scope-0",
                   "location": {
                     "start": {
@@ -13111,7 +13436,7 @@
           "gaps": [
             {
               "code": "SPL_SYNTAX_ERROR",
-              "message": "no viable alternative at input 'append [ search child=1 | eval good=child, broken= ]'",
+              "message": "no viable alternative at input 'eval good=child, broken= ]'",
               "reference_ids": [],
               "diagnostic_codes": [
                 "SPL_SYNTAX_ERROR"
@@ -13121,32 +13446,12 @@
               "code": "SPL_REQUIREMENT_INDETERMINATE",
               "message": "requirement origin is indeterminate",
               "reference_ids": [
-                "ref-1"
+                "ref-4"
               ],
               "diagnostic_codes": []
             }
           ],
           "diagnostics": [
-            {
-              "code": "SPL_SYNTAX_ERROR",
-              "severity": "error",
-              "category": "syntax",
-              "message": "no viable alternative at input 'append [ search child=1 | eval good=child, broken= ]'",
-              "location": {
-                "start": {
-                  "offset": 69,
-                  "line": 1,
-                  "column": 70
-                },
-                "end": {
-                  "offset": 70,
-                  "line": 1,
-                  "column": 71
-                }
-              },
-              "stage_id": "",
-              "scope_id": ""
-            },
             {
               "code": "SPL_SYNTAX_ERROR",
               "severity": "error",
@@ -13717,7 +14022,7 @@
             "version": "current",
             "query_digest": "sha256:856cf87a80acb8df1640cedccf40ac234ea21500d99c0f2dc3c6413ceab61d8a"
           },
-          "capability_revision": "sha256:4824cd3df03aef27ae9375eb2298faffce0ffd4216396cec58954ce369f65f47",
+          "capability_revision": "sha256:08901c84ac8c420f59ddb86168c534f0e83484c05d3c8a81078a716c878a1733",
           "query_status": "valid",
           "coverage": {
             "complete": true,
@@ -14061,7 +14366,7 @@
             "version": "current",
             "query_digest": "sha256:2bd786cbd6092c6f01f2c8f965357b6fc32a60d5add8c1dec007fd86bdc3dc6f"
           },
-          "capability_revision": "sha256:4824cd3df03aef27ae9375eb2298faffce0ffd4216396cec58954ce369f65f47",
+          "capability_revision": "sha256:08901c84ac8c420f59ddb86168c534f0e83484c05d3c8a81078a716c878a1733",
           "query_status": "incomplete",
           "coverage": {
             "complete": false,
@@ -14509,7 +14814,7 @@
             "version": "current",
             "query_digest": "sha256:cdbb6b5cb3e4ec2ab5b08e0fbaa1f48bb630352de1f17b7aa1975e0bbba5c333"
           },
-          "capability_revision": "sha256:4824cd3df03aef27ae9375eb2298faffce0ffd4216396cec58954ce369f65f47",
+          "capability_revision": "sha256:08901c84ac8c420f59ddb86168c534f0e83484c05d3c8a81078a716c878a1733",
           "query_status": "valid",
           "coverage": {
             "complete": false,
@@ -14877,7 +15182,7 @@
             "version": "current",
             "query_digest": "sha256:7fa8b91db67033a4b95384c5345a17bb8cec5785a7173f1f59349e9c7ac960cb"
           },
-          "capability_revision": "sha256:4824cd3df03aef27ae9375eb2298faffce0ffd4216396cec58954ce369f65f47",
+          "capability_revision": "sha256:08901c84ac8c420f59ddb86168c534f0e83484c05d3c8a81078a716c878a1733",
           "query_status": "invalid",
           "coverage": {
             "complete": true,
@@ -15221,7 +15526,7 @@
             "version": "current",
             "query_digest": "sha256:7f6b7577efc1c4724b77fa45956f800ff3c154cc8e97d995ae1156929b711c7c"
           },
-          "capability_revision": "sha256:4824cd3df03aef27ae9375eb2298faffce0ffd4216396cec58954ce369f65f47",
+          "capability_revision": "sha256:08901c84ac8c420f59ddb86168c534f0e83484c05d3c8a81078a716c878a1733",
           "query_status": "valid",
           "coverage": {
             "complete": false,
@@ -15589,7 +15894,7 @@
             "version": "current",
             "query_digest": "sha256:16af95420adfcbddcffe12e1359078f4e949b5cbe4ce762e8060d235ca664341"
           },
-          "capability_revision": "sha256:4824cd3df03aef27ae9375eb2298faffce0ffd4216396cec58954ce369f65f47",
+          "capability_revision": "sha256:08901c84ac8c420f59ddb86168c534f0e83484c05d3c8a81078a716c878a1733",
           "query_status": "invalid",
           "coverage": {
             "complete": true,
@@ -15933,7 +16238,7 @@
             "version": "current",
             "query_digest": "sha256:762551b5e55ea03e775fb10e84739ebbf8d25d970d638e347ab8430684adf937"
           },
-          "capability_revision": "sha256:4824cd3df03aef27ae9375eb2298faffce0ffd4216396cec58954ce369f65f47",
+          "capability_revision": "sha256:08901c84ac8c420f59ddb86168c534f0e83484c05d3c8a81078a716c878a1733",
           "query_status": "valid",
           "coverage": {
             "complete": false,
@@ -16301,7 +16606,7 @@
             "version": "current",
             "query_digest": "sha256:7142976de515b50a2d53d2706cab10a93a7396d03b18e055305771c8a59b8f76"
           },
-          "capability_revision": "sha256:4824cd3df03aef27ae9375eb2298faffce0ffd4216396cec58954ce369f65f47",
+          "capability_revision": "sha256:08901c84ac8c420f59ddb86168c534f0e83484c05d3c8a81078a716c878a1733",
           "query_status": "invalid",
           "coverage": {
             "complete": true,
@@ -16645,7 +16950,7 @@
             "version": "current",
             "query_digest": "sha256:70418479c02e049a4375d907cb69d45bc2f89bf9f92f8670adccf5d74c5ee9f3"
           },
-          "capability_revision": "sha256:4824cd3df03aef27ae9375eb2298faffce0ffd4216396cec58954ce369f65f47",
+          "capability_revision": "sha256:08901c84ac8c420f59ddb86168c534f0e83484c05d3c8a81078a716c878a1733",
           "query_status": "valid",
           "coverage": {
             "complete": false,
@@ -17013,7 +17318,7 @@
             "version": "current",
             "query_digest": "sha256:1ae013f002132c4b3796cbd62b7e9e44df31a785a7d40d35b5c3c11f7ee1d78f"
           },
-          "capability_revision": "sha256:4824cd3df03aef27ae9375eb2298faffce0ffd4216396cec58954ce369f65f47",
+          "capability_revision": "sha256:08901c84ac8c420f59ddb86168c534f0e83484c05d3c8a81078a716c878a1733",
           "query_status": "invalid",
           "coverage": {
             "complete": true,
@@ -17041,6 +17346,5024 @@
               },
               "stage_id": "stage-2",
               "scope_id": "scope-0"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "tstats_basic",
+      "document": {
+        "text": "| tstats count AS total FROM datamodel=Network_Traffic.All_Traffic WHERE All_Traffic.action=\"allowed\" BY All_Traffic.src",
+        "language": "",
+        "profile": "",
+        "version": "",
+        "source_id": "corpus:tstats_basic"
+      },
+      "expected": {
+        "schema_version": 1,
+        "document": {
+          "text": "| tstats count AS total FROM datamodel=Network_Traffic.All_Traffic WHERE All_Traffic.action=\"allowed\" BY All_Traffic.src",
+          "language": "spl",
+          "profile": "splunkd",
+          "version": "current",
+          "source_id": "corpus:tstats_basic"
+        },
+        "status": "valid",
+        "coverage": {
+          "syntax_complete": true,
+          "semantic_complete": true,
+          "reasons": []
+        },
+        "stages": [
+          {
+            "id": "stage-0",
+            "command": "tstats",
+            "position": 0,
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 2,
+                "line": 1,
+                "column": 3
+              },
+              "end": {
+                "offset": 120,
+                "line": 1,
+                "column": 121
+              }
+            },
+            "semantic_complete": true
+          }
+        ],
+        "scopes": [
+          {
+            "id": "scope-0",
+            "parent_id": "",
+            "kind": "root",
+            "stage_id": "",
+            "location": {
+              "start": {
+                "offset": 0,
+                "line": 1,
+                "column": 1
+              },
+              "end": {
+                "offset": 120,
+                "line": 1,
+                "column": 121
+              }
+            }
+          }
+        ],
+        "references": [
+          {
+            "id": "ref-0",
+            "original_name": "total",
+            "normalized_name": "total",
+            "kind": "field",
+            "role": "output",
+            "stage_id": "stage-0",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 18,
+                "line": 1,
+                "column": 19
+              },
+              "end": {
+                "offset": 23,
+                "line": 1,
+                "column": 24
+              }
+            },
+            "resolution": "exact",
+            "binding": "not_applicable",
+            "origin_reference_ids": []
+          },
+          {
+            "id": "ref-1",
+            "original_name": "Network_Traffic",
+            "normalized_name": "Network_Traffic",
+            "kind": "data_model",
+            "role": "read",
+            "stage_id": "stage-0",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 39,
+                "line": 1,
+                "column": 40
+              },
+              "end": {
+                "offset": 54,
+                "line": 1,
+                "column": 55
+              }
+            },
+            "resolution": "exact",
+            "binding": "not_applicable",
+            "origin_reference_ids": []
+          },
+          {
+            "id": "ref-2",
+            "original_name": "Network_Traffic.All_Traffic",
+            "normalized_name": "Network_Traffic.All_Traffic",
+            "kind": "dataset",
+            "role": "read",
+            "stage_id": "stage-0",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 39,
+                "line": 1,
+                "column": 40
+              },
+              "end": {
+                "offset": 66,
+                "line": 1,
+                "column": 67
+              }
+            },
+            "resolution": "exact",
+            "binding": "not_applicable",
+            "origin_reference_ids": []
+          },
+          {
+            "id": "ref-3",
+            "original_name": "All_Traffic.action",
+            "normalized_name": "All_Traffic.action",
+            "kind": "field",
+            "role": "filter",
+            "stage_id": "stage-0",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 73,
+                "line": 1,
+                "column": 74
+              },
+              "end": {
+                "offset": 91,
+                "line": 1,
+                "column": 92
+              }
+            },
+            "resolution": "exact",
+            "binding": "source",
+            "origin_reference_ids": []
+          },
+          {
+            "id": "ref-4",
+            "original_name": "All_Traffic.src",
+            "normalized_name": "All_Traffic.src",
+            "kind": "field",
+            "role": "group",
+            "stage_id": "stage-0",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 105,
+                "line": 1,
+                "column": 106
+              },
+              "end": {
+                "offset": 120,
+                "line": 1,
+                "column": 121
+              }
+            },
+            "resolution": "exact",
+            "binding": "source",
+            "origin_reference_ids": []
+          }
+        ],
+        "lineage": [
+          {
+            "stage_id": "stage-0",
+            "scope_id": "scope-0",
+            "before": {
+              "fields": [],
+              "removed": [],
+              "open": true,
+              "uncertain": false
+            },
+            "after": {
+              "fields": [
+                {
+                  "name": "All_Traffic.src",
+                  "origin_reference_ids": [
+                    "ref-4"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "total",
+                  "origin_reference_ids": [
+                    "ref-0"
+                  ],
+                  "conditional": false
+                }
+              ],
+              "removed": [],
+              "open": false,
+              "uncertain": false
+            },
+            "transitions": [
+              {
+                "operation": "project",
+                "output": "All_Traffic.src",
+                "input_reference_ids": [
+                  "ref-4"
+                ],
+                "output_reference_id": "",
+                "conditional": false
+              },
+              {
+                "operation": "aggregate",
+                "output": "total",
+                "input_reference_ids": [],
+                "output_reference_id": "ref-0",
+                "conditional": false
+              }
+            ]
+          }
+        ],
+        "dependencies": {
+          "indexes": [],
+          "sources": [],
+          "source_types": [],
+          "datasets": [
+            "Network_Traffic.All_Traffic"
+          ],
+          "lookups": [],
+          "data_models": [
+            "Network_Traffic"
+          ],
+          "macros": []
+        },
+        "diagnostics": [],
+        "requirements": {
+          "schema_version": 1,
+          "query": {
+            "source_id": "corpus:tstats_basic",
+            "language": "spl",
+            "profile": "splunkd",
+            "version": "current",
+            "query_digest": "sha256:7bd655e0fdd8c023e6fec7d2bd7de9074e8b7f73345e7e1b738024512235e501"
+          },
+          "capability_revision": "sha256:08901c84ac8c420f59ddb86168c534f0e83484c05d3c8a81078a716c878a1733",
+          "query_status": "valid",
+          "coverage": {
+            "complete": true,
+            "reasons": []
+          },
+          "items": [
+            {
+              "id": "req-1",
+              "kind": "data_model",
+              "identity": "Network_Traffic",
+              "role": "read",
+              "necessity": "required",
+              "origin": "direct",
+              "resolution": "exact",
+              "occurrences": [
+                {
+                  "reference_id": "ref-1",
+                  "original_name": "Network_Traffic",
+                  "binding": "not_applicable",
+                  "stage_id": "stage-0",
+                  "scope_id": "scope-0",
+                  "location": {
+                    "start": {
+                      "offset": 39,
+                      "line": 1,
+                      "column": 40
+                    },
+                    "end": {
+                      "offset": 54,
+                      "line": 1,
+                      "column": 55
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "id": "req-2",
+              "kind": "dataset",
+              "identity": "Network_Traffic.All_Traffic",
+              "role": "read",
+              "necessity": "required",
+              "origin": "direct",
+              "resolution": "exact",
+              "occurrences": [
+                {
+                  "reference_id": "ref-2",
+                  "original_name": "Network_Traffic.All_Traffic",
+                  "binding": "not_applicable",
+                  "stage_id": "stage-0",
+                  "scope_id": "scope-0",
+                  "location": {
+                    "start": {
+                      "offset": 39,
+                      "line": 1,
+                      "column": 40
+                    },
+                    "end": {
+                      "offset": 66,
+                      "line": 1,
+                      "column": 67
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "id": "req-3",
+              "kind": "field",
+              "identity": "All_Traffic.action",
+              "role": "filter",
+              "necessity": "required",
+              "origin": "direct",
+              "resolution": "exact",
+              "occurrences": [
+                {
+                  "reference_id": "ref-3",
+                  "original_name": "All_Traffic.action",
+                  "binding": "source",
+                  "stage_id": "stage-0",
+                  "scope_id": "scope-0",
+                  "location": {
+                    "start": {
+                      "offset": 73,
+                      "line": 1,
+                      "column": 74
+                    },
+                    "end": {
+                      "offset": 91,
+                      "line": 1,
+                      "column": 92
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "id": "req-4",
+              "kind": "field",
+              "identity": "All_Traffic.src",
+              "role": "group",
+              "necessity": "required",
+              "origin": "direct",
+              "resolution": "exact",
+              "occurrences": [
+                {
+                  "reference_id": "ref-4",
+                  "original_name": "All_Traffic.src",
+                  "binding": "source",
+                  "stage_id": "stage-0",
+                  "scope_id": "scope-0",
+                  "location": {
+                    "start": {
+                      "offset": 105,
+                      "line": 1,
+                      "column": 106
+                    },
+                    "end": {
+                      "offset": 120,
+                      "line": 1,
+                      "column": 121
+                    }
+                  }
+                }
+              ]
+            }
+          ],
+          "gaps": [],
+          "diagnostics": []
+        }
+      }
+    },
+    {
+      "id": "field_commands",
+      "document": {
+        "text": "search action=* _raw=* | rex field=_raw \"user=(?\u003cuser\u003e[^ ]+)\" | spath input=_raw path=\"event.id\" output=event_id | fillnull value=\"unknown\" missing | bin span=5m _time AS bucket_time | regex action!=\"blocked\" | mvexpand values | table user event_id missing bucket_time action values",
+        "language": "",
+        "profile": "",
+        "version": "",
+        "source_id": "corpus:field_commands"
+      },
+      "expected": {
+        "schema_version": 1,
+        "document": {
+          "text": "search action=* _raw=* | rex field=_raw \"user=(?\u003cuser\u003e[^ ]+)\" | spath input=_raw path=\"event.id\" output=event_id | fillnull value=\"unknown\" missing | bin span=5m _time AS bucket_time | regex action!=\"blocked\" | mvexpand values | table user event_id missing bucket_time action values",
+          "language": "spl",
+          "profile": "splunkd",
+          "version": "current",
+          "source_id": "corpus:field_commands"
+        },
+        "status": "valid",
+        "coverage": {
+          "syntax_complete": true,
+          "semantic_complete": true,
+          "reasons": []
+        },
+        "stages": [
+          {
+            "id": "stage-0",
+            "command": "search",
+            "position": 0,
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 0,
+                "line": 1,
+                "column": 1
+              },
+              "end": {
+                "offset": 22,
+                "line": 1,
+                "column": 23
+              }
+            },
+            "semantic_complete": true
+          },
+          {
+            "id": "stage-1",
+            "command": "rex",
+            "position": 1,
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 25,
+                "line": 1,
+                "column": 26
+              },
+              "end": {
+                "offset": 61,
+                "line": 1,
+                "column": 62
+              }
+            },
+            "semantic_complete": true
+          },
+          {
+            "id": "stage-2",
+            "command": "spath",
+            "position": 2,
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 64,
+                "line": 1,
+                "column": 65
+              },
+              "end": {
+                "offset": 112,
+                "line": 1,
+                "column": 113
+              }
+            },
+            "semantic_complete": true
+          },
+          {
+            "id": "stage-3",
+            "command": "fillnull",
+            "position": 3,
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 115,
+                "line": 1,
+                "column": 116
+              },
+              "end": {
+                "offset": 147,
+                "line": 1,
+                "column": 148
+              }
+            },
+            "semantic_complete": true
+          },
+          {
+            "id": "stage-4",
+            "command": "bin",
+            "position": 4,
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 150,
+                "line": 1,
+                "column": 151
+              },
+              "end": {
+                "offset": 182,
+                "line": 1,
+                "column": 183
+              }
+            },
+            "semantic_complete": true
+          },
+          {
+            "id": "stage-5",
+            "command": "regex",
+            "position": 5,
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 185,
+                "line": 1,
+                "column": 186
+              },
+              "end": {
+                "offset": 208,
+                "line": 1,
+                "column": 209
+              }
+            },
+            "semantic_complete": true
+          },
+          {
+            "id": "stage-6",
+            "command": "mvexpand",
+            "position": 6,
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 211,
+                "line": 1,
+                "column": 212
+              },
+              "end": {
+                "offset": 226,
+                "line": 1,
+                "column": 227
+              }
+            },
+            "semantic_complete": true
+          },
+          {
+            "id": "stage-7",
+            "command": "table",
+            "position": 7,
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 229,
+                "line": 1,
+                "column": 230
+              },
+              "end": {
+                "offset": 282,
+                "line": 1,
+                "column": 283
+              }
+            },
+            "semantic_complete": true
+          }
+        ],
+        "scopes": [
+          {
+            "id": "scope-0",
+            "parent_id": "",
+            "kind": "root",
+            "stage_id": "",
+            "location": {
+              "start": {
+                "offset": 0,
+                "line": 1,
+                "column": 1
+              },
+              "end": {
+                "offset": 282,
+                "line": 1,
+                "column": 283
+              }
+            }
+          }
+        ],
+        "references": [
+          {
+            "id": "ref-0",
+            "original_name": "action",
+            "normalized_name": "action",
+            "kind": "field",
+            "role": "filter",
+            "stage_id": "stage-0",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 7,
+                "line": 1,
+                "column": 8
+              },
+              "end": {
+                "offset": 13,
+                "line": 1,
+                "column": 14
+              }
+            },
+            "resolution": "exact",
+            "binding": "source",
+            "origin_reference_ids": []
+          },
+          {
+            "id": "ref-1",
+            "original_name": "_raw",
+            "normalized_name": "_raw",
+            "kind": "field",
+            "role": "filter",
+            "stage_id": "stage-0",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 16,
+                "line": 1,
+                "column": 17
+              },
+              "end": {
+                "offset": 20,
+                "line": 1,
+                "column": 21
+              }
+            },
+            "resolution": "exact",
+            "binding": "source",
+            "origin_reference_ids": []
+          },
+          {
+            "id": "ref-2",
+            "original_name": "_raw",
+            "normalized_name": "_raw",
+            "kind": "field",
+            "role": "read",
+            "stage_id": "stage-1",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 35,
+                "line": 1,
+                "column": 36
+              },
+              "end": {
+                "offset": 39,
+                "line": 1,
+                "column": 40
+              }
+            },
+            "resolution": "exact",
+            "binding": "source",
+            "origin_reference_ids": [
+              "ref-1"
+            ]
+          },
+          {
+            "id": "ref-3",
+            "original_name": "user",
+            "normalized_name": "user",
+            "kind": "field",
+            "role": "output",
+            "stage_id": "stage-1",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 49,
+                "line": 1,
+                "column": 50
+              },
+              "end": {
+                "offset": 53,
+                "line": 1,
+                "column": 54
+              }
+            },
+            "resolution": "exact",
+            "binding": "not_applicable",
+            "origin_reference_ids": [
+              "ref-2",
+              "ref-1"
+            ]
+          },
+          {
+            "id": "ref-4",
+            "original_name": "_raw",
+            "normalized_name": "_raw",
+            "kind": "field",
+            "role": "read",
+            "stage_id": "stage-2",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 76,
+                "line": 1,
+                "column": 77
+              },
+              "end": {
+                "offset": 80,
+                "line": 1,
+                "column": 81
+              }
+            },
+            "resolution": "exact",
+            "binding": "source",
+            "origin_reference_ids": [
+              "ref-1"
+            ]
+          },
+          {
+            "id": "ref-5",
+            "original_name": "event_id",
+            "normalized_name": "event_id",
+            "kind": "field",
+            "role": "output",
+            "stage_id": "stage-2",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 104,
+                "line": 1,
+                "column": 105
+              },
+              "end": {
+                "offset": 112,
+                "line": 1,
+                "column": 113
+              }
+            },
+            "resolution": "exact",
+            "binding": "not_applicable",
+            "origin_reference_ids": [
+              "ref-4",
+              "ref-1"
+            ]
+          },
+          {
+            "id": "ref-6",
+            "original_name": "missing",
+            "normalized_name": "missing",
+            "kind": "field",
+            "role": "create",
+            "stage_id": "stage-3",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 140,
+                "line": 1,
+                "column": 141
+              },
+              "end": {
+                "offset": 147,
+                "line": 1,
+                "column": 148
+              }
+            },
+            "resolution": "exact",
+            "binding": "not_applicable",
+            "origin_reference_ids": [
+              "ref-7"
+            ]
+          },
+          {
+            "id": "ref-7",
+            "original_name": "missing",
+            "normalized_name": "missing",
+            "kind": "field",
+            "role": "read",
+            "stage_id": "stage-3",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 140,
+                "line": 1,
+                "column": 141
+              },
+              "end": {
+                "offset": 147,
+                "line": 1,
+                "column": 148
+              }
+            },
+            "resolution": "exact",
+            "binding": "indeterminate",
+            "origin_reference_ids": []
+          },
+          {
+            "id": "ref-8",
+            "original_name": "_time",
+            "normalized_name": "_time",
+            "kind": "field",
+            "role": "read",
+            "stage_id": "stage-4",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 162,
+                "line": 1,
+                "column": 163
+              },
+              "end": {
+                "offset": 167,
+                "line": 1,
+                "column": 168
+              }
+            },
+            "resolution": "exact",
+            "binding": "source",
+            "origin_reference_ids": []
+          },
+          {
+            "id": "ref-9",
+            "original_name": "bucket_time",
+            "normalized_name": "bucket_time",
+            "kind": "field",
+            "role": "create",
+            "stage_id": "stage-4",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 171,
+                "line": 1,
+                "column": 172
+              },
+              "end": {
+                "offset": 182,
+                "line": 1,
+                "column": 183
+              }
+            },
+            "resolution": "exact",
+            "binding": "not_applicable",
+            "origin_reference_ids": [
+              "ref-8"
+            ]
+          },
+          {
+            "id": "ref-10",
+            "original_name": "action",
+            "normalized_name": "action",
+            "kind": "field",
+            "role": "filter",
+            "stage_id": "stage-5",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 191,
+                "line": 1,
+                "column": 192
+              },
+              "end": {
+                "offset": 197,
+                "line": 1,
+                "column": 198
+              }
+            },
+            "resolution": "exact",
+            "binding": "source",
+            "origin_reference_ids": [
+              "ref-0"
+            ]
+          },
+          {
+            "id": "ref-11",
+            "original_name": "values",
+            "normalized_name": "values",
+            "kind": "field",
+            "role": "read",
+            "stage_id": "stage-6",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 220,
+                "line": 1,
+                "column": 221
+              },
+              "end": {
+                "offset": 226,
+                "line": 1,
+                "column": 227
+              }
+            },
+            "resolution": "exact",
+            "binding": "source",
+            "origin_reference_ids": []
+          },
+          {
+            "id": "ref-12",
+            "original_name": "user",
+            "normalized_name": "user",
+            "kind": "field",
+            "role": "read",
+            "stage_id": "stage-7",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 235,
+                "line": 1,
+                "column": 236
+              },
+              "end": {
+                "offset": 239,
+                "line": 1,
+                "column": 240
+              }
+            },
+            "resolution": "exact",
+            "binding": "indeterminate",
+            "origin_reference_ids": [
+              "ref-3",
+              "ref-2",
+              "ref-1"
+            ]
+          },
+          {
+            "id": "ref-13",
+            "original_name": "event_id",
+            "normalized_name": "event_id",
+            "kind": "field",
+            "role": "read",
+            "stage_id": "stage-7",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 240,
+                "line": 1,
+                "column": 241
+              },
+              "end": {
+                "offset": 248,
+                "line": 1,
+                "column": 249
+              }
+            },
+            "resolution": "exact",
+            "binding": "indeterminate",
+            "origin_reference_ids": [
+              "ref-5",
+              "ref-4",
+              "ref-1"
+            ]
+          },
+          {
+            "id": "ref-14",
+            "original_name": "missing",
+            "normalized_name": "missing",
+            "kind": "field",
+            "role": "read",
+            "stage_id": "stage-7",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 249,
+                "line": 1,
+                "column": 250
+              },
+              "end": {
+                "offset": 256,
+                "line": 1,
+                "column": 257
+              }
+            },
+            "resolution": "exact",
+            "binding": "indeterminate",
+            "origin_reference_ids": [
+              "ref-6",
+              "ref-7"
+            ]
+          },
+          {
+            "id": "ref-15",
+            "original_name": "bucket_time",
+            "normalized_name": "bucket_time",
+            "kind": "field",
+            "role": "read",
+            "stage_id": "stage-7",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 257,
+                "line": 1,
+                "column": 258
+              },
+              "end": {
+                "offset": 268,
+                "line": 1,
+                "column": 269
+              }
+            },
+            "resolution": "exact",
+            "binding": "derived",
+            "origin_reference_ids": [
+              "ref-9",
+              "ref-8"
+            ]
+          },
+          {
+            "id": "ref-16",
+            "original_name": "action",
+            "normalized_name": "action",
+            "kind": "field",
+            "role": "read",
+            "stage_id": "stage-7",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 269,
+                "line": 1,
+                "column": 270
+              },
+              "end": {
+                "offset": 275,
+                "line": 1,
+                "column": 276
+              }
+            },
+            "resolution": "exact",
+            "binding": "source",
+            "origin_reference_ids": [
+              "ref-0"
+            ]
+          },
+          {
+            "id": "ref-17",
+            "original_name": "values",
+            "normalized_name": "values",
+            "kind": "field",
+            "role": "read",
+            "stage_id": "stage-7",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 276,
+                "line": 1,
+                "column": 277
+              },
+              "end": {
+                "offset": 282,
+                "line": 1,
+                "column": 283
+              }
+            },
+            "resolution": "exact",
+            "binding": "source",
+            "origin_reference_ids": [
+              "ref-11"
+            ]
+          }
+        ],
+        "lineage": [
+          {
+            "stage_id": "stage-0",
+            "scope_id": "scope-0",
+            "before": {
+              "fields": [],
+              "removed": [],
+              "open": true,
+              "uncertain": false
+            },
+            "after": {
+              "fields": [
+                {
+                  "name": "_raw",
+                  "origin_reference_ids": [
+                    "ref-1"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "action",
+                  "origin_reference_ids": [
+                    "ref-0"
+                  ],
+                  "conditional": false
+                }
+              ],
+              "removed": [],
+              "open": true,
+              "uncertain": false
+            },
+            "transitions": []
+          },
+          {
+            "stage_id": "stage-1",
+            "scope_id": "scope-0",
+            "before": {
+              "fields": [
+                {
+                  "name": "_raw",
+                  "origin_reference_ids": [
+                    "ref-1"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "action",
+                  "origin_reference_ids": [
+                    "ref-0"
+                  ],
+                  "conditional": false
+                }
+              ],
+              "removed": [],
+              "open": true,
+              "uncertain": false
+            },
+            "after": {
+              "fields": [
+                {
+                  "name": "_raw",
+                  "origin_reference_ids": [
+                    "ref-1"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "action",
+                  "origin_reference_ids": [
+                    "ref-0"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "user",
+                  "origin_reference_ids": [
+                    "ref-3",
+                    "ref-2",
+                    "ref-1"
+                  ],
+                  "conditional": true
+                }
+              ],
+              "removed": [],
+              "open": true,
+              "uncertain": false
+            },
+            "transitions": [
+              {
+                "operation": "create",
+                "output": "user",
+                "input_reference_ids": [
+                  "ref-2"
+                ],
+                "output_reference_id": "ref-3",
+                "conditional": true
+              }
+            ]
+          },
+          {
+            "stage_id": "stage-2",
+            "scope_id": "scope-0",
+            "before": {
+              "fields": [
+                {
+                  "name": "_raw",
+                  "origin_reference_ids": [
+                    "ref-1"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "action",
+                  "origin_reference_ids": [
+                    "ref-0"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "user",
+                  "origin_reference_ids": [
+                    "ref-3",
+                    "ref-2",
+                    "ref-1"
+                  ],
+                  "conditional": true
+                }
+              ],
+              "removed": [],
+              "open": true,
+              "uncertain": false
+            },
+            "after": {
+              "fields": [
+                {
+                  "name": "_raw",
+                  "origin_reference_ids": [
+                    "ref-1"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "action",
+                  "origin_reference_ids": [
+                    "ref-0"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "event_id",
+                  "origin_reference_ids": [
+                    "ref-5",
+                    "ref-4",
+                    "ref-1"
+                  ],
+                  "conditional": true
+                },
+                {
+                  "name": "user",
+                  "origin_reference_ids": [
+                    "ref-3",
+                    "ref-2",
+                    "ref-1"
+                  ],
+                  "conditional": true
+                }
+              ],
+              "removed": [],
+              "open": true,
+              "uncertain": false
+            },
+            "transitions": [
+              {
+                "operation": "create",
+                "output": "event_id",
+                "input_reference_ids": [
+                  "ref-4"
+                ],
+                "output_reference_id": "ref-5",
+                "conditional": true
+              }
+            ]
+          },
+          {
+            "stage_id": "stage-3",
+            "scope_id": "scope-0",
+            "before": {
+              "fields": [
+                {
+                  "name": "_raw",
+                  "origin_reference_ids": [
+                    "ref-1"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "action",
+                  "origin_reference_ids": [
+                    "ref-0"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "event_id",
+                  "origin_reference_ids": [
+                    "ref-5",
+                    "ref-4",
+                    "ref-1"
+                  ],
+                  "conditional": true
+                },
+                {
+                  "name": "user",
+                  "origin_reference_ids": [
+                    "ref-3",
+                    "ref-2",
+                    "ref-1"
+                  ],
+                  "conditional": true
+                }
+              ],
+              "removed": [],
+              "open": true,
+              "uncertain": false
+            },
+            "after": {
+              "fields": [
+                {
+                  "name": "_raw",
+                  "origin_reference_ids": [
+                    "ref-1"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "action",
+                  "origin_reference_ids": [
+                    "ref-0"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "event_id",
+                  "origin_reference_ids": [
+                    "ref-5",
+                    "ref-4",
+                    "ref-1"
+                  ],
+                  "conditional": true
+                },
+                {
+                  "name": "missing",
+                  "origin_reference_ids": [
+                    "ref-6",
+                    "ref-7"
+                  ],
+                  "conditional": true
+                },
+                {
+                  "name": "user",
+                  "origin_reference_ids": [
+                    "ref-3",
+                    "ref-2",
+                    "ref-1"
+                  ],
+                  "conditional": true
+                }
+              ],
+              "removed": [],
+              "open": true,
+              "uncertain": false
+            },
+            "transitions": [
+              {
+                "operation": "create",
+                "output": "missing",
+                "input_reference_ids": [
+                  "ref-7"
+                ],
+                "output_reference_id": "ref-6",
+                "conditional": true
+              }
+            ]
+          },
+          {
+            "stage_id": "stage-4",
+            "scope_id": "scope-0",
+            "before": {
+              "fields": [
+                {
+                  "name": "_raw",
+                  "origin_reference_ids": [
+                    "ref-1"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "action",
+                  "origin_reference_ids": [
+                    "ref-0"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "event_id",
+                  "origin_reference_ids": [
+                    "ref-5",
+                    "ref-4",
+                    "ref-1"
+                  ],
+                  "conditional": true
+                },
+                {
+                  "name": "missing",
+                  "origin_reference_ids": [
+                    "ref-6",
+                    "ref-7"
+                  ],
+                  "conditional": true
+                },
+                {
+                  "name": "user",
+                  "origin_reference_ids": [
+                    "ref-3",
+                    "ref-2",
+                    "ref-1"
+                  ],
+                  "conditional": true
+                }
+              ],
+              "removed": [],
+              "open": true,
+              "uncertain": false
+            },
+            "after": {
+              "fields": [
+                {
+                  "name": "_raw",
+                  "origin_reference_ids": [
+                    "ref-1"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "_time",
+                  "origin_reference_ids": [
+                    "ref-8"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "action",
+                  "origin_reference_ids": [
+                    "ref-0"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "bucket_time",
+                  "origin_reference_ids": [
+                    "ref-9",
+                    "ref-8"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "event_id",
+                  "origin_reference_ids": [
+                    "ref-5",
+                    "ref-4",
+                    "ref-1"
+                  ],
+                  "conditional": true
+                },
+                {
+                  "name": "missing",
+                  "origin_reference_ids": [
+                    "ref-6",
+                    "ref-7"
+                  ],
+                  "conditional": true
+                },
+                {
+                  "name": "user",
+                  "origin_reference_ids": [
+                    "ref-3",
+                    "ref-2",
+                    "ref-1"
+                  ],
+                  "conditional": true
+                }
+              ],
+              "removed": [],
+              "open": true,
+              "uncertain": false
+            },
+            "transitions": [
+              {
+                "operation": "create",
+                "output": "bucket_time",
+                "input_reference_ids": [
+                  "ref-8"
+                ],
+                "output_reference_id": "ref-9",
+                "conditional": false
+              }
+            ]
+          },
+          {
+            "stage_id": "stage-5",
+            "scope_id": "scope-0",
+            "before": {
+              "fields": [
+                {
+                  "name": "_raw",
+                  "origin_reference_ids": [
+                    "ref-1"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "_time",
+                  "origin_reference_ids": [
+                    "ref-8"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "action",
+                  "origin_reference_ids": [
+                    "ref-0"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "bucket_time",
+                  "origin_reference_ids": [
+                    "ref-9",
+                    "ref-8"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "event_id",
+                  "origin_reference_ids": [
+                    "ref-5",
+                    "ref-4",
+                    "ref-1"
+                  ],
+                  "conditional": true
+                },
+                {
+                  "name": "missing",
+                  "origin_reference_ids": [
+                    "ref-6",
+                    "ref-7"
+                  ],
+                  "conditional": true
+                },
+                {
+                  "name": "user",
+                  "origin_reference_ids": [
+                    "ref-3",
+                    "ref-2",
+                    "ref-1"
+                  ],
+                  "conditional": true
+                }
+              ],
+              "removed": [],
+              "open": true,
+              "uncertain": false
+            },
+            "after": {
+              "fields": [
+                {
+                  "name": "_raw",
+                  "origin_reference_ids": [
+                    "ref-1"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "_time",
+                  "origin_reference_ids": [
+                    "ref-8"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "action",
+                  "origin_reference_ids": [
+                    "ref-0"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "bucket_time",
+                  "origin_reference_ids": [
+                    "ref-9",
+                    "ref-8"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "event_id",
+                  "origin_reference_ids": [
+                    "ref-5",
+                    "ref-4",
+                    "ref-1"
+                  ],
+                  "conditional": true
+                },
+                {
+                  "name": "missing",
+                  "origin_reference_ids": [
+                    "ref-6",
+                    "ref-7"
+                  ],
+                  "conditional": true
+                },
+                {
+                  "name": "user",
+                  "origin_reference_ids": [
+                    "ref-3",
+                    "ref-2",
+                    "ref-1"
+                  ],
+                  "conditional": true
+                }
+              ],
+              "removed": [],
+              "open": true,
+              "uncertain": false
+            },
+            "transitions": []
+          },
+          {
+            "stage_id": "stage-6",
+            "scope_id": "scope-0",
+            "before": {
+              "fields": [
+                {
+                  "name": "_raw",
+                  "origin_reference_ids": [
+                    "ref-1"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "_time",
+                  "origin_reference_ids": [
+                    "ref-8"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "action",
+                  "origin_reference_ids": [
+                    "ref-0"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "bucket_time",
+                  "origin_reference_ids": [
+                    "ref-9",
+                    "ref-8"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "event_id",
+                  "origin_reference_ids": [
+                    "ref-5",
+                    "ref-4",
+                    "ref-1"
+                  ],
+                  "conditional": true
+                },
+                {
+                  "name": "missing",
+                  "origin_reference_ids": [
+                    "ref-6",
+                    "ref-7"
+                  ],
+                  "conditional": true
+                },
+                {
+                  "name": "user",
+                  "origin_reference_ids": [
+                    "ref-3",
+                    "ref-2",
+                    "ref-1"
+                  ],
+                  "conditional": true
+                }
+              ],
+              "removed": [],
+              "open": true,
+              "uncertain": false
+            },
+            "after": {
+              "fields": [
+                {
+                  "name": "_raw",
+                  "origin_reference_ids": [
+                    "ref-1"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "_time",
+                  "origin_reference_ids": [
+                    "ref-8"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "action",
+                  "origin_reference_ids": [
+                    "ref-0"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "bucket_time",
+                  "origin_reference_ids": [
+                    "ref-9",
+                    "ref-8"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "event_id",
+                  "origin_reference_ids": [
+                    "ref-5",
+                    "ref-4",
+                    "ref-1"
+                  ],
+                  "conditional": true
+                },
+                {
+                  "name": "missing",
+                  "origin_reference_ids": [
+                    "ref-6",
+                    "ref-7"
+                  ],
+                  "conditional": true
+                },
+                {
+                  "name": "user",
+                  "origin_reference_ids": [
+                    "ref-3",
+                    "ref-2",
+                    "ref-1"
+                  ],
+                  "conditional": true
+                },
+                {
+                  "name": "values",
+                  "origin_reference_ids": [
+                    "ref-11"
+                  ],
+                  "conditional": false
+                }
+              ],
+              "removed": [],
+              "open": true,
+              "uncertain": false
+            },
+            "transitions": []
+          },
+          {
+            "stage_id": "stage-7",
+            "scope_id": "scope-0",
+            "before": {
+              "fields": [
+                {
+                  "name": "_raw",
+                  "origin_reference_ids": [
+                    "ref-1"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "_time",
+                  "origin_reference_ids": [
+                    "ref-8"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "action",
+                  "origin_reference_ids": [
+                    "ref-0"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "bucket_time",
+                  "origin_reference_ids": [
+                    "ref-9",
+                    "ref-8"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "event_id",
+                  "origin_reference_ids": [
+                    "ref-5",
+                    "ref-4",
+                    "ref-1"
+                  ],
+                  "conditional": true
+                },
+                {
+                  "name": "missing",
+                  "origin_reference_ids": [
+                    "ref-6",
+                    "ref-7"
+                  ],
+                  "conditional": true
+                },
+                {
+                  "name": "user",
+                  "origin_reference_ids": [
+                    "ref-3",
+                    "ref-2",
+                    "ref-1"
+                  ],
+                  "conditional": true
+                },
+                {
+                  "name": "values",
+                  "origin_reference_ids": [
+                    "ref-11"
+                  ],
+                  "conditional": false
+                }
+              ],
+              "removed": [],
+              "open": true,
+              "uncertain": false
+            },
+            "after": {
+              "fields": [
+                {
+                  "name": "action",
+                  "origin_reference_ids": [
+                    "ref-0"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "bucket_time",
+                  "origin_reference_ids": [
+                    "ref-9",
+                    "ref-8"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "event_id",
+                  "origin_reference_ids": [
+                    "ref-5",
+                    "ref-4",
+                    "ref-1"
+                  ],
+                  "conditional": true
+                },
+                {
+                  "name": "missing",
+                  "origin_reference_ids": [
+                    "ref-6",
+                    "ref-7"
+                  ],
+                  "conditional": true
+                },
+                {
+                  "name": "user",
+                  "origin_reference_ids": [
+                    "ref-3",
+                    "ref-2",
+                    "ref-1"
+                  ],
+                  "conditional": true
+                },
+                {
+                  "name": "values",
+                  "origin_reference_ids": [
+                    "ref-11"
+                  ],
+                  "conditional": false
+                }
+              ],
+              "removed": [],
+              "open": false,
+              "uncertain": false
+            },
+            "transitions": [
+              {
+                "operation": "project",
+                "output": "user",
+                "input_reference_ids": [
+                  "ref-12"
+                ],
+                "output_reference_id": "",
+                "conditional": false
+              },
+              {
+                "operation": "project",
+                "output": "event_id",
+                "input_reference_ids": [
+                  "ref-13"
+                ],
+                "output_reference_id": "",
+                "conditional": false
+              },
+              {
+                "operation": "project",
+                "output": "missing",
+                "input_reference_ids": [
+                  "ref-14"
+                ],
+                "output_reference_id": "",
+                "conditional": false
+              },
+              {
+                "operation": "project",
+                "output": "bucket_time",
+                "input_reference_ids": [
+                  "ref-15"
+                ],
+                "output_reference_id": "",
+                "conditional": false
+              },
+              {
+                "operation": "project",
+                "output": "action",
+                "input_reference_ids": [
+                  "ref-16"
+                ],
+                "output_reference_id": "",
+                "conditional": false
+              },
+              {
+                "operation": "project",
+                "output": "values",
+                "input_reference_ids": [
+                  "ref-17"
+                ],
+                "output_reference_id": "",
+                "conditional": false
+              }
+            ]
+          }
+        ],
+        "dependencies": {
+          "indexes": [],
+          "sources": [],
+          "source_types": [],
+          "datasets": [],
+          "lookups": [],
+          "data_models": [],
+          "macros": []
+        },
+        "diagnostics": [],
+        "requirements": {
+          "schema_version": 1,
+          "query": {
+            "source_id": "corpus:field_commands",
+            "language": "spl",
+            "profile": "splunkd",
+            "version": "current",
+            "query_digest": "sha256:edf32023e8d91019b19b823c2c3c43d299020d7dd015f107da78bc2380f61d7a"
+          },
+          "capability_revision": "sha256:08901c84ac8c420f59ddb86168c534f0e83484c05d3c8a81078a716c878a1733",
+          "query_status": "valid",
+          "coverage": {
+            "complete": false,
+            "reasons": [
+              "SPL_REQUIREMENT_INDETERMINATE"
+            ]
+          },
+          "items": [
+            {
+              "id": "req-1",
+              "kind": "field",
+              "identity": "action",
+              "role": "filter",
+              "necessity": "required",
+              "origin": "direct",
+              "resolution": "exact",
+              "occurrences": [
+                {
+                  "reference_id": "ref-0",
+                  "original_name": "action",
+                  "binding": "source",
+                  "stage_id": "stage-0",
+                  "scope_id": "scope-0",
+                  "location": {
+                    "start": {
+                      "offset": 7,
+                      "line": 1,
+                      "column": 8
+                    },
+                    "end": {
+                      "offset": 13,
+                      "line": 1,
+                      "column": 14
+                    }
+                  }
+                },
+                {
+                  "reference_id": "ref-10",
+                  "original_name": "action",
+                  "binding": "source",
+                  "stage_id": "stage-5",
+                  "scope_id": "scope-0",
+                  "location": {
+                    "start": {
+                      "offset": 191,
+                      "line": 1,
+                      "column": 192
+                    },
+                    "end": {
+                      "offset": 197,
+                      "line": 1,
+                      "column": 198
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "id": "req-2",
+              "kind": "field",
+              "identity": "_raw",
+              "role": "filter",
+              "necessity": "required",
+              "origin": "direct",
+              "resolution": "exact",
+              "occurrences": [
+                {
+                  "reference_id": "ref-1",
+                  "original_name": "_raw",
+                  "binding": "source",
+                  "stage_id": "stage-0",
+                  "scope_id": "scope-0",
+                  "location": {
+                    "start": {
+                      "offset": 16,
+                      "line": 1,
+                      "column": 17
+                    },
+                    "end": {
+                      "offset": 20,
+                      "line": 1,
+                      "column": 21
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "id": "req-3",
+              "kind": "field",
+              "identity": "_raw",
+              "role": "read",
+              "necessity": "required",
+              "origin": "direct",
+              "resolution": "exact",
+              "occurrences": [
+                {
+                  "reference_id": "ref-2",
+                  "original_name": "_raw",
+                  "binding": "source",
+                  "stage_id": "stage-1",
+                  "scope_id": "scope-0",
+                  "location": {
+                    "start": {
+                      "offset": 35,
+                      "line": 1,
+                      "column": 36
+                    },
+                    "end": {
+                      "offset": 39,
+                      "line": 1,
+                      "column": 40
+                    }
+                  }
+                },
+                {
+                  "reference_id": "ref-4",
+                  "original_name": "_raw",
+                  "binding": "source",
+                  "stage_id": "stage-2",
+                  "scope_id": "scope-0",
+                  "location": {
+                    "start": {
+                      "offset": 76,
+                      "line": 1,
+                      "column": 77
+                    },
+                    "end": {
+                      "offset": 80,
+                      "line": 1,
+                      "column": 81
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "id": "req-4",
+              "kind": "field",
+              "identity": "missing",
+              "role": "read",
+              "necessity": "conditional",
+              "origin": "direct",
+              "resolution": "exact",
+              "occurrences": [
+                {
+                  "reference_id": "ref-7",
+                  "original_name": "missing",
+                  "binding": "indeterminate",
+                  "stage_id": "stage-3",
+                  "scope_id": "scope-0",
+                  "location": {
+                    "start": {
+                      "offset": 140,
+                      "line": 1,
+                      "column": 141
+                    },
+                    "end": {
+                      "offset": 147,
+                      "line": 1,
+                      "column": 148
+                    }
+                  }
+                },
+                {
+                  "reference_id": "ref-14",
+                  "original_name": "missing",
+                  "binding": "indeterminate",
+                  "stage_id": "stage-7",
+                  "scope_id": "scope-0",
+                  "location": {
+                    "start": {
+                      "offset": 249,
+                      "line": 1,
+                      "column": 250
+                    },
+                    "end": {
+                      "offset": 256,
+                      "line": 1,
+                      "column": 257
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "id": "req-5",
+              "kind": "field",
+              "identity": "_time",
+              "role": "read",
+              "necessity": "required",
+              "origin": "direct",
+              "resolution": "exact",
+              "occurrences": [
+                {
+                  "reference_id": "ref-8",
+                  "original_name": "_time",
+                  "binding": "source",
+                  "stage_id": "stage-4",
+                  "scope_id": "scope-0",
+                  "location": {
+                    "start": {
+                      "offset": 162,
+                      "line": 1,
+                      "column": 163
+                    },
+                    "end": {
+                      "offset": 167,
+                      "line": 1,
+                      "column": 168
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "id": "req-6",
+              "kind": "field",
+              "identity": "values",
+              "role": "read",
+              "necessity": "required",
+              "origin": "direct",
+              "resolution": "exact",
+              "occurrences": [
+                {
+                  "reference_id": "ref-11",
+                  "original_name": "values",
+                  "binding": "source",
+                  "stage_id": "stage-6",
+                  "scope_id": "scope-0",
+                  "location": {
+                    "start": {
+                      "offset": 220,
+                      "line": 1,
+                      "column": 221
+                    },
+                    "end": {
+                      "offset": 226,
+                      "line": 1,
+                      "column": 227
+                    }
+                  }
+                },
+                {
+                  "reference_id": "ref-17",
+                  "original_name": "values",
+                  "binding": "source",
+                  "stage_id": "stage-7",
+                  "scope_id": "scope-0",
+                  "location": {
+                    "start": {
+                      "offset": 276,
+                      "line": 1,
+                      "column": 277
+                    },
+                    "end": {
+                      "offset": 282,
+                      "line": 1,
+                      "column": 283
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "id": "req-7",
+              "kind": "field",
+              "identity": "user",
+              "role": "read",
+              "necessity": "conditional",
+              "origin": "direct",
+              "resolution": "exact",
+              "occurrences": [
+                {
+                  "reference_id": "ref-12",
+                  "original_name": "user",
+                  "binding": "indeterminate",
+                  "stage_id": "stage-7",
+                  "scope_id": "scope-0",
+                  "location": {
+                    "start": {
+                      "offset": 235,
+                      "line": 1,
+                      "column": 236
+                    },
+                    "end": {
+                      "offset": 239,
+                      "line": 1,
+                      "column": 240
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "id": "req-8",
+              "kind": "field",
+              "identity": "event_id",
+              "role": "read",
+              "necessity": "conditional",
+              "origin": "direct",
+              "resolution": "exact",
+              "occurrences": [
+                {
+                  "reference_id": "ref-13",
+                  "original_name": "event_id",
+                  "binding": "indeterminate",
+                  "stage_id": "stage-7",
+                  "scope_id": "scope-0",
+                  "location": {
+                    "start": {
+                      "offset": 240,
+                      "line": 1,
+                      "column": 241
+                    },
+                    "end": {
+                      "offset": 248,
+                      "line": 1,
+                      "column": 249
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "id": "req-9",
+              "kind": "field",
+              "identity": "action",
+              "role": "read",
+              "necessity": "required",
+              "origin": "direct",
+              "resolution": "exact",
+              "occurrences": [
+                {
+                  "reference_id": "ref-16",
+                  "original_name": "action",
+                  "binding": "source",
+                  "stage_id": "stage-7",
+                  "scope_id": "scope-0",
+                  "location": {
+                    "start": {
+                      "offset": 269,
+                      "line": 1,
+                      "column": 270
+                    },
+                    "end": {
+                      "offset": 275,
+                      "line": 1,
+                      "column": 276
+                    }
+                  }
+                }
+              ]
+            }
+          ],
+          "gaps": [
+            {
+              "code": "SPL_REQUIREMENT_INDETERMINATE",
+              "message": "requirement origin is indeterminate",
+              "reference_ids": [
+                "ref-7"
+              ],
+              "diagnostic_codes": []
+            },
+            {
+              "code": "SPL_REQUIREMENT_INDETERMINATE",
+              "message": "requirement origin is indeterminate",
+              "reference_ids": [
+                "ref-12"
+              ],
+              "diagnostic_codes": []
+            },
+            {
+              "code": "SPL_REQUIREMENT_INDETERMINATE",
+              "message": "requirement origin is indeterminate",
+              "reference_ids": [
+                "ref-13"
+              ],
+              "diagnostic_codes": []
+            },
+            {
+              "code": "SPL_REQUIREMENT_INDETERMINATE",
+              "message": "requirement origin is indeterminate",
+              "reference_ids": [
+                "ref-14"
+              ],
+              "diagnostic_codes": []
+            }
+          ],
+          "diagnostics": []
+        }
+      }
+    },
+    {
+      "id": "selected_functions",
+      "document": {
+        "text": "search values=* _time=* bytes=* user=* action=* | eval picked=mvindex(values,0), found=mvfind(values,\"error\"), cutoff=relative_time(now(),\"-24h@h\"), label=strftime(_time,\"%F\"), allowed=like(action,\"allow%\"), empty=null(), keep=true() | stats earliest(cutoff) AS first_seen latest(_time) AS last_seen stdev(bytes) AS spread BY user | table user first_seen last_seen spread",
+        "language": "",
+        "profile": "",
+        "version": "",
+        "source_id": "corpus:selected_functions"
+      },
+      "expected": {
+        "schema_version": 1,
+        "document": {
+          "text": "search values=* _time=* bytes=* user=* action=* | eval picked=mvindex(values,0), found=mvfind(values,\"error\"), cutoff=relative_time(now(),\"-24h@h\"), label=strftime(_time,\"%F\"), allowed=like(action,\"allow%\"), empty=null(), keep=true() | stats earliest(cutoff) AS first_seen latest(_time) AS last_seen stdev(bytes) AS spread BY user | table user first_seen last_seen spread",
+          "language": "spl",
+          "profile": "splunkd",
+          "version": "current",
+          "source_id": "corpus:selected_functions"
+        },
+        "status": "valid",
+        "coverage": {
+          "syntax_complete": true,
+          "semantic_complete": true,
+          "reasons": []
+        },
+        "stages": [
+          {
+            "id": "stage-0",
+            "command": "search",
+            "position": 0,
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 0,
+                "line": 1,
+                "column": 1
+              },
+              "end": {
+                "offset": 47,
+                "line": 1,
+                "column": 48
+              }
+            },
+            "semantic_complete": true
+          },
+          {
+            "id": "stage-1",
+            "command": "eval",
+            "position": 1,
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 50,
+                "line": 1,
+                "column": 51
+              },
+              "end": {
+                "offset": 233,
+                "line": 1,
+                "column": 234
+              }
+            },
+            "semantic_complete": true
+          },
+          {
+            "id": "stage-2",
+            "command": "stats",
+            "position": 2,
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 236,
+                "line": 1,
+                "column": 237
+              },
+              "end": {
+                "offset": 330,
+                "line": 1,
+                "column": 331
+              }
+            },
+            "semantic_complete": true
+          },
+          {
+            "id": "stage-3",
+            "command": "table",
+            "position": 3,
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 333,
+                "line": 1,
+                "column": 334
+              },
+              "end": {
+                "offset": 371,
+                "line": 1,
+                "column": 372
+              }
+            },
+            "semantic_complete": true
+          }
+        ],
+        "scopes": [
+          {
+            "id": "scope-0",
+            "parent_id": "",
+            "kind": "root",
+            "stage_id": "",
+            "location": {
+              "start": {
+                "offset": 0,
+                "line": 1,
+                "column": 1
+              },
+              "end": {
+                "offset": 371,
+                "line": 1,
+                "column": 372
+              }
+            }
+          }
+        ],
+        "references": [
+          {
+            "id": "ref-0",
+            "original_name": "values",
+            "normalized_name": "values",
+            "kind": "field",
+            "role": "filter",
+            "stage_id": "stage-0",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 7,
+                "line": 1,
+                "column": 8
+              },
+              "end": {
+                "offset": 13,
+                "line": 1,
+                "column": 14
+              }
+            },
+            "resolution": "exact",
+            "binding": "source",
+            "origin_reference_ids": []
+          },
+          {
+            "id": "ref-1",
+            "original_name": "_time",
+            "normalized_name": "_time",
+            "kind": "field",
+            "role": "filter",
+            "stage_id": "stage-0",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 16,
+                "line": 1,
+                "column": 17
+              },
+              "end": {
+                "offset": 21,
+                "line": 1,
+                "column": 22
+              }
+            },
+            "resolution": "exact",
+            "binding": "source",
+            "origin_reference_ids": []
+          },
+          {
+            "id": "ref-2",
+            "original_name": "bytes",
+            "normalized_name": "bytes",
+            "kind": "field",
+            "role": "filter",
+            "stage_id": "stage-0",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 24,
+                "line": 1,
+                "column": 25
+              },
+              "end": {
+                "offset": 29,
+                "line": 1,
+                "column": 30
+              }
+            },
+            "resolution": "exact",
+            "binding": "source",
+            "origin_reference_ids": []
+          },
+          {
+            "id": "ref-3",
+            "original_name": "user",
+            "normalized_name": "user",
+            "kind": "field",
+            "role": "filter",
+            "stage_id": "stage-0",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 32,
+                "line": 1,
+                "column": 33
+              },
+              "end": {
+                "offset": 36,
+                "line": 1,
+                "column": 37
+              }
+            },
+            "resolution": "exact",
+            "binding": "source",
+            "origin_reference_ids": []
+          },
+          {
+            "id": "ref-4",
+            "original_name": "action",
+            "normalized_name": "action",
+            "kind": "field",
+            "role": "filter",
+            "stage_id": "stage-0",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 39,
+                "line": 1,
+                "column": 40
+              },
+              "end": {
+                "offset": 45,
+                "line": 1,
+                "column": 46
+              }
+            },
+            "resolution": "exact",
+            "binding": "source",
+            "origin_reference_ids": []
+          },
+          {
+            "id": "ref-5",
+            "original_name": "picked",
+            "normalized_name": "picked",
+            "kind": "field",
+            "role": "create",
+            "stage_id": "stage-1",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 55,
+                "line": 1,
+                "column": 56
+              },
+              "end": {
+                "offset": 61,
+                "line": 1,
+                "column": 62
+              }
+            },
+            "resolution": "exact",
+            "binding": "not_applicable",
+            "origin_reference_ids": [
+              "ref-6",
+              "ref-0"
+            ]
+          },
+          {
+            "id": "ref-6",
+            "original_name": "values",
+            "normalized_name": "values",
+            "kind": "field",
+            "role": "read",
+            "stage_id": "stage-1",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 70,
+                "line": 1,
+                "column": 71
+              },
+              "end": {
+                "offset": 76,
+                "line": 1,
+                "column": 77
+              }
+            },
+            "resolution": "exact",
+            "binding": "source",
+            "origin_reference_ids": [
+              "ref-0"
+            ]
+          },
+          {
+            "id": "ref-7",
+            "original_name": "found",
+            "normalized_name": "found",
+            "kind": "field",
+            "role": "create",
+            "stage_id": "stage-1",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 81,
+                "line": 1,
+                "column": 82
+              },
+              "end": {
+                "offset": 86,
+                "line": 1,
+                "column": 87
+              }
+            },
+            "resolution": "exact",
+            "binding": "not_applicable",
+            "origin_reference_ids": [
+              "ref-8",
+              "ref-0"
+            ]
+          },
+          {
+            "id": "ref-8",
+            "original_name": "values",
+            "normalized_name": "values",
+            "kind": "field",
+            "role": "read",
+            "stage_id": "stage-1",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 94,
+                "line": 1,
+                "column": 95
+              },
+              "end": {
+                "offset": 100,
+                "line": 1,
+                "column": 101
+              }
+            },
+            "resolution": "exact",
+            "binding": "source",
+            "origin_reference_ids": [
+              "ref-0"
+            ]
+          },
+          {
+            "id": "ref-9",
+            "original_name": "cutoff",
+            "normalized_name": "cutoff",
+            "kind": "field",
+            "role": "create",
+            "stage_id": "stage-1",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 111,
+                "line": 1,
+                "column": 112
+              },
+              "end": {
+                "offset": 117,
+                "line": 1,
+                "column": 118
+              }
+            },
+            "resolution": "exact",
+            "binding": "not_applicable",
+            "origin_reference_ids": []
+          },
+          {
+            "id": "ref-10",
+            "original_name": "label",
+            "normalized_name": "label",
+            "kind": "field",
+            "role": "create",
+            "stage_id": "stage-1",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 149,
+                "line": 1,
+                "column": 150
+              },
+              "end": {
+                "offset": 154,
+                "line": 1,
+                "column": 155
+              }
+            },
+            "resolution": "exact",
+            "binding": "not_applicable",
+            "origin_reference_ids": [
+              "ref-11",
+              "ref-1"
+            ]
+          },
+          {
+            "id": "ref-11",
+            "original_name": "_time",
+            "normalized_name": "_time",
+            "kind": "field",
+            "role": "read",
+            "stage_id": "stage-1",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 164,
+                "line": 1,
+                "column": 165
+              },
+              "end": {
+                "offset": 169,
+                "line": 1,
+                "column": 170
+              }
+            },
+            "resolution": "exact",
+            "binding": "source",
+            "origin_reference_ids": [
+              "ref-1"
+            ]
+          },
+          {
+            "id": "ref-12",
+            "original_name": "allowed",
+            "normalized_name": "allowed",
+            "kind": "field",
+            "role": "create",
+            "stage_id": "stage-1",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 177,
+                "line": 1,
+                "column": 178
+              },
+              "end": {
+                "offset": 184,
+                "line": 1,
+                "column": 185
+              }
+            },
+            "resolution": "exact",
+            "binding": "not_applicable",
+            "origin_reference_ids": [
+              "ref-13",
+              "ref-4"
+            ]
+          },
+          {
+            "id": "ref-13",
+            "original_name": "action",
+            "normalized_name": "action",
+            "kind": "field",
+            "role": "read",
+            "stage_id": "stage-1",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 190,
+                "line": 1,
+                "column": 191
+              },
+              "end": {
+                "offset": 196,
+                "line": 1,
+                "column": 197
+              }
+            },
+            "resolution": "exact",
+            "binding": "source",
+            "origin_reference_ids": [
+              "ref-4"
+            ]
+          },
+          {
+            "id": "ref-14",
+            "original_name": "empty",
+            "normalized_name": "empty",
+            "kind": "field",
+            "role": "create",
+            "stage_id": "stage-1",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 208,
+                "line": 1,
+                "column": 209
+              },
+              "end": {
+                "offset": 213,
+                "line": 1,
+                "column": 214
+              }
+            },
+            "resolution": "exact",
+            "binding": "not_applicable",
+            "origin_reference_ids": []
+          },
+          {
+            "id": "ref-15",
+            "original_name": "keep",
+            "normalized_name": "keep",
+            "kind": "field",
+            "role": "create",
+            "stage_id": "stage-1",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 222,
+                "line": 1,
+                "column": 223
+              },
+              "end": {
+                "offset": 226,
+                "line": 1,
+                "column": 227
+              }
+            },
+            "resolution": "exact",
+            "binding": "not_applicable",
+            "origin_reference_ids": []
+          },
+          {
+            "id": "ref-16",
+            "original_name": "cutoff",
+            "normalized_name": "cutoff",
+            "kind": "field",
+            "role": "read",
+            "stage_id": "stage-2",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 251,
+                "line": 1,
+                "column": 252
+              },
+              "end": {
+                "offset": 257,
+                "line": 1,
+                "column": 258
+              }
+            },
+            "resolution": "exact",
+            "binding": "derived",
+            "origin_reference_ids": [
+              "ref-9"
+            ]
+          },
+          {
+            "id": "ref-17",
+            "original_name": "first_seen",
+            "normalized_name": "first_seen",
+            "kind": "field",
+            "role": "output",
+            "stage_id": "stage-2",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 262,
+                "line": 1,
+                "column": 263
+              },
+              "end": {
+                "offset": 272,
+                "line": 1,
+                "column": 273
+              }
+            },
+            "resolution": "exact",
+            "binding": "not_applicable",
+            "origin_reference_ids": [
+              "ref-16",
+              "ref-9"
+            ]
+          },
+          {
+            "id": "ref-18",
+            "original_name": "_time",
+            "normalized_name": "_time",
+            "kind": "field",
+            "role": "read",
+            "stage_id": "stage-2",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 280,
+                "line": 1,
+                "column": 281
+              },
+              "end": {
+                "offset": 285,
+                "line": 1,
+                "column": 286
+              }
+            },
+            "resolution": "exact",
+            "binding": "source",
+            "origin_reference_ids": [
+              "ref-1"
+            ]
+          },
+          {
+            "id": "ref-19",
+            "original_name": "last_seen",
+            "normalized_name": "last_seen",
+            "kind": "field",
+            "role": "output",
+            "stage_id": "stage-2",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 290,
+                "line": 1,
+                "column": 291
+              },
+              "end": {
+                "offset": 299,
+                "line": 1,
+                "column": 300
+              }
+            },
+            "resolution": "exact",
+            "binding": "not_applicable",
+            "origin_reference_ids": [
+              "ref-18",
+              "ref-1"
+            ]
+          },
+          {
+            "id": "ref-20",
+            "original_name": "bytes",
+            "normalized_name": "bytes",
+            "kind": "field",
+            "role": "read",
+            "stage_id": "stage-2",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 306,
+                "line": 1,
+                "column": 307
+              },
+              "end": {
+                "offset": 311,
+                "line": 1,
+                "column": 312
+              }
+            },
+            "resolution": "exact",
+            "binding": "source",
+            "origin_reference_ids": [
+              "ref-2"
+            ]
+          },
+          {
+            "id": "ref-21",
+            "original_name": "spread",
+            "normalized_name": "spread",
+            "kind": "field",
+            "role": "output",
+            "stage_id": "stage-2",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 316,
+                "line": 1,
+                "column": 317
+              },
+              "end": {
+                "offset": 322,
+                "line": 1,
+                "column": 323
+              }
+            },
+            "resolution": "exact",
+            "binding": "not_applicable",
+            "origin_reference_ids": [
+              "ref-20",
+              "ref-2"
+            ]
+          },
+          {
+            "id": "ref-22",
+            "original_name": "user",
+            "normalized_name": "user",
+            "kind": "field",
+            "role": "group",
+            "stage_id": "stage-2",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 326,
+                "line": 1,
+                "column": 327
+              },
+              "end": {
+                "offset": 330,
+                "line": 1,
+                "column": 331
+              }
+            },
+            "resolution": "exact",
+            "binding": "source",
+            "origin_reference_ids": [
+              "ref-3"
+            ]
+          },
+          {
+            "id": "ref-23",
+            "original_name": "user",
+            "normalized_name": "user",
+            "kind": "field",
+            "role": "read",
+            "stage_id": "stage-3",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 339,
+                "line": 1,
+                "column": 340
+              },
+              "end": {
+                "offset": 343,
+                "line": 1,
+                "column": 344
+              }
+            },
+            "resolution": "exact",
+            "binding": "source",
+            "origin_reference_ids": [
+              "ref-3"
+            ]
+          },
+          {
+            "id": "ref-24",
+            "original_name": "first_seen",
+            "normalized_name": "first_seen",
+            "kind": "field",
+            "role": "read",
+            "stage_id": "stage-3",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 344,
+                "line": 1,
+                "column": 345
+              },
+              "end": {
+                "offset": 354,
+                "line": 1,
+                "column": 355
+              }
+            },
+            "resolution": "exact",
+            "binding": "derived",
+            "origin_reference_ids": [
+              "ref-17",
+              "ref-16",
+              "ref-9"
+            ]
+          },
+          {
+            "id": "ref-25",
+            "original_name": "last_seen",
+            "normalized_name": "last_seen",
+            "kind": "field",
+            "role": "read",
+            "stage_id": "stage-3",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 355,
+                "line": 1,
+                "column": 356
+              },
+              "end": {
+                "offset": 364,
+                "line": 1,
+                "column": 365
+              }
+            },
+            "resolution": "exact",
+            "binding": "derived",
+            "origin_reference_ids": [
+              "ref-19",
+              "ref-18",
+              "ref-1"
+            ]
+          },
+          {
+            "id": "ref-26",
+            "original_name": "spread",
+            "normalized_name": "spread",
+            "kind": "field",
+            "role": "read",
+            "stage_id": "stage-3",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 365,
+                "line": 1,
+                "column": 366
+              },
+              "end": {
+                "offset": 371,
+                "line": 1,
+                "column": 372
+              }
+            },
+            "resolution": "exact",
+            "binding": "derived",
+            "origin_reference_ids": [
+              "ref-21",
+              "ref-20",
+              "ref-2"
+            ]
+          }
+        ],
+        "lineage": [
+          {
+            "stage_id": "stage-0",
+            "scope_id": "scope-0",
+            "before": {
+              "fields": [],
+              "removed": [],
+              "open": true,
+              "uncertain": false
+            },
+            "after": {
+              "fields": [
+                {
+                  "name": "_time",
+                  "origin_reference_ids": [
+                    "ref-1"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "action",
+                  "origin_reference_ids": [
+                    "ref-4"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "bytes",
+                  "origin_reference_ids": [
+                    "ref-2"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "user",
+                  "origin_reference_ids": [
+                    "ref-3"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "values",
+                  "origin_reference_ids": [
+                    "ref-0"
+                  ],
+                  "conditional": false
+                }
+              ],
+              "removed": [],
+              "open": true,
+              "uncertain": false
+            },
+            "transitions": []
+          },
+          {
+            "stage_id": "stage-1",
+            "scope_id": "scope-0",
+            "before": {
+              "fields": [
+                {
+                  "name": "_time",
+                  "origin_reference_ids": [
+                    "ref-1"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "action",
+                  "origin_reference_ids": [
+                    "ref-4"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "bytes",
+                  "origin_reference_ids": [
+                    "ref-2"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "user",
+                  "origin_reference_ids": [
+                    "ref-3"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "values",
+                  "origin_reference_ids": [
+                    "ref-0"
+                  ],
+                  "conditional": false
+                }
+              ],
+              "removed": [],
+              "open": true,
+              "uncertain": false
+            },
+            "after": {
+              "fields": [
+                {
+                  "name": "_time",
+                  "origin_reference_ids": [
+                    "ref-1"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "action",
+                  "origin_reference_ids": [
+                    "ref-4"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "allowed",
+                  "origin_reference_ids": [
+                    "ref-12",
+                    "ref-13",
+                    "ref-4"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "bytes",
+                  "origin_reference_ids": [
+                    "ref-2"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "cutoff",
+                  "origin_reference_ids": [
+                    "ref-9"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "empty",
+                  "origin_reference_ids": [
+                    "ref-14"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "found",
+                  "origin_reference_ids": [
+                    "ref-7",
+                    "ref-8",
+                    "ref-0"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "keep",
+                  "origin_reference_ids": [
+                    "ref-15"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "label",
+                  "origin_reference_ids": [
+                    "ref-10",
+                    "ref-11",
+                    "ref-1"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "picked",
+                  "origin_reference_ids": [
+                    "ref-5",
+                    "ref-6",
+                    "ref-0"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "user",
+                  "origin_reference_ids": [
+                    "ref-3"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "values",
+                  "origin_reference_ids": [
+                    "ref-0"
+                  ],
+                  "conditional": false
+                }
+              ],
+              "removed": [],
+              "open": true,
+              "uncertain": false
+            },
+            "transitions": [
+              {
+                "operation": "create",
+                "output": "picked",
+                "input_reference_ids": [
+                  "ref-6"
+                ],
+                "output_reference_id": "ref-5",
+                "conditional": false
+              },
+              {
+                "operation": "create",
+                "output": "found",
+                "input_reference_ids": [
+                  "ref-8"
+                ],
+                "output_reference_id": "ref-7",
+                "conditional": false
+              },
+              {
+                "operation": "create",
+                "output": "cutoff",
+                "input_reference_ids": [],
+                "output_reference_id": "ref-9",
+                "conditional": false
+              },
+              {
+                "operation": "create",
+                "output": "label",
+                "input_reference_ids": [
+                  "ref-11"
+                ],
+                "output_reference_id": "ref-10",
+                "conditional": false
+              },
+              {
+                "operation": "create",
+                "output": "allowed",
+                "input_reference_ids": [
+                  "ref-13"
+                ],
+                "output_reference_id": "ref-12",
+                "conditional": false
+              },
+              {
+                "operation": "create",
+                "output": "empty",
+                "input_reference_ids": [],
+                "output_reference_id": "ref-14",
+                "conditional": false
+              },
+              {
+                "operation": "create",
+                "output": "keep",
+                "input_reference_ids": [],
+                "output_reference_id": "ref-15",
+                "conditional": false
+              }
+            ]
+          },
+          {
+            "stage_id": "stage-2",
+            "scope_id": "scope-0",
+            "before": {
+              "fields": [
+                {
+                  "name": "_time",
+                  "origin_reference_ids": [
+                    "ref-1"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "action",
+                  "origin_reference_ids": [
+                    "ref-4"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "allowed",
+                  "origin_reference_ids": [
+                    "ref-12",
+                    "ref-13",
+                    "ref-4"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "bytes",
+                  "origin_reference_ids": [
+                    "ref-2"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "cutoff",
+                  "origin_reference_ids": [
+                    "ref-9"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "empty",
+                  "origin_reference_ids": [
+                    "ref-14"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "found",
+                  "origin_reference_ids": [
+                    "ref-7",
+                    "ref-8",
+                    "ref-0"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "keep",
+                  "origin_reference_ids": [
+                    "ref-15"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "label",
+                  "origin_reference_ids": [
+                    "ref-10",
+                    "ref-11",
+                    "ref-1"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "picked",
+                  "origin_reference_ids": [
+                    "ref-5",
+                    "ref-6",
+                    "ref-0"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "user",
+                  "origin_reference_ids": [
+                    "ref-3"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "values",
+                  "origin_reference_ids": [
+                    "ref-0"
+                  ],
+                  "conditional": false
+                }
+              ],
+              "removed": [],
+              "open": true,
+              "uncertain": false
+            },
+            "after": {
+              "fields": [
+                {
+                  "name": "first_seen",
+                  "origin_reference_ids": [
+                    "ref-17",
+                    "ref-16",
+                    "ref-9"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "last_seen",
+                  "origin_reference_ids": [
+                    "ref-19",
+                    "ref-18",
+                    "ref-1"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "spread",
+                  "origin_reference_ids": [
+                    "ref-21",
+                    "ref-20",
+                    "ref-2"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "user",
+                  "origin_reference_ids": [
+                    "ref-3"
+                  ],
+                  "conditional": false
+                }
+              ],
+              "removed": [],
+              "open": false,
+              "uncertain": false
+            },
+            "transitions": [
+              {
+                "operation": "project",
+                "output": "user",
+                "input_reference_ids": [
+                  "ref-22"
+                ],
+                "output_reference_id": "",
+                "conditional": false
+              },
+              {
+                "operation": "aggregate",
+                "output": "first_seen",
+                "input_reference_ids": [
+                  "ref-16"
+                ],
+                "output_reference_id": "ref-17",
+                "conditional": false
+              },
+              {
+                "operation": "aggregate",
+                "output": "last_seen",
+                "input_reference_ids": [
+                  "ref-18"
+                ],
+                "output_reference_id": "ref-19",
+                "conditional": false
+              },
+              {
+                "operation": "aggregate",
+                "output": "spread",
+                "input_reference_ids": [
+                  "ref-20"
+                ],
+                "output_reference_id": "ref-21",
+                "conditional": false
+              }
+            ]
+          },
+          {
+            "stage_id": "stage-3",
+            "scope_id": "scope-0",
+            "before": {
+              "fields": [
+                {
+                  "name": "first_seen",
+                  "origin_reference_ids": [
+                    "ref-17",
+                    "ref-16",
+                    "ref-9"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "last_seen",
+                  "origin_reference_ids": [
+                    "ref-19",
+                    "ref-18",
+                    "ref-1"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "spread",
+                  "origin_reference_ids": [
+                    "ref-21",
+                    "ref-20",
+                    "ref-2"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "user",
+                  "origin_reference_ids": [
+                    "ref-3"
+                  ],
+                  "conditional": false
+                }
+              ],
+              "removed": [],
+              "open": false,
+              "uncertain": false
+            },
+            "after": {
+              "fields": [
+                {
+                  "name": "first_seen",
+                  "origin_reference_ids": [
+                    "ref-17",
+                    "ref-16",
+                    "ref-9"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "last_seen",
+                  "origin_reference_ids": [
+                    "ref-19",
+                    "ref-18",
+                    "ref-1"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "spread",
+                  "origin_reference_ids": [
+                    "ref-21",
+                    "ref-20",
+                    "ref-2"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "user",
+                  "origin_reference_ids": [
+                    "ref-3"
+                  ],
+                  "conditional": false
+                }
+              ],
+              "removed": [],
+              "open": false,
+              "uncertain": false
+            },
+            "transitions": [
+              {
+                "operation": "project",
+                "output": "user",
+                "input_reference_ids": [
+                  "ref-23"
+                ],
+                "output_reference_id": "",
+                "conditional": false
+              },
+              {
+                "operation": "project",
+                "output": "first_seen",
+                "input_reference_ids": [
+                  "ref-24"
+                ],
+                "output_reference_id": "",
+                "conditional": false
+              },
+              {
+                "operation": "project",
+                "output": "last_seen",
+                "input_reference_ids": [
+                  "ref-25"
+                ],
+                "output_reference_id": "",
+                "conditional": false
+              },
+              {
+                "operation": "project",
+                "output": "spread",
+                "input_reference_ids": [
+                  "ref-26"
+                ],
+                "output_reference_id": "",
+                "conditional": false
+              }
+            ]
+          }
+        ],
+        "dependencies": {
+          "indexes": [],
+          "sources": [],
+          "source_types": [],
+          "datasets": [],
+          "lookups": [],
+          "data_models": [],
+          "macros": []
+        },
+        "diagnostics": [],
+        "requirements": {
+          "schema_version": 1,
+          "query": {
+            "source_id": "corpus:selected_functions",
+            "language": "spl",
+            "profile": "splunkd",
+            "version": "current",
+            "query_digest": "sha256:4c894d1352e7d49da4330603a82f4dc5fd14736cd9cf3e1a4d4231e57c325d61"
+          },
+          "capability_revision": "sha256:08901c84ac8c420f59ddb86168c534f0e83484c05d3c8a81078a716c878a1733",
+          "query_status": "valid",
+          "coverage": {
+            "complete": true,
+            "reasons": []
+          },
+          "items": [
+            {
+              "id": "req-1",
+              "kind": "field",
+              "identity": "values",
+              "role": "filter",
+              "necessity": "required",
+              "origin": "direct",
+              "resolution": "exact",
+              "occurrences": [
+                {
+                  "reference_id": "ref-0",
+                  "original_name": "values",
+                  "binding": "source",
+                  "stage_id": "stage-0",
+                  "scope_id": "scope-0",
+                  "location": {
+                    "start": {
+                      "offset": 7,
+                      "line": 1,
+                      "column": 8
+                    },
+                    "end": {
+                      "offset": 13,
+                      "line": 1,
+                      "column": 14
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "id": "req-2",
+              "kind": "field",
+              "identity": "_time",
+              "role": "filter",
+              "necessity": "required",
+              "origin": "direct",
+              "resolution": "exact",
+              "occurrences": [
+                {
+                  "reference_id": "ref-1",
+                  "original_name": "_time",
+                  "binding": "source",
+                  "stage_id": "stage-0",
+                  "scope_id": "scope-0",
+                  "location": {
+                    "start": {
+                      "offset": 16,
+                      "line": 1,
+                      "column": 17
+                    },
+                    "end": {
+                      "offset": 21,
+                      "line": 1,
+                      "column": 22
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "id": "req-3",
+              "kind": "field",
+              "identity": "bytes",
+              "role": "filter",
+              "necessity": "required",
+              "origin": "direct",
+              "resolution": "exact",
+              "occurrences": [
+                {
+                  "reference_id": "ref-2",
+                  "original_name": "bytes",
+                  "binding": "source",
+                  "stage_id": "stage-0",
+                  "scope_id": "scope-0",
+                  "location": {
+                    "start": {
+                      "offset": 24,
+                      "line": 1,
+                      "column": 25
+                    },
+                    "end": {
+                      "offset": 29,
+                      "line": 1,
+                      "column": 30
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "id": "req-4",
+              "kind": "field",
+              "identity": "user",
+              "role": "filter",
+              "necessity": "required",
+              "origin": "direct",
+              "resolution": "exact",
+              "occurrences": [
+                {
+                  "reference_id": "ref-3",
+                  "original_name": "user",
+                  "binding": "source",
+                  "stage_id": "stage-0",
+                  "scope_id": "scope-0",
+                  "location": {
+                    "start": {
+                      "offset": 32,
+                      "line": 1,
+                      "column": 33
+                    },
+                    "end": {
+                      "offset": 36,
+                      "line": 1,
+                      "column": 37
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "id": "req-5",
+              "kind": "field",
+              "identity": "action",
+              "role": "filter",
+              "necessity": "required",
+              "origin": "direct",
+              "resolution": "exact",
+              "occurrences": [
+                {
+                  "reference_id": "ref-4",
+                  "original_name": "action",
+                  "binding": "source",
+                  "stage_id": "stage-0",
+                  "scope_id": "scope-0",
+                  "location": {
+                    "start": {
+                      "offset": 39,
+                      "line": 1,
+                      "column": 40
+                    },
+                    "end": {
+                      "offset": 45,
+                      "line": 1,
+                      "column": 46
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "id": "req-6",
+              "kind": "field",
+              "identity": "values",
+              "role": "read",
+              "necessity": "required",
+              "origin": "direct",
+              "resolution": "exact",
+              "occurrences": [
+                {
+                  "reference_id": "ref-6",
+                  "original_name": "values",
+                  "binding": "source",
+                  "stage_id": "stage-1",
+                  "scope_id": "scope-0",
+                  "location": {
+                    "start": {
+                      "offset": 70,
+                      "line": 1,
+                      "column": 71
+                    },
+                    "end": {
+                      "offset": 76,
+                      "line": 1,
+                      "column": 77
+                    }
+                  }
+                },
+                {
+                  "reference_id": "ref-8",
+                  "original_name": "values",
+                  "binding": "source",
+                  "stage_id": "stage-1",
+                  "scope_id": "scope-0",
+                  "location": {
+                    "start": {
+                      "offset": 94,
+                      "line": 1,
+                      "column": 95
+                    },
+                    "end": {
+                      "offset": 100,
+                      "line": 1,
+                      "column": 101
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "id": "req-7",
+              "kind": "field",
+              "identity": "_time",
+              "role": "read",
+              "necessity": "required",
+              "origin": "direct",
+              "resolution": "exact",
+              "occurrences": [
+                {
+                  "reference_id": "ref-11",
+                  "original_name": "_time",
+                  "binding": "source",
+                  "stage_id": "stage-1",
+                  "scope_id": "scope-0",
+                  "location": {
+                    "start": {
+                      "offset": 164,
+                      "line": 1,
+                      "column": 165
+                    },
+                    "end": {
+                      "offset": 169,
+                      "line": 1,
+                      "column": 170
+                    }
+                  }
+                },
+                {
+                  "reference_id": "ref-18",
+                  "original_name": "_time",
+                  "binding": "source",
+                  "stage_id": "stage-2",
+                  "scope_id": "scope-0",
+                  "location": {
+                    "start": {
+                      "offset": 280,
+                      "line": 1,
+                      "column": 281
+                    },
+                    "end": {
+                      "offset": 285,
+                      "line": 1,
+                      "column": 286
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "id": "req-8",
+              "kind": "field",
+              "identity": "action",
+              "role": "read",
+              "necessity": "required",
+              "origin": "direct",
+              "resolution": "exact",
+              "occurrences": [
+                {
+                  "reference_id": "ref-13",
+                  "original_name": "action",
+                  "binding": "source",
+                  "stage_id": "stage-1",
+                  "scope_id": "scope-0",
+                  "location": {
+                    "start": {
+                      "offset": 190,
+                      "line": 1,
+                      "column": 191
+                    },
+                    "end": {
+                      "offset": 196,
+                      "line": 1,
+                      "column": 197
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "id": "req-9",
+              "kind": "field",
+              "identity": "bytes",
+              "role": "read",
+              "necessity": "required",
+              "origin": "direct",
+              "resolution": "exact",
+              "occurrences": [
+                {
+                  "reference_id": "ref-20",
+                  "original_name": "bytes",
+                  "binding": "source",
+                  "stage_id": "stage-2",
+                  "scope_id": "scope-0",
+                  "location": {
+                    "start": {
+                      "offset": 306,
+                      "line": 1,
+                      "column": 307
+                    },
+                    "end": {
+                      "offset": 311,
+                      "line": 1,
+                      "column": 312
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "id": "req-10",
+              "kind": "field",
+              "identity": "user",
+              "role": "group",
+              "necessity": "required",
+              "origin": "direct",
+              "resolution": "exact",
+              "occurrences": [
+                {
+                  "reference_id": "ref-22",
+                  "original_name": "user",
+                  "binding": "source",
+                  "stage_id": "stage-2",
+                  "scope_id": "scope-0",
+                  "location": {
+                    "start": {
+                      "offset": 326,
+                      "line": 1,
+                      "column": 327
+                    },
+                    "end": {
+                      "offset": 330,
+                      "line": 1,
+                      "column": 331
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "id": "req-11",
+              "kind": "field",
+              "identity": "user",
+              "role": "read",
+              "necessity": "required",
+              "origin": "direct",
+              "resolution": "exact",
+              "occurrences": [
+                {
+                  "reference_id": "ref-23",
+                  "original_name": "user",
+                  "binding": "source",
+                  "stage_id": "stage-3",
+                  "scope_id": "scope-0",
+                  "location": {
+                    "start": {
+                      "offset": 339,
+                      "line": 1,
+                      "column": 340
+                    },
+                    "end": {
+                      "offset": 343,
+                      "line": 1,
+                      "column": 344
+                    }
+                  }
+                }
+              ]
+            }
+          ],
+          "gaps": [],
+          "diagnostics": []
+        }
+      }
+    },
+    {
+      "id": "branch_macro_boundaries",
+      "document": {
+        "text": "search parent=* | append [ search index=child child=* | eval local=child | `child_macro()` ] | where parent=*",
+        "language": "",
+        "profile": "",
+        "version": "",
+        "source_id": "corpus:branch_macro_boundaries"
+      },
+      "expected": {
+        "schema_version": 1,
+        "document": {
+          "text": "search parent=* | append [ search index=child child=* | eval local=child | `child_macro()` ] | where parent=*",
+          "language": "spl",
+          "profile": "splunkd",
+          "version": "current",
+          "source_id": "corpus:branch_macro_boundaries"
+        },
+        "status": "incomplete",
+        "coverage": {
+          "syntax_complete": true,
+          "semantic_complete": false,
+          "reasons": [
+            "SPL_UNSUPPORTED_SEMANTICS",
+            "SPL_DYNAMIC_REFERENCE"
+          ]
+        },
+        "stages": [
+          {
+            "id": "stage-0",
+            "command": "search",
+            "position": 0,
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 0,
+                "line": 1,
+                "column": 1
+              },
+              "end": {
+                "offset": 15,
+                "line": 1,
+                "column": 16
+              }
+            },
+            "semantic_complete": true
+          },
+          {
+            "id": "stage-1",
+            "command": "append",
+            "position": 1,
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 18,
+                "line": 1,
+                "column": 19
+              },
+              "end": {
+                "offset": 92,
+                "line": 1,
+                "column": 93
+              }
+            },
+            "semantic_complete": false
+          },
+          {
+            "id": "stage-2",
+            "command": "search",
+            "position": 0,
+            "scope_id": "scope-1",
+            "location": {
+              "start": {
+                "offset": 27,
+                "line": 1,
+                "column": 28
+              },
+              "end": {
+                "offset": 53,
+                "line": 1,
+                "column": 54
+              }
+            },
+            "semantic_complete": true
+          },
+          {
+            "id": "stage-3",
+            "command": "eval",
+            "position": 1,
+            "scope_id": "scope-1",
+            "location": {
+              "start": {
+                "offset": 56,
+                "line": 1,
+                "column": 57
+              },
+              "end": {
+                "offset": 72,
+                "line": 1,
+                "column": 73
+              }
+            },
+            "semantic_complete": true
+          },
+          {
+            "id": "stage-4",
+            "command": "macro",
+            "position": 2,
+            "scope_id": "scope-1",
+            "location": {
+              "start": {
+                "offset": 75,
+                "line": 1,
+                "column": 76
+              },
+              "end": {
+                "offset": 90,
+                "line": 1,
+                "column": 91
+              }
+            },
+            "semantic_complete": false
+          },
+          {
+            "id": "stage-5",
+            "command": "where",
+            "position": 2,
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 95,
+                "line": 1,
+                "column": 96
+              },
+              "end": {
+                "offset": 109,
+                "line": 1,
+                "column": 110
+              }
+            },
+            "semantic_complete": true
+          }
+        ],
+        "scopes": [
+          {
+            "id": "scope-0",
+            "parent_id": "",
+            "kind": "root",
+            "stage_id": "",
+            "location": {
+              "start": {
+                "offset": 0,
+                "line": 1,
+                "column": 1
+              },
+              "end": {
+                "offset": 109,
+                "line": 1,
+                "column": 110
+              }
+            }
+          },
+          {
+            "id": "scope-1",
+            "parent_id": "scope-0",
+            "kind": "append",
+            "stage_id": "stage-1",
+            "location": {
+              "start": {
+                "offset": 25,
+                "line": 1,
+                "column": 26
+              },
+              "end": {
+                "offset": 92,
+                "line": 1,
+                "column": 93
+              }
+            }
+          }
+        ],
+        "references": [
+          {
+            "id": "ref-0",
+            "original_name": "parent",
+            "normalized_name": "parent",
+            "kind": "field",
+            "role": "filter",
+            "stage_id": "stage-0",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 7,
+                "line": 1,
+                "column": 8
+              },
+              "end": {
+                "offset": 13,
+                "line": 1,
+                "column": 14
+              }
+            },
+            "resolution": "exact",
+            "binding": "source",
+            "origin_reference_ids": []
+          },
+          {
+            "id": "ref-1",
+            "original_name": "child",
+            "normalized_name": "child",
+            "kind": "index",
+            "role": "read",
+            "stage_id": "stage-2",
+            "scope_id": "scope-1",
+            "location": {
+              "start": {
+                "offset": 40,
+                "line": 1,
+                "column": 41
+              },
+              "end": {
+                "offset": 45,
+                "line": 1,
+                "column": 46
+              }
+            },
+            "resolution": "exact",
+            "binding": "not_applicable",
+            "origin_reference_ids": []
+          },
+          {
+            "id": "ref-2",
+            "original_name": "child",
+            "normalized_name": "child",
+            "kind": "field",
+            "role": "filter",
+            "stage_id": "stage-2",
+            "scope_id": "scope-1",
+            "location": {
+              "start": {
+                "offset": 46,
+                "line": 1,
+                "column": 47
+              },
+              "end": {
+                "offset": 51,
+                "line": 1,
+                "column": 52
+              }
+            },
+            "resolution": "exact",
+            "binding": "source",
+            "origin_reference_ids": []
+          },
+          {
+            "id": "ref-3",
+            "original_name": "local",
+            "normalized_name": "local",
+            "kind": "field",
+            "role": "create",
+            "stage_id": "stage-3",
+            "scope_id": "scope-1",
+            "location": {
+              "start": {
+                "offset": 61,
+                "line": 1,
+                "column": 62
+              },
+              "end": {
+                "offset": 66,
+                "line": 1,
+                "column": 67
+              }
+            },
+            "resolution": "exact",
+            "binding": "not_applicable",
+            "origin_reference_ids": [
+              "ref-4",
+              "ref-2"
+            ]
+          },
+          {
+            "id": "ref-4",
+            "original_name": "child",
+            "normalized_name": "child",
+            "kind": "field",
+            "role": "read",
+            "stage_id": "stage-3",
+            "scope_id": "scope-1",
+            "location": {
+              "start": {
+                "offset": 67,
+                "line": 1,
+                "column": 68
+              },
+              "end": {
+                "offset": 72,
+                "line": 1,
+                "column": 73
+              }
+            },
+            "resolution": "exact",
+            "binding": "source",
+            "origin_reference_ids": [
+              "ref-2"
+            ]
+          },
+          {
+            "id": "ref-5",
+            "original_name": "child_macro",
+            "normalized_name": "child_macro",
+            "kind": "macro",
+            "role": "read",
+            "stage_id": "stage-4",
+            "scope_id": "scope-1",
+            "location": {
+              "start": {
+                "offset": 76,
+                "line": 1,
+                "column": 77
+              },
+              "end": {
+                "offset": 87,
+                "line": 1,
+                "column": 88
+              }
+            },
+            "resolution": "exact",
+            "binding": "not_applicable",
+            "origin_reference_ids": []
+          },
+          {
+            "id": "ref-6",
+            "original_name": "parent",
+            "normalized_name": "parent",
+            "kind": "field",
+            "role": "read",
+            "stage_id": "stage-5",
+            "scope_id": "scope-0",
+            "location": {
+              "start": {
+                "offset": 101,
+                "line": 1,
+                "column": 102
+              },
+              "end": {
+                "offset": 107,
+                "line": 1,
+                "column": 108
+              }
+            },
+            "resolution": "exact",
+            "binding": "source",
+            "origin_reference_ids": [
+              "ref-0"
+            ]
+          }
+        ],
+        "lineage": [
+          {
+            "stage_id": "stage-0",
+            "scope_id": "scope-0",
+            "before": {
+              "fields": [],
+              "removed": [],
+              "open": true,
+              "uncertain": false
+            },
+            "after": {
+              "fields": [
+                {
+                  "name": "parent",
+                  "origin_reference_ids": [
+                    "ref-0"
+                  ],
+                  "conditional": false
+                }
+              ],
+              "removed": [],
+              "open": true,
+              "uncertain": false
+            },
+            "transitions": []
+          },
+          {
+            "stage_id": "stage-1",
+            "scope_id": "scope-0",
+            "before": {
+              "fields": [
+                {
+                  "name": "parent",
+                  "origin_reference_ids": [
+                    "ref-0"
+                  ],
+                  "conditional": false
+                }
+              ],
+              "removed": [],
+              "open": true,
+              "uncertain": false
+            },
+            "after": {
+              "fields": [
+                {
+                  "name": "parent",
+                  "origin_reference_ids": [
+                    "ref-0"
+                  ],
+                  "conditional": false
+                }
+              ],
+              "removed": [],
+              "open": true,
+              "uncertain": true
+            },
+            "transitions": []
+          },
+          {
+            "stage_id": "stage-2",
+            "scope_id": "scope-1",
+            "before": {
+              "fields": [],
+              "removed": [],
+              "open": true,
+              "uncertain": false
+            },
+            "after": {
+              "fields": [
+                {
+                  "name": "child",
+                  "origin_reference_ids": [
+                    "ref-2"
+                  ],
+                  "conditional": false
+                }
+              ],
+              "removed": [],
+              "open": true,
+              "uncertain": false
+            },
+            "transitions": []
+          },
+          {
+            "stage_id": "stage-3",
+            "scope_id": "scope-1",
+            "before": {
+              "fields": [
+                {
+                  "name": "child",
+                  "origin_reference_ids": [
+                    "ref-2"
+                  ],
+                  "conditional": false
+                }
+              ],
+              "removed": [],
+              "open": true,
+              "uncertain": false
+            },
+            "after": {
+              "fields": [
+                {
+                  "name": "child",
+                  "origin_reference_ids": [
+                    "ref-2"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "local",
+                  "origin_reference_ids": [
+                    "ref-3",
+                    "ref-4",
+                    "ref-2"
+                  ],
+                  "conditional": false
+                }
+              ],
+              "removed": [],
+              "open": true,
+              "uncertain": false
+            },
+            "transitions": [
+              {
+                "operation": "create",
+                "output": "local",
+                "input_reference_ids": [
+                  "ref-4"
+                ],
+                "output_reference_id": "ref-3",
+                "conditional": false
+              }
+            ]
+          },
+          {
+            "stage_id": "stage-4",
+            "scope_id": "scope-1",
+            "before": {
+              "fields": [
+                {
+                  "name": "child",
+                  "origin_reference_ids": [
+                    "ref-2"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "local",
+                  "origin_reference_ids": [
+                    "ref-3",
+                    "ref-4",
+                    "ref-2"
+                  ],
+                  "conditional": false
+                }
+              ],
+              "removed": [],
+              "open": true,
+              "uncertain": false
+            },
+            "after": {
+              "fields": [
+                {
+                  "name": "child",
+                  "origin_reference_ids": [
+                    "ref-2"
+                  ],
+                  "conditional": false
+                },
+                {
+                  "name": "local",
+                  "origin_reference_ids": [
+                    "ref-3",
+                    "ref-4",
+                    "ref-2"
+                  ],
+                  "conditional": false
+                }
+              ],
+              "removed": [],
+              "open": true,
+              "uncertain": true
+            },
+            "transitions": []
+          },
+          {
+            "stage_id": "stage-5",
+            "scope_id": "scope-0",
+            "before": {
+              "fields": [
+                {
+                  "name": "parent",
+                  "origin_reference_ids": [
+                    "ref-0"
+                  ],
+                  "conditional": false
+                }
+              ],
+              "removed": [],
+              "open": true,
+              "uncertain": true
+            },
+            "after": {
+              "fields": [
+                {
+                  "name": "parent",
+                  "origin_reference_ids": [
+                    "ref-0"
+                  ],
+                  "conditional": false
+                }
+              ],
+              "removed": [],
+              "open": true,
+              "uncertain": true
+            },
+            "transitions": []
+          }
+        ],
+        "dependencies": {
+          "indexes": [
+            "child"
+          ],
+          "sources": [],
+          "source_types": [],
+          "datasets": [],
+          "lookups": [],
+          "data_models": [],
+          "macros": [
+            "child_macro"
+          ]
+        },
+        "diagnostics": [
+          {
+            "code": "SPL_UNSUPPORTED_SEMANTICS",
+            "severity": "warning",
+            "category": "unsupported_semantics",
+            "message": "command \"append\" has unmodeled field effects",
+            "location": {
+              "start": {
+                "offset": 18,
+                "line": 1,
+                "column": 19
+              },
+              "end": {
+                "offset": 92,
+                "line": 1,
+                "column": 93
+              }
+            },
+            "stage_id": "stage-1",
+            "scope_id": "scope-0"
+          },
+          {
+            "code": "SPL_DYNAMIC_REFERENCE",
+            "severity": "warning",
+            "category": "unsupported_semantics",
+            "message": "macro expansion is unresolved",
+            "location": {
+              "start": {
+                "offset": 75,
+                "line": 1,
+                "column": 76
+              },
+              "end": {
+                "offset": 90,
+                "line": 1,
+                "column": 91
+              }
+            },
+            "stage_id": "stage-4",
+            "scope_id": "scope-1"
+          }
+        ],
+        "requirements": {
+          "schema_version": 1,
+          "query": {
+            "source_id": "corpus:branch_macro_boundaries",
+            "language": "spl",
+            "profile": "splunkd",
+            "version": "current",
+            "query_digest": "sha256:132329b9970a9dbe15c03bc50e7ed1b723b753243c6216ca13066d62ca456f1c"
+          },
+          "capability_revision": "sha256:08901c84ac8c420f59ddb86168c534f0e83484c05d3c8a81078a716c878a1733",
+          "query_status": "incomplete",
+          "coverage": {
+            "complete": false,
+            "reasons": [
+              "SPL_UNSUPPORTED_SEMANTICS",
+              "SPL_DYNAMIC_REFERENCE"
+            ]
+          },
+          "items": [
+            {
+              "id": "req-1",
+              "kind": "field",
+              "identity": "parent",
+              "role": "filter",
+              "necessity": "required",
+              "origin": "direct",
+              "resolution": "exact",
+              "occurrences": [
+                {
+                  "reference_id": "ref-0",
+                  "original_name": "parent",
+                  "binding": "source",
+                  "stage_id": "stage-0",
+                  "scope_id": "scope-0",
+                  "location": {
+                    "start": {
+                      "offset": 7,
+                      "line": 1,
+                      "column": 8
+                    },
+                    "end": {
+                      "offset": 13,
+                      "line": 1,
+                      "column": 14
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "id": "req-2",
+              "kind": "index",
+              "identity": "child",
+              "role": "read",
+              "necessity": "required",
+              "origin": "direct",
+              "resolution": "exact",
+              "occurrences": [
+                {
+                  "reference_id": "ref-1",
+                  "original_name": "child",
+                  "binding": "not_applicable",
+                  "stage_id": "stage-2",
+                  "scope_id": "scope-1",
+                  "location": {
+                    "start": {
+                      "offset": 40,
+                      "line": 1,
+                      "column": 41
+                    },
+                    "end": {
+                      "offset": 45,
+                      "line": 1,
+                      "column": 46
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "id": "req-3",
+              "kind": "field",
+              "identity": "child",
+              "role": "filter",
+              "necessity": "required",
+              "origin": "direct",
+              "resolution": "exact",
+              "occurrences": [
+                {
+                  "reference_id": "ref-2",
+                  "original_name": "child",
+                  "binding": "source",
+                  "stage_id": "stage-2",
+                  "scope_id": "scope-1",
+                  "location": {
+                    "start": {
+                      "offset": 46,
+                      "line": 1,
+                      "column": 47
+                    },
+                    "end": {
+                      "offset": 51,
+                      "line": 1,
+                      "column": 52
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "id": "req-4",
+              "kind": "field",
+              "identity": "child",
+              "role": "read",
+              "necessity": "required",
+              "origin": "direct",
+              "resolution": "exact",
+              "occurrences": [
+                {
+                  "reference_id": "ref-4",
+                  "original_name": "child",
+                  "binding": "source",
+                  "stage_id": "stage-3",
+                  "scope_id": "scope-1",
+                  "location": {
+                    "start": {
+                      "offset": 67,
+                      "line": 1,
+                      "column": 68
+                    },
+                    "end": {
+                      "offset": 72,
+                      "line": 1,
+                      "column": 73
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "id": "req-5",
+              "kind": "macro",
+              "identity": "child_macro",
+              "role": "read",
+              "necessity": "required",
+              "origin": "direct",
+              "resolution": "exact",
+              "occurrences": [
+                {
+                  "reference_id": "ref-5",
+                  "original_name": "child_macro",
+                  "binding": "not_applicable",
+                  "stage_id": "stage-4",
+                  "scope_id": "scope-1",
+                  "location": {
+                    "start": {
+                      "offset": 76,
+                      "line": 1,
+                      "column": 77
+                    },
+                    "end": {
+                      "offset": 87,
+                      "line": 1,
+                      "column": 88
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "id": "req-6",
+              "kind": "field",
+              "identity": "parent",
+              "role": "read",
+              "necessity": "required",
+              "origin": "direct",
+              "resolution": "exact",
+              "occurrences": [
+                {
+                  "reference_id": "ref-6",
+                  "original_name": "parent",
+                  "binding": "source",
+                  "stage_id": "stage-5",
+                  "scope_id": "scope-0",
+                  "location": {
+                    "start": {
+                      "offset": 101,
+                      "line": 1,
+                      "column": 102
+                    },
+                    "end": {
+                      "offset": 107,
+                      "line": 1,
+                      "column": 108
+                    }
+                  }
+                }
+              ]
+            }
+          ],
+          "gaps": [
+            {
+              "code": "SPL_UNSUPPORTED_SEMANTICS",
+              "message": "command \"append\" has unmodeled field effects",
+              "reference_ids": [],
+              "diagnostic_codes": [
+                "SPL_UNSUPPORTED_SEMANTICS"
+              ]
+            },
+            {
+              "code": "SPL_DYNAMIC_REFERENCE",
+              "message": "macro expansion is unresolved",
+              "reference_ids": [
+                "ref-5"
+              ],
+              "diagnostic_codes": [
+                "SPL_DYNAMIC_REFERENCE"
+              ]
+            }
+          ],
+          "diagnostics": [
+            {
+              "code": "SPL_UNSUPPORTED_SEMANTICS",
+              "severity": "warning",
+              "category": "unsupported_semantics",
+              "message": "command \"append\" has unmodeled field effects",
+              "location": {
+                "start": {
+                  "offset": 18,
+                  "line": 1,
+                  "column": 19
+                },
+                "end": {
+                  "offset": 92,
+                  "line": 1,
+                  "column": 93
+                }
+              },
+              "stage_id": "stage-1",
+              "scope_id": "scope-0"
+            },
+            {
+              "code": "SPL_DYNAMIC_REFERENCE",
+              "severity": "warning",
+              "category": "unsupported_semantics",
+              "message": "macro expansion is unresolved",
+              "location": {
+                "start": {
+                  "offset": 75,
+                  "line": 1,
+                  "column": 76
+                },
+                "end": {
+                  "offset": 90,
+                  "line": 1,
+                  "column": 91
+                }
+              },
+              "stage_id": "stage-4",
+              "scope_id": "scope-1"
             }
           ]
         }

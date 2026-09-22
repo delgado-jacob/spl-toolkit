@@ -134,7 +134,7 @@ def passing_records() -> list[dict]:
                 "requirements_surface_evidence": {
                     "schema_version": 1,
                     "fixture_sha256": HASH,
-                    "corpus_cases": 20,
+                    "corpus_cases": 24,
                     "dense_cases": 4,
                     "concurrent_calls": 16,
                     "long_sparse_cases": 2,
@@ -242,9 +242,9 @@ def test_requirement_corpus_evidence_below_current_floor_is_rejected():
     records = passing_records()
     for record in records:
         if record["kind"] == "installed-wheel":
-            record["requirements_surface_evidence"]["corpus_cases"] = 19
+            record["requirements_surface_evidence"]["corpus_cases"] = 23
     assert any(
-        "requirements_surface_evidence corpus_cases is below 20" in error
+        "requirements_surface_evidence corpus_cases is below 24" in error
         for error in validate_records(records, SHA)
     )
 

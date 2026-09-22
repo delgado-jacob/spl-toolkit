@@ -47,7 +47,7 @@ DEPENDENCY_KEYS = (
     "macros",
 )
 CAPABILITY_REVISIONS = {
-    "spl": "sha256:4824cd3df03aef27ae9375eb2298faffce0ffd4216396cec58954ce369f65f47",
+    "spl": "sha256:08901c84ac8c420f59ddb86168c534f0e83484c05d3c8a81078a716c878a1733",
     "spl2": "sha256:f1391296cfbc616e9bb1b1828e2471e37b60a35c0555654c0734640e072a0437",
 }
 DENSE_QUERY_DIGESTS = {
@@ -551,7 +551,7 @@ def requirement_fixture_path() -> Path:
 @pytest.fixture(scope="session")
 def requirement_cases() -> list[dict]:
     data = json.loads(requirement_fixture_path().read_text(encoding="utf-8"))
-    assert data["version"] == "1" and len(data["cases"]) == 20
+    assert data["version"] == "1" and len(data["cases"]) == 24
     assert {
         (case["document"].get("language") or "spl", case["expected"]["query_status"])
         for case in data["cases"]

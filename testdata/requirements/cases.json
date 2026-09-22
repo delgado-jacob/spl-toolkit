@@ -19,7 +19,7 @@
           "version": "current",
           "query_digest": "sha256:717dea7c30929b4559dfbc5b71de621af048179bc23f2047415c0fc0b9049fc6"
         },
-        "capability_revision": "sha256:4824cd3df03aef27ae9375eb2298faffce0ffd4216396cec58954ce369f65f47",
+        "capability_revision": "sha256:08901c84ac8c420f59ddb86168c534f0e83484c05d3c8a81078a716c878a1733",
         "query_status": "valid",
         "coverage": {
           "complete": true,
@@ -48,7 +48,7 @@
           "version": "current",
           "query_digest": "sha256:33e3c69fe52d9aad632aa000d7f6dafe0f147d41c66562c50b242ec403bd95d7"
         },
-        "capability_revision": "sha256:4824cd3df03aef27ae9375eb2298faffce0ffd4216396cec58954ce369f65f47",
+        "capability_revision": "sha256:08901c84ac8c420f59ddb86168c534f0e83484c05d3c8a81078a716c878a1733",
         "query_status": "valid",
         "coverage": {
           "complete": true,
@@ -157,7 +157,7 @@
           "version": "current",
           "query_digest": "sha256:29c3b3ee729857446a9d62ca2c302c7f3f35718f30b187415d40e33492433617"
         },
-        "capability_revision": "sha256:4824cd3df03aef27ae9375eb2298faffce0ffd4216396cec58954ce369f65f47",
+        "capability_revision": "sha256:08901c84ac8c420f59ddb86168c534f0e83484c05d3c8a81078a716c878a1733",
         "query_status": "incomplete",
         "coverage": {
           "complete": false,
@@ -258,7 +258,7 @@
           "version": "current",
           "query_digest": "sha256:3a5857fbdb1af43d292b8f75c7a1dcebf384f34c3aaa19b7d23bc1bf67ceaf39"
         },
-        "capability_revision": "sha256:4824cd3df03aef27ae9375eb2298faffce0ffd4216396cec58954ce369f65f47",
+        "capability_revision": "sha256:08901c84ac8c420f59ddb86168c534f0e83484c05d3c8a81078a716c878a1733",
         "query_status": "incomplete",
         "coverage": {
           "complete": false,
@@ -382,7 +382,7 @@
           "version": "current",
           "query_digest": "sha256:7a9765c7cd51da878bea531735f06b7f9150d2840116c2b754ca764aa9fc39c5"
         },
-        "capability_revision": "sha256:4824cd3df03aef27ae9375eb2298faffce0ffd4216396cec58954ce369f65f47",
+        "capability_revision": "sha256:08901c84ac8c420f59ddb86168c534f0e83484c05d3c8a81078a716c878a1733",
         "query_status": "valid",
         "coverage": {
           "complete": true,
@@ -502,7 +502,7 @@
           "version": "current",
           "query_digest": "sha256:0dc76923fa47fdaa30ad258c85f6308c784f76b351b6ebb4f947656044c57d5b"
         },
-        "capability_revision": "sha256:4824cd3df03aef27ae9375eb2298faffce0ffd4216396cec58954ce369f65f47",
+        "capability_revision": "sha256:08901c84ac8c420f59ddb86168c534f0e83484c05d3c8a81078a716c878a1733",
         "query_status": "valid",
         "coverage": {
           "complete": true,
@@ -592,7 +592,7 @@
           "version": "current",
           "query_digest": "sha256:6a58c4862e1ba050d1621405b79ee40a939f30285029c7faf3ba95056f5e601c"
         },
-        "capability_revision": "sha256:4824cd3df03aef27ae9375eb2298faffce0ffd4216396cec58954ce369f65f47",
+        "capability_revision": "sha256:08901c84ac8c420f59ddb86168c534f0e83484c05d3c8a81078a716c878a1733",
         "query_status": "incomplete",
         "coverage": {
           "complete": false,
@@ -684,7 +684,7 @@
           "version": "current",
           "query_digest": "sha256:361b0ab3e3c354a13d3dd203935807a6af1d558fdcea70ff4e9dcb0579c8f51d"
         },
-        "capability_revision": "sha256:4824cd3df03aef27ae9375eb2298faffce0ffd4216396cec58954ce369f65f47",
+        "capability_revision": "sha256:08901c84ac8c420f59ddb86168c534f0e83484c05d3c8a81078a716c878a1733",
         "query_status": "incomplete",
         "coverage": {
           "complete": false,
@@ -847,7 +847,7 @@
           "version": "current",
           "query_digest": "sha256:aebec667d8b0b1706562b330b062e6e29d9ef195070fc4d28ab092410cff9081"
         },
-        "capability_revision": "sha256:4824cd3df03aef27ae9375eb2298faffce0ffd4216396cec58954ce369f65f47",
+        "capability_revision": "sha256:08901c84ac8c420f59ddb86168c534f0e83484c05d3c8a81078a716c878a1733",
         "query_status": "valid",
         "coverage": {
           "complete": true,
@@ -937,7 +937,7 @@
           "version": "current",
           "query_digest": "sha256:f7adcfdf9129d82ae3195685215c28928bb8f7dee31607c9e8bf43158c013b29"
         },
-        "capability_revision": "sha256:4824cd3df03aef27ae9375eb2298faffce0ffd4216396cec58954ce369f65f47",
+        "capability_revision": "sha256:08901c84ac8c420f59ddb86168c534f0e83484c05d3c8a81078a716c878a1733",
         "query_status": "invalid",
         "coverage": {
           "complete": true,
@@ -1018,7 +1018,7 @@
           "version": "current",
           "query_digest": "sha256:a6d6b2c3e480e6a5fedc48fc9dd6f67a4c4955f7188ccd63475341df90c5b003"
         },
-        "capability_revision": "sha256:4824cd3df03aef27ae9375eb2298faffce0ffd4216396cec58954ce369f65f47",
+        "capability_revision": "sha256:08901c84ac8c420f59ddb86168c534f0e83484c05d3c8a81078a716c878a1733",
         "query_status": "invalid",
         "coverage": {
           "complete": false,
@@ -1079,7 +1079,7 @@
           "version": "current",
           "query_digest": "sha256:11915da48f694079f9a71d70adbace4cdbd2643e480606b5711e4cce84686aed"
         },
-        "capability_revision": "sha256:4824cd3df03aef27ae9375eb2298faffce0ffd4216396cec58954ce369f65f47",
+        "capability_revision": "sha256:08901c84ac8c420f59ddb86168c534f0e83484c05d3c8a81078a716c878a1733",
         "query_status": "incomplete",
         "coverage": {
           "complete": false,
@@ -1261,7 +1261,7 @@
           "version": "current",
           "query_digest": "sha256:0f6a3f7e6d0fc4840d2952a16eb30d951fa8b4394fe343f0af98c0b1908d1358"
         },
-        "capability_revision": "sha256:4824cd3df03aef27ae9375eb2298faffce0ffd4216396cec58954ce369f65f47",
+        "capability_revision": "sha256:08901c84ac8c420f59ddb86168c534f0e83484c05d3c8a81078a716c878a1733",
         "query_status": "valid",
         "coverage": {
           "complete": true,
@@ -1600,7 +1600,7 @@
           "version": "current",
           "query_digest": "sha256:72d1806d01e2eaa01dad59014c221c050b051fcaa46bd5f417c1dcd080aa12c9"
         },
-        "capability_revision": "sha256:4824cd3df03aef27ae9375eb2298faffce0ffd4216396cec58954ce369f65f47",
+        "capability_revision": "sha256:08901c84ac8c420f59ddb86168c534f0e83484c05d3c8a81078a716c878a1733",
         "query_status": "incomplete",
         "coverage": {
           "complete": false,
@@ -1829,7 +1829,7 @@
             "resolution": "exact",
             "occurrences": [
               {
-                "reference_id": "ref-7",
+                "reference_id": "ref-8",
                 "original_name": "Authentication",
                 "binding": "not_applicable",
                 "stage_id": "stage-6",
@@ -1859,7 +1859,7 @@
             "resolution": "exact",
             "occurrences": [
               {
-                "reference_id": "ref-8",
+                "reference_id": "ref-9",
                 "original_name": "Authentication.Authentication",
                 "binding": "not_applicable",
                 "stage_id": "stage-6",
@@ -1889,7 +1889,7 @@
             "resolution": "exact",
             "occurrences": [
               {
-                "reference_id": "ref-9",
+                "reference_id": "ref-10",
                 "original_name": "users",
                 "binding": "not_applicable",
                 "stage_id": "stage-7",
@@ -2020,26 +2020,6 @@
             },
             "stage_id": "stage-5",
             "scope_id": "scope-0"
-          },
-          {
-            "code": "SPL_UNSUPPORTED_SEMANTICS",
-            "severity": "warning",
-            "category": "unsupported_semantics",
-            "message": "command \"tstats\" has unmodeled field effects",
-            "location": {
-              "start": {
-                "offset": 168,
-                "line": 1,
-                "column": 169
-              },
-              "end": {
-                "offset": 225,
-                "line": 1,
-                "column": 226
-              }
-            },
-            "stage_id": "stage-6",
-            "scope_id": "scope-3"
           }
         ]
       }
@@ -2545,6 +2525,1238 @@
             },
             "stage_id": "stage-1",
             "scope_id": "scope-0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "tstats_basic_spl",
+      "document": {
+        "text": "| tstats count AS total FROM datamodel=Network_Traffic.All_Traffic WHERE All_Traffic.action=\"allowed\" BY All_Traffic.src",
+        "language": "",
+        "profile": "",
+        "version": "",
+        "source_id": "requirements:tstats_basic"
+      },
+      "expected": {
+        "schema_version": 1,
+        "query": {
+          "source_id": "requirements:tstats_basic",
+          "language": "spl",
+          "profile": "splunkd",
+          "version": "current",
+          "query_digest": "sha256:7bd655e0fdd8c023e6fec7d2bd7de9074e8b7f73345e7e1b738024512235e501"
+        },
+        "capability_revision": "sha256:08901c84ac8c420f59ddb86168c534f0e83484c05d3c8a81078a716c878a1733",
+        "query_status": "valid",
+        "coverage": {
+          "complete": true,
+          "reasons": []
+        },
+        "items": [
+          {
+            "id": "req-1",
+            "kind": "data_model",
+            "identity": "Network_Traffic",
+            "role": "read",
+            "necessity": "required",
+            "origin": "direct",
+            "resolution": "exact",
+            "occurrences": [
+              {
+                "reference_id": "ref-1",
+                "original_name": "Network_Traffic",
+                "binding": "not_applicable",
+                "stage_id": "stage-0",
+                "scope_id": "scope-0",
+                "location": {
+                  "start": {
+                    "offset": 39,
+                    "line": 1,
+                    "column": 40
+                  },
+                  "end": {
+                    "offset": 54,
+                    "line": 1,
+                    "column": 55
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "id": "req-2",
+            "kind": "dataset",
+            "identity": "Network_Traffic.All_Traffic",
+            "role": "read",
+            "necessity": "required",
+            "origin": "direct",
+            "resolution": "exact",
+            "occurrences": [
+              {
+                "reference_id": "ref-2",
+                "original_name": "Network_Traffic.All_Traffic",
+                "binding": "not_applicable",
+                "stage_id": "stage-0",
+                "scope_id": "scope-0",
+                "location": {
+                  "start": {
+                    "offset": 39,
+                    "line": 1,
+                    "column": 40
+                  },
+                  "end": {
+                    "offset": 66,
+                    "line": 1,
+                    "column": 67
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "id": "req-3",
+            "kind": "field",
+            "identity": "All_Traffic.action",
+            "role": "filter",
+            "necessity": "required",
+            "origin": "direct",
+            "resolution": "exact",
+            "occurrences": [
+              {
+                "reference_id": "ref-3",
+                "original_name": "All_Traffic.action",
+                "binding": "source",
+                "stage_id": "stage-0",
+                "scope_id": "scope-0",
+                "location": {
+                  "start": {
+                    "offset": 73,
+                    "line": 1,
+                    "column": 74
+                  },
+                  "end": {
+                    "offset": 91,
+                    "line": 1,
+                    "column": 92
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "id": "req-4",
+            "kind": "field",
+            "identity": "All_Traffic.src",
+            "role": "group",
+            "necessity": "required",
+            "origin": "direct",
+            "resolution": "exact",
+            "occurrences": [
+              {
+                "reference_id": "ref-4",
+                "original_name": "All_Traffic.src",
+                "binding": "source",
+                "stage_id": "stage-0",
+                "scope_id": "scope-0",
+                "location": {
+                  "start": {
+                    "offset": 105,
+                    "line": 1,
+                    "column": 106
+                  },
+                  "end": {
+                    "offset": 120,
+                    "line": 1,
+                    "column": 121
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "gaps": [],
+        "diagnostics": []
+      }
+    },
+    {
+      "id": "field_commands_spl",
+      "document": {
+        "text": "search action=* _raw=* | rex field=_raw \"user=(?\u003cuser\u003e[^ ]+)\" | spath input=_raw path=\"event.id\" output=event_id | fillnull value=\"unknown\" missing | bin span=5m _time AS bucket_time | regex action!=\"blocked\" | mvexpand values | table user event_id missing bucket_time action values",
+        "language": "",
+        "profile": "",
+        "version": "",
+        "source_id": "requirements:field_commands"
+      },
+      "expected": {
+        "schema_version": 1,
+        "query": {
+          "source_id": "requirements:field_commands",
+          "language": "spl",
+          "profile": "splunkd",
+          "version": "current",
+          "query_digest": "sha256:edf32023e8d91019b19b823c2c3c43d299020d7dd015f107da78bc2380f61d7a"
+        },
+        "capability_revision": "sha256:08901c84ac8c420f59ddb86168c534f0e83484c05d3c8a81078a716c878a1733",
+        "query_status": "valid",
+        "coverage": {
+          "complete": false,
+          "reasons": [
+            "SPL_REQUIREMENT_INDETERMINATE"
+          ]
+        },
+        "items": [
+          {
+            "id": "req-1",
+            "kind": "field",
+            "identity": "action",
+            "role": "filter",
+            "necessity": "required",
+            "origin": "direct",
+            "resolution": "exact",
+            "occurrences": [
+              {
+                "reference_id": "ref-0",
+                "original_name": "action",
+                "binding": "source",
+                "stage_id": "stage-0",
+                "scope_id": "scope-0",
+                "location": {
+                  "start": {
+                    "offset": 7,
+                    "line": 1,
+                    "column": 8
+                  },
+                  "end": {
+                    "offset": 13,
+                    "line": 1,
+                    "column": 14
+                  }
+                }
+              },
+              {
+                "reference_id": "ref-10",
+                "original_name": "action",
+                "binding": "source",
+                "stage_id": "stage-5",
+                "scope_id": "scope-0",
+                "location": {
+                  "start": {
+                    "offset": 191,
+                    "line": 1,
+                    "column": 192
+                  },
+                  "end": {
+                    "offset": 197,
+                    "line": 1,
+                    "column": 198
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "id": "req-2",
+            "kind": "field",
+            "identity": "_raw",
+            "role": "filter",
+            "necessity": "required",
+            "origin": "direct",
+            "resolution": "exact",
+            "occurrences": [
+              {
+                "reference_id": "ref-1",
+                "original_name": "_raw",
+                "binding": "source",
+                "stage_id": "stage-0",
+                "scope_id": "scope-0",
+                "location": {
+                  "start": {
+                    "offset": 16,
+                    "line": 1,
+                    "column": 17
+                  },
+                  "end": {
+                    "offset": 20,
+                    "line": 1,
+                    "column": 21
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "id": "req-3",
+            "kind": "field",
+            "identity": "_raw",
+            "role": "read",
+            "necessity": "required",
+            "origin": "direct",
+            "resolution": "exact",
+            "occurrences": [
+              {
+                "reference_id": "ref-2",
+                "original_name": "_raw",
+                "binding": "source",
+                "stage_id": "stage-1",
+                "scope_id": "scope-0",
+                "location": {
+                  "start": {
+                    "offset": 35,
+                    "line": 1,
+                    "column": 36
+                  },
+                  "end": {
+                    "offset": 39,
+                    "line": 1,
+                    "column": 40
+                  }
+                }
+              },
+              {
+                "reference_id": "ref-4",
+                "original_name": "_raw",
+                "binding": "source",
+                "stage_id": "stage-2",
+                "scope_id": "scope-0",
+                "location": {
+                  "start": {
+                    "offset": 76,
+                    "line": 1,
+                    "column": 77
+                  },
+                  "end": {
+                    "offset": 80,
+                    "line": 1,
+                    "column": 81
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "id": "req-4",
+            "kind": "field",
+            "identity": "missing",
+            "role": "read",
+            "necessity": "conditional",
+            "origin": "direct",
+            "resolution": "exact",
+            "occurrences": [
+              {
+                "reference_id": "ref-7",
+                "original_name": "missing",
+                "binding": "indeterminate",
+                "stage_id": "stage-3",
+                "scope_id": "scope-0",
+                "location": {
+                  "start": {
+                    "offset": 140,
+                    "line": 1,
+                    "column": 141
+                  },
+                  "end": {
+                    "offset": 147,
+                    "line": 1,
+                    "column": 148
+                  }
+                }
+              },
+              {
+                "reference_id": "ref-14",
+                "original_name": "missing",
+                "binding": "indeterminate",
+                "stage_id": "stage-7",
+                "scope_id": "scope-0",
+                "location": {
+                  "start": {
+                    "offset": 249,
+                    "line": 1,
+                    "column": 250
+                  },
+                  "end": {
+                    "offset": 256,
+                    "line": 1,
+                    "column": 257
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "id": "req-5",
+            "kind": "field",
+            "identity": "_time",
+            "role": "read",
+            "necessity": "required",
+            "origin": "direct",
+            "resolution": "exact",
+            "occurrences": [
+              {
+                "reference_id": "ref-8",
+                "original_name": "_time",
+                "binding": "source",
+                "stage_id": "stage-4",
+                "scope_id": "scope-0",
+                "location": {
+                  "start": {
+                    "offset": 162,
+                    "line": 1,
+                    "column": 163
+                  },
+                  "end": {
+                    "offset": 167,
+                    "line": 1,
+                    "column": 168
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "id": "req-6",
+            "kind": "field",
+            "identity": "values",
+            "role": "read",
+            "necessity": "required",
+            "origin": "direct",
+            "resolution": "exact",
+            "occurrences": [
+              {
+                "reference_id": "ref-11",
+                "original_name": "values",
+                "binding": "source",
+                "stage_id": "stage-6",
+                "scope_id": "scope-0",
+                "location": {
+                  "start": {
+                    "offset": 220,
+                    "line": 1,
+                    "column": 221
+                  },
+                  "end": {
+                    "offset": 226,
+                    "line": 1,
+                    "column": 227
+                  }
+                }
+              },
+              {
+                "reference_id": "ref-17",
+                "original_name": "values",
+                "binding": "source",
+                "stage_id": "stage-7",
+                "scope_id": "scope-0",
+                "location": {
+                  "start": {
+                    "offset": 276,
+                    "line": 1,
+                    "column": 277
+                  },
+                  "end": {
+                    "offset": 282,
+                    "line": 1,
+                    "column": 283
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "id": "req-7",
+            "kind": "field",
+            "identity": "user",
+            "role": "read",
+            "necessity": "conditional",
+            "origin": "direct",
+            "resolution": "exact",
+            "occurrences": [
+              {
+                "reference_id": "ref-12",
+                "original_name": "user",
+                "binding": "indeterminate",
+                "stage_id": "stage-7",
+                "scope_id": "scope-0",
+                "location": {
+                  "start": {
+                    "offset": 235,
+                    "line": 1,
+                    "column": 236
+                  },
+                  "end": {
+                    "offset": 239,
+                    "line": 1,
+                    "column": 240
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "id": "req-8",
+            "kind": "field",
+            "identity": "event_id",
+            "role": "read",
+            "necessity": "conditional",
+            "origin": "direct",
+            "resolution": "exact",
+            "occurrences": [
+              {
+                "reference_id": "ref-13",
+                "original_name": "event_id",
+                "binding": "indeterminate",
+                "stage_id": "stage-7",
+                "scope_id": "scope-0",
+                "location": {
+                  "start": {
+                    "offset": 240,
+                    "line": 1,
+                    "column": 241
+                  },
+                  "end": {
+                    "offset": 248,
+                    "line": 1,
+                    "column": 249
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "id": "req-9",
+            "kind": "field",
+            "identity": "action",
+            "role": "read",
+            "necessity": "required",
+            "origin": "direct",
+            "resolution": "exact",
+            "occurrences": [
+              {
+                "reference_id": "ref-16",
+                "original_name": "action",
+                "binding": "source",
+                "stage_id": "stage-7",
+                "scope_id": "scope-0",
+                "location": {
+                  "start": {
+                    "offset": 269,
+                    "line": 1,
+                    "column": 270
+                  },
+                  "end": {
+                    "offset": 275,
+                    "line": 1,
+                    "column": 276
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "gaps": [
+          {
+            "code": "SPL_REQUIREMENT_INDETERMINATE",
+            "message": "requirement origin is indeterminate",
+            "reference_ids": [
+              "ref-7"
+            ],
+            "diagnostic_codes": []
+          },
+          {
+            "code": "SPL_REQUIREMENT_INDETERMINATE",
+            "message": "requirement origin is indeterminate",
+            "reference_ids": [
+              "ref-12"
+            ],
+            "diagnostic_codes": []
+          },
+          {
+            "code": "SPL_REQUIREMENT_INDETERMINATE",
+            "message": "requirement origin is indeterminate",
+            "reference_ids": [
+              "ref-13"
+            ],
+            "diagnostic_codes": []
+          },
+          {
+            "code": "SPL_REQUIREMENT_INDETERMINATE",
+            "message": "requirement origin is indeterminate",
+            "reference_ids": [
+              "ref-14"
+            ],
+            "diagnostic_codes": []
+          }
+        ],
+        "diagnostics": []
+      }
+    },
+    {
+      "id": "selected_functions_spl",
+      "document": {
+        "text": "search values=* _time=* bytes=* user=* action=* | eval picked=mvindex(values,0), found=mvfind(values,\"error\"), cutoff=relative_time(now(),\"-24h@h\"), label=strftime(_time,\"%F\"), allowed=like(action,\"allow%\"), empty=null(), keep=true() | stats earliest(cutoff) AS first_seen latest(_time) AS last_seen stdev(bytes) AS spread BY user | table user first_seen last_seen spread",
+        "language": "",
+        "profile": "",
+        "version": "",
+        "source_id": "requirements:selected_functions"
+      },
+      "expected": {
+        "schema_version": 1,
+        "query": {
+          "source_id": "requirements:selected_functions",
+          "language": "spl",
+          "profile": "splunkd",
+          "version": "current",
+          "query_digest": "sha256:4c894d1352e7d49da4330603a82f4dc5fd14736cd9cf3e1a4d4231e57c325d61"
+        },
+        "capability_revision": "sha256:08901c84ac8c420f59ddb86168c534f0e83484c05d3c8a81078a716c878a1733",
+        "query_status": "valid",
+        "coverage": {
+          "complete": true,
+          "reasons": []
+        },
+        "items": [
+          {
+            "id": "req-1",
+            "kind": "field",
+            "identity": "values",
+            "role": "filter",
+            "necessity": "required",
+            "origin": "direct",
+            "resolution": "exact",
+            "occurrences": [
+              {
+                "reference_id": "ref-0",
+                "original_name": "values",
+                "binding": "source",
+                "stage_id": "stage-0",
+                "scope_id": "scope-0",
+                "location": {
+                  "start": {
+                    "offset": 7,
+                    "line": 1,
+                    "column": 8
+                  },
+                  "end": {
+                    "offset": 13,
+                    "line": 1,
+                    "column": 14
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "id": "req-2",
+            "kind": "field",
+            "identity": "_time",
+            "role": "filter",
+            "necessity": "required",
+            "origin": "direct",
+            "resolution": "exact",
+            "occurrences": [
+              {
+                "reference_id": "ref-1",
+                "original_name": "_time",
+                "binding": "source",
+                "stage_id": "stage-0",
+                "scope_id": "scope-0",
+                "location": {
+                  "start": {
+                    "offset": 16,
+                    "line": 1,
+                    "column": 17
+                  },
+                  "end": {
+                    "offset": 21,
+                    "line": 1,
+                    "column": 22
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "id": "req-3",
+            "kind": "field",
+            "identity": "bytes",
+            "role": "filter",
+            "necessity": "required",
+            "origin": "direct",
+            "resolution": "exact",
+            "occurrences": [
+              {
+                "reference_id": "ref-2",
+                "original_name": "bytes",
+                "binding": "source",
+                "stage_id": "stage-0",
+                "scope_id": "scope-0",
+                "location": {
+                  "start": {
+                    "offset": 24,
+                    "line": 1,
+                    "column": 25
+                  },
+                  "end": {
+                    "offset": 29,
+                    "line": 1,
+                    "column": 30
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "id": "req-4",
+            "kind": "field",
+            "identity": "user",
+            "role": "filter",
+            "necessity": "required",
+            "origin": "direct",
+            "resolution": "exact",
+            "occurrences": [
+              {
+                "reference_id": "ref-3",
+                "original_name": "user",
+                "binding": "source",
+                "stage_id": "stage-0",
+                "scope_id": "scope-0",
+                "location": {
+                  "start": {
+                    "offset": 32,
+                    "line": 1,
+                    "column": 33
+                  },
+                  "end": {
+                    "offset": 36,
+                    "line": 1,
+                    "column": 37
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "id": "req-5",
+            "kind": "field",
+            "identity": "action",
+            "role": "filter",
+            "necessity": "required",
+            "origin": "direct",
+            "resolution": "exact",
+            "occurrences": [
+              {
+                "reference_id": "ref-4",
+                "original_name": "action",
+                "binding": "source",
+                "stage_id": "stage-0",
+                "scope_id": "scope-0",
+                "location": {
+                  "start": {
+                    "offset": 39,
+                    "line": 1,
+                    "column": 40
+                  },
+                  "end": {
+                    "offset": 45,
+                    "line": 1,
+                    "column": 46
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "id": "req-6",
+            "kind": "field",
+            "identity": "values",
+            "role": "read",
+            "necessity": "required",
+            "origin": "direct",
+            "resolution": "exact",
+            "occurrences": [
+              {
+                "reference_id": "ref-6",
+                "original_name": "values",
+                "binding": "source",
+                "stage_id": "stage-1",
+                "scope_id": "scope-0",
+                "location": {
+                  "start": {
+                    "offset": 70,
+                    "line": 1,
+                    "column": 71
+                  },
+                  "end": {
+                    "offset": 76,
+                    "line": 1,
+                    "column": 77
+                  }
+                }
+              },
+              {
+                "reference_id": "ref-8",
+                "original_name": "values",
+                "binding": "source",
+                "stage_id": "stage-1",
+                "scope_id": "scope-0",
+                "location": {
+                  "start": {
+                    "offset": 94,
+                    "line": 1,
+                    "column": 95
+                  },
+                  "end": {
+                    "offset": 100,
+                    "line": 1,
+                    "column": 101
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "id": "req-7",
+            "kind": "field",
+            "identity": "_time",
+            "role": "read",
+            "necessity": "required",
+            "origin": "direct",
+            "resolution": "exact",
+            "occurrences": [
+              {
+                "reference_id": "ref-11",
+                "original_name": "_time",
+                "binding": "source",
+                "stage_id": "stage-1",
+                "scope_id": "scope-0",
+                "location": {
+                  "start": {
+                    "offset": 164,
+                    "line": 1,
+                    "column": 165
+                  },
+                  "end": {
+                    "offset": 169,
+                    "line": 1,
+                    "column": 170
+                  }
+                }
+              },
+              {
+                "reference_id": "ref-18",
+                "original_name": "_time",
+                "binding": "source",
+                "stage_id": "stage-2",
+                "scope_id": "scope-0",
+                "location": {
+                  "start": {
+                    "offset": 280,
+                    "line": 1,
+                    "column": 281
+                  },
+                  "end": {
+                    "offset": 285,
+                    "line": 1,
+                    "column": 286
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "id": "req-8",
+            "kind": "field",
+            "identity": "action",
+            "role": "read",
+            "necessity": "required",
+            "origin": "direct",
+            "resolution": "exact",
+            "occurrences": [
+              {
+                "reference_id": "ref-13",
+                "original_name": "action",
+                "binding": "source",
+                "stage_id": "stage-1",
+                "scope_id": "scope-0",
+                "location": {
+                  "start": {
+                    "offset": 190,
+                    "line": 1,
+                    "column": 191
+                  },
+                  "end": {
+                    "offset": 196,
+                    "line": 1,
+                    "column": 197
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "id": "req-9",
+            "kind": "field",
+            "identity": "bytes",
+            "role": "read",
+            "necessity": "required",
+            "origin": "direct",
+            "resolution": "exact",
+            "occurrences": [
+              {
+                "reference_id": "ref-20",
+                "original_name": "bytes",
+                "binding": "source",
+                "stage_id": "stage-2",
+                "scope_id": "scope-0",
+                "location": {
+                  "start": {
+                    "offset": 306,
+                    "line": 1,
+                    "column": 307
+                  },
+                  "end": {
+                    "offset": 311,
+                    "line": 1,
+                    "column": 312
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "id": "req-10",
+            "kind": "field",
+            "identity": "user",
+            "role": "group",
+            "necessity": "required",
+            "origin": "direct",
+            "resolution": "exact",
+            "occurrences": [
+              {
+                "reference_id": "ref-22",
+                "original_name": "user",
+                "binding": "source",
+                "stage_id": "stage-2",
+                "scope_id": "scope-0",
+                "location": {
+                  "start": {
+                    "offset": 326,
+                    "line": 1,
+                    "column": 327
+                  },
+                  "end": {
+                    "offset": 330,
+                    "line": 1,
+                    "column": 331
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "id": "req-11",
+            "kind": "field",
+            "identity": "user",
+            "role": "read",
+            "necessity": "required",
+            "origin": "direct",
+            "resolution": "exact",
+            "occurrences": [
+              {
+                "reference_id": "ref-23",
+                "original_name": "user",
+                "binding": "source",
+                "stage_id": "stage-3",
+                "scope_id": "scope-0",
+                "location": {
+                  "start": {
+                    "offset": 339,
+                    "line": 1,
+                    "column": 340
+                  },
+                  "end": {
+                    "offset": 343,
+                    "line": 1,
+                    "column": 344
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "gaps": [],
+        "diagnostics": []
+      }
+    },
+    {
+      "id": "branch_macro_boundaries_spl",
+      "document": {
+        "text": "search parent=* | append [ search index=child child=* | eval local=child | `child_macro()` ] | where parent=*",
+        "language": "",
+        "profile": "",
+        "version": "",
+        "source_id": "requirements:branch_macro_boundaries"
+      },
+      "expected": {
+        "schema_version": 1,
+        "query": {
+          "source_id": "requirements:branch_macro_boundaries",
+          "language": "spl",
+          "profile": "splunkd",
+          "version": "current",
+          "query_digest": "sha256:132329b9970a9dbe15c03bc50e7ed1b723b753243c6216ca13066d62ca456f1c"
+        },
+        "capability_revision": "sha256:08901c84ac8c420f59ddb86168c534f0e83484c05d3c8a81078a716c878a1733",
+        "query_status": "incomplete",
+        "coverage": {
+          "complete": false,
+          "reasons": [
+            "SPL_UNSUPPORTED_SEMANTICS",
+            "SPL_DYNAMIC_REFERENCE"
+          ]
+        },
+        "items": [
+          {
+            "id": "req-1",
+            "kind": "field",
+            "identity": "parent",
+            "role": "filter",
+            "necessity": "required",
+            "origin": "direct",
+            "resolution": "exact",
+            "occurrences": [
+              {
+                "reference_id": "ref-0",
+                "original_name": "parent",
+                "binding": "source",
+                "stage_id": "stage-0",
+                "scope_id": "scope-0",
+                "location": {
+                  "start": {
+                    "offset": 7,
+                    "line": 1,
+                    "column": 8
+                  },
+                  "end": {
+                    "offset": 13,
+                    "line": 1,
+                    "column": 14
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "id": "req-2",
+            "kind": "index",
+            "identity": "child",
+            "role": "read",
+            "necessity": "required",
+            "origin": "direct",
+            "resolution": "exact",
+            "occurrences": [
+              {
+                "reference_id": "ref-1",
+                "original_name": "child",
+                "binding": "not_applicable",
+                "stage_id": "stage-2",
+                "scope_id": "scope-1",
+                "location": {
+                  "start": {
+                    "offset": 40,
+                    "line": 1,
+                    "column": 41
+                  },
+                  "end": {
+                    "offset": 45,
+                    "line": 1,
+                    "column": 46
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "id": "req-3",
+            "kind": "field",
+            "identity": "child",
+            "role": "filter",
+            "necessity": "required",
+            "origin": "direct",
+            "resolution": "exact",
+            "occurrences": [
+              {
+                "reference_id": "ref-2",
+                "original_name": "child",
+                "binding": "source",
+                "stage_id": "stage-2",
+                "scope_id": "scope-1",
+                "location": {
+                  "start": {
+                    "offset": 46,
+                    "line": 1,
+                    "column": 47
+                  },
+                  "end": {
+                    "offset": 51,
+                    "line": 1,
+                    "column": 52
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "id": "req-4",
+            "kind": "field",
+            "identity": "child",
+            "role": "read",
+            "necessity": "required",
+            "origin": "direct",
+            "resolution": "exact",
+            "occurrences": [
+              {
+                "reference_id": "ref-4",
+                "original_name": "child",
+                "binding": "source",
+                "stage_id": "stage-3",
+                "scope_id": "scope-1",
+                "location": {
+                  "start": {
+                    "offset": 67,
+                    "line": 1,
+                    "column": 68
+                  },
+                  "end": {
+                    "offset": 72,
+                    "line": 1,
+                    "column": 73
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "id": "req-5",
+            "kind": "macro",
+            "identity": "child_macro",
+            "role": "read",
+            "necessity": "required",
+            "origin": "direct",
+            "resolution": "exact",
+            "occurrences": [
+              {
+                "reference_id": "ref-5",
+                "original_name": "child_macro",
+                "binding": "not_applicable",
+                "stage_id": "stage-4",
+                "scope_id": "scope-1",
+                "location": {
+                  "start": {
+                    "offset": 76,
+                    "line": 1,
+                    "column": 77
+                  },
+                  "end": {
+                    "offset": 87,
+                    "line": 1,
+                    "column": 88
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "id": "req-6",
+            "kind": "field",
+            "identity": "parent",
+            "role": "read",
+            "necessity": "required",
+            "origin": "direct",
+            "resolution": "exact",
+            "occurrences": [
+              {
+                "reference_id": "ref-6",
+                "original_name": "parent",
+                "binding": "source",
+                "stage_id": "stage-5",
+                "scope_id": "scope-0",
+                "location": {
+                  "start": {
+                    "offset": 101,
+                    "line": 1,
+                    "column": 102
+                  },
+                  "end": {
+                    "offset": 107,
+                    "line": 1,
+                    "column": 108
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "gaps": [
+          {
+            "code": "SPL_UNSUPPORTED_SEMANTICS",
+            "message": "command \"append\" has unmodeled field effects",
+            "reference_ids": [],
+            "diagnostic_codes": [
+              "SPL_UNSUPPORTED_SEMANTICS"
+            ]
+          },
+          {
+            "code": "SPL_DYNAMIC_REFERENCE",
+            "message": "macro expansion is unresolved",
+            "reference_ids": [
+              "ref-5"
+            ],
+            "diagnostic_codes": [
+              "SPL_DYNAMIC_REFERENCE"
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "code": "SPL_UNSUPPORTED_SEMANTICS",
+            "severity": "warning",
+            "category": "unsupported_semantics",
+            "message": "command \"append\" has unmodeled field effects",
+            "location": {
+              "start": {
+                "offset": 18,
+                "line": 1,
+                "column": 19
+              },
+              "end": {
+                "offset": 92,
+                "line": 1,
+                "column": 93
+              }
+            },
+            "stage_id": "stage-1",
+            "scope_id": "scope-0"
+          },
+          {
+            "code": "SPL_DYNAMIC_REFERENCE",
+            "severity": "warning",
+            "category": "unsupported_semantics",
+            "message": "macro expansion is unresolved",
+            "location": {
+              "start": {
+                "offset": 75,
+                "line": 1,
+                "column": 76
+              },
+              "end": {
+                "offset": 90,
+                "line": 1,
+                "column": 91
+              }
+            },
+            "stage_id": "stage-4",
+            "scope_id": "scope-1"
           }
         ]
       }

@@ -102,7 +102,7 @@ def assert_capability_ledger_is_self_consistent(manifest: dict, language: str, e
 def analysis_cases() -> list[dict]:
     path = required_absolute_path("SPL_ANALYSIS_FIXTURES")
     fixture = json.loads(path.read_text(encoding="utf-8"))
-    assert fixture["version"] == "1" and fixture["cases"]
+    assert fixture["version"] == "1" and len(fixture["cases"]) == 38
     return fixture["cases"]
 
 
