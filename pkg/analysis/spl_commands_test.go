@@ -619,38 +619,57 @@ func TestRexNamedCaptures(t *testing.T) {
 }
 
 func TestSpathSemantics(t *testing.T) {
-	t.Run("exact input path and output flow downstream", func(t *testing.T) {
-		result := analyzeFieldCommand(t, `search payload=* | spath input=payload path="event.id" output=event_id | where event_id="42"`)
-		assertFieldCommandComplete(t, result, "spath")
-		assertFieldCommandReference(t, result, "spath", "payload", "read", "source", "exact")
-		assertFieldCommandReference(t, result, "spath", "event_id", "output", "not_applicable", "exact")
-		assertFieldCommandReference(t, result, "where", "event_id", "read", "indeterminate", "exact")
-		assertFieldCommandTransition(t, result, "spath", "event_id", true)
-	})
+	pathTests := []struct {
+		name         string
+		path         string
+		pathIdentity string
+		complete     bool
+	}{
+		{name: "ASCII dotted path", path: `event.id`, pathIdentity: "event.id", complete: true},
+		{name: "Unicode dotted path", path: `用户.标识`, pathIdentity: "用户.标识", complete: true},
+		{name: "quoted literal path", path: `"event.id"`, pathIdentity: "event.id", complete: true},
+		{name: "leading dot", path: `.event`},
+		{name: "trailing dot", path: `event.`},
+		{name: "repeated dot", path: `event..id`},
+		{name: "single bare identifier", path: `event_path`},
+		{name: "single quoted exact identifier", path: `'event.id'`},
+	}
+	for _, tc := range pathTests {
+		t.Run(tc.name, func(t *testing.T) {
+			result := analyzeFieldCommand(t, fmt.Sprintf(`| spath input=_raw path=%s output=event_id | where event_id="42"`, tc.path))
+			assertFieldCommandReference(t, result, "spath", "_raw", "read", "source", "exact")
+			if tc.complete {
+				assertFieldCommandComplete(t, result, "spath")
+				assertFieldCommandReference(t, result, "spath", "event_id", "output", "not_applicable", "exact")
+				assertFieldCommandReference(t, result, "where", "event_id", "read", "indeterminate", "exact")
+				assertFieldCommandTransition(t, result, "spath", "event_id", true)
+				for _, reference := range result.References {
+					if reference.Kind == "field" && reference.NormalizedName == tc.pathIdentity {
+						t.Fatalf("spath path %q became a field reference: %+v", tc.path, reference)
+					}
+				}
+				for _, requirement := range result.Requirements.Items {
+					if requirement.Kind == "field" && requirement.Identity == tc.pathIdentity {
+						t.Fatalf("spath path %q became a field requirement: %+v", tc.path, requirement)
+					}
+				}
+				return
+			}
 
-	t.Run("unquoted static dotted path publishes explicit output", func(t *testing.T) {
-		result := analyzeFieldCommand(t, `| spath input=_raw path=event.id output=event_id | where event_id="42"`)
-		assertFieldCommandComplete(t, result, "spath")
-		assertFieldCommandReference(t, result, "spath", "_raw", "read", "source", "exact")
-		assertFieldCommandReference(t, result, "spath", "event_id", "output", "not_applicable", "exact")
-		assertFieldCommandReference(t, result, "where", "event_id", "read", "indeterminate", "exact")
-		assertFieldCommandTransition(t, result, "spath", "event_id", true)
-	})
+			assertFieldCommandIncomplete(t, result, "spath", "path="+tc.path)
+			if fieldCommandHasReference(result, "spath", "event_id", "output") {
+				t.Fatalf("spath with held path %q invented an output: %+v", tc.path, result.References)
+			}
+			if transitions := fieldCommandLineage(t, result, "spath").Transitions; len(transitions) != 0 {
+				t.Fatalf("spath with held path %q invented transitions: %+v", tc.path, transitions)
+			}
+		})
+	}
 
 	t.Run("auto extraction is held after retaining the input read", func(t *testing.T) {
 		result := analyzeFieldCommand(t, `search payload=* | spath input=payload | where payload="x"`)
 		assertFieldCommandIncomplete(t, result, "spath", "input=payload")
 		assertFieldCommandReference(t, result, "spath", "payload", "read", "source", "exact")
-		assertFieldCommandReference(t, result, "where", "payload", "read", "source", "exact")
-	})
-
-	t.Run("dynamic path is held without inventing an output", func(t *testing.T) {
-		result := analyzeFieldCommand(t, `search payload=* | spath input=payload path=event_path output=event_id | where payload="x"`)
-		assertFieldCommandIncomplete(t, result, "spath", "path=event_path")
-		assertFieldCommandReference(t, result, "spath", "payload", "read", "source", "exact")
-		if fieldCommandHasReference(result, "spath", "event_id", "output") {
-			t.Fatalf("spath with dynamic path invented an output: %+v", result.References)
-		}
 		assertFieldCommandReference(t, result, "where", "payload", "read", "source", "exact")
 	})
 
