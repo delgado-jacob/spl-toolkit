@@ -2,6 +2,7 @@ package analysis
 
 import (
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -17,8 +18,8 @@ func TestCorpusDependencies(t *testing.T) {
 		{`| datamodel Web All_Traffic search`, Dependencies{DataModels: []string{"Web"}, Datasets: []string{"Web.All_Traffic"}}, []struct{ kind, name, original string }{{"data_model", "Web", "Web"}, {"dataset", "Web.All_Traffic", "All_Traffic"}}},
 		{`| from datamodel:Network_Traffic.All_Traffic`, Dependencies{DataModels: []string{"Network_Traffic"}, Datasets: []string{"Network_Traffic.All_Traffic"}}, []struct{ kind, name, original string }{{"data_model", "Network_Traffic", "Network_Traffic"}, {"dataset", "Network_Traffic.All_Traffic", "Network_Traffic.All_Traffic"}}},
 		{`| from savedsearch:Daily`, Dependencies{Datasets: []string{"savedsearch:Daily"}}, nil},
-		{`| tstats count FROM datamodel=Authentication.Authentication WHERE nodename=Authentication.Authentication BY user`, Dependencies{DataModels: []string{"Authentication"}, Datasets: []string{"Authentication.Authentication"}}, nil},
-		{`| tstats count FROM datamodel=Authentication`, Dependencies{DataModels: []string{"Authentication"}}, nil},
+		{`| tstats count FROM datamodel=Authentication.Authentication WHERE nodename=Authentication.Authentication BY user`, Dependencies{DataModels: []string{"Authentication"}, Datasets: []string{"Authentication.Authentication"}}, []struct{ kind, name, original string }{{"data_model", "Authentication", "Authentication"}, {"dataset", "Authentication.Authentication", "Authentication.Authentication"}}},
+		{`| tstats count FROM datamodel=Authentication`, Dependencies{DataModels: []string{"Authentication"}}, []struct{ kind, name, original string }{{"data_model", "Authentication", "Authentication"}}},
 	} {
 		t.Run(tc.query, func(t *testing.T) {
 			r, _ := Analyze(QueryDocument{Text: tc.query})
@@ -40,6 +41,12 @@ func TestCorpusDependencies(t *testing.T) {
 				}
 			}
 			if len(tc.want.DataModels) > 0 || len(tc.want.Datasets) > 0 {
+				if strings.Contains(tc.query, "tstats") {
+					if r.Status != Valid || !r.Coverage.SemanticComplete {
+						t.Fatal(r.Status, r.Coverage, r.Diagnostics)
+					}
+					return
+				}
 				if r.Status != Incomplete {
 					t.Fatal(r.Status)
 				}
@@ -61,16 +68,21 @@ func TestCorpusOpaqueDoesNotInventDependencies(t *testing.T) {
 
 func TestCorpusTstatsSearchDependencies(t *testing.T) {
 	r, _ := Analyze(QueryDocument{Text: `| tstats count WHERE index=main source="/var/log/a" sourcetype=syslog BY user`})
-	if r.Status != Incomplete || !r.Coverage.SyntaxComplete {
+	if r.Status != Valid || !r.Coverage.SyntaxComplete || !r.Coverage.SemanticComplete {
 		t.Fatal(r)
 	}
 	if !reflect.DeepEqual(r.Dependencies.Indexes, []string{"main"}) || !reflect.DeepEqual(r.Dependencies.Sources, []string{"/var/log/a"}) || !reflect.DeepEqual(r.Dependencies.SourceTypes, []string{"syslog"}) {
 		t.Fatal(r.Dependencies)
 	}
-	for _, ref := range r.References {
-		if ref.Kind == "field" {
-			t.Fatal("unmodeled field inference", ref)
-		}
+	want := []string{
+		"count=>count:field:output:not_applicable:exact",
+		"main=>main:index:read:not_applicable:exact",
+		`"/var/log/a"=>/var/log/a:source:read:not_applicable:exact`,
+		"syslog=>syslog:sourcetype:read:not_applicable:exact",
+		"user=>user:field:group:source:exact",
+	}
+	if got := tstatsReferenceFacts(r.References); !reflect.DeepEqual(got, want) {
+		t.Fatalf("references\n got: %q\nwant: %q", got, want)
 	}
 }
 

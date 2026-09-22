@@ -563,6 +563,7 @@ func TestRequirementTraceKnowledgeObjects(t *testing.T) {
 		{"lookup", QueryDocument{Text: `| inputlookup users`}, map[string]string{"lookup:users": "exact"}},
 		{"data model", QueryDocument{Text: `| datamodel Web search`}, map[string]string{"data_model:Web": "exact"}},
 		{"qualified data model", QueryDocument{Text: `| from datamodel:Network_Traffic.All_Traffic`}, map[string]string{"data_model:Network_Traffic": "exact", "dataset:Network_Traffic.All_Traffic": "exact"}},
+		{"tstats objects", QueryDocument{Text: `| tstats count FROM datamodel=Network_Traffic.All_Traffic WHERE index=main source=access.log sourcetype=web`}, map[string]string{"data_model:Network_Traffic": "exact", "dataset:Network_Traffic.All_Traffic": "exact", "index:main": "exact", "source:access.log": "exact", "sourcetype:web": "exact"}},
 		{"wildcard objects", QueryDocument{Text: `index=ma* source="access*"`}, map[string]string{"index:ma*": "wildcard", "source:access*": "wildcard"}},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
@@ -612,6 +613,54 @@ func TestRequirementTraceKnowledgeObjects(t *testing.T) {
 	}
 	if !foundExpansion {
 		t.Fatalf("macro expansion diagnostic does not own %s: %+v", macro.reference.ID, trace.diagnostics)
+	}
+}
+
+func TestTstatsOwnedFactsAreNotDuplicated(t *testing.T) {
+	query := "| tstats `accelerated` sum(bytes) AS total FROM datamodel=Network_Traffic.All_Traffic WHERE index=main All_Traffic.action=allowed BY All_Traffic.src"
+	result, trace, err := analyzeRewriteWithTrace(QueryDocument{Text: query}, nil, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	wantReferences := []string{
+		"accelerated=>accelerated:macro:read:not_applicable:exact",
+		"bytes=>bytes:field:read:source:exact",
+		"total=>total:field:output:not_applicable:exact",
+		"Network_Traffic=>Network_Traffic:data_model:read:not_applicable:exact",
+		"Network_Traffic.All_Traffic=>Network_Traffic.All_Traffic:dataset:read:not_applicable:exact",
+		"main=>main:index:read:not_applicable:exact",
+		"All_Traffic.action=>All_Traffic.action:field:filter:source:exact",
+		"All_Traffic.src=>All_Traffic.src:field:group:source:exact",
+	}
+	if got := tstatsReferenceFacts(result.References); !reflect.DeepEqual(got, wantReferences) {
+		t.Fatalf("owned references\n got: %q\nwant: %q", got, wantReferences)
+	}
+	if len(trace.references) != len(result.References) {
+		t.Fatalf("trace references = %d, public references = %d", len(trace.references), len(result.References))
+	}
+	seenTrace := map[string]int{}
+	for _, entry := range trace.references {
+		seenTrace[entry.reference.ID]++
+	}
+	for _, reference := range result.References {
+		if seenTrace[reference.ID] != 1 {
+			t.Errorf("reference %s trace occurrences = %d", reference.ID, seenTrace[reference.ID])
+		}
+	}
+	wantRequirements := []string{
+		"req-1:macro:accelerated:read:required:exact:ref-0:accelerated:not_applicable",
+		"req-2:field:bytes:read:required:exact:ref-1:bytes:source",
+		"req-3:data_model:Network_Traffic:read:required:exact:ref-3:Network_Traffic:not_applicable",
+		"req-4:dataset:Network_Traffic.All_Traffic:read:required:exact:ref-4:Network_Traffic.All_Traffic:not_applicable",
+		"req-5:index:main:read:required:exact:ref-5:main:not_applicable",
+		"req-6:field:All_Traffic.action:filter:required:exact:ref-6:All_Traffic.action:source",
+		"req-7:field:All_Traffic.src:group:required:exact:ref-7:All_Traffic.src:source",
+	}
+	if got := tstatsRequirementFacts(result.Requirements.Items); !reflect.DeepEqual(got, wantRequirements) {
+		t.Fatalf("owned requirement occurrences\n got: %q\nwant: %q", got, wantRequirements)
+	}
+	if !reflect.DeepEqual(result.Dependencies.DataModels, []string{"Network_Traffic"}) || !reflect.DeepEqual(result.Dependencies.Datasets, []string{"Network_Traffic.All_Traffic"}) || !reflect.DeepEqual(result.Dependencies.Indexes, []string{"main"}) || !reflect.DeepEqual(result.Dependencies.Macros, []string{"accelerated"}) {
+		t.Fatalf("owned dependencies were duplicated or omitted: %+v", result.Dependencies)
 	}
 }
 

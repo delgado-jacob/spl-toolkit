@@ -552,6 +552,65 @@ func TestRequirementsMatchesEmbeddedAndIsDetached(t *testing.T) {
 	}
 }
 
+func TestTstatsRequirements(t *testing.T) {
+	t.Run("exact catalog predicate aggregate and group requirements", func(t *testing.T) {
+		query := `| tstats sum(bytes) AS total FROM datamodel=Network_Traffic.All_Traffic WHERE index=main All_Traffic.action=allowed BY All_Traffic.src`
+		result, err := Analyze(QueryDocument{Text: query})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if result.Requirements.QueryStatus != Valid || !result.Requirements.Coverage.Complete || len(result.Requirements.Gaps) != 0 {
+			t.Fatalf("requirements completeness = %+v", result.Requirements)
+		}
+		want := []string{
+			"req-1:field:bytes:read:required:exact:ref-0:bytes:source",
+			"req-2:data_model:Network_Traffic:read:required:exact:ref-2:Network_Traffic:not_applicable",
+			"req-3:dataset:Network_Traffic.All_Traffic:read:required:exact:ref-3:Network_Traffic.All_Traffic:not_applicable",
+			"req-4:index:main:read:required:exact:ref-4:main:not_applicable",
+			"req-5:field:All_Traffic.action:filter:required:exact:ref-5:All_Traffic.action:source",
+			"req-6:field:All_Traffic.src:group:required:exact:ref-6:All_Traffic.src:source",
+		}
+		if got := tstatsRequirementFacts(result.Requirements.Items); !reflect.DeepEqual(got, want) {
+			t.Fatalf("requirements\n got: %q\nwant: %q", got, want)
+		}
+	})
+
+	t.Run("inline macro requirement and owned gap", func(t *testing.T) {
+		query := "| tstats `summariesonly` count FROM datamodel=Authentication.Authentication BY Authentication.user"
+		result, err := Analyze(QueryDocument{Text: query})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if result.Requirements.QueryStatus != Incomplete || result.Requirements.Coverage.Complete || !reflect.DeepEqual(result.Requirements.Coverage.Reasons, []string{CodeDynamicReference}) {
+			t.Fatalf("macro requirement coverage = %+v", result.Requirements)
+		}
+		want := []string{
+			"req-1:macro:summariesonly:read:required:exact:ref-0:summariesonly:not_applicable",
+			"req-2:data_model:Authentication:read:required:exact:ref-2:Authentication:not_applicable",
+			"req-3:dataset:Authentication.Authentication:read:required:exact:ref-3:Authentication.Authentication:not_applicable",
+			"req-4:field:Authentication.user:group:required:exact:ref-4:Authentication.user:source",
+		}
+		if got := tstatsRequirementFacts(result.Requirements.Items); !reflect.DeepEqual(got, want) {
+			t.Fatalf("requirements\n got: %q\nwant: %q", got, want)
+		}
+		wantGaps := []RequirementGap{{Code: CodeDynamicReference, Message: "macro expansion is unresolved", ReferenceIDs: []string{"ref-0"}, DiagnosticCodes: []string{CodeDynamicReference}}}
+		if !reflect.DeepEqual(result.Requirements.Gaps, wantGaps) {
+			t.Fatalf("macro gaps\n got: %+v\nwant: %+v", result.Requirements.Gaps, wantGaps)
+		}
+		assertTstatsDiagnosticLocation(t, result, CodeDynamicReference, "`summariesonly`")
+	})
+}
+
+func tstatsRequirementFacts(items []RequirementItem) []string {
+	facts := []string{}
+	for _, item := range items {
+		for _, occurrence := range item.Occurrences {
+			facts = append(facts, fmt.Sprintf("%s:%s:%s:%s:%s:%s:%s:%s:%s", item.ID, item.Kind, item.Identity, item.Role, item.Necessity, item.Resolution, occurrence.ReferenceID, occurrence.OriginalName, occurrence.Binding))
+		}
+	}
+	return facts
+}
+
 func TestRequirementTypesJSONShape(t *testing.T) {
 	set := RequirementSet{
 		SchemaVersion: 1,

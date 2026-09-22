@@ -58,6 +58,8 @@ func (s *semanticStage) dependencies(node antlr.Tree) {
 	switch c := node.(type) {
 	case parser.IAnalysisSubqueryContext:
 		return
+	case *parser.AnalysisTstatsStageContext:
+		return
 	case parser.IAnalysisMacroContext:
 		s.macro(c)
 		return

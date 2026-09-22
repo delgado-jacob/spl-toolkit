@@ -34,12 +34,18 @@ var commands = map[string]commandSpec{
 	"join":        {nil, "Branch merging is unmodeled."},
 	"datamodel":   {nil, "Exact model and optional dataset operands only; field effects are unmodeled. Qualified dataset references can cover the dataset component."},
 	"from":        {nil, "One exact dataset operand; datamodel:model.dataset yields overlapping located root-model and dataset references. Field effects are unmodeled."},
-	"tstats":      {nil, "Aggregate syntax, optional FROM datamodel=model.dataset and WHERE selectors; only dependencies are analyzed. Field effects are unmodeled."},
+	"tstats":      {tstatsCommand, "Exact data-model sources, predicates, registered aggregates, aliases, and exact grouping fields with literal _time spans. Dynamic catalogs, macros, wildcard grouping, prestats/append result-shape modes, unknown options, and unknown output identities remain held."},
 	"macro":       {nil, "Synthetic category for a macro-only stage; exact macro name dependencies, unresolved expansion. A literal command named macro remains unmodeled."},
 }
 
 func searchCommand(s *semanticStage, node antlr.ParserRuleContext) {
-	s.rewritePredicate(node, "spl", true, false)
+	s.searchPredicate(node, true)
+}
+
+func (s *semanticStage) searchPredicate(node antlr.Tree, rewrite bool) {
+	if rewrite {
+		s.rewritePredicate(node, "spl", true, false)
+	}
 	var visit func(antlr.Tree)
 	visit = func(n antlr.Tree) {
 		switch c := n.(type) {
