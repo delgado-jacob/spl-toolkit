@@ -53,20 +53,117 @@
           "complete": false,
           "stages": [
             {
+              "command": "search",
+              "semantic_complete": true
+            },
+            {
               "command": "append",
               "semantic_complete": false
+            },
+            {
+              "command": "search",
+              "semantic_complete": true
             }
           ],
-          "references": [],
-          "dependencies": [],
+          "references": [
+            {
+              "normalized_name": "main",
+              "kind": "index",
+              "role": "read",
+              "resolution": "exact",
+              "binding": "not_applicable",
+              "location": {
+                "start": {
+                  "offset": 13,
+                  "line": 1,
+                  "column": 14
+                },
+                "end": {
+                  "offset": 17,
+                  "line": 1,
+                  "column": 18
+                }
+              }
+            },
+            {
+              "normalized_name": "archive",
+              "kind": "index",
+              "role": "read",
+              "resolution": "exact",
+              "binding": "not_applicable",
+              "location": {
+                "start": {
+                  "offset": 42,
+                  "line": 1,
+                  "column": 43
+                },
+                "end": {
+                  "offset": 49,
+                  "line": 1,
+                  "column": 50
+                }
+              }
+            }
+          ],
+          "dependencies": [
+            {
+              "kind": "index",
+              "name": "archive"
+            },
+            {
+              "kind": "index",
+              "name": "main"
+            }
+          ],
           "transitions": [],
-          "diagnostics": []
+          "diagnostics": [
+            {
+              "code": "SPL_UNSUPPORTED_SEMANTICS",
+              "category": "unsupported_semantics",
+              "severity": "warning",
+              "location": {
+                "start": {
+                  "offset": 20,
+                  "line": 1,
+                  "column": 21
+                },
+                "end": {
+                  "offset": 51,
+                  "line": 1,
+                  "column": 52
+                }
+              }
+            }
+          ]
+        },
+        "requirements": {
+          "query_status": "incomplete",
+          "complete": false,
+          "items": [
+            {
+              "kind": "index",
+              "identity": "main",
+              "role": "read",
+              "necessity": "required",
+              "resolution": "exact"
+            },
+            {
+              "kind": "index",
+              "identity": "archive",
+              "role": "read",
+              "necessity": "required",
+              "resolution": "exact"
+            }
+          ],
+          "gap_codes": [
+            "SPL_UNSUPPORTED_SEMANTICS"
+          ]
         }
       },
       "provenance": {
         "source_family": "toolkit",
         "reference": "pkg/analysis",
-        "note": "Conservative local boundary with incomplete coverage."
+        "note": "Exact authored bytes and typed observations from the local analyzer contract."
       }
     },
     {
@@ -107,20 +204,111 @@
           "complete": false,
           "stages": [
             {
+              "command": "search",
+              "semantic_complete": true
+            },
+            {
               "command": "appendpipe",
               "semantic_complete": false
+            },
+            {
+              "command": "stats",
+              "semantic_complete": true
             }
           ],
-          "references": [],
-          "dependencies": [],
-          "transitions": [],
-          "diagnostics": []
+          "references": [
+            {
+              "normalized_name": "main",
+              "kind": "index",
+              "role": "read",
+              "resolution": "exact",
+              "binding": "not_applicable",
+              "location": {
+                "start": {
+                  "offset": 13,
+                  "line": 1,
+                  "column": 14
+                },
+                "end": {
+                  "offset": 17,
+                  "line": 1,
+                  "column": 18
+                }
+              }
+            },
+            {
+              "normalized_name": "count",
+              "kind": "field",
+              "role": "output",
+              "resolution": "exact",
+              "binding": "not_applicable",
+              "location": {
+                "start": {
+                  "offset": 39,
+                  "line": 1,
+                  "column": 40
+                },
+                "end": {
+                  "offset": 44,
+                  "line": 1,
+                  "column": 45
+                }
+              }
+            }
+          ],
+          "dependencies": [
+            {
+              "kind": "index",
+              "name": "main"
+            }
+          ],
+          "transitions": [
+            {
+              "operation": "aggregate",
+              "output": "count"
+            }
+          ],
+          "diagnostics": [
+            {
+              "code": "SPL_UNSUPPORTED_SEMANTICS",
+              "category": "unsupported_semantics",
+              "severity": "warning",
+              "location": {
+                "start": {
+                  "offset": 20,
+                  "line": 1,
+                  "column": 21
+                },
+                "end": {
+                  "offset": 46,
+                  "line": 1,
+                  "column": 47
+                }
+              }
+            }
+          ]
+        },
+        "requirements": {
+          "query_status": "incomplete",
+          "complete": false,
+          "items": [
+            {
+              "kind": "index",
+              "identity": "main",
+              "role": "read",
+              "necessity": "required",
+              "resolution": "exact"
+            }
+          ],
+          "gap_codes": [
+            "SPL_UNSUPPORTED_SEMANTICS"
+          ]
         }
       },
       "provenance": {
         "source_family": "toolkit",
         "reference": "pkg/analysis",
-        "note": "Conservative local boundary with incomplete coverage."
+        "note": "Exact authored bytes and typed observations from the local analyzer contract."
       }
     },
     {
@@ -179,6 +367,254 @@
         "source_family": "toolkit",
         "reference": "pkg/analysis",
         "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl.bin.exact-field.positive",
+      "classification": "positive",
+      "document": {
+        "text": "search _time=* | bin span=5m _time AS bucket_time",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.bin.exact-field.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "search",
+              "semantic_complete": true
+            },
+            {
+              "command": "bin",
+              "semantic_complete": true
+            }
+          ],
+          "references": [
+            {
+              "normalized_name": "_time",
+              "kind": "field",
+              "role": "filter",
+              "resolution": "exact",
+              "binding": "source",
+              "location": {
+                "start": {
+                  "offset": 7,
+                  "line": 1,
+                  "column": 8
+                },
+                "end": {
+                  "offset": 12,
+                  "line": 1,
+                  "column": 13
+                }
+              }
+            },
+            {
+              "normalized_name": "_time",
+              "kind": "field",
+              "role": "read",
+              "resolution": "exact",
+              "binding": "source",
+              "location": {
+                "start": {
+                  "offset": 29,
+                  "line": 1,
+                  "column": 30
+                },
+                "end": {
+                  "offset": 34,
+                  "line": 1,
+                  "column": 35
+                }
+              }
+            },
+            {
+              "normalized_name": "bucket_time",
+              "kind": "field",
+              "role": "create",
+              "resolution": "exact",
+              "binding": "not_applicable",
+              "location": {
+                "start": {
+                  "offset": 38,
+                  "line": 1,
+                  "column": 39
+                },
+                "end": {
+                  "offset": 49,
+                  "line": 1,
+                  "column": 50
+                }
+              }
+            }
+          ],
+          "dependencies": [],
+          "transitions": [
+            {
+              "operation": "create",
+              "output": "bucket_time"
+            }
+          ],
+          "diagnostics": []
+        },
+        "requirements": {
+          "query_status": "valid",
+          "complete": true,
+          "items": [
+            {
+              "kind": "field",
+              "identity": "_time",
+              "role": "filter",
+              "necessity": "required",
+              "resolution": "exact"
+            },
+            {
+              "kind": "field",
+              "identity": "_time",
+              "role": "read",
+              "necessity": "required",
+              "resolution": "exact"
+            }
+          ],
+          "gap_codes": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Exact authored bytes and typed observations from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl.bucket.exact-field.positive",
+      "classification": "positive",
+      "document": {
+        "text": "search bytes=* | bucket bins=10 bytes",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.bucket.exact-field.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "search",
+              "semantic_complete": true
+            },
+            {
+              "command": "bucket",
+              "semantic_complete": true
+            }
+          ],
+          "references": [
+            {
+              "normalized_name": "bytes",
+              "kind": "field",
+              "role": "filter",
+              "resolution": "exact",
+              "binding": "source",
+              "location": {
+                "start": {
+                  "offset": 7,
+                  "line": 1,
+                  "column": 8
+                },
+                "end": {
+                  "offset": 12,
+                  "line": 1,
+                  "column": 13
+                }
+              }
+            },
+            {
+              "normalized_name": "bytes",
+              "kind": "field",
+              "role": "create",
+              "resolution": "exact",
+              "binding": "not_applicable",
+              "location": {
+                "start": {
+                  "offset": 32,
+                  "line": 1,
+                  "column": 33
+                },
+                "end": {
+                  "offset": 37,
+                  "line": 1,
+                  "column": 38
+                }
+              }
+            },
+            {
+              "normalized_name": "bytes",
+              "kind": "field",
+              "role": "read",
+              "resolution": "exact",
+              "binding": "source",
+              "location": {
+                "start": {
+                  "offset": 32,
+                  "line": 1,
+                  "column": 33
+                },
+                "end": {
+                  "offset": 37,
+                  "line": 1,
+                  "column": 38
+                }
+              }
+            }
+          ],
+          "dependencies": [],
+          "transitions": [
+            {
+              "operation": "create",
+              "output": "bytes"
+            }
+          ],
+          "diagnostics": []
+        },
+        "requirements": {
+          "query_status": "valid",
+          "complete": true,
+          "items": [
+            {
+              "kind": "field",
+              "identity": "bytes",
+              "role": "filter",
+              "necessity": "required",
+              "resolution": "exact"
+            },
+            {
+              "kind": "field",
+              "identity": "bytes",
+              "role": "read",
+              "necessity": "required",
+              "resolution": "exact"
+            }
+          ],
+          "gap_codes": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Exact authored bytes and typed observations from the local analyzer contract."
       }
     },
     {
@@ -774,6 +1210,130 @@
       }
     },
     {
+      "id": "spl.earliest.one-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "search _time=* | stats earliest(_time) AS out",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.earliest.one-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "search",
+              "semantic_complete": true
+            },
+            {
+              "command": "stats",
+              "semantic_complete": true
+            }
+          ],
+          "references": [
+            {
+              "normalized_name": "_time",
+              "kind": "field",
+              "role": "filter",
+              "resolution": "exact",
+              "binding": "source",
+              "location": {
+                "start": {
+                  "offset": 7,
+                  "line": 1,
+                  "column": 8
+                },
+                "end": {
+                  "offset": 12,
+                  "line": 1,
+                  "column": 13
+                }
+              }
+            },
+            {
+              "normalized_name": "_time",
+              "kind": "field",
+              "role": "read",
+              "resolution": "exact",
+              "binding": "source",
+              "location": {
+                "start": {
+                  "offset": 32,
+                  "line": 1,
+                  "column": 33
+                },
+                "end": {
+                  "offset": 37,
+                  "line": 1,
+                  "column": 38
+                }
+              }
+            },
+            {
+              "normalized_name": "out",
+              "kind": "field",
+              "role": "output",
+              "resolution": "exact",
+              "binding": "not_applicable",
+              "location": {
+                "start": {
+                  "offset": 42,
+                  "line": 1,
+                  "column": 43
+                },
+                "end": {
+                  "offset": 45,
+                  "line": 1,
+                  "column": 46
+                }
+              }
+            }
+          ],
+          "dependencies": [],
+          "transitions": [
+            {
+              "operation": "aggregate",
+              "output": "out"
+            }
+          ],
+          "diagnostics": []
+        },
+        "requirements": {
+          "query_status": "valid",
+          "complete": true,
+          "items": [
+            {
+              "kind": "field",
+              "identity": "_time",
+              "role": "filter",
+              "necessity": "required",
+              "resolution": "exact"
+            },
+            {
+              "kind": "field",
+              "identity": "_time",
+              "role": "read",
+              "necessity": "required",
+              "resolution": "exact"
+            }
+          ],
+          "gap_codes": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Exact authored bytes and typed observations from the local analyzer contract."
+      }
+    },
+    {
       "id": "spl.eval.exact-assignment.positive",
       "classification": "positive",
       "document": {
@@ -1317,6 +1877,130 @@
       }
     },
     {
+      "id": "spl.fillnull.exact-fields.positive",
+      "classification": "positive",
+      "document": {
+        "text": "search user=* | fillnull value=\"unknown\" user",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.fillnull.exact-fields.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "search",
+              "semantic_complete": true
+            },
+            {
+              "command": "fillnull",
+              "semantic_complete": true
+            }
+          ],
+          "references": [
+            {
+              "normalized_name": "user",
+              "kind": "field",
+              "role": "filter",
+              "resolution": "exact",
+              "binding": "source",
+              "location": {
+                "start": {
+                  "offset": 7,
+                  "line": 1,
+                  "column": 8
+                },
+                "end": {
+                  "offset": 11,
+                  "line": 1,
+                  "column": 12
+                }
+              }
+            },
+            {
+              "normalized_name": "user",
+              "kind": "field",
+              "role": "create",
+              "resolution": "exact",
+              "binding": "not_applicable",
+              "location": {
+                "start": {
+                  "offset": 41,
+                  "line": 1,
+                  "column": 42
+                },
+                "end": {
+                  "offset": 45,
+                  "line": 1,
+                  "column": 46
+                }
+              }
+            },
+            {
+              "normalized_name": "user",
+              "kind": "field",
+              "role": "read",
+              "resolution": "exact",
+              "binding": "source",
+              "location": {
+                "start": {
+                  "offset": 41,
+                  "line": 1,
+                  "column": 42
+                },
+                "end": {
+                  "offset": 45,
+                  "line": 1,
+                  "column": 46
+                }
+              }
+            }
+          ],
+          "dependencies": [],
+          "transitions": [
+            {
+              "operation": "create",
+              "output": "user"
+            }
+          ],
+          "diagnostics": []
+        },
+        "requirements": {
+          "query_status": "valid",
+          "complete": true,
+          "items": [
+            {
+              "kind": "field",
+              "identity": "user",
+              "role": "filter",
+              "necessity": "required",
+              "resolution": "exact"
+            },
+            {
+              "kind": "field",
+              "identity": "user",
+              "role": "read",
+              "necessity": "required",
+              "resolution": "exact"
+            }
+          ],
+          "gap_codes": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Exact authored bytes and typed observations from the local analyzer contract."
+      }
+    },
+    {
       "id": "spl.first.one-positional.positive",
       "classification": "positive",
       "document": {
@@ -1686,20 +2370,143 @@
           "complete": false,
           "stages": [
             {
+              "command": "search",
+              "semantic_complete": true
+            },
+            {
               "command": "join",
               "semantic_complete": false
+            },
+            {
+              "command": "search",
+              "semantic_complete": true
             }
           ],
-          "references": [],
-          "dependencies": [],
+          "references": [
+            {
+              "normalized_name": "main",
+              "kind": "index",
+              "role": "read",
+              "resolution": "exact",
+              "binding": "not_applicable",
+              "location": {
+                "start": {
+                  "offset": 13,
+                  "line": 1,
+                  "column": 14
+                },
+                "end": {
+                  "offset": 17,
+                  "line": 1,
+                  "column": 18
+                }
+              }
+            },
+            {
+              "normalized_name": "user",
+              "kind": "field",
+              "role": "read",
+              "resolution": "exact",
+              "binding": "source",
+              "location": {
+                "start": {
+                  "offset": 25,
+                  "line": 1,
+                  "column": 26
+                },
+                "end": {
+                  "offset": 29,
+                  "line": 1,
+                  "column": 30
+                }
+              }
+            },
+            {
+              "normalized_name": "archive",
+              "kind": "index",
+              "role": "read",
+              "resolution": "exact",
+              "binding": "not_applicable",
+              "location": {
+                "start": {
+                  "offset": 45,
+                  "line": 1,
+                  "column": 46
+                },
+                "end": {
+                  "offset": 52,
+                  "line": 1,
+                  "column": 53
+                }
+              }
+            }
+          ],
+          "dependencies": [
+            {
+              "kind": "index",
+              "name": "archive"
+            },
+            {
+              "kind": "index",
+              "name": "main"
+            }
+          ],
           "transitions": [],
-          "diagnostics": []
+          "diagnostics": [
+            {
+              "code": "SPL_UNSUPPORTED_SEMANTICS",
+              "category": "unsupported_semantics",
+              "severity": "warning",
+              "location": {
+                "start": {
+                  "offset": 20,
+                  "line": 1,
+                  "column": 21
+                },
+                "end": {
+                  "offset": 54,
+                  "line": 1,
+                  "column": 55
+                }
+              }
+            }
+          ]
+        },
+        "requirements": {
+          "query_status": "incomplete",
+          "complete": false,
+          "items": [
+            {
+              "kind": "index",
+              "identity": "main",
+              "role": "read",
+              "necessity": "required",
+              "resolution": "exact"
+            },
+            {
+              "kind": "field",
+              "identity": "user",
+              "role": "read",
+              "necessity": "required",
+              "resolution": "exact"
+            },
+            {
+              "kind": "index",
+              "identity": "archive",
+              "role": "read",
+              "necessity": "required",
+              "resolution": "exact"
+            }
+          ],
+          "gap_codes": [
+            "SPL_UNSUPPORTED_SEMANTICS"
+          ]
         }
       },
       "provenance": {
         "source_family": "toolkit",
         "reference": "pkg/analysis",
-        "note": "Conservative local boundary with incomplete coverage."
+        "note": "Exact authored bytes and typed observations from the local analyzer contract."
       }
     },
     {
@@ -1761,6 +2568,130 @@
       }
     },
     {
+      "id": "spl.latest.one-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "search _time=* | stats latest(_time) AS out",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.latest.one-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "search",
+              "semantic_complete": true
+            },
+            {
+              "command": "stats",
+              "semantic_complete": true
+            }
+          ],
+          "references": [
+            {
+              "normalized_name": "_time",
+              "kind": "field",
+              "role": "filter",
+              "resolution": "exact",
+              "binding": "source",
+              "location": {
+                "start": {
+                  "offset": 7,
+                  "line": 1,
+                  "column": 8
+                },
+                "end": {
+                  "offset": 12,
+                  "line": 1,
+                  "column": 13
+                }
+              }
+            },
+            {
+              "normalized_name": "_time",
+              "kind": "field",
+              "role": "read",
+              "resolution": "exact",
+              "binding": "source",
+              "location": {
+                "start": {
+                  "offset": 30,
+                  "line": 1,
+                  "column": 31
+                },
+                "end": {
+                  "offset": 35,
+                  "line": 1,
+                  "column": 36
+                }
+              }
+            },
+            {
+              "normalized_name": "out",
+              "kind": "field",
+              "role": "output",
+              "resolution": "exact",
+              "binding": "not_applicable",
+              "location": {
+                "start": {
+                  "offset": 40,
+                  "line": 1,
+                  "column": 41
+                },
+                "end": {
+                  "offset": 43,
+                  "line": 1,
+                  "column": 44
+                }
+              }
+            }
+          ],
+          "dependencies": [],
+          "transitions": [
+            {
+              "operation": "aggregate",
+              "output": "out"
+            }
+          ],
+          "diagnostics": []
+        },
+        "requirements": {
+          "query_status": "valid",
+          "complete": true,
+          "items": [
+            {
+              "kind": "field",
+              "identity": "_time",
+              "role": "filter",
+              "necessity": "required",
+              "resolution": "exact"
+            },
+            {
+              "kind": "field",
+              "identity": "_time",
+              "role": "read",
+              "necessity": "required",
+              "resolution": "exact"
+            }
+          ],
+          "gap_codes": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Exact authored bytes and typed observations from the local analyzer contract."
+      }
+    },
+    {
       "id": "spl.len.one-positional.positive",
       "classification": "positive",
       "document": {
@@ -1794,6 +2725,130 @@
         "source_family": "toolkit",
         "reference": "pkg/analysis",
         "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl.like.two-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "search host=* | eval out=like(host,\"web%\")",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.like.two-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "search",
+              "semantic_complete": true
+            },
+            {
+              "command": "eval",
+              "semantic_complete": true
+            }
+          ],
+          "references": [
+            {
+              "normalized_name": "host",
+              "kind": "field",
+              "role": "filter",
+              "resolution": "exact",
+              "binding": "source",
+              "location": {
+                "start": {
+                  "offset": 7,
+                  "line": 1,
+                  "column": 8
+                },
+                "end": {
+                  "offset": 11,
+                  "line": 1,
+                  "column": 12
+                }
+              }
+            },
+            {
+              "normalized_name": "out",
+              "kind": "field",
+              "role": "create",
+              "resolution": "exact",
+              "binding": "not_applicable",
+              "location": {
+                "start": {
+                  "offset": 21,
+                  "line": 1,
+                  "column": 22
+                },
+                "end": {
+                  "offset": 24,
+                  "line": 1,
+                  "column": 25
+                }
+              }
+            },
+            {
+              "normalized_name": "host",
+              "kind": "field",
+              "role": "read",
+              "resolution": "exact",
+              "binding": "source",
+              "location": {
+                "start": {
+                  "offset": 30,
+                  "line": 1,
+                  "column": 31
+                },
+                "end": {
+                  "offset": 34,
+                  "line": 1,
+                  "column": 35
+                }
+              }
+            }
+          ],
+          "dependencies": [],
+          "transitions": [
+            {
+              "operation": "create",
+              "output": "out"
+            }
+          ],
+          "diagnostics": []
+        },
+        "requirements": {
+          "query_status": "valid",
+          "complete": true,
+          "items": [
+            {
+              "kind": "field",
+              "identity": "host",
+              "role": "filter",
+              "necessity": "required",
+              "resolution": "exact"
+            },
+            {
+              "kind": "field",
+              "identity": "host",
+              "role": "read",
+              "necessity": "required",
+              "resolution": "exact"
+            }
+          ],
+          "gap_codes": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Exact authored bytes and typed observations from the local analyzer contract."
       }
     },
     {
@@ -2008,16 +3063,75 @@
               "semantic_complete": false
             }
           ],
-          "references": [],
-          "dependencies": [],
+          "references": [
+            {
+              "normalized_name": "example",
+              "kind": "macro",
+              "role": "read",
+              "resolution": "exact",
+              "binding": "not_applicable",
+              "location": {
+                "start": {
+                  "offset": 1,
+                  "line": 1,
+                  "column": 2
+                },
+                "end": {
+                  "offset": 8,
+                  "line": 1,
+                  "column": 9
+                }
+              }
+            }
+          ],
+          "dependencies": [
+            {
+              "kind": "macro",
+              "name": "example"
+            }
+          ],
           "transitions": [],
-          "diagnostics": []
+          "diagnostics": [
+            {
+              "code": "SPL_DYNAMIC_REFERENCE",
+              "category": "unsupported_semantics",
+              "severity": "warning",
+              "location": {
+                "start": {
+                  "offset": 0,
+                  "line": 1,
+                  "column": 1
+                },
+                "end": {
+                  "offset": 9,
+                  "line": 1,
+                  "column": 10
+                }
+              }
+            }
+          ]
+        },
+        "requirements": {
+          "query_status": "incomplete",
+          "complete": false,
+          "items": [
+            {
+              "kind": "macro",
+              "identity": "example",
+              "role": "read",
+              "necessity": "required",
+              "resolution": "exact"
+            }
+          ],
+          "gap_codes": [
+            "SPL_DYNAMIC_REFERENCE"
+          ]
         }
       },
       "provenance": {
         "source_family": "toolkit",
         "reference": "pkg/analysis",
-        "note": "Conservative local boundary with incomplete coverage."
+        "note": "Exact authored bytes and typed observations from the local analyzer contract."
       }
     },
     {
@@ -2187,6 +3301,767 @@
       }
     },
     {
+      "id": "spl.mvexpand.exact-field.positive",
+      "classification": "positive",
+      "document": {
+        "text": "search values=* | mvexpand values",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.mvexpand.exact-field.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "search",
+              "semantic_complete": true
+            },
+            {
+              "command": "mvexpand",
+              "semantic_complete": true
+            }
+          ],
+          "references": [
+            {
+              "normalized_name": "values",
+              "kind": "field",
+              "role": "filter",
+              "resolution": "exact",
+              "binding": "source",
+              "location": {
+                "start": {
+                  "offset": 7,
+                  "line": 1,
+                  "column": 8
+                },
+                "end": {
+                  "offset": 13,
+                  "line": 1,
+                  "column": 14
+                }
+              }
+            },
+            {
+              "normalized_name": "values",
+              "kind": "field",
+              "role": "read",
+              "resolution": "exact",
+              "binding": "source",
+              "location": {
+                "start": {
+                  "offset": 27,
+                  "line": 1,
+                  "column": 28
+                },
+                "end": {
+                  "offset": 33,
+                  "line": 1,
+                  "column": 34
+                }
+              }
+            }
+          ],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        },
+        "requirements": {
+          "query_status": "valid",
+          "complete": true,
+          "items": [
+            {
+              "kind": "field",
+              "identity": "values",
+              "role": "filter",
+              "necessity": "required",
+              "resolution": "exact"
+            },
+            {
+              "kind": "field",
+              "identity": "values",
+              "role": "read",
+              "necessity": "required",
+              "resolution": "exact"
+            }
+          ],
+          "gap_codes": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Exact authored bytes and typed observations from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl.mvfind.two-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "search values=* | eval out=mvfind(values,\"error\")",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.mvfind.two-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "search",
+              "semantic_complete": true
+            },
+            {
+              "command": "eval",
+              "semantic_complete": true
+            }
+          ],
+          "references": [
+            {
+              "normalized_name": "values",
+              "kind": "field",
+              "role": "filter",
+              "resolution": "exact",
+              "binding": "source",
+              "location": {
+                "start": {
+                  "offset": 7,
+                  "line": 1,
+                  "column": 8
+                },
+                "end": {
+                  "offset": 13,
+                  "line": 1,
+                  "column": 14
+                }
+              }
+            },
+            {
+              "normalized_name": "out",
+              "kind": "field",
+              "role": "create",
+              "resolution": "exact",
+              "binding": "not_applicable",
+              "location": {
+                "start": {
+                  "offset": 23,
+                  "line": 1,
+                  "column": 24
+                },
+                "end": {
+                  "offset": 26,
+                  "line": 1,
+                  "column": 27
+                }
+              }
+            },
+            {
+              "normalized_name": "values",
+              "kind": "field",
+              "role": "read",
+              "resolution": "exact",
+              "binding": "source",
+              "location": {
+                "start": {
+                  "offset": 34,
+                  "line": 1,
+                  "column": 35
+                },
+                "end": {
+                  "offset": 40,
+                  "line": 1,
+                  "column": 41
+                }
+              }
+            }
+          ],
+          "dependencies": [],
+          "transitions": [
+            {
+              "operation": "create",
+              "output": "out"
+            }
+          ],
+          "diagnostics": []
+        },
+        "requirements": {
+          "query_status": "valid",
+          "complete": true,
+          "items": [
+            {
+              "kind": "field",
+              "identity": "values",
+              "role": "filter",
+              "necessity": "required",
+              "resolution": "exact"
+            },
+            {
+              "kind": "field",
+              "identity": "values",
+              "role": "read",
+              "necessity": "required",
+              "resolution": "exact"
+            }
+          ],
+          "gap_codes": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Exact authored bytes and typed observations from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl.mvindex.two-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "search values=* | eval out=mvindex(values,0)",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.mvindex.two-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "search",
+              "semantic_complete": true
+            },
+            {
+              "command": "eval",
+              "semantic_complete": true
+            }
+          ],
+          "references": [
+            {
+              "normalized_name": "values",
+              "kind": "field",
+              "role": "filter",
+              "resolution": "exact",
+              "binding": "source",
+              "location": {
+                "start": {
+                  "offset": 7,
+                  "line": 1,
+                  "column": 8
+                },
+                "end": {
+                  "offset": 13,
+                  "line": 1,
+                  "column": 14
+                }
+              }
+            },
+            {
+              "normalized_name": "out",
+              "kind": "field",
+              "role": "create",
+              "resolution": "exact",
+              "binding": "not_applicable",
+              "location": {
+                "start": {
+                  "offset": 23,
+                  "line": 1,
+                  "column": 24
+                },
+                "end": {
+                  "offset": 26,
+                  "line": 1,
+                  "column": 27
+                }
+              }
+            },
+            {
+              "normalized_name": "values",
+              "kind": "field",
+              "role": "read",
+              "resolution": "exact",
+              "binding": "source",
+              "location": {
+                "start": {
+                  "offset": 35,
+                  "line": 1,
+                  "column": 36
+                },
+                "end": {
+                  "offset": 41,
+                  "line": 1,
+                  "column": 42
+                }
+              }
+            }
+          ],
+          "dependencies": [],
+          "transitions": [
+            {
+              "operation": "create",
+              "output": "out"
+            }
+          ],
+          "diagnostics": []
+        },
+        "requirements": {
+          "query_status": "valid",
+          "complete": true,
+          "items": [
+            {
+              "kind": "field",
+              "identity": "values",
+              "role": "filter",
+              "necessity": "required",
+              "resolution": "exact"
+            },
+            {
+              "kind": "field",
+              "identity": "values",
+              "role": "read",
+              "necessity": "required",
+              "resolution": "exact"
+            }
+          ],
+          "gap_codes": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Exact authored bytes and typed observations from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl.now.zero-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "search seed=* | eval out=now()",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.now.zero-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "search",
+              "semantic_complete": true
+            },
+            {
+              "command": "eval",
+              "semantic_complete": true
+            }
+          ],
+          "references": [
+            {
+              "normalized_name": "seed",
+              "kind": "field",
+              "role": "filter",
+              "resolution": "exact",
+              "binding": "source",
+              "location": {
+                "start": {
+                  "offset": 7,
+                  "line": 1,
+                  "column": 8
+                },
+                "end": {
+                  "offset": 11,
+                  "line": 1,
+                  "column": 12
+                }
+              }
+            },
+            {
+              "normalized_name": "out",
+              "kind": "field",
+              "role": "create",
+              "resolution": "exact",
+              "binding": "not_applicable",
+              "location": {
+                "start": {
+                  "offset": 21,
+                  "line": 1,
+                  "column": 22
+                },
+                "end": {
+                  "offset": 24,
+                  "line": 1,
+                  "column": 25
+                }
+              }
+            }
+          ],
+          "dependencies": [],
+          "transitions": [
+            {
+              "operation": "create",
+              "output": "out"
+            }
+          ],
+          "diagnostics": []
+        },
+        "requirements": {
+          "query_status": "valid",
+          "complete": true,
+          "items": [
+            {
+              "kind": "field",
+              "identity": "seed",
+              "role": "filter",
+              "necessity": "required",
+              "resolution": "exact"
+            }
+          ],
+          "gap_codes": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Exact authored bytes and typed observations from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl.null.zero-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "search seed=* | eval out=null()",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.null.zero-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "search",
+              "semantic_complete": true
+            },
+            {
+              "command": "eval",
+              "semantic_complete": true
+            }
+          ],
+          "references": [
+            {
+              "normalized_name": "seed",
+              "kind": "field",
+              "role": "filter",
+              "resolution": "exact",
+              "binding": "source",
+              "location": {
+                "start": {
+                  "offset": 7,
+                  "line": 1,
+                  "column": 8
+                },
+                "end": {
+                  "offset": 11,
+                  "line": 1,
+                  "column": 12
+                }
+              }
+            },
+            {
+              "normalized_name": "out",
+              "kind": "field",
+              "role": "create",
+              "resolution": "exact",
+              "binding": "not_applicable",
+              "location": {
+                "start": {
+                  "offset": 21,
+                  "line": 1,
+                  "column": 22
+                },
+                "end": {
+                  "offset": 24,
+                  "line": 1,
+                  "column": 25
+                }
+              }
+            }
+          ],
+          "dependencies": [],
+          "transitions": [
+            {
+              "operation": "create",
+              "output": "out"
+            }
+          ],
+          "diagnostics": []
+        },
+        "requirements": {
+          "query_status": "valid",
+          "complete": true,
+          "items": [
+            {
+              "kind": "field",
+              "identity": "seed",
+              "role": "filter",
+              "necessity": "required",
+              "resolution": "exact"
+            }
+          ],
+          "gap_codes": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Exact authored bytes and typed observations from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl.regex.exact-field.positive",
+      "classification": "positive",
+      "document": {
+        "text": "search user=* | regex user!=\"^svc_\"",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.regex.exact-field.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "search",
+              "semantic_complete": true
+            },
+            {
+              "command": "regex",
+              "semantic_complete": true
+            }
+          ],
+          "references": [
+            {
+              "normalized_name": "user",
+              "kind": "field",
+              "role": "filter",
+              "resolution": "exact",
+              "binding": "source",
+              "location": {
+                "start": {
+                  "offset": 7,
+                  "line": 1,
+                  "column": 8
+                },
+                "end": {
+                  "offset": 11,
+                  "line": 1,
+                  "column": 12
+                }
+              }
+            },
+            {
+              "normalized_name": "user",
+              "kind": "field",
+              "role": "filter",
+              "resolution": "exact",
+              "binding": "source",
+              "location": {
+                "start": {
+                  "offset": 22,
+                  "line": 1,
+                  "column": 23
+                },
+                "end": {
+                  "offset": 26,
+                  "line": 1,
+                  "column": 27
+                }
+              }
+            }
+          ],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        },
+        "requirements": {
+          "query_status": "valid",
+          "complete": true,
+          "items": [
+            {
+              "kind": "field",
+              "identity": "user",
+              "role": "filter",
+              "necessity": "required",
+              "resolution": "exact"
+            }
+          ],
+          "gap_codes": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Exact authored bytes and typed observations from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl.relative_time.two-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "search _time=* | eval out=relative_time(_time,\"-1h\")",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.relative_time.two-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "search",
+              "semantic_complete": true
+            },
+            {
+              "command": "eval",
+              "semantic_complete": true
+            }
+          ],
+          "references": [
+            {
+              "normalized_name": "_time",
+              "kind": "field",
+              "role": "filter",
+              "resolution": "exact",
+              "binding": "source",
+              "location": {
+                "start": {
+                  "offset": 7,
+                  "line": 1,
+                  "column": 8
+                },
+                "end": {
+                  "offset": 12,
+                  "line": 1,
+                  "column": 13
+                }
+              }
+            },
+            {
+              "normalized_name": "out",
+              "kind": "field",
+              "role": "create",
+              "resolution": "exact",
+              "binding": "not_applicable",
+              "location": {
+                "start": {
+                  "offset": 22,
+                  "line": 1,
+                  "column": 23
+                },
+                "end": {
+                  "offset": 25,
+                  "line": 1,
+                  "column": 26
+                }
+              }
+            },
+            {
+              "normalized_name": "_time",
+              "kind": "field",
+              "role": "read",
+              "resolution": "exact",
+              "binding": "source",
+              "location": {
+                "start": {
+                  "offset": 40,
+                  "line": 1,
+                  "column": 41
+                },
+                "end": {
+                  "offset": 45,
+                  "line": 1,
+                  "column": 46
+                }
+              }
+            }
+          ],
+          "dependencies": [],
+          "transitions": [
+            {
+              "operation": "create",
+              "output": "out"
+            }
+          ],
+          "diagnostics": []
+        },
+        "requirements": {
+          "query_status": "valid",
+          "complete": true,
+          "items": [
+            {
+              "kind": "field",
+              "identity": "_time",
+              "role": "filter",
+              "necessity": "required",
+              "resolution": "exact"
+            },
+            {
+              "kind": "field",
+              "identity": "_time",
+              "role": "read",
+              "necessity": "required",
+              "resolution": "exact"
+            }
+          ],
+          "gap_codes": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Exact authored bytes and typed observations from the local analyzer contract."
+      }
+    },
+    {
       "id": "spl.rename.exact-pair.positive",
       "classification": "positive",
       "document": {
@@ -2256,6 +4131,130 @@
         "source_family": "toolkit",
         "reference": "pkg/analysis",
         "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl.rex.named-captures.positive",
+      "classification": "positive",
+      "document": {
+        "text": "search payload=* | rex field=payload \"(?<user>.+)\"",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.rex.named-captures.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "search",
+              "semantic_complete": true
+            },
+            {
+              "command": "rex",
+              "semantic_complete": true
+            }
+          ],
+          "references": [
+            {
+              "normalized_name": "payload",
+              "kind": "field",
+              "role": "filter",
+              "resolution": "exact",
+              "binding": "source",
+              "location": {
+                "start": {
+                  "offset": 7,
+                  "line": 1,
+                  "column": 8
+                },
+                "end": {
+                  "offset": 14,
+                  "line": 1,
+                  "column": 15
+                }
+              }
+            },
+            {
+              "normalized_name": "payload",
+              "kind": "field",
+              "role": "read",
+              "resolution": "exact",
+              "binding": "source",
+              "location": {
+                "start": {
+                  "offset": 29,
+                  "line": 1,
+                  "column": 30
+                },
+                "end": {
+                  "offset": 36,
+                  "line": 1,
+                  "column": 37
+                }
+              }
+            },
+            {
+              "normalized_name": "user",
+              "kind": "field",
+              "role": "output",
+              "resolution": "exact",
+              "binding": "not_applicable",
+              "location": {
+                "start": {
+                  "offset": 41,
+                  "line": 1,
+                  "column": 42
+                },
+                "end": {
+                  "offset": 45,
+                  "line": 1,
+                  "column": 46
+                }
+              }
+            }
+          ],
+          "dependencies": [],
+          "transitions": [
+            {
+              "operation": "create",
+              "output": "user"
+            }
+          ],
+          "diagnostics": []
+        },
+        "requirements": {
+          "query_status": "valid",
+          "complete": true,
+          "items": [
+            {
+              "kind": "field",
+              "identity": "payload",
+              "role": "filter",
+              "necessity": "required",
+              "resolution": "exact"
+            },
+            {
+              "kind": "field",
+              "identity": "payload",
+              "role": "read",
+              "necessity": "required",
+              "resolution": "exact"
+            }
+          ],
+          "gap_codes": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Exact authored bytes and typed observations from the local analyzer contract."
       }
     },
     {
@@ -2553,6 +4552,130 @@
       }
     },
     {
+      "id": "spl.spath.explicit-output.positive",
+      "classification": "positive",
+      "document": {
+        "text": "search payload=* | spath input=payload path=\"event.id\" output=event_id",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.spath.explicit-output.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "search",
+              "semantic_complete": true
+            },
+            {
+              "command": "spath",
+              "semantic_complete": true
+            }
+          ],
+          "references": [
+            {
+              "normalized_name": "payload",
+              "kind": "field",
+              "role": "filter",
+              "resolution": "exact",
+              "binding": "source",
+              "location": {
+                "start": {
+                  "offset": 7,
+                  "line": 1,
+                  "column": 8
+                },
+                "end": {
+                  "offset": 14,
+                  "line": 1,
+                  "column": 15
+                }
+              }
+            },
+            {
+              "normalized_name": "payload",
+              "kind": "field",
+              "role": "read",
+              "resolution": "exact",
+              "binding": "source",
+              "location": {
+                "start": {
+                  "offset": 31,
+                  "line": 1,
+                  "column": 32
+                },
+                "end": {
+                  "offset": 38,
+                  "line": 1,
+                  "column": 39
+                }
+              }
+            },
+            {
+              "normalized_name": "event_id",
+              "kind": "field",
+              "role": "output",
+              "resolution": "exact",
+              "binding": "not_applicable",
+              "location": {
+                "start": {
+                  "offset": 62,
+                  "line": 1,
+                  "column": 63
+                },
+                "end": {
+                  "offset": 70,
+                  "line": 1,
+                  "column": 71
+                }
+              }
+            }
+          ],
+          "dependencies": [],
+          "transitions": [
+            {
+              "operation": "create",
+              "output": "event_id"
+            }
+          ],
+          "diagnostics": []
+        },
+        "requirements": {
+          "query_status": "valid",
+          "complete": true,
+          "items": [
+            {
+              "kind": "field",
+              "identity": "payload",
+              "role": "filter",
+              "necessity": "required",
+              "resolution": "exact"
+            },
+            {
+              "kind": "field",
+              "identity": "payload",
+              "role": "read",
+              "necessity": "required",
+              "resolution": "exact"
+            }
+          ],
+          "gap_codes": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Exact authored bytes and typed observations from the local analyzer contract."
+      }
+    },
+    {
       "id": "spl.split.two-positional.positive",
       "classification": "positive",
       "document": {
@@ -2733,6 +4856,130 @@
       }
     },
     {
+      "id": "spl.stdev.one-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "search duration=* | stats stdev(duration) AS out",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.stdev.one-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "search",
+              "semantic_complete": true
+            },
+            {
+              "command": "stats",
+              "semantic_complete": true
+            }
+          ],
+          "references": [
+            {
+              "normalized_name": "duration",
+              "kind": "field",
+              "role": "filter",
+              "resolution": "exact",
+              "binding": "source",
+              "location": {
+                "start": {
+                  "offset": 7,
+                  "line": 1,
+                  "column": 8
+                },
+                "end": {
+                  "offset": 15,
+                  "line": 1,
+                  "column": 16
+                }
+              }
+            },
+            {
+              "normalized_name": "duration",
+              "kind": "field",
+              "role": "read",
+              "resolution": "exact",
+              "binding": "source",
+              "location": {
+                "start": {
+                  "offset": 32,
+                  "line": 1,
+                  "column": 33
+                },
+                "end": {
+                  "offset": 40,
+                  "line": 1,
+                  "column": 41
+                }
+              }
+            },
+            {
+              "normalized_name": "out",
+              "kind": "field",
+              "role": "output",
+              "resolution": "exact",
+              "binding": "not_applicable",
+              "location": {
+                "start": {
+                  "offset": 45,
+                  "line": 1,
+                  "column": 46
+                },
+                "end": {
+                  "offset": 48,
+                  "line": 1,
+                  "column": 49
+                }
+              }
+            }
+          ],
+          "dependencies": [],
+          "transitions": [
+            {
+              "operation": "aggregate",
+              "output": "out"
+            }
+          ],
+          "diagnostics": []
+        },
+        "requirements": {
+          "query_status": "valid",
+          "complete": true,
+          "items": [
+            {
+              "kind": "field",
+              "identity": "duration",
+              "role": "filter",
+              "necessity": "required",
+              "resolution": "exact"
+            },
+            {
+              "kind": "field",
+              "identity": "duration",
+              "role": "read",
+              "necessity": "required",
+              "resolution": "exact"
+            }
+          ],
+          "gap_codes": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Exact authored bytes and typed observations from the local analyzer contract."
+      }
+    },
+    {
       "id": "spl.streamstats.aggregate-call.positive",
       "classification": "positive",
       "document": {
@@ -2766,6 +5013,130 @@
         "source_family": "toolkit",
         "reference": "pkg/analysis",
         "note": "Exact accepted form recorded from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl.strftime.two-positional.positive",
+      "classification": "positive",
+      "document": {
+        "text": "search _time=* | eval out=strftime(_time,\"%F\")",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.strftime.two-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "search",
+              "semantic_complete": true
+            },
+            {
+              "command": "eval",
+              "semantic_complete": true
+            }
+          ],
+          "references": [
+            {
+              "normalized_name": "_time",
+              "kind": "field",
+              "role": "filter",
+              "resolution": "exact",
+              "binding": "source",
+              "location": {
+                "start": {
+                  "offset": 7,
+                  "line": 1,
+                  "column": 8
+                },
+                "end": {
+                  "offset": 12,
+                  "line": 1,
+                  "column": 13
+                }
+              }
+            },
+            {
+              "normalized_name": "out",
+              "kind": "field",
+              "role": "create",
+              "resolution": "exact",
+              "binding": "not_applicable",
+              "location": {
+                "start": {
+                  "offset": 22,
+                  "line": 1,
+                  "column": 23
+                },
+                "end": {
+                  "offset": 25,
+                  "line": 1,
+                  "column": 26
+                }
+              }
+            },
+            {
+              "normalized_name": "_time",
+              "kind": "field",
+              "role": "read",
+              "resolution": "exact",
+              "binding": "source",
+              "location": {
+                "start": {
+                  "offset": 35,
+                  "line": 1,
+                  "column": 36
+                },
+                "end": {
+                  "offset": 40,
+                  "line": 1,
+                  "column": 41
+                }
+              }
+            }
+          ],
+          "dependencies": [],
+          "transitions": [
+            {
+              "operation": "create",
+              "output": "out"
+            }
+          ],
+          "diagnostics": []
+        },
+        "requirements": {
+          "query_status": "valid",
+          "complete": true,
+          "items": [
+            {
+              "kind": "field",
+              "identity": "_time",
+              "role": "filter",
+              "necessity": "required",
+              "resolution": "exact"
+            },
+            {
+              "kind": "field",
+              "identity": "_time",
+              "role": "read",
+              "necessity": "required",
+              "resolution": "exact"
+            }
+          ],
+          "gap_codes": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Exact authored bytes and typed observations from the local analyzer contract."
       }
     },
     {
@@ -3021,14 +5392,346 @@
       }
     },
     {
-      "id": "spl.tstats.exact-model-dataset.incomplete",
-      "classification": "incomplete",
+      "id": "spl.true.zero-positional.positive",
+      "classification": "positive",
       "document": {
-        "text": "tstats count FROM datamodel=Authentication.Authentication",
+        "text": "search seed=* | eval out=true()",
         "language": "spl",
         "profile": "splunkd",
         "version": "current",
-        "source_id": "capability:spl.tstats.exact-model-dataset.incomplete"
+        "source_id": "capability:spl.true.zero-positional.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "search",
+              "semantic_complete": true
+            },
+            {
+              "command": "eval",
+              "semantic_complete": true
+            }
+          ],
+          "references": [
+            {
+              "normalized_name": "seed",
+              "kind": "field",
+              "role": "filter",
+              "resolution": "exact",
+              "binding": "source",
+              "location": {
+                "start": {
+                  "offset": 7,
+                  "line": 1,
+                  "column": 8
+                },
+                "end": {
+                  "offset": 11,
+                  "line": 1,
+                  "column": 12
+                }
+              }
+            },
+            {
+              "normalized_name": "out",
+              "kind": "field",
+              "role": "create",
+              "resolution": "exact",
+              "binding": "not_applicable",
+              "location": {
+                "start": {
+                  "offset": 21,
+                  "line": 1,
+                  "column": 22
+                },
+                "end": {
+                  "offset": 24,
+                  "line": 1,
+                  "column": 25
+                }
+              }
+            }
+          ],
+          "dependencies": [],
+          "transitions": [
+            {
+              "operation": "create",
+              "output": "out"
+            }
+          ],
+          "diagnostics": []
+        },
+        "requirements": {
+          "query_status": "valid",
+          "complete": true,
+          "items": [
+            {
+              "kind": "field",
+              "identity": "seed",
+              "role": "filter",
+              "necessity": "required",
+              "resolution": "exact"
+            }
+          ],
+          "gap_codes": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Exact authored bytes and typed observations from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl.tstats.exact-model-dataset.positive",
+      "classification": "positive",
+      "document": {
+        "text": "tstats sum(Authentication.duration) AS total count FROM datamodel=Authentication.Authentication WHERE Authentication.user=\"alice\" BY Authentication.src",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.tstats.exact-model-dataset.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        },
+        "semantics": {
+          "status": "valid",
+          "complete": true,
+          "stages": [
+            {
+              "command": "tstats",
+              "semantic_complete": true
+            }
+          ],
+          "references": [
+            {
+              "normalized_name": "Authentication.duration",
+              "kind": "field",
+              "role": "read",
+              "resolution": "exact",
+              "binding": "source",
+              "location": {
+                "start": {
+                  "offset": 11,
+                  "line": 1,
+                  "column": 12
+                },
+                "end": {
+                  "offset": 34,
+                  "line": 1,
+                  "column": 35
+                }
+              }
+            },
+            {
+              "normalized_name": "total",
+              "kind": "field",
+              "role": "output",
+              "resolution": "exact",
+              "binding": "not_applicable",
+              "location": {
+                "start": {
+                  "offset": 39,
+                  "line": 1,
+                  "column": 40
+                },
+                "end": {
+                  "offset": 44,
+                  "line": 1,
+                  "column": 45
+                }
+              }
+            },
+            {
+              "normalized_name": "count",
+              "kind": "field",
+              "role": "output",
+              "resolution": "exact",
+              "binding": "not_applicable",
+              "location": {
+                "start": {
+                  "offset": 45,
+                  "line": 1,
+                  "column": 46
+                },
+                "end": {
+                  "offset": 50,
+                  "line": 1,
+                  "column": 51
+                }
+              }
+            },
+            {
+              "normalized_name": "Authentication",
+              "kind": "data_model",
+              "role": "read",
+              "resolution": "exact",
+              "binding": "not_applicable",
+              "location": {
+                "start": {
+                  "offset": 66,
+                  "line": 1,
+                  "column": 67
+                },
+                "end": {
+                  "offset": 80,
+                  "line": 1,
+                  "column": 81
+                }
+              }
+            },
+            {
+              "normalized_name": "Authentication.Authentication",
+              "kind": "dataset",
+              "role": "read",
+              "resolution": "exact",
+              "binding": "not_applicable",
+              "location": {
+                "start": {
+                  "offset": 66,
+                  "line": 1,
+                  "column": 67
+                },
+                "end": {
+                  "offset": 95,
+                  "line": 1,
+                  "column": 96
+                }
+              }
+            },
+            {
+              "normalized_name": "Authentication.user",
+              "kind": "field",
+              "role": "filter",
+              "resolution": "exact",
+              "binding": "source",
+              "location": {
+                "start": {
+                  "offset": 102,
+                  "line": 1,
+                  "column": 103
+                },
+                "end": {
+                  "offset": 121,
+                  "line": 1,
+                  "column": 122
+                }
+              }
+            },
+            {
+              "normalized_name": "Authentication.src",
+              "kind": "field",
+              "role": "group",
+              "resolution": "exact",
+              "binding": "source",
+              "location": {
+                "start": {
+                  "offset": 133,
+                  "line": 1,
+                  "column": 134
+                },
+                "end": {
+                  "offset": 151,
+                  "line": 1,
+                  "column": 152
+                }
+              }
+            }
+          ],
+          "dependencies": [
+            {
+              "kind": "dataset",
+              "name": "Authentication.Authentication"
+            },
+            {
+              "kind": "data_model",
+              "name": "Authentication"
+            }
+          ],
+          "transitions": [
+            {
+              "operation": "project",
+              "output": "Authentication.src"
+            },
+            {
+              "operation": "aggregate",
+              "output": "total"
+            },
+            {
+              "operation": "aggregate",
+              "output": "count"
+            }
+          ],
+          "diagnostics": []
+        },
+        "requirements": {
+          "query_status": "valid",
+          "complete": true,
+          "items": [
+            {
+              "kind": "field",
+              "identity": "Authentication.duration",
+              "role": "read",
+              "necessity": "required",
+              "resolution": "exact"
+            },
+            {
+              "kind": "data_model",
+              "identity": "Authentication",
+              "role": "read",
+              "necessity": "required",
+              "resolution": "exact"
+            },
+            {
+              "kind": "dataset",
+              "identity": "Authentication.Authentication",
+              "role": "read",
+              "necessity": "required",
+              "resolution": "exact"
+            },
+            {
+              "kind": "field",
+              "identity": "Authentication.user",
+              "role": "filter",
+              "necessity": "required",
+              "resolution": "exact"
+            },
+            {
+              "kind": "field",
+              "identity": "Authentication.src",
+              "role": "group",
+              "necessity": "required",
+              "resolution": "exact"
+            }
+          ],
+          "gap_codes": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Exact authored bytes and typed observations from the local analyzer contract."
+      }
+    },
+    {
+      "id": "spl.tstats.inline-macro.incomplete",
+      "classification": "incomplete",
+      "document": {
+        "text": "tstats `accelerated` count FROM datamodel=Authentication.Authentication BY Authentication.user",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.tstats.inline-macro.incomplete"
       },
       "observations": {
         "semantics": {
@@ -3040,38 +5743,229 @@
               "semantic_complete": false
             }
           ],
-          "references": [],
-          "dependencies": [],
-          "transitions": [],
-          "diagnostics": []
+          "references": [
+            {
+              "normalized_name": "accelerated",
+              "kind": "macro",
+              "role": "read",
+              "resolution": "exact",
+              "binding": "not_applicable",
+              "location": {
+                "start": {
+                  "offset": 8,
+                  "line": 1,
+                  "column": 9
+                },
+                "end": {
+                  "offset": 19,
+                  "line": 1,
+                  "column": 20
+                }
+              }
+            },
+            {
+              "normalized_name": "count",
+              "kind": "field",
+              "role": "output",
+              "resolution": "exact",
+              "binding": "not_applicable",
+              "location": {
+                "start": {
+                  "offset": 21,
+                  "line": 1,
+                  "column": 22
+                },
+                "end": {
+                  "offset": 26,
+                  "line": 1,
+                  "column": 27
+                }
+              }
+            },
+            {
+              "normalized_name": "Authentication",
+              "kind": "data_model",
+              "role": "read",
+              "resolution": "exact",
+              "binding": "not_applicable",
+              "location": {
+                "start": {
+                  "offset": 42,
+                  "line": 1,
+                  "column": 43
+                },
+                "end": {
+                  "offset": 56,
+                  "line": 1,
+                  "column": 57
+                }
+              }
+            },
+            {
+              "normalized_name": "Authentication.Authentication",
+              "kind": "dataset",
+              "role": "read",
+              "resolution": "exact",
+              "binding": "not_applicable",
+              "location": {
+                "start": {
+                  "offset": 42,
+                  "line": 1,
+                  "column": 43
+                },
+                "end": {
+                  "offset": 71,
+                  "line": 1,
+                  "column": 72
+                }
+              }
+            },
+            {
+              "normalized_name": "Authentication.user",
+              "kind": "field",
+              "role": "group",
+              "resolution": "exact",
+              "binding": "source",
+              "location": {
+                "start": {
+                  "offset": 75,
+                  "line": 1,
+                  "column": 76
+                },
+                "end": {
+                  "offset": 94,
+                  "line": 1,
+                  "column": 95
+                }
+              }
+            }
+          ],
+          "dependencies": [
+            {
+              "kind": "dataset",
+              "name": "Authentication.Authentication"
+            },
+            {
+              "kind": "data_model",
+              "name": "Authentication"
+            },
+            {
+              "kind": "macro",
+              "name": "accelerated"
+            }
+          ],
+          "transitions": [
+            {
+              "operation": "project",
+              "output": "Authentication.user"
+            },
+            {
+              "operation": "aggregate",
+              "output": "count"
+            }
+          ],
+          "diagnostics": [
+            {
+              "code": "SPL_DYNAMIC_REFERENCE",
+              "category": "unsupported_semantics",
+              "severity": "warning",
+              "location": {
+                "start": {
+                  "offset": 7,
+                  "line": 1,
+                  "column": 8
+                },
+                "end": {
+                  "offset": 20,
+                  "line": 1,
+                  "column": 21
+                }
+              }
+            }
+          ]
+        },
+        "requirements": {
+          "query_status": "incomplete",
+          "complete": false,
+          "items": [
+            {
+              "kind": "macro",
+              "identity": "accelerated",
+              "role": "read",
+              "necessity": "required",
+              "resolution": "exact"
+            },
+            {
+              "kind": "data_model",
+              "identity": "Authentication",
+              "role": "read",
+              "necessity": "required",
+              "resolution": "exact"
+            },
+            {
+              "kind": "dataset",
+              "identity": "Authentication.Authentication",
+              "role": "read",
+              "necessity": "required",
+              "resolution": "exact"
+            },
+            {
+              "kind": "field",
+              "identity": "Authentication.user",
+              "role": "group",
+              "necessity": "required",
+              "resolution": "exact"
+            }
+          ],
+          "gap_codes": [
+            "SPL_DYNAMIC_REFERENCE"
+          ]
         }
       },
       "provenance": {
         "source_family": "toolkit",
         "reference": "pkg/analysis",
-        "note": "Conservative local boundary with incomplete coverage."
+        "note": "Exact authored bytes and typed observations from the local analyzer contract."
       }
     },
     {
-      "id": "spl.tstats.exact-model-dataset.positive",
+      "id": "spl.tstats.inline-macro.syntax-positive",
       "classification": "positive",
       "document": {
-        "text": "tstats count FROM datamodel=Authentication.Authentication",
+        "text": "tstats `accelerated` count FROM datamodel=Authentication.Authentication BY Authentication.user",
         "language": "spl",
         "profile": "splunkd",
         "version": "current",
-        "source_id": "capability:spl.tstats.exact-model-dataset.positive"
+        "source_id": "capability:spl.tstats.inline-macro.syntax-positive"
       },
       "observations": {
         "syntax": {
           "complete": true,
-          "diagnostics": []
+          "diagnostics": [
+            {
+              "code": "SPL_DYNAMIC_REFERENCE",
+              "category": "unsupported_semantics",
+              "severity": "warning",
+              "location": {
+                "start": {
+                  "offset": 7,
+                  "line": 1,
+                  "column": 8
+                },
+                "end": {
+                  "offset": 20,
+                  "line": 1,
+                  "column": 21
+                }
+              }
+            }
+          ]
         }
       },
       "provenance": {
         "source_family": "toolkit",
         "reference": "pkg/analysis",
-        "note": "Exact accepted form recorded from the local analyzer contract."
+        "note": "Exact authored bytes and typed observations from the local analyzer contract."
       }
     },
     {

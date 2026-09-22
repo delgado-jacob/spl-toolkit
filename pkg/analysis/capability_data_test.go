@@ -284,6 +284,98 @@ func TestEmbeddedCapabilityReviewedFacts(t *testing.T) {
 	}
 }
 
+func TestMilestone10CapabilityClaimsStayBounded(t *testing.T) {
+	records, cases, err := loadEmbeddedCapabilityData()
+	if err != nil {
+		t.Fatalf("load embedded capability data: %v", err)
+	}
+	recordByID := make(map[string]CapabilityRecord, len(records))
+	for _, record := range records {
+		recordByID[record.ID] = record
+	}
+	evidenceByID := make(map[string]CapabilityEvidence, len(cases))
+	for _, evidence := range cases {
+		evidenceByID[evidence.ID] = evidence
+	}
+
+	supportedIDs := []string{
+		"spl.command.bin.exact-field",
+		"spl.command.bucket.exact-field",
+		"spl.command.fillnull.exact-fields",
+		"spl.command.mvexpand.exact-field",
+		"spl.command.regex.exact-field",
+		"spl.command.rex.named-captures",
+		"spl.command.spath.explicit-output",
+		"spl.command.tstats.exact-model-dataset",
+		"spl.function.earliest.one-positional",
+		"spl.function.latest.one-positional",
+		"spl.function.like.two-positional",
+		"spl.function.mvfind.two-positional",
+		"spl.function.mvindex.two-positional",
+		"spl.function.now.zero-positional",
+		"spl.function.null.zero-positional",
+		"spl.function.relative_time.two-positional",
+		"spl.function.stdev.one-positional",
+		"spl.function.strftime.two-positional",
+		"spl.function.true.zero-positional",
+	}
+	for _, id := range supportedIDs {
+		record, ok := recordByID[id]
+		if !ok {
+			t.Errorf("Milestone 10 record %q is missing", id)
+			continue
+		}
+		for name, claim := range map[string]CapabilityClaim{
+			"syntax": record.Dimensions.Syntax, "semantics": record.Dimensions.Semantics, "requirements": record.Dimensions.Requirements,
+		} {
+			if claim.State != CapabilitySupported || len(claim.EvidenceIDs) != 1 {
+				t.Errorf("%s %s claim = %+v, want one supported witness", id, name, claim)
+				continue
+			}
+			if name != "requirements" {
+				continue
+			}
+			observation := evidenceByID[claim.EvidenceIDs[0]].Observations.Requirements
+			if observation == nil || !observation.Complete || len(observation.Items) == 0 || len(observation.GapCodes) != 0 {
+				t.Errorf("%s supported requirements observation = %+v, want exact nonempty items and no gaps", id, observation)
+			}
+		}
+	}
+
+	inline := recordByID["spl.command.tstats.inline-macro"]
+	if inline.Dimensions.Syntax.State != CapabilitySupported || inline.Dimensions.Semantics.State != CapabilityUnsupported || inline.Dimensions.Requirements.State != CapabilityUnsupported {
+		t.Errorf("inline tstats macro claims = %+v, want supported syntax with unsupported semantics and requirements", inline.Dimensions)
+	}
+	for _, id := range []string{
+		"spl.command.append.append-subsearch",
+		"spl.command.appendpipe.appendpipe-subsearch",
+		"spl.command.join.field-subsearch",
+		"spl.command.macro.exact-invocation",
+	} {
+		if got := recordByID[id].Dimensions.Requirements.State; got != CapabilityUnsupported {
+			t.Errorf("%s requirements state = %q, want %q", id, got, CapabilityUnsupported)
+		}
+	}
+
+	tstats := evidenceByID["spl.tstats.exact-model-dataset.positive"]
+	if got := tstats.Observations.Semantics; got == nil || !got.Complete ||
+		!slices.Contains(got.Dependencies, CapabilityDependencyExpectation{Kind: "data_model", Name: "Authentication"}) ||
+		!slices.Contains(got.Dependencies, CapabilityDependencyExpectation{Kind: "dataset", Name: "Authentication.Authentication"}) ||
+		!slices.Contains(got.Transitions, CapabilityTransitionExpectation{Operation: "aggregate", Output: "total"}) ||
+		!slices.Contains(got.Transitions, CapabilityTransitionExpectation{Operation: "aggregate", Output: "count"}) {
+		t.Errorf("exact tstats semantic witness lacks reviewed source or aggregate facts: %+v", got)
+	}
+
+	spl2Revision, err := capabilityRevisionFor(CapabilityOptions{Language: "spl2", Profile: "splunkd", Version: "current"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	const wantSPL2Revision = "sha256:f1391296cfbc616e9bb1b1828e2471e37b60a35c0555654c0734640e072a0437"
+	if spl2Revision != wantSPL2Revision {
+		t.Errorf("SPL2 capability revision = %q, want preserved %q", spl2Revision, wantSPL2Revision)
+	}
+}
+
 func TestCapabilityEvidenceIsReferenced(t *testing.T) {
 	records, cases, err := loadEmbeddedCapabilityData()
 	if err != nil {

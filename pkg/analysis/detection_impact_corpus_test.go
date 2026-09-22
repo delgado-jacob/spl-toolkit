@@ -90,9 +90,17 @@ func TestDetectionImpactCorpusBaseline(t *testing.T) {
 	results := analyzeDetectionImpactCorpus(t, manifest)
 	assertDetectionImpactSelectors(t, manifest, results)
 
-	actual := detectionImpactMetrics(manifest, results)
-	if actual != manifest.Baseline {
-		t.Fatalf("detection-impact baseline = %+v, want %+v", actual, manifest.Baseline)
+	want := detectionImpactBaseline{
+		SyntaxCompleteCases:          12,
+		SemanticCompleteTargetStages: 1,
+		NonmacroGapCount:             35,
+	}
+	if manifest.Baseline != want {
+		t.Fatalf("detection-impact bound baseline = %+v, want immutable pre-change baseline %+v", manifest.Baseline, want)
+	}
+	const wantDigest = "sha256:63aa3e808bad38edd3b0c6935c0f7e9ceb9d8f68e133866ba33ca0ce553954e1"
+	if manifest.BaselineDigest != wantDigest {
+		t.Fatalf("detection-impact baseline digest = %q, want %q", manifest.BaselineDigest, wantDigest)
 	}
 }
 
@@ -100,13 +108,12 @@ func TestDetectionImpactCorpusImproves(t *testing.T) {
 	manifest := loadDetectionImpactManifest(t)
 	results := analyzeDetectionImpactCorpus(t, manifest)
 	assertDetectionImpactSelectors(t, manifest, results)
-	allExpectedFactsPresent := true
 
 	for i, corpusCase := range manifest.Cases {
 		result := results[i]
 		for _, target := range corpusCase.Targets {
 			target := target
-			if !t.Run(corpusCase.ID+"/target/"+detectionImpactSelectorName(target.Command, target.Occurrence), func(t *testing.T) {
+			t.Run(corpusCase.ID+"/target/"+detectionImpactSelectorName(target.Command, target.Occurrence), func(t *testing.T) {
 				stage := resolveDetectionImpactStage(t, result, target.Command, target.Occurrence)
 				if actual := detectionImpactStageSyntaxComplete(result, stage); actual != *target.SyntaxComplete {
 					t.Errorf("target syntax_complete = %t, want %t", actual, *target.SyntaxComplete)
@@ -114,36 +121,24 @@ func TestDetectionImpactCorpusImproves(t *testing.T) {
 				if stage.SemanticComplete != *target.SemanticComplete {
 					t.Errorf("target semantic_complete = %t, want %t", stage.SemanticComplete, *target.SemanticComplete)
 				}
-			}) {
-				allExpectedFactsPresent = false
-			}
+			})
 		}
-		if !t.Run(corpusCase.ID+"/facts", func(t *testing.T) {
+		t.Run(corpusCase.ID+"/facts", func(t *testing.T) {
 			assertDetectionImpactFacts(t, result, corpusCase.Expected)
-		}) {
-			allExpectedFactsPresent = false
-		}
+		})
 		for _, boundary := range corpusCase.HeldBoundaries {
 			boundary := boundary
-			if !t.Run(corpusCase.ID+"/held/"+detectionImpactSelectorName(boundary.Command, boundary.Occurrence), func(t *testing.T) {
+			t.Run(corpusCase.ID+"/held/"+detectionImpactSelectorName(boundary.Command, boundary.Occurrence), func(t *testing.T) {
 				stage := resolveDetectionImpactStage(t, result, boundary.Command, boundary.Occurrence)
 				for _, code := range boundary.RequiredGapCodes {
 					if !hasDetectionImpactStageGap(result, stage.ID, code) {
 						t.Errorf("held boundary lacks gap %q", code)
 					}
 				}
-			}) {
-				allExpectedFactsPresent = false
-			}
+			})
 		}
 	}
 
-	// The strict aggregate comparison becomes useful only after every reviewed
-	// target and fact is present. Before semantic implementation, the failures
-	// above identify the exact missing contract instead of reporting only counts.
-	if !allExpectedFactsPresent {
-		return
-	}
 	actual := detectionImpactMetrics(manifest, results)
 	if actual.SyntaxCompleteCases <= manifest.Baseline.SyntaxCompleteCases {
 		t.Errorf("syntax-complete cases = %d, want > baseline %d", actual.SyntaxCompleteCases, manifest.Baseline.SyntaxCompleteCases)

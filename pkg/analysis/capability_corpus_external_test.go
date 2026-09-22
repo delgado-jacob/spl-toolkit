@@ -524,9 +524,15 @@ func compareRequirements(expected analysis.CapabilityRequirementsObservation, se
 		Items:       requirementItemFacts(set.Items),
 		GapCodes:    requirementGapCodes(set.Gaps),
 	}
+	itemsMatch := containsAll(actual.Items, expected.Items)
+	if expected.Complete {
+		// A complete requirement claim is an exact obligation set, not a lower
+		// bound. This prevents supported records from hiding unexpected items.
+		itemsMatch = slices.Equal(expected.Items, actual.Items)
+	}
 	passed := expected.QueryStatus == actual.QueryStatus &&
 		expected.Complete == actual.Complete &&
-		containsAll(actual.Items, expected.Items) &&
+		itemsMatch &&
 		slices.Equal(expected.GapCodes, actual.GapCodes)
 	return evidenceDimensionResult{passed: passed, expected: formatValue(expected), actual: formatValue(actual)}
 }

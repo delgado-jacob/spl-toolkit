@@ -75,9 +75,13 @@
           ]
         },
         "requirements": {
-          "state": "unassessed",
-          "evidence_ids": [],
-          "limitations": []
+          "state": "unsupported",
+          "evidence_ids": [
+            "spl.append.append-subsearch.incomplete"
+          ],
+          "limitations": [
+            "Branch merging remains unmodeled; direct child and parent requirements are retained."
+          ]
         },
         "linting": {
           "state": "unassessed",
@@ -124,8 +128,110 @@
           ]
         },
         "requirements": {
+          "state": "unsupported",
+          "evidence_ids": [
+            "spl.appendpipe.appendpipe-subsearch.incomplete"
+          ],
+          "limitations": [
+            "Branch merging remains unmodeled; direct child and parent requirements are retained."
+          ]
+        },
+        "linting": {
           "state": "unassessed",
           "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        }
+      }
+    },
+    {
+      "id": "spl.command.bin.exact-field",
+      "language": "spl",
+      "profile": "splunkd",
+      "kind": "command",
+      "name": "bin",
+      "form": "exact-field",
+      "grammar_registered": true,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis/spl_field_commands.go",
+        "note": "Exact locally analyzed form with syntax, semantic, and direct-requirement evidence."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl.bin.exact-field.positive"
+          ],
+          "limitations": [
+            "Exact input and optional alias with supported literal binning options."
+          ]
+        },
+        "semantics": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl.bin.exact-field.positive"
+          ],
+          "limitations": []
+        },
+        "requirements": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl.bin.exact-field.positive"
+          ],
+          "limitations": []
+        },
+        "linting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        }
+      }
+    },
+    {
+      "id": "spl.command.bucket.exact-field",
+      "language": "spl",
+      "profile": "splunkd",
+      "kind": "command",
+      "name": "bucket",
+      "form": "exact-field",
+      "grammar_registered": true,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis/spl_field_commands.go",
+        "note": "Exact locally analyzed form with syntax, semantic, and direct-requirement evidence."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl.bucket.exact-field.positive"
+          ],
+          "limitations": [
+            "Exact input and optional alias with supported literal binning options."
+          ]
+        },
+        "semantics": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl.bucket.exact-field.positive"
+          ],
+          "limitations": []
+        },
+        "requirements": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl.bucket.exact-field.positive"
+          ],
           "limitations": []
         },
         "linting": {
@@ -378,6 +484,55 @@
       }
     },
     {
+      "id": "spl.command.fillnull.exact-fields",
+      "language": "spl",
+      "profile": "splunkd",
+      "kind": "command",
+      "name": "fillnull",
+      "form": "exact-fields",
+      "grammar_registered": true,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis/spl_field_commands.go",
+        "note": "Exact locally analyzed form with syntax, semantic, and direct-requirement evidence."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl.fillnull.exact-fields.positive"
+          ],
+          "limitations": [
+            "Exact field targets with an optional literal fill value."
+          ]
+        },
+        "semantics": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl.fillnull.exact-fields.positive"
+          ],
+          "limitations": []
+        },
+        "requirements": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl.fillnull.exact-fields.positive"
+          ],
+          "limitations": []
+        },
+        "linting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        }
+      }
+    },
+    {
       "id": "spl.command.from.exact-dataset",
       "language": "spl",
       "profile": "splunkd",
@@ -553,9 +708,13 @@
           ]
         },
         "requirements": {
-          "state": "unassessed",
-          "evidence_ids": [],
-          "limitations": []
+          "state": "unsupported",
+          "evidence_ids": [
+            "spl.join.field-subsearch.incomplete"
+          ],
+          "limitations": [
+            "Branch merging remains unmodeled; direct child and parent requirements are retained."
+          ]
         },
         "linting": {
           "state": "unassessed",
@@ -649,8 +808,110 @@
           ]
         },
         "requirements": {
+          "state": "unsupported",
+          "evidence_ids": [
+            "spl.macro.exact-invocation.incomplete"
+          ],
+          "limitations": [
+            "The exact direct macro requirement is retained, but expansion requirements are unresolved."
+          ]
+        },
+        "linting": {
           "state": "unassessed",
           "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        }
+      }
+    },
+    {
+      "id": "spl.command.mvexpand.exact-field",
+      "language": "spl",
+      "profile": "splunkd",
+      "kind": "command",
+      "name": "mvexpand",
+      "form": "exact-field",
+      "grammar_registered": true,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis/spl_field_commands.go",
+        "note": "Exact locally analyzed form with syntax, semantic, and direct-requirement evidence."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl.mvexpand.exact-field.positive"
+          ],
+          "limitations": [
+            "Exact field form; row-count and memory effects are outside the static model."
+          ]
+        },
+        "semantics": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl.mvexpand.exact-field.positive"
+          ],
+          "limitations": []
+        },
+        "requirements": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl.mvexpand.exact-field.positive"
+          ],
+          "limitations": []
+        },
+        "linting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        }
+      }
+    },
+    {
+      "id": "spl.command.regex.exact-field",
+      "language": "spl",
+      "profile": "splunkd",
+      "kind": "command",
+      "name": "regex",
+      "form": "exact-field",
+      "grammar_registered": true,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis/spl_field_commands.go",
+        "note": "Exact locally analyzed form with syntax, semantic, and direct-requirement evidence."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl.regex.exact-field.positive"
+          ],
+          "limitations": [
+            "Exact field comparison form."
+          ]
+        },
+        "semantics": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl.regex.exact-field.positive"
+          ],
+          "limitations": []
+        },
+        "requirements": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl.regex.exact-field.positive"
+          ],
           "limitations": []
         },
         "linting": {
@@ -698,6 +959,55 @@
         "requirements": {
           "state": "unassessed",
           "evidence_ids": [],
+          "limitations": []
+        },
+        "linting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        }
+      }
+    },
+    {
+      "id": "spl.command.rex.named-captures",
+      "language": "spl",
+      "profile": "splunkd",
+      "kind": "command",
+      "name": "rex",
+      "form": "named-captures",
+      "grammar_registered": true,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis/spl_field_commands.go",
+        "note": "Exact locally analyzed form with syntax, semantic, and direct-requirement evidence."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl.rex.named-captures.positive"
+          ],
+          "limitations": [
+            "Exact input fields and unambiguous (?<name>) or (?P<name>) captures."
+          ]
+        },
+        "semantics": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl.rex.named-captures.positive"
+          ],
+          "limitations": []
+        },
+        "requirements": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl.rex.named-captures.positive"
+          ],
           "limitations": []
         },
         "linting": {
@@ -792,6 +1102,55 @@
         "requirements": {
           "state": "unassessed",
           "evidence_ids": [],
+          "limitations": []
+        },
+        "linting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        }
+      }
+    },
+    {
+      "id": "spl.command.spath.explicit-output",
+      "language": "spl",
+      "profile": "splunkd",
+      "kind": "command",
+      "name": "spath",
+      "form": "explicit-output",
+      "grammar_registered": true,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis/spl_field_commands.go",
+        "note": "Exact locally analyzed form with syntax, semantic, and direct-requirement evidence."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl.spath.explicit-output.positive"
+          ],
+          "limitations": [
+            "Exact input, literal path, and exact output forms."
+          ]
+        },
+        "semantics": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl.spath.explicit-output.positive"
+          ],
+          "limitations": []
+        },
+        "requirements": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl.spath.explicit-output.positive"
+          ],
           "limitations": []
         },
         "linting": {
@@ -1004,8 +1363,8 @@
       "grammar_registered": true,
       "provenance": {
         "source_family": "toolkit",
-        "reference": "pkg/analysis/commands.go",
-        "note": "Narrow authored form for the current compatibility contract."
+        "reference": "pkg/analysis/spl_tstats.go",
+        "note": "Bounded exact tstats form with aggregate, data-model source, predicate, and group evidence."
       },
       "dimensions": {
         "syntax": {
@@ -1014,22 +1373,75 @@
             "spl.tstats.exact-model-dataset.positive"
           ],
           "limitations": [
-            "Aggregate syntax, optional FROM datamodel=model.dataset and WHERE selectors; only dependencies are analyzed. Field effects are unmodeled."
+            "Exact aggregates, a literal data-model source, exact WHERE selectors, exact groups, and supported literal options."
+          ]
+        },
+        "semantics": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl.tstats.exact-model-dataset.positive"
+          ],
+          "limitations": []
+        },
+        "requirements": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl.tstats.exact-model-dataset.positive"
+          ],
+          "limitations": []
+        },
+        "linting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        }
+      }
+    },
+    {
+      "id": "spl.command.tstats.inline-macro",
+      "language": "spl",
+      "profile": "splunkd",
+      "kind": "command",
+      "name": "tstats",
+      "form": "inline-macro",
+      "grammar_registered": true,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis/spl_tstats.go",
+        "note": "Bounded tstats syntax containing one exact inline macro invocation."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl.tstats.inline-macro.syntax-positive"
+          ],
+          "limitations": [
+            "Exact inline macro syntax is recognized; expansion remains unresolved."
           ]
         },
         "semantics": {
           "state": "unsupported",
           "evidence_ids": [
-            "spl.tstats.exact-model-dataset.incomplete"
+            "spl.tstats.inline-macro.incomplete"
           ],
           "limitations": [
-            "Aggregate syntax, optional FROM datamodel=model.dataset and WHERE selectors; only dependencies are analyzed. Field effects are unmodeled."
+            "Macro expansion is unresolved, so the stage and output environment remain incomplete."
           ]
         },
         "requirements": {
-          "state": "unassessed",
-          "evidence_ids": [],
-          "limitations": []
+          "state": "unsupported",
+          "evidence_ids": [
+            "spl.tstats.inline-macro.incomplete"
+          ],
+          "limitations": [
+            "The direct macro and sibling requirements are retained, but expansion requirements are unresolved."
+          ]
         },
         "linting": {
           "state": "unassessed",
@@ -2406,6 +2818,55 @@
       }
     },
     {
+      "id": "spl.function.earliest.one-positional",
+      "language": "spl",
+      "profile": "splunkd",
+      "kind": "function",
+      "name": "earliest",
+      "form": "one-positional",
+      "grammar_registered": true,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis/functions.go",
+        "note": "Exact locally analyzed form with syntax, semantic, and direct-requirement evidence."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl.earliest.one-positional.positive"
+          ],
+          "limitations": [
+            "1 to 1 arguments; aggregate context only"
+          ]
+        },
+        "semantics": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl.earliest.one-positional.positive"
+          ],
+          "limitations": []
+        },
+        "requirements": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl.earliest.one-positional.positive"
+          ],
+          "limitations": []
+        },
+        "linting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        }
+      }
+    },
+    {
       "id": "spl.function.first.one-positional",
       "language": "spl",
       "profile": "splunkd",
@@ -2688,6 +3149,55 @@
       }
     },
     {
+      "id": "spl.function.latest.one-positional",
+      "language": "spl",
+      "profile": "splunkd",
+      "kind": "function",
+      "name": "latest",
+      "form": "one-positional",
+      "grammar_registered": true,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis/functions.go",
+        "note": "Exact locally analyzed form with syntax, semantic, and direct-requirement evidence."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl.latest.one-positional.positive"
+          ],
+          "limitations": [
+            "1 to 1 arguments; aggregate context only"
+          ]
+        },
+        "semantics": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl.latest.one-positional.positive"
+          ],
+          "limitations": []
+        },
+        "requirements": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl.latest.one-positional.positive"
+          ],
+          "limitations": []
+        },
+        "linting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        }
+      }
+    },
+    {
       "id": "spl.function.len.one-positional",
       "language": "spl",
       "profile": "splunkd",
@@ -2720,6 +3230,55 @@
         "requirements": {
           "state": "unassessed",
           "evidence_ids": [],
+          "limitations": []
+        },
+        "linting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        }
+      }
+    },
+    {
+      "id": "spl.function.like.two-positional",
+      "language": "spl",
+      "profile": "splunkd",
+      "kind": "function",
+      "name": "like",
+      "form": "two-positional",
+      "grammar_registered": true,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis/functions.go",
+        "note": "Exact locally analyzed form with syntax, semantic, and direct-requirement evidence."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl.like.two-positional.positive"
+          ],
+          "limitations": [
+            "2 to 2 arguments; expression context only"
+          ]
+        },
+        "semantics": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl.like.two-positional.positive"
+          ],
+          "limitations": []
+        },
+        "requirements": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl.like.two-positional.positive"
+          ],
           "limitations": []
         },
         "linting": {
@@ -3064,6 +3623,251 @@
       }
     },
     {
+      "id": "spl.function.mvfind.two-positional",
+      "language": "spl",
+      "profile": "splunkd",
+      "kind": "function",
+      "name": "mvfind",
+      "form": "two-positional",
+      "grammar_registered": true,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis/functions.go",
+        "note": "Exact locally analyzed form with syntax, semantic, and direct-requirement evidence."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl.mvfind.two-positional.positive"
+          ],
+          "limitations": [
+            "2 to 2 arguments; expression context only"
+          ]
+        },
+        "semantics": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl.mvfind.two-positional.positive"
+          ],
+          "limitations": []
+        },
+        "requirements": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl.mvfind.two-positional.positive"
+          ],
+          "limitations": []
+        },
+        "linting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        }
+      }
+    },
+    {
+      "id": "spl.function.mvindex.two-positional",
+      "language": "spl",
+      "profile": "splunkd",
+      "kind": "function",
+      "name": "mvindex",
+      "form": "two-positional",
+      "grammar_registered": true,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis/functions.go",
+        "note": "Exact locally analyzed form with syntax, semantic, and direct-requirement evidence."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl.mvindex.two-positional.positive"
+          ],
+          "limitations": [
+            "2 or 3 arguments; expression context only"
+          ]
+        },
+        "semantics": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl.mvindex.two-positional.positive"
+          ],
+          "limitations": []
+        },
+        "requirements": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl.mvindex.two-positional.positive"
+          ],
+          "limitations": []
+        },
+        "linting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        }
+      }
+    },
+    {
+      "id": "spl.function.now.zero-positional",
+      "language": "spl",
+      "profile": "splunkd",
+      "kind": "function",
+      "name": "now",
+      "form": "zero-positional",
+      "grammar_registered": true,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis/functions.go",
+        "note": "Exact locally analyzed form with syntax, semantic, and direct-requirement evidence."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl.now.zero-positional.positive"
+          ],
+          "limitations": [
+            "0 to 0 arguments; expression context only"
+          ]
+        },
+        "semantics": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl.now.zero-positional.positive"
+          ],
+          "limitations": []
+        },
+        "requirements": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl.now.zero-positional.positive"
+          ],
+          "limitations": []
+        },
+        "linting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        }
+      }
+    },
+    {
+      "id": "spl.function.null.zero-positional",
+      "language": "spl",
+      "profile": "splunkd",
+      "kind": "function",
+      "name": "null",
+      "form": "zero-positional",
+      "grammar_registered": true,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis/functions.go",
+        "note": "Exact locally analyzed form with syntax, semantic, and direct-requirement evidence."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl.null.zero-positional.positive"
+          ],
+          "limitations": [
+            "0 to 0 arguments; expression context only"
+          ]
+        },
+        "semantics": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl.null.zero-positional.positive"
+          ],
+          "limitations": []
+        },
+        "requirements": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl.null.zero-positional.positive"
+          ],
+          "limitations": []
+        },
+        "linting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        }
+      }
+    },
+    {
+      "id": "spl.function.relative_time.two-positional",
+      "language": "spl",
+      "profile": "splunkd",
+      "kind": "function",
+      "name": "relative_time",
+      "form": "two-positional",
+      "grammar_registered": true,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis/functions.go",
+        "note": "Exact locally analyzed form with syntax, semantic, and direct-requirement evidence."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl.relative_time.two-positional.positive"
+          ],
+          "limitations": [
+            "2 to 2 arguments; expression context only"
+          ]
+        },
+        "semantics": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl.relative_time.two-positional.positive"
+          ],
+          "limitations": []
+        },
+        "requirements": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl.relative_time.two-positional.positive"
+          ],
+          "limitations": []
+        },
+        "linting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        }
+      }
+    },
+    {
       "id": "spl.function.replace.three-positional",
       "language": "spl",
       "profile": "splunkd",
@@ -3301,6 +4105,104 @@
       }
     },
     {
+      "id": "spl.function.stdev.one-positional",
+      "language": "spl",
+      "profile": "splunkd",
+      "kind": "function",
+      "name": "stdev",
+      "form": "one-positional",
+      "grammar_registered": true,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis/functions.go",
+        "note": "Exact locally analyzed form with syntax, semantic, and direct-requirement evidence."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl.stdev.one-positional.positive"
+          ],
+          "limitations": [
+            "1 to 1 arguments; aggregate context only"
+          ]
+        },
+        "semantics": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl.stdev.one-positional.positive"
+          ],
+          "limitations": []
+        },
+        "requirements": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl.stdev.one-positional.positive"
+          ],
+          "limitations": []
+        },
+        "linting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        }
+      }
+    },
+    {
+      "id": "spl.function.strftime.two-positional",
+      "language": "spl",
+      "profile": "splunkd",
+      "kind": "function",
+      "name": "strftime",
+      "form": "two-positional",
+      "grammar_registered": true,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis/functions.go",
+        "note": "Exact locally analyzed form with syntax, semantic, and direct-requirement evidence."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl.strftime.two-positional.positive"
+          ],
+          "limitations": [
+            "2 to 2 arguments; expression context only"
+          ]
+        },
+        "semantics": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl.strftime.two-positional.positive"
+          ],
+          "limitations": []
+        },
+        "requirements": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl.strftime.two-positional.positive"
+          ],
+          "limitations": []
+        },
+        "linting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        }
+      }
+    },
+    {
       "id": "spl.function.substr.two-positional",
       "language": "spl",
       "profile": "splunkd",
@@ -3521,6 +4423,55 @@
         "requirements": {
           "state": "unassessed",
           "evidence_ids": [],
+          "limitations": []
+        },
+        "linting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        }
+      }
+    },
+    {
+      "id": "spl.function.true.zero-positional",
+      "language": "spl",
+      "profile": "splunkd",
+      "kind": "function",
+      "name": "true",
+      "form": "zero-positional",
+      "grammar_registered": true,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis/functions.go",
+        "note": "Exact locally analyzed form with syntax, semantic, and direct-requirement evidence."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl.true.zero-positional.positive"
+          ],
+          "limitations": [
+            "0 to 0 arguments; expression context only"
+          ]
+        },
+        "semantics": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl.true.zero-positional.positive"
+          ],
+          "limitations": []
+        },
+        "requirements": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl.true.zero-positional.positive"
+          ],
           "limitations": []
         },
         "linting": {
