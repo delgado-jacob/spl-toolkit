@@ -686,6 +686,53 @@ func TestRexSemantics(t *testing.T) {
 		}
 	})
 
+	t.Run("disabled extended mode preserves captures", func(t *testing.T) {
+		result := analyzeFieldCommand(t, `search _raw=* | rex field=_raw "(?i-mx:(?<kept>a))" | table kept`)
+		assertFieldCommandComplete(t, result, "rex")
+		assertFieldCommandReference(t, result, "rex", "_raw", "read", "source", "exact")
+		assertFieldCommandReference(t, result, "rex", "kept", "output", "not_applicable", "exact")
+		assertFieldCommandReference(t, result, "table", "kept", "read", "indeterminate", "exact")
+		assertFieldCommandTransition(t, result, "rex", "kept", true)
+	})
+
+	t.Run("duplicate inputs remain conditional candidates", func(t *testing.T) {
+		result := analyzeFieldCommand(t, `| rex field=a field=b "(?<x>.)" | table x`)
+		assertFieldCommandIncomplete(t, result, "rex", "field=b")
+		for _, name := range []string{"a", "b"} {
+			assertFieldCommandReference(t, result, "rex", name, "read", "indeterminate", "exact")
+			assertFieldCommandRequirement(t, result, "rex", name, "read", "conditional", "indeterminate")
+			for _, field := range fieldCommandLineage(t, result, "rex").After.Fields {
+				if field.Name == name {
+					t.Fatalf("duplicate rex input candidate %q was installed: %+v", name, fieldCommandLineage(t, result, "rex").After)
+				}
+			}
+		}
+		if fieldCommandHasReference(result, "rex", "x", "output") {
+			t.Fatalf("rex with ambiguous input published a capture: %+v", result.References)
+		}
+		assertFieldCommandReference(t, result, "table", "x", "read", "indeterminate", "exact")
+	})
+
+	t.Run("duplicate offset fields publish no offset output", func(t *testing.T) {
+		result := analyzeFieldCommand(t, `search payload=* | rex field=payload offset_field=first offset_field=second "(?<x>.)" | table first x`)
+		assertFieldCommandIncomplete(t, result, "rex", "offset_field=second")
+		assertFieldCommandReference(t, result, "rex", "payload", "read", "source", "exact")
+		assertFieldCommandRequirement(t, result, "rex", "payload", "read", "required", "source")
+		assertFieldCommandReference(t, result, "rex", "x", "output", "not_applicable", "exact")
+		assertFieldCommandTransition(t, result, "rex", "x", true)
+		for _, name := range []string{"first", "second"} {
+			if fieldCommandHasReference(result, "rex", name, "output") {
+				t.Fatalf("duplicate rex offset_field published %q: %+v", name, result.References)
+			}
+			for _, transition := range fieldCommandLineage(t, result, "rex").Transitions {
+				if transition.Output == name {
+					t.Fatalf("duplicate rex offset_field created %q transition: %+v", name, transition)
+				}
+			}
+		}
+		assertFieldCommandReference(t, result, "table", "first", "read", "indeterminate", "exact")
+	})
+
 	t.Run("dynamic input does not install the wildcard spelling", func(t *testing.T) {
 		result := analyzeFieldCommand(t, `search user=* | rex field='user*' "(?<capture>x)" | where 'user*'="x"`)
 		assertFieldCommandIncomplete(t, result, "rex", `field='user*'`)
@@ -707,6 +754,10 @@ func TestRexNamedCaptures(t *testing.T) {
 		{name: "unsupported quoted capture opener", pattern: `(?'name'x)`, ok: false},
 		{name: "inline extended mode", pattern: `(?x)# (?<fake>x)`, ok: false},
 		{name: "scoped extended mode", pattern: `(?x:(?<fake>x))`, ok: false},
+		{name: "inline extended mode disabled", pattern: `(?-x)(?<name>a)`, want: []string{"name"}, ok: true},
+		{name: "scoped extended mode disabled", pattern: `(?i-mx:(?<name>a))`, want: []string{"name"}, ok: true},
+		{name: "harmless inline mode", pattern: `(?i)(?<name>a)`, want: []string{"name"}, ok: true},
+		{name: "harmless scoped mode", pattern: `(?s:(?<name>a))`, want: []string{"name"}, ok: true},
 		{name: "Python named backreference", pattern: `(?P<name>x)(?P=name)`, want: []string{"name"}, ok: true},
 		{name: "leading literal closing bracket", pattern: `[](?<fake>)](?<real>x)`, want: []string{"real"}, ok: true},
 		{name: "second caret is a class member", pattern: `[^^](?<real>x)`, want: []string{"real"}, ok: true},
@@ -783,6 +834,24 @@ func TestSpathSemantics(t *testing.T) {
 			}
 		})
 	}
+
+	t.Run("duplicate inputs remain conditional candidates", func(t *testing.T) {
+		result := analyzeFieldCommand(t, `| spath input=a input=b path="event.id" output=id | table id`)
+		assertFieldCommandIncomplete(t, result, "spath", "input=b")
+		for _, name := range []string{"a", "b"} {
+			assertFieldCommandReference(t, result, "spath", name, "read", "indeterminate", "exact")
+			assertFieldCommandRequirement(t, result, "spath", name, "read", "conditional", "indeterminate")
+			for _, field := range fieldCommandLineage(t, result, "spath").After.Fields {
+				if field.Name == name {
+					t.Fatalf("duplicate spath input candidate %q was installed: %+v", name, fieldCommandLineage(t, result, "spath").After)
+				}
+			}
+		}
+		if fieldCommandHasReference(result, "spath", "id", "output") {
+			t.Fatalf("spath with ambiguous input published an output: %+v", result.References)
+		}
+		assertFieldCommandReference(t, result, "table", "id", "read", "indeterminate", "exact")
+	})
 
 	t.Run("auto extraction is held after retaining the input read", func(t *testing.T) {
 		result := analyzeFieldCommand(t, `search payload=* | spath input=payload | where payload="x"`)
@@ -1153,4 +1222,37 @@ func assertFieldCommandTransition(t *testing.T, result *Result, command, output 
 		}
 	}
 	t.Fatalf("missing %s transition for %s: %+v", command, output, lineage.Transitions)
+}
+
+func assertFieldCommandRequirement(t *testing.T, result *Result, command, identity, role, necessity, binding string) {
+	t.Helper()
+	stageID := ""
+	for _, stage := range result.Stages {
+		if stage.Command == command {
+			stageID = stage.ID
+		}
+	}
+	for _, item := range result.Requirements.Items {
+		if item.Kind != "field" || item.Identity != identity || item.Role != role || item.Necessity != necessity {
+			continue
+		}
+		for _, occurrence := range item.Occurrences {
+			if occurrence.StageID == stageID && occurrence.Binding == binding {
+				if necessity == "conditional" {
+					for _, candidate := range result.Requirements.Items {
+						if candidate.Kind != "field" || candidate.Identity != identity || candidate.Role != role || candidate.Necessity != "required" {
+							continue
+						}
+						for _, requiredOccurrence := range candidate.Occurrences {
+							if requiredOccurrence.StageID == stageID {
+								t.Fatalf("%s requirement %s/%s also became required: %+v", command, identity, role, candidate)
+							}
+						}
+					}
+				}
+				return
+			}
+		}
+	}
+	t.Fatalf("missing %s requirement %s/%s necessity=%s binding=%s: %+v", command, identity, role, necessity, binding, result.Requirements.Items)
 }

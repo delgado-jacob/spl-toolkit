@@ -47,8 +47,12 @@ func rexCommand(s *semanticStage, node antlr.ParserRuleContext) {
 	ctx := stage.AnalysisRex()
 	input := fieldCommandImplicitRaw(s, stage)
 	inputExact := true
+	inputID := ""
 	fieldOptions := ctx.AllAnalysisRexFieldOption()
-	if len(fieldOptions) > 0 {
+	switch len(fieldOptions) {
+	case 0:
+		inputID = s.readAt(input, "read")
+	case 1:
 		identifiers := fieldOptions[0].AllAnalysisIdentifier()
 		if len(identifiers) == 2 && s.sound(identifiers[1]) {
 			input = fieldCommandOperand(s, identifiers[1])
@@ -56,15 +60,20 @@ func rexCommand(s *semanticStage, node antlr.ParserRuleContext) {
 		} else {
 			inputExact = false
 		}
-	}
-	inputID := ""
-	if inputExact {
-		inputID = s.readAt(input, "read")
-	} else {
-		inputID = fieldCommandHeldRead(s, input, "read")
-	}
-	if !inputExact {
-		s.diagnostic(CodeUnsupportedSemantics, "rex input must be an exact field", fieldCommandDiagnosticContext(fieldOptions, ctx))
+		if inputExact {
+			inputID = s.readAt(input, "read")
+		} else {
+			inputID = fieldCommandHeldRead(s, input, "read")
+			s.diagnostic(CodeUnsupportedSemantics, "rex input must be an exact field", fieldOptions[0])
+		}
+	default:
+		inputExact = false
+		for _, option := range fieldOptions {
+			identifiers := option.AllAnalysisIdentifier()
+			if len(identifiers) == 2 && s.sound(identifiers[1]) {
+				fieldCommandCandidateRead(s, fieldCommandOperand(s, identifiers[1]), "read")
+			}
+		}
 	}
 	for i := 1; i < len(fieldOptions); i++ {
 		s.diagnostic(CodeUnsupportedSemantics, "rex accepts one input field option", fieldOptions[i])
@@ -100,7 +109,7 @@ func rexCommand(s *semanticStage, node antlr.ParserRuleContext) {
 	for i := 1; i < len(offsetOptions); i++ {
 		s.diagnostic(CodeUnsupportedSemantics, "rex accepts one offset_field option", offsetOptions[i])
 	}
-	if len(offsetOptions) > 0 && modeledExtraction && inputExact {
+	if len(offsetOptions) == 1 && modeledExtraction && inputExact {
 		identifiers := offsetOptions[0].AllAnalysisIdentifier()
 		if len(identifiers) == 2 && s.sound(identifiers[1]) {
 			target := fieldCommandOperand(s, identifiers[1])
@@ -138,8 +147,12 @@ func spathCommand(s *semanticStage, node antlr.ParserRuleContext) {
 	ctx := stage.AnalysisSpath()
 	input := fieldCommandImplicitRaw(s, stage)
 	inputExact := true
+	inputID := ""
 	inputOptions := ctx.AllAnalysisSpathInputOption()
-	if len(inputOptions) > 0 {
+	switch len(inputOptions) {
+	case 0:
+		inputID = s.readAt(input, "read")
+	case 1:
 		identifiers := inputOptions[0].AllAnalysisIdentifier()
 		if len(identifiers) == 2 && s.sound(identifiers[1]) {
 			input = fieldCommandOperand(s, identifiers[1])
@@ -147,15 +160,20 @@ func spathCommand(s *semanticStage, node antlr.ParserRuleContext) {
 		} else {
 			inputExact = false
 		}
-	}
-	inputID := ""
-	if inputExact {
-		inputID = s.readAt(input, "read")
-	} else {
-		inputID = fieldCommandHeldRead(s, input, "read")
-	}
-	if !inputExact {
-		s.diagnostic(CodeUnsupportedSemantics, "spath input must be an exact field", fieldCommandDiagnosticContext(inputOptions, ctx))
+		if inputExact {
+			inputID = s.readAt(input, "read")
+		} else {
+			inputID = fieldCommandHeldRead(s, input, "read")
+			s.diagnostic(CodeUnsupportedSemantics, "spath input must be an exact field", inputOptions[0])
+		}
+	default:
+		inputExact = false
+		for _, option := range inputOptions {
+			identifiers := option.AllAnalysisIdentifier()
+			if len(identifiers) == 2 && s.sound(identifiers[1]) {
+				fieldCommandCandidateRead(s, fieldCommandOperand(s, identifiers[1]), "read")
+			}
+		}
 	}
 	for i := 1; i < len(inputOptions); i++ {
 		s.diagnostic(CodeUnsupportedSemantics, "spath accepts one input option", inputOptions[i])
@@ -510,11 +528,16 @@ func scanRexNamedCaptures(pattern string) ([]rexCapture, bool) {
 }
 
 func rexHasExtendedMode(runes []rune, start int) bool {
+	enabled := true
 	for i := start; i < len(runes); i++ {
 		switch runes[i] {
 		case 'x':
-			return true
-		case 'i', 'm', 'n', 'r', 's', 'J', 'U', '-':
+			if enabled {
+				return true
+			}
+		case '-':
+			enabled = false
+		case 'i', 'm', 'n', 'r', 's', 'J', 'U':
 			continue
 		default:
 			return false
@@ -527,12 +550,31 @@ func fieldCommandHeldRead(s *semanticStage, operand locatedOperand, role string)
 	if !operand.Sound || operand.Resolution == "exact" {
 		return ""
 	}
+	return fieldCommandCandidateRead(s, operand, role)
+}
+
+func fieldCommandCandidateRead(s *semanticStage, operand locatedOperand, role string) string {
+	if !operand.Sound {
+		return ""
+	}
+	requirementField, requirementKnown := s.env.requirements.fields[operand.Name]
 	id := s.operandReference(operand, "field", role)
 	if id == "" {
 		return ""
 	}
+	if requirementKnown {
+		s.env.requirements.fields[operand.Name] = requirementField
+	} else {
+		delete(s.env.requirements.fields, operand.Name)
+	}
 	reference := &s.result.References[len(s.result.References)-1]
 	reference.Binding = "indeterminate"
+	if trace := s.env.requirements.trace; trace != nil {
+		entry := trace.reference(id)
+		entry.reference.Binding = "indeterminate"
+		entry.directExternal = false
+		entry.conditional = true
+	}
 	s.rewriteBinding(id, reference.Binding, nil)
 	return id
 }
@@ -550,13 +592,6 @@ func fieldCommandImplicitRaw(s *semanticStage, node interface {
 	AnalysisCommandName() parser.IAnalysisCommandNameContext
 }) locatedOperand {
 	return s.operand(node.AnalysisCommandName(), "_raw")
-}
-
-func fieldCommandDiagnosticContext[T antlr.ParserRuleContext](contexts []T, fallback antlr.ParserRuleContext) antlr.ParserRuleContext {
-	if len(contexts) > 0 {
-		return contexts[0]
-	}
-	return fallback
 }
 
 func nonemptyReferenceIDs(ids ...string) []string {
