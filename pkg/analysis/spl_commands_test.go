@@ -410,6 +410,18 @@ func TestRexSemantics(t *testing.T) {
 		assertFieldCommandReference(t, result, "where", "kept", "read", "indeterminate", "exact")
 	})
 
+	t.Run("literal closing bracket stays in the character class", func(t *testing.T) {
+		query := `search payload=* | rex field=payload "[](?<fake>)](?<real>x)" | where real="x"`
+		result := analyzeFieldCommand(t, query)
+		assertFieldCommandComplete(t, result, "rex")
+		assertFieldCommandReference(t, result, "rex", "real", "output", "not_applicable", "exact")
+		assertFieldCommandReferenceLocation(t, result, "rex", "real", "output", "real")
+		if fieldCommandHasReference(result, "rex", "fake", "output") {
+			t.Fatalf("rex scanner treated a leading literal ] as the class close: %+v", result.References)
+		}
+		assertFieldCommandReference(t, result, "where", "real", "read", "indeterminate", "exact")
+	})
+
 	t.Run("sed mode keeps the input identity and is held", func(t *testing.T) {
 		result := analyzeFieldCommand(t, `search payload=* | rex mode=sed field=payload "s/a/b/g" | where payload="b"`)
 		assertFieldCommandIncomplete(t, result, "rex", "mode=sed")
@@ -422,6 +434,37 @@ func TestRexSemantics(t *testing.T) {
 		assertFieldCommandIncomplete(t, result, "rex", `"(?<bad-name>.+)"`)
 		assertFieldCommandReference(t, result, "where", "payload", "read", "source", "exact")
 	})
+
+	t.Run("incomplete Python capture opener is held at the expression", func(t *testing.T) {
+		result := analyzeFieldCommand(t, `search payload=* | rex field=payload "(?P" | where payload="x"`)
+		assertFieldCommandIncomplete(t, result, "rex", `"(?P"`)
+		assertFieldCommandReference(t, result, "rex", "payload", "read", "source", "exact")
+		assertFieldCommandReference(t, result, "where", "payload", "read", "source", "exact")
+	})
+}
+
+func TestRexNamedCaptures(t *testing.T) {
+	tests := []struct {
+		name    string
+		pattern string
+		want    []string
+		ok      bool
+	}{
+		{name: "incomplete Python opener", pattern: `(?P`, ok: false},
+		{name: "leading literal closing bracket", pattern: `[](?<fake>)](?<real>x)`, want: []string{"real"}, ok: true},
+		{name: "second caret is a class member", pattern: `[^^](?<real>x)`, want: []string{"real"}, ok: true},
+		{name: "escaped and class-contained openers", pattern: `\(?<escaped>x)[(?P<class>x)](?<real>x)`, want: []string{"real"}, ok: true},
+		{name: "source order and deduplication", pattern: `(?P<two>x)(?<one>y)(?<two>z)`, want: []string{"two", "one"}, ok: true},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			got, ok := rexNamedCaptures(tc.pattern)
+			if ok != tc.ok || !reflect.DeepEqual(got, tc.want) {
+				t.Fatalf("rexNamedCaptures(%q) = (%v, %t), want (%v, %t)", tc.pattern, got, ok, tc.want, tc.ok)
+			}
+		})
+	}
 }
 
 func TestSpathSemantics(t *testing.T) {
@@ -477,6 +520,26 @@ func TestBinAndBucketSemantics(t *testing.T) {
 		assertFieldCommandIncomplete(t, result, "bin", "mystery=5")
 		assertFieldCommandReference(t, result, "bin", "bytes", "read", "source", "exact")
 		assertFieldCommandReference(t, result, "where", "bytes", "read", "source", "exact")
+	})
+
+	t.Run("dynamic bin span retains the exact source fact", func(t *testing.T) {
+		result := analyzeFieldCommand(t, `search bytes=* | bin span=foo bytes | where bytes>0`)
+		assertFieldCommandIncomplete(t, result, "bin", "span=foo")
+		assertFieldCommandReference(t, result, "bin", "bytes", "read", "source", "exact")
+		assertFieldCommandReference(t, result, "where", "bytes", "read", "source", "exact")
+		if fieldCommandHasReference(result, "bin", "bytes", "create") {
+			t.Fatalf("dynamic bin span applied a false assignment: %+v", result.References)
+		}
+	})
+
+	t.Run("dynamic bucket minspan retains source and suppresses alias", func(t *testing.T) {
+		result := analyzeFieldCommand(t, `search bytes=* | bucket minspan=dynamic bytes AS band | where bytes>0`)
+		assertFieldCommandIncomplete(t, result, "bucket", "minspan=dynamic")
+		assertFieldCommandReference(t, result, "bucket", "bytes", "read", "source", "exact")
+		assertFieldCommandReference(t, result, "where", "bytes", "read", "source", "exact")
+		if fieldCommandHasReference(result, "bucket", "band", "create") {
+			t.Fatalf("dynamic bucket minspan applied a false alias: %+v", result.References)
+		}
 	})
 }
 
@@ -576,6 +639,26 @@ func assertFieldCommandReference(t *testing.T, result *Result, command, name, ro
 			}
 			return
 		}
+	}
+	t.Fatalf("missing %s %s/%s reference: %+v", command, name, role, result.References)
+}
+
+func assertFieldCommandReferenceLocation(t *testing.T, result *Result, command, name, role, source string) {
+	t.Helper()
+	stageID := ""
+	for _, stage := range result.Stages {
+		if stage.Command == command {
+			stageID = stage.ID
+		}
+	}
+	for _, reference := range result.References {
+		if reference.StageID != stageID || reference.NormalizedName != name || reference.Role != role {
+			continue
+		}
+		if got := result.Document.Text[reference.Location.Start.Offset:reference.Location.End.Offset]; got != source {
+			t.Fatalf("%s %s/%s location = %q, want %q: %+v", command, name, role, got, source, reference)
+		}
+		return
 	}
 	t.Fatalf("missing %s %s/%s reference: %+v", command, name, role, result.References)
 }

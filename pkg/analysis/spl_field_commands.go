@@ -214,7 +214,8 @@ func binCommand(s *semanticStage, node antlr.ParserRuleContext) {
 		literal := false
 		switch name {
 		case "span", "minspan":
-			literal = option.AnalysisUnitOptionValue() != nil && s.sound(option.AnalysisUnitOptionValue())
+			value := option.AnalysisUnitOptionValue()
+			literal = value != nil && value.NUMBER() != nil && s.sound(value)
 		case "bins", "start", "end", "aligntime":
 			value := option.AnalysisOptionValue()
 			literal = value != nil && value.AnalysisLiteral() != nil && s.sound(value.AnalysisLiteral())
@@ -298,10 +299,15 @@ func scanRexNamedCaptures(pattern string) ([]rexCapture, bool) {
 	captures := []rexCapture{}
 	seen := map[string]bool{}
 	escaped, inClass := false, false
+	classCanClose, classMayNegate := false, false
 	for i := 0; i < len(runes); i++ {
 		r := runes[i]
 		if escaped {
 			escaped = false
+			if inClass {
+				classCanClose = true
+				classMayNegate = false
+			}
 			continue
 		}
 		if r == '\\' {
@@ -309,13 +315,24 @@ func scanRexNamedCaptures(pattern string) ([]rexCapture, bool) {
 			continue
 		}
 		if inClass {
-			if r == ']' {
+			if r == ']' && classCanClose {
 				inClass = false
+				classCanClose = false
+				classMayNegate = false
+				continue
 			}
+			if classMayNegate && r == '^' {
+				classMayNegate = false
+				continue
+			}
+			classCanClose = true
+			classMayNegate = false
 			continue
 		}
 		if r == '[' {
 			inClass = true
+			classCanClose = false
+			classMayNegate = true
 			continue
 		}
 		if r != '(' || i+2 >= len(runes) || runes[i+1] != '?' {
@@ -329,7 +346,10 @@ func scanRexNamedCaptures(pattern string) ([]rexCapture, bool) {
 				continue
 			}
 			nameStart = i + 3
-		case runes[i+2] == 'P' && i+3 < len(runes) && runes[i+3] == '<':
+		case runes[i+2] == 'P':
+			if i+3 >= len(runes) || runes[i+3] != '<' {
+				return nil, false
+			}
 			nameStart = i + 4
 		default:
 			continue
