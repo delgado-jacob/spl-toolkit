@@ -228,13 +228,23 @@ func ownedMapperJSONResult(mapperID C.int, operation func() (any, error)) *C.SPL
 		result.error = C.CString(err.Error())
 		return result
 	}
-	encoded, err := json.Marshal(report)
+	encoded, err := marshalNativeJSON(report)
 	if err != nil {
 		result.error = C.CString(err.Error())
 		return result
 	}
 	result.result = C.CString(string(encoded))
 	return result
+}
+
+func marshalNativeJSON(value any) ([]byte, error) {
+	var encoded bytes.Buffer
+	encoder := json.NewEncoder(&encoded)
+	encoder.SetEscapeHTML(false)
+	if err := encoder.Encode(value); err != nil {
+		return nil, err
+	}
+	return bytes.TrimSuffix(encoded.Bytes(), []byte{'\n'}), nil
 }
 
 //export spl_mapper_validate_fields
@@ -455,7 +465,7 @@ func spl_mapper_capabilities(mapperID C.int) *C.SPLResult {
 	}
 	defer runtime.KeepAlive(m)
 
-	encoded, err := json.Marshal(analysis.Capabilities())
+	encoded, err := marshalNativeJSON(analysis.Capabilities())
 	if err != nil {
 		result.error = C.CString(err.Error())
 		return result

@@ -81,3 +81,45 @@ func TestCapabilitiesBindingsReturnCompleteCanonicalOwnedManifests(t *testing.T)
 		})
 	}
 }
+
+func TestOwnedNativeJSONResultUsesCompactUTF8WithoutHTMLEscaping(t *testing.T) {
+	handle := spl_mapper_new()
+	defer spl_mapper_free(handle)
+
+	result := ownedMapperJSONResult(handle, func() (any, error) {
+		return map[string]string{"value": "café <tag> &"}, nil
+	})
+	if result == nil {
+		t.Fatal("owned native JSON result returned nil")
+	}
+	defer spl_result_free(result)
+	if result.error != nil || result.result == nil {
+		t.Fatalf("owned native JSON result = error %q, result %q", nativeTestGoString(result.error), nativeTestGoString(result.result))
+	}
+	if got, want := nativeTestGoString(result.result), `{"value":"café <tag> &"}`; got != want {
+		t.Fatalf("owned native JSON result = %q, want compact UTF-8 JSON %q", got, want)
+	}
+}
+
+func TestCapabilityNativeEntryPointsRemainByteIdentical(t *testing.T) {
+	handle := spl_mapper_new()
+	defer spl_mapper_free(handle)
+
+	legacy := spl_mapper_capabilities(handle)
+	if legacy == nil {
+		t.Fatal("legacy native capability export returned nil")
+	}
+	defer spl_result_free(legacy)
+	selected := spl_mapper_capabilities_for(handle, nativeTestCString(t, `{}`))
+	if selected == nil {
+		t.Fatal("selected native capability export returned nil")
+	}
+	defer spl_result_free(selected)
+	if legacy.error != nil || legacy.result == nil || selected.error != nil || selected.result == nil {
+		t.Fatalf("native capability exports = legacy error %q result %q, selected error %q result %q",
+			nativeTestGoString(legacy.error), nativeTestGoString(legacy.result), nativeTestGoString(selected.error), nativeTestGoString(selected.result))
+	}
+	if got, want := nativeTestGoString(legacy.result), nativeTestGoString(selected.result); got != want {
+		t.Fatal("native capability entry points returned different JSON bytes")
+	}
+}
