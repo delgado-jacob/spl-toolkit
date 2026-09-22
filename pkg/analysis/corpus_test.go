@@ -24,6 +24,54 @@ type requirementsCorpusCase struct {
 	Expected RequirementSet `json:"expected"`
 }
 
+var reviewedAnalysisCorpusIDs = []string{
+	"unicode_repeated",
+	"comparisons",
+	"functions_assignments",
+	"transfer_family",
+	"aggregate_family",
+	"lookup_conditional",
+	"inputlookup",
+	"wildcard_closed",
+	"wildcard_open",
+	"unknown_function",
+	"macro",
+	"join_scope",
+	"appendpipe_scope",
+	"partial_recovery",
+	"invalid_precedence",
+	"dependencies",
+	"saved_dataset",
+	"quoted_asterisk",
+	"implicit_aggregate",
+	"exact_after_unknown",
+	"fields_internal",
+	"fields_open",
+	"quoted_projection",
+	"malformed_child_scope",
+	"wildcard_exclusion_closed",
+	"wildcard_exclusion_open",
+	"literal_star_inclusion",
+	"literal_star_exclusion",
+	"literal_star_suffix_inclusion",
+	"literal_star_suffix_exclusion",
+	"quoted_fragment_prefix_inclusion",
+	"quoted_fragment_prefix_exclusion",
+	"quoted_fragment_suffix_inclusion",
+	"quoted_fragment_suffix_exclusion",
+	"tstats_basic",
+	"field_commands",
+	"selected_functions",
+	"branch_macro_boundaries",
+}
+
+func validateExactCorpusIDs(got, want []string) error {
+	if reflect.DeepEqual(got, want) {
+		return nil
+	}
+	return fmt.Errorf("analysis corpus IDs = %v, want %v", got, want)
+}
+
 func loadRequirementsCorpus(t *testing.T) []requirementsCorpusCase {
 	t.Helper()
 	data, err := os.ReadFile("../../testdata/requirements/cases.json")
@@ -113,12 +161,25 @@ func TestCorpusSemanticReview(t *testing.T) {
 		"selected_functions":               {Valid, "values,_time,bytes,user,action,picked,values,found,values,cutoff,label,_time,allowed,action,empty,keep,cutoff,first_seen,_time,last_seen,bytes,spread,user,user,first_seen,last_seen,spread", "first_seen,last_seen,spread,user", 4, 1, false, false},
 		"branch_macro_boundaries":          {Incomplete, "parent,child,child,local,child,child_macro,parent", "parent", 6, 2, true, true},
 	}
+	wantIDs := reviewedAnalysisCorpusIDs
+	if len(want) != len(wantIDs) {
+		t.Fatalf("semantic oracle count = %d, want %d reviewed corpus IDs", len(want), len(wantIDs))
+	}
+	for _, id := range wantIDs {
+		if _, ok := want[id]; !ok {
+			t.Fatalf("reviewed corpus ID %q has no handwritten oracle", id)
+		}
+	}
+	gotIDs := make([]string, 0, len(wantIDs))
+	exercised := make(map[string]int, len(wantIDs))
 	for _, c := range loadCorpus(t) {
+		gotIDs = append(gotIDs, c.ID)
 		t.Run(c.ID, func(t *testing.T) {
 			w, ok := want[c.ID]
 			if !ok {
 				t.Fatal("no handwritten oracle")
 			}
+			exercised[c.ID]++
 			r, err := Analyze(c.Document)
 			if err != nil {
 				t.Fatal(err)
@@ -185,6 +246,30 @@ func TestCorpusSemanticReview(t *testing.T) {
 				if r.References[len(r.References)-1].Resolution != "wildcard" {
 					t.Fatal(r.References)
 				}
+			}
+		})
+	}
+	if err := validateExactCorpusIDs(gotIDs, wantIDs); err != nil {
+		t.Fatal(err)
+	}
+	for id := range want {
+		if exercised[id] != 1 {
+			t.Errorf("handwritten oracle %q exercised %d times, want exactly once", id, exercised[id])
+		}
+	}
+}
+
+func TestAnalysisCorpusMembershipRejectsSameCountMutations(t *testing.T) {
+	tests := map[string]func([]string){
+		"replacement": func(ids []string) { ids[len(ids)-1] = "unreviewed_replacement" },
+		"duplicate":   func(ids []string) { ids[len(ids)-1] = ids[0] },
+	}
+	for name, mutate := range tests {
+		t.Run(name, func(t *testing.T) {
+			ids := append([]string(nil), reviewedAnalysisCorpusIDs...)
+			mutate(ids)
+			if err := validateExactCorpusIDs(ids, reviewedAnalysisCorpusIDs); err == nil {
+				t.Fatal("same-count corpus membership mutation was accepted")
 			}
 		})
 	}
