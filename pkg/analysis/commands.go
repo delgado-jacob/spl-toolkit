@@ -313,6 +313,11 @@ func limitCommand(s *semanticStage, node antlr.ParserRuleContext) {
 
 func branchCommand(s *semanticStage, node antlr.ParserRuleContext) {
 	if stage, ok := node.(*parser.AnalysisJoinStageContext); ok && stage.AnalysisJoin() != nil {
+		type heldKey struct {
+			operand locatedOperand
+			id      string
+		}
+		held := []heldKey{}
 		for _, key := range stage.AnalysisJoin().AllAnalysisIdentifier() {
 			operand := fieldCommandOperand(s, key)
 			if operand.Resolution == "exact" {
@@ -320,8 +325,11 @@ func branchCommand(s *semanticStage, node antlr.ParserRuleContext) {
 				continue
 			}
 			if id := fieldCommandHeldRead(s, operand, "read"); id != "" {
-				s.diagnosticAtOwned(CodeDynamicReference, "warning", "unsupported_semantics", "join key identity must be exact", operand.Location, true, []string{id})
+				held = append(held, heldKey{operand: operand, id: id})
 			}
+		}
+		for _, key := range held {
+			s.diagnosticAtOwned(CodeDynamicReference, "warning", "unsupported_semantics", "join key identity must be exact", key.operand.Location, true, []string{key.id})
 		}
 	}
 	command := s.result.Stages[s.stage].Command

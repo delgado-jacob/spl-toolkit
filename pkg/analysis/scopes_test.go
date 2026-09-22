@@ -142,6 +142,84 @@ func TestBranchJoinWildcardKeyIsHeld(t *testing.T) {
 	}
 }
 
+func TestBranchJoinMixedKeyOrderPreservesExactFacts(t *testing.T) {
+	for _, tc := range []struct {
+		name string
+		keys string
+	}{
+		{"dynamic before exact", `'user*', 'exact'`},
+		{"exact before dynamic", `'exact', 'user*'`},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			query := `search seed=* | join ` + tc.keys + ` [ search child=* ]`
+			r, err := Analyze(QueryDocument{Text: query})
+			if err != nil || r.Status != Incomplete || !r.Coverage.SyntaxComplete || r.Coverage.SemanticComplete {
+				t.Fatal(r, err)
+			}
+
+			exact := scopedReference(t, r, "scope-0", "exact", "read")
+			if exact.StageID != "stage-1" || exact.Resolution != "exact" || exact.Binding != "source" {
+				t.Fatalf("exact join key = %+v", exact)
+			}
+			if got := query[exact.Location.Start.Offset:exact.Location.End.Offset]; got != `'exact'` {
+				t.Fatalf("exact join key source = %q", got)
+			}
+			dynamic := scopedReference(t, r, "scope-0", "user*", "read")
+			if dynamic.StageID != "stage-1" || dynamic.Resolution != "dynamic" || dynamic.Binding != "indeterminate" || len(dynamic.OriginReferenceIDs) != 0 {
+				t.Fatalf("dynamic join key = %+v", dynamic)
+			}
+
+			branch := r.Lineage[1].After
+			if !branch.Uncertain {
+				t.Fatalf("mixed join merge remained certain: %+v", branch)
+			}
+			gotFields := []string{}
+			for _, field := range branch.Fields {
+				gotFields = append(gotFields, field.Name)
+			}
+			if !reflect.DeepEqual(gotFields, []string{"exact", "seed"}) {
+				t.Fatalf("mixed join fields = %v", gotFields)
+			}
+			child := scopedReference(t, r, "scope-1", "child", "filter")
+			if child.Binding != "source" {
+				t.Fatalf("child fact lost: %+v", child)
+			}
+
+			exactRequirements, dynamicRequirements := 0, 0
+			for _, item := range r.Requirements.Items {
+				if item.Kind != "field" || item.Role != "read" || len(item.Occurrences) != 1 {
+					continue
+				}
+				switch item.Identity {
+				case "exact":
+					exactRequirements++
+					if item.Necessity != "required" || item.Resolution != "exact" || item.Occurrences[0].Binding != "source" {
+						t.Fatalf("exact join requirement = %+v", item)
+					}
+				case "user*":
+					dynamicRequirements++
+					if item.Necessity != "conditional" || item.Resolution != "dynamic" || item.Occurrences[0].Binding != "indeterminate" {
+						t.Fatalf("dynamic join requirement = %+v", item)
+					}
+				}
+			}
+			if exactRequirements != 1 || dynamicRequirements != 1 {
+				t.Fatalf("mixed join requirements = exact %d dynamic %d: %+v", exactRequirements, dynamicRequirements, r.Requirements.Items)
+			}
+
+			mergeDiagnostics := 0
+			for _, diagnostic := range r.Diagnostics {
+				if diagnostic.StageID == "stage-1" && diagnostic.Code == CodeUnsupportedSemantics {
+					mergeDiagnostics++
+				}
+			}
+			if mergeDiagnostics != 1 {
+				t.Fatalf("merge diagnostics = %d: %+v", mergeDiagnostics, r.Diagnostics)
+			}
+		})
+	}
+}
+
 // Catches taking appendpipe's inherited copy after merge uncertainty and leaking child removals.
 func TestScopesAppendpipeInheritsBeforeMerge(t *testing.T) {
 	r, _ := Analyze(QueryDocument{Text: `search root=1 | eval local=root | appendpipe [ where local>1 | fields - local | eval branch=root ] | where local=2`})
