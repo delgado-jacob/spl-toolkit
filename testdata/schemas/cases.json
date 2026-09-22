@@ -7178,7 +7178,7 @@
         ]
       },
       "id": "unicode_crlf",
-      "outcomes": "café:optional,missing:missing",
+      "outcomes": "caf\u00e9:optional,missing:missing",
       "schema_complete": true,
       "status": "invalid",
       "target": {
