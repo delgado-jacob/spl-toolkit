@@ -60,12 +60,23 @@ Evidence IDs must resolve to typed cases in the same manifest. Stable IDs retain
 the exact reviewed scope; a broadened form receives a new ID unless a reviewed
 scope correction changes the original boundary. `grammar_registered` is a parser
 fact independent of syntax coverage. Linting likewise requires its own evidence.
-The current manifests contain 86 SPL records with 85 evidence cases and 114 SPL2
-records with 124 evidence cases. Safe rewriting has 17 supported, 2 unsupported
-and 67 unassessed SPL records; SPL2 has 14 supported, 3 unsupported and 97
-unassessed records. These cases establish static local toolkit
-behavior only, not live Splunk execution, runtime equivalence, environment
-compatibility, authorization or upstream support.
+The current manifests contain 105 SPL records with 104 evidence cases and 114 SPL2
+records with 124 evidence cases. SPL requirements have 19 supported, 5 unsupported,
+and 81 unassessed records. Safe rewriting has 17 supported, 2 unsupported and 86
+unassessed SPL records; SPL2 has 14 supported, 3 unsupported and 97 unassessed
+records. The current SPL revision is
+`sha256:08901c84ac8c420f59ddb86168c534f0e83484c05d3c8a81078a716c878a1733`;
+the SPL2 revision remains
+`sha256:f1391296cfbc616e9bb1b1828e2471e37b60a35c0555654c0734640e072a0437`.
+
+The SPL ledger includes bounded field-flow semantics for exact `tstats`, selected
+field commands, and selected function arities. Exact macros produce direct macro
+requirements and source-located unresolved-expansion gaps. Branch children retain
+their evidence and direct requirements, while unmodeled merge effects leave parent
+outputs uncertain. These cases establish static local toolkit behavior only. The
+toolkit does not execute SPL, evaluate regular expressions, compare result rows,
+model acceleration, load macro definitions, or certify runtime compatibility. It
+also does not prove authorization or upstream support.
 
 Strict canonical and new request objects reject unknown members, wrong types,
 null optional objects, and conflicting selectors. Query selectors accept their

@@ -63,10 +63,21 @@ The same ID keeps the same reviewed scope; a broadened form uses a new ID unless
 a reviewed scope correction changes the original boundary. `grammar_registered`
 records parser registration separately from syntax coverage, and ordinary parser
 or semantic diagnostics do not count as lint evidence. Current exact totals are
-86 SPL records with 85 evidence cases and 114 SPL2 records with 124 evidence cases.
-The corpus establishes static local toolkit behavior only, not live Splunk
-execution, runtime equivalence, environment compatibility, authorization or
-upstream support.
+105 SPL records with 104 evidence cases and 114 SPL2 records with 124 evidence
+cases. The current SPL revision is
+`sha256:08901c84ac8c420f59ddb86168c534f0e83484c05d3c8a81078a716c878a1733`;
+the unchanged SPL2 revision is
+`sha256:f1391296cfbc616e9bb1b1828e2471e37b60a35c0555654c0734640e072a0437`.
+
+The SPL records cover bounded field-flow semantics for exact `tstats`, selected
+field commands, and selected function arities. Exact macro invocations emit a
+direct macro requirement and source-located unresolved-expansion gap. Branch
+children retain direct requirements and evidence, while merge effects keep parent
+outputs uncertain. Dynamic identities, unsupported options, unresolved macro
+expansion, and branch merging remain incomplete. The toolkit does not execute SPL,
+evaluate regular expressions, compare result rows, model acceleration, load macro
+definitions, or certify runtime compatibility. The corpus also does not prove
+authorization or upstream support.
 
 | Stable code | Meaning |
 | --- | --- |
