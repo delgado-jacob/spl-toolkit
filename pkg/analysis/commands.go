@@ -314,7 +314,14 @@ func limitCommand(s *semanticStage, node antlr.ParserRuleContext) {
 func branchCommand(s *semanticStage, node antlr.ParserRuleContext) {
 	if stage, ok := node.(*parser.AnalysisJoinStageContext); ok && stage.AnalysisJoin() != nil {
 		for _, key := range stage.AnalysisJoin().AllAnalysisIdentifier() {
-			s.read(key, normalizedName(key.GetText()), "read")
+			operand := fieldCommandOperand(s, key)
+			if operand.Resolution == "exact" {
+				s.readAt(operand, "read")
+				continue
+			}
+			if id := fieldCommandHeldRead(s, operand, "read"); id != "" {
+				s.diagnosticAtOwned(CodeDynamicReference, "warning", "unsupported_semantics", "join key identity must be exact", operand.Location, true, []string{id})
+			}
 		}
 	}
 	command := s.result.Stages[s.stage].Command

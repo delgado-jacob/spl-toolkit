@@ -95,6 +95,53 @@ func TestBranchJoinKeyReadsAndUncertainMerge(t *testing.T) {
 	}
 }
 
+func TestBranchJoinWildcardKeyIsHeld(t *testing.T) {
+	query := `search seed=* | join 'user*' [ search child=* ]`
+	r, err := Analyze(QueryDocument{Text: query})
+	if err != nil || r.Status != Incomplete || !r.Coverage.SyntaxComplete || r.Coverage.SemanticComplete {
+		t.Fatal(r, err)
+	}
+
+	join := scopedReference(t, r, "scope-0", "user*", "read")
+	if join.StageID != "stage-1" || join.Resolution != "dynamic" || join.Binding != "indeterminate" || len(join.OriginReferenceIDs) != 0 {
+		t.Fatalf("held join key = %+v", join)
+	}
+	if got := query[join.Location.Start.Offset:join.Location.End.Offset]; got != `'user*'` {
+		t.Fatalf("held join key source = %q", got)
+	}
+
+	branch := r.Lineage[1].After
+	if !branch.Uncertain {
+		t.Fatalf("wildcard join merge remained certain: %+v", branch)
+	}
+	if len(branch.Fields) != 1 || branch.Fields[0].Name != "seed" || !reflect.DeepEqual(branch.Fields[0].OriginReferenceIDs, []string{"ref-0"}) {
+		t.Fatalf("wildcard join installed a key or lost its sibling: %+v", branch)
+	}
+	child := scopedReference(t, r, "scope-1", "child", "filter")
+	if child.Binding != "source" {
+		t.Fatalf("child fact lost: %+v", child)
+	}
+
+	joinRequirement, joinGaps := 0, 0
+	for _, item := range r.Requirements.Items {
+		if item.Kind != "field" || item.Identity != "user*" || item.Role != "read" {
+			continue
+		}
+		joinRequirement++
+		if item.Necessity != "conditional" || item.Resolution != "dynamic" || len(item.Occurrences) != 1 || item.Occurrences[0].Binding != "indeterminate" {
+			t.Fatalf("wildcard join requirement = %+v", item)
+		}
+	}
+	for _, gap := range r.Requirements.Gaps {
+		if gap.Code == CodeDynamicReference && reflect.DeepEqual(gap.ReferenceIDs, []string{join.ID}) {
+			joinGaps++
+		}
+	}
+	if joinRequirement != 1 || joinGaps != 1 {
+		t.Fatalf("wildcard join evidence = requirement %d gap %d: items=%+v gaps=%+v", joinRequirement, joinGaps, r.Requirements.Items, r.Requirements.Gaps)
+	}
+}
+
 // Catches taking appendpipe's inherited copy after merge uncertainty and leaking child removals.
 func TestScopesAppendpipeInheritsBeforeMerge(t *testing.T) {
 	r, _ := Analyze(QueryDocument{Text: `search root=1 | eval local=root | appendpipe [ where local>1 | fields - local | eval branch=root ] | where local=2`})
