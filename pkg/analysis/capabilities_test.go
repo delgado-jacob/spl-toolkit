@@ -211,6 +211,66 @@ func legacySPLCapabilities() CapabilityManifest {
 	for name, command := range commands {
 		manifest.Commands = append(manifest.Commands, Capability{Name: name, SyntaxSupported: true, SemanticSupported: command.handle != nil, Limitations: []string{command.limitation}})
 	}
+	reviewedCommands := map[string]Capability{
+		"append": {
+			Name: "append", SyntaxSupported: true, SemanticSupported: false,
+			Limitations: []string{"Branch merging is unmodeled.", "Branch merging remains unmodeled; direct child and parent requirements are retained."},
+		},
+		"appendpipe": {
+			Name: "appendpipe", SyntaxSupported: true, SemanticSupported: false,
+			Limitations: []string{"Branch merging is unmodeled.", "Branch merging remains unmodeled; direct child and parent requirements are retained."},
+		},
+		"bin": {
+			Name: "bin", SyntaxSupported: true, SemanticSupported: true,
+			Limitations: []string{"Exact input and optional alias with supported literal binning options."},
+		},
+		"bucket": {
+			Name: "bucket", SyntaxSupported: true, SemanticSupported: true,
+			Limitations: []string{"Exact input and optional alias with supported literal binning options."},
+		},
+		"fillnull": {
+			Name: "fillnull", SyntaxSupported: true, SemanticSupported: true,
+			Limitations: []string{"Exact field targets with an optional literal fill value."},
+		},
+		"join": {
+			Name: "join", SyntaxSupported: true, SemanticSupported: false,
+			Limitations: []string{"Branch merging is unmodeled.", "Branch merging remains unmodeled; direct child and parent requirements are retained."},
+		},
+		"macro": {
+			Name: "macro", SyntaxSupported: true, SemanticSupported: false,
+			Limitations: []string{"Synthetic category for a macro-only stage; exact macro name dependencies, unresolved expansion. A literal command named macro remains unmodeled.", "The exact direct macro requirement is retained, but expansion requirements are unresolved."},
+		},
+		"mvexpand": {
+			Name: "mvexpand", SyntaxSupported: true, SemanticSupported: true,
+			Limitations: []string{"Exact field form; row-count and memory effects are outside the static model."},
+		},
+		"regex": {
+			Name: "regex", SyntaxSupported: true, SemanticSupported: true,
+			Limitations: []string{"Exact field comparison form."},
+		},
+		"rex": {
+			Name: "rex", SyntaxSupported: true, SemanticSupported: true,
+			Limitations: []string{"Exact input fields and unambiguous (?<name>) or (?P<name>) captures."},
+		},
+		"spath": {
+			Name: "spath", SyntaxSupported: true, SemanticSupported: true,
+			Limitations: []string{"Exact input, literal path, and exact output forms."},
+		},
+		"tstats": {
+			Name: "tstats", SyntaxSupported: true, SemanticSupported: true,
+			Limitations: []string{
+				"Exact aggregates, a literal data-model source, exact WHERE selectors, exact groups, and supported literal options.",
+				"Exact inline macro syntax is recognized; expansion remains unresolved.",
+				"Macro expansion is unresolved, so the stage and output environment remain incomplete.",
+				"The direct macro and sibling requirements are retained, but expansion requirements are unresolved.",
+			},
+		},
+	}
+	for i, command := range manifest.Commands {
+		if reviewed, ok := reviewedCommands[command.Name]; ok {
+			manifest.Commands[i] = reviewed
+		}
+	}
 	for name, function := range functions {
 		limit := fmt.Sprintf("%d to %d arguments", function.min, function.max)
 		if function.max < 0 {
@@ -226,6 +286,9 @@ func legacySPLCapabilities() CapabilityManifest {
 		}
 		if function.dynamic {
 			limit = "Dynamic query semantics are unresolved."
+		}
+		if name == "mvindex" {
+			limit = "2 or 3 arguments; expression context only"
 		}
 		manifest.Functions = append(manifest.Functions, Capability{Name: name, SyntaxSupported: true, SemanticSupported: !function.dynamic, Limitations: []string{limit}})
 	}
