@@ -16,6 +16,9 @@ func (s *semanticStage) rewriteSPLOwner(ctx antlr.ParserRuleContext) rewriteOwne
 }
 
 func (s *semanticStage) splOwner(ctx antlr.ParserRuleContext) rewriteOwner {
+	if owner, held := s.splMilestone10Owner(ctx); held {
+		return owner
+	}
 	o := rewriteOwner{location: s.parsed.source.contextLocation(ctx)}
 	switch c := ctx.(type) {
 	case parser.IAnalysisIdentifierContext:
@@ -77,6 +80,58 @@ func (s *semanticStage) splOwner(ctx antlr.ParserRuleContext) rewriteOwner {
 	}
 	return o
 }
+
+func (s *semanticStage) splMilestone10Owner(ctx antlr.ParserRuleContext) (rewriteOwner, bool) {
+	tstatsCatalog := false
+	for node := antlr.Tree(ctx); node != nil; node = node.GetParent() {
+		parent, ok := node.(antlr.ParserRuleContext)
+		if !ok {
+			continue
+		}
+		switch parent.(type) {
+		case parser.IAnalysisTstatsFromContext:
+			// The existing data-model rewrite contract remains proven inside the
+			// newly typed tstats source wrapper.
+			tstatsCatalog = true
+		case parser.IAnalysisTstatsOptionContext,
+			parser.IAnalysisTstatsWhereContext,
+			parser.IAnalysisTstatsGroupItemContext,
+			parser.IAnalysisTstatsGroupContext,
+			parser.IAnalysisTstatsSpanOptionContext:
+			return rewriteOwner{location: s.parsed.source.contextLocation(parent)}, true
+		case parser.IAnalysisTstatsContext:
+			if !tstatsCatalog {
+				return rewriteOwner{location: s.parsed.source.contextLocation(parent)}, true
+			}
+		case parser.IAnalysisFillnullValueOptionContext,
+			parser.IAnalysisFillnullContext,
+			parser.IAnalysisRexFieldOptionContext,
+			parser.IAnalysisRexMaxMatchOptionContext,
+			parser.IAnalysisRexOffsetFieldOptionContext,
+			parser.IAnalysisRexModeOptionContext,
+			parser.IAnalysisRexContext,
+			parser.IAnalysisSpathInputOptionContext,
+			parser.IAnalysisSpathPathOptionContext,
+			parser.IAnalysisSpathOutputOptionContext,
+			parser.IAnalysisSpathContext,
+			parser.IAnalysisBinOptionContext,
+			parser.IAnalysisBinContext,
+			parser.IAnalysisRegexContext,
+			parser.IAnalysisMvexpandOptionContext,
+			parser.IAnalysisMvexpandContext,
+			parser.IAnalysisJoinOptionContext,
+			parser.IAnalysisJoinContext,
+			parser.IAnalysisBranchOptionContext,
+			parser.IAnalysisBranchContext,
+			parser.IAnalysisMacroContext:
+			return rewriteOwner{location: s.parsed.source.contextLocation(parent)}, true
+		case parser.IAnalysisStageContext:
+			return rewriteOwner{}, false
+		}
+	}
+	return rewriteOwner{}, false
+}
+
 func rewriteSPLQuoted(name string, quote byte) (string, bool) {
 	if strings.ContainsAny(name, "\r\n\x00") {
 		return "", false

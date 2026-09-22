@@ -6,6 +6,23 @@ import (
 	"testing"
 )
 
+func rewriteSupportedForm(t *testing.T, language, kind, role string) bool {
+	t.Helper()
+	manifest, err := CapabilitiesFor(CapabilityOptions{Language: language})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if manifest.Rewrite == nil {
+		t.Fatalf("%s rewrite capability absent", language)
+	}
+	for _, form := range manifest.Rewrite.Forms {
+		if form.Kind == kind && form.Role == role {
+			return form.Supported
+		}
+	}
+	return false
+}
+
 // Durable examples exercise the canonical facade, including held forms whose
 // original syntax coverage is intentionally incomplete.
 func TestRewriteForms(t *testing.T) {

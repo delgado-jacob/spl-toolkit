@@ -62,6 +62,88 @@ func TestRewriteEvidenceSPL(t *testing.T) {
 		rewriteFind(t, rewriteTestSession(t, "spl", tc.query), tc.kind, tc.name, 0)
 	}
 }
+
+func TestRewriteMilestone10OperandsRemainUnproved(t *testing.T) {
+	tests := []struct {
+		name, query, kind, operand, target string
+		occurrence                         int
+	}{
+		{"tstats aggregate input", `tstats sum(bytes) FROM datamodel=Traffic.All`, "field", "bytes", "octets", 0},
+		{"tstats where field", `tstats count FROM datamodel=Traffic.All WHERE status=200`, "field", "status", "state", 0},
+		{"tstats group", `tstats count FROM datamodel=Traffic.All BY host`, "field", "host", "server", 0},
+		{"fillnull", `search index=main | fillnull value="0" user`, "field", "user", "account", 0},
+		{"rex", `search index=main | rex field=payload "(?<user>.+)"`, "field", "payload", "body", 0},
+		{"spath", `search index=main | spath input=payload path="event.id" output=event_id`, "field", "payload", "body", 0},
+		{"bin", `search index=main | bin span=5m _time AS bucket_time`, "field", "_time", "event_time", 0},
+		{"bucket", `search index=main | bucket bins=10 duration`, "field", "duration", "elapsed", 0},
+		{"regex", `search index=main | regex message="error"`, "field", "message", "body", 0},
+		{"mvexpand", `search index=main | mvexpand values`, "field", "values", "items", 0},
+		{"join key", `search index=main | join user [ search index=other ]`, "field", "user", "account", 0},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			s := rewriteTestSession(t, "spl", tc.query)
+			site := rewriteFind(t, s, tc.kind, tc.operand, tc.occurrence)
+			if site.Role != "" || site.Eligibility == "eligible" {
+				t.Fatalf("milestone 10 operand escaped its rewrite boundary: %+v", site)
+			}
+			unproved := false
+			for _, limitation := range site.Limitations {
+				unproved = unproved || limitation.Code == "unproved_owner"
+			}
+			if !unproved {
+				t.Fatalf("missing unproved-owner refusal: %+v", site)
+			}
+			if rewriteSupportedForm(t, "spl", site.Kind, site.Role) {
+				t.Fatalf("held owner became an advertised rewrite form: %+v", site)
+			}
+			rendering, err := s.Render([]RewriteReplacement{{SiteID: site.ID, Target: rewriteName(tc.target)}})
+			if err != nil {
+				t.Fatal(err)
+			}
+			text := s.Evidence().Analysis.Document.Text
+			candidateText := rewriteApply(text, rendering.Edits())
+			if len(rendering.Edits()) != 0 || candidateText != text || len(rendering.Requirements()) == 0 {
+				t.Fatalf("unproved operand rendered: text=%q candidate_text=%q edits=%+v requirements=%+v", text, candidateText, rendering.Edits(), rendering.Requirements())
+			}
+		})
+	}
+
+	t.Run("macro identity", func(t *testing.T) {
+		const text = `search index=main | ` + "`normalize_user(user)`"
+		s := rewriteTestSession(t, "spl", text)
+		macroReferences := 0
+		for _, reference := range s.Evidence().Analysis.References {
+			if reference.Kind == "macro" && reference.NormalizedName == "normalize_user" && reference.Resolution == "exact" {
+				macroReferences++
+			}
+		}
+		if macroReferences != 1 {
+			t.Fatalf("exact macro reference changed: %+v", s.Evidence().Analysis.References)
+		}
+		for _, site := range s.Evidence().Sites {
+			if site.Kind == "macro" {
+				t.Fatalf("macro identity became a rewrite site: %+v", site)
+			}
+		}
+		if rewriteSupportedForm(t, "spl", "macro", "") {
+			t.Fatal("macro identity became an advertised rewrite form")
+		}
+		candidateText := rewriteApply(text, nil)
+		if candidateText != text {
+			t.Fatalf("macro boundary changed text: text=%q candidate_text=%q", text, candidateText)
+		}
+	})
+
+	t.Run("existing tstats data model", func(t *testing.T) {
+		const text = `tstats count FROM datamodel=Traffic.All`
+		s := rewriteTestSession(t, "spl", text)
+		site := rewriteFind(t, s, "data_model", "Traffic", 0)
+		if site.Eligibility != "eligible" || site.Role != "catalog_component" {
+			t.Fatalf("existing data-model rewrite role changed: %+v", site)
+		}
+	})
+}
 func TestRewriteEvidenceSPL2(t *testing.T) {
 	s := rewriteTestSession(t, "spl2", `FROM main | where status=200 | rename user AS actor | lookup people remote AS actor OUTPUT label AS display | table actor, display`, RewriteFactProbe{Kind: "field", Identity: rewriteName("status")})
 	input := rewriteFind(t, s, "field", "user", 0)
