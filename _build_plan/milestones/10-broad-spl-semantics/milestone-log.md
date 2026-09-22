@@ -47,7 +47,7 @@ The local source and surface checks completed before this log included:
 - `env GOWORK=off go test ./pkg/analysis ./cmd ./pkg/api ./pkg/bindings -count=1`.
 - `python3 -m pytest tools/tests/test_acceptance.py -q`.
 - `make build-all`.
-- `make python-test`, including direct-wheel and rebuilt-sdist acceptance. Each package path passed 562 native, 257 cross-surface, and 18 tooling tests.
+- `env PIP_FIND_LINKS=file:///private/tmp/spl-toolkit-offline-wheelhouse make python-test`, including direct-wheel and rebuilt-sdist acceptance. Each package path passed 562 native, 257 cross-surface, and 18 tooling tests.
 - Byte comparisons showing that regenerated `docs/docs.go`, `docs/swagger.json`, and `docs/swagger.yaml` were unchanged.
 - `python3 tools/check_docs.py`, which validated YAML front matter for all 17 maintained documentation pages.
 
