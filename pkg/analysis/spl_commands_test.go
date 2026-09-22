@@ -352,3 +352,292 @@ func assertTstatsDiagnosticMessage(t *testing.T, result *Result, code, source, m
 	}
 	t.Fatalf("missing diagnostic %s with source %q and message %q in %+v", code, source, message, result.Diagnostics)
 }
+
+func TestFillnullSemantics(t *testing.T) {
+	t.Run("exact target flows conditionally downstream", func(t *testing.T) {
+		result := analyzeFieldCommand(t, `search user=* | fillnull value="unknown" user | where user="svc"`)
+		assertFieldCommandComplete(t, result, "fillnull")
+		assertFieldCommandReference(t, result, "fillnull", "user", "read", "source", "exact")
+		assertFieldCommandReference(t, result, "fillnull", "user", "create", "not_applicable", "exact")
+		assertFieldCommandReference(t, result, "where", "user", "read", "indeterminate", "exact")
+		assertFieldCommandTransition(t, result, "fillnull", "user", true)
+	})
+
+	t.Run("all fields preserves a closed environment", func(t *testing.T) {
+		result := analyzeFieldCommand(t, `| eval user="known" | table user | fillnull value="unknown" | where user="svc"`)
+		assertFieldCommandComplete(t, result, "fillnull")
+		lineage := fieldCommandLineage(t, result, "fillnull")
+		if !reflect.DeepEqual(lineage.Before, lineage.After) || lineage.After.Open || lineage.After.Uncertain {
+			t.Fatalf("fillnull without targets changed the field environment: before=%+v after=%+v", lineage.Before, lineage.After)
+		}
+		assertFieldCommandReference(t, result, "where", "user", "read", "derived", "exact")
+	})
+
+	t.Run("dynamic selector is held without hiding known flow", func(t *testing.T) {
+		result := analyzeFieldCommand(t, `search user=* | fillnull 'user*' | where user="svc"`)
+		assertFieldCommandIncomplete(t, result, "fillnull", `'user*'`)
+		assertFieldCommandReference(t, result, "where", "user", "read", "source", "exact")
+		if fieldCommandHasReference(result, "fillnull", "user*", "create") {
+			t.Fatalf("dynamic fillnull selector became a literal output: %+v", result.References)
+		}
+	})
+}
+
+func TestRexSemantics(t *testing.T) {
+	t.Run("exact input offset and captures flow downstream", func(t *testing.T) {
+		query := `search payload=* | rex field=payload max_match=2 offset_field=positions "(?<user>[^ ]+)(?P<host>.+)(?<user>x)" | where user="svc" AND host="web" AND positions>0`
+		result := analyzeFieldCommand(t, query)
+		assertFieldCommandComplete(t, result, "rex")
+		assertFieldCommandReference(t, result, "rex", "payload", "read", "source", "exact")
+		for _, name := range []string{"positions", "user", "host"} {
+			assertFieldCommandReference(t, result, "rex", name, "output", "not_applicable", "exact")
+			assertFieldCommandReference(t, result, "where", name, "read", "indeterminate", "exact")
+			assertFieldCommandTransition(t, result, "rex", name, true)
+		}
+		if got := fieldCommandReferenceCount(result, "rex", "user", "output"); got != 1 {
+			t.Fatalf("deduplicated rex capture count = %d, want 1: %+v", got, result.References)
+		}
+	})
+
+	t.Run("escaped and class-contained openers are ignored", func(t *testing.T) {
+		query := `search payload=* | rex field=payload "\(?<escaped>x)[(?<class>x)](?<kept>.+)" | where kept="x"`
+		result := analyzeFieldCommand(t, query)
+		assertFieldCommandComplete(t, result, "rex")
+		assertFieldCommandReference(t, result, "rex", "kept", "output", "not_applicable", "exact")
+		if fieldCommandHasReference(result, "rex", "escaped", "output") || fieldCommandHasReference(result, "rex", "class", "output") {
+			t.Fatalf("rex scanner accepted escaped or class-contained openers: %+v", result.References)
+		}
+		assertFieldCommandReference(t, result, "where", "kept", "read", "indeterminate", "exact")
+	})
+
+	t.Run("sed mode keeps the input identity and is held", func(t *testing.T) {
+		result := analyzeFieldCommand(t, `search payload=* | rex mode=sed field=payload "s/a/b/g" | where payload="b"`)
+		assertFieldCommandIncomplete(t, result, "rex", "mode=sed")
+		assertFieldCommandReference(t, result, "rex", "payload", "read", "source", "exact")
+		assertFieldCommandReference(t, result, "where", "payload", "read", "source", "exact")
+	})
+
+	t.Run("malformed capture opener is held at the expression", func(t *testing.T) {
+		result := analyzeFieldCommand(t, `search payload=* | rex field=payload "(?<bad-name>.+)" | where payload="x"`)
+		assertFieldCommandIncomplete(t, result, "rex", `"(?<bad-name>.+)"`)
+		assertFieldCommandReference(t, result, "where", "payload", "read", "source", "exact")
+	})
+}
+
+func TestSpathSemantics(t *testing.T) {
+	t.Run("exact input path and output flow downstream", func(t *testing.T) {
+		result := analyzeFieldCommand(t, `search payload=* | spath input=payload path="event.id" output=event_id | where event_id="42"`)
+		assertFieldCommandComplete(t, result, "spath")
+		assertFieldCommandReference(t, result, "spath", "payload", "read", "source", "exact")
+		assertFieldCommandReference(t, result, "spath", "event_id", "output", "not_applicable", "exact")
+		assertFieldCommandReference(t, result, "where", "event_id", "read", "indeterminate", "exact")
+		assertFieldCommandTransition(t, result, "spath", "event_id", true)
+	})
+
+	t.Run("auto extraction is held after retaining the input read", func(t *testing.T) {
+		result := analyzeFieldCommand(t, `search payload=* | spath input=payload | where payload="x"`)
+		assertFieldCommandIncomplete(t, result, "spath", "input=payload")
+		assertFieldCommandReference(t, result, "spath", "payload", "read", "source", "exact")
+		assertFieldCommandReference(t, result, "where", "payload", "read", "source", "exact")
+	})
+
+	t.Run("dynamic path is held without inventing an output", func(t *testing.T) {
+		result := analyzeFieldCommand(t, `search payload=* | spath input=payload path=event_path output=event_id | where payload="x"`)
+		assertFieldCommandIncomplete(t, result, "spath", "path=event_path")
+		assertFieldCommandReference(t, result, "spath", "payload", "read", "source", "exact")
+		if fieldCommandHasReference(result, "spath", "event_id", "output") {
+			t.Fatalf("spath with dynamic path invented an output: %+v", result.References)
+		}
+		assertFieldCommandReference(t, result, "where", "payload", "read", "source", "exact")
+	})
+}
+
+func TestBinAndBucketSemantics(t *testing.T) {
+	t.Run("bin replaces its exact input", func(t *testing.T) {
+		result := analyzeFieldCommand(t, `search _time=* | bin span=5m _time | where _time>0`)
+		assertFieldCommandComplete(t, result, "bin")
+		assertFieldCommandReference(t, result, "bin", "_time", "read", "source", "exact")
+		assertFieldCommandReference(t, result, "bin", "_time", "create", "not_applicable", "exact")
+		assertFieldCommandReference(t, result, "where", "_time", "read", "derived", "exact")
+		assertFieldCommandTransition(t, result, "bin", "_time", false)
+	})
+
+	t.Run("bucket alias leaves its source present", func(t *testing.T) {
+		result := analyzeFieldCommand(t, `search bytes=* | bucket bins=10 bytes AS band | where bytes>0 AND band>0`)
+		assertFieldCommandComplete(t, result, "bucket")
+		assertFieldCommandReference(t, result, "bucket", "bytes", "read", "source", "exact")
+		assertFieldCommandReference(t, result, "bucket", "band", "create", "not_applicable", "exact")
+		assertFieldCommandReference(t, result, "where", "bytes", "read", "source", "exact")
+		assertFieldCommandReference(t, result, "where", "band", "read", "derived", "exact")
+		assertFieldCommandTransition(t, result, "bucket", "band", false)
+	})
+
+	t.Run("unsupported option retains the exact source fact", func(t *testing.T) {
+		result := analyzeFieldCommand(t, `search bytes=* | bin mystery=5 bytes | where bytes>0`)
+		assertFieldCommandIncomplete(t, result, "bin", "mystery=5")
+		assertFieldCommandReference(t, result, "bin", "bytes", "read", "source", "exact")
+		assertFieldCommandReference(t, result, "where", "bytes", "read", "source", "exact")
+	})
+}
+
+func TestRegexSemantics(t *testing.T) {
+	t.Run("exact field comparison is a filter read", func(t *testing.T) {
+		result := analyzeFieldCommand(t, `search user=* | regex user!="^svc_" | where user="alice"`)
+		assertFieldCommandComplete(t, result, "regex")
+		assertFieldCommandReference(t, result, "regex", "user", "filter", "source", "exact")
+		assertFieldCommandReference(t, result, "where", "user", "read", "source", "exact")
+		if len(fieldCommandLineage(t, result, "regex").Transitions) != 0 {
+			t.Fatalf("regex changed field shape: %+v", fieldCommandLineage(t, result, "regex"))
+		}
+	})
+
+	t.Run("quoted-only form reads the implicit raw field", func(t *testing.T) {
+		result := analyzeFieldCommand(t, `| regex "error" | where _raw="error"`)
+		assertFieldCommandComplete(t, result, "regex")
+		assertFieldCommandReference(t, result, "regex", "_raw", "filter", "source", "exact")
+		assertFieldCommandReference(t, result, "where", "_raw", "read", "source", "exact")
+	})
+
+	t.Run("dynamic field is held without changing known shape", func(t *testing.T) {
+		result := analyzeFieldCommand(t, `search user=* | regex 'user*'="x" | where user="alice"`)
+		assertFieldCommandIncomplete(t, result, "regex", `'user*'`)
+		assertFieldCommandReference(t, result, "regex", "user*", "filter", "source", "dynamic")
+		assertFieldCommandReference(t, result, "where", "user", "read", "source", "exact")
+	})
+}
+
+func TestMvexpandSemantics(t *testing.T) {
+	t.Run("exact field identity flows downstream", func(t *testing.T) {
+		result := analyzeFieldCommand(t, `search values=* | mvexpand values | where values="x"`)
+		assertFieldCommandComplete(t, result, "mvexpand")
+		assertFieldCommandReference(t, result, "mvexpand", "values", "read", "source", "exact")
+		assertFieldCommandReference(t, result, "where", "values", "read", "source", "exact")
+		if len(fieldCommandLineage(t, result, "mvexpand").Transitions) != 0 {
+			t.Fatalf("mvexpand changed field identity: %+v", fieldCommandLineage(t, result, "mvexpand"))
+		}
+	})
+
+	t.Run("unsupported option retains the exact read", func(t *testing.T) {
+		result := analyzeFieldCommand(t, `search values=* | mvexpand values limit=3 | where values="x"`)
+		assertFieldCommandIncomplete(t, result, "mvexpand", "limit=3")
+		assertFieldCommandReference(t, result, "mvexpand", "values", "read", "source", "exact")
+		assertFieldCommandReference(t, result, "where", "values", "read", "source", "exact")
+	})
+}
+
+func analyzeFieldCommand(t *testing.T, query string) *Result {
+	t.Helper()
+	result, err := Analyze(QueryDocument{Text: query})
+	if err != nil {
+		t.Fatal(err)
+	}
+	return result
+}
+
+func assertFieldCommandComplete(t *testing.T, result *Result, command string) {
+	t.Helper()
+	for _, stage := range result.Stages {
+		if stage.Command == command {
+			if result.Status != Valid || !stage.SemanticComplete {
+				t.Fatalf("%s completeness = status %q stage %+v diagnostics %+v", command, result.Status, stage, result.Diagnostics)
+			}
+			return
+		}
+	}
+	t.Fatalf("missing %s stage: %+v", command, result.Stages)
+}
+
+func assertFieldCommandIncomplete(t *testing.T, result *Result, command, diagnosticSource string) {
+	t.Helper()
+	if result.Status != Incomplete {
+		t.Fatalf("%s status = %q, want incomplete: %+v", command, result.Status, result.Diagnostics)
+	}
+	for _, stage := range result.Stages {
+		if stage.Command == command && !stage.SemanticComplete {
+			assertTstatsDiagnosticLocation(t, result, CodeUnsupportedSemantics, diagnosticSource)
+			return
+		}
+	}
+	t.Fatalf("missing incomplete %s stage: %+v", command, result.Stages)
+}
+
+func assertFieldCommandReference(t *testing.T, result *Result, command, name, role, binding, resolution string) {
+	t.Helper()
+	stageID := ""
+	for _, stage := range result.Stages {
+		if stage.Command == command {
+			stageID = stage.ID
+		}
+	}
+	for _, reference := range result.References {
+		if reference.StageID == stageID && reference.NormalizedName == name && reference.Role == role {
+			if reference.Binding != binding || reference.Resolution != resolution {
+				t.Fatalf("%s %s/%s reference = %+v, want binding=%s resolution=%s", command, name, role, reference, binding, resolution)
+			}
+			return
+		}
+	}
+	t.Fatalf("missing %s %s/%s reference: %+v", command, name, role, result.References)
+}
+
+func fieldCommandHasReference(result *Result, command, name, role string) bool {
+	stageID := ""
+	for _, stage := range result.Stages {
+		if stage.Command == command {
+			stageID = stage.ID
+		}
+	}
+	for _, reference := range result.References {
+		if reference.StageID == stageID && reference.NormalizedName == name && reference.Role == role {
+			return true
+		}
+	}
+	return false
+}
+
+func fieldCommandReferenceCount(result *Result, command, name, role string) int {
+	count := 0
+	stageID := ""
+	for _, stage := range result.Stages {
+		if stage.Command == command {
+			stageID = stage.ID
+		}
+	}
+	for _, reference := range result.References {
+		if reference.StageID == stageID && reference.NormalizedName == name && reference.Role == role {
+			count++
+		}
+	}
+	return count
+}
+
+func fieldCommandLineage(t *testing.T, result *Result, command string) Lineage {
+	t.Helper()
+	stageID := ""
+	for _, stage := range result.Stages {
+		if stage.Command == command {
+			stageID = stage.ID
+		}
+	}
+	for _, lineage := range result.Lineage {
+		if lineage.StageID == stageID {
+			return lineage
+		}
+	}
+	t.Fatalf("missing %s lineage: %+v", command, result.Lineage)
+	return Lineage{}
+}
+
+func assertFieldCommandTransition(t *testing.T, result *Result, command, output string, conditional bool) {
+	t.Helper()
+	lineage := fieldCommandLineage(t, result, command)
+	for _, transition := range lineage.Transitions {
+		if transition.Output == output {
+			if transition.Conditional != conditional || len(transition.InputReferenceIDs) != 1 {
+				t.Fatalf("%s transition for %s = %+v, want one input and conditional=%t", command, output, transition, conditional)
+			}
+			return
+		}
+	}
+	t.Fatalf("missing %s transition for %s: %+v", command, output, lineage.Transitions)
+}

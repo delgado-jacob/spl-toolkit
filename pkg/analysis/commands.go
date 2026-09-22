@@ -35,6 +35,13 @@ var commands = map[string]commandSpec{
 	"datamodel":   {nil, "Exact model and optional dataset operands only; field effects are unmodeled. Qualified dataset references can cover the dataset component."},
 	"from":        {nil, "One exact dataset operand; datamodel:model.dataset yields overlapping located root-model and dataset references. Field effects are unmodeled."},
 	"tstats":      {tstatsCommand, "Exact data-model sources, predicates, registered aggregates, aliases, and exact grouping fields with literal _time spans. Dynamic catalogs, macros, wildcard grouping, prestats/append result-shape modes, unknown options, and unknown output identities remain held."},
+	"fillnull":    {fillnullCommand, "Optional literal replacement and exact target fields. All-fields mode preserves field shape; dynamic selectors and unsupported options remain held."},
+	"rex":         {rexCommand, "Exact or default _raw input, literal max_match, exact offset field, and unambiguous named captures. Sed mode and ambiguous captures remain held."},
+	"spath":       {spathCommand, "Exact or default _raw input with an exact literal path and explicit exact output. Auto-extraction and dynamic operands remain held."},
+	"bin":         {binCommand, "One exact input, supported literal value options, and an optional exact alias. Dynamic operands and unsupported options remain held."},
+	"bucket":      {binCommand, "Alias of bin with one exact input, supported literal value options, and an optional exact alias. Dynamic operands and unsupported options remain held."},
+	"regex":       {regexCommand, "Quoted expression against _raw or an exact field with = or !=. Dynamic fields and malformed forms remain held."},
+	"mvexpand":    {mvexpandCommand, "One exact field with identity-preserving field flow. Options and dynamic fields remain held."},
 	"macro":       {nil, "Synthetic category for a macro-only stage; exact macro name dependencies, unresolved expansion. A literal command named macro remains unmodeled."},
 }
 

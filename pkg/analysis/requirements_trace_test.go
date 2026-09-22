@@ -1045,6 +1045,21 @@ func requirementTraceReferenceByNameAndRole(t *testing.T, trace *requirementTrac
 	return nil
 }
 
+func assertFieldCommandRequirementTrace(t *testing.T, trace *requirementTrace, stageID, name, role, binding string, directExternal, conditional bool) {
+	t.Helper()
+	for i := range trace.references {
+		entry := &trace.references[i]
+		if entry.reference.StageID != stageID || entry.reference.NormalizedName != name || entry.reference.Role != role {
+			continue
+		}
+		if entry.reference.Binding != binding || entry.directExternal != directExternal || entry.conditional != conditional {
+			t.Fatalf("field-command requirement trace = %+v, want binding=%s direct=%t conditional=%t", entry, binding, directExternal, conditional)
+		}
+		return
+	}
+	t.Fatalf("missing field-command trace %s %s/%s: %+v", stageID, name, role, trace.references)
+}
+
 func TestRequirementTraceMacroDiagnosticsOwnExactReferences(t *testing.T) {
 	const query = "| eval a=`one()`, b=`two()`"
 	_, trace, err := analyzeRewriteWithTrace(QueryDocument{Text: query}, nil, nil)

@@ -601,6 +601,139 @@ func TestTstatsRequirements(t *testing.T) {
 	})
 }
 
+func TestFieldCommandRequirements(t *testing.T) {
+	tests := []struct {
+		name                 string
+		query                string
+		stageID              string
+		identity             string
+		role                 string
+		necessity            string
+		binding              string
+		traceDirectExternal  bool
+		traceConditional     bool
+		forbidRequiredTarget string
+	}{
+		{
+			name:                "rex exact input",
+			query:               `search payload=* | rex field=payload "(?<user>.+)" | where user="svc"`,
+			stageID:             "stage-1",
+			identity:            "payload",
+			role:                "read",
+			necessity:           "required",
+			binding:             "source",
+			traceDirectExternal: true,
+		},
+		{
+			name:                 "fillnull absent target is conditional",
+			query:                `| eval known=1 | table known | fillnull missing | where missing="x"`,
+			stageID:              "stage-2",
+			identity:             "missing",
+			role:                 "read",
+			necessity:            "conditional",
+			binding:              "indeterminate",
+			traceConditional:     true,
+			forbidRequiredTarget: "missing",
+		},
+		{
+			name:                "spath exact input",
+			query:               `search payload=* | spath input=payload path="event.id" output=event_id | where event_id="42"`,
+			stageID:             "stage-1",
+			identity:            "payload",
+			role:                "read",
+			necessity:           "required",
+			binding:             "source",
+			traceDirectExternal: true,
+		},
+		{
+			name:                "bin exact input",
+			query:               `search bytes=* | bin bins=10 bytes | where bytes>0`,
+			stageID:             "stage-1",
+			identity:            "bytes",
+			role:                "read",
+			necessity:           "required",
+			binding:             "source",
+			traceDirectExternal: true,
+		},
+		{
+			name:                "regex exact filter",
+			query:               `search user=* | regex user!="^svc_" | where user="alice"`,
+			stageID:             "stage-1",
+			identity:            "user",
+			role:                "filter",
+			necessity:           "required",
+			binding:             "source",
+			traceDirectExternal: true,
+		},
+		{
+			name:                "mvexpand exact input",
+			query:               `search values=* | mvexpand values | where values="x"`,
+			stageID:             "stage-1",
+			identity:            "values",
+			role:                "read",
+			necessity:           "required",
+			binding:             "source",
+			traceDirectExternal: true,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			result, trace, err := analyzeRewriteWithTrace(QueryDocument{Text: tc.query}, nil, nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+			found := false
+			for _, item := range result.Requirements.Items {
+				if item.Identity != tc.identity || item.Role != tc.role || item.Necessity != tc.necessity {
+					continue
+				}
+				for _, occurrence := range item.Occurrences {
+					if occurrence.StageID == tc.stageID && occurrence.Binding == tc.binding {
+						found = true
+					}
+				}
+			}
+			if !found {
+				t.Fatalf("missing requirement %s/%s necessity=%s binding=%s at %s: %+v", tc.identity, tc.role, tc.necessity, tc.binding, tc.stageID, result.Requirements)
+			}
+			if tc.forbidRequiredTarget != "" {
+				for _, item := range result.Requirements.Items {
+					if item.Identity == tc.forbidRequiredTarget && item.Necessity == "required" {
+						t.Fatalf("conditional fillnull target became required: %+v", item)
+					}
+				}
+			}
+			assertFieldCommandRequirementTrace(t, trace, tc.stageID, tc.identity, tc.role, tc.binding, tc.traceDirectExternal, tc.traceConditional)
+		})
+	}
+
+	t.Run("conditional outputs stay conditional downstream", func(t *testing.T) {
+		for _, tc := range []struct {
+			name  string
+			query string
+			field string
+		}{
+			{"rex capture", `search payload=* | rex field=payload "(?<user>.+)" | where user="svc"`, "user"},
+			{"spath output", `search payload=* | spath input=payload path="event.id" output=event_id | where event_id="42"`, "event_id"},
+		} {
+			t.Run(tc.name, func(t *testing.T) {
+				result, trace, err := analyzeRewriteWithTrace(QueryDocument{Text: tc.query}, nil, nil)
+				if err != nil {
+					t.Fatal(err)
+				}
+				stageID := result.Stages[len(result.Stages)-1].ID
+				assertFieldCommandRequirementTrace(t, trace, stageID, tc.field, "read", "indeterminate", false, true)
+				for _, item := range result.Requirements.Items {
+					if item.Identity == tc.field && item.Role == "read" && item.Necessity == "required" {
+						t.Fatalf("conditional derived output became required: %+v", item)
+					}
+				}
+			})
+		}
+	})
+}
+
 func tstatsRequirementFacts(items []RequirementItem) []string {
 	facts := []string{}
 	for _, item := range items {
