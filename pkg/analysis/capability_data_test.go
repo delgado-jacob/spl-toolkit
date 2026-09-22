@@ -356,6 +356,14 @@ func TestMilestone10CapabilityClaimsStayBounded(t *testing.T) {
 			t.Errorf("%s requirements state = %q, want %q", id, got, CapabilityUnsupported)
 		}
 	}
+	appendpipe := evidenceByID["spl.appendpipe.appendpipe-subsearch.incomplete"]
+	wantAppendpipeItems := []CapabilityRequirementExpectation{
+		{Kind: "index", Identity: "main", Role: "read", Necessity: "required", Resolution: "exact"},
+		{Kind: "field", Identity: "child", Role: "filter", Necessity: "required", Resolution: "exact"},
+	}
+	if got := appendpipe.Observations.Requirements; got == nil || !slices.Equal(got.Items, wantAppendpipeItems) || !slices.Equal(got.GapCodes, []string{"SPL_UNSUPPORTED_SEMANTICS"}) {
+		t.Errorf("appendpipe retained requirements = %+v, want exact parent and child items plus merge gap", got)
+	}
 
 	tstats := evidenceByID["spl.tstats.exact-model-dataset.positive"]
 	if got := tstats.Observations.Semantics; got == nil || !got.Complete ||

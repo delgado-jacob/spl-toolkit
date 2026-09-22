@@ -124,7 +124,7 @@
       "selection_rationale": "Exercises conditional named-capture and explicit path outputs followed by a stable sibling projection.",
       "targets": [
         {"command": "rex", "occurrence": 0, "syntax_complete": true, "semantic_complete": true},
-        {"command": "spath", "occurrence": 0, "syntax_complete": true, "semantic_complete": false}
+        {"command": "spath", "occurrence": 0, "syntax_complete": true, "semantic_complete": true}
       ],
       "expected": {
         "required_normalized_reference_names": ["_raw", "user", "event_id"],
@@ -133,16 +133,15 @@
         "required_requirement_pairs": [
           {"kind": "field", "name": "_raw"}
         ],
-        "required_gap_codes": ["SPL_UNSUPPORTED_COMMAND", "SPL_UNSUPPORTED_SEMANTICS"],
+        "required_gap_codes": ["SPL_UNSUPPORTED_COMMAND"],
         "required_stage_facts": [
           {"command": "rex", "occurrence": 0, "required_normalized_reference_names": ["_raw", "user"], "required_transition_targets": ["user"], "required_requirement_pairs": [{"kind": "field", "name": "_raw"}]},
-          {"command": "spath", "occurrence": 0, "required_normalized_reference_names": ["_raw"], "required_transition_targets": [], "required_requirement_pairs": [{"kind": "field", "name": "_raw"}]},
+          {"command": "spath", "occurrence": 0, "required_normalized_reference_names": ["_raw", "event_id"], "required_transition_targets": ["event_id"], "required_requirement_pairs": [{"kind": "field", "name": "_raw"}]},
           {"command": "table", "occurrence": 0, "required_normalized_reference_names": ["user", "event_id"], "required_transition_targets": ["user", "event_id"], "required_requirement_pairs": []}
         ]
       },
       "held_boundaries": [
-        {"command": "makeresults", "occurrence": 0, "required_gap_codes": ["SPL_UNSUPPORTED_COMMAND"]},
-        {"command": "spath", "occurrence": 0, "required_gap_codes": ["SPL_UNSUPPORTED_SEMANTICS"]}
+        {"command": "makeresults", "occurrence": 0, "required_gap_codes": ["SPL_UNSUPPORTED_COMMAND"]}
       ]
     },
     {

@@ -192,7 +192,7 @@
       "id": "spl.appendpipe.appendpipe-subsearch.incomplete",
       "classification": "incomplete",
       "document": {
-        "text": "search index=main | appendpipe [ stats count ]",
+        "text": "search index=main | appendpipe [ search child=* | stats count ]",
         "language": "spl",
         "profile": "splunkd",
         "version": "current",
@@ -210,6 +210,10 @@
             {
               "command": "appendpipe",
               "semantic_complete": false
+            },
+            {
+              "command": "search",
+              "semantic_complete": true
             },
             {
               "command": "stats",
@@ -237,6 +241,25 @@
               }
             },
             {
+              "normalized_name": "child",
+              "kind": "field",
+              "role": "filter",
+              "resolution": "exact",
+              "binding": "source",
+              "location": {
+                "start": {
+                  "offset": 40,
+                  "line": 1,
+                  "column": 41
+                },
+                "end": {
+                  "offset": 45,
+                  "line": 1,
+                  "column": 46
+                }
+              }
+            },
+            {
               "normalized_name": "count",
               "kind": "field",
               "role": "output",
@@ -244,14 +267,14 @@
               "binding": "not_applicable",
               "location": {
                 "start": {
-                  "offset": 39,
+                  "offset": 56,
                   "line": 1,
-                  "column": 40
+                  "column": 57
                 },
                 "end": {
-                  "offset": 44,
+                  "offset": 61,
                   "line": 1,
-                  "column": 45
+                  "column": 62
                 }
               }
             }
@@ -280,9 +303,9 @@
                   "column": 21
                 },
                 "end": {
-                  "offset": 46,
+                  "offset": 63,
                   "line": 1,
-                  "column": 47
+                  "column": 64
                 }
               }
             }
@@ -296,6 +319,13 @@
               "kind": "index",
               "identity": "main",
               "role": "read",
+              "necessity": "required",
+              "resolution": "exact"
+            },
+            {
+              "kind": "field",
+              "identity": "child",
+              "role": "filter",
               "necessity": "required",
               "resolution": "exact"
             }
