@@ -170,7 +170,7 @@ func spathCommand(s *semanticStage, node antlr.ParserRuleContext) {
 	} else {
 		option := pathOptions[0]
 		value := option.AnalysisOptionValue()
-		pathExact = value != nil && value.AnalysisLiteral() != nil && s.sound(value.AnalysisLiteral())
+		pathExact = fieldCommandExactSpathPath(s, value)
 		if !pathExact {
 			s.diagnostic(CodeUnsupportedSemantics, "spath path requires an exact literal", option)
 		}
@@ -200,6 +200,30 @@ func spathCommand(s *semanticStage, node antlr.ParserRuleContext) {
 	if inputExact && pathExact && outputExact && len(inputOptions) <= 1 && len(pathOptions) == 1 && len(outputOptions) == 1 {
 		s.createAt(output, "output", "create", nonemptyReferenceIDs(inputID), true)
 	}
+}
+
+func fieldCommandExactSpathPath(s *semanticStage, value parser.IAnalysisOptionValueContext) bool {
+	if value == nil {
+		return false
+	}
+	if literal := value.AnalysisLiteral(); literal != nil {
+		return s.sound(literal)
+	}
+
+	identifier := value.AnalysisIdentifier()
+	if identifier == nil || identifier.IDENTIFIER() == nil || !s.sound(identifier) {
+		return false
+	}
+	components := strings.Split(identifier.GetText(), ".")
+	if len(components) < 2 {
+		return false
+	}
+	for _, component := range components {
+		if !rewriteSPLBare(component) {
+			return false
+		}
+	}
+	return true
 }
 
 func binCommand(s *semanticStage, node antlr.ParserRuleContext) {

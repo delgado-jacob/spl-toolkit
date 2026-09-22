@@ -628,6 +628,15 @@ func TestSpathSemantics(t *testing.T) {
 		assertFieldCommandTransition(t, result, "spath", "event_id", true)
 	})
 
+	t.Run("unquoted static dotted path publishes explicit output", func(t *testing.T) {
+		result := analyzeFieldCommand(t, `| spath input=_raw path=event.id output=event_id | where event_id="42"`)
+		assertFieldCommandComplete(t, result, "spath")
+		assertFieldCommandReference(t, result, "spath", "_raw", "read", "source", "exact")
+		assertFieldCommandReference(t, result, "spath", "event_id", "output", "not_applicable", "exact")
+		assertFieldCommandReference(t, result, "where", "event_id", "read", "indeterminate", "exact")
+		assertFieldCommandTransition(t, result, "spath", "event_id", true)
+	})
+
 	t.Run("auto extraction is held after retaining the input read", func(t *testing.T) {
 		result := analyzeFieldCommand(t, `search payload=* | spath input=payload | where payload="x"`)
 		assertFieldCommandIncomplete(t, result, "spath", "input=payload")
