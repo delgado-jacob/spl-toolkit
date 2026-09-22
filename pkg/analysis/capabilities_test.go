@@ -263,7 +263,7 @@ func legacySPL2Capabilities() CapabilityManifest {
 
 // Catches unsupported functions/forms being advertised or treated as complete.
 func TestCapabilitiesFunctionForms(t *testing.T) {
-	for _, q := range []string{"eval x=abs(a)", "eval x=round(a,2)", "eval x=ceil(a)", "eval x=ceiling(a)", "eval x=floor(a)", "eval x=len(a)", "eval x=lower(a)", "eval x=upper(a)", "eval x=trim(a)", "eval x=ltrim(a,\"x\")", "eval x=rtrim(a)", "eval x=substr(a,1,2)", "eval x=replace(a,\"x\",\"y\")", "eval x=coalesce(a,b)", "eval x=if(a,b,c)", "eval x=case(a,b,c,d)", "eval x=isnull(a)", "eval x=isnotnull(a)", "eval x=tonumber(a)", "eval x=tostring(a)", "eval x=mvcount(a)", "eval x=split(a,\",\")", "eval x=match(a,\"x\")", "stats count sum(a) avg(a) min(a) max(a) values(a) list(a) dc(a) distinct_count(a) first(a) last(a)"} {
+	for _, q := range []string{"eval x=abs(a)", "eval x=round(a,2)", "eval x=ceil(a)", "eval x=ceiling(a)", "eval x=floor(a)", "eval x=len(a)", "eval x=lower(a)", "eval x=upper(a)", "eval x=trim(a)", "eval x=ltrim(a,\"x\")", "eval x=rtrim(a)", "eval x=substr(a,1,2)", "eval x=replace(a,\"x\",\"y\")", "eval x=coalesce(a,b)", "eval x=if(a,b,c)", "eval x=case(a,b,c,d)", "eval x=isnull(a)", "eval x=isnotnull(a)", "eval x=tonumber(a)", "eval x=tostring(a)", "eval x=mvcount(a)", "eval x=split(a,\",\")", "eval x=match(a,\"x\")", "eval x=mvindex(a,0)", "eval x=mvindex(a,0,1)", "eval x=mvfind(a,\"x\")", "eval x=true()", "eval x=null()", "eval x=now()", "eval x=relative_time(_time,\"-1h\")", "eval x=strftime(_time,\"%F\")", "eval x=like(host,\"web%\")", "stats count sum(a) avg(a) min(a) max(a) values(a) list(a) dc(a) distinct_count(a) first(a) last(a) earliest(_time) latest(_time) stdev(duration)"} {
 		r, _ := Analyze(QueryDocument{Text: q})
 		if r.Status != Valid {
 			t.Errorf("%s: %s %+v", q, r.Status, r.Diagnostics)
@@ -306,6 +306,46 @@ func TestCapabilitiesUnsupportedArgumentForms(t *testing.T) {
 		if !found {
 			t.Error(tc.q, "missing", tc.code)
 		}
+	}
+	for _, tc := range []struct {
+		query  string
+		source string
+	}{
+		{`eval x=mvindex(a)`, `mvindex(a)`},
+		{`eval x=mvindex(a,0,1,2)`, `mvindex(a,0,1,2)`},
+		{`eval x=mvfind(a)`, `mvfind(a)`},
+		{`eval x=true(a)`, `true(a)`},
+		{`eval x=null(a)`, `null(a)`},
+		{`eval x=now(a)`, `now(a)`},
+		{`eval x=relative_time(a)`, `relative_time(a)`},
+		{`eval x=strftime(a)`, `strftime(a)`},
+		{`eval x=like(a)`, `like(a)`},
+		{`eval x=earliest(a)`, `earliest(a)`},
+		{`eval x=latest(a)`, `latest(a)`},
+		{`eval x=stdev(a)`, `stdev(a)`},
+		{`stats like(host,"web%")`, `like(host,"web%")`},
+	} {
+		t.Run(tc.query, func(t *testing.T) {
+			r, err := Analyze(QueryDocument{Text: tc.query})
+			if err != nil {
+				t.Fatal(err)
+			}
+			if r.Status != Incomplete || !r.Coverage.SyntaxComplete || r.Coverage.SemanticComplete {
+				t.Fatalf("unsupported function form = status %q coverage %+v diagnostics %+v", r.Status, r.Coverage, r.Diagnostics)
+			}
+			found := false
+			for _, diagnostic := range r.Diagnostics {
+				if diagnostic.Code != CodeUnsupportedSemantics {
+					continue
+				}
+				if got := tc.query[diagnostic.Location.Start.Offset:diagnostic.Location.End.Offset]; got == tc.source {
+					found = true
+				}
+			}
+			if !found {
+				t.Fatalf("missing source-located %s for %q: %+v", CodeUnsupportedSemantics, tc.source, r.Diagnostics)
+			}
+		})
 	}
 }
 

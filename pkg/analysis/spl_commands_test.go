@@ -7,6 +7,103 @@ import (
 	"testing"
 )
 
+func TestMilestone10FunctionFieldFlow(t *testing.T) {
+	query := `search multivalue=items event_time=1 host=web duration=2 | eval chosen=mvindex(multivalue,0), found=mvfind(multivalue,"web"), flag=true(), missing=null(), current=now(), shifted=relative_time(event_time,"-1h"), label=strftime(event_time,"%F"), web=like(host,"web%") | stats earliest(shifted) AS oldest latest(current) stdev(duration) BY chosen found flag missing label web | table oldest 'latest(current)' 'stdev(duration)' chosen found flag missing label web`
+	result, err := Analyze(QueryDocument{Text: query})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if result.Status != Valid || !result.Coverage.SyntaxComplete || !result.Coverage.SemanticComplete || len(result.Diagnostics) != 0 {
+		t.Fatalf("function field flow = status %q coverage %+v diagnostics %+v", result.Status, result.Coverage, result.Diagnostics)
+	}
+
+	stageID := map[string]string{}
+	for _, stage := range result.Stages {
+		stageID[stage.Command] = stage.ID
+	}
+	wantArgumentReads := map[string]map[string]int{
+		stageID["eval"]: {
+			"multivalue": 2,
+			"event_time": 2,
+			"host":       1,
+		},
+		stageID["stats"]: {
+			"shifted":  1,
+			"current":  1,
+			"duration": 1,
+		},
+	}
+	for _, reference := range result.References {
+		if reference.Kind == "field" && reference.Role == "read" && wantArgumentReads[reference.StageID][reference.NormalizedName] > 0 {
+			wantArgumentReads[reference.StageID][reference.NormalizedName]--
+		}
+	}
+	for stage, reads := range wantArgumentReads {
+		for name, remaining := range reads {
+			if remaining != 0 {
+				t.Errorf("stage %s missing %d argument reads for %q", stage, remaining, name)
+			}
+		}
+	}
+
+	zeroArgumentOutputs := map[string]bool{"flag": false, "missing": false, "current": false}
+	for _, reference := range result.References {
+		if reference.StageID != stageID["eval"] || reference.Role != "create" {
+			continue
+		}
+		if _, ok := zeroArgumentOutputs[reference.NormalizedName]; ok {
+			zeroArgumentOutputs[reference.NormalizedName] = len(reference.OriginReferenceIDs) == 0
+		}
+	}
+	for name, found := range zeroArgumentOutputs {
+		if !found {
+			t.Errorf("zero-argument output %q was not created without argument origins", name)
+		}
+	}
+
+	wantAggregateOutputs := map[string]bool{"oldest": false, "latest(current)": false, "stdev(duration)": false}
+	for _, reference := range result.References {
+		if reference.StageID == stageID["stats"] && reference.Role == "output" {
+			if _, ok := wantAggregateOutputs[reference.NormalizedName]; ok {
+				wantAggregateOutputs[reference.NormalizedName] = true
+			}
+		}
+	}
+	for name, found := range wantAggregateOutputs {
+		if !found {
+			t.Errorf("missing aliased or implicit aggregate output %q", name)
+		}
+	}
+
+	wantDownstream := map[string]bool{
+		"oldest":          false,
+		"latest(current)": false,
+		"stdev(duration)": false,
+		"chosen":          false,
+		"found":           false,
+		"flag":            false,
+		"missing":         false,
+		"label":           false,
+		"web":             false,
+	}
+	for _, reference := range result.References {
+		if reference.StageID != stageID["table"] || reference.Role != "read" {
+			continue
+		}
+		if _, ok := wantDownstream[reference.NormalizedName]; ok {
+			if reference.Binding != "derived" {
+				t.Errorf("downstream field %q binding = %q, want derived", reference.NormalizedName, reference.Binding)
+			}
+			wantDownstream[reference.NormalizedName] = true
+		}
+	}
+	for name, found := range wantDownstream {
+		if !found {
+			t.Errorf("downstream field %q is unavailable", name)
+		}
+	}
+}
+
 func TestTstatsSemantics(t *testing.T) {
 	empty := func() Dependencies {
 		return Dependencies{Indexes: []string{}, Sources: []string{}, SourceTypes: []string{}, Datasets: []string{}, Lookups: []string{}, DataModels: []string{}, Macros: []string{}}
