@@ -1092,6 +1092,46 @@ func TestRequirementTraceMacroDiagnosticsOwnExactReferences(t *testing.T) {
 	if found != len(wantOwners) {
 		t.Fatalf("macro diagnostic count = %d, want %d: %+v", found, len(wantOwners), trace.diagnostics)
 	}
+
+	for _, tc := range []struct{ name, query, macro string }{
+		{"macro-only stage", "| `standalone()`", "standalone"},
+		{"tstats inline macro", "| tstats `accelerated` count FROM datamodel=Authentication.Authentication BY Authentication.user", "accelerated"},
+		{"macro next to stats", "search stable=* | `expand(invented)` | stats count by stable", "expand"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			result, siblingTrace, err := analyzeRewriteWithTrace(QueryDocument{Text: tc.query}, nil, nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+			var macro *requirementTraceReference
+			macroCount := 0
+			for i := range siblingTrace.references {
+				entry := &siblingTrace.references[i]
+				if entry.reference.Kind != "macro" {
+					continue
+				}
+				macro, macroCount = entry, macroCount+1
+			}
+			if macroCount != 1 || macro.reference.NormalizedName != tc.macro || !macro.directExternal || macro.conditional {
+				t.Fatalf("macro trace = %+v count=%d", macro, macroCount)
+			}
+			if got := tc.query[macro.reference.Location.Start.Offset:macro.reference.Location.End.Offset]; got != tc.macro {
+				t.Fatalf("macro trace source = %q, want %q", got, tc.macro)
+			}
+			owned := 0
+			for _, diagnostic := range siblingTrace.diagnostics {
+				if diagnostic.diagnostic.Code == CodeDynamicReference && diagnostic.incomplete && reflect.DeepEqual(diagnostic.pendingReferenceIDs, []string{macro.reference.ID}) {
+					owned++
+					if got := tc.query[diagnostic.diagnostic.Location.Start.Offset:diagnostic.diagnostic.Location.End.Offset]; !strings.Contains(got, tc.macro) {
+						t.Fatalf("macro diagnostic source = %q", got)
+					}
+				}
+			}
+			if owned != 1 || len(result.Dependencies.Macros) != 1 {
+				t.Fatalf("owned macro evidence = %d dependencies=%v diagnostics=%+v", owned, result.Dependencies.Macros, siblingTrace.diagnostics)
+			}
+		})
+	}
 }
 
 func TestRequirementTraceRemapsEachPendingIDOnce(t *testing.T) {

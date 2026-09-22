@@ -29,9 +29,9 @@ var commands = map[string]commandSpec{
 	"dedup":       {dedupCommand, "Numeric limit and exact field lists; options and wildcard selectors are unmodeled."},
 	"head":        {limitCommand, "Optional numeric limit only."},
 	"tail":        {limitCommand, "Optional numeric limit only."},
-	"append":      {nil, "Branch merging is unmodeled."},
-	"appendpipe":  {nil, "Branch merging is unmodeled."},
-	"join":        {nil, "Branch merging is unmodeled."},
+	"append":      {branchCommand, "Branch merging is unmodeled."},
+	"appendpipe":  {branchCommand, "Branch merging is unmodeled."},
+	"join":        {branchCommand, "Branch merging is unmodeled."},
 	"datamodel":   {nil, "Exact model and optional dataset operands only; field effects are unmodeled. Qualified dataset references can cover the dataset component."},
 	"from":        {nil, "One exact dataset operand; datamodel:model.dataset yields overlapping located root-model and dataset references. Field effects are unmodeled."},
 	"tstats":      {tstatsCommand, "Exact data-model sources, predicates, registered aggregates, aliases, and exact grouping fields with literal _time spans. Dynamic catalogs, macros, wildcard grouping, prestats/append result-shape modes, unknown options, and unknown output identities remain held."},
@@ -309,6 +309,16 @@ func limitCommand(s *semanticStage, node antlr.ParserRuleContext) {
 		s.expression(c.AnalysisExpression())
 		s.diagnostic(CodeUnsupportedSemantics, "only numeric head/tail limits are modeled", c)
 	}
+}
+
+func branchCommand(s *semanticStage, node antlr.ParserRuleContext) {
+	if stage, ok := node.(*parser.AnalysisJoinStageContext); ok && stage.AnalysisJoin() != nil {
+		for _, key := range stage.AnalysisJoin().AllAnalysisIdentifier() {
+			s.read(key, normalizedName(key.GetText()), "read")
+		}
+	}
+	command := s.result.Stages[s.stage].Command
+	s.diagnostic(CodeUnsupportedSemantics, "command \""+command+"\" has unmodeled field effects", node)
 }
 
 // Only a single typed identifier establishes an implicit aggregate output name.

@@ -86,6 +86,34 @@ func TestCorpusTstatsSearchDependencies(t *testing.T) {
 	}
 }
 
+func TestMacroDependenciesPreserveSiblingFacts(t *testing.T) {
+	tests := []struct {
+		name       string
+		query      string
+		macro      string
+		dataModels []string
+		datasets   []string
+	}{
+		{"macro-only stage", "| `standalone()`", "standalone", nil, nil},
+		{"tstats inline macro", "| tstats `accelerated` count FROM datamodel=Authentication.Authentication BY Authentication.user", "accelerated", []string{"Authentication"}, []string{"Authentication.Authentication"}},
+		{"macro next to stats", "search stable=* | `expand(invented)` | stats count by stable", "expand", nil, nil},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			r, err := Analyze(QueryDocument{Text: tc.query})
+			if err != nil {
+				t.Fatal(err)
+			}
+			if !reflect.DeepEqual(r.Dependencies.Macros, []string{tc.macro}) {
+				t.Fatalf("macro dependencies = %v, want %q", r.Dependencies.Macros, tc.macro)
+			}
+			if !reflect.DeepEqual(append([]string{}, r.Dependencies.DataModels...), append([]string{}, tc.dataModels...)) || !reflect.DeepEqual(append([]string{}, r.Dependencies.Datasets...), append([]string{}, tc.datasets...)) {
+				t.Fatalf("catalog siblings lost: %+v", r.Dependencies)
+			}
+		})
+	}
+}
+
 func TestCorpusDatamodelSearchModeIsNotDataset(t *testing.T) {
 	r, _ := Analyze(QueryDocument{Text: `| datamodel Web search`})
 	if r.Status != Incomplete || !r.Coverage.SyntaxComplete || len(r.Dependencies.Datasets) != 0 || !reflect.DeepEqual(r.Dependencies.DataModels, []string{"Web"}) {

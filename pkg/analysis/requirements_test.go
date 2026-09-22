@@ -601,6 +601,181 @@ func TestTstatsRequirements(t *testing.T) {
 	})
 }
 
+func TestBranchChildRequirementsSurvive(t *testing.T) {
+	query := "search parent=* | append [ search index=child child=* | eval local=child | `child_macro()` ] | where parent=*"
+	result, err := Analyze(QueryDocument{Text: query})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if result.Status != Incomplete || result.Requirements.QueryStatus != Incomplete || result.Requirements.Coverage.Complete {
+		t.Fatalf("branch requirement status = %+v", result.Requirements)
+	}
+
+	wantChild := map[string]bool{
+		"index:child:read:scope-1":       false,
+		"field:child:filter:scope-1":     false,
+		"field:child:read:scope-1":       false,
+		"macro:child_macro:read:scope-1": false,
+	}
+	for _, item := range result.Requirements.Items {
+		for _, occurrence := range item.Occurrences {
+			key := item.Kind + ":" + item.Identity + ":" + item.Role + ":" + occurrence.ScopeID
+			if _, ok := wantChild[key]; ok {
+				if item.Necessity != "required" || item.Origin != "direct" || occurrence.StageID == "" {
+					t.Fatalf("child requirement = %+v occurrence=%+v", item, occurrence)
+				}
+				wantChild[key] = true
+			}
+		}
+	}
+	for fact, found := range wantChild {
+		if !found {
+			t.Errorf("missing child requirement %s: %+v", fact, result.Requirements.Items)
+		}
+	}
+	if !reflect.DeepEqual(result.Dependencies.Indexes, []string{"child"}) || !reflect.DeepEqual(result.Dependencies.Macros, []string{"child_macro"}) {
+		t.Fatalf("child dependency lost: %+v", result.Dependencies)
+	}
+	foundTransition := false
+	for _, lineage := range result.Lineage {
+		if lineage.ScopeID != "scope-1" {
+			continue
+		}
+		for _, transition := range lineage.Transitions {
+			if transition.Operation == "create" && transition.Output == "local" {
+				foundTransition = true
+			}
+		}
+	}
+	if !foundTransition {
+		t.Fatalf("child transition lost: %+v", result.Lineage)
+	}
+	foundChildDiagnostic := false
+	for _, diagnostic := range result.Diagnostics {
+		if diagnostic.Code == CodeDynamicReference && diagnostic.ScopeID == "scope-1" {
+			foundChildDiagnostic = true
+		}
+	}
+	if !foundChildDiagnostic {
+		t.Fatalf("child diagnostic lost or misowned: %+v", result.Diagnostics)
+	}
+}
+
+func TestMacroSiblingFactsSurvive(t *testing.T) {
+	tests := []struct {
+		name  string
+		query string
+		macro string
+		check func(*testing.T, *Result)
+	}{
+		{
+			name:  "macro-only stage",
+			query: "| `standalone()`",
+			macro: "standalone",
+			check: func(t *testing.T, result *Result) {
+				if len(result.Stages) != 1 || result.Stages[0].Command != "macro" || result.Stages[0].SemanticComplete {
+					t.Fatalf("macro stage = %+v", result.Stages)
+				}
+				for _, reference := range result.References {
+					if reference.Kind == "field" {
+						t.Fatalf("macro-only stage invented field: %+v", reference)
+					}
+				}
+			},
+		},
+		{
+			name:  "tstats inline macro",
+			query: "| tstats `accelerated` count FROM datamodel=Authentication.Authentication BY Authentication.user",
+			macro: "accelerated",
+			check: func(t *testing.T, result *Result) {
+				for _, want := range []struct{ kind, name, role string }{{"data_model", "Authentication", "read"}, {"dataset", "Authentication.Authentication", "read"}, {"field", "Authentication.user", "group"}, {"field", "count", "output"}} {
+					found := false
+					for _, reference := range result.References {
+						found = found || (reference.Kind == want.kind && reference.NormalizedName == want.name && reference.Role == want.role)
+					}
+					if !found {
+						t.Errorf("missing tstats sibling %s/%s/%s: %+v", want.kind, want.name, want.role, result.References)
+					}
+				}
+			},
+		},
+		{
+			name:  "macro next to sound stats",
+			query: "search stable=* | `expand(invented)` | stats count by stable",
+			macro: "expand",
+			check: func(t *testing.T, result *Result) {
+				stats := result.Stages[len(result.Stages)-1]
+				if stats.Command != "stats" || !stats.SemanticComplete {
+					t.Fatalf("stats sibling = %+v", stats)
+				}
+				foundGroup, foundOutput := false, false
+				for _, reference := range result.References {
+					if reference.Kind == "field" && reference.NormalizedName == "invented" {
+						t.Fatalf("macro argument invented field requirement: %+v", reference)
+					}
+					foundGroup = foundGroup || (reference.NormalizedName == "stable" && reference.Role == "group")
+					foundOutput = foundOutput || (reference.NormalizedName == "count" && reference.Role == "output")
+				}
+				if !foundGroup || !foundOutput {
+					t.Fatalf("stats sibling facts lost: %+v", result.References)
+				}
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			result, err := Analyze(QueryDocument{Text: tc.query})
+			if err != nil {
+				t.Fatal(err)
+			}
+			if result.Status != Incomplete || result.Coverage.SemanticComplete || result.Requirements.QueryStatus != Incomplete || result.Requirements.Coverage.Complete {
+				t.Fatalf("macro completeness = analysis %+v requirements %+v", result.Coverage, result.Requirements.Coverage)
+			}
+			if !reflect.DeepEqual(result.Dependencies.Macros, []string{tc.macro}) {
+				t.Fatalf("macro dependencies = %v, want %q", result.Dependencies.Macros, tc.macro)
+			}
+
+			var macro Reference
+			macroCount := 0
+			for _, reference := range result.References {
+				if reference.Kind == "macro" {
+					macro, macroCount = reference, macroCount+1
+				}
+			}
+			if macroCount != 1 || macro.NormalizedName != tc.macro || macro.OriginalName != tc.macro || macro.Role != "read" || macro.Resolution != "exact" {
+				t.Fatalf("macro reference = %+v count=%d", macro, macroCount)
+			}
+			if got := tc.query[macro.Location.Start.Offset:macro.Location.End.Offset]; got != tc.macro {
+				t.Fatalf("macro source location = %q, want %q", got, tc.macro)
+			}
+
+			macroRequirements := 0
+			for _, item := range result.Requirements.Items {
+				if item.Kind == "macro" {
+					macroRequirements++
+					if item.Identity != tc.macro || item.Role != "read" || item.Necessity != "required" || item.Origin != "direct" || item.Resolution != "exact" || len(item.Occurrences) != 1 || item.Occurrences[0].ReferenceID != macro.ID {
+						t.Fatalf("macro requirement = %+v", item)
+					}
+				}
+			}
+			if macroRequirements != 1 {
+				t.Fatalf("macro requirement count = %d: %+v", macroRequirements, result.Requirements.Items)
+			}
+			ownedGap := 0
+			for _, gap := range result.Requirements.Gaps {
+				if gap.Code == CodeDynamicReference && reflect.DeepEqual(gap.ReferenceIDs, []string{macro.ID}) {
+					ownedGap++
+				}
+			}
+			if ownedGap != 1 {
+				t.Fatalf("macro expansion gaps = %d: %+v", ownedGap, result.Requirements.Gaps)
+			}
+			tc.check(t, result)
+		})
+	}
+}
+
 func TestFieldCommandRequirements(t *testing.T) {
 	tests := []struct {
 		name                 string

@@ -36,7 +36,62 @@ func TestScopesIndependentBranches(t *testing.T) {
 			} else if last.Binding != "indeterminate" || len(last.OriginReferenceIDs) != 0 {
 				t.Fatal(last)
 			}
+			for _, field := range r.Lineage[len(r.Lineage)-1].After.Fields {
+				if field.Name == "local" || field.Name == "child" {
+					t.Fatal("child binding leaked into parent", field)
+				}
+			}
 		})
+	}
+}
+
+func TestBranchJoinKeyReadsAndUncertainMerge(t *testing.T) {
+	query := `search id=* stable=* | join id [ search child=* | eval child_only=child ] | where stable=* AND child_only=*`
+	r, err := Analyze(QueryDocument{Text: query})
+	if err != nil || r.Status != Incomplete || !r.Coverage.SyntaxComplete || r.Coverage.SemanticComplete {
+		t.Fatal(r, err)
+	}
+
+	join := scopedReference(t, r, "scope-0", "id", "read")
+	if join.StageID != "stage-1" || join.Binding != "source" || !reflect.DeepEqual(join.OriginReferenceIDs, []string{"ref-0"}) {
+		t.Fatalf("join key = %+v", join)
+	}
+	if got := query[join.Location.Start.Offset:join.Location.End.Offset]; got != "id" {
+		t.Fatalf("join key source = %q", got)
+	}
+
+	branchLineage := r.Lineage[1]
+	if !branchLineage.After.Uncertain {
+		t.Fatalf("branch merge remained certain: %+v", branchLineage.After)
+	}
+	wantFields := []string{"id", "stable"}
+	gotFields := []string{}
+	for _, field := range branchLineage.After.Fields {
+		gotFields = append(gotFields, field.Name)
+	}
+	if !reflect.DeepEqual(gotFields, wantFields) {
+		t.Fatalf("branch fields = %v, want %v", gotFields, wantFields)
+	}
+
+	downstreamStable := scopedReference(t, r, "scope-0", "stable", "read")
+	if downstreamStable.StageID != "stage-4" || downstreamStable.Binding != "source" || !reflect.DeepEqual(downstreamStable.OriginReferenceIDs, []string{"ref-1"}) {
+		t.Fatalf("known parent sibling = %+v", downstreamStable)
+	}
+	downstreamChild := scopedReference(t, r, "scope-0", "child_only", "read")
+	if downstreamChild.Binding != "indeterminate" || len(downstreamChild.OriginReferenceIDs) != 0 {
+		t.Fatalf("unknown post-branch field = %+v", downstreamChild)
+	}
+	mergeDiagnostics := 0
+	for _, diagnostic := range r.Diagnostics {
+		if diagnostic.Code == CodeUnsupportedSemantics && diagnostic.StageID == "stage-1" {
+			mergeDiagnostics++
+			if got := query[diagnostic.Location.Start.Offset:diagnostic.Location.End.Offset]; got != `join id [ search child=* | eval child_only=child ]` {
+				t.Fatalf("merge diagnostic source = %q", got)
+			}
+		}
+	}
+	if mergeDiagnostics != 1 {
+		t.Fatalf("merge diagnostics = %d: %+v", mergeDiagnostics, r.Diagnostics)
 	}
 }
 
@@ -52,6 +107,9 @@ func TestScopesAppendpipeInheritsBeforeMerge(t *testing.T) {
 	}
 	if r.Lineage[3].Before.Uncertain {
 		t.Fatal("child inherited merge uncertainty", r.Lineage[3])
+	}
+	if !r.Lineage[2].After.Uncertain {
+		t.Fatal("appendpipe merge remained certain", r.Lineage[2])
 	}
 	last := r.References[len(r.References)-1]
 	if last.Binding != "derived" || !reflect.DeepEqual(last.OriginReferenceIDs, child.OriginReferenceIDs) {
@@ -92,6 +150,11 @@ func TestScopesNestedOwnership(t *testing.T) {
 		}
 	}
 	scopedReference(t, r, "scope-2", "a", "read")
+	for _, diagnostic := range r.Diagnostics {
+		if diagnostic.StageID == "stage-3" && diagnostic.ScopeID != "scope-1" {
+			t.Fatal("nested branch diagnostic escaped owner scope", diagnostic)
+		}
+	}
 }
 
 // ANTLR can recover child stages as root siblings when it loses a bracketed
@@ -116,6 +179,11 @@ func TestScopesMalformedChildCannotBecomeParent(t *testing.T) {
 			}
 			for _, line := range r.Lineage {
 				if line.ScopeID == "scope-0" {
+					for _, transition := range line.Transitions {
+						if transition.Output == "good" || transition.Output == "child" {
+							t.Error("child transition leaked to parent lineage", line)
+						}
+					}
 					for _, state := range []FieldState{line.Before, line.After} {
 						for _, field := range state.Fields {
 							if field.Name == "good" || field.Name == "child" {
