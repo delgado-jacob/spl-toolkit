@@ -1,6 +1,7 @@
 package analysis
 
 import (
+	"strconv"
 	"strings"
 
 	"github.com/antlr4-go/antlr/v4"
@@ -56,7 +57,12 @@ func rexCommand(s *semanticStage, node antlr.ParserRuleContext) {
 			inputExact = false
 		}
 	}
-	inputID := s.readAt(input, "read")
+	inputID := ""
+	if inputExact {
+		inputID = s.readAt(input, "read")
+	} else {
+		inputID = fieldCommandHeldRead(s, input, "read")
+	}
 	if !inputExact {
 		s.diagnostic(CodeUnsupportedSemantics, "rex input must be an exact field", fieldCommandDiagnosticContext(fieldOptions, ctx))
 	}
@@ -144,7 +150,12 @@ func spathCommand(s *semanticStage, node antlr.ParserRuleContext) {
 			inputExact = false
 		}
 	}
-	inputID := s.readAt(input, "read")
+	inputID := ""
+	if inputExact {
+		inputID = s.readAt(input, "read")
+	} else {
+		inputID = fieldCommandHeldRead(s, input, "read")
+	}
 	if !inputExact {
 		s.diagnostic(CodeUnsupportedSemantics, "spath input must be an exact field", fieldCommandDiagnosticContext(inputOptions, ctx))
 	}
@@ -201,8 +212,13 @@ func binCommand(s *semanticStage, node antlr.ParserRuleContext) {
 		return
 	}
 	input := fieldCommandOperand(s, ctx.AnalysisIdentifier())
-	inputID := s.readAt(input, "read")
 	modeled := input.Resolution == "exact"
+	inputID := ""
+	if modeled {
+		inputID = s.readAt(input, "read")
+	} else {
+		inputID = fieldCommandHeldRead(s, input, "read")
+	}
 	if !modeled {
 		s.diagnostic(CodeUnsupportedSemantics, "bin input must be an exact field", ctx.AnalysisIdentifier())
 	}
@@ -216,9 +232,26 @@ func binCommand(s *semanticStage, node antlr.ParserRuleContext) {
 		case "span", "minspan":
 			value := option.AnalysisUnitOptionValue()
 			literal = value != nil && value.NUMBER() != nil && s.sound(value)
-		case "bins", "start", "end", "aligntime":
+		case "bins":
 			value := option.AnalysisOptionValue()
-			literal = value != nil && value.AnalysisLiteral() != nil && s.sound(value.AnalysisLiteral())
+			if value != nil && value.AnalysisLiteral() != nil && value.AnalysisLiteral().NUMBER() != nil && s.sound(value.AnalysisLiteral()) {
+				count, err := strconv.Atoi(value.AnalysisLiteral().NUMBER().GetText())
+				literal = err == nil && count > 0
+			}
+		case "start", "end":
+			value := option.AnalysisOptionValue()
+			literal = value != nil && value.AnalysisLiteral() != nil && value.AnalysisLiteral().NUMBER() != nil && s.sound(value.AnalysisLiteral())
+		case "aligntime":
+			value := option.AnalysisOptionValue()
+			if value != nil && s.sound(value) {
+				switch {
+				case value.AnalysisLiteral() != nil:
+					literal = value.AnalysisLiteral().TIME() != nil
+				case value.AnalysisIdentifier() != nil:
+					alignment := strings.ToLower(normalizedName(value.AnalysisIdentifier().GetText()))
+					literal = alignment == "earliest" || alignment == "latest"
+				}
+			}
 		}
 		if !literal {
 			modeled = false
@@ -252,8 +285,10 @@ func regexCommand(s *semanticStage, node antlr.ParserRuleContext) {
 	if ctx.AnalysisIdentifier() != nil {
 		input = fieldCommandOperand(s, ctx.AnalysisIdentifier())
 	}
-	s.readAt(input, "filter")
-	if input.Resolution != "exact" {
+	if input.Resolution == "exact" {
+		s.readAt(input, "filter")
+	} else {
+		fieldCommandHeldRead(s, input, "filter")
 		s.diagnostic(CodeUnsupportedSemantics, "regex input must be an exact field", ctx.AnalysisIdentifier())
 	}
 }
@@ -268,8 +303,10 @@ func mvexpandCommand(s *semanticStage, node antlr.ParserRuleContext) {
 		return
 	}
 	input := fieldCommandOperand(s, ctx.AnalysisIdentifier())
-	s.readAt(input, "read")
-	if input.Resolution != "exact" {
+	if input.Resolution == "exact" {
+		s.readAt(input, "read")
+	} else {
+		fieldCommandHeldRead(s, input, "read")
 		s.diagnostic(CodeUnsupportedSemantics, "mvexpand input must be an exact field", ctx.AnalysisIdentifier())
 	}
 	for _, option := range ctx.AllAnalysisMvexpandOption() {
@@ -298,10 +335,17 @@ func scanRexNamedCaptures(pattern string) ([]rexCapture, bool) {
 	runes := []rune(pattern)
 	captures := []rexCapture{}
 	seen := map[string]bool{}
-	escaped, inClass := false, false
+	escaped, inClass, inPOSIXClass, inQuotedLiteral := false, false, false, false
 	classCanClose, classMayNegate := false, false
 	for i := 0; i < len(runes); i++ {
 		r := runes[i]
+		if inQuotedLiteral {
+			if r == '\\' && i+1 < len(runes) && runes[i+1] == 'E' {
+				inQuotedLiteral = false
+				i++
+			}
+			continue
+		}
 		if escaped {
 			escaped = false
 			if inClass {
@@ -311,10 +355,31 @@ func scanRexNamedCaptures(pattern string) ([]rexCapture, bool) {
 			continue
 		}
 		if r == '\\' {
+			if !inClass && i+1 < len(runes) && runes[i+1] == 'Q' {
+				inQuotedLiteral = true
+				i++
+				continue
+			}
 			escaped = true
 			continue
 		}
 		if inClass {
+			if inPOSIXClass {
+				if r == ':' && i+1 < len(runes) && runes[i+1] == ']' {
+					inPOSIXClass = false
+					classCanClose = true
+					classMayNegate = false
+					i++
+				}
+				continue
+			}
+			if r == '[' && i+1 < len(runes) && runes[i+1] == ':' {
+				inPOSIXClass = true
+				classCanClose = true
+				classMayNegate = false
+				i++
+				continue
+			}
 			if r == ']' && classCanClose {
 				inClass = false
 				classCanClose = false
@@ -333,6 +398,27 @@ func scanRexNamedCaptures(pattern string) ([]rexCapture, bool) {
 			inClass = true
 			classCanClose = false
 			classMayNegate = true
+			continue
+		}
+		if r == '(' && i+2 < len(runes) && runes[i+1] == '?' && runes[i+2] == '#' {
+			commentEnd, commentEscaped := i+3, false
+			for ; commentEnd < len(runes); commentEnd++ {
+				if commentEscaped {
+					commentEscaped = false
+					continue
+				}
+				if runes[commentEnd] == '\\' {
+					commentEscaped = true
+					continue
+				}
+				if runes[commentEnd] == ')' {
+					break
+				}
+			}
+			if commentEnd == len(runes) {
+				return nil, false
+			}
+			i = commentEnd
 			continue
 		}
 		if r != '(' || i+2 >= len(runes) || runes[i+1] != '?' {
@@ -387,7 +473,24 @@ func scanRexNamedCaptures(pattern string) ([]rexCapture, bool) {
 		}
 		i = nameEnd
 	}
+	if inPOSIXClass || inQuotedLiteral {
+		return nil, false
+	}
 	return captures, true
+}
+
+func fieldCommandHeldRead(s *semanticStage, operand locatedOperand, role string) string {
+	if !operand.Sound || operand.Resolution == "exact" {
+		return ""
+	}
+	id := s.operandReference(operand, "field", role)
+	if id == "" {
+		return ""
+	}
+	reference := &s.result.References[len(s.result.References)-1]
+	reference.Binding = "indeterminate"
+	s.rewriteBinding(id, reference.Binding, nil)
+	return id
 }
 
 func fieldCommandOperand(s *semanticStage, ctx parser.IAnalysisIdentifierContext) locatedOperand {

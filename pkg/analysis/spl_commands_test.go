@@ -434,6 +434,19 @@ func TestRexSemantics(t *testing.T) {
 		}
 	})
 
+	t.Run("POSIX classes comments and quoted literals hide captures", func(t *testing.T) {
+		query := `search payload=* | rex field=payload "[[:alpha:](?<class_fake>)](?# (?<comment_fake>y))\Q(?<quoted_fake>x)\E(?<real>x)" | where real="x"`
+		result := analyzeFieldCommand(t, query)
+		assertFieldCommandComplete(t, result, "rex")
+		assertFieldCommandReference(t, result, "rex", "real", "output", "not_applicable", "exact")
+		assertFieldCommandReference(t, result, "where", "real", "read", "indeterminate", "exact")
+		for _, name := range []string{"class_fake", "comment_fake", "quoted_fake"} {
+			if fieldCommandHasReference(result, "rex", name, "output") {
+				t.Fatalf("rex scanner published %s from a non-capture region: %+v", name, result.References)
+			}
+		}
+	})
+
 	t.Run("sed mode keeps the input identity and is held", func(t *testing.T) {
 		result := analyzeFieldCommand(t, `search payload=* | rex mode=sed field=payload "s/a/b/g" | where payload="b"`)
 		assertFieldCommandIncomplete(t, result, "rex", "mode=sed")
@@ -453,6 +466,15 @@ func TestRexSemantics(t *testing.T) {
 		assertFieldCommandReference(t, result, "rex", "payload", "read", "source", "exact")
 		assertFieldCommandReference(t, result, "where", "payload", "read", "source", "exact")
 	})
+
+	t.Run("dynamic input does not install the wildcard spelling", func(t *testing.T) {
+		result := analyzeFieldCommand(t, `search user=* | rex field='user*' "(?<capture>x)" | where 'user*'="x"`)
+		assertFieldCommandIncomplete(t, result, "rex", `field='user*'`)
+		assertFieldCommandHeldDynamicRead(t, result, "rex", "user*", "read")
+		if fieldCommandHasReference(result, "rex", "capture", "output") {
+			t.Fatalf("rex with a dynamic input published a capture: %+v", result.References)
+		}
+	})
 }
 
 func TestRexNamedCaptures(t *testing.T) {
@@ -467,6 +489,9 @@ func TestRexNamedCaptures(t *testing.T) {
 		{name: "leading literal closing bracket", pattern: `[](?<fake>)](?<real>x)`, want: []string{"real"}, ok: true},
 		{name: "second caret is a class member", pattern: `[^^](?<real>x)`, want: []string{"real"}, ok: true},
 		{name: "escaped and class-contained openers", pattern: `\(?<escaped>x)[(?P<class>x)](?<real>x)`, want: []string{"real"}, ok: true},
+		{name: "POSIX character class", pattern: `[[:alpha:](?<fake>)](?<real>x)`, want: []string{"real"}, ok: true},
+		{name: "comment group", pattern: `(?# (?<fake>y))(?<real>x)`, want: []string{"real"}, ok: true},
+		{name: "quoted literal region", pattern: `\Q(?<fake>x)\E(?<real>x)`, want: []string{"real"}, ok: true},
 		{name: "source order and deduplication", pattern: `(?P<two>x)(?<one>y)(?<two>z)`, want: []string{"two", "one"}, ok: true},
 	}
 
@@ -506,6 +531,15 @@ func TestSpathSemantics(t *testing.T) {
 		}
 		assertFieldCommandReference(t, result, "where", "payload", "read", "source", "exact")
 	})
+
+	t.Run("dynamic input does not install the wildcard spelling", func(t *testing.T) {
+		result := analyzeFieldCommand(t, `search user=* | spath input='user*' path="event.id" output=event_id | where 'user*'="x"`)
+		assertFieldCommandIncomplete(t, result, "spath", `input='user*'`)
+		assertFieldCommandHeldDynamicRead(t, result, "spath", "user*", "read")
+		if fieldCommandHasReference(result, "spath", "event_id", "output") {
+			t.Fatalf("spath with a dynamic input published an output: %+v", result.References)
+		}
+	})
 }
 
 func TestBinAndBucketSemantics(t *testing.T) {
@@ -526,6 +560,23 @@ func TestBinAndBucketSemantics(t *testing.T) {
 		assertFieldCommandReference(t, result, "where", "bytes", "read", "source", "exact")
 		assertFieldCommandReference(t, result, "where", "band", "read", "derived", "exact")
 		assertFieldCommandTransition(t, result, "bucket", "band", false)
+	})
+
+	t.Run("supported option domains apply the alias", func(t *testing.T) {
+		for _, tc := range []struct {
+			name    string
+			options string
+		}{
+			{name: "positive bins numeric bounds and earliest alignment", options: "bins=10 start=0 end=100 aligntime=earliest span=5"},
+			{name: "latest alignment", options: "aligntime=latest"},
+			{name: "typed time alignment", options: "aligntime=+5m"},
+		} {
+			t.Run(tc.name, func(t *testing.T) {
+				result := analyzeFieldCommand(t, `search bytes=* | bin `+tc.options+` bytes AS band | where band>0`)
+				assertFieldCommandComplete(t, result, "bin")
+				assertFieldCommandReference(t, result, "where", "band", "read", "derived", "exact")
+			})
+		}
 	})
 
 	t.Run("unsupported option retains the exact source fact", func(t *testing.T) {
@@ -554,6 +605,38 @@ func TestBinAndBucketSemantics(t *testing.T) {
 			t.Fatalf("dynamic bucket minspan applied a false alias: %+v", result.References)
 		}
 	})
+
+	t.Run("invalid literal option domains retain only the input", func(t *testing.T) {
+		for _, tc := range []struct {
+			name, option string
+		}{
+			{name: "quoted bins", option: `bins="ten"`},
+			{name: "zero bins", option: "bins=0"},
+			{name: "fractional bins", option: "bins=1.5"},
+			{name: "quoted start", option: `start="zero"`},
+			{name: "quoted end", option: `end="ten"`},
+			{name: "quoted alignment", option: `aligntime="noon"`},
+		} {
+			t.Run(tc.name, func(t *testing.T) {
+				result := analyzeFieldCommand(t, `search bytes=* | bin `+tc.option+` bytes AS band | where bytes>0`)
+				assertFieldCommandIncomplete(t, result, "bin", tc.option)
+				assertFieldCommandReference(t, result, "bin", "bytes", "read", "source", "exact")
+				assertFieldCommandReference(t, result, "where", "bytes", "read", "source", "exact")
+				if fieldCommandHasReference(result, "bin", "band", "create") {
+					t.Fatalf("invalid %s applied a false alias: %+v", tc.option, result.References)
+				}
+			})
+		}
+	})
+
+	t.Run("dynamic input does not install the wildcard spelling", func(t *testing.T) {
+		result := analyzeFieldCommand(t, `search user=* | bin 'user*' | where 'user*'>0`)
+		assertFieldCommandIncomplete(t, result, "bin", `'user*'`)
+		assertFieldCommandHeldDynamicRead(t, result, "bin", "user*", "read")
+		if fieldCommandHasReference(result, "bin", "user*", "create") {
+			t.Fatalf("bin with a dynamic input applied a false assignment: %+v", result.References)
+		}
+	})
 }
 
 func TestRegexSemantics(t *testing.T) {
@@ -575,10 +658,9 @@ func TestRegexSemantics(t *testing.T) {
 	})
 
 	t.Run("dynamic field is held without changing known shape", func(t *testing.T) {
-		result := analyzeFieldCommand(t, `search user=* | regex 'user*'="x" | where user="alice"`)
+		result := analyzeFieldCommand(t, `search user=* | regex 'user*'="x" | where 'user*'="alice"`)
 		assertFieldCommandIncomplete(t, result, "regex", `'user*'`)
-		assertFieldCommandReference(t, result, "regex", "user*", "filter", "source", "dynamic")
-		assertFieldCommandReference(t, result, "where", "user", "read", "source", "exact")
+		assertFieldCommandHeldDynamicRead(t, result, "regex", "user*", "filter")
 	})
 }
 
@@ -598,6 +680,12 @@ func TestMvexpandSemantics(t *testing.T) {
 		assertFieldCommandIncomplete(t, result, "mvexpand", "limit=3")
 		assertFieldCommandReference(t, result, "mvexpand", "values", "read", "source", "exact")
 		assertFieldCommandReference(t, result, "where", "values", "read", "source", "exact")
+	})
+
+	t.Run("dynamic input does not install the wildcard spelling", func(t *testing.T) {
+		result := analyzeFieldCommand(t, `search user=* | mvexpand 'user*' | where 'user*'="x"`)
+		assertFieldCommandIncomplete(t, result, "mvexpand", `'user*'`)
+		assertFieldCommandHeldDynamicRead(t, result, "mvexpand", "user*", "read")
 	})
 }
 
@@ -674,6 +762,44 @@ func assertFieldCommandReferenceLocation(t *testing.T, result *Result, command, 
 		return
 	}
 	t.Fatalf("missing %s %s/%s reference: %+v", command, name, role, result.References)
+}
+
+func assertFieldCommandHeldDynamicRead(t *testing.T, result *Result, command, name, role string) {
+	t.Helper()
+	assertFieldCommandReference(t, result, command, name, role, "indeterminate", "dynamic")
+	lineage := fieldCommandLineage(t, result, command)
+	for _, field := range lineage.After.Fields {
+		if field.Name == name {
+			t.Fatalf("%s installed dynamic field %q in its environment: %+v", command, name, lineage.After)
+		}
+	}
+	var dynamicID string
+	for _, reference := range result.References {
+		if reference.StageID == lineage.StageID && reference.NormalizedName == name && reference.Role == role {
+			dynamicID = reference.ID
+		}
+	}
+	stageID := ""
+	for _, stage := range result.Stages {
+		if stage.Command == "where" {
+			stageID = stage.ID
+		}
+	}
+	for _, reference := range result.References {
+		if reference.StageID != stageID || reference.NormalizedName != name || reference.Role != "read" {
+			continue
+		}
+		if reference.Binding != "indeterminate" || reference.Resolution != "exact" {
+			t.Fatalf("later exact read after %s dynamic operand = %+v, want exact indeterminate", command, reference)
+		}
+		for _, origin := range reference.OriginReferenceIDs {
+			if origin == dynamicID {
+				t.Fatalf("later exact read used %s dynamic reference %s as a producer: %+v", command, dynamicID, reference)
+			}
+		}
+		return
+	}
+	t.Fatalf("missing later exact read for %q after %s: %+v", name, command, result.References)
 }
 
 func fieldCommandHasReference(result *Result, command, name, role string) bool {
