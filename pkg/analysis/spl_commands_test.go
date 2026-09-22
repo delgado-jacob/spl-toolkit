@@ -203,6 +203,14 @@ func TestTstatsSemantics(t *testing.T) {
 			fields:       []string{"_time:false:ref-1", "count:false:ref-0", "host:false:ref-2"},
 			transitions:  []string{"project:_time:ref-1::false", "project:host:ref-2::false", "aggregate:count::ref-0:false"},
 		},
+		{
+			name:         "_time unitless fractional span",
+			query:        `| tstats count BY _time span=0.5`,
+			references:   []string{"count=>count:field:output:not_applicable:exact", "_time=>_time:field:group:source:exact"},
+			dependencies: empty(),
+			fields:       []string{"_time:false:ref-1", "count:false:ref-0"},
+			transitions:  []string{"project:_time:ref-1::false", "aggregate:count::ref-0:false"},
+		},
 	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
@@ -397,6 +405,81 @@ func TestTstatsCombinedBoundariesRetainRequiredWhere(t *testing.T) {
 	if got := tstatsRequirementFacts(result.Requirements.Items); !reflect.DeepEqual(got, wantRequirements) {
 		t.Fatalf("combined-boundary requirements\n got: %q\nwant: %q", got, wantRequirements)
 	}
+}
+
+func TestTstatsSpanDomain(t *testing.T) {
+	for _, tc := range []struct {
+		name, span string
+	}{
+		{name: "quoted garbage", span: `"garbage"`},
+		{name: "zero", span: "0"},
+		{name: "fractional unit duration", span: "0.5m"},
+		{name: "quoted logarithmic form", span: `"5log10"`},
+		{name: "quoted snapped form", span: `"w@w1"`},
+		{name: "dynamic form", span: "latest"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			query := `| tstats count FROM datamodel=Model.Dataset BY _time span=` + tc.span
+			result, err := Analyze(QueryDocument{Text: query})
+			if err != nil {
+				t.Fatal(err)
+			}
+			if result.Status != Incomplete || !result.Coverage.SyntaxComplete || result.Coverage.SemanticComplete || result.Stages[0].SemanticComplete {
+				t.Fatalf("span %q completeness = status %q coverage %+v stages %+v diagnostics %+v", tc.span, result.Status, result.Coverage, result.Stages, result.Diagnostics)
+			}
+			wantReferences := []string{
+				"count=>count:field:output:not_applicable:exact",
+				"Model=>Model:data_model:read:not_applicable:exact",
+				"Model.Dataset=>Model.Dataset:dataset:read:not_applicable:exact",
+				"_time=>_time:field:group:source:exact",
+			}
+			if got := tstatsReferenceFacts(result.References); !reflect.DeepEqual(got, wantReferences) {
+				t.Fatalf("span %q references\n got: %q\nwant: %q", tc.span, got, wantReferences)
+			}
+			wantFields := []string{"_time:true:ref-3", "count:true:ref-0"}
+			if got := tstatsFieldFacts(result.Lineage[0].After.Fields); !reflect.DeepEqual(got, wantFields) || !result.Lineage[0].After.Open || !result.Lineage[0].After.Uncertain {
+				t.Fatalf("span %q final shape = fields %q state %+v, want fields %q open uncertain", tc.span, got, result.Lineage[0].After, wantFields)
+			}
+			if !reflect.DeepEqual(result.Dependencies.DataModels, []string{"Model"}) || !reflect.DeepEqual(result.Dependencies.Datasets, []string{"Model.Dataset"}) {
+				t.Fatalf("span %q lost catalog facts: %+v", tc.span, result.Dependencies)
+			}
+			assertTstatsDiagnosticLocation(t, result, CodeUnsupportedSemantics, "span="+tc.span)
+		})
+	}
+}
+
+func TestTstatsQuotedWildcardAggregateHeld(t *testing.T) {
+	query := `| tstats sum('foo*') FROM datamodel=Model.Dataset`
+	result, err := Analyze(QueryDocument{Text: query})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if result.Status != Incomplete || !result.Coverage.SyntaxComplete || result.Coverage.SemanticComplete || result.Stages[0].SemanticComplete {
+		t.Fatalf("quoted wildcard completeness = status %q coverage %+v stages %+v diagnostics %+v", result.Status, result.Coverage, result.Stages, result.Diagnostics)
+	}
+	wantReferences := []string{
+		"'foo*'=>foo*:field:read:indeterminate:dynamic",
+		"Model=>Model:data_model:read:not_applicable:exact",
+		"Model.Dataset=>Model.Dataset:dataset:read:not_applicable:exact",
+	}
+	if got := tstatsReferenceFacts(result.References); !reflect.DeepEqual(got, wantReferences) {
+		t.Fatalf("quoted wildcard references\n got: %q\nwant: %q", got, wantReferences)
+	}
+	if got := tstatsFieldFacts(result.Lineage[0].After.Fields); len(got) != 0 || !result.Lineage[0].After.Open || !result.Lineage[0].After.Uncertain || len(result.Lineage[0].Transitions) != 0 {
+		t.Fatalf("quoted wildcard final shape = fields %q lineage %+v, want no invented output in an open uncertain environment", got, result.Lineage[0])
+	}
+	wantRequirements := []string{
+		"req-1:field:foo*:read:conditional:dynamic:ref-0:'foo*':indeterminate",
+		"req-2:data_model:Model:read:required:exact:ref-1:Model:not_applicable",
+		"req-3:dataset:Model.Dataset:read:required:exact:ref-2:Model.Dataset:not_applicable",
+	}
+	if got := tstatsRequirementFacts(result.Requirements.Items); !reflect.DeepEqual(got, wantRequirements) {
+		t.Fatalf("quoted wildcard requirements\n got: %q\nwant: %q", got, wantRequirements)
+	}
+	if !reflect.DeepEqual(result.Dependencies.DataModels, []string{"Model"}) || !reflect.DeepEqual(result.Dependencies.Datasets, []string{"Model.Dataset"}) {
+		t.Fatalf("quoted wildcard lost catalog facts: %+v", result.Dependencies)
+	}
+	assertTstatsDiagnosticLocation(t, result, CodeDynamicReference, "'foo*'")
 }
 
 func tstatsReferenceFacts(references []Reference) []string {

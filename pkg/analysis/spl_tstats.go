@@ -70,9 +70,8 @@ func tstatsCommand(s *semanticStage, node antlr.ParserRuleContext) {
 			}
 			groups = append(groups, operand)
 			if span := item.AnalysisTstatsSpanOption(); span != nil {
-				value := span.AnalysisUnitOptionValue()
-				if name != "_time" || value == nil || value.AnalysisIdentifier() != nil {
-					s.diagnostic(CodeUnsupportedSemantics, "tstats span requires an exact literal _time grouping", span)
+				if !s.tstatsSpanModeled(name, span.AnalysisUnitOptionValue()) {
+					s.diagnostic(CodeUnsupportedSemantics, "tstats span requires a supported positive numeric _time duration", span)
 				}
 			}
 		}
@@ -157,6 +156,14 @@ func (s *semanticStage) tstatsOption(ctx parser.IAnalysisTstatsOptionContext) st
 	return ""
 }
 
+func (s *semanticStage) tstatsSpanModeled(group string, value parser.IAnalysisUnitOptionValueContext) bool {
+	if group != "_time" || value == nil || value.NUMBER() == nil || !s.sound(value) {
+		return false
+	}
+	magnitude := value.NUMBER().GetText()
+	return strings.ContainsAny(magnitude, "123456789") && (value.AnalysisUnitSuffix() == nil || !strings.Contains(magnitude, "."))
+}
+
 func (s *semanticStage) tstatsAggregate(aggregate parser.IAnalysisAggregateContext) (*aggregateOutput, bool) {
 	if aggregate == nil || !intact(aggregate) {
 		return nil, false
@@ -167,28 +174,45 @@ func (s *semanticStage) tstatsAggregate(aggregate parser.IAnalysisAggregateConte
 	var target antlr.ParserRuleContext = aggregate
 	if call := aggregate.AnalysisFunctionCall(); call != nil {
 		functionName := strings.ToLower(call.AnalysisFunctionName().GetText())
-		if call.AnalysisArgumentList() != nil {
-			inputs = s.expression(call.AnalysisArgumentList())
-		}
 		if functionName == "prefix" {
+			if call.AnalysisArgumentList() != nil {
+				inputs = s.expression(call.AnalysisArgumentList())
+			}
 			s.diagnostic(CodeUnsupportedSemantics, "tstats PREFIX output identity is unmodeled", call)
 			understood = false
-		} else if s.function(call, true) {
-			name = functionName + "()"
-			if call.AnalysisArgumentList() != nil {
-				field, exact := aggregateField(call.AnalysisArgumentList().AnalysisExpression(0))
-				if exact {
-					name = functionName + "(" + field + ")"
-				} else {
-					name = ""
-					understood = false
-					s.diagnostic(CodeUnsupportedSemantics, "aggregate arguments must be exact field identifiers", call)
-				}
-			} else if functionName == "count" {
-				name = "count"
-			}
 		} else {
-			understood = false
+			arguments := call.AnalysisArgumentList()
+			if arguments != nil {
+				if identifier := tstatsAggregateIdentifier(arguments); identifier != nil && strings.Contains(normalizedName(identifier.GetText()), "*") {
+					operand := fieldCommandOperand(s, identifier)
+					if id := fieldCommandHeldRead(s, operand, "read"); id != "" {
+						inputs = append(inputs, id)
+						s.diagnosticAtOwned(CodeDynamicReference, "warning", "unsupported_semantics", "tstats aggregate operand identity must be exact", operand.Location, true, []string{id})
+					} else {
+						s.diagnostic(CodeDynamicReference, "tstats aggregate operand identity must be exact", identifier)
+					}
+					understood = false
+				} else {
+					inputs = s.expression(arguments)
+				}
+			}
+			if s.function(call, true) && understood {
+				name = functionName + "()"
+				if arguments != nil {
+					field, exact := aggregateField(arguments.AnalysisExpression(0))
+					if exact {
+						name = functionName + "(" + field + ")"
+					} else {
+						name = ""
+						understood = false
+						s.diagnostic(CodeUnsupportedSemantics, "aggregate arguments must be exact field identifiers", call)
+					}
+				} else if functionName == "count" {
+					name = "count"
+				}
+			} else {
+				understood = false
+			}
 		}
 		target = call
 	} else if aggregate.AnalysisIdentifier() != nil && strings.EqualFold(aggregate.AnalysisIdentifier().GetText(), "count") {
@@ -213,6 +237,26 @@ func (s *semanticStage) tstatsAggregate(aggregate parser.IAnalysisAggregateConte
 		return nil, false
 	}
 	return &aggregateOutput{Target: s.operand(target, name), InputReferenceIDs: inputs}, true
+}
+
+func tstatsAggregateIdentifier(arguments parser.IAnalysisArgumentListContext) parser.IAnalysisIdentifierContext {
+	if arguments == nil || len(arguments.AllAnalysisExpression()) != 1 {
+		return nil
+	}
+	var exactIdentifier func(antlr.Tree) parser.IAnalysisIdentifierContext
+	exactIdentifier = func(node antlr.Tree) parser.IAnalysisIdentifierContext {
+		if identifier, ok := node.(parser.IAnalysisIdentifierContext); ok {
+			if intact(identifier) {
+				return identifier
+			}
+			return nil
+		}
+		if node.GetChildCount() != 1 {
+			return nil
+		}
+		return exactIdentifier(node.GetChild(0))
+	}
+	return exactIdentifier(arguments.AnalysisExpression(0))
 }
 
 func (s *semanticStage) applyTstatsPartialAggregation(outputs []aggregateOutput, groups []locatedOperand) {
