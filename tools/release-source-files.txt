@@ -123,6 +123,8 @@ pkg/analysis/spl2_recovery.go
 pkg/analysis/spl2_scopes.go
 pkg/analysis/spl2_sql.go
 pkg/analysis/spl2_syntax.go
+pkg/analysis/spl_field_commands.go
+pkg/analysis/spl_tstats.go
 pkg/analysis/transfers.go
 pkg/api/analysis.go
 pkg/api/handlers.go
