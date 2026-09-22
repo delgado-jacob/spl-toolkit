@@ -422,6 +422,18 @@ func TestRexSemantics(t *testing.T) {
 		assertFieldCommandReference(t, result, "where", "real", "read", "indeterminate", "exact")
 	})
 
+	t.Run("Python named backreference preserves the capture", func(t *testing.T) {
+		query := `search payload=* | rex field=payload "(?P<name>x)(?P=name)" | where name="x"`
+		result := analyzeFieldCommand(t, query)
+		assertFieldCommandComplete(t, result, "rex")
+		assertFieldCommandReference(t, result, "rex", "name", "output", "not_applicable", "exact")
+		assertFieldCommandReferenceLocation(t, result, "rex", "name", "output", "name")
+		assertFieldCommandReference(t, result, "where", "name", "read", "indeterminate", "exact")
+		if got := fieldCommandReferenceCount(result, "rex", "name", "output"); got != 1 {
+			t.Fatalf("rex backreference changed capture output count = %d, want 1: %+v", got, result.References)
+		}
+	})
+
 	t.Run("sed mode keeps the input identity and is held", func(t *testing.T) {
 		result := analyzeFieldCommand(t, `search payload=* | rex mode=sed field=payload "s/a/b/g" | where payload="b"`)
 		assertFieldCommandIncomplete(t, result, "rex", "mode=sed")
@@ -451,6 +463,7 @@ func TestRexNamedCaptures(t *testing.T) {
 		ok      bool
 	}{
 		{name: "incomplete Python opener", pattern: `(?P`, ok: false},
+		{name: "Python named backreference", pattern: `(?P<name>x)(?P=name)`, want: []string{"name"}, ok: true},
 		{name: "leading literal closing bracket", pattern: `[](?<fake>)](?<real>x)`, want: []string{"real"}, ok: true},
 		{name: "second caret is a class member", pattern: `[^^](?<real>x)`, want: []string{"real"}, ok: true},
 		{name: "escaped and class-contained openers", pattern: `\(?<escaped>x)[(?P<class>x)](?<real>x)`, want: []string{"real"}, ok: true},

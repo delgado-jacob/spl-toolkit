@@ -347,10 +347,25 @@ func scanRexNamedCaptures(pattern string) ([]rexCapture, bool) {
 			}
 			nameStart = i + 3
 		case runes[i+2] == 'P':
-			if i+3 >= len(runes) || runes[i+3] != '<' {
+			if i+3 >= len(runes) {
 				return nil, false
 			}
-			nameStart = i + 4
+			switch runes[i+3] {
+			case '<':
+				nameStart = i + 4
+			case '=':
+				nameEnd := i + 4
+				for nameEnd < len(runes) && runes[nameEnd] != ')' {
+					nameEnd++
+				}
+				if nameEnd == len(runes) || !rewriteSPLBare(string(runes[i+4:nameEnd])) {
+					return nil, false
+				}
+				i = nameEnd
+				continue
+			default:
+				return nil, false
+			}
 		default:
 			continue
 		}
