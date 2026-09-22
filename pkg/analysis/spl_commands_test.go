@@ -481,6 +481,15 @@ func TestFillnullSemantics(t *testing.T) {
 }
 
 func TestRexSemantics(t *testing.T) {
+	t.Run("default raw input flows to the extracted field", func(t *testing.T) {
+		result := analyzeFieldCommand(t, `search _raw=* | rex "(?<x>.)" | table x`)
+		assertFieldCommandComplete(t, result, "rex")
+		assertFieldCommandReference(t, result, "rex", "_raw", "read", "source", "exact")
+		assertFieldCommandReference(t, result, "rex", "x", "output", "not_applicable", "exact")
+		assertFieldCommandReference(t, result, "table", "x", "read", "indeterminate", "exact")
+		assertFieldCommandTransition(t, result, "rex", "x", true)
+	})
+
 	t.Run("exact input offset and captures flow downstream", func(t *testing.T) {
 		query := `search payload=* | rex field=payload max_match=2 offset_field=positions "(?<user>[^ ]+)(?P<host>.+)(?<user>x)" | where user="svc" AND host="web" AND positions>0`
 		result := analyzeFieldCommand(t, query)
@@ -579,6 +588,21 @@ func TestRexSemantics(t *testing.T) {
 		}
 	})
 
+	t.Run("extended mode is held before publishing captures", func(t *testing.T) {
+		result := analyzeFieldCommand(t, `search _raw=* | rex field=_raw "(?x)# (?<fake>x)" | table fake`)
+		assertFieldCommandIncomplete(t, result, "rex", `"(?x)# (?<fake>x)"`)
+		assertFieldCommandReference(t, result, "rex", "_raw", "read", "source", "exact")
+		if fieldCommandHasReference(result, "rex", "fake", "output") {
+			t.Fatalf("rex extended mode published a lexically uncertain capture: %+v", result.References)
+		}
+		assertFieldCommandReference(t, result, "table", "fake", "read", "indeterminate", "exact")
+		for _, field := range fieldCommandLineage(t, result, "rex").After.Fields {
+			if field.Name == "fake" {
+				t.Fatalf("rex extended mode installed fake as a produced field: %+v", fieldCommandLineage(t, result, "rex").After)
+			}
+		}
+	})
+
 	t.Run("dynamic input does not install the wildcard spelling", func(t *testing.T) {
 		result := analyzeFieldCommand(t, `search user=* | rex field='user*' "(?<capture>x)" | where 'user*'="x"`)
 		assertFieldCommandIncomplete(t, result, "rex", `field='user*'`)
@@ -598,6 +622,8 @@ func TestRexNamedCaptures(t *testing.T) {
 	}{
 		{name: "incomplete Python opener", pattern: `(?P`, ok: false},
 		{name: "unsupported quoted capture opener", pattern: `(?'name'x)`, ok: false},
+		{name: "inline extended mode", pattern: `(?x)# (?<fake>x)`, ok: false},
+		{name: "scoped extended mode", pattern: `(?x:(?<fake>x))`, ok: false},
 		{name: "Python named backreference", pattern: `(?P<name>x)(?P=name)`, want: []string{"name"}, ok: true},
 		{name: "leading literal closing bracket", pattern: `[](?<fake>)](?<real>x)`, want: []string{"real"}, ok: true},
 		{name: "second caret is a class member", pattern: `[^^](?<real>x)`, want: []string{"real"}, ok: true},
@@ -619,6 +645,15 @@ func TestRexNamedCaptures(t *testing.T) {
 }
 
 func TestSpathSemantics(t *testing.T) {
+	t.Run("default raw input flows to the explicit output", func(t *testing.T) {
+		result := analyzeFieldCommand(t, `search _raw=* | spath path="event.id" output=id | table id`)
+		assertFieldCommandComplete(t, result, "spath")
+		assertFieldCommandReference(t, result, "spath", "_raw", "read", "source", "exact")
+		assertFieldCommandReference(t, result, "spath", "id", "output", "not_applicable", "exact")
+		assertFieldCommandReference(t, result, "table", "id", "read", "indeterminate", "exact")
+		assertFieldCommandTransition(t, result, "spath", "id", true)
+	})
+
 	pathTests := []struct {
 		name         string
 		path         string

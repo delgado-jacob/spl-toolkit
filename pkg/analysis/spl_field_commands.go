@@ -66,8 +66,8 @@ func rexCommand(s *semanticStage, node antlr.ParserRuleContext) {
 	if !inputExact {
 		s.diagnostic(CodeUnsupportedSemantics, "rex input must be an exact field", fieldCommandDiagnosticContext(fieldOptions, ctx))
 	}
-	for _, option := range fieldOptions[1:] {
-		s.diagnostic(CodeUnsupportedSemantics, "rex accepts one input field option", option)
+	for i := 1; i < len(fieldOptions); i++ {
+		s.diagnostic(CodeUnsupportedSemantics, "rex accepts one input field option", fieldOptions[i])
 	}
 
 	maxMatchOptions := ctx.AllAnalysisRexMaxMatchOption()
@@ -91,16 +91,14 @@ func rexCommand(s *semanticStage, node antlr.ParserRuleContext) {
 			message = "rex sed value rewriting is unmodeled"
 		}
 		s.diagnostic(CodeUnsupportedSemantics, message, modeOptions[0])
-		for _, option := range modeOptions[1:] {
-			s.diagnostic(CodeUnsupportedSemantics, "rex accepts one mode option", option)
+		for i := 1; i < len(modeOptions); i++ {
+			s.diagnostic(CodeUnsupportedSemantics, "rex accepts one mode option", modeOptions[i])
 		}
 	}
 
 	offsetOptions := ctx.AllAnalysisRexOffsetFieldOption()
-	if len(offsetOptions) > 1 {
-		for _, option := range offsetOptions[1:] {
-			s.diagnostic(CodeUnsupportedSemantics, "rex accepts one offset_field option", option)
-		}
+	for i := 1; i < len(offsetOptions); i++ {
+		s.diagnostic(CodeUnsupportedSemantics, "rex accepts one offset_field option", offsetOptions[i])
 	}
 	if len(offsetOptions) > 0 && modeledExtraction && inputExact {
 		identifiers := offsetOptions[0].AllAnalysisIdentifier()
@@ -159,8 +157,8 @@ func spathCommand(s *semanticStage, node antlr.ParserRuleContext) {
 	if !inputExact {
 		s.diagnostic(CodeUnsupportedSemantics, "spath input must be an exact field", fieldCommandDiagnosticContext(inputOptions, ctx))
 	}
-	for _, option := range inputOptions[1:] {
-		s.diagnostic(CodeUnsupportedSemantics, "spath accepts one input option", option)
+	for i := 1; i < len(inputOptions); i++ {
+		s.diagnostic(CodeUnsupportedSemantics, "spath accepts one input option", inputOptions[i])
 	}
 
 	pathExact := false
@@ -174,8 +172,8 @@ func spathCommand(s *semanticStage, node antlr.ParserRuleContext) {
 		if !pathExact {
 			s.diagnostic(CodeUnsupportedSemantics, "spath path requires an exact literal", option)
 		}
-		for _, duplicate := range pathOptions[1:] {
-			s.diagnostic(CodeUnsupportedSemantics, "spath accepts one path option", duplicate)
+		for i := 1; i < len(pathOptions); i++ {
+			s.diagnostic(CodeUnsupportedSemantics, "spath accepts one path option", pathOptions[i])
 		}
 	}
 
@@ -193,8 +191,8 @@ func spathCommand(s *semanticStage, node antlr.ParserRuleContext) {
 		if !outputExact {
 			s.diagnostic(CodeUnsupportedSemantics, "spath output must be an exact field", outputOptions[0])
 		}
-		for _, duplicate := range outputOptions[1:] {
-			s.diagnostic(CodeUnsupportedSemantics, "spath accepts one output option", duplicate)
+		for i := 1; i < len(outputOptions); i++ {
+			s.diagnostic(CodeUnsupportedSemantics, "spath accepts one output option", outputOptions[i])
 		}
 	}
 	if inputExact && pathExact && outputExact && len(inputOptions) <= 1 && len(pathOptions) == 1 && len(outputOptions) == 1 {
@@ -448,6 +446,9 @@ func scanRexNamedCaptures(pattern string) ([]rexCapture, bool) {
 			i = commentEnd
 			continue
 		}
+		if r == '(' && i+2 < len(runes) && runes[i+1] == '?' && rexHasExtendedMode(runes, i+2) {
+			return nil, false
+		}
 		if r != '(' || i+2 >= len(runes) || runes[i+1] != '?' {
 			continue
 		}
@@ -506,6 +507,20 @@ func scanRexNamedCaptures(pattern string) ([]rexCapture, bool) {
 		return nil, false
 	}
 	return captures, true
+}
+
+func rexHasExtendedMode(runes []rune, start int) bool {
+	for i := start; i < len(runes); i++ {
+		switch runes[i] {
+		case 'x':
+			return true
+		case 'i', 'm', 'n', 'r', 's', 'J', 'U', '-':
+			continue
+		default:
+			return false
+		}
+	}
+	return false
 }
 
 func fieldCommandHeldRead(s *semanticStage, operand locatedOperand, role string) string {
