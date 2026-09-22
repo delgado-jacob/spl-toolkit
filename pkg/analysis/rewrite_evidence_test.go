@@ -65,20 +65,20 @@ func TestRewriteEvidenceSPL(t *testing.T) {
 
 func TestRewriteMilestone10OperandsRemainUnproved(t *testing.T) {
 	tests := []struct {
-		name, query, kind, operand, target string
-		occurrence                         int
+		name, query, kind, operand, target, owner string
+		occurrence                                int
 	}{
-		{"tstats aggregate input", `tstats sum(bytes) FROM datamodel=Traffic.All`, "field", "bytes", "octets", 0},
-		{"tstats where field", `tstats count FROM datamodel=Traffic.All WHERE status=200`, "field", "status", "state", 0},
-		{"tstats group", `tstats count FROM datamodel=Traffic.All BY host`, "field", "host", "server", 0},
-		{"fillnull", `search index=main | fillnull value="0" user`, "field", "user", "account", 0},
-		{"rex", `search index=main | rex field=payload "(?<user>.+)"`, "field", "payload", "body", 0},
-		{"spath", `search index=main | spath input=payload path="event.id" output=event_id`, "field", "payload", "body", 0},
-		{"bin", `search index=main | bin span=5m _time AS bucket_time`, "field", "_time", "event_time", 0},
-		{"bucket", `search index=main | bucket bins=10 duration`, "field", "duration", "elapsed", 0},
-		{"regex", `search index=main | regex message="error"`, "field", "message", "body", 0},
-		{"mvexpand", `search index=main | mvexpand values`, "field", "values", "items", 0},
-		{"join key", `search index=main | join user [ search index=other ]`, "field", "user", "account", 0},
+		{"tstats aggregate input", `tstats sum(bytes) FROM datamodel=Traffic.All`, "field", "bytes", "octets", `sum(bytes) FROM datamodel=Traffic.All`, 0},
+		{"tstats where field", `tstats count FROM datamodel=Traffic.All WHERE status=200`, "field", "status", "state", `WHERE status=200`, 0},
+		{"tstats group", `tstats count FROM datamodel=Traffic.All BY host`, "field", "host", "server", `host`, 0},
+		{"fillnull", `search index=main | fillnull value="0" user`, "field", "user", "account", `value="0" user`, 0},
+		{"rex", `search index=main | rex field=payload "(?<user>.+)"`, "field", "payload", "body", `field=payload`, 0},
+		{"spath", `search index=main | spath input=payload path="event.id" output=event_id`, "field", "payload", "body", `input=payload`, 0},
+		{"bin", `search index=main | bin span=5m _time AS bucket_time`, "field", "_time", "event_time", `span=5m _time AS bucket_time`, 0},
+		{"bucket", `search index=main | bucket bins=10 duration`, "field", "duration", "elapsed", `bins=10 duration`, 0},
+		{"regex", `search index=main | regex message="error"`, "field", "message", "body", `message="error"`, 0},
+		{"mvexpand", `search index=main | mvexpand values`, "field", "values", "items", `values`, 0},
+		{"join key", `search index=main | join user [ search index=other ]`, "field", "user", "account", `user [ search index=other ]`, 0},
 	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
@@ -86,6 +86,14 @@ func TestRewriteMilestone10OperandsRemainUnproved(t *testing.T) {
 			site := rewriteFind(t, s, tc.kind, tc.operand, tc.occurrence)
 			if site.Role != "" || site.Eligibility == "eligible" {
 				t.Fatalf("milestone 10 operand escaped its rewrite boundary: %+v", site)
+			}
+			ownerStart := strings.Index(tc.query, tc.owner)
+			wantOwner := Location{
+				Start: Position{Offset: ownerStart, Line: 1, Column: ownerStart + 1},
+				End:   Position{Offset: ownerStart + len(tc.owner), Line: 1, Column: ownerStart + len(tc.owner) + 1},
+			}
+			if ownerStart < 0 || site.OwnerLocation != wantOwner {
+				t.Fatalf("rewrite barrier owner = %+v, want %q at %+v", site.OwnerLocation, tc.owner, wantOwner)
 			}
 			unproved := false
 			for _, limitation := range site.Limitations {
@@ -139,7 +147,12 @@ func TestRewriteMilestone10OperandsRemainUnproved(t *testing.T) {
 		const text = `tstats count FROM datamodel=Traffic.All`
 		s := rewriteTestSession(t, "spl", text)
 		site := rewriteFind(t, s, "data_model", "Traffic", 0)
-		if site.Eligibility != "eligible" || site.Role != "catalog_component" {
+		ownerStart := strings.Index(text, "Traffic.All")
+		wantOwner := Location{
+			Start: Position{Offset: ownerStart, Line: 1, Column: ownerStart + 1},
+			End:   Position{Offset: ownerStart + len("Traffic.All"), Line: 1, Column: ownerStart + len("Traffic.All") + 1},
+		}
+		if site.Eligibility != "eligible" || site.Role != "catalog_component" || site.OwnerLocation != wantOwner {
 			t.Fatalf("existing data-model rewrite role changed: %+v", site)
 		}
 	})
