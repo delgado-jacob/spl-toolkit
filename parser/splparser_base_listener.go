@@ -542,6 +542,14 @@ func (s *BaseSPLParserListener) EnterAnalysisMissingOperand(ctx *AnalysisMissing
 // ExitAnalysisMissingOperand is called when production analysisMissingOperand is exited.
 func (s *BaseSPLParserListener) ExitAnalysisMissingOperand(ctx *AnalysisMissingOperandContext) {}
 
+// EnterAnalysisMissingEvalAssignment is called when production analysisMissingEvalAssignment is entered.
+func (s *BaseSPLParserListener) EnterAnalysisMissingEvalAssignment(ctx *AnalysisMissingEvalAssignmentContext) {
+}
+
+// ExitAnalysisMissingEvalAssignment is called when production analysisMissingEvalAssignment is exited.
+func (s *BaseSPLParserListener) ExitAnalysisMissingEvalAssignment(ctx *AnalysisMissingEvalAssignmentContext) {
+}
+
 // EnterAnalysisDataModelName is called when production analysisDataModelName is entered.
 func (s *BaseSPLParserListener) EnterAnalysisDataModelName(ctx *AnalysisDataModelNameContext) {}
 

@@ -684,6 +684,41 @@ func TestParseMilestone10HeldForms(t *testing.T) {
 		}
 	})
 
+	t.Run("damaged datamodel assignment keeps strict recovery", func(t *testing.T) {
+		r, err := Analyze(QueryDocument{Text: `| datamodel Web foo= | table safe`})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(r.Diagnostics) != 1 || r.Diagnostics[0].Message != "no viable alternative at input 'datamodel'" || r.Diagnostics[0].Location.Start.Offset != 2 || r.Diagnostics[0].Location.End.Offset != 11 {
+			t.Fatalf("datamodel diagnostics = %+v", r.Diagnostics)
+		}
+		if len(r.Dependencies.DataModels) != 0 {
+			t.Fatalf("damaged datamodel dependencies = %+v", r.Dependencies.DataModels)
+		}
+		if len(r.References) != 1 || r.References[0].OriginalName != "safe" || r.References[0].Kind != "field" {
+			t.Fatalf("damaged datamodel references = %+v", r.References)
+		}
+		if len(r.Stages) != 2 || r.Stages[0].Command != "datamodel" || r.Stages[1].Command != "table" {
+			t.Fatalf("datamodel stages = %+v", r.Stages)
+		}
+	})
+
+	t.Run("damaged opaque assignment keeps local recovery", func(t *testing.T) {
+		r, err := Analyze(QueryDocument{Text: `| mystery foo= | table safe`})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(r.Diagnostics) != 1 || r.Diagnostics[0].Message != "no viable alternative at input 'foo= |'" || r.Diagnostics[0].Location.Start.Offset != 15 || r.Diagnostics[0].Location.End.Offset != 16 {
+			t.Fatalf("opaque diagnostics = %+v", r.Diagnostics)
+		}
+		if len(r.References) != 1 || r.References[0].OriginalName != "safe" || r.References[0].Kind != "field" {
+			t.Fatalf("opaque references = %+v", r.References)
+		}
+		if len(r.Stages) != 2 || r.Stages[0].Command != "mystery" || r.Stages[1].Command != "table" {
+			t.Fatalf("opaque stages = %+v", r.Stages)
+		}
+	})
+
 	t.Run("damaged child remains isolated", func(t *testing.T) {
 		p := parseDocument(`search root=* | append [ search child=* | mystery good $ | stats count BY child ] | table root`)
 		if len(p.diagnostics) == 0 {

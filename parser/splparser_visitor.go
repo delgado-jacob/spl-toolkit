@@ -262,6 +262,9 @@ type SPLParserVisitor interface {
 	// Visit a parse tree produced by SPLParser#analysisMissingOperand.
 	VisitAnalysisMissingOperand(ctx *AnalysisMissingOperandContext) interface{}
 
+	// Visit a parse tree produced by SPLParser#analysisMissingEvalAssignment.
+	VisitAnalysisMissingEvalAssignment(ctx *AnalysisMissingEvalAssignmentContext) interface{}
+
 	// Visit a parse tree produced by SPLParser#analysisDataModelName.
 	VisitAnalysisDataModelName(ctx *AnalysisDataModelNameContext) interface{}
 

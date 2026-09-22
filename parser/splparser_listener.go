@@ -262,6 +262,9 @@ type SPLParserListener interface {
 	// EnterAnalysisMissingOperand is called when entering the analysisMissingOperand production.
 	EnterAnalysisMissingOperand(c *AnalysisMissingOperandContext)
 
+	// EnterAnalysisMissingEvalAssignment is called when entering the analysisMissingEvalAssignment production.
+	EnterAnalysisMissingEvalAssignment(c *AnalysisMissingEvalAssignmentContext)
+
 	// EnterAnalysisDataModelName is called when entering the analysisDataModelName production.
 	EnterAnalysisDataModelName(c *AnalysisDataModelNameContext)
 
@@ -657,6 +660,9 @@ type SPLParserListener interface {
 
 	// ExitAnalysisMissingOperand is called when exiting the analysisMissingOperand production.
 	ExitAnalysisMissingOperand(c *AnalysisMissingOperandContext)
+
+	// ExitAnalysisMissingEvalAssignment is called when exiting the analysisMissingEvalAssignment production.
+	ExitAnalysisMissingEvalAssignment(c *AnalysisMissingEvalAssignmentContext)
 
 	// ExitAnalysisDataModelName is called when exiting the analysisDataModelName production.
 	ExitAnalysisDataModelName(c *AnalysisDataModelNameContext)

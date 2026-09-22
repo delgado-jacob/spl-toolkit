@@ -60,6 +60,34 @@ func (p *SPLParser) analysisReportMissingOperand() {
     }
     p.GetErrorHandler().ReportError(p, antlr.NewNoViableAltException(p, p.GetTokenStream(), start, p.GetCurrentToken(), nil, p.GetParserRuleContext()))
 }
+func (p *SPLParser) analysisStageEndsWithEquals() bool {
+    parens, brackets, previous := 0, 0, 0
+    for offset := 1; ; offset++ {
+        kind := p.GetTokenStream().LA(offset)
+        switch kind {
+        case antlr.TokenEOF:
+            return previous == SPLParserEQ
+        case SPLParserLPAREN:
+            parens++
+        case SPLParserRPAREN:
+            if parens > 0 { parens-- }
+        case SPLParserLBRACK:
+            brackets++
+        case SPLParserRBRACK:
+            if brackets == 0 && parens == 0 {
+                return previous == SPLParserEQ
+            }
+            if brackets > 0 { brackets-- }
+        case SPLParserPIPE:
+            if parens == 0 && brackets == 0 {
+                return previous == SPLParserEQ
+            }
+        }
+        if parens == 0 && brackets == 0 {
+            previous = kind
+        }
+    }
+}
 }
 
 query
@@ -156,7 +184,7 @@ analysisImplicitSearch : analysisSearch;
 analysisStage
     : {p.analysisCommandIs("search")}? analysisCommandName analysisSearch #AnalysisSearchStage
     | {p.analysisCommandIs("where")}? analysisCommandName analysisExpression #AnalysisWhereStage
-    | {p.analysisCommandIs("eval")}? analysisCommandName analysisAssignment (COMMA analysisAssignment)* #AnalysisEvalStage
+    | {p.analysisCommandIs("eval")}? analysisCommandName (analysisAssignment | analysisMissingEvalAssignment) (COMMA (analysisAssignment | analysisMissingEvalAssignment))* #AnalysisEvalStage
     | {p.analysisCommandIs("rename")}? analysisCommandName analysisRename (COMMA? analysisRename)* #AnalysisRenameStage
     | {p.analysisCommandIs("fields", "table")}? analysisCommandName (ADD | SUB)? analysisFieldList #AnalysisFieldsStage
     | {p.analysisCommandIs("stats", "eventstats", "streamstats")}? analysisCommandName analysisOption* analysisAggregate (COMMA? analysisAggregate)* analysisGroup? #AnalysisStatsStage
@@ -165,7 +193,7 @@ analysisStage
     | {p.analysisCommandIs("dedup")}? analysisCommandName analysisLimit? analysisOption* analysisFieldList #AnalysisDedupStage
     | {p.analysisCommandIs("head", "tail")}? analysisCommandName (analysisLimit | analysisExpression)? #AnalysisLimitStage
     | {p.analysisCommandIs("inputlookup")}? analysisCommandName analysisOption* analysisCatalogName #AnalysisInputlookupStage
-    | {p.analysisCommandIs("datamodel")}? analysisCommandName analysisDataModelName analysisDataModelDataset? analysisArgument* #AnalysisDatamodelStage
+    | {p.analysisCommandIs("datamodel") && !p.analysisStageEndsWithEquals()}? analysisCommandName analysisDataModelName analysisDataModelDataset? analysisArgument* #AnalysisDatamodelStage
     | {p.analysisCommandIs("from")}? analysisCommandName analysisFromDataset #AnalysisFromStage
     | {p.analysisCommandIs("tstats")}? analysisCommandName analysisTstats #AnalysisTstatsStage
     | {p.analysisCommandIs("fillnull")}? analysisCommandName analysisFillnull #AnalysisFillnullStage
@@ -243,6 +271,7 @@ analysisMissingOperand
     : {p.GetTokenStream().LA(1) == SPLParserPIPE || p.GetTokenStream().LA(1) == SPLParserRBRACK || p.GetTokenStream().LA(1) == antlr.TokenEOF}?
       {p.analysisReportMissingOperand()}
     ;
+analysisMissingEvalAssignment : analysisIdentifier EQ analysisMissingOperand;
 // Catalog roles are established here; qualified names remain single lexer tokens.
 analysisDataModelName : analysisCatalogName;
 analysisDataModelDataset : {!p.analysisCommandIs("search", "flat", "acceleration_search", "search_string", "flat_string", "acceleration_search_string")}? analysisCatalogName;
@@ -254,7 +283,7 @@ analysisSortField : (ADD | SUB)? analysisSelector;
 analysisLimit : NUMBER;
 analysisOption : analysisIdentifier EQ (analysisLiteral | analysisIdentifier);
 analysisCatalogName : analysisIdentifier | STRING;
-analysisAssignment : analysisIdentifier EQ (analysisExpression | analysisMissingOperand);
+analysisAssignment : analysisIdentifier EQ analysisExpression;
 analysisRename : analysisSelector analysisAlias;
 analysisAlias : AS analysisIdentifier;
 analysisFieldList : analysisSelector (COMMA? analysisSelector)*;

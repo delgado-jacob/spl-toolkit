@@ -347,6 +347,10 @@ func (v *BaseSPLParserVisitor) VisitAnalysisMissingOperand(ctx *AnalysisMissingO
 	return v.VisitChildren(ctx)
 }
 
+func (v *BaseSPLParserVisitor) VisitAnalysisMissingEvalAssignment(ctx *AnalysisMissingEvalAssignmentContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
 func (v *BaseSPLParserVisitor) VisitAnalysisDataModelName(ctx *AnalysisDataModelNameContext) interface{} {
 	return v.VisitChildren(ctx)
 }
