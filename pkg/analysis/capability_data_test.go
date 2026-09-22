@@ -335,10 +335,39 @@ func TestMilestone10CapabilityClaimsStayBounded(t *testing.T) {
 			if name != "requirements" {
 				continue
 			}
-			observation := evidenceByID[claim.EvidenceIDs[0]].Observations.Requirements
-			if observation == nil || !observation.Complete || len(observation.Items) == 0 || len(observation.GapCodes) != 0 {
-				t.Errorf("%s supported requirements observation = %+v, want exact nonempty items and no gaps", id, observation)
+			evidence := evidenceByID[claim.EvidenceIDs[0]]
+			observation := evidence.Observations.Requirements
+			if observation == nil || !observation.Complete || len(observation.GapCodes) != 0 {
+				t.Errorf("%s supported requirements observation = %+v, want complete evidence with no gaps", id, observation)
+				continue
 			}
+			actual, err := Requirements(evidence.Document)
+			if err != nil {
+				t.Errorf("%s requirements execution: %v", id, err)
+				continue
+			}
+			actualItems := make([]CapabilityRequirementExpectation, 0, len(actual.Items))
+			for _, item := range actual.Items {
+				actualItems = append(actualItems, CapabilityRequirementExpectation{
+					Kind: item.Kind, Identity: item.Identity, Role: item.Role, Necessity: item.Necessity, Resolution: item.Resolution,
+				})
+			}
+			if !actual.Coverage.Complete || !slices.Equal(observation.Items, actualItems) || len(actual.Gaps) != 0 {
+				t.Errorf("%s supported requirements observation = %+v, actual = %+v; want exact item equality and no gaps", id, observation, actual)
+			}
+		}
+	}
+	for id, text := range map[string]string{
+		"spl.now.zero-positional.positive":  "| eval out=now()",
+		"spl.null.zero-positional.positive": "| eval out=null()",
+		"spl.true.zero-positional.positive": "| eval out=true()",
+	} {
+		evidence := evidenceByID[id]
+		if evidence.Document.Text != text {
+			t.Errorf("%s document = %q, want isolated witness %q", id, evidence.Document.Text, text)
+		}
+		if got := evidence.Observations.Requirements; got == nil || !got.Complete || len(got.Items) != 0 || len(got.GapCodes) != 0 {
+			t.Errorf("%s requirements = %+v, want an exact empty item and gap set", id, got)
 		}
 	}
 
@@ -717,10 +746,34 @@ func TestDecodeCapabilityAssetsRejectsMalformedObservations(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "requirements without typed content",
+			name: "complete requirements with exact empty collections",
+			mutate: func(evidence *CapabilityEvidence) {
+				evidence.Observations.Requirements.Items = []CapabilityRequirementExpectation{}
+				evidence.Observations.Requirements.GapCodes = []string{}
+			},
+		},
+		{
+			name: "requirements missing exact item collection",
 			mutate: func(evidence *CapabilityEvidence) {
 				evidence.Observations.Requirements.Items = nil
+			},
+			wantErr: true,
+		},
+		{
+			name: "requirements missing exact gap collection",
+			mutate: func(evidence *CapabilityEvidence) {
 				evidence.Observations.Requirements.GapCodes = nil
+			},
+			wantErr: true,
+		},
+		{
+			name: "incomplete requirements without typed content",
+			mutate: func(evidence *CapabilityEvidence) {
+				evidence.Classification = CapabilityEvidenceIncomplete
+				evidence.Observations.Requirements.Complete = false
+				evidence.Observations.Requirements.QueryStatus = Incomplete
+				evidence.Observations.Requirements.Items = []CapabilityRequirementExpectation{}
+				evidence.Observations.Requirements.GapCodes = []string{}
 			},
 			wantErr: true,
 		},

@@ -455,7 +455,10 @@ func validateCapabilityEvidenceObservation(evidence CapabilityEvidence, dimensio
 		if positive && !observation.Complete {
 			return fmt.Errorf("positive requirements evidence must be complete")
 		}
-		if len(observation.Items)+len(observation.GapCodes) == 0 {
+		if observation.Items == nil || observation.GapCodes == nil {
+			return fmt.Errorf("requirements items and gap_codes must be exact arrays")
+		}
+		if !observation.Complete && len(observation.Items)+len(observation.GapCodes) == 0 {
 			return fmt.Errorf("at least one typed requirement fact is required")
 		}
 		if observation.Complete && len(observation.GapCodes) != 0 {

@@ -3682,7 +3682,7 @@
       "id": "spl.now.zero-positional.positive",
       "classification": "positive",
       "document": {
-        "text": "search seed=* | eval out=now()",
+        "text": "| eval out=now()",
         "language": "spl",
         "profile": "splunkd",
         "version": "current",
@@ -3698,34 +3698,11 @@
           "complete": true,
           "stages": [
             {
-              "command": "search",
-              "semantic_complete": true
-            },
-            {
               "command": "eval",
               "semantic_complete": true
             }
           ],
           "references": [
-            {
-              "normalized_name": "seed",
-              "kind": "field",
-              "role": "filter",
-              "resolution": "exact",
-              "binding": "source",
-              "location": {
-                "start": {
-                  "offset": 7,
-                  "line": 1,
-                  "column": 8
-                },
-                "end": {
-                  "offset": 11,
-                  "line": 1,
-                  "column": 12
-                }
-              }
-            },
             {
               "normalized_name": "out",
               "kind": "field",
@@ -3734,14 +3711,14 @@
               "binding": "not_applicable",
               "location": {
                 "start": {
-                  "offset": 21,
+                  "offset": 7,
                   "line": 1,
-                  "column": 22
+                  "column": 8
                 },
                 "end": {
-                  "offset": 24,
+                  "offset": 10,
                   "line": 1,
-                  "column": 25
+                  "column": 11
                 }
               }
             }
@@ -3758,15 +3735,7 @@
         "requirements": {
           "query_status": "valid",
           "complete": true,
-          "items": [
-            {
-              "kind": "field",
-              "identity": "seed",
-              "role": "filter",
-              "necessity": "required",
-              "resolution": "exact"
-            }
-          ],
+          "items": [],
           "gap_codes": []
         }
       },
@@ -3780,7 +3749,7 @@
       "id": "spl.null.zero-positional.positive",
       "classification": "positive",
       "document": {
-        "text": "search seed=* | eval out=null()",
+        "text": "| eval out=null()",
         "language": "spl",
         "profile": "splunkd",
         "version": "current",
@@ -3796,34 +3765,11 @@
           "complete": true,
           "stages": [
             {
-              "command": "search",
-              "semantic_complete": true
-            },
-            {
               "command": "eval",
               "semantic_complete": true
             }
           ],
           "references": [
-            {
-              "normalized_name": "seed",
-              "kind": "field",
-              "role": "filter",
-              "resolution": "exact",
-              "binding": "source",
-              "location": {
-                "start": {
-                  "offset": 7,
-                  "line": 1,
-                  "column": 8
-                },
-                "end": {
-                  "offset": 11,
-                  "line": 1,
-                  "column": 12
-                }
-              }
-            },
             {
               "normalized_name": "out",
               "kind": "field",
@@ -3832,14 +3778,14 @@
               "binding": "not_applicable",
               "location": {
                 "start": {
-                  "offset": 21,
+                  "offset": 7,
                   "line": 1,
-                  "column": 22
+                  "column": 8
                 },
                 "end": {
-                  "offset": 24,
+                  "offset": 10,
                   "line": 1,
-                  "column": 25
+                  "column": 11
                 }
               }
             }
@@ -3856,15 +3802,7 @@
         "requirements": {
           "query_status": "valid",
           "complete": true,
-          "items": [
-            {
-              "kind": "field",
-              "identity": "seed",
-              "role": "filter",
-              "necessity": "required",
-              "resolution": "exact"
-            }
-          ],
+          "items": [],
           "gap_codes": []
         }
       },
@@ -5425,7 +5363,7 @@
       "id": "spl.true.zero-positional.positive",
       "classification": "positive",
       "document": {
-        "text": "search seed=* | eval out=true()",
+        "text": "| eval out=true()",
         "language": "spl",
         "profile": "splunkd",
         "version": "current",
@@ -5441,34 +5379,11 @@
           "complete": true,
           "stages": [
             {
-              "command": "search",
-              "semantic_complete": true
-            },
-            {
               "command": "eval",
               "semantic_complete": true
             }
           ],
           "references": [
-            {
-              "normalized_name": "seed",
-              "kind": "field",
-              "role": "filter",
-              "resolution": "exact",
-              "binding": "source",
-              "location": {
-                "start": {
-                  "offset": 7,
-                  "line": 1,
-                  "column": 8
-                },
-                "end": {
-                  "offset": 11,
-                  "line": 1,
-                  "column": 12
-                }
-              }
-            },
             {
               "normalized_name": "out",
               "kind": "field",
@@ -5477,14 +5392,14 @@
               "binding": "not_applicable",
               "location": {
                 "start": {
-                  "offset": 21,
+                  "offset": 7,
                   "line": 1,
-                  "column": 22
+                  "column": 8
                 },
                 "end": {
-                  "offset": 24,
+                  "offset": 10,
                   "line": 1,
-                  "column": 25
+                  "column": 11
                 }
               }
             }
@@ -5501,15 +5416,7 @@
         "requirements": {
           "query_status": "valid",
           "complete": true,
-          "items": [
-            {
-              "kind": "field",
-              "identity": "seed",
-              "role": "filter",
-              "necessity": "required",
-              "resolution": "exact"
-            }
-          ],
+          "items": [],
           "gap_codes": []
         }
       },
