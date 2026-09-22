@@ -636,50 +636,84 @@ func TestTstatsNestedWildcardAggregateArgumentsHeld(t *testing.T) {
 		assertTstatsDiagnosticLocation(t, result, CodeUnsupportedSemantics, "PREFIX('foo*')")
 	})
 
-	t.Run("nested wildcard does not produce downstream exact field", func(t *testing.T) {
-		query := `| tstats sum('foo*'+bar) FROM datamodel=Model.Dataset BY host | where 'foo*'=1`
-		result, err := Analyze(QueryDocument{Text: query})
-		if err != nil {
-			t.Fatal(err)
-		}
-		wantReferences := []string{
-			"'foo*'=>foo*:field:read:indeterminate:dynamic",
-			"bar=>bar:field:read:source:exact",
-			"Model=>Model:data_model:read:not_applicable:exact",
-			"Model.Dataset=>Model.Dataset:dataset:read:not_applicable:exact",
-			"host=>host:field:group:source:exact",
-			"'foo*'=>foo*:field:read:indeterminate:exact",
-		}
-		if got := tstatsReferenceFacts(result.References); !reflect.DeepEqual(got, wantReferences) {
-			t.Fatalf("nested wildcard references\n got: %q\nwant: %q", got, wantReferences)
-		}
-		wantFields := []string{"host:true:ref-4"}
-		if got := tstatsFieldFacts(result.Lineage[0].After.Fields); !reflect.DeepEqual(got, wantFields) || !result.Lineage[0].After.Open || !result.Lineage[0].After.Uncertain || len(result.Lineage[0].Transitions) != 1 {
-			t.Fatalf("nested wildcard tstats shape = fields %q lineage %+v, want fields %q and only the group transition", got, result.Lineage[0], wantFields)
-		}
-		upstreamDynamicID := result.References[0].ID
-		downstream := result.References[len(result.References)-1]
-		if downstream.NormalizedName != "foo*" || downstream.Resolution != "exact" || downstream.Binding != "indeterminate" {
-			t.Fatalf("downstream same-spelling read = %+v", downstream)
-		}
-		for _, origin := range downstream.OriginReferenceIDs {
-			if origin == upstreamDynamicID {
-				t.Fatalf("downstream exact read used dynamic held read %s as a producer: %+v", upstreamDynamicID, downstream)
+	for _, tc := range []struct {
+		name             string
+		query            string
+		wantReferences   []string
+		wantRequirements []string
+		dynamicIndex     int
+	}{
+		{
+			name:  "nested wildcard before exact sibling",
+			query: `| tstats sum(round('foo*')+bar) FROM datamodel=Model.Dataset BY host | where 'foo*'=1`,
+			wantReferences: []string{
+				"'foo*'=>foo*:field:read:indeterminate:dynamic",
+				"bar=>bar:field:read:source:exact",
+				"Model=>Model:data_model:read:not_applicable:exact",
+				"Model.Dataset=>Model.Dataset:dataset:read:not_applicable:exact",
+				"host=>host:field:group:source:exact",
+				"'foo*'=>foo*:field:read:indeterminate:exact",
+			},
+			wantRequirements: []string{
+				"req-1:field:foo*:read:conditional:dynamic:ref-0:'foo*':indeterminate",
+				"req-2:field:bar:read:required:exact:ref-1:bar:source",
+				"req-3:data_model:Model:read:required:exact:ref-2:Model:not_applicable",
+				"req-4:dataset:Model.Dataset:read:required:exact:ref-3:Model.Dataset:not_applicable",
+				"req-5:field:host:group:required:exact:ref-4:host:source",
+				"req-6:field:foo*:read:conditional:exact:ref-5:'foo*':indeterminate",
+			},
+			dynamicIndex: 0,
+		},
+		{
+			name:  "exact sibling before nested wildcard",
+			query: `| tstats sum(bar+round('foo*')) FROM datamodel=Model.Dataset BY host | where 'foo*'=1`,
+			wantReferences: []string{
+				"bar=>bar:field:read:source:exact",
+				"'foo*'=>foo*:field:read:indeterminate:dynamic",
+				"Model=>Model:data_model:read:not_applicable:exact",
+				"Model.Dataset=>Model.Dataset:dataset:read:not_applicable:exact",
+				"host=>host:field:group:source:exact",
+				"'foo*'=>foo*:field:read:indeterminate:exact",
+			},
+			wantRequirements: []string{
+				"req-1:field:bar:read:required:exact:ref-0:bar:source",
+				"req-2:field:foo*:read:conditional:dynamic:ref-1:'foo*':indeterminate",
+				"req-3:data_model:Model:read:required:exact:ref-2:Model:not_applicable",
+				"req-4:dataset:Model.Dataset:read:required:exact:ref-3:Model.Dataset:not_applicable",
+				"req-5:field:host:group:required:exact:ref-4:host:source",
+				"req-6:field:foo*:read:conditional:exact:ref-5:'foo*':indeterminate",
+			},
+			dynamicIndex: 1,
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			result, err := Analyze(QueryDocument{Text: tc.query})
+			if err != nil {
+				t.Fatal(err)
 			}
-		}
-		wantRequirements := []string{
-			"req-1:field:foo*:read:conditional:dynamic:ref-0:'foo*':indeterminate",
-			"req-2:field:bar:read:required:exact:ref-1:bar:source",
-			"req-3:data_model:Model:read:required:exact:ref-2:Model:not_applicable",
-			"req-4:dataset:Model.Dataset:read:required:exact:ref-3:Model.Dataset:not_applicable",
-			"req-5:field:host:group:required:exact:ref-4:host:source",
-			"req-6:field:foo*:read:conditional:exact:ref-5:'foo*':indeterminate",
-		}
-		if got := tstatsRequirementFacts(result.Requirements.Items); !reflect.DeepEqual(got, wantRequirements) {
-			t.Fatalf("nested wildcard requirements\n got: %q\nwant: %q", got, wantRequirements)
-		}
-		assertTstatsDiagnosticLocation(t, result, CodeDynamicReference, "'foo*'")
-	})
+			if got := tstatsReferenceFacts(result.References); !reflect.DeepEqual(got, tc.wantReferences) {
+				t.Fatalf("nested wildcard references\n got: %q\nwant: %q", got, tc.wantReferences)
+			}
+			wantFields := []string{"host:true:ref-4"}
+			if got := tstatsFieldFacts(result.Lineage[0].After.Fields); !reflect.DeepEqual(got, wantFields) || !result.Lineage[0].After.Open || !result.Lineage[0].After.Uncertain || len(result.Lineage[0].Transitions) != 1 {
+				t.Fatalf("nested wildcard tstats shape = fields %q lineage %+v, want fields %q and only the group transition", got, result.Lineage[0], wantFields)
+			}
+			upstreamDynamicID := result.References[tc.dynamicIndex].ID
+			downstream := result.References[len(result.References)-1]
+			if downstream.NormalizedName != "foo*" || downstream.Resolution != "exact" || downstream.Binding != "indeterminate" {
+				t.Fatalf("downstream same-spelling read = %+v", downstream)
+			}
+			for _, origin := range downstream.OriginReferenceIDs {
+				if origin == upstreamDynamicID {
+					t.Fatalf("downstream exact read used dynamic held read %s as a producer: %+v", upstreamDynamicID, downstream)
+				}
+			}
+			if got := tstatsRequirementFacts(result.Requirements.Items); !reflect.DeepEqual(got, tc.wantRequirements) {
+				t.Fatalf("nested wildcard requirements\n got: %q\nwant: %q", got, tc.wantRequirements)
+			}
+			assertTstatsDiagnosticLocation(t, result, CodeDynamicReference, "'foo*'")
+		})
+	}
 }
 
 func tstatsReferenceFacts(references []Reference) []string {

@@ -120,7 +120,20 @@ func (s *semanticStage) origins(ids []string) []string {
 func (s *semanticStage) create(ctx antlr.ParserRuleContext, name, role, operation string, inputs []string, conditional bool) string {
 	return s.createAt(s.operand(ctx, name), role, operation, inputs, conditional)
 }
+
+type expressionIdentifierReader func(parser.IAnalysisIdentifierContext) string
+
 func (s *semanticStage) expression(node antlr.Tree) []string {
+	return s.walkExpression(node, func(ctx parser.IAnalysisIdentifierContext) string {
+		role := "read"
+		if s.splOwner(ctx).role == "null_test" {
+			role = "null_test"
+		}
+		return s.read(ctx, normalizedName(ctx.GetText()), role)
+	})
+}
+
+func (s *semanticStage) walkExpression(node antlr.Tree, readIdentifier expressionIdentifierReader) []string {
 	ids := []string{}
 	if node == nil {
 		return ids
@@ -128,11 +141,7 @@ func (s *semanticStage) expression(node antlr.Tree) []string {
 	switch ctx := node.(type) {
 	case parser.IAnalysisIdentifierContext:
 		if intact(ctx) {
-			role := "read"
-			if s.splOwner(ctx).role == "null_test" {
-				role = "null_test"
-			}
-			id := s.read(ctx, normalizedName(ctx.GetText()), role)
+			id := readIdentifier(ctx)
 			if id != "" {
 				ids = append(ids, id)
 			}
@@ -143,7 +152,7 @@ func (s *semanticStage) expression(node antlr.Tree) []string {
 	case parser.IAnalysisFunctionCallContext:
 		s.function(ctx, false)
 		if ctx.AnalysisArgumentList() != nil {
-			return s.expression(ctx.AnalysisArgumentList())
+			return s.walkExpression(ctx.AnalysisArgumentList(), readIdentifier)
 		}
 		return ids
 	case parser.IAnalysisMacroContext:
@@ -159,7 +168,7 @@ func (s *semanticStage) expression(node antlr.Tree) []string {
 		return ids
 	}
 	for i := 0; i < node.GetChildCount(); i++ {
-		ids = append(ids, s.expression(node.GetChild(i))...)
+		ids = append(ids, s.walkExpression(node.GetChild(i), readIdentifier)...)
 	}
 	return ids
 }

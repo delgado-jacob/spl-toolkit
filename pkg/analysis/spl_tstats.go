@@ -254,60 +254,20 @@ func (s *semanticStage) tstatsAggregateInputs(node antlr.Tree) ([]string, bool) 
 		operand locatedOperand
 		id      string
 	}
-	inputs := []string{}
 	held := []heldInput{}
-	var visit func(antlr.Tree)
-	visit = func(node antlr.Tree) {
-		if node == nil {
-			return
+	inputs := s.walkExpression(node, func(ctx parser.IAnalysisIdentifierContext) string {
+		operand := fieldCommandOperand(s, ctx)
+		if operand.Resolution == "exact" {
+			role := "read"
+			if s.splOwner(ctx).role == "null_test" {
+				role = "null_test"
+			}
+			return s.readAt(operand, role)
 		}
-		switch ctx := node.(type) {
-		case parser.IAnalysisIdentifierContext:
-			if !intact(ctx) {
-				return
-			}
-			operand := fieldCommandOperand(s, ctx)
-			if operand.Resolution == "exact" {
-				role := "read"
-				if s.splOwner(ctx).role == "null_test" {
-					role = "null_test"
-				}
-				if id := s.readAt(operand, role); id != "" {
-					inputs = append(inputs, id)
-				}
-				return
-			}
-			id := fieldCommandHeldRead(s, operand, "read")
-			if id != "" {
-				inputs = append(inputs, id)
-			}
-			held = append(held, heldInput{context: ctx, operand: operand, id: id})
-			return
-		case parser.IAnalysisLiteralContext:
-			return
-		case parser.IAnalysisFunctionCallContext:
-			s.function(ctx, false)
-			if ctx.AnalysisArgumentList() != nil {
-				visit(ctx.AnalysisArgumentList())
-			}
-			return
-		case parser.IAnalysisMacroContext:
-			s.macro(ctx)
-			return
-		case parser.IAnalysisSubqueryContext:
-			s.diagnostic(CodeUnsupportedSemantics, "subsearch result field effects are unmodeled", ctx)
-			return
-		case antlr.TerminalNode:
-			if atom, ok := node.GetParent().(parser.IAnalysisAtomContext); ok && ctx.GetSymbol().GetTokenType() == parser.SPLLexerMULT {
-				s.diagnostic(CodeUnresolvedWildcard, "wildcard expression membership is unresolved", atom)
-			}
-			return
-		}
-		for i := 0; i < node.GetChildCount(); i++ {
-			visit(node.GetChild(i))
-		}
-	}
-	visit(node)
+		id := fieldCommandHeldRead(s, operand, "read")
+		held = append(held, heldInput{context: ctx, operand: operand, id: id})
+		return id
+	})
 	for _, input := range held {
 		if input.id != "" {
 			s.diagnosticAtOwned(CodeDynamicReference, "warning", "unsupported_semantics", "tstats aggregate operand identity must be exact", input.operand.Location, true, []string{input.id})
