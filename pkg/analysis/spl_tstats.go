@@ -174,28 +174,18 @@ func (s *semanticStage) tstatsAggregate(aggregate parser.IAnalysisAggregateConte
 	var target antlr.ParserRuleContext = aggregate
 	if call := aggregate.AnalysisFunctionCall(); call != nil {
 		functionName := strings.ToLower(call.AnalysisFunctionName().GetText())
-		if functionName == "prefix" {
-			if call.AnalysisArgumentList() != nil {
-				inputs = s.expression(call.AnalysisArgumentList())
+		arguments := call.AnalysisArgumentList()
+		dynamicInput := false
+		if arguments != nil {
+			inputs, dynamicInput = s.tstatsAggregateInputs(arguments)
+			if dynamicInput {
+				understood = false
 			}
+		}
+		if functionName == "prefix" {
 			s.diagnostic(CodeUnsupportedSemantics, "tstats PREFIX output identity is unmodeled", call)
 			understood = false
 		} else {
-			arguments := call.AnalysisArgumentList()
-			if arguments != nil {
-				if identifier := tstatsAggregateIdentifier(arguments); identifier != nil && strings.Contains(normalizedName(identifier.GetText()), "*") {
-					operand := fieldCommandOperand(s, identifier)
-					if id := fieldCommandHeldRead(s, operand, "read"); id != "" {
-						inputs = append(inputs, id)
-						s.diagnosticAtOwned(CodeDynamicReference, "warning", "unsupported_semantics", "tstats aggregate operand identity must be exact", operand.Location, true, []string{id})
-					} else {
-						s.diagnostic(CodeDynamicReference, "tstats aggregate operand identity must be exact", identifier)
-					}
-					understood = false
-				} else {
-					inputs = s.expression(arguments)
-				}
-			}
 			if s.function(call, true) && understood {
 				name = functionName + "()"
 				if arguments != nil {
@@ -239,24 +229,74 @@ func (s *semanticStage) tstatsAggregate(aggregate parser.IAnalysisAggregateConte
 	return &aggregateOutput{Target: s.operand(target, name), InputReferenceIDs: inputs}, true
 }
 
-func tstatsAggregateIdentifier(arguments parser.IAnalysisArgumentListContext) parser.IAnalysisIdentifierContext {
-	if arguments == nil || len(arguments.AllAnalysisExpression()) != 1 {
-		return nil
+func (s *semanticStage) tstatsAggregateInputs(node antlr.Tree) ([]string, bool) {
+	type heldInput struct {
+		context parser.IAnalysisIdentifierContext
+		operand locatedOperand
+		id      string
 	}
-	var exactIdentifier func(antlr.Tree) parser.IAnalysisIdentifierContext
-	exactIdentifier = func(node antlr.Tree) parser.IAnalysisIdentifierContext {
-		if identifier, ok := node.(parser.IAnalysisIdentifierContext); ok {
-			if intact(identifier) {
-				return identifier
+	inputs := []string{}
+	held := []heldInput{}
+	var visit func(antlr.Tree)
+	visit = func(node antlr.Tree) {
+		if node == nil {
+			return
+		}
+		switch ctx := node.(type) {
+		case parser.IAnalysisIdentifierContext:
+			if !intact(ctx) {
+				return
 			}
-			return nil
+			operand := fieldCommandOperand(s, ctx)
+			if operand.Resolution == "exact" {
+				role := "read"
+				if s.splOwner(ctx).role == "null_test" {
+					role = "null_test"
+				}
+				if id := s.readAt(operand, role); id != "" {
+					inputs = append(inputs, id)
+				}
+				return
+			}
+			id := fieldCommandHeldRead(s, operand, "read")
+			if id != "" {
+				inputs = append(inputs, id)
+			}
+			held = append(held, heldInput{context: ctx, operand: operand, id: id})
+			return
+		case parser.IAnalysisLiteralContext:
+			return
+		case parser.IAnalysisFunctionCallContext:
+			s.function(ctx, false)
+			if ctx.AnalysisArgumentList() != nil {
+				visit(ctx.AnalysisArgumentList())
+			}
+			return
+		case parser.IAnalysisMacroContext:
+			s.macro(ctx)
+			return
+		case parser.IAnalysisSubqueryContext:
+			s.diagnostic(CodeUnsupportedSemantics, "subsearch result field effects are unmodeled", ctx)
+			return
+		case antlr.TerminalNode:
+			if atom, ok := node.GetParent().(parser.IAnalysisAtomContext); ok && ctx.GetSymbol().GetTokenType() == parser.SPLLexerMULT {
+				s.diagnostic(CodeUnresolvedWildcard, "wildcard expression membership is unresolved", atom)
+			}
+			return
 		}
-		if node.GetChildCount() != 1 {
-			return nil
+		for i := 0; i < node.GetChildCount(); i++ {
+			visit(node.GetChild(i))
 		}
-		return exactIdentifier(node.GetChild(0))
 	}
-	return exactIdentifier(arguments.AnalysisExpression(0))
+	visit(node)
+	for _, input := range held {
+		if input.id != "" {
+			s.diagnosticAtOwned(CodeDynamicReference, "warning", "unsupported_semantics", "tstats aggregate operand identity must be exact", input.operand.Location, true, []string{input.id})
+			continue
+		}
+		s.diagnostic(CodeDynamicReference, "tstats aggregate operand identity must be exact", input.context)
+	}
+	return inputs, len(held) > 0
 }
 
 func (s *semanticStage) applyTstatsPartialAggregation(outputs []aggregateOutput, groups []locatedOperand) {
