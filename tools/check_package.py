@@ -65,7 +65,7 @@ SPL2_FIXTURE_FILES = (
     "manifest.json", "provenance.json", "lexical-expressions.json", "frontend-boundaries.json",
     "pipeline-commands.json", "pipeline-boundaries.json", "sql-clauses.json", "sql-boundaries.json",
     "extended-commands.json", "extended-boundaries.json", "functions.json", "canonical-core.json",
-    "recovery-core.json",
+    "recovery-core.json", "linus-forms.json",
 )
 ACCEPTANCE_FILES = ("test_documented_cli.py", "test_surfaces.py", "test_analysis_surfaces.py", "test_requirements_surfaces.py", "test_validation_surfaces.py", "test_schema_surfaces.py", "test_spl2_surfaces.py", "test_rewrite_surfaces.py", "test_tooling_surfaces.py", "test_machine_contracts.py", "spl2_transport.py", "cli_examples.json")
 REQUIRED_PYTEST_PLUGIN = r'''\

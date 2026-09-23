@@ -15,6 +15,9 @@
     "recovery-core.json"
   ],
   "provenance_file": "provenance.json",
+  "supplemental_form_files": [
+    "linus-forms.json"
+  ],
   "mandatory_command_families": [
     "C01",
     "C02",

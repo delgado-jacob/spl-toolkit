@@ -1,0 +1,551 @@
+{
+  "schema_version": 1,
+  "authorship": "locally-authored-synthetic",
+  "obligations": [
+    {
+      "id": "M11.layout.standalone-pipeline",
+      "family": "M11.layout",
+      "description": "Standalone pipeline layout.",
+      "query": "FROM synthetic_events | where synthetic_value > 0",
+      "disposition": "included",
+      "source_keys": ["linus_m11"]
+    },
+    {
+      "id": "M11.layout.predicate-embedding",
+      "family": "M11.layout",
+      "description": "Predicate embedded in a complete local pipeline.",
+      "query": "FROM synthetic_events | where (synthetic_value > 1)",
+      "disposition": "included",
+      "source_keys": ["linus_m11"]
+    },
+    {
+      "id": "M11.layout.multiline-expression",
+      "family": "M11.layout",
+      "description": "Expression split across lines.",
+      "query": "FROM synthetic_events\n| eval synthetic_total=(synthetic_value\n  + synthetic_delta)",
+      "disposition": "included",
+      "source_keys": ["linus_m11"]
+    },
+    {
+      "id": "M11.layout.multiline-arguments",
+      "family": "M11.layout",
+      "description": "Function arguments split across lines.",
+      "query": "FROM synthetic_events\n| eval synthetic_choice=coalesce(\n  synthetic_primary,\n  synthetic_fallback\n)",
+      "disposition": "included",
+      "source_keys": ["linus_m11"]
+    },
+    {
+      "id": "M11.layout.multiline-aggregation",
+      "family": "M11.layout",
+      "description": "Aggregation split across lines.",
+      "query": "FROM synthetic_events\n| stats\n  sum(synthetic_value) AS synthetic_total",
+      "disposition": "included",
+      "source_keys": ["linus_m11"]
+    },
+    {
+      "id": "M11.layout.multiline-grouping",
+      "family": "M11.layout",
+      "description": "Grouping list split across lines.",
+      "query": "FROM synthetic_events\n| stats count() AS synthetic_count BY\n  synthetic_region,\n  synthetic_kind",
+      "disposition": "included",
+      "source_keys": ["linus_m11"]
+    },
+    {
+      "id": "M11.layout.clause-boundaries",
+      "family": "M11.layout",
+      "description": "SQL clauses on distinct lines.",
+      "query": "SELECT synthetic_region, count() AS synthetic_count\nFROM synthetic_events\nWHERE synthetic_value > 2\nGROUP BY synthetic_region",
+      "disposition": "included",
+      "source_keys": ["linus_m11"]
+    },
+    {
+      "id": "M11.dataset.parameter",
+      "family": "M11.dataset",
+      "description": "Dataset parameter boundary.",
+      "query": "FROM $synthetic_dataset | fields synthetic_value",
+      "disposition": "included",
+      "source_keys": ["linus_m11"]
+    },
+    {
+      "id": "M11.dataset.named",
+      "family": "M11.dataset",
+      "description": "Named dataset reference.",
+      "query": "FROM synthetic_events | fields synthetic_region",
+      "disposition": "included",
+      "source_keys": ["linus_m11"]
+    },
+    {
+      "id": "M11.dataset.local-view",
+      "family": "M11.dataset",
+      "description": "Locally named view reference.",
+      "query": "FROM synthetic_local_view | fields synthetic_value",
+      "disposition": "included",
+      "source_keys": ["linus_m11"]
+    },
+    {
+      "id": "M11.dataset.static-descriptor",
+      "family": "M11.dataset",
+      "description": "Static dataset descriptor.",
+      "query": "FROM synthetic_catalog.synthetic_events | fields synthetic_value",
+      "disposition": "included",
+      "source_keys": ["linus_m11"]
+    },
+    {
+      "id": "M11.dataset.dynamic-descriptor-boundary",
+      "family": "M11.dataset",
+      "description": "Dynamic descriptor boundary remains explicit.",
+      "query": "FROM $synthetic_catalog.$synthetic_collection | fields synthetic_value",
+      "disposition": "included",
+      "source_keys": ["linus_m11"]
+    },
+    {
+      "id": "M11.field.atomic-quoted-dotted-name",
+      "family": "M11.field",
+      "description": "Quoted dotted field is one atomic name.",
+      "query": "FROM synthetic_events | fields 'synthetic.object.value'",
+      "disposition": "included",
+      "source_keys": ["linus_m11"]
+    },
+    {
+      "id": "M11.field.structural-dotted-path",
+      "family": "M11.field",
+      "description": "Unquoted dotted access is structural.",
+      "query": "FROM synthetic_events | eval synthetic_out=synthetic_object.synthetic_value",
+      "disposition": "included",
+      "source_keys": ["linus_m11"]
+    },
+    {
+      "id": "M11.field.alias-qualified-path",
+      "family": "M11.field",
+      "description": "Dataset alias qualifies a structural path.",
+      "query": "SELECT synthetic_source.synthetic_value FROM synthetic_events AS synthetic_source",
+      "disposition": "included",
+      "source_keys": ["linus_m11"]
+    },
+    {
+      "id": "M11.pipeline.where",
+      "family": "M11.pipeline",
+      "description": "Where stage predicate.",
+      "query": "FROM synthetic_events | where synthetic_enabled=true",
+      "disposition": "included",
+      "source_keys": ["linus_m11"]
+    },
+    {
+      "id": "M11.pipeline.eval",
+      "family": "M11.pipeline",
+      "description": "Eval stage assignment.",
+      "query": "FROM synthetic_events | eval synthetic_scaled=synthetic_value * 2",
+      "disposition": "included",
+      "source_keys": ["linus_m11"]
+    },
+    {
+      "id": "M11.pipeline.fields",
+      "family": "M11.pipeline",
+      "description": "Fields stage projection.",
+      "query": "FROM synthetic_events | fields synthetic_value, synthetic_region",
+      "disposition": "included",
+      "source_keys": ["linus_m11"]
+    },
+    {
+      "id": "M11.pipeline.stats",
+      "family": "M11.pipeline",
+      "description": "Stats stage aggregation.",
+      "query": "FROM synthetic_events | stats avg(synthetic_value) AS synthetic_average",
+      "disposition": "included",
+      "source_keys": ["linus_m11"]
+    },
+    {
+      "id": "M11.pipeline.bin",
+      "family": "M11.pipeline",
+      "description": "Bin stage over a synthetic time field.",
+      "query": "FROM synthetic_events | bin synthetic_time span=5m",
+      "disposition": "included",
+      "source_keys": ["linus_m11"]
+    },
+    {
+      "id": "M11.pipeline.mvexpand",
+      "family": "M11.pipeline",
+      "description": "Multivalue expansion stage.",
+      "query": "FROM synthetic_events | mvexpand synthetic_values",
+      "disposition": "included",
+      "source_keys": ["linus_m11"]
+    },
+    {
+      "id": "M11.sql.source-where",
+      "family": "M11.sql",
+      "description": "SQL source and WHERE clause.",
+      "query": "SELECT synthetic_value FROM synthetic_events WHERE synthetic_enabled=true",
+      "disposition": "included",
+      "source_keys": ["linus_m11"]
+    },
+    {
+      "id": "M11.sql.projection",
+      "family": "M11.sql",
+      "description": "SQL projection list.",
+      "query": "SELECT synthetic_value, synthetic_region FROM synthetic_events",
+      "disposition": "included",
+      "source_keys": ["linus_m11"]
+    },
+    {
+      "id": "M11.sql.grouping",
+      "family": "M11.sql",
+      "description": "SQL aggregate grouping.",
+      "query": "SELECT synthetic_region, sum(synthetic_value) FROM synthetic_events GROUP BY synthetic_region",
+      "disposition": "included",
+      "source_keys": ["linus_m11"]
+    },
+    {
+      "id": "M11.sql.aggregate-alias",
+      "family": "M11.sql",
+      "description": "SQL aggregate alias.",
+      "query": "SELECT max(synthetic_value) AS synthetic_maximum FROM synthetic_events",
+      "disposition": "included",
+      "source_keys": ["linus_m11"]
+    },
+    {
+      "id": "M11.sql.clause-scheduling",
+      "family": "M11.sql",
+      "description": "SQL clause scheduling with filter and grouping.",
+      "query": "SELECT synthetic_region, count() AS synthetic_count FROM synthetic_events WHERE synthetic_value >= 3 GROUP BY synthetic_region",
+      "disposition": "included",
+      "source_keys": ["linus_m11"]
+    },
+    {
+      "id": "M11.aggregate.call",
+      "family": "M11.aggregate",
+      "description": "Aggregate call.",
+      "query": "FROM synthetic_events | stats sum(synthetic_value)",
+      "disposition": "included",
+      "source_keys": ["linus_m11"]
+    },
+    {
+      "id": "M11.aggregate.alias",
+      "family": "M11.aggregate",
+      "description": "Aggregate result alias.",
+      "query": "FROM synthetic_events | stats min(synthetic_value) AS synthetic_minimum",
+      "disposition": "included",
+      "source_keys": ["linus_m11"]
+    },
+    {
+      "id": "M11.aggregate.expression-grouping",
+      "family": "M11.aggregate",
+      "description": "Grouped arithmetic around aggregate results.",
+      "query": "FROM synthetic_events | stats (sum(synthetic_value) / count()) AS synthetic_ratio",
+      "disposition": "included",
+      "source_keys": ["linus_m11"]
+    },
+    {
+      "id": "M11.aggregate.span-field-duration",
+      "family": "M11.aggregate",
+      "description": "Span grouping with field and duration arguments.",
+      "query": "FROM synthetic_events | stats count() AS synthetic_count BY span(synthetic_time, 5m)",
+      "disposition": "included",
+      "source_keys": ["linus_m11"]
+    },
+    {
+      "id": "M11.predicate.comparison",
+      "family": "M11.predicate",
+      "description": "Scalar comparison predicate.",
+      "query": "FROM synthetic_events | where synthetic_value <= 10",
+      "disposition": "included",
+      "source_keys": ["linus_m11"]
+    },
+    {
+      "id": "M11.predicate.boolean-composition",
+      "family": "M11.predicate",
+      "description": "Boolean predicate composition.",
+      "query": "FROM synthetic_events | where synthetic_enabled=true AND (synthetic_value > 4 OR synthetic_priority=1)",
+      "disposition": "included",
+      "source_keys": ["linus_m11"]
+    },
+    {
+      "id": "M11.predicate.membership-pattern",
+      "family": "M11.predicate",
+      "description": "Membership and pattern predicates.",
+      "query": "FROM synthetic_events | where synthetic_region IN (\"east\", \"west\") AND like(synthetic_label, \"demo%\")",
+      "disposition": "included",
+      "source_keys": ["linus_m11"]
+    },
+    {
+      "id": "M11.predicate.cidr",
+      "family": "M11.predicate",
+      "description": "CIDR predicate.",
+      "query": "FROM synthetic_events | where cidrmatch(\"192.0.2.0/24\", synthetic_address)",
+      "disposition": "included",
+      "source_keys": ["linus_m11"]
+    },
+    {
+      "id": "M11.predicate.lambda",
+      "family": "M11.predicate",
+      "description": "Lambda predicate over a synthetic collection.",
+      "query": "FROM synthetic_events | where any(synthetic_values, synthetic_item -> synthetic_item > 0)",
+      "disposition": "included",
+      "source_keys": ["linus_m11"]
+    },
+    {
+      "id": "M11.expression.scalar-call",
+      "family": "M11.expression",
+      "description": "Scalar function expression.",
+      "query": "FROM synthetic_events | eval synthetic_root=sqrt(synthetic_value)",
+      "disposition": "included",
+      "source_keys": ["linus_m11"]
+    },
+    {
+      "id": "M11.expression.dotted-read",
+      "family": "M11.expression",
+      "description": "Dotted structural read expression.",
+      "query": "FROM synthetic_events | eval synthetic_leaf=synthetic_object.synthetic_leaf",
+      "disposition": "included",
+      "source_keys": ["linus_m11"]
+    },
+    {
+      "id": "M11.expression.array-object-conversion",
+      "family": "M11.expression",
+      "description": "Array and object conversion expression.",
+      "query": "FROM synthetic_events | eval synthetic_array=json_array_to_mv(json(synthetic_object))",
+      "disposition": "included",
+      "source_keys": ["linus_m11"]
+    },
+    {
+      "id": "M11.expression.numeric-composition",
+      "family": "M11.expression",
+      "description": "Composed numeric expression.",
+      "query": "FROM synthetic_events | eval synthetic_score=round((synthetic_value + synthetic_delta) / 2, 2)",
+      "disposition": "included",
+      "source_keys": ["linus_m11"]
+    },
+    {
+      "id": "M11.expression.lambda-binding",
+      "family": "M11.expression",
+      "description": "Lambda binding expression.",
+      "query": "FROM synthetic_events | eval synthetic_any=any(synthetic_values, synthetic_member -> synthetic_member=synthetic_value)",
+      "disposition": "included",
+      "source_keys": ["linus_m11"]
+    },
+    {
+      "id": "M11.function.abs",
+      "family": "M11.function",
+      "description": "Absolute-value call.",
+      "function": "abs",
+      "query": "FROM synthetic_events | eval synthetic_out=abs(synthetic_value)",
+      "disposition": "included",
+      "source_keys": ["linus_m11"]
+    },
+    {
+      "id": "M11.function.any",
+      "family": "M11.function",
+      "description": "Any lambda call.",
+      "function": "any",
+      "query": "FROM synthetic_events | eval synthetic_out=any(synthetic_values, synthetic_member -> synthetic_member > 1)",
+      "disposition": "included",
+      "source_keys": ["linus_m11"]
+    },
+    {
+      "id": "M11.function.avg",
+      "family": "M11.function",
+      "description": "Average aggregate call.",
+      "function": "avg",
+      "query": "FROM synthetic_events | stats avg(synthetic_value) AS synthetic_out",
+      "disposition": "included",
+      "source_keys": ["linus_m11"]
+    },
+    {
+      "id": "M11.function.cidrmatch",
+      "family": "M11.function",
+      "description": "CIDR match call.",
+      "function": "cidrmatch",
+      "query": "FROM synthetic_events | eval synthetic_out=cidrmatch(\"198.51.100.0/24\", synthetic_address)",
+      "disposition": "included",
+      "source_keys": ["linus_m11"]
+    },
+    {
+      "id": "M11.function.coalesce",
+      "family": "M11.function",
+      "description": "Coalescing call.",
+      "function": "coalesce",
+      "query": "FROM synthetic_events | eval synthetic_out=coalesce(synthetic_primary, synthetic_fallback)",
+      "disposition": "included",
+      "source_keys": ["linus_m11"]
+    },
+    {
+      "id": "M11.function.count",
+      "family": "M11.function",
+      "description": "Count aggregate call.",
+      "function": "count",
+      "query": "FROM synthetic_events | stats count() AS synthetic_out",
+      "disposition": "included",
+      "source_keys": ["linus_m11"]
+    },
+    {
+      "id": "M11.function.dc",
+      "family": "M11.function",
+      "description": "Distinct-count abbreviation call.",
+      "function": "dc",
+      "query": "FROM synthetic_events | stats dc(synthetic_value) AS synthetic_out",
+      "disposition": "included",
+      "source_keys": ["linus_m11"]
+    },
+    {
+      "id": "M11.function.distinct-count",
+      "family": "M11.function",
+      "description": "Distinct-count long-form call.",
+      "function": "distinct_count",
+      "query": "FROM synthetic_events | stats distinct_count(synthetic_value) AS synthetic_out",
+      "disposition": "included",
+      "source_keys": ["linus_m11"]
+    },
+    {
+      "id": "M11.function.json",
+      "family": "M11.function",
+      "description": "JSON conversion call.",
+      "function": "json",
+      "query": "FROM synthetic_events | eval synthetic_out=json(synthetic_object)",
+      "disposition": "included",
+      "source_keys": ["linus_m11"]
+    },
+    {
+      "id": "M11.function.json-array-to-mv",
+      "family": "M11.function",
+      "description": "JSON-array conversion call.",
+      "function": "json_array_to_mv",
+      "query": "FROM synthetic_events | eval synthetic_out=json_array_to_mv(synthetic_json_array)",
+      "disposition": "included",
+      "source_keys": ["linus_m11"]
+    },
+    {
+      "id": "M11.function.like",
+      "family": "M11.function",
+      "description": "Pattern comparison call.",
+      "function": "like",
+      "query": "FROM synthetic_events | eval synthetic_out=like(synthetic_label, \"sample%\")",
+      "disposition": "included",
+      "source_keys": ["linus_m11"]
+    },
+    {
+      "id": "M11.function.lower",
+      "family": "M11.function",
+      "description": "Lowercase conversion call.",
+      "function": "lower",
+      "query": "FROM synthetic_events | eval synthetic_out=lower(synthetic_label)",
+      "disposition": "included",
+      "source_keys": ["linus_m11"]
+    },
+    {
+      "id": "M11.function.match",
+      "family": "M11.function",
+      "description": "Regular-expression match call.",
+      "function": "match",
+      "query": "FROM synthetic_events | eval synthetic_out=match(synthetic_label, \"^sample\")",
+      "disposition": "included",
+      "source_keys": ["linus_m11"]
+    },
+    {
+      "id": "M11.function.max",
+      "family": "M11.function",
+      "description": "Maximum aggregate call.",
+      "function": "max",
+      "query": "FROM synthetic_events | stats max(synthetic_value) AS synthetic_out",
+      "disposition": "included",
+      "source_keys": ["linus_m11"]
+    },
+    {
+      "id": "M11.function.min",
+      "family": "M11.function",
+      "description": "Minimum aggregate call.",
+      "function": "min",
+      "query": "FROM synthetic_events | stats min(synthetic_value) AS synthetic_out",
+      "disposition": "included",
+      "source_keys": ["linus_m11"]
+    },
+    {
+      "id": "M11.function.mvindex",
+      "family": "M11.function",
+      "description": "Multivalue index call.",
+      "function": "mvindex",
+      "query": "FROM synthetic_events | eval synthetic_out=mvindex(synthetic_values, 0)",
+      "disposition": "included",
+      "source_keys": ["linus_m11"]
+    },
+    {
+      "id": "M11.function.round",
+      "family": "M11.function",
+      "description": "Numeric rounding call.",
+      "function": "round",
+      "query": "FROM synthetic_events | eval synthetic_out=round(synthetic_value, 2)",
+      "disposition": "included",
+      "source_keys": ["linus_m11"]
+    },
+    {
+      "id": "M11.function.rtrim",
+      "family": "M11.function",
+      "description": "Right-trim call.",
+      "function": "rtrim",
+      "query": "FROM synthetic_events | eval synthetic_out=rtrim(synthetic_label, \".\")",
+      "disposition": "included",
+      "source_keys": ["linus_m11"]
+    },
+    {
+      "id": "M11.function.span",
+      "family": "M11.function",
+      "description": "Span grouping call.",
+      "function": "span",
+      "query": "FROM synthetic_events | stats count() AS synthetic_out BY span(synthetic_time, 10m)",
+      "disposition": "included",
+      "source_keys": ["linus_m11"]
+    },
+    {
+      "id": "M11.function.sqrt",
+      "family": "M11.function",
+      "description": "Square-root call.",
+      "function": "sqrt",
+      "query": "FROM synthetic_events | eval synthetic_out=sqrt(synthetic_value)",
+      "disposition": "included",
+      "source_keys": ["linus_m11"]
+    },
+    {
+      "id": "M11.function.stdev",
+      "family": "M11.function",
+      "description": "Standard-deviation aggregate call.",
+      "function": "stdev",
+      "query": "FROM synthetic_events | stats stdev(synthetic_value) AS synthetic_out",
+      "disposition": "included",
+      "source_keys": ["linus_m11"]
+    },
+    {
+      "id": "M11.function.strftime",
+      "family": "M11.function",
+      "description": "Timestamp formatting call.",
+      "function": "strftime",
+      "query": "FROM synthetic_events | eval synthetic_out=strftime(synthetic_time, \"%Y-%m-%d\")",
+      "disposition": "included",
+      "source_keys": ["linus_m11"]
+    },
+    {
+      "id": "M11.function.sum",
+      "family": "M11.function",
+      "description": "Sum aggregate call.",
+      "function": "sum",
+      "query": "FROM synthetic_events | stats sum(synthetic_value) AS synthetic_out",
+      "disposition": "included",
+      "source_keys": ["linus_m11"]
+    },
+    {
+      "id": "M11.function.tonumber",
+      "family": "M11.function",
+      "description": "Numeric conversion call.",
+      "function": "tonumber",
+      "query": "FROM synthetic_events | eval synthetic_out=tonumber(synthetic_label)",
+      "disposition": "included",
+      "source_keys": ["linus_m11"]
+    },
+    {
+      "id": "M11.function.values",
+      "family": "M11.function",
+      "description": "Values aggregate call.",
+      "function": "values",
+      "query": "FROM synthetic_events | stats values(synthetic_label) AS synthetic_out",
+      "disposition": "included",
+      "source_keys": ["linus_m11"]
+    }
+  ]
+}

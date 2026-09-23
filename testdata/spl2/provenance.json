@@ -4,6 +4,22 @@
     "matrix_sha256": "84d07d0ba4638cff5e3e7cf021698a9d570d0b4a81f46414a670f0eb8491fe51",
     "expansion_sha256": "6eb5f7242f8dd8078ce9ec2daed06a374c0fec873dfb314156cc83d5cb36e2ba"
   },
+  "supplemental_sources": {
+    "linus_m11": {
+      "authority": "aggregate-only-local-audit",
+      "audited_commit": "a00742a733fb0ad96fd007940498d1d7138ae4a6",
+      "toolkit_base": "ec9f626c03f67fe783c3dfc1d409ff75a12bbca9",
+      "spl2_grammar_ref": "4d3b7850a47c7f493f4e4c3cae8c3f30ae4cc5fe",
+      "inventory": {
+        "yaml_documents": 53,
+        "top_level_search_block_scalars": 49,
+        "standalone_programs": 45,
+        "predicate_fragments": 4,
+        "form_obligations": 65,
+        "function_obligations": 25
+      }
+    }
+  },
   "sources": {
     "compat": {
       "url": "https://help.splunk.com/en/splunk-enterprise/search/spl2-search-reference/spl2-compatibility-profiles-and-quick-references/compatibility-quick-reference-for-spl2-commands",

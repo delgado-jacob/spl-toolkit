@@ -959,6 +959,7 @@ def test_rewrite_fixture_copy_rejects_missing_or_changed_input(tmp_path, monkeyp
 
 def test_spl2_fixture_copy_and_source_override(tmp_path, monkeypatch):
     checker = load_package_checker()
+    assert "linus-forms.json" in checker.SPL2_FIXTURE_FILES
     monkeypatch.setenv("SPL_SPL2_FIXTURES", "checkout-only")
     assert "SPL_SPL2_FIXTURES" not in checker.clean_env()
     destination = tmp_path / "spl2"
