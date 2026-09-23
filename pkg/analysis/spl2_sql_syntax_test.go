@@ -233,3 +233,40 @@ func TestSPL2SQLSyntaxQualifiedGroupingWildcards(t *testing.T) {
 		}
 	}
 }
+
+func TestSPL2SelectedMultilineSQLAndDottedOwnership(t *testing.T) {
+	text := "SELECT\n" +
+		"  coalesce(\n" +
+		"    e.payload.user.name,\n" +
+		"    'payload.user.name'\n" +
+		"  ) AS 'display.name',\n" +
+		"  count() AS total\n" +
+		"FROM\n" +
+		"  catalog.events AS e\n" +
+		"WHERE\n" +
+		"  e.payload.status=\"ok\"\n" +
+		"GROUP BY\n" +
+		"  lower(e.payload.region),\n" +
+		"  span(e._time, 5m)\n" +
+		"ORDER BY\n" +
+		"  total DESC"
+	p := spl2RequireNoDiagnostics(t, text)
+	if got := len(spl2Nodes(p.syntax, "datasetPath")); got != 1 {
+		t.Fatalf("SQL dataset paths %d: %s", got, p.syntax.shape())
+	}
+	if got := len(spl2Nodes(p.syntax, "accessPart")) + len(spl2Nodes(p.syntax, "multilineAccessPart")); got != 8 {
+		t.Fatalf("SQL structural access parts %d: %s", got, p.syntax.shape())
+	}
+	aliases := spl2Nodes(p.syntax, "projectionAlias")
+	if len(aliases) != 2 {
+		t.Fatalf("projection aliases %d", len(aliases))
+	}
+	first := aliases[0]
+	if got := text[first.Location.Start.Offset:first.Location.End.Offset]; got != "'display.name'" || len(spl2Nodes(first, "accessPart")) != 0 {
+		t.Fatalf("quoted dotted projection alias became structural: %q", got)
+	}
+	span := spl2Nodes(p.syntax, "multilineSqlSpanCall")
+	if len(span) != 1 || text[span[0].Location.Start.Offset:span[0].Location.End.Offset] != "span(e._time, 5m)" {
+		t.Fatalf("SQL span ownership: %s", p.syntax.shape())
+	}
+}

@@ -36,6 +36,36 @@ func (p *SPL2Parser) adjacentPrevious() bool {
 func (p *SPL2Parser) contextualKeyword(word string) bool {
     return strings.EqualFold(p.GetTokenStream().LT(1).GetText(), word)
 }
+func (p *SPL2Parser) selectedBranch() bool {
+    if p.GetTokenStream().LT(1).GetText() != "branch" { return false }
+    parens, brackets, braces := 0, 0, 0
+    separators := 0
+    for offset := 2; ; offset++ {
+        token := p.GetTokenStream().LA(offset)
+        if token == antlr.TokenEOF || (token == SPL2ParserPIPE || token == SPL2ParserRBRACKET) && parens == 0 && brackets == 0 && braces == 0 {
+            return separators > 0 && parens == 0 && brackets == 0 && braces == 0
+        }
+        switch token {
+        case SPL2ParserLPAREN:
+            parens++
+        case SPL2ParserRPAREN:
+            if parens == 0 { return false }
+            parens--
+        case SPL2ParserLBRACKET:
+            brackets++
+        case SPL2ParserRBRACKET:
+            if brackets == 0 { return false }
+            brackets--
+        case SPL2ParserLBRACE:
+            braces++
+        case SPL2ParserRBRACE:
+            if braces == 0 { return false }
+            braces--
+        case SPL2ParserCOMMA:
+            if parens == 0 && brackets == 0 && braces == 0 { separators++ }
+        }
+    }
+}
 // SQL clause words remain ordinary identifiers in previously supported pipeline
 // expressions. Within SQL they are boundaries, not missing operand fallbacks.
 func (p *SPL2Parser) outsideSQL() bool {
@@ -68,19 +98,22 @@ func (p *SPL2Parser) unreviewedOption(command int) bool {
 
 query: NL* (pipeline moduleSuffix? | moduleDeclaration) NL* EOF;
 pipeline: start (NL* PIPE NL* command)*;
-start: fromCommand | selectCommand | searchCommand | implicitSearch | generator | loadjobCommand | metricsCommand | unionCommand | embeddedCommand;
+start: fromCommand | selectCommand | searchCommand | implicitSearch | generator | loadjobCommand | metricsCommand | unionCommand | branchCommand | embeddedCommand;
 command: evalCommand | whereCommand | fieldsCommand | tableCommand | renameCommand
     | statsCommand | eventstatsCommand | streamstatsCommand | lookupCommand
     | sortCommand | dedupCommand | headCommand | reverseCommand
     | fromCommand | selectCommand | searchCommand | rexCommand | embeddedCommand
-    | joinCommand | appendCommand | appendpipeCommand | appendcolsCommand | unionCommand | ifCommand
+    | joinCommand | appendCommand | appendpipeCommand | appendcolsCommand | unionCommand | branchCommand | ifCommand
     | binCommand | spathCommand | timechartCommand | timewrapCommand | makemvCommand | mvexpandCommand | mvcombineCommand | fillnullCommand;
 // Clause contexts own only their original lexical spans. Logical SQL scheduling
 // is deliberately deferred to lowering, not represented by reordered source.
 fromCommand: sqlFromClause (NL* sqlWhereClause)? (NL* sqlGroupClause NL* sqlSelectClause | NL* sqlSelectClause)?
     (NL* sqlHavingClause)? (NL* sqlOrderClause)? (NL* sqlLimitClause)? (NL* sqlOffsetClause)?;
 selectCommand: sqlSelectClause NL* sqlFromClause (NL* sqlWhereClause)? (NL* sqlGroupClause)?
-    (NL* sqlHavingClause)? (NL* sqlOrderClause)? (NL* sqlLimitClause)? (NL* sqlOffsetClause)?;
+    (NL* sqlHavingClause)? (NL* sqlOrderClause)? (NL* sqlLimitClause)? (NL* sqlOffsetClause)?
+    | {p.GetTokenStream().LA(2) == SPL2ParserNL}? multilineSqlSelectClause NL+ multilineSqlFromClause
+    (NL* multilineSqlWhereClause)? (NL* multilineSqlGroupClause)? (NL* sqlHavingClause)?
+    (NL* multilineSqlOrderClause)? (NL* sqlLimitClause)? (NL* sqlOffsetClause)?;
 sqlFromClause: FROM dataset sourceAlias? (NL* sqlJoinClause)*;
 sourceAlias: aliasKeyword identifier;
 sqlJoinClause: (INNER | LEFT OUTER?)? JOIN dataset sourceAlias ON sqlJoinPredicate;
@@ -104,15 +137,44 @@ sqlOrderTerm: expression sqlDirection?;
 sqlDirection: ASC | DESC;
 sqlLimitClause: LIMIT integerValue;
 sqlOffsetClause: OFFSET integerValue;
+multilineSqlSelectClause: SELECT NL+ DISTINCT? NL* multilineSqlProjection (NL* COMMA NL* multilineSqlProjection)*;
+multilineSqlProjection: (multilineCall | multilineOperand) (aliasKeyword projectionAlias)?;
+multilineSqlFromClause: FROM NL+ dataset (NL* sourceAlias)? (NL* sqlJoinClause)*;
+multilineSqlWhereClause: WHERE NL+ multilineSqlPredicate;
+multilineSqlPredicate: multilineOperand comparison multilineOperand;
+multilineSqlGroupClause: (GROUP sqlBy | GROUPBY) NL+ multilineSqlGroupKey (NL* COMMA NL* multilineSqlGroupKey)*;
+multilineSqlGroupKey: multilineSqlSpanCall | multilineOperand;
+multilineSqlSpanCall: SPAN LPAREN multilineOperand COMMA timeSpan RPAREN;
+multilineSqlOrderClause: (ORDER sqlBy | ORDERBY) NL+ multilineSqlOrderTerm (NL* COMMA NL* multilineSqlOrderTerm)*;
+multilineSqlOrderTerm: multilineOperand sqlDirection?;
 existsPredicate: EXISTS LPAREN (fromCommand | selectCommand) RPAREN;
-dataset: identifier | array;
+dataset: identifier | dottedDataset | datasetParameter | staticDatasetDescriptor | array;
+dottedDataset: identifier datasetPath;
+datasetPath: (NL* DOT NL* identifier)+;
+datasetParameter: LOCAL;
+// Descriptor identity is deliberately static. Key uniqueness and canonical
+// kind/property semantics belong to later validation, not this syntax slice.
+staticDatasetDescriptor: LBRACE NL* descriptorKindKey NL* COLON NL* jsonStringLiteral NL* COMMA NL*
+    descriptorPropertiesKey NL* COLON NL* descriptorProperties NL* RBRACE;
+descriptorKindKey: {p.contextualKeyword("kind")}? IDENTIFIER;
+descriptorPropertiesKey: {p.contextualKeyword("properties")}? IDENTIFIER;
+descriptorProperties: LBRACE NL* (descriptorProperty (NL* COMMA NL* descriptorProperty)* NL* COMMA?)? NL* RBRACE;
+descriptorProperty: jsonObjectKey NL* COLON NL* jsonLiteral;
+jsonObjectKey: identifier | jsonStringLiteral;
+jsonLiteral: NUMBER | BOOLEAN | NULL | jsonStringLiteral | jsonArray | jsonObject;
+jsonStringLiteral: DQUOTE (STRING_TEXT | STRING_DOLLAR)* STRING_END;
+jsonArray: LBRACKET NL* (jsonLiteral (NL* COMMA NL* jsonLiteral)*)? NL* RBRACKET;
+jsonObject: LBRACE NL* (descriptorProperty (NL* COMMA NL* descriptorProperty)*)? NL* RBRACE;
 generator: MAKERESULTS extendedOption* integerValue?;
-evalCommand: EVAL assignment (COMMA assignment)*;
+evalCommand: EVAL assignment (COMMA assignment)*
+    | EVAL NL+ assignment (NL* COMMA NL* assignment)*;
 assignment: fieldName ASSIGN expression;
-whereCommand: WHERE expression;
+whereCommand: WHERE NL* expression;
 fieldsCommand: FIELDS fieldSelection;
-fieldSelection: (PLUS | MINUS)? fieldSelector (COMMA fieldSelector)*;
-fieldSelector: identifier;
+fieldSelection: (PLUS | MINUS)? fieldSelector (NL* COMMA NL* fieldSelector)*;
+fieldSelector: identifier | structuralFieldSelector;
+structuralFieldSelector: identifier fieldPath;
+fieldPath: (NL* DOT NL* identifier)+;
 tableCommand: TABLE tableField (COMMA tableField)*;
 tableField: identifier | stringLiteral;
 renameCommand: RENAME renamePair (COMMA renamePair)*;
@@ -120,14 +182,20 @@ renamePair: renameSource aliasKeyword renameTarget;
 renameSource: identifier;
 renameTarget: identifier;
 aliasKeyword: AS | AS_LOWER;
-statsCommand: STATS statsOption* aggregate (COMMA aggregate)* aggregateGroup?;
+statsCommand: STATS statsOption* aggregate (COMMA aggregate)* (aggregateGroup | selectedAggregateGroup)?
+    | STATS NL+ (statsOption NL*)* aggregate (NL* COMMA NL* aggregate)*
+      (NL* (aggregateGroup | selectedAggregateGroup))?;
 statsOption: allnumOption | delimOption | partitionsOption | {p.unreviewedOption(SPL2ParserSTATS)}? unknownOption;
 allnumOption: ALLNUM ASSIGN BOOLEAN;
 delimOption: DELIM ASSIGN stringLiteral;
 partitionsOption: PARTITIONS ASSIGN (PLUS | MINUS)? NUMBER;
 aggregate: call (aliasKeyword aggregateAlias)?;
 aggregateAlias: identifier;
-aggregateGroup: BY groupField (COMMA groupField)*;
+aggregateGroup: BY groupField (COMMA groupField)*
+    | BY NL+ groupField (NL* COMMA NL* groupField)*;
+selectedAggregateGroup: SELECTED_BY selectedGroupTerm (COMMA selectedGroupTerm)*;
+selectedGroupTerm: selectedSpanGroup | expression;
+selectedSpanGroup: SPAN LPAREN expression COMMA timeSpan RPAREN;
 groupField: identifier groupSpan?;
 groupSpan: SPAN ASSIGN timeSpan;
 timeSpan: NUMBER? IDENTIFIER;
@@ -175,9 +243,13 @@ joinType: INNER | LEFT | OUTER | identifier;
 appendCommand: APPEND extendedOption* independentSearch;
 appendpipeCommand: APPENDPIPE extendedOption* (RUN_IN_PREVIEW ASSIGN BOOLEAN)? inheritedSubpipe;
 appendcolsCommand: APPENDCOLS extendedOption* independentSearch;
-unionCommand: UNION unionDataset (COMMA unionDataset)*;
+unionCommand: UNION NL* unionDataset (NL* COMMA NL* unionDataset)*;
 unionDataset: independentSearch | dataset;
-ifCommand: IF LPAREN expression RPAREN inheritedSubpipe (ELSEIF LPAREN expression RPAREN inheritedSubpipe)* (ELSE inheritedSubpipe)?;
+branchCommand: {p.selectedBranch()}? IDENTIFIER NL* branchArm (NL* COMMA NL* branchArm)+;
+branchArm: LPAREN NL* expression NL* RPAREN NL* inheritedSubpipe;
+ifCommand: IF NL* LPAREN NL* expression NL* RPAREN NL* inheritedSubpipe
+    (NL* ELSEIF NL* LPAREN NL* expression NL* RPAREN NL* inheritedSubpipe)*
+    (NL* ELSE NL* inheritedSubpipe)?;
 binCommand: BIN (binOption | extendedOption)* identifier (aliasKeyword identifier)?;
 binOption: BINS ASSIGN integerValue | MINSPAN ASSIGN binSpan | SPAN ASSIGN binSpan
     | (START | END) ASSIGN signedNumber | alignmentOption;
@@ -213,8 +285,36 @@ fillnullCommand: FILLNULL extendedOption* (VALUE ASSIGN stringLiteral)? (identif
 embeddedCommand: SPL1 stringLiteral | SPL1? embeddedText;
 
 embeddedText: BACKTICK EMBEDDED_TEXT? EMBEDDED_END;
-moduleSuffix: SEMI .*?;
-moduleDeclaration: (IMPORT | EXPORT | FUNCTION | LOCAL ASSIGN) .*?;
+moduleSuffix: statementTerminator (NL* trailingPipelineBoundary)?;
+trailingPipelineBoundary: FROM identifier;
+moduleDeclaration: annotatedStatement (NL* annotatedStatement)*;
+annotatedStatement: annotations NL* annotationStatement | annotations? NL* moduleStatement;
+moduleStatement: viewDeclaration | functionDeclaration | importDeclaration | exportDeclaration | unsupportedModuleBoundary;
+unsupportedModuleBoundary: unsupportedImportWildcard | unsupportedExportView | unsupportedFunctionTerminator;
+unsupportedImportWildcard: IMPORT NL* STAR NL* FROM NL* qualifiedName NL* statementTerminator;
+unsupportedExportView: EXPORT NL* LOCAL NL* ASSIGN NL* FROM NL* identifier NL* statementTerminator;
+unsupportedFunctionTerminator: FUNCTION NL* identifier NL* LPAREN NL* functionParameters? NL* RPAREN NL*
+    LBRACE NL* RETURN NL* expression NL* RBRACE;
+viewDeclaration: LOCAL NL* ASSIGN NL* pipeline NL* statementTerminator;
+functionDeclaration: FUNCTION NL* identifier NL* LPAREN NL* functionParameters? NL* RPAREN NL*
+    LBRACE NL* returnStatement NL* RBRACE;
+functionParameters: functionParameter (NL* COMMA NL* functionParameter)*;
+functionParameter: LOCAL;
+returnStatement: RETURN NL* expression NL* statementTerminator;
+importDeclaration: IMPORT NL* importSelection NL* FROM NL* qualifiedName NL* statementTerminator;
+importSelection: importWildcard | importList | aliasedImport;
+importWildcard: STAR NL* aliasKeyword NL* identifier;
+importList: LBRACE NL* aliasedImport (NL* COMMA NL* aliasedImport)* NL* RBRACE;
+aliasedImport: identifier (NL* aliasKeyword NL* identifier)?;
+exportDeclaration: EXPORT NL* exportSelection NL* statementTerminator;
+exportSelection: exportList | aliasedExport;
+exportList: LBRACE NL* aliasedExport (NL* COMMA NL* aliasedExport)* NL* RBRACE;
+aliasedExport: identifier (NL* aliasKeyword NL* identifier)?;
+qualifiedName: identifier (NL* (SLASH | DOT) NL* identifier)*;
+annotations: annotation (NL* annotation)*;
+annotation: AT identifier (NL* LPAREN NL* arguments? NL* RPAREN)?;
+annotationStatement: statementTerminator;
+statementTerminator: SEMI;
 
 searchCommand: SEARCH searchExpression;
 // The token guard restricts entry, while the entire search owns precedence.
@@ -262,7 +362,15 @@ unary: (PLUS | MINUS) unary | access;
 access: primary accessPart*;
 accessPart: DOT identifier | LBRACKET expression RBRACKET;
 primary: existsPredicate | call | fieldName | LOCAL | literal | array | object | LPAREN expression RPAREN | searchLiteral;
+multilineOperator: PLUS | MINUS | STAR | SLASH | MOD | comparison | logicalAnd | logicalOr | logicalXor;
+multilineOperand: multilineSimpleCall | multilineAtom multilineAccessPart*;
+multilineSimpleCall: identifier LPAREN (multilineOperand (COMMA multilineOperand)*)? RPAREN;
+multilineAtom: fieldName | literal | LOCAL;
+multilineAccessPart: DOT identifier;
 call: identifier LPAREN arguments? RPAREN;
+multilineCall: {p.GetTokenStream().LA(3) == SPL2ParserNL}? identifier LPAREN NL+ multilineArguments? NL* RPAREN;
+multilineArguments: multilineArgument (NL* COMMA NL* multilineArgument)*;
+multilineArgument: identifier COLON multilineOperand | multilineOperand;
 arguments: namedArgument (COMMA namedArgument)* | expression (COMMA expression)* (COMMA namedArgument)*;
 namedArgument: identifier COLON expression;
 literal: NUMBER | BOOLEAN | NULL | RAW_STRING | stringLiteral;

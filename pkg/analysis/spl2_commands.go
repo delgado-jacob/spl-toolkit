@@ -109,6 +109,9 @@ func (s *spl2SemanticStage) command(ctx antlr.ParserRuleContext) {
 				s.unsupported(o, "Unmodeled stats option")
 			}
 		}
+		if group := c.SelectedAggregateGroup(); group != nil {
+			s.unsupportedOwned(group, "Expression and span grouping effects are unmodeled", nil)
+		}
 		s.aggregates(c.AllAggregate(), spl2Groups(c.AggregateGroup()), false, s.allnum(allnum))
 	case *spl2.EventstatsCommandContext:
 		s.aggregates(c.AllAggregate(), spl2Groups(c.AggregateGroup()), true, s.allnum(c.AllAllnumOption()))

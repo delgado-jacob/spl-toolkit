@@ -303,3 +303,327 @@ func TestSPL2PipelineUnprovedLiteralOwnership(t *testing.T) {
 		}
 	}
 }
+
+func TestSPL2SelectedMultilinePipelineSyntax(t *testing.T) {
+	for _, text := range []string{
+		"FROM events\n| eval total=(value\n  + delta)",
+		"FROM events\n| eval choice=coalesce(\n  primary,\n  fallback\n)",
+		"FROM events\n| stats\n  sum(value) AS total",
+		"FROM events\n| stats count() AS total BY\n  region,\n  kind",
+	} {
+		t.Run(text, func(t *testing.T) {
+			p := spl2RequireNoDiagnostics(t, text)
+			if len(spl2Nodes(p.syntax, "NL")) == 0 {
+				t.Fatal("multiline source lost newline ownership")
+			}
+		})
+	}
+}
+
+func TestSPL2SelectedExpressionGroupingAndSpan(t *testing.T) {
+	text := "FROM events | stats sum(value) AS total BY bytes+delta, lower(region), payload.kind, span(_time, 5m)"
+	p := spl2RequireNoDiagnostics(t, text)
+	for kind, want := range map[string]int{"aggregate": 1, "selectedGroupTerm": 4, "selectedSpanGroup": 1, "timeSpan": 1} {
+		if got := len(spl2Nodes(p.syntax, kind)); got != want {
+			t.Errorf("%s count %d want %d: %s", kind, got, want, p.syntax.shape())
+		}
+	}
+	span := spl2Nodes(p.syntax, "selectedSpanGroup")[0]
+	if got := text[span.Location.Start.Offset:span.Location.End.Offset]; got != "span(_time, 5m)" {
+		t.Fatalf("span source %q", got)
+	}
+
+	arithmetic := spl2RequireNoDiagnostics(t, "FROM events | stats count() BY bytes+delta")
+	if got := len(spl2Nodes(arithmetic.syntax, "expression")); got != 1 {
+		t.Fatalf("arithmetic group expressions %d: %s", got, arithmetic.syntax.shape())
+	}
+}
+
+func TestSPL2SelectedExpressionGroupingUsesExistingExpressions(t *testing.T) {
+	for _, tc := range []struct {
+		text string
+		held bool
+	}{
+		{`FROM events | stats count() BY if(bytes>0, region, "other")`, false},
+		{"FROM events | stats count() BY (bytes+delta)", false},
+		{"FROM events | stats count() BY -bytes", false},
+		{"FROM events | stats count() BY ready AND active", false},
+		{"FROM events | stats count() BY ready and active", true},
+		{"FROM events | stats count() BY ready or active", true},
+		{"FROM events | stats count() BY ready xor active", true},
+		{"FROM events | stats count() BY NOT ready", false},
+		{"FROM events | stats count() BY not ready", true},
+		{"FROM events | stats count() BY bytes BETWEEN 1 AND 10", false},
+		{`FROM events | stats count() BY region IN ("us", "eu")`, false},
+		{`FROM events | stats count() BY name LIKE "a%"`, false},
+		{"FROM events | stats count() BY value IS NOT NULL", false},
+		{"FROM events | stats count() BY true", false},
+		{"FROM events | stats count() BY null", false},
+		{`FROM events | stats count() BY "other"`, false},
+		{"FROM events | stats count() BY 42", false},
+	} {
+		t.Run(tc.text, func(t *testing.T) {
+			p := parseSPL2Document(tc.text)
+			for _, diagnostic := range p.diagnostics {
+				if diagnostic.Severity == "error" || diagnostic.Code == CodeSyntaxError {
+					t.Fatalf("grouping expression was not admitted: %+v", p.diagnostics)
+				}
+			}
+			if tc.held == p.syntaxComplete {
+				t.Fatalf("contextual casing hold = %t, syntax complete = %t: %+v", tc.held, p.syntaxComplete, p.diagnostics)
+			}
+			if len(spl2Nodes(p.syntax, "expression")) == 0 {
+				t.Fatalf("grouping bypassed expression ownership: %s", p.syntax.shape())
+			}
+		})
+	}
+}
+
+func TestSPL2SelectedExpressionGroupingClassifiesOnlyItsIntroducingBY(t *testing.T) {
+	for _, tc := range []struct {
+		name       string
+		query      string
+		introducer int
+	}{
+		{"single stats", "FROM events | stats count() BY BY+1", 1},
+		{"independent stats", "FROM events | stats count() BY bytes+delta | stats count() BY BY+1", 2},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			p := spl2RequireNoDiagnostics(t, tc.query)
+			selected, atoms := 0, 0
+			for _, token := range p.tokens.GetAllTokens() {
+				switch token.GetTokenType() {
+				case spl2.SPL2LexerSELECTED_BY:
+					selected++
+				case spl2.SPL2LexerBY:
+					atoms++
+				}
+			}
+			if selected != tc.introducer || atoms != 1 {
+				t.Fatalf("selected BY = %d want %d; expression atoms = %d want 1", selected, tc.introducer, atoms)
+			}
+		})
+	}
+}
+
+func TestSPL2SelectedStatsDistinguishesExpressionAndCommandBrackets(t *testing.T) {
+	for _, query := range []string{
+		"FROM events | stats count() BY [stats, BY+1]",
+		"FROM events | eval x=[stats, BY+1]",
+	} {
+		t.Run(query, func(t *testing.T) {
+			p := spl2RequireNoDiagnostics(t, query)
+			if got := len(spl2Nodes(p.syntax, "array")); got != 1 {
+				t.Fatalf("expression arrays = %d want 1: %s", got, p.syntax.shape())
+			}
+		})
+	}
+
+	t.Run("inherited subpipe", func(t *testing.T) {
+		query := "FROM events | appendpipe [stats count() BY bytes+delta]"
+		p := spl2RequireNoDiagnostics(t, query)
+		if got := len(spl2Nodes(p.syntax, "inheritedSubpipe")); got != 1 {
+			t.Fatalf("inherited subpipes = %d want 1: %s", got, p.syntax.shape())
+		}
+		if got := len(spl2Nodes(p.syntax, "selectedAggregateGroup")); got != 1 {
+			t.Fatalf("selected groups = %d want 1: %s", got, p.syntax.shape())
+		}
+	})
+
+	t.Run("nested expression and subpipe", func(t *testing.T) {
+		query := "FROM events | appendpipe [eval x=[stats, BY+1] | appendpipe [stats count() BY bytes+delta]]"
+		p := spl2RequireNoDiagnostics(t, query)
+		if got := len(spl2Nodes(p.syntax, "inheritedSubpipe")); got != 2 {
+			t.Fatalf("inherited subpipes = %d want 2: %s", got, p.syntax.shape())
+		}
+		if got := len(spl2Nodes(p.syntax, "array")); got != 1 {
+			t.Fatalf("expression arrays = %d want 1: %s", got, p.syntax.shape())
+		}
+		if got := len(spl2Nodes(p.syntax, "selectedAggregateGroup")); got != 1 {
+			t.Fatalf("selected groups = %d want 1: %s", got, p.syntax.shape())
+		}
+	})
+}
+
+func TestSPL2SelectedMultilineAssignmentAnalysis(t *testing.T) {
+	r := spl2AnalyzeTest(t, "FROM [{value:1, delta:2}] | eval total=(value\n + delta) | fields total")
+	if r.Status != Valid || !r.Coverage.SyntaxComplete || !r.Coverage.SemanticComplete {
+		t.Fatalf("multiline assignment remained unmodeled: %+v", r)
+	}
+	spl2Ref(t, r, "value", "read")
+	spl2Ref(t, r, "delta", "read")
+	spl2Ref(t, r, "total", "create")
+	spl2Ref(t, r, "total", "read")
+}
+
+func TestSPL2SelectedGroupingAnalysisIsConservative(t *testing.T) {
+	for _, tc := range []struct {
+		name  string
+		query string
+		group string
+		input []string
+	}{
+		{"expression", "FROM [{bytes:1, delta:2}] | stats count() BY bytes+delta", "BY bytes+delta", []string{"bytes", "delta"}},
+		{"span", "FROM [{_time:1}] | stats count() BY span(_time, 5m)", "BY span(_time, 5m)", []string{"_time"}},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			r := spl2AnalyzeTest(t, tc.query)
+			if r.Status != Incomplete || !r.Coverage.SyntaxComplete || r.Coverage.SemanticComplete || !spl2HasCode(r, CodeUnsupportedSemantics) {
+				t.Fatalf("selected grouping received silent semantic credit: %+v", r)
+			}
+			if r.Requirements.QueryStatus != Incomplete || r.Requirements.Coverage.Complete || len(r.Requirements.Gaps) == 0 {
+				t.Fatalf("selected grouping lacks an explicit requirement gap: %+v", r.Requirements)
+			}
+			const message = "Expression and span grouping effects are unmodeled"
+			diagnostics := 0
+			for _, diagnostic := range r.Diagnostics {
+				if diagnostic.Code != CodeUnsupportedSemantics || diagnostic.Message != message {
+					continue
+				}
+				diagnostics++
+				if got := tc.query[diagnostic.Location.Start.Offset:diagnostic.Location.End.Offset]; got != tc.group {
+					t.Fatalf("selected grouping diagnostic owns %q, want %q", got, tc.group)
+				}
+			}
+			if diagnostics != 1 {
+				t.Fatalf("selected grouping diagnostics = %d, want 1: %+v", diagnostics, r.Diagnostics)
+			}
+			gaps := 0
+			for _, gap := range r.Requirements.Gaps {
+				if gap.Code == CodeUnsupportedSemantics && gap.Message == message {
+					gaps++
+					if len(gap.ReferenceIDs) != 0 || len(gap.DiagnosticCodes) != 1 || gap.DiagnosticCodes[0] != CodeUnsupportedSemantics {
+						t.Fatalf("selected grouping gap ownership drifted: %+v", gap)
+					}
+				}
+			}
+			if gaps != 1 {
+				t.Fatalf("selected grouping gaps = %d, want 1: %+v", gaps, r.Requirements.Gaps)
+			}
+			sourceStage := ""
+			for _, stage := range r.Stages {
+				if stage.Command == "from" {
+					sourceStage = stage.ID
+					break
+				}
+			}
+			if sourceStage == "" {
+				t.Fatalf("selected grouping lacks a source stage: %+v", r.Stages)
+			}
+			wanted := map[string]int{}
+			for _, name := range tc.input {
+				wanted[name] = 0
+			}
+			for _, ref := range r.References {
+				if _, ok := wanted[ref.NormalizedName]; ok {
+					if ref.Kind != "field" || ref.Role != "create" || ref.StageID != sourceStage {
+						t.Fatalf("unmodeled group input acquired derived evidence: %+v", ref)
+					}
+					wanted[ref.NormalizedName]++
+				}
+				if ref.NormalizedName == "span" || ref.NormalizedName == "bytes+delta" {
+					t.Fatalf("expression spelling became a false field identity: %+v", ref)
+				}
+			}
+			for name, count := range wanted {
+				if count != 1 {
+					t.Fatalf("source-stage create references for %q = %d, want 1: %+v", name, count, r.References)
+				}
+			}
+			for _, item := range r.Requirements.Items {
+				if _, ok := wanted[item.Identity]; ok {
+					t.Fatalf("unmodeled grouping acquired a requirement item: %+v", item)
+				}
+			}
+		})
+	}
+}
+
+func TestSPL2SelectedStructuralFieldSelectorAnalysisIsConservative(t *testing.T) {
+	r := spl2AnalyzeTest(t, "FROM [{payload:1, other:2}] | fields payload.user.name")
+	if r.Status != Incomplete || !r.Coverage.SyntaxComplete || r.Coverage.SemanticComplete || !spl2HasCode(r, CodeUnsupportedSemantics) {
+		t.Fatalf("structural selector received silent semantic credit: %+v", r)
+	}
+	if r.Requirements.QueryStatus != Incomplete || r.Requirements.Coverage.Complete || len(r.Requirements.Gaps) == 0 {
+		t.Fatalf("structural selector lacks an explicit requirement gap: %+v", r.Requirements)
+	}
+	for _, ref := range r.References {
+		if ref.NormalizedName == "payload" && (ref.Role == "read" || ref.Role == "output") {
+			t.Fatalf("structural selector collapsed to its root: %+v", ref)
+		}
+	}
+}
+
+func TestSPL2SelectedConditionalBranchUnionAndJoin(t *testing.T) {
+	for _, text := range []string{
+		"FROM events | if (ready=true) [eval state=\"ready\"] elseif (failed=true) [eval state=\"failed\"] else [eval state=\"pending\"]",
+		"FROM events | if (ready=true) [eval state=\"ready\"] elseif (failed=true) [eval state=\"failed\"]",
+	} {
+		p := spl2RequireNoDiagnostics(t, text)
+		if got := len(spl2Nodes(p.syntax, "ifCommand")); got != 1 {
+			t.Fatalf("if commands %d", got)
+		}
+	}
+
+	branchText := "FROM events | branch (status=\"ok\") [where active=true], (status!=\"ok\") [eval failed=true]"
+	branch := spl2RequireNoDiagnostics(t, branchText)
+	if got := len(spl2Nodes(branch.syntax, "branchArm")); got != 2 {
+		t.Fatalf("branch arms %d: %s", got, branch.syntax.shape())
+	}
+
+	unionText := "union $target_1, catalog.events, [FROM backup | where active=true]"
+	union := spl2RequireNoDiagnostics(t, unionText)
+	if len(spl2Nodes(union.syntax, "datasetParameter")) != 1 || len(spl2Nodes(union.syntax, "datasetPath")) != 1 || len(spl2Nodes(union.syntax, "independentSearch")) != 1 {
+		t.Fatalf("union operands lost typed ownership: %s", union.syntax.shape())
+	}
+
+	joinText := "FROM events | join type=left left=L right=R where L.id=R.id AND L.realm=R.realm [FROM identities | where enabled=true]"
+	join := spl2RequireNoDiagnostics(t, joinText)
+	if len(spl2Nodes(join.syntax, "joinCommand")) != 1 || len(spl2Nodes(join.syntax, "sqlJoinEquality")) != 2 || len(spl2Nodes(join.syntax, "independentSearch")) != 1 {
+		t.Fatalf("join ownership: %s", join.syntax.shape())
+	}
+}
+
+func TestSPL2SelectedFinalBranchInBracketedPipelines(t *testing.T) {
+	for _, tc := range []struct {
+		name string
+		text string
+		kind string
+	}{
+		{
+			name: "inherited",
+			text: `FROM events | appendpipe [branch (status="ok") [where active=true], (status!="ok") [eval failed=true]]`,
+			kind: "inheritedSubpipe",
+		},
+		{
+			name: "independent",
+			text: `FROM seed | append [FROM events | branch (status="ok") [where active=true], (status!="ok") [eval failed=true]]`,
+			kind: "independentSearch",
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			parsed := spl2RequireNoDiagnostics(t, tc.text)
+			if got := len(spl2Nodes(parsed.syntax, "branchArm")); got != 2 {
+				t.Fatalf("branch arms = %d, want 2: %s", got, parsed.syntax.shape())
+			}
+			if got := len(spl2Nodes(parsed.syntax, tc.kind)); got == 0 {
+				t.Fatalf("missing %s ownership: %s", tc.kind, parsed.syntax.shape())
+			}
+		})
+	}
+}
+
+func TestSPL2SelectedBranchUnionAndJoinBoundaries(t *testing.T) {
+	for _, text := range []string{
+		"FROM events | branch [where active=true], [eval failed=true]",
+		"union $left.$right, events",
+		"FROM events | join left=L right=R [FROM identities]",
+		"FROM events | join left=L right=R where L.id>R.id [FROM identities]",
+		"FROM events | join left=L right=R where L.id=R.id [$target_1]",
+		"FROM events | join type=left left=L right=R where L.id=R.id [FROM identities] [FROM extra]",
+	} {
+		t.Run(text, func(t *testing.T) {
+			spl2RequireLocatedError(t, text)
+		})
+	}
+}

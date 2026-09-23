@@ -194,6 +194,67 @@ func (s *BaseSPL2ParserListener) EnterSqlOffsetClause(ctx *SqlOffsetClauseContex
 // ExitSqlOffsetClause is called when production sqlOffsetClause is exited.
 func (s *BaseSPL2ParserListener) ExitSqlOffsetClause(ctx *SqlOffsetClauseContext) {}
 
+// EnterMultilineSqlSelectClause is called when production multilineSqlSelectClause is entered.
+func (s *BaseSPL2ParserListener) EnterMultilineSqlSelectClause(ctx *MultilineSqlSelectClauseContext) {
+}
+
+// ExitMultilineSqlSelectClause is called when production multilineSqlSelectClause is exited.
+func (s *BaseSPL2ParserListener) ExitMultilineSqlSelectClause(ctx *MultilineSqlSelectClauseContext) {}
+
+// EnterMultilineSqlProjection is called when production multilineSqlProjection is entered.
+func (s *BaseSPL2ParserListener) EnterMultilineSqlProjection(ctx *MultilineSqlProjectionContext) {}
+
+// ExitMultilineSqlProjection is called when production multilineSqlProjection is exited.
+func (s *BaseSPL2ParserListener) ExitMultilineSqlProjection(ctx *MultilineSqlProjectionContext) {}
+
+// EnterMultilineSqlFromClause is called when production multilineSqlFromClause is entered.
+func (s *BaseSPL2ParserListener) EnterMultilineSqlFromClause(ctx *MultilineSqlFromClauseContext) {}
+
+// ExitMultilineSqlFromClause is called when production multilineSqlFromClause is exited.
+func (s *BaseSPL2ParserListener) ExitMultilineSqlFromClause(ctx *MultilineSqlFromClauseContext) {}
+
+// EnterMultilineSqlWhereClause is called when production multilineSqlWhereClause is entered.
+func (s *BaseSPL2ParserListener) EnterMultilineSqlWhereClause(ctx *MultilineSqlWhereClauseContext) {}
+
+// ExitMultilineSqlWhereClause is called when production multilineSqlWhereClause is exited.
+func (s *BaseSPL2ParserListener) ExitMultilineSqlWhereClause(ctx *MultilineSqlWhereClauseContext) {}
+
+// EnterMultilineSqlPredicate is called when production multilineSqlPredicate is entered.
+func (s *BaseSPL2ParserListener) EnterMultilineSqlPredicate(ctx *MultilineSqlPredicateContext) {}
+
+// ExitMultilineSqlPredicate is called when production multilineSqlPredicate is exited.
+func (s *BaseSPL2ParserListener) ExitMultilineSqlPredicate(ctx *MultilineSqlPredicateContext) {}
+
+// EnterMultilineSqlGroupClause is called when production multilineSqlGroupClause is entered.
+func (s *BaseSPL2ParserListener) EnterMultilineSqlGroupClause(ctx *MultilineSqlGroupClauseContext) {}
+
+// ExitMultilineSqlGroupClause is called when production multilineSqlGroupClause is exited.
+func (s *BaseSPL2ParserListener) ExitMultilineSqlGroupClause(ctx *MultilineSqlGroupClauseContext) {}
+
+// EnterMultilineSqlGroupKey is called when production multilineSqlGroupKey is entered.
+func (s *BaseSPL2ParserListener) EnterMultilineSqlGroupKey(ctx *MultilineSqlGroupKeyContext) {}
+
+// ExitMultilineSqlGroupKey is called when production multilineSqlGroupKey is exited.
+func (s *BaseSPL2ParserListener) ExitMultilineSqlGroupKey(ctx *MultilineSqlGroupKeyContext) {}
+
+// EnterMultilineSqlSpanCall is called when production multilineSqlSpanCall is entered.
+func (s *BaseSPL2ParserListener) EnterMultilineSqlSpanCall(ctx *MultilineSqlSpanCallContext) {}
+
+// ExitMultilineSqlSpanCall is called when production multilineSqlSpanCall is exited.
+func (s *BaseSPL2ParserListener) ExitMultilineSqlSpanCall(ctx *MultilineSqlSpanCallContext) {}
+
+// EnterMultilineSqlOrderClause is called when production multilineSqlOrderClause is entered.
+func (s *BaseSPL2ParserListener) EnterMultilineSqlOrderClause(ctx *MultilineSqlOrderClauseContext) {}
+
+// ExitMultilineSqlOrderClause is called when production multilineSqlOrderClause is exited.
+func (s *BaseSPL2ParserListener) ExitMultilineSqlOrderClause(ctx *MultilineSqlOrderClauseContext) {}
+
+// EnterMultilineSqlOrderTerm is called when production multilineSqlOrderTerm is entered.
+func (s *BaseSPL2ParserListener) EnterMultilineSqlOrderTerm(ctx *MultilineSqlOrderTermContext) {}
+
+// ExitMultilineSqlOrderTerm is called when production multilineSqlOrderTerm is exited.
+func (s *BaseSPL2ParserListener) ExitMultilineSqlOrderTerm(ctx *MultilineSqlOrderTermContext) {}
+
 // EnterExistsPredicate is called when production existsPredicate is entered.
 func (s *BaseSPL2ParserListener) EnterExistsPredicate(ctx *ExistsPredicateContext) {}
 
@@ -205,6 +266,84 @@ func (s *BaseSPL2ParserListener) EnterDataset(ctx *DatasetContext) {}
 
 // ExitDataset is called when production dataset is exited.
 func (s *BaseSPL2ParserListener) ExitDataset(ctx *DatasetContext) {}
+
+// EnterDottedDataset is called when production dottedDataset is entered.
+func (s *BaseSPL2ParserListener) EnterDottedDataset(ctx *DottedDatasetContext) {}
+
+// ExitDottedDataset is called when production dottedDataset is exited.
+func (s *BaseSPL2ParserListener) ExitDottedDataset(ctx *DottedDatasetContext) {}
+
+// EnterDatasetPath is called when production datasetPath is entered.
+func (s *BaseSPL2ParserListener) EnterDatasetPath(ctx *DatasetPathContext) {}
+
+// ExitDatasetPath is called when production datasetPath is exited.
+func (s *BaseSPL2ParserListener) ExitDatasetPath(ctx *DatasetPathContext) {}
+
+// EnterDatasetParameter is called when production datasetParameter is entered.
+func (s *BaseSPL2ParserListener) EnterDatasetParameter(ctx *DatasetParameterContext) {}
+
+// ExitDatasetParameter is called when production datasetParameter is exited.
+func (s *BaseSPL2ParserListener) ExitDatasetParameter(ctx *DatasetParameterContext) {}
+
+// EnterStaticDatasetDescriptor is called when production staticDatasetDescriptor is entered.
+func (s *BaseSPL2ParserListener) EnterStaticDatasetDescriptor(ctx *StaticDatasetDescriptorContext) {}
+
+// ExitStaticDatasetDescriptor is called when production staticDatasetDescriptor is exited.
+func (s *BaseSPL2ParserListener) ExitStaticDatasetDescriptor(ctx *StaticDatasetDescriptorContext) {}
+
+// EnterDescriptorKindKey is called when production descriptorKindKey is entered.
+func (s *BaseSPL2ParserListener) EnterDescriptorKindKey(ctx *DescriptorKindKeyContext) {}
+
+// ExitDescriptorKindKey is called when production descriptorKindKey is exited.
+func (s *BaseSPL2ParserListener) ExitDescriptorKindKey(ctx *DescriptorKindKeyContext) {}
+
+// EnterDescriptorPropertiesKey is called when production descriptorPropertiesKey is entered.
+func (s *BaseSPL2ParserListener) EnterDescriptorPropertiesKey(ctx *DescriptorPropertiesKeyContext) {}
+
+// ExitDescriptorPropertiesKey is called when production descriptorPropertiesKey is exited.
+func (s *BaseSPL2ParserListener) ExitDescriptorPropertiesKey(ctx *DescriptorPropertiesKeyContext) {}
+
+// EnterDescriptorProperties is called when production descriptorProperties is entered.
+func (s *BaseSPL2ParserListener) EnterDescriptorProperties(ctx *DescriptorPropertiesContext) {}
+
+// ExitDescriptorProperties is called when production descriptorProperties is exited.
+func (s *BaseSPL2ParserListener) ExitDescriptorProperties(ctx *DescriptorPropertiesContext) {}
+
+// EnterDescriptorProperty is called when production descriptorProperty is entered.
+func (s *BaseSPL2ParserListener) EnterDescriptorProperty(ctx *DescriptorPropertyContext) {}
+
+// ExitDescriptorProperty is called when production descriptorProperty is exited.
+func (s *BaseSPL2ParserListener) ExitDescriptorProperty(ctx *DescriptorPropertyContext) {}
+
+// EnterJsonObjectKey is called when production jsonObjectKey is entered.
+func (s *BaseSPL2ParserListener) EnterJsonObjectKey(ctx *JsonObjectKeyContext) {}
+
+// ExitJsonObjectKey is called when production jsonObjectKey is exited.
+func (s *BaseSPL2ParserListener) ExitJsonObjectKey(ctx *JsonObjectKeyContext) {}
+
+// EnterJsonLiteral is called when production jsonLiteral is entered.
+func (s *BaseSPL2ParserListener) EnterJsonLiteral(ctx *JsonLiteralContext) {}
+
+// ExitJsonLiteral is called when production jsonLiteral is exited.
+func (s *BaseSPL2ParserListener) ExitJsonLiteral(ctx *JsonLiteralContext) {}
+
+// EnterJsonStringLiteral is called when production jsonStringLiteral is entered.
+func (s *BaseSPL2ParserListener) EnterJsonStringLiteral(ctx *JsonStringLiteralContext) {}
+
+// ExitJsonStringLiteral is called when production jsonStringLiteral is exited.
+func (s *BaseSPL2ParserListener) ExitJsonStringLiteral(ctx *JsonStringLiteralContext) {}
+
+// EnterJsonArray is called when production jsonArray is entered.
+func (s *BaseSPL2ParserListener) EnterJsonArray(ctx *JsonArrayContext) {}
+
+// ExitJsonArray is called when production jsonArray is exited.
+func (s *BaseSPL2ParserListener) ExitJsonArray(ctx *JsonArrayContext) {}
+
+// EnterJsonObject is called when production jsonObject is entered.
+func (s *BaseSPL2ParserListener) EnterJsonObject(ctx *JsonObjectContext) {}
+
+// ExitJsonObject is called when production jsonObject is exited.
+func (s *BaseSPL2ParserListener) ExitJsonObject(ctx *JsonObjectContext) {}
 
 // EnterGenerator is called when production generator is entered.
 func (s *BaseSPL2ParserListener) EnterGenerator(ctx *GeneratorContext) {}
@@ -247,6 +386,18 @@ func (s *BaseSPL2ParserListener) EnterFieldSelector(ctx *FieldSelectorContext) {
 
 // ExitFieldSelector is called when production fieldSelector is exited.
 func (s *BaseSPL2ParserListener) ExitFieldSelector(ctx *FieldSelectorContext) {}
+
+// EnterStructuralFieldSelector is called when production structuralFieldSelector is entered.
+func (s *BaseSPL2ParserListener) EnterStructuralFieldSelector(ctx *StructuralFieldSelectorContext) {}
+
+// ExitStructuralFieldSelector is called when production structuralFieldSelector is exited.
+func (s *BaseSPL2ParserListener) ExitStructuralFieldSelector(ctx *StructuralFieldSelectorContext) {}
+
+// EnterFieldPath is called when production fieldPath is entered.
+func (s *BaseSPL2ParserListener) EnterFieldPath(ctx *FieldPathContext) {}
+
+// ExitFieldPath is called when production fieldPath is exited.
+func (s *BaseSPL2ParserListener) ExitFieldPath(ctx *FieldPathContext) {}
 
 // EnterTableCommand is called when production tableCommand is entered.
 func (s *BaseSPL2ParserListener) EnterTableCommand(ctx *TableCommandContext) {}
@@ -337,6 +488,24 @@ func (s *BaseSPL2ParserListener) EnterAggregateGroup(ctx *AggregateGroupContext)
 
 // ExitAggregateGroup is called when production aggregateGroup is exited.
 func (s *BaseSPL2ParserListener) ExitAggregateGroup(ctx *AggregateGroupContext) {}
+
+// EnterSelectedAggregateGroup is called when production selectedAggregateGroup is entered.
+func (s *BaseSPL2ParserListener) EnterSelectedAggregateGroup(ctx *SelectedAggregateGroupContext) {}
+
+// ExitSelectedAggregateGroup is called when production selectedAggregateGroup is exited.
+func (s *BaseSPL2ParserListener) ExitSelectedAggregateGroup(ctx *SelectedAggregateGroupContext) {}
+
+// EnterSelectedGroupTerm is called when production selectedGroupTerm is entered.
+func (s *BaseSPL2ParserListener) EnterSelectedGroupTerm(ctx *SelectedGroupTermContext) {}
+
+// ExitSelectedGroupTerm is called when production selectedGroupTerm is exited.
+func (s *BaseSPL2ParserListener) ExitSelectedGroupTerm(ctx *SelectedGroupTermContext) {}
+
+// EnterSelectedSpanGroup is called when production selectedSpanGroup is entered.
+func (s *BaseSPL2ParserListener) EnterSelectedSpanGroup(ctx *SelectedSpanGroupContext) {}
+
+// ExitSelectedSpanGroup is called when production selectedSpanGroup is exited.
+func (s *BaseSPL2ParserListener) ExitSelectedSpanGroup(ctx *SelectedSpanGroupContext) {}
 
 // EnterGroupField is called when production groupField is entered.
 func (s *BaseSPL2ParserListener) EnterGroupField(ctx *GroupFieldContext) {}
@@ -608,6 +777,18 @@ func (s *BaseSPL2ParserListener) EnterUnionDataset(ctx *UnionDatasetContext) {}
 // ExitUnionDataset is called when production unionDataset is exited.
 func (s *BaseSPL2ParserListener) ExitUnionDataset(ctx *UnionDatasetContext) {}
 
+// EnterBranchCommand is called when production branchCommand is entered.
+func (s *BaseSPL2ParserListener) EnterBranchCommand(ctx *BranchCommandContext) {}
+
+// ExitBranchCommand is called when production branchCommand is exited.
+func (s *BaseSPL2ParserListener) ExitBranchCommand(ctx *BranchCommandContext) {}
+
+// EnterBranchArm is called when production branchArm is entered.
+func (s *BaseSPL2ParserListener) EnterBranchArm(ctx *BranchArmContext) {}
+
+// ExitBranchArm is called when production branchArm is exited.
+func (s *BaseSPL2ParserListener) ExitBranchArm(ctx *BranchArmContext) {}
+
 // EnterIfCommand is called when production ifCommand is entered.
 func (s *BaseSPL2ParserListener) EnterIfCommand(ctx *IfCommandContext) {}
 
@@ -788,11 +969,174 @@ func (s *BaseSPL2ParserListener) EnterModuleSuffix(ctx *ModuleSuffixContext) {}
 // ExitModuleSuffix is called when production moduleSuffix is exited.
 func (s *BaseSPL2ParserListener) ExitModuleSuffix(ctx *ModuleSuffixContext) {}
 
+// EnterTrailingPipelineBoundary is called when production trailingPipelineBoundary is entered.
+func (s *BaseSPL2ParserListener) EnterTrailingPipelineBoundary(ctx *TrailingPipelineBoundaryContext) {
+}
+
+// ExitTrailingPipelineBoundary is called when production trailingPipelineBoundary is exited.
+func (s *BaseSPL2ParserListener) ExitTrailingPipelineBoundary(ctx *TrailingPipelineBoundaryContext) {}
+
 // EnterModuleDeclaration is called when production moduleDeclaration is entered.
 func (s *BaseSPL2ParserListener) EnterModuleDeclaration(ctx *ModuleDeclarationContext) {}
 
 // ExitModuleDeclaration is called when production moduleDeclaration is exited.
 func (s *BaseSPL2ParserListener) ExitModuleDeclaration(ctx *ModuleDeclarationContext) {}
+
+// EnterAnnotatedStatement is called when production annotatedStatement is entered.
+func (s *BaseSPL2ParserListener) EnterAnnotatedStatement(ctx *AnnotatedStatementContext) {}
+
+// ExitAnnotatedStatement is called when production annotatedStatement is exited.
+func (s *BaseSPL2ParserListener) ExitAnnotatedStatement(ctx *AnnotatedStatementContext) {}
+
+// EnterModuleStatement is called when production moduleStatement is entered.
+func (s *BaseSPL2ParserListener) EnterModuleStatement(ctx *ModuleStatementContext) {}
+
+// ExitModuleStatement is called when production moduleStatement is exited.
+func (s *BaseSPL2ParserListener) ExitModuleStatement(ctx *ModuleStatementContext) {}
+
+// EnterUnsupportedModuleBoundary is called when production unsupportedModuleBoundary is entered.
+func (s *BaseSPL2ParserListener) EnterUnsupportedModuleBoundary(ctx *UnsupportedModuleBoundaryContext) {
+}
+
+// ExitUnsupportedModuleBoundary is called when production unsupportedModuleBoundary is exited.
+func (s *BaseSPL2ParserListener) ExitUnsupportedModuleBoundary(ctx *UnsupportedModuleBoundaryContext) {
+}
+
+// EnterUnsupportedImportWildcard is called when production unsupportedImportWildcard is entered.
+func (s *BaseSPL2ParserListener) EnterUnsupportedImportWildcard(ctx *UnsupportedImportWildcardContext) {
+}
+
+// ExitUnsupportedImportWildcard is called when production unsupportedImportWildcard is exited.
+func (s *BaseSPL2ParserListener) ExitUnsupportedImportWildcard(ctx *UnsupportedImportWildcardContext) {
+}
+
+// EnterUnsupportedExportView is called when production unsupportedExportView is entered.
+func (s *BaseSPL2ParserListener) EnterUnsupportedExportView(ctx *UnsupportedExportViewContext) {}
+
+// ExitUnsupportedExportView is called when production unsupportedExportView is exited.
+func (s *BaseSPL2ParserListener) ExitUnsupportedExportView(ctx *UnsupportedExportViewContext) {}
+
+// EnterUnsupportedFunctionTerminator is called when production unsupportedFunctionTerminator is entered.
+func (s *BaseSPL2ParserListener) EnterUnsupportedFunctionTerminator(ctx *UnsupportedFunctionTerminatorContext) {
+}
+
+// ExitUnsupportedFunctionTerminator is called when production unsupportedFunctionTerminator is exited.
+func (s *BaseSPL2ParserListener) ExitUnsupportedFunctionTerminator(ctx *UnsupportedFunctionTerminatorContext) {
+}
+
+// EnterViewDeclaration is called when production viewDeclaration is entered.
+func (s *BaseSPL2ParserListener) EnterViewDeclaration(ctx *ViewDeclarationContext) {}
+
+// ExitViewDeclaration is called when production viewDeclaration is exited.
+func (s *BaseSPL2ParserListener) ExitViewDeclaration(ctx *ViewDeclarationContext) {}
+
+// EnterFunctionDeclaration is called when production functionDeclaration is entered.
+func (s *BaseSPL2ParserListener) EnterFunctionDeclaration(ctx *FunctionDeclarationContext) {}
+
+// ExitFunctionDeclaration is called when production functionDeclaration is exited.
+func (s *BaseSPL2ParserListener) ExitFunctionDeclaration(ctx *FunctionDeclarationContext) {}
+
+// EnterFunctionParameters is called when production functionParameters is entered.
+func (s *BaseSPL2ParserListener) EnterFunctionParameters(ctx *FunctionParametersContext) {}
+
+// ExitFunctionParameters is called when production functionParameters is exited.
+func (s *BaseSPL2ParserListener) ExitFunctionParameters(ctx *FunctionParametersContext) {}
+
+// EnterFunctionParameter is called when production functionParameter is entered.
+func (s *BaseSPL2ParserListener) EnterFunctionParameter(ctx *FunctionParameterContext) {}
+
+// ExitFunctionParameter is called when production functionParameter is exited.
+func (s *BaseSPL2ParserListener) ExitFunctionParameter(ctx *FunctionParameterContext) {}
+
+// EnterReturnStatement is called when production returnStatement is entered.
+func (s *BaseSPL2ParserListener) EnterReturnStatement(ctx *ReturnStatementContext) {}
+
+// ExitReturnStatement is called when production returnStatement is exited.
+func (s *BaseSPL2ParserListener) ExitReturnStatement(ctx *ReturnStatementContext) {}
+
+// EnterImportDeclaration is called when production importDeclaration is entered.
+func (s *BaseSPL2ParserListener) EnterImportDeclaration(ctx *ImportDeclarationContext) {}
+
+// ExitImportDeclaration is called when production importDeclaration is exited.
+func (s *BaseSPL2ParserListener) ExitImportDeclaration(ctx *ImportDeclarationContext) {}
+
+// EnterImportSelection is called when production importSelection is entered.
+func (s *BaseSPL2ParserListener) EnterImportSelection(ctx *ImportSelectionContext) {}
+
+// ExitImportSelection is called when production importSelection is exited.
+func (s *BaseSPL2ParserListener) ExitImportSelection(ctx *ImportSelectionContext) {}
+
+// EnterImportWildcard is called when production importWildcard is entered.
+func (s *BaseSPL2ParserListener) EnterImportWildcard(ctx *ImportWildcardContext) {}
+
+// ExitImportWildcard is called when production importWildcard is exited.
+func (s *BaseSPL2ParserListener) ExitImportWildcard(ctx *ImportWildcardContext) {}
+
+// EnterImportList is called when production importList is entered.
+func (s *BaseSPL2ParserListener) EnterImportList(ctx *ImportListContext) {}
+
+// ExitImportList is called when production importList is exited.
+func (s *BaseSPL2ParserListener) ExitImportList(ctx *ImportListContext) {}
+
+// EnterAliasedImport is called when production aliasedImport is entered.
+func (s *BaseSPL2ParserListener) EnterAliasedImport(ctx *AliasedImportContext) {}
+
+// ExitAliasedImport is called when production aliasedImport is exited.
+func (s *BaseSPL2ParserListener) ExitAliasedImport(ctx *AliasedImportContext) {}
+
+// EnterExportDeclaration is called when production exportDeclaration is entered.
+func (s *BaseSPL2ParserListener) EnterExportDeclaration(ctx *ExportDeclarationContext) {}
+
+// ExitExportDeclaration is called when production exportDeclaration is exited.
+func (s *BaseSPL2ParserListener) ExitExportDeclaration(ctx *ExportDeclarationContext) {}
+
+// EnterExportSelection is called when production exportSelection is entered.
+func (s *BaseSPL2ParserListener) EnterExportSelection(ctx *ExportSelectionContext) {}
+
+// ExitExportSelection is called when production exportSelection is exited.
+func (s *BaseSPL2ParserListener) ExitExportSelection(ctx *ExportSelectionContext) {}
+
+// EnterExportList is called when production exportList is entered.
+func (s *BaseSPL2ParserListener) EnterExportList(ctx *ExportListContext) {}
+
+// ExitExportList is called when production exportList is exited.
+func (s *BaseSPL2ParserListener) ExitExportList(ctx *ExportListContext) {}
+
+// EnterAliasedExport is called when production aliasedExport is entered.
+func (s *BaseSPL2ParserListener) EnterAliasedExport(ctx *AliasedExportContext) {}
+
+// ExitAliasedExport is called when production aliasedExport is exited.
+func (s *BaseSPL2ParserListener) ExitAliasedExport(ctx *AliasedExportContext) {}
+
+// EnterQualifiedName is called when production qualifiedName is entered.
+func (s *BaseSPL2ParserListener) EnterQualifiedName(ctx *QualifiedNameContext) {}
+
+// ExitQualifiedName is called when production qualifiedName is exited.
+func (s *BaseSPL2ParserListener) ExitQualifiedName(ctx *QualifiedNameContext) {}
+
+// EnterAnnotations is called when production annotations is entered.
+func (s *BaseSPL2ParserListener) EnterAnnotations(ctx *AnnotationsContext) {}
+
+// ExitAnnotations is called when production annotations is exited.
+func (s *BaseSPL2ParserListener) ExitAnnotations(ctx *AnnotationsContext) {}
+
+// EnterAnnotation is called when production annotation is entered.
+func (s *BaseSPL2ParserListener) EnterAnnotation(ctx *AnnotationContext) {}
+
+// ExitAnnotation is called when production annotation is exited.
+func (s *BaseSPL2ParserListener) ExitAnnotation(ctx *AnnotationContext) {}
+
+// EnterAnnotationStatement is called when production annotationStatement is entered.
+func (s *BaseSPL2ParserListener) EnterAnnotationStatement(ctx *AnnotationStatementContext) {}
+
+// ExitAnnotationStatement is called when production annotationStatement is exited.
+func (s *BaseSPL2ParserListener) ExitAnnotationStatement(ctx *AnnotationStatementContext) {}
+
+// EnterStatementTerminator is called when production statementTerminator is entered.
+func (s *BaseSPL2ParserListener) EnterStatementTerminator(ctx *StatementTerminatorContext) {}
+
+// ExitStatementTerminator is called when production statementTerminator is exited.
+func (s *BaseSPL2ParserListener) ExitStatementTerminator(ctx *StatementTerminatorContext) {}
 
 // EnterSearchCommand is called when production searchCommand is entered.
 func (s *BaseSPL2ParserListener) EnterSearchCommand(ctx *SearchCommandContext) {}
@@ -1016,11 +1360,59 @@ func (s *BaseSPL2ParserListener) EnterPrimary(ctx *PrimaryContext) {}
 // ExitPrimary is called when production primary is exited.
 func (s *BaseSPL2ParserListener) ExitPrimary(ctx *PrimaryContext) {}
 
+// EnterMultilineOperator is called when production multilineOperator is entered.
+func (s *BaseSPL2ParserListener) EnterMultilineOperator(ctx *MultilineOperatorContext) {}
+
+// ExitMultilineOperator is called when production multilineOperator is exited.
+func (s *BaseSPL2ParserListener) ExitMultilineOperator(ctx *MultilineOperatorContext) {}
+
+// EnterMultilineOperand is called when production multilineOperand is entered.
+func (s *BaseSPL2ParserListener) EnterMultilineOperand(ctx *MultilineOperandContext) {}
+
+// ExitMultilineOperand is called when production multilineOperand is exited.
+func (s *BaseSPL2ParserListener) ExitMultilineOperand(ctx *MultilineOperandContext) {}
+
+// EnterMultilineSimpleCall is called when production multilineSimpleCall is entered.
+func (s *BaseSPL2ParserListener) EnterMultilineSimpleCall(ctx *MultilineSimpleCallContext) {}
+
+// ExitMultilineSimpleCall is called when production multilineSimpleCall is exited.
+func (s *BaseSPL2ParserListener) ExitMultilineSimpleCall(ctx *MultilineSimpleCallContext) {}
+
+// EnterMultilineAtom is called when production multilineAtom is entered.
+func (s *BaseSPL2ParserListener) EnterMultilineAtom(ctx *MultilineAtomContext) {}
+
+// ExitMultilineAtom is called when production multilineAtom is exited.
+func (s *BaseSPL2ParserListener) ExitMultilineAtom(ctx *MultilineAtomContext) {}
+
+// EnterMultilineAccessPart is called when production multilineAccessPart is entered.
+func (s *BaseSPL2ParserListener) EnterMultilineAccessPart(ctx *MultilineAccessPartContext) {}
+
+// ExitMultilineAccessPart is called when production multilineAccessPart is exited.
+func (s *BaseSPL2ParserListener) ExitMultilineAccessPart(ctx *MultilineAccessPartContext) {}
+
 // EnterCall is called when production call is entered.
 func (s *BaseSPL2ParserListener) EnterCall(ctx *CallContext) {}
 
 // ExitCall is called when production call is exited.
 func (s *BaseSPL2ParserListener) ExitCall(ctx *CallContext) {}
+
+// EnterMultilineCall is called when production multilineCall is entered.
+func (s *BaseSPL2ParserListener) EnterMultilineCall(ctx *MultilineCallContext) {}
+
+// ExitMultilineCall is called when production multilineCall is exited.
+func (s *BaseSPL2ParserListener) ExitMultilineCall(ctx *MultilineCallContext) {}
+
+// EnterMultilineArguments is called when production multilineArguments is entered.
+func (s *BaseSPL2ParserListener) EnterMultilineArguments(ctx *MultilineArgumentsContext) {}
+
+// ExitMultilineArguments is called when production multilineArguments is exited.
+func (s *BaseSPL2ParserListener) ExitMultilineArguments(ctx *MultilineArgumentsContext) {}
+
+// EnterMultilineArgument is called when production multilineArgument is entered.
+func (s *BaseSPL2ParserListener) EnterMultilineArgument(ctx *MultilineArgumentContext) {}
+
+// ExitMultilineArgument is called when production multilineArgument is exited.
+func (s *BaseSPL2ParserListener) ExitMultilineArgument(ctx *MultilineArgumentContext) {}
 
 // EnterArguments is called when production arguments is entered.
 func (s *BaseSPL2ParserListener) EnterArguments(ctx *ArgumentsContext) {}
