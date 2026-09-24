@@ -2,21 +2,18 @@ package analysis
 
 import (
 	"fmt"
-	"github.com/antlr4-go/antlr/v4"
 	"strings"
+
+	"github.com/antlr4-go/antlr/v4"
+	"github.com/delgado-jacob/spl-toolkit/parser/spl2"
 )
 
 // SPL2 retains its own typed tree and locations. The embedded stage is only the
 // shared field-transfer kernel; its legacy SPL parser pointer stays nil.
 type spl2SemanticStage struct {
 	*semanticStage
-	parsed2               *spl2ParsedDocument
-	aliases               map[string]bool
-	structuralUncertainty map[string]spl2UncertaintySnapshot
-}
-
-type spl2UncertaintySnapshot struct {
-	public, requirements bool
+	parsed2 *spl2ParsedDocument
+	aliases map[string]bool
 }
 
 func analyzeSPL2(result *Result, parsed *spl2ParsedDocument, refinement *sourceRefinement, trace *requirementTrace) {
@@ -71,7 +68,7 @@ func (s *spl2SemanticStage) operand(ctx antlr.ParserRuleContext) locatedOperand 
 		s.unsupported(ctx, "Identifier decoding is unproved")
 		return locatedOperand{}
 	}
-	return locatedOperand{Name: name, Location: s.parsed2.source.contextLocation(ctx), Resolution: "exact", Sound: true, UnresolvedSource: strings.Contains(name, "."), rewrite: s.rewriteSPL2Owner(ctx)}
+	return locatedOperand{Name: name, Identity: atomicFieldIdentity(name), Location: s.parsed2.source.contextLocation(ctx), Resolution: "exact", Sound: true, UnresolvedSource: strings.Contains(name, "."), rewrite: s.rewriteSPL2Owner(ctx)}
 }
 func (s *spl2SemanticStage) selector(ctx antlr.ParserRuleContext) locatedOperand {
 	o := s.operand(ctx)
@@ -83,6 +80,25 @@ func (s *spl2SemanticStage) selector(ctx antlr.ParserRuleContext) locatedOperand
 	}
 	return o
 }
+
+func (s *spl2SemanticStage) structuralSelector(ctx spl2.IStructuralFieldSelectorContext) locatedOperand {
+	if ctx == nil || !spl2IntactSyntax(ctx) || ctx.Identifier() == nil || ctx.FieldPath() == nil {
+		return locatedOperand{}
+	}
+	identifiers := []spl2.IIdentifierContext{ctx.Identifier()}
+	identifiers = append(identifiers, ctx.FieldPath().AllIdentifier()...)
+	segments := make([]string, 0, len(identifiers))
+	for _, identifier := range identifiers {
+		part := s.operand(identifier)
+		if !part.Sound {
+			return locatedOperand{}
+		}
+		segments = append(segments, part.Name)
+	}
+	identity := pathFieldIdentity("", segments)
+	owner := rewriteOwner{role: "navigation", location: s.parsed2.source.contextLocation(ctx), identity: RewriteIdentity{Path: append([]string{}, segments...)}}
+	return locatedOperand{Name: identity.PublicName, Identity: identity, Location: s.parsed2.source.contextLocation(ctx), Resolution: "exact", Sound: true, UnresolvedSource: true, rewrite: owner}
+}
 func (s *spl2SemanticStage) unsupported(ctx antlr.ParserRuleContext, message string) {
 	s.diagnosticAt(CodeUnsupportedSemantics, "warning", "unsupported_semantics", message, s.parsed2.source.contextLocation(ctx), true)
 }
@@ -90,28 +106,13 @@ func (s *spl2SemanticStage) unsupportedOwned(ctx antlr.ParserRuleContext, messag
 	s.diagnosticAtOwned(CodeUnsupportedSemantics, "warning", "unsupported_semantics", message, s.parsed2.source.contextLocation(ctx), true, pendingReferenceIDs)
 }
 
-// Remember pre-diagnostic uncertainty for a later quoted atomic field with the
-// same decoded spelling. The diagnostic still updates stage uncertainty
-// normally, so unrelated later reads remain conservative.
-func (s *spl2SemanticStage) unsupportedStructuralReference(ctx antlr.ParserRuleContext, name, message string, pendingReferenceIDs []string) {
-	if s.structuralUncertainty == nil {
-		s.structuralUncertainty = map[string]spl2UncertaintySnapshot{}
-	}
-	if _, found := s.structuralUncertainty[name]; !found {
-		s.structuralUncertainty[name] = spl2UncertaintySnapshot{public: s.env.uncertain, requirements: s.env.requirements.uncertain}
-	}
-	s.unsupportedOwned(ctx, message, pendingReferenceIDs)
-}
-
-// structuralFieldReference records one grammar-proven structural occurrence
-// without reading from or writing to either string-keyed field environment.
+// structuralFieldReference routes grammar-proven structural occurrences through
+// the same shared environment as atomic SPL and SPL2 fields.
 func (s *spl2SemanticStage) structuralFieldReference(operand locatedOperand) string {
 	if !operand.Sound {
 		return ""
 	}
-	id := s.referenceAt(operand.Location, operand.Name, "field", "read", operand.Resolution)
-	s.bindStructuralFieldReference(id, operand)
-	return id
+	return s.readAt(operand, "read")
 }
 
 func (s *spl2SemanticStage) bindStructuralFieldReference(id string, operand locatedOperand) {

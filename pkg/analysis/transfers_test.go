@@ -149,9 +149,13 @@ func TestPreparedProjectionPreservesEvidenceAndFinalizesIDs(t *testing.T) {
 	sourceID := s.readAt(op("source", 6, 12), "read")
 	aliasID := s.createAt(op("alias", 0, 5), "output", "create", []string{sourceID}, true)
 	internalID := s.readAt(op("_time", 13, 18), "read")
-	source := s.env.fields["source"]
-	alias := s.env.fields["alias"]
-	internal := s.env.fields["_time"]
+	sourceKey, _ := atomicFieldIdentity("source").privateKey()
+	aliasKey, _ := atomicFieldIdentity("alias").privateKey()
+	internalKey, _ := atomicFieldIdentity("_time").privateKey()
+	goneKey, _ := atomicFieldIdentity("gone").privateKey()
+	source := s.env.fields[sourceKey]
+	alias := s.env.fields[aliasKey]
+	internal := s.env.fields[internalKey]
 	prepared := []preparedSelection{{source, []string{sourceID}, true}, {alias, []string{aliasID}, true}, {internal, nil, false}, {source, []string{sourceID}, true}}
 	refsBefore, _ := json.Marshal(r.References)
 	s.env.remove("gone")
@@ -164,11 +168,12 @@ func TestPreparedProjectionPreservesEvidenceAndFinalizesIDs(t *testing.T) {
 		t.Fatal("prepared installation created or rewrote references")
 	}
 	for _, want := range []trackedField{source, alias, internal} {
-		if !reflect.DeepEqual(s.env.fields[want.Name], want) {
+		key, _ := want.identity.privateKey()
+		if !reflect.DeepEqual(s.env.fields[key], want) {
 			t.Fatalf("lost copied field evidence: %#v", s.env.fields)
 		}
 	}
-	if !s.env.removed["gone"] || s.env.open || s.env.uncertain {
+	if !s.env.removed[goneKey] || s.env.open || s.env.uncertain {
 		t.Fatal("changed restriction/tombstone policy", s.env)
 	}
 	if len(s.transitions) != 3 || s.transitions[0].InputReferenceIDs[0] != sourceID || s.transitions[1].InputReferenceIDs[0] != aliasID || s.transitions[2].InputReferenceIDs[0] != sourceID {
@@ -177,7 +182,7 @@ func TestPreparedProjectionPreservesEvidenceAndFinalizesIDs(t *testing.T) {
 	// Neither input evidence nor transition arrays may alias the installed bindings.
 	prepared[0].Field.OriginReferenceIDs[0] = "mutated"
 	prepared[0].InputReferenceIDs[0] = "mutated"
-	if s.env.fields["source"].OriginReferenceIDs[0] != sourceID || s.transitions[0].InputReferenceIDs[0] != sourceID {
+	if s.env.fields[sourceKey].OriginReferenceIDs[0] != sourceID || s.transitions[0].InputReferenceIDs[0] != sourceID {
 		t.Fatal("installation retained mutable caller arrays")
 	}
 	r.Lineage = []Lineage{{After: s.env.snapshot(), Transitions: s.transitions}}
@@ -233,10 +238,11 @@ func TestLocatedTransferExactNullRemovesWithoutReadOrCreation(t *testing.T) {
 	target := locatedOperand{Name: "field", Location: newSourceIndex(doc.Text).location(0, 5), Resolution: "exact", Sound: true}
 	s.env.install("field", []string{}, false)
 	s.applyAssignment(target, nil, false, true)
+	fieldKey, _ := atomicFieldIdentity("field").privateKey()
 	if len(r.References) != 1 || r.References[0].Role != "remove" || r.References[0].Binding != "not_applicable" || len(r.References[0].OriginReferenceIDs) != 0 {
 		t.Fatal("null fabricated a target obligation or creation", r.References)
 	}
-	if _, known := s.env.fields["field"]; known || !s.env.removed["field"] {
+	if _, known := s.env.fields[fieldKey]; known || !s.env.removed[fieldKey] {
 		t.Fatal("null did not preserve canonical tombstone", s.env)
 	}
 	want := []Transition{{Operation: "remove", Output: "field", InputReferenceIDs: []string{}, OutputReferenceID: r.References[0].ID}}

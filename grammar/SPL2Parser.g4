@@ -152,10 +152,10 @@ dataset: identifier | dottedDataset | datasetParameter | staticDatasetDescriptor
 dottedDataset: identifier datasetPath;
 datasetPath: (NL* DOT NL* identifier)+;
 datasetParameter: LOCAL;
-// Descriptor identity is deliberately static. Key uniqueness and canonical
-// kind/property semantics belong to later validation, not this syntax slice.
-staticDatasetDescriptor: LBRACE NL* descriptorKindKey NL* COLON NL* jsonStringLiteral NL* COMMA NL*
-    descriptorPropertiesKey NL* COLON NL* descriptorProperties NL* RBRACE;
+// Preserve dynamic descriptor expressions for located semantic evidence. Exact
+// identity, key uniqueness, and canonical properties belong to lowering.
+staticDatasetDescriptor: LBRACE NL* descriptorKindKey NL* COLON NL* (jsonStringLiteral | expression)
+    (NL* COMMA NL* descriptorPropertiesKey NL* COLON NL* (descriptorProperties | expression))? NL* RBRACE;
 descriptorKindKey: {p.contextualKeyword("kind")}? IDENTIFIER;
 descriptorPropertiesKey: {p.contextualKeyword("properties")}? IDENTIFIER;
 descriptorProperties: LBRACE NL* (descriptorProperty (NL* COMMA NL* descriptorProperty)* NL* COMMA?)? NL* RBRACE;

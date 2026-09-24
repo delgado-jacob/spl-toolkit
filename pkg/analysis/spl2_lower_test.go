@@ -266,18 +266,28 @@ func TestSPL2ExternalJobAndJoinIntentions(t *testing.T) {
 	if r.Status != Incomplete || len(r.Scopes) != 2 {
 		t.Fatalf("join scope: %+v", r)
 	}
-	for _, name := range []string{"L.id", "R.uid"} {
+	for _, name := range []string{"id", "uid"} {
 		ref := spl2Ref(t, r, name, "read")
-		if ref.Binding != "indeterminate" || ref.ScopeID != "scope-0" || len(ref.OriginReferenceIDs) != 0 {
+		if ref.Binding != "source" || ref.Resolution != "exact" || ref.ScopeID != "scope-0" || len(ref.OriginReferenceIDs) != 0 {
 			t.Fatalf("qualified join input: %+v", ref)
 		}
 	}
-	for _, line := range r.Lineage {
-		if line.ScopeID == "scope-0" && len(line.After.Fields) != 0 {
-			t.Fatalf("join installed qualified inputs: %+v", r)
+	var parentAfter *FieldState
+	for i := range r.Lineage {
+		if r.Lineage[i].StageID == "stage-1" && r.Lineage[i].ScopeID == "scope-0" {
+			parentAfter = &r.Lineage[i].After
 		}
 	}
-	if spl2Ref(t, r, "uid", "read").ScopeID != "scope-1" {
+	if parentAfter == nil || len(parentAfter.Fields) != 2 || parentAfter.Fields[0].Name != "id" || parentAfter.Fields[1].Name != "uid" || !parentAfter.Uncertain {
+		t.Fatalf("join qualified inputs: %+v", parentAfter)
+	}
+	childUID := Reference{}
+	for _, ref := range r.References {
+		if ref.OriginalName == "uid" && ref.Role == "read" {
+			childUID = ref
+		}
+	}
+	if childUID.ScopeID != "scope-1" {
 		t.Fatalf("child scope lost: %+v", r)
 	}
 	assertCorpusIntegrity(t, r)
@@ -313,8 +323,14 @@ func TestSPL2MetricsSelectorTypedPosition(t *testing.T) {
 }
 
 func TestSPL2UnresolvedMetricsSelectorKeepsItsRole(t *testing.T) {
-	for _, rhs := range []string{`"${catalog}"`, `lower(catalog)`, `catalog.name`} {
-		r := spl2AnalyzeTest(t, `mstats aggregates=[count()] predicate=(index=`+rhs+`)`)
+	for _, tc := range []struct {
+		rhs, field string
+	}{
+		{rhs: `"${catalog}"`, field: "catalog"},
+		{rhs: `lower(catalog)`, field: "catalog"},
+		{rhs: `catalog.name`, field: "catalog.name"},
+	} {
+		r := spl2AnalyzeTest(t, `mstats aggregates=[count()] predicate=(index=`+tc.rhs+`)`)
 		if r.Status != Incomplete || len(r.Dependencies.Indexes) != 0 {
 			t.Fatalf("unresolved selector promoted: %+v", r)
 		}
@@ -323,7 +339,10 @@ func TestSPL2UnresolvedMetricsSelectorKeepsItsRole(t *testing.T) {
 				t.Fatalf("selector label became field: %+v", r)
 			}
 		}
-		spl2Ref(t, r, "catalog", "read")
+		ref := spl2Ref(t, r, tc.field, "read")
+		if tc.field == "catalog.name" && (ref.Resolution != "exact" || ref.Binding != "source") {
+			t.Fatalf("structural selector operand: %+v", ref)
+		}
 	}
 }
 

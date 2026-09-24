@@ -9,6 +9,53 @@ import (
 )
 
 func rewriteName(name string) RewriteIdentity { return RewriteIdentity{Name: &name} }
+
+func TestRewriteAnalysisComparisonScopesAllowedReason(t *testing.T) {
+	ordinary := &Result{Coverage: Coverage{SemanticComplete: true, Reasons: []string{"existing"}}}
+	rewrite := Result{Coverage: Coverage{SemanticComplete: true, Reasons: []string{"existing", CodeUnsupportedSemantics}}}
+	if rewriteAnalysesMatch(ordinary, rewrite, "") {
+		t.Fatal("strict rewrite comparison ignored an unrelated coverage reason")
+	}
+	if !rewriteAnalysesMatch(ordinary, rewrite, CodeUnsupportedSemantics) {
+		t.Fatal("scoped structural-navigation allowance was not applied")
+	}
+	if !reflect.DeepEqual(rewrite.Coverage.Reasons, []string{"existing", CodeUnsupportedSemantics}) {
+		t.Fatalf("comparison mutated rewrite coverage: %+v", rewrite.Coverage)
+	}
+}
+
+func TestRewriteAnalysisComparisonPreservesExistingUnsupportedReason(t *testing.T) {
+	query := `FROM main | where coalesce(actor.name, value:host)=1`
+	ordinary, err := Analyze(QueryDocument{Text: query, Language: "spl2"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	session, err := PrepareRewrite(QueryDocument{Text: query, Language: "spl2"}, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !rewriteAnalysesMatch(ordinary, session.Evidence().Analysis, "") {
+		t.Fatalf("rewrite-only coverage duplicated an existing analysis reason: ordinary=%+v rewrite=%+v", ordinary.Coverage, session.Evidence().Analysis.Coverage)
+	}
+}
+
+func rewriteAnalysesMatch(ordinary *Result, rewrite Result, allowedRewriteOnlyReason string) bool {
+	candidate := rewrite
+	candidate.Coverage = rewrite.Coverage
+	candidate.Coverage.Reasons = append([]string{}, rewrite.Coverage.Reasons...)
+	if allowedRewriteOnlyReason != "" {
+		for i, reason := range candidate.Coverage.Reasons {
+			if reason == allowedRewriteOnlyReason {
+				candidate.Coverage.Reasons = append(candidate.Coverage.Reasons[:i], candidate.Coverage.Reasons[i+1:]...)
+				break
+			}
+		}
+	}
+	a, _ := json.Marshal(ordinary)
+	b, _ := json.Marshal(&candidate)
+	return string(a) == string(b)
+}
+
 func rewriteTestSession(t *testing.T, language, query string, probes ...RewriteFactProbe) *RewriteSession {
 	t.Helper()
 	ordinary, err := Analyze(QueryDocument{Language: language, Text: query})
@@ -19,9 +66,10 @@ func rewriteTestSession(t *testing.T, language, query string, probes ...RewriteF
 	if err != nil {
 		t.Fatal(err)
 	}
-	a, _ := json.Marshal(ordinary)
-	b, _ := json.Marshal(s.Evidence().Analysis)
-	if string(a) != string(b) {
+	rewriteAnalysis := s.Evidence().Analysis
+	if !rewriteAnalysesMatch(ordinary, rewriteAnalysis, "") {
+		a, _ := json.Marshal(ordinary)
+		b, _ := json.Marshal(rewriteAnalysis)
 		t.Fatalf("ordinary analysis changed: %s != %s", a, b)
 	}
 	return s
@@ -172,9 +220,25 @@ func TestRewriteEvidenceSPL2(t *testing.T) {
 	}
 }
 
-func TestRewriteEvidenceSPL2StructuralNavigationIsIndeterminateAndRefused(t *testing.T) {
+func TestRewriteEvidenceSPL2StructuralNavigationIsExactAndRefused(t *testing.T) {
 	query := `FROM main | eval x=actor.name`
-	s := rewriteTestSession(t, "spl2", query)
+	plain, err := Analyze(QueryDocument{Text: query, Language: "spl2"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if plain.Status != Valid || !plain.Coverage.SemanticComplete || len(plain.Coverage.Reasons) != 0 {
+		t.Fatalf("structural analysis must remain complete: %+v", plain.Coverage)
+	}
+	s, err := PrepareRewrite(QueryDocument{Text: query, Language: "spl2"}, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !rewriteAnalysesMatch(plain, s.Evidence().Analysis, CodeUnsupportedSemantics) {
+		t.Fatalf("structural rewrite analysis differs beyond its scoped coverage reason: plain=%+v rewrite=%+v", plain.Coverage, s.Evidence().Analysis.Coverage)
+	}
+	if got := s.Evidence().Analysis.Coverage; !got.SemanticComplete || !reflect.DeepEqual(got.Reasons, []string{CodeUnsupportedSemantics}) {
+		t.Fatalf("rewrite-only structural limitation: %+v", got)
+	}
 	var site *rewriteSite
 	for _, candidate := range s.sites {
 		if reflect.DeepEqual(candidate.public.Identity.Path, []string{"actor", "name"}) {
@@ -193,7 +257,7 @@ func TestRewriteEvidenceSPL2StructuralNavigationIsIndeterminateAndRefused(t *tes
 			reference = &s.result.References[i]
 		}
 	}
-	if reference == nil || reference.Binding != "indeterminate" || site.binding != "indeterminate" || site.public.Eligibility != "ineligible" || site.public.BindingID != "" {
+	if reference == nil || reference.Resolution != "exact" || reference.Binding != "source" || site.binding != "source" || site.public.Eligibility != "ineligible" || site.public.BindingID == "" {
 		t.Fatalf("structural rewrite binding: reference=%+v site=%+v private_binding=%q", reference, site.public, site.binding)
 	}
 	if !reflect.DeepEqual(site.inputs, reference.OriginReferenceIDs) {

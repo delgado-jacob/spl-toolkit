@@ -1,8 +1,10 @@
 package analysis
 
 import (
+	"encoding/json"
 	"github.com/antlr4-go/antlr/v4"
 	"github.com/delgado-jacob/spl-toolkit/parser/spl2"
+	"strconv"
 	"strings"
 )
 
@@ -12,7 +14,9 @@ func (s *spl2SemanticStage) command(ctx antlr.ParserRuleContext) {
 		s.applySource()
 		clear(s.aliases)
 		source := c.SqlFromClause()
-		s.dataset(source.Dataset())
+		if !s.exactDatasetSource(source.Dataset()) {
+			s.dataset(source.Dataset())
+		}
 		s.joinDatasetIntentions(source)
 		if alias := source.SourceAlias(); alias != nil {
 			o := s.operand(alias.Identifier())
@@ -50,7 +54,12 @@ func (s *spl2SemanticStage) command(ctx antlr.ParserRuleContext) {
 		fields := []locatedOperand{}
 		unproved := false
 		for _, f := range selection.AllFieldSelector() {
-			o := s.selector(f.Identifier())
+			o := locatedOperand{}
+			if f.Identifier() != nil {
+				o = s.selector(f.Identifier())
+			} else if f.StructuralFieldSelector() != nil {
+				o = s.structuralSelector(f.StructuralFieldSelector())
+			}
 			if o.Sound && o.Name != "" {
 				fields = append(fields, o)
 			} else {
@@ -171,7 +180,7 @@ func (s *spl2SemanticStage) command(ctx antlr.ParserRuleContext) {
 		s.operandReference(o, "search_job", "read")
 		s.unsupported(c, "External job output fields are unproved")
 	case *spl2.JoinCommandContext:
-		ids := s.joinPredicateIntentions(c.SqlJoinPredicate())
+		ids := s.joinPredicateIntentions(c)
 		s.unsupportedOwned(c, "Join output merge and qualified input binding are unproved", ids)
 	case *spl2.BinCommandContext:
 		input := s.operand(c.Identifier(0))
@@ -243,21 +252,32 @@ func (s *spl2SemanticStage) command(ctx antlr.ParserRuleContext) {
 	}
 }
 
-func (s *spl2SemanticStage) joinPredicateIntentions(predicate spl2.ISqlJoinPredicateContext) []string {
+func (s *spl2SemanticStage) joinPredicateIntentions(command *spl2.JoinCommandContext) []string {
 	ids := []string{}
-	if predicate == nil {
+	if command == nil || command.SqlJoinPredicate() == nil {
 		return ids
 	}
-	for _, equality := range predicate.AllSqlJoinEquality() {
+	aliases := map[string]bool{}
+	for _, option := range command.AllJoinOption() {
+		if option.Identifier() == nil || option.LEFT() == nil && option.RIGHT() == nil {
+			continue
+		}
+		alias := s.operand(option.Identifier())
+		if alias.Sound {
+			aliases[alias.Name] = true
+		}
+	}
+	for _, equality := range command.SqlJoinPredicate().AllSqlJoinEquality() {
 		for _, field := range equality.AllSqlJoinField() {
 			if !s.parsed2.soundOperand(field) || len(field.AllAccessPart()) != 0 || len(field.AllIdentifier()) != 2 {
 				continue
 			}
 			left, right := s.operand(field.Identifier(0)), s.operand(field.Identifier(1))
-			if !left.Sound || !right.Sound {
+			if !left.Sound || !right.Sound || !aliases[left.Name] {
 				continue
 			}
-			o := locatedOperand{Name: left.Name + "." + right.Name, Location: s.parsed2.source.contextLocation(field), Resolution: "exact", Sound: true}
+			identity := pathFieldIdentity(left.Name, []string{right.Name})
+			o := locatedOperand{Name: identity.PublicName, Identity: identity, Location: s.parsed2.source.contextLocation(field), Resolution: "exact", Sound: true}
 			if id := s.structuralFieldReference(o); id != "" {
 				ids = append(ids, id)
 			}
@@ -295,11 +315,11 @@ func (s *spl2SemanticStage) deferredAggregate(aggregate spl2.IAggregateContext) 
 // never install fields or transitions. Nil affected means unknown output names.
 func (s *spl2SemanticStage) deferredEffects(ctx antlr.ParserRuleContext, affected map[string]bool, generating bool) {
 	s.unsupported(ctx, "Command field effects are not yet modeled")
-	for name, field := range s.env.fields {
-		if affected == nil || affected[name] {
+	for key, field := range s.env.fields {
+		if affected == nil || affected[field.Name] {
 			field.Conditional = true
-			s.env.fields[name] = field
-			s.env.requirements.markConditional(name)
+			s.env.fields[key] = field
+			s.env.requirements.markConditionalIdentity(field.identity)
 		}
 	}
 	if generating {
@@ -446,11 +466,11 @@ func (s *spl2SemanticStage) lookup(c *spl2.LookupCommandContext) {
 	output := c.LookupOutputClause()
 	if output == nil {
 		s.unsupported(c, "Lookup without explicit outputs requires catalog field membership")
-		for name, field := range s.env.fields {
-			if !remoteKeys[name] {
+		for key, field := range s.env.fields {
+			if !remoteKeys[field.Name] {
 				field.Conditional = true
-				s.env.fields[name] = field
-				s.env.requirements.markConditional(name)
+				s.env.fields[key] = field
+				s.env.requirements.markConditionalIdentity(field.identity)
 			}
 		}
 		return
@@ -537,8 +557,8 @@ func (s *spl2SemanticStage) nextCommandToken(ctx antlr.ParserRuleContext) antlr.
 // a joined array's row shape into the parent environment.
 func (s *spl2SemanticStage) joinDatasetIntentions(from spl2.ISqlFromClauseContext) {
 	for _, join := range from.AllSqlJoinClause() {
-		if dataset := join.Dataset(); dataset != nil && dataset.Identifier() != nil {
-			s.dependency(dataset.Identifier(), "dataset")
+		if dataset := join.Dataset(); dataset != nil {
+			s.exactDatasetSource(dataset)
 		}
 	}
 }
@@ -570,8 +590,8 @@ func (s *spl2SemanticStage) recoveredInputs(ctx antlr.ParserRuleContext) {
 	}
 }
 func (s *spl2SemanticStage) sourceIntentions(from spl2.ISqlFromClauseContext) {
-	if dataset := from.Dataset(); dataset != nil && dataset.Identifier() != nil {
-		s.dependency(dataset.Identifier(), "dataset")
+	if dataset := from.Dataset(); dataset != nil {
+		s.exactDatasetSource(dataset)
 	}
 	s.joinDatasetIntentions(from)
 }
@@ -630,8 +650,162 @@ func (s *spl2SemanticStage) timechartInputs(c *spl2.TimechartCommandContext) {
 
 func (s *spl2SemanticStage) unionDatasetIntentions(c *spl2.UnionCommandContext) {
 	for _, input := range c.AllUnionDataset() {
-		if dataset := input.Dataset(); dataset != nil && dataset.Identifier() != nil {
-			s.dependency(dataset.Identifier(), "dataset")
+		if dataset := input.Dataset(); dataset != nil {
+			s.exactDatasetSource(dataset)
 		}
 	}
+}
+
+func (s *spl2SemanticStage) exactDatasetSource(dataset spl2.IDatasetContext) bool {
+	if dataset == nil {
+		return false
+	}
+	var owner antlr.ParserRuleContext
+	name := ""
+	switch {
+	case dataset.Identifier() != nil:
+		owner = dataset.Identifier()
+		name = s.operand(owner).Name
+	case dataset.DottedDataset() != nil:
+		owner = dataset.DottedDataset()
+		parts := []string{}
+		identifiers := []spl2.IIdentifierContext{dataset.DottedDataset().Identifier()}
+		identifiers = append(identifiers, dataset.DottedDataset().DatasetPath().AllIdentifier()...)
+		for _, identifier := range identifiers {
+			part := s.operand(identifier)
+			if !part.Sound {
+				return true
+			}
+			parts = append(parts, part.Name)
+		}
+		name = strings.Join(parts, ".")
+	case dataset.DatasetParameter() != nil:
+		owner = dataset.DatasetParameter()
+		if spl2IntactSyntax(owner) {
+			name = owner.GetText()
+		}
+	case dataset.StaticDatasetDescriptor() != nil:
+		owner = dataset.StaticDatasetDescriptor()
+		canonical, ok := spl2CanonicalDatasetDescriptor(dataset.StaticDatasetDescriptor())
+		if !ok {
+			s.dynamicDatasetSource(owner)
+			for _, expression := range dataset.StaticDatasetDescriptor().AllExpression() {
+				s.expression(expression)
+			}
+			return true
+		}
+		name = canonical
+	default:
+		return false
+	}
+	if name == "" || !spl2IntactSyntax(owner) {
+		return true
+	}
+	location := s.parsed2.source.contextLocation(owner)
+	operand := locatedOperand{Name: name, Location: location, Resolution: "exact", Sound: true, rewrite: s.rewriteSPL2Owner(owner)}
+	if s.operandReference(operand, "dataset", "read") != "" {
+		s.addDependency(name, "dataset")
+	}
+	return true
+}
+
+func (s *spl2SemanticStage) dynamicDatasetSource(owner antlr.ParserRuleContext) {
+	location := s.parsed2.source.contextLocation(owner)
+	name := s.result.Document.Text[location.Start.Offset:location.End.Offset]
+	operand := locatedOperand{Name: name, Location: location, Resolution: "dynamic", Sound: name != "", rewrite: s.rewriteSPL2Owner(owner)}
+	id := s.operandReference(operand, "dataset", "read")
+	if id == "" {
+		s.diagnosticAt(CodeDynamicReference, "warning", "unsupported_semantics", "Dynamic dataset descriptor identity is unresolved", location, true)
+		return
+	}
+	ref := &s.result.References[len(s.result.References)-1]
+	ref.Binding = "indeterminate"
+	if trace := s.env.requirements.trace; trace != nil {
+		trace.reference(id).reference.Binding = "indeterminate"
+	}
+	s.rewriteBinding(id, "indeterminate", nil)
+	s.diagnosticAtOwned(CodeDynamicReference, "warning", "unsupported_semantics", "Dynamic dataset descriptor identity is unresolved", location, true, []string{id})
+}
+
+func spl2CanonicalDatasetDescriptor(descriptor spl2.IStaticDatasetDescriptorContext) (string, bool) {
+	if descriptor == nil || !spl2IntactSyntax(descriptor) || descriptor.JsonStringLiteral() == nil || len(descriptor.AllExpression()) != 0 {
+		return "", false
+	}
+	kind, ok := spl2StaticJSONString(descriptor.JsonStringLiteral())
+	if !ok {
+		return "", false
+	}
+	value := map[string]any{"kind": kind}
+	if descriptor.DescriptorPropertiesKey() != nil {
+		if descriptor.DescriptorProperties() == nil {
+			return "", false
+		}
+		properties, ok := spl2StaticJSONObject(descriptor.DescriptorProperties().AllDescriptorProperty())
+		if !ok {
+			return "", false
+		}
+		value["properties"] = properties
+	}
+	encoded, err := json.Marshal(value)
+	return string(encoded), err == nil
+}
+
+func spl2StaticJSONLiteral(literal spl2.IJsonLiteralContext) (any, bool) {
+	switch {
+	case literal == nil:
+		return nil, false
+	case literal.NUMBER() != nil:
+		number := json.Number(literal.NUMBER().GetText())
+		return number, true
+	case literal.BOOLEAN() != nil:
+		value, err := strconv.ParseBool(literal.BOOLEAN().GetText())
+		return value, err == nil
+	case literal.NULL() != nil:
+		return nil, true
+	case literal.JsonStringLiteral() != nil:
+		return spl2StaticJSONString(literal.JsonStringLiteral())
+	case literal.JsonArray() != nil:
+		values := make([]any, 0, len(literal.JsonArray().AllJsonLiteral()))
+		for _, child := range literal.JsonArray().AllJsonLiteral() {
+			value, ok := spl2StaticJSONLiteral(child)
+			if !ok {
+				return nil, false
+			}
+			values = append(values, value)
+		}
+		return values, true
+	case literal.JsonObject() != nil:
+		return spl2StaticJSONObject(literal.JsonObject().AllDescriptorProperty())
+	default:
+		return nil, false
+	}
+}
+
+func spl2StaticJSONObject(properties []spl2.IDescriptorPropertyContext) (map[string]any, bool) {
+	out := map[string]any{}
+	for _, property := range properties {
+		if property == nil || property.JsonObjectKey() == nil {
+			return nil, false
+		}
+		key, ok := spl2DecodeKey(property.JsonObjectKey().GetText())
+		if !ok {
+			return nil, false
+		}
+		if _, duplicate := out[key]; duplicate {
+			return nil, false
+		}
+		value, ok := spl2StaticJSONLiteral(property.JsonLiteral())
+		if !ok {
+			return nil, false
+		}
+		out[key] = value
+	}
+	return out, true
+}
+
+func spl2StaticJSONString(literal spl2.IJsonStringLiteralContext) (string, bool) {
+	if literal == nil || strings.Contains(literal.GetText(), "${") {
+		return "", false
+	}
+	return spl2DecodeKey(literal.GetText())
 }

@@ -47,6 +47,7 @@ pkg/analysis/capabilitydata/ledger.json
 pkg/analysis/commands.go
 pkg/analysis/dependencies.go
 pkg/analysis/diagnostics.go
+pkg/analysis/field_identity.go
 pkg/analysis/flow.go
 pkg/analysis/functions.go
 pkg/analysis/model.go

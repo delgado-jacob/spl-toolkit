@@ -106,7 +106,9 @@ func executeSPL2SQL(result *Result, parsed *spl2ParsedDocument, refinement *sour
 			clear(aliases)
 		}
 		from := c.SqlFromClause()
-		s.dataset(from.Dataset())
+		if !s.exactDatasetSource(from.Dataset()) {
+			s.dataset(from.Dataset())
+		}
 		s.joinDatasetIntentions(from)
 		if a := from.SourceAlias(); a != nil {
 			o := s.operand(a.Identifier())
@@ -167,10 +169,15 @@ func executeSPL2SQL(result *Result, parsed *spl2ParsedDocument, refinement *sour
 		s.applyPreparedProjection(selected, "table")
 		if selectedShape {
 			s.env.open, s.env.uncertain = false, false
-			fields := map[string]requirementField{}
+			fields := map[fieldIdentityKey]requirementField{}
 			for _, selection := range selected {
-				if field, ok := s.env.requirements.exactProjection(selection.Field.Name, selection.InputReferenceIDs); ok {
-					fields[selection.Field.Name] = field
+				identity := selection.Field.identity
+				if _, exact := identity.privateKey(); !exact {
+					identity = atomicFieldIdentity(selection.Field.Name)
+				}
+				if field, ok := s.env.requirements.exactIdentityProjection(identity, selection.InputReferenceIDs); ok {
+					key, _ := identity.privateKey()
+					fields[key] = field
 				}
 			}
 			s.env.requirements.fields = fields
@@ -247,8 +254,8 @@ func (s *spl2SemanticStage) prepareSQLSelection(clause spl2.ISqlSelectClauseCont
 		input = s.env
 	}
 	groups := map[string]bool{}
-	for name := range input.fields {
-		groups[name] = true
+	for _, field := range input.fields {
+		groups[field.Name] = true
 	}
 	for _, p := range clause.AllProjection() {
 		item := projection{ctx: p}
@@ -321,7 +328,7 @@ func (s *spl2SemanticStage) prepareSQLSelection(clause spl2.ISqlSelectClauseCont
 		if !item.target.Sound {
 			continue
 		}
-		_, source := pregroup.fields[item.target.Name]
+		_, source := pregroup.field(item.target.fieldIdentity())
 		if source || counts[item.target.Name] > 1 {
 			collisions[item.target.Name] = true
 			s.unsupported(item.ctx, "SQL alias collision or sibling alias visibility is unproved")
@@ -459,10 +466,12 @@ func (s *spl2SemanticStage) sqlRestrictedExpression(tree antlr.Tree, visible map
 			if c.Identifier() != nil {
 				o := s.operand(c.Identifier())
 				if o.Sound && !visible[o.Name] {
-					f := s.env.fields[o.Name]
+					key, _ := o.fieldIdentity().privateKey()
+					f := s.env.fields[key]
 					f.Name = o.Name
+					f.identity = o.fieldIdentity()
 					f.Conditional = true
-					s.env.fields[o.Name] = f
+					s.env.fields[key] = f
 					s.env.requirements.markConditional(o.Name)
 					s.env.requirements.uncertain = true
 					hidden = append(hidden, o)

@@ -937,7 +937,8 @@
       "syntax_complete": true,
       "semantic_complete": false,
       "required_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
+        "SPL_UNSUPPORTED_SEMANTICS",
+        "SPL_AMBIGUOUS_FIELD"
       ],
       "forbidden_codes": [
         "SPL_SYNTAX_ERROR",
@@ -957,23 +958,23 @@
         },
         {
           "original_name": "L.id",
-          "normalized_name": "L.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
           "start": 38,
           "end": 42,
-          "binding": "indeterminate",
+          "binding": "source",
           "scope_start": 0,
           "scope_end": 60
         },
         {
           "original_name": "R.id",
-          "normalized_name": "R.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
           "start": 43,
           "end": 47,
-          "binding": "indeterminate",
+          "binding": "source",
           "scope_start": 0,
           "scope_end": 60
         },
@@ -1014,109 +1015,17 @@
           "original_name": "where",
           "start": 32,
           "end": 37
-        },
-        {
-          "original_name": "L.id",
-          "start": 38,
-          "end": 42,
-          "role": "create"
-        },
-        {
-          "original_name": "L.id",
-          "start": 38,
-          "end": 42,
-          "role": "output"
-        },
-        {
-          "original_name": "L.id",
-          "start": 38,
-          "end": 42,
-          "role": "remove"
-        },
-        {
-          "original_name": "L.id",
-          "start": 38,
-          "end": 42,
-          "role": "rename"
-        },
-        {
-          "original_name": "L.id",
-          "start": 38,
-          "end": 42,
-          "role": "group"
-        },
-        {
-          "original_name": "L.id",
-          "start": 38,
-          "end": 42,
-          "role": "null_test"
-        },
-        {
-          "original_name": "L.id",
-          "start": 38,
-          "end": 42,
-          "binding": "source"
-        },
-        {
-          "original_name": "L.id",
-          "start": 38,
-          "end": 42,
-          "binding": "derived"
-        },
-        {
-          "original_name": "R.id",
-          "start": 43,
-          "end": 47,
-          "role": "create"
-        },
-        {
-          "original_name": "R.id",
-          "start": 43,
-          "end": 47,
-          "role": "output"
-        },
-        {
-          "original_name": "R.id",
-          "start": 43,
-          "end": 47,
-          "role": "remove"
-        },
-        {
-          "original_name": "R.id",
-          "start": 43,
-          "end": 47,
-          "role": "rename"
-        },
-        {
-          "original_name": "R.id",
-          "start": 43,
-          "end": 47,
-          "role": "group"
-        },
-        {
-          "original_name": "R.id",
-          "start": 43,
-          "end": 47,
-          "role": "null_test"
-        },
-        {
-          "original_name": "R.id",
-          "start": 43,
-          "end": 47,
-          "binding": "source"
-        },
-        {
-          "original_name": "R.id",
-          "start": 43,
-          "end": 47,
-          "binding": "derived"
         }
       ],
-      "required_fields": [],
+      "required_fields": [
+        {
+          "name": "id",
+          "conditional": false
+        }
+      ],
       "forbidden_field_names": [
         "L.id",
-        "R.id",
-        "id"
+        "R.id"
       ],
       "required_stages": [
         {
@@ -1143,7 +1052,12 @@
       ],
       "max_scopes": 2,
       "final_state": {
-        "fields": [],
+        "fields": [
+          {
+            "name": "id",
+            "conditional": false
+          }
+        ],
         "removed": [],
         "open": true,
         "uncertain": true
@@ -1166,6 +1080,7 @@
       "syntax_complete": true,
       "semantic_complete": false,
       "expected_codes": [
+        "SPL_AMBIGUOUS_FIELD",
         "SPL_UNSUPPORTED_SEMANTICS"
       ],
       "references": [
@@ -1180,19 +1095,19 @@
         },
         {
           "original_name": "L.id",
-          "normalized_name": "L.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 38,
           "end": 42
         },
         {
           "original_name": "R.id",
-          "normalized_name": "R.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 43,
           "end": 47
         },
@@ -1206,7 +1121,12 @@
           "end": 59
         }
       ],
-      "fields": [],
+      "fields": [
+        {
+          "name": "id",
+          "conditional": false
+        }
+      ],
       "removed": [],
       "open": true,
       "uncertain": true,
@@ -1257,7 +1177,7 @@
     "canonical_evidence": "regression_snapshot",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "C16/E.C16 plus ROOT qualified-read ruling: whole decoded alias.field name, read/indeterminate; no root literal-dotted field or unqualified suffix installation and no guessed catalogue/origins. Actual typed right source is independent; merge remains U. Required aliases and integer/enum domains are independent contract checks. Damaged grammar leaves the survivor graph unasserted; held uppercase enum is incomplete, not a definite enum error.",
+      "basis": "C16/E.C16 join qualifier ownership: only aliases declared by the selected join form create qualified field identities; undeclared aliases do not become references or requirements. Actual typed right source is independent; merge remains U. Required aliases and integer/enum domains are independent contract checks. Damaged grammar leaves the survivor graph unasserted; held uppercase enum is incomplete, not a definite enum error.",
       "status": "invalid",
       "syntax_complete": true,
       "semantic_complete": false,
@@ -1279,23 +1199,12 @@
         },
         {
           "original_name": "L.id",
-          "normalized_name": "L.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
           "start": 30,
           "end": 34,
-          "binding": "indeterminate",
-          "scope_start": 0,
-          "scope_end": 52
-        },
-        {
-          "original_name": "R.id",
-          "normalized_name": "R.id",
-          "kind": "field",
-          "role": "read",
-          "start": 35,
-          "end": 39,
-          "binding": "indeterminate",
+          "binding": "source",
           "scope_start": 0,
           "scope_end": 52
         },
@@ -1328,107 +1237,21 @@
           "end": 29
         },
         {
-          "original_name": "L.id",
-          "start": 30,
-          "end": 34,
-          "role": "create"
-        },
-        {
-          "original_name": "L.id",
-          "start": 30,
-          "end": 34,
-          "role": "output"
-        },
-        {
-          "original_name": "L.id",
-          "start": 30,
-          "end": 34,
-          "role": "remove"
-        },
-        {
-          "original_name": "L.id",
-          "start": 30,
-          "end": 34,
-          "role": "rename"
-        },
-        {
-          "original_name": "L.id",
-          "start": 30,
-          "end": 34,
-          "role": "group"
-        },
-        {
-          "original_name": "L.id",
-          "start": 30,
-          "end": 34,
-          "role": "null_test"
-        },
-        {
-          "original_name": "L.id",
-          "start": 30,
-          "end": 34,
-          "binding": "source"
-        },
-        {
-          "original_name": "L.id",
-          "start": 30,
-          "end": 34,
-          "binding": "derived"
-        },
-        {
           "original_name": "R.id",
           "start": 35,
           "end": 39,
-          "role": "create"
-        },
-        {
-          "original_name": "R.id",
-          "start": 35,
-          "end": 39,
-          "role": "output"
-        },
-        {
-          "original_name": "R.id",
-          "start": 35,
-          "end": 39,
-          "role": "remove"
-        },
-        {
-          "original_name": "R.id",
-          "start": 35,
-          "end": 39,
-          "role": "rename"
-        },
-        {
-          "original_name": "R.id",
-          "start": 35,
-          "end": 39,
-          "role": "group"
-        },
-        {
-          "original_name": "R.id",
-          "start": 35,
-          "end": 39,
-          "role": "null_test"
-        },
-        {
-          "original_name": "R.id",
-          "start": 35,
-          "end": 39,
-          "binding": "source"
-        },
-        {
-          "original_name": "R.id",
-          "start": 35,
-          "end": 39,
-          "binding": "derived"
+          "role": "read"
         }
       ],
-      "required_fields": [],
+      "required_fields": [
+        {
+          "name": "id",
+          "conditional": false
+        }
+      ],
       "forbidden_field_names": [
         "L.id",
-        "R.id",
-        "id"
+        "R.id"
       ],
       "required_stages": [
         {
@@ -1488,21 +1311,12 @@
         },
         {
           "original_name": "L.id",
-          "normalized_name": "L.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 30,
           "end": 34
-        },
-        {
-          "original_name": "R.id",
-          "normalized_name": "R.id",
-          "kind": "field",
-          "role": "read",
-          "binding": "indeterminate",
-          "start": 35,
-          "end": 39
         },
         {
           "original_name": "other",
@@ -1514,7 +1328,12 @@
           "end": 51
         }
       ],
-      "fields": [],
+      "fields": [
+        {
+          "name": "id",
+          "conditional": false
+        }
+      ],
       "removed": [],
       "open": true,
       "uncertain": true,
@@ -5582,7 +5401,8 @@
       "syntax_complete": true,
       "semantic_complete": false,
       "required_codes": [
-        "SPL_SYNTAX_ERROR"
+        "SPL_SYNTAX_ERROR",
+        "SPL_AMBIGUOUS_FIELD"
       ],
       "forbidden_codes": [],
       "required_references": [
@@ -5599,23 +5419,23 @@
         },
         {
           "original_name": "A.id",
-          "normalized_name": "A.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
           "start": 56,
           "end": 60,
-          "binding": "indeterminate",
+          "binding": "source",
           "scope_start": 0,
           "scope_end": 78
         },
         {
           "original_name": "B.id",
-          "normalized_name": "B.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
           "start": 61,
           "end": 65,
-          "binding": "indeterminate",
+          "binding": "source",
           "scope_start": 0,
           "scope_end": 78
         },
@@ -5676,109 +5496,17 @@
           "original_name": "where",
           "start": 50,
           "end": 55
-        },
-        {
-          "original_name": "A.id",
-          "start": 56,
-          "end": 60,
-          "role": "create"
-        },
-        {
-          "original_name": "A.id",
-          "start": 56,
-          "end": 60,
-          "role": "output"
-        },
-        {
-          "original_name": "A.id",
-          "start": 56,
-          "end": 60,
-          "role": "remove"
-        },
-        {
-          "original_name": "A.id",
-          "start": 56,
-          "end": 60,
-          "role": "rename"
-        },
-        {
-          "original_name": "A.id",
-          "start": 56,
-          "end": 60,
-          "role": "group"
-        },
-        {
-          "original_name": "A.id",
-          "start": 56,
-          "end": 60,
-          "role": "null_test"
-        },
-        {
-          "original_name": "A.id",
-          "start": 56,
-          "end": 60,
-          "binding": "source"
-        },
-        {
-          "original_name": "A.id",
-          "start": 56,
-          "end": 60,
-          "binding": "derived"
-        },
-        {
-          "original_name": "B.id",
-          "start": 61,
-          "end": 65,
-          "role": "create"
-        },
-        {
-          "original_name": "B.id",
-          "start": 61,
-          "end": 65,
-          "role": "output"
-        },
-        {
-          "original_name": "B.id",
-          "start": 61,
-          "end": 65,
-          "role": "remove"
-        },
-        {
-          "original_name": "B.id",
-          "start": 61,
-          "end": 65,
-          "role": "rename"
-        },
-        {
-          "original_name": "B.id",
-          "start": 61,
-          "end": 65,
-          "role": "group"
-        },
-        {
-          "original_name": "B.id",
-          "start": 61,
-          "end": 65,
-          "role": "null_test"
-        },
-        {
-          "original_name": "B.id",
-          "start": 61,
-          "end": 65,
-          "binding": "source"
-        },
-        {
-          "original_name": "B.id",
-          "start": 61,
-          "end": 65,
-          "binding": "derived"
         }
       ],
-      "required_fields": [],
+      "required_fields": [
+        {
+          "name": "id",
+          "conditional": false
+        }
+      ],
       "forbidden_field_names": [
         "A.id",
-        "B.id",
-        "id"
+        "B.id"
       ],
       "required_stages": [
         {
@@ -5823,6 +5551,7 @@
       "syntax_complete": true,
       "semantic_complete": false,
       "expected_codes": [
+        "SPL_AMBIGUOUS_FIELD",
         "SPL_SYNTAX_ERROR",
         "SPL_UNSUPPORTED_SEMANTICS"
       ],
@@ -5838,19 +5567,19 @@
         },
         {
           "original_name": "A.id",
-          "normalized_name": "A.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 56,
           "end": 60
         },
         {
           "original_name": "B.id",
-          "normalized_name": "B.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 61,
           "end": 65
         },
@@ -5864,7 +5593,12 @@
           "end": 77
         }
       ],
-      "fields": [],
+      "fields": [
+        {
+          "name": "id",
+          "conditional": false
+        }
+      ],
       "removed": [],
       "open": true,
       "uncertain": true,
@@ -6487,7 +6221,8 @@
       "syntax_complete": false,
       "semantic_complete": false,
       "required_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
+        "SPL_UNSUPPORTED_SEMANTICS",
+        "SPL_AMBIGUOUS_FIELD"
       ],
       "forbidden_codes": [
         "SPL_SYNTAX_ERROR",
@@ -6507,10 +6242,10 @@
         },
         {
           "original_name": "A.id",
-          "normalized_name": "A.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 38,
           "end": 42,
           "scope_start": 0,
@@ -6518,10 +6253,10 @@
         },
         {
           "original_name": "B.id",
-          "normalized_name": "B.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 43,
           "end": 47,
           "scope_start": 0,
@@ -6564,109 +6299,17 @@
           "original_name": "B",
           "start": 30,
           "end": 31
-        },
-        {
-          "original_name": "A.id",
-          "start": 38,
-          "end": 42,
-          "role": "create"
-        },
-        {
-          "original_name": "A.id",
-          "start": 38,
-          "end": 42,
-          "role": "output"
-        },
-        {
-          "original_name": "A.id",
-          "start": 38,
-          "end": 42,
-          "role": "remove"
-        },
-        {
-          "original_name": "A.id",
-          "start": 38,
-          "end": 42,
-          "role": "rename"
-        },
-        {
-          "original_name": "A.id",
-          "start": 38,
-          "end": 42,
-          "role": "group"
-        },
-        {
-          "original_name": "A.id",
-          "start": 38,
-          "end": 42,
-          "role": "null_test"
-        },
-        {
-          "original_name": "A.id",
-          "start": 38,
-          "end": 42,
-          "binding": "source"
-        },
-        {
-          "original_name": "A.id",
-          "start": 38,
-          "end": 42,
-          "binding": "derived"
-        },
-        {
-          "original_name": "B.id",
-          "start": 43,
-          "end": 47,
-          "role": "create"
-        },
-        {
-          "original_name": "B.id",
-          "start": 43,
-          "end": 47,
-          "role": "output"
-        },
-        {
-          "original_name": "B.id",
-          "start": 43,
-          "end": 47,
-          "role": "remove"
-        },
-        {
-          "original_name": "B.id",
-          "start": 43,
-          "end": 47,
-          "role": "rename"
-        },
-        {
-          "original_name": "B.id",
-          "start": 43,
-          "end": 47,
-          "role": "group"
-        },
-        {
-          "original_name": "B.id",
-          "start": 43,
-          "end": 47,
-          "role": "null_test"
-        },
-        {
-          "original_name": "B.id",
-          "start": 43,
-          "end": 47,
-          "binding": "source"
-        },
-        {
-          "original_name": "B.id",
-          "start": 43,
-          "end": 47,
-          "binding": "derived"
         }
       ],
-      "required_fields": [],
+      "required_fields": [
+        {
+          "name": "id",
+          "conditional": false
+        }
+      ],
       "forbidden_field_names": [
         "A.id",
-        "B.id",
-        "id"
+        "B.id"
       ],
       "required_stages": [
         {
@@ -6711,6 +6354,7 @@
       "syntax_complete": false,
       "semantic_complete": false,
       "expected_codes": [
+        "SPL_AMBIGUOUS_FIELD",
         "SPL_UNSUPPORTED_SEMANTICS"
       ],
       "references": [
@@ -6725,19 +6369,19 @@
         },
         {
           "original_name": "A.id",
-          "normalized_name": "A.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 38,
           "end": 42
         },
         {
           "original_name": "B.id",
-          "normalized_name": "B.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 43,
           "end": 47
         },
@@ -6751,7 +6395,12 @@
           "end": 59
         }
       ],
-      "fields": [],
+      "fields": [
+        {
+          "name": "id",
+          "conditional": false
+        }
+      ],
       "removed": [],
       "open": true,
       "uncertain": true,
@@ -6810,7 +6459,8 @@
       "syntax_complete": false,
       "semantic_complete": false,
       "required_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
+        "SPL_UNSUPPORTED_SEMANTICS",
+        "SPL_AMBIGUOUS_FIELD"
       ],
       "forbidden_codes": [
         "SPL_SYNTAX_ERROR",
@@ -6830,10 +6480,10 @@
         },
         {
           "original_name": "A.id",
-          "normalized_name": "A.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 49,
           "end": 53,
           "scope_start": 0,
@@ -6841,10 +6491,10 @@
         },
         {
           "original_name": "B.id",
-          "normalized_name": "B.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 54,
           "end": 58,
           "scope_start": 0,
@@ -6897,109 +6547,17 @@
           "original_name": "where",
           "start": 43,
           "end": 48
-        },
-        {
-          "original_name": "A.id",
-          "start": 49,
-          "end": 53,
-          "role": "create"
-        },
-        {
-          "original_name": "A.id",
-          "start": 49,
-          "end": 53,
-          "role": "output"
-        },
-        {
-          "original_name": "A.id",
-          "start": 49,
-          "end": 53,
-          "role": "remove"
-        },
-        {
-          "original_name": "A.id",
-          "start": 49,
-          "end": 53,
-          "role": "rename"
-        },
-        {
-          "original_name": "A.id",
-          "start": 49,
-          "end": 53,
-          "role": "group"
-        },
-        {
-          "original_name": "A.id",
-          "start": 49,
-          "end": 53,
-          "role": "null_test"
-        },
-        {
-          "original_name": "A.id",
-          "start": 49,
-          "end": 53,
-          "binding": "source"
-        },
-        {
-          "original_name": "A.id",
-          "start": 49,
-          "end": 53,
-          "binding": "derived"
-        },
-        {
-          "original_name": "B.id",
-          "start": 54,
-          "end": 58,
-          "role": "create"
-        },
-        {
-          "original_name": "B.id",
-          "start": 54,
-          "end": 58,
-          "role": "output"
-        },
-        {
-          "original_name": "B.id",
-          "start": 54,
-          "end": 58,
-          "role": "remove"
-        },
-        {
-          "original_name": "B.id",
-          "start": 54,
-          "end": 58,
-          "role": "rename"
-        },
-        {
-          "original_name": "B.id",
-          "start": 54,
-          "end": 58,
-          "role": "group"
-        },
-        {
-          "original_name": "B.id",
-          "start": 54,
-          "end": 58,
-          "role": "null_test"
-        },
-        {
-          "original_name": "B.id",
-          "start": 54,
-          "end": 58,
-          "binding": "source"
-        },
-        {
-          "original_name": "B.id",
-          "start": 54,
-          "end": 58,
-          "binding": "derived"
         }
       ],
-      "required_fields": [],
+      "required_fields": [
+        {
+          "name": "id",
+          "conditional": false
+        }
+      ],
       "forbidden_field_names": [
         "A.id",
-        "B.id",
-        "id"
+        "B.id"
       ],
       "required_stages": [
         {
@@ -7044,6 +6602,7 @@
       "syntax_complete": false,
       "semantic_complete": false,
       "expected_codes": [
+        "SPL_AMBIGUOUS_FIELD",
         "SPL_UNSUPPORTED_SEMANTICS"
       ],
       "references": [
@@ -7058,19 +6617,19 @@
         },
         {
           "original_name": "A.id",
-          "normalized_name": "A.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 49,
           "end": 53
         },
         {
           "original_name": "B.id",
-          "normalized_name": "B.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 54,
           "end": 58
         },
@@ -7084,7 +6643,12 @@
           "end": 70
         }
       ],
-      "fields": [],
+      "fields": [
+        {
+          "name": "id",
+          "conditional": false
+        }
+      ],
       "removed": [],
       "open": true,
       "uncertain": true,
@@ -7802,7 +7366,7 @@
     "canonical_evidence": "regression_snapshot",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "C16/E.C16 plus ROOT qualified-read ruling: whole decoded alias.field name, read/indeterminate; no root literal-dotted field or unqualified suffix installation and no guessed catalogue/origins. Actual typed right source is independent; merge remains U. Required aliases and integer/enum domains are independent contract checks. Damaged grammar leaves the survivor graph unasserted; held uppercase enum is incomplete, not a definite enum error.",
+      "basis": "C16/E.C16 join qualifier ownership: only aliases declared by the selected join form create qualified field identities; undeclared aliases do not become references or requirements. Actual typed right source is independent; merge remains U. Required aliases and integer/enum domains are independent contract checks. Damaged grammar leaves the survivor graph unasserted; held uppercase enum is incomplete, not a definite enum error.",
       "status": "invalid",
       "syntax_complete": true,
       "semantic_complete": false,
@@ -7824,23 +7388,12 @@
         },
         {
           "original_name": "L.id",
-          "normalized_name": "L.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
           "start": 41,
           "end": 45,
-          "binding": "indeterminate",
-          "scope_start": 0,
-          "scope_end": 63
-        },
-        {
-          "original_name": "R.id",
-          "normalized_name": "R.id",
-          "kind": "field",
-          "role": "read",
-          "start": 46,
-          "end": 50,
-          "binding": "indeterminate",
+          "binding": "source",
           "scope_start": 0,
           "scope_end": 63
         },
@@ -7883,107 +7436,21 @@
           "end": 40
         },
         {
-          "original_name": "L.id",
-          "start": 41,
-          "end": 45,
-          "role": "create"
-        },
-        {
-          "original_name": "L.id",
-          "start": 41,
-          "end": 45,
-          "role": "output"
-        },
-        {
-          "original_name": "L.id",
-          "start": 41,
-          "end": 45,
-          "role": "remove"
-        },
-        {
-          "original_name": "L.id",
-          "start": 41,
-          "end": 45,
-          "role": "rename"
-        },
-        {
-          "original_name": "L.id",
-          "start": 41,
-          "end": 45,
-          "role": "group"
-        },
-        {
-          "original_name": "L.id",
-          "start": 41,
-          "end": 45,
-          "role": "null_test"
-        },
-        {
-          "original_name": "L.id",
-          "start": 41,
-          "end": 45,
-          "binding": "source"
-        },
-        {
-          "original_name": "L.id",
-          "start": 41,
-          "end": 45,
-          "binding": "derived"
-        },
-        {
           "original_name": "R.id",
           "start": 46,
           "end": 50,
-          "role": "create"
-        },
-        {
-          "original_name": "R.id",
-          "start": 46,
-          "end": 50,
-          "role": "output"
-        },
-        {
-          "original_name": "R.id",
-          "start": 46,
-          "end": 50,
-          "role": "remove"
-        },
-        {
-          "original_name": "R.id",
-          "start": 46,
-          "end": 50,
-          "role": "rename"
-        },
-        {
-          "original_name": "R.id",
-          "start": 46,
-          "end": 50,
-          "role": "group"
-        },
-        {
-          "original_name": "R.id",
-          "start": 46,
-          "end": 50,
-          "role": "null_test"
-        },
-        {
-          "original_name": "R.id",
-          "start": 46,
-          "end": 50,
-          "binding": "source"
-        },
-        {
-          "original_name": "R.id",
-          "start": 46,
-          "end": 50,
-          "binding": "derived"
+          "role": "read"
         }
       ],
-      "required_fields": [],
+      "required_fields": [
+        {
+          "name": "id",
+          "conditional": false
+        }
+      ],
       "forbidden_field_names": [
         "L.id",
-        "R.id",
-        "id"
+        "R.id"
       ],
       "required_stages": [
         {
@@ -8043,21 +7510,12 @@
         },
         {
           "original_name": "L.id",
-          "normalized_name": "L.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 41,
           "end": 45
-        },
-        {
-          "original_name": "R.id",
-          "normalized_name": "R.id",
-          "kind": "field",
-          "role": "read",
-          "binding": "indeterminate",
-          "start": 46,
-          "end": 50
         },
         {
           "original_name": "other",
@@ -8069,7 +7527,12 @@
           "end": 62
         }
       ],
-      "fields": [],
+      "fields": [
+        {
+          "name": "id",
+          "conditional": false
+        }
+      ],
       "removed": [],
       "open": true,
       "uncertain": true,
@@ -8125,7 +7588,8 @@
       "syntax_complete": true,
       "semantic_complete": false,
       "required_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
+        "SPL_UNSUPPORTED_SEMANTICS",
+        "SPL_AMBIGUOUS_FIELD"
       ],
       "forbidden_codes": [
         "SPL_SYNTAX_ERROR",
@@ -8145,23 +7609,23 @@
         },
         {
           "original_name": "R.id",
-          "normalized_name": "R.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
           "start": 49,
           "end": 53,
-          "binding": "indeterminate",
+          "binding": "source",
           "scope_start": 0,
           "scope_end": 71
         },
         {
           "original_name": "L.id",
-          "normalized_name": "L.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
           "start": 54,
           "end": 58,
-          "binding": "indeterminate",
+          "binding": "source",
           "scope_start": 0,
           "scope_end": 71
         },
@@ -8212,109 +7676,17 @@
           "original_name": "where",
           "start": 43,
           "end": 48
-        },
-        {
-          "original_name": "R.id",
-          "start": 49,
-          "end": 53,
-          "role": "create"
-        },
-        {
-          "original_name": "R.id",
-          "start": 49,
-          "end": 53,
-          "role": "output"
-        },
-        {
-          "original_name": "R.id",
-          "start": 49,
-          "end": 53,
-          "role": "remove"
-        },
-        {
-          "original_name": "R.id",
-          "start": 49,
-          "end": 53,
-          "role": "rename"
-        },
-        {
-          "original_name": "R.id",
-          "start": 49,
-          "end": 53,
-          "role": "group"
-        },
-        {
-          "original_name": "R.id",
-          "start": 49,
-          "end": 53,
-          "role": "null_test"
-        },
-        {
-          "original_name": "R.id",
-          "start": 49,
-          "end": 53,
-          "binding": "source"
-        },
-        {
-          "original_name": "R.id",
-          "start": 49,
-          "end": 53,
-          "binding": "derived"
-        },
-        {
-          "original_name": "L.id",
-          "start": 54,
-          "end": 58,
-          "role": "create"
-        },
-        {
-          "original_name": "L.id",
-          "start": 54,
-          "end": 58,
-          "role": "output"
-        },
-        {
-          "original_name": "L.id",
-          "start": 54,
-          "end": 58,
-          "role": "remove"
-        },
-        {
-          "original_name": "L.id",
-          "start": 54,
-          "end": 58,
-          "role": "rename"
-        },
-        {
-          "original_name": "L.id",
-          "start": 54,
-          "end": 58,
-          "role": "group"
-        },
-        {
-          "original_name": "L.id",
-          "start": 54,
-          "end": 58,
-          "role": "null_test"
-        },
-        {
-          "original_name": "L.id",
-          "start": 54,
-          "end": 58,
-          "binding": "source"
-        },
-        {
-          "original_name": "L.id",
-          "start": 54,
-          "end": 58,
-          "binding": "derived"
         }
       ],
-      "required_fields": [],
+      "required_fields": [
+        {
+          "name": "id",
+          "conditional": false
+        }
+      ],
       "forbidden_field_names": [
         "L.id",
-        "R.id",
-        "id"
+        "R.id"
       ],
       "required_stages": [
         {
@@ -8341,7 +7713,12 @@
       ],
       "max_scopes": 2,
       "final_state": {
-        "fields": [],
+        "fields": [
+          {
+            "name": "id",
+            "conditional": false
+          }
+        ],
         "removed": [],
         "open": true,
         "uncertain": true
@@ -8364,6 +7741,7 @@
       "syntax_complete": true,
       "semantic_complete": false,
       "expected_codes": [
+        "SPL_AMBIGUOUS_FIELD",
         "SPL_UNSUPPORTED_SEMANTICS"
       ],
       "references": [
@@ -8378,19 +7756,19 @@
         },
         {
           "original_name": "R.id",
-          "normalized_name": "R.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 49,
           "end": 53
         },
         {
           "original_name": "L.id",
-          "normalized_name": "L.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 54,
           "end": 58
         },
@@ -8404,7 +7782,12 @@
           "end": 70
         }
       ],
-      "fields": [],
+      "fields": [
+        {
+          "name": "id",
+          "conditional": false
+        }
+      ],
       "removed": [],
       "open": true,
       "uncertain": true,
@@ -8455,7 +7838,7 @@
     "canonical_evidence": "regression_snapshot",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "C16/E.C16 plus ROOT qualified-read ruling: whole decoded alias.field name, read/indeterminate; no root literal-dotted field or unqualified suffix installation and no guessed catalogue/origins. Actual typed right source is independent; merge remains U. Required aliases and integer/enum domains are independent contract checks. Damaged grammar leaves the survivor graph unasserted; held uppercase enum is incomplete, not a definite enum error.",
+      "basis": "C16/E.C16 join qualifier ownership: only aliases declared by the selected join form create qualified field identities; undeclared aliases do not become references or requirements. Actual typed right source is independent; merge remains U. Required aliases and integer/enum domains are independent contract checks. Damaged grammar leaves the survivor graph unasserted; held uppercase enum is incomplete, not a definite enum error.",
       "status": "invalid",
       "syntax_complete": true,
       "semantic_complete": false,
@@ -8476,24 +7859,13 @@
           "scope_end": 63
         },
         {
-          "original_name": "R.id",
-          "normalized_name": "R.id",
-          "kind": "field",
-          "role": "read",
-          "start": 41,
-          "end": 45,
-          "binding": "indeterminate",
-          "scope_start": 0,
-          "scope_end": 63
-        },
-        {
           "original_name": "L.id",
-          "normalized_name": "L.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
           "start": 46,
           "end": 50,
-          "binding": "indeterminate",
+          "binding": "source",
           "scope_start": 0,
           "scope_end": 63
         },
@@ -8539,104 +7911,18 @@
           "original_name": "R.id",
           "start": 41,
           "end": 45,
-          "role": "create"
-        },
-        {
-          "original_name": "R.id",
-          "start": 41,
-          "end": 45,
-          "role": "output"
-        },
-        {
-          "original_name": "R.id",
-          "start": 41,
-          "end": 45,
-          "role": "remove"
-        },
-        {
-          "original_name": "R.id",
-          "start": 41,
-          "end": 45,
-          "role": "rename"
-        },
-        {
-          "original_name": "R.id",
-          "start": 41,
-          "end": 45,
-          "role": "group"
-        },
-        {
-          "original_name": "R.id",
-          "start": 41,
-          "end": 45,
-          "role": "null_test"
-        },
-        {
-          "original_name": "R.id",
-          "start": 41,
-          "end": 45,
-          "binding": "source"
-        },
-        {
-          "original_name": "R.id",
-          "start": 41,
-          "end": 45,
-          "binding": "derived"
-        },
-        {
-          "original_name": "L.id",
-          "start": 46,
-          "end": 50,
-          "role": "create"
-        },
-        {
-          "original_name": "L.id",
-          "start": 46,
-          "end": 50,
-          "role": "output"
-        },
-        {
-          "original_name": "L.id",
-          "start": 46,
-          "end": 50,
-          "role": "remove"
-        },
-        {
-          "original_name": "L.id",
-          "start": 46,
-          "end": 50,
-          "role": "rename"
-        },
-        {
-          "original_name": "L.id",
-          "start": 46,
-          "end": 50,
-          "role": "group"
-        },
-        {
-          "original_name": "L.id",
-          "start": 46,
-          "end": 50,
-          "role": "null_test"
-        },
-        {
-          "original_name": "L.id",
-          "start": 46,
-          "end": 50,
-          "binding": "source"
-        },
-        {
-          "original_name": "L.id",
-          "start": 46,
-          "end": 50,
-          "binding": "derived"
+          "role": "read"
         }
       ],
-      "required_fields": [],
+      "required_fields": [
+        {
+          "name": "id",
+          "conditional": false
+        }
+      ],
       "forbidden_field_names": [
         "L.id",
-        "R.id",
-        "id"
+        "R.id"
       ],
       "required_stages": [
         {
@@ -8695,20 +7981,11 @@
           "end": 9
         },
         {
-          "original_name": "R.id",
-          "normalized_name": "R.id",
-          "kind": "field",
-          "role": "read",
-          "binding": "indeterminate",
-          "start": 41,
-          "end": 45
-        },
-        {
           "original_name": "L.id",
-          "normalized_name": "L.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 46,
           "end": 50
         },
@@ -8722,7 +7999,12 @@
           "end": 62
         }
       ],
-      "fields": [],
+      "fields": [
+        {
+          "name": "id",
+          "conditional": false
+        }
+      ],
       "removed": [],
       "open": true,
       "uncertain": true,
@@ -8778,7 +8060,8 @@
       "syntax_complete": true,
       "semantic_complete": false,
       "required_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
+        "SPL_UNSUPPORTED_SEMANTICS",
+        "SPL_AMBIGUOUS_FIELD"
       ],
       "forbidden_codes": [
         "SPL_SYNTAX_ERROR",
@@ -8798,23 +8081,23 @@
         },
         {
           "original_name": "L.id",
-          "normalized_name": "L.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
           "start": 48,
           "end": 52,
-          "binding": "indeterminate",
+          "binding": "source",
           "scope_start": 0,
           "scope_end": 70
         },
         {
           "original_name": "R.id",
-          "normalized_name": "R.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
           "start": 53,
           "end": 57,
-          "binding": "indeterminate",
+          "binding": "source",
           "scope_start": 0,
           "scope_end": 70
         },
@@ -8865,109 +8148,17 @@
           "original_name": "where",
           "start": 42,
           "end": 47
-        },
-        {
-          "original_name": "L.id",
-          "start": 48,
-          "end": 52,
-          "role": "create"
-        },
-        {
-          "original_name": "L.id",
-          "start": 48,
-          "end": 52,
-          "role": "output"
-        },
-        {
-          "original_name": "L.id",
-          "start": 48,
-          "end": 52,
-          "role": "remove"
-        },
-        {
-          "original_name": "L.id",
-          "start": 48,
-          "end": 52,
-          "role": "rename"
-        },
-        {
-          "original_name": "L.id",
-          "start": 48,
-          "end": 52,
-          "role": "group"
-        },
-        {
-          "original_name": "L.id",
-          "start": 48,
-          "end": 52,
-          "role": "null_test"
-        },
-        {
-          "original_name": "L.id",
-          "start": 48,
-          "end": 52,
-          "binding": "source"
-        },
-        {
-          "original_name": "L.id",
-          "start": 48,
-          "end": 52,
-          "binding": "derived"
-        },
-        {
-          "original_name": "R.id",
-          "start": 53,
-          "end": 57,
-          "role": "create"
-        },
-        {
-          "original_name": "R.id",
-          "start": 53,
-          "end": 57,
-          "role": "output"
-        },
-        {
-          "original_name": "R.id",
-          "start": 53,
-          "end": 57,
-          "role": "remove"
-        },
-        {
-          "original_name": "R.id",
-          "start": 53,
-          "end": 57,
-          "role": "rename"
-        },
-        {
-          "original_name": "R.id",
-          "start": 53,
-          "end": 57,
-          "role": "group"
-        },
-        {
-          "original_name": "R.id",
-          "start": 53,
-          "end": 57,
-          "role": "null_test"
-        },
-        {
-          "original_name": "R.id",
-          "start": 53,
-          "end": 57,
-          "binding": "source"
-        },
-        {
-          "original_name": "R.id",
-          "start": 53,
-          "end": 57,
-          "binding": "derived"
         }
       ],
-      "required_fields": [],
+      "required_fields": [
+        {
+          "name": "id",
+          "conditional": false
+        }
+      ],
       "forbidden_field_names": [
         "L.id",
-        "R.id",
-        "id"
+        "R.id"
       ],
       "required_stages": [
         {
@@ -8994,7 +8185,12 @@
       ],
       "max_scopes": 2,
       "final_state": {
-        "fields": [],
+        "fields": [
+          {
+            "name": "id",
+            "conditional": false
+          }
+        ],
         "removed": [],
         "open": true,
         "uncertain": true
@@ -9017,6 +8213,7 @@
       "syntax_complete": true,
       "semantic_complete": false,
       "expected_codes": [
+        "SPL_AMBIGUOUS_FIELD",
         "SPL_UNSUPPORTED_SEMANTICS"
       ],
       "references": [
@@ -9031,19 +8228,19 @@
         },
         {
           "original_name": "L.id",
-          "normalized_name": "L.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 48,
           "end": 52
         },
         {
           "original_name": "R.id",
-          "normalized_name": "R.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 53,
           "end": 57
         },
@@ -9057,7 +8254,12 @@
           "end": 69
         }
       ],
-      "fields": [],
+      "fields": [
+        {
+          "name": "id",
+          "conditional": false
+        }
+      ],
       "removed": [],
       "open": true,
       "uncertain": true,
@@ -9108,7 +8310,7 @@
     "canonical_evidence": "regression_snapshot",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "C16/E.C16 plus ROOT qualified-read ruling: whole decoded alias.field name, read/indeterminate; no root literal-dotted field or unqualified suffix installation and no guessed catalogue/origins. Actual typed right source is independent; merge remains U. Required aliases and integer/enum domains are independent contract checks. Damaged grammar leaves the survivor graph unasserted; held uppercase enum is incomplete, not a definite enum error.",
+      "basis": "C16/E.C16 join qualifier ownership: only aliases declared by the selected join form create qualified field identities; undeclared aliases do not become references or requirements. Actual typed right source is independent; merge remains U. Required aliases and integer/enum domains are independent contract checks. Damaged grammar leaves the survivor graph unasserted; held uppercase enum is incomplete, not a definite enum error.",
       "status": "invalid",
       "syntax_complete": true,
       "semantic_complete": false,
@@ -9130,23 +8332,12 @@
         },
         {
           "original_name": "L.id",
-          "normalized_name": "L.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
           "start": 40,
           "end": 44,
-          "binding": "indeterminate",
-          "scope_start": 0,
-          "scope_end": 62
-        },
-        {
-          "original_name": "R.id",
-          "normalized_name": "R.id",
-          "kind": "field",
-          "role": "read",
-          "start": 45,
-          "end": 49,
-          "binding": "indeterminate",
+          "binding": "source",
           "scope_start": 0,
           "scope_end": 62
         },
@@ -9189,107 +8380,21 @@
           "end": 39
         },
         {
-          "original_name": "L.id",
-          "start": 40,
-          "end": 44,
-          "role": "create"
-        },
-        {
-          "original_name": "L.id",
-          "start": 40,
-          "end": 44,
-          "role": "output"
-        },
-        {
-          "original_name": "L.id",
-          "start": 40,
-          "end": 44,
-          "role": "remove"
-        },
-        {
-          "original_name": "L.id",
-          "start": 40,
-          "end": 44,
-          "role": "rename"
-        },
-        {
-          "original_name": "L.id",
-          "start": 40,
-          "end": 44,
-          "role": "group"
-        },
-        {
-          "original_name": "L.id",
-          "start": 40,
-          "end": 44,
-          "role": "null_test"
-        },
-        {
-          "original_name": "L.id",
-          "start": 40,
-          "end": 44,
-          "binding": "source"
-        },
-        {
-          "original_name": "L.id",
-          "start": 40,
-          "end": 44,
-          "binding": "derived"
-        },
-        {
           "original_name": "R.id",
           "start": 45,
           "end": 49,
-          "role": "create"
-        },
-        {
-          "original_name": "R.id",
-          "start": 45,
-          "end": 49,
-          "role": "output"
-        },
-        {
-          "original_name": "R.id",
-          "start": 45,
-          "end": 49,
-          "role": "remove"
-        },
-        {
-          "original_name": "R.id",
-          "start": 45,
-          "end": 49,
-          "role": "rename"
-        },
-        {
-          "original_name": "R.id",
-          "start": 45,
-          "end": 49,
-          "role": "group"
-        },
-        {
-          "original_name": "R.id",
-          "start": 45,
-          "end": 49,
-          "role": "null_test"
-        },
-        {
-          "original_name": "R.id",
-          "start": 45,
-          "end": 49,
-          "binding": "source"
-        },
-        {
-          "original_name": "R.id",
-          "start": 45,
-          "end": 49,
-          "binding": "derived"
+          "role": "read"
         }
       ],
-      "required_fields": [],
+      "required_fields": [
+        {
+          "name": "id",
+          "conditional": false
+        }
+      ],
       "forbidden_field_names": [
         "L.id",
-        "R.id",
-        "id"
+        "R.id"
       ],
       "required_stages": [
         {
@@ -9349,21 +8454,12 @@
         },
         {
           "original_name": "L.id",
-          "normalized_name": "L.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 40,
           "end": 44
-        },
-        {
-          "original_name": "R.id",
-          "normalized_name": "R.id",
-          "kind": "field",
-          "role": "read",
-          "binding": "indeterminate",
-          "start": 45,
-          "end": 49
         },
         {
           "original_name": "other",
@@ -9375,7 +8471,12 @@
           "end": 61
         }
       ],
-      "fields": [],
+      "fields": [
+        {
+          "name": "id",
+          "conditional": false
+        }
+      ],
       "removed": [],
       "open": true,
       "uncertain": true,
@@ -9431,7 +8532,8 @@
       "syntax_complete": true,
       "semantic_complete": false,
       "required_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
+        "SPL_UNSUPPORTED_SEMANTICS",
+        "SPL_AMBIGUOUS_FIELD"
       ],
       "forbidden_codes": [
         "SPL_SYNTAX_ERROR",
@@ -9451,23 +8553,23 @@
         },
         {
           "original_name": "R.id",
-          "normalized_name": "R.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
           "start": 48,
           "end": 52,
-          "binding": "indeterminate",
+          "binding": "source",
           "scope_start": 0,
           "scope_end": 70
         },
         {
           "original_name": "L.id",
-          "normalized_name": "L.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
           "start": 53,
           "end": 57,
-          "binding": "indeterminate",
+          "binding": "source",
           "scope_start": 0,
           "scope_end": 70
         },
@@ -9518,109 +8620,17 @@
           "original_name": "where",
           "start": 42,
           "end": 47
-        },
-        {
-          "original_name": "R.id",
-          "start": 48,
-          "end": 52,
-          "role": "create"
-        },
-        {
-          "original_name": "R.id",
-          "start": 48,
-          "end": 52,
-          "role": "output"
-        },
-        {
-          "original_name": "R.id",
-          "start": 48,
-          "end": 52,
-          "role": "remove"
-        },
-        {
-          "original_name": "R.id",
-          "start": 48,
-          "end": 52,
-          "role": "rename"
-        },
-        {
-          "original_name": "R.id",
-          "start": 48,
-          "end": 52,
-          "role": "group"
-        },
-        {
-          "original_name": "R.id",
-          "start": 48,
-          "end": 52,
-          "role": "null_test"
-        },
-        {
-          "original_name": "R.id",
-          "start": 48,
-          "end": 52,
-          "binding": "source"
-        },
-        {
-          "original_name": "R.id",
-          "start": 48,
-          "end": 52,
-          "binding": "derived"
-        },
-        {
-          "original_name": "L.id",
-          "start": 53,
-          "end": 57,
-          "role": "create"
-        },
-        {
-          "original_name": "L.id",
-          "start": 53,
-          "end": 57,
-          "role": "output"
-        },
-        {
-          "original_name": "L.id",
-          "start": 53,
-          "end": 57,
-          "role": "remove"
-        },
-        {
-          "original_name": "L.id",
-          "start": 53,
-          "end": 57,
-          "role": "rename"
-        },
-        {
-          "original_name": "L.id",
-          "start": 53,
-          "end": 57,
-          "role": "group"
-        },
-        {
-          "original_name": "L.id",
-          "start": 53,
-          "end": 57,
-          "role": "null_test"
-        },
-        {
-          "original_name": "L.id",
-          "start": 53,
-          "end": 57,
-          "binding": "source"
-        },
-        {
-          "original_name": "L.id",
-          "start": 53,
-          "end": 57,
-          "binding": "derived"
         }
       ],
-      "required_fields": [],
+      "required_fields": [
+        {
+          "name": "id",
+          "conditional": false
+        }
+      ],
       "forbidden_field_names": [
         "L.id",
-        "R.id",
-        "id"
+        "R.id"
       ],
       "required_stages": [
         {
@@ -9647,7 +8657,12 @@
       ],
       "max_scopes": 2,
       "final_state": {
-        "fields": [],
+        "fields": [
+          {
+            "name": "id",
+            "conditional": false
+          }
+        ],
         "removed": [],
         "open": true,
         "uncertain": true
@@ -9670,6 +8685,7 @@
       "syntax_complete": true,
       "semantic_complete": false,
       "expected_codes": [
+        "SPL_AMBIGUOUS_FIELD",
         "SPL_UNSUPPORTED_SEMANTICS"
       ],
       "references": [
@@ -9684,19 +8700,19 @@
         },
         {
           "original_name": "R.id",
-          "normalized_name": "R.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 48,
           "end": 52
         },
         {
           "original_name": "L.id",
-          "normalized_name": "L.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 53,
           "end": 57
         },
@@ -9710,7 +8726,12 @@
           "end": 69
         }
       ],
-      "fields": [],
+      "fields": [
+        {
+          "name": "id",
+          "conditional": false
+        }
+      ],
       "removed": [],
       "open": true,
       "uncertain": true,
@@ -9761,7 +8782,7 @@
     "canonical_evidence": "regression_snapshot",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "C16/E.C16 plus ROOT qualified-read ruling: whole decoded alias.field name, read/indeterminate; no root literal-dotted field or unqualified suffix installation and no guessed catalogue/origins. Actual typed right source is independent; merge remains U. Required aliases and integer/enum domains are independent contract checks. Damaged grammar leaves the survivor graph unasserted; held uppercase enum is incomplete, not a definite enum error.",
+      "basis": "C16/E.C16 join qualifier ownership: only aliases declared by the selected join form create qualified field identities; undeclared aliases do not become references or requirements. Actual typed right source is independent; merge remains U. Required aliases and integer/enum domains are independent contract checks. Damaged grammar leaves the survivor graph unasserted; held uppercase enum is incomplete, not a definite enum error.",
       "status": "invalid",
       "syntax_complete": true,
       "semantic_complete": false,
@@ -9782,24 +8803,13 @@
           "scope_end": 62
         },
         {
-          "original_name": "R.id",
-          "normalized_name": "R.id",
-          "kind": "field",
-          "role": "read",
-          "start": 40,
-          "end": 44,
-          "binding": "indeterminate",
-          "scope_start": 0,
-          "scope_end": 62
-        },
-        {
           "original_name": "L.id",
-          "normalized_name": "L.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
           "start": 45,
           "end": 49,
-          "binding": "indeterminate",
+          "binding": "source",
           "scope_start": 0,
           "scope_end": 62
         },
@@ -9845,104 +8855,18 @@
           "original_name": "R.id",
           "start": 40,
           "end": 44,
-          "role": "create"
-        },
-        {
-          "original_name": "R.id",
-          "start": 40,
-          "end": 44,
-          "role": "output"
-        },
-        {
-          "original_name": "R.id",
-          "start": 40,
-          "end": 44,
-          "role": "remove"
-        },
-        {
-          "original_name": "R.id",
-          "start": 40,
-          "end": 44,
-          "role": "rename"
-        },
-        {
-          "original_name": "R.id",
-          "start": 40,
-          "end": 44,
-          "role": "group"
-        },
-        {
-          "original_name": "R.id",
-          "start": 40,
-          "end": 44,
-          "role": "null_test"
-        },
-        {
-          "original_name": "R.id",
-          "start": 40,
-          "end": 44,
-          "binding": "source"
-        },
-        {
-          "original_name": "R.id",
-          "start": 40,
-          "end": 44,
-          "binding": "derived"
-        },
-        {
-          "original_name": "L.id",
-          "start": 45,
-          "end": 49,
-          "role": "create"
-        },
-        {
-          "original_name": "L.id",
-          "start": 45,
-          "end": 49,
-          "role": "output"
-        },
-        {
-          "original_name": "L.id",
-          "start": 45,
-          "end": 49,
-          "role": "remove"
-        },
-        {
-          "original_name": "L.id",
-          "start": 45,
-          "end": 49,
-          "role": "rename"
-        },
-        {
-          "original_name": "L.id",
-          "start": 45,
-          "end": 49,
-          "role": "group"
-        },
-        {
-          "original_name": "L.id",
-          "start": 45,
-          "end": 49,
-          "role": "null_test"
-        },
-        {
-          "original_name": "L.id",
-          "start": 45,
-          "end": 49,
-          "binding": "source"
-        },
-        {
-          "original_name": "L.id",
-          "start": 45,
-          "end": 49,
-          "binding": "derived"
+          "role": "read"
         }
       ],
-      "required_fields": [],
+      "required_fields": [
+        {
+          "name": "id",
+          "conditional": false
+        }
+      ],
       "forbidden_field_names": [
         "L.id",
-        "R.id",
-        "id"
+        "R.id"
       ],
       "required_stages": [
         {
@@ -10001,20 +8925,11 @@
           "end": 9
         },
         {
-          "original_name": "R.id",
-          "normalized_name": "R.id",
-          "kind": "field",
-          "role": "read",
-          "binding": "indeterminate",
-          "start": 40,
-          "end": 44
-        },
-        {
           "original_name": "L.id",
-          "normalized_name": "L.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 45,
           "end": 49
         },
@@ -10028,7 +8943,12 @@
           "end": 61
         }
       ],
-      "fields": [],
+      "fields": [
+        {
+          "name": "id",
+          "conditional": false
+        }
+      ],
       "removed": [],
       "open": true,
       "uncertain": true,
@@ -10084,7 +9004,8 @@
       "syntax_complete": true,
       "semantic_complete": false,
       "required_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
+        "SPL_UNSUPPORTED_SEMANTICS",
+        "SPL_AMBIGUOUS_FIELD"
       ],
       "forbidden_codes": [
         "SPL_SYNTAX_ERROR",
@@ -10104,23 +9025,23 @@
         },
         {
           "original_name": "L.id",
-          "normalized_name": "L.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
           "start": 49,
           "end": 53,
-          "binding": "indeterminate",
+          "binding": "source",
           "scope_start": 0,
           "scope_end": 71
         },
         {
           "original_name": "R.id",
-          "normalized_name": "R.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
           "start": 54,
           "end": 58,
-          "binding": "indeterminate",
+          "binding": "source",
           "scope_start": 0,
           "scope_end": 71
         },
@@ -10171,109 +9092,17 @@
           "original_name": "where",
           "start": 43,
           "end": 48
-        },
-        {
-          "original_name": "L.id",
-          "start": 49,
-          "end": 53,
-          "role": "create"
-        },
-        {
-          "original_name": "L.id",
-          "start": 49,
-          "end": 53,
-          "role": "output"
-        },
-        {
-          "original_name": "L.id",
-          "start": 49,
-          "end": 53,
-          "role": "remove"
-        },
-        {
-          "original_name": "L.id",
-          "start": 49,
-          "end": 53,
-          "role": "rename"
-        },
-        {
-          "original_name": "L.id",
-          "start": 49,
-          "end": 53,
-          "role": "group"
-        },
-        {
-          "original_name": "L.id",
-          "start": 49,
-          "end": 53,
-          "role": "null_test"
-        },
-        {
-          "original_name": "L.id",
-          "start": 49,
-          "end": 53,
-          "binding": "source"
-        },
-        {
-          "original_name": "L.id",
-          "start": 49,
-          "end": 53,
-          "binding": "derived"
-        },
-        {
-          "original_name": "R.id",
-          "start": 54,
-          "end": 58,
-          "role": "create"
-        },
-        {
-          "original_name": "R.id",
-          "start": 54,
-          "end": 58,
-          "role": "output"
-        },
-        {
-          "original_name": "R.id",
-          "start": 54,
-          "end": 58,
-          "role": "remove"
-        },
-        {
-          "original_name": "R.id",
-          "start": 54,
-          "end": 58,
-          "role": "rename"
-        },
-        {
-          "original_name": "R.id",
-          "start": 54,
-          "end": 58,
-          "role": "group"
-        },
-        {
-          "original_name": "R.id",
-          "start": 54,
-          "end": 58,
-          "role": "null_test"
-        },
-        {
-          "original_name": "R.id",
-          "start": 54,
-          "end": 58,
-          "binding": "source"
-        },
-        {
-          "original_name": "R.id",
-          "start": 54,
-          "end": 58,
-          "binding": "derived"
         }
       ],
-      "required_fields": [],
+      "required_fields": [
+        {
+          "name": "id",
+          "conditional": false
+        }
+      ],
       "forbidden_field_names": [
         "L.id",
-        "R.id",
-        "id"
+        "R.id"
       ],
       "required_stages": [
         {
@@ -10300,7 +9129,12 @@
       ],
       "max_scopes": 2,
       "final_state": {
-        "fields": [],
+        "fields": [
+          {
+            "name": "id",
+            "conditional": false
+          }
+        ],
         "removed": [],
         "open": true,
         "uncertain": true
@@ -10323,6 +9157,7 @@
       "syntax_complete": true,
       "semantic_complete": false,
       "expected_codes": [
+        "SPL_AMBIGUOUS_FIELD",
         "SPL_UNSUPPORTED_SEMANTICS"
       ],
       "references": [
@@ -10337,19 +9172,19 @@
         },
         {
           "original_name": "L.id",
-          "normalized_name": "L.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 49,
           "end": 53
         },
         {
           "original_name": "R.id",
-          "normalized_name": "R.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 54,
           "end": 58
         },
@@ -10363,7 +9198,12 @@
           "end": 70
         }
       ],
-      "fields": [],
+      "fields": [
+        {
+          "name": "id",
+          "conditional": false
+        }
+      ],
       "removed": [],
       "open": true,
       "uncertain": true,
@@ -10414,7 +9254,7 @@
     "canonical_evidence": "regression_snapshot",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "C16/E.C16 plus ROOT qualified-read ruling: whole decoded alias.field name, read/indeterminate; no root literal-dotted field or unqualified suffix installation and no guessed catalogue/origins. Actual typed right source is independent; merge remains U. Required aliases and integer/enum domains are independent contract checks. Damaged grammar leaves the survivor graph unasserted; held uppercase enum is incomplete, not a definite enum error.",
+      "basis": "C16/E.C16 join qualifier ownership: only aliases declared by the selected join form create qualified field identities; undeclared aliases do not become references or requirements. Actual typed right source is independent; merge remains U. Required aliases and integer/enum domains are independent contract checks. Damaged grammar leaves the survivor graph unasserted; held uppercase enum is incomplete, not a definite enum error.",
       "status": "invalid",
       "syntax_complete": true,
       "semantic_complete": false,
@@ -10436,23 +9276,12 @@
         },
         {
           "original_name": "L.id",
-          "normalized_name": "L.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
           "start": 41,
           "end": 45,
-          "binding": "indeterminate",
-          "scope_start": 0,
-          "scope_end": 63
-        },
-        {
-          "original_name": "R.id",
-          "normalized_name": "R.id",
-          "kind": "field",
-          "role": "read",
-          "start": 46,
-          "end": 50,
-          "binding": "indeterminate",
+          "binding": "source",
           "scope_start": 0,
           "scope_end": 63
         },
@@ -10495,107 +9324,21 @@
           "end": 40
         },
         {
-          "original_name": "L.id",
-          "start": 41,
-          "end": 45,
-          "role": "create"
-        },
-        {
-          "original_name": "L.id",
-          "start": 41,
-          "end": 45,
-          "role": "output"
-        },
-        {
-          "original_name": "L.id",
-          "start": 41,
-          "end": 45,
-          "role": "remove"
-        },
-        {
-          "original_name": "L.id",
-          "start": 41,
-          "end": 45,
-          "role": "rename"
-        },
-        {
-          "original_name": "L.id",
-          "start": 41,
-          "end": 45,
-          "role": "group"
-        },
-        {
-          "original_name": "L.id",
-          "start": 41,
-          "end": 45,
-          "role": "null_test"
-        },
-        {
-          "original_name": "L.id",
-          "start": 41,
-          "end": 45,
-          "binding": "source"
-        },
-        {
-          "original_name": "L.id",
-          "start": 41,
-          "end": 45,
-          "binding": "derived"
-        },
-        {
           "original_name": "R.id",
           "start": 46,
           "end": 50,
-          "role": "create"
-        },
-        {
-          "original_name": "R.id",
-          "start": 46,
-          "end": 50,
-          "role": "output"
-        },
-        {
-          "original_name": "R.id",
-          "start": 46,
-          "end": 50,
-          "role": "remove"
-        },
-        {
-          "original_name": "R.id",
-          "start": 46,
-          "end": 50,
-          "role": "rename"
-        },
-        {
-          "original_name": "R.id",
-          "start": 46,
-          "end": 50,
-          "role": "group"
-        },
-        {
-          "original_name": "R.id",
-          "start": 46,
-          "end": 50,
-          "role": "null_test"
-        },
-        {
-          "original_name": "R.id",
-          "start": 46,
-          "end": 50,
-          "binding": "source"
-        },
-        {
-          "original_name": "R.id",
-          "start": 46,
-          "end": 50,
-          "binding": "derived"
+          "role": "read"
         }
       ],
-      "required_fields": [],
+      "required_fields": [
+        {
+          "name": "id",
+          "conditional": false
+        }
+      ],
       "forbidden_field_names": [
         "L.id",
-        "R.id",
-        "id"
+        "R.id"
       ],
       "required_stages": [
         {
@@ -10655,21 +9398,12 @@
         },
         {
           "original_name": "L.id",
-          "normalized_name": "L.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 41,
           "end": 45
-        },
-        {
-          "original_name": "R.id",
-          "normalized_name": "R.id",
-          "kind": "field",
-          "role": "read",
-          "binding": "indeterminate",
-          "start": 46,
-          "end": 50
         },
         {
           "original_name": "other",
@@ -10681,7 +9415,12 @@
           "end": 62
         }
       ],
-      "fields": [],
+      "fields": [
+        {
+          "name": "id",
+          "conditional": false
+        }
+      ],
       "removed": [],
       "open": true,
       "uncertain": true,
@@ -10737,7 +9476,8 @@
       "syntax_complete": true,
       "semantic_complete": false,
       "required_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
+        "SPL_UNSUPPORTED_SEMANTICS",
+        "SPL_AMBIGUOUS_FIELD"
       ],
       "forbidden_codes": [
         "SPL_SYNTAX_ERROR",
@@ -10757,23 +9497,23 @@
         },
         {
           "original_name": "R.id",
-          "normalized_name": "R.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
           "start": 49,
           "end": 53,
-          "binding": "indeterminate",
+          "binding": "source",
           "scope_start": 0,
           "scope_end": 71
         },
         {
           "original_name": "L.id",
-          "normalized_name": "L.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
           "start": 54,
           "end": 58,
-          "binding": "indeterminate",
+          "binding": "source",
           "scope_start": 0,
           "scope_end": 71
         },
@@ -10824,109 +9564,17 @@
           "original_name": "where",
           "start": 43,
           "end": 48
-        },
-        {
-          "original_name": "R.id",
-          "start": 49,
-          "end": 53,
-          "role": "create"
-        },
-        {
-          "original_name": "R.id",
-          "start": 49,
-          "end": 53,
-          "role": "output"
-        },
-        {
-          "original_name": "R.id",
-          "start": 49,
-          "end": 53,
-          "role": "remove"
-        },
-        {
-          "original_name": "R.id",
-          "start": 49,
-          "end": 53,
-          "role": "rename"
-        },
-        {
-          "original_name": "R.id",
-          "start": 49,
-          "end": 53,
-          "role": "group"
-        },
-        {
-          "original_name": "R.id",
-          "start": 49,
-          "end": 53,
-          "role": "null_test"
-        },
-        {
-          "original_name": "R.id",
-          "start": 49,
-          "end": 53,
-          "binding": "source"
-        },
-        {
-          "original_name": "R.id",
-          "start": 49,
-          "end": 53,
-          "binding": "derived"
-        },
-        {
-          "original_name": "L.id",
-          "start": 54,
-          "end": 58,
-          "role": "create"
-        },
-        {
-          "original_name": "L.id",
-          "start": 54,
-          "end": 58,
-          "role": "output"
-        },
-        {
-          "original_name": "L.id",
-          "start": 54,
-          "end": 58,
-          "role": "remove"
-        },
-        {
-          "original_name": "L.id",
-          "start": 54,
-          "end": 58,
-          "role": "rename"
-        },
-        {
-          "original_name": "L.id",
-          "start": 54,
-          "end": 58,
-          "role": "group"
-        },
-        {
-          "original_name": "L.id",
-          "start": 54,
-          "end": 58,
-          "role": "null_test"
-        },
-        {
-          "original_name": "L.id",
-          "start": 54,
-          "end": 58,
-          "binding": "source"
-        },
-        {
-          "original_name": "L.id",
-          "start": 54,
-          "end": 58,
-          "binding": "derived"
         }
       ],
-      "required_fields": [],
+      "required_fields": [
+        {
+          "name": "id",
+          "conditional": false
+        }
+      ],
       "forbidden_field_names": [
         "L.id",
-        "R.id",
-        "id"
+        "R.id"
       ],
       "required_stages": [
         {
@@ -10953,7 +9601,12 @@
       ],
       "max_scopes": 2,
       "final_state": {
-        "fields": [],
+        "fields": [
+          {
+            "name": "id",
+            "conditional": false
+          }
+        ],
         "removed": [],
         "open": true,
         "uncertain": true
@@ -10976,6 +9629,7 @@
       "syntax_complete": true,
       "semantic_complete": false,
       "expected_codes": [
+        "SPL_AMBIGUOUS_FIELD",
         "SPL_UNSUPPORTED_SEMANTICS"
       ],
       "references": [
@@ -10990,19 +9644,19 @@
         },
         {
           "original_name": "R.id",
-          "normalized_name": "R.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 49,
           "end": 53
         },
         {
           "original_name": "L.id",
-          "normalized_name": "L.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 54,
           "end": 58
         },
@@ -11016,7 +9670,12 @@
           "end": 70
         }
       ],
-      "fields": [],
+      "fields": [
+        {
+          "name": "id",
+          "conditional": false
+        }
+      ],
       "removed": [],
       "open": true,
       "uncertain": true,
@@ -11067,7 +9726,7 @@
     "canonical_evidence": "regression_snapshot",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "C16/E.C16 plus ROOT qualified-read ruling: whole decoded alias.field name, read/indeterminate; no root literal-dotted field or unqualified suffix installation and no guessed catalogue/origins. Actual typed right source is independent; merge remains U. Required aliases and integer/enum domains are independent contract checks. Damaged grammar leaves the survivor graph unasserted; held uppercase enum is incomplete, not a definite enum error.",
+      "basis": "C16/E.C16 join qualifier ownership: only aliases declared by the selected join form create qualified field identities; undeclared aliases do not become references or requirements. Actual typed right source is independent; merge remains U. Required aliases and integer/enum domains are independent contract checks. Damaged grammar leaves the survivor graph unasserted; held uppercase enum is incomplete, not a definite enum error.",
       "status": "invalid",
       "syntax_complete": true,
       "semantic_complete": false,
@@ -11088,24 +9747,13 @@
           "scope_end": 63
         },
         {
-          "original_name": "R.id",
-          "normalized_name": "R.id",
-          "kind": "field",
-          "role": "read",
-          "start": 41,
-          "end": 45,
-          "binding": "indeterminate",
-          "scope_start": 0,
-          "scope_end": 63
-        },
-        {
           "original_name": "L.id",
-          "normalized_name": "L.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
           "start": 46,
           "end": 50,
-          "binding": "indeterminate",
+          "binding": "source",
           "scope_start": 0,
           "scope_end": 63
         },
@@ -11151,104 +9799,18 @@
           "original_name": "R.id",
           "start": 41,
           "end": 45,
-          "role": "create"
-        },
-        {
-          "original_name": "R.id",
-          "start": 41,
-          "end": 45,
-          "role": "output"
-        },
-        {
-          "original_name": "R.id",
-          "start": 41,
-          "end": 45,
-          "role": "remove"
-        },
-        {
-          "original_name": "R.id",
-          "start": 41,
-          "end": 45,
-          "role": "rename"
-        },
-        {
-          "original_name": "R.id",
-          "start": 41,
-          "end": 45,
-          "role": "group"
-        },
-        {
-          "original_name": "R.id",
-          "start": 41,
-          "end": 45,
-          "role": "null_test"
-        },
-        {
-          "original_name": "R.id",
-          "start": 41,
-          "end": 45,
-          "binding": "source"
-        },
-        {
-          "original_name": "R.id",
-          "start": 41,
-          "end": 45,
-          "binding": "derived"
-        },
-        {
-          "original_name": "L.id",
-          "start": 46,
-          "end": 50,
-          "role": "create"
-        },
-        {
-          "original_name": "L.id",
-          "start": 46,
-          "end": 50,
-          "role": "output"
-        },
-        {
-          "original_name": "L.id",
-          "start": 46,
-          "end": 50,
-          "role": "remove"
-        },
-        {
-          "original_name": "L.id",
-          "start": 46,
-          "end": 50,
-          "role": "rename"
-        },
-        {
-          "original_name": "L.id",
-          "start": 46,
-          "end": 50,
-          "role": "group"
-        },
-        {
-          "original_name": "L.id",
-          "start": 46,
-          "end": 50,
-          "role": "null_test"
-        },
-        {
-          "original_name": "L.id",
-          "start": 46,
-          "end": 50,
-          "binding": "source"
-        },
-        {
-          "original_name": "L.id",
-          "start": 46,
-          "end": 50,
-          "binding": "derived"
+          "role": "read"
         }
       ],
-      "required_fields": [],
+      "required_fields": [
+        {
+          "name": "id",
+          "conditional": false
+        }
+      ],
       "forbidden_field_names": [
         "L.id",
-        "R.id",
-        "id"
+        "R.id"
       ],
       "required_stages": [
         {
@@ -11307,20 +9869,11 @@
           "end": 9
         },
         {
-          "original_name": "R.id",
-          "normalized_name": "R.id",
-          "kind": "field",
-          "role": "read",
-          "binding": "indeterminate",
-          "start": 41,
-          "end": 45
-        },
-        {
           "original_name": "L.id",
-          "normalized_name": "L.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 46,
           "end": 50
         },
@@ -11334,7 +9887,12 @@
           "end": 62
         }
       ],
-      "fields": [],
+      "fields": [
+        {
+          "name": "id",
+          "conditional": false
+        }
+      ],
       "removed": [],
       "open": true,
       "uncertain": true,

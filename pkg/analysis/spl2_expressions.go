@@ -1,8 +1,6 @@
 package analysis
 
 import (
-	"strings"
-
 	"github.com/antlr4-go/antlr/v4"
 	"github.com/delgado-jacob/spl-toolkit/parser/spl2"
 )
@@ -18,13 +16,6 @@ func (s *spl2SemanticStage) readIdentifier(ctx antlr.ParserRuleContext, role str
 	o := s.operand(ctx)
 	if !o.Sound {
 		return ""
-	}
-	if snapshot, found := s.structuralUncertainty[o.Name]; found && strings.HasPrefix(ctx.GetText(), "'") {
-		publicUncertain, requirementUncertain := s.env.uncertain, s.env.requirements.uncertain
-		s.env.uncertain, s.env.requirements.uncertain = snapshot.public, snapshot.requirements
-		id := s.readAt(o, role)
-		s.env.uncertain, s.env.requirements.uncertain = publicUncertain, requirementUncertain
-		return id
 	}
 	return s.readAt(o, role)
 }
@@ -59,9 +50,46 @@ func (s *spl2SemanticStage) expression(node antlr.Tree) spl2ExpressionEvidence {
 		}
 		base := c.Primary()
 		alias := false
+		baseName := ""
 		if f := base.FieldName(); f != nil && f.Identifier() != nil {
-			name := s.operand(f.Identifier()).Name
-			alias = s.aliases[name]
+			baseName = s.operand(f.Identifier()).Name
+			alias = s.aliases[baseName]
+		}
+		segments := []string{}
+		static := baseName != ""
+		for _, part := range c.AllAccessPart() {
+			if part.DOT() == nil || part.Identifier() == nil {
+				static = false
+				break
+			}
+			segment := s.operand(part.Identifier())
+			if !segment.Sound {
+				static = false
+				break
+			}
+			segments = append(segments, segment.Name)
+		}
+		if static {
+			qualifier := ""
+			if alias {
+				qualifier = baseName
+			} else {
+				segments = append([]string{baseName}, segments...)
+			}
+			identity := pathFieldIdentity(qualifier, segments)
+			o := locatedOperand{Name: identity.PublicName, Identity: identity, Location: s.parsed2.source.contextLocation(c), Resolution: "exact", Sound: spl2IntactSyntax(c), UnresolvedSource: true, rewrite: s.rewriteNavigation(c)}
+			id := s.structuralFieldReference(o)
+			if id != "" {
+				out.ids = append(out.ids, id)
+				r := s.result.References[len(s.result.References)-1]
+				out.nonnull = r.Binding == "source" || r.Binding == "derived"
+				out.requirementNonnull = out.nonnull
+				if trace := s.env.requirements.trace; trace != nil {
+					entry := trace.reference(id)
+					out.requirementNonnull = entry.reference.Binding == "source" || entry.reference.Binding == "derived"
+				}
+			}
+			return out
 		}
 		if !alias {
 			out = s.expression(base)
@@ -72,26 +100,26 @@ func (s *spl2SemanticStage) expression(node antlr.Tree) spl2ExpressionEvidence {
 				out.ids = append(out.ids, e.ids...)
 			}
 		}
-		referenceIDs := []string{}
-		if field := base.FieldName(); field != nil && field.Identifier() != nil {
-			name := s.operand(field.Identifier()).Name
-			for _, part := range c.AllAccessPart() {
-				if part.Identifier() != nil {
-					name += "." + s.operand(part.Identifier()).Name
-				} else {
-					name += "[]"
-				}
-			}
-			id := s.structuralFieldReference(locatedOperand{Name: name, Location: s.parsed2.source.contextLocation(c), Resolution: "exact", Sound: spl2IntactSyntax(c), rewrite: s.rewriteNavigation(c)})
-			if id != "" {
-				out.ids = append(out.ids, id)
-				referenceIDs = append(referenceIDs, id)
+		name := baseName
+		if name == "" {
+			name = base.GetText()
+		}
+		for _, part := range c.AllAccessPart() {
+			if part.Identifier() != nil {
+				name += "." + s.operand(part.Identifier()).Name
+			} else {
+				name += "[]"
 			}
 		}
-		if len(referenceIDs) == 0 {
-			s.unsupported(c, "Typed navigation or alias binding is not represented by the string-only source universe")
+		o := locatedOperand{Name: name, Identity: dynamicFieldIdentity(name), Location: s.parsed2.source.contextLocation(c), Resolution: "dynamic", Sound: spl2IntactSyntax(c), rewrite: s.rewriteNavigation(c)}
+		if id := s.operandReference(o, "field", "read"); id != "" {
+			out.ids = append(out.ids, id)
+			ref := &s.result.References[len(s.result.References)-1]
+			ref.Binding = "indeterminate"
+			s.rewriteBinding(id, "indeterminate", nil)
+			s.unsupportedOwned(c, "Dynamic field navigation has no exact identity", []string{id})
 		} else {
-			s.unsupportedStructuralReference(c, s.result.References[len(s.result.References)-1].NormalizedName, "Typed navigation or alias binding is not represented by the string-only source universe", referenceIDs)
+			s.unsupported(c, "Dynamic field navigation has no exact identity")
 		}
 		out.nonnull = false
 		out.requirementNonnull = false

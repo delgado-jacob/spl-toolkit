@@ -21658,7 +21658,7 @@
       "committed": false,
       "coverage": {
         "syntax_complete": true,
-        "semantic_complete": false,
+        "semantic_complete": true,
         "rewrite_complete": false,
         "reasons": [
           "SPL_UNSUPPORTED_SEMANTICS",
@@ -21672,7 +21672,7 @@
           "outcome": "skipped",
           "reason": "unsupported_reference",
           "reference_ids": [
-            "ref-2"
+            "ref-1"
           ],
           "location": [
             18,
@@ -21691,18 +21691,10 @@
         ],
         [
           "ref-1",
-          "actor",
-          "field",
-          "read",
-          "source",
-          []
-        ],
-        [
-          "ref-2",
           "actor.name",
           "field",
           "read",
-          "indeterminate",
+          "source",
           []
         ]
       ],
@@ -21717,18 +21709,10 @@
         ],
         [
           "ref-1",
-          "actor",
-          "field",
-          "read",
-          "source",
-          []
-        ],
-        [
-          "ref-2",
           "actor.name",
           "field",
           "read",
-          "indeterminate",
+          "source",
           []
         ]
       ],
@@ -21746,7 +21730,7 @@
           "",
           [
             [
-              "actor",
+              "actor.name",
               false
             ]
           ],
@@ -21767,7 +21751,7 @@
           "",
           [
             [
-              "actor",
+              "actor.name",
               false
             ]
           ],

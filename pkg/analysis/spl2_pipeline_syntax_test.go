@@ -539,13 +539,17 @@ func TestSPL2SelectedGroupingAnalysisIsConservative(t *testing.T) {
 	}
 }
 
-func TestSPL2SelectedStructuralFieldSelectorAnalysisIsConservative(t *testing.T) {
+func TestSPL2SelectedStructuralFieldSelectorReportsExactUnavailability(t *testing.T) {
 	r := spl2AnalyzeTest(t, "FROM [{payload:1, other:2}] | fields payload.user.name")
-	if r.Status != Incomplete || !r.Coverage.SyntaxComplete || r.Coverage.SemanticComplete || !spl2HasCode(r, CodeUnsupportedSemantics) {
-		t.Fatalf("structural selector received silent semantic credit: %+v", r)
+	if r.Status != Invalid || !r.Coverage.SyntaxComplete || !r.Coverage.SemanticComplete || !spl2HasCode(r, CodeUnavailableField) {
+		t.Fatalf("structural selector did not retain exact unavailable evidence: %+v", r)
 	}
-	if r.Requirements.QueryStatus != Incomplete || r.Requirements.Coverage.Complete || len(r.Requirements.Gaps) == 0 {
-		t.Fatalf("structural selector lacks an explicit requirement gap: %+v", r.Requirements)
+	if r.Requirements.QueryStatus != Invalid || !r.Requirements.Coverage.Complete || len(r.Requirements.Items) != 0 || len(r.Requirements.Gaps) != 0 {
+		t.Fatalf("structural selector requirements disagree with exact unavailability: %+v", r.Requirements)
+	}
+	structural := spl2Ref(t, r, "payload.user.name", "read")
+	if structural.Binding != "unavailable" || structural.OriginalName != "payload.user.name" {
+		t.Fatalf("structural selector lost its exact identity: %+v", structural)
 	}
 	for _, ref := range r.References {
 		if ref.NormalizedName == "payload" && (ref.Role == "read" || ref.Role == "output") {

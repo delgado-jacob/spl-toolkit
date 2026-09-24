@@ -14,8 +14,8 @@ func TestSPL2CanonicalSchemaBoundaries(t *testing.T) {
 		outcomes     []string
 	}{
 		{`FROM main | where 'actor.name'="a"`, `{"type":"object","properties":{"actor":{"type":"object","properties":{"name":true},"required":["name"],"additionalProperties":false}},"required":["actor"],"additionalProperties":false}`, analysis.Incomplete, []string{"indeterminate"}},
-		{`FROM main | where actor.name="a"`, `{"type":"object","properties":{"actor.name":true},"required":["actor.name"],"additionalProperties":false}`, analysis.Invalid, []string{"missing", "indeterminate"}},
-		{`FROM main | where actor.name="a"`, `{"type":"object","properties":{"actor":{"type":"object","properties":{"name":true},"required":["name"],"additionalProperties":false}},"required":["actor"],"additionalProperties":false}`, analysis.Incomplete, []string{"required", "indeterminate"}},
+		{`FROM main | where actor.name="a"`, `{"type":"object","properties":{"actor.name":true},"required":["actor.name"],"additionalProperties":false}`, analysis.Incomplete, []string{"indeterminate"}},
+		{`FROM main | where actor.name="a"`, `{"type":"object","properties":{"actor":{"type":"object","properties":{"name":true},"required":["name"],"additionalProperties":false}},"required":["actor"],"additionalProperties":false}`, analysis.Incomplete, []string{"indeterminate"}},
 		{`FROM main | eval x=tonumber("17") | table x`, `false`, analysis.Incomplete, []string{"indeterminate"}},
 		{`FROM main | eval x=tonumber("17")`, `false`, analysis.Valid, []string{}},
 		{`FROM main | eval x=coalesce(tonumber("17"),0) | table x`, `false`, analysis.Valid, []string{"matching"}},

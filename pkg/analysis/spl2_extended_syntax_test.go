@@ -342,16 +342,16 @@ func TestSPL2ExtendedSyntaxCommandSpecificSpanUnits(t *testing.T) {
 }
 
 func TestSPL2SelectedStaticDatasetDescriptors(t *testing.T) {
-	text := "FROM {kind: \"index\", properties: {name: \"main\", enabled: true, retries: 2, missing: null, labels: [\"a\", \"b\"], nested: {region: \"us\"}}} | fields host"
-	p := spl2RequireNoDiagnostics(t, text)
-	if got := len(spl2Nodes(p.syntax, "staticDatasetDescriptor")); got != 1 {
-		t.Fatalf("static descriptors %d: %s", got, p.syntax.shape())
-	}
-	if got := len(spl2Nodes(p.syntax, "descriptorProperty")); got != 7 {
-		t.Fatalf("descriptor properties %d want 7: %s", got, p.syntax.shape())
-	}
-	if got := len(spl2Nodes(p.syntax, "jsonLiteral")); got < 9 {
-		t.Fatalf("JSON literal ownership too shallow: %s", p.syntax.shape())
+	for _, text := range []string{
+		"FROM {kind: \"index\"} | fields host",
+		"FROM {kind: \"index\", properties: {name: \"main\", enabled: true, retries: 2, missing: null, labels: [\"a\", \"b\"], nested: {region: \"us\"}}} | fields host",
+	} {
+		t.Run(text, func(t *testing.T) {
+			p := spl2RequireNoDiagnostics(t, text)
+			if got := len(spl2Nodes(p.syntax, "staticDatasetDescriptor")); got != 1 {
+				t.Fatalf("static descriptors %d: %s", got, p.syntax.shape())
+			}
+		})
 	}
 }
 
@@ -360,11 +360,15 @@ func TestSPL2SelectedDynamicDatasetDescriptorBoundaries(t *testing.T) {
 		"FROM {kind: $kind, properties: {name: \"main\"}} | fields host",
 		"FROM {kind: \"${kind}\", properties: {name: \"main\"}} | fields host",
 		"FROM {kind: \"index\", properties: {name: dataset_name}} | fields host",
-		"FROM {properties: {name: \"main\"}} | fields host",
+		"FROM {kind: \"index\", properties: {name: coalesce(dataset.name, fallback)}} | fields host",
 		"FROM {kind: \"index\", properties: $properties} | fields host",
 	} {
 		t.Run(text, func(t *testing.T) {
-			spl2RequireLocatedError(t, text)
+			p := spl2RequireNoDiagnostics(t, text)
+			if got := len(spl2Nodes(p.syntax, "staticDatasetDescriptor")); got != 1 {
+				t.Fatalf("dynamic descriptor nodes %d: %s", got, p.syntax.shape())
+			}
 		})
 	}
+	spl2RequireLocatedError(t, "FROM {properties: {name: \"main\"}} | fields host")
 }

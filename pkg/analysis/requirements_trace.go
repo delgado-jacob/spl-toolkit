@@ -31,6 +31,7 @@ type requirementTraceDiagnostic struct {
 }
 
 type requirementField struct {
+	identity    fieldIdentity
 	source      bool
 	unavailable bool
 	conditional bool
@@ -39,8 +40,9 @@ type requirementField struct {
 
 type requirementEnvironment struct {
 	trace     *requirementTrace
-	fields    map[string]requirementField
-	removed   map[string]bool
+	fields    map[fieldIdentityKey]requirementField
+	removed   map[fieldIdentityKey]bool
+	ambiguous map[string]bool
 	open      bool
 	uncertain bool
 }
@@ -216,10 +218,11 @@ func traceOrigins(trace *requirementTrace, ids []string) []string {
 
 func newRequirementEnvironment(trace *requirementTrace) requirementEnvironment {
 	return requirementEnvironment{
-		trace:   trace,
-		fields:  map[string]requirementField{},
-		removed: map[string]bool{},
-		open:    true,
+		trace:     trace,
+		fields:    map[fieldIdentityKey]requirementField{},
+		removed:   map[fieldIdentityKey]bool{},
+		ambiguous: map[string]bool{},
+		open:      true,
 	}
 }
 
@@ -229,15 +232,23 @@ func (e requirementEnvironment) clone() requirementEnvironment {
 	out.uncertain = e.uncertain
 	for name, field := range e.fields {
 		field.origins = append([]string{}, field.origins...)
+		field.identity = field.identity.clone()
 		out.fields[name] = field
 	}
 	for name, removed := range e.removed {
 		out.removed[name] = removed
 	}
+	for name, ambiguous := range e.ambiguous {
+		out.ambiguous[name] = ambiguous
+	}
 	return out
 }
 
 func (e *requirementEnvironment) read(reference Reference) (binding string, directExternal, conditional bool) {
+	return e.readIdentity(reference, atomicFieldIdentity(reference.NormalizedName))
+}
+
+func (e *requirementEnvironment) readIdentity(reference Reference, identity fieldIdentity) (binding string, directExternal, conditional bool) {
 	if reference.Role == "remove" || reference.Role == "create" || reference.Role == "output" || reference.Role == "rename" {
 		return "not_applicable", false, false
 	}
@@ -249,10 +260,11 @@ func (e *requirementEnvironment) read(reference Reference) (binding string, dire
 		return binding, directExternal, conditional
 	}
 	name := reference.NormalizedName
+	key, exactIdentity := identity.privateKey()
 	if reference.Resolution == "wildcard" || reference.Resolution == "dynamic" {
 		return classified("indeterminate", false, true)
 	}
-	field, known := e.fields[name]
+	field, known := e.fields[key]
 	switch {
 	case known && field.conditional:
 		return classified("indeterminate", false, true)
@@ -262,12 +274,17 @@ func (e *requirementEnvironment) read(reference Reference) (binding string, dire
 		}
 		return classified("derived", false, false)
 	case e.uncertain:
+		if !nullTest && exactIdentity && e.hasOtherIdentity(identity) {
+			e.fields[key] = requirementField{identity: identity.clone(), source: true, conditional: true, origins: []string{reference.ID}}
+			e.detectCollision(name)
+		}
 		return classified("indeterminate", false, true)
-	case e.removed[name] || !e.open:
+	case exactIdentity && e.removed[key] || !e.open:
 		return classified("unavailable", false, false)
 	default:
 		if !nullTest {
-			e.fields[name] = requirementField{source: true, origins: []string{reference.ID}}
+			e.fields[key] = requirementField{identity: identity.clone(), source: true, origins: []string{reference.ID}}
+			e.detectCollision(name)
 		}
 		return classified("source", true, false)
 	}
@@ -289,22 +306,94 @@ func requirementReferencePolicy(reference Reference) (directExternal, conditiona
 }
 
 func (e *requirementEnvironment) install(name string, origins []string, conditional bool) {
-	e.fields[name] = requirementField{conditional: conditional, origins: append([]string{}, origins...)}
-	delete(e.removed, name)
+	e.installIdentity(atomicFieldIdentity(name), origins, conditional, false)
+}
+
+func (e *requirementEnvironment) installIdentity(identity fieldIdentity, origins []string, conditional, source bool) {
+	key, exact := identity.privateKey()
+	if !exact {
+		return
+	}
+	e.registerIdentityField(requirementField{identity: identity.clone(), source: source, conditional: conditional, origins: append([]string{}, origins...)})
+	delete(e.removed, key)
+}
+
+func (e *requirementEnvironment) registerIdentityField(field requirementField) {
+	key, exact := field.identity.privateKey()
+	if !exact {
+		return
+	}
+	field.identity = field.identity.clone()
+	field.origins = append([]string{}, field.origins...)
+	e.fields[key] = field
+	e.detectCollision(field.identity.PublicName)
+}
+
+func (e *requirementEnvironment) field(identity fieldIdentity) (requirementField, bool) {
+	key, exact := identity.privateKey()
+	if !exact {
+		return requirementField{}, false
+	}
+	field, known := e.fields[key]
+	return field, known
+}
+
+func (e *requirementEnvironment) hasOtherIdentity(identity fieldIdentity) bool {
+	key, exact := identity.privateKey()
+	if !exact {
+		return false
+	}
+	for candidateKey, field := range e.fields {
+		if candidateKey != key && field.identity.PublicName == identity.PublicName {
+			return true
+		}
+	}
+	return false
+}
+
+func (e *requirementEnvironment) detectCollision(publicName string) {
+	identities := map[fieldIdentityKey]bool{}
+	for _, field := range e.fields {
+		if field.identity.PublicName != publicName {
+			continue
+		}
+		key, exact := field.identity.privateKey()
+		if !exact {
+			key, _ = atomicFieldIdentity(publicName).privateKey()
+		}
+		identities[key] = true
+	}
+	if len(identities) > 1 {
+		e.ambiguous[publicName] = true
+		e.uncertain = true
+	}
 }
 
 func (e *requirementEnvironment) markConditional(name string) {
-	field, known := e.fields[name]
+	e.markConditionalIdentity(atomicFieldIdentity(name))
+}
+
+func (e *requirementEnvironment) markConditionalIdentity(identity fieldIdentity) {
+	key, _ := identity.privateKey()
+	field, known := e.fields[key]
 	if !known {
 		return
 	}
 	field.conditional = true
-	e.fields[name] = field
+	e.fields[key] = field
 }
 
 func (e *requirementEnvironment) remove(name string) {
-	delete(e.fields, name)
-	e.removed[name] = true
+	e.removeIdentity(atomicFieldIdentity(name))
+}
+
+func (e *requirementEnvironment) removeIdentity(identity fieldIdentity) {
+	key, exact := identity.privateKey()
+	if !exact {
+		return
+	}
+	delete(e.fields, key)
+	e.removed[key] = true
 }
 
 func (e *requirementEnvironment) stageIncomplete(stageID string) bool {
@@ -316,7 +405,12 @@ func (e *requirementEnvironment) stageIncomplete(stageID string) bool {
 }
 
 func (e *requirementEnvironment) exactProjection(name string, referenceIDs []string) (requirementField, bool) {
-	if field, ok := e.fields[name]; ok {
+	return e.exactIdentityProjection(atomicFieldIdentity(name), referenceIDs)
+}
+
+func (e *requirementEnvironment) exactIdentityProjection(identity fieldIdentity, referenceIDs []string) (requirementField, bool) {
+	key, _ := identity.privateKey()
+	if field, ok := e.fields[key]; ok {
 		field.origins = append([]string{}, field.origins...)
 		return field, true
 	}
@@ -330,7 +424,7 @@ func (e *requirementEnvironment) exactProjection(name string, referenceIDs []str
 		}
 		entry := e.trace.reference(id)
 		reference := entry.reference
-		if reference.Kind != "field" || reference.NormalizedName != name || reference.Resolution != "exact" || reference.Binding != "indeterminate" || !entry.conditional || reference.Role == "null_test" {
+		if reference.Kind != "field" || reference.NormalizedName != identity.PublicName || reference.Resolution != "exact" || reference.Binding != "indeterminate" || !entry.conditional || reference.Role == "null_test" {
 			continue
 		}
 		matching = append(matching, id)
@@ -338,7 +432,7 @@ func (e *requirementEnvironment) exactProjection(name string, referenceIDs []str
 	if len(matching) == 0 {
 		return requirementField{}, false
 	}
-	return requirementField{conditional: true, origins: traceOrigins(e.trace, matching)}, true
+	return requirementField{identity: identity.clone(), conditional: true, origins: traceOrigins(e.trace, matching)}, true
 }
 
 func (e *requirementEnvironment) applyProjection(selectors []locatedOperand, referenceIDs [][]string, mode string, retainKnownInternals bool, stageID string) {
@@ -347,28 +441,44 @@ func (e *requirementEnvironment) applyProjection(selectors []locatedOperand, ref
 			if selector.Resolution != "wildcard" {
 				continue
 			}
-			for name := range e.fields {
-				if wildcardMatches(selector.Name, name) {
-					e.remove(name)
+			for key, field := range e.fields {
+				if wildcardMatches(selector.Name, field.identity.PublicName) {
+					e.removeIdentity(field.identity)
+					delete(e.fields, key)
 				}
 			}
 		}
 		return
 	}
 
-	selected := map[string]requirementField{}
+	selected := []requirementField{}
+	selectedIndex := map[fieldIdentityKey]int{}
+	selectField := func(field requirementField) {
+		key, exact := field.identity.privateKey()
+		if !exact {
+			return
+		}
+		if index, exists := selectedIndex[key]; exists {
+			selected[index] = field
+			return
+		}
+		selectedIndex[key] = len(selected)
+		selected = append(selected, field)
+	}
 	if retainKnownInternals {
-		for name, field := range e.fields {
-			if strings.HasPrefix(name, "_") {
-				selected[name] = field
+		for _, key := range orderedIdentityKeys(nil, e.fields) {
+			field := e.fields[key]
+			if strings.HasPrefix(field.identity.PublicName, "_") {
+				selectField(field)
 			}
 		}
 	}
 	for i, selector := range selectors {
 		if selector.Resolution == "wildcard" {
-			for name, field := range e.fields {
-				if wildcardMatches(selector.Name, name) {
-					selected[name] = field
+			for _, key := range orderedIdentityKeys(nil, e.fields) {
+				field := e.fields[key]
+				if wildcardMatches(selector.Name, field.identity.PublicName) {
+					selectField(field)
 				}
 			}
 			continue
@@ -377,11 +487,14 @@ func (e *requirementEnvironment) applyProjection(selectors []locatedOperand, ref
 		if i < len(referenceIDs) {
 			ids = referenceIDs[i]
 		}
-		if field, ok := e.exactProjection(selector.Name, ids); ok {
-			selected[selector.Name] = field
+		if field, ok := e.exactIdentityProjection(selector.fieldIdentity(), ids); ok {
+			selectField(field)
 		}
 	}
-	e.fields = selected
+	e.fields = map[fieldIdentityKey]requirementField{}
+	for _, field := range selected {
+		e.registerIdentityField(field)
+	}
 	e.open = false
 	if mode == "table" && !e.stageIncomplete(stageID) {
 		e.uncertain = false

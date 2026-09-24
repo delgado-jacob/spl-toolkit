@@ -10,6 +10,7 @@ import (
 type locatedOperand struct {
 	rewrite    rewriteOwner
 	Name       string
+	Identity   fieldIdentity
 	Location   Location
 	Resolution string
 	Sound      bool
@@ -17,6 +18,14 @@ type locatedOperand struct {
 	// Derived bindings and structurally proven absence remain independently sound.
 	UnresolvedSource bool
 }
+
+func (o locatedOperand) fieldIdentity() fieldIdentity {
+	if _, exact := o.Identity.privateKey(); exact {
+		return o.Identity
+	}
+	return atomicFieldIdentity(o.Name)
+}
+
 type renameOperands struct{ Source, Target locatedOperand }
 type aggregateOutput struct {
 	Target                 locatedOperand
@@ -86,16 +95,18 @@ func (s *semanticStage) operandReference(operand locatedOperand, kind, role stri
 	if trace := s.env.requirements.trace; trace != nil {
 		entry := trace.reference(id)
 		if kind == "field" {
-			entry.reference.Binding, entry.directExternal, entry.conditional = s.env.requirements.read(entry.reference)
+			entry.reference.Binding, entry.directExternal, entry.conditional = s.env.requirements.readIdentity(entry.reference, operand.fieldIdentity())
 		} else {
 			entry.directExternal, entry.conditional = requirementReferencePolicy(entry.reference)
 		}
 	}
 	s.rewriteReference(id, operand, kind, role)
+	s.rewriteIdentityCoverage(operand, kind)
 	return id
 }
 func (s *semanticStage) readAt(operand locatedOperand, role string) string {
 	name := operand.Name
+	identity := operand.fieldIdentity()
 	id := s.operandReference(operand, "field", role)
 	if id == "" {
 		return id
@@ -105,7 +116,8 @@ func (s *semanticStage) readAt(operand locatedOperand, role string) string {
 	if trace := s.env.requirements.trace; trace != nil {
 		requirementBinding = trace.reference(id).reference.Binding
 	}
-	f, known := s.env.fields[name]
+	f, known := s.env.field(identity)
+	key, exactIdentity := identity.privateKey()
 	switch {
 	case known && !f.Conditional:
 		ref.Binding = "derived"
@@ -117,13 +129,21 @@ func (s *semanticStage) readAt(operand locatedOperand, role string) string {
 		ref.Binding = "indeterminate"
 		if known {
 			ref.OriginReferenceIDs = copyIDs(f.OriginReferenceIDs)
+		} else if exactIdentity && role != "null_test" && s.env.hasOtherIdentity(identity) {
+			collision, owners := s.env.installIdentity(identity, []string{id}, true, true)
+			if collision {
+				s.fieldIdentityCollision(name, operand.Location, owners)
+			}
 		}
-	case s.env.removed[name] || !s.env.open:
+	case exactIdentity && s.env.removed[key] || !s.env.open:
 		ref.Binding = "unavailable"
 	default:
 		ref.Binding = "source"
 		if role != "null_test" {
-			s.env.fields[name] = trackedField{FieldBinding: FieldBinding{Name: name, OriginReferenceIDs: []string{id}}, source: true}
+			collision, owners := s.env.installIdentity(identity, []string{id}, false, true)
+			if collision {
+				s.fieldIdentityCollision(name, operand.Location, owners)
+			}
 		}
 	}
 	if role != "null_test" {
@@ -142,9 +162,10 @@ func (s *semanticStage) readAt(operand locatedOperand, role string) string {
 	if operand.UnresolvedSource && s.refinement != nil && s.refinement.resolve != nil && ref.Binding == "source" {
 		ref.Binding = "indeterminate"
 		if role != "null_test" {
-			field := s.env.fields[name]
+			field, _ := s.env.field(identity)
 			field.Conditional = true
-			s.env.fields[name] = field
+			key, _ := identity.privateKey()
+			s.env.fields[key] = field
 		}
 		s.refinementDiagnosticAt(CodeUnsupportedSemantics, "warning", "unsupported_semantics", "Source-name identity is not represented by the string-only source universe", operand.Location, false)
 		s.result.Stages[s.stage].SemanticComplete = false
@@ -165,24 +186,27 @@ func (s *semanticStage) createAtWithRequirementConditional(operand locatedOperan
 	s.rewriteBinding(id, "definition", inputs)
 	origins := s.origins(inputs)
 	s.result.References[len(s.result.References)-1].OriginReferenceIDs = copyIDs(origins)
-	s.env.install(name, uniqueIDs([]string{id}, origins), conditional)
+	collision, owners := s.env.installIdentity(operand.fieldIdentity(), uniqueIDs([]string{id}, origins), conditional, false)
 	if trace := s.env.requirements.trace; trace != nil {
 		entry := trace.reference(id)
 		entry.reference.Binding = "definition"
 		entry.reference.OriginReferenceIDs = traceOrigins(trace, inputs)
-		s.env.requirements.install(name, uniqueIDs([]string{id}, entry.reference.OriginReferenceIDs), requirementConditional)
+		s.env.requirements.installIdentity(operand.fieldIdentity(), uniqueIDs([]string{id}, entry.reference.OriginReferenceIDs), requirementConditional, false)
 	}
-	s.transitions = append(s.transitions, Transition{Operation: operation, Output: name, InputReferenceIDs: copyIDs(inputs), OutputReferenceID: id, Conditional: conditional})
+	if collision {
+		s.fieldIdentityCollision(name, operand.Location, owners)
+	}
+	s.appendTransition(Transition{Operation: operation, Output: name, InputReferenceIDs: copyIDs(inputs), OutputReferenceID: id, Conditional: conditional})
 	return id
 }
-func (s *semanticStage) selectorAt(operand locatedOperand, role string, allowWildcard bool) ([]string, []string) {
+func (s *semanticStage) selectorAt(operand locatedOperand, role string, allowWildcard bool) ([]fieldIdentity, []string) {
 	name := operand.Name
 	if operand.Resolution != "wildcard" {
-		return []string{name}, []string{s.readAt(operand, role)}
+		return []fieldIdentity{operand.fieldIdentity()}, []string{s.readAt(operand, role)}
 	}
 	id := s.operandReference(operand, "field", role)
 	if id == "" {
-		return []string{}, []string{}
+		return []fieldIdentity{}, []string{}
 	}
 	ref := &s.result.References[len(s.result.References)-1]
 	if role != "remove" {
@@ -195,32 +219,43 @@ func (s *semanticStage) selectorAt(operand locatedOperand, role string, allowWil
 		} else if s.env.requirements.open || s.env.requirements.uncertain {
 			s.requirementDiagnosticAt(CodeUnresolvedWildcard, "warning", "unsupported_semantics", fmt.Sprintf("wildcard %q membership is unresolved", name), operand.Location, true, []string{id})
 		}
-		names := s.refinedSelectorAt(operand, role, id)
+		identities := s.refinedSelectorAt(operand, role, id)
 		if !allowWildcard {
 			s.refinementDiagnosticAt(CodeUnsupportedSemantics, "warning", "unsupported_semantics", fmt.Sprintf("wildcard selectors for command %q are unmodeled", command), operand.Location, true)
-			return []string{}, []string{id}
+			return []fieldIdentity{}, []string{id}
 		}
-		return names, []string{id}
+		return identities, []string{id}
 	}
 	if !allowWildcard {
 		s.diagnosticAtOwned(CodeUnsupportedSemantics, "warning", "unsupported_semantics", fmt.Sprintf("wildcard selectors for command %q are unmodeled", command), operand.Location, true, []string{id})
-		return []string{}, []string{id}
+		return []fieldIdentity{}, []string{id}
 	}
-	names := []string{}
+	identities := []fieldIdentity{}
 	origins := []string{}
-	for n, f := range s.env.fields {
-		if wildcardMatches(name, n) {
-			names = append(names, n)
+	for _, key := range s.env.orderedFieldKeys() {
+		f, exists := s.env.fields[key]
+		if !exists {
+			continue
+		}
+		if wildcardMatches(name, f.Name) {
+			identities = append(identities, f.identity.clone())
 			origins = uniqueIDs(origins, f.OriginReferenceIDs)
 		}
 	}
-	sort.Strings(names)
+	sort.Slice(identities, func(i, j int) bool {
+		if identities[i].PublicName != identities[j].PublicName {
+			return identities[i].PublicName < identities[j].PublicName
+		}
+		left, _ := identities[i].privateKey()
+		right, _ := identities[j].privateKey()
+		return left < right
+	})
 	sort.Strings(origins)
 	ref.OriginReferenceIDs = origins
 	if s.env.open || s.env.uncertain {
 		s.diagnosticAtOwned(CodeUnresolvedWildcard, "warning", "unsupported_semantics", fmt.Sprintf("wildcard %q membership is unresolved", name), operand.Location, true, []string{id})
 	}
-	return names, []string{id}
+	return identities, []string{id}
 }
 
 // applyProjection prepares lexical reads once before restricting the environment.
@@ -237,8 +272,9 @@ func (s *semanticStage) applyProjection(selectors []locatedOperand, mode string,
 		if s.refinement != nil {
 			internalsComplete = s.retainSourceInternals()
 		}
-		for name, field := range s.env.fields {
-			if strings.HasPrefix(name, "_") {
+		for _, key := range s.env.orderedFieldKeys() {
+			field := s.env.fields[key]
+			if strings.HasPrefix(field.Name, "_") {
 				selected = append(selected, preparedSelection{Field: field})
 			}
 		}
@@ -259,13 +295,13 @@ func (s *semanticStage) applyProjection(selectors []locatedOperand, mode string,
 		if exclude {
 			role = "remove"
 		}
-		names, ids := s.selectorAt(operand, role, true)
+		identities, ids := s.selectorAt(operand, role, true)
 		requirementReferenceIDs[i] = copyIDs(ids)
-		for _, name := range names {
+		for _, identity := range identities {
 			if exclude {
-				s.env.remove(name)
-				s.transitions = append(s.transitions, Transition{Operation: "remove", Output: name, InputReferenceIDs: copyIDs(ids)})
-			} else if f, ok := s.projectedField(name, ids); ok {
+				s.env.removeIdentity(identity)
+				s.appendTransition(Transition{Operation: "remove", Output: identity.PublicName, InputReferenceIDs: copyIDs(ids)})
+			} else if f, ok := s.projectedIdentityField(identity, ids); ok {
 				selected = append(selected, preparedSelection{Field: f, InputReferenceIDs: ids, EmitProjectTransition: true})
 			}
 		}
@@ -279,17 +315,70 @@ func (s *semanticStage) applyProjection(selectors []locatedOperand, mode string,
 // applyPreparedProjection installs copied binding evidence without resolving it
 // again. Ordered records intentionally retain repeated explicit projections.
 func (s *semanticStage) applyPreparedProjection(selected []preparedSelection, mode string) {
-	fields := map[string]trackedField{}
+	previousFields := s.env.fields
+	previousOrder := s.env.orderedFieldKeys()
+	registrations := []preparedSelection{}
+	registrationIndex := map[fieldIdentityKey]int{}
+	register := func(selection preparedSelection) {
+		field := selection.Field
+		key, exact := field.identity.privateKey()
+		if !exact {
+			field.identity = atomicFieldIdentity(field.Name)
+			key, _ = field.identity.privateKey()
+		}
+		selection.Field = field
+		if index, exists := registrationIndex[key]; exists {
+			registrations[index] = selection
+			return
+		}
+		registrationIndex[key] = len(registrations)
+		registrations = append(registrations, selection)
+	}
 	for _, selection := range selected {
 		field := selection.Field
-		field.OriginReferenceIDs = copyIDs(field.OriginReferenceIDs)
-		fields[field.Name] = field
-		if selection.EmitProjectTransition {
-			s.transitions = append(s.transitions, Transition{Operation: "project", Output: field.Name, InputReferenceIDs: copyIDs(selection.InputReferenceIDs)})
+		key, exact := field.identity.privateKey()
+		if !exact {
+			field.identity = atomicFieldIdentity(field.Name)
+			key, _ = field.identity.privateKey()
+		}
+		if s.env.ambiguous[field.Name] {
+			matched := false
+			for _, candidateKey := range previousOrder {
+				candidate, exists := previousFields[candidateKey]
+				if exists && candidate.Name == field.Name {
+					candidateSelection := preparedSelection{Field: candidate}
+					if candidateKey == key {
+						candidateSelection = selection
+						candidateSelection.Field = field
+						matched = true
+					}
+					register(candidateSelection)
+				}
+			}
+			if !matched {
+				selection.Field = field
+				register(selection)
+			}
+			continue
+		}
+		selection.Field = field
+		register(selection)
+	}
+
+	s.env.fields = map[fieldIdentityKey]trackedField{}
+	s.env.fieldOrder = nil
+	for _, selection := range registrations {
+		collision, owners := s.env.registerIdentityField(selection.Field)
+		if collision {
+			s.fieldIdentityCollision(selection.Field.Name, s.referenceLocation(selection.InputReferenceIDs), owners)
 		}
 	}
-	s.env.rewriteProject(fields)
-	s.env.fields = fields
+	for _, selection := range selected {
+		if selection.EmitProjectTransition {
+			s.appendTransition(Transition{Operation: "project", Output: selection.Field.Name, InputReferenceIDs: copyIDs(selection.InputReferenceIDs)})
+		}
+	}
+	s.env.rewriteProject(s.env.fields)
 	// Partial selectors retain an unknown remainder; finite compatibility keeps
 	// its historical closed-output wire shape. Existing tombstones are retained.
 	s.env.open = s.refinement != nil && !s.refinement.finiteCompatibility && s.env.open && !s.result.Stages[s.stage].SemanticComplete
@@ -298,13 +387,28 @@ func (s *semanticStage) applyPreparedProjection(selected []preparedSelection, mo
 	}
 }
 
+func (s *semanticStage) referenceLocation(ids []string) Location {
+	for _, id := range ids {
+		for _, reference := range s.result.References {
+			if reference.ID == id {
+				return reference.Location
+			}
+		}
+	}
+	return s.result.Stages[s.stage].Location
+}
+
 // Exact projection fixes the output names without proving conditional inputs exist.
 func (s *semanticStage) projectedField(name string, ids []string) (trackedField, bool) {
-	if field, known := s.env.fields[name]; known {
+	return s.projectedIdentityField(atomicFieldIdentity(name), ids)
+}
+
+func (s *semanticStage) projectedIdentityField(identity fieldIdentity, ids []string) (trackedField, bool) {
+	if field, known := s.env.field(identity); known {
 		return field, true
 	}
 	if s.env.uncertain {
-		return trackedField{FieldBinding: FieldBinding{Name: name, OriginReferenceIDs: s.origins(ids), Conditional: true}}, true
+		return trackedField{FieldBinding: FieldBinding{Name: identity.PublicName, OriginReferenceIDs: s.origins(ids), Conditional: true}, identity: identity.clone()}, true
 	}
 	return trackedField{}, false
 }
@@ -324,6 +428,13 @@ func (s *semanticStage) applyRename(pairs []renameOperands) {
 	items := []rename{}
 	publicSources, publicDests := map[string]bool{}, map[string]bool{}
 	requirementSources, requirementDests := map[string]bool{}, map[string]bool{}
+	publicSourceKeys, publicDestKeys := map[fieldIdentityKey]bool{}, map[fieldIdentityKey]bool{}
+	requirementSourceKeys, requirementDestKeys := map[fieldIdentityKey]bool{}, map[fieldIdentityKey]bool{}
+	trackIdentity := func(keys map[fieldIdentityKey]bool, identity fieldIdentity) {
+		if key, exact := identity.privateKey(); exact {
+			keys[key] = true
+		}
+	}
 	publicConflict, requirementConflict := false, false
 	for _, r := range pairs {
 		if !r.Source.Sound || !r.Target.Sound {
@@ -333,33 +444,40 @@ func (s *semanticStage) applyRename(pairs []renameOperands) {
 		dst := r.Target.Name
 		if r.Source.Resolution == "wildcard" || r.Target.Resolution == "wildcard" {
 			s.env = before
-			names, ids := s.selectorAt(r.Source, "read", true)
-			for _, name := range names {
-				publicSources[name] = true
+			identities, ids := s.selectorAt(r.Source, "read", true)
+			for _, identity := range identities {
+				publicSources[identity.PublicName] = true
+				trackIdentity(publicSourceKeys, identity)
 			}
 			if r.Source.Resolution == "wildcard" {
-				for name := range requirementOriginal.fields {
-					if wildcardMatches(src, name) {
-						requirementSources[name] = true
+				for key, field := range requirementOriginal.fields {
+					if wildcardMatches(src, field.identity.PublicName) {
+						requirementSources[field.identity.PublicName] = true
+						requirementSourceKeys[key] = true
 					}
 				}
 			} else {
 				requirementSources[src] = true
+				trackIdentity(requirementSourceKeys, r.Source.fieldIdentity())
 			}
 			if r.Target.Resolution == "wildcard" {
-				for name := range original.fields {
-					if wildcardMatches(dst, name) {
-						publicDests[name] = true
+				for key, field := range original.fields {
+					if wildcardMatches(dst, field.Name) {
+						publicDests[field.Name] = true
+						publicDestKeys[key] = true
 					}
 				}
-				for name := range requirementOriginal.fields {
-					if wildcardMatches(dst, name) {
-						requirementDests[name] = true
+				for key, field := range requirementOriginal.fields {
+					if wildcardMatches(dst, field.identity.PublicName) {
+						requirementDests[field.identity.PublicName] = true
+						requirementDestKeys[key] = true
 					}
 				}
 			} else {
 				publicDests[dst] = true
 				requirementDests[dst] = true
+				trackIdentity(publicDestKeys, r.Target.fieldIdentity())
+				trackIdentity(requirementDestKeys, r.Target.fieldIdentity())
 				if len(ids) > 0 {
 					items = append(items, rename{source: src, dest: dst, target: r.Target, input: ids[0], conditional: true, requirementConditional: true})
 				}
@@ -371,8 +489,8 @@ func (s *semanticStage) applyRename(pairs []renameOperands) {
 		}
 		s.env = before
 		id := s.readAt(r.Source, "read")
-		_, publicExistingDestination := original.fields[dst]
-		_, requirementExistingDestination := requirementOriginal.fields[dst]
+		_, publicExistingDestination := original.field(r.Target.fieldIdentity())
+		_, requirementExistingDestination := requirementOriginal.field(r.Target.fieldIdentity())
 		if publicSources[src] || publicDests[dst] || publicExistingDestination {
 			publicConflict = true
 		}
@@ -383,6 +501,10 @@ func (s *semanticStage) applyRename(pairs []renameOperands) {
 		publicDests[dst] = true
 		requirementSources[src] = true
 		requirementDests[dst] = true
+		trackIdentity(publicSourceKeys, r.Source.fieldIdentity())
+		trackIdentity(publicDestKeys, r.Target.fieldIdentity())
+		trackIdentity(requirementSourceKeys, r.Source.fieldIdentity())
+		trackIdentity(requirementDestKeys, r.Target.fieldIdentity())
 		binding := s.result.References[len(s.result.References)-1].Binding
 		requirementBinding := binding
 		if trace := s.env.requirements.trace; trace != nil {
@@ -419,11 +541,11 @@ func (s *semanticStage) applyRename(pairs []renameOperands) {
 		s.requirementDiagnosticAt(CodeUnsupportedSemantics, "warning", "unsupported_semantics", message, location, true, nil)
 	}
 	if publicConflict {
-		for name := range publicSources {
-			delete(s.env.fields, name)
+		for key := range publicSourceKeys {
+			delete(s.env.fields, key)
 		}
-		for name := range publicDests {
-			delete(s.env.fields, name)
+		for key := range publicDestKeys {
+			delete(s.env.fields, key)
 		}
 		for i := range items {
 			items[i].output = s.recordRejectedRenameTarget(items[i].target, items[i].input)
@@ -442,11 +564,11 @@ func (s *semanticStage) applyRename(pairs []renameOperands) {
 		}
 	}
 	if requirementConflict {
-		for name := range requirementSources {
-			delete(s.env.requirements.fields, name)
+		for key := range requirementSourceKeys {
+			delete(s.env.requirements.fields, key)
 		}
-		for name := range requirementDests {
-			delete(s.env.requirements.fields, name)
+		for key := range requirementDestKeys {
+			delete(s.env.requirements.fields, key)
 		}
 		return
 	}
@@ -484,17 +606,19 @@ func (s *semanticStage) applyAggregation(outputs []aggregateOutput, groups []loc
 	output.open = false
 	output.requirements.open = false
 	for _, operand := range groups {
-		names, ids := s.selectorAt(operand, "group", false)
+		identities, ids := s.selectorAt(operand, "group", false)
 		if operand.Resolution == "exact" {
-			if field, ok := s.env.requirements.exactProjection(operand.Name, ids); ok {
-				output.requirements.fields[operand.Name] = field
+			if field, ok := s.env.requirements.exactIdentityProjection(operand.fieldIdentity(), ids); ok {
+				key, _ := operand.fieldIdentity().privateKey()
+				output.requirements.fields[key] = field
 			}
 		}
-		for _, name := range names {
-			if field, ok := s.projectedField(name, ids); ok {
-				output.fields[name] = field
+		for _, identity := range identities {
+			if field, ok := s.projectedIdentityField(identity, ids); ok {
+				key, _ := identity.privateKey()
+				output.fields[key] = field
 			}
-			s.transitions = append(s.transitions, Transition{Operation: "project", Output: name, InputReferenceIDs: copyIDs(ids)})
+			s.appendTransition(Transition{Operation: "project", Output: identity.PublicName, InputReferenceIDs: copyIDs(ids)})
 		}
 	}
 	if !preserveInput {
@@ -516,7 +640,7 @@ func (s *semanticStage) applyAggregation(outputs []aggregateOutput, groups []loc
 func (s *semanticStage) applyLookupOutputs(matchReferenceIDs []string, outputs []lookupOutput) {
 	for _, output := range outputs {
 		if output.PreserveExisting {
-			if _, known := s.env.fields[output.Target.Name]; known {
+			if _, known := s.env.field(output.Target.fieldIdentity()); known {
 				s.operandReference(output.Target, "field", "output")
 				continue
 			}
@@ -546,12 +670,24 @@ func (s *semanticStage) applyAssignmentWithRequirementConditional(target located
 func (s *semanticStage) removeAt(operand locatedOperand) {
 	id := s.operandReference(operand, "field", "remove")
 	s.rewriteRemoval(id, operand)
-	s.env.remove(operand.Name)
-	s.env.requirements.remove(operand.Name)
-	s.transitions = append(s.transitions, Transition{Operation: "remove", Output: operand.Name, InputReferenceIDs: []string{}, OutputReferenceID: id})
+	s.env.removeIdentity(operand.fieldIdentity())
+	s.env.requirements.removeIdentity(operand.fieldIdentity())
+	s.appendTransition(Transition{Operation: "remove", Output: operand.Name, InputReferenceIDs: []string{}, OutputReferenceID: id})
 }
 
 // applySource starts an independent external dataset without carrying prior fields.
 func (s *semanticStage) applySource() {
 	s.env = newEnvironmentWithRequirementTrace(s.env.requirements.trace)
+}
+
+func (s *semanticStage) appendTransition(transition Transition) {
+	if s.env.ambiguous[transition.Output] {
+		return
+	}
+	s.transitions = append(s.transitions, transition)
+}
+
+func (s *semanticStage) fieldIdentityCollision(name string, location Location, pendingReferenceIDs []string) {
+	message := fmt.Sprintf("field %q has multiple private identities that schema version 1 cannot distinguish", name)
+	s.diagnosticAtOwned(CodeAmbiguousField, "warning", "unsupported_semantics", message, location, true, pendingReferenceIDs)
 }

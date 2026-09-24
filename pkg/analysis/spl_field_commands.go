@@ -24,8 +24,8 @@ func fillnullCommand(s *semanticStage, node antlr.ParserRuleContext) {
 			continue
 		}
 
-		field, semanticKnown := s.env.fields[target.Name]
-		requirementField, requirementKnown := s.env.requirements.fields[target.Name]
+		field, semanticKnown := s.env.field(target.fieldIdentity())
+		requirementField, requirementKnown := s.env.requirements.field(target.fieldIdentity())
 		semanticConditional := !semanticKnown || field.Conditional
 		requirementConditional := !requirementKnown || requirementField.conditional
 		if semanticConditional && !semanticKnown {
@@ -621,15 +621,16 @@ func fieldCommandCandidateRead(s *semanticStage, operand locatedOperand, role st
 	if !operand.Sound {
 		return ""
 	}
-	requirementField, requirementKnown := s.env.requirements.fields[operand.Name]
+	key, _ := operand.fieldIdentity().privateKey()
+	requirementField, requirementKnown := s.env.requirements.fields[key]
 	id := s.operandReference(operand, "field", role)
 	if id == "" {
 		return ""
 	}
 	if requirementKnown {
-		s.env.requirements.fields[operand.Name] = requirementField
+		s.env.requirements.fields[key] = requirementField
 	} else {
-		delete(s.env.requirements.fields, operand.Name)
+		delete(s.env.requirements.fields, key)
 	}
 	reference := &s.result.References[len(s.result.References)-1]
 	reference.Binding = "indeterminate"

@@ -61,13 +61,43 @@ func (e *environment) rewriteBarrier() {
 		e.rewrite.seen = map[string][]string{}
 	}
 }
-func (e *environment) rewriteProject(fields map[string]trackedField) {
+
+// Exact structured identities can be semantically complete while their typed
+// owner still lacks canonical rewrite rendering. Preserve that distinction in
+// rewrite-only coverage without changing Analyze diagnostics or requirements.
+func (s *semanticStage) rewriteIdentityCoverage(operand locatedOperand, kind string) {
+	if s.result.rewrite == nil || kind != "field" || operand.Identity.Kind != fieldIdentityPath {
+		return
+	}
+	if _, exact := operand.Identity.privateKey(); !exact {
+		// Dynamic navigation already contributes its semantic boundary through
+		// the located unsupported diagnostic owned by the expression.
+		return
+	}
+	role := operand.rewrite.role
+	if role != "" && role != "navigation" {
+		return
+	}
+	if s.stage < 0 || s.stage >= len(s.result.Stages) || !s.result.Stages[s.stage].SemanticComplete {
+		return
+	}
+	for _, reason := range s.result.Coverage.Reasons {
+		if reason == CodeUnsupportedSemantics {
+			s.result.rewrite.identityCoverageIncomplete = true
+			return
+		}
+	}
+	s.result.rewrite.identityCoverageIncomplete = true
+	s.result.Coverage.Reasons = append(s.result.Coverage.Reasons, CodeUnsupportedSemantics)
+}
+
+func (e *environment) rewriteProject(fields map[fieldIdentityKey]trackedField) {
 	if e.rewrite == nil {
 		return
 	}
 	retained := map[string]bool{}
-	for name := range fields {
-		retained[rewriteFactKey("field", rewriteAtom(name))] = true
+	for _, field := range fields {
+		retained[rewriteFactKey("field", rewriteAtom(field.Name))] = true
 	}
 	for key := range e.rewrite.facts {
 		if strings.HasPrefix(key, "field:") && !retained[key] {
@@ -85,7 +115,7 @@ func (s *semanticStage) rewriteRemoval(id string, operand locatedOperand) {
 		return
 	}
 	binding := "unavailable"
-	field, known := s.env.fields[operand.Name]
+	field, known := s.env.field(operand.fieldIdentity())
 	if known && !field.Conditional {
 		binding = "derived"
 		if field.source {
@@ -93,7 +123,7 @@ func (s *semanticStage) rewriteRemoval(id string, operand locatedOperand) {
 		}
 	} else if s.env.uncertain || known {
 		binding = "indeterminate"
-	} else if !s.env.removed[operand.Name] && s.env.open {
+	} else if key, _ := operand.fieldIdentity().privateKey(); !s.env.removed[key] && s.env.open {
 		binding = "source"
 	}
 	s.rewriteBinding(id, binding, nil)
@@ -114,8 +144,10 @@ func (s *semanticStage) rewriteFacts() []RewriteFactEvidence {
 		complete := flow.complete && (!known || fact.complete) && p.Identity.Name != nil && !s.env.uncertain
 		if p.Kind == "field" && p.Identity.Name != nil {
 			name := *p.Identity.Name
-			field, bound := s.env.fields[name]
-			if (bound && (!field.source || field.Conditional)) || (!bound && (s.env.removed[name] || !s.env.open)) {
+			identity := atomicFieldIdentity(name)
+			field, bound := s.env.field(identity)
+			key, _ := identity.privateKey()
+			if (bound && (!field.source || field.Conditional)) || (!bound && (s.env.removed[key] || !s.env.open)) {
 				complete = false
 			}
 		}
@@ -384,8 +416,10 @@ func (s *semanticStage) rewritePredicateFacts(node antlr.Tree, language string, 
 			kind = name
 		}
 		if kind == "field" {
-			field, known := s.env.fields[name]
-			if (known && (!field.source || field.Conditional)) || (!known && (s.env.uncertain || s.env.removed[name] || !s.env.open)) {
+			identity := atomicFieldIdentity(name)
+			field, known := s.env.field(identity)
+			key, _ := identity.privateKey()
+			if (known && (!field.source || field.Conditional)) || (!known && (s.env.uncertain || s.env.removed[key] || !s.env.open)) {
 				return empty, false
 			}
 		}

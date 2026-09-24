@@ -142,7 +142,7 @@ func selectorName(c parser.IAnalysisSelectorContext) string {
 	}
 	return name.String()
 }
-func (s *semanticStage) selector(c parser.IAnalysisSelectorContext, role string) ([]string, []string) {
+func (s *semanticStage) selector(c parser.IAnalysisSelectorContext, role string) ([]fieldIdentity, []string) {
 	command := s.result.Stages[s.stage].Command
 	return s.selectorAt(s.operand(c, selectorName(c)), role, command == "fields" || command == "table" || command == "rename")
 }

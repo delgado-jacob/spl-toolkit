@@ -117,33 +117,41 @@ func (r *sourceRefinement) ambiguousSourceName(name string) bool {
 
 // Tracked obligations control local exhaustiveness even when admission is
 // unresolved. Conditional provenance shadows declarations and is never promoted.
-func (s *semanticStage) refinedSelectorCandidates(pattern string) ([]string, map[string]trackedField, bool) {
-	bindings := map[string]trackedField{}
+func (s *semanticStage) refinedSelectorCandidates(pattern string) ([]fieldIdentity, map[fieldIdentityKey]trackedField, bool) {
+	bindings := map[fieldIdentityKey]trackedField{}
 	exhaustive := !s.env.open || s.refinement.complete
-	add := func(name string, field trackedField) {
-		if !wildcardMatches(pattern, name) {
+	add := func(identity fieldIdentity, field trackedField) {
+		if !wildcardMatches(pattern, identity.PublicName) {
 			return
 		}
-		if field.source && s.refinement.ambiguousSourceName(name) {
+		if field.source && s.refinement.ambiguousSourceName(identity.PublicName) {
 			exhaustive = false
 			return
 		}
 		if field.source && !field.Conditional {
-			switch s.refinement.admission(name) {
+			switch s.refinement.admission(identity.PublicName) {
 			case SourceFieldProhibited:
 				return
 			case SourceFieldIndeterminate:
 				exhaustive = false
 			}
 		}
-		bindings[name] = field
+		key, exact := identity.privateKey()
+		if !exact {
+			exhaustive = false
+			return
+		}
+		field.identity = identity.clone()
+		bindings[key] = field
 	}
-	for name, field := range s.env.fields {
-		add(name, field)
+	for _, field := range s.env.fields {
+		add(field.identity, field)
 	}
 	if s.env.open {
 		for _, name := range s.refinement.names {
-			if _, known := s.env.fields[name]; known || s.env.removed[name] {
+			identity := atomicFieldIdentity(name)
+			key, _ := identity.privateKey()
+			if _, known := s.env.fields[key]; known || s.env.removed[key] {
 				continue
 			}
 			// Identity is checked per matching candidate, even for patterns like
@@ -156,29 +164,41 @@ func (s *semanticStage) refinedSelectorCandidates(pattern string) ([]string, map
 			if s.refinement.admission(name) == SourceFieldProhibited {
 				continue
 			}
-			add(name, trackedField{FieldBinding: FieldBinding{Name: name, OriginReferenceIDs: []string{}, Conditional: s.env.uncertain}, source: true})
+			add(identity, trackedField{FieldBinding: FieldBinding{Name: name, OriginReferenceIDs: []string{}, Conditional: s.env.uncertain}, identity: identity, source: true})
 		}
 	}
-	names := make([]string, 0, len(bindings))
-	for name := range bindings {
-		names = append(names, name)
+	identities := make([]fieldIdentity, 0, len(bindings))
+	for _, field := range bindings {
+		identities = append(identities, field.identity.clone())
 	}
-	sort.Strings(names)
-	return names, bindings, exhaustive
+	sort.Slice(identities, func(i, j int) bool {
+		if identities[i].PublicName != identities[j].PublicName {
+			return identities[i].PublicName < identities[j].PublicName
+		}
+		left, _ := identities[i].privateKey()
+		right, _ := identities[j].privateKey()
+		return left < right
+	})
+	return identities, bindings, exhaustive
 }
 
-func (s *semanticStage) provenExpandedFields(names []string, bindings map[string]trackedField) []ExpandedField {
+func (s *semanticStage) provenExpandedFields(identities []fieldIdentity, bindings map[fieldIdentityKey]trackedField) []ExpandedField {
 	proven := []string{}
-	for _, name := range names {
-		field := bindings[name]
-		if !field.Conditional && (!field.source || s.refinement.admission(name) == SourceFieldAdmitted) {
-			proven = append(proven, name)
+	publicBindings := map[string]trackedField{}
+	for _, identity := range identities {
+		key, _ := identity.privateKey()
+		field := bindings[key]
+		if !field.Conditional && (!field.source || s.refinement.admission(identity.PublicName) == SourceFieldAdmitted) {
+			if _, exists := publicBindings[identity.PublicName]; !exists {
+				proven = append(proven, identity.PublicName)
+				publicBindings[identity.PublicName] = field
+			}
 		}
 	}
-	return sortedExpandedFields(proven, bindings)
+	return sortedExpandedFields(proven, publicBindings)
 }
 
-func allBindingsProven(bindings map[string]trackedField) bool {
+func allBindingsProven(bindings map[fieldIdentityKey]trackedField) bool {
 	for _, field := range bindings {
 		if field.Conditional {
 			return false
@@ -210,8 +230,8 @@ func (s *semanticStage) recordExpansion(id string, complete bool, matches []Expa
 // by catalog membership. A closed set can exclude a pattern outright; an open
 // set can prove only the removal of all matching catalog declarations.
 func (s *semanticStage) selectorStructurallyAbsent(pattern string) bool {
-	for name := range s.env.fields {
-		if wildcardMatches(pattern, name) {
+	for _, field := range s.env.fields {
+		if wildcardMatches(pattern, field.Name) {
 			return false
 		}
 	}
@@ -233,7 +253,8 @@ func (s *semanticStage) selectorStructurallyAbsent(pattern string) bool {
 		if admission == SourceFieldProhibited {
 			continue
 		}
-		if !s.env.removed[name] {
+		key, _ := atomicFieldIdentity(name).privateKey()
+		if !s.env.removed[key] {
 			return false
 		}
 		removedMatch = true
@@ -241,22 +262,22 @@ func (s *semanticStage) selectorStructurallyAbsent(pattern string) bool {
 	return removedMatch
 }
 
-func (s *semanticStage) refinedSelectorAt(operand locatedOperand, role, id string) []string {
+func (s *semanticStage) refinedSelectorAt(operand locatedOperand, role, id string) []fieldIdentity {
 	pattern := operand.Name
 	// Removal operates on tracked obligations too, even when external validation
 	// would find those names absent. These are transfer candidates, not evidence.
-	removals := map[string]bool{}
+	removals := map[fieldIdentityKey]fieldIdentity{}
 	if role == "remove" {
-		for name := range s.env.fields {
-			if wildcardMatches(pattern, name) {
-				removals[name] = true
+		for key, field := range s.env.fields {
+			if wildcardMatches(pattern, field.Name) {
+				removals[key] = field.identity.clone()
 			}
 		}
 	}
-	names, bindings, exhaustive := s.refinedSelectorCandidates(pattern)
+	identities, bindings, exhaustive := s.refinedSelectorCandidates(pattern)
 	complete := exhaustive && !s.env.uncertain && allBindingsProven(bindings)
 	ref := &s.result.References[len(s.result.References)-1]
-	matches := s.provenExpandedFields(names, bindings)
+	matches := s.provenExpandedFields(identities, bindings)
 	if !complete {
 		s.recordExpansion(id, false, matches)
 		s.refinementDiagnosticAt(CodeUnresolvedWildcard, "warning", "unsupported_semantics", fmt.Sprintf("wildcard %q membership is unresolved", pattern), operand.Location, true)
@@ -279,36 +300,48 @@ func (s *semanticStage) refinedSelectorAt(operand locatedOperand, role, id strin
 		}
 	}
 	origins := []string{}
-	for _, name := range names {
-		field := bindings[name]
+	for _, identity := range identities {
+		key, _ := identity.privateKey()
+		field := bindings[key]
 		if role == "remove" {
-			removals[name] = true
+			removals[key] = identity.clone()
 		} else {
-			if _, known := s.env.fields[name]; !known {
+			if _, known := s.env.fields[key]; !known {
 				field.OriginReferenceIDs = []string{id}
-				s.env.fields[name] = field
+				field.identity = identity.clone()
+				s.env.fields[key] = field
+				s.env.fieldOrder = append(s.env.fieldOrder, key)
+				s.env.identities[key] = identity.clone()
 			}
 		}
 		// Newly materialized members originate at this selector; avoid a self-link
 		// on the selector itself while preserving that provenance downstream.
-		origins = uniqueIDs(origins, bindings[name].OriginReferenceIDs)
+		origins = uniqueIDs(origins, bindings[key].OriginReferenceIDs)
 	}
 	sort.Strings(origins)
 	ref.OriginReferenceIDs = origins
 	if role == "remove" {
-		names = make([]string, 0, len(removals))
-		for name := range removals {
-			names = append(names, name)
+		identities = make([]fieldIdentity, 0, len(removals))
+		for _, identity := range removals {
+			identities = append(identities, identity.clone())
 		}
-		sort.Strings(names)
+		sort.Slice(identities, func(i, j int) bool {
+			if identities[i].PublicName != identities[j].PublicName {
+				return identities[i].PublicName < identities[j].PublicName
+			}
+			left, _ := identities[i].privateKey()
+			right, _ := identities[j].privateKey()
+			return left < right
+		})
 	}
-	return names
+	return identities
 }
 
 func (s *semanticStage) retainSourceInternals() bool {
 	complete := !s.env.open || s.refinement.complete
 	// Earlier exact reads track structural obligations without proving admission.
-	for name, field := range s.env.fields {
+	for _, field := range s.env.fields {
+		name := field.Name
 		if field.source && strings.HasPrefix(name, "_") && (s.refinement.admission(name) == SourceFieldIndeterminate || s.refinement.ambiguousSourceName(name)) {
 			complete = false
 		}
@@ -317,7 +350,9 @@ func (s *semanticStage) retainSourceInternals() bool {
 		return complete
 	}
 	for _, name := range s.refinement.names {
-		if _, known := s.env.fields[name]; known || s.env.removed[name] || !strings.HasPrefix(name, "_") {
+		identity := atomicFieldIdentity(name)
+		key, _ := identity.privateKey()
+		if _, known := s.env.fields[key]; known || s.env.removed[key] || !strings.HasPrefix(name, "_") {
 			continue
 		}
 		if s.refinement.ambiguousSourceName(name) {
@@ -331,7 +366,7 @@ func (s *semanticStage) retainSourceInternals() bool {
 		if admission == SourceFieldIndeterminate {
 			complete = false
 		}
-		s.env.fields[name] = trackedField{FieldBinding: FieldBinding{Name: name, OriginReferenceIDs: []string{}, Conditional: s.env.uncertain}, source: true}
+		s.env.fields[key] = trackedField{FieldBinding: FieldBinding{Name: name, OriginReferenceIDs: []string{}, Conditional: s.env.uncertain}, identity: identity, source: true}
 	}
 	return complete
 }
