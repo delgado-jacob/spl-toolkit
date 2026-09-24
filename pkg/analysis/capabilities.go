@@ -15,17 +15,57 @@ type capabilityContract struct {
 }
 
 type capabilityRevisionPayload struct {
-	Rewrite               *RewriteCapabilityManifest `json:"rewrite,omitempty"`
-	SchemaVersion         int                        `json:"schema_version"`
-	Language              string                     `json:"language"`
-	Profile               string                     `json:"profile"`
-	Version               string                     `json:"version"`
-	DocumentationSnapshot string                     `json:"documentation_snapshot,omitempty"`
-	Commands              []Capability               `json:"commands"`
-	Functions             []Capability               `json:"functions"`
-	Records               []CapabilityRecord         `json:"records"`
-	Summary               CapabilitySummary          `json:"summary"`
-	Evidence              []CapabilityEvidence       `json:"evidence"`
+	Rewrite                   *RewriteCapabilityManifest           `json:"rewrite,omitempty"`
+	SchemaVersion             int                                  `json:"schema_version"`
+	Language                  string                               `json:"language"`
+	Profile                   string                               `json:"profile"`
+	Version                   string                               `json:"version"`
+	DocumentationSnapshot     string                               `json:"documentation_snapshot,omitempty"`
+	Commands                  []Capability                         `json:"commands"`
+	Functions                 []Capability                         `json:"functions"`
+	Records                   []CapabilityRecord                   `json:"records"`
+	Summary                   CapabilitySummary                    `json:"summary"`
+	Evidence                  []capabilityRevisionEvidence         `json:"evidence"`
+	SemanticProofRequirements []capabilityRevisionProofRequirement `json:"semantic_proof_requirements,omitempty"`
+}
+
+type capabilityRevisionEvidence struct {
+	ID             string                                 `json:"id"`
+	Classification CapabilityEvidenceClassification       `json:"classification"`
+	Document       QueryDocument                          `json:"document"`
+	Observations   capabilityRevisionEvidenceObservations `json:"observations"`
+	RewriteRequest json.RawMessage                        `json:"rewrite_request,omitempty" swaggertype:"object"`
+	Provenance     CapabilityProvenance                   `json:"provenance"`
+}
+
+type capabilityRevisionEvidenceObservations struct {
+	Syntax        *CapabilitySyntaxObservation            `json:"syntax,omitempty"`
+	Semantics     *capabilityRevisionSemanticsObservation `json:"semantics,omitempty"`
+	Requirements  *CapabilityRequirementsObservation      `json:"requirements,omitempty"`
+	Linting       *CapabilityLintingObservation           `json:"linting,omitempty"`
+	SafeRewriting *CapabilityRewriteObservation           `json:"safe_rewriting,omitempty"`
+}
+
+type capabilityRevisionStageExpectation CapabilityStageExpectation
+type capabilityRevisionReferenceExpectation CapabilityReferenceExpectation
+type capabilityRevisionTransitionExpectation CapabilityTransitionExpectation
+
+type capabilityRevisionSemanticsObservation struct {
+	Status          Status                                    `json:"status"`
+	Complete        bool                                      `json:"complete"`
+	Stages          []capabilityRevisionStageExpectation      `json:"stages"`
+	Scopes          []CapabilityScopeExpectation              `json:"scopes,omitempty"`
+	References      []capabilityRevisionReferenceExpectation  `json:"references"`
+	Dependencies    []CapabilityDependencyExpectation         `json:"dependencies"`
+	Lineage         []CapabilityLineageExpectation            `json:"lineage,omitempty"`
+	Transitions     []capabilityRevisionTransitionExpectation `json:"transitions"`
+	FinalFieldState *CapabilityFieldStateExpectation          `json:"final_field_state,omitempty"`
+	Diagnostics     []CapabilityDiagnosticExpectation         `json:"diagnostics"`
+}
+
+type capabilityRevisionProofRequirement struct {
+	RecordID   string   `json:"record_id"`
+	Categories []string `json:"categories"`
 }
 
 var capabilityCatalog = mustBuildCapabilityCatalog()
@@ -123,19 +163,110 @@ func projectLegacyCapabilities(records []CapabilityRecord, kind string) []Capabi
 }
 
 func capabilityRevisionPayloadFor(manifest CapabilityManifest) capabilityRevisionPayload {
+	return capabilityRevisionPayloadForRequirements(manifest, milestone11SemanticProofRequirements)
+}
+
+func capabilityRevisionPayloadForRequirements(manifest CapabilityManifest, proofRequirements map[string]capabilitySemanticProofRequirement) capabilityRevisionPayload {
 	return capabilityRevisionPayload{
-		Rewrite:               manifest.Rewrite,
-		SchemaVersion:         manifest.SchemaVersion,
-		Language:              manifest.Language,
-		Profile:               manifest.Profile,
-		Version:               manifest.Version,
-		DocumentationSnapshot: manifest.DocumentationSnapshot,
-		Commands:              manifest.Commands,
-		Functions:             manifest.Functions,
-		Records:               manifest.Records,
-		Summary:               manifest.Summary,
-		Evidence:              manifest.Evidence,
+		Rewrite:                   manifest.Rewrite,
+		SchemaVersion:             manifest.SchemaVersion,
+		Language:                  manifest.Language,
+		Profile:                   manifest.Profile,
+		Version:                   manifest.Version,
+		DocumentationSnapshot:     manifest.DocumentationSnapshot,
+		Commands:                  manifest.Commands,
+		Functions:                 manifest.Functions,
+		Records:                   manifest.Records,
+		Summary:                   manifest.Summary,
+		Evidence:                  capabilityRevisionEvidenceFor(manifest.Evidence),
+		SemanticProofRequirements: capabilityRevisionProofRequirementsFor(manifest.Records, proofRequirements),
 	}
+}
+
+func capabilityRevisionEvidenceFor(evidence []CapabilityEvidence) []capabilityRevisionEvidence {
+	out := make([]capabilityRevisionEvidence, len(evidence))
+	for i, item := range evidence {
+		out[i] = capabilityRevisionEvidence{
+			ID:             item.ID,
+			Classification: item.Classification,
+			Document:       item.Document,
+			Observations: capabilityRevisionEvidenceObservations{
+				Syntax:        item.Observations.Syntax,
+				Semantics:     capabilityRevisionSemanticsFor(item.Observations.Semantics),
+				Requirements:  item.Observations.Requirements,
+				Linting:       item.Observations.Linting,
+				SafeRewriting: item.Observations.SafeRewriting,
+			},
+			RewriteRequest: item.RewriteRequest,
+			Provenance:     item.Provenance,
+		}
+	}
+	return out
+}
+
+func capabilityRevisionSemanticsFor(observation *CapabilitySemanticsObservation) *capabilityRevisionSemanticsObservation {
+	if observation == nil {
+		return nil
+	}
+	stages := make([]capabilityRevisionStageExpectation, len(observation.Stages))
+	for i, stage := range observation.Stages {
+		stages[i] = capabilityRevisionStageExpectation(stage)
+	}
+	references := make([]capabilityRevisionReferenceExpectation, len(observation.References))
+	for i, reference := range observation.References {
+		references[i] = capabilityRevisionReferenceExpectation(reference)
+	}
+	transitions := make([]capabilityRevisionTransitionExpectation, len(observation.Transitions))
+	for i, transition := range observation.Transitions {
+		transitions[i] = capabilityRevisionTransitionExpectation(transition)
+	}
+	return &capabilityRevisionSemanticsObservation{
+		Status:          observation.Status,
+		Complete:        observation.Complete,
+		Stages:          stages,
+		Scopes:          observation.Scopes,
+		References:      references,
+		Dependencies:    observation.Dependencies,
+		Lineage:         observation.Lineage,
+		Transitions:     transitions,
+		FinalFieldState: observation.FinalFieldState,
+		Diagnostics:     observation.Diagnostics,
+	}
+}
+
+func capabilityRevisionProofRequirementsFor(records []CapabilityRecord, proofRequirements map[string]capabilitySemanticProofRequirement) []capabilityRevisionProofRequirement {
+	out := make([]capabilityRevisionProofRequirement, 0, len(proofRequirements))
+	for _, record := range records {
+		requirement, ok := proofRequirements[record.ID]
+		if !ok {
+			continue
+		}
+		out = append(out, capabilityRevisionProofRequirement{
+			RecordID:   record.ID,
+			Categories: capabilityRevisionProofCategories(requirement),
+		})
+	}
+	return out
+}
+
+func capabilityRevisionProofCategories(requirement capabilitySemanticProofRequirement) []string {
+	categories := make([]string, 0, 6)
+	for _, category := range []struct {
+		flag capabilitySemanticProofRequirement
+		name string
+	}{
+		{capabilityProofScope, "scope"},
+		{capabilityProofLineage, "lineage"},
+		{capabilityProofOrigins, "origins"},
+		{capabilityProofTransitions, "transitions"},
+		{capabilityProofFinalState, "final_state"},
+		{capabilityProofMerge, "merge"},
+	} {
+		if requirement&category.flag != 0 {
+			categories = append(categories, category.name)
+		}
+	}
+	return categories
 }
 
 // Capabilities returns a detached copy of the default capability contract.

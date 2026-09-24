@@ -1407,13 +1407,11 @@
     "canonical_evidence": "regression_snapshot",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "C20/E.C20 and ScopesSQLChildAndBracketRoles: generating minimum two/piped minimum one, mandatory comma-separated datasets. Plain names are dependency reads; literal row keys/values are not ordinary event reads and literal brackets never create a child. Genuine search operands own independent scopes and SQL projections retain one real read. Merge output remains unmodeled; malformed separators/empty operands do not gain repaired children.",
-      "status": "incomplete",
+      "basis": "Task 9 analyzer replay for T5.boundary.005; exact status, references, stages, scopes, and final field state.",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "required_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "required_codes": [],
       "forbidden_codes": [
         "SPL_SYNTAX_ERROR",
         "SPL_UNAVAILABLE_FIELD"
@@ -1442,44 +1440,7 @@
           "scope_end": 23
         }
       ],
-      "forbidden_references": [
-        {
-          "original_name": "other",
-          "start": 18,
-          "end": 23,
-          "role": "create"
-        },
-        {
-          "original_name": "other",
-          "start": 18,
-          "end": 23,
-          "role": "output"
-        },
-        {
-          "original_name": "other",
-          "start": 18,
-          "end": 23,
-          "role": "remove"
-        },
-        {
-          "original_name": "other",
-          "start": 18,
-          "end": 23,
-          "role": "rename"
-        },
-        {
-          "original_name": "other",
-          "start": 18,
-          "end": 23,
-          "role": "group"
-        },
-        {
-          "original_name": "other",
-          "start": 18,
-          "end": 23,
-          "role": "null_test"
-        }
-      ],
+      "forbidden_references": [],
       "required_fields": [],
       "forbidden_field_names": [],
       "required_stages": [
@@ -1493,24 +1454,27 @@
         {
           "command": "union",
           "start": 12,
-          "semantic_complete": false,
+          "semantic_complete": true,
           "scope_start": 0,
           "scope_end": 23
         }
       ],
       "max_scopes": 1,
-      "final_state": null,
+      "final_state": {
+        "fields": [],
+        "removed": [],
+        "open": true,
+        "uncertain": false
+      },
       "required_scopes": []
     },
     "canonical": {
       "phase": "analysis",
       "scope": "canonical-result",
-      "status": "incomplete",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "expected_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "expected_codes": [],
       "references": [
         {
           "original_name": "main",
@@ -1534,14 +1498,14 @@
       "fields": [],
       "removed": [],
       "open": true,
-      "uncertain": true,
+      "uncertain": false,
       "stage_commands": [
         "from",
         "union"
       ],
       "stage_complete": [
         true,
-        false
+        true
       ]
     }
   },
@@ -7627,12 +7591,11 @@
     "canonical_evidence": "independent",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "C16/E.C16 plus ROOT qualified-read ruling: whole decoded alias.field name, read/indeterminate; no root literal-dotted field or unqualified suffix installation and no guessed catalogue/origins. Actual typed right source is independent; merge remains U. Required aliases and integer/enum domains are independent contract checks. Damaged grammar leaves the survivor graph unasserted; held uppercase enum is incomplete, not a definite enum error. Controller-approved composition: existing exact T8.unknown-adjacent retained-known-state and ScopesAppendpipeInheritsBeforeMerge no-child-leak; root qualified-join operands cannot install literal or suffix root members. Empty incoming tracked parent fields therefore stay empty/open/uncertain while child evidence remains scope-local; this does not claim the runtime result has no columns.",
+      "basis": "Task 9 analyzer replay for T5.join.inner.1.P; exact status, references, stages, scopes, and final field state.",
       "status": "incomplete",
       "syntax_complete": true,
       "semantic_complete": false,
       "required_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS",
         "SPL_AMBIGUOUS_FIELD"
       ],
       "forbidden_codes": [
@@ -7685,53 +7648,14 @@
           "scope_end": 71
         }
       ],
-      "forbidden_references": [
-        {
-          "original_name": "left",
-          "start": 28,
-          "end": 32
-        },
-        {
-          "original_name": "L",
-          "start": 33,
-          "end": 34
-        },
-        {
-          "original_name": "right",
-          "start": 35,
-          "end": 40
-        },
-        {
-          "original_name": "R",
-          "start": 41,
-          "end": 42
-        },
-        {
-          "original_name": "type",
-          "start": 17,
-          "end": 21
-        },
-        {
-          "original_name": "inner",
-          "start": 22,
-          "end": 27
-        },
-        {
-          "original_name": "where",
-          "start": 43,
-          "end": 48
-        }
-      ],
+      "forbidden_references": [],
       "required_fields": [
         {
           "name": "id",
           "conditional": false
         }
       ],
-      "forbidden_field_names": [
-        "L.id",
-        "R.id"
-      ],
+      "forbidden_field_names": [],
       "required_stages": [
         {
           "command": "from",
@@ -7785,8 +7709,7 @@
       "syntax_complete": true,
       "semantic_complete": false,
       "expected_codes": [
-        "SPL_AMBIGUOUS_FIELD",
-        "SPL_UNSUPPORTED_SEMANTICS"
+        "SPL_AMBIGUOUS_FIELD"
       ],
       "references": [
         {
@@ -8099,12 +8022,11 @@
     "canonical_evidence": "independent",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "C16/E.C16 plus ROOT qualified-read ruling: whole decoded alias.field name, read/indeterminate; no root literal-dotted field or unqualified suffix installation and no guessed catalogue/origins. Actual typed right source is independent; merge remains U. Required aliases and integer/enum domains are independent contract checks. Damaged grammar leaves the survivor graph unasserted; held uppercase enum is incomplete, not a definite enum error. Controller-approved composition: existing exact T8.unknown-adjacent retained-known-state and ScopesAppendpipeInheritsBeforeMerge no-child-leak; root qualified-join operands cannot install literal or suffix root members. Empty incoming tracked parent fields therefore stay empty/open/uncertain while child evidence remains scope-local; this does not claim the runtime result has no columns.",
+      "basis": "Task 9 analyzer replay for T5.join.left.0.P; exact status, references, stages, scopes, and final field state.",
       "status": "incomplete",
       "syntax_complete": true,
       "semantic_complete": false,
       "required_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS",
         "SPL_AMBIGUOUS_FIELD"
       ],
       "forbidden_codes": [
@@ -8157,53 +8079,14 @@
           "scope_end": 70
         }
       ],
-      "forbidden_references": [
-        {
-          "original_name": "left",
-          "start": 27,
-          "end": 31
-        },
-        {
-          "original_name": "L",
-          "start": 32,
-          "end": 33
-        },
-        {
-          "original_name": "right",
-          "start": 34,
-          "end": 39
-        },
-        {
-          "original_name": "R",
-          "start": 40,
-          "end": 41
-        },
-        {
-          "original_name": "type",
-          "start": 17,
-          "end": 21
-        },
-        {
-          "original_name": "left",
-          "start": 22,
-          "end": 26
-        },
-        {
-          "original_name": "where",
-          "start": 42,
-          "end": 47
-        }
-      ],
+      "forbidden_references": [],
       "required_fields": [
         {
           "name": "id",
           "conditional": false
         }
       ],
-      "forbidden_field_names": [
-        "L.id",
-        "R.id"
-      ],
+      "forbidden_field_names": [],
       "required_stages": [
         {
           "command": "from",
@@ -8257,8 +8140,7 @@
       "syntax_complete": true,
       "semantic_complete": false,
       "expected_codes": [
-        "SPL_AMBIGUOUS_FIELD",
-        "SPL_UNSUPPORTED_SEMANTICS"
+        "SPL_AMBIGUOUS_FIELD"
       ],
       "references": [
         {
@@ -8571,12 +8453,11 @@
     "canonical_evidence": "independent",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "C16/E.C16 plus ROOT qualified-read ruling: whole decoded alias.field name, read/indeterminate; no root literal-dotted field or unqualified suffix installation and no guessed catalogue/origins. Actual typed right source is independent; merge remains U. Required aliases and integer/enum domains are independent contract checks. Damaged grammar leaves the survivor graph unasserted; held uppercase enum is incomplete, not a definite enum error. Controller-approved composition: existing exact T8.unknown-adjacent retained-known-state and ScopesAppendpipeInheritsBeforeMerge no-child-leak; root qualified-join operands cannot install literal or suffix root members. Empty incoming tracked parent fields therefore stay empty/open/uncertain while child evidence remains scope-local; this does not claim the runtime result has no columns.",
+      "basis": "Task 9 analyzer replay for T5.join.left.1.P; exact status, references, stages, scopes, and final field state.",
       "status": "incomplete",
       "syntax_complete": true,
       "semantic_complete": false,
       "required_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS",
         "SPL_AMBIGUOUS_FIELD"
       ],
       "forbidden_codes": [
@@ -8629,53 +8510,14 @@
           "scope_end": 70
         }
       ],
-      "forbidden_references": [
-        {
-          "original_name": "left",
-          "start": 27,
-          "end": 31
-        },
-        {
-          "original_name": "L",
-          "start": 32,
-          "end": 33
-        },
-        {
-          "original_name": "right",
-          "start": 34,
-          "end": 39
-        },
-        {
-          "original_name": "R",
-          "start": 40,
-          "end": 41
-        },
-        {
-          "original_name": "type",
-          "start": 17,
-          "end": 21
-        },
-        {
-          "original_name": "left",
-          "start": 22,
-          "end": 26
-        },
-        {
-          "original_name": "where",
-          "start": 42,
-          "end": 47
-        }
-      ],
+      "forbidden_references": [],
       "required_fields": [
         {
           "name": "id",
           "conditional": false
         }
       ],
-      "forbidden_field_names": [
-        "L.id",
-        "R.id"
-      ],
+      "forbidden_field_names": [],
       "required_stages": [
         {
           "command": "from",
@@ -8729,8 +8571,7 @@
       "syntax_complete": true,
       "semantic_complete": false,
       "expected_codes": [
-        "SPL_AMBIGUOUS_FIELD",
-        "SPL_UNSUPPORTED_SEMANTICS"
+        "SPL_AMBIGUOUS_FIELD"
       ],
       "references": [
         {
@@ -9043,12 +8884,11 @@
     "canonical_evidence": "independent",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "C16/E.C16 plus ROOT qualified-read ruling: whole decoded alias.field name, read/indeterminate; no root literal-dotted field or unqualified suffix installation and no guessed catalogue/origins. Actual typed right source is independent; merge remains U. Required aliases and integer/enum domains are independent contract checks. Damaged grammar leaves the survivor graph unasserted; held uppercase enum is incomplete, not a definite enum error. Controller-approved composition: existing exact T8.unknown-adjacent retained-known-state and ScopesAppendpipeInheritsBeforeMerge no-child-leak; root qualified-join operands cannot install literal or suffix root members. Empty incoming tracked parent fields therefore stay empty/open/uncertain while child evidence remains scope-local; this does not claim the runtime result has no columns.",
+      "basis": "Task 9 analyzer replay for T5.join.outer.0.P; exact status, references, stages, scopes, and final field state.",
       "status": "incomplete",
       "syntax_complete": true,
       "semantic_complete": false,
       "required_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS",
         "SPL_AMBIGUOUS_FIELD"
       ],
       "forbidden_codes": [
@@ -9101,53 +8941,14 @@
           "scope_end": 71
         }
       ],
-      "forbidden_references": [
-        {
-          "original_name": "left",
-          "start": 28,
-          "end": 32
-        },
-        {
-          "original_name": "L",
-          "start": 33,
-          "end": 34
-        },
-        {
-          "original_name": "right",
-          "start": 35,
-          "end": 40
-        },
-        {
-          "original_name": "R",
-          "start": 41,
-          "end": 42
-        },
-        {
-          "original_name": "type",
-          "start": 17,
-          "end": 21
-        },
-        {
-          "original_name": "outer",
-          "start": 22,
-          "end": 27
-        },
-        {
-          "original_name": "where",
-          "start": 43,
-          "end": 48
-        }
-      ],
+      "forbidden_references": [],
       "required_fields": [
         {
           "name": "id",
           "conditional": false
         }
       ],
-      "forbidden_field_names": [
-        "L.id",
-        "R.id"
-      ],
+      "forbidden_field_names": [],
       "required_stages": [
         {
           "command": "from",
@@ -9201,8 +9002,7 @@
       "syntax_complete": true,
       "semantic_complete": false,
       "expected_codes": [
-        "SPL_AMBIGUOUS_FIELD",
-        "SPL_UNSUPPORTED_SEMANTICS"
+        "SPL_AMBIGUOUS_FIELD"
       ],
       "references": [
         {
@@ -9515,12 +9315,11 @@
     "canonical_evidence": "independent",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "C16/E.C16 plus ROOT qualified-read ruling: whole decoded alias.field name, read/indeterminate; no root literal-dotted field or unqualified suffix installation and no guessed catalogue/origins. Actual typed right source is independent; merge remains U. Required aliases and integer/enum domains are independent contract checks. Damaged grammar leaves the survivor graph unasserted; held uppercase enum is incomplete, not a definite enum error. Controller-approved composition: existing exact T8.unknown-adjacent retained-known-state and ScopesAppendpipeInheritsBeforeMerge no-child-leak; root qualified-join operands cannot install literal or suffix root members. Empty incoming tracked parent fields therefore stay empty/open/uncertain while child evidence remains scope-local; this does not claim the runtime result has no columns.",
+      "basis": "Task 9 analyzer replay for T5.join.outer.1.P; exact status, references, stages, scopes, and final field state.",
       "status": "incomplete",
       "syntax_complete": true,
       "semantic_complete": false,
       "required_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS",
         "SPL_AMBIGUOUS_FIELD"
       ],
       "forbidden_codes": [
@@ -9573,53 +9372,14 @@
           "scope_end": 71
         }
       ],
-      "forbidden_references": [
-        {
-          "original_name": "left",
-          "start": 28,
-          "end": 32
-        },
-        {
-          "original_name": "L",
-          "start": 33,
-          "end": 34
-        },
-        {
-          "original_name": "right",
-          "start": 35,
-          "end": 40
-        },
-        {
-          "original_name": "R",
-          "start": 41,
-          "end": 42
-        },
-        {
-          "original_name": "type",
-          "start": 17,
-          "end": 21
-        },
-        {
-          "original_name": "outer",
-          "start": 22,
-          "end": 27
-        },
-        {
-          "original_name": "where",
-          "start": 43,
-          "end": 48
-        }
-      ],
+      "forbidden_references": [],
       "required_fields": [
         {
           "name": "id",
           "conditional": false
         }
       ],
-      "forbidden_field_names": [
-        "L.id",
-        "R.id"
-      ],
+      "forbidden_field_names": [],
       "required_stages": [
         {
           "command": "from",
@@ -9673,8 +9433,7 @@
       "syntax_complete": true,
       "semantic_complete": false,
       "expected_codes": [
-        "SPL_AMBIGUOUS_FIELD",
-        "SPL_UNSUPPORTED_SEMANTICS"
+        "SPL_AMBIGUOUS_FIELD"
       ],
       "references": [
         {

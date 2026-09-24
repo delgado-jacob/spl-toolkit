@@ -40,13 +40,16 @@ type diagnosticFact struct {
 }
 
 type semanticFacts struct {
-	Status       analysis.Status
-	Complete     bool
-	Stages       []analysis.CapabilityStageExpectation
-	References   []analysis.CapabilityReferenceExpectation
-	Dependencies []analysis.CapabilityDependencyExpectation
-	Transitions  []analysis.CapabilityTransitionExpectation
-	Diagnostics  []diagnosticFact
+	Status          analysis.Status
+	Complete        bool
+	Stages          []analysis.CapabilityStageExpectation
+	Scopes          []analysis.CapabilityScopeExpectation
+	References      []analysis.CapabilityReferenceExpectation
+	Dependencies    []analysis.CapabilityDependencyExpectation
+	Lineage         []analysis.CapabilityLineageExpectation
+	Transitions     []analysis.CapabilityTransitionExpectation
+	FinalFieldState *analysis.CapabilityFieldStateExpectation
+	Diagnostics     []diagnosticFact
 }
 
 type requirementFacts struct {
@@ -132,6 +135,88 @@ func TestCapabilityEvidenceCorpus(t *testing.T) {
 				assertClaimEvidence(t, record.ID, dimension, evidenceByID, executions)
 			}
 		}
+	}
+}
+
+func TestCapabilitySemanticComparisonRejectsStructuredFactMismatches(t *testing.T) {
+	result, err := analysis.Analyze(analysis.QueryDocument{
+		Text:     "FROM main | eval beta=alpha",
+		Language: "spl2",
+		Profile:  "splunkd",
+		Version:  "current",
+		SourceID: "capability:test-structured-mismatch",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	baseline := func() analysis.CapabilitySemanticsObservation {
+		return analysis.CapabilitySemanticsObservation{
+			Status:          result.Status,
+			Complete:        result.Coverage.SemanticComplete,
+			Stages:          stageFacts(result.Stages),
+			Scopes:          scopeFacts(result.Scopes),
+			References:      referenceFacts(result.References),
+			Dependencies:    dependencyFacts(result.Dependencies),
+			Lineage:         lineageFacts(result.Lineage),
+			Transitions:     transitionFacts(result.Lineage),
+			FinalFieldState: finalFieldStateFact(result.Lineage),
+		}
+	}
+	tests := []struct {
+		name   string
+		mutate func(*analysis.CapabilitySemanticsObservation)
+	}{
+		{
+			name: "unknown scope",
+			mutate: func(observation *analysis.CapabilitySemanticsObservation) {
+				observation.Scopes = []analysis.CapabilityScopeExpectation{{ID: "scope-missing", Kind: "pipeline", StageID: "stage-missing"}}
+			},
+		},
+		{
+			name: "wrong lineage origin",
+			mutate: func(observation *analysis.CapabilitySemanticsObservation) {
+				observation.Lineage[1].After.Fields[0].OriginReferenceIDs[0] = "ref-0"
+			},
+		},
+		{
+			name: "wrong canonical lineage order",
+			mutate: func(observation *analysis.CapabilitySemanticsObservation) {
+				observation.Lineage[0], observation.Lineage[1] = observation.Lineage[1], observation.Lineage[0]
+			},
+		},
+		{
+			name: "wrong lineage openness",
+			mutate: func(observation *analysis.CapabilitySemanticsObservation) {
+				observation.Lineage[1].After.Open = false
+			},
+		},
+		{
+			name: "wrong final uncertainty",
+			mutate: func(observation *analysis.CapabilitySemanticsObservation) {
+				observation.FinalFieldState.Uncertain = true
+			},
+		},
+		{
+			name: "wrong field conditionality",
+			mutate: func(observation *analysis.CapabilitySemanticsObservation) {
+				observation.FinalFieldState.Fields[1].Conditional = true
+			},
+		},
+		{
+			name: "wrong expanded transition input",
+			mutate: func(observation *analysis.CapabilitySemanticsObservation) {
+				observation.Transitions[0].InputReferenceIDs[0] = "ref-0"
+			},
+		},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			observation := baseline()
+			tc.mutate(&observation)
+			if comparison := compareSemantics(observation, result); comparison.passed {
+				t.Fatalf("structured semantic mismatch was accepted: %+v", observation)
+			}
+		})
 	}
 }
 
@@ -493,20 +578,36 @@ func compareSyntax(expected analysis.CapabilitySyntaxObservation, result *analys
 
 func compareSemantics(expected analysis.CapabilitySemanticsObservation, result *analysis.Result) evidenceDimensionResult {
 	actual := semanticFacts{
-		Status:       result.Status,
-		Complete:     result.Coverage.SemanticComplete,
-		Stages:       stageFacts(result.Stages),
-		References:   referenceFacts(result.References),
-		Dependencies: dependencyFacts(result.Dependencies),
-		Transitions:  transitionFacts(result.Lineage),
-		Diagnostics:  resultDiagnosticFacts(result.Diagnostics),
+		Status:          result.Status,
+		Complete:        result.Coverage.SemanticComplete,
+		Stages:          stageFacts(result.Stages),
+		Scopes:          scopeFacts(result.Scopes),
+		References:      referenceFacts(result.References),
+		Dependencies:    dependencyFacts(result.Dependencies),
+		Lineage:         lineageFacts(result.Lineage),
+		Transitions:     transitionFacts(result.Lineage),
+		FinalFieldState: finalFieldStateFact(result.Lineage),
+		Diagnostics:     resultDiagnosticFacts(result.Diagnostics),
+	}
+	structured := len(expected.Scopes) != 0 || len(expected.Lineage) != 0 || expected.FinalFieldState != nil
+	for _, stage := range expected.Stages {
+		structured = structured || stage.ID != "" || stage.ScopeID != ""
+	}
+	for _, reference := range expected.References {
+		structured = structured || reference.ID != ""
+	}
+	for _, transition := range expected.Transitions {
+		structured = structured || transition.InputReferenceIDs != nil || transition.OutputReferenceID != "" || transition.Conditional
 	}
 	passed := expected.Status == actual.Status &&
 		expected.Complete == actual.Complete &&
-		containsAll(actual.Stages, expected.Stages) &&
-		containsAll(actual.References, expected.References) &&
+		containsAllStages(actual.Stages, expected.Stages, structured) &&
+		containsAll(actual.Scopes, expected.Scopes) &&
+		containsAllReferences(actual.References, expected.References, structured) &&
 		containsAll(actual.Dependencies, expected.Dependencies) &&
-		containsAll(actual.Transitions, expected.Transitions) &&
+		containsAllLineage(actual.Lineage, expected.Lineage) &&
+		containsAllTransitions(actual.Transitions, expected.Transitions, structured) &&
+		(expected.FinalFieldState == nil || reflect.DeepEqual(actual.FinalFieldState, expected.FinalFieldState)) &&
 		containsAll(actual.Diagnostics, diagnosticFacts(expected.Diagnostics))
 	return evidenceDimensionResult{passed: passed, expected: formatValue(expected), actual: formatValue(actual)}
 }
@@ -847,7 +948,17 @@ func resultDiagnosticFacts(diagnostics []analysis.Diagnostic) []diagnosticFact {
 func stageFacts(stages []analysis.Stage) []analysis.CapabilityStageExpectation {
 	facts := make([]analysis.CapabilityStageExpectation, 0, len(stages))
 	for _, stage := range stages {
-		facts = append(facts, analysis.CapabilityStageExpectation{Command: stage.Command, SemanticComplete: stage.SemanticComplete})
+		facts = append(facts, analysis.CapabilityStageExpectation{ID: stage.ID, Command: stage.Command, ScopeID: stage.ScopeID, SemanticComplete: stage.SemanticComplete})
+	}
+	return facts
+}
+
+func scopeFacts(scopes []analysis.Scope) []analysis.CapabilityScopeExpectation {
+	facts := make([]analysis.CapabilityScopeExpectation, 0, len(scopes))
+	for _, scope := range scopes {
+		facts = append(facts, analysis.CapabilityScopeExpectation{
+			ID: scope.ID, ParentID: scope.ParentID, Kind: scope.Kind, StageID: scope.StageID, Location: scope.Location,
+		})
 	}
 	return facts
 }
@@ -856,6 +967,7 @@ func referenceFacts(references []analysis.Reference) []analysis.CapabilityRefere
 	facts := make([]analysis.CapabilityReferenceExpectation, 0, len(references))
 	for _, reference := range references {
 		facts = append(facts, analysis.CapabilityReferenceExpectation{
+			ID:             reference.ID,
 			NormalizedName: reference.NormalizedName,
 			Kind:           reference.Kind,
 			Role:           reference.Role,
@@ -888,10 +1000,56 @@ func transitionFacts(lineage []analysis.Lineage) []analysis.CapabilityTransition
 	facts := make([]analysis.CapabilityTransitionExpectation, 0)
 	for _, entry := range lineage {
 		for _, transition := range entry.Transitions {
-			facts = append(facts, analysis.CapabilityTransitionExpectation{Operation: transition.Operation, Output: transition.Output})
+			facts = append(facts, analysis.CapabilityTransitionExpectation{
+				Operation:         transition.Operation,
+				Output:            transition.Output,
+				InputReferenceIDs: slices.Clone(transition.InputReferenceIDs),
+				OutputReferenceID: transition.OutputReferenceID,
+				Conditional:       transition.Conditional,
+			})
 		}
 	}
 	return facts
+}
+
+func lineageFacts(lineage []analysis.Lineage) []analysis.CapabilityLineageExpectation {
+	facts := make([]analysis.CapabilityLineageExpectation, 0, len(lineage))
+	for _, entry := range lineage {
+		before := fieldStateFact(entry.Before)
+		after := fieldStateFact(entry.After)
+		facts = append(facts, analysis.CapabilityLineageExpectation{
+			StageID: entry.StageID,
+			ScopeID: entry.ScopeID,
+			Before:  &before,
+			After:   &after,
+		})
+	}
+	return facts
+}
+
+func finalFieldStateFact(lineage []analysis.Lineage) *analysis.CapabilityFieldStateExpectation {
+	if len(lineage) == 0 {
+		return nil
+	}
+	state := fieldStateFact(lineage[len(lineage)-1].After)
+	return &state
+}
+
+func fieldStateFact(state analysis.FieldState) analysis.CapabilityFieldStateExpectation {
+	fields := make([]analysis.CapabilityFieldExpectation, 0, len(state.Fields))
+	for _, field := range state.Fields {
+		fields = append(fields, analysis.CapabilityFieldExpectation{
+			Name:               field.Name,
+			OriginReferenceIDs: slices.Clone(field.OriginReferenceIDs),
+			Conditional:        field.Conditional,
+		})
+	}
+	return analysis.CapabilityFieldStateExpectation{
+		Fields:    fields,
+		Removed:   slices.Clone(state.Removed),
+		Open:      state.Open,
+		Uncertain: state.Uncertain,
+	}
 }
 
 func requirementItemFacts(items []analysis.RequirementItem) []analysis.CapabilityRequirementExpectation {
@@ -940,6 +1098,109 @@ func containsAll[T comparable](actual, selected []T) bool {
 			if !used[i] && candidate == expected {
 				used[i] = true
 				found = true
+				break
+			}
+		}
+		if !found {
+			return false
+		}
+	}
+	return true
+}
+
+func containsAllStages(actual, selected []analysis.CapabilityStageExpectation, ordered bool) bool {
+	used := make([]bool, len(actual))
+	next := 0
+	for _, expected := range selected {
+		found := false
+		for i := next; i < len(actual); i++ {
+			candidate := actual[i]
+			if used[i] || candidate.Command != expected.Command || candidate.SemanticComplete != expected.SemanticComplete {
+				continue
+			}
+			if expected.ID != "" && candidate.ID != expected.ID || expected.ScopeID != "" && candidate.ScopeID != expected.ScopeID {
+				continue
+			}
+			used[i], found = true, true
+			if ordered {
+				next = i + 1
+			}
+			break
+		}
+		if !found {
+			return false
+		}
+	}
+	return true
+}
+
+func containsAllReferences(actual, selected []analysis.CapabilityReferenceExpectation, ordered bool) bool {
+	used := make([]bool, len(actual))
+	next := 0
+	for _, expected := range selected {
+		found := false
+		expectedID := expected.ID
+		expected.ID = ""
+		for i := next; i < len(actual); i++ {
+			candidate := actual[i]
+			candidateID := candidate.ID
+			candidate.ID = ""
+			if !used[i] && reflect.DeepEqual(candidate, expected) && (expectedID == "" || candidateID == expectedID) {
+				used[i], found = true, true
+				if ordered {
+					next = i + 1
+				}
+				break
+			}
+		}
+		if !found {
+			return false
+		}
+	}
+	return true
+}
+
+func containsAllLineage(actual, selected []analysis.CapabilityLineageExpectation) bool {
+	next := 0
+	for _, expected := range selected {
+		found := false
+		for i := next; i < len(actual); i++ {
+			candidate := actual[i]
+			if candidate.StageID != expected.StageID || candidate.ScopeID != expected.ScopeID {
+				continue
+			}
+			if expected.Before != nil && !reflect.DeepEqual(candidate.Before, expected.Before) || expected.After != nil && !reflect.DeepEqual(candidate.After, expected.After) {
+				continue
+			}
+			next, found = i+1, true
+			break
+		}
+		if !found {
+			return false
+		}
+	}
+	return true
+}
+
+func containsAllTransitions(actual, selected []analysis.CapabilityTransitionExpectation, structured bool) bool {
+	used := make([]bool, len(actual))
+	next := 0
+	for _, expected := range selected {
+		found := false
+		for i := next; i < len(actual); i++ {
+			candidate := actual[i]
+			if used[i] || candidate.Operation != expected.Operation || candidate.Output != expected.Output {
+				continue
+			}
+			if expected.InputReferenceIDs != nil && !slices.Equal(candidate.InputReferenceIDs, expected.InputReferenceIDs) || expected.OutputReferenceID != "" && candidate.OutputReferenceID != expected.OutputReferenceID || structured && candidate.Conditional != expected.Conditional {
+				continue
+			}
+			if !used[i] {
+				used[i] = true
+				found = true
+				if structured {
+					next = i + 1
+				}
 				break
 			}
 		}

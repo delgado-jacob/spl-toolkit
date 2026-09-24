@@ -23,6 +23,37 @@ class ValidationOpenAPITests(unittest.TestCase):
             r'RewriteRequest\s+json\.RawMessage\s+`json:"rewrite_request,omitempty" swaggertype:"object"`',
         )
 
+    def test_capability_authored_fields_are_hidden_from_openapi(self):
+        source = (SCRIPT.parents[1] / "pkg/analysis/capability_model.go").read_text(encoding="utf-8")
+        private_fields = {
+            "CapabilityStageExpectation": (
+                ("ID", "string", "id,omitempty"),
+                ("ScopeID", "string", "scope_id,omitempty"),
+            ),
+            "CapabilityReferenceExpectation": (
+                ("ID", "string", "id,omitempty"),
+            ),
+            "CapabilityTransitionExpectation": (
+                ("InputReferenceIDs", r"\[\]string", "input_reference_ids,omitempty"),
+                ("OutputReferenceID", "string", "output_reference_id,omitempty"),
+                ("Conditional", "bool", "conditional,omitempty"),
+            ),
+            "CapabilitySemanticsObservation": (
+                ("Scopes", r"\[\]CapabilityScopeExpectation", "scopes,omitempty"),
+                ("Lineage", r"\[\]CapabilityLineageExpectation", "lineage,omitempty"),
+                ("FinalFieldState", r"\*CapabilityFieldStateExpectation", "final_field_state,omitempty"),
+            ),
+        }
+        for struct_name, fields in private_fields.items():
+            body = re.search(rf"type {struct_name} struct \{{(.*?)\n\}}", source, re.DOTALL)
+            self.assertIsNotNone(body, struct_name)
+            for field, field_type, json_name in fields:
+                with self.subTest(struct=struct_name, field=field):
+                    self.assertRegex(
+                        body.group(1),
+                        rf'{field}\s+{field_type}\s+`json:"{json_name}" swaggerignore:"true"`',
+                    )
+
     def schema_accepts(self, schemas, name, instance):
         def valid(schema, value):
             if "$ref" in schema:

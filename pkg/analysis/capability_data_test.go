@@ -1,10 +1,12 @@
 package analysis
 
 import (
+	"crypto/sha256"
 	"encoding/json"
 	"fmt"
 	"slices"
 	"sort"
+	"strings"
 	"testing"
 )
 
@@ -29,6 +31,487 @@ func TestEmbeddedCapabilityAssetsAreStructurallyValid(t *testing.T) {
 			t.Errorf("embedded capability record %d lacks an explicit boolean grammar_registered value", i)
 		}
 	}
+}
+
+func TestDecodeCapabilityAssetsAcceptsOptionalStructuredSemanticExpectations(t *testing.T) {
+	ledger, corpus := validCapabilityAssets(t)
+	var file map[string]any
+	mustUnmarshal(t, corpus, &file)
+	cases := file["cases"].([]any)
+	observations := cases[0].(map[string]any)["observations"].(map[string]any)
+	semantics := observations["semantics"].(map[string]any)
+	semantics["scopes"] = []any{}
+	semantics["lineage"] = []any{}
+	semantics["final_field_state"] = map[string]any{
+		"fields":    []any{},
+		"removed":   []any{},
+		"open":      true,
+		"uncertain": false,
+	}
+
+	if _, _, err := decodeCapabilityAssets(ledger, mustJSON(t, file)); err != nil {
+		t.Fatalf("optional structured semantic expectations were rejected: %v", err)
+	}
+}
+
+func TestCapabilityStructuredSemanticExpectationsValidation(t *testing.T) {
+	valid := validStructuredCapabilityEvidence()
+	if err := validateCapabilityEvidenceObservation(valid, "semantics"); err != nil {
+		t.Fatalf("valid structured semantic evidence: %v", err)
+	}
+
+	tests := []struct {
+		name   string
+		mutate func(*CapabilityEvidence)
+	}{
+		{
+			name: "duplicate scope ID",
+			mutate: func(evidence *CapabilityEvidence) {
+				evidence.Observations.Semantics.Scopes = append(evidence.Observations.Semantics.Scopes, evidence.Observations.Semantics.Scopes[0])
+			},
+		},
+		{
+			name: "scope IDs out of canonical order",
+			mutate: func(evidence *CapabilityEvidence) {
+				scope := evidence.Observations.Semantics.Scopes[0]
+				scope.ID = "scope-0"
+				evidence.Observations.Semantics.Scopes = append(evidence.Observations.Semantics.Scopes, scope)
+			},
+		},
+		{
+			name: "scope names unknown stage",
+			mutate: func(evidence *CapabilityEvidence) {
+				evidence.Observations.Semantics.Scopes[0].StageID = "stage-missing"
+			},
+		},
+		{
+			name: "stage names unknown scope",
+			mutate: func(evidence *CapabilityEvidence) {
+				evidence.Observations.Semantics.Stages[0].ScopeID = "scope-missing"
+			},
+		},
+		{
+			name: "lineage names unknown scope",
+			mutate: func(evidence *CapabilityEvidence) {
+				evidence.Observations.Semantics.Lineage[0].ScopeID = "scope-missing"
+			},
+		},
+		{
+			name: "lineage names unknown stage",
+			mutate: func(evidence *CapabilityEvidence) {
+				evidence.Observations.Semantics.Lineage[0].StageID = "stage-missing"
+			},
+		},
+		{
+			name: "lineage omits both states",
+			mutate: func(evidence *CapabilityEvidence) {
+				evidence.Observations.Semantics.Lineage[0].Before = nil
+				evidence.Observations.Semantics.Lineage[0].After = nil
+			},
+		},
+		{
+			name: "fields out of canonical order",
+			mutate: func(evidence *CapabilityEvidence) {
+				state := evidence.Observations.Semantics.Lineage[0].After
+				state.Fields[0], state.Fields[1] = state.Fields[1], state.Fields[0]
+			},
+		},
+		{
+			name: "field names unknown origin",
+			mutate: func(evidence *CapabilityEvidence) {
+				evidence.Observations.Semantics.Lineage[0].After.Fields[0].OriginReferenceIDs = []string{"reference-missing"}
+			},
+		},
+		{
+			name: "field origins reverse producer order",
+			mutate: func(evidence *CapabilityEvidence) {
+				evidence.Observations.Semantics.Lineage[0].After.Fields[1].OriginReferenceIDs = []string{"reference-2", "reference-1"}
+			},
+		},
+		{
+			name: "transition names unknown input reference",
+			mutate: func(evidence *CapabilityEvidence) {
+				evidence.Observations.Semantics.Transitions[0].InputReferenceIDs = []string{"reference-missing"}
+			},
+		},
+		{
+			name: "transition names non-output reference",
+			mutate: func(evidence *CapabilityEvidence) {
+				evidence.Observations.Semantics.Transitions[0].OutputReferenceID = "reference-1"
+			},
+		},
+		{
+			name: "transition inputs reverse producer order",
+			mutate: func(evidence *CapabilityEvidence) {
+				reference := evidence.Observations.Semantics.References[0]
+				reference.ID = "reference-3"
+				reference.NormalizedName = "other"
+				evidence.Observations.Semantics.References = append(evidence.Observations.Semantics.References, reference)
+				evidence.Observations.Semantics.Transitions[0].InputReferenceIDs = []string{"reference-3", "reference-1"}
+			},
+		},
+		{
+			name: "final state fields are not exact array",
+			mutate: func(evidence *CapabilityEvidence) {
+				evidence.Observations.Semantics.FinalFieldState.Fields = nil
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			evidence := cloneCapabilityEvidence(valid)
+			tc.mutate(&evidence)
+			if err := validateCapabilityEvidenceObservation(evidence, "semantics"); err == nil {
+				t.Fatal("malformed structured semantic evidence was accepted")
+			}
+		})
+	}
+
+	t.Run("double-digit scope ordinals follow producer order", func(t *testing.T) {
+		evidence := cloneCapabilityEvidence(valid)
+		evidence.Observations.Semantics.Stages[0].ScopeID = "scope-9"
+		evidence.Observations.Semantics.Scopes[0].ID = "scope-9"
+		evidence.Observations.Semantics.Lineage[0].ScopeID = "scope-9"
+		scope := evidence.Observations.Semantics.Scopes[0]
+		scope.ID = "scope-10"
+		evidence.Observations.Semantics.Scopes = append(evidence.Observations.Semantics.Scopes, scope)
+		if err := validateCapabilityEvidenceObservation(evidence, "semantics"); err != nil {
+			t.Fatalf("numeric scope producer order was rejected: %v", err)
+		}
+	})
+}
+
+func TestMilestone11SemanticClaimsRequireStructuredProofCategories(t *testing.T) {
+	tests := []struct {
+		name     string
+		recordID string
+		mutate   func(map[string]any)
+	}{
+		{
+			name:     "guarded branch cannot discard all private proof",
+			recordID: "spl2.pipeline.branch.guarded-arms",
+			mutate: func(observation map[string]any) {
+				delete(observation, "scopes")
+				delete(observation, "lineage")
+				delete(observation, "final_field_state")
+				for _, item := range observation["stages"].([]any) {
+					stage := item.(map[string]any)
+					delete(stage, "id")
+					delete(stage, "scope_id")
+				}
+				for _, item := range observation["references"].([]any) {
+					delete(item.(map[string]any), "id")
+				}
+				for _, item := range observation["transitions"].([]any) {
+					transition := item.(map[string]any)
+					delete(transition, "input_reference_ids")
+					delete(transition, "output_reference_id")
+					delete(transition, "conditional")
+				}
+			},
+		},
+		{
+			name:     "guarded branch requires merge facts",
+			recordID: "spl2.pipeline.branch.guarded-arms",
+			mutate: func(observation map[string]any) {
+				clearCapabilityMergeFactsMap(observation)
+			},
+		},
+		{
+			name:     "local view requires scope facts",
+			recordID: "spl2.module.module.local-view",
+			mutate: func(observation map[string]any) {
+				delete(observation, "scopes")
+			},
+		},
+		{
+			name:     "static dataset requires lineage facts",
+			recordID: "spl2.dataset.dataset.static-descriptor",
+			mutate: func(observation map[string]any) {
+				delete(observation, "lineage")
+			},
+		},
+		{
+			name:     "structural field path requires origin facts",
+			recordID: "spl2.expression.field.structural-path",
+			mutate: func(observation map[string]any) {
+				clearCapabilityOriginsMap(observation)
+			},
+		},
+		{
+			name:     "eval assignment requires expanded transition facts",
+			recordID: "spl2.command.eval.exact-assignment",
+			mutate: func(observation map[string]any) {
+				for _, item := range observation["transitions"].([]any) {
+					transition := item.(map[string]any)
+					delete(transition, "input_reference_ids")
+					delete(transition, "output_reference_id")
+					delete(transition, "conditional")
+				}
+			},
+		},
+		{
+			name:     "static dataset requires final field state",
+			recordID: "spl2.dataset.dataset.static-descriptor",
+			mutate: func(observation map[string]any) {
+				delete(observation, "final_field_state")
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			var ledger capabilityLedgerFile
+			mustUnmarshal(t, embeddedCapabilityLedger, &ledger)
+			evidenceID := semanticEvidenceIDForRecord(t, ledger, tc.recordID)
+			corpus := embeddedCapabilityCorpusMap(t)
+			tc.mutate(capabilitySemanticsMap(t, corpus, evidenceID))
+			errorOwner := capabilityEvidenceErrorOwner(t, corpus, evidenceID)
+			if _, _, err := decodeCapabilityAssets(embeddedCapabilityLedger, mustJSON(t, corpus)); err == nil {
+				t.Fatalf("record %q accepted missing structured proof", tc.recordID)
+			} else if !strings.Contains(err.Error(), evidenceID) && !strings.Contains(err.Error(), errorOwner) {
+				t.Fatalf("record %q mutation failed unrelated evidence: %v", tc.recordID, err)
+			}
+		})
+	}
+}
+
+func TestMilestone11MergeOriginsRejectReversedProducerOrder(t *testing.T) {
+	var ledger capabilityLedgerFile
+	mustUnmarshal(t, embeddedCapabilityLedger, &ledger)
+	evidenceID := semanticEvidenceIDForRecord(t, ledger, "spl2.pipeline.branch.guarded-arms")
+	corpus := embeddedCapabilityCorpusMap(t)
+	observation := capabilitySemanticsMap(t, corpus, evidenceID)
+	errorOwner := capabilityEvidenceErrorOwner(t, corpus, evidenceID)
+	mutated := false
+	for _, item := range observation["final_field_state"].(map[string]any)["fields"].([]any) {
+		field := item.(map[string]any)
+		origins := field["origin_reference_ids"].([]any)
+		if len(origins) < 3 {
+			continue
+		}
+		slices.Reverse(origins)
+		mutated = true
+		break
+	}
+	if !mutated {
+		t.Fatal("guarded branch evidence has no merged origin chain")
+	}
+	if _, _, err := decodeCapabilityAssets(embeddedCapabilityLedger, mustJSON(t, corpus)); err == nil {
+		t.Fatal("reversed merged producer origins were accepted")
+	} else if !strings.Contains(err.Error(), evidenceID) && !strings.Contains(err.Error(), errorOwner) {
+		t.Fatalf("reversed merge mutation failed unrelated evidence: %v", err)
+	}
+}
+
+func TestMilestone11SemanticProofRequirementsCoverExactClaimInventory(t *testing.T) {
+	want := []string{
+		"spl2.command.bin.span-field",
+		"spl2.command.eval.exact-assignment",
+		"spl2.command.fields.exact-field-list",
+		"spl2.command.from.dataset",
+		"spl2.command.if.subpipe",
+		"spl2.command.join.qualified-subsearch",
+		"spl2.command.mvexpand.limited-field",
+		"spl2.command.select.projection",
+		"spl2.command.stats.aggregate-call",
+		"spl2.command.union.dataset",
+		"spl2.command.where.predicate",
+		"spl2.dataset.dataset.dynamic-descriptor",
+		"spl2.dataset.dataset.parameter",
+		"spl2.dataset.dataset.static-descriptor",
+		"spl2.expression.field.identity-collision",
+		"spl2.expression.field.quoted-dotted-atom",
+		"spl2.expression.field.structural-path",
+		"spl2.expression.function-call.invalid-selected-arity",
+		"spl2.function.abs.one-positional",
+		"spl2.function.any.lambda-positional",
+		"spl2.function.avg.one-positional",
+		"spl2.function.cidrmatch.two-positional",
+		"spl2.function.coalesce.two-positional",
+		"spl2.function.count.zero-positional",
+		"spl2.function.dc.one-positional",
+		"spl2.function.distinct_count.one-positional",
+		"spl2.function.json.one-positional",
+		"spl2.function.json_array_to_mv.one-positional",
+		"spl2.function.like.two-positional",
+		"spl2.function.lower.one-positional",
+		"spl2.function.match.two-positional",
+		"spl2.function.max.one-positional",
+		"spl2.function.min.one-positional",
+		"spl2.function.mvindex.two-positional",
+		"spl2.function.round.one-positional",
+		"spl2.function.rtrim.one-positional",
+		"spl2.function.span.grouping-positional",
+		"spl2.function.sqrt.one-positional",
+		"spl2.function.stdev.one-positional",
+		"spl2.function.strftime.two-positional",
+		"spl2.function.sum.one-positional",
+		"spl2.function.tonumber.one-positional",
+		"spl2.function.values.one-positional",
+		"spl2.module.module.declaration-cycle",
+		"spl2.module.module.local-scalar-function",
+		"spl2.module.module.local-view",
+		"spl2.module.module.unresolved-import",
+		"spl2.pipeline.branch.guarded-arms",
+		"spl2.pipeline.branch.unguarded-arms",
+		"spl2.pipeline.join.output-collision",
+		"spl2.pipeline.join.qualified-left-subsearch",
+		"spl2.pipeline.join.qualified-outer-subsearch",
+	}
+	got := make([]string, 0, len(milestone11SemanticProofRequirements))
+	for recordID, requirement := range milestone11SemanticProofRequirements {
+		if requirement == 0 {
+			t.Errorf("record %q has no semantic proof requirements", recordID)
+		}
+		got = append(got, recordID)
+	}
+	sort.Strings(got)
+	if !slices.Equal(got, want) {
+		t.Fatalf("semantic proof inventory differs\n got: %v\nwant: %v", got, want)
+	}
+}
+
+func TestCapabilityRevisionIncludesPrivateSemanticProof(t *testing.T) {
+	manifest, err := CapabilitiesFor(CapabilityOptions{Language: "spl2"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	baseline := capabilityRevisionTestDigest(t, manifest)
+	publicBaseline := string(mustJSON(t, manifest))
+
+	mutations := []struct {
+		name   string
+		mutate func(*CapabilitySemanticsObservation) bool
+	}{
+		{"scopes", func(observation *CapabilitySemanticsObservation) bool {
+			observation.Scopes[0].Kind += "-mutated"
+			return true
+		}},
+		{"lineage state", func(observation *CapabilitySemanticsObservation) bool {
+			for i := range observation.Lineage {
+				if observation.Lineage[i].After != nil {
+					observation.Lineage[i].After.Removed = append(observation.Lineage[i].After.Removed, "revision-only")
+					return true
+				}
+			}
+			return false
+		}},
+		{"origins", func(observation *CapabilitySemanticsObservation) bool {
+			return mutateCapabilityRevisionField(observation, func(field *CapabilityFieldExpectation) {
+				field.OriginReferenceIDs[0] += "-mutated"
+			}, func(field CapabilityFieldExpectation) bool { return len(field.OriginReferenceIDs) != 0 })
+		}},
+		{"conditionality", func(observation *CapabilitySemanticsObservation) bool {
+			return mutateCapabilityRevisionField(observation, func(field *CapabilityFieldExpectation) {
+				field.Conditional = !field.Conditional
+			}, func(CapabilityFieldExpectation) bool { return true })
+		}},
+		{"openness", func(observation *CapabilitySemanticsObservation) bool {
+			observation.Lineage[0].After.Open = !observation.Lineage[0].After.Open
+			return true
+		}},
+		{"uncertainty", func(observation *CapabilitySemanticsObservation) bool {
+			observation.Lineage[0].After.Uncertain = !observation.Lineage[0].After.Uncertain
+			return true
+		}},
+		{"final state", func(observation *CapabilitySemanticsObservation) bool {
+			observation.FinalFieldState.Removed = append(observation.FinalFieldState.Removed, "revision-only")
+			return true
+		}},
+		{"expanded transition references", func(observation *CapabilitySemanticsObservation) bool {
+			for i := range observation.Transitions {
+				if len(observation.Transitions[i].InputReferenceIDs) != 0 {
+					observation.Transitions[i].InputReferenceIDs[0] += "-mutated"
+					return true
+				}
+			}
+			return false
+		}},
+	}
+
+	for _, tc := range mutations {
+		t.Run(tc.name, func(t *testing.T) {
+			candidate := cloneCapabilityManifest(manifest)
+			observation := capabilityRevisionSemanticObservation(t, &candidate, "spl2.branch.guarded-arms.positive")
+			if !tc.mutate(observation) {
+				t.Fatal("representative evidence lacks the private fact to mutate")
+			}
+			if got := capabilityRevisionTestDigest(t, candidate); got == baseline {
+				t.Fatalf("%s mutation did not change capability revision payload", tc.name)
+			}
+			if got := string(mustJSON(t, candidate)); got != publicBaseline {
+				t.Fatalf("%s private mutation changed public capability JSON", tc.name)
+			}
+		})
+	}
+
+	const recordID = "spl2.pipeline.branch.guarded-arms"
+	requirements := make(map[string]capabilitySemanticProofRequirement, len(milestone11SemanticProofRequirements))
+	keys := make([]string, 0, len(milestone11SemanticProofRequirements))
+	for id, requirement := range milestone11SemanticProofRequirements {
+		requirements[id] = requirement
+		keys = append(keys, id)
+	}
+	mutatedRequirements := make(map[string]capabilitySemanticProofRequirement, len(requirements))
+	for id, requirement := range requirements {
+		mutatedRequirements[id] = requirement
+	}
+	mutatedRequirements[recordID] ^= capabilityProofMerge
+	if got := capabilityRevisionTestDigestForRequirements(t, manifest, mutatedRequirements); got == baseline {
+		t.Error("proof metadata mutation did not change capability revision payload")
+	}
+
+	sort.Sort(sort.Reverse(sort.StringSlice(keys)))
+	reorderedRequirements := make(map[string]capabilitySemanticProofRequirement, len(requirements))
+	for _, id := range keys {
+		reorderedRequirements[id] = requirements[id]
+	}
+	if got := capabilityRevisionTestDigestForRequirements(t, manifest, reorderedRequirements); got != baseline {
+		t.Error("proof metadata map insertion order changed capability revision payload")
+	}
+}
+
+func capabilityRevisionSemanticObservation(t *testing.T, manifest *CapabilityManifest, evidenceID string) *CapabilitySemanticsObservation {
+	t.Helper()
+	for i := range manifest.Evidence {
+		if manifest.Evidence[i].ID == evidenceID {
+			return manifest.Evidence[i].Observations.Semantics
+		}
+	}
+	t.Fatalf("missing evidence %q", evidenceID)
+	return nil
+}
+
+func mutateCapabilityRevisionField(observation *CapabilitySemanticsObservation, mutate func(*CapabilityFieldExpectation), eligible func(CapabilityFieldExpectation) bool) bool {
+	for i := range observation.Lineage {
+		for _, state := range []*CapabilityFieldStateExpectation{observation.Lineage[i].Before, observation.Lineage[i].After} {
+			if state == nil {
+				continue
+			}
+			for j := range state.Fields {
+				if eligible(state.Fields[j]) {
+					mutate(&state.Fields[j])
+					return true
+				}
+			}
+		}
+	}
+	return false
+}
+
+func capabilityRevisionTestDigest(t *testing.T, manifest CapabilityManifest) [sha256.Size]byte {
+	return capabilityRevisionTestDigestForRequirements(t, manifest, milestone11SemanticProofRequirements)
+}
+
+func capabilityRevisionTestDigestForRequirements(t *testing.T, manifest CapabilityManifest, requirements map[string]capabilitySemanticProofRequirement) [sha256.Size]byte {
+	t.Helper()
+	encoded, err := json.Marshal(capabilityRevisionPayloadForRequirements(manifest, requirements))
+	if err != nil {
+		t.Fatal(err)
+	}
+	return sha256.Sum256(encoded)
 }
 
 func TestCapabilityLedgerCoversEveryKindPerLanguage(t *testing.T) {
@@ -86,8 +569,8 @@ func TestCapabilityLedgerCoversLegacyInventory(t *testing.T) {
 		wantSPL2Commands = append(wantSPL2Commands, entry.name)
 	}
 	sort.Strings(wantSPL2Commands)
-	wantSPL2Functions := make([]string, 0, len(spl2Functions))
-	for name := range spl2Functions {
+	wantSPL2Functions := make([]string, 0, len(spl2TypedPolicies["splunkd/current"].functions))
+	for name := range spl2TypedPolicies["splunkd/current"].functions {
 		wantSPL2Functions = append(wantSPL2Functions, name)
 	}
 	sort.Strings(wantSPL2Functions)
@@ -228,7 +711,6 @@ func TestEmbeddedCapabilityReviewedFacts(t *testing.T) {
 	for _, id := range []string{
 		"spl2.decrypt.profile-mismatch.incomplete",
 		"spl2.fillnull.field-list.incomplete",
-		"spl2.if.subpipe.incomplete",
 		"spl2.ocsf.profile-mismatch.incomplete",
 		"spl2.route.profile-mismatch.incomplete",
 		"spl2.timewrap.span.incomplete",
@@ -236,6 +718,22 @@ func TestEmbeddedCapabilityReviewedFacts(t *testing.T) {
 		got := evidence(id)
 		if got.Observations.Semantics == nil || got.Observations.Semantics.Status != Invalid {
 			t.Errorf("%s semantic status is not invalid: %+v", id, got.Observations.Semantics)
+		}
+	}
+	for _, replacement := range []struct {
+		positive string
+		boundary string
+	}{
+		{positive: "spl2.if.subpipe.positive", boundary: "spl2.branch.unguarded-arms.incomplete"},
+		{positive: "spl2.join.qualified-subsearch.positive", boundary: "spl2.join.output-collision.incomplete"},
+	} {
+		positive := evidence(replacement.positive)
+		if positive.Observations.Semantics == nil || positive.Observations.Semantics.Status != Valid || !positive.Observations.Semantics.Complete {
+			t.Errorf("%s is not complete valid replacement evidence: %+v", replacement.positive, positive.Observations.Semantics)
+		}
+		boundary := evidence(replacement.boundary)
+		if boundary.Observations.Semantics == nil || boundary.Observations.Semantics.Status != Incomplete || boundary.Observations.Semantics.Complete {
+			t.Errorf("%s is not held-boundary replacement evidence: %+v", replacement.boundary, boundary.Observations.Semantics)
 		}
 	}
 
@@ -281,6 +779,76 @@ func TestEmbeddedCapabilityReviewedFacts(t *testing.T) {
 	}
 	if !result.Coverage.SyntaxComplete || result.Status == Invalid {
 		t.Fatalf("timewrap positive witness status = %q, syntax complete = %v", result.Status, result.Coverage.SyntaxComplete)
+	}
+}
+
+func TestSPL2Milestone11CapabilityClaimsDoNotBroadenLintingOrRewriting(t *testing.T) {
+	records, cases, err := loadEmbeddedCapabilityData()
+	if err != nil {
+		t.Fatal(err)
+	}
+	changed := map[string]bool{
+		"spl2.command.bin.span-field": true, "spl2.command.eval.exact-assignment": true,
+		"spl2.command.fields.exact-field-list": true, "spl2.command.from.dataset": true,
+		"spl2.command.if.subpipe": true, "spl2.command.join.qualified-subsearch": true,
+		"spl2.command.mvexpand.limited-field": true, "spl2.command.select.projection": true,
+		"spl2.command.stats.aggregate-call": true, "spl2.command.union.dataset": true,
+		"spl2.command.where.predicate":            true,
+		"spl2.dataset.dataset.dynamic-descriptor": true, "spl2.dataset.dataset.parameter": true,
+		"spl2.dataset.dataset.static-descriptor":   true,
+		"spl2.expression.field.identity-collision": true, "spl2.expression.field.quoted-dotted-atom": true,
+		"spl2.expression.field.structural-path": true, "spl2.expression.function-call.invalid-selected-arity": true,
+		"spl2.pipeline.branch.guarded-arms": true, "spl2.pipeline.branch.unguarded-arms": true,
+		"spl2.pipeline.join.output-collision": true, "spl2.pipeline.join.qualified-left-subsearch": true,
+		"spl2.pipeline.join.qualified-outer-subsearch": true,
+		"spl2.module.module.declaration-cycle":         true, "spl2.module.module.local-scalar-function": true,
+		"spl2.module.module.local-view": true, "spl2.module.module.unresolved-import": true,
+	}
+	for _, name := range []string{"abs", "avg", "coalesce", "count", "dc", "distinct_count", "lower", "match", "max", "min", "round", "rtrim", "sum", "tonumber", "values"} {
+		form := "one-positional"
+		if name == "coalesce" || name == "match" {
+			form = "two-positional"
+		} else if name == "count" {
+			form = "zero-positional"
+		}
+		changed["spl2.function."+name+"."+form] = true
+	}
+	for _, id := range []string{
+		"spl2.function.any.lambda-positional", "spl2.function.cidrmatch.two-positional",
+		"spl2.function.json.one-positional", "spl2.function.json_array_to_mv.one-positional",
+		"spl2.function.like.two-positional", "spl2.function.mvindex.two-positional",
+		"spl2.function.span.grouping-positional", "spl2.function.sqrt.one-positional",
+		"spl2.function.stdev.one-positional", "spl2.function.strftime.two-positional",
+	} {
+		changed[id] = true
+	}
+
+	for _, record := range records {
+		if !changed[record.ID] {
+			continue
+		}
+		for dimension, claim := range map[string]CapabilityClaim{
+			"linting":        record.Dimensions.Linting,
+			"safe_rewriting": record.Dimensions.SafeRewriting,
+		} {
+			if claim.State != CapabilityUnassessed || len(claim.EvidenceIDs) != 0 || len(claim.Limitations) != 0 {
+				t.Errorf("%s %s broadened without independent evidence: %+v", record.ID, dimension, claim)
+			}
+		}
+		delete(changed, record.ID)
+	}
+	if len(changed) != 0 {
+		t.Fatalf("Milestone 11 capability records missing from ledger: %v", changed)
+	}
+
+	frozen := map[string]bool{
+		"spl2.bin.span-field.incomplete": true, "spl2.mvexpand.limited-field.incomplete": true,
+		"spl2.union.dataset.incomplete": true,
+	}
+	for _, evidence := range cases {
+		if frozen[evidence.ID] {
+			t.Errorf("frozen evidence %q was retained instead of replaced", evidence.ID)
+		}
 	}
 }
 
@@ -398,8 +966,12 @@ func TestMilestone10CapabilityClaimsStayBounded(t *testing.T) {
 	if got := tstats.Observations.Semantics; got == nil || !got.Complete ||
 		!slices.Contains(got.Dependencies, CapabilityDependencyExpectation{Kind: "data_model", Name: "Authentication"}) ||
 		!slices.Contains(got.Dependencies, CapabilityDependencyExpectation{Kind: "dataset", Name: "Authentication.Authentication"}) ||
-		!slices.Contains(got.Transitions, CapabilityTransitionExpectation{Operation: "aggregate", Output: "total"}) ||
-		!slices.Contains(got.Transitions, CapabilityTransitionExpectation{Operation: "aggregate", Output: "count"}) {
+		!slices.ContainsFunc(got.Transitions, func(transition CapabilityTransitionExpectation) bool {
+			return transition.Operation == "aggregate" && transition.Output == "total"
+		}) ||
+		!slices.ContainsFunc(got.Transitions, func(transition CapabilityTransitionExpectation) bool {
+			return transition.Operation == "aggregate" && transition.Output == "count"
+		}) {
 		t.Errorf("exact tstats semantic witness lacks reviewed source or aggregate facts: %+v", got)
 	}
 
@@ -407,7 +979,7 @@ func TestMilestone10CapabilityClaimsStayBounded(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	const wantSPL2Revision = "sha256:f1391296cfbc616e9bb1b1828e2471e37b60a35c0555654c0734640e072a0437"
+	const wantSPL2Revision = "sha256:69b166318f99909d0ffbad378f0369fd9377a1f56945e2c3c0b69eaa32c03e95"
 	if spl2Revision != wantSPL2Revision {
 		t.Errorf("SPL2 capability revision = %q, want preserved %q", spl2Revision, wantSPL2Revision)
 	}
@@ -1264,15 +1836,22 @@ func TestCapabilityDataClonesAreDeep(t *testing.T) {
 	}
 
 	evidence := validCapabilityEvidence("positive", CapabilityEvidencePositive)
+	evidence.Observations.Semantics = validStructuredCapabilityEvidence().Observations.Semantics
 	evidence.Observations.SafeRewriting.ChangeReasons = []string{}
 	evidenceClone := cloneCapabilityEvidence(evidence)
 	if evidenceClone.Observations.SafeRewriting.ChangeReasons == nil {
 		t.Fatal("evidence clone changed an authored empty slice to nil")
 	}
 	evidenceClone.Observations.Semantics.Stages[0].Command = "mutated"
+	evidenceClone.Observations.Semantics.Transitions[0].InputReferenceIDs[0] = "mutated"
+	evidenceClone.Observations.Semantics.Lineage[0].After.Fields[0].OriginReferenceIDs[0] = "mutated"
+	evidenceClone.Observations.Semantics.FinalFieldState.Removed[0] = "mutated"
 	evidenceClone.Observations.Requirements.Items[0].Identity = "mutated"
 	evidenceClone.RewriteRequest[0] = '['
 	if evidence.Observations.Semantics.Stages[0].Command == "mutated" ||
+		evidence.Observations.Semantics.Transitions[0].InputReferenceIDs[0] == "mutated" ||
+		evidence.Observations.Semantics.Lineage[0].After.Fields[0].OriginReferenceIDs[0] == "mutated" ||
+		evidence.Observations.Semantics.FinalFieldState.Removed[0] == "mutated" ||
 		evidence.Observations.Requirements.Items[0].Identity == "mutated" ||
 		evidence.RewriteRequest[0] == '[' {
 		t.Fatal("evidence clone aliases nested authored data")
@@ -1286,6 +1865,92 @@ func validCapabilityAssets(t *testing.T) ([]byte, []byte) {
 			validCapabilityEvidenceForLanguage("positive-spl", CapabilityEvidencePositive, "spl"),
 			validCapabilityEvidenceForLanguage("positive-spl2", CapabilityEvidencePositive, "spl2"),
 		}})
+}
+
+func embeddedCapabilityCorpusMap(t *testing.T) map[string]any {
+	t.Helper()
+	var corpus map[string]any
+	mustUnmarshal(t, embeddedCapabilityCorpus, &corpus)
+	return corpus
+}
+
+func semanticEvidenceIDForRecord(t *testing.T, ledger capabilityLedgerFile, recordID string) string {
+	t.Helper()
+	for _, record := range ledger.Records {
+		if record.ID != recordID {
+			continue
+		}
+		if len(record.Dimensions.Semantics.EvidenceIDs) != 1 {
+			t.Fatalf("record %q has %d semantic evidence IDs, want 1", recordID, len(record.Dimensions.Semantics.EvidenceIDs))
+		}
+		return record.Dimensions.Semantics.EvidenceIDs[0]
+	}
+	t.Fatalf("missing capability record %q", recordID)
+	return ""
+}
+
+func capabilitySemanticsMap(t *testing.T, corpus map[string]any, evidenceID string) map[string]any {
+	t.Helper()
+	for _, item := range corpus["cases"].([]any) {
+		evidence := item.(map[string]any)
+		if evidence["id"] == evidenceID {
+			return evidence["observations"].(map[string]any)["semantics"].(map[string]any)
+		}
+	}
+	t.Fatalf("missing semantic evidence %q", evidenceID)
+	return nil
+}
+
+func capabilityEvidenceErrorOwner(t *testing.T, corpus map[string]any, evidenceID string) string {
+	t.Helper()
+	for i, item := range corpus["cases"].([]any) {
+		if item.(map[string]any)["id"] == evidenceID {
+			return fmt.Sprintf("evidence case %d", i)
+		}
+	}
+	t.Fatalf("missing capability evidence %q", evidenceID)
+	return ""
+}
+
+func visitCapabilityFieldStateMaps(observation map[string]any, visit func(map[string]any)) {
+	if lineage, ok := observation["lineage"].([]any); ok {
+		for _, item := range lineage {
+			entry := item.(map[string]any)
+			for _, key := range []string{"before", "after"} {
+				if state, ok := entry[key].(map[string]any); ok {
+					visit(state)
+				}
+			}
+		}
+	}
+	if state, ok := observation["final_field_state"].(map[string]any); ok {
+		visit(state)
+	}
+}
+
+func clearCapabilityOriginsMap(observation map[string]any) {
+	visitCapabilityFieldStateMaps(observation, func(state map[string]any) {
+		for _, item := range state["fields"].([]any) {
+			item.(map[string]any)["origin_reference_ids"] = []any{}
+		}
+	})
+}
+
+func clearCapabilityMergeFactsMap(observation map[string]any) {
+	visitCapabilityFieldStateMaps(observation, func(state map[string]any) {
+		state["uncertain"] = false
+		for _, item := range state["fields"].([]any) {
+			field := item.(map[string]any)
+			field["conditional"] = false
+			origins := field["origin_reference_ids"].([]any)
+			if len(origins) > 1 {
+				field["origin_reference_ids"] = origins[:1]
+			}
+		}
+	})
+	for _, item := range observation["transitions"].([]any) {
+		item.(map[string]any)["conditional"] = false
+	}
 }
 
 func validCapabilityRecords() []CapabilityRecord {
@@ -1350,6 +2015,51 @@ func claimsReferencing(id string) CapabilityDimensions {
 
 func validCapabilityEvidence(id string, classification CapabilityEvidenceClassification) CapabilityEvidence {
 	return validCapabilityEvidenceForLanguage(id, classification, "spl")
+}
+
+func validStructuredCapabilityEvidence() CapabilityEvidence {
+	evidence := validCapabilityEvidence("structured", CapabilityEvidencePositive)
+	semantics := evidence.Observations.Semantics
+	semantics.Stages[0].ID = "stage-1"
+	semantics.Stages[0].ScopeID = "scope-1"
+	semantics.Scopes = []CapabilityScopeExpectation{{
+		ID:      "scope-1",
+		Kind:    "pipeline",
+		StageID: "stage-1",
+		Location: Location{
+			Start: Position{Offset: 0, Line: 1, Column: 1},
+			End:   Position{Offset: 6, Line: 1, Column: 7},
+		},
+	}}
+	semantics.References = []CapabilityReferenceExpectation{
+		{ID: "reference-1", NormalizedName: "main", Kind: "index", Role: "read", Resolution: "exact", Binding: "source", Location: semantics.Diagnostics[0].Location},
+		{ID: "reference-2", NormalizedName: "result", Kind: "field", Role: "output", Resolution: "exact", Binding: "not_applicable", Location: semantics.Diagnostics[0].Location},
+	}
+	before := &CapabilityFieldStateExpectation{
+		Fields:    []CapabilityFieldExpectation{{Name: "alpha", OriginReferenceIDs: []string{"reference-1"}}},
+		Removed:   []string{},
+		Open:      true,
+		Uncertain: false,
+	}
+	after := &CapabilityFieldStateExpectation{
+		Fields: []CapabilityFieldExpectation{
+			{Name: "alpha", OriginReferenceIDs: []string{"reference-1"}},
+			{Name: "beta", OriginReferenceIDs: []string{"reference-1", "reference-2"}, Conditional: true},
+		},
+		Removed:   []string{"discarded"},
+		Open:      false,
+		Uncertain: true,
+	}
+	semantics.Lineage = []CapabilityLineageExpectation{{StageID: "stage-1", ScopeID: "scope-1", Before: before, After: after}}
+	semantics.Transitions = []CapabilityTransitionExpectation{{
+		Operation:         "eval",
+		Output:            "beta",
+		InputReferenceIDs: []string{"reference-1"},
+		OutputReferenceID: "reference-2",
+		Conditional:       true,
+	}}
+	semantics.FinalFieldState = cloneCapabilityFieldStateExpectation(after)
+	return evidence
 }
 
 func validCapabilityEvidenceForLanguage(id string, classification CapabilityEvidenceClassification, language string) CapabilityEvidence {

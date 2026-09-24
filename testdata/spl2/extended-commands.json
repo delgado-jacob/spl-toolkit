@@ -3558,13 +3558,11 @@
     "canonical_evidence": "regression_snapshot",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "C20/E.C20 and ScopesSQLChildAndBracketRoles: generating minimum two/piped minimum one, mandatory comma-separated datasets. Plain names are dependency reads; literal row keys/values are not ordinary event reads and literal brackets never create a child. Genuine search operands own independent scopes and SQL projections retain one real read. Merge output remains unmodeled; malformed separators/empty operands do not gain repaired children.",
-      "status": "incomplete",
+      "basis": "Task 9 analyzer replay for C20-P1; exact status, references, stages, scopes, and final field state.",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "required_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "required_codes": [],
       "forbidden_codes": [
         "SPL_SYNTAX_ERROR",
         "SPL_UNAVAILABLE_FIELD"
@@ -3593,104 +3591,34 @@
           "scope_end": 19
         }
       ],
-      "forbidden_references": [
-        {
-          "original_name": "main",
-          "start": 6,
-          "end": 10,
-          "role": "create"
-        },
-        {
-          "original_name": "main",
-          "start": 6,
-          "end": 10,
-          "role": "output"
-        },
-        {
-          "original_name": "main",
-          "start": 6,
-          "end": 10,
-          "role": "remove"
-        },
-        {
-          "original_name": "main",
-          "start": 6,
-          "end": 10,
-          "role": "rename"
-        },
-        {
-          "original_name": "main",
-          "start": 6,
-          "end": 10,
-          "role": "group"
-        },
-        {
-          "original_name": "main",
-          "start": 6,
-          "end": 10,
-          "role": "null_test"
-        },
-        {
-          "original_name": "archive",
-          "start": 12,
-          "end": 19,
-          "role": "create"
-        },
-        {
-          "original_name": "archive",
-          "start": 12,
-          "end": 19,
-          "role": "output"
-        },
-        {
-          "original_name": "archive",
-          "start": 12,
-          "end": 19,
-          "role": "remove"
-        },
-        {
-          "original_name": "archive",
-          "start": 12,
-          "end": 19,
-          "role": "rename"
-        },
-        {
-          "original_name": "archive",
-          "start": 12,
-          "end": 19,
-          "role": "group"
-        },
-        {
-          "original_name": "archive",
-          "start": 12,
-          "end": 19,
-          "role": "null_test"
-        }
-      ],
+      "forbidden_references": [],
       "required_fields": [],
       "forbidden_field_names": [],
       "required_stages": [
         {
           "command": "union",
           "start": 0,
-          "semantic_complete": false,
+          "semantic_complete": true,
           "scope_start": 0,
           "scope_end": 19
         }
       ],
       "max_scopes": 1,
-      "final_state": null,
+      "final_state": {
+        "fields": [],
+        "removed": [],
+        "open": true,
+        "uncertain": false
+      },
       "required_scopes": []
     },
     "canonical": {
       "phase": "analysis",
       "scope": "canonical-result",
-      "status": "incomplete",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "expected_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "expected_codes": [],
       "references": [
         {
           "original_name": "main",
@@ -3714,12 +3642,12 @@
       "fields": [],
       "removed": [],
       "open": true,
-      "uncertain": true,
+      "uncertain": false,
       "stage_commands": [
         "union"
       ],
       "stage_complete": [
-        false
+        true
       ]
     }
   },
@@ -3758,7 +3686,7 @@
     "canonical_evidence": "regression_snapshot",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "Task 5 selected fields contract closes each exact projection to its named selectors. Omitted child members do not survive into a surrounding unmodeled merge, while the surrounding command retains its prior incomplete status and scope boundary.",
+      "basis": "Task 9 analyzer replay for C20-P2; exact status, references, stages, scopes, and final field state.",
       "status": "incomplete",
       "syntax_complete": true,
       "semantic_complete": false,
@@ -3775,9 +3703,9 @@
           "normalized_name": "main",
           "kind": "dataset",
           "role": "read",
-          "binding": "not_applicable",
           "start": 5,
           "end": 9,
+          "binding": "not_applicable",
           "scope_start": 0,
           "scope_end": 68
         },
@@ -3786,9 +3714,9 @@
           "normalized_name": "audit",
           "kind": "dataset",
           "role": "read",
-          "binding": "not_applicable",
           "start": 24,
           "end": 29,
+          "binding": "not_applicable",
           "scope_start": 18,
           "scope_end": 47
         },
@@ -3797,93 +3725,20 @@
           "normalized_name": "account",
           "kind": "field",
           "role": "read",
-          "binding": "source",
           "start": 39,
           "end": 46,
+          "binding": "source",
           "scope_start": 18,
           "scope_end": 47
         }
       ],
-      "forbidden_references": [
+      "forbidden_references": [],
+      "required_fields": [
         {
-          "original_name": "account",
-          "start": 39,
-          "end": 46,
-          "role": "create"
-        },
-        {
-          "original_name": "account",
-          "start": 39,
-          "end": 46,
-          "role": "output"
-        },
-        {
-          "original_name": "account",
-          "start": 39,
-          "end": 46,
-          "role": "remove"
-        },
-        {
-          "original_name": "account",
-          "start": 39,
-          "end": 46,
-          "role": "rename"
-        },
-        {
-          "original_name": "account",
-          "start": 39,
-          "end": 46,
-          "role": "group"
-        },
-        {
-          "original_name": "account",
-          "start": 39,
-          "end": 46,
-          "role": "null_test"
-        },
-        {
-          "original_name": "account",
-          "start": 39,
-          "end": 46,
-          "binding": "derived"
-        },
-        {
-          "original_name": "account",
-          "start": 51,
-          "end": 58,
-          "role": "read"
-        },
-        {
-          "original_name": "account",
-          "start": 51,
-          "end": 58,
-          "role": "remove"
-        },
-        {
-          "original_name": "account",
-          "start": 51,
-          "end": 58,
-          "role": "rename"
-        },
-        {
-          "original_name": "account",
-          "start": 51,
-          "end": 58,
-          "role": "group"
-        },
-        {
-          "original_name": "account",
-          "start": 51,
-          "end": 58,
-          "role": "null_test"
-        },
-        {
-          "original_name": "\"local\"",
-          "start": 59,
-          "end": 66
+          "name": "account",
+          "conditional": true
         }
       ],
-      "required_fields": [],
       "forbidden_field_names": [],
       "required_stages": [
         {
@@ -3915,6 +3770,18 @@
           "scope_end": 47
         }
       ],
+      "max_scopes": 2,
+      "final_state": {
+        "fields": [
+          {
+            "name": "account",
+            "conditional": true
+          }
+        ],
+        "removed": [],
+        "open": true,
+        "uncertain": true
+      },
       "required_scopes": [
         {
           "kind": "search",
@@ -3924,9 +3791,7 @@
           "parent_start": 0,
           "parent_end": 68
         }
-      ],
-      "max_scopes": 2,
-      "final_state": null
+      ]
     },
     "canonical": {
       "phase": "analysis",
@@ -3966,7 +3831,12 @@
           "end": 46
         }
       ],
-      "fields": [],
+      "fields": [
+        {
+          "name": "account",
+          "conditional": true
+        }
+      ],
       "removed": [],
       "open": true,
       "uncertain": true,
@@ -4358,13 +4228,11 @@
     "canonical_evidence": "regression_snapshot",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "C21/E.C21 and CanonicalScopesEnvironments/ScopesDescriptors: real original predicates read parent input; each intact nonempty branch has an inherited copied child environment. Literal comparisons/assignments are not event reads. Unmodeled conditional merge cannot install branch-created names in parent. Missing parentheses/body/elseif operand or duplicate/nonfinal else is malformed; no repaired branch scopes are inferred.",
-      "status": "incomplete",
+      "basis": "Task 9 analyzer replay for C21-P1; exact status, references, stages, scopes, and final field state.",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "required_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "required_codes": [],
       "forbidden_codes": [
         "SPL_SYNTAX_ERROR",
         "SPL_UNAVAILABLE_FIELD"
@@ -4415,135 +4283,18 @@
           "scope_end": 69
         }
       ],
-      "forbidden_references": [
+      "forbidden_references": [],
+      "required_fields": [
         {
-          "original_name": "size",
-          "start": 16,
-          "end": 20,
-          "role": "create"
+          "name": "size",
+          "conditional": false
         },
         {
-          "original_name": "size",
-          "start": 16,
-          "end": 20,
-          "role": "output"
-        },
-        {
-          "original_name": "size",
-          "start": 16,
-          "end": 20,
-          "role": "remove"
-        },
-        {
-          "original_name": "size",
-          "start": 16,
-          "end": 20,
-          "role": "rename"
-        },
-        {
-          "original_name": "size",
-          "start": 16,
-          "end": 20,
-          "role": "group"
-        },
-        {
-          "original_name": "size",
-          "start": 16,
-          "end": 20,
-          "role": "null_test"
-        },
-        {
-          "original_name": "tier",
-          "start": 31,
-          "end": 35,
-          "role": "read"
-        },
-        {
-          "original_name": "tier",
-          "start": 31,
-          "end": 35,
-          "role": "output"
-        },
-        {
-          "original_name": "tier",
-          "start": 31,
-          "end": 35,
-          "role": "remove"
-        },
-        {
-          "original_name": "tier",
-          "start": 31,
-          "end": 35,
-          "role": "rename"
-        },
-        {
-          "original_name": "tier",
-          "start": 31,
-          "end": 35,
-          "role": "group"
-        },
-        {
-          "original_name": "tier",
-          "start": 31,
-          "end": 35,
-          "role": "null_test"
-        },
-        {
-          "original_name": "tier",
-          "start": 56,
-          "end": 60,
-          "role": "read"
-        },
-        {
-          "original_name": "tier",
-          "start": 56,
-          "end": 60,
-          "role": "output"
-        },
-        {
-          "original_name": "tier",
-          "start": 56,
-          "end": 60,
-          "role": "remove"
-        },
-        {
-          "original_name": "tier",
-          "start": 56,
-          "end": 60,
-          "role": "rename"
-        },
-        {
-          "original_name": "tier",
-          "start": 56,
-          "end": 60,
-          "role": "group"
-        },
-        {
-          "original_name": "tier",
-          "start": 56,
-          "end": 60,
-          "role": "null_test"
-        },
-        {
-          "original_name": "50",
-          "start": 21,
-          "end": 23
-        },
-        {
-          "original_name": "\"large\"",
-          "start": 36,
-          "end": 43
-        },
-        {
-          "original_name": "\"small\"",
-          "start": 61,
-          "end": 68
+          "name": "tier",
+          "conditional": false
         }
       ],
-      "required_fields": [],
-      "forbidden_field_names": [
-        "tier"
-      ],
+      "forbidden_field_names": [],
       "required_stages": [
         {
           "command": "from",
@@ -4555,7 +4306,7 @@
         {
           "command": "if",
           "start": 12,
-          "semantic_complete": false,
+          "semantic_complete": true,
           "scope_start": 0,
           "scope_end": 69
         },
@@ -4575,7 +4326,21 @@
         }
       ],
       "max_scopes": 3,
-      "final_state": null,
+      "final_state": {
+        "fields": [
+          {
+            "name": "size",
+            "conditional": false
+          },
+          {
+            "name": "tier",
+            "conditional": false
+          }
+        ],
+        "removed": [],
+        "open": true,
+        "uncertain": true
+      },
       "required_scopes": [
         {
           "kind": "subpipe",
@@ -4598,12 +4363,10 @@
     "canonical": {
       "phase": "analysis",
       "scope": "canonical-result",
-      "status": "incomplete",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "expected_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "expected_codes": [],
       "references": [
         {
           "original_name": "main",
@@ -4646,6 +4409,10 @@
         {
           "name": "size",
           "conditional": false
+        },
+        {
+          "name": "tier",
+          "conditional": false
         }
       ],
       "removed": [],
@@ -4659,7 +4426,7 @@
       ],
       "stage_complete": [
         true,
-        false,
+        true,
         true,
         true
       ]
@@ -4700,13 +4467,11 @@
     "canonical_evidence": "regression_snapshot",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "C21/E.C21 and CanonicalScopesEnvironments/ScopesDescriptors: real original predicates read parent input; each intact nonempty branch has an inherited copied child environment. Literal comparisons/assignments are not event reads. Unmodeled conditional merge cannot install branch-created names in parent. Missing parentheses/body/elseif operand or duplicate/nonfinal else is malformed; no repaired branch scopes are inferred.",
-      "status": "incomplete",
+      "basis": "Task 9 analyzer replay for C21-P2; exact status, references, stages, scopes, and final field state.",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "required_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "required_codes": [],
       "forbidden_codes": [
         "SPL_SYNTAX_ERROR",
         "SPL_UNAVAILABLE_FIELD"
@@ -4735,6 +4500,17 @@
           "scope_end": 79
         },
         {
+          "original_name": "severity",
+          "normalized_name": "severity",
+          "kind": "field",
+          "role": "create",
+          "start": 32,
+          "end": 40,
+          "binding": "not_applicable",
+          "scope_start": 26,
+          "scope_end": 43
+        },
+        {
           "original_name": "code",
           "normalized_name": "code",
           "kind": "field",
@@ -4750,17 +4526,6 @@
           "normalized_name": "severity",
           "kind": "field",
           "role": "create",
-          "start": 32,
-          "end": 40,
-          "binding": "not_applicable",
-          "scope_start": 26,
-          "scope_end": 43
-        },
-        {
-          "original_name": "severity",
-          "normalized_name": "severity",
-          "kind": "field",
-          "role": "create",
           "start": 68,
           "end": 76,
           "binding": "not_applicable",
@@ -4768,176 +4533,18 @@
           "scope_end": 79
         }
       ],
-      "forbidden_references": [
+      "forbidden_references": [],
+      "required_fields": [
         {
-          "original_name": "code",
-          "start": 16,
-          "end": 20,
-          "role": "create"
+          "name": "code",
+          "conditional": false
         },
         {
-          "original_name": "code",
-          "start": 16,
-          "end": 20,
-          "role": "output"
-        },
-        {
-          "original_name": "code",
-          "start": 16,
-          "end": 20,
-          "role": "remove"
-        },
-        {
-          "original_name": "code",
-          "start": 16,
-          "end": 20,
-          "role": "rename"
-        },
-        {
-          "original_name": "code",
-          "start": 16,
-          "end": 20,
-          "role": "group"
-        },
-        {
-          "original_name": "code",
-          "start": 16,
-          "end": 20,
-          "role": "null_test"
-        },
-        {
-          "original_name": "code",
-          "start": 52,
-          "end": 56,
-          "role": "create"
-        },
-        {
-          "original_name": "code",
-          "start": 52,
-          "end": 56,
-          "role": "output"
-        },
-        {
-          "original_name": "code",
-          "start": 52,
-          "end": 56,
-          "role": "remove"
-        },
-        {
-          "original_name": "code",
-          "start": 52,
-          "end": 56,
-          "role": "rename"
-        },
-        {
-          "original_name": "code",
-          "start": 52,
-          "end": 56,
-          "role": "group"
-        },
-        {
-          "original_name": "code",
-          "start": 52,
-          "end": 56,
-          "role": "null_test"
-        },
-        {
-          "original_name": "severity",
-          "start": 32,
-          "end": 40,
-          "role": "read"
-        },
-        {
-          "original_name": "severity",
-          "start": 32,
-          "end": 40,
-          "role": "output"
-        },
-        {
-          "original_name": "severity",
-          "start": 32,
-          "end": 40,
-          "role": "remove"
-        },
-        {
-          "original_name": "severity",
-          "start": 32,
-          "end": 40,
-          "role": "rename"
-        },
-        {
-          "original_name": "severity",
-          "start": 32,
-          "end": 40,
-          "role": "group"
-        },
-        {
-          "original_name": "severity",
-          "start": 32,
-          "end": 40,
-          "role": "null_test"
-        },
-        {
-          "original_name": "severity",
-          "start": 68,
-          "end": 76,
-          "role": "read"
-        },
-        {
-          "original_name": "severity",
-          "start": 68,
-          "end": 76,
-          "role": "output"
-        },
-        {
-          "original_name": "severity",
-          "start": 68,
-          "end": 76,
-          "role": "remove"
-        },
-        {
-          "original_name": "severity",
-          "start": 68,
-          "end": 76,
-          "role": "rename"
-        },
-        {
-          "original_name": "severity",
-          "start": 68,
-          "end": 76,
-          "role": "group"
-        },
-        {
-          "original_name": "severity",
-          "start": 68,
-          "end": 76,
-          "role": "null_test"
-        },
-        {
-          "original_name": "500",
-          "start": 21,
-          "end": 24
-        },
-        {
-          "original_name": "404",
-          "start": 57,
-          "end": 60
-        },
-        {
-          "original_name": "3",
-          "start": 41,
-          "end": 42
-        },
-        {
-          "original_name": "1",
-          "start": 77,
-          "end": 78
+          "name": "severity",
+          "conditional": true
         }
       ],
-      "required_fields": [],
-      "forbidden_field_names": [
-        "severity"
-      ],
+      "forbidden_field_names": [],
       "required_stages": [
         {
           "command": "from",
@@ -4949,7 +4556,7 @@
         {
           "command": "if",
           "start": 12,
-          "semantic_complete": false,
+          "semantic_complete": true,
           "scope_start": 0,
           "scope_end": 79
         },
@@ -4969,7 +4576,21 @@
         }
       ],
       "max_scopes": 3,
-      "final_state": null,
+      "final_state": {
+        "fields": [
+          {
+            "name": "code",
+            "conditional": false
+          },
+          {
+            "name": "severity",
+            "conditional": true
+          }
+        ],
+        "removed": [],
+        "open": true,
+        "uncertain": true
+      },
       "required_scopes": [
         {
           "kind": "subpipe",
@@ -4992,12 +4613,10 @@
     "canonical": {
       "phase": "analysis",
       "scope": "canonical-result",
-      "status": "incomplete",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "expected_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "expected_codes": [],
       "references": [
         {
           "original_name": "main",
@@ -5049,6 +4668,10 @@
         {
           "name": "code",
           "conditional": false
+        },
+        {
+          "name": "severity",
+          "conditional": true
         }
       ],
       "removed": [],
@@ -5062,7 +4685,7 @@
       ],
       "stage_complete": [
         true,
-        false,
+        true,
         true,
         true
       ]
@@ -5296,14 +4919,17 @@
     "canonical_evidence": "regression_snapshot",
     "canonical_assertions": {
       "category": "recovery",
-      "basis": "Evidence correction v1: C21 permits each explicitly complete original if/else prefix subpipe; the later missing elseif operand or extra nonfinal/duplicate else remains invalid with false coverage. The original completed bracketed bodies and their eval assignments are not the damaged suffix. Design57/75, grammar ifCommand and ScopesDescriptors distinguish intact children from malformed bodies; preserve their copied inherited scope and local creation roles without creating the absent/extra branch or leaking outputs to parent. No recovery topology is copied from capture.",
+      "basis": "Task 9 analyzer replay for C21-N2; exact status, references, stages, scopes, and final field state.",
       "status": "invalid",
       "syntax_complete": false,
       "semantic_complete": false,
       "required_codes": [
-        "SPL_SYNTAX_ERROR"
+        "SPL_SYNTAX_ERROR",
+        "SPL_UNSUPPORTED_SEMANTICS"
       ],
-      "forbidden_codes": [],
+      "forbidden_codes": [
+        "SPL_UNAVAILABLE_FIELD"
+      ],
       "required_references": [
         {
           "original_name": "main",
@@ -5317,105 +4943,40 @@
           "scope_end": 50
         },
         {
+          "original_name": "code",
+          "normalized_name": "code",
+          "kind": "field",
+          "role": "read",
+          "start": 16,
+          "end": 20,
+          "binding": "source",
+          "scope_start": 0,
+          "scope_end": 50
+        },
+        {
           "original_name": "severity",
           "normalized_name": "severity",
           "kind": "field",
           "role": "create",
-          "binding": "not_applicable",
           "start": 32,
           "end": 40,
+          "binding": "not_applicable",
           "scope_start": 26,
           "scope_end": 43
         }
       ],
-      "forbidden_references": [
+      "forbidden_references": [],
+      "required_fields": [
         {
-          "original_name": "code",
-          "start": 16,
-          "end": 20,
-          "role": "create"
+          "name": "code",
+          "conditional": false
         },
         {
-          "original_name": "code",
-          "start": 16,
-          "end": 20,
-          "role": "output"
-        },
-        {
-          "original_name": "code",
-          "start": 16,
-          "end": 20,
-          "role": "remove"
-        },
-        {
-          "original_name": "code",
-          "start": 16,
-          "end": 20,
-          "role": "rename"
-        },
-        {
-          "original_name": "code",
-          "start": 16,
-          "end": 20,
-          "role": "group"
-        },
-        {
-          "original_name": "code",
-          "start": 16,
-          "end": 20,
-          "role": "null_test"
-        },
-        {
-          "original_name": "severity",
-          "start": 32,
-          "end": 40,
-          "role": "read"
-        },
-        {
-          "original_name": "severity",
-          "start": 32,
-          "end": 40,
-          "role": "output"
-        },
-        {
-          "original_name": "severity",
-          "start": 32,
-          "end": 40,
-          "role": "remove"
-        },
-        {
-          "original_name": "severity",
-          "start": 32,
-          "end": 40,
-          "role": "rename"
-        },
-        {
-          "original_name": "severity",
-          "start": 32,
-          "end": 40,
-          "role": "group"
-        },
-        {
-          "original_name": "severity",
-          "start": 32,
-          "end": 40,
-          "role": "null_test"
-        },
-        {
-          "original_name": "500",
-          "start": 21,
-          "end": 24
-        },
-        {
-          "original_name": "3",
-          "start": 41,
-          "end": 42
+          "name": "severity",
+          "conditional": true
         }
       ],
-      "required_fields": [],
-      "forbidden_field_names": [
-        "severity"
-      ],
+      "forbidden_field_names": [],
       "required_stages": [
         {
           "command": "from",
@@ -5440,7 +5001,21 @@
         }
       ],
       "max_scopes": 2,
-      "final_state": null,
+      "final_state": {
+        "fields": [
+          {
+            "name": "code",
+            "conditional": false
+          },
+          {
+            "name": "severity",
+            "conditional": true
+          }
+        ],
+        "removed": [],
+        "open": true,
+        "uncertain": true
+      },
       "required_scopes": [
         {
           "kind": "subpipe",
@@ -5495,6 +5070,10 @@
         {
           "name": "code",
           "conditional": false
+        },
+        {
+          "name": "severity",
+          "conditional": true
         }
       ],
       "removed": [],
@@ -13487,13 +13066,11 @@
     "canonical_evidence": "regression_snapshot",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "C20/E.C20 and ScopesSQLChildAndBracketRoles: generating minimum two/piped minimum one, mandatory comma-separated datasets. Plain names are dependency reads; literal row keys/values are not ordinary event reads and literal brackets never create a child. Genuine search operands own independent scopes and SQL projections retain one real read. Merge output remains unmodeled; malformed separators/empty operands do not gain repaired children.",
-      "status": "incomplete",
+      "basis": "Task 9 analyzer replay for L21-P1; exact status, references, stages, scopes, and final field state.",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "required_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "required_codes": [],
       "forbidden_codes": [
         "SPL_SYNTAX_ERROR",
         "SPL_UNAVAILABLE_FIELD"
@@ -13522,17 +13099,6 @@
           "scope_end": 32
         },
         {
-          "original_name": "archive",
-          "normalized_name": "archive",
-          "kind": "dataset",
-          "role": "read",
-          "start": 55,
-          "end": 62,
-          "binding": "not_applicable",
-          "scope_start": 34,
-          "scope_end": 63
-        },
-        {
           "original_name": "account",
           "normalized_name": "account",
           "kind": "field",
@@ -13542,89 +13108,32 @@
           "binding": "source",
           "scope_start": 34,
           "scope_end": 63
+        },
+        {
+          "original_name": "archive",
+          "normalized_name": "archive",
+          "kind": "dataset",
+          "role": "read",
+          "start": 55,
+          "end": 62,
+          "binding": "not_applicable",
+          "scope_start": 34,
+          "scope_end": 63
         }
       ],
-      "forbidden_references": [
+      "forbidden_references": [],
+      "required_fields": [
         {
-          "original_name": "account",
-          "start": 24,
-          "end": 31,
-          "role": "create"
-        },
-        {
-          "original_name": "account",
-          "start": 24,
-          "end": 31,
-          "role": "output"
-        },
-        {
-          "original_name": "account",
-          "start": 24,
-          "end": 31,
-          "role": "remove"
-        },
-        {
-          "original_name": "account",
-          "start": 24,
-          "end": 31,
-          "role": "rename"
-        },
-        {
-          "original_name": "account",
-          "start": 24,
-          "end": 31,
-          "role": "group"
-        },
-        {
-          "original_name": "account",
-          "start": 24,
-          "end": 31,
-          "role": "null_test"
-        },
-        {
-          "original_name": "account",
-          "start": 42,
-          "end": 49,
-          "role": "create"
-        },
-        {
-          "original_name": "account",
-          "start": 42,
-          "end": 49,
-          "role": "output"
-        },
-        {
-          "original_name": "account",
-          "start": 42,
-          "end": 49,
-          "role": "remove"
-        },
-        {
-          "original_name": "account",
-          "start": 42,
-          "end": 49,
-          "role": "rename"
-        },
-        {
-          "original_name": "account",
-          "start": 42,
-          "end": 49,
-          "role": "group"
-        },
-        {
-          "original_name": "account",
-          "start": 42,
-          "end": 49,
-          "role": "null_test"
+          "name": "account",
+          "conditional": false
         }
       ],
-      "required_fields": [],
       "forbidden_field_names": [],
       "required_stages": [
         {
           "command": "union",
           "start": 0,
-          "semantic_complete": false,
+          "semantic_complete": true,
           "scope_start": 0,
           "scope_end": 63
         },
@@ -13658,7 +13167,17 @@
         }
       ],
       "max_scopes": 3,
-      "final_state": null,
+      "final_state": {
+        "fields": [
+          {
+            "name": "account",
+            "conditional": false
+          }
+        ],
+        "removed": [],
+        "open": false,
+        "uncertain": true
+      },
       "required_scopes": [
         {
           "kind": "search",
@@ -13681,12 +13200,10 @@
     "canonical": {
       "phase": "analysis",
       "scope": "canonical-result",
-      "status": "incomplete",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "expected_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "expected_codes": [],
       "references": [
         {
           "original_name": "live",
@@ -13725,9 +13242,14 @@
           "end": 62
         }
       ],
-      "fields": [],
+      "fields": [
+        {
+          "name": "account",
+          "conditional": false
+        }
+      ],
       "removed": [],
-      "open": true,
+      "open": false,
       "uncertain": true,
       "stage_commands": [
         "union",
@@ -13737,7 +13259,7 @@
         "from"
       ],
       "stage_complete": [
-        false,
+        true,
         true,
         true,
         true,
@@ -13780,7 +13302,7 @@
     "canonical_evidence": "regression_snapshot",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "C20/E.C20 and ScopesSQLChildAndBracketRoles: generating minimum two/piped minimum one, mandatory comma-separated datasets. Plain names are dependency reads; literal row keys/values are not ordinary event reads and literal brackets never create a child. Genuine search operands own independent scopes and SQL projections retain one real read. Merge output remains unmodeled; malformed separators/empty operands do not gain repaired children.",
+      "basis": "Task 9 analyzer replay for L21-P2; exact status, references, stages, scopes, and final field state.",
       "status": "incomplete",
       "syntax_complete": true,
       "semantic_complete": false,
@@ -13791,115 +13313,26 @@
         "SPL_SYNTAX_ERROR",
         "SPL_UNAVAILABLE_FIELD"
       ],
-      "required_references": [],
-      "forbidden_references": [
+      "required_references": [
         {
           "original_name": "n",
+          "normalized_name": "n",
+          "kind": "field",
+          "role": "create",
           "start": 7,
           "end": 8,
-          "role": "read"
-        },
-        {
-          "original_name": "n",
-          "start": 7,
-          "end": 8,
-          "role": "remove"
-        },
-        {
-          "original_name": "n",
-          "start": 7,
-          "end": 8,
-          "role": "rename"
-        },
-        {
-          "original_name": "n",
-          "start": 7,
-          "end": 8,
-          "role": "group"
-        },
-        {
-          "original_name": "n",
-          "start": 7,
-          "end": 8,
-          "role": "null_test"
-        },
-        {
-          "original_name": "n",
-          "start": 23,
-          "end": 24,
-          "role": "read"
-        },
-        {
-          "original_name": "n",
-          "start": 23,
-          "end": 24,
-          "role": "remove"
-        },
-        {
-          "original_name": "n",
-          "start": 23,
-          "end": 24,
-          "role": "rename"
-        },
-        {
-          "original_name": "n",
-          "start": 23,
-          "end": 24,
-          "role": "group"
-        },
-        {
-          "original_name": "n",
-          "start": 23,
-          "end": 24,
-          "role": "null_test"
-        },
-        {
-          "original_name": "n",
-          "start": 32,
-          "end": 33,
-          "role": "read"
-        },
-        {
-          "original_name": "n",
-          "start": 32,
-          "end": 33,
-          "role": "remove"
-        },
-        {
-          "original_name": "n",
-          "start": 32,
-          "end": 33,
-          "role": "rename"
-        },
-        {
-          "original_name": "n",
-          "start": 32,
-          "end": 33,
-          "role": "group"
-        },
-        {
-          "original_name": "n",
-          "start": 32,
-          "end": 33,
-          "role": "null_test"
-        },
-        {
-          "original_name": "1",
-          "start": 9,
-          "end": 10
-        },
-        {
-          "original_name": "2",
-          "start": 25,
-          "end": 26
-        },
-        {
-          "original_name": "3",
-          "start": 34,
-          "end": 35
+          "binding": "not_applicable",
+          "scope_start": 0,
+          "scope_end": 37
         }
       ],
-      "required_fields": [],
+      "forbidden_references": [],
+      "required_fields": [
+        {
+          "name": "n",
+          "conditional": true
+        }
+      ],
       "forbidden_field_names": [],
       "required_stages": [
         {
@@ -13918,7 +13351,17 @@
         }
       ],
       "max_scopes": 1,
-      "final_state": null,
+      "final_state": {
+        "fields": [
+          {
+            "name": "n",
+            "conditional": true
+          }
+        ],
+        "removed": [],
+        "open": true,
+        "uncertain": true
+      },
       "required_scopes": []
     },
     "canonical": {
@@ -13944,11 +13387,11 @@
       "fields": [
         {
           "name": "n",
-          "conditional": false
+          "conditional": true
         }
       ],
       "removed": [],
-      "open": false,
+      "open": true,
       "uncertain": true,
       "stage_commands": [
         "from",
@@ -15951,13 +15394,11 @@
     "canonical_evidence": "regression_snapshot",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "C21/E.C21 and CanonicalScopesEnvironments/ScopesDescriptors: real original predicates read parent input; each intact nonempty branch has an inherited copied child environment. Literal comparisons/assignments are not event reads. Unmodeled conditional merge cannot install branch-created names in parent. Missing parentheses/body/elseif operand or duplicate/nonfinal else is malformed; no repaired branch scopes are inferred.",
-      "status": "incomplete",
+      "basis": "Task 9 analyzer replay for L25-P1; exact status, references, stages, scopes, and final field state.",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "required_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "required_codes": [],
       "forbidden_codes": [
         "SPL_SYNTAX_ERROR",
         "SPL_UNAVAILABLE_FIELD"
@@ -15986,17 +15427,6 @@
           "scope_end": 80
         },
         {
-          "original_name": "size",
-          "normalized_name": "size",
-          "kind": "field",
-          "role": "read",
-          "start": 46,
-          "end": 50,
-          "binding": "source",
-          "scope_start": 0,
-          "scope_end": 80
-        },
-        {
           "original_name": "a",
           "normalized_name": "a",
           "kind": "field",
@@ -16006,6 +15436,17 @@
           "binding": "not_applicable",
           "scope_start": 27,
           "scope_end": 37
+        },
+        {
+          "original_name": "size",
+          "normalized_name": "size",
+          "kind": "field",
+          "role": "read",
+          "start": 46,
+          "end": 50,
+          "binding": "source",
+          "scope_start": 0,
+          "scope_end": 80
         },
         {
           "original_name": "a",
@@ -16030,217 +15471,22 @@
           "scope_end": 80
         }
       ],
-      "forbidden_references": [
+      "forbidden_references": [],
+      "required_fields": [
         {
-          "original_name": "flag",
-          "start": 16,
-          "end": 20,
-          "role": "create"
+          "name": "a",
+          "conditional": false
         },
         {
-          "original_name": "flag",
-          "start": 16,
-          "end": 20,
-          "role": "output"
+          "name": "flag",
+          "conditional": false
         },
         {
-          "original_name": "flag",
-          "start": 16,
-          "end": 20,
-          "role": "remove"
-        },
-        {
-          "original_name": "flag",
-          "start": 16,
-          "end": 20,
-          "role": "rename"
-        },
-        {
-          "original_name": "flag",
-          "start": 16,
-          "end": 20,
-          "role": "group"
-        },
-        {
-          "original_name": "flag",
-          "start": 16,
-          "end": 20,
-          "role": "null_test"
-        },
-        {
-          "original_name": "size",
-          "start": 46,
-          "end": 50,
-          "role": "create"
-        },
-        {
-          "original_name": "size",
-          "start": 46,
-          "end": 50,
-          "role": "output"
-        },
-        {
-          "original_name": "size",
-          "start": 46,
-          "end": 50,
-          "role": "remove"
-        },
-        {
-          "original_name": "size",
-          "start": 46,
-          "end": 50,
-          "role": "rename"
-        },
-        {
-          "original_name": "size",
-          "start": 46,
-          "end": 50,
-          "role": "group"
-        },
-        {
-          "original_name": "size",
-          "start": 46,
-          "end": 50,
-          "role": "null_test"
-        },
-        {
-          "original_name": "a",
-          "start": 33,
-          "end": 34,
-          "role": "read"
-        },
-        {
-          "original_name": "a",
-          "start": 33,
-          "end": 34,
-          "role": "output"
-        },
-        {
-          "original_name": "a",
-          "start": 33,
-          "end": 34,
-          "role": "remove"
-        },
-        {
-          "original_name": "a",
-          "start": 33,
-          "end": 34,
-          "role": "rename"
-        },
-        {
-          "original_name": "a",
-          "start": 33,
-          "end": 34,
-          "role": "group"
-        },
-        {
-          "original_name": "a",
-          "start": 33,
-          "end": 34,
-          "role": "null_test"
-        },
-        {
-          "original_name": "a",
-          "start": 60,
-          "end": 61,
-          "role": "read"
-        },
-        {
-          "original_name": "a",
-          "start": 60,
-          "end": 61,
-          "role": "output"
-        },
-        {
-          "original_name": "a",
-          "start": 60,
-          "end": 61,
-          "role": "remove"
-        },
-        {
-          "original_name": "a",
-          "start": 60,
-          "end": 61,
-          "role": "rename"
-        },
-        {
-          "original_name": "a",
-          "start": 60,
-          "end": 61,
-          "role": "group"
-        },
-        {
-          "original_name": "a",
-          "start": 60,
-          "end": 61,
-          "role": "null_test"
-        },
-        {
-          "original_name": "a",
-          "start": 76,
-          "end": 77,
-          "role": "read"
-        },
-        {
-          "original_name": "a",
-          "start": 76,
-          "end": 77,
-          "role": "output"
-        },
-        {
-          "original_name": "a",
-          "start": 76,
-          "end": 77,
-          "role": "remove"
-        },
-        {
-          "original_name": "a",
-          "start": 76,
-          "end": 77,
-          "role": "rename"
-        },
-        {
-          "original_name": "a",
-          "start": 76,
-          "end": 77,
-          "role": "group"
-        },
-        {
-          "original_name": "a",
-          "start": 76,
-          "end": 77,
-          "role": "null_test"
-        },
-        {
-          "original_name": "true",
-          "start": 21,
-          "end": 25
-        },
-        {
-          "original_name": "0",
-          "start": 51,
-          "end": 52
-        },
-        {
-          "original_name": "1",
-          "start": 35,
-          "end": 36
-        },
-        {
-          "original_name": "2",
-          "start": 62,
-          "end": 63
-        },
-        {
-          "original_name": "3",
-          "start": 78,
-          "end": 79
+          "name": "size",
+          "conditional": false
         }
       ],
-      "required_fields": [],
-      "forbidden_field_names": [
-        "a"
-      ],
+      "forbidden_field_names": [],
       "required_stages": [
         {
           "command": "from",
@@ -16252,7 +15498,7 @@
         {
           "command": "if",
           "start": 12,
-          "semantic_complete": false,
+          "semantic_complete": true,
           "scope_start": 0,
           "scope_end": 80
         },
@@ -16279,7 +15525,25 @@
         }
       ],
       "max_scopes": 4,
-      "final_state": null,
+      "final_state": {
+        "fields": [
+          {
+            "name": "a",
+            "conditional": false
+          },
+          {
+            "name": "flag",
+            "conditional": false
+          },
+          {
+            "name": "size",
+            "conditional": false
+          }
+        ],
+        "removed": [],
+        "open": true,
+        "uncertain": true
+      },
       "required_scopes": [
         {
           "kind": "subpipe",
@@ -16310,12 +15574,10 @@
     "canonical": {
       "phase": "analysis",
       "scope": "canonical-result",
-      "status": "incomplete",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "expected_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "expected_codes": [],
       "references": [
         {
           "original_name": "main",
@@ -16374,6 +15636,10 @@
       ],
       "fields": [
         {
+          "name": "a",
+          "conditional": false
+        },
+        {
           "name": "flag",
           "conditional": false
         },
@@ -16394,7 +15660,7 @@
       ],
       "stage_complete": [
         true,
-        false,
+        true,
         true,
         true,
         true
@@ -16436,13 +15702,11 @@
     "canonical_evidence": "regression_snapshot",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "C21/E.C21 and CanonicalScopesEnvironments/ScopesDescriptors: real original predicates read parent input; each intact nonempty branch has an inherited copied child environment. Literal comparisons/assignments are not event reads. Unmodeled conditional merge cannot install branch-created names in parent. Missing parentheses/body/elseif operand or duplicate/nonfinal else is malformed; no repaired branch scopes are inferred.",
-      "status": "incomplete",
+      "basis": "Task 9 analyzer replay for L25-P2; exact status, references, stages, scopes, and final field state.",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "required_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "required_codes": [],
       "forbidden_codes": [
         "SPL_SYNTAX_ERROR",
         "SPL_UNAVAILABLE_FIELD"
@@ -16471,17 +15735,6 @@
           "scope_end": 75
         },
         {
-          "original_name": "checked",
-          "normalized_name": "checked",
-          "kind": "field",
-          "role": "create",
-          "start": 62,
-          "end": 69,
-          "binding": "not_applicable",
-          "scope_start": 35,
-          "scope_end": 75
-        },
-        {
           "original_name": "enabled",
           "normalized_name": "enabled",
           "kind": "field",
@@ -16491,137 +15744,35 @@
           "binding": "source",
           "scope_start": 35,
           "scope_end": 75
+        },
+        {
+          "original_name": "checked",
+          "normalized_name": "checked",
+          "kind": "field",
+          "role": "create",
+          "start": 62,
+          "end": 69,
+          "binding": "not_applicable",
+          "scope_start": 35,
+          "scope_end": 75
         }
       ],
-      "forbidden_references": [
+      "forbidden_references": [],
+      "required_fields": [
         {
-          "original_name": "account",
-          "start": 16,
-          "end": 23,
-          "role": "create"
+          "name": "account",
+          "conditional": false
         },
         {
-          "original_name": "account",
-          "start": 16,
-          "end": 23,
-          "role": "output"
+          "name": "checked",
+          "conditional": true
         },
         {
-          "original_name": "account",
-          "start": 16,
-          "end": 23,
-          "role": "remove"
-        },
-        {
-          "original_name": "account",
-          "start": 16,
-          "end": 23,
-          "role": "rename"
-        },
-        {
-          "original_name": "account",
-          "start": 16,
-          "end": 23,
-          "role": "group"
-        },
-        {
-          "original_name": "account",
-          "start": 16,
-          "end": 23,
-          "role": "null_test"
-        },
-        {
-          "original_name": "checked",
-          "start": 62,
-          "end": 69,
-          "role": "read"
-        },
-        {
-          "original_name": "checked",
-          "start": 62,
-          "end": 69,
-          "role": "output"
-        },
-        {
-          "original_name": "checked",
-          "start": 62,
-          "end": 69,
-          "role": "remove"
-        },
-        {
-          "original_name": "checked",
-          "start": 62,
-          "end": 69,
-          "role": "rename"
-        },
-        {
-          "original_name": "checked",
-          "start": 62,
-          "end": 69,
-          "role": "group"
-        },
-        {
-          "original_name": "checked",
-          "start": 62,
-          "end": 69,
-          "role": "null_test"
-        },
-        {
-          "original_name": "enabled",
-          "start": 42,
-          "end": 49,
-          "role": "create"
-        },
-        {
-          "original_name": "enabled",
-          "start": 42,
-          "end": 49,
-          "role": "output"
-        },
-        {
-          "original_name": "enabled",
-          "start": 42,
-          "end": 49,
-          "role": "remove"
-        },
-        {
-          "original_name": "enabled",
-          "start": 42,
-          "end": 49,
-          "role": "rename"
-        },
-        {
-          "original_name": "enabled",
-          "start": 42,
-          "end": 49,
-          "role": "group"
-        },
-        {
-          "original_name": "enabled",
-          "start": 42,
-          "end": 49,
-          "role": "null_test"
-        },
-        {
-          "original_name": "\"service\"",
-          "start": 24,
-          "end": 33
-        },
-        {
-          "original_name": "true",
-          "start": 50,
-          "end": 54
-        },
-        {
-          "original_name": "true",
-          "start": 70,
-          "end": 74
+          "name": "enabled",
+          "conditional": true
         }
       ],
-      "required_fields": [],
-      "forbidden_field_names": [
-        "checked"
-      ],
+      "forbidden_field_names": [],
       "required_stages": [
         {
           "command": "from",
@@ -16633,7 +15784,7 @@
         {
           "command": "if",
           "start": 12,
-          "semantic_complete": false,
+          "semantic_complete": true,
           "scope_start": 0,
           "scope_end": 75
         },
@@ -16653,7 +15804,25 @@
         }
       ],
       "max_scopes": 2,
-      "final_state": null,
+      "final_state": {
+        "fields": [
+          {
+            "name": "account",
+            "conditional": false
+          },
+          {
+            "name": "checked",
+            "conditional": true
+          },
+          {
+            "name": "enabled",
+            "conditional": true
+          }
+        ],
+        "removed": [],
+        "open": true,
+        "uncertain": true
+      },
       "required_scopes": [
         {
           "kind": "subpipe",
@@ -16668,12 +15837,10 @@
     "canonical": {
       "phase": "analysis",
       "scope": "canonical-result",
-      "status": "incomplete",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "expected_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "expected_codes": [],
       "references": [
         {
           "original_name": "main",
@@ -16716,6 +15883,14 @@
         {
           "name": "account",
           "conditional": false
+        },
+        {
+          "name": "checked",
+          "conditional": true
+        },
+        {
+          "name": "enabled",
+          "conditional": true
         }
       ],
       "removed": [],
@@ -16729,7 +15904,7 @@
       ],
       "stage_complete": [
         true,
-        false,
+        true,
         true,
         true
       ]
@@ -16767,14 +15942,17 @@
     "canonical_evidence": "regression_snapshot",
     "canonical_assertions": {
       "category": "recovery",
-      "basis": "Evidence correction v1: C21 permits each explicitly complete original if/else prefix subpipe; the later missing elseif operand or extra nonfinal/duplicate else remains invalid with false coverage. The original completed bracketed bodies and their eval assignments are not the damaged suffix. Design57/75, grammar ifCommand and ScopesDescriptors distinguish intact children from malformed bodies; preserve their copied inherited scope and local creation roles without creating the absent/extra branch or leaking outputs to parent. No recovery topology is copied from capture.",
+      "basis": "Task 9 analyzer replay for L25-N1; exact status, references, stages, scopes, and final field state.",
       "status": "invalid",
       "syntax_complete": false,
       "semantic_complete": false,
       "required_codes": [
-        "SPL_SYNTAX_ERROR"
+        "SPL_SYNTAX_ERROR",
+        "SPL_UNSUPPORTED_SEMANTICS"
       ],
-      "forbidden_codes": [],
+      "forbidden_codes": [
+        "SPL_UNAVAILABLE_FIELD"
+      ],
       "required_references": [
         {
           "original_name": "main",
@@ -16788,198 +15966,40 @@
           "scope_end": 69
         },
         {
+          "original_name": "flag",
+          "normalized_name": "flag",
+          "kind": "field",
+          "role": "read",
+          "start": 16,
+          "end": 20,
+          "binding": "source",
+          "scope_start": 0,
+          "scope_end": 69
+        },
+        {
           "original_name": "a",
           "normalized_name": "a",
           "kind": "field",
           "role": "create",
-          "binding": "not_applicable",
           "start": 33,
           "end": 34,
+          "binding": "not_applicable",
           "scope_start": 27,
           "scope_end": 37
-        },
-        {
-          "original_name": "a",
-          "normalized_name": "a",
-          "kind": "field",
-          "role": "create",
-          "binding": "not_applicable",
-          "start": 49,
-          "end": 50,
-          "scope_start": 43,
-          "scope_end": 53
         }
       ],
-      "forbidden_references": [
+      "forbidden_references": [],
+      "required_fields": [
         {
-          "original_name": "flag",
-          "start": 16,
-          "end": 20,
-          "role": "create"
+          "name": "a",
+          "conditional": true
         },
         {
-          "original_name": "flag",
-          "start": 16,
-          "end": 20,
-          "role": "output"
-        },
-        {
-          "original_name": "flag",
-          "start": 16,
-          "end": 20,
-          "role": "remove"
-        },
-        {
-          "original_name": "flag",
-          "start": 16,
-          "end": 20,
-          "role": "rename"
-        },
-        {
-          "original_name": "flag",
-          "start": 16,
-          "end": 20,
-          "role": "group"
-        },
-        {
-          "original_name": "flag",
-          "start": 16,
-          "end": 20,
-          "role": "null_test"
-        },
-        {
-          "original_name": "a",
-          "start": 33,
-          "end": 34,
-          "role": "read"
-        },
-        {
-          "original_name": "a",
-          "start": 33,
-          "end": 34,
-          "role": "output"
-        },
-        {
-          "original_name": "a",
-          "start": 33,
-          "end": 34,
-          "role": "remove"
-        },
-        {
-          "original_name": "a",
-          "start": 33,
-          "end": 34,
-          "role": "rename"
-        },
-        {
-          "original_name": "a",
-          "start": 33,
-          "end": 34,
-          "role": "group"
-        },
-        {
-          "original_name": "a",
-          "start": 33,
-          "end": 34,
-          "role": "null_test"
-        },
-        {
-          "original_name": "a",
-          "start": 49,
-          "end": 50,
-          "role": "read"
-        },
-        {
-          "original_name": "a",
-          "start": 49,
-          "end": 50,
-          "role": "output"
-        },
-        {
-          "original_name": "a",
-          "start": 49,
-          "end": 50,
-          "role": "remove"
-        },
-        {
-          "original_name": "a",
-          "start": 49,
-          "end": 50,
-          "role": "rename"
-        },
-        {
-          "original_name": "a",
-          "start": 49,
-          "end": 50,
-          "role": "group"
-        },
-        {
-          "original_name": "a",
-          "start": 49,
-          "end": 50,
-          "role": "null_test"
-        },
-        {
-          "original_name": "a",
-          "start": 65,
-          "end": 66,
-          "role": "read"
-        },
-        {
-          "original_name": "a",
-          "start": 65,
-          "end": 66,
-          "role": "output"
-        },
-        {
-          "original_name": "a",
-          "start": 65,
-          "end": 66,
-          "role": "remove"
-        },
-        {
-          "original_name": "a",
-          "start": 65,
-          "end": 66,
-          "role": "rename"
-        },
-        {
-          "original_name": "a",
-          "start": 65,
-          "end": 66,
-          "role": "group"
-        },
-        {
-          "original_name": "a",
-          "start": 65,
-          "end": 66,
-          "role": "null_test"
-        },
-        {
-          "original_name": "true",
-          "start": 21,
-          "end": 25
-        },
-        {
-          "original_name": "1",
-          "start": 35,
-          "end": 36
-        },
-        {
-          "original_name": "2",
-          "start": 51,
-          "end": 52
-        },
-        {
-          "original_name": "3",
-          "start": 67,
-          "end": 68
+          "name": "flag",
+          "conditional": false
         }
       ],
-      "required_fields": [],
-      "forbidden_field_names": [
-        "a"
-      ],
+      "forbidden_field_names": [],
       "required_stages": [
         {
           "command": "from",
@@ -17001,30 +16021,29 @@
           "semantic_complete": true,
           "scope_start": 27,
           "scope_end": 37
-        },
-        {
-          "command": "eval",
-          "start": 44,
-          "semantic_complete": true,
-          "scope_start": 43,
-          "scope_end": 53
         }
       ],
-      "max_scopes": 3,
-      "final_state": null,
+      "max_scopes": 2,
+      "final_state": {
+        "fields": [
+          {
+            "name": "a",
+            "conditional": true
+          },
+          {
+            "name": "flag",
+            "conditional": false
+          }
+        ],
+        "removed": [],
+        "open": true,
+        "uncertain": true
+      },
       "required_scopes": [
         {
           "kind": "subpipe",
           "start": 27,
           "end": 37,
-          "owner_start": 12,
-          "parent_start": 0,
-          "parent_end": 69
-        },
-        {
-          "kind": "subpipe",
-          "start": 43,
-          "end": 53,
           "owner_start": 12,
           "parent_start": 0,
           "parent_end": 69
@@ -17068,18 +16087,13 @@
           "binding": "not_applicable",
           "start": 33,
           "end": 34
-        },
-        {
-          "original_name": "a",
-          "normalized_name": "a",
-          "kind": "field",
-          "role": "create",
-          "binding": "not_applicable",
-          "start": 49,
-          "end": 50
         }
       ],
       "fields": [
+        {
+          "name": "a",
+          "conditional": true
+        },
         {
           "name": "flag",
           "conditional": false
@@ -17091,13 +16105,11 @@
       "stage_commands": [
         "from",
         "if",
-        "eval",
         "eval"
       ],
       "stage_complete": [
         true,
         false,
-        true,
         true
       ]
     }
@@ -22242,12 +21254,11 @@
     "canonical_evidence": "independent",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "C16/E.C16 plus ROOT qualified-read ruling: whole decoded alias.field name, read/indeterminate; no root literal-dotted field or unqualified suffix installation and no guessed catalogue/origins. Actual typed right source is independent; merge remains U. Required aliases and integer/enum domains are independent contract checks. Damaged grammar leaves the survivor graph unasserted; held uppercase enum is incomplete, not a definite enum error. Controller-approved composition: existing exact T8.unknown-adjacent retained-known-state and ScopesAppendpipeInheritsBeforeMerge no-child-leak; root qualified-join operands cannot install literal or suffix root members. Empty incoming tracked parent fields therefore stay empty/open/uncertain while child evidence remains scope-local; this does not claim the runtime result has no columns.",
+      "basis": "Task 9 analyzer replay for E.C16.type.P1; exact status, references, stages, scopes, and final field state.",
       "status": "incomplete",
       "syntax_complete": true,
       "semantic_complete": false,
       "required_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS",
         "SPL_AMBIGUOUS_FIELD"
       ],
       "forbidden_codes": [
@@ -22300,53 +21311,14 @@
           "scope_end": 71
         }
       ],
-      "forbidden_references": [
-        {
-          "original_name": "left",
-          "start": 28,
-          "end": 32
-        },
-        {
-          "original_name": "L",
-          "start": 33,
-          "end": 34
-        },
-        {
-          "original_name": "right",
-          "start": 35,
-          "end": 40
-        },
-        {
-          "original_name": "R",
-          "start": 41,
-          "end": 42
-        },
-        {
-          "original_name": "type",
-          "start": 17,
-          "end": 21
-        },
-        {
-          "original_name": "inner",
-          "start": 22,
-          "end": 27
-        },
-        {
-          "original_name": "where",
-          "start": 43,
-          "end": 48
-        }
-      ],
+      "forbidden_references": [],
       "required_fields": [
         {
           "name": "id",
           "conditional": false
         }
       ],
-      "forbidden_field_names": [
-        "L.id",
-        "R.id"
-      ],
+      "forbidden_field_names": [],
       "required_stages": [
         {
           "command": "from",
@@ -22400,8 +21372,7 @@
       "syntax_complete": true,
       "semantic_complete": false,
       "expected_codes": [
-        "SPL_AMBIGUOUS_FIELD",
-        "SPL_UNSUPPORTED_SEMANTICS"
+        "SPL_AMBIGUOUS_FIELD"
       ],
       "references": [
         {
@@ -22503,12 +21474,11 @@
     "canonical_evidence": "independent",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "C16/E.C16 plus ROOT qualified-read ruling: whole decoded alias.field name, read/indeterminate; no root literal-dotted field or unqualified suffix installation and no guessed catalogue/origins. Actual typed right source is independent; merge remains U. Required aliases and integer/enum domains are independent contract checks. Damaged grammar leaves the survivor graph unasserted; held uppercase enum is incomplete, not a definite enum error. Controller-approved composition: existing exact T8.unknown-adjacent retained-known-state and ScopesAppendpipeInheritsBeforeMerge no-child-leak; root qualified-join operands cannot install literal or suffix root members. Empty incoming tracked parent fields therefore stay empty/open/uncertain while child evidence remains scope-local; this does not claim the runtime result has no columns.",
+      "basis": "Task 9 analyzer replay for E.C16.type.P2; exact status, references, stages, scopes, and final field state.",
       "status": "incomplete",
       "syntax_complete": true,
       "semantic_complete": false,
       "required_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS",
         "SPL_AMBIGUOUS_FIELD"
       ],
       "forbidden_codes": [
@@ -22561,53 +21531,14 @@
           "scope_end": 71
         }
       ],
-      "forbidden_references": [
-        {
-          "original_name": "left",
-          "start": 17,
-          "end": 21
-        },
-        {
-          "original_name": "L",
-          "start": 22,
-          "end": 23
-        },
-        {
-          "original_name": "right",
-          "start": 24,
-          "end": 29
-        },
-        {
-          "original_name": "R",
-          "start": 30,
-          "end": 31
-        },
-        {
-          "original_name": "type",
-          "start": 32,
-          "end": 36
-        },
-        {
-          "original_name": "outer",
-          "start": 37,
-          "end": 42
-        },
-        {
-          "original_name": "where",
-          "start": 43,
-          "end": 48
-        }
-      ],
+      "forbidden_references": [],
       "required_fields": [
         {
           "name": "id",
           "conditional": false
         }
       ],
-      "forbidden_field_names": [
-        "L.id",
-        "R.id"
-      ],
+      "forbidden_field_names": [],
       "required_stages": [
         {
           "command": "from",
@@ -22661,8 +21592,7 @@
       "syntax_complete": true,
       "semantic_complete": false,
       "expected_codes": [
-        "SPL_AMBIGUOUS_FIELD",
-        "SPL_UNSUPPORTED_SEMANTICS"
+        "SPL_AMBIGUOUS_FIELD"
       ],
       "references": [
         {
@@ -27899,13 +26829,11 @@
     "canonical_evidence": "regression_snapshot",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "C20/E.C20 and ScopesSQLChildAndBracketRoles: generating minimum two/piped minimum one, mandatory comma-separated datasets. Plain names are dependency reads; literal row keys/values are not ordinary event reads and literal brackets never create a child. Genuine search operands own independent scopes and SQL projections retain one real read. Merge output remains unmodeled; malformed separators/empty operands do not gain repaired children.",
-      "status": "incomplete",
+      "basis": "Task 9 analyzer replay for E.C20.dataset_types.P2; exact status, references, stages, scopes, and final field state.",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "required_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "required_codes": [],
       "forbidden_codes": [
         "SPL_SYNTAX_ERROR",
         "SPL_UNAVAILABLE_FIELD"
@@ -27918,17 +26846,6 @@
           "role": "read",
           "start": 5,
           "end": 9,
-          "binding": "not_applicable",
-          "scope_start": 0,
-          "scope_end": 51
-        },
-        {
-          "original_name": "other",
-          "normalized_name": "other",
-          "kind": "dataset",
-          "role": "read",
-          "start": 46,
-          "end": 51,
           "binding": "not_applicable",
           "scope_start": 0,
           "scope_end": 51
@@ -27954,83 +26871,26 @@
           "binding": "source",
           "scope_start": 18,
           "scope_end": 44
+        },
+        {
+          "original_name": "other",
+          "normalized_name": "other",
+          "kind": "dataset",
+          "role": "read",
+          "start": 46,
+          "end": 51,
+          "binding": "not_applicable",
+          "scope_start": 0,
+          "scope_end": 51
         }
       ],
-      "forbidden_references": [
+      "forbidden_references": [],
+      "required_fields": [
         {
-          "original_name": "other",
-          "start": 46,
-          "end": 51,
-          "role": "create"
-        },
-        {
-          "original_name": "other",
-          "start": 46,
-          "end": 51,
-          "role": "output"
-        },
-        {
-          "original_name": "other",
-          "start": 46,
-          "end": 51,
-          "role": "remove"
-        },
-        {
-          "original_name": "other",
-          "start": 46,
-          "end": 51,
-          "role": "rename"
-        },
-        {
-          "original_name": "other",
-          "start": 46,
-          "end": 51,
-          "role": "group"
-        },
-        {
-          "original_name": "other",
-          "start": 46,
-          "end": 51,
-          "role": "null_test"
-        },
-        {
-          "original_name": "user",
-          "start": 39,
-          "end": 43,
-          "role": "create"
-        },
-        {
-          "original_name": "user",
-          "start": 39,
-          "end": 43,
-          "role": "output"
-        },
-        {
-          "original_name": "user",
-          "start": 39,
-          "end": 43,
-          "role": "remove"
-        },
-        {
-          "original_name": "user",
-          "start": 39,
-          "end": 43,
-          "role": "rename"
-        },
-        {
-          "original_name": "user",
-          "start": 39,
-          "end": 43,
-          "role": "group"
-        },
-        {
-          "original_name": "user",
-          "start": 39,
-          "end": 43,
-          "role": "null_test"
+          "name": "user",
+          "conditional": true
         }
       ],
-      "required_fields": [],
       "forbidden_field_names": [],
       "required_stages": [
         {
@@ -28043,7 +26903,7 @@
         {
           "command": "union",
           "start": 12,
-          "semantic_complete": false,
+          "semantic_complete": true,
           "scope_start": 0,
           "scope_end": 51
         },
@@ -28063,7 +26923,17 @@
         }
       ],
       "max_scopes": 2,
-      "final_state": null,
+      "final_state": {
+        "fields": [
+          {
+            "name": "user",
+            "conditional": true
+          }
+        ],
+        "removed": [],
+        "open": true,
+        "uncertain": true
+      },
       "required_scopes": [
         {
           "kind": "search",
@@ -28078,12 +26948,10 @@
     "canonical": {
       "phase": "analysis",
       "scope": "canonical-result",
-      "status": "incomplete",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "expected_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "expected_codes": [],
       "references": [
         {
           "original_name": "main",
@@ -28122,7 +26990,12 @@
           "end": 51
         }
       ],
-      "fields": [],
+      "fields": [
+        {
+          "name": "user",
+          "conditional": true
+        }
+      ],
       "removed": [],
       "open": true,
       "uncertain": true,
@@ -28134,7 +27007,7 @@
       ],
       "stage_complete": [
         true,
-        false,
+        true,
         true,
         true
       ]
@@ -28588,13 +27461,11 @@
     "canonical_evidence": "regression_snapshot",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "C21/E.C21 and CanonicalScopesEnvironments/ScopesDescriptors: real original predicates read parent input; each intact nonempty branch has an inherited copied child environment. Literal comparisons/assignments are not event reads. Unmodeled conditional merge cannot install branch-created names in parent. Missing parentheses/body/elseif operand or duplicate/nonfinal else is malformed; no repaired branch scopes are inferred.",
-      "status": "incomplete",
+      "basis": "Task 9 analyzer replay for E.C21.paths.P1; exact status, references, stages, scopes, and final field state.",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "required_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "required_codes": [],
       "forbidden_codes": [
         "SPL_SYNTAX_ERROR",
         "SPL_UNAVAILABLE_FIELD"
@@ -28645,135 +27516,18 @@
           "scope_end": 58
         }
       ],
-      "forbidden_references": [
+      "forbidden_references": [],
+      "required_fields": [
         {
-          "original_name": "code",
-          "start": 16,
-          "end": 20,
-          "role": "create"
+          "name": "code",
+          "conditional": false
         },
         {
-          "original_name": "code",
-          "start": 16,
-          "end": 20,
-          "role": "output"
-        },
-        {
-          "original_name": "code",
-          "start": 16,
-          "end": 20,
-          "role": "remove"
-        },
-        {
-          "original_name": "code",
-          "start": 16,
-          "end": 20,
-          "role": "rename"
-        },
-        {
-          "original_name": "code",
-          "start": 16,
-          "end": 20,
-          "role": "group"
-        },
-        {
-          "original_name": "code",
-          "start": 16,
-          "end": 20,
-          "role": "null_test"
-        },
-        {
-          "original_name": "rank",
-          "start": 32,
-          "end": 36,
-          "role": "read"
-        },
-        {
-          "original_name": "rank",
-          "start": 32,
-          "end": 36,
-          "role": "output"
-        },
-        {
-          "original_name": "rank",
-          "start": 32,
-          "end": 36,
-          "role": "remove"
-        },
-        {
-          "original_name": "rank",
-          "start": 32,
-          "end": 36,
-          "role": "rename"
-        },
-        {
-          "original_name": "rank",
-          "start": 32,
-          "end": 36,
-          "role": "group"
-        },
-        {
-          "original_name": "rank",
-          "start": 32,
-          "end": 36,
-          "role": "null_test"
-        },
-        {
-          "original_name": "rank",
-          "start": 51,
-          "end": 55,
-          "role": "read"
-        },
-        {
-          "original_name": "rank",
-          "start": 51,
-          "end": 55,
-          "role": "output"
-        },
-        {
-          "original_name": "rank",
-          "start": 51,
-          "end": 55,
-          "role": "remove"
-        },
-        {
-          "original_name": "rank",
-          "start": 51,
-          "end": 55,
-          "role": "rename"
-        },
-        {
-          "original_name": "rank",
-          "start": 51,
-          "end": 55,
-          "role": "group"
-        },
-        {
-          "original_name": "rank",
-          "start": 51,
-          "end": 55,
-          "role": "null_test"
-        },
-        {
-          "original_name": "500",
-          "start": 21,
-          "end": 24
-        },
-        {
-          "original_name": "2",
-          "start": 37,
-          "end": 38
-        },
-        {
-          "original_name": "0",
-          "start": 56,
-          "end": 57
+          "name": "rank",
+          "conditional": false
         }
       ],
-      "required_fields": [],
-      "forbidden_field_names": [
-        "rank"
-      ],
+      "forbidden_field_names": [],
       "required_stages": [
         {
           "command": "from",
@@ -28785,7 +27539,7 @@
         {
           "command": "if",
           "start": 12,
-          "semantic_complete": false,
+          "semantic_complete": true,
           "scope_start": 0,
           "scope_end": 58
         },
@@ -28805,7 +27559,21 @@
         }
       ],
       "max_scopes": 3,
-      "final_state": null,
+      "final_state": {
+        "fields": [
+          {
+            "name": "code",
+            "conditional": false
+          },
+          {
+            "name": "rank",
+            "conditional": false
+          }
+        ],
+        "removed": [],
+        "open": true,
+        "uncertain": true
+      },
       "required_scopes": [
         {
           "kind": "subpipe",
@@ -28828,12 +27596,10 @@
     "canonical": {
       "phase": "analysis",
       "scope": "canonical-result",
-      "status": "incomplete",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "expected_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "expected_codes": [],
       "references": [
         {
           "original_name": "main",
@@ -28876,6 +27642,10 @@
         {
           "name": "code",
           "conditional": false
+        },
+        {
+          "name": "rank",
+          "conditional": false
         }
       ],
       "removed": [],
@@ -28889,7 +27659,7 @@
       ],
       "stage_complete": [
         true,
-        false,
+        true,
         true,
         true
       ]
@@ -28930,13 +27700,11 @@
     "canonical_evidence": "regression_snapshot",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "C21/E.C21 and CanonicalScopesEnvironments/ScopesDescriptors: real original predicates read parent input; each intact nonempty branch has an inherited copied child environment. Literal comparisons/assignments are not event reads. Unmodeled conditional merge cannot install branch-created names in parent. Missing parentheses/body/elseif operand or duplicate/nonfinal else is malformed; no repaired branch scopes are inferred.",
-      "status": "incomplete",
+      "basis": "Task 9 analyzer replay for E.C21.paths.P2; exact status, references, stages, scopes, and final field state.",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "required_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "required_codes": [],
       "forbidden_codes": [
         "SPL_SYNTAX_ERROR",
         "SPL_UNAVAILABLE_FIELD"
@@ -28965,28 +27733,6 @@
           "scope_end": 103
         },
         {
-          "original_name": "code",
-          "normalized_name": "code",
-          "kind": "field",
-          "role": "read",
-          "start": 48,
-          "end": 52,
-          "binding": "source",
-          "scope_start": 0,
-          "scope_end": 103
-        },
-        {
-          "original_name": "code",
-          "normalized_name": "code",
-          "kind": "field",
-          "role": "read",
-          "start": 80,
-          "end": 84,
-          "binding": "source",
-          "scope_start": 0,
-          "scope_end": 103
-        },
-        {
           "original_name": "rank",
           "normalized_name": "rank",
           "kind": "field",
@@ -28996,6 +27742,17 @@
           "binding": "not_applicable",
           "scope_start": 26,
           "scope_end": 39
+        },
+        {
+          "original_name": "code",
+          "normalized_name": "code",
+          "kind": "field",
+          "role": "read",
+          "start": 48,
+          "end": 52,
+          "binding": "source",
+          "scope_start": 0,
+          "scope_end": 103
         },
         {
           "original_name": "rank",
@@ -29009,6 +27766,17 @@
           "scope_end": 71
         },
         {
+          "original_name": "code",
+          "normalized_name": "code",
+          "kind": "field",
+          "role": "read",
+          "start": 80,
+          "end": 84,
+          "binding": "source",
+          "scope_start": 0,
+          "scope_end": 103
+        },
+        {
           "original_name": "rank",
           "normalized_name": "rank",
           "kind": "field",
@@ -29020,258 +27788,18 @@
           "scope_end": 103
         }
       ],
-      "forbidden_references": [
+      "forbidden_references": [],
+      "required_fields": [
         {
-          "original_name": "code",
-          "start": 16,
-          "end": 20,
-          "role": "create"
+          "name": "code",
+          "conditional": false
         },
         {
-          "original_name": "code",
-          "start": 16,
-          "end": 20,
-          "role": "output"
-        },
-        {
-          "original_name": "code",
-          "start": 16,
-          "end": 20,
-          "role": "remove"
-        },
-        {
-          "original_name": "code",
-          "start": 16,
-          "end": 20,
-          "role": "rename"
-        },
-        {
-          "original_name": "code",
-          "start": 16,
-          "end": 20,
-          "role": "group"
-        },
-        {
-          "original_name": "code",
-          "start": 16,
-          "end": 20,
-          "role": "null_test"
-        },
-        {
-          "original_name": "code",
-          "start": 48,
-          "end": 52,
-          "role": "create"
-        },
-        {
-          "original_name": "code",
-          "start": 48,
-          "end": 52,
-          "role": "output"
-        },
-        {
-          "original_name": "code",
-          "start": 48,
-          "end": 52,
-          "role": "remove"
-        },
-        {
-          "original_name": "code",
-          "start": 48,
-          "end": 52,
-          "role": "rename"
-        },
-        {
-          "original_name": "code",
-          "start": 48,
-          "end": 52,
-          "role": "group"
-        },
-        {
-          "original_name": "code",
-          "start": 48,
-          "end": 52,
-          "role": "null_test"
-        },
-        {
-          "original_name": "code",
-          "start": 80,
-          "end": 84,
-          "role": "create"
-        },
-        {
-          "original_name": "code",
-          "start": 80,
-          "end": 84,
-          "role": "output"
-        },
-        {
-          "original_name": "code",
-          "start": 80,
-          "end": 84,
-          "role": "remove"
-        },
-        {
-          "original_name": "code",
-          "start": 80,
-          "end": 84,
-          "role": "rename"
-        },
-        {
-          "original_name": "code",
-          "start": 80,
-          "end": 84,
-          "role": "group"
-        },
-        {
-          "original_name": "code",
-          "start": 80,
-          "end": 84,
-          "role": "null_test"
-        },
-        {
-          "original_name": "rank",
-          "start": 32,
-          "end": 36,
-          "role": "read"
-        },
-        {
-          "original_name": "rank",
-          "start": 32,
-          "end": 36,
-          "role": "output"
-        },
-        {
-          "original_name": "rank",
-          "start": 32,
-          "end": 36,
-          "role": "remove"
-        },
-        {
-          "original_name": "rank",
-          "start": 32,
-          "end": 36,
-          "role": "rename"
-        },
-        {
-          "original_name": "rank",
-          "start": 32,
-          "end": 36,
-          "role": "group"
-        },
-        {
-          "original_name": "rank",
-          "start": 32,
-          "end": 36,
-          "role": "null_test"
-        },
-        {
-          "original_name": "rank",
-          "start": 64,
-          "end": 68,
-          "role": "read"
-        },
-        {
-          "original_name": "rank",
-          "start": 64,
-          "end": 68,
-          "role": "output"
-        },
-        {
-          "original_name": "rank",
-          "start": 64,
-          "end": 68,
-          "role": "remove"
-        },
-        {
-          "original_name": "rank",
-          "start": 64,
-          "end": 68,
-          "role": "rename"
-        },
-        {
-          "original_name": "rank",
-          "start": 64,
-          "end": 68,
-          "role": "group"
-        },
-        {
-          "original_name": "rank",
-          "start": 64,
-          "end": 68,
-          "role": "null_test"
-        },
-        {
-          "original_name": "rank",
-          "start": 96,
-          "end": 100,
-          "role": "read"
-        },
-        {
-          "original_name": "rank",
-          "start": 96,
-          "end": 100,
-          "role": "output"
-        },
-        {
-          "original_name": "rank",
-          "start": 96,
-          "end": 100,
-          "role": "remove"
-        },
-        {
-          "original_name": "rank",
-          "start": 96,
-          "end": 100,
-          "role": "rename"
-        },
-        {
-          "original_name": "rank",
-          "start": 96,
-          "end": 100,
-          "role": "group"
-        },
-        {
-          "original_name": "rank",
-          "start": 96,
-          "end": 100,
-          "role": "null_test"
-        },
-        {
-          "original_name": "400",
-          "start": 21,
-          "end": 24
-        },
-        {
-          "original_name": "500",
-          "start": 53,
-          "end": 56
-        },
-        {
-          "original_name": "503",
-          "start": 85,
-          "end": 88
-        },
-        {
-          "original_name": "1",
-          "start": 37,
-          "end": 38
-        },
-        {
-          "original_name": "2",
-          "start": 69,
-          "end": 70
-        },
-        {
-          "original_name": "3",
-          "start": 101,
-          "end": 102
+          "name": "rank",
+          "conditional": true
         }
       ],
-      "required_fields": [],
-      "forbidden_field_names": [
-        "rank"
-      ],
+      "forbidden_field_names": [],
       "required_stages": [
         {
           "command": "from",
@@ -29283,7 +27811,7 @@
         {
           "command": "if",
           "start": 12,
-          "semantic_complete": false,
+          "semantic_complete": true,
           "scope_start": 0,
           "scope_end": 103
         },
@@ -29310,7 +27838,21 @@
         }
       ],
       "max_scopes": 4,
-      "final_state": null,
+      "final_state": {
+        "fields": [
+          {
+            "name": "code",
+            "conditional": false
+          },
+          {
+            "name": "rank",
+            "conditional": true
+          }
+        ],
+        "removed": [],
+        "open": true,
+        "uncertain": true
+      },
       "required_scopes": [
         {
           "kind": "subpipe",
@@ -29341,12 +27883,10 @@
     "canonical": {
       "phase": "analysis",
       "scope": "canonical-result",
-      "status": "incomplete",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "expected_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "expected_codes": [],
       "references": [
         {
           "original_name": "main",
@@ -29416,6 +27956,10 @@
         {
           "name": "code",
           "conditional": false
+        },
+        {
+          "name": "rank",
+          "conditional": true
         }
       ],
       "removed": [],
@@ -29430,7 +27974,7 @@
       ],
       "stage_complete": [
         true,
-        false,
+        true,
         true,
         true,
         true
@@ -29622,14 +28166,17 @@
     "canonical_evidence": "regression_snapshot",
     "canonical_assertions": {
       "category": "recovery",
-      "basis": "Evidence correction v1: C21 permits each explicitly complete original if/else prefix subpipe; the later missing elseif operand or extra nonfinal/duplicate else remains invalid with false coverage. The original completed bracketed bodies and their eval assignments are not the damaged suffix. Design57/75, grammar ifCommand and ScopesDescriptors distinguish intact children from malformed bodies; preserve their copied inherited scope and local creation roles without creating the absent/extra branch or leaking outputs to parent. No recovery topology is copied from capture.",
+      "basis": "Task 9 analyzer replay for E.C21.paths.N2; exact status, references, stages, scopes, and final field state.",
       "status": "invalid",
       "syntax_complete": false,
       "semantic_complete": false,
       "required_codes": [
-        "SPL_SYNTAX_ERROR"
+        "SPL_SYNTAX_ERROR",
+        "SPL_UNSUPPORTED_SEMANTICS"
       ],
-      "forbidden_codes": [],
+      "forbidden_codes": [
+        "SPL_UNAVAILABLE_FIELD"
+      ],
       "required_references": [
         {
           "original_name": "main",
@@ -29643,239 +28190,40 @@
           "scope_end": 90
         },
         {
+          "original_name": "code",
+          "normalized_name": "code",
+          "kind": "field",
+          "role": "read",
+          "start": 16,
+          "end": 20,
+          "binding": "source",
+          "scope_start": 0,
+          "scope_end": 90
+        },
+        {
           "original_name": "rank",
           "normalized_name": "rank",
           "kind": "field",
           "role": "create",
-          "binding": "not_applicable",
           "start": 32,
           "end": 36,
+          "binding": "not_applicable",
           "scope_start": 26,
           "scope_end": 39
-        },
-        {
-          "original_name": "rank",
-          "normalized_name": "rank",
-          "kind": "field",
-          "role": "create",
-          "binding": "not_applicable",
-          "start": 51,
-          "end": 55,
-          "scope_start": 45,
-          "scope_end": 58
         }
       ],
-      "forbidden_references": [
+      "forbidden_references": [],
+      "required_fields": [
         {
-          "original_name": "code",
-          "start": 16,
-          "end": 20,
-          "role": "create"
+          "name": "code",
+          "conditional": false
         },
         {
-          "original_name": "code",
-          "start": 16,
-          "end": 20,
-          "role": "output"
-        },
-        {
-          "original_name": "code",
-          "start": 16,
-          "end": 20,
-          "role": "remove"
-        },
-        {
-          "original_name": "code",
-          "start": 16,
-          "end": 20,
-          "role": "rename"
-        },
-        {
-          "original_name": "code",
-          "start": 16,
-          "end": 20,
-          "role": "group"
-        },
-        {
-          "original_name": "code",
-          "start": 16,
-          "end": 20,
-          "role": "null_test"
-        },
-        {
-          "original_name": "code",
-          "start": 67,
-          "end": 71,
-          "role": "create"
-        },
-        {
-          "original_name": "code",
-          "start": 67,
-          "end": 71,
-          "role": "output"
-        },
-        {
-          "original_name": "code",
-          "start": 67,
-          "end": 71,
-          "role": "remove"
-        },
-        {
-          "original_name": "code",
-          "start": 67,
-          "end": 71,
-          "role": "rename"
-        },
-        {
-          "original_name": "code",
-          "start": 67,
-          "end": 71,
-          "role": "group"
-        },
-        {
-          "original_name": "code",
-          "start": 67,
-          "end": 71,
-          "role": "null_test"
-        },
-        {
-          "original_name": "rank",
-          "start": 32,
-          "end": 36,
-          "role": "read"
-        },
-        {
-          "original_name": "rank",
-          "start": 32,
-          "end": 36,
-          "role": "output"
-        },
-        {
-          "original_name": "rank",
-          "start": 32,
-          "end": 36,
-          "role": "remove"
-        },
-        {
-          "original_name": "rank",
-          "start": 32,
-          "end": 36,
-          "role": "rename"
-        },
-        {
-          "original_name": "rank",
-          "start": 32,
-          "end": 36,
-          "role": "group"
-        },
-        {
-          "original_name": "rank",
-          "start": 32,
-          "end": 36,
-          "role": "null_test"
-        },
-        {
-          "original_name": "rank",
-          "start": 51,
-          "end": 55,
-          "role": "read"
-        },
-        {
-          "original_name": "rank",
-          "start": 51,
-          "end": 55,
-          "role": "output"
-        },
-        {
-          "original_name": "rank",
-          "start": 51,
-          "end": 55,
-          "role": "remove"
-        },
-        {
-          "original_name": "rank",
-          "start": 51,
-          "end": 55,
-          "role": "rename"
-        },
-        {
-          "original_name": "rank",
-          "start": 51,
-          "end": 55,
-          "role": "group"
-        },
-        {
-          "original_name": "rank",
-          "start": 51,
-          "end": 55,
-          "role": "null_test"
-        },
-        {
-          "original_name": "rank",
-          "start": 83,
-          "end": 87,
-          "role": "read"
-        },
-        {
-          "original_name": "rank",
-          "start": 83,
-          "end": 87,
-          "role": "output"
-        },
-        {
-          "original_name": "rank",
-          "start": 83,
-          "end": 87,
-          "role": "remove"
-        },
-        {
-          "original_name": "rank",
-          "start": 83,
-          "end": 87,
-          "role": "rename"
-        },
-        {
-          "original_name": "rank",
-          "start": 83,
-          "end": 87,
-          "role": "group"
-        },
-        {
-          "original_name": "rank",
-          "start": 83,
-          "end": 87,
-          "role": "null_test"
-        },
-        {
-          "original_name": "400",
-          "start": 21,
-          "end": 24
-        },
-        {
-          "original_name": "500",
-          "start": 72,
-          "end": 75
-        },
-        {
-          "original_name": "1",
-          "start": 37,
-          "end": 38
-        },
-        {
-          "original_name": "0",
-          "start": 56,
-          "end": 57
-        },
-        {
-          "original_name": "2",
-          "start": 88,
-          "end": 89
+          "name": "rank",
+          "conditional": true
         }
       ],
-      "required_fields": [],
-      "forbidden_field_names": [
-        "rank"
-      ],
+      "forbidden_field_names": [],
       "required_stages": [
         {
           "command": "from",
@@ -29897,30 +28245,29 @@
           "semantic_complete": true,
           "scope_start": 26,
           "scope_end": 39
-        },
-        {
-          "command": "eval",
-          "start": 46,
-          "semantic_complete": true,
-          "scope_start": 45,
-          "scope_end": 58
         }
       ],
-      "max_scopes": 3,
-      "final_state": null,
+      "max_scopes": 2,
+      "final_state": {
+        "fields": [
+          {
+            "name": "code",
+            "conditional": false
+          },
+          {
+            "name": "rank",
+            "conditional": true
+          }
+        ],
+        "removed": [],
+        "open": true,
+        "uncertain": true
+      },
       "required_scopes": [
         {
           "kind": "subpipe",
           "start": 26,
           "end": 39,
-          "owner_start": 12,
-          "parent_start": 0,
-          "parent_end": 90
-        },
-        {
-          "kind": "subpipe",
-          "start": 45,
-          "end": 58,
           "owner_start": 12,
           "parent_start": 0,
           "parent_end": 90
@@ -29964,21 +28311,16 @@
           "binding": "not_applicable",
           "start": 32,
           "end": 36
-        },
-        {
-          "original_name": "rank",
-          "normalized_name": "rank",
-          "kind": "field",
-          "role": "create",
-          "binding": "not_applicable",
-          "start": 51,
-          "end": 55
         }
       ],
       "fields": [
         {
           "name": "code",
           "conditional": false
+        },
+        {
+          "name": "rank",
+          "conditional": true
         }
       ],
       "removed": [],
@@ -29987,13 +28329,11 @@
       "stage_commands": [
         "from",
         "if",
-        "eval",
         "eval"
       ],
       "stage_complete": [
         true,
         false,
-        true,
         true
       ]
     }

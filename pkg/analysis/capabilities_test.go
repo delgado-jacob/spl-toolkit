@@ -44,7 +44,7 @@ func TestCapabilitiesPublishCanonicalLedger(t *testing.T) {
 	}
 }
 
-func TestCapabilitiesSurviveJSONRoundTrip(t *testing.T) {
+func TestCapabilitiesPublicJSONRoundTripIsCanonical(t *testing.T) {
 	for _, options := range []CapabilityOptions{{}, {Language: "spl2"}} {
 		manifest, err := CapabilitiesFor(options)
 		if err != nil {
@@ -58,9 +58,105 @@ func TestCapabilitiesSurviveJSONRoundTrip(t *testing.T) {
 		if err := json.Unmarshal(encoded, &decoded); err != nil {
 			t.Fatal(err)
 		}
-		if !reflect.DeepEqual(decoded, manifest) {
-			t.Fatal("capability manifest changed across its JSON wire representation")
+		reencoded, err := json.Marshal(decoded)
+		if err != nil {
+			t.Fatal(err)
 		}
+		var firstWire, secondWire any
+		if err := json.Unmarshal(encoded, &firstWire); err != nil {
+			t.Fatal(err)
+		}
+		if err := json.Unmarshal(reencoded, &secondWire); err != nil {
+			t.Fatal(err)
+		}
+		if !reflect.DeepEqual(firstWire, secondWire) {
+			t.Fatal("capability manifest public JSON changed across its wire representation")
+		}
+	}
+}
+
+func TestCapabilitiesPublicWirePreservesV1SemanticShape(t *testing.T) {
+	manifest, err := CapabilitiesFor(CapabilityOptions{Language: "spl2"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	encoded, err := json.Marshal(manifest)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var wire struct {
+		Evidence []struct {
+			ID           string `json:"id"`
+			Observations struct {
+				Semantics map[string]any `json:"semantics"`
+			} `json:"observations"`
+		} `json:"evidence"`
+	}
+	if err := json.Unmarshal(encoded, &wire); err != nil {
+		t.Fatal(err)
+	}
+	var decoded CapabilityManifest
+	if err := json.Unmarshal(encoded, &decoded); err != nil {
+		t.Fatal(err)
+	}
+
+	wantSemanticsKeys := []string{"complete", "dependencies", "diagnostics", "references", "stages", "status", "transitions"}
+	wantStageKeys := []string{"command", "semantic_complete"}
+	wantReferenceKeys := []string{"binding", "kind", "location", "normalized_name", "resolution", "role"}
+	wantTransitionKeys := []string{"operation", "output"}
+	foundPrivateAuthoredEvidence := false
+	for i, evidence := range manifest.Evidence {
+		if evidence.Observations.Semantics == nil {
+			continue
+		}
+		if len(evidence.Observations.Semantics.Scopes) != 0 || len(evidence.Observations.Semantics.Lineage) != 0 || evidence.Observations.Semantics.FinalFieldState != nil {
+			foundPrivateAuthoredEvidence = true
+		}
+		semantics := wire.Evidence[i].Observations.Semantics
+		assertCapabilityJSONKeys(t, evidence.ID+" semantics", semantics, wantSemanticsKeys)
+		for j, stage := range semantics["stages"].([]any) {
+			assertCapabilityJSONKeys(t, fmt.Sprintf("%s stage %d", evidence.ID, j), stage.(map[string]any), wantStageKeys)
+		}
+		for j, reference := range semantics["references"].([]any) {
+			assertCapabilityJSONKeys(t, fmt.Sprintf("%s reference %d", evidence.ID, j), reference.(map[string]any), wantReferenceKeys)
+		}
+		for j, transition := range semantics["transitions"].([]any) {
+			assertCapabilityJSONKeys(t, fmt.Sprintf("%s transition %d", evidence.ID, j), transition.(map[string]any), wantTransitionKeys)
+		}
+		wantPublic := cloneCapabilityEvidence(evidence).Observations.Semantics
+		wantPublic.Scopes = nil
+		wantPublic.Lineage = nil
+		wantPublic.FinalFieldState = nil
+		for j := range wantPublic.Stages {
+			wantPublic.Stages[j].ID = ""
+			wantPublic.Stages[j].ScopeID = ""
+		}
+		for j := range wantPublic.References {
+			wantPublic.References[j].ID = ""
+		}
+		for j := range wantPublic.Transitions {
+			wantPublic.Transitions[j].InputReferenceIDs = nil
+			wantPublic.Transitions[j].OutputReferenceID = ""
+			wantPublic.Transitions[j].Conditional = false
+		}
+		if gotPublic := decoded.Evidence[i].Observations.Semantics; !reflect.DeepEqual(gotPublic, wantPublic) {
+			t.Fatalf("%s legacy public semantic fields changed\n got: %#v\nwant: %#v", evidence.ID, gotPublic, wantPublic)
+		}
+	}
+	if !foundPrivateAuthoredEvidence {
+		t.Fatal("SPL2 manifest has no private authored evidence to exercise the public projection")
+	}
+}
+
+func assertCapabilityJSONKeys(t *testing.T, label string, object map[string]any, want []string) {
+	t.Helper()
+	got := make([]string, 0, len(object))
+	for key := range object {
+		got = append(got, key)
+	}
+	sort.Strings(got)
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("%s keys = %v, want public v1 keys %v", label, got, want)
 	}
 }
 
@@ -299,9 +395,12 @@ func legacySPLCapabilities() CapabilityManifest {
 
 func legacySPL2Capabilities() CapabilityManifest {
 	manifest := CapabilityManifest{Commands: []Capability{}, Functions: []Capability{}}
+	publishedCommands := map[string]bool{
+		"bin": true, "if": true, "join": true, "mvexpand": true, "union": true,
+	}
 	for _, entry := range spl2CommandInventory {
 		limitations := append([]string{entry.limitation}, spl2FormLimitations(entry.name)...)
-		manifest.Commands = append(manifest.Commands, Capability{Name: entry.name, SyntaxSupported: entry.syntax, SemanticSupported: entry.semantic, Limitations: limitations})
+		manifest.Commands = append(manifest.Commands, Capability{Name: entry.name, SyntaxSupported: entry.syntax, SemanticSupported: entry.semantic || publishedCommands[entry.name], Limitations: limitations})
 	}
 	for name, function := range spl2Functions {
 		limit := fmt.Sprintf("%d to %d positional arguments", function.min, function.max)
@@ -318,6 +417,12 @@ func legacySPL2Capabilities() CapabilityManifest {
 		}
 		limit += "; conditional availability follows expression evidence; named arguments remain incomplete"
 		manifest.Functions = append(manifest.Functions, Capability{Name: name, SyntaxSupported: true, SemanticSupported: true, Limitations: append([]string{limit}, spl2FormLimitations("function:"+name)...)})
+	}
+	for _, name := range []string{"any", "cidrmatch", "json", "json_array_to_mv", "like", "mvindex", "span", "sqrt", "stdev", "strftime"} {
+		manifest.Functions = append(manifest.Functions, Capability{
+			Name: name, SyntaxSupported: true, SemanticSupported: true,
+			Limitations: []string{"Selected positional form only; neighboring arities and named arguments remain incomplete."},
+		})
 	}
 	sort.Slice(manifest.Commands, func(i, j int) bool { return manifest.Commands[i].Name < manifest.Commands[j].Name })
 	sort.Slice(manifest.Functions, func(i, j int) bool { return manifest.Functions[i].Name < manifest.Functions[j].Name })

@@ -5199,17 +5199,17 @@
           ]
         },
         "semantics": {
-          "state": "unsupported",
+          "state": "supported",
           "evidence_ids": [
-            "spl2.bin.span-field.incomplete"
+            "spl2.bin.span-field.positive"
           ],
-          "limitations": [
-            "Dedicated grammar; child reads are retained where owned, but command output effects remain incomplete."
-          ]
+          "limitations": []
         },
         "requirements": {
-          "state": "unassessed",
-          "evidence_ids": [],
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.bin.span-field.positive"
+          ],
           "limitations": []
         },
         "linting": {
@@ -5515,8 +5515,10 @@
           "limitations": []
         },
         "requirements": {
-          "state": "unassessed",
-          "evidence_ids": [],
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.eval.exact-assignment.positive"
+          ],
           "limitations": []
         },
         "linting": {
@@ -5665,8 +5667,10 @@
           "limitations": []
         },
         "requirements": {
-          "state": "unassessed",
-          "evidence_ids": [],
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.fields.exact-field-list.positive"
+          ],
           "limitations": []
         },
         "linting": {
@@ -5896,8 +5900,10 @@
           "limitations": []
         },
         "requirements": {
-          "state": "unassessed",
-          "evidence_ids": [],
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.from.dataset.positive"
+          ],
           "limitations": []
         },
         "linting": {
@@ -5990,17 +5996,17 @@
           ]
         },
         "semantics": {
-          "state": "unsupported",
+          "state": "supported",
           "evidence_ids": [
-            "spl2.if.subpipe.incomplete"
+            "spl2.if.subpipe.positive"
           ],
-          "limitations": [
-            "Dedicated grammar; child reads are retained where owned, but command output effects remain incomplete."
-          ]
+          "limitations": []
         },
         "requirements": {
-          "state": "unassessed",
-          "evidence_ids": [],
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.if.subpipe.positive"
+          ],
           "limitations": []
         },
         "linting": {
@@ -6142,17 +6148,17 @@
           ]
         },
         "semantics": {
-          "state": "unsupported",
+          "state": "supported",
           "evidence_ids": [
-            "spl2.join.qualified-subsearch.incomplete"
+            "spl2.join.qualified-subsearch.positive"
           ],
-          "limitations": [
-            "Dedicated grammar; child reads are retained where owned, but command output effects remain incomplete."
-          ]
+          "limitations": []
         },
         "requirements": {
-          "state": "unassessed",
-          "evidence_ids": [],
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.join.qualified-subsearch.positive"
+          ],
           "limitations": []
         },
         "linting": {
@@ -6502,17 +6508,17 @@
           ]
         },
         "semantics": {
-          "state": "unsupported",
+          "state": "supported",
           "evidence_ids": [
-            "spl2.mvexpand.limited-field.incomplete"
+            "spl2.mvexpand.limited-field.positive"
           ],
-          "limitations": [
-            "Dedicated grammar; child reads are retained where owned, but command output effects remain incomplete."
-          ]
+          "limitations": []
         },
         "requirements": {
-          "state": "unassessed",
-          "evidence_ids": [],
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.mvexpand.limited-field.positive"
+          ],
           "limitations": []
         },
         "linting": {
@@ -7004,8 +7010,10 @@
           "limitations": []
         },
         "requirements": {
-          "state": "unassessed",
-          "evidence_ids": [],
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.select.projection.positive"
+          ],
           "limitations": []
         },
         "linting": {
@@ -7213,8 +7221,10 @@
           "limitations": []
         },
         "requirements": {
-          "state": "unassessed",
-          "evidence_ids": [],
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.stats.aggregate-call.positive"
+          ],
           "limitations": []
         },
         "linting": {
@@ -7686,17 +7696,17 @@
           ]
         },
         "semantics": {
-          "state": "unsupported",
+          "state": "supported",
           "evidence_ids": [
-            "spl2.union.dataset.incomplete"
+            "spl2.union.dataset.positive"
           ],
-          "limitations": [
-            "Dedicated grammar; child reads are retained where owned, but command output effects remain incomplete."
-          ]
+          "limitations": []
         },
         "requirements": {
-          "state": "unassessed",
-          "evidence_ids": [],
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.union.dataset.positive"
+          ],
           "limitations": []
         },
         "linting": {
@@ -7795,8 +7805,10 @@
           "limitations": []
         },
         "requirements": {
-          "state": "unassessed",
-          "evidence_ids": [],
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.where.predicate.positive"
+          ],
           "limitations": []
         },
         "linting": {
@@ -7939,6 +7951,149 @@
           "limitations": [
             "Named external dependency, independent of columns and source aliases."
           ]
+        }
+      }
+    },
+    {
+      "id": "spl2.dataset.dataset.dynamic-descriptor",
+      "language": "spl2",
+      "profile": "splunkd",
+      "kind": "dataset",
+      "name": "dataset",
+      "form": "dynamic-descriptor",
+      "grammar_registered": true,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Narrow Milestone 11 form proved by canonical replay."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "semantics": {
+          "state": "unsupported",
+          "evidence_ids": [
+            "spl2.dataset.dynamic-descriptor.incomplete"
+          ],
+          "limitations": [
+            "Neighboring dynamic or ambiguous form remains explicit and incomplete."
+          ]
+        },
+        "requirements": {
+          "state": "unsupported",
+          "evidence_ids": [
+            "spl2.dataset.dynamic-descriptor.incomplete"
+          ],
+          "limitations": [
+            "Neighboring dynamic or ambiguous form remains explicit and incomplete."
+          ]
+        },
+        "linting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        }
+      }
+    },
+    {
+      "id": "spl2.dataset.dataset.parameter",
+      "language": "spl2",
+      "profile": "splunkd",
+      "kind": "dataset",
+      "name": "dataset",
+      "form": "parameter",
+      "grammar_registered": true,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Narrow Milestone 11 form proved by canonical replay."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.dataset.parameter.positive"
+          ],
+          "limitations": []
+        },
+        "semantics": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.dataset.parameter.positive"
+          ],
+          "limitations": []
+        },
+        "requirements": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.dataset.parameter.positive"
+          ],
+          "limitations": []
+        },
+        "linting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        }
+      }
+    },
+    {
+      "id": "spl2.dataset.dataset.static-descriptor",
+      "language": "spl2",
+      "profile": "splunkd",
+      "kind": "dataset",
+      "name": "dataset",
+      "form": "static-descriptor",
+      "grammar_registered": true,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Narrow Milestone 11 form proved by canonical replay."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.dataset.static-descriptor.positive"
+          ],
+          "limitations": []
+        },
+        "semantics": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.dataset.static-descriptor.positive"
+          ],
+          "limitations": []
+        },
+        "requirements": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.dataset.static-descriptor.positive"
+          ],
+          "limitations": []
+        },
+        "linting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
         }
       }
     },
@@ -8254,6 +8409,55 @@
       }
     },
     {
+      "id": "spl2.expression.field.identity-collision",
+      "language": "spl2",
+      "profile": "splunkd",
+      "kind": "expression",
+      "name": "field",
+      "form": "identity-collision",
+      "grammar_registered": true,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Narrow Milestone 11 form proved by canonical replay."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "semantics": {
+          "state": "unsupported",
+          "evidence_ids": [
+            "spl2.field.identity-collision.incomplete"
+          ],
+          "limitations": [
+            "Neighboring dynamic or ambiguous form remains explicit and incomplete."
+          ]
+        },
+        "requirements": {
+          "state": "unsupported",
+          "evidence_ids": [
+            "spl2.field.identity-collision.incomplete"
+          ],
+          "limitations": [
+            "Neighboring dynamic or ambiguous form remains explicit and incomplete."
+          ]
+        },
+        "linting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        }
+      }
+    },
+    {
       "id": "spl2.expression.field.implicit-output-rewrite",
       "language": "spl2",
       "profile": "splunkd",
@@ -8479,6 +8683,53 @@
       }
     },
     {
+      "id": "spl2.expression.field.quoted-dotted-atom",
+      "language": "spl2",
+      "profile": "splunkd",
+      "kind": "expression",
+      "name": "field",
+      "form": "quoted-dotted-atom",
+      "grammar_registered": true,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Narrow Milestone 11 form proved by canonical replay."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.field.quoted-dotted-atom.positive"
+          ],
+          "limitations": []
+        },
+        "semantics": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.field.quoted-dotted-atom.positive"
+          ],
+          "limitations": []
+        },
+        "requirements": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.field.quoted-dotted-atom.positive"
+          ],
+          "limitations": []
+        },
+        "linting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        }
+      }
+    },
+    {
       "id": "spl2.expression.field.rename-input-rewrite",
       "language": "spl2",
       "profile": "splunkd",
@@ -8614,6 +8865,102 @@
       }
     },
     {
+      "id": "spl2.expression.field.structural-path",
+      "language": "spl2",
+      "profile": "splunkd",
+      "kind": "expression",
+      "name": "field",
+      "form": "structural-path",
+      "grammar_registered": true,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Narrow Milestone 11 form proved by canonical replay."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.field.structural-path.positive"
+          ],
+          "limitations": []
+        },
+        "semantics": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.field.structural-path.positive"
+          ],
+          "limitations": []
+        },
+        "requirements": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.field.structural-path.positive"
+          ],
+          "limitations": []
+        },
+        "linting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        }
+      }
+    },
+    {
+      "id": "spl2.expression.function-call.invalid-selected-arity",
+      "language": "spl2",
+      "profile": "splunkd",
+      "kind": "expression",
+      "name": "function-call",
+      "form": "invalid-selected-arity",
+      "grammar_registered": true,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Narrow Milestone 11 form proved by canonical replay."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "semantics": {
+          "state": "unsupported",
+          "evidence_ids": [
+            "spl2.function-call.invalid-selected-arity.incomplete"
+          ],
+          "limitations": [
+            "Neighboring dynamic or ambiguous form remains explicit and incomplete."
+          ]
+        },
+        "requirements": {
+          "state": "unsupported",
+          "evidence_ids": [
+            "spl2.function-call.invalid-selected-arity.incomplete"
+          ],
+          "limitations": [
+            "Neighboring dynamic or ambiguous form remains explicit and incomplete."
+          ]
+        },
+        "linting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        }
+      }
+    },
+    {
       "id": "spl2.function.abs.one-positional",
       "language": "spl2",
       "profile": "splunkd",
@@ -8645,8 +8992,59 @@
           "limitations": []
         },
         "requirements": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.abs.one-positional.positive"
+          ],
+          "limitations": []
+        },
+        "linting": {
           "state": "unassessed",
           "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        }
+      }
+    },
+    {
+      "id": "spl2.function.any.lambda-positional",
+      "language": "spl2",
+      "profile": "splunkd",
+      "kind": "function",
+      "name": "any",
+      "form": "lambda-positional",
+      "grammar_registered": true,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Narrow Milestone 11 form proved by canonical replay."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.any.lambda-positional.positive"
+          ],
+          "limitations": [
+            "Selected positional form only; neighboring arities and named arguments remain incomplete."
+          ]
+        },
+        "semantics": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.any.lambda-positional.positive"
+          ],
+          "limitations": []
+        },
+        "requirements": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.any.lambda-positional.positive"
+          ],
           "limitations": []
         },
         "linting": {
@@ -8693,8 +9091,10 @@
           "limitations": []
         },
         "requirements": {
-          "state": "unassessed",
-          "evidence_ids": [],
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.avg.one-positional.positive"
+          ],
           "limitations": []
         },
         "linting": {
@@ -8854,6 +9254,55 @@
       }
     },
     {
+      "id": "spl2.function.cidrmatch.two-positional",
+      "language": "spl2",
+      "profile": "splunkd",
+      "kind": "function",
+      "name": "cidrmatch",
+      "form": "two-positional",
+      "grammar_registered": true,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Narrow Milestone 11 form proved by canonical replay."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.cidrmatch.two-positional.positive"
+          ],
+          "limitations": [
+            "Selected positional form only; neighboring arities and named arguments remain incomplete."
+          ]
+        },
+        "semantics": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.cidrmatch.two-positional.positive"
+          ],
+          "limitations": []
+        },
+        "requirements": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.cidrmatch.two-positional.positive"
+          ],
+          "limitations": []
+        },
+        "linting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        }
+      }
+    },
+    {
       "id": "spl2.function.coalesce.two-positional",
       "language": "spl2",
       "profile": "splunkd",
@@ -8885,8 +9334,10 @@
           "limitations": []
         },
         "requirements": {
-          "state": "unassessed",
-          "evidence_ids": [],
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.coalesce.two-positional.positive"
+          ],
           "limitations": []
         },
         "linting": {
@@ -8933,8 +9384,10 @@
           "limitations": []
         },
         "requirements": {
-          "state": "unassessed",
-          "evidence_ids": [],
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.count.zero-positional.positive"
+          ],
           "limitations": []
         },
         "linting": {
@@ -8981,8 +9434,10 @@
           "limitations": []
         },
         "requirements": {
-          "state": "unassessed",
-          "evidence_ids": [],
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.dc.one-positional.positive"
+          ],
           "limitations": []
         },
         "linting": {
@@ -9029,8 +9484,10 @@
           "limitations": []
         },
         "requirements": {
-          "state": "unassessed",
-          "evidence_ids": [],
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.distinct_count.one-positional.positive"
+          ],
           "limitations": []
         },
         "linting": {
@@ -9286,6 +9743,104 @@
       }
     },
     {
+      "id": "spl2.function.json.one-positional",
+      "language": "spl2",
+      "profile": "splunkd",
+      "kind": "function",
+      "name": "json",
+      "form": "one-positional",
+      "grammar_registered": true,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Narrow Milestone 11 form proved by canonical replay."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.json.one-positional.positive"
+          ],
+          "limitations": [
+            "Selected positional form only; neighboring arities and named arguments remain incomplete."
+          ]
+        },
+        "semantics": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.json.one-positional.positive"
+          ],
+          "limitations": []
+        },
+        "requirements": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.json.one-positional.positive"
+          ],
+          "limitations": []
+        },
+        "linting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        }
+      }
+    },
+    {
+      "id": "spl2.function.json_array_to_mv.one-positional",
+      "language": "spl2",
+      "profile": "splunkd",
+      "kind": "function",
+      "name": "json_array_to_mv",
+      "form": "one-positional",
+      "grammar_registered": true,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Narrow Milestone 11 form proved by canonical replay."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.json_array_to_mv.one-positional.positive"
+          ],
+          "limitations": [
+            "Selected positional form only; neighboring arities and named arguments remain incomplete."
+          ]
+        },
+        "semantics": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.json_array_to_mv.one-positional.positive"
+          ],
+          "limitations": []
+        },
+        "requirements": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.json_array_to_mv.one-positional.positive"
+          ],
+          "limitations": []
+        },
+        "linting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        }
+      }
+    },
+    {
       "id": "spl2.function.last.one-positional",
       "language": "spl2",
       "profile": "splunkd",
@@ -9382,6 +9937,55 @@
       }
     },
     {
+      "id": "spl2.function.like.two-positional",
+      "language": "spl2",
+      "profile": "splunkd",
+      "kind": "function",
+      "name": "like",
+      "form": "two-positional",
+      "grammar_registered": true,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Narrow Milestone 11 form proved by canonical replay."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.like.two-positional.positive"
+          ],
+          "limitations": [
+            "Selected positional form only; neighboring arities and named arguments remain incomplete."
+          ]
+        },
+        "semantics": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.like.two-positional.positive"
+          ],
+          "limitations": []
+        },
+        "requirements": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.like.two-positional.positive"
+          ],
+          "limitations": []
+        },
+        "linting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        }
+      }
+    },
+    {
       "id": "spl2.function.list.one-positional",
       "language": "spl2",
       "profile": "splunkd",
@@ -9461,8 +10065,10 @@
           "limitations": []
         },
         "requirements": {
-          "state": "unassessed",
-          "evidence_ids": [],
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.lower.one-positional.positive"
+          ],
           "limitations": []
         },
         "linting": {
@@ -9557,8 +10163,10 @@
           "limitations": []
         },
         "requirements": {
-          "state": "unassessed",
-          "evidence_ids": [],
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.match.two-positional.positive"
+          ],
           "limitations": []
         },
         "linting": {
@@ -9605,8 +10213,10 @@
           "limitations": []
         },
         "requirements": {
-          "state": "unassessed",
-          "evidence_ids": [],
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.max.one-positional.positive"
+          ],
           "limitations": []
         },
         "linting": {
@@ -9653,8 +10263,10 @@
           "limitations": []
         },
         "requirements": {
-          "state": "unassessed",
-          "evidence_ids": [],
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.min.one-positional.positive"
+          ],
           "limitations": []
         },
         "linting": {
@@ -9703,6 +10315,55 @@
         "requirements": {
           "state": "unassessed",
           "evidence_ids": [],
+          "limitations": []
+        },
+        "linting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        }
+      }
+    },
+    {
+      "id": "spl2.function.mvindex.two-positional",
+      "language": "spl2",
+      "profile": "splunkd",
+      "kind": "function",
+      "name": "mvindex",
+      "form": "two-positional",
+      "grammar_registered": true,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Narrow Milestone 11 form proved by canonical replay."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.mvindex.two-positional.positive"
+          ],
+          "limitations": [
+            "Selected positional form only; neighboring arities and named arguments remain incomplete."
+          ]
+        },
+        "semantics": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.mvindex.two-positional.positive"
+          ],
+          "limitations": []
+        },
+        "requirements": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.mvindex.two-positional.positive"
+          ],
           "limitations": []
         },
         "linting": {
@@ -9797,8 +10458,10 @@
           "limitations": []
         },
         "requirements": {
-          "state": "unassessed",
-          "evidence_ids": [],
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.round.one-positional.positive"
+          ],
           "limitations": []
         },
         "linting": {
@@ -9845,8 +10508,59 @@
           "limitations": []
         },
         "requirements": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.rtrim.one-positional.positive"
+          ],
+          "limitations": []
+        },
+        "linting": {
           "state": "unassessed",
           "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        }
+      }
+    },
+    {
+      "id": "spl2.function.span.grouping-positional",
+      "language": "spl2",
+      "profile": "splunkd",
+      "kind": "function",
+      "name": "span",
+      "form": "grouping-positional",
+      "grammar_registered": true,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Narrow Milestone 11 form proved by canonical replay."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.span.grouping-positional.positive"
+          ],
+          "limitations": [
+            "Selected positional form only; neighboring arities and named arguments remain incomplete."
+          ]
+        },
+        "semantics": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.span.grouping-positional.positive"
+          ],
+          "limitations": []
+        },
+        "requirements": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.span.grouping-positional.positive"
+          ],
           "limitations": []
         },
         "linting": {
@@ -9895,6 +10609,153 @@
         "requirements": {
           "state": "unassessed",
           "evidence_ids": [],
+          "limitations": []
+        },
+        "linting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        }
+      }
+    },
+    {
+      "id": "spl2.function.sqrt.one-positional",
+      "language": "spl2",
+      "profile": "splunkd",
+      "kind": "function",
+      "name": "sqrt",
+      "form": "one-positional",
+      "grammar_registered": true,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Narrow Milestone 11 form proved by canonical replay."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.sqrt.one-positional.positive"
+          ],
+          "limitations": [
+            "Selected positional form only; neighboring arities and named arguments remain incomplete."
+          ]
+        },
+        "semantics": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.sqrt.one-positional.positive"
+          ],
+          "limitations": []
+        },
+        "requirements": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.sqrt.one-positional.positive"
+          ],
+          "limitations": []
+        },
+        "linting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        }
+      }
+    },
+    {
+      "id": "spl2.function.stdev.one-positional",
+      "language": "spl2",
+      "profile": "splunkd",
+      "kind": "function",
+      "name": "stdev",
+      "form": "one-positional",
+      "grammar_registered": true,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Narrow Milestone 11 form proved by canonical replay."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.stdev.one-positional.positive"
+          ],
+          "limitations": [
+            "Selected positional form only; neighboring arities and named arguments remain incomplete."
+          ]
+        },
+        "semantics": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.stdev.one-positional.positive"
+          ],
+          "limitations": []
+        },
+        "requirements": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.stdev.one-positional.positive"
+          ],
+          "limitations": []
+        },
+        "linting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        }
+      }
+    },
+    {
+      "id": "spl2.function.strftime.two-positional",
+      "language": "spl2",
+      "profile": "splunkd",
+      "kind": "function",
+      "name": "strftime",
+      "form": "two-positional",
+      "grammar_registered": true,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Narrow Milestone 11 form proved by canonical replay."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.strftime.two-positional.positive"
+          ],
+          "limitations": [
+            "Selected positional form only; neighboring arities and named arguments remain incomplete."
+          ]
+        },
+        "semantics": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.strftime.two-positional.positive"
+          ],
+          "limitations": []
+        },
+        "requirements": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.strftime.two-positional.positive"
+          ],
           "limitations": []
         },
         "linting": {
@@ -9989,8 +10850,10 @@
           "limitations": []
         },
         "requirements": {
-          "state": "unassessed",
-          "evidence_ids": [],
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.sum.one-positional.positive"
+          ],
           "limitations": []
         },
         "linting": {
@@ -10037,8 +10900,10 @@
           "limitations": []
         },
         "requirements": {
-          "state": "unassessed",
-          "evidence_ids": [],
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.tonumber.one-positional.positive"
+          ],
           "limitations": []
         },
         "linting": {
@@ -10229,8 +11094,10 @@
           "limitations": []
         },
         "requirements": {
-          "state": "unassessed",
-          "evidence_ids": [],
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.values.one-positional.positive"
+          ],
           "limitations": []
         },
         "linting": {
@@ -10369,6 +11236,198 @@
       }
     },
     {
+      "id": "spl2.module.module.declaration-cycle",
+      "language": "spl2",
+      "profile": "splunkd",
+      "kind": "module",
+      "name": "module",
+      "form": "declaration-cycle",
+      "grammar_registered": true,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Narrow Milestone 11 form proved by canonical replay."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "semantics": {
+          "state": "unsupported",
+          "evidence_ids": [
+            "spl2.module.declaration-cycle.incomplete"
+          ],
+          "limitations": [
+            "Neighboring dynamic or ambiguous form remains explicit and incomplete."
+          ]
+        },
+        "requirements": {
+          "state": "unsupported",
+          "evidence_ids": [
+            "spl2.module.declaration-cycle.incomplete"
+          ],
+          "limitations": [
+            "Neighboring dynamic or ambiguous form remains explicit and incomplete."
+          ]
+        },
+        "linting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        }
+      }
+    },
+    {
+      "id": "spl2.module.module.local-scalar-function",
+      "language": "spl2",
+      "profile": "splunkd",
+      "kind": "module",
+      "name": "module",
+      "form": "local-scalar-function",
+      "grammar_registered": true,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Narrow Milestone 11 form proved by canonical replay."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.module.local-scalar-function.positive"
+          ],
+          "limitations": []
+        },
+        "semantics": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.module.local-scalar-function.positive"
+          ],
+          "limitations": []
+        },
+        "requirements": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.module.local-scalar-function.positive"
+          ],
+          "limitations": []
+        },
+        "linting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        }
+      }
+    },
+    {
+      "id": "spl2.module.module.local-view",
+      "language": "spl2",
+      "profile": "splunkd",
+      "kind": "module",
+      "name": "module",
+      "form": "local-view",
+      "grammar_registered": true,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Narrow Milestone 11 form proved by canonical replay."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.module.local-view.positive"
+          ],
+          "limitations": []
+        },
+        "semantics": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.module.local-view.positive"
+          ],
+          "limitations": []
+        },
+        "requirements": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.module.local-view.positive"
+          ],
+          "limitations": []
+        },
+        "linting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        }
+      }
+    },
+    {
+      "id": "spl2.module.module.unresolved-import",
+      "language": "spl2",
+      "profile": "splunkd",
+      "kind": "module",
+      "name": "module",
+      "form": "unresolved-import",
+      "grammar_registered": true,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Narrow Milestone 11 form proved by canonical replay."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.module.unresolved-import.positive"
+          ],
+          "limitations": []
+        },
+        "semantics": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.module.unresolved-import.positive"
+          ],
+          "limitations": []
+        },
+        "requirements": {
+          "state": "unsupported",
+          "evidence_ids": [
+            "spl2.module.unresolved-import.incomplete"
+          ],
+          "limitations": [
+            "Neighboring dynamic or ambiguous form remains explicit and incomplete."
+          ]
+        },
+        "linting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        }
+      }
+    },
+    {
       "id": "spl2.namespace.namespace.baseline",
       "language": "spl2",
       "profile": "splunkd",
@@ -10395,6 +11454,245 @@
         "requirements": {
           "state": "unassessed",
           "evidence_ids": [],
+          "limitations": []
+        },
+        "linting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        }
+      }
+    },
+    {
+      "id": "spl2.pipeline.branch.guarded-arms",
+      "language": "spl2",
+      "profile": "splunkd",
+      "kind": "pipeline",
+      "name": "branch",
+      "form": "guarded-arms",
+      "grammar_registered": true,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Narrow Milestone 11 form proved by canonical replay."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.branch.guarded-arms.positive"
+          ],
+          "limitations": []
+        },
+        "semantics": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.branch.guarded-arms.positive"
+          ],
+          "limitations": []
+        },
+        "requirements": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.branch.guarded-arms.positive"
+          ],
+          "limitations": []
+        },
+        "linting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        }
+      }
+    },
+    {
+      "id": "spl2.pipeline.branch.unguarded-arms",
+      "language": "spl2",
+      "profile": "splunkd",
+      "kind": "pipeline",
+      "name": "branch",
+      "form": "unguarded-arms",
+      "grammar_registered": true,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Narrow Milestone 11 form proved by canonical replay."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "semantics": {
+          "state": "unsupported",
+          "evidence_ids": [
+            "spl2.branch.unguarded-arms.incomplete"
+          ],
+          "limitations": [
+            "Neighboring dynamic or ambiguous form remains explicit and incomplete."
+          ]
+        },
+        "requirements": {
+          "state": "unsupported",
+          "evidence_ids": [
+            "spl2.branch.unguarded-arms.incomplete"
+          ],
+          "limitations": [
+            "Neighboring dynamic or ambiguous form remains explicit and incomplete."
+          ]
+        },
+        "linting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        }
+      }
+    },
+    {
+      "id": "spl2.pipeline.join.output-collision",
+      "language": "spl2",
+      "profile": "splunkd",
+      "kind": "pipeline",
+      "name": "join",
+      "form": "output-collision",
+      "grammar_registered": true,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Narrow Milestone 11 form proved by canonical replay."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "semantics": {
+          "state": "unsupported",
+          "evidence_ids": [
+            "spl2.join.output-collision.incomplete"
+          ],
+          "limitations": [
+            "Neighboring dynamic or ambiguous form remains explicit and incomplete."
+          ]
+        },
+        "requirements": {
+          "state": "unsupported",
+          "evidence_ids": [
+            "spl2.join.output-collision.incomplete"
+          ],
+          "limitations": [
+            "Neighboring dynamic or ambiguous form remains explicit and incomplete."
+          ]
+        },
+        "linting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        }
+      }
+    },
+    {
+      "id": "spl2.pipeline.join.qualified-left-subsearch",
+      "language": "spl2",
+      "profile": "splunkd",
+      "kind": "pipeline",
+      "name": "join",
+      "form": "qualified-left-subsearch",
+      "grammar_registered": true,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Narrow Milestone 11 form proved by canonical replay."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.join.qualified-left-subsearch.positive"
+          ],
+          "limitations": []
+        },
+        "semantics": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.join.qualified-left-subsearch.positive"
+          ],
+          "limitations": []
+        },
+        "requirements": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.join.qualified-left-subsearch.positive"
+          ],
+          "limitations": []
+        },
+        "linting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        }
+      }
+    },
+    {
+      "id": "spl2.pipeline.join.qualified-outer-subsearch",
+      "language": "spl2",
+      "profile": "splunkd",
+      "kind": "pipeline",
+      "name": "join",
+      "form": "qualified-outer-subsearch",
+      "grammar_registered": true,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Narrow Milestone 11 form proved by canonical replay."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.join.qualified-outer-subsearch.positive"
+          ],
+          "limitations": []
+        },
+        "semantics": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.join.qualified-outer-subsearch.positive"
+          ],
+          "limitations": []
+        },
+        "requirements": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.join.qualified-outer-subsearch.positive"
+          ],
           "limitations": []
         },
         "linting": {

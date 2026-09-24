@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"slices"
 	"sort"
 	"strings"
 )
@@ -51,6 +52,78 @@ var capabilityProvenanceFamilies = map[string]struct{}{
 	"spl2":               {},
 	"splunk_analytics":   {},
 	"security_detection": {},
+}
+
+type capabilitySemanticProofRequirement uint8
+
+const (
+	capabilityProofScope capabilitySemanticProofRequirement = 1 << iota
+	capabilityProofLineage
+	capabilityProofOrigins
+	capabilityProofTransitions
+	capabilityProofFinalState
+	capabilityProofMerge
+
+	capabilityProofScopedLineage = capabilityProofScope | capabilityProofLineage | capabilityProofFinalState
+	capabilityProofField         = capabilityProofScopedLineage | capabilityProofOrigins
+	capabilityProofTransition    = capabilityProofScopedLineage | capabilityProofTransitions
+	capabilityProofFieldTransfer = capabilityProofField | capabilityProofTransitions
+	capabilityProofFieldMerge    = capabilityProofFieldTransfer | capabilityProofMerge
+)
+
+var milestone11SemanticProofRequirements = map[string]capabilitySemanticProofRequirement{
+	"spl2.command.bin.span-field":                          capabilityProofFieldTransfer,
+	"spl2.command.eval.exact-assignment":                   capabilityProofFieldTransfer,
+	"spl2.command.fields.exact-field-list":                 capabilityProofTransition,
+	"spl2.command.from.dataset":                            capabilityProofScopedLineage,
+	"spl2.command.if.subpipe":                              capabilityProofFieldMerge,
+	"spl2.command.join.qualified-subsearch":                capabilityProofFieldMerge,
+	"spl2.command.mvexpand.limited-field":                  capabilityProofField,
+	"spl2.command.select.projection":                       capabilityProofFieldTransfer,
+	"spl2.command.stats.aggregate-call":                    capabilityProofFieldTransfer,
+	"spl2.command.union.dataset":                           capabilityProofFieldMerge,
+	"spl2.command.where.predicate":                         capabilityProofField,
+	"spl2.dataset.dataset.dynamic-descriptor":              capabilityProofScopedLineage,
+	"spl2.dataset.dataset.parameter":                       capabilityProofField,
+	"spl2.dataset.dataset.static-descriptor":               capabilityProofScopedLineage,
+	"spl2.expression.field.identity-collision":             capabilityProofField | capabilityProofMerge,
+	"spl2.expression.field.quoted-dotted-atom":             capabilityProofField,
+	"spl2.expression.field.structural-path":                capabilityProofField,
+	"spl2.expression.function-call.invalid-selected-arity": capabilityProofFieldTransfer,
+	"spl2.function.abs.one-positional":                     capabilityProofFieldTransfer,
+	"spl2.function.any.lambda-positional":                  capabilityProofFieldTransfer,
+	"spl2.function.avg.one-positional":                     capabilityProofFieldTransfer,
+	"spl2.function.cidrmatch.two-positional":               capabilityProofFieldTransfer,
+	"spl2.function.coalesce.two-positional":                capabilityProofFieldTransfer,
+	"spl2.function.count.zero-positional":                  capabilityProofFieldTransfer,
+	"spl2.function.dc.one-positional":                      capabilityProofFieldTransfer,
+	"spl2.function.distinct_count.one-positional":          capabilityProofFieldTransfer,
+	"spl2.function.json.one-positional":                    capabilityProofFieldTransfer,
+	"spl2.function.json_array_to_mv.one-positional":        capabilityProofFieldTransfer,
+	"spl2.function.like.two-positional":                    capabilityProofFieldTransfer,
+	"spl2.function.lower.one-positional":                   capabilityProofFieldTransfer,
+	"spl2.function.match.two-positional":                   capabilityProofFieldTransfer,
+	"spl2.function.max.one-positional":                     capabilityProofFieldTransfer,
+	"spl2.function.min.one-positional":                     capabilityProofFieldTransfer,
+	"spl2.function.mvindex.two-positional":                 capabilityProofFieldTransfer,
+	"spl2.function.round.one-positional":                   capabilityProofFieldTransfer,
+	"spl2.function.rtrim.one-positional":                   capabilityProofFieldTransfer,
+	"spl2.function.span.grouping-positional":               capabilityProofFieldTransfer,
+	"spl2.function.sqrt.one-positional":                    capabilityProofFieldTransfer,
+	"spl2.function.stdev.one-positional":                   capabilityProofFieldTransfer,
+	"spl2.function.strftime.two-positional":                capabilityProofFieldTransfer,
+	"spl2.function.sum.one-positional":                     capabilityProofFieldTransfer,
+	"spl2.function.tonumber.one-positional":                capabilityProofFieldTransfer,
+	"spl2.function.values.one-positional":                  capabilityProofFieldTransfer,
+	"spl2.module.module.declaration-cycle":                 capabilityProofScopedLineage,
+	"spl2.module.module.local-scalar-function":             capabilityProofFieldTransfer,
+	"spl2.module.module.local-view":                        capabilityProofFieldTransfer,
+	"spl2.module.module.unresolved-import":                 capabilityProofScopedLineage,
+	"spl2.pipeline.branch.guarded-arms":                    capabilityProofFieldMerge,
+	"spl2.pipeline.branch.unguarded-arms":                  capabilityProofFieldMerge,
+	"spl2.pipeline.join.output-collision":                  capabilityProofFieldMerge,
+	"spl2.pipeline.join.qualified-left-subsearch":          capabilityProofFieldMerge,
+	"spl2.pipeline.join.qualified-outer-subsearch":         capabilityProofFieldMerge,
 }
 
 func decodeCapabilityAssets(ledgerJSON, corpusJSON []byte) ([]CapabilityRecord, []CapabilityEvidence, error) {
@@ -250,7 +323,91 @@ func validateCapabilityRecord(record CapabilityRecord, evidence map[string]Capab
 			referenced[evidenceID] = struct{}{}
 		}
 	}
+	if requirement, ok := milestone11SemanticProofRequirements[record.ID]; ok {
+		for _, evidenceID := range record.Dimensions.Semantics.EvidenceIDs {
+			if err := validateCapabilitySemanticProof(evidence[evidenceID].Observations.Semantics, requirement); err != nil {
+				return fmt.Errorf("semantics evidence %q: %w", evidenceID, err)
+			}
+		}
+	}
 	return nil
+}
+
+func validateCapabilitySemanticProof(observation *CapabilitySemanticsObservation, requirement capabilitySemanticProofRequirement) error {
+	if observation == nil {
+		return fmt.Errorf("structured proof is required")
+	}
+	if requirement&capabilityProofScope != 0 && len(observation.Scopes) == 0 {
+		return fmt.Errorf("scope proof is required")
+	}
+	if requirement&capabilityProofLineage != 0 && len(observation.Lineage) == 0 {
+		return fmt.Errorf("lineage proof is required")
+	}
+	if requirement&capabilityProofOrigins != 0 && !capabilitySemanticsHaveOrigins(observation) {
+		return fmt.Errorf("field-origin proof is required")
+	}
+	if requirement&capabilityProofTransitions != 0 && !capabilitySemanticsHaveExpandedTransitions(observation) {
+		return fmt.Errorf("expanded transition proof is required")
+	}
+	if requirement&capabilityProofFinalState != 0 && observation.FinalFieldState == nil {
+		return fmt.Errorf("final field-state proof is required")
+	}
+	if requirement&capabilityProofMerge != 0 && !capabilitySemanticsHaveMergeFacts(observation) {
+		return fmt.Errorf("merge proof is required")
+	}
+	return nil
+}
+
+func capabilitySemanticsHaveOrigins(observation *CapabilitySemanticsObservation) bool {
+	found := false
+	visit := func(state *CapabilityFieldStateExpectation) {
+		if state == nil {
+			return
+		}
+		for _, field := range state.Fields {
+			found = found || len(field.OriginReferenceIDs) != 0
+		}
+	}
+	for _, lineage := range observation.Lineage {
+		visit(lineage.Before)
+		visit(lineage.After)
+	}
+	visit(observation.FinalFieldState)
+	return found
+}
+
+func capabilitySemanticsHaveExpandedTransitions(observation *CapabilitySemanticsObservation) bool {
+	for _, transition := range observation.Transitions {
+		if len(transition.InputReferenceIDs) != 0 || transition.OutputReferenceID != "" || transition.Conditional {
+			return true
+		}
+	}
+	return false
+}
+
+func capabilitySemanticsHaveMergeFacts(observation *CapabilitySemanticsObservation) bool {
+	found := false
+	for _, scope := range observation.Scopes {
+		found = found || scope.Kind == "search" && scope.ParentID != ""
+	}
+	visit := func(state *CapabilityFieldStateExpectation) {
+		if state == nil {
+			return
+		}
+		found = found || state.Uncertain
+		for _, field := range state.Fields {
+			found = found || field.Conditional || len(field.OriginReferenceIDs) > 1
+		}
+	}
+	for _, lineage := range observation.Lineage {
+		visit(lineage.Before)
+		visit(lineage.After)
+	}
+	visit(observation.FinalFieldState)
+	for _, transition := range observation.Transitions {
+		found = found || transition.Conditional
+	}
+	return found
 }
 
 func validateCapabilityEvidence(evidence CapabilityEvidence) error {
@@ -417,7 +574,7 @@ func validateCapabilityEvidenceObservation(evidence CapabilityEvidence, dimensio
 		if positive && !observation.Complete {
 			return fmt.Errorf("positive semantics evidence must be complete")
 		}
-		if len(observation.Stages)+len(observation.References)+len(observation.Dependencies)+len(observation.Transitions)+len(observation.Diagnostics) == 0 {
+		if len(observation.Stages)+len(observation.Scopes)+len(observation.References)+len(observation.Dependencies)+len(observation.Lineage)+len(observation.Transitions)+len(observation.Diagnostics) == 0 && observation.FinalFieldState == nil {
 			return fmt.Errorf("at least one typed semantic fact is required")
 		}
 		for i, stage := range observation.Stages {
@@ -445,6 +602,9 @@ func validateCapabilityEvidenceObservation(evidence CapabilityEvidence, dimensio
 			if err := requireCapabilityFields("transition", transition.Operation, transition.Output); err != nil {
 				return fmt.Errorf("transition %d: %w", i, err)
 			}
+		}
+		if err := validateCapabilityStructuredSemantics(evidence.Document, observation); err != nil {
+			return err
 		}
 		return validateCapabilityDiagnostics(evidence.Document, observation.Diagnostics, false)
 	case "requirements":
@@ -502,6 +662,259 @@ func validateCapabilityEvidenceObservation(evidence CapabilityEvidence, dimensio
 	default:
 		return fmt.Errorf("unknown observation dimension %q", dimension)
 	}
+}
+
+func validateCapabilityStructuredSemantics(document QueryDocument, observation *CapabilitySemanticsObservation) error {
+	structured := len(observation.Scopes) != 0 || len(observation.Lineage) != 0 || observation.FinalFieldState != nil
+	for _, stage := range observation.Stages {
+		structured = structured || stage.ID != "" || stage.ScopeID != ""
+	}
+	for _, reference := range observation.References {
+		structured = structured || reference.ID != ""
+	}
+	for _, transition := range observation.Transitions {
+		structured = structured || transition.InputReferenceIDs != nil || transition.OutputReferenceID != "" || transition.Conditional
+	}
+	if !structured {
+		return nil
+	}
+
+	stageIDs := make(map[string]struct{}, len(observation.Stages))
+	for i, stage := range observation.Stages {
+		if stage.ID == "" && stage.ScopeID == "" {
+			continue
+		}
+		if err := requireCapabilityFields("structured stage", stage.ID, stage.ScopeID); err != nil {
+			return fmt.Errorf("stage %d: %w", i, err)
+		}
+		if _, duplicate := stageIDs[stage.ID]; duplicate {
+			return fmt.Errorf("stage %d has duplicate ID %q", i, stage.ID)
+		}
+		stageIDs[stage.ID] = struct{}{}
+	}
+
+	referenceRoles := make(map[string]string, len(observation.References))
+	referenceOrder := make(map[string]int, len(observation.References))
+	for i, reference := range observation.References {
+		if strings.TrimSpace(reference.ID) == "" {
+			continue
+		}
+		if _, duplicate := referenceRoles[reference.ID]; duplicate {
+			return fmt.Errorf("reference %d has duplicate ID %q", i, reference.ID)
+		}
+		referenceRoles[reference.ID] = reference.Role
+		referenceOrder[reference.ID] = i
+	}
+	scopeIDs := make(map[string]struct{}, len(observation.Scopes))
+	for i, scope := range observation.Scopes {
+		if err := requireCapabilityFields("scope", scope.ID, scope.Kind); err != nil {
+			return fmt.Errorf("scope %d: %w", i, err)
+		}
+		if i > 0 && !capabilityOrdinalIDLess(observation.Scopes[i-1].ID, scope.ID) {
+			return fmt.Errorf("scopes are not in canonical ID order at indexes %d and %d", i-1, i)
+		}
+		if scope.StageID != "" {
+			if _, ok := stageIDs[scope.StageID]; !ok {
+				return fmt.Errorf("scope %d names unknown stage ID %q", i, scope.StageID)
+			}
+		}
+		if scope.ParentID != "" {
+			if _, ok := scopeIDs[scope.ParentID]; !ok {
+				return fmt.Errorf("scope %d names unknown or later parent scope ID %q", i, scope.ParentID)
+			}
+		}
+		if err := validateCapabilityLocation(document, scope.Location); err != nil {
+			return fmt.Errorf("scope %d: %w", i, err)
+		}
+		scopeIDs[scope.ID] = struct{}{}
+	}
+	for i, stage := range observation.Stages {
+		if stage.ID == "" && stage.ScopeID == "" {
+			continue
+		}
+		if _, ok := scopeIDs[stage.ScopeID]; !ok {
+			return fmt.Errorf("stage %d names unknown scope ID %q", i, stage.ScopeID)
+		}
+	}
+
+	for i, lineage := range observation.Lineage {
+		if err := requireCapabilityFields("lineage", lineage.StageID, lineage.ScopeID); err != nil {
+			return fmt.Errorf("lineage %d: %w", i, err)
+		}
+		if _, ok := stageIDs[lineage.StageID]; !ok {
+			return fmt.Errorf("lineage %d names unknown stage ID %q", i, lineage.StageID)
+		}
+		if _, ok := scopeIDs[lineage.ScopeID]; !ok {
+			return fmt.Errorf("lineage %d names unknown scope ID %q", i, lineage.ScopeID)
+		}
+		if lineage.Before == nil && lineage.After == nil {
+			return fmt.Errorf("lineage %d requires before or after field state", i)
+		}
+		if err := validateCapabilityFieldState("lineage before", lineage.Before, referenceOrder, observation.Transitions); err != nil {
+			return fmt.Errorf("lineage %d: %w", i, err)
+		}
+		if err := validateCapabilityFieldState("lineage after", lineage.After, referenceOrder, observation.Transitions); err != nil {
+			return fmt.Errorf("lineage %d: %w", i, err)
+		}
+	}
+
+	for i, transition := range observation.Transitions {
+		if transition.InputReferenceIDs == nil && transition.OutputReferenceID == "" && !transition.Conditional {
+			continue
+		}
+		if !orderedCapabilityReferenceIDs(transition.InputReferenceIDs, referenceOrder) {
+			return fmt.Errorf("transition %d input reference IDs are not in canonical order", i)
+		}
+		for _, id := range transition.InputReferenceIDs {
+			role, ok := referenceRoles[id]
+			if !ok {
+				return fmt.Errorf("transition %d names unknown input reference ID %q", i, id)
+			}
+			if role == "output" {
+				return fmt.Errorf("transition %d uses output reference %q as an input", i, id)
+			}
+		}
+		if transition.OutputReferenceID != "" {
+			role, ok := referenceRoles[transition.OutputReferenceID]
+			if !ok {
+				return fmt.Errorf("transition %d names unknown output reference ID %q", i, transition.OutputReferenceID)
+			}
+			if role != "output" && role != "create" && role != "remove" {
+				return fmt.Errorf("transition %d output reference %q has role %q", i, transition.OutputReferenceID, role)
+			}
+		}
+	}
+
+	if err := validateCapabilityFieldState("final field state", observation.FinalFieldState, referenceOrder, observation.Transitions); err != nil {
+		return err
+	}
+	return nil
+}
+
+func validateCapabilityFieldState(label string, state *CapabilityFieldStateExpectation, referenceOrder map[string]int, transitions []CapabilityTransitionExpectation) error {
+	if state == nil {
+		return nil
+	}
+	if state.Fields == nil || state.Removed == nil {
+		return fmt.Errorf("%s fields and removed must be exact arrays", label)
+	}
+	previousName := ""
+	fieldNames := make(map[string]struct{}, len(state.Fields))
+	for i, field := range state.Fields {
+		if strings.TrimSpace(field.Name) == "" {
+			return fmt.Errorf("%s field %d requires a name", label, i)
+		}
+		if i > 0 && strings.Compare(previousName, field.Name) >= 0 {
+			return fmt.Errorf("%s fields are not in canonical name order at indexes %d and %d", label, i-1, i)
+		}
+		if field.OriginReferenceIDs == nil || !orderedCapabilityOriginReferenceIDs(field.Name, field.OriginReferenceIDs, referenceOrder, transitions) {
+			return fmt.Errorf("%s field %d origin reference IDs must be an exact canonical array", label, i)
+		}
+		for _, id := range field.OriginReferenceIDs {
+			if _, ok := referenceOrder[id]; !ok {
+				return fmt.Errorf("%s field %d names unknown origin reference ID %q", label, i, id)
+			}
+		}
+		fieldNames[field.Name] = struct{}{}
+		previousName = field.Name
+	}
+	if !strictlyIncreasingStrings(state.Removed) {
+		return fmt.Errorf("%s removed fields are not in canonical order", label)
+	}
+	for _, name := range state.Removed {
+		if strings.TrimSpace(name) == "" {
+			return fmt.Errorf("%s removed field must not be empty", label)
+		}
+		if _, present := fieldNames[name]; present {
+			return fmt.Errorf("%s field %q cannot be both present and removed", label, name)
+		}
+	}
+	return nil
+}
+
+func orderedCapabilityOriginReferenceIDs(fieldName string, values []string, referenceOrder map[string]int, transitions []CapabilityTransitionExpectation) bool {
+	if orderedCapabilityReferenceIDs(values, referenceOrder) {
+		return true
+	}
+	producers := make([]CapabilityTransitionExpectation, 0, 2)
+	for _, transition := range transitions {
+		if transition.Output == fieldName && transition.OutputReferenceID != "" && slices.Contains(values, transition.OutputReferenceID) {
+			producers = append(producers, transition)
+		}
+	}
+	if len(producers) == 1 {
+		producer := producers[0]
+		prefixLength := len(producer.InputReferenceIDs) + 1
+		if len(values) < prefixLength || values[0] != producer.OutputReferenceID || !slices.Equal(values[1:prefixLength], producer.InputReferenceIDs) {
+			return false
+		}
+		return (producer.Operation == "aggregate" || len(values) > prefixLength) && orderedCapabilityReferenceIDs(values[prefixLength:], referenceOrder)
+	}
+	if len(producers) < 2 {
+		return false
+	}
+	producerIDs := make(map[string]struct{})
+	for _, producer := range producers {
+		producerIDs[producer.OutputReferenceID] = struct{}{}
+		for _, input := range producer.InputReferenceIDs {
+			producerIDs[input] = struct{}{}
+		}
+	}
+	expected := make([]string, 0, len(values))
+	for _, value := range values {
+		if _, produced := producerIDs[value]; !produced {
+			expected = append(expected, value)
+		}
+	}
+	if !orderedCapabilityReferenceIDs(expected, referenceOrder) {
+		return false
+	}
+	for _, producer := range producers {
+		if !orderedCapabilityReferenceIDs(producer.InputReferenceIDs, referenceOrder) {
+			return false
+		}
+		expected = append(expected, producer.InputReferenceIDs...)
+		expected = append(expected, producer.OutputReferenceID)
+	}
+	return slices.Equal(values, expected)
+}
+
+func orderedCapabilityReferenceIDs(values []string, order map[string]int) bool {
+	seen := make(map[string]struct{}, len(values))
+	previous := -1
+	for _, value := range values {
+		position, ok := order[value]
+		if !ok || position <= previous {
+			return false
+		}
+		if _, duplicate := seen[value]; duplicate {
+			return false
+		}
+		seen[value] = struct{}{}
+		previous = position
+	}
+	return true
+}
+
+func capabilityOrdinalIDLess(left, right string) bool {
+	leftPrefix, leftOrdinal := referenceIDOrder(left)
+	rightPrefix, rightOrdinal := referenceIDOrder(right)
+	if leftPrefix != rightPrefix {
+		return leftPrefix < rightPrefix
+	}
+	if leftOrdinal != rightOrdinal {
+		return leftOrdinal < rightOrdinal
+	}
+	return left < right
+}
+
+func strictlyIncreasingStrings(values []string) bool {
+	for i, value := range values {
+		if strings.TrimSpace(value) == "" || (i > 0 && strings.Compare(values[i-1], value) >= 0) {
+			return false
+		}
+	}
+	return true
 }
 
 func validateCapabilityStatus(status Status) error {
