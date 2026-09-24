@@ -15,6 +15,146 @@ type spl2CapabilityEntry struct {
 }
 type spl2CapabilityForm struct{ id, disposition, owners string }
 
+type spl2FunctionPosition string
+
+const (
+	spl2ScalarFunction    spl2FunctionPosition = "scalar"
+	spl2AggregateFunction spl2FunctionPosition = "aggregate"
+	spl2GroupingFunction  spl2FunctionPosition = "grouping"
+)
+
+type spl2FunctionNullability uint8
+
+const (
+	spl2NullabilityConservative spl2FunctionNullability = iota
+	spl2NullabilityAlways
+	spl2NullabilityAllArguments
+	spl2NullabilityCoalesce
+	spl2NullabilityIfBranches
+	spl2NullabilityCaseBranches
+	spl2NullabilityNumericArguments
+	spl2NullabilityStringArguments
+	spl2NullabilitySubstringArguments
+	spl2NullabilityFirstArgument
+)
+
+type spl2FunctionPolicy struct {
+	signature       spl2FunctionSpec
+	position        spl2FunctionPosition
+	returnKind      string
+	nullability     spl2FunctionNullability
+	lambda          bool
+	nullTest        bool
+	unmodeledScalar bool
+	pairedArguments bool
+}
+
+type spl2CommandHandler uint8
+
+const (
+	spl2WhereCommandHandler spl2CommandHandler = iota + 1
+	spl2EvalCommandHandler
+	spl2FieldsCommandHandler
+	spl2StatsCommandHandler
+	spl2BinCommandHandler
+	spl2MvexpandCommandHandler
+)
+
+type spl2TypedPolicy struct {
+	functions map[string]spl2FunctionPolicy
+	commands  map[string]spl2CommandHandler
+}
+
+var spl2TypedPolicies = map[string]spl2TypedPolicy{
+	"splunkd/current": newSPL2CurrentTypedPolicy(),
+}
+
+func newSPL2CurrentTypedPolicy() spl2TypedPolicy {
+	functions := make(map[string]spl2FunctionPolicy, len(spl2Functions)+10)
+	for name, signature := range spl2Functions {
+		position := spl2ScalarFunction
+		if signature.aggregate {
+			position = spl2AggregateFunction
+		}
+		functions[name] = spl2FunctionPolicy{signature: signature, position: position, returnKind: "unknown", nullability: spl2NullabilityConservative}
+	}
+	for name, function := range map[string]spl2FunctionPolicy{
+		"any":              {signature: spl2FunctionSpec{2, 2, false}, position: spl2ScalarFunction, returnKind: "boolean", nullability: spl2NullabilityAllArguments, lambda: true},
+		"cidrmatch":        {signature: spl2FunctionSpec{2, 2, false}, position: spl2ScalarFunction, returnKind: "boolean"},
+		"json":             {signature: spl2FunctionSpec{1, 1, false}, position: spl2ScalarFunction, returnKind: "json"},
+		"json_array_to_mv": {signature: spl2FunctionSpec{1, 1, false}, position: spl2ScalarFunction, returnKind: "multivalue"},
+		"like":             {signature: spl2FunctionSpec{2, 2, false}, position: spl2ScalarFunction, returnKind: "boolean"},
+		"mvindex":          {signature: spl2FunctionSpec{2, 2, false}, position: spl2ScalarFunction, returnKind: "unknown"},
+		"span":             {signature: spl2FunctionSpec{2, 2, false}, position: spl2GroupingFunction, returnKind: "unknown"},
+		"sqrt":             {signature: spl2FunctionSpec{1, 1, false}, position: spl2ScalarFunction, returnKind: "number"},
+		"stdev":            {signature: spl2FunctionSpec{1, 1, true}, position: spl2AggregateFunction, returnKind: "number"},
+		"strftime":         {signature: spl2FunctionSpec{2, 2, false}, position: spl2ScalarFunction, returnKind: "string"},
+	} {
+		functions[name] = function
+	}
+	setPolicy := func(names []string, returnKind string, nullability spl2FunctionNullability) {
+		for _, name := range names {
+			function := functions[name]
+			function.returnKind = returnKind
+			function.nullability = nullability
+			functions[name] = function
+		}
+	}
+	setPolicy([]string{"abs", "ceil", "ceiling", "floor", "round", "sqrt"}, "number", spl2NullabilityNumericArguments)
+	setPolicy([]string{"lower", "upper", "trim", "ltrim", "rtrim", "strftime"}, "string", spl2NullabilityStringArguments)
+	setPolicy([]string{"len"}, "number", spl2NullabilityStringArguments)
+	setPolicy([]string{"split"}, "multivalue", spl2NullabilityStringArguments)
+	setPolicy([]string{"count", "dc", "distinct_count"}, "number", spl2NullabilityAlways)
+	setPolicy([]string{"isnull", "isnotnull"}, "boolean", spl2NullabilityAlways)
+	setPolicy([]string{"any", "cidrmatch", "like"}, "boolean", spl2NullabilityAllArguments)
+	setPolicy([]string{"json"}, "json", spl2NullabilityFirstArgument)
+	setPolicy([]string{"json_array_to_mv"}, "multivalue", spl2NullabilityFirstArgument)
+	setPolicy([]string{"coalesce"}, "unknown", spl2NullabilityCoalesce)
+	setPolicy([]string{"if"}, "unknown", spl2NullabilityIfBranches)
+	setPolicy([]string{"case"}, "unknown", spl2NullabilityCaseBranches)
+	setPolicy([]string{"substr"}, "string", spl2NullabilitySubstringArguments)
+	setPolicy([]string{"avg", "max", "min", "stdev", "sum", "tonumber", "mvcount"}, "number", spl2NullabilityConservative)
+	setPolicy([]string{"replace", "tostring"}, "string", spl2NullabilityConservative)
+	setPolicy([]string{"list", "values"}, "multivalue", spl2NullabilityConservative)
+	setPolicy([]string{"match"}, "boolean", spl2NullabilityConservative)
+	for _, name := range []string{"isnull", "isnotnull"} {
+		function := functions[name]
+		function.nullTest = true
+		functions[name] = function
+	}
+	for _, name := range []string{"min", "max", "span"} {
+		function := functions[name]
+		function.unmodeledScalar = true
+		functions[name] = function
+	}
+	caseFunction := functions["case"]
+	caseFunction.pairedArguments = true
+	functions["case"] = caseFunction
+	return spl2TypedPolicy{
+		functions: functions,
+		commands: map[string]spl2CommandHandler{
+			"where":    spl2WhereCommandHandler,
+			"eval":     spl2EvalCommandHandler,
+			"fields":   spl2FieldsCommandHandler,
+			"stats":    spl2StatsCommandHandler,
+			"bin":      spl2BinCommandHandler,
+			"mvexpand": spl2MvexpandCommandHandler,
+		},
+	}
+}
+
+func spl2TypedPolicyFor(profile, version string) (spl2TypedPolicy, bool) {
+	policy, ok := spl2TypedPolicies[profile+"/"+version]
+	return policy, ok
+}
+
+func (s *spl2SemanticStage) typedPolicy() (spl2TypedPolicy, bool) {
+	if s == nil || s.result == nil {
+		return spl2TypedPolicy{}, false
+	}
+	return spl2TypedPolicyFor(s.result.Document.Profile, s.result.Document.Version)
+}
+
 func spl2FormLimitations(owner string) []string {
 	out := []string{}
 	for _, f := range spl2FormInventory {

@@ -120,7 +120,7 @@ sqlJoinClause: (INNER | LEFT OUTER?)? JOIN dataset sourceAlias ON sqlJoinPredica
 sqlJoinPredicate: sqlJoinEquality (AND sqlJoinEquality)*;
 sqlJoinEquality: sqlJoinField ASSIGN sqlJoinField;
 sqlJoinField: identifier DOT identifier accessPart*;
-sqlSelectClause: SELECT DISTINCT? projection (COMMA projection)*;
+sqlSelectClause: SELECT DISTINCT? projection (COMMA NL* projection)*;
 projection: expression (aliasKeyword projectionAlias)?;
 projectionAlias: identifier;
 sqlWhereClause: WHERE sqlPredicate;
@@ -166,7 +166,7 @@ jsonStringLiteral: DQUOTE (STRING_TEXT | STRING_DOLLAR)* STRING_END;
 jsonArray: LBRACKET NL* (jsonLiteral (NL* COMMA NL* jsonLiteral)*)? NL* RBRACKET;
 jsonObject: LBRACE NL* (descriptorProperty (NL* COMMA NL* descriptorProperty)*)? NL* RBRACE;
 generator: MAKERESULTS extendedOption* integerValue?;
-evalCommand: EVAL assignment (COMMA assignment)*
+evalCommand: EVAL assignment (COMMA NL* assignment)*
     | EVAL NL+ assignment (NL* COMMA NL* assignment)*;
 assignment: fieldName ASSIGN expression;
 whereCommand: WHERE NL* expression;
@@ -182,7 +182,7 @@ renamePair: renameSource aliasKeyword renameTarget;
 renameSource: identifier;
 renameTarget: identifier;
 aliasKeyword: AS | AS_LOWER;
-statsCommand: STATS statsOption* aggregate (COMMA aggregate)* (aggregateGroup | selectedAggregateGroup)?
+statsCommand: STATS statsOption* aggregate (COMMA NL* aggregate)* (NL* (aggregateGroup | selectedAggregateGroup))?
     | STATS NL+ (statsOption NL*)* aggregate (NL* COMMA NL* aggregate)*
       (NL* (aggregateGroup | selectedAggregateGroup))?;
 statsOption: allnumOption | delimOption | partitionsOption | {p.unreviewedOption(SPL2ParserSTATS)}? unknownOption;
@@ -193,7 +193,7 @@ aggregate: call (aliasKeyword aggregateAlias)?;
 aggregateAlias: identifier;
 aggregateGroup: BY groupField (COMMA groupField)*
     | BY NL+ groupField (NL* COMMA NL* groupField)*;
-selectedAggregateGroup: SELECTED_BY selectedGroupTerm (COMMA selectedGroupTerm)*;
+selectedAggregateGroup: SELECTED_BY NL* selectedGroupTerm (NL* COMMA NL* selectedGroupTerm)*;
 selectedGroupTerm: selectedSpanGroup | expression;
 selectedSpanGroup: SPAN LPAREN expression COMMA timeSpan RPAREN;
 groupField: identifier groupSpan?;
@@ -342,13 +342,13 @@ timeModifierValue: relativeTime | NUMBER | stringLiteral | NOW LPAREN RPAREN;
 relativeTime: (PLUS | MINUS) NUMBER? IDENTIFIER (AT IDENTIFIER)? ((PLUS | MINUS) NUMBER? IDENTIFIER)? | AT IDENTIFIER ((PLUS | MINUS) NUMBER? IDENTIFIER)?;
 
 expression: lambdaExpression | xorExpression;
-xorExpression: orExpression (logicalXor orExpression)*;
-orExpression: andExpression (logicalOr andExpression)*;
-andExpression: notExpression (logicalAnd notExpression)*;
+xorExpression: orExpression (NL* logicalXor NL* orExpression)*;
+orExpression: andExpression (NL* logicalOr NL* andExpression)*;
+andExpression: notExpression (NL* logicalAnd NL* notExpression)*;
 // Prefer a complete ordinary identifier expression when a contextual spelling
 // also permits prefix NOT. The reserved uppercase token remains unambiguous.
-notExpression: predicate | logicalNot notExpression;
-predicate: additive (comparison additive | logicalNot? betweenOperator additive betweenConjunction additive | logicalNot? IN LPAREN expression (COMMA expression)* RPAREN | logicalNot? LIKE additive | IS (logicalNot? (NULL | NULL_TEST) | logicalNot? TYPE))?;
+notExpression: predicate | logicalNot NL* notExpression;
+predicate: additive (comparison additive | logicalNot? betweenOperator additive betweenConjunction additive | logicalNot? IN NL* LPAREN NL* expression (NL* COMMA NL* expression)* NL* RPAREN | logicalNot? LIKE additive | IS (logicalNot? (NULL | NULL_TEST) | logicalNot? TYPE))?;
 logicalAnd: AND | {p.contextualKeyword("and")}? IDENTIFIER;
 logicalOr: OR | {p.contextualKeyword("or")}? IDENTIFIER;
 logicalXor: XOR | {p.contextualKeyword("xor")}? IDENTIFIER;
@@ -357,21 +357,21 @@ betweenOperator: BETWEEN | {p.contextualKeyword("between")}? IDENTIFIER;
 betweenConjunction: AND | {p.contextualKeyword("and")}? IDENTIFIER;
 comparison: ASSIGN | EQ | NE | LT | LE | GT | GE;
 additive: multiplicative ((PLUS | MINUS) multiplicative)*;
-multiplicative: unary ((STAR | SLASH | MOD) unary)*;
+multiplicative: unary ((STAR | SLASH | MOD) NL* unary)*;
 unary: (PLUS | MINUS) unary | access;
 access: primary accessPart*;
 accessPart: DOT identifier | LBRACKET expression RBRACKET;
-primary: existsPredicate | call | fieldName | LOCAL | literal | array | object | LPAREN expression RPAREN | searchLiteral;
+primary: existsPredicate | call | fieldName | LOCAL | literal | array | object | LPAREN NL* expression NL* RPAREN | searchLiteral;
 multilineOperator: PLUS | MINUS | STAR | SLASH | MOD | comparison | logicalAnd | logicalOr | logicalXor;
 multilineOperand: multilineSimpleCall | multilineAtom multilineAccessPart*;
 multilineSimpleCall: identifier LPAREN (multilineOperand (COMMA multilineOperand)*)? RPAREN;
 multilineAtom: fieldName | literal | LOCAL;
 multilineAccessPart: DOT identifier;
-call: identifier LPAREN arguments? RPAREN;
+call: identifier LPAREN NL* arguments? NL* RPAREN;
 multilineCall: {p.GetTokenStream().LA(3) == SPL2ParserNL}? identifier LPAREN NL+ multilineArguments? NL* RPAREN;
 multilineArguments: multilineArgument (NL* COMMA NL* multilineArgument)*;
 multilineArgument: identifier COLON multilineOperand | multilineOperand;
-arguments: namedArgument (COMMA namedArgument)* | expression (COMMA expression)* (COMMA namedArgument)*;
+arguments: namedArgument (NL* COMMA NL* namedArgument)* | expression (NL* COMMA NL* expression)* (NL* COMMA NL* namedArgument)*;
 namedArgument: identifier COLON expression;
 literal: NUMBER | BOOLEAN | NULL | RAW_STRING | stringLiteral;
 stringLiteral: DQUOTE (STRING_TEXT | STRING_DOLLAR | STRING_INTERPOLATION expression RBRACE)* STRING_END;
@@ -392,6 +392,6 @@ object: LBRACE (objectEntry (COMMA objectEntry)* COMMA?)? RBRACE;
 objectEntry: objectKey COLON expression;
 objectKey: identifier | stringLiteral;
 searchLiteral: embeddedText;
-lambdaExpression: (lambdaParameter | LPAREN (lambdaParameter (COMMA lambdaParameter)*)? RPAREN) ARROW (expression | lambdaBlock);
+lambdaExpression: (lambdaParameter | LPAREN (lambdaParameter (COMMA lambdaParameter)*)? RPAREN) ARROW NL* (expression | lambdaBlock);
 lambdaParameter: LOCAL (COLON TYPE)? (ASSIGN ((PLUS | MINUS)? NUMBER | stringLiteral))?;
 lambdaBlock: LBRACE NL* (LOCAL ASSIGN expression (SEMI NL* | NL+))* RETURN expression SEMI? NL* RBRACE;

@@ -668,20 +668,49 @@ func TestSPL2SelectedStatsProbeErrorsAreRangeLocal(t *testing.T) {
 
 func TestSPL2SelectedStatsLongLowTokenTailsRemainAdmitted(t *testing.T) {
 	for _, tc := range []struct {
-		name  string
-		query string
+		name   string
+		query  string
+		groups []string
 	}{
-		{"whitespace", "FROM main | stats count() BY " + strings.Repeat(" ", 5000) + "bytes+delta"},
-		{"literal", `FROM main | stats count() BY if(ready, "` + strings.Repeat("x", 5000) + `", "other")`},
+		{"whitespace", "FROM main | stats count() BY " + strings.Repeat(" ", 5000) + "bytes+delta", []string{"bytes", "delta"}},
+		{"literal", `FROM main | stats count() BY if(ready, "` + strings.Repeat("x", 5000) + `", "other")`, []string{"ready"}},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			spl2RequireNoDiagnostics(t, tc.query)
 			result := spl2AnalyzeTest(t, tc.query)
-			if result.Status != Incomplete || !result.Coverage.SyntaxComplete || result.Coverage.SemanticComplete {
-				t.Fatalf("low-token selected grouping was not conservatively admitted: %+v", result)
+			if result.Status != Valid || !result.Coverage.SyntaxComplete || !result.Coverage.SemanticComplete || !result.Requirements.Coverage.Complete {
+				t.Fatalf("low-token selected grouping was not completely analyzed: %+v", result)
 			}
-			if spl2HasCode(result, CodeAnalysisResourceLimit) {
-				t.Fatalf("low-token selected grouping exhausted lexer work: %+v", result.Diagnostics)
+			if spl2HasCode(result, CodeAnalysisResourceLimit) || spl2HasCode(result, CodeUnsupportedSemantics) {
+				t.Fatalf("low-token selected grouping retained a temporary limitation: %+v", result.Diagnostics)
+			}
+			groupRefs := map[string]bool{}
+			for _, ref := range result.References {
+				if ref.Role == "group" && ref.Binding == "source" && ref.Resolution == "exact" {
+					groupRefs[ref.NormalizedName] = true
+				}
+			}
+			groupRequirements := map[string]bool{}
+			for _, item := range result.Requirements.Items {
+				if item.Role == "group" && item.Resolution == "exact" {
+					groupRequirements[item.Identity] = true
+				}
+			}
+			for _, group := range tc.groups {
+				if !groupRefs[group] || !groupRequirements[group] {
+					t.Fatalf("missing exact group evidence for %q: refs=%+v requirements=%+v", group, result.References, result.Requirements)
+				}
+			}
+			after := result.Lineage[len(result.Lineage)-1].After
+			if after.Open || after.Uncertain || len(after.Fields) != 2 {
+				t.Fatalf("group plus aggregate output is not closed: %+v", after)
+			}
+			count := false
+			for _, field := range after.Fields {
+				count = count || field.Name == "count"
+			}
+			if !count {
+				t.Fatalf("closed output lacks aggregate: %+v", after)
 			}
 		})
 	}

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"testing"
 
@@ -320,6 +321,38 @@ func TestSPL2SelectedMultilinePipelineSyntax(t *testing.T) {
 	}
 }
 
+func TestSPL2SelectedCommandListContinuationNewlines(t *testing.T) {
+	for _, tc := range []struct {
+		name  string
+		query string
+		kind  string
+		want  int
+	}{
+		{"aggregate list", "FROM synthetic_dataset | stats count() AS synthetic_count,\nsum(synthetic_value) AS synthetic_sum", "aggregate", 2},
+		{"group boundary", "FROM synthetic_dataset | stats count() AS synthetic_count\nBY\nspan(synthetic_time, 5m)", "selectedAggregateGroup", 1},
+		{"assignment list", "FROM synthetic_dataset | eval synthetic_left=1,\nsynthetic_right=2", "assignment", 2},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			parsed := spl2RequireNoDiagnostics(t, tc.query)
+			if got := len(spl2Nodes(parsed.syntax, tc.kind)); got != tc.want {
+				t.Fatalf("%s nodes = %d want %d: %s", tc.kind, got, tc.want, parsed.syntax.shape())
+			}
+		})
+	}
+
+	for _, query := range []string{
+		"FROM synthetic_dataset | stats count() AS synthetic_count,\n| fields synthetic_count",
+		"FROM synthetic_dataset | eval synthetic_left=1,\n| fields synthetic_left",
+	} {
+		t.Run(query, func(t *testing.T) {
+			parsed := parseSPL2Document(query)
+			if parsed.syntaxComplete || len(parsed.diagnostics) == 0 {
+				t.Fatalf("missing list element was accepted: %+v", parsed.diagnostics)
+			}
+		})
+	}
+}
+
 func TestSPL2SelectedExpressionGroupingAndSpan(t *testing.T) {
 	text := "FROM events | stats sum(value) AS total BY bytes+delta, lower(region), payload.kind, span(_time, 5m)"
 	p := spl2RequireNoDiagnostics(t, text)
@@ -337,6 +370,49 @@ func TestSPL2SelectedExpressionGroupingAndSpan(t *testing.T) {
 	if got := len(spl2Nodes(arithmetic.syntax, "expression")); got != 1 {
 		t.Fatalf("arithmetic group expressions %d: %s", got, arithmetic.syntax.shape())
 	}
+}
+
+func TestSPL2SelectedMultilineExpressionGroupingAndSpan(t *testing.T) {
+	for _, tc := range []struct {
+		name       string
+		query      string
+		terms      int
+		spanGroups int
+	}{
+		{"dotted", "FROM synthetic_dataset | stats count() BY\nsynthetic_parent.synthetic_field", 1, 0},
+		{"span", "FROM synthetic_dataset | stats count() BY\nspan(synthetic_time, 5m)", 1, 1},
+		{"expression list", "FROM synthetic_dataset | stats count() BY\nlower(synthetic_field),\nsynthetic_other", 2, 0},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			parsed := spl2RequireNoDiagnostics(t, tc.query)
+			if got := len(spl2Nodes(parsed.syntax, "selectedAggregateGroup")); got != 1 {
+				t.Fatalf("selected groups = %d want 1: %s", got, parsed.syntax.shape())
+			}
+			if got := len(spl2Nodes(parsed.syntax, "selectedGroupTerm")); got != tc.terms {
+				t.Fatalf("selected terms = %d want %d: %s", got, tc.terms, parsed.syntax.shape())
+			}
+			if got := len(spl2Nodes(parsed.syntax, "selectedSpanGroup")); got != tc.spanGroups {
+				t.Fatalf("selected span groups = %d want %d: %s", got, tc.spanGroups, parsed.syntax.shape())
+			}
+			selected := 0
+			for _, token := range parsed.tokens.GetAllTokens() {
+				if token.GetTokenType() == spl2.SPL2LexerSELECTED_BY {
+					selected++
+				}
+			}
+			if selected != 1 {
+				t.Fatalf("selected BY tokens = %d want 1", selected)
+			}
+		})
+	}
+
+	t.Run("missing selected term remains invalid", func(t *testing.T) {
+		query := "FROM synthetic_dataset | stats count() BY\nlower(synthetic_field),\n| fields synthetic_field"
+		parsed := parseSPL2Document(query)
+		if parsed.syntaxComplete || len(parsed.diagnostics) == 0 {
+			t.Fatalf("missing selected group term was accepted: %+v", parsed.diagnostics)
+		}
+	})
 }
 
 func TestSPL2SelectedExpressionGroupingUsesExistingExpressions(t *testing.T) {
@@ -456,83 +532,64 @@ func TestSPL2SelectedMultilineAssignmentAnalysis(t *testing.T) {
 	spl2Ref(t, r, "total", "read")
 }
 
-func TestSPL2SelectedGroupingAnalysisIsConservative(t *testing.T) {
+func TestSPL2SelectedGroupingAnalysisIsComplete(t *testing.T) {
 	for _, tc := range []struct {
-		name  string
-		query string
-		group string
-		input []string
+		name        string
+		query       string
+		groupOutput string
+		inputs      []string
 	}{
-		{"expression", "FROM [{bytes:1, delta:2}] | stats count() BY bytes+delta", "BY bytes+delta", []string{"bytes", "delta"}},
-		{"span", "FROM [{_time:1}] | stats count() BY span(_time, 5m)", "BY span(_time, 5m)", []string{"_time"}},
+		{"expression", "FROM synthetic_events | stats count() AS synthetic_count BY synthetic_bytes+synthetic_delta", "synthetic_bytes+synthetic_delta", []string{"synthetic_bytes", "synthetic_delta"}},
+		{"span", "FROM synthetic_events | stats count() AS synthetic_count BY span(synthetic_time, 5m)", "synthetic_time", []string{"synthetic_time"}},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			r := spl2AnalyzeTest(t, tc.query)
-			if r.Status != Incomplete || !r.Coverage.SyntaxComplete || r.Coverage.SemanticComplete || !spl2HasCode(r, CodeUnsupportedSemantics) {
-				t.Fatalf("selected grouping received silent semantic credit: %+v", r)
+			if r.Status != Valid || !r.Coverage.SyntaxComplete || !r.Coverage.SemanticComplete || len(r.Diagnostics) != 0 {
+				t.Fatalf("selected grouping did not receive complete semantic credit: %+v", r)
 			}
-			if r.Requirements.QueryStatus != Incomplete || r.Requirements.Coverage.Complete || len(r.Requirements.Gaps) == 0 {
-				t.Fatalf("selected grouping lacks an explicit requirement gap: %+v", r.Requirements)
+			if r.Requirements.QueryStatus != Valid || !r.Requirements.Coverage.Complete || len(r.Requirements.Gaps) != 0 {
+				t.Fatalf("selected grouping requirements are incomplete: %+v", r.Requirements)
 			}
 			const message = "Expression and span grouping effects are unmodeled"
-			diagnostics := 0
 			for _, diagnostic := range r.Diagnostics {
-				if diagnostic.Code != CodeUnsupportedSemantics || diagnostic.Message != message {
-					continue
-				}
-				diagnostics++
-				if got := tc.query[diagnostic.Location.Start.Offset:diagnostic.Location.End.Offset]; got != tc.group {
-					t.Fatalf("selected grouping diagnostic owns %q, want %q", got, tc.group)
+				if diagnostic.Message == message {
+					t.Fatalf("temporary grouping diagnostic survived recovery: %+v", diagnostic)
 				}
 			}
-			if diagnostics != 1 {
-				t.Fatalf("selected grouping diagnostics = %d, want 1: %+v", diagnostics, r.Diagnostics)
-			}
-			gaps := 0
 			for _, gap := range r.Requirements.Gaps {
-				if gap.Code == CodeUnsupportedSemantics && gap.Message == message {
-					gaps++
-					if len(gap.ReferenceIDs) != 0 || len(gap.DiagnosticCodes) != 1 || gap.DiagnosticCodes[0] != CodeUnsupportedSemantics {
-						t.Fatalf("selected grouping gap ownership drifted: %+v", gap)
-					}
+				if gap.Message == message {
+					t.Fatalf("temporary grouping requirement gap survived recovery: %+v", gap)
 				}
 			}
-			if gaps != 1 {
-				t.Fatalf("selected grouping gaps = %d, want 1: %+v", gaps, r.Requirements.Gaps)
-			}
-			sourceStage := ""
-			for _, stage := range r.Stages {
-				if stage.Command == "from" {
-					sourceStage = stage.ID
-					break
+			groupIDs := []string{}
+			for _, name := range tc.inputs {
+				ref := spl2Ref(t, r, name, "group")
+				if ref.Binding != "source" || ref.Resolution != "exact" {
+					t.Fatalf("group input %q lost exact source ownership: %+v", name, ref)
+				}
+				groupIDs = append(groupIDs, ref.ID)
+				item := requirementItem(r.Requirements, "field", name, "group")
+				if item == nil || item.Necessity != "required" || item.Resolution != "exact" || len(item.Occurrences) != 1 || item.Occurrences[0].ReferenceID != ref.ID {
+					t.Fatalf("group input %q requirement is not exact: %+v", name, r.Requirements.Items)
 				}
 			}
-			if sourceStage == "" {
-				t.Fatalf("selected grouping lacks a source stage: %+v", r.Stages)
+			var output *FieldBinding
+			for i := range r.Lineage[len(r.Lineage)-1].After.Fields {
+				field := &r.Lineage[len(r.Lineage)-1].After.Fields[i]
+				if field.Name == tc.groupOutput {
+					output = field
+				}
 			}
-			wanted := map[string]int{}
-			for _, name := range tc.input {
-				wanted[name] = 0
+			if output == nil || !reflect.DeepEqual(output.OriginReferenceIDs, groupIDs) || output.Conditional {
+				t.Fatalf("modeled group output %q = %+v, want origins %v", tc.groupOutput, output, groupIDs)
+			}
+			alias := spl2Ref(t, r, "synthetic_count", "output")
+			if alias.StageID != r.Stages[len(r.Stages)-1].ID || alias.Binding != "not_applicable" {
+				t.Fatalf("aggregate alias lost output ownership: %+v", alias)
 			}
 			for _, ref := range r.References {
-				if _, ok := wanted[ref.NormalizedName]; ok {
-					if ref.Kind != "field" || ref.Role != "create" || ref.StageID != sourceStage {
-						t.Fatalf("unmodeled group input acquired derived evidence: %+v", ref)
-					}
-					wanted[ref.NormalizedName]++
-				}
-				if ref.NormalizedName == "span" || ref.NormalizedName == "bytes+delta" {
-					t.Fatalf("expression spelling became a false field identity: %+v", ref)
-				}
-			}
-			for name, count := range wanted {
-				if count != 1 {
-					t.Fatalf("source-stage create references for %q = %d, want 1: %+v", name, count, r.References)
-				}
-			}
-			for _, item := range r.Requirements.Items {
-				if _, ok := wanted[item.Identity]; ok {
-					t.Fatalf("unmodeled grouping acquired a requirement item: %+v", item)
+				if ref.NormalizedName == "span" || ref.NormalizedName == "5m" {
+					t.Fatalf("span operator or duration became a field: %+v", ref)
 				}
 			}
 		})

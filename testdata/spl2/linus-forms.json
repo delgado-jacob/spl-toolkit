@@ -278,7 +278,7 @@
       "id": "M11.predicate.lambda",
       "family": "M11.predicate",
       "description": "Lambda predicate over a synthetic collection.",
-      "query": "FROM synthetic_events | where any(synthetic_values, synthetic_item -> synthetic_item > 0)",
+      "query": "FROM synthetic_events | where any(synthetic_values, $synthetic_item -> $synthetic_item > 0)",
       "disposition": "included",
       "source_keys": ["linus_m11"]
     },
@@ -318,7 +318,7 @@
       "id": "M11.expression.lambda-binding",
       "family": "M11.expression",
       "description": "Lambda binding expression.",
-      "query": "FROM synthetic_events | eval synthetic_any=any(synthetic_values, synthetic_member -> synthetic_member=synthetic_value)",
+      "query": "FROM synthetic_events | eval synthetic_any=any(synthetic_values, $synthetic_member -> $synthetic_member=synthetic_value)",
       "disposition": "included",
       "source_keys": ["linus_m11"]
     },
@@ -336,7 +336,7 @@
       "family": "M11.function",
       "description": "Any lambda call.",
       "function": "any",
-      "query": "FROM synthetic_events | eval synthetic_out=any(synthetic_values, synthetic_member -> synthetic_member > 1)",
+      "query": "FROM synthetic_events | eval synthetic_out=any(synthetic_values, $synthetic_member -> $synthetic_member > 1)",
       "disposition": "included",
       "source_keys": ["linus_m11"]
     },

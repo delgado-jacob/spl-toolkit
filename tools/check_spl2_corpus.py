@@ -16,7 +16,7 @@ import sys
 # Activations, case aliases, assembly and owner/disposition state are excluded.
 # New supplemental task witnesses live outside the original C/L/Q/B/E/F/I IDs.
 CANONICAL_PROVENANCE_SHA256_V1 = "3345cf5712b1bdbf467d1651784fdb8bccc596805038da0d54e7a123384e3a4e"
-APPROVED_LINUS_FORM_SHA256_V1 = "e3d5d6de6926579a23fd47ff02bb15fc9454f732758dc33306ff5ea73ef8fe83"
+APPROVED_LINUS_FORM_SHA256_V1 = "209f470a49eca9f5866ca0bdb380f3d3ebbd598d3bbcf8eda4a976aa78f292d4"
 
 LINUS_FORM_FLOORS = {
     "M11.layout": 7,

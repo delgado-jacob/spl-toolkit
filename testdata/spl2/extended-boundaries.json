@@ -34,12 +34,10 @@
     "canonical": {
       "phase": "analysis",
       "scope": "canonical-result",
-      "status": "incomplete",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "expected_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "expected_codes": [],
       "references": [
         {
           "original_name": "main",
@@ -54,28 +52,37 @@
           "original_name": "bytes",
           "normalized_name": "bytes",
           "kind": "field",
-          "role": "read",
+          "role": "output",
+          "binding": "not_applicable",
           "start": 31,
-          "end": 36,
-          "binding": "source"
+          "end": 36
+        },
+        {
+          "original_name": "bytes",
+          "normalized_name": "bytes",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 31,
+          "end": 36
         }
       ],
       "fields": [
         {
           "name": "bytes",
-          "conditional": true
+          "conditional": false
         }
       ],
       "removed": [],
       "open": true,
-      "uncertain": true,
+      "uncertain": false,
       "stage_commands": [
         "from",
         "bin"
       ],
       "stage_complete": [
         true,
-        false
+        true
       ]
     },
     "canonical_basis": "Approved conformance matrix bin dedicated U contract; form-expansion per-ID I.bin.P1; original typed operand contexts at b754b9bfa80eb990cb83ee05d3b4588c2c2e54c3.  Read/group binding is left open because this addendum proves input role, not unknown command transfer ordering. Exact transfer composition: initial open source with no preceding uncertain effect; all intact simple field operands bind source. Root-approved deferred overwrite/generating policy applies after reads. Candidate output references never install members. Complete original roles are independently enumerated in the frozen role oracle; field set is exactly those reads, sorted. No product reports were used to derive this object."
@@ -115,12 +122,10 @@
     "canonical": {
       "phase": "analysis",
       "scope": "canonical-result",
-      "status": "incomplete",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "expected_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "expected_codes": [],
       "references": [
         {
           "original_name": "main",
@@ -136,21 +141,25 @@
           "normalized_name": "bytes",
           "kind": "field",
           "role": "read",
+          "binding": "source",
           "start": 32,
-          "end": 37,
-          "binding": "source"
+          "end": 37
         },
         {
           "original_name": "bucket",
           "normalized_name": "bucket",
           "kind": "field",
           "role": "output",
+          "binding": "not_applicable",
           "start": 41,
-          "end": 47,
-          "binding": "not_applicable"
+          "end": 47
         }
       ],
       "fields": [
+        {
+          "name": "bucket",
+          "conditional": false
+        },
         {
           "name": "bytes",
           "conditional": false
@@ -158,14 +167,14 @@
       ],
       "removed": [],
       "open": true,
-      "uncertain": true,
+      "uncertain": false,
       "stage_commands": [
         "from",
         "bin"
       ],
       "stage_complete": [
         true,
-        false
+        true
       ]
     },
     "canonical_basis": "Approved conformance matrix bin dedicated U contract; form-expansion per-ID I.bin.P2; original typed operand contexts at b754b9bfa80eb990cb83ee05d3b4588c2c2e54c3.  Read/group binding is left open because this addendum proves input role, not unknown command transfer ordering. Exact transfer composition: initial open source with no preceding uncertain effect; all intact simple field operands bind source. Root-approved deferred overwrite/generating policy applies after reads. Candidate output references never install members. Complete original roles are independently enumerated in the frozen role oracle; field set is exactly those reads, sorted. No product reports were used to derive this object."
@@ -417,9 +426,23 @@
           "binding": "not_applicable",
           "start": 5,
           "end": 9
+        },
+        {
+          "original_name": "bytes",
+          "normalized_name": "bytes",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 32,
+          "end": 37
         }
       ],
-      "fields": [],
+      "fields": [
+        {
+          "name": "bytes",
+          "conditional": true
+        }
+      ],
       "removed": [],
       "open": true,
       "uncertain": true,
@@ -4539,12 +4562,10 @@
     "canonical": {
       "phase": "analysis",
       "scope": "canonical-result",
-      "status": "incomplete",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "expected_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "expected_codes": [],
       "references": [
         {
           "original_name": "main",
@@ -4559,28 +4580,37 @@
           "original_name": "bytes",
           "normalized_name": "bytes",
           "kind": "field",
-          "role": "read",
+          "role": "output",
+          "binding": "not_applicable",
           "start": 27,
-          "end": 32,
-          "binding": "source"
+          "end": 32
+        },
+        {
+          "original_name": "bytes",
+          "normalized_name": "bytes",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 27,
+          "end": 32
         }
       ],
       "fields": [
         {
           "name": "bytes",
-          "conditional": true
+          "conditional": false
         }
       ],
       "removed": [],
       "open": true,
-      "uncertain": true,
+      "uncertain": false,
       "stage_commands": [
         "from",
         "bin"
       ],
       "stage_complete": [
         true,
-        false
+        true
       ]
     },
     "canonical_basis": "Approved conformance matrix bin dedicated U contract; form-expansion per-ID T5.boundary.038; original typed operand contexts at b754b9bfa80eb990cb83ee05d3b4588c2c2e54c3.  Read/group binding is left open because this addendum proves input role, not unknown command transfer ordering. Exact transfer composition: initial open source with no preceding uncertain effect; all intact simple field operands bind source. Root-approved deferred overwrite/generating policy applies after reads. Candidate output references never install members. Complete original roles are independently enumerated in the frozen role oracle; field set is exactly those reads, sorted. No product reports were used to derive this object."
@@ -4620,12 +4650,10 @@
     "canonical": {
       "phase": "analysis",
       "scope": "canonical-result",
-      "status": "incomplete",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "expected_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "expected_codes": [],
       "references": [
         {
           "original_name": "main",
@@ -4640,28 +4668,37 @@
           "original_name": "bytes",
           "normalized_name": "bytes",
           "kind": "field",
-          "role": "read",
+          "role": "output",
+          "binding": "not_applicable",
           "start": 25,
-          "end": 30,
-          "binding": "source"
+          "end": 30
+        },
+        {
+          "original_name": "bytes",
+          "normalized_name": "bytes",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 25,
+          "end": 30
         }
       ],
       "fields": [
         {
           "name": "bytes",
-          "conditional": true
+          "conditional": false
         }
       ],
       "removed": [],
       "open": true,
-      "uncertain": true,
+      "uncertain": false,
       "stage_commands": [
         "from",
         "bin"
       ],
       "stage_complete": [
         true,
-        false
+        true
       ]
     },
     "canonical_basis": "Approved conformance matrix bin dedicated U contract; form-expansion per-ID T5.boundary.039; original typed operand contexts at b754b9bfa80eb990cb83ee05d3b4588c2c2e54c3.  Read/group binding is left open because this addendum proves input role, not unknown command transfer ordering. Exact transfer composition: initial open source with no preceding uncertain effect; all intact simple field operands bind source. Root-approved deferred overwrite/generating policy applies after reads. Candidate output references never install members. Complete original roles are independently enumerated in the frozen role oracle; field set is exactly those reads, sorted. No product reports were used to derive this object."
@@ -5932,7 +5969,7 @@
     "canonical_evidence": "regression_snapshot",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "Accepted ExtendedSyntaxOptionBoundaries accepts the original child rex regex syntax but extraction/merge effects remain U. Named capture n is not an ordinary consuming read and child extraction cannot prove parent n. The later fields n is genuinely located but indeterminate; no source/derived certainty, guessed regex output catalogue or fabricated internals.",
+      "basis": "Task 5 selected fields contract closes each exact projection to its named selectors. Omitted child members do not survive into a surrounding unmodeled merge, while the surrounding command retains its prior incomplete status and scope boundary.",
       "status": "incomplete",
       "syntax_complete": true,
       "semantic_complete": false,
@@ -5949,9 +5986,9 @@
           "normalized_name": "main",
           "kind": "dataset",
           "role": "read",
+          "binding": "not_applicable",
           "start": 5,
           "end": 9,
-          "binding": "not_applicable",
           "scope_start": 0,
           "scope_end": 63
         },
@@ -5960,9 +5997,9 @@
           "normalized_name": "other",
           "kind": "dataset",
           "role": "read",
+          "binding": "not_applicable",
           "start": 25,
           "end": 30,
-          "binding": "not_applicable",
           "scope_start": 19,
           "scope_end": 52
         },
@@ -5971,9 +6008,9 @@
           "normalized_name": "n",
           "kind": "field",
           "role": "read",
+          "binding": "indeterminate",
           "start": 62,
           "end": 63,
-          "binding": "indeterminate",
           "scope_start": 0,
           "scope_end": 63
         }
@@ -6097,13 +6134,11 @@
         {
           "command": "fields",
           "start": 55,
-          "semantic_complete": false,
+          "semantic_complete": true,
           "scope_start": 0,
           "scope_end": 63
         }
       ],
-      "max_scopes": 2,
-      "final_state": null,
       "required_scopes": [
         {
           "kind": "search",
@@ -6113,7 +6148,9 @@
           "parent_start": 0,
           "parent_end": 63
         }
-      ]
+      ],
+      "max_scopes": 2,
+      "final_state": null
     },
     "canonical": {
       "phase": "analysis",
@@ -6174,7 +6211,7 @@
         false,
         true,
         false,
-        false
+        true
       ]
     }
   },
@@ -7285,12 +7322,10 @@
     "canonical": {
       "phase": "analysis",
       "scope": "canonical-result",
-      "status": "incomplete",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "expected_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "expected_codes": [],
       "references": [
         {
           "original_name": "main",
@@ -7305,28 +7340,37 @@
           "original_name": "bytes",
           "normalized_name": "bytes",
           "kind": "field",
-          "role": "read",
+          "role": "output",
+          "binding": "not_applicable",
           "start": 28,
-          "end": 33,
-          "binding": "source"
+          "end": 33
+        },
+        {
+          "original_name": "bytes",
+          "normalized_name": "bytes",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 28,
+          "end": 33
         }
       ],
       "fields": [
         {
           "name": "bytes",
-          "conditional": true
+          "conditional": false
         }
       ],
       "removed": [],
       "open": true,
-      "uncertain": true,
+      "uncertain": false,
       "stage_commands": [
         "from",
         "bin"
       ],
       "stage_complete": [
         true,
-        false
+        true
       ]
     },
     "canonical_basis": "Approved conformance matrix bin dedicated U contract; form-expansion per-ID T5.boundary.055; original typed operand contexts at b754b9bfa80eb990cb83ee05d3b4588c2c2e54c3.  Read/group binding is left open because this addendum proves input role, not unknown command transfer ordering. Exact transfer composition: initial open source with no preceding uncertain effect; all intact simple field operands bind source. Root-approved deferred overwrite/generating policy applies after reads. Candidate output references never install members. Complete original roles are independently enumerated in the frozen role oracle; field set is exactly those reads, sorted. No product reports were used to derive this object."
@@ -9943,12 +9987,10 @@
     "canonical": {
       "phase": "analysis",
       "scope": "canonical-result",
-      "status": "incomplete",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "expected_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "expected_codes": [],
       "references": [
         {
           "original_name": "main",
@@ -9964,36 +10006,40 @@
           "normalized_name": "_time",
           "kind": "field",
           "role": "read",
+          "binding": "source",
           "start": 44,
-          "end": 49,
-          "binding": "source"
+          "end": 49
         },
         {
           "original_name": "bucket",
           "normalized_name": "bucket",
           "kind": "field",
           "role": "output",
+          "binding": "not_applicable",
           "start": 53,
-          "end": 59,
-          "binding": "not_applicable"
+          "end": 59
         }
       ],
       "fields": [
         {
           "name": "_time",
           "conditional": false
+        },
+        {
+          "name": "bucket",
+          "conditional": false
         }
       ],
       "removed": [],
       "open": true,
-      "uncertain": true,
+      "uncertain": false,
       "stage_commands": [
         "from",
         "bin"
       ],
       "stage_complete": [
         true,
-        false
+        true
       ]
     },
     "canonical_basis": "Approved conformance matrix bin dedicated U contract; form-expansion per-ID T5.bin.align.earliest.1.P; original typed operand contexts at b754b9bfa80eb990cb83ee05d3b4588c2c2e54c3.  Read/group binding is left open because this addendum proves input role, not unknown command transfer ordering. Exact transfer composition: initial open source with no preceding uncertain effect; all intact simple field operands bind source. Root-approved deferred overwrite/generating policy applies after reads. Candidate output references never install members. Complete original roles are independently enumerated in the frozen role oracle; field set is exactly those reads, sorted. No product reports were used to derive this object."
@@ -10175,12 +10221,10 @@
     "canonical": {
       "phase": "analysis",
       "scope": "canonical-result",
-      "status": "incomplete",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "expected_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "expected_codes": [],
       "references": [
         {
           "original_name": "main",
@@ -10195,28 +10239,37 @@
           "original_name": "_time",
           "normalized_name": "_time",
           "kind": "field",
-          "role": "read",
+          "role": "output",
+          "binding": "not_applicable",
           "start": 42,
-          "end": 47,
-          "binding": "source"
+          "end": 47
+        },
+        {
+          "original_name": "_time",
+          "normalized_name": "_time",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 42,
+          "end": 47
         }
       ],
       "fields": [
         {
           "name": "_time",
-          "conditional": true
+          "conditional": false
         }
       ],
       "removed": [],
       "open": true,
-      "uncertain": true,
+      "uncertain": false,
       "stage_commands": [
         "from",
         "bin"
       ],
       "stage_complete": [
         true,
-        false
+        true
       ]
     },
     "canonical_basis": "Approved conformance matrix bin dedicated U contract; form-expansion per-ID T5.bin.align.latest.0.P; original typed operand contexts at b754b9bfa80eb990cb83ee05d3b4588c2c2e54c3.  Read/group binding is left open because this addendum proves input role, not unknown command transfer ordering. Exact transfer composition: initial open source with no preceding uncertain effect; all intact simple field operands bind source. Root-approved deferred overwrite/generating policy applies after reads. Candidate output references never install members. Complete original roles are independently enumerated in the frozen role oracle; field set is exactly those reads, sorted. No product reports were used to derive this object."
@@ -10256,12 +10309,10 @@
     "canonical": {
       "phase": "analysis",
       "scope": "canonical-result",
-      "status": "incomplete",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "expected_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "expected_codes": [],
       "references": [
         {
           "original_name": "main",
@@ -10277,36 +10328,40 @@
           "normalized_name": "_time",
           "kind": "field",
           "role": "read",
+          "binding": "source",
           "start": 42,
-          "end": 47,
-          "binding": "source"
+          "end": 47
         },
         {
           "original_name": "bucket",
           "normalized_name": "bucket",
           "kind": "field",
           "role": "output",
+          "binding": "not_applicable",
           "start": 51,
-          "end": 57,
-          "binding": "not_applicable"
+          "end": 57
         }
       ],
       "fields": [
         {
           "name": "_time",
           "conditional": false
+        },
+        {
+          "name": "bucket",
+          "conditional": false
         }
       ],
       "removed": [],
       "open": true,
-      "uncertain": true,
+      "uncertain": false,
       "stage_commands": [
         "from",
         "bin"
       ],
       "stage_complete": [
         true,
-        false
+        true
       ]
     },
     "canonical_basis": "Approved conformance matrix bin dedicated U contract; form-expansion per-ID T5.bin.align.latest.1.P; original typed operand contexts at b754b9bfa80eb990cb83ee05d3b4588c2c2e54c3.  Read/group binding is left open because this addendum proves input role, not unknown command transfer ordering. Exact transfer composition: initial open source with no preceding uncertain effect; all intact simple field operands bind source. Root-approved deferred overwrite/generating policy applies after reads. Candidate output references never install members. Complete original roles are independently enumerated in the frozen role oracle; field set is exactly those reads, sorted. No product reports were used to derive this object."
@@ -10346,12 +10401,10 @@
     "canonical": {
       "phase": "analysis",
       "scope": "canonical-result",
-      "status": "incomplete",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "expected_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "expected_codes": [],
       "references": [
         {
           "original_name": "main",
@@ -10366,28 +10419,37 @@
           "original_name": "_time",
           "normalized_name": "_time",
           "kind": "field",
-          "role": "read",
+          "role": "output",
+          "binding": "not_applicable",
           "start": 41,
-          "end": 46,
-          "binding": "source"
+          "end": 46
+        },
+        {
+          "original_name": "_time",
+          "normalized_name": "_time",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 41,
+          "end": 46
         }
       ],
       "fields": [
         {
           "name": "_time",
-          "conditional": true
+          "conditional": false
         }
       ],
       "removed": [],
       "open": true,
-      "uncertain": true,
+      "uncertain": false,
       "stage_commands": [
         "from",
         "bin"
       ],
       "stage_complete": [
         true,
-        false
+        true
       ]
     },
     "canonical_basis": "Approved conformance matrix bin dedicated U contract; form-expansion per-ID T5.bin.align.@d+3h.0.P; original typed operand contexts at b754b9bfa80eb990cb83ee05d3b4588c2c2e54c3.  Read/group binding is left open because this addendum proves input role, not unknown command transfer ordering. Exact transfer composition: initial open source with no preceding uncertain effect; all intact simple field operands bind source. Root-approved deferred overwrite/generating policy applies after reads. Candidate output references never install members. Complete original roles are independently enumerated in the frozen role oracle; field set is exactly those reads, sorted. No product reports were used to derive this object."
@@ -10427,12 +10489,10 @@
     "canonical": {
       "phase": "analysis",
       "scope": "canonical-result",
-      "status": "incomplete",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "expected_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "expected_codes": [],
       "references": [
         {
           "original_name": "main",
@@ -10448,36 +10508,40 @@
           "normalized_name": "_time",
           "kind": "field",
           "role": "read",
+          "binding": "source",
           "start": 41,
-          "end": 46,
-          "binding": "source"
+          "end": 46
         },
         {
           "original_name": "bucket",
           "normalized_name": "bucket",
           "kind": "field",
           "role": "output",
+          "binding": "not_applicable",
           "start": 50,
-          "end": 56,
-          "binding": "not_applicable"
+          "end": 56
         }
       ],
       "fields": [
         {
           "name": "_time",
           "conditional": false
+        },
+        {
+          "name": "bucket",
+          "conditional": false
         }
       ],
       "removed": [],
       "open": true,
-      "uncertain": true,
+      "uncertain": false,
       "stage_commands": [
         "from",
         "bin"
       ],
       "stage_complete": [
         true,
-        false
+        true
       ]
     },
     "canonical_basis": "Approved conformance matrix bin dedicated U contract; form-expansion per-ID T5.bin.align.@d+3h.1.P; original typed operand contexts at b754b9bfa80eb990cb83ee05d3b4588c2c2e54c3.  Read/group binding is left open because this addendum proves input role, not unknown command transfer ordering. Exact transfer composition: initial open source with no preceding uncertain effect; all intact simple field operands bind source. Root-approved deferred overwrite/generating policy applies after reads. Candidate output references never install members. Complete original roles are independently enumerated in the frozen role oracle; field set is exactly those reads, sorted. No product reports were used to derive this object."
@@ -16282,7 +16346,7 @@
     "canonical_evidence": "regression_snapshot",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "Accepted ExtendedSyntaxSourceGuards: unknown mystery option keeps syntax/effects incomplete without a definite error. The literal inherited subpipe remains a real typed child; no option token becomes a field. Unobserved fields selector remains indeterminate and child membership cannot establish parent field n.",
+      "basis": "Task 5 selected fields contract closes each exact projection to its named selectors. Omitted child members do not survive into a surrounding unmodeled merge, while the surrounding command retains its prior incomplete status and scope boundary.",
       "status": "incomplete",
       "syntax_complete": false,
       "semantic_complete": false,
@@ -16299,9 +16363,9 @@
           "normalized_name": "main",
           "kind": "dataset",
           "role": "read",
+          "binding": "not_applicable",
           "start": 5,
           "end": 9,
-          "binding": "not_applicable",
           "scope_start": 0,
           "scope_end": 43
         },
@@ -16310,9 +16374,9 @@
           "normalized_name": "n",
           "kind": "field",
           "role": "read",
+          "binding": "source",
           "start": 41,
           "end": 42,
-          "binding": "indeterminate",
           "scope_start": 33,
           "scope_end": 43
         }
@@ -16368,12 +16432,6 @@
           "original_name": "n",
           "start": 41,
           "end": 42,
-          "binding": "source"
-        },
-        {
-          "original_name": "n",
-          "start": 41,
-          "end": 42,
           "binding": "derived"
         }
       ],
@@ -16397,13 +16455,11 @@
         {
           "command": "fields",
           "start": 34,
-          "semantic_complete": false,
+          "semantic_complete": true,
           "scope_start": 33,
           "scope_end": 43
         }
       ],
-      "max_scopes": 2,
-      "final_state": null,
       "required_scopes": [
         {
           "kind": "subpipe",
@@ -16413,7 +16469,9 @@
           "parent_start": 0,
           "parent_end": 43
         }
-      ]
+      ],
+      "max_scopes": 2,
+      "final_state": null
     },
     "canonical": {
       "phase": "analysis",
@@ -16439,7 +16497,7 @@
           "normalized_name": "n",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 41,
           "end": 42
         }
@@ -16456,7 +16514,7 @@
       "stage_complete": [
         true,
         false,
-        false
+        true
       ]
     }
   },
@@ -18475,12 +18533,10 @@
     "canonical": {
       "phase": "analysis",
       "scope": "canonical-result",
-      "status": "incomplete",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "expected_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "expected_codes": [],
       "references": [
         {
           "original_name": "main",
@@ -18495,28 +18551,37 @@
           "original_name": "bytes",
           "normalized_name": "bytes",
           "kind": "field",
-          "role": "read",
+          "role": "output",
+          "binding": "not_applicable",
           "start": 47,
-          "end": 52,
-          "binding": "source"
+          "end": 52
+        },
+        {
+          "original_name": "bytes",
+          "normalized_name": "bytes",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 47,
+          "end": 52
         }
       ],
       "fields": [
         {
           "name": "bytes",
-          "conditional": true
+          "conditional": false
         }
       ],
       "removed": [],
       "open": true,
-      "uncertain": true,
+      "uncertain": false,
       "stage_commands": [
         "from",
         "bin"
       ],
       "stage_complete": [
         true,
-        false
+        true
       ]
     },
     "canonical_basis": "Approved conformance matrix bin dedicated U contract; form-expansion per-ID T5.log-precision.0; original typed operand contexts at b754b9bfa80eb990cb83ee05d3b4588c2c2e54c3.  Read/group binding is left open because this addendum proves input role, not unknown command transfer ordering. Exact transfer composition: initial open source with no preceding uncertain effect; all intact simple field operands bind source. Root-approved deferred overwrite/generating policy applies after reads. Candidate output references never install members. Complete original roles are independently enumerated in the frozen role oracle; field set is exactly those reads, sorted. No product reports were used to derive this object."
@@ -18556,12 +18621,10 @@
     "canonical": {
       "phase": "analysis",
       "scope": "canonical-result",
-      "status": "incomplete",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "expected_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "expected_codes": [],
       "references": [
         {
           "original_name": "main",
@@ -18576,28 +18639,37 @@
           "original_name": "bytes",
           "normalized_name": "bytes",
           "kind": "field",
-          "role": "read",
+          "role": "output",
+          "binding": "not_applicable",
           "start": 69,
-          "end": 74,
-          "binding": "source"
+          "end": 74
+        },
+        {
+          "original_name": "bytes",
+          "normalized_name": "bytes",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 69,
+          "end": 74
         }
       ],
       "fields": [
         {
           "name": "bytes",
-          "conditional": true
+          "conditional": false
         }
       ],
       "removed": [],
       "open": true,
-      "uncertain": true,
+      "uncertain": false,
       "stage_commands": [
         "from",
         "bin"
       ],
       "stage_complete": [
         true,
-        false
+        true
       ]
     },
     "canonical_basis": "Approved conformance matrix bin dedicated U contract; form-expansion per-ID T5.log-precision.1; original typed operand contexts at b754b9bfa80eb990cb83ee05d3b4588c2c2e54c3.  Read/group binding is left open because this addendum proves input role, not unknown command transfer ordering. Exact transfer composition: initial open source with no preceding uncertain effect; all intact simple field operands bind source. Root-approved deferred overwrite/generating policy applies after reads. Candidate output references never install members. Complete original roles are independently enumerated in the frozen role oracle; field set is exactly those reads, sorted. No product reports were used to derive this object."

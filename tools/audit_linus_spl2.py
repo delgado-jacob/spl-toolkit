@@ -259,7 +259,7 @@ def _requirements_status(report: dict) -> str | None:
     return None
 
 
-def parse_toolkit_result(operation: str, completed: subprocess.CompletedProcess[str]) -> tuple[str, list[dict]]:
+def parse_toolkit_result(operation: str, completed: subprocess.CompletedProcess[str]) -> tuple[str, list[dict], bool | None]:
     if operation not in {"analyze", "requirements"}:
         raise AuditError("unknown toolkit operation")
     try:
@@ -274,7 +274,13 @@ def parse_toolkit_result(operation: str, completed: subprocess.CompletedProcess[
     diagnostics = report.get("diagnostics", [])
     if not isinstance(diagnostics, list) or not all(isinstance(item, dict) for item in diagnostics):
         raise AuditError(f"toolkit {operation} returned invalid diagnostics")
-    return status, diagnostics
+    syntax_complete = None
+    if operation == "analyze":
+        coverage = report.get("coverage")
+        if not isinstance(coverage, dict) or not isinstance(coverage.get("syntax_complete"), bool):
+            raise AuditError("toolkit analyze returned invalid syntax coverage")
+        syntax_complete = coverage["syntax_complete"]
+    return status, diagnostics, syntax_complete
 
 
 def _count_diagnostics(diagnostics: list[dict], codes: Counter, categories: Counter) -> None:
@@ -308,8 +314,7 @@ def reject_protected_output(output: dict, protected_values: set[str]) -> None:
 
 
 def audit(content_root: Path, toolkit_bin: Path, forms_path: Path, *, runner=subprocess.run) -> dict:
-    content_root = Path(content_root)
-    scan_root = content_root / "detections" if (content_root / "detections").is_dir() else content_root
+    scan_root = Path(content_root)
     commit = exact_commit(scan_root)
     documents = extract_tracked_yaml_documents(scan_root, commit)
     content_queries = []
@@ -321,7 +326,7 @@ def audit(content_root: Path, toolkit_bin: Path, forms_path: Path, *, runner=sub
             continue
         classification = classify_query(document.query)
         classifications[classification] += 1
-        content_queries.append(executable_query(document.query, classification))
+        content_queries.append((classification, executable_query(document.query, classification)))
 
     forms = load_forms(forms_path)
     protected.update(query for _, query in forms)
@@ -337,9 +342,19 @@ def audit(content_root: Path, toolkit_bin: Path, forms_path: Path, *, runner=sub
     status_counts = {operation: Counter() for operation in ("analyze", "requirements")}
     diagnostic_codes = {operation: Counter() for operation in ("analyze", "requirements")}
     diagnostic_categories = {operation: Counter() for operation in ("analyze", "requirements")}
-    queries = content_queries + [query for _, query in forms]
+    content_syntax_counts = {
+        classification: Counter({"complete": 0, "incomplete": 0})
+        for classification in ("predicate_fragment", "standalone")
+    }
+    queries = [
+        ("content", classification, query)
+        for classification, query in content_queries
+    ] + [
+        ("form", "", query)
+        for _, query in forms
+    ]
     toolkit = str(Path(toolkit_bin))
-    for query in queries:
+    for origin, classification, query in queries:
         for operation in ("analyze", "requirements"):
             args = [
                 toolkit, operation,
@@ -353,13 +368,19 @@ def audit(content_root: Path, toolkit_bin: Path, forms_path: Path, *, runner=sub
                 completed = runner(args, capture_output=True, text=True, check=False)
             except (OSError, subprocess.SubprocessError) as error:
                 raise AuditError(f"toolkit {operation} could not be executed") from error
-            status, diagnostics = parse_toolkit_result(operation, completed)
+            status, diagnostics, syntax_complete = parse_toolkit_result(operation, completed)
             status_counts[operation][status] += 1
+            if operation == "analyze" and origin == "content":
+                outcome = "complete" if syntax_complete else "incomplete"
+                content_syntax_counts[classification][outcome] += 1
             _count_diagnostics(
                 diagnostics,
                 diagnostic_codes[operation],
                 diagnostic_categories[operation],
             )
+
+    if any(counts["incomplete"] for counts in content_syntax_counts.values()):
+        raise AuditError("external content syntax coverage is incomplete")
 
     if exact_commit(scan_root) != commit:
         raise AuditError("content root changed during the audit")
@@ -369,6 +390,10 @@ def audit(content_root: Path, toolkit_bin: Path, forms_path: Path, *, runner=sub
             "form_obligations": len(forms),
             "analyze_invocations": len(queries),
             "requirements_invocations": len(queries),
+        },
+        "content_syntax_counts": {
+            classification: dict(sorted(counts.items()))
+            for classification, counts in sorted(content_syntax_counts.items())
         },
         "form_ids": sorted(identity for identity, _ in forms),
         "status_classes": {

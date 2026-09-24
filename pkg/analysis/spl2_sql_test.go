@@ -10,6 +10,64 @@ import (
 	"github.com/delgado-jacob/spl-toolkit/parser/spl2"
 )
 
+func TestSPL2SQLSelectedLinusForms(t *testing.T) {
+	tests := []struct {
+		name  string
+		query string
+	}{
+		{"source where", `SELECT synthetic_value FROM synthetic_events WHERE synthetic_enabled=true`},
+		{"projection", `SELECT synthetic_value, synthetic_region FROM synthetic_events`},
+		{"group aggregate", `SELECT synthetic_region, sum(synthetic_value) AS synthetic_total FROM synthetic_events GROUP BY synthetic_region`},
+		{"aggregate alias", `SELECT max(synthetic_value) AS synthetic_maximum FROM synthetic_events`},
+		{"private aggregate policy", `SELECT stdev(synthetic_value) AS synthetic_stdev FROM synthetic_events`},
+		{"dotted read", `SELECT synthetic_object.synthetic_value AS synthetic_leaf FROM synthetic_events WHERE synthetic_object.synthetic_enabled=true`},
+		{"multiline", "SELECT synthetic_region, count() AS synthetic_count\nFROM synthetic_events\nWHERE synthetic_value > 2\nGROUP BY synthetic_region"},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			r := spl2AnalyzeTest(t, tc.query)
+			if r.Status != Valid || !r.Coverage.SyntaxComplete || !r.Coverage.SemanticComplete || !r.Requirements.Coverage.Complete || len(r.Diagnostics) != 0 {
+				t.Fatalf("selected SQL form must be complete: %+v", r)
+			}
+			assertCorpusIntegrity(t, r)
+		})
+	}
+
+	r := spl2AnalyzeTest(t, `SELECT synthetic_region, sum(synthetic_value) AS synthetic_total FROM synthetic_events WHERE synthetic_enabled=true GROUP BY synthetic_region`)
+	phases := []string{}
+	for _, lineage := range r.Lineage {
+		phases = append(phases, lineage.Phase)
+	}
+	if !reflect.DeepEqual(phases, []string{"source", "filter", "group", "aggregate", "project"}) {
+		t.Fatalf("SQL phase schedule = %v", phases)
+	}
+	alias := spl2Ref(t, r, "synthetic_total", "output")
+	input := spl2Ref(t, r, "synthetic_value", "read")
+	if !reflect.DeepEqual(alias.OriginReferenceIDs, []string{input.ID}) {
+		t.Fatalf("aggregate alias origin = %v, want %s", alias.OriginReferenceIDs, input.ID)
+	}
+	for _, name := range []string{"synthetic_enabled", "synthetic_value", "synthetic_region"} {
+		role := "read"
+		if name == "synthetic_region" {
+			role = "group"
+		}
+		if item := requirementItem(r.Requirements, "field", name, role); item == nil || item.Necessity != "required" || item.Resolution != "exact" {
+			t.Fatalf("SQL requirement %s/%s = %+v", name, role, item)
+		}
+	}
+
+	dotted := spl2AnalyzeTest(t, `SELECT synthetic_object.synthetic_value AS synthetic_leaf FROM synthetic_events WHERE synthetic_object.synthetic_enabled=true`)
+	for _, name := range []string{"synthetic_object.synthetic_value", "synthetic_object.synthetic_enabled"} {
+		ref := spl2Ref(t, dotted, name, "read")
+		if ref.Resolution != "exact" || ref.Binding != "source" {
+			t.Fatalf("dotted SQL read %q = %+v", name, ref)
+		}
+		if item := requirementItem(dotted.Requirements, "field", name, "read"); item == nil || item.Resolution != "exact" {
+			t.Fatalf("dotted SQL requirement %q = %+v", name, item)
+		}
+	}
+}
+
 // This witnesses lexical evidence independently of the SQL execution schedule.
 func TestSPL2SQLLexicalStagesAndProjectionRead(t *testing.T) {
 	text := "SELECT host FROM main WHERE bytes>0"

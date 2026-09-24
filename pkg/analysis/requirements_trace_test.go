@@ -1051,13 +1051,14 @@ func TestRequirementTraceDatasetLiteralClosesAbsentField(t *testing.T) {
 
 func TestRequirementTracePreservesConditionalFields(t *testing.T) {
 	for _, tc := range []struct {
-		name     string
-		document QueryDocument
-		field    string
+		name               string
+		document           QueryDocument
+		field, binding     string
+		requireConditional bool
 	}{
-		{"SPL OUTPUTNEW", QueryDocument{Text: "search user=* | lookup users user OUTPUTNEW role | table role"}, "role"},
-		{"SPL2 partial dataset field", QueryDocument{Text: "FROM [{a:1},{b:2}] | table a", Language: "spl2"}, "a"},
-		{"SPL2 deferred bin effect", QueryDocument{Text: "FROM main | eval a=host | bin a | table a", Language: "spl2"}, "a"},
+		{"SPL OUTPUTNEW", QueryDocument{Text: "search user=* | lookup users user OUTPUTNEW role | table role"}, "role", "indeterminate", true},
+		{"SPL2 partial dataset field", QueryDocument{Text: "FROM [{a:1},{b:2}] | table a", Language: "spl2"}, "a", "indeterminate", true},
+		{"SPL2 selected bin effect", QueryDocument{Text: "FROM main | eval a=host | bin a | table a", Language: "spl2"}, "a", "derived", false},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			result, trace, err := analyzeRewriteWithTrace(tc.document, nil, nil)
@@ -1082,11 +1083,11 @@ func TestRequirementTracePreservesConditionalFields(t *testing.T) {
 			if public == nil || traced == nil {
 				t.Fatalf("missing final %s read: public=%+v trace=%+v", tc.field, result.References, trace.references)
 			}
-			if public.Binding != "indeterminate" {
-				t.Fatalf("public final read = %+v, want indeterminate", public)
+			if public.Binding != tc.binding {
+				t.Fatalf("public final read = %+v, want %s", public, tc.binding)
 			}
-			if traced.reference.Binding != "indeterminate" || traced.directExternal || !traced.conditional {
-				t.Fatalf("query-only final read = %+v, want conditional indeterminate evidence", traced)
+			if traced.reference.Binding != tc.binding || traced.directExternal || traced.conditional != tc.requireConditional {
+				t.Fatalf("query-only final read = %+v, want binding=%s conditional=%v", traced, tc.binding, tc.requireConditional)
 			}
 		})
 	}

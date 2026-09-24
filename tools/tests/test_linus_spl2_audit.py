@@ -14,7 +14,15 @@ SPEC.loader.exec_module(AUDIT)
 
 
 class LinusSPL2AuditTests(unittest.TestCase):
-    def make_content(self, root: Path, *, standalone_count=45, metadata_count=4, ignored=None):
+    def make_content(
+        self,
+        root: Path,
+        *,
+        standalone_count=45,
+        metadata_count=4,
+        metadata_outside_detections=False,
+        ignored=None,
+    ):
         detections = root / "detections"
         detections.mkdir()
         for index in range(standalone_count):
@@ -29,8 +37,10 @@ class LinusSPL2AuditTests(unittest.TestCase):
                 % (index, index),
                 encoding="utf-8",
             )
+        metadata = root / "metadata" if metadata_outside_detections else detections
+        metadata.mkdir(exist_ok=True)
         for index in range(metadata_count):
-            (detections / f"metadata-{index:02}.yaml").write_text(
+            (metadata / f"metadata-{index:02}.yaml").write_text(
                 f"title: Private metadata only {index:02}\n",
                 encoding="utf-8",
             )
@@ -40,6 +50,8 @@ class LinusSPL2AuditTests(unittest.TestCase):
         subprocess.run(["git", "-C", str(root), "config", "user.email", "audit@example.invalid"], check=True)
         subprocess.run(["git", "-C", str(root), "config", "user.name", "Audit Fixture"], check=True)
         add = ["git", "-C", str(root), "add", "detections"]
+        if metadata_outside_detections:
+            add.append("metadata")
         if ignored:
             add.append(".gitignore")
         subprocess.run(add, check=True)
@@ -50,16 +62,22 @@ class LinusSPL2AuditTests(unittest.TestCase):
         path.write_bytes(source.read_bytes())
 
     @staticmethod
-    def successful_runner(calls):
+    def successful_runner(calls, syntax_incomplete=frozenset()):
         def run(args, **kwargs):
             calls.append((list(args), dict(kwargs)))
             operation = args[1]
             if operation == "analyze":
+                query = args[args.index("--query") + 1]
+                syntax_complete = query not in syntax_incomplete
                 report = {
-                    "status": "valid",
-                    "diagnostics": [{"code": "SPL_GENERIC_NOTE", "category": "coverage"}],
+                    "status": "valid" if syntax_complete else "invalid",
+                    "coverage": {"syntax_complete": syntax_complete},
+                    "diagnostics": [{
+                        "code": "SPL_GENERIC_NOTE" if syntax_complete else "SPL_SYNTAX_ERROR",
+                        "category": "coverage" if syntax_complete else "syntax",
+                    }],
                 }
-                return subprocess.CompletedProcess(args, 0, json.dumps(report), "")
+                return subprocess.CompletedProcess(args, 0 if syntax_complete else 1, json.dumps(report), "")
             report = {
                 "query_status": "incomplete",
                 "coverage": {"complete": False, "reasons": ["SPL_GENERIC_GAP"]},
@@ -122,7 +140,7 @@ class LinusSPL2AuditTests(unittest.TestCase):
             self.assertEqual(classifications.count("predicate_fragment"), 4)
 
     def test_full_audit_rejects_escaped_search_key_hidden_from_inventory(self):
-        with tempfile.TemporaryDirectory() as temporary:
+        with tempfile.TemporaryDirectory() as temporary, tempfile.TemporaryDirectory() as auxiliary:
             root = Path(temporary)
             self.make_content(root)
             hidden = root / "detections" / "metadata-00.yaml"
@@ -132,7 +150,7 @@ class LinusSPL2AuditTests(unittest.TestCase):
             )
             subprocess.run(["git", "-C", str(root), "add", str(hidden)], check=True)
             subprocess.run(["git", "-C", str(root), "commit", "-qm", "escaped key"], check=True)
-            forms = root / "forms.json"
+            forms = Path(auxiliary) / "forms.json"
             self.write_forms(forms)
             with self.assertRaisesRegex(AUDIT.AuditError, "mapping key"):
                 AUDIT.audit(root, root / "toolkit", forms, runner=self.successful_runner([]))
@@ -145,20 +163,24 @@ class LinusSPL2AuditTests(unittest.TestCase):
             "alias-sequence": "private_key: &private search\nrules:\n  - *private: |-\n      FROM synthetic_events | where synthetic_hidden=true\n",
         }
         for name, content in hidden_keys.items():
-            with self.subTest(name=name), tempfile.TemporaryDirectory() as temporary:
+            with (
+                self.subTest(name=name),
+                tempfile.TemporaryDirectory() as temporary,
+                tempfile.TemporaryDirectory() as auxiliary,
+            ):
                 root = Path(temporary)
                 self.make_content(root)
                 hidden = root / "detections" / "metadata-00.yaml"
                 hidden.write_text(content, encoding="utf-8")
                 subprocess.run(["git", "-C", str(root), "add", str(hidden)], check=True)
                 subprocess.run(["git", "-C", str(root), "commit", "-qm", "node property key"], check=True)
-                forms = root / "forms.json"
+                forms = Path(auxiliary) / "forms.json"
                 self.write_forms(forms)
                 with self.assertRaisesRegex(AUDIT.AuditError, "mapping key"):
                     AUDIT.audit(root, root / "toolkit", forms, runner=self.successful_runner([]))
 
     def test_full_audit_rejects_ignored_untracked_yaml_even_when_counts_match(self):
-        with tempfile.TemporaryDirectory() as temporary:
+        with tempfile.TemporaryDirectory() as temporary, tempfile.TemporaryDirectory() as auxiliary:
             root = Path(temporary)
             ignored = "detections/ignored.yaml"
             self.make_content(root, standalone_count=44, ignored=ignored)
@@ -166,7 +188,7 @@ class LinusSPL2AuditTests(unittest.TestCase):
                 "search: |\n  FROM synthetic_events | where synthetic_ignored=true\n",
                 encoding="utf-8",
             )
-            forms = root / "forms.json"
+            forms = Path(auxiliary) / "forms.json"
             self.write_forms(forms)
             with self.assertRaisesRegex(AUDIT.AuditError, "tracked at HEAD"):
                 AUDIT.audit(root, root / "toolkit", forms, runner=self.successful_runner([]))
@@ -174,14 +196,16 @@ class LinusSPL2AuditTests(unittest.TestCase):
     def test_audit_embeds_fragments_and_emits_aggregate_only_output(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
-            self.make_content(root)
+            content = root / "content"
+            content.mkdir()
+            self.make_content(content, metadata_outside_detections=True)
             forms = root / "forms.json"
             self.write_forms(forms)
             calls = []
-            result = AUDIT.audit(root, root / "toolkit", forms, runner=self.successful_runner(calls))
+            result = AUDIT.audit(content, root / "toolkit", forms, runner=self.successful_runner(calls))
 
             commit = subprocess.run(
-                ["git", "-C", str(root), "rev-parse", "HEAD"],
+                ["git", "-C", str(content), "rev-parse", "HEAD"],
                 check=True, capture_output=True, text=True,
             ).stdout.strip()
             self.assertEqual(result["audited_commit"], commit)
@@ -193,6 +217,10 @@ class LinusSPL2AuditTests(unittest.TestCase):
                 "form_obligations": 65,
                 "analyze_invocations": 114,
                 "requirements_invocations": 114,
+            })
+            self.assertEqual(result["content_syntax_counts"], {
+                "predicate_fragment": {"complete": 4, "incomplete": 0},
+                "standalone": {"complete": 45, "incomplete": 0},
             })
             self.assertEqual(len(result["form_ids"]), 65)
             self.assertEqual(result["status_classes"], {
@@ -219,11 +247,65 @@ class LinusSPL2AuditTests(unittest.TestCase):
             self.assertNotIn("generic-00.yaml", rendered)
             self.assertNotIn("synthetic_value > 0", rendered)
             self.assertEqual(set(result), {
-                "audited_commit", "counts", "form_ids", "status_classes", "diagnostic_counts",
+                "audited_commit", "counts", "content_syntax_counts", "form_ids", "status_classes", "diagnostic_counts",
             })
 
+    def test_external_syntax_gate_rejects_content_without_leaking_it(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            content = root / "content"
+            content.mkdir()
+            self.make_content(content)
+            protected_query = "FROM synthetic_events | where ("
+            target = content / "detections" / "generic-00.yaml"
+            target.write_text(
+                "title: Private invalid syntax detection\nsearch: |-\n  " + protected_query + "\n",
+                encoding="utf-8",
+            )
+            subprocess.run(["git", "-C", str(content), "add", str(target)], check=True)
+            subprocess.run(["git", "-C", str(content), "commit", "-qm", "invalid syntax"], check=True)
+            forms = root / "forms.json"
+            self.write_forms(forms)
+
+            with self.assertRaisesRegex(AUDIT.AuditError, "external content syntax coverage is incomplete") as raised:
+                AUDIT.audit(
+                    content,
+                    root / "toolkit",
+                    forms,
+                    runner=self.successful_runner([], {protected_query}),
+                )
+            self.assertNotIn(protected_query, str(raised.exception))
+            self.assertNotIn("generic-00.yaml", str(raised.exception))
+            self.assertNotIn("Private invalid syntax detection", str(raised.exception))
+
+    def test_generic_form_syntax_boundary_does_not_fail_external_gate(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            content = root / "content"
+            content.mkdir()
+            self.make_content(content)
+            forms = root / "forms.json"
+            self.write_forms(forms)
+            protected_form = next(
+                query for _, query in AUDIT.load_forms(forms)
+                if "| eval " in query
+            )
+
+            result = AUDIT.audit(
+                content,
+                root / "toolkit",
+                forms,
+                runner=self.successful_runner([], {protected_form}),
+            )
+            self.assertEqual(result["content_syntax_counts"], {
+                "predicate_fragment": {"complete": 4, "incomplete": 0},
+                "standalone": {"complete": 45, "incomplete": 0},
+            })
+            self.assertEqual(result["status_classes"]["analyze"]["invalid"], 1)
+            self.assertNotIn(protected_form, json.dumps(result, sort_keys=True))
+
     def test_subprocess_status_exits_are_checked_without_leaking_output(self):
-        valid = {"status": "invalid", "diagnostics": []}
+        valid = {"status": "invalid", "coverage": {"syntax_complete": False}, "diagnostics": []}
         completed = subprocess.CompletedProcess([], 1, json.dumps(valid), "protected stderr")
         self.assertEqual(AUDIT.parse_toolkit_result("analyze", completed)[0], "invalid")
 

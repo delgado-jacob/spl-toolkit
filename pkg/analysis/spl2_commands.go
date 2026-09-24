@@ -8,7 +8,175 @@ import (
 	"strings"
 )
 
+func (s *spl2SemanticStage) selectedCommandHandler() (spl2CommandHandler, bool) {
+	policy, selected := s.typedPolicy()
+	if !selected || s.stage < 0 || s.stage >= len(s.result.Stages) {
+		return 0, false
+	}
+	handler, ok := policy.commands[s.result.Stages[s.stage].Command]
+	return handler, ok
+}
+
+func (s *spl2SemanticStage) selectedCommand(ctx antlr.ParserRuleContext, handler spl2CommandHandler) {
+	switch handler {
+	case spl2WhereCommandHandler:
+		c, ok := ctx.(*spl2.WhereCommandContext)
+		if !ok {
+			s.unsupported(ctx, "Selected command policy does not match parsed command")
+			return
+		}
+		if c.Expression() == nil || s.damagedExpressionContinuation(c.Expression()) {
+			s.unsupported(c, "Recovered SPL2 command effects are not yet modeled")
+			return
+		}
+		s.rewritePredicate(c.Expression(), "spl2", false, false)
+		s.expression(c.Expression())
+	case spl2EvalCommandHandler:
+		c, ok := ctx.(*spl2.EvalCommandContext)
+		if !ok {
+			s.unsupported(ctx, "Selected command policy does not match parsed command")
+			return
+		}
+		for _, a := range c.AllAssignment() {
+			if s.damagedExpressionContinuation(a.Expression()) {
+				s.unsupported(a, "Recovered SPL2 assignment effects are not yet modeled")
+				continue
+			}
+			value := s.expression(a.Expression())
+			if !s.assignmentEffectSound(a) {
+				continue
+			}
+			if a.FieldName().Identifier() == nil {
+				s.expression(a.FieldName())
+				s.unsupported(a.FieldName(), "Computed assignment target is unresolved")
+				continue
+			}
+			s.applyAssignmentWithRequirementConditional(s.operand(a.FieldName().Identifier()), value.ids, !value.nonnull, !value.requirementNonnull, value.exactNull)
+		}
+	case spl2FieldsCommandHandler:
+		c, ok := ctx.(*spl2.FieldsCommandContext)
+		if !ok {
+			s.unsupported(ctx, "Selected command policy does not match parsed command")
+			return
+		}
+		selection := c.FieldSelection()
+		fields := []locatedOperand{}
+		priorFields := map[fieldIdentityKey]bool{}
+		for key := range s.env.fields {
+			priorFields[key] = true
+		}
+		priorExpansionCount := 0
+		if s.refinement != nil {
+			priorExpansionCount = len(s.refinement.expansions)
+		}
+		unproved := false
+		for _, f := range selection.AllFieldSelector() {
+			o := locatedOperand{}
+			if f.Identifier() != nil {
+				o = s.selector(f.Identifier())
+			} else if f.StructuralFieldSelector() != nil {
+				o = s.structuralSelector(f.StructuralFieldSelector())
+			}
+			if o.Sound && o.Name != "" {
+				fields = append(fields, o)
+			} else {
+				unproved = true
+			}
+		}
+		mode := "include"
+		if selection.MINUS() != nil {
+			mode = "exclude"
+		}
+		if unproved {
+			s.unprovedProjection(c, fields)
+		} else {
+			s.applyProjection(fields, mode, false)
+			if mode == "include" {
+				s.closeSelectedFieldsWildcard(fields, priorFields, priorExpansionCount)
+			}
+		}
+	case spl2StatsCommandHandler:
+		c, ok := ctx.(*spl2.StatsCommandContext)
+		if !ok {
+			s.unsupported(ctx, "Selected command policy does not match parsed command")
+			return
+		}
+		allnum := []spl2.IAllnumOptionContext{}
+		for _, o := range c.AllStatsOption() {
+			if a := o.AllnumOption(); a != nil {
+				allnum = append(allnum, a)
+			}
+			if o.UnknownOption() != nil {
+				s.unsupported(o, "Unmodeled stats option")
+			}
+		}
+		s.aggregates(c.AllAggregate(), spl2Groups(c.AggregateGroup()), c.SelectedAggregateGroup(), false, s.allnum(allnum))
+	case spl2BinCommandHandler:
+		c, ok := ctx.(*spl2.BinCommandContext)
+		if !ok {
+			s.unsupported(ctx, "Selected command policy does not match parsed command")
+			return
+		}
+		input := s.operand(c.Identifier(0))
+		id := s.readAt(input, "read")
+		if len(c.AllExtendedOption()) > 0 || !s.commandEffectSound(c) {
+			s.rejectSelectedIdentityEffect(c, input, id)
+			return
+		}
+		if id == "" {
+			return
+		}
+		inputReference := s.result.References[len(s.result.References)-1]
+		requirementBinding := inputReference.Binding
+		requirementConditional := inputReference.Binding == "indeterminate"
+		if trace := s.env.requirements.trace; trace != nil {
+			entry := trace.reference(id)
+			requirementBinding = entry.reference.Binding
+			requirementConditional = entry.conditional
+		}
+		if inputReference.Binding == "unavailable" || requirementBinding == "unavailable" {
+			return
+		}
+		target := input
+		if len(c.AllIdentifier()) > 1 {
+			target = s.operand(c.Identifier(1))
+		}
+		s.createAtWithRequirementConditional(target, "output", "bin", []string{id}, inputReference.Binding == "indeterminate", requirementConditional)
+	case spl2MvexpandCommandHandler:
+		c, ok := ctx.(*spl2.MvexpandCommandContext)
+		if !ok {
+			s.unsupported(ctx, "Selected command policy does not match parsed command")
+			return
+		}
+		o := s.operand(c.Identifier())
+		id := s.readAt(o, "read")
+		if len(c.AllExtendedOption()) > 0 || !s.commandEffectSound(c) {
+			s.rejectSelectedIdentityEffect(c, o, id)
+			return
+		}
+		if id == "" {
+			return
+		}
+		inputReference := s.result.References[len(s.result.References)-1]
+		requirementBinding := inputReference.Binding
+		if trace := s.env.requirements.trace; trace != nil {
+			requirementBinding = trace.reference(id).reference.Binding
+		}
+		if inputReference.Binding == "unavailable" || requirementBinding == "unavailable" {
+			s.unsupportedOwned(c, "mvexpand cannot select an unavailable field", []string{id})
+			return
+		}
+		if !s.env.selectElement(o.fieldIdentity()) {
+			s.unsupportedOwned(c, "mvexpand input value state is unresolved", []string{id})
+		}
+	}
+}
+
 func (s *spl2SemanticStage) command(ctx antlr.ParserRuleContext) {
+	if handler, selected := s.selectedCommandHandler(); selected {
+		s.selectedCommand(ctx, handler)
+		return
+	}
 	switch c := ctx.(type) {
 	case *spl2.FromCommandContext:
 		s.applySource()
@@ -33,48 +201,6 @@ func (s *spl2SemanticStage) command(ctx antlr.ParserRuleContext) {
 	case *spl2.ImplicitSearchContext:
 		s.rewritePredicate(c.SearchExpression(), "spl2", true, false)
 		s.search(c.SearchExpression())
-	case *spl2.WhereCommandContext:
-		s.rewritePredicate(c.Expression(), "spl2", false, false)
-		s.expression(c.Expression())
-	case *spl2.EvalCommandContext:
-		for _, a := range c.AllAssignment() {
-			value := s.expression(a.Expression())
-			if !s.assignmentEffectSound(a) {
-				continue
-			}
-			if a.FieldName().Identifier() == nil {
-				s.expression(a.FieldName())
-				s.unsupported(a.FieldName(), "Computed assignment target is unresolved")
-				continue
-			}
-			s.applyAssignmentWithRequirementConditional(s.operand(a.FieldName().Identifier()), value.ids, !value.nonnull, !value.requirementNonnull, value.exactNull)
-		}
-	case *spl2.FieldsCommandContext:
-		selection := c.FieldSelection()
-		fields := []locatedOperand{}
-		unproved := false
-		for _, f := range selection.AllFieldSelector() {
-			o := locatedOperand{}
-			if f.Identifier() != nil {
-				o = s.selector(f.Identifier())
-			} else if f.StructuralFieldSelector() != nil {
-				o = s.structuralSelector(f.StructuralFieldSelector())
-			}
-			if o.Sound && o.Name != "" {
-				fields = append(fields, o)
-			} else {
-				unproved = true
-			}
-		}
-		mode := "include"
-		if selection.MINUS() != nil {
-			mode = "exclude"
-		}
-		if unproved {
-			s.unprovedProjection(c, fields)
-		} else {
-			s.applyProjection(fields, mode, true)
-		}
 	case *spl2.TableCommandContext:
 		fields := []locatedOperand{}
 		unproved := false
@@ -108,22 +234,8 @@ func (s *spl2SemanticStage) command(ctx antlr.ParserRuleContext) {
 			pairs = append(pairs, renameOperands{s.selector(pair.RenameSource()), s.selector(pair.RenameTarget())})
 		}
 		s.applyRename(pairs)
-	case *spl2.StatsCommandContext:
-		allnum := []spl2.IAllnumOptionContext{}
-		for _, o := range c.AllStatsOption() {
-			if a := o.AllnumOption(); a != nil {
-				allnum = append(allnum, a)
-			}
-			if o.UnknownOption() != nil {
-				s.unsupported(o, "Unmodeled stats option")
-			}
-		}
-		if group := c.SelectedAggregateGroup(); group != nil {
-			s.unsupportedOwned(group, "Expression and span grouping effects are unmodeled", nil)
-		}
-		s.aggregates(c.AllAggregate(), spl2Groups(c.AggregateGroup()), false, s.allnum(allnum))
 	case *spl2.EventstatsCommandContext:
-		s.aggregates(c.AllAggregate(), spl2Groups(c.AggregateGroup()), true, s.allnum(c.AllAllnumOption()))
+		s.aggregates(c.AllAggregate(), spl2Groups(c.AggregateGroup()), nil, true, s.allnum(c.AllAllnumOption()))
 	case *spl2.StreamstatsCommandContext:
 		groups := []spl2.IGroupFieldContext{}
 		if g := c.StreamGroup(); g != nil {
@@ -138,7 +250,7 @@ func (s *spl2SemanticStage) command(ctx antlr.ParserRuleContext) {
 			}
 		}
 		conditional := c.CurrentOption() != nil && c.CurrentOption().BOOLEAN().GetText() == "false"
-		s.aggregates(c.AllAggregate(), groups, true, conditional)
+		s.aggregates(c.AllAggregate(), groups, nil, true, conditional)
 	case *spl2.LookupCommandContext:
 		s.lookup(c)
 	case *spl2.SortCommandContext:
@@ -182,15 +294,6 @@ func (s *spl2SemanticStage) command(ctx antlr.ParserRuleContext) {
 	case *spl2.JoinCommandContext:
 		ids := s.joinPredicateIntentions(c)
 		s.unsupportedOwned(c, "Join output merge and qualified input binding are unproved", ids)
-	case *spl2.BinCommandContext:
-		input := s.operand(c.Identifier(0))
-		s.readAt(input, "read")
-		target := input
-		if len(c.AllIdentifier()) > 1 {
-			target = s.operand(c.Identifier(1))
-			s.operandReference(target, "field", "output")
-		}
-		s.deferredEffects(c, map[string]bool{target.Name: target.Sound}, false)
 	case *spl2.RexCommandContext:
 		input, sed := "_raw", false
 		for _, option := range c.AllRexOption() {
@@ -239,10 +342,6 @@ func (s *spl2SemanticStage) command(ctx antlr.ParserRuleContext) {
 		o := s.operand(c.Identifier())
 		s.readAt(o, "read")
 		s.deferredEffects(c, map[string]bool{o.Name: o.Sound}, false)
-	case *spl2.MvexpandCommandContext:
-		o := s.operand(c.Identifier())
-		s.readAt(o, "read")
-		s.deferredEffects(c, map[string]bool{o.Name: o.Sound}, false)
 	case *spl2.MvcombineCommandContext:
 		o := s.operand(c.Identifier())
 		s.readAt(o, "read")
@@ -250,6 +349,84 @@ func (s *spl2SemanticStage) command(ctx antlr.ParserRuleContext) {
 	default:
 		s.unsupported(ctx, "Command field effects are not yet modeled")
 	}
+}
+
+// SPL2 fields inclusion closes over bindings proved before the command plus
+// source names admitted by the caller. An unresolved source declaration keeps
+// the wildcard incomplete, but it does not become a guessed output field.
+func (s *spl2SemanticStage) closeSelectedFieldsWildcard(selectors []locatedOperand, priorFields map[fieldIdentityKey]bool, priorExpansionCount int) {
+	if s.refinement == nil {
+		return
+	}
+	patterns := []string{}
+	exact := map[fieldIdentityKey]bool{}
+	for _, selector := range selectors {
+		if selector.Resolution == "wildcard" {
+			patterns = append(patterns, selector.Name)
+			continue
+		}
+		if key, ok := selector.fieldIdentity().privateKey(); ok {
+			exact[key] = true
+		}
+	}
+	if len(patterns) == 0 {
+		return
+	}
+	pruned := map[string]bool{}
+	for key, field := range s.env.fields {
+		if priorFields[key] || exact[key] || !field.source || s.refinement.admission(field.Name) == SourceFieldAdmitted {
+			continue
+		}
+		matched := false
+		for _, pattern := range patterns {
+			matched = matched || wildcardMatches(pattern, field.Name)
+		}
+		if !matched {
+			continue
+		}
+		delete(s.env.fields, key)
+		delete(s.env.identities, key)
+		pruned[field.Name] = true
+	}
+	if len(pruned) == 0 {
+		return
+	}
+	for i := priorExpansionCount; i < len(s.refinement.expansions); i++ {
+		expansion := &s.refinement.expansions[i]
+		matches := expansion.Matches[:0]
+		for _, match := range expansion.Matches {
+			if !pruned[match.Name] {
+				matches = append(matches, match)
+			}
+		}
+		expansion.Matches = matches
+	}
+	transitions := s.transitions[:0]
+	for _, transition := range s.transitions {
+		if transition.Operation != "project" || !pruned[transition.Output] {
+			transitions = append(transitions, transition)
+		}
+	}
+	s.transitions = transitions
+	s.env.rewriteProject(s.env.fields)
+}
+
+// Independently parsed inputs survive rejected commands, but parser damage or
+// a command-owned contract error cannot prove an output effect.
+func (s *spl2SemanticStage) commandEffectSound(ctx antlr.ParserRuleContext) bool {
+	if ctx == nil || !spl2IntactSyntax(ctx) {
+		return false
+	}
+	if s.stage >= 0 && s.stage < len(s.result.Stages) && !s.result.Stages[s.stage].SemanticComplete {
+		return false
+	}
+	location := s.parsed2.source.contextLocation(ctx)
+	for _, d := range s.parsed2.diagnostics {
+		if d.Code == CodeSyntaxError && d.Location.Start.Offset >= location.Start.Offset && d.Location.Start.Offset < location.End.Offset {
+			return false
+		}
+	}
+	return true
 }
 
 func (s *spl2SemanticStage) joinPredicateIntentions(command *spl2.JoinCommandContext) []string {
@@ -301,6 +478,35 @@ func (s *spl2SemanticStage) assignmentEffectSound(a spl2.IAssignmentContext) boo
 	return true
 }
 
+func (s *spl2SemanticStage) damagedExpressionContinuation(ctx antlr.ParserRuleContext) bool {
+	if ctx == nil {
+		return true
+	}
+	isContinuation := func(token antlr.Token) bool {
+		if token == nil {
+			return false
+		}
+		switch token.GetTokenType() {
+		case spl2.SPL2ParserSTAR, spl2.SPL2ParserSLASH, spl2.SPL2ParserMOD, spl2.SPL2ParserAND, spl2.SPL2ParserOR, spl2.SPL2ParserXOR, spl2.SPL2ParserNOT:
+			return true
+		}
+		return false
+	}
+	if isContinuation(ctx.GetStop()) || isContinuation(s.nextCommandToken(ctx)) {
+		return true
+	}
+	if ctx.GetStart() == nil || ctx.GetStart().GetTokenType() != spl2.SPL2ParserLPAREN {
+		return false
+	}
+	location := s.parsed2.source.contextLocation(ctx)
+	for _, diagnostic := range s.parsed2.diagnostics {
+		if diagnostic.Code == CodeSyntaxError && diagnostic.Location.Start.Offset >= location.Start.Offset && diagnostic.Location.Start.Offset <= location.End.Offset {
+			return true
+		}
+	}
+	return !spl2IntactSyntax(ctx)
+}
+
 func (s *spl2SemanticStage) deferredAggregate(aggregate spl2.IAggregateContext) {
 	if aggregate == nil || aggregate.Call() == nil {
 		return
@@ -324,6 +530,52 @@ func (s *spl2SemanticStage) deferredEffects(ctx antlr.ParserRuleContext, affecte
 	}
 	if generating {
 		s.env.open = true
+	}
+}
+
+func (s *spl2SemanticStage) markRejectedIdentityEffect(operand locatedOperand) {
+	if !operand.Sound {
+		return
+	}
+	identity := operand.fieldIdentity()
+	key, exact := identity.privateKey()
+	if !exact {
+		return
+	}
+	field, known := s.env.fields[key]
+	if !known {
+		return
+	}
+	field.Conditional = true
+	field.valueState = fieldValueUnknown
+	s.env.fields[key] = field
+	s.env.requirements.markConditionalIdentity(identity)
+}
+
+func (s *spl2SemanticStage) ownExistingUnsupportedEffect(id string) bool {
+	if id == "" || s.env.requirements.trace == nil {
+		return false
+	}
+	stageID := s.result.Stages[s.stage].ID
+	trace := s.env.requirements.trace
+	for index := len(trace.diagnostics) - 1; index >= 0; index-- {
+		entry := &trace.diagnostics[index]
+		if entry.incomplete && entry.diagnostic.StageID == stageID && entry.diagnostic.Code == CodeUnsupportedSemantics {
+			entry.pendingReferenceIDs = uniqueIDs(entry.pendingReferenceIDs, []string{id})
+			return true
+		}
+	}
+	return false
+}
+
+func (s *spl2SemanticStage) rejectSelectedIdentityEffect(ctx antlr.ParserRuleContext, operand locatedOperand, id string) {
+	s.markRejectedIdentityEffect(operand)
+	if !s.ownExistingUnsupportedEffect(id) {
+		pendingReferenceIDs := []string{}
+		if id != "" {
+			pendingReferenceIDs = append(pendingReferenceIDs, id)
+		}
+		s.unsupportedOwned(ctx, "Rejected command field effects are not modeled", pendingReferenceIDs)
 	}
 }
 
@@ -397,9 +649,50 @@ func spl2Groups(ctx spl2.IAggregateGroupContext) []spl2.IGroupFieldContext {
 	}
 	return ctx.AllGroupField()
 }
-func (s *spl2SemanticStage) aggregates(calls []spl2.IAggregateContext, keys []spl2.IGroupFieldContext, preserve, conditional bool) {
+
+type spl2ExpressionGroup struct {
+	Target                 locatedOperand
+	InputReferenceIDs      []string
+	Conditional            bool
+	RequirementConditional bool
+}
+
+type spl2InstalledAggregateOutput struct {
+	aggregateOutput
+	OutputReferenceID string
+	Conditional       bool
+}
+
+// Selected expression groups must finish installing every private identity
+// before transitions are published. This mirrors the shared create transfer
+// without emitting a transition that a later collision could invalidate.
+func (s *spl2SemanticStage) installSelectedAggregateOutput(output aggregateOutput, stageID string) spl2InstalledAggregateOutput {
+	id := s.operandReference(output.Target, "field", "output")
+	if id == "" {
+		return spl2InstalledAggregateOutput{}
+	}
+	s.rewriteBinding(id, "definition", output.InputReferenceIDs)
+	origins := s.origins(output.InputReferenceIDs)
+	s.result.References[len(s.result.References)-1].OriginReferenceIDs = copyIDs(origins)
+	conditional := output.Conditional || !s.result.Stages[s.stage].SemanticComplete
+	collision, owners := s.env.installIdentity(output.Target.fieldIdentity(), uniqueIDs([]string{id}, origins), conditional, false)
+	if trace := s.env.requirements.trace; trace != nil {
+		entry := trace.reference(id)
+		entry.reference.Binding = "definition"
+		entry.reference.OriginReferenceIDs = traceOrigins(trace, output.InputReferenceIDs)
+		requirementConditional := output.RequirementConditional || s.env.requirements.stageIncomplete(stageID)
+		s.env.requirements.installIdentity(output.Target.fieldIdentity(), uniqueIDs([]string{id}, entry.reference.OriginReferenceIDs), requirementConditional, false)
+	}
+	if collision {
+		s.fieldIdentityCollision(output.Target.Name, output.Target.Location, owners)
+	}
+	return spl2InstalledAggregateOutput{aggregateOutput: output, OutputReferenceID: id, Conditional: conditional}
+}
+
+func (s *spl2SemanticStage) aggregates(calls []spl2.IAggregateContext, keys []spl2.IGroupFieldContext, selected spl2.ISelectedAggregateGroupContext, preserve, conditional bool) {
 	outputs := []aggregateOutput{}
 	groups := []locatedOperand{}
+	expressionGroups := []spl2ExpressionGroup{}
 	for _, a := range calls {
 		value := s.call(a.Call(), true)
 		target := locatedOperand{}
@@ -446,7 +739,89 @@ func (s *spl2SemanticStage) aggregates(calls []spl2.IAggregateContext, keys []sp
 			s.unsupported(key.GroupSpan(), "Grouping span field effects are unmodeled")
 		}
 	}
+	if selected != nil {
+		for _, term := range selected.AllSelectedGroupTerm() {
+			group := term.Expression()
+			span := term.SelectedSpanGroup()
+			if span != nil {
+				group = span.Expression()
+			}
+			value := s.expressionWithRole(group, "group")
+			target, exact := s.selectedGroupTarget(group)
+			if span != nil && !exact {
+				s.unsupportedOwned(span, "Grouping span requires one exact field path", value.ids)
+				continue
+			}
+			if !exact {
+				name := group.GetText()
+				target = locatedOperand{Name: name, Identity: atomicFieldIdentity(name), Location: s.parsed2.source.contextLocation(group), Resolution: "exact", Sound: spl2IntactSyntax(group)}
+			}
+			if target.Sound {
+				expressionGroups = append(expressionGroups, spl2ExpressionGroup{Target: target, InputReferenceIDs: value.ids, Conditional: !value.nonnull, RequirementConditional: !value.requirementNonnull})
+			}
+		}
+	}
+	if len(expressionGroups) > 0 {
+		knownAmbiguity := map[string]bool{}
+		for name, ambiguous := range s.env.ambiguous {
+			knownAmbiguity[name] = ambiguous
+		}
+		s.applyAggregation(nil, nil, false)
+		for _, group := range expressionGroups {
+			origins := s.origins(group.InputReferenceIDs)
+			collision, owners := s.env.installIdentity(group.Target.fieldIdentity(), origins, group.Conditional, false)
+			if trace := s.env.requirements.trace; trace != nil {
+				s.env.requirements.installIdentity(group.Target.fieldIdentity(), traceOrigins(trace, group.InputReferenceIDs), group.RequirementConditional, false)
+			}
+			if collision && !knownAmbiguity[group.Target.Name] {
+				s.fieldIdentityCollision(group.Target.Name, group.Target.Location, owners)
+				knownAmbiguity[group.Target.Name] = true
+			}
+		}
+		stageID := s.result.Stages[s.stage].ID
+		installedOutputs := make([]spl2InstalledAggregateOutput, 0, len(outputs))
+		for _, output := range outputs {
+			if installed := s.installSelectedAggregateOutput(output, stageID); installed.OutputReferenceID != "" {
+				installedOutputs = append(installedOutputs, installed)
+			}
+		}
+		for _, group := range expressionGroups {
+			s.appendTransition(Transition{Operation: "project", Output: group.Target.Name, InputReferenceIDs: copyIDs(group.InputReferenceIDs), Conditional: group.Conditional})
+		}
+		for _, output := range installedOutputs {
+			s.appendTransition(Transition{Operation: "aggregate", Output: output.Target.Name, InputReferenceIDs: copyIDs(output.InputReferenceIDs), OutputReferenceID: output.OutputReferenceID, Conditional: output.Conditional})
+		}
+		return
+	}
 	s.applyAggregation(outputs, groups, preserve)
+}
+
+func (s *spl2SemanticStage) selectedGroupTarget(tree antlr.Tree) (locatedOperand, bool) {
+	access := spl2SQLFieldAccess(tree)
+	if access == nil || access.Primary().FieldName() == nil || access.Primary().FieldName().Identifier() == nil {
+		return locatedOperand{}, false
+	}
+	base := s.operand(access.Primary().FieldName().Identifier())
+	if !base.Sound {
+		return locatedOperand{}, false
+	}
+	if len(access.AllAccessPart()) == 0 {
+		base.rewrite.role = "selector_atom"
+		return base, true
+	}
+	segments := []string{base.Name}
+	for _, part := range access.AllAccessPart() {
+		if part.DOT() == nil || part.Identifier() == nil {
+			return locatedOperand{}, false
+		}
+		segment := s.operand(part.Identifier())
+		if !segment.Sound {
+			return locatedOperand{}, false
+		}
+		segments = append(segments, segment.Name)
+	}
+	identity := pathFieldIdentity("", segments)
+	return locatedOperand{Name: identity.PublicName, Identity: identity, Location: s.parsed2.source.contextLocation(access), Resolution: "exact", Sound: spl2IntactSyntax(access), UnresolvedSource: true, rewrite: s.rewriteNavigation(access)}, true
 }
 func (s *spl2SemanticStage) lookup(c *spl2.LookupCommandContext) {
 	s.dependency(c.LookupDataset(), "lookup")
@@ -563,8 +938,26 @@ func (s *spl2SemanticStage) joinDatasetIntentions(from spl2.ISqlFromClauseContex
 	}
 }
 
-func (s *spl2SemanticStage) recoveredInputs(ctx antlr.ParserRuleContext) {
+func (s *spl2SemanticStage) recoveredInputs(ctx antlr.ParserRuleContext) []string {
 	switch c := ctx.(type) {
+	case *spl2.BinCommandContext:
+		if len(c.AllIdentifier()) > 0 {
+			input := s.operand(c.Identifier(0))
+			id := s.readAt(input, "read")
+			s.markRejectedIdentityEffect(input)
+			if id != "" {
+				return []string{id}
+			}
+		}
+	case *spl2.MvexpandCommandContext:
+		if c.Identifier() != nil {
+			input := s.operand(c.Identifier())
+			id := s.readAt(input, "read")
+			s.markRejectedIdentityEffect(input)
+			if id != "" {
+				return []string{id}
+			}
+		}
 	case *spl2.MetricsCommandContext:
 		s.metricsInputs(c)
 		s.deferredEffects(c, nil, true)
@@ -588,6 +981,7 @@ func (s *spl2SemanticStage) recoveredInputs(ctx antlr.ParserRuleContext) {
 			s.sourceIntentions(from)
 		}
 	}
+	return nil
 }
 func (s *spl2SemanticStage) sourceIntentions(from spl2.ISqlFromClauseContext) {
 	if dataset := from.Dataset(); dataset != nil {

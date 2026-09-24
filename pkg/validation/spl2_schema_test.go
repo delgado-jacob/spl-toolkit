@@ -98,7 +98,7 @@ func TestSPL2SchemaCanonicalBoundaries(t *testing.T) {
 func TestSPL2SchemaWildcardPartialEvidence(t *testing.T) {
 	// These controls preserve the accepted shared fields/internal-retention
 	// policy. Schema admission is separate from source environment conditionality:
-	// an partial unobserved source loses certainty before candidate expansion, while
+	// an admitted partial source retains candidate evidence, while
 	// a prior exact read and the local derived output retain independent evidence.
 	// A closed root with generic true leaves still has unbounded descendant names.
 	for _, tt := range []struct {
@@ -106,8 +106,8 @@ func TestSPL2SchemaWildcardPartialEvidence(t *testing.T) {
 		matches                  []string
 	}{
 		{true, false, true, []string{"host", "local"}},
-		{true, false, false, []string{"local"}},
-		{false, false, false, []string{"local"}},
+		{true, false, false, []string{"host", "local"}},
+		{false, false, false, []string{"host", "local"}},
 		{false, true, false, []string{"host", "local"}},
 	} {
 		schema := `{"type":"object","properties":{"host":true,"actor.name":true}}`

@@ -2,10 +2,18 @@ package analysis
 
 import "sort"
 
+type fieldValueState uint8
+
+const (
+	fieldValueUnknown fieldValueState = iota
+	fieldValueElementSelected
+)
+
 type trackedField struct {
 	FieldBinding
-	identity fieldIdentity
-	source   bool
+	identity   fieldIdentity
+	source     bool
+	valueState fieldValueState
 }
 type environment struct {
 	rewrite         *rewriteFlow
@@ -148,6 +156,22 @@ func (e *environment) field(identity fieldIdentity) (trackedField, bool) {
 	}
 	field, known := e.fields[key]
 	return field, known
+}
+
+// selectElement records a private value-shape fact without changing public
+// field presence, provenance, identity, or requirement evidence.
+func (e *environment) selectElement(identity fieldIdentity) bool {
+	key, exact := identity.privateKey()
+	if !exact {
+		return false
+	}
+	field, known := e.fields[key]
+	if !known {
+		return false
+	}
+	field.valueState = fieldValueElementSelected
+	e.fields[key] = field
+	return true
 }
 
 func (e *environment) hasOtherIdentity(identity fieldIdentity) bool {

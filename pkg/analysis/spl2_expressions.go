@@ -19,6 +19,21 @@ func (s *spl2SemanticStage) readIdentifier(ctx antlr.ParserRuleContext, role str
 	}
 	return s.readAt(o, role)
 }
+
+func (s *spl2SemanticStage) expressionRole() string {
+	if s.readRole != "" {
+		return s.readRole
+	}
+	return "read"
+}
+
+func (s *spl2SemanticStage) expressionWithRole(node antlr.Tree, role string) spl2ExpressionEvidence {
+	previous := s.readRole
+	s.readRole = role
+	defer func() { s.readRole = previous }()
+	return s.expression(node)
+}
+
 func (s *spl2SemanticStage) expression(node antlr.Tree) spl2ExpressionEvidence {
 	out := spl2ExpressionEvidence{ids: []string{}, nonnull: true, requirementNonnull: true, modeled: true}
 	if node == nil {
@@ -49,6 +64,18 @@ func (s *spl2SemanticStage) expression(node antlr.Tree) spl2ExpressionEvidence {
 			return s.expression(c.Primary())
 		}
 		base := c.Primary()
+		if base.LOCAL() != nil && s.locals[base.LOCAL().GetText()] {
+			for _, part := range c.AllAccessPart() {
+				if part.Expression() != nil {
+					value := s.expression(part.Expression())
+					out.ids = append(out.ids, value.ids...)
+					out.modeled = out.modeled && value.modeled
+				}
+			}
+			out.nonnull = false
+			out.requirementNonnull = false
+			return out
+		}
 		alias := false
 		baseName := ""
 		if f := base.FieldName(); f != nil && f.Identifier() != nil {
@@ -78,7 +105,7 @@ func (s *spl2SemanticStage) expression(node antlr.Tree) spl2ExpressionEvidence {
 			}
 			identity := pathFieldIdentity(qualifier, segments)
 			o := locatedOperand{Name: identity.PublicName, Identity: identity, Location: s.parsed2.source.contextLocation(c), Resolution: "exact", Sound: spl2IntactSyntax(c), UnresolvedSource: true, rewrite: s.rewriteNavigation(c)}
-			id := s.structuralFieldReference(o)
+			id := s.readAt(o, s.expressionRole())
 			if id != "" {
 				out.ids = append(out.ids, id)
 				r := s.result.References[len(s.result.References)-1]
@@ -112,7 +139,7 @@ func (s *spl2SemanticStage) expression(node antlr.Tree) spl2ExpressionEvidence {
 			}
 		}
 		o := locatedOperand{Name: name, Identity: dynamicFieldIdentity(name), Location: s.parsed2.source.contextLocation(c), Resolution: "dynamic", Sound: spl2IntactSyntax(c), rewrite: s.rewriteNavigation(c)}
-		if id := s.operandReference(o, "field", "read"); id != "" {
+		if id := s.operandReference(o, "field", s.expressionRole()); id != "" {
 			out.ids = append(out.ids, id)
 			ref := &s.result.References[len(s.result.References)-1]
 			ref.Binding = "indeterminate"
@@ -128,7 +155,7 @@ func (s *spl2SemanticStage) expression(node antlr.Tree) spl2ExpressionEvidence {
 		return out
 	case spl2.IFieldNameContext:
 		if c.Identifier() != nil {
-			id := s.readIdentifier(c.Identifier(), "read")
+			id := s.readIdentifier(c.Identifier(), s.expressionRole())
 			if id != "" {
 				out.ids = append(out.ids, id)
 				r := s.result.References[len(s.result.References)-1]
@@ -230,6 +257,14 @@ func (s *spl2SemanticStage) expression(node antlr.Tree) spl2ExpressionEvidence {
 		return out // Names/labels are read only in their owning field role.
 	case spl2.IPrimaryContext:
 		if c.LOCAL() != nil {
+			if s.locals[c.LOCAL().GetText()] {
+				out.nonnull = false
+				out.requirementNonnull = false
+				return out
+			}
+			if len(s.locals) > 0 {
+				s.unsupported(c, "Unbound lambda local is unresolved")
+			}
 			out.nonnull = false
 			out.requirementNonnull = false
 			out.modeled = false

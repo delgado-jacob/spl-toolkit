@@ -5,6 +5,42 @@ import (
 	"testing"
 )
 
+func TestFlowPrivateElementSelectionPreservesBindingEvidence(t *testing.T) {
+	identity := atomicFieldIdentity("synthetic_values")
+	environment := newEnvironment()
+	environment.installIdentity(identity, []string{"ref-input"}, true, true)
+	environment.requirements.installIdentity(identity, []string{"ref-input"}, true, true)
+	before := environment.snapshot()
+	requirementsBefore := environment.requirements.clone()
+
+	if !environment.selectElement(identity) {
+		t.Fatal("available exact identity was not selected")
+	}
+	field, known := environment.field(identity)
+	if !known || field.valueState != fieldValueElementSelected || !field.source || !field.Conditional || !reflect.DeepEqual(field.OriginReferenceIDs, []string{"ref-input"}) {
+		t.Fatalf("element selection changed binding evidence: %+v", field)
+	}
+	if got := environment.snapshot(); !reflect.DeepEqual(got, before) {
+		t.Fatalf("private value state changed public snapshot: got %+v want %+v", got, before)
+	}
+	if !reflect.DeepEqual(environment.requirements, requirementsBefore) {
+		t.Fatalf("element selection changed requirements: got %+v want %+v", environment.requirements, requirementsBefore)
+	}
+	clone, ok := environment.clone().field(identity)
+	if !ok || clone.valueState != fieldValueElementSelected {
+		t.Fatalf("clone lost private value state: %+v", clone)
+	}
+
+	environment.installIdentity(identity, []string{"ref-replacement"}, false, false)
+	replacement, ok := environment.field(identity)
+	if !ok || replacement.valueState != fieldValueUnknown {
+		t.Fatalf("replacement inherited stale element state: %+v", replacement)
+	}
+	if environment.selectElement(dynamicFieldIdentity("synthetic_dynamic")) || environment.selectElement(atomicFieldIdentity("synthetic_missing")) {
+		t.Fatal("dynamic or unavailable identity gained element-selected state")
+	}
+}
+
 // Catches incorrect source/derived classification and missing destructive transfers.
 func TestFlowRepresentativePipelines(t *testing.T) {
 	for _, tc := range []struct {

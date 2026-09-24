@@ -76,6 +76,27 @@ func TestSPL2SQLSyntaxBoundaries(t *testing.T) {
 	}
 }
 
+func TestSPL2SQLFromFirstProjectionContinuationNewline(t *testing.T) {
+	query := "FROM synthetic_dataset\nWHERE synthetic_filter = 1\nSELECT synthetic_left,\nsynthetic_right"
+	parsed := spl2RequireNoDiagnostics(t, query)
+	command := parsed.tree.Pipeline().Start_().FromCommand()
+	if command == nil || command.SqlSelectClause() == nil || len(command.SqlSelectClause().AllProjection()) != 2 {
+		t.Fatalf("FROM-first projections lost typed ownership: %s", parsed.syntax.shape())
+	}
+
+	for _, malformed := range []string{
+		"FROM synthetic_dataset SELECT synthetic_left,\n",
+		"FROM synthetic_dataset SELECT synthetic_left\nsynthetic_right",
+	} {
+		t.Run(malformed, func(t *testing.T) {
+			candidate := parseSPL2Document(malformed)
+			if candidate.syntaxComplete || len(candidate.diagnostics) == 0 {
+				t.Fatalf("missing projection separator or expression was accepted: %+v", candidate.diagnostics)
+			}
+		})
+	}
+}
+
 func TestSPL2SQLSyntaxClauseOwnership(t *testing.T) {
 	text := "SELECT a.'café' AS label,'a.café',payload.user.name\r\nFROM main AS a\r\nWHERE a.bytes>0\r\nGROUP BY a.'café','a.café',payload.user.name\r\nHAVING label!=\"\"\r\nORDER BY label DESC\r\nLIMIT 2\r\nOFFSET 1 | table label"
 	p := parseSPL2Document(text)

@@ -12,8 +12,10 @@ import (
 // shared field-transfer kernel; its legacy SPL parser pointer stays nil.
 type spl2SemanticStage struct {
 	*semanticStage
-	parsed2 *spl2ParsedDocument
-	aliases map[string]bool
+	parsed2  *spl2ParsedDocument
+	aliases  map[string]bool
+	locals   map[string]bool
+	readRole string
 }
 
 func analyzeSPL2(result *Result, parsed *spl2ParsedDocument, refinement *sourceRefinement, trace *requirementTrace) {

@@ -158,14 +158,15 @@ func (q *spl2ScopeScheduler) pipeline(sites []spl2CommandSite, env *environment,
 		if ctx != nil && spl2IntactSyntax(ctx) {
 			s.command(ctx)
 		} else {
+			pendingReferenceIDs := []string{}
 			if ctx != nil {
-				s.recoveredInputs(ctx)
+				pendingReferenceIDs = s.recoveredInputs(ctx)
 			}
 			message := "Recovered SPL2 command effects are not yet modeled"
 			if ctx == nil {
 				message = "Standalone command effects are unproved"
 			}
-			s.diagnosticAt(CodeUnsupportedSemantics, "warning", "unsupported_semantics", message, location, true)
+			s.diagnosticAtOwned(CodeUnsupportedSemantics, "warning", "unsupported_semantics", message, location, true, pendingReferenceIDs)
 		}
 		if !q.result.Stages[index].SemanticComplete {
 			s.env.uncertain = true

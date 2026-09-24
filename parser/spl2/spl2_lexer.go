@@ -1565,7 +1565,7 @@ func (c *spl2ProbeContext) statsTailRange(byStart int) (int, int, bool) {
 				return by + 1, index, true
 			}
 			depth--
-		case SPL2LexerPIPE, SPL2LexerSEMI, SPL2LexerNL:
+		case SPL2LexerPIPE, SPL2LexerSEMI:
 			if depth == 0 {
 				return by + 1, index, true
 			}
@@ -1587,10 +1587,19 @@ func (l *SPL2Lexer) statsGroupProbe(tokens *antlr.CommonTokenStream, selected bo
 			parser.GroupField()
 		}
 	}
+	consumeLayout := func() {
+		for tokens.LA(1) == SPL2ParserNL {
+			parser.Consume()
+		}
+	}
+	consumeLayout()
 	parseTerm()
+	consumeLayout()
 	for !errors.failed && tokens.LA(1) == SPL2ParserCOMMA {
 		parser.Consume()
+		consumeLayout()
 		parseTerm()
+		consumeLayout()
 	}
 	return !errors.failed && tokens.LA(1) == antlr.TokenEOF
 }

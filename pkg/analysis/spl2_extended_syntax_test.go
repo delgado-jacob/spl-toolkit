@@ -2,6 +2,50 @@ package analysis
 
 import "testing"
 
+func TestSPL2SelectedExpressionContinuationNewlines(t *testing.T) {
+	for _, tc := range []struct {
+		name  string
+		query string
+	}{
+		{"before boolean operator", "FROM synthetic_dataset | where synthetic_left = 1\nAND synthetic_right = 2"},
+		{"after boolean operator", "FROM synthetic_dataset | where synthetic_left = 1 AND\nsynthetic_right = 2"},
+		{"inside parentheses", "FROM synthetic_dataset | where (\nsynthetic_left = 1\n)"},
+		{"inside membership", "FROM synthetic_dataset | where synthetic_left IN (\n1,\n2\n)"},
+		{"after lambda arrow", "FROM synthetic_dataset | where any(synthetic_values, $synthetic_item ->\n$synthetic_item > 0)"},
+		{"ordinary call arguments", "FROM synthetic_dataset | where synthetic_gate = 1 AND synthetic_check(\nsynthetic_value\n)"},
+		{"after prefix not", "FROM synthetic_dataset | where synthetic_gate = 1 AND NOT\n(synthetic_value = 1)"},
+		{"after multiplicative operator", "FROM synthetic_dataset | where synthetic_left *\nsynthetic_right > 0"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			parsed := spl2RequireNoDiagnostics(t, tc.query)
+			if len(spl2Nodes(parsed.syntax, "NL")) == 0 {
+				t.Fatal("continuation newline lost source ownership")
+			}
+		})
+	}
+
+	t.Run("statement boundary remains explicit", func(t *testing.T) {
+		query := "FROM synthetic_dataset | where synthetic_left = 1\nfields synthetic_left"
+		parsed := parseSPL2Document(query)
+		if parsed.syntaxComplete || len(parsed.diagnostics) == 0 {
+			t.Fatalf("statement-boundary newline became general whitespace: %+v", parsed.diagnostics)
+		}
+	})
+
+	for _, query := range []string{
+		"FROM synthetic_dataset | where synthetic_check(synthetic_value,\n)",
+		"FROM synthetic_dataset | where synthetic_gate = 1 AND NOT\n| fields synthetic_gate",
+		"FROM synthetic_dataset | where synthetic_left *\n| fields synthetic_left",
+	} {
+		t.Run(query, func(t *testing.T) {
+			parsed := parseSPL2Document(query)
+			if parsed.syntaxComplete || len(parsed.diagnostics) == 0 {
+				t.Fatalf("missing continuation operand was accepted: %+v", parsed.diagnostics)
+			}
+		})
+	}
+}
+
 func TestSPL2ExtendedSyntaxContracts(t *testing.T) {
 	for _, tt := range []struct {
 		query         string
