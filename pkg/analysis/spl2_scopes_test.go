@@ -126,6 +126,67 @@ func TestSPL2ScopeSchedulerReturnsChildEnvironmentAndTraceFork(t *testing.T) {
 	}
 }
 
+func TestSPL2ScopeSelectedBranchChildrenKeepSourceOrderAndLocations(t *testing.T) {
+	query := `FROM [{flag:true}] | if (flag=true) [eval first=1] elseif (flag=false) [eval second=1] else [eval third=1]`
+	first := spl2AnalyzeTest(t, query)
+	second := spl2AnalyzeTest(t, query)
+	if first.Status != Valid || !reflect.DeepEqual(first.Scopes, second.Scopes) || !reflect.DeepEqual(first.References, second.References) {
+		t.Fatalf("selected branch ordering is not deterministic: first=%+v second=%+v", first, second)
+	}
+	wantText := []string{
+		query,
+		`[eval first=1]`,
+		`[eval second=1]`,
+		`[eval third=1]`,
+	}
+	if len(first.Scopes) != len(wantText) {
+		t.Fatalf("scope count = %d want %d: %+v", len(first.Scopes), len(wantText), first.Scopes)
+	}
+	for i, scope := range first.Scopes {
+		if got := query[scope.Location.Start.Offset:scope.Location.End.Offset]; got != wantText[i] {
+			t.Errorf("scope %d text = %q want %q", i, got, wantText[i])
+		}
+		if i > 0 && (scope.ParentID != "scope-0" || scope.Kind != "subpipe" || scope.StageID == "") {
+			t.Errorf("scope %d ownership = %+v", i, scope)
+		}
+	}
+}
+
+func TestSPL2ScopeSelectedIfMergedTraceKeepsEveryReference(t *testing.T) {
+	query := `FROM synthetic_events | if (synthetic_guard=true) [where synthetic_left>0] else [where synthetic_right>0]`
+	result, trace, err := analyzeRewriteWithTrace(QueryDocument{Text: query, Language: "spl2"}, nil, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	trace.assertReferences(result.References)
+	if len(result.References) != 4 || len(trace.references) != 4 {
+		t.Fatalf("merged trace/public cardinality = %d/%d", len(trace.references), len(result.References))
+	}
+}
+
+func TestSPL2ScopeSelectedJoinRightOwnership(t *testing.T) {
+	query := `FROM [{left_id:1}] | join type=inner left=L right=R where L.left_id=R.right_id [FROM [{right_id:1}] | eval right_value=right_id]`
+	r := spl2AnalyzeTest(t, query)
+	if r.Status != Valid || len(r.Scopes) != 2 {
+		t.Fatalf("selected join scope = %+v", r)
+	}
+	child := r.Scopes[1]
+	if child.Kind != "search" || child.ParentID != "scope-0" || query[child.Location.Start.Offset:child.Location.End.Offset] != `[FROM [{right_id:1}] | eval right_value=right_id]` {
+		t.Fatalf("selected join child = %+v", child)
+	}
+	for _, ref := range r.References {
+		if ref.NormalizedName == "right_value" || ref.OriginalName == "right_id" {
+			if ref.ScopeID != child.ID {
+				t.Errorf("right-side reference escaped child scope: %+v", ref)
+			}
+		}
+	}
+	joinKey := spl2Ref(t, r, "right_id", "read")
+	if joinKey.OriginalName != "R.right_id" || joinKey.ScopeID != "scope-0" || len(joinKey.OriginReferenceIDs) == 0 {
+		t.Fatalf("join key ownership = %+v", joinKey)
+	}
+}
+
 func TestSPL2ScopeLocalViewChildPreservesFork(t *testing.T) {
 	query := `$base = FROM synthetic_events | fields value; $out = FROM main | append [FROM $base | where value>0];`
 	result, trace, err := analyzeRewriteWithTrace(QueryDocument{Text: query, Language: "spl2"}, nil, nil)

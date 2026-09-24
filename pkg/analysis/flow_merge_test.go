@@ -225,3 +225,130 @@ func TestMergeFlowEnvironmentsRetainsElementSelectionOnlyWhenEveryPathAgrees(t *
 		t.Fatalf("disagreed private state changed public schema: got %+v want %+v", got, want)
 	}
 }
+
+func TestComposeFlowEnvironmentsDisjointFieldsAndRequiredTrace(t *testing.T) {
+	baseTrace := newRequirementTrace()
+	left := newEnvironmentWithRequirementTrace(baseTrace)
+	left.open = false
+	left.requirements.open = false
+	installMergeField(left, atomicFieldIdentity("left"), []string{"ref-1"})
+
+	rightTrace := baseTrace.forkBranch()
+	appendMergeTraceReference(rightTrace, "pending-right", "right_source", 10)
+	right := newEnvironmentWithRequirementTrace(rightTrace)
+	right.open = false
+	right.requirements.open = false
+	installMergeField(right, atomicFieldIdentity("right"), []string{"ref-2"})
+
+	composed, collisions, ok := composeFlowEnvironments(left, right)
+	if !ok || len(collisions) != 0 {
+		t.Fatalf("composition = ok %t collisions %v", ok, collisions)
+	}
+	for _, identity := range []fieldIdentity{atomicFieldIdentity("left"), atomicFieldIdentity("right")} {
+		field, known := composed.field(identity)
+		if !known || field.Conditional {
+			t.Errorf("disjoint field %s = %+v known=%t", identity.PublicName, field, known)
+		}
+	}
+	if composed.requirements.trace == rightTrace || len(composed.requirements.trace.references) != 1 || !composed.requirements.trace.references[0].directExternal || composed.requirements.trace.references[0].conditional {
+		t.Fatalf("composed trace = %+v", composed.requirements.trace)
+	}
+}
+
+func TestComposeFlowEnvironmentsCombinesSameIdentityOrigins(t *testing.T) {
+	left := closedMergeEnvironment()
+	right := closedMergeEnvironment()
+	identity := atomicFieldIdentity("shared")
+	installMergeField(left, identity, []string{"ref-1"})
+	installMergeField(right, identity, []string{"ref-2"})
+
+	composed, collisions, ok := composeFlowEnvironments(left, right)
+	field, known := composed.field(identity)
+	if !ok || !known || field.Conditional || composed.uncertain || !reflect.DeepEqual(field.OriginReferenceIDs, []string{"ref-1", "ref-2"}) || !reflect.DeepEqual(collisions, []string{"shared"}) {
+		t.Fatalf("same identity composition = field %+v known=%t uncertain=%t collisions=%v ok=%t", field, known, composed.uncertain, collisions, ok)
+	}
+	requirement, known := composed.requirements.field(identity)
+	if !known || requirement.conditional || !reflect.DeepEqual(requirement.origins, []string{"ref-1", "ref-2"}) {
+		t.Fatalf("same identity requirement = %+v known=%t", requirement, known)
+	}
+}
+
+func TestComposeFlowEnvironmentsReportsPrivatePublicCollision(t *testing.T) {
+	left := closedMergeEnvironment()
+	right := closedMergeEnvironment()
+	installMergeField(left, atomicFieldIdentity("actor.name"), []string{"ref-1"})
+	installMergeField(right, pathFieldIdentity("", []string{"actor", "name"}), []string{"ref-2"})
+
+	composed, collisions, ok := composeFlowEnvironments(left, right)
+	state := composed.snapshot()
+	if !ok || !reflect.DeepEqual(collisions, []string{"actor.name"}) || len(state.Fields) != 1 || state.Fields[0].Name != "actor.name" || !state.Uncertain || !reflect.DeepEqual(state.Fields[0].OriginReferenceIDs, []string{"ref-1", "ref-2"}) {
+		t.Fatalf("private/public composition = state %+v collisions=%v ok=%t", state, collisions, ok)
+	}
+}
+
+func TestComposeFlowEnvironmentsPropagatesOpenUncertainAndRemovals(t *testing.T) {
+	left := closedMergeEnvironment()
+	right := closedMergeEnvironment()
+	removed := atomicFieldIdentity("removed")
+	left.removeIdentity(removed)
+	left.requirements.removeIdentity(removed)
+	right.removeIdentity(removed)
+	right.requirements.removeIdentity(removed)
+	right.open = true
+	right.requirements.open = true
+	right.uncertain = true
+	right.requirements.uncertain = true
+
+	composed, _, ok := composeFlowEnvironments(left, right)
+	key, _ := removed.privateKey()
+	if !ok || !composed.open || !composed.uncertain || !composed.requirements.open || !composed.requirements.uncertain || !composed.removed[key] || !composed.requirements.removed[key] {
+		t.Fatalf("open/uncertain/removal composition = %+v requirements=%+v ok=%t", composed.snapshot(), composed.requirements, ok)
+	}
+
+	provider := closedMergeEnvironment()
+	installMergeField(provider, removed, []string{"ref-3"})
+	present, _, ok := composeFlowEnvironments(left, provider)
+	if field, known := present.field(removed); !ok || !known || field.Conditional || present.removed[key] {
+		t.Fatalf("present side did not override removal: field %+v known=%t state=%+v ok=%t", field, known, present.snapshot(), ok)
+	}
+}
+
+func TestComposeFlowEnvironmentsPreservesStructuredIdentityAndPrivateValueState(t *testing.T) {
+	left := closedMergeEnvironment()
+	right := closedMergeEnvironment()
+	structured := pathFieldIdentity("", []string{"actor", "name"})
+	selected := atomicFieldIdentity("values")
+	installMergeField(left, structured, []string{"ref-1"})
+	installMergeField(left, selected, []string{"ref-2"})
+	installMergeField(right, selected, []string{"ref-3"})
+	left.selectElement(selected)
+	right.selectElement(selected)
+
+	composed, _, ok := composeFlowEnvironments(left, right)
+	structuredField, structuredKnown := composed.field(structured)
+	selectedField, selectedKnown := composed.field(selected)
+	if !ok || !structuredKnown || structuredField.identity.Kind != fieldIdentityPath || !selectedKnown || selectedField.valueState != fieldValueElementSelected {
+		t.Fatalf("structured/private composition = structured %+v/%t selected %+v/%t ok=%t", structuredField, structuredKnown, selectedField, selectedKnown, ok)
+	}
+
+	disagreed := closedMergeEnvironment()
+	installMergeField(disagreed, selected, []string{"ref-4"})
+	composed, _, ok = composeFlowEnvironments(left, disagreed)
+	selectedField, _ = composed.field(selected)
+	if !ok || selectedField.valueState != fieldValueUnknown {
+		t.Fatalf("disagreed private state = %+v ok=%t", selectedField, ok)
+	}
+}
+
+func TestComposeFlowEnvironmentsRejectsTraceWithoutCurrentPrefix(t *testing.T) {
+	leftTrace := newRequirementTrace()
+	appendMergeTraceReference(leftTrace, "pending-left", "left", 1)
+	rightTrace := newRequirementTrace()
+	appendMergeTraceReference(rightTrace, "pending-right", "right", 2)
+	left := newEnvironmentWithRequirementTrace(leftTrace)
+	right := newEnvironmentWithRequirementTrace(rightTrace)
+
+	if composed, collisions, ok := composeFlowEnvironments(left, right); ok || composed != nil || len(collisions) != 0 {
+		t.Fatalf("mismatched trace composition = env %+v collisions=%v ok=%t", composed, collisions, ok)
+	}
+}

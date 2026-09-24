@@ -18,11 +18,12 @@ type requirementTrace struct {
 }
 
 type requirementTraceReference struct {
-	pendingID      string
-	reference      Reference
-	directExternal bool
-	conditional    bool
-	eventOrdinal   int
+	pendingID       string
+	reference       Reference
+	directExternal  bool
+	conditional     bool
+	pathConditional bool
+	eventOrdinal    int
 }
 
 type requirementTraceDiagnostic struct {
@@ -190,16 +191,21 @@ func mergeRequirementTraces(base *requirementTrace, paths []requirementTracePath
 		ordinal := merged.nextEvent()
 		if event.reference != nil {
 			entry := *event.reference
-			if entry.directExternal || entry.conditional {
-				if entry.directExternal && directPathCounts[requirementTraceKey(entry)] == len(reachable) {
+			if entry.directExternal || entry.conditional || entry.pathConditional {
+				if entry.conditional {
+					entry.directExternal = false
+				} else if entry.directExternal && directPathCounts[requirementTraceKey(entry)] == len(reachable) {
 					entry.directExternal = true
 					entry.conditional = false
+					entry.pathConditional = false
 				} else {
 					entry.directExternal = false
-					entry.conditional = true
+					entry.conditional = false
+					entry.pathConditional = true
 				}
 			}
 			merged.recordReference(entry.reference, entry.directExternal, entry.conditional, ordinal)
+			merged.references[len(merged.references)-1].pathConditional = entry.pathConditional
 			continue
 		}
 		entry := *event.diagnostic
@@ -241,6 +247,7 @@ func rebaseRequirementTrace(oldBase, newBase, branch *requirementTrace) *require
 		if event.reference != nil {
 			entry := *event.reference
 			rebased.recordReference(entry.reference, entry.directExternal, entry.conditional, ordinal)
+			rebased.references[len(rebased.references)-1].pathConditional = entry.pathConditional
 			continue
 		}
 		entry := *event.diagnostic

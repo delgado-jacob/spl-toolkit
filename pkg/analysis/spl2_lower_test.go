@@ -663,6 +663,602 @@ func TestSPL2ExternalJobAndJoinIntentions(t *testing.T) {
 	assertCorpusIntegrity(t, r)
 }
 
+func TestSPL2IfMergesSelectedBranches(t *testing.T) {
+	query := `FROM [{base:1, guard:true}] | if (guard=true) [eval shared=base, left_only=1] else [eval shared=base, right_only=1]`
+	r := spl2AnalyzeTest(t, query)
+	if r.Status != Valid || !r.Coverage.SemanticComplete {
+		t.Fatalf("selected if coverage = status %s coverage %+v diagnostics %+v", r.Status, r.Coverage, r.Diagnostics)
+	}
+	final := r.Lineage[len(r.Lineage)-1].After
+	want := map[string]bool{"base": false, "guard": false, "shared": false, "left_only": true, "right_only": true}
+	if len(final.Fields) != len(want) || !final.Uncertain {
+		t.Fatalf("selected if state = %+v", final)
+	}
+	for _, field := range final.Fields {
+		conditional, ok := want[field.Name]
+		if !ok || field.Conditional != conditional {
+			t.Errorf("selected if field = %+v want conditional=%t", field, conditional)
+		}
+	}
+	guard := spl2Ref(t, r, "guard", "read")
+	if guard.ScopeID != "scope-0" || guard.StageID != r.Lineage[len(r.Lineage)-1].StageID {
+		t.Errorf("guard ownership = %+v", guard)
+	}
+	childReads := 0
+	for _, ref := range r.References {
+		if ref.NormalizedName == "base" && ref.Role == "read" {
+			childReads++
+			if ref.ScopeID == "scope-0" {
+				t.Errorf("branch read escaped child scope: %+v", ref)
+			}
+		}
+	}
+	if childReads != 2 || len(r.Scopes) != 3 {
+		t.Fatalf("branch-local evidence = reads %d scopes %+v", childReads, r.Scopes)
+	}
+}
+
+func TestSPL2IfOmittedElseAndNestedConditional(t *testing.T) {
+	for _, tc := range []struct {
+		name, query string
+		field       string
+	}{
+		{name: "omitted else", query: `FROM [{guard:true}] | if (guard=true) [eval branch_only=1]`, field: "branch_only"},
+		{name: "nested", query: `FROM [{outer_flag:true, inner_flag:true}] | if (outer_flag=true) [if (inner_flag=true) [eval nested_only=1] else [eval nested_only=2]]`, field: "nested_only"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			r := spl2AnalyzeTest(t, tc.query)
+			if r.Status != Valid || !r.Coverage.SemanticComplete {
+				t.Fatalf("coverage = status %s coverage %+v diagnostics %+v", r.Status, r.Coverage, r.Diagnostics)
+			}
+			final := r.Lineage[len(r.Lineage)-1].After
+			found := false
+			for _, field := range final.Fields {
+				if field.Name == tc.field {
+					found = true
+					if !field.Conditional {
+						t.Errorf("%s should be conditional after unchanged outer path: %+v", tc.field, field)
+					}
+				}
+			}
+			if !found {
+				t.Fatalf("missing %s in %+v", tc.field, final)
+			}
+		})
+	}
+}
+
+func TestSPL2BranchMergesGuardedArms(t *testing.T) {
+	query := `FROM [{status:"ok", value:1}] | branch (status="ok") [eval common=value, ok_only=1], (status!="ok") [eval common=value, failed_only=1]`
+	r := spl2AnalyzeTest(t, query)
+	if r.Status != Valid || !r.Coverage.SemanticComplete {
+		t.Fatalf("guarded branch coverage = status %s coverage %+v diagnostics %+v", r.Status, r.Coverage, r.Diagnostics)
+	}
+	final := r.Lineage[len(r.Lineage)-1].After
+	want := map[string]bool{"status": false, "value": false, "common": false, "ok_only": true, "failed_only": true}
+	for _, field := range final.Fields {
+		conditional, ok := want[field.Name]
+		if !ok || field.Conditional != conditional {
+			t.Errorf("guarded branch field = %+v want conditional=%t", field, conditional)
+		}
+		delete(want, field.Name)
+	}
+	if len(want) != 0 || len(r.Scopes) != 3 {
+		t.Fatalf("guarded branch state = %+v scopes %+v missing %v", final, r.Scopes, want)
+	}
+}
+
+func TestSPL2BranchRejectsUnguardedLayout(t *testing.T) {
+	r := spl2AnalyzeTest(t, `FROM [{status:"ok"}] | branch [eval leaked=1], (status="ok") [eval selected=1]`)
+	if r.Status == Valid || r.Coverage.SemanticComplete || !spl2HasCode(r, CodeUnsupportedSemantics) {
+		t.Fatalf("unguarded branch received selected semantics: %+v", r)
+	}
+	for _, field := range r.Lineage[len(r.Lineage)-1].After.Fields {
+		if field.Name == "leaked" || field.Name == "selected" {
+			t.Fatalf("unguarded branch installed child output: %+v", r)
+		}
+	}
+}
+
+func TestSPL2UnionMergesExactDatasetsAndIndependentQueries(t *testing.T) {
+	query := `union synthetic_left, $synthetic_right, [FROM [{shared:1, child_only:1}]]`
+	r := spl2AnalyzeTest(t, query)
+	if r.Status != Valid || !r.Coverage.SemanticComplete {
+		t.Fatalf("selected union coverage = status %s coverage %+v diagnostics %+v", r.Status, r.Coverage, r.Diagnostics)
+	}
+	if !reflect.DeepEqual(r.Dependencies.Datasets, []string{"$synthetic_right", "synthetic_left"}) {
+		t.Fatalf("union dependencies = %v", r.Dependencies.Datasets)
+	}
+	final := r.Lineage[len(r.Lineage)-1].After
+	if !final.Open || !final.Uncertain {
+		t.Fatalf("union state = %+v", final)
+	}
+	for _, name := range []string{"shared", "child_only"} {
+		found := false
+		for _, field := range final.Fields {
+			if field.Name == name {
+				found = true
+				if !field.Conditional {
+					t.Errorf("union child field should be conditional: %+v", field)
+				}
+			}
+		}
+		if !found {
+			t.Errorf("union output missing %s: %+v", name, final)
+		}
+	}
+	if len(r.Scopes) != 2 || r.Scopes[1].Kind != "search" {
+		t.Fatalf("union child scope = %+v", r.Scopes)
+	}
+}
+
+func TestSPL2UnionDynamicOperandRetainsSiblingEvidence(t *testing.T) {
+	query := `union {kind:lower("synthetic")}, [FROM [{proved:1}]]`
+	r := spl2AnalyzeTest(t, query)
+	if r.Status != Incomplete || !spl2HasCode(r, CodeDynamicReference) {
+		t.Fatalf("dynamic union boundary = status %s diagnostics %+v", r.Status, r.Diagnostics)
+	}
+	proved := false
+	for _, field := range r.Lineage[len(r.Lineage)-1].After.Fields {
+		proved = proved || field.Name == "proved"
+	}
+	if !proved || len(r.Scopes) != 2 {
+		t.Fatalf("dynamic union erased sibling evidence: %+v", r)
+	}
+}
+
+func TestSPL2UnionResolvesLocalViewOperand(t *testing.T) {
+	r := spl2ProgramAnalyze(t, `$out = union $base, [FROM [{b:1}]]; $base = FROM [{a:1}];`)
+	if r.Status != Valid || !r.Coverage.SemanticComplete || !r.Requirements.Coverage.Complete {
+		t.Fatalf("local-view union = %+v", r)
+	}
+	for _, ref := range r.References {
+		if ref.Kind == "dataset" && ref.NormalizedName == "$base" {
+			t.Fatalf("local view leaked as dataset requirement: %+v", ref)
+		}
+	}
+	if spl2ProgramContains(r.Dependencies.Datasets, "$base") {
+		t.Fatalf("local view leaked as dependency: %+v", r.Dependencies)
+	}
+	foundView := false
+	for _, ref := range r.References {
+		foundView = foundView || ref.Kind == "view" && ref.NormalizedName == "$base" && ref.Role == "read"
+	}
+	if !foundView {
+		t.Fatalf("local view reference missing: %+v", r.References)
+	}
+	unionStageID := ""
+	for _, stage := range r.Stages {
+		if stage.Command == "union" {
+			unionStageID = stage.ID
+		}
+	}
+	unionFields := map[string]bool{}
+	for _, lineage := range r.Lineage {
+		if lineage.StageID != unionStageID {
+			continue
+		}
+		for _, field := range lineage.After.Fields {
+			unionFields[field.Name] = field.Conditional
+		}
+	}
+	if !reflect.DeepEqual(unionFields, map[string]bool{"a": true, "b": true}) {
+		t.Fatalf("local-view union fields = %+v", unionFields)
+	}
+}
+
+func TestSPL2UnionMergesOverlappingAndDisjointIndependentFields(t *testing.T) {
+	for _, tc := range []struct {
+		name, query string
+		wantScopes  int
+	}{
+		{name: "generating", query: `union [FROM [{shared:1, left_only:1}]], [FROM [{shared:2, right_only:1}]]`, wantScopes: 3},
+		{name: "pipelined", query: `FROM [{shared:1, left_only:1}] | union [FROM [{shared:2, right_only:1}]]`, wantScopes: 2},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			r := spl2AnalyzeTest(t, tc.query)
+			if r.Status != Valid || !r.Coverage.SemanticComplete {
+				t.Fatalf("independent union coverage = status %s coverage %+v diagnostics %+v", r.Status, r.Coverage, r.Diagnostics)
+			}
+			final := r.Lineage[len(r.Lineage)-1].After
+			want := map[string]bool{"shared": false, "left_only": true, "right_only": true}
+			if len(final.Fields) != len(want) || !final.Uncertain {
+				t.Fatalf("independent union state = %+v", final)
+			}
+			for _, field := range final.Fields {
+				conditional, ok := want[field.Name]
+				if !ok || field.Conditional != conditional {
+					t.Errorf("independent union field = %+v want conditional=%t", field, conditional)
+				}
+				delete(want, field.Name)
+			}
+			if len(want) != 0 || len(r.Scopes) != tc.wantScopes {
+				t.Fatalf("independent union missing fields %v scopes %+v", want, r.Scopes)
+			}
+		})
+	}
+}
+
+func TestSPL2PipelineJoinSelectedTypes(t *testing.T) {
+	for _, tc := range []struct {
+		joinType         string
+		leftConditional  bool
+		rightConditional bool
+	}{
+		{joinType: "inner"},
+		{joinType: "left", rightConditional: true},
+		{joinType: "outer", leftConditional: true, rightConditional: true},
+	} {
+		t.Run(tc.joinType, func(t *testing.T) {
+			query := `FROM [{left_key:1, left_value:2}] | join type=` + tc.joinType + ` left=L right=R where L.left_key=R.right_key [FROM [{right_key:1, right_value:3}]]`
+			r := spl2AnalyzeTest(t, query)
+			if r.Status != Valid || !r.Coverage.SemanticComplete {
+				t.Fatalf("join coverage = status %s coverage %+v diagnostics %+v", r.Status, r.Coverage, r.Diagnostics)
+			}
+			want := map[string]bool{
+				"left_key": tc.leftConditional, "left_value": tc.leftConditional,
+				"right_key": tc.rightConditional, "right_value": tc.rightConditional,
+			}
+			final := r.Lineage[len(r.Lineage)-1].After
+			if len(final.Fields) != len(want) || final.Uncertain {
+				t.Fatalf("join state = %+v", final)
+			}
+			for _, field := range final.Fields {
+				conditional, ok := want[field.Name]
+				if !ok || field.Conditional != conditional {
+					t.Errorf("join field = %+v want conditional=%t", field, conditional)
+				}
+			}
+			for _, identity := range []string{"left_key", "right_key"} {
+				ref := spl2Ref(t, r, identity, "read")
+				if ref.Binding == "unavailable" || ref.Resolution != "exact" || len(ref.OriginReferenceIDs) == 0 {
+					t.Errorf("join key %s = %+v", identity, ref)
+				}
+			}
+			if len(r.Scopes) != 2 || r.Scopes[1].Kind != "search" {
+				t.Fatalf("join right scope = %+v", r.Scopes)
+			}
+		})
+	}
+}
+
+func TestSPL2PipelineJoinRejectsUnselectedLayouts(t *testing.T) {
+	for _, query := range []string{
+		`FROM [{id:1}] | join left=L right=R where L.id=R.id [FROM [{id:1}]]`,
+		`FROM [{id:1}] | join type=left left=L where L.id=R.id [FROM [{id:1}]]`,
+		`FROM [{id:1}] | join type=right left=L right=R where L.id=R.id [FROM [{id:1}]]`,
+		`FROM [{id:1}] | join type=inner left=L right=R max=2 where L.id=R.id [FROM [{id:1}]]`,
+	} {
+		r := spl2AnalyzeTest(t, query)
+		if r.Status == Valid || r.Coverage.SemanticComplete {
+			t.Errorf("unselected join layout became complete for %q: %+v", query, r)
+		}
+	}
+}
+
+func TestSPL2PipelineJoinRejectsUnresolvedKeysAndOutputCollisions(t *testing.T) {
+	unavailable := spl2AnalyzeTest(t, `FROM [{left_key:1}] | join type=inner left=L right=R where L.missing=R.right_key [FROM [{right_key:1}]]`)
+	if unavailable.Status != Invalid || !spl2HasCode(unavailable, CodeUnavailableField) {
+		t.Fatalf("unavailable join key = %+v", unavailable)
+	}
+
+	unresolved := spl2AnalyzeTest(t, `FROM [{left_key:1}] | join type=inner left=L right=R where L.left_key=X.right_key [FROM [{right_key:1}]]`)
+	if unresolved.Status == Valid || unresolved.Coverage.SemanticComplete || !spl2HasCode(unresolved, CodeUnsupportedSemantics) {
+		t.Fatalf("unresolved join qualifier = %+v", unresolved)
+	}
+
+	collision := spl2AnalyzeTest(t, `FROM [{id:1, left_value:2}] | join type=inner left=L right=R where L.id=R.id [FROM [{id:1, right_value:3}]]`)
+	if collision.Status != Incomplete || collision.Coverage.SemanticComplete || !spl2HasCode(collision, CodeAmbiguousField) {
+		t.Fatalf("join output collision = %+v", collision)
+	}
+	state := collision.Lineage[len(collision.Lineage)-1].After
+	fields := map[string]FieldBinding{}
+	for _, field := range state.Fields {
+		fields[field.Name] = field
+	}
+	id := fields["id"]
+	if !state.Uncertain || len(fields) != 3 || len(id.OriginReferenceIDs) != 2 || fields["right_value"].Name == "" {
+		t.Fatalf("join collision state = %+v", state)
+	}
+	assertRequirementGap(t, collision.Requirements.Gaps, CodeAmbiguousField, id.OriginReferenceIDs, []string{CodeAmbiguousField})
+}
+
+func TestSPL2PipelineJoinOpenSourcesInstallSideOwnedKeys(t *testing.T) {
+	query := `FROM main | join type=left left=L right=R where L.id=R.uid [FROM other] | where uid>0`
+	r := spl2AnalyzeTest(t, query)
+	var joinAfter *FieldState
+	for i := range r.Lineage {
+		stage := r.Lineage[i]
+		if stage.ScopeID == "scope-0" && r.Stages[1].ID == stage.StageID {
+			joinAfter = &stage.After
+		}
+	}
+	if joinAfter == nil {
+		t.Fatalf("missing join lineage: %+v", r.Lineage)
+	}
+	uidConditional := false
+	for _, field := range joinAfter.Fields {
+		uidConditional = uidConditional || field.Name == "uid" && field.Conditional
+	}
+	if !uidConditional {
+		t.Fatalf("right key did not become a conditional left-join output: %+v", joinAfter)
+	}
+	downstream := Reference{}
+	for _, ref := range r.References {
+		if ref.OriginalName == "uid" && ref.Role == "read" {
+			downstream = ref
+		}
+	}
+	if downstream.Binding != "indeterminate" || len(downstream.OriginReferenceIDs) == 0 {
+		t.Fatalf("downstream right key = %+v", downstream)
+	}
+
+	collision := spl2AnalyzeTest(t, `FROM main | join type=inner left=L right=R where L.id=R.id [FROM other]`)
+	if collision.Status != Incomplete || !spl2HasCode(collision, CodeAmbiguousField) {
+		t.Fatalf("open-source join collision = %+v", collision)
+	}
+}
+
+func TestSPL2PipelineJoinDoesNotReownInputAmbiguity(t *testing.T) {
+	query := `FROM main | where actor.name="x" AND 'actor.name'="x" | join type=inner left=L right=R where L.id=R.uid [FROM other]`
+	r := spl2AnalyzeTest(t, query)
+	ambiguities := 0
+	for _, diagnostic := range r.Diagnostics {
+		if diagnostic.Code != CodeAmbiguousField {
+			continue
+		}
+		ambiguities++
+		if diagnostic.Location.Start.Offset >= strings.Index(query, " | join") {
+			t.Errorf("join re-owned input ambiguity: %+v", diagnostic)
+		}
+	}
+	gaps := 0
+	for _, gap := range r.Requirements.Gaps {
+		if gap.Code == CodeAmbiguousField {
+			gaps++
+		}
+	}
+	if ambiguities != 1 || gaps != 1 {
+		t.Fatalf("input ambiguity cardinality = diagnostics %d gaps %d: %+v", ambiguities, gaps, r)
+	}
+}
+
+func TestSPL2SelectedFlowRejectsDeferredHeldParserDiagnostic(t *testing.T) {
+	r := spl2ProgramAnalyze(t, `$out = FROM [{left_id:1}] | join type=INNER left=L right=R where L.left_id=R.right_id [FROM [{right_id:1, right_value:2}]];`)
+	if r.Status == Valid || r.Coverage.SemanticComplete {
+		t.Fatalf("held parser diagnostic received selected join effects: %+v", r)
+	}
+	joinStageID := ""
+	for _, stage := range r.Stages {
+		if stage.Command == "join" {
+			joinStageID = stage.ID
+		}
+	}
+	for _, lineage := range r.Lineage {
+		if lineage.StageID != joinStageID {
+			continue
+		}
+		for _, field := range lineage.After.Fields {
+			if field.Name == "right_id" || field.Name == "right_value" {
+				t.Fatalf("held join installed right output in parent lineage: %+v", lineage)
+			}
+		}
+	}
+}
+
+func TestSPL2SelectedAlternativeMergesOwnPrivateIdentityCollisions(t *testing.T) {
+	for _, tc := range []struct {
+		name, query string
+	}{
+		{name: "if", query: `FROM main | if (guard=true) [where actor.name="x"] else [where 'actor.name'="x"]`},
+		{name: "branch", query: `FROM main | branch (guard=true) [where actor.name="x"], (guard=false) [where 'actor.name'="x"]`},
+		{name: "union", query: `union [FROM main | where actor.name="x"], [FROM other | where 'actor.name'="x"]`},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			r := spl2AnalyzeTest(t, tc.query)
+			ambiguities := 0
+			for _, diagnostic := range r.Diagnostics {
+				if diagnostic.Code == CodeAmbiguousField {
+					ambiguities++
+				}
+			}
+			if r.Status != Incomplete || r.Coverage.SemanticComplete || r.Requirements.Coverage.Complete || ambiguities != 1 {
+				t.Fatalf("selected merge collision = %+v", r)
+			}
+			state := r.Lineage[len(r.Lineage)-1].After
+			actorBindings := []FieldBinding{}
+			for _, field := range state.Fields {
+				if field.Name == "actor.name" {
+					actorBindings = append(actorBindings, field)
+				}
+			}
+			if !state.Uncertain || len(actorBindings) != 1 || len(actorBindings[0].OriginReferenceIDs) != 2 {
+				t.Fatalf("selected merge collision state = %+v", state)
+			}
+			assertRequirementGap(t, r.Requirements.Gaps, CodeAmbiguousField, actorBindings[0].OriginReferenceIDs, []string{CodeAmbiguousField})
+		})
+	}
+}
+
+func TestSPL2SelectedFlowForwardViewAlternatives(t *testing.T) {
+	for _, tc := range []struct {
+		name, command, query string
+	}{
+		{
+			name:    "if",
+			command: "if",
+			query: `$out = FROM synthetic_seed | if (guard=true) [FROM $left] else [FROM $right];
+$left = FROM synthetic_left | fields a;
+$right = FROM synthetic_right | fields b;`,
+		},
+		{
+			name:    "branch",
+			command: "branch",
+			query: `$out = FROM synthetic_seed | branch (guard=true) [FROM $left], (guard=false) [FROM $right];
+$left = FROM synthetic_left | fields a;
+$right = FROM synthetic_right | fields b;`,
+		},
+		{
+			name:    "union",
+			command: "union",
+			query: `$out = union $left, $right;
+$left = FROM synthetic_left | fields a;
+$right = FROM synthetic_right | fields b;`,
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			result, trace, err := analyzeRewriteWithTrace(QueryDocument{Text: tc.query, Language: "spl2"}, nil, nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+			trace.assertReferences(result.References)
+			if result.Status != Valid || !result.Coverage.SemanticComplete || !result.Requirements.Coverage.Complete {
+				t.Fatalf("forward-view %s = %+v", tc.command, result)
+			}
+			stageID := ""
+			for _, stage := range result.Stages {
+				if stage.Command == tc.command {
+					stageID = stage.ID
+					break
+				}
+			}
+			var state *FieldState
+			for i := range result.Lineage {
+				if result.Lineage[i].StageID == stageID {
+					state = &result.Lineage[i].After
+				}
+			}
+			if state == nil || state.Open || len(state.Fields) != 2 {
+				t.Fatalf("forward-view %s state = %+v", tc.command, state)
+			}
+			fields := map[string]FieldBinding{}
+			for _, field := range state.Fields {
+				fields[field.Name] = field
+			}
+			for _, name := range []string{"a", "b"} {
+				field, ok := fields[name]
+				if !ok || !field.Conditional || len(field.OriginReferenceIDs) != 1 {
+					t.Errorf("forward-view %s field %s = %+v", tc.command, name, field)
+				}
+			}
+			for _, dataset := range []string{"synthetic_left", "synthetic_right"} {
+				item := requirementItem(result.Requirements, "dataset", dataset, "read")
+				if item == nil || item.Necessity != "required" || len(item.Occurrences) != 1 {
+					t.Errorf("forward-view %s dataset %s = %+v", tc.command, dataset, item)
+				}
+			}
+			if tc.command != "union" {
+				guard := requirementItem(result.Requirements, "field", "guard", "read")
+				if guard == nil || guard.Necessity != "required" {
+					t.Errorf("forward-view %s guard = %+v", tc.command, guard)
+				}
+			}
+		})
+	}
+}
+
+func TestSPL2PipelineJoinForwardViewsKeepTraceSuffixOnce(t *testing.T) {
+	for _, tc := range []struct {
+		name, options string
+		valid         bool
+	}{
+		{name: "selected", options: "type=inner ", valid: true},
+		{name: "rejected", options: ""},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			query := `$out = FROM $left | join ` + tc.options + `left=L right=R where L.id=R.uid [FROM $right];
+$left = FROM synthetic_left | fields id;
+$right = FROM synthetic_right | fields uid, name;`
+			result, trace, err := analyzeRewriteWithTrace(QueryDocument{Text: query, Language: "spl2"}, nil, nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+			trace.assertReferences(result.References)
+			if tc.valid && (result.Status != Valid || !result.Coverage.SemanticComplete || !result.Requirements.Coverage.Complete) {
+				t.Fatalf("forward join = %+v", result)
+			}
+			if !tc.valid && (result.Status == Valid || result.Coverage.SemanticComplete) {
+				t.Fatalf("rejected forward join was promoted: %+v", result)
+			}
+			for _, dataset := range []string{"synthetic_left", "synthetic_right"} {
+				refs := 0
+				for _, ref := range result.References {
+					if ref.Kind == "dataset" && ref.Role == "read" && ref.NormalizedName == dataset {
+						refs++
+					}
+				}
+				if refs != 1 {
+					t.Errorf("forward join dataset %s references = %d", dataset, refs)
+				}
+			}
+			for _, identity := range []string{"synthetic_left", "synthetic_right"} {
+				item := requirementItem(result.Requirements, "dataset", identity, "read")
+				if item == nil || item.Necessity != "required" || len(item.Occurrences) != 1 {
+					t.Errorf("forward join dataset %s = %+v", identity, item)
+				}
+			}
+		})
+	}
+}
+
+func TestSPL2SelectedFlowRecoveryKeepsAlternativeRequirementsConditional(t *testing.T) {
+	for _, tc := range []struct {
+		name, query string
+		recovered   []string
+		lost        []string
+	}{
+		{
+			name:      "if",
+			query:     `FROM main | if (guard=true) [where left>0] elseif (oops=) [where bad>0] else [where right>0]`,
+			recovered: []string{"left"},
+			lost:      []string{"right"},
+		},
+		{
+			name:      "branch",
+			query:     `FROM main | branch (guard=true) [where left>0], (oops=) [where bad>0], (guard=false) [where right>0]`,
+			recovered: []string{"left", "right"},
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			result, trace, err := analyzeRewriteWithTrace(QueryDocument{Text: tc.query, Language: "spl2"}, nil, nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+			trace.assertReferences(result.References)
+			if result.Status == Valid || result.Coverage.SyntaxComplete || result.Coverage.SemanticComplete || result.Requirements.Coverage.Complete {
+				t.Fatalf("recovered selected flow received complete credit: %+v", result)
+			}
+			guard := requirementItem(result.Requirements, "field", "guard", "read")
+			if guard == nil || guard.Necessity != "required" {
+				t.Errorf("recovered %s guard = %+v", tc.name, guard)
+			}
+			for _, identity := range tc.recovered {
+				item := requirementItem(result.Requirements, "field", identity, "read")
+				if item == nil || item.Necessity != "conditional" {
+					t.Errorf("recovered %s alternative %s = %+v", tc.name, identity, item)
+				}
+			}
+			for _, identity := range tc.lost {
+				if item := requirementItem(result.Requirements, "field", identity, "read"); item != nil {
+					t.Errorf("unrepresented %s alternative %s was invented: %+v", tc.name, identity, item)
+				}
+			}
+			for _, ref := range result.References {
+				if (ref.NormalizedName == "left" || ref.NormalizedName == "right") && ref.ScopeID == "scope-0" {
+					t.Errorf("recovered child read escaped child scope: %+v", ref)
+				}
+			}
+			gap := false
+			for _, candidate := range result.Requirements.Gaps {
+				gap = gap || candidate.Code == CodeUnsupportedSemantics
+			}
+			if !gap {
+				t.Errorf("recovered %s lost-arm evidence has no command gap: %+v", tc.name, result.Requirements.Gaps)
+			}
+		})
+	}
+}
+
 func TestSPL2MetricsSelectorTypedPosition(t *testing.T) {
 	for _, predicate := range []string{`index="metrics"`, `index=metrics`, `index="metrics" AND port=443`} {
 		r := spl2AnalyzeTest(t, `mstats aggregates=[count()] predicate=(`+predicate+`) byfields=[index]`)

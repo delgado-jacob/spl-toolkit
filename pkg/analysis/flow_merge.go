@@ -1,6 +1,7 @@
 package analysis
 
 import (
+	"reflect"
 	"sort"
 	"strconv"
 	"strings"
@@ -10,6 +11,145 @@ type flowMergePath struct {
 	Ordinal     int
 	Environment *environment
 	Reachable   bool
+}
+
+// composeFlowEnvironments combines simultaneous inputs into one matched row.
+// Unlike mergeFlowEnvironments, neither input is an alternative path, so a
+// field supplied by either side keeps its own presence and conditionality.
+// The right trace must already be rebased onto the complete left trace; its
+// suffix is then retained without changing requirement necessity.
+func composeFlowEnvironments(left, right *environment) (*environment, []string, bool) {
+	if left == nil || right == nil || !requirementTraceHasPrefix(left.requirements.trace, right.requirements.trace) {
+		return nil, nil, false
+	}
+	trace := (*requirementTrace)(nil)
+	if right.requirements.trace != nil {
+		trace = right.requirements.trace.clone()
+	}
+	composed := left.cloneWithRequirementTrace(trace)
+	composed.open = left.open || right.open
+	composed.uncertain = left.uncertain || right.uncertain
+	composed.requirements.open = left.requirements.open || right.requirements.open
+	composed.requirements.uncertain = left.requirements.uncertain || right.requirements.uncertain
+	composed.rewriteBarrier()
+
+	collisions := []string{}
+	seenCollision := map[string]bool{}
+	recordCollision := func(name string) {
+		if name != "" && !seenCollision[name] {
+			seenCollision[name] = true
+			collisions = append(collisions, name)
+		}
+	}
+	leftNames := map[string]bool{}
+	for _, key := range left.orderedFieldKeys() {
+		if field, ok := left.fields[key]; ok {
+			leftNames[field.Name] = true
+		}
+	}
+
+	for _, key := range right.orderedFieldKeys() {
+		rightField, ok := right.fields[key]
+		if !ok {
+			continue
+		}
+		if leftNames[rightField.Name] {
+			recordCollision(rightField.Name)
+		}
+		if leftField, sameIdentity := composed.fields[key]; sameIdentity {
+			leftField.OriginReferenceIDs = uniqueIDs(leftField.OriginReferenceIDs, rightField.OriginReferenceIDs)
+			leftField.Conditional = leftField.Conditional && rightField.Conditional
+			leftField.source = leftField.source && rightField.source
+			if leftField.valueState != rightField.valueState {
+				leftField.valueState = fieldValueUnknown
+			}
+			composed.fields[key] = leftField
+			delete(composed.removed, key)
+			continue
+		}
+		composed.registerIdentityField(rightField)
+		delete(composed.removed, key)
+	}
+
+	for key, rightField := range right.requirements.fields {
+		if leftField, sameIdentity := composed.requirements.fields[key]; sameIdentity {
+			leftField.origins = uniqueIDs(leftField.origins, rightField.origins)
+			leftField.conditional = leftField.conditional && rightField.conditional
+			leftField.source = leftField.source && rightField.source
+			leftField.unavailable = leftField.unavailable && rightField.unavailable
+			composed.requirements.fields[key] = leftField
+			delete(composed.requirements.removed, key)
+			continue
+		}
+		composed.requirements.registerIdentityField(rightField)
+		delete(composed.requirements.removed, key)
+	}
+
+	composeRemovedIdentities(composed, left, right)
+	sort.Strings(collisions)
+	return composed, collisions, true
+}
+
+func requirementTraceHasPrefix(prefix, trace *requirementTrace) bool {
+	if prefix == nil || trace == nil {
+		return prefix == nil && trace == nil
+	}
+	if len(trace.references) < len(prefix.references) || len(trace.diagnostics) < len(prefix.diagnostics) {
+		return false
+	}
+	return reflect.DeepEqual(trace.references[:len(prefix.references)], prefix.references) &&
+		reflect.DeepEqual(trace.diagnostics[:len(prefix.diagnostics)], prefix.diagnostics)
+}
+
+func composeRemovedIdentities(composed, left, right *environment) {
+	keys := map[fieldIdentityKey]bool{}
+	for key := range left.removed {
+		keys[key] = true
+	}
+	for key := range right.removed {
+		keys[key] = true
+	}
+	orderedKeys := make([]string, 0, len(keys))
+	for key := range keys {
+		orderedKeys = append(orderedKeys, string(key))
+	}
+	sort.Strings(orderedKeys)
+	for _, encoded := range orderedKeys {
+		key := fieldIdentityKey(encoded)
+		if _, present := composed.fields[key]; present {
+			delete(composed.removed, key)
+			continue
+		}
+		leftRemoved, rightRemoved := left.removed[key], right.removed[key]
+		provedAbsent := leftRemoved && rightRemoved || leftRemoved && !right.open || rightRemoved && !left.open
+		if provedAbsent {
+			if !composed.removed[key] {
+				composed.removedOrder = append(composed.removedOrder, key)
+			}
+			composed.removed[key] = true
+			if identity, ok := right.identities[key]; ok {
+				composed.identities[key] = identity.clone()
+			}
+		} else {
+			delete(composed.removed, key)
+			composed.uncertain = true
+		}
+
+		if _, present := composed.requirements.fields[key]; present {
+			delete(composed.requirements.removed, key)
+			continue
+		}
+		leftRequirementRemoved, rightRequirementRemoved := left.requirements.removed[key], right.requirements.removed[key]
+		requirementAbsent := leftRequirementRemoved && rightRequirementRemoved || leftRequirementRemoved && !right.requirements.open || rightRequirementRemoved && !left.requirements.open
+		if requirementAbsent {
+			composed.requirements.removed[key] = true
+		} else {
+			delete(composed.requirements.removed, key)
+			if leftRequirementRemoved || rightRequirementRemoved {
+				composed.requirements.uncertain = true
+			}
+		}
+	}
 }
 
 func mergeFlowEnvironments(parent *environment, paths []flowMergePath, includeParent bool) *environment {

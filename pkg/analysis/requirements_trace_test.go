@@ -1509,11 +1509,12 @@ func testSourceRefinement(fields []string, complete bool, resolve func(string) S
 func marshalRequirementTrace(t *testing.T, trace *requirementTrace) []byte {
 	t.Helper()
 	type referenceJSON struct {
-		PendingID      string    `json:"pending_id"`
-		Reference      Reference `json:"reference"`
-		DirectExternal bool      `json:"direct_external"`
-		Conditional    bool      `json:"conditional"`
-		EventOrdinal   int       `json:"event_ordinal"`
+		PendingID       string    `json:"pending_id"`
+		Reference       Reference `json:"reference"`
+		DirectExternal  bool      `json:"direct_external"`
+		Conditional     bool      `json:"conditional"`
+		PathConditional bool      `json:"path_conditional"`
+		EventOrdinal    int       `json:"event_ordinal"`
 	}
 	type diagnosticJSON struct {
 		Diagnostic          Diagnostic `json:"diagnostic"`
@@ -1533,7 +1534,7 @@ func marshalRequirementTrace(t *testing.T, trace *requirementTrace) []byte {
 		SemanticComplete: trace.semanticComplete,
 	}
 	for _, entry := range trace.references {
-		wire.References = append(wire.References, referenceJSON{entry.pendingID, entry.reference, entry.directExternal, entry.conditional, entry.eventOrdinal})
+		wire.References = append(wire.References, referenceJSON{entry.pendingID, entry.reference, entry.directExternal, entry.conditional, entry.pathConditional, entry.eventOrdinal})
 	}
 	for _, entry := range trace.diagnostics {
 		wire.Diagnostics = append(wire.Diagnostics, diagnosticJSON{entry.diagnostic, entry.incomplete, entry.pendingReferenceIDs, entry.eventOrdinal})
@@ -1596,13 +1597,13 @@ func TestRequirementTraceMergeMakesEveryPathObligationRequired(t *testing.T) {
 		t.Fatalf("merged references = %+v", merged.references)
 	}
 	for _, entry := range merged.references {
-		if !entry.directExternal || entry.conditional {
+		if !entry.directExternal || entry.conditional || entry.pathConditional {
 			t.Fatalf("every-path obligation was not required: %+v", entry)
 		}
 	}
 	projected := mustProjectRequirements(t, merged)
-	if len(projected.Items) != 1 || projected.Items[0].Necessity != "required" || len(projected.Items[0].Occurrences) != 2 {
-		t.Fatalf("every-path projection = %+v", projected.Items)
+	if !projected.Coverage.Complete || len(projected.Gaps) != 0 || len(projected.Items) != 1 || projected.Items[0].Necessity != "required" || len(projected.Items[0].Occurrences) != 2 {
+		t.Fatalf("every-path projection = coverage %+v items %+v gaps %+v", projected.Coverage, projected.Items, projected.Gaps)
 	}
 }
 
@@ -1616,12 +1617,12 @@ func TestRequirementTraceMergeMakesSubsetObligationConditional(t *testing.T) {
 		{Ordinal: 0, Trace: left, Reachable: true},
 		{Ordinal: 1, Trace: right, Reachable: true},
 	})
-	if len(merged.references) != 1 || merged.references[0].directExternal || !merged.references[0].conditional {
+	if len(merged.references) != 1 || merged.references[0].directExternal || merged.references[0].conditional || !merged.references[0].pathConditional {
 		t.Fatalf("subset obligation = %+v", merged.references)
 	}
 	projected := mustProjectRequirements(t, merged)
-	if len(projected.Items) != 1 || projected.Items[0].Necessity != "conditional" || len(projected.Items[0].Occurrences) != 1 {
-		t.Fatalf("subset projection = %+v", projected.Items)
+	if !projected.Coverage.Complete || len(projected.Gaps) != 0 || len(projected.Items) != 1 || projected.Items[0].Necessity != "conditional" || len(projected.Items[0].Occurrences) != 1 {
+		t.Fatalf("subset projection = coverage %+v items %+v gaps %+v", projected.Coverage, projected.Items, projected.Gaps)
 	}
 }
 
@@ -1652,7 +1653,7 @@ func TestRequirementTraceMergeSupportsNestedForks(t *testing.T) {
 	if !reflect.DeepEqual(got, want) {
 		t.Fatalf("nested merged order = %v want %v", got, want)
 	}
-	if mergedOuter.references[1].directExternal || !mergedOuter.references[1].conditional || mergedOuter.references[2].directExternal || !mergedOuter.references[2].conditional {
+	if mergedOuter.references[1].directExternal || mergedOuter.references[1].conditional || !mergedOuter.references[1].pathConditional || mergedOuter.references[2].directExternal || mergedOuter.references[2].conditional || !mergedOuter.references[2].pathConditional {
 		t.Fatalf("nested subset necessity was lost: %+v", mergedOuter.references)
 	}
 }
@@ -1668,8 +1669,49 @@ func TestRequirementTraceMergeIgnoresUnreachablePaths(t *testing.T) {
 		{Ordinal: 0, Trace: unreachable, Reachable: false},
 		{Ordinal: 1, Trace: reachable, Reachable: true},
 	})
-	if len(merged.references) != 1 || merged.references[0].pendingID != "pending-live" || !merged.references[0].directExternal || merged.references[0].conditional {
+	if len(merged.references) != 1 || merged.references[0].pendingID != "pending-live" || !merged.references[0].directExternal || merged.references[0].conditional || merged.references[0].pathConditional {
 		t.Fatalf("unreachable path contributed requirements: %+v", merged.references)
+	}
+	projected := mustProjectRequirements(t, merged)
+	if !projected.Coverage.Complete || len(projected.Items) != 1 || projected.Items[0].Identity != "live" || projected.Items[0].Necessity != "required" || len(projected.Gaps) != 0 {
+		t.Fatalf("unreachable-path projection = %+v", projected)
+	}
+}
+
+func TestRequirementTraceMergeKeepsOriginIndeterminacySeparateFromPathNecessity(t *testing.T) {
+	base := newRequirementTrace()
+	uncertain := base.forkBranch()
+	reference := mergeTraceReference("pending-uncertain", "uncertain", 10)
+	reference.Binding = "indeterminate"
+	uncertain.recordReference(reference, false, true, uncertain.nextEvent())
+	other := base.forkBranch()
+
+	merged := mergeRequirementTraces(base, []requirementTracePath{
+		{Ordinal: 0, Trace: uncertain, Reachable: true},
+		{Ordinal: 1, Trace: other, Reachable: true},
+	})
+	if len(merged.references) != 1 || !merged.references[0].conditional || merged.references[0].directExternal {
+		t.Fatalf("origin indeterminacy changed: %+v", merged.references)
+	}
+	projected := mustProjectRequirements(t, merged)
+	if projected.Coverage.Complete || len(projected.Gaps) != 1 || projected.Gaps[0].Code != CodeRequirementIndeterminate || projected.Items[0].Necessity != "conditional" {
+		t.Fatalf("origin-indeterminate projection = %+v", projected)
+	}
+}
+
+func TestRequirementTraceMergeRetainsIncompleteReachableChild(t *testing.T) {
+	base := newRequirementTrace()
+	complete := base.forkBranch()
+	incomplete := base.forkBranch()
+	incomplete.recordDiagnostic(Diagnostic{Code: CodeUnsupportedSemantics, Severity: "warning", Category: "unsupported_semantics", Message: "child gap", StageID: "stage-child"}, true, nil, incomplete.nextEvent())
+
+	merged := mergeRequirementTraces(base, []requirementTracePath{
+		{Ordinal: 0, Trace: complete, Reachable: true},
+		{Ordinal: 1, Trace: incomplete, Reachable: true},
+	})
+	projected := mustProjectRequirements(t, merged)
+	if projected.Coverage.Complete || len(projected.Gaps) != 1 || projected.Gaps[0].Code != CodeUnsupportedSemantics {
+		t.Fatalf("incomplete reachable child projection = %+v", projected)
 	}
 }
 

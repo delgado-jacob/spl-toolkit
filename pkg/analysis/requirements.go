@@ -235,7 +235,7 @@ func projectRequirements(document QueryDocument, trace *requirementTrace) (Requi
 		return a.Resolution < b.Resolution
 	})
 	for _, entry := range references {
-		if !entry.directExternal && !entry.conditional {
+		if !entry.directExternal && !entry.conditional && !entry.pathConditional {
 			continue
 		}
 		reference := entry.reference
@@ -244,7 +244,7 @@ func projectRequirements(document QueryDocument, trace *requirementTrace) (Requi
 			index, found := groups[key]
 			if !found {
 				necessity := "required"
-				if entry.conditional {
+				if entry.conditional || entry.pathConditional {
 					necessity = "conditional"
 				}
 				set.Items = append(set.Items, RequirementItem{

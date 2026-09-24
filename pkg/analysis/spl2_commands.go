@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/antlr4-go/antlr/v4"
 	"github.com/delgado-jacob/spl-toolkit/parser/spl2"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -351,6 +352,495 @@ func (s *spl2SemanticStage) command(ctx antlr.ParserRuleContext) {
 	}
 }
 
+func (q *spl2ScopeScheduler) lowerSelectedFlowCommand(s *spl2SemanticStage, ctx antlr.ParserRuleContext, aliases map[string]bool, scopeID string, parent int) {
+	switch command := ctx.(type) {
+	case *spl2.IfCommandContext:
+		q.lowerSelectedIf(s, command, aliases, scopeID, parent)
+	case *spl2.BranchCommandContext:
+		q.lowerSelectedBranch(s, command, aliases, scopeID, parent)
+	case *spl2.UnionCommandContext:
+		q.lowerSelectedUnion(s, command, aliases, scopeID, parent)
+	case *spl2.JoinCommandContext:
+		q.lowerSelectedJoin(s, command, aliases, scopeID, parent)
+	default:
+		s.command(ctx)
+	}
+}
+
+func (q *spl2ScopeScheduler) lowerRecoveredSelectedFlowCommand(s *spl2SemanticStage, ctx antlr.ParserRuleContext, aliases map[string]bool, scopeID string, parent int, location Location) {
+	base := s.env
+	paths := []flowMergePath{}
+	schedule := func(ordinal int, child antlr.ParserRuleContext) {
+		checkpoint := q.selectedFlowTraceCheckpoint(base)
+		execution, ok := q.executeDirectChild(child, base, aliases, scopeID, parent)
+		q.reconcileSelectedFlowTrace(checkpoint, base, paths)
+		if ok {
+			paths = append(paths, flowMergePath{Ordinal: ordinal, Environment: execution.Environment, Reachable: true})
+		}
+	}
+
+	switch command := ctx.(type) {
+	case *spl2.IfCommandContext:
+		expressions, children := command.AllExpression(), command.AllInheritedSubpipe()
+		for _, expression := range expressions {
+			if spl2IntactSyntax(expression) {
+				s.expression(expression)
+			}
+		}
+		for i := 0; i < len(expressions) && i < len(children); i++ {
+			if spl2IntactSyntax(expressions[i]) && spl2IntactSyntax(children[i]) {
+				schedule(i, children[i])
+			}
+		}
+	case *spl2.BranchCommandContext:
+		for _, arm := range command.AllBranchArm() {
+			if arm.Expression() != nil && spl2IntactSyntax(arm.Expression()) {
+				s.expression(arm.Expression())
+			}
+		}
+		for ordinal, arm := range command.AllBranchArm() {
+			if arm.Expression() != nil && arm.InheritedSubpipe() != nil && spl2IntactSyntax(arm.Expression()) && spl2IntactSyntax(arm.InheritedSubpipe()) {
+				schedule(ordinal, arm.InheritedSubpipe())
+			}
+		}
+	}
+
+	s.installSelectedAlternativeMerge(ctx, base, paths, true)
+	s.env.uncertain = true
+	s.env.requirements.uncertain = true
+	s.diagnosticAtOwned(CodeUnsupportedSemantics, "warning", "unsupported_semantics", "Recovered SPL2 command effects are not yet modeled", location, true, nil)
+}
+
+func (q *spl2ScopeScheduler) lowerSelectedIf(s *spl2SemanticStage, command *spl2.IfCommandContext, aliases map[string]bool, scopeID string, parent int) {
+	for _, condition := range command.AllExpression() {
+		s.expression(condition)
+	}
+	base := s.env
+	paths := make([]flowMergePath, 0, len(command.AllInheritedSubpipe()))
+	for ordinal, child := range command.AllInheritedSubpipe() {
+		checkpoint := q.selectedFlowTraceCheckpoint(base)
+		execution, ok := q.executeDirectChild(child, base, aliases, scopeID, parent)
+		q.reconcileSelectedFlowTrace(checkpoint, base, paths)
+		if !ok {
+			s.unsupported(command, "Conditional child scope could not be scheduled")
+			continue
+		}
+		paths = append(paths, flowMergePath{Ordinal: ordinal, Environment: execution.Environment, Reachable: true})
+	}
+	s.installSelectedAlternativeMerge(command, base, paths, command.ELSE() == nil)
+}
+
+func (q *spl2ScopeScheduler) lowerSelectedBranch(s *spl2SemanticStage, command *spl2.BranchCommandContext, aliases map[string]bool, scopeID string, parent int) {
+	base := s.env
+	for _, arm := range command.AllBranchArm() {
+		s.expression(arm.Expression())
+	}
+	paths := make([]flowMergePath, 0, len(command.AllBranchArm()))
+	for ordinal, arm := range command.AllBranchArm() {
+		checkpoint := q.selectedFlowTraceCheckpoint(base)
+		execution, ok := q.executeDirectChild(arm.InheritedSubpipe(), base, aliases, scopeID, parent)
+		q.reconcileSelectedFlowTrace(checkpoint, base, paths)
+		if !ok {
+			s.unsupported(command, "Guarded branch child scope could not be scheduled")
+			continue
+		}
+		paths = append(paths, flowMergePath{Ordinal: ordinal, Environment: execution.Environment, Reachable: true})
+	}
+	s.installSelectedAlternativeMerge(command, base, paths, false)
+}
+
+func (q *spl2ScopeScheduler) lowerSelectedUnion(s *spl2SemanticStage, command *spl2.UnionCommandContext, aliases map[string]bool, scopeID string, parent int) {
+	base := s.env
+	paths := make([]flowMergePath, 0, len(command.AllUnionDataset()))
+	for ordinal, input := range command.AllUnionDataset() {
+		checkpoint := q.selectedFlowTraceCheckpoint(base)
+		if child := input.IndependentSearch(); child != nil {
+			execution, ok := q.executeDirectChild(child, base, aliases, scopeID, parent)
+			q.reconcileSelectedFlowTrace(checkpoint, base, paths)
+			if !ok {
+				s.unsupported(input, "Union child scope could not be scheduled")
+				continue
+			}
+			paths = append(paths, flowMergePath{Ordinal: ordinal, Environment: execution.Environment, Reachable: true})
+			continue
+		}
+
+		trace := (*requirementTrace)(nil)
+		if base.requirements.trace != nil {
+			trace = base.requirements.trace.forkBranch()
+		}
+		branch := newEnvironmentWithRequirementTrace(trace)
+		branchStage := &spl2SemanticStage{
+			semanticStage: &semanticStage{result: s.result, stage: s.stage, env: branch, transitions: []Transition{}, refinement: s.refinement},
+			parsed2:       s.parsed2,
+			aliases:       map[string]bool{},
+			locals:        map[string]bool{},
+			program:       s.program,
+		}
+		dataset := input.Dataset()
+		resolved := false
+		if branchStage.program != nil && dataset != nil {
+			resolved = branchStage.program.resolveViewSource(branchStage, dataset.DatasetParameter()) || branchStage.program.resolveImportedDataset(branchStage, dataset)
+		}
+		if !resolved && (dataset == nil || !branchStage.exactDatasetSource(dataset)) {
+			branchStage.unsupported(input, "Union operand is not an exact dataset")
+		}
+		q.reconcileSelectedFlowTrace(checkpoint, base, paths)
+		paths = append(paths, flowMergePath{Ordinal: ordinal, Environment: branchStage.env, Reachable: true})
+	}
+	s.installSelectedAlternativeMerge(command, base, paths, s.selectedUnionIncludesParent(command))
+}
+
+type selectedFlowTraceCheckpoint struct {
+	base      *requirementTrace
+	canonical *requirementTrace
+}
+
+func (q *spl2ScopeScheduler) selectedFlowTraceCheckpoint(base *environment) selectedFlowTraceCheckpoint {
+	checkpoint := selectedFlowTraceCheckpoint{}
+	if base != nil && base.requirements.trace != nil {
+		checkpoint.base = base.requirements.trace.clone()
+	}
+	if q.trace != nil {
+		checkpoint.canonical = q.trace.clone()
+	}
+	return checkpoint
+}
+
+// Lazy view binding can extend the canonical trace while an alternative is
+// executing. Keep the shared base and every earlier sibling on that new prefix;
+// the just-executed path is already rebased by its child or source binder.
+func (q *spl2ScopeScheduler) reconcileSelectedFlowTrace(checkpoint selectedFlowTraceCheckpoint, base *environment, paths []flowMergePath) {
+	if base == nil || base.requirements.trace == nil || checkpoint.base == nil {
+		return
+	}
+	parserDiagnostics := q.result.Diagnostics[:q.initialDiagnosticCount]
+	checkpoint.base.syncParserDiagnostics(parserDiagnostics)
+	if checkpoint.canonical != nil {
+		checkpoint.canonical.syncParserDiagnostics(parserDiagnostics)
+	}
+	if q.trace != nil && base.requirements.trace != q.trace && !requirementTraceHasPrefix(q.trace, base.requirements.trace) {
+		if checkpoint.canonical == nil {
+			return
+		}
+		base.requirements.trace = rebaseRequirementTrace(checkpoint.canonical, q.trace, base.requirements.trace)
+	}
+	for i := range paths {
+		path := paths[i].Environment
+		if path == nil || path.requirements.trace == nil {
+			continue
+		}
+		path.requirements.trace.syncParserDiagnostics(parserDiagnostics)
+		if requirementTraceHasPrefix(base.requirements.trace, path.requirements.trace) {
+			continue
+		}
+		path.requirements.trace = rebaseRequirementTrace(checkpoint.base, base.requirements.trace, path.requirements.trace)
+	}
+}
+
+func (s *spl2SemanticStage) selectedUnionIncludesParent(command *spl2.UnionCommandContext) bool {
+	if s.stage >= 0 && s.stage < len(s.result.Stages) && s.result.Stages[s.stage].Position > 0 {
+		return true
+	}
+	for ancestor := antlr.Tree(command.GetParent()); ancestor != nil; ancestor = ancestor.GetParent() {
+		switch ancestor.(type) {
+		case *spl2.InheritedSubpipeContext:
+			return true
+		case *spl2.IndependentSearchContext:
+			return false
+		}
+	}
+	return false
+}
+
+type spl2SelectedJoin struct {
+	leftAlias  string
+	rightAlias string
+	joinType   string
+	selected   bool
+}
+
+func (s *spl2SemanticStage) selectedJoin(command *spl2.JoinCommandContext) spl2SelectedJoin {
+	selection := spl2SelectedJoin{selected: true}
+	leftCount, rightCount, typeCount := 0, 0, 0
+	for _, option := range command.AllJoinOption() {
+		switch {
+		case option.LEFT() != nil:
+			leftCount++
+			operand := s.operand(option.Identifier())
+			if operand.Sound {
+				selection.leftAlias = operand.Name
+			} else {
+				selection.selected = false
+			}
+		case option.RIGHT() != nil:
+			rightCount++
+			operand := s.operand(option.Identifier())
+			if operand.Sound {
+				selection.rightAlias = operand.Name
+			} else {
+				selection.selected = false
+			}
+		case option.TYPE_OPTION() != nil:
+			typeCount++
+			joinType := option.JoinType()
+			switch {
+			case joinType != nil && joinType.INNER() != nil:
+				selection.joinType = "inner"
+			case joinType != nil && joinType.LEFT() != nil:
+				selection.joinType = "left"
+			case joinType != nil && joinType.OUTER() != nil:
+				selection.joinType = "outer"
+			default:
+				selection.selected = false
+			}
+		default:
+			selection.selected = false
+		}
+	}
+	selection.selected = selection.selected && leftCount == 1 && rightCount == 1 && typeCount == 1 && selection.leftAlias != "" && selection.rightAlias != "" && selection.leftAlias != selection.rightAlias
+	return selection
+}
+
+func (q *spl2ScopeScheduler) lowerSelectedJoin(s *spl2SemanticStage, command *spl2.JoinCommandContext, aliases map[string]bool, scopeID string, parent int) {
+	right, childOK := q.executeDirectChild(command.IndependentSearch(), s.env, aliases, scopeID, parent)
+	baseAfterChild := (*requirementTrace)(nil)
+	if s.env.requirements.trace != nil {
+		baseAfterChild = s.env.requirements.trace.clone()
+	}
+	selection := s.selectedJoin(command)
+	if !selection.selected {
+		joinReferenceIDs := s.joinPredicateIntentions(command)
+		if childOK {
+			s.retainSelectedChildTrace(baseAfterChild, right.Trace)
+		}
+		s.unsupportedOwned(command, "Join output merge and qualified input binding are unproved", joinReferenceIDs)
+		return
+	}
+	joinReferenceIDs, predicateOK := s.selectedJoinPredicate(command, selection, s.env, right.Environment)
+
+	if !childOK || !predicateOK {
+		if childOK {
+			s.retainSelectedChildTrace(baseAfterChild, right.Trace)
+		}
+		s.unsupportedOwned(command, "Join layout is outside selected semantics", joinReferenceIDs)
+		return
+	}
+
+	combinedTrace := s.rebasedSelectedChildTrace(baseAfterChild, right.Trace)
+	rightMatched := right.Environment.cloneWithRequirementTrace(combinedTrace)
+	matched, collisions, composed := composeFlowEnvironments(s.env, rightMatched)
+	if !composed {
+		s.retainSelectedChildTrace(baseAfterChild, right.Trace)
+		s.unsupportedOwned(command, "Join child requirement trace does not extend the current parent", joinReferenceIDs)
+		return
+	}
+	if len(collisions) != 0 {
+		matched.uncertain = true
+		matched.requirements.uncertain = true
+	}
+
+	mergeBase := s.env.cloneWithRequirementTrace(combinedTrace.clone())
+	paths := []flowMergePath{{Ordinal: 0, Environment: matched, Reachable: true}}
+	switch selection.joinType {
+	case "left":
+		leftOnly := s.env.cloneWithRequirementTrace(combinedTrace.clone())
+		paths = append(paths, flowMergePath{Ordinal: 1, Environment: leftOnly, Reachable: true})
+	case "outer":
+		leftOnly := s.env.cloneWithRequirementTrace(combinedTrace.clone())
+		paths = append(paths, flowMergePath{Ordinal: 1, Environment: leftOnly, Reachable: true})
+		rightOnly := right.Environment.cloneWithRequirementTrace(combinedTrace.clone())
+		paths = append(paths, flowMergePath{Ordinal: 2, Environment: rightOnly, Reachable: true})
+	}
+	base := s.env
+	s.installSelectedFlowMerge(base, mergeFlowEnvironments(mergeBase, paths, false))
+	for _, name := range collisions {
+		origins := selectedFlowFieldOrigins(s.env, name)
+		s.diagnosticAtOwned(CodeAmbiguousField, "warning", "unsupported_semantics", "Join output contains fields with the same public name", s.parsed2.source.contextLocation(command), true, origins)
+	}
+}
+
+func selectedFlowFieldOrigins(env *environment, name string) []string {
+	origins := []string{}
+	if env == nil {
+		return origins
+	}
+	for _, key := range env.orderedFieldKeys() {
+		field, ok := env.fields[key]
+		if ok && field.Name == name {
+			origins = uniqueIDs(origins, field.OriginReferenceIDs)
+		}
+	}
+	return origins
+}
+
+func (s *spl2SemanticStage) installSelectedFlowMerge(base, merged *environment) {
+	if base != nil && merged != nil && base.requirements.trace != nil && merged.requirements.trace != nil {
+		canonical := base.requirements.trace
+		*canonical = *merged.requirements.trace
+		merged.requirements.trace = canonical
+	}
+	s.env = merged
+}
+
+func (s *spl2SemanticStage) installSelectedAlternativeMerge(owner antlr.ParserRuleContext, base *environment, paths []flowMergePath, includeParent bool) {
+	merged := mergeFlowEnvironments(base, paths, includeParent)
+	s.installSelectedFlowMerge(base, merged)
+	names := make([]string, 0, len(merged.ambiguous))
+	for name, ambiguous := range merged.ambiguous {
+		if !ambiguous || base != nil && base.ambiguous[name] {
+			continue
+		}
+		alreadyOwned := false
+		for _, path := range paths {
+			alreadyOwned = alreadyOwned || path.Environment != nil && path.Environment.ambiguous[name]
+		}
+		if !alreadyOwned {
+			names = append(names, name)
+		}
+	}
+	sort.Strings(names)
+	for _, name := range names {
+		_, origins := merged.detectCollision(name)
+		s.fieldIdentityCollision(name, s.parsed2.source.contextLocation(owner), origins)
+	}
+}
+
+func (s *spl2SemanticStage) retainSelectedChildTrace(oldBase, child *requirementTrace) {
+	if child == nil || s.env.requirements.trace == nil {
+		return
+	}
+	if oldBase != nil {
+		child = rebaseRequirementTrace(oldBase, s.env.requirements.trace, child)
+	}
+	merged := mergeRequirementTraces(s.env.requirements.trace, []requirementTracePath{{Ordinal: 0, Trace: child, Reachable: true}})
+	canonical := s.env.requirements.trace
+	*canonical = *merged
+	s.env.requirements.trace = canonical
+}
+
+func (s *spl2SemanticStage) rebasedSelectedChildTrace(oldBase, child *requirementTrace) *requirementTrace {
+	if child == nil || s.env.requirements.trace == nil {
+		return s.env.requirements.trace
+	}
+	if oldBase == nil {
+		return child
+	}
+	return rebaseRequirementTrace(oldBase, s.env.requirements.trace, child)
+}
+
+func (s *spl2SemanticStage) selectedJoinPredicate(command *spl2.JoinCommandContext, selection spl2SelectedJoin, left, right *environment) ([]string, bool) {
+	ids := []string{}
+	if command == nil || command.SqlJoinPredicate() == nil || left == nil || right == nil {
+		return ids, false
+	}
+	valid := selection.leftAlias != "" && selection.rightAlias != ""
+	for _, equality := range command.SqlJoinPredicate().AllSqlJoinEquality() {
+		fields := equality.AllSqlJoinField()
+		if len(fields) != 2 {
+			valid = false
+			continue
+		}
+		sides := map[string]bool{}
+		for _, field := range fields {
+			identifiers := field.AllIdentifier()
+			if !s.parsed2.soundOperand(field) || len(field.AllAccessPart()) != 0 || len(identifiers) != 2 {
+				valid = false
+				continue
+			}
+			qualifier := s.operand(identifiers[0])
+			name := s.operand(identifiers[1])
+			if !qualifier.Sound || !name.Sound {
+				valid = false
+				continue
+			}
+			var source *environment
+			switch qualifier.Name {
+			case selection.leftAlias:
+				source = left
+				sides["left"] = true
+			case selection.rightAlias:
+				source = right
+				sides["right"] = true
+			default:
+				valid = false
+				continue
+			}
+			operand := locatedOperand{
+				Name:       name.Name,
+				Identity:   pathFieldIdentity(qualifier.Name, []string{name.Name}),
+				Location:   s.parsed2.source.contextLocation(field),
+				Resolution: "exact",
+				Sound:      true,
+			}
+			id := s.selectedJoinReference(operand, source, atomicFieldIdentity(name.Name))
+			if id == "" {
+				valid = false
+				continue
+			}
+			ids = append(ids, id)
+		}
+		if !sides["left"] || !sides["right"] {
+			valid = false
+		}
+	}
+	return ids, valid
+}
+
+func (s *spl2SemanticStage) selectedJoinReference(operand locatedOperand, source *environment, identity fieldIdentity) string {
+	id := s.referenceAt(operand.Location, operand.Name, "field", "read", operand.Resolution)
+	if id == "" {
+		return ""
+	}
+	ref := &s.result.References[len(s.result.References)-1]
+	requirementBinding, directExternal, requirementConditional := "not_applicable", false, false
+	if trace := s.env.requirements.trace; trace != nil {
+		entry := trace.reference(id)
+		requirementBinding, directExternal, requirementConditional = source.requirements.readIdentity(entry.reference, identity)
+		entry.reference.Binding = requirementBinding
+		entry.directExternal = directExternal
+		entry.conditional = requirementConditional
+	}
+
+	binding, origins := "source", []string{}
+	field, known := source.field(identity)
+	switch {
+	case known && field.Conditional || source.uncertain:
+		binding = "indeterminate"
+		if known {
+			origins = copyIDs(field.OriginReferenceIDs)
+		}
+	case known:
+		binding = "derived"
+		if field.source {
+			binding = "source"
+		}
+		origins = copyIDs(field.OriginReferenceIDs)
+	case !source.open:
+		binding = "unavailable"
+	default:
+		collision, owners := source.installIdentity(identity, []string{id}, false, true)
+		if collision {
+			s.fieldIdentityCollision(operand.Name, operand.Location, owners)
+		}
+	}
+	ref.Binding = binding
+	ref.OriginReferenceIDs = origins
+	s.rewriteReference(id, operand, "field", "read")
+	s.rewriteIdentityCoverage(operand, "field")
+	s.rewriteBinding(id, ref.Binding, origins)
+	message := "join equality field is unavailable on its declared side"
+	switch {
+	case binding == "unavailable" && requirementBinding == "unavailable":
+		s.diagnosticAtOwned(CodeUnavailableField, "error", "unavailable_field", message, operand.Location, false, []string{id})
+	case binding == "unavailable":
+		s.appendDiagnostic(CodeUnavailableField, "error", "unavailable_field", message, operand.Location, false, false, nil, false)
+	case requirementBinding == "unavailable":
+		s.requirementDiagnosticAt(CodeUnavailableField, "error", "unavailable_field", message, operand.Location, false, []string{id})
+	}
+	return id
+}
+
 // SPL2 fields inclusion closes over bindings proved before the command plus
 // source names admitted by the caller. An unresolved source declaration keeps
 // the wildcard incomplete, but it does not become a guessed output field.
@@ -422,7 +912,7 @@ func (s *spl2SemanticStage) commandEffectSound(ctx antlr.ParserRuleContext) bool
 	}
 	location := s.parsed2.source.contextLocation(ctx)
 	for _, d := range s.parsed2.diagnostics {
-		if d.Code == CodeSyntaxError && d.Location.Start.Offset >= location.Start.Offset && d.Location.Start.Offset < location.End.Offset {
+		if d.Location.Start.Offset >= location.Start.Offset && d.Location.Start.Offset < location.End.Offset {
 			return false
 		}
 	}

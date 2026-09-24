@@ -237,6 +237,120 @@ func TestSPL2SQLJoinPredicateDoesNotGainReferences(t *testing.T) {
 	}
 }
 
+func TestSPL2StructuralRequirementsConditionalPaths(t *testing.T) {
+	for _, tc := range []struct {
+		name, query string
+	}{
+		{
+			name:  "if",
+			query: `FROM synthetic_events | if (synthetic_guard=true) [where synthetic_left>0 AND synthetic_shared>0] else [where synthetic_right>0 AND synthetic_shared>1]`,
+		},
+		{
+			name:  "branch",
+			query: `FROM synthetic_events | branch (synthetic_guard=true) [where synthetic_left>0 AND synthetic_shared>0], (synthetic_guard=false) [where synthetic_right>0 AND synthetic_shared>1]`,
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			result, trace, err := analyzeRewriteWithTrace(QueryDocument{Text: tc.query, Language: "spl2"}, nil, nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if result.Status != Valid || !result.Requirements.Coverage.Complete {
+				t.Fatalf("path requirement coverage = status %s requirements %+v diagnostics %+v", result.Status, result.Requirements, result.Diagnostics)
+			}
+			trace.assertReferences(result.References)
+			for _, identity := range []string{"synthetic_guard", "synthetic_shared"} {
+				item := requirementItem(result.Requirements, "field", identity, "read")
+				if item == nil || item.Necessity != "required" {
+					t.Errorf("%s item = %+v", identity, item)
+				}
+			}
+			for _, identity := range []string{"synthetic_left", "synthetic_right"} {
+				item := requirementItem(result.Requirements, "field", identity, "read")
+				if item == nil || item.Necessity != "conditional" || len(item.Occurrences) != 1 {
+					t.Errorf("%s item = %+v", identity, item)
+				}
+			}
+		})
+	}
+}
+
+func TestSPL2StructuralRequirementsUnionDatasetPaths(t *testing.T) {
+	query := `union synthetic_left, $synthetic_right, [FROM synthetic_child | where synthetic_value>0]`
+	result, trace, err := analyzeRewriteWithTrace(QueryDocument{Text: query, Language: "spl2"}, nil, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if result.Status != Valid || !result.Requirements.Coverage.Complete {
+		t.Fatalf("union requirement coverage = status %s requirements %+v diagnostics %+v", result.Status, result.Requirements, result.Diagnostics)
+	}
+	trace.assertReferences(result.References)
+	for _, identity := range []string{"synthetic_left", "$synthetic_right", "synthetic_child"} {
+		item := requirementItem(result.Requirements, "dataset", identity, "read")
+		if item == nil || item.Necessity != "conditional" || len(item.Occurrences) != 1 {
+			t.Errorf("union dataset %s = %+v", identity, item)
+		}
+	}
+	value := requirementItem(result.Requirements, "field", "synthetic_value", "read")
+	if value == nil || value.Necessity != "conditional" {
+		t.Errorf("union child field = %+v", value)
+	}
+}
+
+func TestSPL2StructuralRequirementsPipelineJoinSelected(t *testing.T) {
+	for _, joinType := range []string{"inner", "left", "outer"} {
+		t.Run(joinType, func(t *testing.T) {
+			query := `FROM synthetic_left | join type=` + joinType + ` left=L right=R where L.synthetic_id=R.synthetic_uid [FROM synthetic_right | fields synthetic_uid, synthetic_name]`
+			result, trace, err := analyzeRewriteWithTrace(QueryDocument{Text: query, Language: "spl2"}, nil, nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if result.Status != Valid || !result.Requirements.Coverage.Complete {
+				t.Fatalf("join requirement coverage = status %s requirements %+v diagnostics %+v", result.Status, result.Requirements, result.Diagnostics)
+			}
+			trace.assertReferences(result.References)
+			for _, identity := range []string{"synthetic_id", "synthetic_uid"} {
+				item := requirementItem(result.Requirements, "field", identity, "read")
+				if item == nil || item.Necessity != "required" {
+					t.Errorf("join key %s = %+v", identity, item)
+				}
+			}
+			for _, identity := range []string{"synthetic_left", "synthetic_right"} {
+				item := requirementItem(result.Requirements, "dataset", identity, "read")
+				if item == nil || item.Necessity != "required" {
+					t.Errorf("join dataset %s = %+v", identity, item)
+				}
+			}
+		})
+	}
+}
+
+func TestSPL2StructuralRequirementsJoinSideBindingIgnoresPublicRefinement(t *testing.T) {
+	query := `FROM main | join type=inner left=L right=R where L.id=R.uid [FROM other]`
+	plain := spl2AnalyzeTest(t, query)
+	refined, err := AnalyzeWithSourceUniverse(QueryDocument{Text: query, Language: "spl2"}, SourceUniverse{
+		Fields:   []string{"id", "uid"},
+		Complete: true,
+		Resolve:  func(string) SourceFieldAdmission { return SourceFieldAdmitted },
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if plain.Status != Valid || !plain.Requirements.Coverage.Complete {
+		t.Fatalf("plain join requirements = %+v", plain)
+	}
+	if refined.Result.Status != Valid || !refined.Result.Coverage.SemanticComplete || !refined.Result.Requirements.Coverage.Complete {
+		t.Fatalf("refined join requirements = %+v", refined.Result)
+	}
+	for _, identity := range []string{"id", "uid"} {
+		plainItem := requirementItem(plain.Requirements, "field", identity, "read")
+		refinedItem := requirementItem(refined.Result.Requirements, "field", identity, "read")
+		if plainItem == nil || refinedItem == nil || plainItem.Necessity != "required" || refinedItem.Necessity != "required" || len(plainItem.Occurrences) != 1 || len(refinedItem.Occurrences) != 1 {
+			t.Fatalf("join requirement %s changed under refinement: plain=%+v refined=%+v", identity, plainItem, refinedItem)
+		}
+	}
+}
+
 func TestSPLStructuralRemediationDoesNotChangeAtomicDottedField(t *testing.T) {
 	result, trace, err := analyzeRewriteWithTrace(QueryDocument{Text: `search 'actor.name'=value`}, nil, nil)
 	if err != nil {

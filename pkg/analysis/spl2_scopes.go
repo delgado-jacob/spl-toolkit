@@ -164,11 +164,28 @@ func (q *spl2ScopeScheduler) pipeline(sites []spl2CommandSite, env *environment,
 				s.diagnosticAt(CodeSyntaxError, "error", "contract", "Timewrap requires a preceding timechart command", q.parsed.source.location(token.GetStart(), token.GetStop()+1), true)
 			}
 		}
-		if ctx != nil {
+		selectedFlowShape := ctx != nil && spl2IntactSyntax(ctx) && q.selectedFlowCommandContext(ctx)
+		selectedFlow := selectedFlowShape && s.commandEffectSound(ctx)
+		recoveryContext := q.selectedFlowRecoveryContext(ctx, command, location)
+		recoveredSelectedFlow := !selectedFlow && q.prepareSelectedFlowRecovery(recoveryContext, parent)
+		childrenRun := false
+		if ctx != nil && !selectedFlow && !recoveredSelectedFlow {
 			q.runChildren(ctx, env, aliases, scopeID, parent)
+			childrenRun = true
 		}
 		q.assignParserDiagnostics(index)
-		if ctx != nil && spl2IntactSyntax(ctx) {
+		if selectedFlow && !s.commandEffectSound(ctx) {
+			selectedFlow = false
+			recoveredSelectedFlow = q.prepareSelectedFlowRecovery(recoveryContext, parent)
+			if !childrenRun && !recoveredSelectedFlow {
+				q.runChildren(ctx, env, aliases, scopeID, parent)
+			}
+		}
+		if selectedFlow {
+			q.lowerSelectedFlowCommand(s, ctx, aliases, scopeID, parent)
+		} else if recoveredSelectedFlow {
+			q.lowerRecoveredSelectedFlowCommand(s, recoveryContext, aliases, scopeID, parent, location)
+		} else if ctx != nil && spl2IntactSyntax(ctx) {
 			if q.program == nil || !q.program.bindCommand(s, ctx) {
 				s.command(ctx)
 			}
@@ -193,6 +210,121 @@ func (q *spl2ScopeScheduler) pipeline(sites []spl2CommandSite, env *environment,
 		q.result.Lineage = append(q.result.Lineage, Lineage{StageID: q.result.Stages[index].ID, ScopeID: scopeID, Before: before, After: env.snapshot(), Transitions: s.transitions})
 	}
 	return env
+}
+
+func (q *spl2ScopeScheduler) selectedFlowRecoveryContext(ctx antlr.ParserRuleContext, command string, location Location) antlr.ParserRuleContext {
+	switch ctx.(type) {
+	case *spl2.IfCommandContext, *spl2.BranchCommandContext:
+		return ctx
+	}
+	if q.parsed == nil || q.parsed.tree == nil || command != "if" && command != "branch" {
+		return nil
+	}
+	var found antlr.ParserRuleContext
+	var visit func(antlr.Tree)
+	visit = func(tree antlr.Tree) {
+		if tree == nil || found != nil {
+			return
+		}
+		candidate, selected := tree.(antlr.ParserRuleContext)
+		if selected {
+			switch candidate.(type) {
+			case *spl2.IfCommandContext:
+				selected = command == "if"
+			case *spl2.BranchCommandContext:
+				selected = command == "branch"
+			default:
+				selected = false
+			}
+		}
+		if selected {
+			candidateLocation := q.parsed.source.contextLocation(candidate)
+			if candidateLocation.Start.Offset == location.Start.Offset && candidateLocation.End.Offset <= location.End.Offset {
+				found = candidate
+				return
+			}
+		}
+		for _, child := range tree.GetChildren() {
+			visit(child)
+		}
+	}
+	visit(q.parsed.tree)
+	return found
+}
+
+func (q *spl2ScopeScheduler) prepareSelectedFlowRecovery(ctx antlr.ParserRuleContext, parent int) bool {
+	proved := 0
+	switch command := ctx.(type) {
+	case *spl2.IfCommandContext:
+		expressions, children := command.AllExpression(), command.AllInheritedSubpipe()
+		for i := 0; i < len(expressions) && i < len(children); i++ {
+			if spl2IntactSyntax(expressions[i]) && spl2IntactSyntax(children[i]) {
+				proved++
+			}
+		}
+	case *spl2.BranchCommandContext:
+		for _, arm := range command.AllBranchArm() {
+			if arm.Expression() != nil && arm.InheritedSubpipe() != nil && spl2IntactSyntax(arm.Expression()) && spl2IntactSyntax(arm.InheritedSubpipe()) {
+				proved++
+			}
+		}
+		if proved < 2 {
+			return false
+		}
+	default:
+		return false
+	}
+	if proved == 0 {
+		return false
+	}
+	q.registerSelectedFlowRecoveryChildren(ctx, parent)
+	return true
+}
+
+func (q *spl2ScopeScheduler) registerSelectedFlowRecoveryChildren(ctx antlr.ParserRuleContext, parent int) {
+	registered := spl2ChildScopesIn(q.parsed, []antlr.Tree{ctx})
+	indexes := make(map[int]int, len(registered))
+	for i, child := range registered {
+		globalParent := parent
+		if child.parent >= 0 {
+			globalParent = indexes[child.parent]
+		}
+		index := -1
+		for existing := range q.children {
+			if q.children[existing].owner == child.owner && q.children[existing].parent == globalParent {
+				index = existing
+				break
+			}
+		}
+		if index < 0 {
+			child.parent = globalParent
+			q.children = append(q.children, child)
+			index = len(q.children) - 1
+		}
+		indexes[i] = index
+	}
+}
+
+func (q *spl2ScopeScheduler) selectedFlowCommandContext(ctx antlr.ParserRuleContext) bool {
+	switch ctx.(type) {
+	case *spl2.IfCommandContext, *spl2.BranchCommandContext, *spl2.UnionCommandContext, *spl2.JoinCommandContext:
+		return true
+	default:
+		return false
+	}
+}
+
+func (q *spl2ScopeScheduler) executeDirectChild(owner antlr.ParserRuleContext, env *environment, aliases map[string]bool, scopeID string, parent int) (spl2ChildExecution, bool) {
+	if owner == nil {
+		return spl2ChildExecution{}, false
+	}
+	for i, child := range q.children {
+		if child.parent != parent || q.executed[i] || child.owner != owner {
+			continue
+		}
+		return q.executeChild(i, env, aliases, scopeID, parent)
+	}
+	return spl2ChildExecution{}, false
 }
 
 func (q *spl2ScopeScheduler) runChildren(ctx antlr.ParserRuleContext, env *environment, aliases map[string]bool, scopeID string, parent int) {
