@@ -19,7 +19,7 @@ class LinusSPL2AuditTests(unittest.TestCase):
         root: Path,
         *,
         standalone_count=45,
-        metadata_count=4,
+        metadata_count=5,
         metadata_outside_detections=False,
         ignored=None,
     ):
@@ -71,7 +71,7 @@ class LinusSPL2AuditTests(unittest.TestCase):
                 syntax_complete = query not in syntax_incomplete
                 report = {
                     "status": "valid" if syntax_complete else "invalid",
-                    "coverage": {"syntax_complete": syntax_complete},
+                    "coverage": {"syntax_complete": syntax_complete, "semantic_complete": syntax_complete},
                     "diagnostics": [{
                         "code": "SPL_GENERIC_NOTE" if syntax_complete else "SPL_SYNTAX_ERROR",
                         "category": "coverage" if syntax_complete else "syntax",
@@ -210,7 +210,7 @@ class LinusSPL2AuditTests(unittest.TestCase):
             ).stdout.strip()
             self.assertEqual(result["audited_commit"], commit)
             self.assertEqual(result["counts"], {
-                "yaml_documents": 53,
+                "yaml_documents": 54,
                 "search_blocks": 49,
                 "standalone_programs": 45,
                 "predicate_fragments": 4,
@@ -221,6 +221,24 @@ class LinusSPL2AuditTests(unittest.TestCase):
             self.assertEqual(result["content_syntax_counts"], {
                 "predicate_fragment": {"complete": 4, "incomplete": 0},
                 "standalone": {"complete": 45, "incomplete": 0},
+            })
+            self.assertEqual(result["content_semantic_counts"], {
+                "predicate_fragment": {"complete": 4, "incomplete": 0},
+                "standalone": {"complete": 45, "incomplete": 0},
+            })
+            self.assertEqual(result["content_status_classes"], {
+                "predicate_fragment": {"analyze": {"valid": 4}, "requirements": {"incomplete": 4}},
+                "standalone": {"analyze": {"valid": 45}, "requirements": {"incomplete": 45}},
+            })
+            self.assertEqual(result["content_diagnostic_counts"], {
+                "predicate_fragment": {
+                    "analyze": {"codes": {"SPL_GENERIC_NOTE": 4}, "categories": {"coverage": 4}},
+                    "requirements": {"codes": {"SPL_GENERIC_GAP": 4}, "categories": {"semantics": 4}},
+                },
+                "standalone": {
+                    "analyze": {"codes": {"SPL_GENERIC_NOTE": 45}, "categories": {"coverage": 45}},
+                    "requirements": {"codes": {"SPL_GENERIC_GAP": 45}, "categories": {"semantics": 45}},
+                },
             })
             self.assertEqual(len(result["form_ids"]), 65)
             self.assertEqual(result["status_classes"], {
@@ -243,12 +261,94 @@ class LinusSPL2AuditTests(unittest.TestCase):
                 self.assertTrue(kwargs["capture_output"])
 
             rendered = json.dumps(result, sort_keys=True)
-            self.assertNotIn("Private standalone detection", rendered)
-            self.assertNotIn("generic-00.yaml", rendered)
-            self.assertNotIn("synthetic_value > 0", rendered)
+            for document in AUDIT.extract_yaml_documents(content):
+                for protected in document.protected_values:
+                    if len(protected) >= 4:
+                        self.assertNotIn(protected, rendered)
+            self.assertNotIn(str(content), rendered)
+            self.assertNotIn(str(content.resolve()), rendered)
             self.assertEqual(set(result), {
-                "audited_commit", "counts", "content_syntax_counts", "form_ids", "status_classes", "diagnostic_counts",
+                "audited_commit", "counts", "content_syntax_counts", "content_semantic_counts",
+                "content_status_classes", "content_diagnostic_counts", "form_ids", "status_classes", "diagnostic_counts",
             })
+
+    def test_content_aggregates_distinguish_valid_incomplete_and_invalid(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            content = root / "content"
+            content.mkdir()
+            self.make_content(content)
+            forms = root / "forms.json"
+            self.write_forms(forms)
+            classes = [
+                AUDIT.classify_query(document.query)
+                for document in AUDIT.extract_yaml_documents(content)
+                if document.query
+            ]
+            standalone = [index for index, classification in enumerate(classes) if classification == "standalone"]
+            calls = []
+            successful = self.successful_runner(calls)
+
+            def mixed_runner(args, **kwargs):
+                query_index = len(calls) // 2
+                completed = successful(args, **kwargs)
+                if query_index >= len(classes):
+                    return completed
+                classification = classes[query_index]
+                status = "valid"
+                if query_index == standalone[0]:
+                    status = "incomplete"
+                elif query_index == standalone[1]:
+                    status = "invalid"
+                code = {"incomplete": "SPL_GENERIC_INCOMPLETE", "invalid": "SPL_GENERIC_INVALID"}.get(status)
+                diagnostics = [{"code": code, "category": "generic_gap"}] if code else []
+                if args[1] == "analyze":
+                    report = {
+                        "status": status,
+                        "coverage": {"syntax_complete": True, "semantic_complete": status != "incomplete"},
+                        "diagnostics": diagnostics,
+                    }
+                else:
+                    report = {
+                        "query_status": status,
+                        "coverage": {"complete": status == "valid"},
+                        "diagnostics": diagnostics,
+                    }
+                return subprocess.CompletedProcess(args, AUDIT.STATUS_EXITS[status], json.dumps(report), "")
+
+            result = AUDIT.audit(content, root / "toolkit", forms, runner=mixed_runner)
+            self.assertEqual(result["content_semantic_counts"], {
+                "predicate_fragment": {"complete": 4, "incomplete": 0},
+                "standalone": {"complete": 44, "incomplete": 1},
+            })
+            self.assertEqual(result["content_status_classes"], {
+                "predicate_fragment": {"analyze": {"valid": 4}, "requirements": {"valid": 4}},
+                "standalone": {
+                    "analyze": {"valid": 43, "incomplete": 1, "invalid": 1},
+                    "requirements": {"valid": 43, "incomplete": 1, "invalid": 1},
+                },
+            })
+            self.assertEqual(result["content_diagnostic_counts"]["standalone"], {
+                "analyze": {
+                    "codes": {"SPL_GENERIC_INCOMPLETE": 1, "SPL_GENERIC_INVALID": 1},
+                    "categories": {"generic_gap": 2},
+                },
+                "requirements": {
+                    "codes": {"SPL_GENERIC_INCOMPLETE": 1, "SPL_GENERIC_INVALID": 1},
+                    "categories": {"generic_gap": 2},
+                },
+            })
+            self.assertEqual(result["content_diagnostic_counts"]["predicate_fragment"], {
+                "analyze": {"codes": {}, "categories": {}},
+                "requirements": {"codes": {}, "categories": {}},
+            })
+            rendered = json.dumps(result, sort_keys=True)
+            for document in AUDIT.extract_yaml_documents(content):
+                for protected in document.protected_values:
+                    if len(protected) >= 4:
+                        self.assertNotIn(protected, rendered)
+            self.assertNotIn(str(content), rendered)
+            self.assertNotIn(str(content.resolve()), rendered)
 
     def test_external_syntax_gate_rejects_content_without_leaking_it(self):
         with tempfile.TemporaryDirectory() as temporary:
@@ -305,7 +405,7 @@ class LinusSPL2AuditTests(unittest.TestCase):
             self.assertNotIn(protected_form, json.dumps(result, sort_keys=True))
 
     def test_subprocess_status_exits_are_checked_without_leaking_output(self):
-        valid = {"status": "invalid", "coverage": {"syntax_complete": False}, "diagnostics": []}
+        valid = {"status": "invalid", "coverage": {"syntax_complete": False, "semantic_complete": False}, "diagnostics": []}
         completed = subprocess.CompletedProcess([], 1, json.dumps(valid), "protected stderr")
         self.assertEqual(AUDIT.parse_toolkit_result("analyze", completed)[0], "invalid")
 
@@ -314,12 +414,74 @@ class LinusSPL2AuditTests(unittest.TestCase):
             AUDIT.parse_toolkit_result("analyze", failed)
         self.assertNotIn("protected", str(raised.exception))
 
+    def test_analyze_requires_boolean_semantic_coverage(self):
+        for missing in (None, "yes"):
+            with self.subTest(missing=missing):
+                report = {
+                    "status": "valid",
+                    "coverage": {"syntax_complete": True, "semantic_complete": missing},
+                    "diagnostics": [],
+                }
+                completed = subprocess.CompletedProcess([], 0, json.dumps(report), "")
+                with self.assertRaisesRegex(AUDIT.AuditError, "semantic coverage"):
+                    AUDIT.parse_toolkit_result("analyze", completed)
+
     def test_output_leak_rejection(self):
         with self.assertRaisesRegex(AUDIT.AuditError, "protected input"):
             AUDIT.reject_protected_output(
                 {"form_ids": ["M11.layout.standalone"], "leak": "Private detection label"},
                 {"Private detection label"},
             )
+
+    def test_audit_rejects_absolute_repository_path_in_aggregate_output(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            content = root / "content"
+            content.mkdir()
+            self.make_content(content)
+            alias = root / "content-alias"
+            alias.symlink_to(content, target_is_directory=True)
+            forms = root / "forms.json"
+            self.write_forms(forms)
+            for path_kind, leaked in (("supplied", str(alias)), ("resolved", str(alias.resolve()))):
+                with self.subTest(path_kind=path_kind):
+                    calls = []
+                    successful = self.successful_runner(calls)
+
+                    def leaking_runner(args, **kwargs):
+                        completed = successful(args, **kwargs)
+                        if len(calls) == 1:
+                            report = json.loads(completed.stdout)
+                            report["diagnostics"][0]["code"] = leaked
+                            return subprocess.CompletedProcess(args, completed.returncode, json.dumps(report), "")
+                        return completed
+
+                    with self.assertRaisesRegex(AUDIT.AuditError, "protected input"):
+                        AUDIT.audit(alias, root / "toolkit", forms, runner=leaking_runner)
+
+    def test_audit_rejects_git_root_when_content_root_is_subdirectory(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            repository = root / "content"
+            repository.mkdir()
+            self.make_content(repository)
+            forms = root / "forms.json"
+            self.write_forms(forms)
+            for path_kind, leaked in (("supplied", str(repository)), ("resolved", str(repository.resolve()))):
+                with self.subTest(path_kind=path_kind):
+                    calls = []
+                    successful = self.successful_runner(calls)
+
+                    def leaking_runner(args, **kwargs):
+                        completed = successful(args, **kwargs)
+                        if len(calls) == 1:
+                            report = json.loads(completed.stdout)
+                            report["diagnostics"][0]["code"] = leaked
+                            return subprocess.CompletedProcess(args, completed.returncode, json.dumps(report), "")
+                        return completed
+
+                    with self.assertRaisesRegex(AUDIT.AuditError, "protected input"):
+                        AUDIT.audit(repository / "detections", root / "toolkit", forms, runner=leaking_runner)
 
     def test_form_inputs_cannot_turn_output_ids_or_queries_into_a_leak(self):
         with tempfile.TemporaryDirectory() as temporary:
