@@ -1,11 +1,12 @@
 ---
-title: "Standalone SPL2"
+title: "SPL2 static analysis"
 layout: page
 ---
 
-# Standalone SPL2
+# SPL2 static analysis
 
-SPL Toolkit analyzes standalone SPL2 documents offline. Select `spl2` explicitly;
+SPL Toolkit analyzes standalone SPL2 queries and selected same-document module
+declarations offline. Select `spl2` explicitly;
 omitting the language still selects the existing SPL contract. Both dialects use
 profile `splunkd`, compatibility version `current`, and integer report format `1`.
 `current` names this build's bounded capability snapshot. It does not select a
@@ -66,17 +67,18 @@ functions and contains no second semantic registry.
 
 ## Syntax and modeled effects
 
-The grammar has dedicated forms for the 35 reviewed command families and 25
-language families, including expressions, quoted identifiers, raw and interpolated
-strings, arrays/objects, lambdas, SQL clauses, child queries and command-specific
-options. Dedicated syntax is distinct from complete field effects. The capability
-manifest classifies all 53 inventory entries, and lists form and held limitations.
+The grammar has dedicated forms for the reviewed command and language families,
+including expressions, quoted identifiers, raw and interpolated strings,
+arrays/objects, lambdas, SQL clauses, child queries, local declarations, and
+command-specific options. Parser acceptance is separate from complete field
+effects. The capability manifest lists evidence and limitations by form.
 
 The evidence ledger is more granular than that legacy inventory projection. The
-current SPL2 manifest has 114 form records and 124 evidence cases. Syntax has 69
-supported, 19 unsupported and 26 unassessed records. Semantics has 50 supported,
-38 unsupported and 26 unassessed records. Requirements and linting are 114
-unassessed. Safe rewriting has 14 supported, 3 unsupported, and 97 unassessed. Supported is the
+current SPL2 manifest has 140 form records and 146 evidence cases. Syntax has 89
+supported, 19 unsupported and 32 unassessed records. Semantics has 75 supported,
+39 unsupported and 26 unassessed records. Requirements has 45 supported, 7
+unsupported and 88 unassessed; linting has 140 unassessed. Safe rewriting has
+14 supported, 3 unsupported and 123 unassessed. Supported is the
 only state counted as covered; partial, unsupported and unassessed remain in the
 applicable denominator. Not-applicable records are outside that denominator. No
 composite score is produced.
@@ -99,22 +101,22 @@ local aliases, so later consumers can remain indeterminate even when the match
 input was a definite source read. Explicit OUTPUT and OUTPUTNEW retain their
 separate overwrite and preserve-existing policies.
 
-`append`, `appendcols`, `appendpipe`, `join`, `union`, conditional `if`, `spl1`,
-`bin`, `rex`, `spath`, `makeresults`, `loadjob`, `tstats`, `mstats`, `timechart`,
-`timewrap`, `makemv`, `mvexpand`, `mvcombine` and `fillnull` have dedicated syntax
-but incomplete overall effects. Intact independently owned or inherited child
-reads remain visible; their presence does not prove the parent's output merge.
-Explicit inputs of `bin`, `rex`, `spath`, metrics, `timechart` and multivalue
-commands retain their original roles. An intact output identifier, such as a bin
-alias, rex offset field, spath output or explicit aggregate alias, records output
-intent without installing that field. `fillnull` field lists likewise record
-output intentions rather than consuming reads or guaranteed presence.
+Selected `bin` and `mvexpand` forms have modeled transfers. Selected guarded
+`if`/`branch`, `union`, and qualified pipeline `join` forms merge child output
+under the rules below. Other forms of these commands remain incomplete.
+`append`, `appendcols`, `appendpipe`, `spl1`, `rex`, `spath`, `makeresults`,
+`loadjob`, `tstats`, `mstats`, `timechart`, `timewrap`, `makemv`, `mvcombine`,
+and `fillnull` have dedicated syntax but incomplete overall effects. Intact
+child reads remain visible without proving the parent's output merge. An intact
+output identifier in a held form records output intent without installing a
+field.
 
 The generating effects of `tstats`, `mstats` and `timechart` remain unmodeled:
 known input names and origins become conditional, with an open and uncertain
 output universe. Wildcard grouping never installs a literal pattern name or
-claims catalog membership. Named UNION inputs retain dataset dependencies;
-arrays and child queries do not establish merged output fields.
+claims catalog membership. In held `union` forms, named inputs retain dataset
+dependencies, while array and child-query inputs do not establish merged output
+fields. Selected `union` forms follow the merge rules below.
 
 A tstats `datamodel_name` value is one atomic `data_model` reference and dependency,
 including the whole original quoted token. Static loadjob SIDs use reference kind
@@ -125,9 +127,9 @@ identities do not by themselves authorize rewriting them.
 prerequisite is a contract error even when an unreviewed unit remains incomplete;
 the unit itself does not become invalid merely because it is unreviewed.
 
-The native deferred inventory, including `branch`, remains incomplete without
-invented child grammar. Unknown commands do not acquire field semantics from
-their spelling. Malformed supported syntax still produces a definite error.
+The native deferred inventory remains incomplete without invented child grammar.
+Unknown commands do not acquire field semantics from their spelling. Malformed
+supported syntax still produces a definite error.
 
 Named arguments, unknown functions, dynamic field templates, unresolved navigation,
 ambiguous aliases and unproved output labels retain incomplete coverage even when
@@ -204,12 +206,68 @@ sibling or later consuming reads still require presence. For example,
 `eval answer=isnull(absent) | where absent>0` still requires `absent` for the WHERE.
 
 SPL2 quoted literal dots and nested navigation are distinct identities.
-`'actor.name'` is not proof of `actor.name` navigation. The shared string-name
-resolver cannot settle every distinction, so ambiguous path evidence stays
-incomplete. Resolver expansion checks every candidate, including broad `*`,
-against typed dotted identity; an unrelated matching field does not authorize
-ambiguous source bindings. Exact flat/derived members and their supporting schema
-evidence remain visible in a partial wildcard result.
+`'actor.name'` is one atomic field name; `actor.name` is a structural path.
+The analyzer keeps those identities separate internally, including for exact
+reads, removals and wildcard matching. The public field state has string names,
+so both identities project to `actor.name`. If they coexist, it reports
+`SPL_AMBIGUOUS_FIELD`, merges their visible origins into one uncertain public
+binding, and leaves semantic and requirement coverage incomplete. A later
+projection cannot turn that collision into a proved identity. Resolver expansion
+checks every candidate, including broad `*`, against typed dotted identity.
+Exact unaffected members and their schema evidence remain visible.
+
+An exact static dataset descriptor produces one canonical JSON dataset identity.
+For example, `FROM {kind: "index", properties: {name: "events"}}` has the identity
+`{"kind":"index","properties":{"name":"events"}}` in dependencies and direct
+requirements. Object keys are ordered canonically while array order is retained.
+Duplicate decoded keys, a missing or dynamic kind, or a dynamic property value
+cannot claim an exact dataset. The analyzer keeps a located dynamic reference,
+any independently parsed child evidence, and an incomplete requirement instead.
+
+## Same-document declarations
+
+Selected module documents can declare local `$view` pipelines and pure scalar
+`function` bodies, attach annotations, and export local names. Forward references
+resolve within the submitted document. A local view contributes its field-flow
+summary to a later `FROM $view`; it is not an external dataset requirement. A
+local function substitutes positional parameters into its reviewed expression
+body, so the call keeps the caller's field origins. Duplicate symbols, unresolved
+exports, invalid calls and declaration cycles are contract errors. A damaged
+declaration cannot make its dependents complete.
+
+```spl
+$base = FROM main | fields host;
+function normalize($value) { return lower($value); }
+$output = FROM $base | eval key=normalize(host);
+export output;
+```
+
+Imports are recorded as module and member references, but external modules are
+not fetched or bound. An unused import can leave analysis `valid` and semantic
+coverage complete while requirement coverage is incomplete. Using an imported
+member makes the affected analysis incomplete with `SPL_UNRESOLVED_MODULE`.
+Import aliases do not become event fields or external datasets. This module
+support is same-document static analysis, not module execution or linking.
+
+## Selected branch merges
+
+Supported `if` arms and guarded `branch` arms inherit a copy of the parent field
+environment. A missing `else` adds the unchanged parent path. `union` merges
+exact named datasets, static descriptors, local views, and independent child
+queries; a pipeline `union` also includes its input path. Named external dataset
+shapes remain open. Selected pipeline `join` requires distinct `left` and `right`
+aliases, `type=inner|left|outer`, a qualified equality predicate, and an intact
+right child query. SQL joins and other pipeline join layouts remain incomplete.
+
+At an alternative merge, fields present on every reachable path remain present;
+fields present on some paths become conditional. Different origins or removal
+states can leave the result uncertain. A selected join combines matched left and
+right fields, then adds unmatched sides for left or outer joins. Duplicate public
+output names produce `SPL_AMBIGUOUS_FIELD` and incomplete coverage. Guard and
+join-key reads keep their original scopes and direct requirement evidence.
+Branch requirement traces are forked and merged with the same reachability rules;
+a conditional requirement remains conditional. Unsupported child syntax or an
+unproved merge does not install guessed fields into the parent.
 
 ## Boundaries and evidence
 
@@ -221,9 +279,10 @@ analysis coverage flags. Only JSON object-key order is irrelevant when comparing
 canonical reports; source, ordered arrays, locations, phase metadata, bindings,
 dependencies, diagnostics and target evidence all remain part of the contract.
 
-Modules, imports, exports and user-defined function declarations are excluded
-with `SPL_UNSUPPORTED_MODULE`. `decrypt`, `ocsf` and `route` are outside the
-`splunkd` query profile and use `SPL_PROFILE_MISMATCH`. These located content
+Selected local declarations are described above. Other module syntax remains
+outside the bound contract and can report `SPL_UNSUPPORTED_MODULE`. `decrypt`,
+`ocsf` and `route` are outside the `splunkd` query profile and use
+`SPL_PROFILE_MISMATCH`. These located content
 findings differ from malformed syntax (`SPL_SYNTAX_ERROR`), unmodeled semantics
 (`SPL_UNSUPPORTED_SEMANTICS`), and a malformed request or unsupported selector.
 Unknown-owner recovery cannot erase lexer errors, unterminated literal modes,
@@ -248,7 +307,11 @@ Record and evidence IDs retain their exact reviewed scope. Broadening a form
 requires a new ID unless a reviewed scope correction establishes that the old
 boundary was wrong. The embedded corpus proves static local toolkit behavior. It
 does not prove live Splunk execution, runtime equivalence, environment
-compatibility, authorization or upstream Splunk support.
+compatibility, authorization or upstream Splunk support. Parser acceptance,
+semantic completeness and direct requirement completeness are separate report
+claims. Lint support and safe rewrite support require their own ledger evidence;
+neither follows from successful analysis. Local package and transport checks do
+not prove deployment or live runtime compatibility.
 
 The [compatibility record](compatibility.md) distinguishes local verification
 from release-platform, interpreter and live/operator acceptance. No local corpus,

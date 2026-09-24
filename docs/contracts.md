@@ -63,11 +63,11 @@ The same ID keeps the same reviewed scope; a broadened form uses a new ID unless
 a reviewed scope correction changes the original boundary. `grammar_registered`
 records parser registration separately from syntax coverage, and ordinary parser
 or semantic diagnostics do not count as lint evidence. Current exact totals are
-105 SPL records with 104 evidence cases and 114 SPL2 records with 124 evidence
+105 SPL records with 104 evidence cases and 140 SPL2 records with 146 evidence
 cases. The current SPL revision is
 `sha256:08901c84ac8c420f59ddb86168c534f0e83484c05d3c8a81078a716c878a1733`;
-the unchanged SPL2 revision is
-`sha256:f1391296cfbc616e9bb1b1828e2471e37b60a35c0555654c0734640e072a0437`.
+the SPL2 revision is
+`sha256:69b166318f99909d0ffbad378f0369fd9377a1f56945e2c3c0b69eaa32c03e95`.
 
 The SPL records cover bounded field-flow semantics for exact `tstats`, selected
 field commands, and selected function arities. Exact macro invocations emit a
