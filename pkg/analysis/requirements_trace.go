@@ -2,6 +2,8 @@ package analysis
 
 import (
 	"fmt"
+	"reflect"
+	"sort"
 	"strings"
 )
 
@@ -30,6 +32,12 @@ type requirementTraceDiagnostic struct {
 	eventOrdinal        int
 }
 
+type requirementTracePath struct {
+	Ordinal   int
+	Trace     *requirementTrace
+	Reachable bool
+}
+
 type requirementField struct {
 	identity    fieldIdentity
 	source      bool
@@ -55,6 +63,207 @@ func newRequirementTrace() *requirementTrace {
 		incompleteStageIDs:      map[string]struct{}{},
 		syntaxComplete:          true,
 		semanticComplete:        true,
+	}
+}
+
+func (t *requirementTrace) clone() *requirementTrace {
+	if t == nil {
+		return nil
+	}
+	out := &requirementTrace{
+		references:              make([]requirementTraceReference, len(t.references)),
+		diagnostics:             make([]requirementTraceDiagnostic, len(t.diagnostics)),
+		pendingReferenceIndexes: make(map[string]int, len(t.pendingReferenceIndexes)),
+		incompleteStageIDs:      make(map[string]struct{}, len(t.incompleteStageIDs)),
+		syntaxComplete:          t.syntaxComplete,
+		semanticComplete:        t.semanticComplete,
+		nextOrdinal:             t.nextOrdinal,
+	}
+	for i, entry := range t.references {
+		entry.reference = cloneTraceReference(entry.reference)
+		out.references[i] = entry
+	}
+	for i, entry := range t.diagnostics {
+		entry.pendingReferenceIDs = append([]string{}, entry.pendingReferenceIDs...)
+		out.diagnostics[i] = entry
+	}
+	for id, index := range t.pendingReferenceIndexes {
+		out.pendingReferenceIndexes[id] = index
+	}
+	for id := range t.incompleteStageIDs {
+		out.incompleteStageIDs[id] = struct{}{}
+	}
+	return out
+}
+
+func (t *requirementTrace) forkBranch() *requirementTrace {
+	return t.clone()
+}
+
+type requirementTraceMergeKey struct {
+	kind       string
+	identity   string
+	role       string
+	resolution string
+}
+
+type requirementTraceMergeEvent struct {
+	branchOrdinal int
+	eventOrdinal  int
+	location      Location
+	reference     *requirementTraceReference
+	diagnostic    *requirementTraceDiagnostic
+}
+
+func mergeRequirementTraces(base *requirementTrace, paths []requirementTracePath) *requirementTrace {
+	if base == nil {
+		return nil
+	}
+	reachable := make([]requirementTracePath, 0, len(paths))
+	for _, path := range paths {
+		if path.Reachable && path.Trace != nil {
+			reachable = append(reachable, path)
+		}
+	}
+	sort.SliceStable(reachable, func(i, j int) bool { return reachable[i].Ordinal < reachable[j].Ordinal })
+	if len(reachable) == 0 {
+		return base.clone()
+	}
+
+	directPathCounts := map[requirementTraceMergeKey]int{}
+	events := []requirementTraceMergeEvent{}
+	for _, path := range reachable {
+		assertRequirementTracePrefix(base, path.Trace)
+		pathDirect := map[requirementTraceMergeKey]bool{}
+		for i := len(base.references); i < len(path.Trace.references); i++ {
+			entry := path.Trace.references[i]
+			copy := entry
+			copy.reference = cloneTraceReference(entry.reference)
+			events = append(events, requirementTraceMergeEvent{
+				branchOrdinal: path.Ordinal,
+				eventOrdinal:  entry.eventOrdinal,
+				location:      entry.reference.Location,
+				reference:     &copy,
+			})
+			if entry.directExternal {
+				pathDirect[requirementTraceKey(entry)] = true
+			}
+		}
+		for key := range pathDirect {
+			directPathCounts[key]++
+		}
+		for i := len(base.diagnostics); i < len(path.Trace.diagnostics); i++ {
+			entry := path.Trace.diagnostics[i]
+			copy := entry
+			copy.pendingReferenceIDs = append([]string{}, entry.pendingReferenceIDs...)
+			events = append(events, requirementTraceMergeEvent{
+				branchOrdinal: path.Ordinal,
+				eventOrdinal:  entry.eventOrdinal,
+				location:      entry.diagnostic.Location,
+				diagnostic:    &copy,
+			})
+		}
+	}
+	sort.SliceStable(events, func(i, j int) bool {
+		left, right := events[i], events[j]
+		if left.location.Start.Offset != right.location.Start.Offset {
+			return left.location.Start.Offset < right.location.Start.Offset
+		}
+		if left.location.End.Offset != right.location.End.Offset {
+			return left.location.End.Offset < right.location.End.Offset
+		}
+		if left.branchOrdinal != right.branchOrdinal {
+			return left.branchOrdinal < right.branchOrdinal
+		}
+		return left.eventOrdinal < right.eventOrdinal
+	})
+
+	merged := base.clone()
+	for _, path := range reachable {
+		merged.syntaxComplete = merged.syntaxComplete && path.Trace.syntaxComplete
+		merged.semanticComplete = merged.semanticComplete && path.Trace.semanticComplete
+		for stageID := range path.Trace.incompleteStageIDs {
+			merged.incompleteStageIDs[stageID] = struct{}{}
+		}
+	}
+	for _, event := range events {
+		ordinal := merged.nextEvent()
+		if event.reference != nil {
+			entry := *event.reference
+			if entry.directExternal || entry.conditional {
+				if entry.directExternal && directPathCounts[requirementTraceKey(entry)] == len(reachable) {
+					entry.directExternal = true
+					entry.conditional = false
+				} else {
+					entry.directExternal = false
+					entry.conditional = true
+				}
+			}
+			merged.recordReference(entry.reference, entry.directExternal, entry.conditional, ordinal)
+			continue
+		}
+		entry := *event.diagnostic
+		merged.recordDiagnostic(entry.diagnostic, entry.incomplete, entry.pendingReferenceIDs, ordinal)
+	}
+	return merged
+}
+
+// Lazy declaration binding can extend the canonical trace after a branch was
+// forked. Rebase keeps that branch's immutable suffix exactly once.
+func rebaseRequirementTrace(oldBase, newBase, branch *requirementTrace) *requirementTrace {
+	if oldBase == nil || newBase == nil || branch == nil {
+		panic("requirement trace rebase requires old base, new base, and branch")
+	}
+	assertRequirementTracePrefix(oldBase, branch)
+	rebased := newBase.clone()
+	rebased.syntaxComplete = rebased.syntaxComplete && branch.syntaxComplete
+	rebased.semanticComplete = rebased.semanticComplete && branch.semanticComplete
+	for stageID := range branch.incompleteStageIDs {
+		rebased.incompleteStageIDs[stageID] = struct{}{}
+	}
+
+	events := make([]requirementTraceMergeEvent, 0, len(branch.references)-len(oldBase.references)+len(branch.diagnostics)-len(oldBase.diagnostics))
+	for i := len(oldBase.references); i < len(branch.references); i++ {
+		entry := branch.references[i]
+		copy := entry
+		copy.reference = cloneTraceReference(entry.reference)
+		events = append(events, requirementTraceMergeEvent{eventOrdinal: entry.eventOrdinal, reference: &copy})
+	}
+	for i := len(oldBase.diagnostics); i < len(branch.diagnostics); i++ {
+		entry := branch.diagnostics[i]
+		copy := entry
+		copy.pendingReferenceIDs = append([]string{}, entry.pendingReferenceIDs...)
+		events = append(events, requirementTraceMergeEvent{eventOrdinal: entry.eventOrdinal, diagnostic: &copy})
+	}
+	sort.SliceStable(events, func(i, j int) bool { return events[i].eventOrdinal < events[j].eventOrdinal })
+	for _, event := range events {
+		ordinal := rebased.nextEvent()
+		if event.reference != nil {
+			entry := *event.reference
+			rebased.recordReference(entry.reference, entry.directExternal, entry.conditional, ordinal)
+			continue
+		}
+		entry := *event.diagnostic
+		rebased.recordDiagnostic(entry.diagnostic, entry.incomplete, entry.pendingReferenceIDs, ordinal)
+	}
+	return rebased
+}
+
+func requirementTraceKey(entry requirementTraceReference) requirementTraceMergeKey {
+	return requirementTraceMergeKey{
+		kind:       entry.reference.Kind,
+		identity:   entry.reference.NormalizedName,
+		role:       entry.reference.Role,
+		resolution: entry.reference.Resolution,
+	}
+}
+
+func assertRequirementTracePrefix(base, branch *requirementTrace) {
+	if len(branch.references) < len(base.references) || len(branch.diagnostics) < len(base.diagnostics) {
+		panic("requirement trace branch does not contain its base prefix")
+	}
+	if !reflect.DeepEqual(branch.references[:len(base.references)], base.references) || !reflect.DeepEqual(branch.diagnostics[:len(base.diagnostics)], base.diagnostics) {
+		panic("requirement trace branch changed its immutable base prefix")
 	}
 }
 

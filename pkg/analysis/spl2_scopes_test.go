@@ -1,6 +1,10 @@
 package analysis
 
-import "testing"
+import (
+	"reflect"
+	"strings"
+	"testing"
+)
 
 func TestSPL2ScopesTypedOwnership(t *testing.T) {
 	query := `FROM main | eval a=[{key:"[|]"}], b=($x)->{return $x;} | append [FROM other | appendpipe [eval nested=1]] | if (flag=true) [fields a] else [where flag=false]`
@@ -81,4 +85,211 @@ func TestSPL2ScopesRecovery(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestSPL2ScopeSchedulerReturnsChildEnvironmentAndTraceFork(t *testing.T) {
+	query := `FROM main | appendpipe [eval child=1]`
+	parsed := parseSPL2Document(query)
+	if !parsed.syntaxComplete {
+		t.Fatalf("syntax: %+v", parsed.diagnostics)
+	}
+	trace := newRequirementTrace()
+	result := newResult(QueryDocument{Text: query, Language: "spl2", Profile: "splunkd", Version: "current"})
+	result.Scopes = append(result.Scopes, Scope{ID: "scope-0", Kind: "root", Location: parsed.source.location(0, len(parsed.source.positions)-1)})
+	scheduler := &spl2ScopeScheduler{
+		result:   result,
+		parsed:   parsed,
+		trace:    trace,
+		children: spl2ChildScopes(parsed),
+		executed: map[int]bool{},
+	}
+	parent := closedMergeEnvironment()
+	parent.requirements.trace = trace
+	root := atomicFieldIdentity("root")
+	installMergeField(parent, root, []string{"pending-root"})
+
+	execution, ok := scheduler.executeChild(0, parent, map[string]bool{}, "scope-0", -1)
+	if !ok || execution.Environment == nil || execution.Trace == nil {
+		t.Fatalf("child execution = %+v ok=%t", execution, ok)
+	}
+	if execution.Trace == trace || len(trace.references) != 0 || len(execution.Trace.references) == 0 {
+		t.Fatalf("child trace did not fork: parent=%p/%+v child=%p/%+v", trace, trace.references, execution.Trace, execution.Trace.references)
+	}
+	if _, ok := parent.field(atomicFieldIdentity("child")); ok {
+		t.Fatal("child output escaped into parent environment")
+	}
+	if child, ok := execution.Environment.field(atomicFieldIdentity("child")); !ok || child.Conditional {
+		t.Fatalf("returned child output = %+v known=%t", child, ok)
+	}
+	if inherited, ok := execution.Environment.field(root); !ok || inherited.Conditional {
+		t.Fatalf("returned child lost inherited input = %+v known=%t", inherited, ok)
+	}
+}
+
+func TestSPL2ScopeLocalViewChildPreservesFork(t *testing.T) {
+	query := `$base = FROM synthetic_events | fields value; $out = FROM main | append [FROM $base | where value>0];`
+	result, trace, err := analyzeRewriteWithTrace(QueryDocument{Text: query, Language: "spl2"}, nil, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if result.Status != Incomplete || result.Coverage.SemanticComplete {
+		t.Fatalf("append boundary = status %s coverage %+v diagnostics %+v", result.Status, result.Coverage, result.Diagnostics)
+	}
+	trace.assertReferences(result.References)
+
+	var summaryRead, childRead *Reference
+	var viewRead *Reference
+	for i := range result.References {
+		reference := &result.References[i]
+		switch {
+		case reference.Kind == "view" && reference.NormalizedName == "$base":
+			viewRead = reference
+		case reference.Kind == "field" && reference.NormalizedName == "value" && reference.ScopeID == "scope-1":
+			summaryRead = reference
+		case reference.Kind == "field" && reference.NormalizedName == "value" && reference.ScopeID != "scope-1":
+			childRead = reference
+		}
+	}
+	if summaryRead == nil || viewRead == nil || childRead == nil {
+		t.Fatalf("local-view child evidence missing: %+v", result.References)
+	}
+	if childRead.Binding != "source" || !reflect.DeepEqual(childRead.OriginReferenceIDs, []string{summaryRead.ID}) {
+		t.Fatalf("child local-view origin = %+v want summary %s", childRead, summaryRead.ID)
+	}
+	entries := requirementTraceReferencesByID(trace)
+	for _, reference := range []*Reference{viewRead, childRead} {
+		entry, ok := entries[reference.ID]
+		if !ok || entry.reference.ScopeID != reference.ScopeID || entry.reference.StageID != reference.StageID {
+			t.Fatalf("child evidence missing from forked trace for %s: %+v", reference.ID, entry)
+		}
+	}
+	foundSummary := false
+	for _, lineage := range result.Lineage {
+		for _, field := range lineage.After.Fields {
+			if lineage.ScopeID == childRead.ScopeID && field.Name == "value" && reflect.DeepEqual(field.OriginReferenceIDs, []string{summaryRead.ID}) {
+				foundSummary = true
+			}
+		}
+	}
+	if !foundSummary {
+		t.Fatalf("child lineage lost local-view summary: %+v", result.Lineage)
+	}
+}
+
+func TestSPL2ScopeForwardLocalViewPipelineChildPreservesFork(t *testing.T) {
+	query := `$out = FROM main | append [FROM $base | where value>0]; $base = FROM synthetic_events | fields value;`
+	result := assertSPL2ForwardLocalViewChild(t, query)
+	if result.Status != Incomplete || result.Coverage.SemanticComplete {
+		t.Fatalf("append boundary = status %s coverage %+v diagnostics %+v", result.Status, result.Coverage, result.Diagnostics)
+	}
+}
+
+func TestSPL2ScopeForwardLocalViewSQLChildPreservesFork(t *testing.T) {
+	query := `$out = FROM main AS m WHERE EXISTS(SELECT value FROM $base WHERE value>0) SELECT m.id; $base = FROM synthetic_events | fields value;`
+	result := assertSPL2ForwardLocalViewChild(t, query)
+	if result.Status != Invalid || !result.Coverage.SyntaxComplete {
+		t.Fatalf("SQL child contract = status %s coverage %+v diagnostics %+v", result.Status, result.Coverage, result.Diagnostics)
+	}
+	foundCorrelationDiagnostic := false
+	for _, diagnostic := range result.Diagnostics {
+		if diagnostic.Code == CodeSyntaxError && strings.Contains(diagnostic.Message, "requires equality correlation") {
+			foundCorrelationDiagnostic = true
+			break
+		}
+	}
+	if !foundCorrelationDiagnostic {
+		t.Fatalf("SQL child lost existing correlation diagnostic: %+v", result.Diagnostics)
+	}
+}
+
+func TestSPL2ScopeForwardLocalViewRepeatedChildrenDoNotDuplicateSuffixes(t *testing.T) {
+	query := `$out = FROM main | append [FROM $base | where value>0] | append [FROM $base | where value<10]; $base = FROM synthetic_events | fields value;`
+	result := assertSPL2ForwardLocalViewChild(t, query)
+	viewReads, childReads := 0, 0
+	for _, reference := range result.References {
+		if reference.Kind == "view" && reference.NormalizedName == "$base" {
+			viewReads++
+		}
+		if reference.Kind == "field" && reference.NormalizedName == "value" && len(reference.OriginReferenceIDs) > 0 {
+			childReads++
+		}
+	}
+	if viewReads != 2 || childReads != 2 {
+		t.Fatalf("repeated forward-view suffixes = view reads %d child reads %d: %+v", viewReads, childReads, result.References)
+	}
+}
+
+func TestSPL2ScopeForwardLocalViewNestedChildDoesNotDuplicateSuffixes(t *testing.T) {
+	query := `$out = FROM main | append [FROM other | append [FROM $base | where value>0]]; $base = FROM synthetic_events | fields value;`
+	result := assertSPL2ForwardLocalViewChild(t, query)
+	viewReads := 0
+	for _, reference := range result.References {
+		if reference.Kind == "view" && reference.NormalizedName == "$base" {
+			viewReads++
+		}
+	}
+	if viewReads != 1 {
+		t.Fatalf("nested forward-view suffix duplicated %d times: %+v", viewReads, result.References)
+	}
+}
+
+func assertSPL2ForwardLocalViewChild(t *testing.T, query string) *Result {
+	t.Helper()
+	result, trace, err := analyzeRewriteWithTrace(QueryDocument{Text: query, Language: "spl2"}, nil, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	trace.assertReferences(result.References)
+	seenTraceIDs := map[string]bool{}
+	for _, entry := range trace.references {
+		if seenTraceIDs[entry.reference.ID] {
+			t.Fatalf("parent trace was mutated before child reconciliation: duplicate %s in %+v", entry.reference.ID, trace.references)
+		}
+		seenTraceIDs[entry.reference.ID] = true
+	}
+
+	stageCommands := map[string]string{}
+	for _, stage := range result.Stages {
+		stageCommands[stage.ID] = stage.Command
+	}
+	var summaryRead, viewRead *Reference
+	childReads := []*Reference{}
+	for i := range result.References {
+		reference := &result.References[i]
+		switch {
+		case reference.Kind == "view" && reference.NormalizedName == "$base":
+			viewRead = reference
+		case reference.Kind == "field" && reference.NormalizedName == "value" && stageCommands[reference.StageID] == "fields":
+			summaryRead = reference
+		case reference.Kind == "field" && reference.NormalizedName == "value":
+			childReads = append(childReads, reference)
+		}
+	}
+	if summaryRead == nil || viewRead == nil || len(childReads) == 0 {
+		t.Fatalf("forward local-view child evidence missing: %+v", result.References)
+	}
+	entries := requirementTraceReferencesByID(trace)
+	if _, ok := entries[viewRead.ID]; !ok {
+		t.Fatalf("view read %s missing from child trace", viewRead.ID)
+	}
+	for _, childRead := range childReads {
+		if childRead.Binding != "source" || !reflect.DeepEqual(childRead.OriginReferenceIDs, []string{summaryRead.ID}) {
+			t.Fatalf("forward child local-view origin = %+v want summary %s", childRead, summaryRead.ID)
+		}
+		if _, ok := entries[childRead.ID]; !ok {
+			t.Fatalf("child field read %s missing from reconciled trace", childRead.ID)
+		}
+	}
+	foundSummary := false
+	for _, lineage := range result.Lineage {
+		for _, field := range lineage.After.Fields {
+			if field.Name == "value" && reflect.DeepEqual(field.OriginReferenceIDs, []string{summaryRead.ID}) {
+				foundSummary = true
+			}
+		}
+	}
+	if !foundSummary {
+		t.Fatalf("forward child lineage lost local-view summary: %+v", result.Lineage)
+	}
+	return result
 }

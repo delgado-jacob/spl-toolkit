@@ -86,6 +86,12 @@ type spl2ScopeScheduler struct {
 	program                *spl2Program
 }
 
+type spl2ChildExecution struct {
+	Environment *environment
+	Trace       *requirementTrace
+	Ordinal     int
+}
+
 // Keep parser-recovery ownership and the incomplete-stage index current before
 // field transfers consume them. Synchronization changes neither diagnostic
 // cardinality nor semantic event order.
@@ -194,33 +200,72 @@ func (q *spl2ScopeScheduler) runChildren(ctx antlr.ParserRuleContext, env *envir
 		if child.parent != parent || q.executed[i] || !spl2Within(child.owner, ctx) {
 			continue
 		}
-		q.executed[i] = true
-		ownerStage := ""
-		// The phase/stage is already registered, even when SQL lexical registration
-		// precedes execution. Prefer the narrowest containing clause.
-		for _, stage := range q.result.Stages {
-			if stage.ScopeID == scopeID && stage.Location.Start.Offset <= child.location.Start.Offset && stage.Location.End.Offset >= child.location.End.Offset {
-				ownerStage = stage.ID
-			}
+		execution, ok := q.executeChild(i, env, aliases, scopeID, parent)
+		if !ok || env.requirements.trace == nil || execution.Trace == nil {
+			continue
 		}
-		id := fmt.Sprintf("scope-%d", len(q.result.Scopes))
-		q.result.Scopes = append(q.result.Scopes, Scope{ID: id, ParentID: scopeID, Kind: child.kind, StageID: ownerStage, Location: child.location})
-		input := newEnvironmentWithRequirementTrace(env.requirements.trace)
-		localAliases := map[string]bool{}
-		if child.input == "inherited" {
-			input = env.clone()
-		}
-		if child.input != "independent" {
-			for name, value := range aliases {
-				localAliases[name] = value
-			}
-		}
-		if sql, ok := child.body.(spl2SQLCommand); ok {
-			executeSPL2SQL(q.result, q.parsed, q.refinement, sql, input, localAliases, q, id, i, 0)
-		} else {
-			q.pipeline(spl2Sites(spl2PipelineContexts(child.body), q.parsed.source), input, localAliases, id, i)
+		merged := mergeRequirementTraces(env.requirements.trace, []requirementTracePath{{Ordinal: execution.Ordinal, Trace: execution.Trace, Reachable: true}})
+		*env.requirements.trace = *merged
+	}
+}
+
+func (q *spl2ScopeScheduler) executeChild(index int, env *environment, aliases map[string]bool, scopeID string, parent int) (spl2ChildExecution, bool) {
+	if index < 0 || index >= len(q.children) || env == nil || q.executed[index] {
+		return spl2ChildExecution{}, false
+	}
+	child := q.children[index]
+	if child.parent != parent {
+		return spl2ChildExecution{}, false
+	}
+	q.executed[index] = true
+	ownerStage := ""
+	// The phase/stage is already registered, even when SQL lexical registration
+	// precedes execution. Prefer the narrowest containing clause.
+	for _, stage := range q.result.Stages {
+		if stage.ScopeID == scopeID && stage.Location.Start.Offset <= child.location.Start.Offset && stage.Location.End.Offset >= child.location.End.Offset {
+			ownerStage = stage.ID
 		}
 	}
+	id := fmt.Sprintf("scope-%d", len(q.result.Scopes))
+	q.result.Scopes = append(q.result.Scopes, Scope{ID: id, ParentID: scopeID, Kind: child.kind, StageID: ownerStage, Location: child.location})
+
+	var canonicalBefore *requirementTrace
+	if env.requirements.trace != nil && q.trace != nil && env.requirements.trace != q.trace {
+		canonicalBefore = q.trace.clone()
+	}
+	var fork *requirementTrace
+	input := newEnvironmentWithRequirementTrace(nil)
+	localAliases := map[string]bool{}
+	if child.input == "inherited" {
+		input = env.forkBranch()
+		fork = input.requirements.trace
+	} else if env.requirements.trace != nil {
+		fork = env.requirements.trace.forkBranch()
+		input.requirements.trace = fork
+	}
+	if child.input != "independent" {
+		for name, value := range aliases {
+			localAliases[name] = value
+		}
+	}
+	output := input
+	if sql, ok := child.body.(spl2SQLCommand); ok {
+		output = executeSPL2SQL(q.result, q.parsed, q.refinement, sql, input, localAliases, q, id, index, 0)
+	} else {
+		output = q.pipeline(spl2Sites(spl2PipelineContexts(child.body), q.parsed.source), input, localAliases, id, index)
+	}
+	q.syncParserDiagnostics()
+	if canonicalBefore != nil {
+		env.requirements.trace = rebaseRequirementTrace(canonicalBefore, q.trace, env.requirements.trace)
+	}
+	if env.requirements.trace != nil && env.requirements.trace != q.trace {
+		env.requirements.trace.syncParserDiagnostics(q.result.Diagnostics[:q.initialDiagnosticCount])
+	}
+	outputTrace := output.requirements.trace
+	if outputTrace != nil {
+		outputTrace.syncParserDiagnostics(q.result.Diagnostics[:q.initialDiagnosticCount])
+	}
+	return spl2ChildExecution{Environment: output, Trace: outputTrace, Ordinal: index}, true
 }
 
 func spl2Within(child, owner antlr.ParserRuleContext) bool {

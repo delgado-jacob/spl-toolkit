@@ -97,6 +97,7 @@ pkg/analysis/dependencies.go
 pkg/analysis/diagnostics.go
 pkg/analysis/field_identity.go
 pkg/analysis/flow.go
+pkg/analysis/flow_merge.go
 pkg/analysis/functions.go
 pkg/analysis/model.go
 pkg/analysis/options.go

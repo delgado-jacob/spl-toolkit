@@ -408,10 +408,19 @@ func (p *spl2Program) resolveViewSource(stage *spl2SemanticStage, parameter spl2
 		return false
 	}
 	location := p.parsed.source.contextLocation(parameter)
+	callerTrace := stage.env.requirements.trace
 	stage.referenceAt(location, name, "view", "read", "exact")
+	var canonicalBefore *requirementTrace
+	if callerTrace != nil && p.trace != nil && callerTrace != p.trace {
+		canonicalBefore = p.trace.clone()
+	}
 	summary, complete := p.bindView(view)
+	if canonicalBefore != nil {
+		callerTrace = rebaseRequirementTrace(canonicalBefore, p.trace, callerTrace)
+		stage.env.requirements.trace = callerTrace
+	}
 	if summary != nil {
-		stage.env = summary
+		stage.env = summary.cloneWithRequirementTrace(callerTrace)
 	}
 	if !complete {
 		if view.parserTainted && len(p.viewStack) > 0 {

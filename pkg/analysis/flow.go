@@ -76,11 +76,16 @@ func (e *environment) snapshot() FieldState {
 	return s
 }
 func (e *environment) clone() *environment {
-	n := newEnvironmentWithRequirementTrace(e.requirements.trace)
+	return e.cloneWithRequirementTrace(e.requirements.trace)
+}
+
+func (e *environment) cloneWithRequirementTrace(trace *requirementTrace) *environment {
+	n := newEnvironmentWithRequirementTrace(trace)
 	n.rewrite = e.rewrite.clone()
 	n.open = e.open
 	n.uncertain = e.uncertain
 	n.requirements = e.requirements.clone()
+	n.requirements.trace = trace
 	for k, v := range e.fields {
 		v.OriginReferenceIDs = copyIDs(v.OriginReferenceIDs)
 		v.identity = v.identity.clone()
@@ -98,6 +103,13 @@ func (e *environment) clone() *environment {
 		n.ambiguous[name] = ambiguous
 	}
 	return n
+}
+
+func (e *environment) forkBranch() *environment {
+	if e.requirements.trace == nil {
+		return e.clone()
+	}
+	return e.cloneWithRequirementTrace(e.requirements.trace.forkBranch())
 }
 func (e *environment) remove(name string) {
 	e.removeIdentity(atomicFieldIdentity(name))

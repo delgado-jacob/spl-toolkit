@@ -1544,3 +1544,219 @@ func marshalRequirementTrace(t *testing.T, trace *requirementTrace) []byte {
 	}
 	return encoded
 }
+
+func mergeTraceReference(id, identity string, offset int) Reference {
+	return Reference{
+		ID:                 id,
+		OriginalName:       identity,
+		NormalizedName:     identity,
+		Kind:               "dataset",
+		Role:               "read",
+		StageID:            "stage-0",
+		ScopeID:            "scope-0",
+		Location:           Location{Start: Position{Offset: offset}, End: Position{Offset: offset + 1}},
+		Resolution:         "exact",
+		Binding:            "not_applicable",
+		OriginReferenceIDs: []string{},
+	}
+}
+
+func appendMergeTraceReference(trace *requirementTrace, id, identity string, offset int) {
+	trace.recordReference(mergeTraceReference(id, identity, offset), true, false, trace.nextEvent())
+}
+
+func TestRequirementTraceForkKeepsSharedPrefixImmutableAndSuffixesIndependent(t *testing.T) {
+	base := newRequirementTrace()
+	appendMergeTraceReference(base, "pending-prefix", "prefix", 1)
+	left := base.forkBranch()
+	right := base.forkBranch()
+	appendMergeTraceReference(left, "pending-left", "left", 2)
+	appendMergeTraceReference(right, "pending-right", "right", 3)
+
+	if got := []string{base.references[0].pendingID}; len(base.references) != 1 || !reflect.DeepEqual(got, []string{"pending-prefix"}) {
+		t.Fatalf("base trace changed after forks: %+v", base.references)
+	}
+	if len(left.references) != 2 || left.references[1].pendingID != "pending-left" || len(right.references) != 2 || right.references[1].pendingID != "pending-right" {
+		t.Fatalf("fork suffixes leaked: left=%+v right=%+v", left.references, right.references)
+	}
+}
+
+func TestRequirementTraceMergeMakesEveryPathObligationRequired(t *testing.T) {
+	base := newRequirementTrace()
+	left := base.forkBranch()
+	right := base.forkBranch()
+	appendMergeTraceReference(left, "pending-left", "shared", 10)
+	appendMergeTraceReference(right, "pending-right", "shared", 20)
+
+	merged := mergeRequirementTraces(base, []requirementTracePath{
+		{Ordinal: 0, Trace: left, Reachable: true},
+		{Ordinal: 1, Trace: right, Reachable: true},
+	})
+	if len(merged.references) != 2 {
+		t.Fatalf("merged references = %+v", merged.references)
+	}
+	for _, entry := range merged.references {
+		if !entry.directExternal || entry.conditional {
+			t.Fatalf("every-path obligation was not required: %+v", entry)
+		}
+	}
+	projected := mustProjectRequirements(t, merged)
+	if len(projected.Items) != 1 || projected.Items[0].Necessity != "required" || len(projected.Items[0].Occurrences) != 2 {
+		t.Fatalf("every-path projection = %+v", projected.Items)
+	}
+}
+
+func TestRequirementTraceMergeMakesSubsetObligationConditional(t *testing.T) {
+	base := newRequirementTrace()
+	left := base.forkBranch()
+	right := base.forkBranch()
+	appendMergeTraceReference(left, "pending-left", "left-only", 10)
+
+	merged := mergeRequirementTraces(base, []requirementTracePath{
+		{Ordinal: 0, Trace: left, Reachable: true},
+		{Ordinal: 1, Trace: right, Reachable: true},
+	})
+	if len(merged.references) != 1 || merged.references[0].directExternal || !merged.references[0].conditional {
+		t.Fatalf("subset obligation = %+v", merged.references)
+	}
+	projected := mustProjectRequirements(t, merged)
+	if len(projected.Items) != 1 || projected.Items[0].Necessity != "conditional" || len(projected.Items[0].Occurrences) != 1 {
+		t.Fatalf("subset projection = %+v", projected.Items)
+	}
+}
+
+func TestRequirementTraceMergeSupportsNestedForks(t *testing.T) {
+	base := newRequirementTrace()
+	outer := base.forkBranch()
+	appendMergeTraceReference(outer, "pending-outer", "outer", 5)
+	innerLeft := outer.forkBranch()
+	innerRight := outer.forkBranch()
+	appendMergeTraceReference(innerLeft, "pending-inner-left", "inner", 10)
+	appendMergeTraceReference(innerRight, "pending-inner-right", "inner", 20)
+	mergedInner := mergeRequirementTraces(outer, []requirementTracePath{
+		{Ordinal: 0, Trace: innerLeft, Reachable: true},
+		{Ordinal: 1, Trace: innerRight, Reachable: true},
+	})
+	otherOuter := base.forkBranch()
+	appendMergeTraceReference(otherOuter, "pending-other", "other", 30)
+
+	mergedOuter := mergeRequirementTraces(base, []requirementTracePath{
+		{Ordinal: 0, Trace: mergedInner, Reachable: true},
+		{Ordinal: 1, Trace: otherOuter, Reachable: true},
+	})
+	want := []string{"pending-outer", "pending-inner-left", "pending-inner-right", "pending-other"}
+	got := make([]string, 0, len(mergedOuter.references))
+	for _, entry := range mergedOuter.references {
+		got = append(got, entry.pendingID)
+	}
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("nested merged order = %v want %v", got, want)
+	}
+	if mergedOuter.references[1].directExternal || !mergedOuter.references[1].conditional || mergedOuter.references[2].directExternal || !mergedOuter.references[2].conditional {
+		t.Fatalf("nested subset necessity was lost: %+v", mergedOuter.references)
+	}
+}
+
+func TestRequirementTraceMergeIgnoresUnreachablePaths(t *testing.T) {
+	base := newRequirementTrace()
+	reachable := base.forkBranch()
+	unreachable := base.forkBranch()
+	appendMergeTraceReference(reachable, "pending-live", "live", 10)
+	appendMergeTraceReference(unreachable, "pending-dead", "dead", 1)
+
+	merged := mergeRequirementTraces(base, []requirementTracePath{
+		{Ordinal: 0, Trace: unreachable, Reachable: false},
+		{Ordinal: 1, Trace: reachable, Reachable: true},
+	})
+	if len(merged.references) != 1 || merged.references[0].pendingID != "pending-live" || !merged.references[0].directExternal || merged.references[0].conditional {
+		t.Fatalf("unreachable path contributed requirements: %+v", merged.references)
+	}
+}
+
+func TestRequirementTraceMergeOrdersOccurrencesByLocationBranchAndEvent(t *testing.T) {
+	base := newRequirementTrace()
+	left := base.forkBranch()
+	right := base.forkBranch()
+	appendMergeTraceReference(left, "pending-late", "shared", 30)
+	appendMergeTraceReference(left, "pending-left-first", "shared", 10)
+	appendMergeTraceReference(left, "pending-left-second", "shared", 10)
+	appendMergeTraceReference(right, "pending-right", "shared", 10)
+
+	merged := mergeRequirementTraces(base, []requirementTracePath{
+		{Ordinal: 7, Trace: right, Reachable: true},
+		{Ordinal: 3, Trace: left, Reachable: true},
+	})
+	want := []string{"pending-left-first", "pending-left-second", "pending-right", "pending-late"}
+	got := make([]string, 0, len(merged.references))
+	for _, entry := range merged.references {
+		got = append(got, entry.pendingID)
+	}
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("merged occurrence order = %v want %v", got, want)
+	}
+}
+
+func TestRequirementTraceMergeIsRepeatableAndDoesNotMutateInputs(t *testing.T) {
+	base := newRequirementTrace()
+	appendMergeTraceReference(base, "pending-prefix", "prefix", 1)
+	left := base.forkBranch()
+	right := base.forkBranch()
+	appendMergeTraceReference(left, "pending-left", "shared", 10)
+	appendMergeTraceReference(right, "pending-right", "shared", 20)
+	baseBefore := marshalRequirementTrace(t, base)
+	leftBefore := marshalRequirementTrace(t, left)
+	rightBefore := marshalRequirementTrace(t, right)
+	paths := []requirementTracePath{
+		{Ordinal: 0, Trace: left, Reachable: true},
+		{Ordinal: 1, Trace: right, Reachable: true},
+	}
+
+	first := mergeRequirementTraces(base, paths)
+	second := mergeRequirementTraces(base, paths)
+	if !reflect.DeepEqual(marshalRequirementTrace(t, first), marshalRequirementTrace(t, second)) {
+		t.Fatalf("repeated trace merges differ: first=%+v second=%+v", first, second)
+	}
+	if !reflect.DeepEqual(marshalRequirementTrace(t, base), baseBefore) || !reflect.DeepEqual(marshalRequirementTrace(t, left), leftBefore) || !reflect.DeepEqual(marshalRequirementTrace(t, right), rightBefore) {
+		t.Fatal("trace merge mutated an input")
+	}
+}
+
+func TestRequirementTraceRebaseRetainsSuffixExactlyOnceWithoutMutation(t *testing.T) {
+	oldBase := newRequirementTrace()
+	appendMergeTraceReference(oldBase, "pending-prefix", "prefix", 1)
+	branch := oldBase.forkBranch()
+	appendMergeTraceReference(branch, "pending-child-first", "child", 5)
+	appendMergeTraceReference(branch, "pending-child-second", "child", 6)
+	newBase := oldBase.clone()
+	appendMergeTraceReference(newBase, "pending-lazy", "lazy", 20)
+	oldBefore := marshalRequirementTrace(t, oldBase)
+	branchBefore := marshalRequirementTrace(t, branch)
+	newBefore := marshalRequirementTrace(t, newBase)
+
+	rebased := rebaseRequirementTrace(oldBase, newBase, branch)
+	want := []string{"pending-prefix", "pending-lazy", "pending-child-first", "pending-child-second"}
+	got := make([]string, 0, len(rebased.references))
+	for _, entry := range rebased.references {
+		got = append(got, entry.pendingID)
+	}
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("rebased trace = %v want %v", got, want)
+	}
+	if !reflect.DeepEqual(marshalRequirementTrace(t, oldBase), oldBefore) || !reflect.DeepEqual(marshalRequirementTrace(t, branch), branchBefore) || !reflect.DeepEqual(marshalRequirementTrace(t, newBase), newBefore) {
+		t.Fatal("trace rebase mutated an input")
+	}
+}
+
+func TestRequirementTraceRebaseRejectsChangedPrefix(t *testing.T) {
+	oldBase := newRequirementTrace()
+	appendMergeTraceReference(oldBase, "pending-prefix", "prefix", 1)
+	branch := oldBase.forkBranch()
+	branch.references[0].reference.NormalizedName = "changed"
+
+	defer func() {
+		if recover() == nil {
+			t.Fatal("trace rebase silently accepted a changed immutable prefix")
+		}
+	}()
+	rebaseRequirementTrace(oldBase, oldBase, branch)
+}
