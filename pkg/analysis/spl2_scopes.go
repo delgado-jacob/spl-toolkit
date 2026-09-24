@@ -83,14 +83,21 @@ type spl2ScopeScheduler struct {
 	initialDiagnosticCount int
 	children               []spl2ChildScope
 	executed               map[int]bool
+	program                *spl2Program
 }
 
-// Stage registration assigns parser-recovery diagnostics to their canonical
-// owners. Keep the query-only copies and incomplete-stage index current before
-// field transfers consume that ownership. Synchronization changes neither
-// diagnostic cardinality nor semantic event order.
+// Keep parser-recovery ownership and the incomplete-stage index current before
+// field transfers consume them. Synchronization changes neither diagnostic
+// cardinality nor semantic event order.
 func (q *spl2ScopeScheduler) syncParserDiagnostics() {
 	q.trace.syncParserDiagnostics(q.result.Diagnostics[:q.initialDiagnosticCount])
+}
+
+func (q *spl2ScopeScheduler) assignParserDiagnostics(stage int) {
+	if q.program != nil {
+		q.program.assignParserDiagnosticsToOwner(stage, q.result.Stages[stage].Location)
+	}
+	q.syncParserDiagnostics()
 }
 
 func spl2PipelineContexts(tree antlr.Tree) []antlr.ParserRuleContext {
@@ -128,9 +135,8 @@ func (q *spl2ScopeScheduler) pipeline(sites []spl2CommandSite, env *environment,
 		}
 		location, command := site.location, site.command
 		index := registerSPL2Stage(q.result, location, command, position, scopeID)
-		q.syncParserDiagnostics()
 		position++
-		s := &spl2SemanticStage{semanticStage: &semanticStage{result: q.result, stage: index, env: env, transitions: []Transition{}, refinement: q.refinement}, parsed2: q.parsed, aliases: aliases}
+		s := &spl2SemanticStage{semanticStage: &semanticStage{result: q.result, stage: index, env: env, transitions: []Transition{}, refinement: q.refinement}, parsed2: q.parsed, aliases: aliases, locals: map[string]bool{}, program: q.program}
 		before := env.snapshot()
 		if _, ok := ctx.(*spl2.TimewrapCommandContext); ok && spl2IntactSyntax(ctx) && siteIndex > 0 {
 			_, fromStart := sites[0].context.(*spl2.FromCommandContext)
@@ -155,8 +161,11 @@ func (q *spl2ScopeScheduler) pipeline(sites []spl2CommandSite, env *environment,
 		if ctx != nil {
 			q.runChildren(ctx, env, aliases, scopeID, parent)
 		}
+		q.assignParserDiagnostics(index)
 		if ctx != nil && spl2IntactSyntax(ctx) {
-			s.command(ctx)
+			if q.program == nil || !q.program.bindCommand(s, ctx) {
+				s.command(ctx)
+			}
 		} else {
 			pendingReferenceIDs := []string{}
 			if ctx != nil {

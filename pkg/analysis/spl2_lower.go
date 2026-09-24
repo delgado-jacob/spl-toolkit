@@ -12,34 +12,47 @@ import (
 // shared field-transfer kernel; its legacy SPL parser pointer stays nil.
 type spl2SemanticStage struct {
 	*semanticStage
-	parsed2  *spl2ParsedDocument
-	aliases  map[string]bool
-	locals   map[string]bool
-	readRole string
+	parsed2                    *spl2ParsedDocument
+	aliases                    map[string]bool
+	locals                     map[string]bool
+	functionSummary            *spl2FunctionSummary
+	program                    *spl2Program
+	readRole                   string
+	suppressLocalCallReference bool
 }
 
 func analyzeSPL2(result *Result, parsed *spl2ParsedDocument, refinement *sourceRefinement, trace *requirementTrace) {
-	result.Coverage.SyntaxComplete = parsed.syntaxComplete
-	result.Diagnostics = append(result.Diagnostics, parsed.diagnostics...)
+	diagnostics, syntaxComplete := spl2BoundProgramDiagnostics(parsed)
+	result.Coverage.SyntaxComplete = syntaxComplete
+	result.Diagnostics = append(result.Diagnostics, diagnostics...)
 	result.Scopes = append(result.Scopes, Scope{ID: "scope-0", Kind: "root", Location: parsed.source.location(0, len(parsed.source.positions)-1)})
-	if !parsed.syntaxComplete {
+	if !syntaxComplete {
 		result.Coverage.SemanticComplete = false
 	}
-	sites := spl2RecoverySites(parsed, result)
-	initialDiagnosticCount := len(result.Diagnostics)
-	trace.syntaxComplete = parsed.syntaxComplete
-	for _, diagnostic := range result.Diagnostics[:initialDiagnosticCount] {
-		trace.recordDiagnostic(diagnostic, true, nil, trace.nextEvent())
-	}
-	trees := []antlr.Tree{}
-	for _, site := range sites {
-		if site.context != nil {
-			trees = append(trees, site.context)
+	trace.syntaxComplete = syntaxComplete
+	if spl2BindableProgram(parsed) {
+		initialDiagnosticCount := len(result.Diagnostics)
+		for _, diagnostic := range result.Diagnostics[:initialDiagnosticCount] {
+			trace.recordDiagnostic(diagnostic, true, nil, trace.nextEvent())
 		}
+		program := collectSPL2Program(parsed)
+		program.bind(result, refinement, trace, initialDiagnosticCount)
+	} else {
+		sites := spl2RecoverySites(parsed, result)
+		initialDiagnosticCount := len(result.Diagnostics)
+		for _, diagnostic := range result.Diagnostics[:initialDiagnosticCount] {
+			trace.recordDiagnostic(diagnostic, true, nil, trace.nextEvent())
+		}
+		trees := []antlr.Tree{}
+		for _, site := range sites {
+			if site.context != nil {
+				trees = append(trees, site.context)
+			}
+		}
+		scheduler := &spl2ScopeScheduler{result: result, parsed: parsed, refinement: refinement, trace: trace, initialDiagnosticCount: initialDiagnosticCount, children: spl2ChildScopesIn(parsed, trees), executed: map[int]bool{}}
+		scheduler.pipeline(sites, newEnvironmentWithRequirementTrace(trace), map[string]bool{}, "scope-0", -1)
+		scheduler.syncParserDiagnostics()
 	}
-	scheduler := &spl2ScopeScheduler{result: result, parsed: parsed, refinement: refinement, trace: trace, initialDiagnosticCount: initialDiagnosticCount, children: spl2ChildScopesIn(parsed, trees), executed: map[int]bool{}}
-	scheduler.pipeline(sites, newEnvironmentWithRequirementTrace(trace), map[string]bool{}, "scope-0", -1)
-	scheduler.syncParserDiagnostics()
 	if len(result.Scopes) > 1 {
 		trace.remapStages(spl2FinalizeStages(result))
 	}

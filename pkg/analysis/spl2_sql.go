@@ -59,7 +59,7 @@ func executeSPL2SQL(result *Result, parsed *spl2ParsedDocument, refinement *sour
 		}
 	}
 	scheduler.syncParserDiagnostics()
-	s := &spl2SemanticStage{semanticStage: &semanticStage{result: result, env: env, refinement: refinement}, parsed2: parsed, aliases: aliases}
+	s := &spl2SemanticStage{semanticStage: &semanticStage{result: result, env: env, refinement: refinement}, parsed2: parsed, aliases: aliases, program: scheduler.program}
 	phase := func(ctx antlr.ParserRuleContext, name string, run func()) {
 		if ctx == nil {
 			return
@@ -69,6 +69,7 @@ func executeSPL2SQL(result *Result, parsed *spl2ParsedDocument, refinement *sour
 		s.transitions = []Transition{}
 		before := s.env.snapshot()
 		scheduler.runChildren(ctx, s.env, aliases, scopeID, parent)
+		scheduler.assignParserDiagnostics(s.stage)
 		if spl2IntactSyntax(ctx) || (provedKey != nil && ctx == c.SqlGroupClause()) {
 			if (provedKey != nil || missingSelect != nil) && ctx == c.SqlGroupClause() {
 				local := *parsed
@@ -106,8 +107,13 @@ func executeSPL2SQL(result *Result, parsed *spl2ParsedDocument, refinement *sour
 			clear(aliases)
 		}
 		from := c.SqlFromClause()
-		if !s.exactDatasetSource(from.Dataset()) {
-			s.dataset(from.Dataset())
+		dataset := from.Dataset()
+		resolved := false
+		if s.program != nil && dataset != nil {
+			resolved = s.program.resolveViewSource(s, dataset.DatasetParameter()) || s.program.resolveImportedDataset(s, dataset)
+		}
+		if !resolved && !s.exactDatasetSource(dataset) {
+			s.dataset(dataset)
 		}
 		s.joinDatasetIntentions(from)
 		if a := from.SourceAlias(); a != nil {

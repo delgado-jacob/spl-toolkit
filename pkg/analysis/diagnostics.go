@@ -10,6 +10,11 @@ const (
 	CodeUnsupportedCommand    = "SPL_UNSUPPORTED_COMMAND"
 	CodeUnsupportedSemantics  = "SPL_UNSUPPORTED_SEMANTICS"
 	CodeAnalysisResourceLimit = "SPL_ANALYSIS_RESOURCE_LIMIT"
+	CodeDuplicateSymbol       = "SPL_DUPLICATE_SYMBOL"
+	CodeUnresolvedSymbol      = "SPL_UNRESOLVED_SYMBOL"
+	CodeDeclarationCycle      = "SPL_DECLARATION_CYCLE"
+	CodeUnresolvedModule      = "SPL_UNRESOLVED_MODULE"
+	CodeInvalidFunctionCall   = "SPL_INVALID_FUNCTION_CALL"
 
 	CodeRequirementIndeterminate      = "SPL_REQUIREMENT_INDETERMINATE"
 	CodeRequirementDynamic            = "SPL_REQUIREMENT_DYNAMIC"

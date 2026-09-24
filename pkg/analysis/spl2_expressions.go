@@ -1,6 +1,9 @@
 package analysis
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/antlr4-go/antlr/v4"
 	"github.com/delgado-jacob/spl-toolkit/parser/spl2"
 )
@@ -10,6 +13,58 @@ type spl2ExpressionEvidence struct {
 	// requirementNonnull follows query-only bindings; nonnull may include refinement.
 	nonnull, requirementNonnull, exactNull, truth, modeled bool
 	domain                                                 string
+	template                                               spl2ExpressionTemplate
+}
+
+type spl2FunctionParameterUse struct {
+	parameter int
+	role      string
+}
+
+type spl2ExpressionTemplate func(map[spl2FunctionParameterUse]spl2ExpressionEvidence) spl2ExpressionEvidence
+
+func (e spl2ExpressionEvidence) instantiate(bindings map[spl2FunctionParameterUse]spl2ExpressionEvidence) spl2ExpressionEvidence {
+	if e.template == nil {
+		e.ids = append([]string{}, e.ids...)
+		return e
+	}
+	return e.template(bindings)
+}
+
+func spl2TransformExpressionEvidence(value spl2ExpressionEvidence, transform func(spl2ExpressionEvidence) spl2ExpressionEvidence) spl2ExpressionEvidence {
+	plain := value
+	plain.template = nil
+	out := transform(plain)
+	out.template = nil
+	if value.template != nil {
+		out.template = func(bindings map[spl2FunctionParameterUse]spl2ExpressionEvidence) spl2ExpressionEvidence {
+			return spl2TransformExpressionEvidence(value.instantiate(bindings), transform)
+		}
+	}
+	return out
+}
+
+func spl2CombineExpressionEvidence(values []spl2ExpressionEvidence, combine func([]spl2ExpressionEvidence) spl2ExpressionEvidence) spl2ExpressionEvidence {
+	plain := make([]spl2ExpressionEvidence, len(values))
+	templated := false
+	for i, value := range values {
+		plain[i] = value
+		plain[i].template = nil
+		templated = templated || value.template != nil
+	}
+	out := combine(plain)
+	out.template = nil
+	if templated {
+		captured := append([]spl2ExpressionEvidence{}, values...)
+		out.template = func(bindings map[spl2FunctionParameterUse]spl2ExpressionEvidence) spl2ExpressionEvidence {
+			instantiated := make([]spl2ExpressionEvidence, len(captured))
+			for i, value := range captured {
+				instantiated[i] = value.instantiate(bindings)
+			}
+			return spl2CombineExpressionEvidence(instantiated, combine)
+		}
+	}
+	return out
 }
 
 func (s *spl2SemanticStage) readIdentifier(ctx antlr.ParserRuleContext, role string) string {
@@ -42,22 +97,29 @@ func (s *spl2SemanticStage) expression(node antlr.Tree) spl2ExpressionEvidence {
 	switch c := node.(type) {
 	case spl2.INotExpressionContext:
 		if operator := c.LogicalNot(); operator != nil && operator.GetText() != "NOT" {
-			value := s.expression(c.NotExpression())
-			value.modeled, value.nonnull, value.requirementNonnull, value.exactNull, value.truth, value.domain = false, false, false, false, false, ""
-			return value
+			return spl2TransformExpressionEvidence(s.expression(c.NotExpression()), func(value spl2ExpressionEvidence) spl2ExpressionEvidence {
+				value.modeled, value.nonnull, value.requirementNonnull, value.exactNull, value.truth, value.domain = false, false, false, false, false, ""
+				return value
+			})
 		}
 	case spl2.IUnaryContext:
 		if c.Unary() != nil {
-			value := s.expression(c.Unary())
-			value.exactNull = false
-			value.truth = false
-			if value.domain != "number" {
-				value.domain = ""
-			}
-			return value
+			return spl2TransformExpressionEvidence(s.expression(c.Unary()), func(value spl2ExpressionEvidence) spl2ExpressionEvidence {
+				value.exactNull = false
+				value.truth = false
+				if value.domain != "number" {
+					value.domain = ""
+				}
+				return value
+			})
 		}
 		return s.expression(c.Access())
 	case spl2.ICallContext:
+		if s.program != nil {
+			if value, handled := s.program.bindCall(s, c, false); handled {
+				return value
+			}
+		}
 		return s.call(c, false)
 	case spl2.IAccessContext:
 		if len(c.AllAccessPart()) == 0 {
@@ -81,6 +143,26 @@ func (s *spl2SemanticStage) expression(node antlr.Tree) spl2ExpressionEvidence {
 		if f := base.FieldName(); f != nil && f.Identifier() != nil {
 			baseName = s.operand(f.Identifier()).Name
 			alias = s.aliases[baseName]
+		}
+		if s.program != nil && baseName != "" {
+			if binding := s.program.imports[baseName]; binding != nil && binding.container {
+				parts := []string{}
+				static := true
+				for _, part := range c.AllAccessPart() {
+					if part.DOT() == nil || part.Identifier() == nil {
+						static = false
+						break
+					}
+					parts = append(parts, spl2ProgramIdentifier(part.Identifier()))
+				}
+				if static {
+					s.program.useImport(s, binding, c, strings.Join(parts, "."))
+					out.modeled = false
+					out.nonnull = false
+					out.requirementNonnull = false
+					return out
+				}
+			}
 		}
 		segments := []string{}
 		static := baseName != ""
@@ -155,6 +237,23 @@ func (s *spl2SemanticStage) expression(node antlr.Tree) spl2ExpressionEvidence {
 		return out
 	case spl2.IFieldNameContext:
 		if c.Identifier() != nil {
+			if s.program != nil {
+				name := spl2ProgramIdentifier(c.Identifier())
+				if binding := s.program.imports[name]; binding != nil {
+					s.program.useImport(s, binding, c.Identifier(), "")
+					out.modeled = false
+					out.nonnull = false
+					out.requirementNonnull = false
+					return out
+				}
+				if s.program.functions[name] != nil {
+					s.diagnosticAtOwned(CodeUnresolvedSymbol, "error", "contract", fmt.Sprintf("function %q is not a scalar value", name), s.parsed2.source.contextLocation(c), true, nil)
+					out.modeled = false
+					out.nonnull = false
+					out.requirementNonnull = false
+					return out
+				}
+			}
 			id := s.readIdentifier(c.Identifier(), s.expressionRole())
 			if id != "" {
 				out.ids = append(out.ids, id)
@@ -194,17 +293,22 @@ func (s *spl2SemanticStage) expression(node antlr.Tree) spl2ExpressionEvidence {
 		}
 		return out
 	case spl2.IStringLiteralContext:
-		out.domain = "string"
+		values := []spl2ExpressionEvidence{}
 		for _, e := range c.AllExpression() {
-			value := s.expression(e)
-			out.ids = append(out.ids, value.ids...)
-			out.modeled = out.modeled && value.modeled
+			values = append(values, s.expression(e))
 		}
 		// Intact interpolation renders a string even when an operand is null.
 		// Unmodeled children still prevent a proven assignment effect.
-		out.nonnull = out.modeled && spl2IntactSyntax(c)
-		out.requirementNonnull = out.nonnull
-		return out
+		return spl2CombineExpressionEvidence(values, func(values []spl2ExpressionEvidence) spl2ExpressionEvidence {
+			out := spl2ExpressionEvidence{ids: []string{}, nonnull: true, requirementNonnull: true, modeled: true, domain: "string"}
+			for _, value := range values {
+				out.ids = append(out.ids, value.ids...)
+				out.modeled = out.modeled && value.modeled
+			}
+			out.nonnull = out.modeled && spl2IntactSyntax(c)
+			out.requirementNonnull = out.nonnull
+			return out
+		})
 	case spl2.IFieldTemplateContext:
 		s.rewriteUnprovedOperand(locatedOperand{Location: s.parsed2.source.contextLocation(c)}, "field", "dynamic_name", "dynamic_identity")
 		for _, e := range c.AllExpression() {
@@ -218,21 +322,31 @@ func (s *spl2SemanticStage) expression(node antlr.Tree) spl2ExpressionEvidence {
 		out.requirementNonnull = false
 		return out
 	case spl2.IArrayContext:
-		out.domain = "array"
+		values := []spl2ExpressionEvidence{}
 		for _, e := range c.AllExpression() {
-			value := s.expression(e)
-			out.ids = append(out.ids, value.ids...)
-			out.modeled = out.modeled && value.modeled
+			values = append(values, s.expression(e))
 		}
-		return out
+		return spl2CombineExpressionEvidence(values, func(values []spl2ExpressionEvidence) spl2ExpressionEvidence {
+			out := spl2ExpressionEvidence{ids: []string{}, nonnull: true, requirementNonnull: true, modeled: true, domain: "array"}
+			for _, value := range values {
+				out.ids = append(out.ids, value.ids...)
+				out.modeled = out.modeled && value.modeled
+			}
+			return out
+		})
 	case spl2.IObjectContext:
-		out.domain = "object"
+		values := []spl2ExpressionEvidence{}
 		for _, e := range c.AllObjectEntry() {
-			value := s.expression(e.Expression())
-			out.ids = append(out.ids, value.ids...)
-			out.modeled = out.modeled && value.modeled
+			values = append(values, s.expression(e.Expression()))
 		}
-		return out
+		return spl2CombineExpressionEvidence(values, func(values []spl2ExpressionEvidence) spl2ExpressionEvidence {
+			out := spl2ExpressionEvidence{ids: []string{}, nonnull: true, requirementNonnull: true, modeled: true, domain: "object"}
+			for _, value := range values {
+				out.ids = append(out.ids, value.ids...)
+				out.modeled = out.modeled && value.modeled
+			}
+			return out
+		})
 	case spl2.ILambdaExpressionContext:
 		for _, child := range c.GetChildren() {
 			switch child.(type) {
@@ -257,13 +371,24 @@ func (s *spl2SemanticStage) expression(node antlr.Tree) spl2ExpressionEvidence {
 		return out // Names/labels are read only in their owning field role.
 	case spl2.IPrimaryContext:
 		if c.LOCAL() != nil {
+			if s.functionSummary != nil {
+				if value, ok := s.functionSummary.parameter(c.LOCAL().GetText(), s.expressionRole()); ok {
+					return value
+				}
+			}
 			if s.locals[c.LOCAL().GetText()] {
 				out.nonnull = false
 				out.requirementNonnull = false
 				return out
 			}
 			if len(s.locals) > 0 {
-				s.unsupported(c, "Unbound lambda local is unresolved")
+				if s.program != nil {
+					s.diagnosticAtOwned(CodeUnresolvedSymbol, "error", "contract", fmt.Sprintf("local symbol %q is unresolved", c.LOCAL().GetText()), s.parsed2.source.contextLocation(c), true, nil)
+				} else {
+					s.unsupported(c, "Unbound lambda local is unresolved")
+				}
+			} else if s.program != nil {
+				s.diagnosticAtOwned(CodeUnresolvedSymbol, "error", "contract", fmt.Sprintf("local symbol %q is unresolved", c.LOCAL().GetText()), s.parsed2.source.contextLocation(c), true, nil)
 			}
 			out.nonnull = false
 			out.requirementNonnull = false
@@ -283,36 +408,40 @@ func (s *spl2SemanticStage) expression(node antlr.Tree) spl2ExpressionEvidence {
 		}
 		return out
 	}
-	parts := 0
+	values := []spl2ExpressionEvidence{}
 	for _, child := range node.GetChildren() {
 		if _, terminal := child.(antlr.TerminalNode); terminal {
 			continue
 		}
-		value := s.expression(child)
-		out.ids = append(out.ids, value.ids...)
-		out.modeled = out.modeled && value.modeled
-		out.nonnull = out.nonnull && value.nonnull
-		out.requirementNonnull = out.requirementNonnull && value.requirementNonnull
-		parts++
-		if parts == 1 {
-			out.exactNull = value.exactNull
-			out.truth = value.truth
-			out.domain = value.domain
-		} else {
-			out.exactNull = false
-			out.truth = false
-			out.domain = ""
-		}
+		values = append(values, s.expression(child))
 	}
-	// Only routing and parentheses preserve the exact literal-null identity.
-	if node.GetChildCount() > 1 {
-		switch node.(type) {
-		case spl2.IPrimaryContext:
-		default:
-			out.exactNull = false
-			out.truth = false
-			out.domain = ""
+	return spl2CombineExpressionEvidence(values, func(values []spl2ExpressionEvidence) spl2ExpressionEvidence {
+		out := spl2ExpressionEvidence{ids: []string{}, nonnull: true, requirementNonnull: true, modeled: true}
+		for i, value := range values {
+			out.ids = append(out.ids, value.ids...)
+			out.modeled = out.modeled && value.modeled
+			out.nonnull = out.nonnull && value.nonnull
+			out.requirementNonnull = out.requirementNonnull && value.requirementNonnull
+			if i == 0 {
+				out.exactNull = value.exactNull
+				out.truth = value.truth
+				out.domain = value.domain
+			} else {
+				out.exactNull = false
+				out.truth = false
+				out.domain = ""
+			}
 		}
-	}
-	return out
+		// Only routing and parentheses preserve the exact literal-null identity.
+		if node.GetChildCount() > 1 {
+			switch node.(type) {
+			case spl2.IPrimaryContext:
+			default:
+				out.exactNull = false
+				out.truth = false
+				out.domain = ""
+			}
+		}
+		return out
+	})
 }

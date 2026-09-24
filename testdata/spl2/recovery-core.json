@@ -2412,33 +2412,45 @@
     "form_ids": [
       "exclusions"
     ],
-    "syntax_complete": false,
+    "syntax_complete": true,
     "semantic_complete": false,
-    "status": "invalid",
-    "expected_codes": [
+    "status": "incomplete",
+    "expected_codes": [],
+    "forbidden_codes": [
       "SPL_UNSUPPORTED_MODULE"
     ],
-    "forbidden_codes": [],
     "assertions": {
       "phase": "syntax",
       "scope": "grammar-contexts-only",
-      "source_exact": true
+      "source_exact": true,
+      "kinds": {
+        "viewDeclaration": 1
+      }
     },
     "floor_credit": false,
     "canonical_evidence": "regression_snapshot",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "This is an explicitly excluded declaration/import/export/function or multi-statement document under the selected standalone contract. SPL_UNSUPPORTED_MODULE and false syntax/semantic coverage are mandatory. Declaration/catalog names and function parameters cannot be manufactured as event fields or runtime child scopes. Exact retained original nonexecuted stages and dependency evidence are separate representation details.",
-      "status": "invalid",
-      "syntax_complete": false,
-      "semantic_complete": false,
-      "required_codes": [
+      "basis": "The Task 6 two-phase binder admits this intact local view declaration, schedules its query body in a nested view scope, and preserves the exact external dataset source without manufacturing the view name as a field.",
+      "status": "valid",
+      "syntax_complete": true,
+      "semantic_complete": true,
+      "required_codes": [],
+      "forbidden_codes": [
+        "SPL_PROFILE_MISMATCH",
         "SPL_UNSUPPORTED_MODULE"
       ],
-      "forbidden_codes": [
-        "SPL_PROFILE_MISMATCH"
+      "required_references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 14,
+          "end": 18
+        }
       ],
-      "required_references": [],
       "forbidden_references": [
         {
           "original_name": "$saved",
@@ -2451,26 +2463,53 @@
         "saved",
         "$saved"
       ],
-      "required_stages": [],
-      "max_scopes": 1,
-      "final_state": null
+      "required_stages": [
+        {
+          "command": "from",
+          "start": 9,
+          "semantic_complete": true,
+          "scope_start": 9,
+          "scope_end": 18
+        }
+      ],
+      "max_scopes": 2,
+      "final_state": {
+        "fields": [],
+        "removed": [],
+        "open": true,
+        "uncertain": false
+      }
     },
     "canonical": {
       "phase": "analysis",
       "scope": "canonical-result",
-      "status": "invalid",
-      "syntax_complete": false,
-      "semantic_complete": false,
-      "expected_codes": [
-        "SPL_UNSUPPORTED_MODULE"
+      "status": "valid",
+      "syntax_complete": true,
+      "semantic_complete": true,
+      "expected_codes": [],
+      "references": [
+        {
+          "original_name": "main",
+          "normalized_name": "main",
+          "kind": "dataset",
+          "role": "read",
+          "binding": "not_applicable",
+          "start": 14,
+          "end": 18
+        }
       ],
-      "references": [],
       "fields": [],
       "removed": [],
-      "open": false,
+      "open": true,
       "uncertain": false,
-      "stage_commands": [],
-      "stage_complete": []
+      "stage_commands": [
+        "view",
+        "from"
+      ],
+      "stage_complete": [
+        true,
+        true
+      ]
     }
   },
   {

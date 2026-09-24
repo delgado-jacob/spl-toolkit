@@ -27,6 +27,11 @@ func (s *spl2SemanticStage) call(c spl2.ICallContext, aggregate bool) spl2Expres
 // SQL compound preparation supplies aggregate-aware operands; all call contracts
 // and direct null-test/wildcard handling still use this single shared policy.
 func (s *spl2SemanticStage) callWithExpression(c spl2.ICallContext, aggregate bool, expression func(antlr.Tree) spl2ExpressionEvidence) spl2ExpressionEvidence {
+	if s.program != nil {
+		if value, handled := s.program.bindCall(s, c, aggregate); handled {
+			return value
+		}
+	}
 	out := spl2ExpressionEvidence{ids: []string{}}
 	name := c.Identifier().GetText()
 	policy, selected := s.typedPolicy()
@@ -42,6 +47,8 @@ func (s *spl2SemanticStage) callWithExpression(c spl2.ICallContext, aggregate bo
 			} else if !aggregate && known && function.nullTest && spl2IntactSyntax(c) && len(args.AllExpression()) == 1 && len(args.AllNamedArgument()) == 0 && access != nil && len(access.AllAccessPart()) == 0 && access.Primary().FieldName() != nil && access.Primary().FieldName().Identifier() != nil {
 				id := s.readIdentifier(access.Primary().FieldName().Identifier(), "null_test")
 				v = spl2ExpressionEvidence{ids: []string{id}, modeled: true}
+			} else if !aggregate && known && function.nullTest && spl2IntactSyntax(c) && len(args.AllExpression()) == 1 && len(args.AllNamedArgument()) == 0 && access != nil && len(access.AllAccessPart()) == 0 && access.Primary().LOCAL() != nil && s.functionSummary != nil {
+				v = s.expressionWithRole(expr, "null_test")
 			} else if aggregate && access != nil && len(access.AllAccessPart()) == 0 && access.Primary().FieldName() != nil && access.Primary().FieldName().Identifier() != nil && strings.Contains(s.operand(access.Primary().FieldName().Identifier()).Name, "*") {
 				_, ids := s.selectorAt(s.selector(access.Primary().FieldName().Identifier()), "read", false)
 				v = spl2ExpressionEvidence{ids: ids}
@@ -80,82 +87,89 @@ func (s *spl2SemanticStage) callWithExpression(c spl2.ICallContext, aggregate bo
 		s.diagnosticAt(CodeSyntaxError, "error", "contract", fmt.Sprintf("function %q has invalid positional arity or context", name), s.parsed2.source.contextLocation(c), true)
 		return out
 	}
-	out.modeled = true
-	for _, value := range values {
-		out.modeled = out.modeled && value.modeled
-	}
-	switch function.nullability {
-	case spl2NullabilityAlways:
-		out.nonnull = out.modeled
-		out.requirementNonnull = out.modeled
-	case spl2NullabilityAllArguments:
-		out.nonnull = out.modeled
-		out.requirementNonnull = out.modeled
+	return spl2SelectedFunctionEvidence(function, values)
+}
+
+func spl2SelectedFunctionEvidence(function spl2FunctionPolicy, values []spl2ExpressionEvidence) spl2ExpressionEvidence {
+	return spl2CombineExpressionEvidence(values, func(values []spl2ExpressionEvidence) spl2ExpressionEvidence {
+		out := spl2ExpressionEvidence{ids: []string{}, modeled: true}
 		for _, value := range values {
-			out.nonnull = out.nonnull && value.nonnull
-			out.requirementNonnull = out.requirementNonnull && value.requirementNonnull
+			out.ids = append(out.ids, value.ids...)
+			out.modeled = out.modeled && value.modeled
 		}
-	case spl2NullabilityCoalesce:
-		out.exactNull = out.modeled
-		for _, value := range values {
-			out.nonnull = out.nonnull || value.nonnull
-			out.requirementNonnull = out.requirementNonnull || value.requirementNonnull
-			out.exactNull = out.exactNull && value.exactNull
-		}
-	case spl2NullabilityIfBranches:
-		out.nonnull = values[1].nonnull && values[2].nonnull && out.modeled
-		out.requirementNonnull = values[1].requirementNonnull && values[2].requirementNonnull && out.modeled
-		out.exactNull = values[1].exactNull && values[2].exactNull && out.modeled
-	case spl2NullabilityCaseBranches:
-		out.nonnull = out.modeled
-		out.requirementNonnull = out.modeled
-		out.exactNull = out.modeled
-		fallback := false
-		for i := 0; i < n; i += 2 {
-			out.nonnull = out.nonnull && values[i+1].nonnull
-			out.requirementNonnull = out.requirementNonnull && values[i+1].requirementNonnull
-			out.exactNull = out.exactNull && values[i+1].exactNull
-			if values[i].truth {
-				fallback = true
-				break
+		switch function.nullability {
+		case spl2NullabilityAlways:
+			out.nonnull = out.modeled
+			out.requirementNonnull = out.modeled
+		case spl2NullabilityAllArguments:
+			out.nonnull = out.modeled
+			out.requirementNonnull = out.modeled
+			for _, value := range values {
+				out.nonnull = out.nonnull && value.nonnull
+				out.requirementNonnull = out.requirementNonnull && value.requirementNonnull
 			}
+		case spl2NullabilityCoalesce:
+			out.exactNull = out.modeled
+			for _, value := range values {
+				out.nonnull = out.nonnull || value.nonnull
+				out.requirementNonnull = out.requirementNonnull || value.requirementNonnull
+				out.exactNull = out.exactNull && value.exactNull
+			}
+		case spl2NullabilityIfBranches:
+			out.nonnull = values[1].nonnull && values[2].nonnull && out.modeled
+			out.requirementNonnull = values[1].requirementNonnull && values[2].requirementNonnull && out.modeled
+			out.exactNull = values[1].exactNull && values[2].exactNull && out.modeled
+		case spl2NullabilityCaseBranches:
+			out.nonnull = out.modeled
+			out.requirementNonnull = out.modeled
+			out.exactNull = out.modeled
+			fallback := false
+			for i := 0; i < len(values); i += 2 {
+				out.nonnull = out.nonnull && values[i+1].nonnull
+				out.requirementNonnull = out.requirementNonnull && values[i+1].requirementNonnull
+				out.exactNull = out.exactNull && values[i+1].exactNull
+				if values[i].truth {
+					fallback = true
+					break
+				}
+			}
+			out.nonnull = out.nonnull && fallback
+			out.requirementNonnull = out.requirementNonnull && fallback
+		case spl2NullabilityNumericArguments:
+			out.nonnull = out.modeled
+			out.requirementNonnull = out.modeled
+			for _, value := range values {
+				out.nonnull = out.nonnull && value.nonnull && value.domain == "number"
+				out.requirementNonnull = out.requirementNonnull && value.requirementNonnull && value.domain == "number"
+			}
+		case spl2NullabilityStringArguments:
+			out.nonnull = out.modeled
+			out.requirementNonnull = out.modeled
+			for _, value := range values {
+				out.nonnull = out.nonnull && value.nonnull && value.domain == "string"
+				out.requirementNonnull = out.requirementNonnull && value.requirementNonnull && value.domain == "string"
+			}
+		case spl2NullabilitySubstringArguments:
+			out.nonnull = out.modeled && values[0].nonnull && values[0].domain == "string"
+			out.requirementNonnull = out.modeled && values[0].requirementNonnull && values[0].domain == "string"
+			for _, value := range values[1:] {
+				out.nonnull = out.nonnull && value.nonnull && value.domain == "number"
+				out.requirementNonnull = out.requirementNonnull && value.requirementNonnull && value.domain == "number"
+			}
+		case spl2NullabilityFirstArgument:
+			out.nonnull = out.modeled && values[0].nonnull
+			out.requirementNonnull = out.modeled && values[0].requirementNonnull
+		case spl2NullabilityConservative:
+			// Aggregate operand presence, conversions, regex matching, and multivalue
+			// selection require more than argument presence to prove a value.
 		}
-		out.nonnull = out.nonnull && fallback
-		out.requirementNonnull = out.requirementNonnull && fallback
-	case spl2NullabilityNumericArguments:
-		out.nonnull = out.modeled
-		out.requirementNonnull = out.modeled
-		for _, value := range values {
-			out.nonnull = out.nonnull && value.nonnull && value.domain == "number"
-			out.requirementNonnull = out.requirementNonnull && value.requirementNonnull && value.domain == "number"
+		if function.returnKind != "unknown" {
+			out.domain = function.returnKind
 		}
-	case spl2NullabilityStringArguments:
-		out.nonnull = out.modeled
-		out.requirementNonnull = out.modeled
-		for _, value := range values {
-			out.nonnull = out.nonnull && value.nonnull && value.domain == "string"
-			out.requirementNonnull = out.requirementNonnull && value.requirementNonnull && value.domain == "string"
-		}
-	case spl2NullabilitySubstringArguments:
-		out.nonnull = out.modeled && values[0].nonnull && values[0].domain == "string"
-		out.requirementNonnull = out.modeled && values[0].requirementNonnull && values[0].domain == "string"
-		for _, value := range values[1:] {
-			out.nonnull = out.nonnull && value.nonnull && value.domain == "number"
-			out.requirementNonnull = out.requirementNonnull && value.requirementNonnull && value.domain == "number"
-		}
-	case spl2NullabilityFirstArgument:
-		out.nonnull = out.modeled && values[0].nonnull
-		out.requirementNonnull = out.modeled && values[0].requirementNonnull
-	case spl2NullabilityConservative:
-		// Aggregate operand presence, conversions, regex matching, and multivalue
-		// selection require more than argument presence to prove a value.
-	}
-	if function.returnKind != "unknown" {
-		out.domain = function.returnKind
-	}
-	out.nonnull = out.nonnull && out.modeled
-	out.requirementNonnull = out.requirementNonnull && out.modeled
-	return out
+		out.nonnull = out.nonnull && out.modeled
+		out.requirementNonnull = out.requirementNonnull && out.modeled
+		return out
+	})
 }
 
 func (s *spl2SemanticStage) selectedLambda(tree antlr.Tree) spl2ExpressionEvidence {
@@ -185,8 +199,10 @@ func (s *spl2SemanticStage) selectedLambda(tree antlr.Tree) spl2ExpressionEviden
 	s.locals[parameters[0].LOCAL().GetText()] = true
 	value := s.expression(lambda.Expression())
 	s.locals = previous
-	value.nonnull = value.modeled
-	value.requirementNonnull = value.modeled
-	value.domain = "boolean"
-	return value
+	return spl2TransformExpressionEvidence(value, func(value spl2ExpressionEvidence) spl2ExpressionEvidence {
+		value.nonnull = value.modeled
+		value.requirementNonnull = value.modeled
+		value.domain = "boolean"
+		return value
+	})
 }

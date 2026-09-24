@@ -53,16 +53,8 @@ func spl2RequireTypedModule(t *testing.T, text string) *spl2ParsedDocument {
 	if p.tree == nil || p.tree.ModuleDeclaration() == nil {
 		t.Fatalf("missing module declaration: %+v", p.diagnostics)
 	}
-	for _, diagnostic := range p.diagnostics {
-		if diagnostic.Code != "SPL_UNSUPPORTED_MODULE" || diagnostic.Category != "unsupported_syntax" || diagnostic.Severity != "error" {
-			t.Fatalf("typed module acquired a parser error: %+v", p.diagnostics)
-		}
-		if diagnostic.Location.Start.Offset < 0 || diagnostic.Location.End.Offset > len(text) || diagnostic.Location.Start.Offset >= diagnostic.Location.End.Offset {
-			t.Fatalf("unlocated module boundary: %+v", diagnostic)
-		}
-	}
-	if len(p.diagnostics) != 1 || p.syntaxComplete {
-		t.Fatalf("module boundary changed: %+v", p.diagnostics)
+	if len(p.diagnostics) != 0 || !p.syntaxComplete {
+		t.Fatalf("selected typed module rejected: %+v", p.diagnostics)
 	}
 	return p
 }
@@ -217,7 +209,8 @@ func TestSPL2LexSearchCommentBoundary(t *testing.T) {
 	}
 }
 func TestSPL2StartExcludedModule(t *testing.T) {
-	for _, text := range []string{"$saved = FROM main;", "import foo", "function f() {}", "FROM main; FROM other"} {
+	spl2RequireTypedModule(t, "$saved = FROM main;")
+	for _, text := range []string{"import foo", "function f() {}", "FROM main; FROM other"} {
 		p := parseSPL2Document(text)
 		found := false
 		for _, d := range p.diagnostics {
