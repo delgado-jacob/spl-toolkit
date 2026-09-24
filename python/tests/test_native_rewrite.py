@@ -112,7 +112,7 @@ def expected_search(mode, language="spl"):
             },
             "capability_revision": {
                 "spl": "sha256:08901c84ac8c420f59ddb86168c534f0e83484c05d3c8a81078a716c878a1733",
-                "spl2": "sha256:f1391296cfbc616e9bb1b1828e2471e37b60a35c0555654c0734640e072a0437",
+                "spl2": "sha256:69b166318f99909d0ffbad378f0369fd9377a1f56945e2c3c0b69eaa32c03e95",
             }[language],
             "query_status": "valid",
             "coverage": {"complete": True, "reasons": []},

@@ -18,6 +18,30 @@ type analysisCorpusCase struct {
 	Expected *analysis.Result       `json:"expected"`
 }
 
+type milestone11SurfaceCase struct {
+	ID       string                 `json:"id"`
+	Document analysis.QueryDocument `json:"document"`
+}
+
+func loadMilestone11SurfaceCases(t *testing.T) []milestone11SurfaceCase {
+	t.Helper()
+	data, err := os.ReadFile("../tests/acceptance/cli_examples.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var manifest struct {
+		Version   string                   `json:"version"`
+		Documents []milestone11SurfaceCase `json:"milestone11_documents"`
+	}
+	if err := json.Unmarshal(data, &manifest); err != nil {
+		t.Fatal(err)
+	}
+	if manifest.Version != "1" || len(manifest.Documents) != 6 {
+		t.Fatalf("Milestone 11 surface documents: version=%q cases=%d", manifest.Version, len(manifest.Documents))
+	}
+	return manifest.Documents
+}
+
 func loadAnalysisCorpus(t *testing.T) []analysisCorpusCase {
 	t.Helper()
 	data, err := os.ReadFile("../testdata/analysis/cases.json")
@@ -88,6 +112,51 @@ func TestAnalysisCLIReportsMatchCorpus(t *testing.T) {
 			}
 			if !reflect.DeepEqual(&got, corpusCase.Expected) {
 				t.Fatalf("report mismatch\ngot:  %#v\nwant: %#v", &got, corpusCase.Expected)
+			}
+		})
+	}
+}
+
+func TestMilestone11AnalysisAndRequirementsCLIMatchCanonicalGo(t *testing.T) {
+	for _, surfaceCase := range loadMilestone11SurfaceCases(t) {
+		t.Run(surfaceCase.ID, func(t *testing.T) {
+			wantAnalysis, err := analysis.Analyze(surfaceCase.Document)
+			if err != nil {
+				t.Fatal(err)
+			}
+			wantRequirements, err := analysis.Requirements(surfaceCase.Document)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if wantAnalysis.Status != analysis.Valid || !wantAnalysis.Coverage.SyntaxComplete || !wantAnalysis.Coverage.SemanticComplete || !wantRequirements.Coverage.Complete {
+				t.Fatalf("representative document is not complete: analysis=%+v requirements=%+v", wantAnalysis.Coverage, wantRequirements.Coverage)
+			}
+			if !reflect.DeepEqual(wantAnalysis.Requirements, *wantRequirements) {
+				t.Fatalf("canonical embedded requirements differ\nanalysis:   %#v\nstandalone: %#v", wantAnalysis.Requirements, wantRequirements)
+			}
+
+			code, stdout, stderr := runCLITest(analysisCLIArgs(surfaceCase.Document)...)
+			if code != 0 || stderr != "" {
+				t.Fatalf("analyze: code=%d stderr=%q", code, stderr)
+			}
+			var gotAnalysis analysis.Result
+			if err := json.Unmarshal([]byte(stdout), &gotAnalysis); err != nil {
+				t.Fatal(err)
+			}
+			if !reflect.DeepEqual(&gotAnalysis, wantAnalysis) {
+				t.Fatalf("CLI analysis differs from Go\ngot:  %#v\nwant: %#v", &gotAnalysis, wantAnalysis)
+			}
+
+			code, stdout, stderr = runCLITest(requirementsCLIArgs(surfaceCase.Document)...)
+			if code != 0 || stderr != "" {
+				t.Fatalf("requirements: code=%d stderr=%q", code, stderr)
+			}
+			var gotRequirements analysis.RequirementSet
+			if err := json.Unmarshal([]byte(stdout), &gotRequirements); err != nil {
+				t.Fatal(err)
+			}
+			if !reflect.DeepEqual(&gotRequirements, wantRequirements) {
+				t.Fatalf("CLI requirements differ from Go\ngot:  %#v\nwant: %#v", &gotRequirements, wantRequirements)
 			}
 		})
 	}

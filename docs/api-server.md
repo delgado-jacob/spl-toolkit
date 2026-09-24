@@ -74,7 +74,7 @@ The full report includes SQL lineage `phase` and `execution_order`, with lexical
 {"text":"FROM main | mystery host","language":"spl2"}
 ```
 
-<!-- api-example: analyze-module /query/analyze invalid -->
+<!-- api-example: analyze-module /query/analyze valid -->
 ```json
 {"text":"$q = FROM main;","language":"spl2"}
 ```
@@ -84,7 +84,7 @@ The full report includes SQL lineage `phase` and `execution_order`, with lexical
 {"text":"FROM main | route output","language":"spl2"}
 ```
 
-Modules/declarations and known wrong-profile constructs carry located `SPL_UNSUPPORTED_MODULE` and `SPL_PROFILE_MISMATCH` findings with incomplete coverage. Unknown standalone syntax remains incomplete.
+Selected same-document view, function, annotation, import, and export declarations are analyzed through the module binder. Known wrong-profile constructs carry located `SPL_PROFILE_MISMATCH` findings with incomplete coverage. Unknown standalone syntax remains incomplete.
 
 `POST /api/v1/query/requirements` accepts the same strict query document and returns its canonical direct requirements without environment metadata, knowledge-object expansion, or compatibility proof:
 

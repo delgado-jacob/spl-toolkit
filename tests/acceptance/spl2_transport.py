@@ -5,8 +5,60 @@ import json
 import os
 from pathlib import Path
 import subprocess
+import tempfile
 
 REPORT_KEYS = {"schema_version", "document", "status", "coverage", "stages", "scopes", "references", "lineage", "dependencies", "diagnostics", "requirements"}
+GO_HELPER = r'''
+package main
+
+import (
+	"encoding/json"
+	"os"
+
+	"github.com/delgado-jacob/spl-toolkit/pkg/analysis"
+)
+
+type documentCase struct {
+	ID       string                 `json:"id"`
+	Document analysis.QueryDocument `json:"document"`
+}
+
+type reportCase struct {
+	ID           string                   `json:"id"`
+	Document     analysis.QueryDocument   `json:"document"`
+	Analysis     *analysis.Result         `json:"analysis"`
+	Requirements *analysis.RequirementSet `json:"requirements"`
+}
+
+func main() {
+	var request struct {
+		Documents []documentCase `json:"documents"`
+	}
+	if err := json.NewDecoder(os.Stdin).Decode(&request); err != nil {
+		panic(err)
+	}
+	response := struct {
+		Milestone11 []reportCase `json:"milestone11"`
+	}{Milestone11: make([]reportCase, 0, len(request.Documents))}
+	for _, item := range request.Documents {
+		analyzed, err := analysis.Analyze(item.Document)
+		if err != nil {
+			panic(err)
+		}
+		requirements, err := analysis.Requirements(item.Document)
+		if err != nil {
+			panic(err)
+		}
+		response.Milestone11 = append(response.Milestone11, reportCase{
+			ID: item.ID, Document: item.Document,
+			Analysis: analyzed, Requirements: requirements,
+		})
+	}
+	if err := json.NewEncoder(os.Stdout).Encode(response); err != nil {
+		panic(err)
+	}
+}
+'''
 
 
 def digest(path):
@@ -19,7 +71,33 @@ def source_hashes(root):
     return {p.relative_to(root).as_posix(): digest(p) for p in sorted(paths)}
 
 
-def load_transport(path, fixtures, expected_sha256, source_root=None):
+def milestone11_documents(path=None):
+    path = path or Path(__file__).with_name("cli_examples.json")
+    manifest = json.loads(path.read_text(encoding="utf-8"))
+    documents = manifest.get("milestone11_documents")
+    assert isinstance(documents, list) and documents, "missing Milestone 11 documents"
+    assert len({item["id"] for item in documents}) == len(documents), "duplicate Milestone 11 document ID"
+    for item in documents:
+        assert set(item) == {"id", "document"}
+        assert set(item["document"]) == {"text", "language", "profile", "version", "source_id"}
+        assert item["document"]["language"] == "spl2"
+        assert item["document"]["profile"] == "splunkd"
+        assert item["document"]["version"] == "current"
+        assert item["document"]["source_id"] == "milestone11:" + item["id"]
+    return documents
+
+
+def assert_full_report(report, document):
+    assert set(report) == REPORT_KEYS, "empty or truncated Go report"
+    assert report["document"] == document, "wrong normalized Query Document"
+    assert report["schema_version"] == 1 and report["status"] in {"valid", "invalid", "incomplete"}
+    assert set(report["coverage"]) == {"syntax_complete", "semantic_complete", "reasons"}
+    assert isinstance(report["requirements"], dict), "truncated Go requirements"
+    for key in ("stages", "scopes", "references", "lineage", "diagnostics"):
+        assert isinstance(report[key], list), f"truncated Go {key}"
+
+
+def load_transport(path, fixtures, expected_sha256, source_root=None, expected_milestone11=None):
     assert digest(path) == expected_sha256, "Go transport artifact hash mismatch"
     artifact = json.loads(path.read_text(encoding="utf-8"))
     assert artifact.get("schema_version") == 1 and artifact.get("kind") == "spl2-go-transport"
@@ -44,15 +122,28 @@ def load_transport(path, fixtures, expected_sha256, source_root=None):
         assert entry["document"] == document, "wrong original Query Document"
         expected = document | {key: document[key] or default for key, default in (("language", "spl"), ("profile", "splunkd"), ("version", "current"))}
         report = entry["report"]
-        assert set(report) == REPORT_KEYS, "empty or truncated Go report"
-        assert report["document"] == expected, "wrong normalized Query Document"
-        assert report["schema_version"] == 1 and report["status"] in {"valid", "invalid", "incomplete"}
-        assert set(report["coverage"]) == {"syntax_complete", "semantic_complete", "reasons"}
-        assert isinstance(report["requirements"], dict), "truncated Go requirements"
-        for key in ("stages", "scopes", "references", "lineage", "diagnostics"):
-            assert isinstance(report[key], list), f"truncated Go {key}"
+        assert_full_report(report, expected)
         reports[identity] = report
     assert documents and set(reports) == set(documents), "missing Go reports"
+
+    expected_milestone11 = expected_milestone11 or milestone11_documents()
+    milestone_documents = {item["id"]: item["document"] for item in expected_milestone11}
+    milestone_reports = {}
+    for entry in artifact.get("milestone11", []):
+        identity = entry["id"]
+        assert identity in milestone_documents and identity not in milestone_reports, "extra or duplicate Milestone 11 report ID"
+        document = milestone_documents[identity]
+        assert entry["document"] == document, "wrong Milestone 11 Query Document"
+        assert_full_report(entry["analysis"], document)
+        assert entry["analysis"]["requirements"] == entry["requirements"], "embedded and standalone Go requirements differ"
+        assert entry["analysis"]["status"] == "valid"
+        assert entry["analysis"]["coverage"] == {
+            "syntax_complete": True, "semantic_complete": True, "reasons": [],
+        }
+        assert entry["requirements"]["query_status"] == "valid"
+        assert entry["requirements"]["coverage"] == {"complete": True, "reasons": []}
+        milestone_reports[identity] = entry
+    assert set(milestone_reports) == set(milestone_documents), "missing Milestone 11 Go reports"
     return artifact, reports
 
 
@@ -61,7 +152,24 @@ def prepare_transport(root, output):
     env = os.environ.copy()
     env["SPL_SPL2_GO_REPORTS"] = str(output.resolve())
     subprocess.run(["go", "test", "-mod=readonly", "./pkg/analysis", "-run", "^TestSPL2CorpusCanonical$", "-count=1"], cwd=root, env=env, check=True)
-    load_transport(output, root / "testdata/spl2", digest(output), root)
+    documents = milestone11_documents(root / "tests/acceptance/cli_examples.json")
+    with tempfile.TemporaryDirectory(prefix="spl2-milestone11-go-") as temporary:
+        helper = Path(temporary) / "main.go"
+        helper.write_text(GO_HELPER, encoding="utf-8")
+        helper_env = env.copy()
+        helper_env["GOWORK"] = "off"
+        completed = subprocess.run(
+            ["go", "run", "-mod=readonly", str(helper)], cwd=root, env=helper_env,
+            input=json.dumps({"documents": documents}, ensure_ascii=False),
+            capture_output=True, text=True, check=True, timeout=90,
+        )
+    artifact = json.loads(output.read_text(encoding="utf-8"))
+    artifact["milestone11"] = json.loads(completed.stdout)["milestone11"]
+    output.write_text(
+        json.dumps(artifact, ensure_ascii=False, separators=(",", ":")) + "\n",
+        encoding="utf-8",
+    )
+    load_transport(output, root / "testdata/spl2", digest(output), root, documents)
     return output
 
 

@@ -18,6 +18,8 @@ from setuptools.command.sdist import sdist
 ROOT_FILES = ("README.md", "LICENSE", "VERSION")
 NATIVE_SOURCE_MANIFEST = "native-source-files.txt"
 PARSER_LICENSE = "PARSER-LICENSE"
+LINUS_FIXTURE = Path("testdata/spl2/linus-forms.json")
+PACKAGED_LINUS_FIXTURE = Path("spl_toolkit") / LINUS_FIXTURE
 
 
 def native_library_name() -> str:
@@ -86,6 +88,19 @@ def parser_attribution(setup_dir: Path) -> str:
     if "Copyright" not in notice or "Redistribution" not in notice:
         raise RuntimeError("parser license notice is incomplete")
     return notice
+
+
+def linus_fixture_source(setup_dir: Path) -> Path:
+    setup_dir = setup_dir.resolve()
+    source = source_root(setup_dir)
+    fixture = (
+        setup_dir / PACKAGED_LINUS_FIXTURE
+        if source.name == "_native_src"
+        else source / LINUS_FIXTURE
+    )
+    if not fixture.is_file():
+        raise FileNotFoundError(f"Linus fixture not found: {fixture}")
+    return fixture
 
 
 def native_linker_flag(system_name: str | None = None) -> str:
@@ -175,6 +190,9 @@ class BuildPy(build_py):
                 destination = output.parent / relative
                 destination.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copy2(source / relative, destination)
+        fixture = output.parent / LINUS_FIXTURE
+        fixture.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(linus_fixture_source(setup_dir), fixture)
 
 
 def native_source_files(manifest: Path) -> list[Path]:
@@ -215,6 +233,9 @@ class SourceDistribution(sdist):
             shutil.copy2(documents / name, destination / name)
         (destination / PARSER_LICENSE).write_text(parser_attribution(setup_dir), encoding="utf-8")
         stage_native_source(source, destination / "_native_src", setup_dir / NATIVE_SOURCE_MANIFEST)
+        fixture = destination / PACKAGED_LINUS_FIXTURE
+        fixture.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(linus_fixture_source(setup_dir), fixture)
 
 
 class BinaryWheel(bdist_wheel):

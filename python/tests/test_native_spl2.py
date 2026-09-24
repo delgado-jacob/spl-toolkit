@@ -25,6 +25,17 @@ CAPABILITY_DIMENSIONS = ('syntax', 'semantics', 'requirements', 'linting', 'safe
 CAPABILITY_COUNTS = {'applicable', 'covered', 'supported', 'partial', 'unsupported', 'not_applicable', 'unassessed'}
 
 
+def milestone11_documents():
+    configured = os.environ.get('SPL_MILESTONE11_DOCUMENTS')
+    path = Path(configured) if configured else Path(__file__).resolve().parents[2] / 'tests/acceptance/cli_examples.json'
+    assert path.is_absolute(), 'SPL_MILESTONE11_DOCUMENTS must be absolute'
+    manifest = json.loads(path.read_text(encoding='utf-8'))
+    documents = manifest.get('milestone11_documents')
+    assert isinstance(documents, list) and len(documents) == 6
+    assert len({item['id'] for item in documents}) == len(documents)
+    return documents
+
+
 def mapper_kwargs():
     return {'library_path': os.environ['SPL_NATIVE_LIBRARY']} if 'SPL_NATIVE_LIBRARY' in os.environ else {}
 
@@ -180,6 +191,26 @@ def test_native_spl2_canonical_corpus_and_full_c_python_parity(case):
         assert document['text'].encode()[location['start']['offset']:location['end']['offset']].decode() == ref['original_name']
 
 
+@pytest.mark.parametrize('case', milestone11_documents(), ids=lambda item: item['id'])
+def test_milestone11_representatives_have_full_c_python_requirement_parity(case):
+    document = deepcopy(case['document'])
+    options = {key: value for key, value in document.items() if key != 'text'}
+    encoded = json.dumps(document, ensure_ascii=False, separators=(',', ':')).encode('utf-8')
+    with SPLMapper(**mapper_kwargs()) as mapper:
+        python_analysis = mapper.analyze_query(document['text'], **options)
+        c_analysis = native_json(mapper, 'analyze_query', encoded)
+        python_requirements = mapper.requirements_query(document['text'], **options)
+        c_requirements = native_json(mapper, 'requirements_query', encoded)
+    assert c_analysis == python_analysis
+    assert c_requirements == python_requirements
+    assert python_analysis['status'] == python_requirements['query_status'] == 'valid'
+    assert python_analysis['coverage'] == {
+        'syntax_complete': True, 'semantic_complete': True, 'reasons': [],
+    }
+    assert python_requirements['coverage'] == {'complete': True, 'reasons': []}
+    assert python_analysis['requirements'] == python_requirements
+
+
 @pytest.mark.parametrize('kind,target', [('fields', CATALOG), ('schema', TARGET)])
 def test_mixed_single_batch_full_native_parity_and_conditional_bindings(kind, target):
     documents = [
@@ -304,18 +335,20 @@ def test_spl2_validation_python_bad_json_never_allocates(kind, target, batch, va
         assert mapper._active_calls == 0
 
 
-@pytest.mark.parametrize('query,schema,status,outcomes', [
-    ("FROM main | where 'actor.name'=\"a\"", {'type':'object', 'properties':{'actor':{'type':'object', 'properties':{'name':True}, 'required':['name'], 'additionalProperties':False}}, 'required':['actor'], 'additionalProperties':False}, 'incomplete', ['indeterminate']),
-    ('FROM main | where actor.name="a"', {'type':'object', 'properties':{'actor.name':True}, 'required':['actor.name'], 'additionalProperties':False}, 'invalid', ['missing', 'indeterminate']),
-    ('SELECT isnull(missing) AS ok FROM main', False, 'valid', []),
+@pytest.mark.parametrize('query,schema,status,outcomes,diagnostics', [
+    ("FROM main | where 'actor.name'=\"a\"", {'type':'object', 'properties':{'actor':{'type':'object', 'properties':{'name':True}, 'required':['name'], 'additionalProperties':False}}, 'required':['actor'], 'additionalProperties':False}, 'incomplete', ['indeterminate'], None),
+    ('FROM main | where actor.name="a"', {'type':'object', 'properties':{'actor.name':True}, 'required':['actor.name'], 'additionalProperties':False}, 'incomplete', ['indeterminate'], ['SPL_INDETERMINATE_FIELD', 'SPL_UNSUPPORTED_SEMANTICS']),
+    ('SELECT isnull(missing) AS ok FROM main', False, 'valid', [], None),
 ])
-def test_spl2_schema_identity_and_null_inspection_boundaries(query, schema, status, outcomes):
+def test_spl2_schema_identity_and_null_inspection_boundaries(query, schema, status, outcomes, diagnostics):
     target = {'kind':'json_schema', 'schema':schema}
     with SPLMapper(**mapper_kwargs()) as mapper:
         report = mapper.validate_schema(query, target, language='spl2')
         assert report == native_json(mapper, 'validate_schema', json.dumps({'document':{'text':query, 'language':'spl2'}, 'target':target}).encode())
     assert report['status'] == status
     assert [item['outcome'] for item in report['outcomes']] == outcomes
+    if diagnostics is not None:
+        assert [item['code'] for item in report['diagnostics']] == diagnostics
     for item in report['outcomes']:
         if item['outcome'] == 'indeterminate':
             assert item['matches_complete'] is False and item['matches'] == []
