@@ -880,3 +880,41 @@ $output = FROM external.events | fields value;`
 		}
 	})
 }
+
+func TestSPL2ReexportedImportIsUnresolvedAtExportUse(t *testing.T) {
+	for _, tc := range []struct {
+		name   string
+		query  string
+		member string
+	}{
+		{name: "named import", query: "import convert from vendor; export convert;", member: "vendor.convert"},
+		{name: "aliased import and export", query: "import remote as convert from vendor; export convert as public;", member: "vendor.remote"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			result := spl2ProgramAnalyze(t, tc.query)
+			if result.Status != Incomplete || !result.Coverage.SyntaxComplete || result.Coverage.SemanticComplete || result.Requirements.QueryStatus != Incomplete || result.Requirements.Coverage.Complete {
+				t.Fatalf("re-export completeness = status %q coverage %+v requirements %+v", result.Status, result.Coverage, result.Requirements)
+			}
+			spl2ProgramRequireV1RequirementKinds(t, result)
+			if len(result.Diagnostics) != 1 || result.Diagnostics[0].Code != CodeUnresolvedModule {
+				t.Fatalf("re-export diagnostics = %+v", result.Diagnostics)
+			}
+			diagnostic := result.Diagnostics[0]
+			export := spl2ProgramStageContaining(t, result, tc.query, "export", "export convert")
+			if diagnostic.Severity != "warning" || diagnostic.Category != "unsupported_semantics" || diagnostic.StageID != export.ID || diagnostic.ScopeID != export.ScopeID || export.SemanticComplete {
+				t.Fatalf("re-export diagnostic ownership = %+v, export stage %+v", diagnostic, export)
+			}
+			if got := tc.query[diagnostic.Location.Start.Offset:diagnostic.Location.End.Offset]; got != "convert" {
+				t.Fatalf("re-export diagnostic location = %q", got)
+			}
+			module := spl2ProgramReferences(result, "module", "vendor", "read")
+			member := spl2ProgramReferences(result, "module_member", tc.member, "read")
+			if len(module) != 1 || len(member) != 1 || member[0].OriginalName != "convert" {
+				t.Fatalf("re-export module references = module %+v member %+v", module, member)
+			}
+			if len(result.Requirements.Gaps) != 1 || result.Requirements.Gaps[0].Code != CodeUnresolvedModule || !reflect.DeepEqual(result.Requirements.Gaps[0].ReferenceIDs, []string{module[0].ID, member[0].ID}) || !reflect.DeepEqual(result.Requirements.Gaps[0].DiagnosticCodes, []string{CodeUnresolvedModule}) {
+				t.Fatalf("re-export requirement gap = %+v", result.Requirements.Gaps)
+			}
+		})
+	}
+}

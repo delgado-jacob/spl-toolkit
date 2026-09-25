@@ -243,9 +243,14 @@ func (p *spl2Program) bindExports() {
 		stage := p.declarationStage(declaration)
 		for _, exported := range declaration.exports {
 			stage.referenceAt(p.parsed.source.contextLocation(exported.aliasCtx), exported.alias, "symbol", "export", "exact")
-			if p.functions[exported.local] == nil && p.imports[exported.local] == nil && p.views["$"+exported.local] == nil {
-				stage.diagnosticAtOwned(CodeUnresolvedSymbol, "error", "contract", fmt.Sprintf("exported symbol %q is unresolved", exported.local), p.parsed.source.contextLocation(exported.localCtx), true, nil)
+			if p.functions[exported.local] != nil || p.views["$"+exported.local] != nil {
+				continue
 			}
+			if binding := p.imports[exported.local]; binding != nil {
+				p.useImport(stage, binding, exported.localCtx, "")
+				continue
+			}
+			stage.diagnosticAtOwned(CodeUnresolvedSymbol, "error", "contract", fmt.Sprintf("exported symbol %q is unresolved", exported.local), p.parsed.source.contextLocation(exported.localCtx), true, nil)
 		}
 	}
 }
