@@ -38,7 +38,7 @@ Task 10 validation included:
 
 - `go test ./cmd ./pkg/api ./pkg/bindings -count=1`: passed.
 - After `make build-shared`, `PYTHONPATH=python SPL_NATIVE_LIBRARY=$PWD/build/libspl_toolkit.dylib SPL_SPL2_FIXTURES=$PWD/testdata/spl2 python3 -m pytest python/tests/test_native_analysis.py python/tests/test_native_requirements.py python/tests/test_native_spl2.py tools/tests/test_package.py -q`: 266 passed.
-- Installed direct-wheel and rebuilt-sdist-wheel acceptance: each passed 568 native, 258 surface, and 18 machine-contract tests.
+- Installed direct-wheel and rebuilt-sdist-wheel acceptance: each passed 568 native and 258 surface tests, including 18 machine-contract tests.
 
 Task 11 validation included:
 
@@ -47,7 +47,58 @@ Task 11 validation included:
 - `python3 tools/audit_linus_spl2.py --content-root "$LINUS_AUDIT_SNAPSHOT" --toolkit-bin build/spl-toolkit --forms testdata/spl2/linus-forms.json`: exited 0 against the exact-ref sparse checkout. Its semantic acceptance result remains 36/45 standalone queries.
 - `python3 tools/check_docs.py` and `git diff --check`: passed for this documentation update.
 
-Other earlier tasks had focused green checks; no full Milestone 11 acceptance run is claimed here.
+Task 13 fresh local acceptance at `2c5dac416122813fbaebab64bba538da774a655b` included:
+
+- `python3 -m unittest tools.tests.test_linus_spl2_audit tools.tests.test_spl2_corpus tools.tests.test_package`: 81 passed.
+- `python3 tools/check_spl2_corpus.py`: passed with 1,835 active obligations, 1,714 active and canonical queries, 288 meaningful cases, and 65 supplemental form obligations.
+- `python3 tools/check_docs.py`: passed for all 17 checked documentation pages.
+- `go test ./...`: passed. `python3 tools/check_go.py --race-timeout=20m`: passed with authorized loopback access. Its first sandboxed run was blocked by `httptest` binding to `[::1]:0`.
+- `make build-all`: passed. `make python-test`: passed after provisioning the hash-locked offline wheelhouse and setting `PIP_FIND_LINKS`. The direct wheel and rebuilt source-distribution wheel each passed 568 native and 258 surface tests, including 18 machine-contract tests. The first package run lacked the required offline wheelhouse and stopped before installed-package tests. The successful run used:
+
+  ```sh
+  test ! -e /private/tmp/spl2-package-wheels-task13 && mkdir /private/tmp/spl2-package-wheels-task13 && printf 'wheelhouse ready\n'
+  python3 -m pip --isolated download --disable-pip-version-check --no-cache-dir --index-url https://pypi.org/simple --only-binary=:all: --require-hashes -r tools/requirements-package-check-hashed.lock --dest /private/tmp/spl2-package-wheels-task13
+  PIP_FIND_LINKS=file:///private/tmp/spl2-package-wheels-task13 make python-test
+  ```
+- `python3 -m pytest tools/tests -q`: 329 passed with 96 subtests. It reported a dependency deprecation warning and a sandbox-only pytest cache-write warning.
+- Pinned ANTLR 4.13.2 generation into a clean temporary directory reproduced all 10 tracked `parser/spl2/` files byte for byte; the generator JAR matched SHA-256 `eae2dfa119a64327444672aff63e9ec35a20180dc5b8090b7a6ab85125df4d76`. The commands run from the repository root were:
+
+  ```sh
+  shasum -a 256 /private/tmp/spl-toolkit-remaining-tools/antlr-4.13.2-complete.jar
+  set -eu
+  gen_tmp=$(mktemp -d /private/tmp/spl2-antlr-acceptance.XXXXXX)
+  java -jar /private/tmp/spl-toolkit-remaining-tools/antlr-4.13.2-complete.jar -Dlanguage=Go -package spl2 -visitor -listener -Xexact-output-dir -o "$gen_tmp" grammar/SPL2Lexer.g4
+  java -jar /private/tmp/spl-toolkit-remaining-tools/antlr-4.13.2-complete.jar -Dlanguage=Go -package spl2 -visitor -listener -Xexact-output-dir -lib "$gen_tmp" -o "$gen_tmp" grammar/SPL2Parser.g4
+  tracked_count=0
+  for tracked_file in $(git ls-files parser/spl2); do
+    cmp "$tracked_file" "$gen_tmp/${tracked_file##*/}"
+    tracked_count=$((tracked_count+1))
+  done
+  generated_count=$(find "$gen_tmp" -type f | wc -l | tr -d ' ')
+  test "$tracked_count" -eq "$generated_count"
+  ```
+
+  Both counts were 10, every `cmp` exited 0, and tracked generated files were not overwritten.
+- The external repository's remote main matched `d4db9bae4adba00bc59d9becbf4014908e7a3ef5`. A fresh exact-ref sparse worktree contained only its 54 tracked YAML inputs. With `LINUS_SOURCE` set to the private source checkout and `LINUS_AUDIT_SNAPSHOT` set to a fresh path under the persistent `~/.worktrees` area, the reproducible setup and audit commands were:
+
+  ```sh
+  set -eu
+  test "$(git -C "$LINUS_SOURCE" ls-remote origin refs/heads/main | awk '{print $1}')" = d4db9bae4adba00bc59d9becbf4014908e7a3ef5
+  git -C "$LINUS_SOURCE" fetch --no-tags origin refs/heads/main
+  git -C "$LINUS_SOURCE" worktree add --detach --no-checkout "$LINUS_AUDIT_SNAPSHOT" d4db9bae4adba00bc59d9becbf4014908e7a3ef5
+  git -C "$LINUS_AUDIT_SNAPSHOT" sparse-checkout set --no-cone '*.yaml' '*.yml'
+  git -C "$LINUS_AUDIT_SNAPSHOT" sparse-checkout reapply
+  git -C "$LINUS_AUDIT_SNAPSHOT" read-tree -mu HEAD
+  test "$(git -C "$LINUS_AUDIT_SNAPSHOT" rev-parse HEAD)" = d4db9bae4adba00bc59d9becbf4014908e7a3ef5
+  test "$(find "$LINUS_AUDIT_SNAPSHOT" -type f \( -name '*.yaml' -o -name '*.yml' \) | wc -l | tr -d ' ')" = 54
+  test -z "$(git -C "$LINUS_AUDIT_SNAPSHOT" status --porcelain)"
+  python3 tools/audit_linus_spl2.py --content-root "$LINUS_AUDIT_SNAPSHOT" --toolkit-bin build/spl-toolkit --forms testdata/spl2/linus-forms.json
+  ```
+
+  The variables' private path values are omitted to avoid exposing source paths. The audit exited 0 after the final build: 49 searches (45 standalone, 4 fragments), 65 form obligations, 45/45 standalone syntax complete, 36/45 standalone semantics complete (34 valid, 2 invalid, 9 incomplete), and 4/4 fragments complete and valid. Standalone analysis emitted 30 `SPL_AMBIGUOUS_FIELD` and 7 `SPL_UNAVAILABLE_FIELD` findings; selected external content emitted no `SPL_UNSUPPORTED_SEMANTICS`.
+- `git diff --check origin/main...HEAD`, `git status --short --branch`, and `git diff --stat origin/main...HEAD` were checked. The branch diff contained 109 files (11 added, 98 modified), all within the Milestone 11 parser, analysis, evidence, tests, packaging, audit tooling, and documentation scope. No dependency lock, public schema, workflow, or Milestone 12 file changed. The original checkout's user-owned plan and design files remained untracked and uncommitted.
+
+The full local checks passed, but the 45/45 standalone semantic gate remains open at 36/45 pending the atomic-versus-structural collision decision. This acceptance does not change the separate runtime, release, approval, or UAT proof levels.
 
 ## Unclaimed proof levels
 
