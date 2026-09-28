@@ -5,7 +5,7 @@ layout: page
 
 # Machine contracts
 
-The [contract registry](../contracts/README.md) lists every v1 schema and request
+The [contract registry](https://github.com/delgado-jacob/spl-toolkit/blob/main/contracts/README.md) lists every v1 schema and request
 entry point. It covers QueryDocument, capabilities, analysis, direct query
 requirements, field-list and JSON Schema/OCSF validation, rewrite, corpus,
 manifest, graph, impact, advanced document view and LSP configuration. Python

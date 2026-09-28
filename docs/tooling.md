@@ -52,10 +52,10 @@ runtime equivalence or permission to apply migrations.
 
 ## Embedding and HTTP
 
-The runnable [Go example](../examples/go/tooling/main.go) uses `corpus.DecodeRequest`,
+The runnable [Go example](https://github.com/delgado-jacob/spl-toolkit/blob/main/examples/go/tooling/main.go) uses `corpus.DecodeRequest`,
 `corpus.Scan` and `graph.Export`. Native Python adds `scan_corpus`, `export_graph`,
 `export_sarif`, `impact_schema`, `impact_mapping` and `document_view` to the existing
-`SPLMapper` lifecycle; see [the Python example](../examples/tooling/native.py).
+`SPLMapper` lifecycle; see [the Python example](https://github.com/delgado-jacob/spl-toolkit/blob/main/examples/tooling/native.py).
 All return dictionaries and use the packaged native library. The advanced
 document snapshot is detached; mutating it does not reanalyze or attest new data.
 Go lookup helpers use checked original byte ranges and return all defensible
@@ -72,7 +72,7 @@ requests cannot select local filesystem paths or fetch remote schemas.
 Run `spl-toolkit lsp --stdio` from a compatible LSP 3.17 client. Register language
 IDs `spl` and `spl2`, set the executable to the installed CLI and arguments to
 `["lsp", "--stdio"]`. No product editor extension is distributed. A minimal
-client configuration is in [examples/tooling/editor.json](../examples/tooling/editor.json).
+client configuration is in [examples/tooling/editor.json](https://github.com/delgado-jacob/spl-toolkit/blob/main/examples/tooling/editor.json).
 
 The server supports full-text open/change/close synchronization, replacement
 diagnostics, document highlights, configuration, cancellation and shutdown.

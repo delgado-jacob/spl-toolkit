@@ -40,6 +40,7 @@ plugins:
   - jekyll-feed
   - jekyll-sitemap
   - jekyll-seo-tag
+  - jekyll-relative-links
 
 # Exclude from processing
 exclude:
