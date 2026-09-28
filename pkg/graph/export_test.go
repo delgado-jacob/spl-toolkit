@@ -206,20 +206,21 @@ func TestGraphKeepsSameDisplayFieldIdentitiesDistinct(t *testing.T) {
 	if path.ID == "" || atomic.ID == "" || path.ID == atomic.ID || path.CanonicalID == atomic.CanonicalID || !reflect.DeepEqual(path.FieldIdentity.Segments, []string{"actor", "name"}) || !reflect.DeepEqual(atomic.FieldIdentity.Segments, []string{"actor.name"}) {
 		t.Fatalf("same-display references conflated: %+v", refs)
 	}
-	if transitions["path"].ID == "" || transitions["atomic"].ID == "" || transitions["path"].ID == transitions["atomic"].ID {
+	pathTransition, atomicTransition := transitions["path"], transitions["atomic"]
+	if pathTransition.ID == "" || atomicTransition.ID == "" || pathTransition.ID == atomicTransition.ID || !reflect.DeepEqual(pathTransition.OutputIdentity.Segments, []string{"actor", "name"}) || !reflect.DeepEqual(atomicTransition.OutputIdentity.Segments, []string{"actor.name"}) {
 		t.Fatalf("same-display transitions conflated: %+v", transitions)
 	}
 	owned := map[string]bool{}
-	inputs := map[string]bool{}
+	inputs := map[string][]string{}
 	for _, edge := range graph.Edges {
 		if edge.Relation == "owns_reference" && (edge.To == path.ID || edge.To == atomic.ID) {
 			owned[edge.To] = true
 		}
 		if edge.Relation == "transition_input" && (edge.From == path.ID || edge.From == atomic.ID) {
-			inputs[edge.From] = true
+			inputs[edge.From] = append(inputs[edge.From], edge.To)
 		}
 	}
-	if !owned[path.ID] || !owned[atomic.ID] || !inputs[path.ID] || !inputs[atomic.ID] {
+	if !owned[path.ID] || !owned[atomic.ID] || !reflect.DeepEqual(inputs[path.ID], []string{pathTransition.ID}) || !reflect.DeepEqual(inputs[atomic.ID], []string{atomicTransition.ID}) {
 		t.Fatalf("same-display edges conflated: owned=%v inputs=%v", owned, inputs)
 	}
 	canonicalBefore, err := json.Marshal(canonical)
