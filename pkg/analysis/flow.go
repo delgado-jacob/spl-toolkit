@@ -232,29 +232,18 @@ func (e *environment) orderedFieldKeys() []fieldIdentityKey {
 }
 
 func (e *environment) orderedRemovedKeys() []fieldIdentityKey {
-	out := append([]fieldIdentityKey{}, e.removedOrder...)
-	seen := map[fieldIdentityKey]bool{}
-	for _, key := range out {
-		seen[key] = true
-	}
-	missing := []string{}
-	for key := range e.removed {
-		if !seen[key] {
-			missing = append(missing, string(key))
-		}
-	}
-	sort.Strings(missing)
-	for _, key := range missing {
-		out = append(out, fieldIdentityKey(key))
-	}
-	return out
+	return orderedIdentityKeys(e.removedOrder, e.removed)
 }
 
 func orderedIdentityKeys[T any](order []fieldIdentityKey, values map[fieldIdentityKey]T) []fieldIdentityKey {
-	out := append([]fieldIdentityKey{}, order...)
+	out := make([]fieldIdentityKey, 0, len(order))
 	seen := map[fieldIdentityKey]bool{}
-	for _, key := range out {
+	for _, key := range order {
+		if seen[key] {
+			continue
+		}
 		seen[key] = true
+		out = append(out, key)
 	}
 	missing := []string{}
 	for key := range values {

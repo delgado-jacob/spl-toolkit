@@ -267,6 +267,28 @@ func TestFieldIdentitySnapshotKeepsConditionalityAndOriginsSeparate(t *testing.T
 	}
 }
 
+func TestFieldIdentityReinstalledBindingAppearsOnceInReport(t *testing.T) {
+	result, err := Analyze(QueryDocument{Text: `FROM main | fields actor.name, 'actor.name' | fields - 'actor.name' | eval 'actor.name'=2`, Language: "spl2"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	state := result.Lineage[len(result.Lineage)-1].After
+	if len(state.Fields) != 2 || state.Fields[0].FieldIdentity.Kind != "atomic" || state.Fields[1].FieldIdentity.Kind != "path" {
+		t.Fatalf("reinstalled binding duplicated or lost typed peer: %+v", state)
+	}
+}
+
+func TestFieldIdentityRepeatedRemovalAppearsOnceInReport(t *testing.T) {
+	result, err := Analyze(QueryDocument{Text: `FROM main | fields actor.name, 'actor.name' | fields - 'actor.name' | eval 'actor.name'=2 | fields - 'actor.name'`, Language: "spl2"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	state := result.Lineage[len(result.Lineage)-1].After
+	if len(state.Fields) != 1 || state.Fields[0].FieldIdentity.Kind != "path" || len(state.Removed) != 1 || state.Removed[0].FieldIdentity.Kind != "atomic" {
+		t.Fatalf("repeated removal duplicated tombstone or lost typed peer: %+v", state)
+	}
+}
+
 func TestFieldIdentityDynamicNavigationKeepsStablePublicSpelling(t *testing.T) {
 	tests := []struct {
 		name       string
