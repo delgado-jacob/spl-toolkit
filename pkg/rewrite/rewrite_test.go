@@ -152,8 +152,8 @@ func explicitAliasReport(mode Mode) *Result {
 				QueryStatus:        analysis.Valid,
 				Coverage:           analysis.RequirementCoverage{Complete: true, Reasons: []string{}},
 				Items: []analysis.RequirementItem{
-					{ID: "req-1", Kind: "field", Identity: expected.name, Role: "filter", Necessity: "required", Origin: "direct", Resolution: "exact", Occurrences: []analysis.RequirementOccurrence{{ReferenceID: "ref-0", OriginalName: expected.name, Binding: "source", StageID: "stage-0", ScopeID: "scope-0", Location: loc(expected.refs[0][0], expected.refs[0][1])}}},
-					{ID: "req-2", Kind: "field", Identity: expected.name, Role: "read", Necessity: "required", Origin: "direct", Resolution: "exact", Occurrences: []analysis.RequirementOccurrence{{ReferenceID: "ref-1", OriginalName: expected.name, Binding: "source", StageID: "stage-1", ScopeID: "scope-0", Location: loc(expected.refs[1][0], expected.refs[1][1])}}},
+					{ID: "req-1", Kind: "field", Identity: expected.name, FieldIdentity: identity(expected.name), Role: "filter", Necessity: "required", Origin: "direct", Resolution: "exact", Occurrences: []analysis.RequirementOccurrence{{ReferenceID: "ref-0", OriginalName: expected.name, Binding: "source", StageID: "stage-0", ScopeID: "scope-0", Location: loc(expected.refs[0][0], expected.refs[0][1])}}},
+					{ID: "req-2", Kind: "field", Identity: expected.name, FieldIdentity: identity(expected.name), Role: "read", Necessity: "required", Origin: "direct", Resolution: "exact", Occurrences: []analysis.RequirementOccurrence{{ReferenceID: "ref-1", OriginalName: expected.name, Binding: "source", StageID: "stage-1", ScopeID: "scope-0", Location: loc(expected.refs[1][0], expected.refs[1][1])}}},
 				},
 				Gaps:        []analysis.RequirementGap{},
 				Diagnostics: []analysis.Diagnostic{},

@@ -262,7 +262,7 @@ def audit_canonical_assertions(case):
     arrays = {"required_codes", "forbidden_codes", "required_references", "forbidden_references",
               "required_fields", "forbidden_field_names", "required_stages"}
     keys = arrays | {"category", "basis", "status", "syntax_complete", "semantic_complete", "max_scopes", "final_state"}
-    require(keys <= set(a) <= keys | {"required_scopes"}, "invalid independent assertion keys")
+    require(keys <= set(a) <= keys | {"required_scopes", "forbidden_field_identities"}, "invalid independent assertion keys")
     require(a["category"] in {"recovery", "representation"} and isinstance(a["basis"], str) and a["basis"].strip(), "snapshot needs independent eligibility basis")
     require(a["status"] in {"valid", "invalid", "incomplete"}, "invalid independent status")
     require(type(a["syntax_complete"]) is bool and type(a["semantic_complete"]) is bool, "independent coverage must be boolean")
@@ -273,6 +273,12 @@ def audit_canonical_assertions(case):
     require(any(a[k] for k in ("required_references", "forbidden_references", "required_fields", "forbidden_field_names", "required_stages")), "snapshot needs nonvacuous soundness assertions")
     for key in ("required_codes", "forbidden_codes", "forbidden_field_names"):
         require(all(isinstance(v, str) and v for v in a[key]), "independent names/codes must be nonempty strings")
+    forbidden_identities = a.get("forbidden_field_identities", [])
+    require(isinstance(forbidden_identities, list), "forbidden field identities must be an array")
+    for identity in forbidden_identities:
+        require(isinstance(identity, dict) and {"kind", "segments"} <= set(identity) <= {"kind", "segments", "qualifier"}, "invalid forbidden field identity")
+        require(identity["kind"] in {"atomic", "path"} and isinstance(identity["segments"], list) and identity["segments"] and all(isinstance(segment, str) and segment for segment in identity["segments"]), "invalid forbidden field identity")
+        require("qualifier" not in identity or identity["kind"] == "path" and isinstance(identity["qualifier"], str) and identity["qualifier"], "invalid forbidden field identity")
     require(not set(a["required_codes"]) & set(a["forbidden_codes"]), "contradictory independent codes")
     expected, raw = case["canonical"], case["document"]["text"].encode("utf-8")
     for key in ("status", "syntax_complete", "semantic_complete"):

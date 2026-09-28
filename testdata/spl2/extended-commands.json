@@ -40,13 +40,12 @@
     "canonical_evidence": "independent",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "C16/E.C16 plus ROOT qualified-read ruling: whole decoded alias.field name, read/indeterminate; no root literal-dotted field or unqualified suffix installation and no guessed catalogue/origins. Actual typed right source is independent; merge remains U. Required aliases and integer/enum domains are independent contract checks. Damaged grammar leaves the survivor graph unasserted; held uppercase enum is incomplete, not a definite enum error. Controller-approved composition: existing exact T8.unknown-adjacent retained-known-state and ScopesAppendpipeInheritsBeforeMerge no-child-leak; root qualified-join operands cannot install literal or suffix root members. Empty incoming tracked parent fields therefore stay empty/open/uncertain while child evidence remains scope-local; this does not claim the runtime result has no columns.",
+      "basis": "C16/E.C16 plus ROOT qualified-read ruling: structural alias.field reads retain qualifier-typed source evidence; no atomic dotted or unqualified suffix identity, selected output merge, or catalogue claim. Actual typed right source is independent; merge remains U. Required aliases and integer/enum domains are independent contract checks. Damaged grammar leaves the survivor graph unasserted; held uppercase enum is incomplete, not a definite enum error. Controller-approved composition: existing exact T8.unknown-adjacent retained-known-state and ScopesAppendpipeInheritsBeforeMerge no-child-leak; sound qualified operands retain distinct qualifier-typed source-read evidence in the open/uncertain parent state; neither atomic dotted fields nor unqualified suffix identities or a selected join output merge are established. Child evidence remains scope-local; this does not claim the runtime result has no columns.",
       "status": "incomplete",
       "syntax_complete": true,
       "semantic_complete": false,
       "required_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS",
-        "SPL_AMBIGUOUS_FIELD"
+        "SPL_UNSUPPORTED_SEMANTICS"
       ],
       "forbidden_codes": [
         "SPL_SYNTAX_ERROR",
@@ -164,6 +163,10 @@
           {
             "name": "id",
             "conditional": false
+          },
+          {
+            "name": "id",
+            "conditional": false
           }
         ],
         "removed": [],
@@ -188,7 +191,6 @@
       "syntax_complete": true,
       "semantic_complete": false,
       "expected_codes": [
-        "SPL_AMBIGUOUS_FIELD",
         "SPL_UNSUPPORTED_SEMANTICS"
       ],
       "references": [
@@ -230,6 +232,10 @@
         }
       ],
       "fields": [
+        {
+          "name": "id",
+          "conditional": false
+        },
         {
           "name": "id",
           "conditional": false
@@ -291,13 +297,12 @@
     "canonical_evidence": "independent",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "C16/E.C16 plus ROOT qualified-read ruling: whole decoded alias.field name, read/indeterminate; no root literal-dotted field or unqualified suffix installation and no guessed catalogue/origins. Actual typed right source is independent; merge remains U. Required aliases and integer/enum domains are independent contract checks. Damaged grammar leaves the survivor graph unasserted; held uppercase enum is incomplete, not a definite enum error. Controller-approved composition: existing exact T8.unknown-adjacent retained-known-state and ScopesAppendpipeInheritsBeforeMerge no-child-leak; root qualified-join operands cannot install literal or suffix root members. Empty incoming tracked parent fields therefore stay empty/open/uncertain while child evidence remains scope-local; this does not claim the runtime result has no columns.",
+      "basis": "C16/E.C16 plus ROOT qualified-read ruling: structural alias.field reads retain qualifier-typed source evidence; no atomic dotted or unqualified suffix identity, selected output merge, or catalogue claim. Actual typed right source is independent; merge remains U. Required aliases and integer/enum domains are independent contract checks. Damaged grammar leaves the survivor graph unasserted; held uppercase enum is incomplete, not a definite enum error. Controller-approved composition: existing exact T8.unknown-adjacent retained-known-state and ScopesAppendpipeInheritsBeforeMerge no-child-leak; sound qualified operands retain distinct qualifier-typed source-read evidence in the open/uncertain parent state; neither atomic dotted fields nor unqualified suffix identities or a selected join output merge are established. Child evidence remains scope-local; this does not claim the runtime result has no columns.",
       "status": "incomplete",
       "syntax_complete": true,
       "semantic_complete": false,
       "required_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS",
-        "SPL_AMBIGUOUS_FIELD"
+        "SPL_UNSUPPORTED_SEMANTICS"
       ],
       "forbidden_codes": [
         "SPL_SYNTAX_ERROR",
@@ -344,7 +349,7 @@
           "role": "read",
           "start": 68,
           "end": 76,
-          "binding": "indeterminate",
+          "binding": "source",
           "scope_start": 0,
           "scope_end": 103
         },
@@ -355,7 +360,7 @@
           "role": "read",
           "start": 77,
           "end": 85,
-          "binding": "indeterminate",
+          "binding": "source",
           "scope_start": 0,
           "scope_end": 103
         },
@@ -433,8 +438,21 @@
         "L.id",
         "L.region",
         "R.id",
-        "R.region",
-        "region"
+        "R.region"
+      ],
+      "forbidden_field_identities": [
+        {
+          "kind": "atomic",
+          "segments": [
+            "region"
+          ]
+        },
+        {
+          "kind": "path",
+          "segments": [
+            "region"
+          ]
+        }
       ],
       "required_stages": [
         {
@@ -465,6 +483,18 @@
           {
             "name": "id",
             "conditional": false
+          },
+          {
+            "name": "id",
+            "conditional": false
+          },
+          {
+            "name": "region",
+            "conditional": false
+          },
+          {
+            "name": "region",
+            "conditional": false
           }
         ],
         "removed": [],
@@ -489,7 +519,6 @@
       "syntax_complete": true,
       "semantic_complete": false,
       "expected_codes": [
-        "SPL_AMBIGUOUS_FIELD",
         "SPL_UNSUPPORTED_SEMANTICS"
       ],
       "references": [
@@ -525,7 +554,7 @@
           "normalized_name": "region",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 68,
           "end": 76
         },
@@ -534,7 +563,7 @@
           "normalized_name": "region",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 77,
           "end": 85
         },
@@ -551,6 +580,18 @@
       "fields": [
         {
           "name": "id",
+          "conditional": false
+        },
+        {
+          "name": "id",
+          "conditional": false
+        },
+        {
+          "name": "region",
+          "conditional": false
+        },
+        {
+          "name": "region",
           "conditional": false
         }
       ],
@@ -21693,13 +21734,12 @@
     "canonical_evidence": "regression_snapshot",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "C16/E.C16 plus ROOT qualified-read ruling: whole decoded alias.field name, read/indeterminate; no root literal-dotted field or unqualified suffix installation and no guessed catalogue/origins. Actual typed right source is independent; merge remains U. Required aliases and integer/enum domains are independent contract checks. Damaged grammar leaves the survivor graph unasserted; held uppercase enum is incomplete, not a definite enum error.",
+      "basis": "C16/E.C16 plus ROOT qualified-read ruling: structural alias.field reads retain qualifier-typed source evidence; no atomic dotted or unqualified suffix identity, selected output merge, or catalogue claim. Actual typed right source is independent; merge remains U. Required aliases and integer/enum domains are independent contract checks. Damaged grammar leaves the survivor graph unasserted; held uppercase enum is incomplete, not a definite enum error.",
       "status": "invalid",
       "syntax_complete": true,
       "semantic_complete": false,
       "required_codes": [
-        "SPL_SYNTAX_ERROR",
-        "SPL_AMBIGUOUS_FIELD"
+        "SPL_SYNTAX_ERROR"
       ],
       "forbidden_codes": [],
       "required_references": [
@@ -21838,7 +21878,6 @@
       "syntax_complete": true,
       "semantic_complete": false,
       "expected_codes": [
-        "SPL_AMBIGUOUS_FIELD",
         "SPL_SYNTAX_ERROR",
         "SPL_UNSUPPORTED_SEMANTICS"
       ],
@@ -21881,6 +21920,10 @@
         }
       ],
       "fields": [
+        {
+          "name": "id",
+          "conditional": false
+        },
         {
           "name": "id",
           "conditional": false
@@ -22222,13 +22265,12 @@
     "canonical_evidence": "independent",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "C16/E.C16 plus ROOT qualified-read ruling: whole decoded alias.field name, read/indeterminate; no root literal-dotted field or unqualified suffix installation and no guessed catalogue/origins. Actual typed right source is independent; merge remains U. Required aliases and integer/enum domains are independent contract checks. Damaged grammar leaves the survivor graph unasserted; held uppercase enum is incomplete, not a definite enum error. Controller-approved composition: existing exact T8.unknown-adjacent retained-known-state and ScopesAppendpipeInheritsBeforeMerge no-child-leak; root qualified-join operands cannot install literal or suffix root members. Empty incoming tracked parent fields therefore stay empty/open/uncertain while child evidence remains scope-local; this does not claim the runtime result has no columns.",
+      "basis": "C16/E.C16 plus ROOT qualified-read ruling: structural alias.field reads retain qualifier-typed source evidence; no atomic dotted or unqualified suffix identity, selected output merge, or catalogue claim. Actual typed right source is independent; merge remains U. Required aliases and integer/enum domains are independent contract checks. Damaged grammar leaves the survivor graph unasserted; held uppercase enum is incomplete, not a definite enum error. Controller-approved composition: existing exact T8.unknown-adjacent retained-known-state and ScopesAppendpipeInheritsBeforeMerge no-child-leak; sound qualified operands retain distinct qualifier-typed source-read evidence in the open/uncertain parent state; neither atomic dotted fields nor unqualified suffix identities or a selected join output merge are established. Child evidence remains scope-local; this does not claim the runtime result has no columns.",
       "status": "incomplete",
       "syntax_complete": true,
       "semantic_complete": false,
       "required_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS",
-        "SPL_AMBIGUOUS_FIELD"
+        "SPL_UNSUPPORTED_SEMANTICS"
       ],
       "forbidden_codes": [
         "SPL_SYNTAX_ERROR",
@@ -22356,6 +22398,10 @@
           {
             "name": "id",
             "conditional": false
+          },
+          {
+            "name": "id",
+            "conditional": false
           }
         ],
         "removed": [],
@@ -22380,7 +22426,6 @@
       "syntax_complete": true,
       "semantic_complete": false,
       "expected_codes": [
-        "SPL_AMBIGUOUS_FIELD",
         "SPL_UNSUPPORTED_SEMANTICS"
       ],
       "references": [
@@ -22422,6 +22467,10 @@
         }
       ],
       "fields": [
+        {
+          "name": "id",
+          "conditional": false
+        },
         {
           "name": "id",
           "conditional": false
@@ -22483,13 +22532,12 @@
     "canonical_evidence": "independent",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "C16/E.C16 plus ROOT qualified-read ruling: whole decoded alias.field name, read/indeterminate; no root literal-dotted field or unqualified suffix installation and no guessed catalogue/origins. Actual typed right source is independent; merge remains U. Required aliases and integer/enum domains are independent contract checks. Damaged grammar leaves the survivor graph unasserted; held uppercase enum is incomplete, not a definite enum error. Controller-approved composition: existing exact T8.unknown-adjacent retained-known-state and ScopesAppendpipeInheritsBeforeMerge no-child-leak; root qualified-join operands cannot install literal or suffix root members. Empty incoming tracked parent fields therefore stay empty/open/uncertain while child evidence remains scope-local; this does not claim the runtime result has no columns.",
+      "basis": "C16/E.C16 plus ROOT qualified-read ruling: structural alias.field reads retain qualifier-typed source evidence; no atomic dotted or unqualified suffix identity, selected output merge, or catalogue claim. Actual typed right source is independent; merge remains U. Required aliases and integer/enum domains are independent contract checks. Damaged grammar leaves the survivor graph unasserted; held uppercase enum is incomplete, not a definite enum error. Controller-approved composition: existing exact T8.unknown-adjacent retained-known-state and ScopesAppendpipeInheritsBeforeMerge no-child-leak; sound qualified operands retain distinct qualifier-typed source-read evidence in the open/uncertain parent state; neither atomic dotted fields nor unqualified suffix identities or a selected join output merge are established. Child evidence remains scope-local; this does not claim the runtime result has no columns.",
       "status": "incomplete",
       "syntax_complete": true,
       "semantic_complete": false,
       "required_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS",
-        "SPL_AMBIGUOUS_FIELD"
+        "SPL_UNSUPPORTED_SEMANTICS"
       ],
       "forbidden_codes": [
         "SPL_SYNTAX_ERROR",
@@ -22617,6 +22665,10 @@
           {
             "name": "id",
             "conditional": false
+          },
+          {
+            "name": "id",
+            "conditional": false
           }
         ],
         "removed": [],
@@ -22641,7 +22693,6 @@
       "syntax_complete": true,
       "semantic_complete": false,
       "expected_codes": [
-        "SPL_AMBIGUOUS_FIELD",
         "SPL_UNSUPPORTED_SEMANTICS"
       ],
       "references": [
@@ -22683,6 +22734,10 @@
         }
       ],
       "fields": [
+        {
+          "name": "id",
+          "conditional": false
+        },
         {
           "name": "id",
           "conditional": false
@@ -23021,13 +23076,12 @@
     "canonical_evidence": "regression_snapshot",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "C16/E.C16 plus ROOT qualified-read ruling: whole decoded alias.field name, read/indeterminate; no root literal-dotted field or unqualified suffix installation and no guessed catalogue/origins. Actual typed right source is independent; merge remains U. Required aliases and integer/enum domains are independent contract checks. Damaged grammar leaves the survivor graph unasserted; held uppercase enum is incomplete, not a definite enum error.",
+      "basis": "C16/E.C16 plus ROOT qualified-read ruling: structural alias.field reads retain qualifier-typed source evidence; no atomic dotted or unqualified suffix identity, selected output merge, or catalogue claim. Actual typed right source is independent; merge remains U. Required aliases and integer/enum domains are independent contract checks. Damaged grammar leaves the survivor graph unasserted; held uppercase enum is incomplete, not a definite enum error.",
       "status": "invalid",
       "syntax_complete": true,
       "semantic_complete": false,
       "required_codes": [
-        "SPL_SYNTAX_ERROR",
-        "SPL_AMBIGUOUS_FIELD"
+        "SPL_SYNTAX_ERROR"
       ],
       "forbidden_codes": [],
       "required_references": [
@@ -23166,7 +23220,6 @@
       "syntax_complete": true,
       "semantic_complete": false,
       "expected_codes": [
-        "SPL_AMBIGUOUS_FIELD",
         "SPL_SYNTAX_ERROR",
         "SPL_UNSUPPORTED_SEMANTICS"
       ],
@@ -23209,6 +23262,10 @@
         }
       ],
       "fields": [
+        {
+          "name": "id",
+          "conditional": false
+        },
         {
           "name": "id",
           "conditional": false
@@ -23525,12 +23582,11 @@
     "canonical_evidence": "independent",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "Task 5 selected fields contract closes each exact projection to its named selectors. Omitted child members do not survive into a surrounding unmodeled merge, while the surrounding command retains its prior incomplete status and scope boundary.",
+      "basis": "Task 5 selected fields contract closes each exact projection to its named selectors. Omitted child members do not survive into a surrounding unmodeled merge, while the surrounding command retains its prior incomplete status and scope boundary. Sound outer predicate reads retain distinct qualifier-typed input evidence while the unselected join output remains open and uncertain.",
       "status": "incomplete",
       "syntax_complete": true,
       "semantic_complete": false,
       "required_codes": [
-        "SPL_AMBIGUOUS_FIELD",
         "SPL_UNSUPPORTED_SEMANTICS"
       ],
       "forbidden_codes": [
@@ -23731,6 +23787,10 @@
             "conditional": false
           },
           {
+            "name": "realm",
+            "conditional": false
+          },
+          {
             "name": "uid",
             "conditional": false
           }
@@ -23747,7 +23807,6 @@
       "syntax_complete": true,
       "semantic_complete": false,
       "expected_codes": [
-        "SPL_AMBIGUOUS_FIELD",
         "SPL_UNSUPPORTED_SEMANTICS"
       ],
       "references": [
@@ -23827,6 +23886,10 @@
       "fields": [
         {
           "name": "id",
+          "conditional": false
+        },
+        {
+          "name": "realm",
           "conditional": false
         },
         {

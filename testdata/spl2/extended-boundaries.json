@@ -955,13 +955,12 @@
     "canonical_evidence": "independent",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "C16/E.C16 plus ROOT qualified-read ruling: whole decoded alias.field name, read/indeterminate; no root literal-dotted field or unqualified suffix installation and no guessed catalogue/origins. Actual typed right source is independent; merge remains U. Required aliases and integer/enum domains are independent contract checks. Damaged grammar leaves the survivor graph unasserted; held uppercase enum is incomplete, not a definite enum error. Controller-approved composition: existing exact T8.unknown-adjacent retained-known-state and ScopesAppendpipeInheritsBeforeMerge no-child-leak; root qualified-join operands cannot install literal or suffix root members. Empty incoming tracked parent fields therefore stay empty/open/uncertain while child evidence remains scope-local; this does not claim the runtime result has no columns.",
+      "basis": "C16/E.C16 plus ROOT qualified-read ruling: structural alias.field reads retain qualifier-typed source evidence; no atomic dotted or unqualified suffix identity, selected output merge, or catalogue claim. Actual typed right source is independent; merge remains U. Required aliases and integer/enum domains are independent contract checks. Damaged grammar leaves the survivor graph unasserted; held uppercase enum is incomplete, not a definite enum error. Controller-approved composition: existing exact T8.unknown-adjacent retained-known-state and ScopesAppendpipeInheritsBeforeMerge no-child-leak; sound qualified operands retain distinct qualifier-typed source-read evidence in the open/uncertain parent state; neither atomic dotted fields nor unqualified suffix identities or a selected join output merge are established. Child evidence remains scope-local; this does not claim the runtime result has no columns.",
       "status": "incomplete",
       "syntax_complete": true,
       "semantic_complete": false,
       "required_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS",
-        "SPL_AMBIGUOUS_FIELD"
+        "SPL_UNSUPPORTED_SEMANTICS"
       ],
       "forbidden_codes": [
         "SPL_SYNTAX_ERROR",
@@ -1079,6 +1078,10 @@
           {
             "name": "id",
             "conditional": false
+          },
+          {
+            "name": "id",
+            "conditional": false
           }
         ],
         "removed": [],
@@ -1103,7 +1106,6 @@
       "syntax_complete": true,
       "semantic_complete": false,
       "expected_codes": [
-        "SPL_AMBIGUOUS_FIELD",
         "SPL_UNSUPPORTED_SEMANTICS"
       ],
       "references": [
@@ -1145,6 +1147,10 @@
         }
       ],
       "fields": [
+        {
+          "name": "id",
+          "conditional": false
+        },
         {
           "name": "id",
           "conditional": false
@@ -5397,13 +5403,12 @@
     "canonical_evidence": "regression_snapshot",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "C16/E.C16 plus ROOT qualified-read ruling: whole decoded alias.field name, read/indeterminate; no root literal-dotted field or unqualified suffix installation and no guessed catalogue/origins. Actual typed right source is independent; merge remains U. Required aliases and integer/enum domains are independent contract checks. Damaged grammar leaves the survivor graph unasserted; held uppercase enum is incomplete, not a definite enum error.",
+      "basis": "C16/E.C16 plus ROOT qualified-read ruling: structural alias.field reads retain qualifier-typed source evidence; no atomic dotted or unqualified suffix identity, selected output merge, or catalogue claim. Actual typed right source is independent; merge remains U. Required aliases and integer/enum domains are independent contract checks. Damaged grammar leaves the survivor graph unasserted; held uppercase enum is incomplete, not a definite enum error.",
       "status": "invalid",
       "syntax_complete": true,
       "semantic_complete": false,
       "required_codes": [
-        "SPL_SYNTAX_ERROR",
-        "SPL_AMBIGUOUS_FIELD"
+        "SPL_SYNTAX_ERROR"
       ],
       "forbidden_codes": [],
       "required_references": [
@@ -5552,7 +5557,6 @@
       "syntax_complete": true,
       "semantic_complete": false,
       "expected_codes": [
-        "SPL_AMBIGUOUS_FIELD",
         "SPL_SYNTAX_ERROR",
         "SPL_UNSUPPORTED_SEMANTICS"
       ],
@@ -5595,6 +5599,10 @@
         }
       ],
       "fields": [
+        {
+          "name": "id",
+          "conditional": false
+        },
         {
           "name": "id",
           "conditional": false
@@ -6217,13 +6225,12 @@
     "canonical_evidence": "regression_snapshot",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "Evidence correction v1: immutable T5.boundary.048 explicitly requires joinCommand:1 under H11; accepted ExtendedSyntaxAdditionalContracts103 holds uppercase spelling without declaring the retained typed structure an opaque command. Preserve syntaxfalse/semanticfalse/U and the original qualified A.id/B.id read/indeterminate identities and independent FROM other child under the root join namespace ruling. Alias-declaration/keyword refs and fabricated root dotted/suffix fields remain forbidden. The earlier analogy to unmodeled native branch was unsupported.",
+      "basis": "Evidence correction v1: immutable T5.boundary.048 explicitly requires joinCommand:1 under H11; accepted ExtendedSyntaxAdditionalContracts103 holds uppercase spelling without declaring the retained typed structure an opaque command. Preserve syntaxfalse/semanticfalse/U and the original qualified A.id/B.id qualifier-typed source-read evidence and independent FROM other child under the root join namespace ruling. Alias-declaration/keyword refs and fabricated atomic dotted or unqualified suffix identities remain forbidden. The earlier analogy to unmodeled native branch was unsupported.",
       "status": "incomplete",
       "syntax_complete": false,
       "semantic_complete": false,
       "required_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS",
-        "SPL_AMBIGUOUS_FIELD"
+        "SPL_UNSUPPORTED_SEMANTICS"
       ],
       "forbidden_codes": [
         "SPL_SYNTAX_ERROR",
@@ -6355,7 +6362,6 @@
       "syntax_complete": false,
       "semantic_complete": false,
       "expected_codes": [
-        "SPL_AMBIGUOUS_FIELD",
         "SPL_UNSUPPORTED_SEMANTICS"
       ],
       "references": [
@@ -6397,6 +6403,10 @@
         }
       ],
       "fields": [
+        {
+          "name": "id",
+          "conditional": false
+        },
         {
           "name": "id",
           "conditional": false
@@ -6455,13 +6465,12 @@
     "canonical_evidence": "regression_snapshot",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "C16/E.C16 plus ROOT qualified-read ruling: whole decoded alias.field name, read/indeterminate; no root literal-dotted field or unqualified suffix installation and no guessed catalogue/origins. Actual typed right source is independent; merge remains U. Required aliases and integer/enum domains are independent contract checks. Damaged grammar leaves the survivor graph unasserted; held uppercase enum is incomplete, not a definite enum error. Source-backed strengthening v1: immutable T5.boundary.049 explicitly requires joinCommand:1 and H11; pinned ExtendedSyntaxAdditionalContracts104 holds exactly this uppercase enum while parser rules170–174 retain the typed join and intact independent body. Require original whole qualified reads with indeterminate binding, actual child59:71 owned by join12 under root0:71, and its original other dataset/read/not_applicable plus complete local FROM. This does not resolve INNER policy or promote parent coverage/merge certainty.",
+      "basis": "C16/E.C16 plus ROOT qualified-read ruling: structural alias.field reads retain qualifier-typed source evidence; no atomic dotted or unqualified suffix identity, selected output merge, or catalogue claim. Actual typed right source is independent; merge remains U. Required aliases and integer/enum domains are independent contract checks. Damaged grammar leaves the survivor graph unasserted; held uppercase enum is incomplete, not a definite enum error. Source-backed strengthening v1: immutable T5.boundary.049 explicitly requires joinCommand:1 and H11; pinned ExtendedSyntaxAdditionalContracts104 holds exactly this uppercase enum while parser rules170–174 retain the typed join and intact independent body. Require original structural qualified reads with qualifier-typed source evidence, actual child59:71 owned by join12 under root0:71, and its original other dataset/read/not_applicable plus complete local FROM. This does not resolve INNER policy or promote parent coverage/merge certainty.",
       "status": "incomplete",
       "syntax_complete": false,
       "semantic_complete": false,
       "required_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS",
-        "SPL_AMBIGUOUS_FIELD"
+        "SPL_UNSUPPORTED_SEMANTICS"
       ],
       "forbidden_codes": [
         "SPL_SYNTAX_ERROR",
@@ -6603,7 +6612,6 @@
       "syntax_complete": false,
       "semantic_complete": false,
       "expected_codes": [
-        "SPL_AMBIGUOUS_FIELD",
         "SPL_UNSUPPORTED_SEMANTICS"
       ],
       "references": [
@@ -6645,6 +6653,10 @@
         }
       ],
       "fields": [
+        {
+          "name": "id",
+          "conditional": false
+        },
         {
           "name": "id",
           "conditional": false

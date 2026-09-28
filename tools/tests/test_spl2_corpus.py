@@ -332,6 +332,18 @@ class SPL2CanonicalLayerTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'forbidden field'):
             self.audit()
 
+    def test_snapshot_forbidden_field_identity_is_typed(self):
+        case = self.snapshot_case()
+        case['canonical_assertions']['forbidden_field_identities'] = [{'kind':'atomic', 'segments':['x']}]
+        CHECK.audit_canonical_assertions(case)
+        for identity in ({'kind':'atomic', 'segments':[]},
+                         {'kind':'path', 'segments':['x'], 'qualifier':''},
+                         {'kind':'atomic', 'segments':['x'], 'qualifier':'L'}):
+            with self.subTest(identity=identity):
+                case['canonical_assertions']['forbidden_field_identities'] = [identity]
+                with self.assertRaisesRegex(ValueError, 'invalid forbidden field identity'):
+                    CHECK.audit_canonical_assertions(case)
+
     def test_snapshot_requires_nonvacuous_soundness_assertions(self):
         case = self.snapshot_case()
         for key in ('required_references', 'forbidden_references', 'required_fields', 'forbidden_field_names', 'required_stages'):

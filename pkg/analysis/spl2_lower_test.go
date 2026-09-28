@@ -921,6 +921,40 @@ func TestSPL2PipelineJoinRejectsUnselectedLayouts(t *testing.T) {
 		if r.Status == Valid || r.Coverage.SemanticComplete {
 			t.Errorf("unselected join layout became complete for %q: %+v", query, r)
 		}
+		if spl2HasCode(r, CodeAmbiguousField) {
+			t.Errorf("unselected join layout claimed an output collision for %q: %+v", query, r.Diagnostics)
+		}
+	}
+}
+
+func TestSPL2PipelineUnselectedJoinRetainsQualifiedInputEvidence(t *testing.T) {
+	r := spl2AnalyzeTest(t, `FROM main | join left=L right=R where L.id=R.id AND L.region=R.region [FROM other]`)
+	if r.Status != Incomplete || r.Coverage.SemanticComplete || !spl2HasCode(r, CodeUnsupportedSemantics) || spl2HasCode(r, CodeAmbiguousField) {
+		t.Fatalf("unselected join claimed output ownership: status=%s coverage=%+v diagnostics=%+v", r.Status, r.Coverage, r.Diagnostics)
+	}
+	reads := map[string]Reference{}
+	for _, ref := range r.References {
+		if ref.Kind == "field" && ref.Role == "read" {
+			reads[ref.OriginalName] = ref
+		}
+	}
+	state := r.Lineage[len(r.Lineage)-1].After
+	if !state.Open || !state.Uncertain || len(state.Fields) != 4 {
+		t.Fatalf("unselected join state = %+v", state)
+	}
+	seen := map[string]bool{}
+	for _, field := range state.Fields {
+		key := field.FieldIdentity.Qualifier + "." + field.Name
+		ref, ok := reads[key]
+		if !ok || field.FieldIdentity.Kind != "path" || !reflect.DeepEqual(field.FieldIdentity.Segments, []string{field.Name}) || ref.Binding != "source" || ref.FieldIdentity == nil || !reflect.DeepEqual(*ref.FieldIdentity, field.FieldIdentity) || !reflect.DeepEqual(field.OriginReferenceIDs, []string{ref.ID}) {
+			t.Fatalf("unselected join invented an unqualified output field: field=%+v ref=%+v", field, ref)
+		}
+		seen[key] = true
+	}
+	for _, key := range []string{"L.id", "R.id", "L.region", "R.region"} {
+		if !seen[key] {
+			t.Errorf("missing qualified predicate read %s: %+v", key, state.Fields)
+		}
 	}
 }
 
@@ -1407,12 +1441,12 @@ func TestSPL2SequentialFullState(t *testing.T) {
 			Language: "spl2", Profile: "splunkd", Version: "current",
 			QueryDigest: "sha256:159f5b7d4683ac55dd0efac524ba3ea30133c495a91e81af6c695b70d1e16afa",
 		},
-		CapabilityRevision: "sha256:69b166318f99909d0ffbad378f0369fd9377a1f56945e2c3c0b69eaa32c03e95",
+		CapabilityRevision: "sha256:a765813624c6edfd754a4529556f5fd35288f464e759f8d969404a072bef1898",
 		QueryStatus:        Valid,
 		Coverage:           RequirementCoverage{Complete: true, Reasons: []string{}},
 		Items: []RequirementItem{
 			{ID: "req-1", Kind: "dataset", Identity: "main", Role: "read", Necessity: "required", Origin: "direct", Resolution: "exact", Occurrences: []RequirementOccurrence{{ReferenceID: "ref-0", OriginalName: "main", Binding: "not_applicable", StageID: "stage-0", ScopeID: "scope-0", Location: loc(5, 9)}}},
-			{ID: "req-2", Kind: "field", Identity: "bytes", Role: "read", Necessity: "required", Origin: "direct", Resolution: "exact", Occurrences: []RequirementOccurrence{{ReferenceID: "ref-2", OriginalName: "bytes", Binding: "source", StageID: "stage-1", ScopeID: "scope-0", Location: loc(19, 24)}}},
+			{ID: "req-2", Kind: "field", Identity: "bytes", FieldIdentity: testAtomicIdentityPointer("bytes"), Role: "read", Necessity: "required", Origin: "direct", Resolution: "exact", Occurrences: []RequirementOccurrence{{ReferenceID: "ref-2", OriginalName: "bytes", Binding: "source", StageID: "stage-1", ScopeID: "scope-0", Location: loc(19, 24)}}},
 		},
 		Gaps:        []RequirementGap{},
 		Diagnostics: []Diagnostic{},
