@@ -1,7 +1,7 @@
 ## What's new in the app
 
 - SPL2 analysis under `splunkd/current` now models selected field and dataset forms, same-document views and scalar functions, and selected `if`, guarded `branch`, `union`, and qualified pipeline `join` merges.
-- Quoted atomic dotted fields and structural paths retain separate private identities. A collision in their shared public name reports `SPL_AMBIGUOUS_FIELD` and leaves semantic and requirement coverage incomplete.
+- Unquoted dotted SPL2 access is structural; a quoted identifier containing dots is atomic. They retain separate private identities. A collision in their shared public name reports `SPL_AMBIGUOUS_FIELD` and leaves semantic and requirement coverage incomplete.
 - Exact static dataset descriptors have canonical JSON identities in dependencies and direct requirements. Dynamic descriptors retain located conditional evidence without an exact dependency.
 - External imports are recorded but not resolved. Unused imports can leave analysis valid while direct requirement coverage is incomplete; using an imported member makes analysis incomplete.
 - The SPL2 capability manifest now has 140 records and 146 evidence cases. Its semantic revision is `sha256:69b166318f99909d0ffbad378f0369fd9377a1f56945e2c3c0b69eaa32c03e95`.
@@ -14,7 +14,7 @@ The external exact-ref audit read 54 YAML documents containing 49 searches: 45 s
 
 ## Implementation decisions
 
-The analyzer keeps atomic and structural field identities in private keys while retaining the established string-valued public report. When two private identities project to one public name, it combines their visible origins and marks the result uncertain. This collision rule is intentional pending a user choice about whether to retain or revise it.
+The analyzer keeps atomic and structural field identities in private keys while retaining the established string-valued public report. When two private identities project to one public name, it combines their visible origins and marks the result uncertain under the previously approved schema-version-1 collision rule. On 2026-09-28, the user confirmed that unquoted dotted access is structural and a quoted identifier containing dots is atomic. The audit must retain incomplete coverage rather than equate those identities.
 
 Static descriptor identity is canonical JSON over a proved literal kind and literal properties. A duplicate decoded key or dynamic value cannot become an exact dataset dependency. Local views and pure scalar functions bind within the submitted document, with forward references, duplicate detection, and cycle detection. Imported modules are not fetched or linked.
 
@@ -22,7 +22,7 @@ Alternative flow paths use copied environments and forked requirement traces. Fi
 
 ## What the next milestone needs to know
 
-Milestone 11 acceptance is open. The audit command exited 0, but only 36 of 45 standalone searches are semantically complete under the current collision rule. A user decision is pending on whether that rule should remain conservative or be revised. The two invalid reports also require preserving the structural-versus-atomic distinction when assessing post-aggregate reads. No external search text, document names, or source paths are recorded here.
+Milestone 11 local acceptance is open until the audit enforces the confirmed exact-ref classification. The current command exited 0 and reported 45/45 standalone syntax-complete searches, 36/45 semantic-complete searches (34 valid, 2 invalid), 9 incomplete searches with `SPL_AMBIGUOUS_FIELD`, and 4/4 valid, complete fragments. The 2 invalid searches have definite unavailable structural reads after atomic aggregate output. This is the expected result under the confirmed distinction, not a reason to collapse quoted and unquoted fields. No external search text, document names, or source paths are recorded here.
 
 ## Deviations from the plan
 
@@ -44,7 +44,7 @@ Task 11 validation included:
 
 - `GOWORK=off make build`: passed.
 - `python3 -m unittest tools.tests.test_linus_spl2_audit`: 18 tests passed.
-- `python3 tools/audit_linus_spl2.py --content-root "$LINUS_AUDIT_SNAPSHOT" --toolkit-bin build/spl-toolkit --forms testdata/spl2/linus-forms.json`: exited 0 against the exact-ref sparse checkout. Its semantic acceptance result remains 36/45 standalone queries.
+- `python3 tools/audit_linus_spl2.py --content-root "$LINUS_AUDIT_SNAPSHOT" --toolkit-bin build/spl-toolkit --forms testdata/spl2/linus-forms.json`: exited 0 against the exact-ref sparse checkout. It reported 36/45 semantic-complete standalone queries.
 - `python3 tools/check_docs.py` and `git diff --check`: passed for this documentation update.
 
 Task 13 fresh local acceptance at `2c5dac416122813fbaebab64bba538da774a655b` included:
@@ -95,7 +95,7 @@ Task 13 fresh local acceptance at `2c5dac416122813fbaebab64bba538da774a655b` inc
   python3 tools/audit_linus_spl2.py --content-root "$LINUS_AUDIT_SNAPSHOT" --toolkit-bin build/spl-toolkit --forms testdata/spl2/linus-forms.json
   ```
 
-  The variables' private path values are omitted to avoid exposing source paths. The audit exited 0 after the final build: 49 searches (45 standalone, 4 fragments), 65 form obligations, 45/45 standalone syntax complete, 36/45 standalone semantics complete (34 valid, 2 invalid, 9 incomplete), and 4/4 fragments complete and valid. Standalone analysis emitted 30 `SPL_AMBIGUOUS_FIELD` and 7 `SPL_UNAVAILABLE_FIELD` findings; selected external content emitted no `SPL_UNSUPPORTED_SEMANTICS`.
+  The variables' private path values are omitted to avoid exposing source paths. The audit exited 0 after the final build: 49 searches (45 standalone, 4 fragments), 65 form obligations, 45/45 standalone syntax complete, 36/45 standalone semantics complete (34 valid, 2 invalid, 9 incomplete), and 4/4 fragments complete and valid. Standalone analysis emitted 30 `SPL_AMBIGUOUS_FIELD` and 7 `SPL_UNAVAILABLE_FIELD` findings; selected external content emitted no `SPL_UNSUPPORTED_SEMANTICS`. The command did not yet enforce the revised semantic classification.
 - `git diff --check origin/main...HEAD`, `git status --short --branch`, and `git diff --stat origin/main...HEAD` were checked. The branch diff contained 109 files (11 added, 98 modified), all within the Milestone 11 parser, analysis, evidence, tests, packaging, audit tooling, and documentation scope. No dependency lock, public schema, workflow, or Milestone 12 file changed. The original checkout's user-owned plan and design files remained untracked and uncommitted.
 
 Task 13 acceptance was refreshed at reviewed code commit `9500aa2b25f4788dce841f231f9c304e6349bb04`. Its import re-export correction now treats exporting an imported symbol as a use of the unresolved external module; the new regression test checks incomplete semantic and requirement coverage with a located `SPL_UNRESOLVED_MODULE` finding. The refreshed checks were:
@@ -107,8 +107,8 @@ Task 13 acceptance was refreshed at reviewed code commit `9500aa2b25f4788dce841f
 - `git diff --name-only 02421b2...HEAD -- grammar/SPL2Lexer.g4 grammar/SPL2Parser.g4 parser/spl2`: empty at the reviewed code commit, so the earlier 10/10 pinned generated-byte comparison still applies.
 - Remote main was reverified as `d4db9bae4adba00bc59d9becbf4014908e7a3ef5`. The clean exact-ref sparse snapshot still had 54 YAML inputs. `python3 tools/audit_linus_spl2.py --content-root "$LINUS_AUDIT_SNAPSHOT" --toolkit-bin build/spl-toolkit --forms testdata/spl2/linus-forms.json` exited 0 after `make build-all`: 49 searches (45 standalone, 4 fragments), 65 forms, 45/45 standalone syntax complete, 36/45 standalone semantics complete (34 valid, 2 invalid, 9 incomplete), and 4/4 fragments complete and valid. Standalone analysis again emitted 30 `SPL_AMBIGUOUS_FIELD` and 7 `SPL_UNAVAILABLE_FIELD` findings; selected external content emitted no `SPL_UNSUPPORTED_SEMANTICS`.
 
-The full local checks passed, but the 45/45 standalone semantic gate remains open at 36/45 pending the atomic-versus-structural collision decision. This acceptance does not change the separate runtime, release, approval, or UAT proof levels.
+The full local checks passed at reviewed code commit `9500aa2b25f4788dce841f231f9c304e6349bb04`. The user confirmed the atomic-versus-structural distinction on 2026-09-28; enforcing the revised exact-ref classification in Task 11 remains open. This local evidence does not change the separate runtime, release, approval, or UAT proof levels.
 
 ## Unclaimed proof levels
 
-Local parser and surface checks establish only the tested toolkit behavior. They do not establish complete SPL2 semantics, complete direct requirements for every form, lint support, safe rewriting for forms outside its evidence ledger, live Splunk runtime compatibility, release-platform CI, deployment, authorization, approval, or UAT. The external audit does not establish 45/45 standalone semantic acceptance while the collision decision and remaining findings are open.
+Local parser and surface checks establish only the tested toolkit behavior. They do not establish complete SPL2 semantics, complete direct requirements for every form, lint support, safe rewriting for forms outside its evidence ledger, live Splunk runtime compatibility, release-platform CI, deployment, authorization, approval, or UAT. The external audit establishes the reported exact-ref classification, not 45/45 standalone semantic completeness; its revised acceptance assertions are not yet enforced.
