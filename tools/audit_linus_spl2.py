@@ -20,6 +20,43 @@ EXPECTED_INVENTORY = {
     "standalone_programs": 45,
     "predicate_fragments": 4,
 }
+EXACT_LINUS_COMMIT = "d4db9bae4adba00bc59d9becbf4014908e7a3ef5"
+EXPECTED_CONTENT_ACCEPTANCE = {
+    "content_syntax_counts": {
+        "standalone": {"complete": 45, "incomplete": 0},
+        "predicate_fragment": {"complete": 4, "incomplete": 0},
+    },
+    "content_semantic_counts": {
+        "standalone": {"complete": 36, "incomplete": 9},
+        "predicate_fragment": {"complete": 4, "incomplete": 0},
+    },
+    "content_status_classes": {
+        "standalone": {
+            "analyze": {"valid": 34, "incomplete": 9, "invalid": 2},
+            "requirements": {"valid": 10, "incomplete": 30, "invalid": 5},
+        },
+        "predicate_fragment": {
+            "analyze": {"valid": 4},
+            "requirements": {"valid": 4},
+        },
+    },
+}
+EXPECTED_CONTENT_DIAGNOSTIC_COUNTS = {
+    "standalone": {
+        "analyze": {
+            "codes": {"SPL_AMBIGUOUS_FIELD": 30, "SPL_UNAVAILABLE_FIELD": 7},
+            "categories": {"unsupported_semantics": 30, "unavailable_field": 7},
+        },
+        "requirements": {
+            "codes": {"SPL_AMBIGUOUS_FIELD": 30, "SPL_UNAVAILABLE_FIELD": 25},
+            "categories": {"unsupported_semantics": 30, "unavailable_field": 25},
+        },
+    },
+    "predicate_fragment": {
+        "analyze": {"codes": {}, "categories": {}},
+        "requirements": {"codes": {}, "categories": {}},
+    },
+}
 STATUS_EXITS = {"valid": 0, "invalid": 1, "incomplete": 3}
 TOP_LEVEL_SEARCH = re.compile(r"^search\s*:\s*(.*)$")
 AMBIGUOUS_SEARCH_KEY = re.compile(
@@ -321,7 +358,40 @@ def reject_protected_output(output: dict, protected_values: set[str]) -> None:
             raise AuditError("aggregate output would expose protected input")
 
 
-def audit(content_root: Path, toolkit_bin: Path, forms_path: Path, *, runner=subprocess.run) -> dict:
+def validate_standalone_attribution(status: str, semantic_complete: bool, diagnostics: list[dict]) -> None:
+    """Keep ambiguity and definite unavailable fields on their respective reports."""
+    pairs = set()
+    for diagnostic in diagnostics:
+        if not isinstance(diagnostic, dict):
+            raise AuditError("toolkit diagnostic lacks aggregate code or category")
+        code, category = diagnostic.get("code"), diagnostic.get("category")
+        if not isinstance(code, str) or not code or not isinstance(category, str) or not category:
+            raise AuditError("toolkit diagnostic lacks aggregate code or category")
+        pairs.add((code, category))
+    ambiguous_pair = ("SPL_AMBIGUOUS_FIELD", "unsupported_semantics")
+    unavailable_pair = ("SPL_UNAVAILABLE_FIELD", "unavailable_field")
+    selected = {pair for pair in pairs if pair[0] in {ambiguous_pair[0], unavailable_pair[0]}}
+    if selected - {ambiguous_pair, unavailable_pair}:
+        raise AuditError("exact-ref standalone field attribution differs from the confirmed baseline")
+    ambiguous = ambiguous_pair in selected
+    unavailable = unavailable_pair in selected
+    accepted = {
+        "valid": semantic_complete and not ambiguous and not unavailable,
+        "incomplete": not semantic_complete and ambiguous and not unavailable,
+        "invalid": semantic_complete and unavailable and not ambiguous,
+    }
+    if not accepted.get(status, False):
+        raise AuditError("exact-ref standalone field attribution differs from the confirmed baseline")
+
+
+def audit(
+    content_root: Path,
+    toolkit_bin: Path,
+    forms_path: Path,
+    *,
+    runner=subprocess.run,
+    enforce_field_attribution: bool = False,
+) -> dict:
     scan_root = Path(content_root)
     commit = exact_commit(scan_root)
     documents = extract_tracked_yaml_documents(scan_root, commit)
@@ -398,6 +468,8 @@ def audit(content_root: Path, toolkit_bin: Path, forms_path: Path, *, runner=sub
             except (OSError, subprocess.SubprocessError) as error:
                 raise AuditError(f"toolkit {operation} could not be executed") from error
             status, diagnostics, syntax_complete, semantic_complete = parse_toolkit_result(operation, completed)
+            if enforce_field_attribution and origin == "content" and classification == "standalone" and operation == "analyze":
+                validate_standalone_attribution(status, semantic_complete, diagnostics)
             status_counts[operation][status] += 1
             if origin == "content":
                 content_status_classes[classification][operation][status] += 1
@@ -469,6 +541,25 @@ def audit(content_root: Path, toolkit_bin: Path, forms_path: Path, *, runner=sub
     return result
 
 
+def validate_exact_ref_acceptance(result: dict) -> None:
+    """Gate the confirmed private-content aggregate without exposing source details."""
+    failure = "exact-ref external content acceptance aggregate differs from the confirmed baseline"
+    expected_counts = EXPECTED_INVENTORY | {
+        "form_obligations": 65,
+        "analyze_invocations": 114,
+        "requirements_invocations": 114,
+    }
+    if result.get("audited_commit") != EXACT_LINUS_COMMIT or result.get("counts") != expected_counts:
+        raise AuditError(failure)
+    if not isinstance(result.get("form_ids"), list) or len(result["form_ids"]) != 65:
+        raise AuditError(failure)
+    for key, expected in EXPECTED_CONTENT_ACCEPTANCE.items():
+        if result.get(key) != expected:
+            raise AuditError(failure)
+    if result.get("content_diagnostic_counts") != EXPECTED_CONTENT_DIAGNOSTIC_COUNTS:
+        raise AuditError(failure)
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--content-root", required=True, type=Path)
@@ -476,7 +567,8 @@ def main(argv=None) -> int:
     parser.add_argument("--forms", required=True, type=Path)
     options = parser.parse_args(argv)
     try:
-        result = audit(options.content_root, options.toolkit_bin, options.forms)
+        result = audit(options.content_root, options.toolkit_bin, options.forms, enforce_field_attribution=True)
+        validate_exact_ref_acceptance(result)
     except (AuditError, OSError, UnicodeError):
         print("Linus SPL2 audit failed: aggregate audit contract was not satisfied", file=sys.stderr)
         return 1
