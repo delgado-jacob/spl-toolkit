@@ -81,11 +81,11 @@ func main() {
 | `gaps` | Ordered explanations for incomplete requirement discovery |
 | `diagnostics` | Detached canonical query-only diagnostics |
 
-Each item has `id`, `kind`, `identity`, `role`, `necessity`, `origin`, `resolution`, and `occurrences`. IDs are `req-N`; necessity is `required` or `conditional`; origin is `direct`; and resolution records the canonical `exact`, `wildcard`, or `dynamic` state. Initial knowledge-object kinds are `index`, `source`, `sourcetype`, `dataset`, `data_model`, `lookup`, and `macro`. Each occurrence has `reference_id`, `original_name`, query-only `binding`, `stage_id`, `scope_id`, and `location`.
+Each item has `id`, `kind`, `identity`, `role`, `necessity`, `origin`, `resolution`, and `occurrences`. Exact SPL2 field items also carry `field_identity`, distinguishing an atomic name from a structural path with the same display string. IDs are `req-N`; necessity is `required` or `conditional`; origin is `direct`; and resolution records the canonical `exact`, `wildcard`, or `dynamic` state. Initial knowledge-object kinds are `index`, `source`, `sourcetype`, `dataset`, `data_model`, `lookup`, and `macro`. Each occurrence has `reference_id`, `original_name`, query-only `binding`, `stage_id`, `scope_id`, and `location`.
 
 Each gap has `code`, `message`, ordered `reference_ids`, and ordered `diagnostic_codes`. Diagnostic fields are `code`, `severity`, `category`, `message`, `location`, `stage_id`, and `scope_id`. Locations use the source-indexed half-open ranges described below. Every collection is an array, including when empty. The standalone set omits full query text; occurrences retain the spelling and range for their evidence.
 
-Items group by `(kind, identity, role, resolution)`, so the same identity used in different roles remains separate. Groups follow the first canonical reference occurrence, then explicit start offset, end offset, kind, role, identity, and resolution tie-breakers. Occurrences remain in canonical reference order. One definite direct occurrence makes the group required; a group with only conditional evidence remains conditional.
+Items group by `(kind, identity, role, resolution)`, with exact fields also separated by typed `field_identity`; the same display name or identity used in different roles need not form one item. Groups follow the first canonical reference occurrence, then explicit start offset, end offset, kind, role, identity, and resolution tie-breakers. Occurrences remain in canonical reference order. One definite direct occurrence makes the group required; a group with only conditional evidence remains conditional.
 
 Exact source-bound consuming fields are direct requirements. Indeterminate, wildcard, and dynamic consumers are conditional and produce gaps. Query-derived fields remain in the parent analysis but are omitted from requirements. Create and output definitions, rename targets, removals, null tests, and query-local unavailable fields are also omitted. A rename source can still be required because it is a source-bound read. Exact direct knowledge-object references are required; wildcard or dynamic identities are conditional when the analyzer can state a defensible identity. Each exact macro invocation produces one direct macro requirement and a source-located unresolved-expansion gap. Selected SPL2 `if`, guarded `branch`, `union`, and pipeline `join` forms merge field environments and forked direct requirement traces. Alternative-only fields and obligations remain conditional. Held forms retain independently sound child evidence without installing unproved fields. The operation does not expand a macro, lookup, data model, dataset, or other knowledge object to infer transitive requirements.
 
@@ -99,7 +99,7 @@ Requirements describe direct obligations visible in the submitted query. Extract
 
 Both digests use `sha256:<64 lowercase hex>`. `query_digest` is SHA-256 over the exact valid UTF-8 query-text bytes. It excludes source ID, language, profile, and compatibility version. Query text is not whitespace-normalized, repaired, or line-ending-normalized.
 
-`capability_revision` is SHA-256 over compact Go `encoding/json` output for the normalized semantic capability payload, without indentation or a trailing newline. It includes `schema_version`, the language/profile/version selectors, `documentation_snapshot` when present, the legacy `commands` and `functions` projections, `rewrite`, `records`, `summary`, and `evidence`. Of the fields in the emitted manifest, only `toolkit_version` is excluded. A source Go build may therefore report `toolkit_version: "dev"` while tagged CLI, server, native, and packaged surfaces report the exact `VERSION`; both retain the same semantic revision when their capability payloads match. The current SPL revision is `sha256:08901c84ac8c420f59ddb86168c534f0e83484c05d3c8a81078a716c878a1733`; the SPL2 revision is `sha256:69b166318f99909d0ffbad378f0369fd9377a1f56945e2c3c0b69eaa32c03e95`.
+`capability_revision` is SHA-256 over compact Go `encoding/json` output for the normalized semantic capability payload, without indentation or a trailing newline. It includes `schema_version`, the language/profile/version selectors, `documentation_snapshot` when present, the legacy `commands` and `functions` projections, `rewrite`, `records`, `summary`, and `evidence`. Of the fields in the emitted manifest, only `toolkit_version` is excluded. A source Go build may therefore report `toolkit_version: "dev"` while tagged CLI, server, native, and packaged surfaces report the exact `VERSION`; both retain the same semantic revision when their capability payloads match. The current SPL revision is `sha256:08901c84ac8c420f59ddb86168c534f0e83484c05d3c8a81078a716c878a1733`; the SPL2 revision is `sha256:a765813624c6edfd754a4529556f5fd35288f464e759f8d969404a072bef1898`.
 
 These digests identify supplied data. They are not authentication, authorization, signatures, proof of environment compatibility, or permission to execute a query.
 
@@ -217,7 +217,7 @@ Locations use half-open `[start, end)` ranges into the original text. `offset` i
 | `diagnostics` | Stable code, severity, category, message, location, stage ID, and scope ID |
 | `coverage` | Separate syntax/semantic completeness and reason codes |
 
-Collections are arrays, including empty arrays, never null. Names preserve field case; default SPL command/function matching is case-insensitive. SPL2 case and held spelling boundaries follow its selected capability/forms contract. IDs and collection order are deterministic for the same document. Reference binding distinguishes source requirements, derived values, indeterminate origins, and non-consuming operands. Removal references describe operations, not required source inputs.
+Collections are arrays, including empty arrays, never null. Names preserve field case; default SPL command/function matching is case-insensitive. SPL2 case and held spelling boundaries follow its selected capability/forms contract. IDs and collection order are deterministic for the same document. Reference binding distinguishes source requirements, derived values, indeterminate origins, and non-consuming operands. Exact SPL2 field references, field bindings, and removals carry `field_identity` with `kind: "atomic"` and one whole-name `segments` entry, or `kind: "path"` with ordered segments and an optional `qualifier`. Proved lineage transitions carry `output_identity`; unproved output identities are omitted. The display name alone does not distinguish atomic from path identity. Removal references describe operations, not required source inputs.
 
 Implicit search stages use command `search`; a macro-only stage uses synthetic command `macro`. Macro identity is a located dependency, with unexpanded effects incomplete. Data-model and dataset references may overlap: `datamodel:Web.All_Traffic` identifies both the root model and qualified dataset. In `datamodel Web All_Traffic`, the dataset's source range covers `All_Traffic` while its normalized name is `Web.All_Traffic`. Consumers must retain the distinct reference identities and component spans.
 
@@ -236,10 +236,11 @@ SPL2 SQL stages stay in lexical order, while scope-local `position` and lineage
 inspections have role `null_test` and retain binding/location/origins without an
 existence outcome; ordinary reads still require presence. Complete modeled effects
 may produce conditional fields, whose later consumers remain indeterminate.
-SPL2 independent rename violations are invalid; named/dynamic/held forms and
-public-name collisions between quoted atomic dots and structural paths remain
-incomplete. Selected same-document views and pure scalar functions can bind
-forward references. Imports remain unresolved outside the submitted document.
+SPL2 independent rename violations are invalid; named/dynamic/held forms remain
+bounded. Quoted atomic dots and structural paths can share a display name
+without merging origins or making semantics incomplete; genuinely unproved
+join outputs remain incomplete. Selected same-document views and pure scalar
+functions can bind forward references. Imports remain unresolved outside the submitted document.
 See the dedicated contract for source-first validation, all-null removal,
 branch merging, phase ownership and exclusions.
 
@@ -258,7 +259,7 @@ For every dimension, `applicable = supported + partial + unsupported + unassesse
 | Language | Records | Evidence cases | Syntax | Semantics | Requirements | Linting | Safe rewriting |
 |---|---:|---:|---|---|---|---|---|
 | SPL | 105 | 104 | 76 supported, 1 unsupported, 28 unassessed | 68 supported, 9 unsupported, 28 unassessed | 19 supported, 5 unsupported, 81 unassessed | 105 unassessed | 17 supported, 2 unsupported, 86 unassessed |
-| SPL2 | 140 | 146 | 89 supported, 19 unsupported, 32 unassessed | 75 supported, 39 unsupported, 26 unassessed | 45 supported, 7 unsupported, 88 unassessed | 140 unassessed | 14 supported, 3 unsupported, 123 unassessed |
+| SPL2 | 140 | 146 | 89 supported, 19 unsupported, 32 unassessed | 76 supported, 38 unsupported, 26 unassessed | 46 supported, 6 unsupported, 88 unassessed | 140 unassessed | 14 supported, 3 unsupported, 123 unassessed |
 
 Evidence IDs resolve to typed local documents, observations, classifications, and provenance in the same manifest. Record and evidence IDs remain stable for the exact reviewed scope. A broadened form receives a new ID unless a reviewed scope correction establishes that the original ID was wrong. `grammar_registered` records parser registration only and never adds coverage. For example, SPL2 record `spl2.command.spl1.quoted-pipeline` has `grammar_registered: true`, but its syntax state is `unsupported`, so it contributes zero covered syntax. Linting is equally separate: analysis diagnostics do not become lint evidence. Both current manifests leave the full linting denominator unassessed.
 

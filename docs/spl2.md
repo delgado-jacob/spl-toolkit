@@ -75,8 +75,8 @@ effects. The capability manifest lists evidence and limitations by form.
 
 The evidence ledger is more granular than that legacy inventory projection. The
 current SPL2 manifest has 140 form records and 146 evidence cases. Syntax has 89
-supported, 19 unsupported and 32 unassessed records. Semantics has 75 supported,
-39 unsupported and 26 unassessed records. Requirements has 45 supported, 7
+supported, 19 unsupported and 32 unassessed records. Semantics has 76 supported,
+38 unsupported and 26 unassessed records. Requirements has 46 supported, 6
 unsupported and 88 unassessed; linting has 140 unassessed. Safe rewriting has
 14 supported, 3 unsupported and 123 unassessed. Supported is the
 only state counted as covered; partial, unsupported and unassessed remain in the
@@ -207,13 +207,15 @@ sibling or later consuming reads still require presence. For example,
 
 SPL2 quoted literal dots and nested navigation are distinct identities.
 `'actor.name'` is one atomic field name; `actor.name` is a structural path.
-The analyzer keeps those identities separate internally, including for exact
-reads, removals and wildcard matching. The public field state has string names,
-so both identities project to `actor.name`. If they coexist, it reports
-`SPL_AMBIGUOUS_FIELD`, merges their visible origins into one uncertain public
-binding, and leaves semantic and requirement coverage incomplete. A later
-projection cannot turn that collision into a proved identity. Resolver expansion
-checks every candidate, including broad `*`, against typed dotted identity.
+Public references, field bindings, removals, and exact field requirement items
+carry `field_identity`: an `atomic` identity has one `segments` entry containing
+the whole name, while a `path` identity has its ordered path segments and an
+optional `qualifier`. Proved lineage transitions carry `output_identity`.
+The two identities may share the display name `actor.name` without merging
+origins or making semantic coverage incomplete. Consumers must use the typed
+identity, not only the display name, to distinguish them. Dynamic or unproved
+identities do not acquire an exact identity by display-name projection. Resolver
+expansion checks every candidate, including broad `*`, against typed identity.
 Exact unaffected members and their schema evidence remain visible.
 
 An exact static dataset descriptor produces one canonical JSON dataset identity.
@@ -262,9 +264,11 @@ right child query. SQL joins and other pipeline join layouts remain incomplete.
 At an alternative merge, fields present on every reachable path remain present;
 fields present on some paths become conditional. Different origins or removal
 states can leave the result uncertain. A selected join combines matched left and
-right fields, then adds unmatched sides for left or outer joins. Duplicate public
-output names produce `SPL_AMBIGUOUS_FIELD` and incomplete coverage. Guard and
-join-key reads keep their original scopes and direct requirement evidence.
+right fields, then adds unmatched sides for left or outer joins. Distinct proved
+atomic and path outputs may share a public name. A join output whose identity or
+ownership cannot be proved remains incomplete; it is not promoted merely because
+its display name matches a known field. Guard and join-key reads keep their
+original scopes and direct requirement evidence.
 Branch requirement traces are forked and merged with the same reachability rules;
 a conditional requirement remains conditional. Unsupported child syntax or an
 unproved merge does not install guessed fields into the parent.

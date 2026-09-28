@@ -26,6 +26,12 @@ meaning/types and new values in closed enums require a contract version change.
 Diagnostic code/reason strings remain extensible; consumers must preserve
 unrecognized values. Existing legacy endpoint decoding remains compatible.
 
+This milestone makes a one-time, reviewed pre-consumer v1 correction to the
+new SPL2 typed-field projection: `field_identity` and `output_identity` retain
+distinct atomic and path identities even when their display names coincide.
+No released consumer had adopted the earlier lossy projection. Once consumed,
+the version-change rule above still applies to changed meaning or types.
+
 Canonical source offsets are zero-based UTF-8 bytes; line/columns are one-based
 Unicode code points with half-open ranges. SARIF declares `unicodeCodePoints`;
 LSP converts to zero-based UTF-16. Source IDs are opaque metadata, not physical
@@ -67,7 +73,7 @@ or semantic diagnostics do not count as lint evidence. Current exact totals are
 cases. The current SPL revision is
 `sha256:08901c84ac8c420f59ddb86168c534f0e83484c05d3c8a81078a716c878a1733`;
 the SPL2 revision is
-`sha256:69b166318f99909d0ffbad378f0369fd9377a1f56945e2c3c0b69eaa32c03e95`.
+`sha256:a765813624c6edfd754a4529556f5fd35288f464e759f8d969404a072bef1898`.
 
 The SPL records cover bounded field-flow semantics for exact `tstats`, selected
 field commands, and selected function arities. Exact macro invocations emit a

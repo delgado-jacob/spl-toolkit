@@ -27,13 +27,13 @@ EXPECTED_CONTENT_ACCEPTANCE = {
         "predicate_fragment": {"complete": 4, "incomplete": 0},
     },
     "content_semantic_counts": {
-        "standalone": {"complete": 36, "incomplete": 9},
+        "standalone": {"complete": 45, "incomplete": 0},
         "predicate_fragment": {"complete": 4, "incomplete": 0},
     },
     "content_status_classes": {
         "standalone": {
-            "analyze": {"valid": 34, "incomplete": 9, "invalid": 2},
-            "requirements": {"valid": 10, "incomplete": 30, "invalid": 5},
+            "analyze": {"valid": 40, "invalid": 5},
+            "requirements": {"valid": 11, "incomplete": 29, "invalid": 5},
         },
         "predicate_fragment": {
             "analyze": {"valid": 4},
@@ -44,12 +44,12 @@ EXPECTED_CONTENT_ACCEPTANCE = {
 EXPECTED_CONTENT_DIAGNOSTIC_COUNTS = {
     "standalone": {
         "analyze": {
-            "codes": {"SPL_AMBIGUOUS_FIELD": 30, "SPL_UNAVAILABLE_FIELD": 7},
-            "categories": {"unsupported_semantics": 30, "unavailable_field": 7},
+            "codes": {"SPL_UNAVAILABLE_FIELD": 25},
+            "categories": {"unavailable_field": 25},
         },
         "requirements": {
-            "codes": {"SPL_AMBIGUOUS_FIELD": 30, "SPL_UNAVAILABLE_FIELD": 25},
-            "categories": {"unsupported_semantics": 30, "unavailable_field": 25},
+            "codes": {"SPL_UNAVAILABLE_FIELD": 25},
+            "categories": {"unavailable_field": 25},
         },
     },
     "predicate_fragment": {
@@ -359,7 +359,7 @@ def reject_protected_output(output: dict, protected_values: set[str]) -> None:
 
 
 def validate_standalone_attribution(status: str, semantic_complete: bool, diagnostics: list[dict]) -> None:
-    """Keep ambiguity and definite unavailable fields on their respective reports."""
+    """Require complete semantics and attach definite unavailable fields to invalid reports."""
     pairs = set()
     for diagnostic in diagnostics:
         if not isinstance(diagnostic, dict):
@@ -368,17 +368,16 @@ def validate_standalone_attribution(status: str, semantic_complete: bool, diagno
         if not isinstance(code, str) or not code or not isinstance(category, str) or not category:
             raise AuditError("toolkit diagnostic lacks aggregate code or category")
         pairs.add((code, category))
-    ambiguous_pair = ("SPL_AMBIGUOUS_FIELD", "unsupported_semantics")
     unavailable_pair = ("SPL_UNAVAILABLE_FIELD", "unavailable_field")
-    selected = {pair for pair in pairs if pair[0] in {ambiguous_pair[0], unavailable_pair[0]}}
-    if selected - {ambiguous_pair, unavailable_pair}:
+    selected = {pair for pair in pairs if pair[0] in {
+        "SPL_AMBIGUOUS_FIELD", "SPL_UNAVAILABLE_FIELD", "SPL_UNSUPPORTED_SEMANTICS",
+    }}
+    if selected - {unavailable_pair}:
         raise AuditError("exact-ref standalone field attribution differs from the confirmed baseline")
-    ambiguous = ambiguous_pair in selected
     unavailable = unavailable_pair in selected
     accepted = {
-        "valid": semantic_complete and not ambiguous and not unavailable,
-        "incomplete": not semantic_complete and ambiguous and not unavailable,
-        "invalid": semantic_complete and unavailable and not ambiguous,
+        "valid": semantic_complete and not unavailable,
+        "invalid": semantic_complete and unavailable,
     }
     if not accepted.get(status, False):
         raise AuditError("exact-ref standalone field attribution differs from the confirmed baseline")

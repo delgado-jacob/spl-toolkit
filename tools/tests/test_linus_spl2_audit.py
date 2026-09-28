@@ -35,13 +35,13 @@ class LinusSPL2AuditTests(unittest.TestCase):
                 "predicate_fragment": {"complete": 4, "incomplete": 0},
             },
             "content_semantic_counts": {
-                "standalone": {"complete": 36, "incomplete": 9},
+                "standalone": {"complete": 45, "incomplete": 0},
                 "predicate_fragment": {"complete": 4, "incomplete": 0},
             },
             "content_status_classes": {
                 "standalone": {
-                    "analyze": {"valid": 34, "incomplete": 9, "invalid": 2},
-                    "requirements": {"valid": 10, "incomplete": 30, "invalid": 5},
+                    "analyze": {"valid": 40, "invalid": 5},
+                    "requirements": {"valid": 11, "incomplete": 29, "invalid": 5},
                 },
                 "predicate_fragment": {
                     "analyze": {"valid": 4},
@@ -51,12 +51,12 @@ class LinusSPL2AuditTests(unittest.TestCase):
             "content_diagnostic_counts": {
                 "standalone": {
                     "analyze": {
-                        "codes": {"SPL_AMBIGUOUS_FIELD": 30, "SPL_UNAVAILABLE_FIELD": 7},
-                        "categories": {"unsupported_semantics": 30, "unavailable_field": 7},
+                        "codes": {"SPL_UNAVAILABLE_FIELD": 25},
+                        "categories": {"unavailable_field": 25},
                     },
                     "requirements": {
-                        "codes": {"SPL_AMBIGUOUS_FIELD": 30, "SPL_UNAVAILABLE_FIELD": 25},
-                        "categories": {"unsupported_semantics": 30, "unavailable_field": 25},
+                        "codes": {"SPL_UNAVAILABLE_FIELD": 25},
+                        "categories": {"unavailable_field": 25},
                     },
                 },
                 "predicate_fragment": {
@@ -67,18 +67,21 @@ class LinusSPL2AuditTests(unittest.TestCase):
             "form_ids": [f"M11.synthetic.{index:02}" for index in range(65)],
         }
 
-    def test_exact_ref_acceptance_allows_confirmed_structural_atomic_boundary(self):
+    def test_exact_ref_acceptance_requires_complete_standalone_semantics(self):
         AUDIT.validate_exact_ref_acceptance(self.accepted_exact_ref_aggregate())
 
     def test_exact_ref_acceptance_rejects_aggregate_drift_without_leaking_content(self):
         mutations = {
             "commit": lambda result: result.update(audited_commit="private-source-path"),
-            "semantic": lambda result: result["content_semantic_counts"]["standalone"].update(complete=35, incomplete=10),
-            "status": lambda result: result["content_status_classes"]["standalone"]["analyze"].update(valid=33, incomplete=10),
-            "requirements": lambda result: result["content_status_classes"]["standalone"]["requirements"].update(valid=9, incomplete=31),
+            "semantic": lambda result: result["content_semantic_counts"]["standalone"].update(complete=44, incomplete=1),
+            "status": lambda result: result["content_status_classes"]["standalone"]["analyze"].update(valid=39, incomplete=1),
+            "requirements": lambda result: result["content_status_classes"]["standalone"]["requirements"].update(valid=10, incomplete=30),
+            "fragment_semantic": lambda result: result["content_semantic_counts"]["predicate_fragment"].update(complete=3, incomplete=1),
             "fragment": lambda result: result["content_status_classes"]["predicate_fragment"]["requirements"].update(valid=3, incomplete=1),
             "unsupported": lambda result: result["content_diagnostic_counts"]["standalone"]["analyze"]["codes"].update(SPL_UNSUPPORTED_SEMANTICS=1),
-            "category": lambda result: result["content_diagnostic_counts"]["standalone"]["analyze"]["categories"].update(unsupported_semantics=29, unavailable_field=8),
+            "ambiguity": lambda result: result["content_diagnostic_counts"]["standalone"]["analyze"]["codes"].update(SPL_AMBIGUOUS_FIELD=1),
+            "requirements_ambiguity": lambda result: result["content_diagnostic_counts"]["standalone"]["requirements"]["codes"].update(SPL_AMBIGUOUS_FIELD=1),
+            "category": lambda result: result["content_diagnostic_counts"]["standalone"]["analyze"]["categories"].update(unsupported_semantics=1, unavailable_field=24),
             "private_diagnostic": lambda result: result["content_diagnostic_counts"]["standalone"]["analyze"]["codes"].update({"private-query-text": 1}),
         }
         for name, mutate in mutations.items():
@@ -111,7 +114,6 @@ class LinusSPL2AuditTests(unittest.TestCase):
         note = [{"code": "SPL_GENERIC_NOTE", "category": "coverage"}]
         for status, complete, diagnostics in (
             ("valid", True, note),
-            ("incomplete", False, ambiguous),
             ("invalid", True, unavailable),
         ):
             with self.subTest(status=status):
@@ -119,13 +121,16 @@ class LinusSPL2AuditTests(unittest.TestCase):
         for status, complete, diagnostics in (
             ("valid", True, ambiguous),
             ("valid", False, note),
+            ("valid", True, [{"code": "SPL_UNSUPPORTED_SEMANTICS", "category": "unsupported_semantics"}]),
             ("incomplete", False, note),
             ("incomplete", True, ambiguous),
             ("incomplete", False, ambiguous + unavailable),
+            ("incomplete", False, ambiguous),
             ("incomplete", False, [{"code": "SPL_AMBIGUOUS_FIELD", "category": "unavailable_field"}]),
             ("invalid", True, note),
             ("invalid", False, unavailable),
             ("invalid", True, unavailable + ambiguous),
+            ("invalid", True, unavailable + [{"code": "SPL_UNSUPPORTED_SEMANTICS", "category": "unsupported_semantics"}]),
             ("invalid", True, [{"code": "SPL_UNAVAILABLE_FIELD", "category": "unsupported_semantics"}]),
         ):
             with self.subTest(status=status, complete=complete, diagnostics=diagnostics):
@@ -133,7 +138,7 @@ class LinusSPL2AuditTests(unittest.TestCase):
                     AUDIT.validate_standalone_attribution(status, complete, diagnostics)
                 self.assertNotIn("private", str(raised.exception))
 
-    def test_exact_ref_attribution_gate_rejects_shifted_diagnostics_with_unchanged_aggregate(self):
+    def test_exact_ref_attribution_gate_rejects_shifted_unavailable_with_unchanged_aggregate(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
             content = root / "content"
@@ -146,41 +151,31 @@ class LinusSPL2AuditTests(unittest.TestCase):
                 for document in AUDIT.extract_yaml_documents(content)
                 if document.query
             ]
-            incomplete_index, invalid_index, valid_index = [
+            invalid_index, valid_index = [
                 index for index, classification in enumerate(classes)
                 if classification == "standalone"
-            ][:3]
+            ][:2]
 
-            def runner(shift_ambiguous=False, swap_categories=False):
+            def runner(shift_unavailable=False):
                 calls = []
                 successful = self.successful_runner(calls)
 
                 def run(args, **kwargs):
                     query_index = len(calls) // 2
                     completed = successful(args, **kwargs)
-                    if args[1] != "analyze" or query_index not in {
-                        incomplete_index, invalid_index, valid_index,
-                    }:
+                    if args[1] != "analyze" or query_index not in {invalid_index, valid_index}:
                         return completed
                     status = "valid"
-                    complete = True
                     diagnostic = {"code": "SPL_GENERIC_NOTE", "category": "coverage"}
-                    if query_index == incomplete_index:
-                        status, complete = "incomplete", False
-                        if not shift_ambiguous:
-                            diagnostic = {"code": "SPL_AMBIGUOUS_FIELD", "category": "unsupported_semantics"}
-                            if swap_categories:
-                                diagnostic["category"] = "unavailable_field"
-                    elif query_index == invalid_index:
+                    if query_index == invalid_index:
                         status = "invalid"
+                        if not shift_unavailable:
+                            diagnostic = {"code": "SPL_UNAVAILABLE_FIELD", "category": "unavailable_field"}
+                    elif shift_unavailable:
                         diagnostic = {"code": "SPL_UNAVAILABLE_FIELD", "category": "unavailable_field"}
-                        if swap_categories:
-                            diagnostic["category"] = "unsupported_semantics"
-                    elif shift_ambiguous:
-                        diagnostic = {"code": "SPL_AMBIGUOUS_FIELD", "category": "unsupported_semantics"}
                     report = {
                         "status": status,
-                        "coverage": {"syntax_complete": True, "semantic_complete": complete},
+                        "coverage": {"syntax_complete": True, "semantic_complete": True},
                         "diagnostics": [diagnostic],
                     }
                     return subprocess.CompletedProcess(args, AUDIT.STATUS_EXITS[status], json.dumps(report), "")
@@ -189,19 +184,14 @@ class LinusSPL2AuditTests(unittest.TestCase):
 
             expected = AUDIT.audit(content, root / "toolkit", forms, runner=runner())
             AUDIT.audit(content, root / "toolkit", forms, runner=runner(), enforce_field_attribution=True)
-            for name, variant in (
-                ("shifted code", {"shift_ambiguous": True}),
-                ("swapped categories", {"swap_categories": True}),
-            ):
-                with self.subTest(name=name):
-                    changed = AUDIT.audit(content, root / "toolkit", forms, runner=runner(**variant))
-                    self.assertEqual(changed, expected)
-                    with self.assertRaises(AUDIT.AuditError) as raised:
-                        AUDIT.audit(
-                            content, root / "toolkit", forms,
-                            runner=runner(**variant), enforce_field_attribution=True,
-                        )
-                    self.assertNotIn(str(content), str(raised.exception))
+            changed = AUDIT.audit(content, root / "toolkit", forms, runner=runner(shift_unavailable=True))
+            self.assertEqual(changed, expected)
+            with self.assertRaises(AUDIT.AuditError) as raised:
+                AUDIT.audit(
+                    content, root / "toolkit", forms,
+                    runner=runner(shift_unavailable=True), enforce_field_attribution=True,
+                )
+            self.assertNotIn(str(content), str(raised.exception))
 
     def test_malformed_diagnostic_code_fails_cli_with_sanitized_error(self):
         with tempfile.TemporaryDirectory() as temporary:
