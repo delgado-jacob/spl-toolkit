@@ -64,3 +64,7 @@
 !python/spl_toolkit/exceptions.py
 !python/spl_toolkit/libspl_toolkit.h
 !python/spl_toolkit/mapper.py
+
+!testdata/
+!testdata/spl2/
+!testdata/spl2/linus-forms.json

@@ -263,7 +263,7 @@ func (b *builder) entry(i int, entry corpus.ReportEntry) error {
 		ptr := ap + pointer("references", j)
 		id := context("reference", ref.ID)
 		loc := ref.Location
-		if err := b.addNode(Node{ID: id, Kind: "reference", ReportPointer: ptr, DocumentID: entry.ID, AnalysisRevision: revision, TargetDigest: entry.TargetDigest, CanonicalID: ref.ID, StageID: ref.StageID, ScopeID: ref.ScopeID, DependencyKind: ref.Kind, Name: ref.NormalizedName, OriginalName: ref.OriginalName, Role: ref.Role, Resolution: ref.Resolution, Binding: ref.Binding, Location: &loc}); err != nil {
+		if err := b.addNode(Node{ID: id, Kind: "reference", ReportPointer: ptr, DocumentID: entry.ID, AnalysisRevision: revision, TargetDigest: entry.TargetDigest, CanonicalID: ref.ID, StageID: ref.StageID, ScopeID: ref.ScopeID, DependencyKind: ref.Kind, Name: ref.NormalizedName, FieldIdentity: copyFieldIdentity(ref.FieldIdentity), OriginalName: ref.OriginalName, Role: ref.Role, Resolution: ref.Resolution, Binding: ref.Binding, Location: &loc}); err != nil {
 			return err
 		}
 		if err := b.edge("owns_reference", context("stage", ref.StageID), id, ptr, entry, false); err != nil {
@@ -321,7 +321,7 @@ func (b *builder) entry(i int, entry corpus.ReportEntry) error {
 			trPtr := ptr + pointer("transitions", k)
 			trID := context("transition", graphID(phaseKey, strconv.Itoa(k)))
 			trOcc := k
-			if err := b.addNode(Node{ID: trID, Kind: "transition", ReportPointer: trPtr, DocumentID: entry.ID, AnalysisRevision: revision, TargetDigest: entry.TargetDigest, StageID: lineage.StageID, ScopeID: lineage.ScopeID, Phase: lineage.Phase, ExecutionOrder: copyInt(lineage.ExecutionOrder), Occurrence: &trOcc, Operation: tr.Operation, Name: tr.Output, Conditional: tr.Conditional}); err != nil {
+			if err := b.addNode(Node{ID: trID, Kind: "transition", ReportPointer: trPtr, DocumentID: entry.ID, AnalysisRevision: revision, TargetDigest: entry.TargetDigest, StageID: lineage.StageID, ScopeID: lineage.ScopeID, Phase: lineage.Phase, ExecutionOrder: copyInt(lineage.ExecutionOrder), Occurrence: &trOcc, Operation: tr.Operation, Name: tr.Output, OutputIdentity: copyFieldIdentity(tr.OutputIdentity), Conditional: tr.Conditional}); err != nil {
 				return err
 			}
 			if err := b.edge("records_transition", phaseID, trID, trPtr, entry, tr.Conditional); err != nil {
@@ -355,12 +355,26 @@ func copyInt(n *int) *int {
 	value := *n
 	return &value
 }
+func copyFieldIdentity(identity *analysis.FieldIdentity) *analysis.FieldIdentity {
+	if identity == nil {
+		return nil
+	}
+	copy := *identity
+	copy.Segments = append([]string{}, identity.Segments...)
+	return &copy
+}
 func copyState(s analysis.FieldState) analysis.FieldState {
 	s.Fields = append([]analysis.FieldBinding{}, s.Fields...)
 	for i := range s.Fields {
 		s.Fields[i].OriginReferenceIDs = append([]string{}, s.Fields[i].OriginReferenceIDs...)
+		s.Fields[i].FieldIdentity.Segments = append([]string{}, s.Fields[i].FieldIdentity.Segments...)
 	}
-	s.Removed = append([]string{}, s.Removed...)
+	removed := make([]analysis.FieldRemoval, len(s.Removed))
+	for i, removal := range s.Removed {
+		removed[i] = removal
+		removed[i].FieldIdentity.Segments = append([]string{}, removal.FieldIdentity.Segments...)
+	}
+	s.Removed = removed
 	return s
 }
 func hasString(items []string, want string) bool {

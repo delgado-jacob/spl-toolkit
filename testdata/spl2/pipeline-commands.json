@@ -1520,13 +1520,11 @@
     "canonical_evidence": "regression_snapshot",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "ROOT fields ruling: syntax is supported but open retained-internal membership is U. FROM has not independently observed these selectors. Retain their located read identity without unproved source/derived certainty; conditional membership is permitted. Do not fabricate internal columns or let per-candidate proof upgrade pipeline uncertainty. Any following independent rename preserves the source uncertainty rather than creating certainty.",
-      "status": "incomplete",
+      "basis": "Task 5 selected fields contract resolves exact inclusion selectors through the shared source identity environment, closes the output to those selectors, and completes the fields stage without inventing implicit members.",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "required_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "required_codes": [],
       "forbidden_codes": [
         "SPL_SYNTAX_ERROR",
         "SPL_UNAVAILABLE_FIELD"
@@ -1534,28 +1532,30 @@
       "required_references": [
         {
           "original_name": "main",
-          "start": 5,
-          "end": 9,
           "normalized_name": "main",
           "kind": "dataset",
           "role": "read",
-          "binding": "not_applicable"
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
         },
         {
           "original_name": "server",
-          "start": 21,
-          "end": 27,
           "normalized_name": "server",
           "kind": "field",
-          "role": "read"
+          "role": "read",
+          "binding": "source",
+          "start": 21,
+          "end": 27
         },
         {
           "original_name": "account",
-          "start": 29,
-          "end": 36,
           "normalized_name": "account",
           "kind": "field",
-          "role": "read"
+          "role": "read",
+          "binding": "source",
+          "start": 29,
+          "end": 36
         }
       ],
       "forbidden_references": [
@@ -1599,12 +1599,6 @@
           "original_name": "server",
           "start": 21,
           "end": 27,
-          "binding": "source"
-        },
-        {
-          "original_name": "server",
-          "start": 21,
-          "end": 27,
           "binding": "derived"
         },
         {
@@ -1647,16 +1641,19 @@
           "original_name": "account",
           "start": 29,
           "end": 36,
-          "binding": "source"
-        },
-        {
-          "original_name": "account",
-          "start": 29,
-          "end": 36,
           "binding": "derived"
         }
       ],
-      "required_fields": [],
+      "required_fields": [
+        {
+          "name": "account",
+          "conditional": false
+        },
+        {
+          "name": "server",
+          "conditional": false
+        }
+      ],
       "forbidden_field_names": [
         "_raw",
         "_time"
@@ -1670,21 +1667,33 @@
         {
           "command": "fields",
           "start": 12,
-          "semantic_complete": false
+          "semantic_complete": true
         }
       ],
       "max_scopes": 1,
-      "final_state": null
+      "final_state": {
+        "fields": [
+          {
+            "name": "account",
+            "conditional": false
+          },
+          {
+            "name": "server",
+            "conditional": false
+          }
+        ],
+        "removed": [],
+        "open": false,
+        "uncertain": false
+      }
     },
     "canonical": {
       "phase": "analysis",
       "scope": "canonical-result",
-      "status": "incomplete",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "expected_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "expected_codes": [],
       "references": [
         {
           "original_name": "main",
@@ -1700,7 +1709,7 @@
           "normalized_name": "server",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 21,
           "end": 27
         },
@@ -1709,7 +1718,7 @@
           "normalized_name": "account",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 29,
           "end": 36
         }
@@ -1717,23 +1726,23 @@
       "fields": [
         {
           "name": "account",
-          "conditional": true
+          "conditional": false
         },
         {
           "name": "server",
-          "conditional": true
+          "conditional": false
         }
       ],
       "removed": [],
       "open": false,
-      "uncertain": true,
+      "uncertain": false,
       "stage_commands": [
         "from",
         "fields"
       ],
       "stage_complete": [
         true,
-        false
+        true
       ]
     }
   },
@@ -1979,8 +1988,7 @@
       "syntax_complete": false,
       "semantic_complete": false,
       "expected_codes": [
-        "SPL_SYNTAX_ERROR",
-        "SPL_UNSUPPORTED_SEMANTICS"
+        "SPL_SYNTAX_ERROR"
       ],
       "references": [
         {
@@ -1997,7 +2005,7 @@
           "normalized_name": "server",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 21,
           "end": 27
         }
@@ -2005,7 +2013,7 @@
       "fields": [
         {
           "name": "server",
-          "conditional": true
+          "conditional": false
         }
       ],
       "removed": [],
@@ -7963,13 +7971,11 @@
     "canonical_evidence": "regression_snapshot",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "ROOT fields ruling: syntax is supported but open retained-internal membership is U. FROM has not independently observed these selectors. Retain their located read identity without unproved source/derived certainty; conditional membership is permitted. Do not fabricate internal columns or let per-candidate proof upgrade pipeline uncertainty. Any following independent rename preserves the source uncertainty rather than creating certainty.",
-      "status": "incomplete",
+      "basis": "Task 5 selected fields contract resolves exact inclusion selectors through the shared source identity environment, closes the output to those selectors, and completes the fields stage without inventing implicit members.",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "required_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "required_codes": [],
       "forbidden_codes": [
         "SPL_SYNTAX_ERROR",
         "SPL_UNAVAILABLE_FIELD"
@@ -7977,37 +7983,39 @@
       "required_references": [
         {
           "original_name": "main",
-          "start": 5,
-          "end": 9,
           "normalized_name": "main",
           "kind": "dataset",
           "role": "read",
-          "binding": "not_applicable"
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
         },
         {
           "original_name": "server",
-          "start": 19,
-          "end": 25,
           "normalized_name": "server",
           "kind": "field",
-          "role": "read"
+          "role": "read",
+          "binding": "source",
+          "start": 19,
+          "end": 25
         },
         {
           "original_name": "size",
-          "start": 27,
-          "end": 31,
           "normalized_name": "size",
           "kind": "field",
-          "role": "read"
+          "role": "read",
+          "binding": "source",
+          "start": 27,
+          "end": 31
         },
         {
           "original_name": "machine",
-          "start": 51,
-          "end": 58,
           "normalized_name": "machine",
           "kind": "field",
           "role": "rename",
-          "binding": "not_applicable"
+          "binding": "not_applicable",
+          "start": 51,
+          "end": 58
         }
       ],
       "forbidden_references": [
@@ -8051,12 +8059,6 @@
           "original_name": "server",
           "start": 19,
           "end": 25,
-          "binding": "source"
-        },
-        {
-          "original_name": "server",
-          "start": 19,
-          "end": 25,
           "binding": "derived"
         },
         {
@@ -8099,16 +8101,19 @@
           "original_name": "size",
           "start": 27,
           "end": 31,
-          "binding": "source"
-        },
-        {
-          "original_name": "size",
-          "start": 27,
-          "end": 31,
           "binding": "derived"
         }
       ],
-      "required_fields": [],
+      "required_fields": [
+        {
+          "name": "machine",
+          "conditional": false
+        },
+        {
+          "name": "size",
+          "conditional": false
+        }
+      ],
       "forbidden_field_names": [
         "_raw",
         "_time"
@@ -8122,7 +8127,7 @@
         {
           "command": "fields",
           "start": 12,
-          "semantic_complete": false
+          "semantic_complete": true
         },
         {
           "command": "rename",
@@ -8131,17 +8136,31 @@
         }
       ],
       "max_scopes": 1,
-      "final_state": null
+      "final_state": {
+        "fields": [
+          {
+            "name": "machine",
+            "conditional": false
+          },
+          {
+            "name": "size",
+            "conditional": false
+          }
+        ],
+        "removed": [
+          "server"
+        ],
+        "open": false,
+        "uncertain": false
+      }
     },
     "canonical": {
       "phase": "analysis",
       "scope": "canonical-result",
-      "status": "incomplete",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "expected_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "expected_codes": [],
       "references": [
         {
           "original_name": "main",
@@ -8157,7 +8176,7 @@
           "normalized_name": "server",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 19,
           "end": 25
         },
@@ -8166,7 +8185,7 @@
           "normalized_name": "size",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 27,
           "end": 31
         },
@@ -8175,7 +8194,7 @@
           "normalized_name": "server",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 41,
           "end": 47
         },
@@ -8192,18 +8211,18 @@
       "fields": [
         {
           "name": "machine",
-          "conditional": true
+          "conditional": false
         },
         {
           "name": "size",
-          "conditional": true
+          "conditional": false
         }
       ],
       "removed": [
         "server"
       ],
       "open": false,
-      "uncertain": true,
+      "uncertain": false,
       "stage_commands": [
         "from",
         "fields",
@@ -8211,7 +8230,7 @@
       ],
       "stage_complete": [
         true,
-        false,
+        true,
         true
       ]
     }
@@ -15215,13 +15234,11 @@
     "canonical_evidence": "regression_snapshot",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "ROOT fields ruling: syntax is supported but open retained-internal membership is U. FROM has not independently observed these selectors. Retain their located read identity without unproved source/derived certainty; conditional membership is permitted. Do not fabricate internal columns or let per-candidate proof upgrade pipeline uncertainty. Any following independent rename preserves the source uncertainty rather than creating certainty.",
-      "status": "incomplete",
+      "basis": "Task 5 selected fields contract resolves exact inclusion selectors through the shared source identity environment, closes the output to those selectors, and completes the fields stage without inventing implicit members.",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "required_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "required_codes": [],
       "forbidden_codes": [
         "SPL_SYNTAX_ERROR",
         "SPL_UNAVAILABLE_FIELD"
@@ -15229,28 +15246,30 @@
       "required_references": [
         {
           "original_name": "main",
-          "start": 5,
-          "end": 9,
           "normalized_name": "main",
           "kind": "dataset",
           "role": "read",
-          "binding": "not_applicable"
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
         },
         {
           "original_name": "user",
-          "start": 19,
-          "end": 23,
           "normalized_name": "user",
           "kind": "field",
-          "role": "read"
+          "role": "read",
+          "binding": "source",
+          "start": 19,
+          "end": 23
         },
         {
           "original_name": "bytes",
-          "start": 25,
-          "end": 30,
           "normalized_name": "bytes",
           "kind": "field",
-          "role": "read"
+          "role": "read",
+          "binding": "source",
+          "start": 25,
+          "end": 30
         }
       ],
       "forbidden_references": [
@@ -15294,12 +15313,6 @@
           "original_name": "user",
           "start": 19,
           "end": 23,
-          "binding": "source"
-        },
-        {
-          "original_name": "user",
-          "start": 19,
-          "end": 23,
           "binding": "derived"
         },
         {
@@ -15342,16 +15355,19 @@
           "original_name": "bytes",
           "start": 25,
           "end": 30,
-          "binding": "source"
-        },
-        {
-          "original_name": "bytes",
-          "start": 25,
-          "end": 30,
           "binding": "derived"
         }
       ],
-      "required_fields": [],
+      "required_fields": [
+        {
+          "name": "bytes",
+          "conditional": false
+        },
+        {
+          "name": "user",
+          "conditional": false
+        }
+      ],
       "forbidden_field_names": [
         "_raw",
         "_time"
@@ -15365,21 +15381,33 @@
         {
           "command": "fields",
           "start": 12,
-          "semantic_complete": false
+          "semantic_complete": true
         }
       ],
       "max_scopes": 1,
-      "final_state": null
+      "final_state": {
+        "fields": [
+          {
+            "name": "bytes",
+            "conditional": false
+          },
+          {
+            "name": "user",
+            "conditional": false
+          }
+        ],
+        "removed": [],
+        "open": false,
+        "uncertain": false
+      }
     },
     "canonical": {
       "phase": "analysis",
       "scope": "canonical-result",
-      "status": "incomplete",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "expected_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "expected_codes": [],
       "references": [
         {
           "original_name": "main",
@@ -15395,7 +15423,7 @@
           "normalized_name": "user",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 19,
           "end": 23
         },
@@ -15404,7 +15432,7 @@
           "normalized_name": "bytes",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 25,
           "end": 30
         }
@@ -15412,23 +15440,23 @@
       "fields": [
         {
           "name": "bytes",
-          "conditional": true
+          "conditional": false
         },
         {
           "name": "user",
-          "conditional": true
+          "conditional": false
         }
       ],
       "removed": [],
       "open": false,
-      "uncertain": true,
+      "uncertain": false,
       "stage_commands": [
         "from",
         "fields"
       ],
       "stage_complete": [
         true,
-        false
+        true
       ]
     }
   },
@@ -15469,12 +15497,11 @@
     "canonical_evidence": "regression_snapshot",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "ROOT fields ruling: syntax is supported but open retained-internal membership is U. FROM has not independently observed these selectors. Retain their located read identity without unproved source/derived certainty; conditional membership is permitted. Do not fabricate internal columns or let per-candidate proof upgrade pipeline uncertainty. Any following independent rename preserves the source uncertainty rather than creating certainty.",
+      "basis": "Task 5 selected fields contract preserves the wildcard-specific unresolved limitation while exact named selectors use the shared source identity environment. The wildcard does not close or promote the result.",
       "status": "incomplete",
       "syntax_complete": true,
       "semantic_complete": false,
       "required_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS",
         "SPL_UNRESOLVED_WILDCARD"
       ],
       "forbidden_codes": [
@@ -15484,28 +15511,30 @@
       "required_references": [
         {
           "original_name": "main",
-          "start": 5,
-          "end": 9,
           "normalized_name": "main",
           "kind": "dataset",
           "role": "read",
-          "binding": "not_applicable"
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
         },
         {
           "original_name": "'user*'",
-          "start": 21,
-          "end": 28,
           "normalized_name": "user*",
           "kind": "field",
-          "role": "read"
+          "role": "read",
+          "binding": "indeterminate",
+          "start": 21,
+          "end": 28
         },
         {
           "original_name": "host",
-          "start": 30,
-          "end": 34,
           "normalized_name": "host",
           "kind": "field",
-          "role": "read"
+          "role": "read",
+          "binding": "indeterminate",
+          "start": 30,
+          "end": 34
         }
       ],
       "forbidden_references": [
@@ -15606,7 +15635,12 @@
           "binding": "derived"
         }
       ],
-      "required_fields": [],
+      "required_fields": [
+        {
+          "name": "host",
+          "conditional": true
+        }
+      ],
       "forbidden_field_names": [
         "_raw",
         "_time"
@@ -15624,7 +15658,17 @@
         }
       ],
       "max_scopes": 1,
-      "final_state": null
+      "final_state": {
+        "fields": [
+          {
+            "name": "host",
+            "conditional": true
+          }
+        ],
+        "removed": [],
+        "open": false,
+        "uncertain": true
+      }
     },
     "canonical": {
       "phase": "analysis",
@@ -15633,8 +15677,7 @@
       "syntax_complete": true,
       "semantic_complete": false,
       "expected_codes": [
-        "SPL_UNRESOLVED_WILDCARD",
-        "SPL_UNSUPPORTED_SEMANTICS"
+        "SPL_UNRESOLVED_WILDCARD"
       ],
       "references": [
         {
@@ -15832,8 +15875,7 @@
       "syntax_complete": false,
       "semantic_complete": false,
       "expected_codes": [
-        "SPL_SYNTAX_ERROR",
-        "SPL_UNSUPPORTED_SEMANTICS"
+        "SPL_SYNTAX_ERROR"
       ],
       "references": [
         {
@@ -15850,7 +15892,7 @@
           "normalized_name": "user",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 19,
           "end": 23
         }
@@ -15858,7 +15900,7 @@
       "fields": [
         {
           "name": "user",
-          "conditional": true
+          "conditional": false
         }
       ],
       "removed": [],

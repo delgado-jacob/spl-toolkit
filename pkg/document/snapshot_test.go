@@ -90,6 +90,55 @@ func TestSnapshotRequirementSetDetached(t *testing.T) {
 	}
 }
 
+func TestSnapshotRequirementFieldIdentityDetached(t *testing.T) {
+	source := analysis.RequirementSet{Items: []analysis.RequirementItem{{FieldIdentity: &analysis.FieldIdentity{Kind: "path", Segments: []string{"actor", "name"}}}}}
+	copy := cloneRequirementSet(source)
+	copy.Items[0].FieldIdentity.Segments[0] = "changed"
+	if source.Items[0].FieldIdentity.Segments[0] != "actor" {
+		t.Fatalf("requirement identity aliases source: %+v", source.Items[0])
+	}
+}
+
+func TestSnapshotFieldIdentityCopiesAcrossEvidence(t *testing.T) {
+	identity := analysis.FieldIdentity{Kind: "path", Segments: []string{"actor", "name"}}
+	result := &analysis.Result{
+		Document:   analysis.QueryDocument{Text: "actor.name"},
+		References: []analysis.Reference{{ID: "ref-0", FieldIdentity: &identity}},
+		Lineage: []analysis.Lineage{{
+			Before:      analysis.FieldState{Fields: []analysis.FieldBinding{{Name: "actor.name", FieldIdentity: identity}}},
+			After:       analysis.FieldState{Removed: []analysis.FieldRemoval{{Name: "actor.name", FieldIdentity: identity}}},
+			Transitions: []analysis.Transition{{Output: "actor.name", OutputIdentity: &identity}},
+		}},
+		Requirements: analysis.RequirementSet{Items: []analysis.RequirementItem{{Identity: "actor.name", FieldIdentity: &identity}}},
+	}
+	snapshot, err := New(result, testRevisionContext(""))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	snapshot.References[0].FieldIdentity.Segments[0] = "changed"
+	snapshot.Lineage[0].Before.Fields[0].FieldIdentity.Segments[0] = "changed"
+	snapshot.Lineage[0].After.Removed[0].FieldIdentity.Segments[0] = "changed"
+	snapshot.Lineage[0].Transitions[0].OutputIdentity.Segments[0] = "changed"
+	snapshot.Requirements.Items[0].FieldIdentity.Segments[0] = "changed"
+	if !reflect.DeepEqual(identity.Segments, []string{"actor", "name"}) {
+		t.Fatalf("snapshot aliases canonical identity: %+v", identity)
+	}
+
+	returned, found := snapshot.Reference("ref-0")
+	if !found {
+		t.Fatal("reference not found")
+	}
+	returned.FieldIdentity.Segments[0] = "returned"
+	if snapshot.References[0].FieldIdentity.Segments[0] != "changed" {
+		t.Fatal("reference accessor aliases snapshot identity")
+	}
+	result.References[0].FieldIdentity.Segments[1] = "source-mutated"
+	if snapshot.References[0].FieldIdentity.Segments[1] != "name" {
+		t.Fatal("canonical reference identity aliases snapshot")
+	}
+}
+
 func mutateSnapshotRequirements(set *analysis.RequirementSet) {
 	set.Coverage.Reasons[0] = "mutated"
 	set.Items[0].Identity = "mutated"

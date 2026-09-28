@@ -76,6 +76,25 @@ def test_analysis_matches_every_canonical_report():
             assert mapper.analyze_query(query, **document) == case["expected"], case["id"]
 
 
+def test_analysis_keeps_structural_dotted_field_after_atomic_removal():
+    query = "FROM main | fields actor.name, 'actor.name' | fields - 'actor.name'"
+    with SPLMapper(**mapper_kwargs()) as mapper:
+        report = mapper.analyze_query(query, language="spl2")
+    path = {"kind": "path", "segments": ["actor", "name"]}
+    atomic = {"kind": "atomic", "segments": ["actor.name"]}
+    assert report["status"] == "valid" and report["coverage"]["semantic_complete"]
+    references = report["references"]
+    assert [ref["field_identity"] for ref in references[1:]] == [path, atomic, atomic]
+    projected, final = report["lineage"][1:]
+    assert {(field["field_identity"]["kind"], tuple(field["origin_reference_ids"])) for field in projected["after"]["fields"]} == {
+        ("path", (references[1]["id"],)), ("atomic", (references[2]["id"],))}
+    assert [(field["field_identity"], field["origin_reference_ids"]) for field in final["after"]["fields"]] == [
+        (path, [references[1]["id"]])]
+    assert final["after"]["removed"] == [{"name": "actor.name", "field_identity": atomic}]
+    assert final["transitions"][0]["output_identity"] == atomic
+    assert final["transitions"][0]["output_reference_id"] == references[3]["id"]
+
+
 def test_analysis_defaults_options_and_partial_result():
     with SPLMapper(**mapper_kwargs()) as mapper:
         query = "search host=web | mystery x"

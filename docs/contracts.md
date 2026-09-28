@@ -5,7 +5,7 @@ layout: page
 
 # Machine contracts
 
-The [contract registry](../contracts/README.md) lists every v1 schema and request
+The [contract registry](https://github.com/delgado-jacob/spl-toolkit/blob/main/contracts/README.md) lists every v1 schema and request
 entry point. It covers QueryDocument, capabilities, analysis, direct query
 requirements, field-list and JSON Schema/OCSF validation, rewrite, corpus,
 manifest, graph, impact, advanced document view and LSP configuration. Python
@@ -25,6 +25,12 @@ properties at documented extension points. Required-field removal, changed
 meaning/types and new values in closed enums require a contract version change.
 Diagnostic code/reason strings remain extensible; consumers must preserve
 unrecognized values. Existing legacy endpoint decoding remains compatible.
+
+This milestone makes a one-time, reviewed pre-consumer v1 correction to the
+new SPL2 typed-field projection: `field_identity` and `output_identity` retain
+distinct atomic and path identities even when their display names coincide.
+No released consumer had adopted the earlier lossy projection. Once consumed,
+the version-change rule above still applies to changed meaning or types.
 
 Canonical source offsets are zero-based UTF-8 bytes; line/columns are one-based
 Unicode code points with half-open ranges. SARIF declares `unicodeCodePoints`;
@@ -63,11 +69,11 @@ The same ID keeps the same reviewed scope; a broadened form uses a new ID unless
 a reviewed scope correction changes the original boundary. `grammar_registered`
 records parser registration separately from syntax coverage, and ordinary parser
 or semantic diagnostics do not count as lint evidence. Current exact totals are
-105 SPL records with 104 evidence cases and 114 SPL2 records with 124 evidence
+105 SPL records with 104 evidence cases and 140 SPL2 records with 146 evidence
 cases. The current SPL revision is
 `sha256:08901c84ac8c420f59ddb86168c534f0e83484c05d3c8a81078a716c878a1733`;
-the unchanged SPL2 revision is
-`sha256:f1391296cfbc616e9bb1b1828e2471e37b60a35c0555654c0734640e072a0437`.
+the SPL2 revision is
+`sha256:a765813624c6edfd754a4529556f5fd35288f464e759f8d969404a072bef1898`.
 
 The SPL records cover bounded field-flow semantics for exact `tstats`, selected
 field commands, and selected function arities. Exact macro invocations emit a

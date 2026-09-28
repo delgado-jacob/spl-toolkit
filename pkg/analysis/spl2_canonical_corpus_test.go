@@ -65,9 +65,10 @@ type spl2CanonicalAssertions struct {
 		Role         *string `json:"role"`
 		Binding      *string `json:"binding"`
 	} `json:"forbidden_references"`
-	RequiredFields      []spl2CanonicalField `json:"required_fields"`
-	ForbiddenFieldNames []string             `json:"forbidden_field_names"`
-	RequiredStages      []struct {
+	RequiredFields           []spl2CanonicalField `json:"required_fields"`
+	ForbiddenFieldNames      []string             `json:"forbidden_field_names"`
+	ForbiddenFieldIdentities []FieldIdentity      `json:"forbidden_field_identities"`
+	RequiredStages           []struct {
 		Command          string `json:"command"`
 		Start            int    `json:"start"`
 		SemanticComplete bool   `json:"semantic_complete"`
@@ -167,6 +168,18 @@ func spl2CheckCanonicalAssertions(r *Result, a *spl2CanonicalAssertions) error {
 	for _, actual := range c.Fields {
 		if contains(a.ForbiddenFieldNames, actual.Name) {
 			return fmt.Errorf("forbidden field %s", actual.Name)
+		}
+	}
+	if len(a.ForbiddenFieldIdentities) != 0 {
+		if len(r.Lineage) == 0 {
+			return fmt.Errorf("missing final state for forbidden field identity assertion")
+		}
+		for _, actual := range r.Lineage[len(r.Lineage)-1].After.Fields {
+			for _, forbidden := range a.ForbiddenFieldIdentities {
+				if reflect.DeepEqual(actual.FieldIdentity, forbidden) {
+					return fmt.Errorf("forbidden field identity %+v", forbidden)
+				}
+			}
 		}
 	}
 	for _, required := range a.RequiredStages {
@@ -557,7 +570,7 @@ func spl2CanonicalProjection(r *Result) spl2CanonicalExpectation {
 	}
 	if len(r.Lineage) > 0 {
 		after := r.Lineage[len(r.Lineage)-1].After
-		got.Removed = after.Removed
+		got.Removed = fieldRemovalNames(after.Removed)
 		got.Open = after.Open
 		got.Uncertain = after.Uncertain
 		for _, f := range after.Fields {
@@ -565,4 +578,32 @@ func spl2CanonicalProjection(r *Result) spl2CanonicalExpectation {
 		}
 	}
 	return got
+}
+
+func TestSPL2CanonicalForbiddenFieldIdentity(t *testing.T) {
+	r := spl2AnalyzeTest(t, `FROM main | join left=L right=R where L.id=R.id AND L.region=R.region [FROM other]`)
+	a := &spl2CanonicalAssertions{
+		Status: r.Status, SyntaxComplete: r.Coverage.SyntaxComplete,
+		SemanticComplete: r.Coverage.SemanticComplete, MaxScopes: len(r.Scopes),
+	}
+	for _, identity := range []FieldIdentity{
+		{Kind: "atomic", Segments: []string{"region"}},
+		{Kind: "path", Segments: []string{"region"}},
+	} {
+		a.ForbiddenFieldIdentities = []FieldIdentity{identity}
+		if err := spl2CheckCanonicalAssertions(r, a); err != nil {
+			t.Fatalf("unqualified region identity was unexpectedly present: %v", err)
+		}
+		injected := *r
+		injected.Lineage = append([]Lineage{}, r.Lineage...)
+		last := len(injected.Lineage) - 1
+		injected.Lineage[last].After.Fields = append(append([]FieldBinding{}, r.Lineage[last].After.Fields...), FieldBinding{Name: "region", FieldIdentity: identity})
+		if err := spl2CheckCanonicalAssertions(&injected, a); err == nil {
+			t.Fatalf("injected unqualified identity escaped the forbidden oracle: %+v", identity)
+		}
+	}
+	a.ForbiddenFieldIdentities = []FieldIdentity{{Kind: "path", Segments: []string{"region"}, Qualifier: "L"}}
+	if err := spl2CheckCanonicalAssertions(r, a); err == nil {
+		t.Fatal("existing qualified region identity escaped the forbidden oracle")
+	}
 }

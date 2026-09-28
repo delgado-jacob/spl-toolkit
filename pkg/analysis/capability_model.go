@@ -84,17 +84,59 @@ type CapabilitySyntaxObservation struct {
 }
 
 type CapabilityStageExpectation struct {
+	ID               string `json:"id,omitempty" swaggerignore:"true"`
 	Command          string `json:"command"`
+	ScopeID          string `json:"scope_id,omitempty" swaggerignore:"true"`
 	SemanticComplete bool   `json:"semantic_complete"`
 }
 
+func (expectation CapabilityStageExpectation) MarshalJSON() ([]byte, error) {
+	type publicCapabilityStageExpectation struct {
+		Command          string `json:"command"`
+		SemanticComplete bool   `json:"semantic_complete"`
+	}
+	return json.Marshal(publicCapabilityStageExpectation{
+		Command:          expectation.Command,
+		SemanticComplete: expectation.SemanticComplete,
+	})
+}
+
+type CapabilityScopeExpectation struct {
+	ID       string   `json:"id"`
+	ParentID string   `json:"parent_id"`
+	Kind     string   `json:"kind"`
+	StageID  string   `json:"stage_id"`
+	Location Location `json:"location"`
+}
+
 type CapabilityReferenceExpectation struct {
-	NormalizedName string   `json:"normalized_name"`
-	Kind           string   `json:"kind"`
-	Role           string   `json:"role"`
-	Resolution     string   `json:"resolution"`
-	Binding        string   `json:"binding"`
-	Location       Location `json:"location"`
+	ID             string         `json:"id,omitempty" swaggerignore:"true"`
+	FieldIdentity  *FieldIdentity `json:"field_identity,omitempty" swaggerignore:"true"`
+	NormalizedName string         `json:"normalized_name"`
+	Kind           string         `json:"kind"`
+	Role           string         `json:"role"`
+	Resolution     string         `json:"resolution"`
+	Binding        string         `json:"binding"`
+	Location       Location       `json:"location"`
+}
+
+func (expectation CapabilityReferenceExpectation) MarshalJSON() ([]byte, error) {
+	type publicCapabilityReferenceExpectation struct {
+		NormalizedName string   `json:"normalized_name"`
+		Kind           string   `json:"kind"`
+		Role           string   `json:"role"`
+		Resolution     string   `json:"resolution"`
+		Binding        string   `json:"binding"`
+		Location       Location `json:"location"`
+	}
+	return json.Marshal(publicCapabilityReferenceExpectation{
+		NormalizedName: expectation.NormalizedName,
+		Kind:           expectation.Kind,
+		Role:           expectation.Role,
+		Resolution:     expectation.Resolution,
+		Binding:        expectation.Binding,
+		Location:       expectation.Location,
+	})
 }
 
 type CapabilityDependencyExpectation struct {
@@ -103,26 +145,106 @@ type CapabilityDependencyExpectation struct {
 }
 
 type CapabilityTransitionExpectation struct {
-	Operation string `json:"operation"`
-	Output    string `json:"output"`
+	Operation         string         `json:"operation"`
+	Output            string         `json:"output"`
+	OutputIdentity    *FieldIdentity `json:"output_identity,omitempty" swaggerignore:"true"`
+	InputReferenceIDs []string       `json:"input_reference_ids,omitempty" swaggerignore:"true"`
+	OutputReferenceID string         `json:"output_reference_id,omitempty" swaggerignore:"true"`
+	Conditional       bool           `json:"conditional,omitempty" swaggerignore:"true"`
+}
+
+func (expectation CapabilityTransitionExpectation) MarshalJSON() ([]byte, error) {
+	type publicCapabilityTransitionExpectation struct {
+		Operation string `json:"operation"`
+		Output    string `json:"output"`
+	}
+	return json.Marshal(publicCapabilityTransitionExpectation{
+		Operation: expectation.Operation,
+		Output:    expectation.Output,
+	})
+}
+
+type CapabilityFieldExpectation struct {
+	Name               string         `json:"name"`
+	FieldIdentity      *FieldIdentity `json:"field_identity,omitempty"`
+	OriginReferenceIDs []string       `json:"origin_reference_ids"`
+	Conditional        bool           `json:"conditional"`
+}
+
+type CapabilityFieldRemovalExpectation struct {
+	Name          string         `json:"name"`
+	FieldIdentity *FieldIdentity `json:"field_identity,omitempty"`
+}
+
+type CapabilityFieldStateExpectation struct {
+	Fields    []CapabilityFieldExpectation        `json:"fields"`
+	Removed   []CapabilityFieldRemovalExpectation `json:"removed"`
+	Open      bool                                `json:"open"`
+	Uncertain bool                                `json:"uncertain"`
+}
+
+type CapabilityLineageExpectation struct {
+	StageID string                           `json:"stage_id,omitempty"`
+	ScopeID string                           `json:"scope_id,omitempty"`
+	Before  *CapabilityFieldStateExpectation `json:"before,omitempty"`
+	After   *CapabilityFieldStateExpectation `json:"after,omitempty"`
 }
 
 type CapabilitySemanticsObservation struct {
-	Status       Status                            `json:"status"`
-	Complete     bool                              `json:"complete"`
-	Stages       []CapabilityStageExpectation      `json:"stages"`
-	References   []CapabilityReferenceExpectation  `json:"references"`
-	Dependencies []CapabilityDependencyExpectation `json:"dependencies"`
-	Transitions  []CapabilityTransitionExpectation `json:"transitions"`
-	Diagnostics  []CapabilityDiagnosticExpectation `json:"diagnostics"`
+	Status          Status                            `json:"status"`
+	Complete        bool                              `json:"complete"`
+	Stages          []CapabilityStageExpectation      `json:"stages"`
+	Scopes          []CapabilityScopeExpectation      `json:"scopes,omitempty" swaggerignore:"true"`
+	References      []CapabilityReferenceExpectation  `json:"references"`
+	Dependencies    []CapabilityDependencyExpectation `json:"dependencies"`
+	Lineage         []CapabilityLineageExpectation    `json:"lineage,omitempty" swaggerignore:"true"`
+	Transitions     []CapabilityTransitionExpectation `json:"transitions"`
+	FinalFieldState *CapabilityFieldStateExpectation  `json:"final_field_state,omitempty" swaggerignore:"true"`
+	Diagnostics     []CapabilityDiagnosticExpectation `json:"diagnostics"`
+}
+
+func (observation CapabilitySemanticsObservation) MarshalJSON() ([]byte, error) {
+	type publicCapabilitySemanticsObservation struct {
+		Status       Status                            `json:"status"`
+		Complete     bool                              `json:"complete"`
+		Stages       []CapabilityStageExpectation      `json:"stages"`
+		References   []CapabilityReferenceExpectation  `json:"references"`
+		Dependencies []CapabilityDependencyExpectation `json:"dependencies"`
+		Transitions  []CapabilityTransitionExpectation `json:"transitions"`
+		Diagnostics  []CapabilityDiagnosticExpectation `json:"diagnostics"`
+	}
+	return json.Marshal(publicCapabilitySemanticsObservation{
+		Status:       observation.Status,
+		Complete:     observation.Complete,
+		Stages:       observation.Stages,
+		References:   observation.References,
+		Dependencies: observation.Dependencies,
+		Transitions:  observation.Transitions,
+		Diagnostics:  observation.Diagnostics,
+	})
 }
 
 type CapabilityRequirementExpectation struct {
-	Kind       string `json:"kind"`
-	Identity   string `json:"identity"`
-	Role       string `json:"role"`
-	Necessity  string `json:"necessity"`
-	Resolution string `json:"resolution"`
+	Kind          string         `json:"kind"`
+	Identity      string         `json:"identity"`
+	FieldIdentity *FieldIdentity `json:"field_identity,omitempty" swaggerignore:"true"`
+	Role          string         `json:"role"`
+	Necessity     string         `json:"necessity"`
+	Resolution    string         `json:"resolution"`
+}
+
+func (expectation CapabilityRequirementExpectation) MarshalJSON() ([]byte, error) {
+	type publicCapabilityRequirementExpectation struct {
+		Kind       string `json:"kind"`
+		Identity   string `json:"identity"`
+		Role       string `json:"role"`
+		Necessity  string `json:"necessity"`
+		Resolution string `json:"resolution"`
+	}
+	return json.Marshal(publicCapabilityRequirementExpectation{
+		Kind: expectation.Kind, Identity: expectation.Identity, Role: expectation.Role,
+		Necessity: expectation.Necessity, Resolution: expectation.Resolution,
+	})
 }
 
 type CapabilityRequirementsObservation struct {
@@ -221,15 +343,28 @@ func cloneCapabilityEvidenceObservations(observations CapabilityEvidenceObservat
 	if observations.Semantics != nil {
 		value := *observations.Semantics
 		value.Stages = cloneCapabilitySlice(value.Stages)
+		value.Scopes = cloneCapabilitySlice(value.Scopes)
 		value.References = cloneCapabilitySlice(value.References)
+		for i := range value.References {
+			value.References[i].FieldIdentity = cloneFieldIdentityPointer(value.References[i].FieldIdentity)
+		}
 		value.Dependencies = cloneCapabilitySlice(value.Dependencies)
 		value.Transitions = cloneCapabilitySlice(value.Transitions)
+		for i := range value.Transitions {
+			value.Transitions[i].InputReferenceIDs = cloneCapabilitySlice(value.Transitions[i].InputReferenceIDs)
+			value.Transitions[i].OutputIdentity = cloneFieldIdentityPointer(value.Transitions[i].OutputIdentity)
+		}
+		value.Lineage = cloneCapabilityLineageExpectations(value.Lineage)
+		value.FinalFieldState = cloneCapabilityFieldStateExpectation(value.FinalFieldState)
 		value.Diagnostics = cloneCapabilitySlice(value.Diagnostics)
 		observations.Semantics = &value
 	}
 	if observations.Requirements != nil {
 		value := *observations.Requirements
 		value.Items = cloneCapabilitySlice(value.Items)
+		for i := range value.Items {
+			value.Items[i].FieldIdentity = cloneFieldIdentityPointer(value.Items[i].FieldIdentity)
+		}
 		value.GapCodes = cloneCapabilitySlice(value.GapCodes)
 		observations.Requirements = &value
 	}
@@ -246,6 +381,41 @@ func cloneCapabilityEvidenceObservations(observations CapabilityEvidenceObservat
 		observations.SafeRewriting = &value
 	}
 	return observations
+}
+
+func cloneCapabilityLineageExpectations(expectations []CapabilityLineageExpectation) []CapabilityLineageExpectation {
+	cloned := cloneCapabilitySlice(expectations)
+	for i := range cloned {
+		cloned[i].Before = cloneCapabilityFieldStateExpectation(cloned[i].Before)
+		cloned[i].After = cloneCapabilityFieldStateExpectation(cloned[i].After)
+	}
+	return cloned
+}
+
+func cloneCapabilityFieldStateExpectation(expectation *CapabilityFieldStateExpectation) *CapabilityFieldStateExpectation {
+	if expectation == nil {
+		return nil
+	}
+	cloned := *expectation
+	cloned.Fields = cloneCapabilitySlice(cloned.Fields)
+	for i := range cloned.Fields {
+		cloned.Fields[i].OriginReferenceIDs = cloneCapabilitySlice(cloned.Fields[i].OriginReferenceIDs)
+		cloned.Fields[i].FieldIdentity = cloneFieldIdentityPointer(cloned.Fields[i].FieldIdentity)
+	}
+	cloned.Removed = cloneCapabilitySlice(cloned.Removed)
+	for i := range cloned.Removed {
+		cloned.Removed[i].FieldIdentity = cloneFieldIdentityPointer(cloned.Removed[i].FieldIdentity)
+	}
+	return &cloned
+}
+
+func cloneFieldIdentityPointer(identity *FieldIdentity) *FieldIdentity {
+	if identity == nil {
+		return nil
+	}
+	cloned := *identity
+	cloned.Segments = cloneCapabilitySlice(identity.Segments)
+	return &cloned
 }
 
 func cloneCapabilitySlice[T any](values []T) []T {

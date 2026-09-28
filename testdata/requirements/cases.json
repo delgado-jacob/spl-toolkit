@@ -83,7 +83,13 @@
                   }
                 }
               }
-            ]
+            ],
+            "field_identity": {
+              "kind": "atomic",
+              "segments": [
+                "src"
+              ]
+            }
           },
           {
             "id": "req-2",
@@ -132,7 +138,13 @@
                   }
                 }
               }
-            ]
+            ],
+            "field_identity": {
+              "kind": "atomic",
+              "segments": [
+                "src"
+              ]
+            }
           }
         ],
         "gaps": [],
@@ -195,7 +207,13 @@
                   }
                 }
               }
-            ]
+            ],
+            "field_identity": {
+              "kind": "atomic",
+              "segments": [
+                "host"
+              ]
+            }
           }
         ],
         "gaps": [
@@ -295,7 +313,13 @@
                   }
                 }
               }
-            ]
+            ],
+            "field_identity": {
+              "kind": "atomic",
+              "segments": [
+                "src"
+              ]
+            }
           },
           {
             "id": "req-2",
@@ -567,7 +591,13 @@
                   }
                 }
               }
-            ]
+            ],
+            "field_identity": {
+              "kind": "atomic",
+              "segments": [
+                "id"
+              ]
+            }
           }
         ],
         "gaps": [],
@@ -722,7 +752,13 @@
                   }
                 }
               }
-            ]
+            ],
+            "field_identity": {
+              "kind": "atomic",
+              "segments": [
+                "host"
+              ]
+            }
           },
           {
             "id": "req-2",
@@ -782,7 +818,13 @@
                   }
                 }
               }
-            ]
+            ],
+            "field_identity": {
+              "kind": "atomic",
+              "segments": [
+                "user"
+              ]
+            }
           }
         ],
         "gaps": [
@@ -882,7 +924,13 @@
                   }
                 }
               }
-            ]
+            ],
+            "field_identity": {
+              "kind": "atomic",
+              "segments": [
+                "host"
+              ]
+            }
           },
           {
             "id": "req-2",
@@ -912,7 +960,13 @@
                   }
                 }
               }
-            ]
+            ],
+            "field_identity": {
+              "kind": "atomic",
+              "segments": [
+                "host"
+              ]
+            }
           }
         ],
         "gaps": [],
@@ -972,7 +1026,13 @@
                   }
                 }
               }
-            ]
+            ],
+            "field_identity": {
+              "kind": "atomic",
+              "segments": [
+                "host"
+              ]
+            }
           }
         ],
         "gaps": [],
@@ -1116,7 +1176,13 @@
                   }
                 }
               }
-            ]
+            ],
+            "field_identity": {
+              "kind": "atomic",
+              "segments": [
+                "host"
+              ]
+            }
           },
           {
             "id": "req-2",
@@ -1146,7 +1212,13 @@
                   }
                 }
               }
-            ]
+            ],
+            "field_identity": {
+              "kind": "atomic",
+              "segments": [
+                "child"
+              ]
+            }
           },
           {
             "id": "req-3",
@@ -1176,7 +1248,13 @@
                   }
                 }
               }
-            ]
+            ],
+            "field_identity": {
+              "kind": "atomic",
+              "segments": [
+                "child"
+              ]
+            }
           },
           {
             "id": "req-4",
@@ -1206,7 +1284,13 @@
                   }
                 }
               }
-            ]
+            ],
+            "field_identity": {
+              "kind": "atomic",
+              "segments": [
+                "host"
+              ]
+            }
           }
         ],
         "gaps": [
@@ -1296,7 +1380,13 @@
                   }
                 }
               }
-            ]
+            ],
+            "field_identity": {
+              "kind": "atomic",
+              "segments": [
+                "café"
+              ]
+            }
           },
           {
             "id": "req-2",
@@ -1345,7 +1435,13 @@
                   }
                 }
               }
-            ]
+            ],
+            "field_identity": {
+              "kind": "atomic",
+              "segments": [
+                "café"
+              ]
+            }
           }
         ],
         "gaps": [],
@@ -1370,7 +1466,7 @@
           "version": "current",
           "query_digest": "sha256:47e9020c2aabad680268a48f4572eef653a4da767ad41b1a6dc5aca9f6c81855"
         },
-        "capability_revision": "sha256:f1391296cfbc616e9bb1b1828e2471e37b60a35c0555654c0734640e072a0437",
+        "capability_revision": "sha256:a765813624c6edfd754a4529556f5fd35288f464e759f8d969404a072bef1898",
         "query_status": "valid",
         "coverage": {
           "complete": true,
@@ -1405,7 +1501,13 @@
                   }
                 }
               }
-            ]
+            ],
+            "field_identity": {
+              "kind": "atomic",
+              "segments": [
+                "actor.name"
+              ]
+            }
           },
           {
             "id": "req-2",
@@ -1460,7 +1562,7 @@
           "version": "current",
           "query_digest": "sha256:7f93aa83df1d910bbf99118e2489c996a1624a42a7dc17387c1ee4132f328c4e"
         },
-        "capability_revision": "sha256:f1391296cfbc616e9bb1b1828e2471e37b60a35c0555654c0734640e072a0437",
+        "capability_revision": "sha256:a765813624c6edfd754a4529556f5fd35288f464e759f8d969404a072bef1898",
         "query_status": "valid",
         "coverage": {
           "complete": true,
@@ -1525,7 +1627,13 @@
                   }
                 }
               }
-            ]
+            ],
+            "field_identity": {
+              "kind": "atomic",
+              "segments": [
+                "bytes"
+              ]
+            }
           }
         ],
         "gaps": [],
@@ -1550,7 +1658,7 @@
           "version": "current",
           "query_digest": "sha256:ec8474dfb6e63d58bf18ae5413b55d59a48fc9f38b054a4ca33a4d29d70e6c65"
         },
-        "capability_revision": "sha256:f1391296cfbc616e9bb1b1828e2471e37b60a35c0555654c0734640e072a0437",
+        "capability_revision": "sha256:a765813624c6edfd754a4529556f5fd35288f464e759f8d969404a072bef1898",
         "query_status": "invalid",
         "coverage": {
           "complete": true,
@@ -2042,7 +2150,7 @@
           "version": "current",
           "query_digest": "sha256:7aae70e1d32ac71295d1b11903013a78c022729f1d95d8f5104e4a2efcbd59b1"
         },
-        "capability_revision": "sha256:f1391296cfbc616e9bb1b1828e2471e37b60a35c0555654c0734640e072a0437",
+        "capability_revision": "sha256:a765813624c6edfd754a4529556f5fd35288f464e759f8d969404a072bef1898",
         "query_status": "incomplete",
         "coverage": {
           "complete": false,
@@ -2109,7 +2217,13 @@
                   }
                 }
               }
-            ]
+            ],
+            "field_identity": {
+              "kind": "atomic",
+              "segments": [
+                "a"
+              ]
+            }
           }
         ],
         "gaps": [
@@ -2164,7 +2278,7 @@
           "version": "current",
           "query_digest": "sha256:61bb24feb65f02a444364327bcde4a82de12768740787a22de424947a797ef54"
         },
-        "capability_revision": "sha256:f1391296cfbc616e9bb1b1828e2471e37b60a35c0555654c0734640e072a0437",
+        "capability_revision": "sha256:a765813624c6edfd754a4529556f5fd35288f464e759f8d969404a072bef1898",
         "query_status": "invalid",
         "coverage": {
           "complete": false,
@@ -2233,7 +2347,13 @@
                   }
                 }
               }
-            ]
+            ],
+            "field_identity": {
+              "kind": "atomic",
+              "segments": [
+                "other"
+              ]
+            }
           }
         ],
         "gaps": [
@@ -2384,14 +2504,11 @@
           "version": "current",
           "query_digest": "sha256:3589d041f66a6ea04d9cc7a845fe665e98248a73b1853ce798a8b9f7027291b4"
         },
-        "capability_revision": "sha256:f1391296cfbc616e9bb1b1828e2471e37b60a35c0555654c0734640e072a0437",
-        "query_status": "incomplete",
+        "capability_revision": "sha256:a765813624c6edfd754a4529556f5fd35288f464e759f8d969404a072bef1898",
+        "query_status": "valid",
         "coverage": {
-          "complete": false,
-          "reasons": [
-            "SPL_REQUIREMENT_INDETERMINATE",
-            "SPL_UNSUPPORTED_SEMANTICS"
-          ]
+          "complete": true,
+          "reasons": []
         },
         "items": [
           {
@@ -2427,7 +2544,7 @@
           {
             "id": "req-2",
             "kind": "field",
-            "identity": "actor",
+            "identity": "actor.name",
             "role": "read",
             "necessity": "required",
             "origin": "direct",
@@ -2435,38 +2552,8 @@
             "occurrences": [
               {
                 "reference_id": "ref-2",
-                "original_name": "actor",
-                "binding": "source",
-                "stage_id": "stage-1",
-                "scope_id": "scope-0",
-                "location": {
-                  "start": {
-                    "offset": 19,
-                    "line": 1,
-                    "column": 20
-                  },
-                  "end": {
-                    "offset": 24,
-                    "line": 1,
-                    "column": 25
-                  }
-                }
-              }
-            ]
-          },
-          {
-            "id": "req-3",
-            "kind": "field",
-            "identity": "actor.name",
-            "role": "read",
-            "necessity": "conditional",
-            "origin": "direct",
-            "resolution": "exact",
-            "occurrences": [
-              {
-                "reference_id": "ref-3",
                 "original_name": "actor.name",
-                "binding": "indeterminate",
+                "binding": "source",
                 "stage_id": "stage-1",
                 "scope_id": "scope-0",
                 "location": {
@@ -2482,51 +2569,18 @@
                   }
                 }
               }
-            ]
+            ],
+            "field_identity": {
+              "kind": "path",
+              "segments": [
+                "actor",
+                "name"
+              ]
+            }
           }
         ],
-        "gaps": [
-          {
-            "code": "SPL_REQUIREMENT_INDETERMINATE",
-            "message": "requirement origin is indeterminate",
-            "reference_ids": [
-              "ref-3"
-            ],
-            "diagnostic_codes": []
-          },
-          {
-            "code": "SPL_UNSUPPORTED_SEMANTICS",
-            "message": "Typed navigation or alias binding is not represented by the string-only source universe",
-            "reference_ids": [
-              "ref-3"
-            ],
-            "diagnostic_codes": [
-              "SPL_UNSUPPORTED_SEMANTICS"
-            ]
-          }
-        ],
-        "diagnostics": [
-          {
-            "code": "SPL_UNSUPPORTED_SEMANTICS",
-            "severity": "warning",
-            "category": "unsupported_semantics",
-            "message": "Typed navigation or alias binding is not represented by the string-only source universe",
-            "location": {
-              "start": {
-                "offset": 19,
-                "line": 1,
-                "column": 20
-              },
-              "end": {
-                "offset": 29,
-                "line": 1,
-                "column": 30
-              }
-            },
-            "stage_id": "stage-1",
-            "scope_id": "scope-0"
-          }
-        ]
+        "gaps": [],
+        "diagnostics": []
       }
     },
     {
@@ -2642,7 +2696,13 @@
                   }
                 }
               }
-            ]
+            ],
+            "field_identity": {
+              "kind": "atomic",
+              "segments": [
+                "All_Traffic.action"
+              ]
+            }
           },
           {
             "id": "req-4",
@@ -2672,7 +2732,13 @@
                   }
                 }
               }
-            ]
+            ],
+            "field_identity": {
+              "kind": "atomic",
+              "segments": [
+                "All_Traffic.src"
+              ]
+            }
           }
         ],
         "gaps": [],
@@ -2753,7 +2819,13 @@
                   }
                 }
               }
-            ]
+            ],
+            "field_identity": {
+              "kind": "atomic",
+              "segments": [
+                "action"
+              ]
+            }
           },
           {
             "id": "req-2",
@@ -2783,7 +2855,13 @@
                   }
                 }
               }
-            ]
+            ],
+            "field_identity": {
+              "kind": "atomic",
+              "segments": [
+                "_raw"
+              ]
+            }
           },
           {
             "id": "req-3",
@@ -2832,7 +2910,13 @@
                   }
                 }
               }
-            ]
+            ],
+            "field_identity": {
+              "kind": "atomic",
+              "segments": [
+                "_raw"
+              ]
+            }
           },
           {
             "id": "req-4",
@@ -2881,7 +2965,13 @@
                   }
                 }
               }
-            ]
+            ],
+            "field_identity": {
+              "kind": "atomic",
+              "segments": [
+                "missing"
+              ]
+            }
           },
           {
             "id": "req-5",
@@ -2911,7 +3001,13 @@
                   }
                 }
               }
-            ]
+            ],
+            "field_identity": {
+              "kind": "atomic",
+              "segments": [
+                "_time"
+              ]
+            }
           },
           {
             "id": "req-6",
@@ -2960,7 +3056,13 @@
                   }
                 }
               }
-            ]
+            ],
+            "field_identity": {
+              "kind": "atomic",
+              "segments": [
+                "values"
+              ]
+            }
           },
           {
             "id": "req-7",
@@ -2990,7 +3092,13 @@
                   }
                 }
               }
-            ]
+            ],
+            "field_identity": {
+              "kind": "atomic",
+              "segments": [
+                "user"
+              ]
+            }
           },
           {
             "id": "req-8",
@@ -3020,7 +3128,13 @@
                   }
                 }
               }
-            ]
+            ],
+            "field_identity": {
+              "kind": "atomic",
+              "segments": [
+                "event_id"
+              ]
+            }
           },
           {
             "id": "req-9",
@@ -3050,7 +3164,13 @@
                   }
                 }
               }
-            ]
+            ],
+            "field_identity": {
+              "kind": "atomic",
+              "segments": [
+                "action"
+              ]
+            }
           }
         ],
         "gaps": [
@@ -3143,7 +3263,13 @@
                   }
                 }
               }
-            ]
+            ],
+            "field_identity": {
+              "kind": "atomic",
+              "segments": [
+                "values"
+              ]
+            }
           },
           {
             "id": "req-2",
@@ -3173,7 +3299,13 @@
                   }
                 }
               }
-            ]
+            ],
+            "field_identity": {
+              "kind": "atomic",
+              "segments": [
+                "_time"
+              ]
+            }
           },
           {
             "id": "req-3",
@@ -3203,7 +3335,13 @@
                   }
                 }
               }
-            ]
+            ],
+            "field_identity": {
+              "kind": "atomic",
+              "segments": [
+                "bytes"
+              ]
+            }
           },
           {
             "id": "req-4",
@@ -3233,7 +3371,13 @@
                   }
                 }
               }
-            ]
+            ],
+            "field_identity": {
+              "kind": "atomic",
+              "segments": [
+                "user"
+              ]
+            }
           },
           {
             "id": "req-5",
@@ -3263,7 +3407,13 @@
                   }
                 }
               }
-            ]
+            ],
+            "field_identity": {
+              "kind": "atomic",
+              "segments": [
+                "action"
+              ]
+            }
           },
           {
             "id": "req-6",
@@ -3312,7 +3462,13 @@
                   }
                 }
               }
-            ]
+            ],
+            "field_identity": {
+              "kind": "atomic",
+              "segments": [
+                "values"
+              ]
+            }
           },
           {
             "id": "req-7",
@@ -3361,7 +3517,13 @@
                   }
                 }
               }
-            ]
+            ],
+            "field_identity": {
+              "kind": "atomic",
+              "segments": [
+                "_time"
+              ]
+            }
           },
           {
             "id": "req-8",
@@ -3391,7 +3553,13 @@
                   }
                 }
               }
-            ]
+            ],
+            "field_identity": {
+              "kind": "atomic",
+              "segments": [
+                "action"
+              ]
+            }
           },
           {
             "id": "req-9",
@@ -3421,7 +3589,13 @@
                   }
                 }
               }
-            ]
+            ],
+            "field_identity": {
+              "kind": "atomic",
+              "segments": [
+                "bytes"
+              ]
+            }
           },
           {
             "id": "req-10",
@@ -3451,7 +3625,13 @@
                   }
                 }
               }
-            ]
+            ],
+            "field_identity": {
+              "kind": "atomic",
+              "segments": [
+                "user"
+              ]
+            }
           },
           {
             "id": "req-11",
@@ -3481,7 +3661,13 @@
                   }
                 }
               }
-            ]
+            ],
+            "field_identity": {
+              "kind": "atomic",
+              "segments": [
+                "user"
+              ]
+            }
           }
         ],
         "gaps": [],
@@ -3544,7 +3730,13 @@
                   }
                 }
               }
-            ]
+            ],
+            "field_identity": {
+              "kind": "atomic",
+              "segments": [
+                "parent"
+              ]
+            }
           },
           {
             "id": "req-2",
@@ -3604,7 +3796,13 @@
                   }
                 }
               }
-            ]
+            ],
+            "field_identity": {
+              "kind": "atomic",
+              "segments": [
+                "child"
+              ]
+            }
           },
           {
             "id": "req-4",
@@ -3634,7 +3832,13 @@
                   }
                 }
               }
-            ]
+            ],
+            "field_identity": {
+              "kind": "atomic",
+              "segments": [
+                "child"
+              ]
+            }
           },
           {
             "id": "req-5",
@@ -3694,7 +3898,13 @@
                   }
                 }
               }
-            ]
+            ],
+            "field_identity": {
+              "kind": "atomic",
+              "segments": [
+                "parent"
+              ]
+            }
           }
         ],
         "gaps": [

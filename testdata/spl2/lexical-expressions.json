@@ -457,13 +457,11 @@
     "canonical_evidence": "regression_snapshot",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "Controller-authorized shared uncertainty boundary: these selected source names have not been independently observed before fields inclusion. The otherwise unproved selector membership cannot become source/derived certainty merely from projection policy. Retain intact FROM, mark fields effects incomplete, permit genuine indeterminate selection evidence, and never fabricate implicit _raw/_time membership. This narrow rule does not generalize to observed-field or no-uncertainty flat controls. Exact conditional selected-field representation remains unset.",
-      "status": "incomplete",
+      "basis": "Task 5 selected fields contract resolves exact inclusion selectors through the shared source identity environment, closes the output to those selectors, and completes the fields stage without inventing implicit members.",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "required_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "required_codes": [],
       "forbidden_codes": [
         "SPL_SYNTAX_ERROR",
         "SPL_PROFILE_MISMATCH",
@@ -472,12 +470,34 @@
       "required_references": [
         {
           "original_name": "main",
-          "start": 5,
-          "end": 9,
           "normalized_name": "main",
           "kind": "dataset",
           "role": "read",
-          "binding": "not_applicable"
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        },
+        {
+          "original_name": "'group'",
+          "normalized_name": "group",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 19,
+          "end": 26,
+          "scope_start": 0,
+          "scope_end": 39
+        },
+        {
+          "original_name": "'peer.addr'",
+          "normalized_name": "peer.addr",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 28,
+          "end": 39,
+          "scope_start": 0,
+          "scope_end": 39
         }
       ],
       "forbidden_references": [
@@ -485,19 +505,7 @@
           "original_name": "'group'",
           "start": 19,
           "end": 26,
-          "binding": "source"
-        },
-        {
-          "original_name": "'group'",
-          "start": 19,
-          "end": 26,
           "binding": "derived"
-        },
-        {
-          "original_name": "'peer.addr'",
-          "start": 28,
-          "end": 39,
-          "binding": "source"
         },
         {
           "original_name": "'peer.addr'",
@@ -506,7 +514,16 @@
           "binding": "derived"
         }
       ],
-      "required_fields": [],
+      "required_fields": [
+        {
+          "name": "group",
+          "conditional": false
+        },
+        {
+          "name": "peer.addr",
+          "conditional": false
+        }
+      ],
       "forbidden_field_names": [
         "_raw",
         "_time"
@@ -520,21 +537,33 @@
         {
           "command": "fields",
           "start": 12,
-          "semantic_complete": false
+          "semantic_complete": true
         }
       ],
       "max_scopes": 1,
-      "final_state": null
+      "final_state": {
+        "fields": [
+          {
+            "name": "group",
+            "conditional": false
+          },
+          {
+            "name": "peer.addr",
+            "conditional": false
+          }
+        ],
+        "removed": [],
+        "open": false,
+        "uncertain": false
+      }
     },
     "canonical": {
       "phase": "analysis",
       "scope": "canonical-result",
-      "status": "incomplete",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "expected_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "expected_codes": [],
       "references": [
         {
           "original_name": "main",
@@ -550,7 +579,7 @@
           "normalized_name": "group",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 19,
           "end": 26
         },
@@ -559,7 +588,7 @@
           "normalized_name": "peer.addr",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 28,
           "end": 39
         }
@@ -567,23 +596,23 @@
       "fields": [
         {
           "name": "group",
-          "conditional": true
+          "conditional": false
         },
         {
           "name": "peer.addr",
-          "conditional": true
+          "conditional": false
         }
       ],
       "removed": [],
       "open": false,
-      "uncertain": true,
+      "uncertain": false,
       "stage_commands": [
         "from",
         "fields"
       ],
       "stage_complete": [
         true,
-        false
+        true
       ]
     }
   },
@@ -1181,13 +1210,11 @@
     "canonical_evidence": "regression_snapshot",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "Controller-authorized shared uncertainty boundary: these selected source names have not been independently observed before fields inclusion. The otherwise unproved selector membership cannot become source/derived certainty merely from projection policy. Retain intact FROM, mark fields effects incomplete, permit genuine indeterminate selection evidence, and never fabricate implicit _raw/_time membership. This narrow rule does not generalize to observed-field or no-uncertainty flat controls. Exact conditional selected-field representation remains unset.",
-      "status": "incomplete",
+      "basis": "Task 5 selected fields contract resolves exact inclusion selectors through the shared source identity environment, closes the output to those selectors, and completes the fields stage without inventing implicit members.",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "required_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "required_codes": [],
       "forbidden_codes": [
         "SPL_SYNTAX_ERROR",
         "SPL_PROFILE_MISMATCH",
@@ -1196,12 +1223,23 @@
       "required_references": [
         {
           "original_name": "main",
-          "start": 5,
-          "end": 9,
           "normalized_name": "main",
           "kind": "dataset",
           "role": "read",
-          "binding": "not_applicable"
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        },
+        {
+          "original_name": "account",
+          "normalized_name": "account",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 45,
+          "end": 52,
+          "scope_start": 0,
+          "scope_end": 52
         }
       ],
       "forbidden_references": [
@@ -1209,16 +1247,15 @@
           "original_name": "account",
           "start": 45,
           "end": 52,
-          "binding": "source"
-        },
-        {
-          "original_name": "account",
-          "start": 45,
-          "end": 52,
           "binding": "derived"
         }
       ],
-      "required_fields": [],
+      "required_fields": [
+        {
+          "name": "account",
+          "conditional": false
+        }
+      ],
       "forbidden_field_names": [
         "_raw",
         "_time"
@@ -1232,21 +1269,29 @@
         {
           "command": "fields",
           "start": 38,
-          "semantic_complete": false
+          "semantic_complete": true
         }
       ],
       "max_scopes": 1,
-      "final_state": null
+      "final_state": {
+        "fields": [
+          {
+            "name": "account",
+            "conditional": false
+          }
+        ],
+        "removed": [],
+        "open": false,
+        "uncertain": false
+      }
     },
     "canonical": {
       "phase": "analysis",
       "scope": "canonical-result",
-      "status": "incomplete",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "expected_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "expected_codes": [],
       "references": [
         {
           "original_name": "main",
@@ -1262,7 +1307,7 @@
           "normalized_name": "account",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 45,
           "end": 52
         }
@@ -1270,19 +1315,19 @@
       "fields": [
         {
           "name": "account",
-          "conditional": true
+          "conditional": false
         }
       ],
       "removed": [],
       "open": false,
-      "uncertain": true,
+      "uncertain": false,
       "stage_commands": [
         "from",
         "fields"
       ],
       "stage_complete": [
         true,
-        false
+        true
       ]
     }
   },
@@ -3015,12 +3060,10 @@
     "canonical_assertions": {
       "category": "representation",
       "basis": "Approved L09/E.L09 and the accepted M4/SPL2 schema-boundary tests distinguish object navigation, constant keys, and dynamic index expressions from literal dotted fields. Preserve the genuine base and index reads. Member/key/operator slices cannot become separate event reads, and an unresolved traversed value cannot prove an unconditional assignment. No flattened root path or invented child query scope is authorized; the precise composite path reference representation may vary.",
-      "status": "incomplete",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "required_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "required_codes": [],
       "forbidden_codes": [
         "SPL_SYNTAX_ERROR",
         "SPL_PROFILE_MISMATCH",
@@ -3037,13 +3080,15 @@
           "binding": "not_applicable"
         },
         {
-          "original_name": "actor",
-          "start": 23,
-          "end": 28,
-          "normalized_name": "actor",
+          "original_name": "actor.user.name",
+          "normalized_name": "actor.user.name",
           "kind": "field",
           "role": "read",
-          "binding": "source"
+          "binding": "source",
+          "start": 23,
+          "end": 38,
+          "scope_start": 0,
+          "scope_end": 38
         }
       ],
       "forbidden_references": [
@@ -3061,12 +3106,14 @@
       "required_fields": [
         {
           "name": "owner",
-          "conditional": true
+          "conditional": false
+        },
+        {
+          "name": "actor.user.name",
+          "conditional": false
         }
       ],
-      "forbidden_field_names": [
-        "actor.user.name"
-      ],
+      "forbidden_field_names": [],
       "required_stages": [
         {
           "command": "from",
@@ -3076,35 +3123,33 @@
         {
           "command": "eval",
           "start": 12,
-          "semantic_complete": false
+          "semantic_complete": true
         }
       ],
       "max_scopes": 1,
       "final_state": {
         "fields": [
           {
-            "name": "actor",
+            "name": "actor.user.name",
             "conditional": false
           },
           {
             "name": "owner",
-            "conditional": true
+            "conditional": false
           }
         ],
         "removed": [],
         "open": true,
-        "uncertain": true
+        "uncertain": false
       }
     },
     "canonical": {
       "phase": "analysis",
       "scope": "canonical-result",
-      "status": "incomplete",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "expected_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "expected_codes": [],
       "references": [
         {
           "original_name": "main",
@@ -3125,44 +3170,35 @@
           "end": 22
         },
         {
-          "original_name": "actor",
-          "normalized_name": "actor",
-          "kind": "field",
-          "role": "read",
-          "binding": "source",
-          "start": 23,
-          "end": 28
-        },
-        {
           "original_name": "actor.user.name",
           "normalized_name": "actor.user.name",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 23,
           "end": 38
         }
       ],
       "fields": [
         {
-          "name": "actor",
+          "name": "actor.user.name",
           "conditional": false
         },
         {
           "name": "owner",
-          "conditional": true
+          "conditional": false
         }
       ],
       "removed": [],
       "open": true,
-      "uncertain": true,
+      "uncertain": false,
       "stage_commands": [
         "from",
         "eval"
       ],
       "stage_complete": [
         true,
-        false
+        true
       ]
     }
   },
@@ -5248,13 +5284,11 @@
     "canonical_evidence": "regression_snapshot",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "Controller-authorized shared uncertainty boundary: these selected source names have not been independently observed before fields inclusion. The otherwise unproved selector membership cannot become source/derived certainty merely from projection policy. Retain intact FROM, mark fields effects incomplete, permit genuine indeterminate selection evidence, and never fabricate implicit _raw/_time membership. This narrow rule does not generalize to observed-field or no-uncertainty flat controls. Exact conditional selected-field representation remains unset.",
-      "status": "incomplete",
+      "basis": "Task 5 selected fields contract resolves exact inclusion selectors through the shared source identity environment, closes the output to those selectors, and completes the fields stage without inventing implicit members.",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "required_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "required_codes": [],
       "forbidden_codes": [
         "SPL_SYNTAX_ERROR",
         "SPL_PROFILE_MISMATCH",
@@ -5263,12 +5297,34 @@
       "required_references": [
         {
           "original_name": "main",
-          "start": 5,
-          "end": 9,
           "normalized_name": "main",
           "kind": "dataset",
           "role": "read",
-          "binding": "not_applicable"
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        },
+        {
+          "original_name": "'group'",
+          "normalized_name": "group",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 19,
+          "end": 26,
+          "scope_start": 0,
+          "scope_end": 36
+        },
+        {
+          "original_name": "'user-id'",
+          "normalized_name": "user-id",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 27,
+          "end": 36,
+          "scope_start": 0,
+          "scope_end": 36
         }
       ],
       "forbidden_references": [
@@ -5276,19 +5332,7 @@
           "original_name": "'group'",
           "start": 19,
           "end": 26,
-          "binding": "source"
-        },
-        {
-          "original_name": "'group'",
-          "start": 19,
-          "end": 26,
           "binding": "derived"
-        },
-        {
-          "original_name": "'user-id'",
-          "start": 27,
-          "end": 36,
-          "binding": "source"
         },
         {
           "original_name": "'user-id'",
@@ -5297,7 +5341,16 @@
           "binding": "derived"
         }
       ],
-      "required_fields": [],
+      "required_fields": [
+        {
+          "name": "group",
+          "conditional": false
+        },
+        {
+          "name": "user-id",
+          "conditional": false
+        }
+      ],
       "forbidden_field_names": [
         "_raw",
         "_time"
@@ -5311,21 +5364,33 @@
         {
           "command": "fields",
           "start": 12,
-          "semantic_complete": false
+          "semantic_complete": true
         }
       ],
       "max_scopes": 1,
-      "final_state": null
+      "final_state": {
+        "fields": [
+          {
+            "name": "group",
+            "conditional": false
+          },
+          {
+            "name": "user-id",
+            "conditional": false
+          }
+        ],
+        "removed": [],
+        "open": false,
+        "uncertain": false
+      }
     },
     "canonical": {
       "phase": "analysis",
       "scope": "canonical-result",
-      "status": "incomplete",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "expected_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "expected_codes": [],
       "references": [
         {
           "original_name": "main",
@@ -5341,7 +5406,7 @@
           "normalized_name": "group",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 19,
           "end": 26
         },
@@ -5350,7 +5415,7 @@
           "normalized_name": "user-id",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 27,
           "end": 36
         }
@@ -5358,23 +5423,23 @@
       "fields": [
         {
           "name": "group",
-          "conditional": true
+          "conditional": false
         },
         {
           "name": "user-id",
-          "conditional": true
+          "conditional": false
         }
       ],
       "removed": [],
       "open": false,
-      "uncertain": true,
+      "uncertain": false,
       "stage_commands": [
         "from",
         "fields"
       ],
       "stage_complete": [
         true,
-        false
+        true
       ]
     }
   },
@@ -6636,13 +6701,11 @@
     "canonical_evidence": "regression_snapshot",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "Controller-authorized shared uncertainty boundary: these selected source names have not been independently observed before fields inclusion. The otherwise unproved selector membership cannot become source/derived certainty merely from projection policy. Retain intact FROM, mark fields effects incomplete, permit genuine indeterminate selection evidence, and never fabricate implicit _raw/_time membership. This narrow rule does not generalize to observed-field or no-uncertainty flat controls. Exact conditional selected-field representation remains unset.",
-      "status": "incomplete",
+      "basis": "Task 5 selected fields contract resolves exact inclusion selectors through the shared source identity environment, closes the output to those selectors, and completes the fields stage without inventing implicit members.",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "required_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "required_codes": [],
       "forbidden_codes": [
         "SPL_SYNTAX_ERROR",
         "SPL_PROFILE_MISMATCH",
@@ -6651,12 +6714,23 @@
       "required_references": [
         {
           "original_name": "main",
-          "start": 5,
-          "end": 9,
           "normalized_name": "main",
           "kind": "dataset",
           "role": "read",
-          "binding": "not_applicable"
+          "binding": "not_applicable",
+          "start": 5,
+          "end": 9
+        },
+        {
+          "original_name": "host",
+          "normalized_name": "host",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 30,
+          "end": 34,
+          "scope_start": 0,
+          "scope_end": 34
         }
       ],
       "forbidden_references": [
@@ -6664,16 +6738,15 @@
           "original_name": "host",
           "start": 30,
           "end": 34,
-          "binding": "source"
-        },
-        {
-          "original_name": "host",
-          "start": 30,
-          "end": 34,
           "binding": "derived"
         }
       ],
-      "required_fields": [],
+      "required_fields": [
+        {
+          "name": "host",
+          "conditional": false
+        }
+      ],
       "forbidden_field_names": [
         "_raw",
         "_time"
@@ -6687,21 +6760,29 @@
         {
           "command": "fields",
           "start": 23,
-          "semantic_complete": false
+          "semantic_complete": true
         }
       ],
       "max_scopes": 1,
-      "final_state": null
+      "final_state": {
+        "fields": [
+          {
+            "name": "host",
+            "conditional": false
+          }
+        ],
+        "removed": [],
+        "open": false,
+        "uncertain": false
+      }
     },
     "canonical": {
       "phase": "analysis",
       "scope": "canonical-result",
-      "status": "incomplete",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "expected_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "expected_codes": [],
       "references": [
         {
           "original_name": "main",
@@ -6717,7 +6798,7 @@
           "normalized_name": "host",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 30,
           "end": 34
         }
@@ -6725,19 +6806,19 @@
       "fields": [
         {
           "name": "host",
-          "conditional": true
+          "conditional": false
         }
       ],
       "removed": [],
       "open": false,
-      "uncertain": true,
+      "uncertain": false,
       "stage_commands": [
         "from",
         "fields"
       ],
       "stage_complete": [
         true,
-        false
+        true
       ]
     }
   },
@@ -10955,12 +11036,10 @@
     "canonical_assertions": {
       "category": "representation",
       "basis": "Approved L09/E.L09 and the accepted M4/SPL2 schema-boundary tests distinguish object navigation, constant keys, and dynamic index expressions from literal dotted fields. Preserve the genuine base and index reads. Member/key/operator slices cannot become separate event reads, and an unresolved traversed value cannot prove an unconditional assignment. No flattened root path or invented child query scope is authorized; the precise composite path reference representation may vary.",
-      "status": "incomplete",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "required_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "required_codes": [],
       "forbidden_codes": [
         "SPL_SYNTAX_ERROR",
         "SPL_PROFILE_MISMATCH",
@@ -10977,13 +11056,15 @@
           "binding": "not_applicable"
         },
         {
-          "original_name": "actor",
-          "start": 22,
-          "end": 27,
-          "normalized_name": "actor",
+          "original_name": "actor.user.name",
+          "normalized_name": "actor.user.name",
           "kind": "field",
           "role": "read",
-          "binding": "source"
+          "binding": "source",
+          "start": 22,
+          "end": 37,
+          "scope_start": 0,
+          "scope_end": 37
         }
       ],
       "forbidden_references": [
@@ -11001,12 +11082,14 @@
       "required_fields": [
         {
           "name": "name",
-          "conditional": true
+          "conditional": false
+        },
+        {
+          "name": "actor.user.name",
+          "conditional": false
         }
       ],
-      "forbidden_field_names": [
-        "actor.user.name"
-      ],
+      "forbidden_field_names": [],
       "required_stages": [
         {
           "command": "from",
@@ -11016,35 +11099,33 @@
         {
           "command": "eval",
           "start": 12,
-          "semantic_complete": false
+          "semantic_complete": true
         }
       ],
       "max_scopes": 1,
       "final_state": {
         "fields": [
           {
-            "name": "actor",
+            "name": "actor.user.name",
             "conditional": false
           },
           {
             "name": "name",
-            "conditional": true
+            "conditional": false
           }
         ],
         "removed": [],
         "open": true,
-        "uncertain": true
+        "uncertain": false
       }
     },
     "canonical": {
       "phase": "analysis",
       "scope": "canonical-result",
-      "status": "incomplete",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "expected_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "expected_codes": [],
       "references": [
         {
           "original_name": "main",
@@ -11065,44 +11146,35 @@
           "end": 21
         },
         {
-          "original_name": "actor",
-          "normalized_name": "actor",
-          "kind": "field",
-          "role": "read",
-          "binding": "source",
-          "start": 22,
-          "end": 27
-        },
-        {
           "original_name": "actor.user.name",
           "normalized_name": "actor.user.name",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 22,
           "end": 37
         }
       ],
       "fields": [
         {
-          "name": "actor",
+          "name": "actor.user.name",
           "conditional": false
         },
         {
           "name": "name",
-          "conditional": true
+          "conditional": false
         }
       ],
       "removed": [],
       "open": true,
-      "uncertain": true,
+      "uncertain": false,
       "stage_commands": [
         "from",
         "eval"
       ],
       "stage_complete": [
         true,
-        false
+        true
       ]
     }
   },
@@ -11143,12 +11215,10 @@
     "canonical_assertions": {
       "category": "representation",
       "basis": "Approved L09/E.L09 and the accepted M4/SPL2 schema-boundary tests distinguish object navigation, constant keys, and dynamic index expressions from literal dotted fields. Preserve the genuine base and index reads. Member/key/operator slices cannot become separate event reads, and an unresolved traversed value cannot prove an unconditional assignment. No flattened root path or invented child query scope is authorized; the precise composite path reference representation may vary.",
-      "status": "incomplete",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "required_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "required_codes": [],
       "forbidden_codes": [
         "SPL_SYNTAX_ERROR",
         "SPL_PROFILE_MISMATCH",
@@ -11165,13 +11235,15 @@
           "binding": "not_applicable"
         },
         {
-          "original_name": "actor",
-          "start": 22,
-          "end": 27,
-          "normalized_name": "actor",
+          "original_name": "actor.'group'.owner",
+          "normalized_name": "actor.group.owner",
           "kind": "field",
           "role": "read",
-          "binding": "source"
+          "binding": "source",
+          "start": 22,
+          "end": 41,
+          "scope_start": 0,
+          "scope_end": 41
         }
       ],
       "forbidden_references": [
@@ -11189,12 +11261,14 @@
       "required_fields": [
         {
           "name": "name",
-          "conditional": true
+          "conditional": false
+        },
+        {
+          "name": "actor.group.owner",
+          "conditional": false
         }
       ],
-      "forbidden_field_names": [
-        "actor.group.owner"
-      ],
+      "forbidden_field_names": [],
       "required_stages": [
         {
           "command": "from",
@@ -11204,35 +11278,33 @@
         {
           "command": "eval",
           "start": 12,
-          "semantic_complete": false
+          "semantic_complete": true
         }
       ],
       "max_scopes": 1,
       "final_state": {
         "fields": [
           {
-            "name": "actor",
+            "name": "actor.group.owner",
             "conditional": false
           },
           {
             "name": "name",
-            "conditional": true
+            "conditional": false
           }
         ],
         "removed": [],
         "open": true,
-        "uncertain": true
+        "uncertain": false
       }
     },
     "canonical": {
       "phase": "analysis",
       "scope": "canonical-result",
-      "status": "incomplete",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "expected_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "expected_codes": [],
       "references": [
         {
           "original_name": "main",
@@ -11253,44 +11325,35 @@
           "end": 21
         },
         {
-          "original_name": "actor",
-          "normalized_name": "actor",
-          "kind": "field",
-          "role": "read",
-          "binding": "source",
-          "start": 22,
-          "end": 27
-        },
-        {
           "original_name": "actor.'group'.owner",
           "normalized_name": "actor.group.owner",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 22,
           "end": 41
         }
       ],
       "fields": [
         {
-          "name": "actor",
+          "name": "actor.group.owner",
           "conditional": false
         },
         {
           "name": "name",
-          "conditional": true
+          "conditional": false
         }
       ],
       "removed": [],
       "open": true,
-      "uncertain": true,
+      "uncertain": false,
       "stage_commands": [
         "from",
         "eval"
       ],
       "stage_complete": [
         true,
-        false
+        true
       ]
     }
   },
@@ -15910,6 +15973,17 @@
           "kind": "field",
           "role": "read",
           "binding": "source"
+        },
+        {
+          "original_name": "$it.amount",
+          "normalized_name": "$it.amount",
+          "kind": "field",
+          "role": "read",
+          "binding": "indeterminate",
+          "start": 37,
+          "end": 47,
+          "scope_start": 0,
+          "scope_end": 50
         }
       ],
       "forbidden_references": [
@@ -15995,6 +16069,15 @@
           "binding": "source",
           "start": 31,
           "end": 36
+        },
+        {
+          "original_name": "$it.amount",
+          "normalized_name": "$it.amount",
+          "kind": "field",
+          "role": "read",
+          "binding": "indeterminate",
+          "start": 37,
+          "end": 47
         }
       ],
       "fields": [

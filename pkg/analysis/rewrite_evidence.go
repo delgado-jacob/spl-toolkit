@@ -79,11 +79,12 @@ type RewriteProof struct {
 // RewriteSession retains canonical typed ownership privately. Public snapshots
 // and render values are copies and cannot add authority to a session.
 type RewriteSession struct {
-	result *Result
-	source *sourceIndex
-	probes []RewriteFactProbe
-	sites  []*rewriteSite
-	epoch  int
+	result                     *Result
+	source                     *sourceIndex
+	probes                     []RewriteFactProbe
+	sites                      []*rewriteSite
+	epoch                      int
+	identityCoverageIncomplete bool
 }
 type rewriteSite struct {
 	public   RewriteSite

@@ -34,12 +34,10 @@
     "canonical": {
       "phase": "analysis",
       "scope": "canonical-result",
-      "status": "incomplete",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "expected_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "expected_codes": [],
       "references": [
         {
           "original_name": "main",
@@ -54,28 +52,37 @@
           "original_name": "bytes",
           "normalized_name": "bytes",
           "kind": "field",
-          "role": "read",
+          "role": "output",
+          "binding": "not_applicable",
           "start": 31,
-          "end": 36,
-          "binding": "source"
+          "end": 36
+        },
+        {
+          "original_name": "bytes",
+          "normalized_name": "bytes",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 31,
+          "end": 36
         }
       ],
       "fields": [
         {
           "name": "bytes",
-          "conditional": true
+          "conditional": false
         }
       ],
       "removed": [],
       "open": true,
-      "uncertain": true,
+      "uncertain": false,
       "stage_commands": [
         "from",
         "bin"
       ],
       "stage_complete": [
         true,
-        false
+        true
       ]
     },
     "canonical_basis": "Approved conformance matrix bin dedicated U contract; form-expansion per-ID I.bin.P1; original typed operand contexts at b754b9bfa80eb990cb83ee05d3b4588c2c2e54c3.  Read/group binding is left open because this addendum proves input role, not unknown command transfer ordering. Exact transfer composition: initial open source with no preceding uncertain effect; all intact simple field operands bind source. Root-approved deferred overwrite/generating policy applies after reads. Candidate output references never install members. Complete original roles are independently enumerated in the frozen role oracle; field set is exactly those reads, sorted. No product reports were used to derive this object."
@@ -115,12 +122,10 @@
     "canonical": {
       "phase": "analysis",
       "scope": "canonical-result",
-      "status": "incomplete",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "expected_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "expected_codes": [],
       "references": [
         {
           "original_name": "main",
@@ -136,21 +141,25 @@
           "normalized_name": "bytes",
           "kind": "field",
           "role": "read",
+          "binding": "source",
           "start": 32,
-          "end": 37,
-          "binding": "source"
+          "end": 37
         },
         {
           "original_name": "bucket",
           "normalized_name": "bucket",
           "kind": "field",
           "role": "output",
+          "binding": "not_applicable",
           "start": 41,
-          "end": 47,
-          "binding": "not_applicable"
+          "end": 47
         }
       ],
       "fields": [
+        {
+          "name": "bucket",
+          "conditional": false
+        },
         {
           "name": "bytes",
           "conditional": false
@@ -158,14 +167,14 @@
       ],
       "removed": [],
       "open": true,
-      "uncertain": true,
+      "uncertain": false,
       "stage_commands": [
         "from",
         "bin"
       ],
       "stage_complete": [
         true,
-        false
+        true
       ]
     },
     "canonical_basis": "Approved conformance matrix bin dedicated U contract; form-expansion per-ID I.bin.P2; original typed operand contexts at b754b9bfa80eb990cb83ee05d3b4588c2c2e54c3.  Read/group binding is left open because this addendum proves input role, not unknown command transfer ordering. Exact transfer composition: initial open source with no preceding uncertain effect; all intact simple field operands bind source. Root-approved deferred overwrite/generating policy applies after reads. Candidate output references never install members. Complete original roles are independently enumerated in the frozen role oracle; field set is exactly those reads, sorted. No product reports were used to derive this object."
@@ -417,9 +426,23 @@
           "binding": "not_applicable",
           "start": 5,
           "end": 9
+        },
+        {
+          "original_name": "bytes",
+          "normalized_name": "bytes",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 32,
+          "end": 37
         }
       ],
-      "fields": [],
+      "fields": [
+        {
+          "name": "bytes",
+          "conditional": true
+        }
+      ],
       "removed": [],
       "open": true,
       "uncertain": true,
@@ -932,7 +955,7 @@
     "canonical_evidence": "independent",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "C16/E.C16 plus ROOT qualified-read ruling: whole decoded alias.field name, read/indeterminate; no root literal-dotted field or unqualified suffix installation and no guessed catalogue/origins. Actual typed right source is independent; merge remains U. Required aliases and integer/enum domains are independent contract checks. Damaged grammar leaves the survivor graph unasserted; held uppercase enum is incomplete, not a definite enum error. Controller-approved composition: existing exact T8.unknown-adjacent retained-known-state and ScopesAppendpipeInheritsBeforeMerge no-child-leak; root qualified-join operands cannot install literal or suffix root members. Empty incoming tracked parent fields therefore stay empty/open/uncertain while child evidence remains scope-local; this does not claim the runtime result has no columns.",
+      "basis": "C16/E.C16 plus ROOT qualified-read ruling: structural alias.field reads retain qualifier-typed source evidence; no atomic dotted or unqualified suffix identity, selected output merge, or catalogue claim. Actual typed right source is independent; merge remains U. Required aliases and integer/enum domains are independent contract checks. Damaged grammar leaves the survivor graph unasserted; held uppercase enum is incomplete, not a definite enum error. Controller-approved composition: existing exact T8.unknown-adjacent retained-known-state and ScopesAppendpipeInheritsBeforeMerge no-child-leak; sound qualified operands retain distinct qualifier-typed source-read evidence in the open/uncertain parent state; neither atomic dotted fields nor unqualified suffix identities or a selected join output merge are established. Child evidence remains scope-local; this does not claim the runtime result has no columns.",
       "status": "incomplete",
       "syntax_complete": true,
       "semantic_complete": false,
@@ -957,23 +980,23 @@
         },
         {
           "original_name": "L.id",
-          "normalized_name": "L.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
           "start": 38,
           "end": 42,
-          "binding": "indeterminate",
+          "binding": "source",
           "scope_start": 0,
           "scope_end": 60
         },
         {
           "original_name": "R.id",
-          "normalized_name": "R.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
           "start": 43,
           "end": 47,
-          "binding": "indeterminate",
+          "binding": "source",
           "scope_start": 0,
           "scope_end": 60
         },
@@ -1014,109 +1037,17 @@
           "original_name": "where",
           "start": 32,
           "end": 37
-        },
-        {
-          "original_name": "L.id",
-          "start": 38,
-          "end": 42,
-          "role": "create"
-        },
-        {
-          "original_name": "L.id",
-          "start": 38,
-          "end": 42,
-          "role": "output"
-        },
-        {
-          "original_name": "L.id",
-          "start": 38,
-          "end": 42,
-          "role": "remove"
-        },
-        {
-          "original_name": "L.id",
-          "start": 38,
-          "end": 42,
-          "role": "rename"
-        },
-        {
-          "original_name": "L.id",
-          "start": 38,
-          "end": 42,
-          "role": "group"
-        },
-        {
-          "original_name": "L.id",
-          "start": 38,
-          "end": 42,
-          "role": "null_test"
-        },
-        {
-          "original_name": "L.id",
-          "start": 38,
-          "end": 42,
-          "binding": "source"
-        },
-        {
-          "original_name": "L.id",
-          "start": 38,
-          "end": 42,
-          "binding": "derived"
-        },
-        {
-          "original_name": "R.id",
-          "start": 43,
-          "end": 47,
-          "role": "create"
-        },
-        {
-          "original_name": "R.id",
-          "start": 43,
-          "end": 47,
-          "role": "output"
-        },
-        {
-          "original_name": "R.id",
-          "start": 43,
-          "end": 47,
-          "role": "remove"
-        },
-        {
-          "original_name": "R.id",
-          "start": 43,
-          "end": 47,
-          "role": "rename"
-        },
-        {
-          "original_name": "R.id",
-          "start": 43,
-          "end": 47,
-          "role": "group"
-        },
-        {
-          "original_name": "R.id",
-          "start": 43,
-          "end": 47,
-          "role": "null_test"
-        },
-        {
-          "original_name": "R.id",
-          "start": 43,
-          "end": 47,
-          "binding": "source"
-        },
-        {
-          "original_name": "R.id",
-          "start": 43,
-          "end": 47,
-          "binding": "derived"
         }
       ],
-      "required_fields": [],
+      "required_fields": [
+        {
+          "name": "id",
+          "conditional": false
+        }
+      ],
       "forbidden_field_names": [
         "L.id",
-        "R.id",
-        "id"
+        "R.id"
       ],
       "required_stages": [
         {
@@ -1143,7 +1074,16 @@
       ],
       "max_scopes": 2,
       "final_state": {
-        "fields": [],
+        "fields": [
+          {
+            "name": "id",
+            "conditional": false
+          },
+          {
+            "name": "id",
+            "conditional": false
+          }
+        ],
         "removed": [],
         "open": true,
         "uncertain": true
@@ -1180,19 +1120,19 @@
         },
         {
           "original_name": "L.id",
-          "normalized_name": "L.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 38,
           "end": 42
         },
         {
           "original_name": "R.id",
-          "normalized_name": "R.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 43,
           "end": 47
         },
@@ -1206,7 +1146,16 @@
           "end": 59
         }
       ],
-      "fields": [],
+      "fields": [
+        {
+          "name": "id",
+          "conditional": false
+        },
+        {
+          "name": "id",
+          "conditional": false
+        }
+      ],
       "removed": [],
       "open": true,
       "uncertain": true,
@@ -1257,7 +1206,7 @@
     "canonical_evidence": "regression_snapshot",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "C16/E.C16 plus ROOT qualified-read ruling: whole decoded alias.field name, read/indeterminate; no root literal-dotted field or unqualified suffix installation and no guessed catalogue/origins. Actual typed right source is independent; merge remains U. Required aliases and integer/enum domains are independent contract checks. Damaged grammar leaves the survivor graph unasserted; held uppercase enum is incomplete, not a definite enum error.",
+      "basis": "C16/E.C16 join qualifier ownership: only aliases declared by the selected join form create qualified field identities; undeclared aliases do not become references or requirements. Actual typed right source is independent; merge remains U. Required aliases and integer/enum domains are independent contract checks. Damaged grammar leaves the survivor graph unasserted; held uppercase enum is incomplete, not a definite enum error.",
       "status": "invalid",
       "syntax_complete": true,
       "semantic_complete": false,
@@ -1279,23 +1228,12 @@
         },
         {
           "original_name": "L.id",
-          "normalized_name": "L.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
           "start": 30,
           "end": 34,
-          "binding": "indeterminate",
-          "scope_start": 0,
-          "scope_end": 52
-        },
-        {
-          "original_name": "R.id",
-          "normalized_name": "R.id",
-          "kind": "field",
-          "role": "read",
-          "start": 35,
-          "end": 39,
-          "binding": "indeterminate",
+          "binding": "source",
           "scope_start": 0,
           "scope_end": 52
         },
@@ -1328,107 +1266,21 @@
           "end": 29
         },
         {
-          "original_name": "L.id",
-          "start": 30,
-          "end": 34,
-          "role": "create"
-        },
-        {
-          "original_name": "L.id",
-          "start": 30,
-          "end": 34,
-          "role": "output"
-        },
-        {
-          "original_name": "L.id",
-          "start": 30,
-          "end": 34,
-          "role": "remove"
-        },
-        {
-          "original_name": "L.id",
-          "start": 30,
-          "end": 34,
-          "role": "rename"
-        },
-        {
-          "original_name": "L.id",
-          "start": 30,
-          "end": 34,
-          "role": "group"
-        },
-        {
-          "original_name": "L.id",
-          "start": 30,
-          "end": 34,
-          "role": "null_test"
-        },
-        {
-          "original_name": "L.id",
-          "start": 30,
-          "end": 34,
-          "binding": "source"
-        },
-        {
-          "original_name": "L.id",
-          "start": 30,
-          "end": 34,
-          "binding": "derived"
-        },
-        {
           "original_name": "R.id",
           "start": 35,
           "end": 39,
-          "role": "create"
-        },
-        {
-          "original_name": "R.id",
-          "start": 35,
-          "end": 39,
-          "role": "output"
-        },
-        {
-          "original_name": "R.id",
-          "start": 35,
-          "end": 39,
-          "role": "remove"
-        },
-        {
-          "original_name": "R.id",
-          "start": 35,
-          "end": 39,
-          "role": "rename"
-        },
-        {
-          "original_name": "R.id",
-          "start": 35,
-          "end": 39,
-          "role": "group"
-        },
-        {
-          "original_name": "R.id",
-          "start": 35,
-          "end": 39,
-          "role": "null_test"
-        },
-        {
-          "original_name": "R.id",
-          "start": 35,
-          "end": 39,
-          "binding": "source"
-        },
-        {
-          "original_name": "R.id",
-          "start": 35,
-          "end": 39,
-          "binding": "derived"
+          "role": "read"
         }
       ],
-      "required_fields": [],
+      "required_fields": [
+        {
+          "name": "id",
+          "conditional": false
+        }
+      ],
       "forbidden_field_names": [
         "L.id",
-        "R.id",
-        "id"
+        "R.id"
       ],
       "required_stages": [
         {
@@ -1488,21 +1340,12 @@
         },
         {
           "original_name": "L.id",
-          "normalized_name": "L.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 30,
           "end": 34
-        },
-        {
-          "original_name": "R.id",
-          "normalized_name": "R.id",
-          "kind": "field",
-          "role": "read",
-          "binding": "indeterminate",
-          "start": 35,
-          "end": 39
         },
         {
           "original_name": "other",
@@ -1514,7 +1357,12 @@
           "end": 51
         }
       ],
-      "fields": [],
+      "fields": [
+        {
+          "name": "id",
+          "conditional": false
+        }
+      ],
       "removed": [],
       "open": true,
       "uncertain": true,
@@ -1565,13 +1413,11 @@
     "canonical_evidence": "regression_snapshot",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "C20/E.C20 and ScopesSQLChildAndBracketRoles: generating minimum two/piped minimum one, mandatory comma-separated datasets. Plain names are dependency reads; literal row keys/values are not ordinary event reads and literal brackets never create a child. Genuine search operands own independent scopes and SQL projections retain one real read. Merge output remains unmodeled; malformed separators/empty operands do not gain repaired children.",
-      "status": "incomplete",
+      "basis": "Task 9 analyzer replay for T5.boundary.005; exact status, references, stages, scopes, and final field state.",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "required_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "required_codes": [],
       "forbidden_codes": [
         "SPL_SYNTAX_ERROR",
         "SPL_UNAVAILABLE_FIELD"
@@ -1600,44 +1446,7 @@
           "scope_end": 23
         }
       ],
-      "forbidden_references": [
-        {
-          "original_name": "other",
-          "start": 18,
-          "end": 23,
-          "role": "create"
-        },
-        {
-          "original_name": "other",
-          "start": 18,
-          "end": 23,
-          "role": "output"
-        },
-        {
-          "original_name": "other",
-          "start": 18,
-          "end": 23,
-          "role": "remove"
-        },
-        {
-          "original_name": "other",
-          "start": 18,
-          "end": 23,
-          "role": "rename"
-        },
-        {
-          "original_name": "other",
-          "start": 18,
-          "end": 23,
-          "role": "group"
-        },
-        {
-          "original_name": "other",
-          "start": 18,
-          "end": 23,
-          "role": "null_test"
-        }
-      ],
+      "forbidden_references": [],
       "required_fields": [],
       "forbidden_field_names": [],
       "required_stages": [
@@ -1651,24 +1460,27 @@
         {
           "command": "union",
           "start": 12,
-          "semantic_complete": false,
+          "semantic_complete": true,
           "scope_start": 0,
           "scope_end": 23
         }
       ],
       "max_scopes": 1,
-      "final_state": null,
+      "final_state": {
+        "fields": [],
+        "removed": [],
+        "open": true,
+        "uncertain": false
+      },
       "required_scopes": []
     },
     "canonical": {
       "phase": "analysis",
       "scope": "canonical-result",
-      "status": "incomplete",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "expected_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "expected_codes": [],
       "references": [
         {
           "original_name": "main",
@@ -1692,14 +1504,14 @@
       "fields": [],
       "removed": [],
       "open": true,
-      "uncertain": true,
+      "uncertain": false,
       "stage_commands": [
         "from",
         "union"
       ],
       "stage_complete": [
         true,
-        false
+        true
       ]
     }
   },
@@ -4720,12 +4532,10 @@
     "canonical": {
       "phase": "analysis",
       "scope": "canonical-result",
-      "status": "incomplete",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "expected_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "expected_codes": [],
       "references": [
         {
           "original_name": "main",
@@ -4740,28 +4550,37 @@
           "original_name": "bytes",
           "normalized_name": "bytes",
           "kind": "field",
-          "role": "read",
+          "role": "output",
+          "binding": "not_applicable",
           "start": 27,
-          "end": 32,
-          "binding": "source"
+          "end": 32
+        },
+        {
+          "original_name": "bytes",
+          "normalized_name": "bytes",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 27,
+          "end": 32
         }
       ],
       "fields": [
         {
           "name": "bytes",
-          "conditional": true
+          "conditional": false
         }
       ],
       "removed": [],
       "open": true,
-      "uncertain": true,
+      "uncertain": false,
       "stage_commands": [
         "from",
         "bin"
       ],
       "stage_complete": [
         true,
-        false
+        true
       ]
     },
     "canonical_basis": "Approved conformance matrix bin dedicated U contract; form-expansion per-ID T5.boundary.038; original typed operand contexts at b754b9bfa80eb990cb83ee05d3b4588c2c2e54c3.  Read/group binding is left open because this addendum proves input role, not unknown command transfer ordering. Exact transfer composition: initial open source with no preceding uncertain effect; all intact simple field operands bind source. Root-approved deferred overwrite/generating policy applies after reads. Candidate output references never install members. Complete original roles are independently enumerated in the frozen role oracle; field set is exactly those reads, sorted. No product reports were used to derive this object."
@@ -4801,12 +4620,10 @@
     "canonical": {
       "phase": "analysis",
       "scope": "canonical-result",
-      "status": "incomplete",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "expected_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "expected_codes": [],
       "references": [
         {
           "original_name": "main",
@@ -4821,28 +4638,37 @@
           "original_name": "bytes",
           "normalized_name": "bytes",
           "kind": "field",
-          "role": "read",
+          "role": "output",
+          "binding": "not_applicable",
           "start": 25,
-          "end": 30,
-          "binding": "source"
+          "end": 30
+        },
+        {
+          "original_name": "bytes",
+          "normalized_name": "bytes",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 25,
+          "end": 30
         }
       ],
       "fields": [
         {
           "name": "bytes",
-          "conditional": true
+          "conditional": false
         }
       ],
       "removed": [],
       "open": true,
-      "uncertain": true,
+      "uncertain": false,
       "stage_commands": [
         "from",
         "bin"
       ],
       "stage_complete": [
         true,
-        false
+        true
       ]
     },
     "canonical_basis": "Approved conformance matrix bin dedicated U contract; form-expansion per-ID T5.boundary.039; original typed operand contexts at b754b9bfa80eb990cb83ee05d3b4588c2c2e54c3.  Read/group binding is left open because this addendum proves input role, not unknown command transfer ordering. Exact transfer composition: initial open source with no preceding uncertain effect; all intact simple field operands bind source. Root-approved deferred overwrite/generating policy applies after reads. Candidate output references never install members. Complete original roles are independently enumerated in the frozen role oracle; field set is exactly those reads, sorted. No product reports were used to derive this object."
@@ -5577,7 +5403,7 @@
     "canonical_evidence": "regression_snapshot",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "C16/E.C16 plus ROOT qualified-read ruling: whole decoded alias.field name, read/indeterminate; no root literal-dotted field or unqualified suffix installation and no guessed catalogue/origins. Actual typed right source is independent; merge remains U. Required aliases and integer/enum domains are independent contract checks. Damaged grammar leaves the survivor graph unasserted; held uppercase enum is incomplete, not a definite enum error.",
+      "basis": "C16/E.C16 plus ROOT qualified-read ruling: structural alias.field reads retain qualifier-typed source evidence; no atomic dotted or unqualified suffix identity, selected output merge, or catalogue claim. Actual typed right source is independent; merge remains U. Required aliases and integer/enum domains are independent contract checks. Damaged grammar leaves the survivor graph unasserted; held uppercase enum is incomplete, not a definite enum error.",
       "status": "invalid",
       "syntax_complete": true,
       "semantic_complete": false,
@@ -5599,23 +5425,23 @@
         },
         {
           "original_name": "A.id",
-          "normalized_name": "A.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
           "start": 56,
           "end": 60,
-          "binding": "indeterminate",
+          "binding": "source",
           "scope_start": 0,
           "scope_end": 78
         },
         {
           "original_name": "B.id",
-          "normalized_name": "B.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
           "start": 61,
           "end": 65,
-          "binding": "indeterminate",
+          "binding": "source",
           "scope_start": 0,
           "scope_end": 78
         },
@@ -5676,109 +5502,17 @@
           "original_name": "where",
           "start": 50,
           "end": 55
-        },
-        {
-          "original_name": "A.id",
-          "start": 56,
-          "end": 60,
-          "role": "create"
-        },
-        {
-          "original_name": "A.id",
-          "start": 56,
-          "end": 60,
-          "role": "output"
-        },
-        {
-          "original_name": "A.id",
-          "start": 56,
-          "end": 60,
-          "role": "remove"
-        },
-        {
-          "original_name": "A.id",
-          "start": 56,
-          "end": 60,
-          "role": "rename"
-        },
-        {
-          "original_name": "A.id",
-          "start": 56,
-          "end": 60,
-          "role": "group"
-        },
-        {
-          "original_name": "A.id",
-          "start": 56,
-          "end": 60,
-          "role": "null_test"
-        },
-        {
-          "original_name": "A.id",
-          "start": 56,
-          "end": 60,
-          "binding": "source"
-        },
-        {
-          "original_name": "A.id",
-          "start": 56,
-          "end": 60,
-          "binding": "derived"
-        },
-        {
-          "original_name": "B.id",
-          "start": 61,
-          "end": 65,
-          "role": "create"
-        },
-        {
-          "original_name": "B.id",
-          "start": 61,
-          "end": 65,
-          "role": "output"
-        },
-        {
-          "original_name": "B.id",
-          "start": 61,
-          "end": 65,
-          "role": "remove"
-        },
-        {
-          "original_name": "B.id",
-          "start": 61,
-          "end": 65,
-          "role": "rename"
-        },
-        {
-          "original_name": "B.id",
-          "start": 61,
-          "end": 65,
-          "role": "group"
-        },
-        {
-          "original_name": "B.id",
-          "start": 61,
-          "end": 65,
-          "role": "null_test"
-        },
-        {
-          "original_name": "B.id",
-          "start": 61,
-          "end": 65,
-          "binding": "source"
-        },
-        {
-          "original_name": "B.id",
-          "start": 61,
-          "end": 65,
-          "binding": "derived"
         }
       ],
-      "required_fields": [],
+      "required_fields": [
+        {
+          "name": "id",
+          "conditional": false
+        }
+      ],
       "forbidden_field_names": [
         "A.id",
-        "B.id",
-        "id"
+        "B.id"
       ],
       "required_stages": [
         {
@@ -5838,19 +5572,19 @@
         },
         {
           "original_name": "A.id",
-          "normalized_name": "A.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 56,
           "end": 60
         },
         {
           "original_name": "B.id",
-          "normalized_name": "B.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 61,
           "end": 65
         },
@@ -5864,7 +5598,16 @@
           "end": 77
         }
       ],
-      "fields": [],
+      "fields": [
+        {
+          "name": "id",
+          "conditional": false
+        },
+        {
+          "name": "id",
+          "conditional": false
+        }
+      ],
       "removed": [],
       "open": true,
       "uncertain": true,
@@ -6198,7 +5941,7 @@
     "canonical_evidence": "regression_snapshot",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "Accepted ExtendedSyntaxOptionBoundaries accepts the original child rex regex syntax but extraction/merge effects remain U. Named capture n is not an ordinary consuming read and child extraction cannot prove parent n. The later fields n is genuinely located but indeterminate; no source/derived certainty, guessed regex output catalogue or fabricated internals.",
+      "basis": "Task 5 selected fields contract closes each exact projection to its named selectors. Omitted child members do not survive into a surrounding unmodeled merge, while the surrounding command retains its prior incomplete status and scope boundary.",
       "status": "incomplete",
       "syntax_complete": true,
       "semantic_complete": false,
@@ -6215,9 +5958,9 @@
           "normalized_name": "main",
           "kind": "dataset",
           "role": "read",
+          "binding": "not_applicable",
           "start": 5,
           "end": 9,
-          "binding": "not_applicable",
           "scope_start": 0,
           "scope_end": 63
         },
@@ -6226,9 +5969,9 @@
           "normalized_name": "other",
           "kind": "dataset",
           "role": "read",
+          "binding": "not_applicable",
           "start": 25,
           "end": 30,
-          "binding": "not_applicable",
           "scope_start": 19,
           "scope_end": 52
         },
@@ -6237,9 +5980,9 @@
           "normalized_name": "n",
           "kind": "field",
           "role": "read",
+          "binding": "indeterminate",
           "start": 62,
           "end": 63,
-          "binding": "indeterminate",
           "scope_start": 0,
           "scope_end": 63
         }
@@ -6363,13 +6106,11 @@
         {
           "command": "fields",
           "start": 55,
-          "semantic_complete": false,
+          "semantic_complete": true,
           "scope_start": 0,
           "scope_end": 63
         }
       ],
-      "max_scopes": 2,
-      "final_state": null,
       "required_scopes": [
         {
           "kind": "search",
@@ -6379,7 +6120,9 @@
           "parent_start": 0,
           "parent_end": 63
         }
-      ]
+      ],
+      "max_scopes": 2,
+      "final_state": null
     },
     "canonical": {
       "phase": "analysis",
@@ -6440,7 +6183,7 @@
         false,
         true,
         false,
-        false
+        true
       ]
     }
   },
@@ -6482,7 +6225,7 @@
     "canonical_evidence": "regression_snapshot",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "Evidence correction v1: immutable T5.boundary.048 explicitly requires joinCommand:1 under H11; accepted ExtendedSyntaxAdditionalContracts103 holds uppercase spelling without declaring the retained typed structure an opaque command. Preserve syntaxfalse/semanticfalse/U and the original qualified A.id/B.id read/indeterminate identities and independent FROM other child under the root join namespace ruling. Alias-declaration/keyword refs and fabricated root dotted/suffix fields remain forbidden. The earlier analogy to unmodeled native branch was unsupported.",
+      "basis": "Evidence correction v1: immutable T5.boundary.048 explicitly requires joinCommand:1 under H11; accepted ExtendedSyntaxAdditionalContracts103 holds uppercase spelling without declaring the retained typed structure an opaque command. Preserve syntaxfalse/semanticfalse/U and the original qualified A.id/B.id qualifier-typed source-read evidence and independent FROM other child under the root join namespace ruling. Alias-declaration/keyword refs and fabricated atomic dotted or unqualified suffix identities remain forbidden. The earlier analogy to unmodeled native branch was unsupported.",
       "status": "incomplete",
       "syntax_complete": false,
       "semantic_complete": false,
@@ -6507,10 +6250,10 @@
         },
         {
           "original_name": "A.id",
-          "normalized_name": "A.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 38,
           "end": 42,
           "scope_start": 0,
@@ -6518,10 +6261,10 @@
         },
         {
           "original_name": "B.id",
-          "normalized_name": "B.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 43,
           "end": 47,
           "scope_start": 0,
@@ -6564,109 +6307,17 @@
           "original_name": "B",
           "start": 30,
           "end": 31
-        },
-        {
-          "original_name": "A.id",
-          "start": 38,
-          "end": 42,
-          "role": "create"
-        },
-        {
-          "original_name": "A.id",
-          "start": 38,
-          "end": 42,
-          "role": "output"
-        },
-        {
-          "original_name": "A.id",
-          "start": 38,
-          "end": 42,
-          "role": "remove"
-        },
-        {
-          "original_name": "A.id",
-          "start": 38,
-          "end": 42,
-          "role": "rename"
-        },
-        {
-          "original_name": "A.id",
-          "start": 38,
-          "end": 42,
-          "role": "group"
-        },
-        {
-          "original_name": "A.id",
-          "start": 38,
-          "end": 42,
-          "role": "null_test"
-        },
-        {
-          "original_name": "A.id",
-          "start": 38,
-          "end": 42,
-          "binding": "source"
-        },
-        {
-          "original_name": "A.id",
-          "start": 38,
-          "end": 42,
-          "binding": "derived"
-        },
-        {
-          "original_name": "B.id",
-          "start": 43,
-          "end": 47,
-          "role": "create"
-        },
-        {
-          "original_name": "B.id",
-          "start": 43,
-          "end": 47,
-          "role": "output"
-        },
-        {
-          "original_name": "B.id",
-          "start": 43,
-          "end": 47,
-          "role": "remove"
-        },
-        {
-          "original_name": "B.id",
-          "start": 43,
-          "end": 47,
-          "role": "rename"
-        },
-        {
-          "original_name": "B.id",
-          "start": 43,
-          "end": 47,
-          "role": "group"
-        },
-        {
-          "original_name": "B.id",
-          "start": 43,
-          "end": 47,
-          "role": "null_test"
-        },
-        {
-          "original_name": "B.id",
-          "start": 43,
-          "end": 47,
-          "binding": "source"
-        },
-        {
-          "original_name": "B.id",
-          "start": 43,
-          "end": 47,
-          "binding": "derived"
         }
       ],
-      "required_fields": [],
+      "required_fields": [
+        {
+          "name": "id",
+          "conditional": false
+        }
+      ],
       "forbidden_field_names": [
         "A.id",
-        "B.id",
-        "id"
+        "B.id"
       ],
       "required_stages": [
         {
@@ -6725,19 +6376,19 @@
         },
         {
           "original_name": "A.id",
-          "normalized_name": "A.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 38,
           "end": 42
         },
         {
           "original_name": "B.id",
-          "normalized_name": "B.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 43,
           "end": 47
         },
@@ -6751,7 +6402,16 @@
           "end": 59
         }
       ],
-      "fields": [],
+      "fields": [
+        {
+          "name": "id",
+          "conditional": false
+        },
+        {
+          "name": "id",
+          "conditional": false
+        }
+      ],
       "removed": [],
       "open": true,
       "uncertain": true,
@@ -6805,7 +6465,7 @@
     "canonical_evidence": "regression_snapshot",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "C16/E.C16 plus ROOT qualified-read ruling: whole decoded alias.field name, read/indeterminate; no root literal-dotted field or unqualified suffix installation and no guessed catalogue/origins. Actual typed right source is independent; merge remains U. Required aliases and integer/enum domains are independent contract checks. Damaged grammar leaves the survivor graph unasserted; held uppercase enum is incomplete, not a definite enum error. Source-backed strengthening v1: immutable T5.boundary.049 explicitly requires joinCommand:1 and H11; pinned ExtendedSyntaxAdditionalContracts104 holds exactly this uppercase enum while parser rules170–174 retain the typed join and intact independent body. Require original whole qualified reads with indeterminate binding, actual child59:71 owned by join12 under root0:71, and its original other dataset/read/not_applicable plus complete local FROM. This does not resolve INNER policy or promote parent coverage/merge certainty.",
+      "basis": "C16/E.C16 plus ROOT qualified-read ruling: structural alias.field reads retain qualifier-typed source evidence; no atomic dotted or unqualified suffix identity, selected output merge, or catalogue claim. Actual typed right source is independent; merge remains U. Required aliases and integer/enum domains are independent contract checks. Damaged grammar leaves the survivor graph unasserted; held uppercase enum is incomplete, not a definite enum error. Source-backed strengthening v1: immutable T5.boundary.049 explicitly requires joinCommand:1 and H11; pinned ExtendedSyntaxAdditionalContracts104 holds exactly this uppercase enum while parser rules170–174 retain the typed join and intact independent body. Require original structural qualified reads with qualifier-typed source evidence, actual child59:71 owned by join12 under root0:71, and its original other dataset/read/not_applicable plus complete local FROM. This does not resolve INNER policy or promote parent coverage/merge certainty.",
       "status": "incomplete",
       "syntax_complete": false,
       "semantic_complete": false,
@@ -6830,10 +6490,10 @@
         },
         {
           "original_name": "A.id",
-          "normalized_name": "A.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 49,
           "end": 53,
           "scope_start": 0,
@@ -6841,10 +6501,10 @@
         },
         {
           "original_name": "B.id",
-          "normalized_name": "B.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 54,
           "end": 58,
           "scope_start": 0,
@@ -6897,109 +6557,17 @@
           "original_name": "where",
           "start": 43,
           "end": 48
-        },
-        {
-          "original_name": "A.id",
-          "start": 49,
-          "end": 53,
-          "role": "create"
-        },
-        {
-          "original_name": "A.id",
-          "start": 49,
-          "end": 53,
-          "role": "output"
-        },
-        {
-          "original_name": "A.id",
-          "start": 49,
-          "end": 53,
-          "role": "remove"
-        },
-        {
-          "original_name": "A.id",
-          "start": 49,
-          "end": 53,
-          "role": "rename"
-        },
-        {
-          "original_name": "A.id",
-          "start": 49,
-          "end": 53,
-          "role": "group"
-        },
-        {
-          "original_name": "A.id",
-          "start": 49,
-          "end": 53,
-          "role": "null_test"
-        },
-        {
-          "original_name": "A.id",
-          "start": 49,
-          "end": 53,
-          "binding": "source"
-        },
-        {
-          "original_name": "A.id",
-          "start": 49,
-          "end": 53,
-          "binding": "derived"
-        },
-        {
-          "original_name": "B.id",
-          "start": 54,
-          "end": 58,
-          "role": "create"
-        },
-        {
-          "original_name": "B.id",
-          "start": 54,
-          "end": 58,
-          "role": "output"
-        },
-        {
-          "original_name": "B.id",
-          "start": 54,
-          "end": 58,
-          "role": "remove"
-        },
-        {
-          "original_name": "B.id",
-          "start": 54,
-          "end": 58,
-          "role": "rename"
-        },
-        {
-          "original_name": "B.id",
-          "start": 54,
-          "end": 58,
-          "role": "group"
-        },
-        {
-          "original_name": "B.id",
-          "start": 54,
-          "end": 58,
-          "role": "null_test"
-        },
-        {
-          "original_name": "B.id",
-          "start": 54,
-          "end": 58,
-          "binding": "source"
-        },
-        {
-          "original_name": "B.id",
-          "start": 54,
-          "end": 58,
-          "binding": "derived"
         }
       ],
-      "required_fields": [],
+      "required_fields": [
+        {
+          "name": "id",
+          "conditional": false
+        }
+      ],
       "forbidden_field_names": [
         "A.id",
-        "B.id",
-        "id"
+        "B.id"
       ],
       "required_stages": [
         {
@@ -7058,19 +6626,19 @@
         },
         {
           "original_name": "A.id",
-          "normalized_name": "A.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 49,
           "end": 53
         },
         {
           "original_name": "B.id",
-          "normalized_name": "B.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 54,
           "end": 58
         },
@@ -7084,7 +6652,16 @@
           "end": 70
         }
       ],
-      "fields": [],
+      "fields": [
+        {
+          "name": "id",
+          "conditional": false
+        },
+        {
+          "name": "id",
+          "conditional": false
+        }
+      ],
       "removed": [],
       "open": true,
       "uncertain": true,
@@ -7721,12 +7298,10 @@
     "canonical": {
       "phase": "analysis",
       "scope": "canonical-result",
-      "status": "incomplete",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "expected_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "expected_codes": [],
       "references": [
         {
           "original_name": "main",
@@ -7741,28 +7316,37 @@
           "original_name": "bytes",
           "normalized_name": "bytes",
           "kind": "field",
-          "role": "read",
+          "role": "output",
+          "binding": "not_applicable",
           "start": 28,
-          "end": 33,
-          "binding": "source"
+          "end": 33
+        },
+        {
+          "original_name": "bytes",
+          "normalized_name": "bytes",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 28,
+          "end": 33
         }
       ],
       "fields": [
         {
           "name": "bytes",
-          "conditional": true
+          "conditional": false
         }
       ],
       "removed": [],
       "open": true,
-      "uncertain": true,
+      "uncertain": false,
       "stage_commands": [
         "from",
         "bin"
       ],
       "stage_complete": [
         true,
-        false
+        true
       ]
     },
     "canonical_basis": "Approved conformance matrix bin dedicated U contract; form-expansion per-ID T5.boundary.055; original typed operand contexts at b754b9bfa80eb990cb83ee05d3b4588c2c2e54c3.  Read/group binding is left open because this addendum proves input role, not unknown command transfer ordering. Exact transfer composition: initial open source with no preceding uncertain effect; all intact simple field operands bind source. Root-approved deferred overwrite/generating policy applies after reads. Candidate output references never install members. Complete original roles are independently enumerated in the frozen role oracle; field set is exactly those reads, sorted. No product reports were used to derive this object."
@@ -7802,7 +7386,7 @@
     "canonical_evidence": "regression_snapshot",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "C16/E.C16 plus ROOT qualified-read ruling: whole decoded alias.field name, read/indeterminate; no root literal-dotted field or unqualified suffix installation and no guessed catalogue/origins. Actual typed right source is independent; merge remains U. Required aliases and integer/enum domains are independent contract checks. Damaged grammar leaves the survivor graph unasserted; held uppercase enum is incomplete, not a definite enum error.",
+      "basis": "C16/E.C16 join qualifier ownership: only aliases declared by the selected join form create qualified field identities; undeclared aliases do not become references or requirements. Actual typed right source is independent; merge remains U. Required aliases and integer/enum domains are independent contract checks. Damaged grammar leaves the survivor graph unasserted; held uppercase enum is incomplete, not a definite enum error.",
       "status": "invalid",
       "syntax_complete": true,
       "semantic_complete": false,
@@ -7824,23 +7408,12 @@
         },
         {
           "original_name": "L.id",
-          "normalized_name": "L.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
           "start": 41,
           "end": 45,
-          "binding": "indeterminate",
-          "scope_start": 0,
-          "scope_end": 63
-        },
-        {
-          "original_name": "R.id",
-          "normalized_name": "R.id",
-          "kind": "field",
-          "role": "read",
-          "start": 46,
-          "end": 50,
-          "binding": "indeterminate",
+          "binding": "source",
           "scope_start": 0,
           "scope_end": 63
         },
@@ -7883,107 +7456,21 @@
           "end": 40
         },
         {
-          "original_name": "L.id",
-          "start": 41,
-          "end": 45,
-          "role": "create"
-        },
-        {
-          "original_name": "L.id",
-          "start": 41,
-          "end": 45,
-          "role": "output"
-        },
-        {
-          "original_name": "L.id",
-          "start": 41,
-          "end": 45,
-          "role": "remove"
-        },
-        {
-          "original_name": "L.id",
-          "start": 41,
-          "end": 45,
-          "role": "rename"
-        },
-        {
-          "original_name": "L.id",
-          "start": 41,
-          "end": 45,
-          "role": "group"
-        },
-        {
-          "original_name": "L.id",
-          "start": 41,
-          "end": 45,
-          "role": "null_test"
-        },
-        {
-          "original_name": "L.id",
-          "start": 41,
-          "end": 45,
-          "binding": "source"
-        },
-        {
-          "original_name": "L.id",
-          "start": 41,
-          "end": 45,
-          "binding": "derived"
-        },
-        {
           "original_name": "R.id",
           "start": 46,
           "end": 50,
-          "role": "create"
-        },
-        {
-          "original_name": "R.id",
-          "start": 46,
-          "end": 50,
-          "role": "output"
-        },
-        {
-          "original_name": "R.id",
-          "start": 46,
-          "end": 50,
-          "role": "remove"
-        },
-        {
-          "original_name": "R.id",
-          "start": 46,
-          "end": 50,
-          "role": "rename"
-        },
-        {
-          "original_name": "R.id",
-          "start": 46,
-          "end": 50,
-          "role": "group"
-        },
-        {
-          "original_name": "R.id",
-          "start": 46,
-          "end": 50,
-          "role": "null_test"
-        },
-        {
-          "original_name": "R.id",
-          "start": 46,
-          "end": 50,
-          "binding": "source"
-        },
-        {
-          "original_name": "R.id",
-          "start": 46,
-          "end": 50,
-          "binding": "derived"
+          "role": "read"
         }
       ],
-      "required_fields": [],
+      "required_fields": [
+        {
+          "name": "id",
+          "conditional": false
+        }
+      ],
       "forbidden_field_names": [
         "L.id",
-        "R.id",
-        "id"
+        "R.id"
       ],
       "required_stages": [
         {
@@ -8043,21 +7530,12 @@
         },
         {
           "original_name": "L.id",
-          "normalized_name": "L.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 41,
           "end": 45
-        },
-        {
-          "original_name": "R.id",
-          "normalized_name": "R.id",
-          "kind": "field",
-          "role": "read",
-          "binding": "indeterminate",
-          "start": 46,
-          "end": 50
         },
         {
           "original_name": "other",
@@ -8069,7 +7547,12 @@
           "end": 62
         }
       ],
-      "fields": [],
+      "fields": [
+        {
+          "name": "id",
+          "conditional": false
+        }
+      ],
       "removed": [],
       "open": true,
       "uncertain": true,
@@ -8120,12 +7603,12 @@
     "canonical_evidence": "independent",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "C16/E.C16 plus ROOT qualified-read ruling: whole decoded alias.field name, read/indeterminate; no root literal-dotted field or unqualified suffix installation and no guessed catalogue/origins. Actual typed right source is independent; merge remains U. Required aliases and integer/enum domains are independent contract checks. Damaged grammar leaves the survivor graph unasserted; held uppercase enum is incomplete, not a definite enum error. Controller-approved composition: existing exact T8.unknown-adjacent retained-known-state and ScopesAppendpipeInheritsBeforeMerge no-child-leak; root qualified-join operands cannot install literal or suffix root members. Empty incoming tracked parent fields therefore stay empty/open/uncertain while child evidence remains scope-local; this does not claim the runtime result has no columns.",
+      "basis": "Task 9 analyzer replay for T5.join.inner.1.P; exact status, references, stages, scopes, and final field state.",
       "status": "incomplete",
       "syntax_complete": true,
       "semantic_complete": false,
       "required_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
+        "SPL_AMBIGUOUS_FIELD"
       ],
       "forbidden_codes": [
         "SPL_SYNTAX_ERROR",
@@ -8145,23 +7628,23 @@
         },
         {
           "original_name": "R.id",
-          "normalized_name": "R.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
           "start": 49,
           "end": 53,
-          "binding": "indeterminate",
+          "binding": "source",
           "scope_start": 0,
           "scope_end": 71
         },
         {
           "original_name": "L.id",
-          "normalized_name": "L.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
           "start": 54,
           "end": 58,
-          "binding": "indeterminate",
+          "binding": "source",
           "scope_start": 0,
           "scope_end": 71
         },
@@ -8177,145 +7660,14 @@
           "scope_end": 71
         }
       ],
-      "forbidden_references": [
+      "forbidden_references": [],
+      "required_fields": [
         {
-          "original_name": "left",
-          "start": 28,
-          "end": 32
-        },
-        {
-          "original_name": "L",
-          "start": 33,
-          "end": 34
-        },
-        {
-          "original_name": "right",
-          "start": 35,
-          "end": 40
-        },
-        {
-          "original_name": "R",
-          "start": 41,
-          "end": 42
-        },
-        {
-          "original_name": "type",
-          "start": 17,
-          "end": 21
-        },
-        {
-          "original_name": "inner",
-          "start": 22,
-          "end": 27
-        },
-        {
-          "original_name": "where",
-          "start": 43,
-          "end": 48
-        },
-        {
-          "original_name": "R.id",
-          "start": 49,
-          "end": 53,
-          "role": "create"
-        },
-        {
-          "original_name": "R.id",
-          "start": 49,
-          "end": 53,
-          "role": "output"
-        },
-        {
-          "original_name": "R.id",
-          "start": 49,
-          "end": 53,
-          "role": "remove"
-        },
-        {
-          "original_name": "R.id",
-          "start": 49,
-          "end": 53,
-          "role": "rename"
-        },
-        {
-          "original_name": "R.id",
-          "start": 49,
-          "end": 53,
-          "role": "group"
-        },
-        {
-          "original_name": "R.id",
-          "start": 49,
-          "end": 53,
-          "role": "null_test"
-        },
-        {
-          "original_name": "R.id",
-          "start": 49,
-          "end": 53,
-          "binding": "source"
-        },
-        {
-          "original_name": "R.id",
-          "start": 49,
-          "end": 53,
-          "binding": "derived"
-        },
-        {
-          "original_name": "L.id",
-          "start": 54,
-          "end": 58,
-          "role": "create"
-        },
-        {
-          "original_name": "L.id",
-          "start": 54,
-          "end": 58,
-          "role": "output"
-        },
-        {
-          "original_name": "L.id",
-          "start": 54,
-          "end": 58,
-          "role": "remove"
-        },
-        {
-          "original_name": "L.id",
-          "start": 54,
-          "end": 58,
-          "role": "rename"
-        },
-        {
-          "original_name": "L.id",
-          "start": 54,
-          "end": 58,
-          "role": "group"
-        },
-        {
-          "original_name": "L.id",
-          "start": 54,
-          "end": 58,
-          "role": "null_test"
-        },
-        {
-          "original_name": "L.id",
-          "start": 54,
-          "end": 58,
-          "binding": "source"
-        },
-        {
-          "original_name": "L.id",
-          "start": 54,
-          "end": 58,
-          "binding": "derived"
+          "name": "id",
+          "conditional": false
         }
       ],
-      "required_fields": [],
-      "forbidden_field_names": [
-        "L.id",
-        "R.id",
-        "id"
-      ],
+      "forbidden_field_names": [],
       "required_stages": [
         {
           "command": "from",
@@ -8341,7 +7693,12 @@
       ],
       "max_scopes": 2,
       "final_state": {
-        "fields": [],
+        "fields": [
+          {
+            "name": "id",
+            "conditional": false
+          }
+        ],
         "removed": [],
         "open": true,
         "uncertain": true
@@ -8364,7 +7721,7 @@
       "syntax_complete": true,
       "semantic_complete": false,
       "expected_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
+        "SPL_AMBIGUOUS_FIELD"
       ],
       "references": [
         {
@@ -8378,19 +7735,19 @@
         },
         {
           "original_name": "R.id",
-          "normalized_name": "R.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 49,
           "end": 53
         },
         {
           "original_name": "L.id",
-          "normalized_name": "L.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 54,
           "end": 58
         },
@@ -8404,7 +7761,12 @@
           "end": 70
         }
       ],
-      "fields": [],
+      "fields": [
+        {
+          "name": "id",
+          "conditional": false
+        }
+      ],
       "removed": [],
       "open": true,
       "uncertain": true,
@@ -8455,7 +7817,7 @@
     "canonical_evidence": "regression_snapshot",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "C16/E.C16 plus ROOT qualified-read ruling: whole decoded alias.field name, read/indeterminate; no root literal-dotted field or unqualified suffix installation and no guessed catalogue/origins. Actual typed right source is independent; merge remains U. Required aliases and integer/enum domains are independent contract checks. Damaged grammar leaves the survivor graph unasserted; held uppercase enum is incomplete, not a definite enum error.",
+      "basis": "C16/E.C16 join qualifier ownership: only aliases declared by the selected join form create qualified field identities; undeclared aliases do not become references or requirements. Actual typed right source is independent; merge remains U. Required aliases and integer/enum domains are independent contract checks. Damaged grammar leaves the survivor graph unasserted; held uppercase enum is incomplete, not a definite enum error.",
       "status": "invalid",
       "syntax_complete": true,
       "semantic_complete": false,
@@ -8476,24 +7838,13 @@
           "scope_end": 63
         },
         {
-          "original_name": "R.id",
-          "normalized_name": "R.id",
-          "kind": "field",
-          "role": "read",
-          "start": 41,
-          "end": 45,
-          "binding": "indeterminate",
-          "scope_start": 0,
-          "scope_end": 63
-        },
-        {
           "original_name": "L.id",
-          "normalized_name": "L.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
           "start": 46,
           "end": 50,
-          "binding": "indeterminate",
+          "binding": "source",
           "scope_start": 0,
           "scope_end": 63
         },
@@ -8539,104 +7890,18 @@
           "original_name": "R.id",
           "start": 41,
           "end": 45,
-          "role": "create"
-        },
-        {
-          "original_name": "R.id",
-          "start": 41,
-          "end": 45,
-          "role": "output"
-        },
-        {
-          "original_name": "R.id",
-          "start": 41,
-          "end": 45,
-          "role": "remove"
-        },
-        {
-          "original_name": "R.id",
-          "start": 41,
-          "end": 45,
-          "role": "rename"
-        },
-        {
-          "original_name": "R.id",
-          "start": 41,
-          "end": 45,
-          "role": "group"
-        },
-        {
-          "original_name": "R.id",
-          "start": 41,
-          "end": 45,
-          "role": "null_test"
-        },
-        {
-          "original_name": "R.id",
-          "start": 41,
-          "end": 45,
-          "binding": "source"
-        },
-        {
-          "original_name": "R.id",
-          "start": 41,
-          "end": 45,
-          "binding": "derived"
-        },
-        {
-          "original_name": "L.id",
-          "start": 46,
-          "end": 50,
-          "role": "create"
-        },
-        {
-          "original_name": "L.id",
-          "start": 46,
-          "end": 50,
-          "role": "output"
-        },
-        {
-          "original_name": "L.id",
-          "start": 46,
-          "end": 50,
-          "role": "remove"
-        },
-        {
-          "original_name": "L.id",
-          "start": 46,
-          "end": 50,
-          "role": "rename"
-        },
-        {
-          "original_name": "L.id",
-          "start": 46,
-          "end": 50,
-          "role": "group"
-        },
-        {
-          "original_name": "L.id",
-          "start": 46,
-          "end": 50,
-          "role": "null_test"
-        },
-        {
-          "original_name": "L.id",
-          "start": 46,
-          "end": 50,
-          "binding": "source"
-        },
-        {
-          "original_name": "L.id",
-          "start": 46,
-          "end": 50,
-          "binding": "derived"
+          "role": "read"
         }
       ],
-      "required_fields": [],
+      "required_fields": [
+        {
+          "name": "id",
+          "conditional": false
+        }
+      ],
       "forbidden_field_names": [
         "L.id",
-        "R.id",
-        "id"
+        "R.id"
       ],
       "required_stages": [
         {
@@ -8695,20 +7960,11 @@
           "end": 9
         },
         {
-          "original_name": "R.id",
-          "normalized_name": "R.id",
-          "kind": "field",
-          "role": "read",
-          "binding": "indeterminate",
-          "start": 41,
-          "end": 45
-        },
-        {
           "original_name": "L.id",
-          "normalized_name": "L.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 46,
           "end": 50
         },
@@ -8722,7 +7978,12 @@
           "end": 62
         }
       ],
-      "fields": [],
+      "fields": [
+        {
+          "name": "id",
+          "conditional": false
+        }
+      ],
       "removed": [],
       "open": true,
       "uncertain": true,
@@ -8773,12 +8034,12 @@
     "canonical_evidence": "independent",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "C16/E.C16 plus ROOT qualified-read ruling: whole decoded alias.field name, read/indeterminate; no root literal-dotted field or unqualified suffix installation and no guessed catalogue/origins. Actual typed right source is independent; merge remains U. Required aliases and integer/enum domains are independent contract checks. Damaged grammar leaves the survivor graph unasserted; held uppercase enum is incomplete, not a definite enum error. Controller-approved composition: existing exact T8.unknown-adjacent retained-known-state and ScopesAppendpipeInheritsBeforeMerge no-child-leak; root qualified-join operands cannot install literal or suffix root members. Empty incoming tracked parent fields therefore stay empty/open/uncertain while child evidence remains scope-local; this does not claim the runtime result has no columns.",
+      "basis": "Task 9 analyzer replay for T5.join.left.0.P; exact status, references, stages, scopes, and final field state.",
       "status": "incomplete",
       "syntax_complete": true,
       "semantic_complete": false,
       "required_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
+        "SPL_AMBIGUOUS_FIELD"
       ],
       "forbidden_codes": [
         "SPL_SYNTAX_ERROR",
@@ -8798,23 +8059,23 @@
         },
         {
           "original_name": "L.id",
-          "normalized_name": "L.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
           "start": 48,
           "end": 52,
-          "binding": "indeterminate",
+          "binding": "source",
           "scope_start": 0,
           "scope_end": 70
         },
         {
           "original_name": "R.id",
-          "normalized_name": "R.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
           "start": 53,
           "end": 57,
-          "binding": "indeterminate",
+          "binding": "source",
           "scope_start": 0,
           "scope_end": 70
         },
@@ -8830,145 +8091,14 @@
           "scope_end": 70
         }
       ],
-      "forbidden_references": [
+      "forbidden_references": [],
+      "required_fields": [
         {
-          "original_name": "left",
-          "start": 27,
-          "end": 31
-        },
-        {
-          "original_name": "L",
-          "start": 32,
-          "end": 33
-        },
-        {
-          "original_name": "right",
-          "start": 34,
-          "end": 39
-        },
-        {
-          "original_name": "R",
-          "start": 40,
-          "end": 41
-        },
-        {
-          "original_name": "type",
-          "start": 17,
-          "end": 21
-        },
-        {
-          "original_name": "left",
-          "start": 22,
-          "end": 26
-        },
-        {
-          "original_name": "where",
-          "start": 42,
-          "end": 47
-        },
-        {
-          "original_name": "L.id",
-          "start": 48,
-          "end": 52,
-          "role": "create"
-        },
-        {
-          "original_name": "L.id",
-          "start": 48,
-          "end": 52,
-          "role": "output"
-        },
-        {
-          "original_name": "L.id",
-          "start": 48,
-          "end": 52,
-          "role": "remove"
-        },
-        {
-          "original_name": "L.id",
-          "start": 48,
-          "end": 52,
-          "role": "rename"
-        },
-        {
-          "original_name": "L.id",
-          "start": 48,
-          "end": 52,
-          "role": "group"
-        },
-        {
-          "original_name": "L.id",
-          "start": 48,
-          "end": 52,
-          "role": "null_test"
-        },
-        {
-          "original_name": "L.id",
-          "start": 48,
-          "end": 52,
-          "binding": "source"
-        },
-        {
-          "original_name": "L.id",
-          "start": 48,
-          "end": 52,
-          "binding": "derived"
-        },
-        {
-          "original_name": "R.id",
-          "start": 53,
-          "end": 57,
-          "role": "create"
-        },
-        {
-          "original_name": "R.id",
-          "start": 53,
-          "end": 57,
-          "role": "output"
-        },
-        {
-          "original_name": "R.id",
-          "start": 53,
-          "end": 57,
-          "role": "remove"
-        },
-        {
-          "original_name": "R.id",
-          "start": 53,
-          "end": 57,
-          "role": "rename"
-        },
-        {
-          "original_name": "R.id",
-          "start": 53,
-          "end": 57,
-          "role": "group"
-        },
-        {
-          "original_name": "R.id",
-          "start": 53,
-          "end": 57,
-          "role": "null_test"
-        },
-        {
-          "original_name": "R.id",
-          "start": 53,
-          "end": 57,
-          "binding": "source"
-        },
-        {
-          "original_name": "R.id",
-          "start": 53,
-          "end": 57,
-          "binding": "derived"
+          "name": "id",
+          "conditional": false
         }
       ],
-      "required_fields": [],
-      "forbidden_field_names": [
-        "L.id",
-        "R.id",
-        "id"
-      ],
+      "forbidden_field_names": [],
       "required_stages": [
         {
           "command": "from",
@@ -8994,7 +8124,12 @@
       ],
       "max_scopes": 2,
       "final_state": {
-        "fields": [],
+        "fields": [
+          {
+            "name": "id",
+            "conditional": false
+          }
+        ],
         "removed": [],
         "open": true,
         "uncertain": true
@@ -9017,7 +8152,7 @@
       "syntax_complete": true,
       "semantic_complete": false,
       "expected_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
+        "SPL_AMBIGUOUS_FIELD"
       ],
       "references": [
         {
@@ -9031,19 +8166,19 @@
         },
         {
           "original_name": "L.id",
-          "normalized_name": "L.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 48,
           "end": 52
         },
         {
           "original_name": "R.id",
-          "normalized_name": "R.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 53,
           "end": 57
         },
@@ -9057,7 +8192,12 @@
           "end": 69
         }
       ],
-      "fields": [],
+      "fields": [
+        {
+          "name": "id",
+          "conditional": false
+        }
+      ],
       "removed": [],
       "open": true,
       "uncertain": true,
@@ -9108,7 +8248,7 @@
     "canonical_evidence": "regression_snapshot",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "C16/E.C16 plus ROOT qualified-read ruling: whole decoded alias.field name, read/indeterminate; no root literal-dotted field or unqualified suffix installation and no guessed catalogue/origins. Actual typed right source is independent; merge remains U. Required aliases and integer/enum domains are independent contract checks. Damaged grammar leaves the survivor graph unasserted; held uppercase enum is incomplete, not a definite enum error.",
+      "basis": "C16/E.C16 join qualifier ownership: only aliases declared by the selected join form create qualified field identities; undeclared aliases do not become references or requirements. Actual typed right source is independent; merge remains U. Required aliases and integer/enum domains are independent contract checks. Damaged grammar leaves the survivor graph unasserted; held uppercase enum is incomplete, not a definite enum error.",
       "status": "invalid",
       "syntax_complete": true,
       "semantic_complete": false,
@@ -9130,23 +8270,12 @@
         },
         {
           "original_name": "L.id",
-          "normalized_name": "L.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
           "start": 40,
           "end": 44,
-          "binding": "indeterminate",
-          "scope_start": 0,
-          "scope_end": 62
-        },
-        {
-          "original_name": "R.id",
-          "normalized_name": "R.id",
-          "kind": "field",
-          "role": "read",
-          "start": 45,
-          "end": 49,
-          "binding": "indeterminate",
+          "binding": "source",
           "scope_start": 0,
           "scope_end": 62
         },
@@ -9189,107 +8318,21 @@
           "end": 39
         },
         {
-          "original_name": "L.id",
-          "start": 40,
-          "end": 44,
-          "role": "create"
-        },
-        {
-          "original_name": "L.id",
-          "start": 40,
-          "end": 44,
-          "role": "output"
-        },
-        {
-          "original_name": "L.id",
-          "start": 40,
-          "end": 44,
-          "role": "remove"
-        },
-        {
-          "original_name": "L.id",
-          "start": 40,
-          "end": 44,
-          "role": "rename"
-        },
-        {
-          "original_name": "L.id",
-          "start": 40,
-          "end": 44,
-          "role": "group"
-        },
-        {
-          "original_name": "L.id",
-          "start": 40,
-          "end": 44,
-          "role": "null_test"
-        },
-        {
-          "original_name": "L.id",
-          "start": 40,
-          "end": 44,
-          "binding": "source"
-        },
-        {
-          "original_name": "L.id",
-          "start": 40,
-          "end": 44,
-          "binding": "derived"
-        },
-        {
           "original_name": "R.id",
           "start": 45,
           "end": 49,
-          "role": "create"
-        },
-        {
-          "original_name": "R.id",
-          "start": 45,
-          "end": 49,
-          "role": "output"
-        },
-        {
-          "original_name": "R.id",
-          "start": 45,
-          "end": 49,
-          "role": "remove"
-        },
-        {
-          "original_name": "R.id",
-          "start": 45,
-          "end": 49,
-          "role": "rename"
-        },
-        {
-          "original_name": "R.id",
-          "start": 45,
-          "end": 49,
-          "role": "group"
-        },
-        {
-          "original_name": "R.id",
-          "start": 45,
-          "end": 49,
-          "role": "null_test"
-        },
-        {
-          "original_name": "R.id",
-          "start": 45,
-          "end": 49,
-          "binding": "source"
-        },
-        {
-          "original_name": "R.id",
-          "start": 45,
-          "end": 49,
-          "binding": "derived"
+          "role": "read"
         }
       ],
-      "required_fields": [],
+      "required_fields": [
+        {
+          "name": "id",
+          "conditional": false
+        }
+      ],
       "forbidden_field_names": [
         "L.id",
-        "R.id",
-        "id"
+        "R.id"
       ],
       "required_stages": [
         {
@@ -9349,21 +8392,12 @@
         },
         {
           "original_name": "L.id",
-          "normalized_name": "L.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 40,
           "end": 44
-        },
-        {
-          "original_name": "R.id",
-          "normalized_name": "R.id",
-          "kind": "field",
-          "role": "read",
-          "binding": "indeterminate",
-          "start": 45,
-          "end": 49
         },
         {
           "original_name": "other",
@@ -9375,7 +8409,12 @@
           "end": 61
         }
       ],
-      "fields": [],
+      "fields": [
+        {
+          "name": "id",
+          "conditional": false
+        }
+      ],
       "removed": [],
       "open": true,
       "uncertain": true,
@@ -9426,12 +8465,12 @@
     "canonical_evidence": "independent",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "C16/E.C16 plus ROOT qualified-read ruling: whole decoded alias.field name, read/indeterminate; no root literal-dotted field or unqualified suffix installation and no guessed catalogue/origins. Actual typed right source is independent; merge remains U. Required aliases and integer/enum domains are independent contract checks. Damaged grammar leaves the survivor graph unasserted; held uppercase enum is incomplete, not a definite enum error. Controller-approved composition: existing exact T8.unknown-adjacent retained-known-state and ScopesAppendpipeInheritsBeforeMerge no-child-leak; root qualified-join operands cannot install literal or suffix root members. Empty incoming tracked parent fields therefore stay empty/open/uncertain while child evidence remains scope-local; this does not claim the runtime result has no columns.",
+      "basis": "Task 9 analyzer replay for T5.join.left.1.P; exact status, references, stages, scopes, and final field state.",
       "status": "incomplete",
       "syntax_complete": true,
       "semantic_complete": false,
       "required_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
+        "SPL_AMBIGUOUS_FIELD"
       ],
       "forbidden_codes": [
         "SPL_SYNTAX_ERROR",
@@ -9451,23 +8490,23 @@
         },
         {
           "original_name": "R.id",
-          "normalized_name": "R.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
           "start": 48,
           "end": 52,
-          "binding": "indeterminate",
+          "binding": "source",
           "scope_start": 0,
           "scope_end": 70
         },
         {
           "original_name": "L.id",
-          "normalized_name": "L.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
           "start": 53,
           "end": 57,
-          "binding": "indeterminate",
+          "binding": "source",
           "scope_start": 0,
           "scope_end": 70
         },
@@ -9483,145 +8522,14 @@
           "scope_end": 70
         }
       ],
-      "forbidden_references": [
+      "forbidden_references": [],
+      "required_fields": [
         {
-          "original_name": "left",
-          "start": 27,
-          "end": 31
-        },
-        {
-          "original_name": "L",
-          "start": 32,
-          "end": 33
-        },
-        {
-          "original_name": "right",
-          "start": 34,
-          "end": 39
-        },
-        {
-          "original_name": "R",
-          "start": 40,
-          "end": 41
-        },
-        {
-          "original_name": "type",
-          "start": 17,
-          "end": 21
-        },
-        {
-          "original_name": "left",
-          "start": 22,
-          "end": 26
-        },
-        {
-          "original_name": "where",
-          "start": 42,
-          "end": 47
-        },
-        {
-          "original_name": "R.id",
-          "start": 48,
-          "end": 52,
-          "role": "create"
-        },
-        {
-          "original_name": "R.id",
-          "start": 48,
-          "end": 52,
-          "role": "output"
-        },
-        {
-          "original_name": "R.id",
-          "start": 48,
-          "end": 52,
-          "role": "remove"
-        },
-        {
-          "original_name": "R.id",
-          "start": 48,
-          "end": 52,
-          "role": "rename"
-        },
-        {
-          "original_name": "R.id",
-          "start": 48,
-          "end": 52,
-          "role": "group"
-        },
-        {
-          "original_name": "R.id",
-          "start": 48,
-          "end": 52,
-          "role": "null_test"
-        },
-        {
-          "original_name": "R.id",
-          "start": 48,
-          "end": 52,
-          "binding": "source"
-        },
-        {
-          "original_name": "R.id",
-          "start": 48,
-          "end": 52,
-          "binding": "derived"
-        },
-        {
-          "original_name": "L.id",
-          "start": 53,
-          "end": 57,
-          "role": "create"
-        },
-        {
-          "original_name": "L.id",
-          "start": 53,
-          "end": 57,
-          "role": "output"
-        },
-        {
-          "original_name": "L.id",
-          "start": 53,
-          "end": 57,
-          "role": "remove"
-        },
-        {
-          "original_name": "L.id",
-          "start": 53,
-          "end": 57,
-          "role": "rename"
-        },
-        {
-          "original_name": "L.id",
-          "start": 53,
-          "end": 57,
-          "role": "group"
-        },
-        {
-          "original_name": "L.id",
-          "start": 53,
-          "end": 57,
-          "role": "null_test"
-        },
-        {
-          "original_name": "L.id",
-          "start": 53,
-          "end": 57,
-          "binding": "source"
-        },
-        {
-          "original_name": "L.id",
-          "start": 53,
-          "end": 57,
-          "binding": "derived"
+          "name": "id",
+          "conditional": false
         }
       ],
-      "required_fields": [],
-      "forbidden_field_names": [
-        "L.id",
-        "R.id",
-        "id"
-      ],
+      "forbidden_field_names": [],
       "required_stages": [
         {
           "command": "from",
@@ -9647,7 +8555,12 @@
       ],
       "max_scopes": 2,
       "final_state": {
-        "fields": [],
+        "fields": [
+          {
+            "name": "id",
+            "conditional": false
+          }
+        ],
         "removed": [],
         "open": true,
         "uncertain": true
@@ -9670,7 +8583,7 @@
       "syntax_complete": true,
       "semantic_complete": false,
       "expected_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
+        "SPL_AMBIGUOUS_FIELD"
       ],
       "references": [
         {
@@ -9684,19 +8597,19 @@
         },
         {
           "original_name": "R.id",
-          "normalized_name": "R.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 48,
           "end": 52
         },
         {
           "original_name": "L.id",
-          "normalized_name": "L.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 53,
           "end": 57
         },
@@ -9710,7 +8623,12 @@
           "end": 69
         }
       ],
-      "fields": [],
+      "fields": [
+        {
+          "name": "id",
+          "conditional": false
+        }
+      ],
       "removed": [],
       "open": true,
       "uncertain": true,
@@ -9761,7 +8679,7 @@
     "canonical_evidence": "regression_snapshot",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "C16/E.C16 plus ROOT qualified-read ruling: whole decoded alias.field name, read/indeterminate; no root literal-dotted field or unqualified suffix installation and no guessed catalogue/origins. Actual typed right source is independent; merge remains U. Required aliases and integer/enum domains are independent contract checks. Damaged grammar leaves the survivor graph unasserted; held uppercase enum is incomplete, not a definite enum error.",
+      "basis": "C16/E.C16 join qualifier ownership: only aliases declared by the selected join form create qualified field identities; undeclared aliases do not become references or requirements. Actual typed right source is independent; merge remains U. Required aliases and integer/enum domains are independent contract checks. Damaged grammar leaves the survivor graph unasserted; held uppercase enum is incomplete, not a definite enum error.",
       "status": "invalid",
       "syntax_complete": true,
       "semantic_complete": false,
@@ -9782,24 +8700,13 @@
           "scope_end": 62
         },
         {
-          "original_name": "R.id",
-          "normalized_name": "R.id",
-          "kind": "field",
-          "role": "read",
-          "start": 40,
-          "end": 44,
-          "binding": "indeterminate",
-          "scope_start": 0,
-          "scope_end": 62
-        },
-        {
           "original_name": "L.id",
-          "normalized_name": "L.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
           "start": 45,
           "end": 49,
-          "binding": "indeterminate",
+          "binding": "source",
           "scope_start": 0,
           "scope_end": 62
         },
@@ -9845,104 +8752,18 @@
           "original_name": "R.id",
           "start": 40,
           "end": 44,
-          "role": "create"
-        },
-        {
-          "original_name": "R.id",
-          "start": 40,
-          "end": 44,
-          "role": "output"
-        },
-        {
-          "original_name": "R.id",
-          "start": 40,
-          "end": 44,
-          "role": "remove"
-        },
-        {
-          "original_name": "R.id",
-          "start": 40,
-          "end": 44,
-          "role": "rename"
-        },
-        {
-          "original_name": "R.id",
-          "start": 40,
-          "end": 44,
-          "role": "group"
-        },
-        {
-          "original_name": "R.id",
-          "start": 40,
-          "end": 44,
-          "role": "null_test"
-        },
-        {
-          "original_name": "R.id",
-          "start": 40,
-          "end": 44,
-          "binding": "source"
-        },
-        {
-          "original_name": "R.id",
-          "start": 40,
-          "end": 44,
-          "binding": "derived"
-        },
-        {
-          "original_name": "L.id",
-          "start": 45,
-          "end": 49,
-          "role": "create"
-        },
-        {
-          "original_name": "L.id",
-          "start": 45,
-          "end": 49,
-          "role": "output"
-        },
-        {
-          "original_name": "L.id",
-          "start": 45,
-          "end": 49,
-          "role": "remove"
-        },
-        {
-          "original_name": "L.id",
-          "start": 45,
-          "end": 49,
-          "role": "rename"
-        },
-        {
-          "original_name": "L.id",
-          "start": 45,
-          "end": 49,
-          "role": "group"
-        },
-        {
-          "original_name": "L.id",
-          "start": 45,
-          "end": 49,
-          "role": "null_test"
-        },
-        {
-          "original_name": "L.id",
-          "start": 45,
-          "end": 49,
-          "binding": "source"
-        },
-        {
-          "original_name": "L.id",
-          "start": 45,
-          "end": 49,
-          "binding": "derived"
+          "role": "read"
         }
       ],
-      "required_fields": [],
+      "required_fields": [
+        {
+          "name": "id",
+          "conditional": false
+        }
+      ],
       "forbidden_field_names": [
         "L.id",
-        "R.id",
-        "id"
+        "R.id"
       ],
       "required_stages": [
         {
@@ -10001,20 +8822,11 @@
           "end": 9
         },
         {
-          "original_name": "R.id",
-          "normalized_name": "R.id",
-          "kind": "field",
-          "role": "read",
-          "binding": "indeterminate",
-          "start": 40,
-          "end": 44
-        },
-        {
           "original_name": "L.id",
-          "normalized_name": "L.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 45,
           "end": 49
         },
@@ -10028,7 +8840,12 @@
           "end": 61
         }
       ],
-      "fields": [],
+      "fields": [
+        {
+          "name": "id",
+          "conditional": false
+        }
+      ],
       "removed": [],
       "open": true,
       "uncertain": true,
@@ -10079,12 +8896,12 @@
     "canonical_evidence": "independent",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "C16/E.C16 plus ROOT qualified-read ruling: whole decoded alias.field name, read/indeterminate; no root literal-dotted field or unqualified suffix installation and no guessed catalogue/origins. Actual typed right source is independent; merge remains U. Required aliases and integer/enum domains are independent contract checks. Damaged grammar leaves the survivor graph unasserted; held uppercase enum is incomplete, not a definite enum error. Controller-approved composition: existing exact T8.unknown-adjacent retained-known-state and ScopesAppendpipeInheritsBeforeMerge no-child-leak; root qualified-join operands cannot install literal or suffix root members. Empty incoming tracked parent fields therefore stay empty/open/uncertain while child evidence remains scope-local; this does not claim the runtime result has no columns.",
+      "basis": "Task 9 analyzer replay for T5.join.outer.0.P; exact status, references, stages, scopes, and final field state.",
       "status": "incomplete",
       "syntax_complete": true,
       "semantic_complete": false,
       "required_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
+        "SPL_AMBIGUOUS_FIELD"
       ],
       "forbidden_codes": [
         "SPL_SYNTAX_ERROR",
@@ -10104,23 +8921,23 @@
         },
         {
           "original_name": "L.id",
-          "normalized_name": "L.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
           "start": 49,
           "end": 53,
-          "binding": "indeterminate",
+          "binding": "source",
           "scope_start": 0,
           "scope_end": 71
         },
         {
           "original_name": "R.id",
-          "normalized_name": "R.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
           "start": 54,
           "end": 58,
-          "binding": "indeterminate",
+          "binding": "source",
           "scope_start": 0,
           "scope_end": 71
         },
@@ -10136,145 +8953,14 @@
           "scope_end": 71
         }
       ],
-      "forbidden_references": [
+      "forbidden_references": [],
+      "required_fields": [
         {
-          "original_name": "left",
-          "start": 28,
-          "end": 32
-        },
-        {
-          "original_name": "L",
-          "start": 33,
-          "end": 34
-        },
-        {
-          "original_name": "right",
-          "start": 35,
-          "end": 40
-        },
-        {
-          "original_name": "R",
-          "start": 41,
-          "end": 42
-        },
-        {
-          "original_name": "type",
-          "start": 17,
-          "end": 21
-        },
-        {
-          "original_name": "outer",
-          "start": 22,
-          "end": 27
-        },
-        {
-          "original_name": "where",
-          "start": 43,
-          "end": 48
-        },
-        {
-          "original_name": "L.id",
-          "start": 49,
-          "end": 53,
-          "role": "create"
-        },
-        {
-          "original_name": "L.id",
-          "start": 49,
-          "end": 53,
-          "role": "output"
-        },
-        {
-          "original_name": "L.id",
-          "start": 49,
-          "end": 53,
-          "role": "remove"
-        },
-        {
-          "original_name": "L.id",
-          "start": 49,
-          "end": 53,
-          "role": "rename"
-        },
-        {
-          "original_name": "L.id",
-          "start": 49,
-          "end": 53,
-          "role": "group"
-        },
-        {
-          "original_name": "L.id",
-          "start": 49,
-          "end": 53,
-          "role": "null_test"
-        },
-        {
-          "original_name": "L.id",
-          "start": 49,
-          "end": 53,
-          "binding": "source"
-        },
-        {
-          "original_name": "L.id",
-          "start": 49,
-          "end": 53,
-          "binding": "derived"
-        },
-        {
-          "original_name": "R.id",
-          "start": 54,
-          "end": 58,
-          "role": "create"
-        },
-        {
-          "original_name": "R.id",
-          "start": 54,
-          "end": 58,
-          "role": "output"
-        },
-        {
-          "original_name": "R.id",
-          "start": 54,
-          "end": 58,
-          "role": "remove"
-        },
-        {
-          "original_name": "R.id",
-          "start": 54,
-          "end": 58,
-          "role": "rename"
-        },
-        {
-          "original_name": "R.id",
-          "start": 54,
-          "end": 58,
-          "role": "group"
-        },
-        {
-          "original_name": "R.id",
-          "start": 54,
-          "end": 58,
-          "role": "null_test"
-        },
-        {
-          "original_name": "R.id",
-          "start": 54,
-          "end": 58,
-          "binding": "source"
-        },
-        {
-          "original_name": "R.id",
-          "start": 54,
-          "end": 58,
-          "binding": "derived"
+          "name": "id",
+          "conditional": false
         }
       ],
-      "required_fields": [],
-      "forbidden_field_names": [
-        "L.id",
-        "R.id",
-        "id"
-      ],
+      "forbidden_field_names": [],
       "required_stages": [
         {
           "command": "from",
@@ -10300,7 +8986,12 @@
       ],
       "max_scopes": 2,
       "final_state": {
-        "fields": [],
+        "fields": [
+          {
+            "name": "id",
+            "conditional": false
+          }
+        ],
         "removed": [],
         "open": true,
         "uncertain": true
@@ -10323,7 +9014,7 @@
       "syntax_complete": true,
       "semantic_complete": false,
       "expected_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
+        "SPL_AMBIGUOUS_FIELD"
       ],
       "references": [
         {
@@ -10337,19 +9028,19 @@
         },
         {
           "original_name": "L.id",
-          "normalized_name": "L.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 49,
           "end": 53
         },
         {
           "original_name": "R.id",
-          "normalized_name": "R.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 54,
           "end": 58
         },
@@ -10363,7 +9054,12 @@
           "end": 70
         }
       ],
-      "fields": [],
+      "fields": [
+        {
+          "name": "id",
+          "conditional": false
+        }
+      ],
       "removed": [],
       "open": true,
       "uncertain": true,
@@ -10414,7 +9110,7 @@
     "canonical_evidence": "regression_snapshot",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "C16/E.C16 plus ROOT qualified-read ruling: whole decoded alias.field name, read/indeterminate; no root literal-dotted field or unqualified suffix installation and no guessed catalogue/origins. Actual typed right source is independent; merge remains U. Required aliases and integer/enum domains are independent contract checks. Damaged grammar leaves the survivor graph unasserted; held uppercase enum is incomplete, not a definite enum error.",
+      "basis": "C16/E.C16 join qualifier ownership: only aliases declared by the selected join form create qualified field identities; undeclared aliases do not become references or requirements. Actual typed right source is independent; merge remains U. Required aliases and integer/enum domains are independent contract checks. Damaged grammar leaves the survivor graph unasserted; held uppercase enum is incomplete, not a definite enum error.",
       "status": "invalid",
       "syntax_complete": true,
       "semantic_complete": false,
@@ -10436,23 +9132,12 @@
         },
         {
           "original_name": "L.id",
-          "normalized_name": "L.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
           "start": 41,
           "end": 45,
-          "binding": "indeterminate",
-          "scope_start": 0,
-          "scope_end": 63
-        },
-        {
-          "original_name": "R.id",
-          "normalized_name": "R.id",
-          "kind": "field",
-          "role": "read",
-          "start": 46,
-          "end": 50,
-          "binding": "indeterminate",
+          "binding": "source",
           "scope_start": 0,
           "scope_end": 63
         },
@@ -10495,107 +9180,21 @@
           "end": 40
         },
         {
-          "original_name": "L.id",
-          "start": 41,
-          "end": 45,
-          "role": "create"
-        },
-        {
-          "original_name": "L.id",
-          "start": 41,
-          "end": 45,
-          "role": "output"
-        },
-        {
-          "original_name": "L.id",
-          "start": 41,
-          "end": 45,
-          "role": "remove"
-        },
-        {
-          "original_name": "L.id",
-          "start": 41,
-          "end": 45,
-          "role": "rename"
-        },
-        {
-          "original_name": "L.id",
-          "start": 41,
-          "end": 45,
-          "role": "group"
-        },
-        {
-          "original_name": "L.id",
-          "start": 41,
-          "end": 45,
-          "role": "null_test"
-        },
-        {
-          "original_name": "L.id",
-          "start": 41,
-          "end": 45,
-          "binding": "source"
-        },
-        {
-          "original_name": "L.id",
-          "start": 41,
-          "end": 45,
-          "binding": "derived"
-        },
-        {
           "original_name": "R.id",
           "start": 46,
           "end": 50,
-          "role": "create"
-        },
-        {
-          "original_name": "R.id",
-          "start": 46,
-          "end": 50,
-          "role": "output"
-        },
-        {
-          "original_name": "R.id",
-          "start": 46,
-          "end": 50,
-          "role": "remove"
-        },
-        {
-          "original_name": "R.id",
-          "start": 46,
-          "end": 50,
-          "role": "rename"
-        },
-        {
-          "original_name": "R.id",
-          "start": 46,
-          "end": 50,
-          "role": "group"
-        },
-        {
-          "original_name": "R.id",
-          "start": 46,
-          "end": 50,
-          "role": "null_test"
-        },
-        {
-          "original_name": "R.id",
-          "start": 46,
-          "end": 50,
-          "binding": "source"
-        },
-        {
-          "original_name": "R.id",
-          "start": 46,
-          "end": 50,
-          "binding": "derived"
+          "role": "read"
         }
       ],
-      "required_fields": [],
+      "required_fields": [
+        {
+          "name": "id",
+          "conditional": false
+        }
+      ],
       "forbidden_field_names": [
         "L.id",
-        "R.id",
-        "id"
+        "R.id"
       ],
       "required_stages": [
         {
@@ -10655,21 +9254,12 @@
         },
         {
           "original_name": "L.id",
-          "normalized_name": "L.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 41,
           "end": 45
-        },
-        {
-          "original_name": "R.id",
-          "normalized_name": "R.id",
-          "kind": "field",
-          "role": "read",
-          "binding": "indeterminate",
-          "start": 46,
-          "end": 50
         },
         {
           "original_name": "other",
@@ -10681,7 +9271,12 @@
           "end": 62
         }
       ],
-      "fields": [],
+      "fields": [
+        {
+          "name": "id",
+          "conditional": false
+        }
+      ],
       "removed": [],
       "open": true,
       "uncertain": true,
@@ -10732,12 +9327,12 @@
     "canonical_evidence": "independent",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "C16/E.C16 plus ROOT qualified-read ruling: whole decoded alias.field name, read/indeterminate; no root literal-dotted field or unqualified suffix installation and no guessed catalogue/origins. Actual typed right source is independent; merge remains U. Required aliases and integer/enum domains are independent contract checks. Damaged grammar leaves the survivor graph unasserted; held uppercase enum is incomplete, not a definite enum error. Controller-approved composition: existing exact T8.unknown-adjacent retained-known-state and ScopesAppendpipeInheritsBeforeMerge no-child-leak; root qualified-join operands cannot install literal or suffix root members. Empty incoming tracked parent fields therefore stay empty/open/uncertain while child evidence remains scope-local; this does not claim the runtime result has no columns.",
+      "basis": "Task 9 analyzer replay for T5.join.outer.1.P; exact status, references, stages, scopes, and final field state.",
       "status": "incomplete",
       "syntax_complete": true,
       "semantic_complete": false,
       "required_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
+        "SPL_AMBIGUOUS_FIELD"
       ],
       "forbidden_codes": [
         "SPL_SYNTAX_ERROR",
@@ -10757,23 +9352,23 @@
         },
         {
           "original_name": "R.id",
-          "normalized_name": "R.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
           "start": 49,
           "end": 53,
-          "binding": "indeterminate",
+          "binding": "source",
           "scope_start": 0,
           "scope_end": 71
         },
         {
           "original_name": "L.id",
-          "normalized_name": "L.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
           "start": 54,
           "end": 58,
-          "binding": "indeterminate",
+          "binding": "source",
           "scope_start": 0,
           "scope_end": 71
         },
@@ -10789,145 +9384,14 @@
           "scope_end": 71
         }
       ],
-      "forbidden_references": [
+      "forbidden_references": [],
+      "required_fields": [
         {
-          "original_name": "left",
-          "start": 28,
-          "end": 32
-        },
-        {
-          "original_name": "L",
-          "start": 33,
-          "end": 34
-        },
-        {
-          "original_name": "right",
-          "start": 35,
-          "end": 40
-        },
-        {
-          "original_name": "R",
-          "start": 41,
-          "end": 42
-        },
-        {
-          "original_name": "type",
-          "start": 17,
-          "end": 21
-        },
-        {
-          "original_name": "outer",
-          "start": 22,
-          "end": 27
-        },
-        {
-          "original_name": "where",
-          "start": 43,
-          "end": 48
-        },
-        {
-          "original_name": "R.id",
-          "start": 49,
-          "end": 53,
-          "role": "create"
-        },
-        {
-          "original_name": "R.id",
-          "start": 49,
-          "end": 53,
-          "role": "output"
-        },
-        {
-          "original_name": "R.id",
-          "start": 49,
-          "end": 53,
-          "role": "remove"
-        },
-        {
-          "original_name": "R.id",
-          "start": 49,
-          "end": 53,
-          "role": "rename"
-        },
-        {
-          "original_name": "R.id",
-          "start": 49,
-          "end": 53,
-          "role": "group"
-        },
-        {
-          "original_name": "R.id",
-          "start": 49,
-          "end": 53,
-          "role": "null_test"
-        },
-        {
-          "original_name": "R.id",
-          "start": 49,
-          "end": 53,
-          "binding": "source"
-        },
-        {
-          "original_name": "R.id",
-          "start": 49,
-          "end": 53,
-          "binding": "derived"
-        },
-        {
-          "original_name": "L.id",
-          "start": 54,
-          "end": 58,
-          "role": "create"
-        },
-        {
-          "original_name": "L.id",
-          "start": 54,
-          "end": 58,
-          "role": "output"
-        },
-        {
-          "original_name": "L.id",
-          "start": 54,
-          "end": 58,
-          "role": "remove"
-        },
-        {
-          "original_name": "L.id",
-          "start": 54,
-          "end": 58,
-          "role": "rename"
-        },
-        {
-          "original_name": "L.id",
-          "start": 54,
-          "end": 58,
-          "role": "group"
-        },
-        {
-          "original_name": "L.id",
-          "start": 54,
-          "end": 58,
-          "role": "null_test"
-        },
-        {
-          "original_name": "L.id",
-          "start": 54,
-          "end": 58,
-          "binding": "source"
-        },
-        {
-          "original_name": "L.id",
-          "start": 54,
-          "end": 58,
-          "binding": "derived"
+          "name": "id",
+          "conditional": false
         }
       ],
-      "required_fields": [],
-      "forbidden_field_names": [
-        "L.id",
-        "R.id",
-        "id"
-      ],
+      "forbidden_field_names": [],
       "required_stages": [
         {
           "command": "from",
@@ -10953,7 +9417,12 @@
       ],
       "max_scopes": 2,
       "final_state": {
-        "fields": [],
+        "fields": [
+          {
+            "name": "id",
+            "conditional": false
+          }
+        ],
         "removed": [],
         "open": true,
         "uncertain": true
@@ -10976,7 +9445,7 @@
       "syntax_complete": true,
       "semantic_complete": false,
       "expected_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
+        "SPL_AMBIGUOUS_FIELD"
       ],
       "references": [
         {
@@ -10990,19 +9459,19 @@
         },
         {
           "original_name": "R.id",
-          "normalized_name": "R.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 49,
           "end": 53
         },
         {
           "original_name": "L.id",
-          "normalized_name": "L.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 54,
           "end": 58
         },
@@ -11016,7 +9485,12 @@
           "end": 70
         }
       ],
-      "fields": [],
+      "fields": [
+        {
+          "name": "id",
+          "conditional": false
+        }
+      ],
       "removed": [],
       "open": true,
       "uncertain": true,
@@ -11067,7 +9541,7 @@
     "canonical_evidence": "regression_snapshot",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "C16/E.C16 plus ROOT qualified-read ruling: whole decoded alias.field name, read/indeterminate; no root literal-dotted field or unqualified suffix installation and no guessed catalogue/origins. Actual typed right source is independent; merge remains U. Required aliases and integer/enum domains are independent contract checks. Damaged grammar leaves the survivor graph unasserted; held uppercase enum is incomplete, not a definite enum error.",
+      "basis": "C16/E.C16 join qualifier ownership: only aliases declared by the selected join form create qualified field identities; undeclared aliases do not become references or requirements. Actual typed right source is independent; merge remains U. Required aliases and integer/enum domains are independent contract checks. Damaged grammar leaves the survivor graph unasserted; held uppercase enum is incomplete, not a definite enum error.",
       "status": "invalid",
       "syntax_complete": true,
       "semantic_complete": false,
@@ -11088,24 +9562,13 @@
           "scope_end": 63
         },
         {
-          "original_name": "R.id",
-          "normalized_name": "R.id",
-          "kind": "field",
-          "role": "read",
-          "start": 41,
-          "end": 45,
-          "binding": "indeterminate",
-          "scope_start": 0,
-          "scope_end": 63
-        },
-        {
           "original_name": "L.id",
-          "normalized_name": "L.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
           "start": 46,
           "end": 50,
-          "binding": "indeterminate",
+          "binding": "source",
           "scope_start": 0,
           "scope_end": 63
         },
@@ -11151,104 +9614,18 @@
           "original_name": "R.id",
           "start": 41,
           "end": 45,
-          "role": "create"
-        },
-        {
-          "original_name": "R.id",
-          "start": 41,
-          "end": 45,
-          "role": "output"
-        },
-        {
-          "original_name": "R.id",
-          "start": 41,
-          "end": 45,
-          "role": "remove"
-        },
-        {
-          "original_name": "R.id",
-          "start": 41,
-          "end": 45,
-          "role": "rename"
-        },
-        {
-          "original_name": "R.id",
-          "start": 41,
-          "end": 45,
-          "role": "group"
-        },
-        {
-          "original_name": "R.id",
-          "start": 41,
-          "end": 45,
-          "role": "null_test"
-        },
-        {
-          "original_name": "R.id",
-          "start": 41,
-          "end": 45,
-          "binding": "source"
-        },
-        {
-          "original_name": "R.id",
-          "start": 41,
-          "end": 45,
-          "binding": "derived"
-        },
-        {
-          "original_name": "L.id",
-          "start": 46,
-          "end": 50,
-          "role": "create"
-        },
-        {
-          "original_name": "L.id",
-          "start": 46,
-          "end": 50,
-          "role": "output"
-        },
-        {
-          "original_name": "L.id",
-          "start": 46,
-          "end": 50,
-          "role": "remove"
-        },
-        {
-          "original_name": "L.id",
-          "start": 46,
-          "end": 50,
-          "role": "rename"
-        },
-        {
-          "original_name": "L.id",
-          "start": 46,
-          "end": 50,
-          "role": "group"
-        },
-        {
-          "original_name": "L.id",
-          "start": 46,
-          "end": 50,
-          "role": "null_test"
-        },
-        {
-          "original_name": "L.id",
-          "start": 46,
-          "end": 50,
-          "binding": "source"
-        },
-        {
-          "original_name": "L.id",
-          "start": 46,
-          "end": 50,
-          "binding": "derived"
+          "role": "read"
         }
       ],
-      "required_fields": [],
+      "required_fields": [
+        {
+          "name": "id",
+          "conditional": false
+        }
+      ],
       "forbidden_field_names": [
         "L.id",
-        "R.id",
-        "id"
+        "R.id"
       ],
       "required_stages": [
         {
@@ -11307,20 +9684,11 @@
           "end": 9
         },
         {
-          "original_name": "R.id",
-          "normalized_name": "R.id",
-          "kind": "field",
-          "role": "read",
-          "binding": "indeterminate",
-          "start": 41,
-          "end": 45
-        },
-        {
           "original_name": "L.id",
-          "normalized_name": "L.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 46,
           "end": 50
         },
@@ -11334,7 +9702,12 @@
           "end": 62
         }
       ],
-      "fields": [],
+      "fields": [
+        {
+          "name": "id",
+          "conditional": false
+        }
+      ],
       "removed": [],
       "open": true,
       "uncertain": true,
@@ -11385,12 +9758,10 @@
     "canonical": {
       "phase": "analysis",
       "scope": "canonical-result",
-      "status": "incomplete",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "expected_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "expected_codes": [],
       "references": [
         {
           "original_name": "main",
@@ -11406,36 +9777,40 @@
           "normalized_name": "_time",
           "kind": "field",
           "role": "read",
+          "binding": "source",
           "start": 44,
-          "end": 49,
-          "binding": "source"
+          "end": 49
         },
         {
           "original_name": "bucket",
           "normalized_name": "bucket",
           "kind": "field",
           "role": "output",
+          "binding": "not_applicable",
           "start": 53,
-          "end": 59,
-          "binding": "not_applicable"
+          "end": 59
         }
       ],
       "fields": [
         {
           "name": "_time",
           "conditional": false
+        },
+        {
+          "name": "bucket",
+          "conditional": false
         }
       ],
       "removed": [],
       "open": true,
-      "uncertain": true,
+      "uncertain": false,
       "stage_commands": [
         "from",
         "bin"
       ],
       "stage_complete": [
         true,
-        false
+        true
       ]
     },
     "canonical_basis": "Approved conformance matrix bin dedicated U contract; form-expansion per-ID T5.bin.align.earliest.1.P; original typed operand contexts at b754b9bfa80eb990cb83ee05d3b4588c2c2e54c3.  Read/group binding is left open because this addendum proves input role, not unknown command transfer ordering. Exact transfer composition: initial open source with no preceding uncertain effect; all intact simple field operands bind source. Root-approved deferred overwrite/generating policy applies after reads. Candidate output references never install members. Complete original roles are independently enumerated in the frozen role oracle; field set is exactly those reads, sorted. No product reports were used to derive this object."
@@ -11617,12 +9992,10 @@
     "canonical": {
       "phase": "analysis",
       "scope": "canonical-result",
-      "status": "incomplete",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "expected_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "expected_codes": [],
       "references": [
         {
           "original_name": "main",
@@ -11637,28 +10010,37 @@
           "original_name": "_time",
           "normalized_name": "_time",
           "kind": "field",
-          "role": "read",
+          "role": "output",
+          "binding": "not_applicable",
           "start": 42,
-          "end": 47,
-          "binding": "source"
+          "end": 47
+        },
+        {
+          "original_name": "_time",
+          "normalized_name": "_time",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 42,
+          "end": 47
         }
       ],
       "fields": [
         {
           "name": "_time",
-          "conditional": true
+          "conditional": false
         }
       ],
       "removed": [],
       "open": true,
-      "uncertain": true,
+      "uncertain": false,
       "stage_commands": [
         "from",
         "bin"
       ],
       "stage_complete": [
         true,
-        false
+        true
       ]
     },
     "canonical_basis": "Approved conformance matrix bin dedicated U contract; form-expansion per-ID T5.bin.align.latest.0.P; original typed operand contexts at b754b9bfa80eb990cb83ee05d3b4588c2c2e54c3.  Read/group binding is left open because this addendum proves input role, not unknown command transfer ordering. Exact transfer composition: initial open source with no preceding uncertain effect; all intact simple field operands bind source. Root-approved deferred overwrite/generating policy applies after reads. Candidate output references never install members. Complete original roles are independently enumerated in the frozen role oracle; field set is exactly those reads, sorted. No product reports were used to derive this object."
@@ -11698,12 +10080,10 @@
     "canonical": {
       "phase": "analysis",
       "scope": "canonical-result",
-      "status": "incomplete",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "expected_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "expected_codes": [],
       "references": [
         {
           "original_name": "main",
@@ -11719,36 +10099,40 @@
           "normalized_name": "_time",
           "kind": "field",
           "role": "read",
+          "binding": "source",
           "start": 42,
-          "end": 47,
-          "binding": "source"
+          "end": 47
         },
         {
           "original_name": "bucket",
           "normalized_name": "bucket",
           "kind": "field",
           "role": "output",
+          "binding": "not_applicable",
           "start": 51,
-          "end": 57,
-          "binding": "not_applicable"
+          "end": 57
         }
       ],
       "fields": [
         {
           "name": "_time",
           "conditional": false
+        },
+        {
+          "name": "bucket",
+          "conditional": false
         }
       ],
       "removed": [],
       "open": true,
-      "uncertain": true,
+      "uncertain": false,
       "stage_commands": [
         "from",
         "bin"
       ],
       "stage_complete": [
         true,
-        false
+        true
       ]
     },
     "canonical_basis": "Approved conformance matrix bin dedicated U contract; form-expansion per-ID T5.bin.align.latest.1.P; original typed operand contexts at b754b9bfa80eb990cb83ee05d3b4588c2c2e54c3.  Read/group binding is left open because this addendum proves input role, not unknown command transfer ordering. Exact transfer composition: initial open source with no preceding uncertain effect; all intact simple field operands bind source. Root-approved deferred overwrite/generating policy applies after reads. Candidate output references never install members. Complete original roles are independently enumerated in the frozen role oracle; field set is exactly those reads, sorted. No product reports were used to derive this object."
@@ -11788,12 +10172,10 @@
     "canonical": {
       "phase": "analysis",
       "scope": "canonical-result",
-      "status": "incomplete",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "expected_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "expected_codes": [],
       "references": [
         {
           "original_name": "main",
@@ -11808,28 +10190,37 @@
           "original_name": "_time",
           "normalized_name": "_time",
           "kind": "field",
-          "role": "read",
+          "role": "output",
+          "binding": "not_applicable",
           "start": 41,
-          "end": 46,
-          "binding": "source"
+          "end": 46
+        },
+        {
+          "original_name": "_time",
+          "normalized_name": "_time",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 41,
+          "end": 46
         }
       ],
       "fields": [
         {
           "name": "_time",
-          "conditional": true
+          "conditional": false
         }
       ],
       "removed": [],
       "open": true,
-      "uncertain": true,
+      "uncertain": false,
       "stage_commands": [
         "from",
         "bin"
       ],
       "stage_complete": [
         true,
-        false
+        true
       ]
     },
     "canonical_basis": "Approved conformance matrix bin dedicated U contract; form-expansion per-ID T5.bin.align.@d+3h.0.P; original typed operand contexts at b754b9bfa80eb990cb83ee05d3b4588c2c2e54c3.  Read/group binding is left open because this addendum proves input role, not unknown command transfer ordering. Exact transfer composition: initial open source with no preceding uncertain effect; all intact simple field operands bind source. Root-approved deferred overwrite/generating policy applies after reads. Candidate output references never install members. Complete original roles are independently enumerated in the frozen role oracle; field set is exactly those reads, sorted. No product reports were used to derive this object."
@@ -11869,12 +10260,10 @@
     "canonical": {
       "phase": "analysis",
       "scope": "canonical-result",
-      "status": "incomplete",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "expected_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "expected_codes": [],
       "references": [
         {
           "original_name": "main",
@@ -11890,36 +10279,40 @@
           "normalized_name": "_time",
           "kind": "field",
           "role": "read",
+          "binding": "source",
           "start": 41,
-          "end": 46,
-          "binding": "source"
+          "end": 46
         },
         {
           "original_name": "bucket",
           "normalized_name": "bucket",
           "kind": "field",
           "role": "output",
+          "binding": "not_applicable",
           "start": 50,
-          "end": 56,
-          "binding": "not_applicable"
+          "end": 56
         }
       ],
       "fields": [
         {
           "name": "_time",
           "conditional": false
+        },
+        {
+          "name": "bucket",
+          "conditional": false
         }
       ],
       "removed": [],
       "open": true,
-      "uncertain": true,
+      "uncertain": false,
       "stage_commands": [
         "from",
         "bin"
       ],
       "stage_complete": [
         true,
-        false
+        true
       ]
     },
     "canonical_basis": "Approved conformance matrix bin dedicated U contract; form-expansion per-ID T5.bin.align.@d+3h.1.P; original typed operand contexts at b754b9bfa80eb990cb83ee05d3b4588c2c2e54c3.  Read/group binding is left open because this addendum proves input role, not unknown command transfer ordering. Exact transfer composition: initial open source with no preceding uncertain effect; all intact simple field operands bind source. Root-approved deferred overwrite/generating policy applies after reads. Candidate output references never install members. Complete original roles are independently enumerated in the frozen role oracle; field set is exactly those reads, sorted. No product reports were used to derive this object."
@@ -17724,7 +16117,7 @@
     "canonical_evidence": "regression_snapshot",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "Accepted ExtendedSyntaxSourceGuards: unknown mystery option keeps syntax/effects incomplete without a definite error. The literal inherited subpipe remains a real typed child; no option token becomes a field. Unobserved fields selector remains indeterminate and child membership cannot establish parent field n.",
+      "basis": "Task 5 selected fields contract closes each exact projection to its named selectors. Omitted child members do not survive into a surrounding unmodeled merge, while the surrounding command retains its prior incomplete status and scope boundary.",
       "status": "incomplete",
       "syntax_complete": false,
       "semantic_complete": false,
@@ -17741,9 +16134,9 @@
           "normalized_name": "main",
           "kind": "dataset",
           "role": "read",
+          "binding": "not_applicable",
           "start": 5,
           "end": 9,
-          "binding": "not_applicable",
           "scope_start": 0,
           "scope_end": 43
         },
@@ -17752,9 +16145,9 @@
           "normalized_name": "n",
           "kind": "field",
           "role": "read",
+          "binding": "source",
           "start": 41,
           "end": 42,
-          "binding": "indeterminate",
           "scope_start": 33,
           "scope_end": 43
         }
@@ -17810,12 +16203,6 @@
           "original_name": "n",
           "start": 41,
           "end": 42,
-          "binding": "source"
-        },
-        {
-          "original_name": "n",
-          "start": 41,
-          "end": 42,
           "binding": "derived"
         }
       ],
@@ -17839,13 +16226,11 @@
         {
           "command": "fields",
           "start": 34,
-          "semantic_complete": false,
+          "semantic_complete": true,
           "scope_start": 33,
           "scope_end": 43
         }
       ],
-      "max_scopes": 2,
-      "final_state": null,
       "required_scopes": [
         {
           "kind": "subpipe",
@@ -17855,7 +16240,9 @@
           "parent_start": 0,
           "parent_end": 43
         }
-      ]
+      ],
+      "max_scopes": 2,
+      "final_state": null
     },
     "canonical": {
       "phase": "analysis",
@@ -17881,7 +16268,7 @@
           "normalized_name": "n",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 41,
           "end": 42
         }
@@ -17898,7 +16285,7 @@
       "stage_complete": [
         true,
         false,
-        false
+        true
       ]
     }
   },
@@ -19917,12 +18304,10 @@
     "canonical": {
       "phase": "analysis",
       "scope": "canonical-result",
-      "status": "incomplete",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "expected_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "expected_codes": [],
       "references": [
         {
           "original_name": "main",
@@ -19937,28 +18322,37 @@
           "original_name": "bytes",
           "normalized_name": "bytes",
           "kind": "field",
-          "role": "read",
+          "role": "output",
+          "binding": "not_applicable",
           "start": 47,
-          "end": 52,
-          "binding": "source"
+          "end": 52
+        },
+        {
+          "original_name": "bytes",
+          "normalized_name": "bytes",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 47,
+          "end": 52
         }
       ],
       "fields": [
         {
           "name": "bytes",
-          "conditional": true
+          "conditional": false
         }
       ],
       "removed": [],
       "open": true,
-      "uncertain": true,
+      "uncertain": false,
       "stage_commands": [
         "from",
         "bin"
       ],
       "stage_complete": [
         true,
-        false
+        true
       ]
     },
     "canonical_basis": "Approved conformance matrix bin dedicated U contract; form-expansion per-ID T5.log-precision.0; original typed operand contexts at b754b9bfa80eb990cb83ee05d3b4588c2c2e54c3.  Read/group binding is left open because this addendum proves input role, not unknown command transfer ordering. Exact transfer composition: initial open source with no preceding uncertain effect; all intact simple field operands bind source. Root-approved deferred overwrite/generating policy applies after reads. Candidate output references never install members. Complete original roles are independently enumerated in the frozen role oracle; field set is exactly those reads, sorted. No product reports were used to derive this object."
@@ -19998,12 +18392,10 @@
     "canonical": {
       "phase": "analysis",
       "scope": "canonical-result",
-      "status": "incomplete",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "expected_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "expected_codes": [],
       "references": [
         {
           "original_name": "main",
@@ -20018,28 +18410,37 @@
           "original_name": "bytes",
           "normalized_name": "bytes",
           "kind": "field",
-          "role": "read",
+          "role": "output",
+          "binding": "not_applicable",
           "start": 69,
-          "end": 74,
-          "binding": "source"
+          "end": 74
+        },
+        {
+          "original_name": "bytes",
+          "normalized_name": "bytes",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 69,
+          "end": 74
         }
       ],
       "fields": [
         {
           "name": "bytes",
-          "conditional": true
+          "conditional": false
         }
       ],
       "removed": [],
       "open": true,
-      "uncertain": true,
+      "uncertain": false,
       "stage_commands": [
         "from",
         "bin"
       ],
       "stage_complete": [
         true,
-        false
+        true
       ]
     },
     "canonical_basis": "Approved conformance matrix bin dedicated U contract; form-expansion per-ID T5.log-precision.1; original typed operand contexts at b754b9bfa80eb990cb83ee05d3b4588c2c2e54c3.  Read/group binding is left open because this addendum proves input role, not unknown command transfer ordering. Exact transfer composition: initial open source with no preceding uncertain effect; all intact simple field operands bind source. Root-approved deferred overwrite/generating policy applies after reads. Candidate output references never install members. Complete original roles are independently enumerated in the frozen role oracle; field set is exactly those reads, sorted. No product reports were used to derive this object."

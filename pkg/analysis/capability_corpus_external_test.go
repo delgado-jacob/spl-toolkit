@@ -40,13 +40,16 @@ type diagnosticFact struct {
 }
 
 type semanticFacts struct {
-	Status       analysis.Status
-	Complete     bool
-	Stages       []analysis.CapabilityStageExpectation
-	References   []analysis.CapabilityReferenceExpectation
-	Dependencies []analysis.CapabilityDependencyExpectation
-	Transitions  []analysis.CapabilityTransitionExpectation
-	Diagnostics  []diagnosticFact
+	Status          analysis.Status
+	Complete        bool
+	Stages          []analysis.CapabilityStageExpectation
+	Scopes          []analysis.CapabilityScopeExpectation
+	References      []analysis.CapabilityReferenceExpectation
+	Dependencies    []analysis.CapabilityDependencyExpectation
+	Lineage         []analysis.CapabilityLineageExpectation
+	Transitions     []analysis.CapabilityTransitionExpectation
+	FinalFieldState *analysis.CapabilityFieldStateExpectation
+	Diagnostics     []diagnosticFact
 }
 
 type requirementFacts struct {
@@ -133,6 +136,149 @@ func TestCapabilityEvidenceCorpus(t *testing.T) {
 			}
 		}
 	}
+}
+
+func TestCapabilitySemanticComparisonRejectsStructuredFactMismatches(t *testing.T) {
+	result, err := analysis.Analyze(analysis.QueryDocument{
+		Text:     "FROM main | eval beta=alpha",
+		Language: "spl2",
+		Profile:  "splunkd",
+		Version:  "current",
+		SourceID: "capability:test-structured-mismatch",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	baseline := func() analysis.CapabilitySemanticsObservation {
+		return analysis.CapabilitySemanticsObservation{
+			Status:          result.Status,
+			Complete:        result.Coverage.SemanticComplete,
+			Stages:          stageFacts(result.Stages),
+			Scopes:          scopeFacts(result.Scopes),
+			References:      referenceFacts(result.References),
+			Dependencies:    dependencyFacts(result.Dependencies),
+			Lineage:         lineageFacts(result.Lineage),
+			Transitions:     transitionFacts(result.Lineage),
+			FinalFieldState: finalFieldStateFact(result.Lineage),
+		}
+	}
+	tests := []struct {
+		name   string
+		mutate func(*analysis.CapabilitySemanticsObservation)
+	}{
+		{
+			name: "unknown scope",
+			mutate: func(observation *analysis.CapabilitySemanticsObservation) {
+				observation.Scopes = []analysis.CapabilityScopeExpectation{{ID: "scope-missing", Kind: "pipeline", StageID: "stage-missing"}}
+			},
+		},
+		{
+			name: "wrong lineage origin",
+			mutate: func(observation *analysis.CapabilitySemanticsObservation) {
+				observation.Lineage[1].After.Fields[0].OriginReferenceIDs[0] = "ref-0"
+			},
+		},
+		{
+			name: "wrong canonical lineage order",
+			mutate: func(observation *analysis.CapabilitySemanticsObservation) {
+				observation.Lineage[0], observation.Lineage[1] = observation.Lineage[1], observation.Lineage[0]
+			},
+		},
+		{
+			name: "wrong lineage openness",
+			mutate: func(observation *analysis.CapabilitySemanticsObservation) {
+				observation.Lineage[1].After.Open = false
+			},
+		},
+		{
+			name: "wrong final uncertainty",
+			mutate: func(observation *analysis.CapabilitySemanticsObservation) {
+				observation.FinalFieldState.Uncertain = true
+			},
+		},
+		{
+			name: "wrong field conditionality",
+			mutate: func(observation *analysis.CapabilitySemanticsObservation) {
+				observation.FinalFieldState.Fields[1].Conditional = true
+			},
+		},
+		{
+			name: "wrong expanded transition input",
+			mutate: func(observation *analysis.CapabilitySemanticsObservation) {
+				observation.Transitions[0].InputReferenceIDs[0] = "ref-0"
+			},
+		},
+		{
+			name: "wrong exact output identity",
+			mutate: func(observation *analysis.CapabilitySemanticsObservation) {
+				observation.Transitions[0].OutputIdentity.Kind = "path"
+			},
+		},
+		{
+			name: "wrong exact reference identity",
+			mutate: func(observation *analysis.CapabilitySemanticsObservation) {
+				for i := range observation.References {
+					if observation.References[i].FieldIdentity != nil {
+						observation.References[i].FieldIdentity.Kind = "path"
+						return
+					}
+				}
+			},
+		},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			observation := baseline()
+			tc.mutate(&observation)
+			if comparison := compareSemantics(observation, result); comparison.passed {
+				t.Fatalf("structured semantic mismatch was accepted: %+v", observation)
+			}
+		})
+	}
+}
+
+func TestCapabilityRequirementComparisonRejectsExactIdentityMismatch(t *testing.T) {
+	set, err := analysis.Requirements(analysis.QueryDocument{
+		Text: "FROM main | where actor.name=1 AND 'actor.name'=1", Language: "spl2", Profile: "splunkd", Version: "current",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	items := requirementItemFacts(set.Items)
+	expected := analysis.CapabilityRequirementsObservation{QueryStatus: set.QueryStatus, Complete: set.Coverage.Complete, Items: items, GapCodes: requirementGapCodes(set.Gaps)}
+	if comparison := compareRequirements(expected, set); !comparison.passed {
+		t.Fatalf("exact requirement facts failed to match: %+v", comparison)
+	}
+	expected.Items[1].FieldIdentity.Kind = "atomic"
+	if comparison := compareRequirements(expected, set); comparison.passed {
+		t.Fatal("requirement evidence accepted a mismatched exact identity")
+	}
+}
+
+func TestCapabilitySemanticComparisonRejectsRemovalIdentityMismatch(t *testing.T) {
+	manifest, err := analysis.CapabilitiesFor(analysis.CapabilityOptions{Language: "spl2", Profile: "splunkd", Version: "current"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, evidence := range manifest.Evidence {
+		if evidence.ID != "spl2.fields.exact-field-list.positive" {
+			continue
+		}
+		result, err := analysis.Analyze(evidence.Document)
+		if err != nil {
+			t.Fatal(err)
+		}
+		expected := *evidence.Observations.Semantics
+		if comparison := compareSemantics(expected, result); !comparison.passed {
+			t.Fatalf("typed removal evidence failed to match: %+v", comparison)
+		}
+		expected.FinalFieldState.Removed[0].FieldIdentity.Kind = "path"
+		if comparison := compareSemantics(expected, result); comparison.passed {
+			t.Fatal("semantic evidence accepted a mismatched removed identity")
+		}
+		return
+	}
+	t.Fatal("missing exact field-list evidence")
 }
 
 func TestAdvertisedRewriteFormsHaveLedgerEvidence(t *testing.T) {
@@ -493,20 +639,36 @@ func compareSyntax(expected analysis.CapabilitySyntaxObservation, result *analys
 
 func compareSemantics(expected analysis.CapabilitySemanticsObservation, result *analysis.Result) evidenceDimensionResult {
 	actual := semanticFacts{
-		Status:       result.Status,
-		Complete:     result.Coverage.SemanticComplete,
-		Stages:       stageFacts(result.Stages),
-		References:   referenceFacts(result.References),
-		Dependencies: dependencyFacts(result.Dependencies),
-		Transitions:  transitionFacts(result.Lineage),
-		Diagnostics:  resultDiagnosticFacts(result.Diagnostics),
+		Status:          result.Status,
+		Complete:        result.Coverage.SemanticComplete,
+		Stages:          stageFacts(result.Stages),
+		Scopes:          scopeFacts(result.Scopes),
+		References:      referenceFacts(result.References),
+		Dependencies:    dependencyFacts(result.Dependencies),
+		Lineage:         lineageFacts(result.Lineage),
+		Transitions:     transitionFacts(result.Lineage),
+		FinalFieldState: finalFieldStateFact(result.Lineage),
+		Diagnostics:     resultDiagnosticFacts(result.Diagnostics),
+	}
+	structured := len(expected.Scopes) != 0 || len(expected.Lineage) != 0 || expected.FinalFieldState != nil
+	for _, stage := range expected.Stages {
+		structured = structured || stage.ID != "" || stage.ScopeID != ""
+	}
+	for _, reference := range expected.References {
+		structured = structured || reference.ID != ""
+	}
+	for _, transition := range expected.Transitions {
+		structured = structured || transition.InputReferenceIDs != nil || transition.OutputReferenceID != "" || transition.Conditional
 	}
 	passed := expected.Status == actual.Status &&
 		expected.Complete == actual.Complete &&
-		containsAll(actual.Stages, expected.Stages) &&
-		containsAll(actual.References, expected.References) &&
+		containsAllStages(actual.Stages, expected.Stages, structured) &&
+		containsAll(actual.Scopes, expected.Scopes) &&
+		containsAllReferences(actual.References, expected.References, structured) &&
 		containsAll(actual.Dependencies, expected.Dependencies) &&
-		containsAll(actual.Transitions, expected.Transitions) &&
+		containsAllLineage(actual.Lineage, expected.Lineage) &&
+		containsAllTransitions(actual.Transitions, expected.Transitions, structured) &&
+		capabilityFieldStateMatches(actual.FinalFieldState, expected.FinalFieldState) &&
 		containsAll(actual.Diagnostics, diagnosticFacts(expected.Diagnostics))
 	return evidenceDimensionResult{passed: passed, expected: formatValue(expected), actual: formatValue(actual)}
 }
@@ -524,11 +686,11 @@ func compareRequirements(expected analysis.CapabilityRequirementsObservation, se
 		Items:       requirementItemFacts(set.Items),
 		GapCodes:    requirementGapCodes(set.Gaps),
 	}
-	itemsMatch := containsAll(actual.Items, expected.Items)
+	itemsMatch := containsAllRequirementFacts(actual.Items, expected.Items, false)
 	if expected.Complete {
 		// A complete requirement claim is an exact obligation set, not a lower
 		// bound. This prevents supported records from hiding unexpected items.
-		itemsMatch = slices.Equal(expected.Items, actual.Items)
+		itemsMatch = containsAllRequirementFacts(actual.Items, expected.Items, true)
 	}
 	passed := expected.QueryStatus == actual.QueryStatus &&
 		expected.Complete == actual.Complete &&
@@ -847,7 +1009,17 @@ func resultDiagnosticFacts(diagnostics []analysis.Diagnostic) []diagnosticFact {
 func stageFacts(stages []analysis.Stage) []analysis.CapabilityStageExpectation {
 	facts := make([]analysis.CapabilityStageExpectation, 0, len(stages))
 	for _, stage := range stages {
-		facts = append(facts, analysis.CapabilityStageExpectation{Command: stage.Command, SemanticComplete: stage.SemanticComplete})
+		facts = append(facts, analysis.CapabilityStageExpectation{ID: stage.ID, Command: stage.Command, ScopeID: stage.ScopeID, SemanticComplete: stage.SemanticComplete})
+	}
+	return facts
+}
+
+func scopeFacts(scopes []analysis.Scope) []analysis.CapabilityScopeExpectation {
+	facts := make([]analysis.CapabilityScopeExpectation, 0, len(scopes))
+	for _, scope := range scopes {
+		facts = append(facts, analysis.CapabilityScopeExpectation{
+			ID: scope.ID, ParentID: scope.ParentID, Kind: scope.Kind, StageID: scope.StageID, Location: scope.Location,
+		})
 	}
 	return facts
 }
@@ -856,6 +1028,8 @@ func referenceFacts(references []analysis.Reference) []analysis.CapabilityRefere
 	facts := make([]analysis.CapabilityReferenceExpectation, 0, len(references))
 	for _, reference := range references {
 		facts = append(facts, analysis.CapabilityReferenceExpectation{
+			ID:             reference.ID,
+			FieldIdentity:  clonePublicFieldIdentity(reference.FieldIdentity),
 			NormalizedName: reference.NormalizedName,
 			Kind:           reference.Kind,
 			Role:           reference.Role,
@@ -888,24 +1062,86 @@ func transitionFacts(lineage []analysis.Lineage) []analysis.CapabilityTransition
 	facts := make([]analysis.CapabilityTransitionExpectation, 0)
 	for _, entry := range lineage {
 		for _, transition := range entry.Transitions {
-			facts = append(facts, analysis.CapabilityTransitionExpectation{Operation: transition.Operation, Output: transition.Output})
+			facts = append(facts, analysis.CapabilityTransitionExpectation{
+				Operation:         transition.Operation,
+				Output:            transition.Output,
+				OutputIdentity:    clonePublicFieldIdentity(transition.OutputIdentity),
+				InputReferenceIDs: slices.Clone(transition.InputReferenceIDs),
+				OutputReferenceID: transition.OutputReferenceID,
+				Conditional:       transition.Conditional,
+			})
 		}
 	}
 	return facts
+}
+
+func lineageFacts(lineage []analysis.Lineage) []analysis.CapabilityLineageExpectation {
+	facts := make([]analysis.CapabilityLineageExpectation, 0, len(lineage))
+	for _, entry := range lineage {
+		before := fieldStateFact(entry.Before)
+		after := fieldStateFact(entry.After)
+		facts = append(facts, analysis.CapabilityLineageExpectation{
+			StageID: entry.StageID,
+			ScopeID: entry.ScopeID,
+			Before:  &before,
+			After:   &after,
+		})
+	}
+	return facts
+}
+
+func finalFieldStateFact(lineage []analysis.Lineage) *analysis.CapabilityFieldStateExpectation {
+	if len(lineage) == 0 {
+		return nil
+	}
+	state := fieldStateFact(lineage[len(lineage)-1].After)
+	return &state
+}
+
+func fieldStateFact(state analysis.FieldState) analysis.CapabilityFieldStateExpectation {
+	fields := make([]analysis.CapabilityFieldExpectation, 0, len(state.Fields))
+	for _, field := range state.Fields {
+		fields = append(fields, analysis.CapabilityFieldExpectation{
+			Name:               field.Name,
+			FieldIdentity:      clonePublicFieldIdentity(&field.FieldIdentity),
+			OriginReferenceIDs: slices.Clone(field.OriginReferenceIDs),
+			Conditional:        field.Conditional,
+		})
+	}
+	removed := make([]analysis.CapabilityFieldRemovalExpectation, 0, len(state.Removed))
+	for _, removal := range state.Removed {
+		removed = append(removed, analysis.CapabilityFieldRemovalExpectation{Name: removal.Name, FieldIdentity: clonePublicFieldIdentity(&removal.FieldIdentity)})
+	}
+	return analysis.CapabilityFieldStateExpectation{
+		Fields:    fields,
+		Removed:   removed,
+		Open:      state.Open,
+		Uncertain: state.Uncertain,
+	}
 }
 
 func requirementItemFacts(items []analysis.RequirementItem) []analysis.CapabilityRequirementExpectation {
 	facts := make([]analysis.CapabilityRequirementExpectation, 0, len(items))
 	for _, item := range items {
 		facts = append(facts, analysis.CapabilityRequirementExpectation{
-			Kind:       item.Kind,
-			Identity:   item.Identity,
-			Role:       item.Role,
-			Necessity:  item.Necessity,
-			Resolution: item.Resolution,
+			Kind:          item.Kind,
+			Identity:      item.Identity,
+			FieldIdentity: clonePublicFieldIdentity(item.FieldIdentity),
+			Role:          item.Role,
+			Necessity:     item.Necessity,
+			Resolution:    item.Resolution,
 		})
 	}
 	return facts
+}
+
+func clonePublicFieldIdentity(identity *analysis.FieldIdentity) *analysis.FieldIdentity {
+	if identity == nil {
+		return nil
+	}
+	cloned := *identity
+	cloned.Segments = slices.Clone(identity.Segments)
+	return &cloned
 }
 
 func requirementGapCodes(gaps []analysis.RequirementGap) []string {
@@ -940,6 +1176,158 @@ func containsAll[T comparable](actual, selected []T) bool {
 			if !used[i] && candidate == expected {
 				used[i] = true
 				found = true
+				break
+			}
+		}
+		if !found {
+			return false
+		}
+	}
+	return true
+}
+
+func containsAllStages(actual, selected []analysis.CapabilityStageExpectation, ordered bool) bool {
+	used := make([]bool, len(actual))
+	next := 0
+	for _, expected := range selected {
+		found := false
+		for i := next; i < len(actual); i++ {
+			candidate := actual[i]
+			if used[i] || candidate.Command != expected.Command || candidate.SemanticComplete != expected.SemanticComplete {
+				continue
+			}
+			if expected.ID != "" && candidate.ID != expected.ID || expected.ScopeID != "" && candidate.ScopeID != expected.ScopeID {
+				continue
+			}
+			used[i], found = true, true
+			if ordered {
+				next = i + 1
+			}
+			break
+		}
+		if !found {
+			return false
+		}
+	}
+	return true
+}
+
+func containsAllReferences(actual, selected []analysis.CapabilityReferenceExpectation, ordered bool) bool {
+	used := make([]bool, len(actual))
+	next := 0
+	for _, expected := range selected {
+		found := false
+		expectedID := expected.ID
+		expected.ID = ""
+		for i := next; i < len(actual); i++ {
+			candidate := actual[i]
+			candidateID := candidate.ID
+			candidate.ID = ""
+			if expected.FieldIdentity == nil {
+				candidate.FieldIdentity = nil
+			}
+			if !used[i] && reflect.DeepEqual(candidate, expected) && (expectedID == "" || candidateID == expectedID) {
+				used[i], found = true, true
+				if ordered {
+					next = i + 1
+				}
+				break
+			}
+		}
+		if !found {
+			return false
+		}
+	}
+	return true
+}
+
+func containsAllLineage(actual, selected []analysis.CapabilityLineageExpectation) bool {
+	next := 0
+	for _, expected := range selected {
+		found := false
+		for i := next; i < len(actual); i++ {
+			candidate := actual[i]
+			if candidate.StageID != expected.StageID || candidate.ScopeID != expected.ScopeID {
+				continue
+			}
+			if !capabilityFieldStateMatches(candidate.Before, expected.Before) || !capabilityFieldStateMatches(candidate.After, expected.After) {
+				continue
+			}
+			next, found = i+1, true
+			break
+		}
+		if !found {
+			return false
+		}
+	}
+	return true
+}
+
+func capabilityFieldStateMatches(actual, expected *analysis.CapabilityFieldStateExpectation) bool {
+	if expected == nil {
+		return true
+	}
+	if actual == nil || actual.Open != expected.Open || actual.Uncertain != expected.Uncertain || len(actual.Fields) != len(expected.Fields) || len(actual.Removed) != len(expected.Removed) {
+		return false
+	}
+	for i, field := range expected.Fields {
+		candidate := actual.Fields[i]
+		if field.Name != candidate.Name || !slices.Equal(field.OriginReferenceIDs, candidate.OriginReferenceIDs) || field.Conditional != candidate.Conditional || field.FieldIdentity != nil && !reflect.DeepEqual(field.FieldIdentity, candidate.FieldIdentity) {
+			return false
+		}
+	}
+	for i, removal := range expected.Removed {
+		candidate := actual.Removed[i]
+		if removal.Name != candidate.Name || removal.FieldIdentity != nil && !reflect.DeepEqual(removal.FieldIdentity, candidate.FieldIdentity) {
+			return false
+		}
+	}
+	return true
+}
+
+func containsAllRequirementFacts(actual, selected []analysis.CapabilityRequirementExpectation, exact bool) bool {
+	if exact && len(actual) != len(selected) {
+		return false
+	}
+	used := make([]bool, len(actual))
+	for position, expected := range selected {
+		found := false
+		for i, candidate := range actual {
+			if used[i] || exact && i != position || candidate.Kind != expected.Kind || candidate.Identity != expected.Identity || candidate.Role != expected.Role || candidate.Necessity != expected.Necessity || candidate.Resolution != expected.Resolution {
+				continue
+			}
+			if expected.FieldIdentity != nil && !reflect.DeepEqual(candidate.FieldIdentity, expected.FieldIdentity) {
+				continue
+			}
+			used[i], found = true, true
+			break
+		}
+		if !found {
+			return false
+		}
+	}
+	return true
+}
+
+func containsAllTransitions(actual, selected []analysis.CapabilityTransitionExpectation, structured bool) bool {
+	used := make([]bool, len(actual))
+	next := 0
+	for _, expected := range selected {
+		found := false
+		for i := next; i < len(actual); i++ {
+			candidate := actual[i]
+			if used[i] || candidate.Operation != expected.Operation || candidate.Output != expected.Output {
+				continue
+			}
+			if expected.InputReferenceIDs != nil && !slices.Equal(candidate.InputReferenceIDs, expected.InputReferenceIDs) || expected.OutputReferenceID != "" && candidate.OutputReferenceID != expected.OutputReferenceID || structured && candidate.Conditional != expected.Conditional || expected.OutputIdentity != nil && !reflect.DeepEqual(candidate.OutputIdentity, expected.OutputIdentity) {
+				continue
+			}
+			if !used[i] {
+				used[i] = true
+				found = true
+				if structured {
+					next = i + 1
+				}
 				break
 			}
 		}

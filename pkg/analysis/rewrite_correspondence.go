@@ -379,6 +379,18 @@ func (s *RewriteSession) Verify(candidate *RewriteSession, rendered *RewriteRend
 		if !reflect.DeepEqual(ids, next.OriginReferenceIDs) {
 			return fail("origin_correspondence", "Candidate changes canonical origins", ref.Location)
 		}
+		expectedIdentity := ref.FieldIdentity
+		if effect, changed := effects[ref.ID]; changed && ref.Kind == "field" {
+			if expectedIdentity == nil || expectedIdentity.Kind != "atomic" || effect.Name == nil {
+				return fail("identity_unproved", "Changed field identity is not an exact atomic field", ref.Location)
+			}
+			updated := *expectedIdentity
+			updated.Segments = []string{*effect.Name}
+			expectedIdentity = &updated
+		}
+		if !reflect.DeepEqual(expectedIdentity, next.FieldIdentity) {
+			return fail("identity_correspondence", "Candidate changes canonical field identity", ref.Location)
+		}
 		oldSite, newSite := originalSites[ref.ID], candidateSites[mapping[ref.ID]]
 		if oldSite != nil && newSite != nil {
 			oldPoint, newPoint := oldSite.public.Point, newSite.public.Point
@@ -433,6 +445,7 @@ func (s *RewriteSession) Verify(candidate *RewriteSession, rendered *RewriteRend
 				inputs = append(inputs, mapping[id])
 			}
 			output := tr.Output
+			outputIdentity := tr.OutputIdentity
 			if effect, ok := effects[tr.OutputReferenceID]; ok && effect.Name != nil {
 				output = *effect.Name
 			} else if tr.Operation == "project" && len(tr.InputReferenceIDs) == 1 {
@@ -440,7 +453,12 @@ func (s *RewriteSession) Verify(candidate *RewriteSession, rendered *RewriteRend
 					output = *effect.Name
 				}
 			}
-			if tr.Operation != n.Operation || output != n.Output || tr.Conditional != n.Conditional || mapping[tr.OutputReferenceID] != n.OutputReferenceID || !reflect.DeepEqual(inputs, n.InputReferenceIDs) {
+			if output != tr.Output && outputIdentity != nil && outputIdentity.Kind == "atomic" {
+				updated := *outputIdentity
+				updated.Segments = []string{output}
+				outputIdentity = &updated
+			}
+			if tr.Operation != n.Operation || output != n.Output || !reflect.DeepEqual(outputIdentity, n.OutputIdentity) || tr.Conditional != n.Conditional || mapping[tr.OutputReferenceID] != n.OutputReferenceID || !reflect.DeepEqual(inputs, n.InputReferenceIDs) {
 				return fail("transition_correspondence", "Candidate changes canonical transfer relationships", Location{})
 			}
 		}
@@ -461,17 +479,21 @@ func (s *RewriteSession) rewriteFieldStateEqual(original, candidate FieldState, 
 			id := field.OriginReferenceIDs[0]
 			if effect, ok := effects[id]; ok && effect.Name != nil && refs[id].NormalizedName == field.Name {
 				field.Name = *effect.Name
+				if field.FieldIdentity.Kind == "atomic" {
+					field.FieldIdentity.Segments = []string{*effect.Name}
+				}
 			}
 		}
 		for j, id := range field.OriginReferenceIDs {
 			field.OriginReferenceIDs[j] = mapping[id]
 		}
 	}
-	for i, name := range expected.Removed {
+	for i, removal := range expected.Removed {
 		var latest *rewriteSite
 		for _, site := range s.sites {
 			p := site.public
-			if p.Point.ScopeID != scope || p.Kind != "field" || p.Identity.Name == nil || *p.Identity.Name != name || (refs[p.ReferenceID].Role != "remove" && p.Role != "rename_input") || p.Point.LineageIndex > lineageIndex || (!after && p.Point.LineageIndex == lineageIndex) {
+			ref := refs[p.ReferenceID]
+			if p.Point.ScopeID != scope || p.Kind != "field" || p.Identity.Name == nil || *p.Identity.Name != removal.Name || ref.FieldIdentity == nil || !reflect.DeepEqual(*ref.FieldIdentity, removal.FieldIdentity) || (ref.Role != "remove" && p.Role != "rename_input") || p.Point.LineageIndex > lineageIndex || (!after && p.Point.LineageIndex == lineageIndex) {
 				continue
 			}
 			if latest == nil || p.Point.LineageIndex > latest.public.Point.LineageIndex || (p.Point.LineageIndex == latest.public.Point.LineageIndex && p.Point.Ordinal > latest.public.Point.Ordinal) {
@@ -480,12 +502,25 @@ func (s *RewriteSession) rewriteFieldStateEqual(original, candidate FieldState, 
 		}
 		if latest != nil {
 			if effect, ok := effects[latest.public.ReferenceID]; ok && effect.Name != nil {
-				expected.Removed[i] = *effect.Name
+				expected.Removed[i].Name = *effect.Name
+				if expected.Removed[i].FieldIdentity.Kind == "atomic" {
+					expected.Removed[i].FieldIdentity.Segments = []string{*effect.Name}
+				}
 			}
 		}
 	}
-	sort.Slice(expected.Fields, func(i, j int) bool { return expected.Fields[i].Name < expected.Fields[j].Name })
-	sort.Strings(expected.Removed)
+	sort.Slice(expected.Fields, func(i, j int) bool {
+		if expected.Fields[i].Name != expected.Fields[j].Name {
+			return expected.Fields[i].Name < expected.Fields[j].Name
+		}
+		return fieldIdentityLess(expected.Fields[i].FieldIdentity, expected.Fields[j].FieldIdentity)
+	})
+	sort.Slice(expected.Removed, func(i, j int) bool {
+		if expected.Removed[i].Name != expected.Removed[j].Name {
+			return expected.Removed[i].Name < expected.Removed[j].Name
+		}
+		return fieldIdentityLess(expected.Removed[i].FieldIdentity, expected.Removed[j].FieldIdentity)
+	})
 	return reflect.DeepEqual(expected, candidate)
 }
 

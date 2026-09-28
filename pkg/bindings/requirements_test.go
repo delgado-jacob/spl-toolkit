@@ -2,12 +2,110 @@ package main
 
 import (
 	"encoding/json"
+	"os"
+	"reflect"
 	"strings"
 	"testing"
 	"unsafe"
 
 	"github.com/delgado-jacob/spl-toolkit/pkg/analysis"
 )
+
+type milestone11NativeSurfaceCase struct {
+	ID       string                 `json:"id"`
+	Document analysis.QueryDocument `json:"document"`
+}
+
+func loadMilestone11NativeSurfaceCases(t *testing.T) []milestone11NativeSurfaceCase {
+	t.Helper()
+	data, err := os.ReadFile("../../tests/acceptance/cli_examples.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var manifest struct {
+		Version   string                         `json:"version"`
+		Documents []milestone11NativeSurfaceCase `json:"milestone11_documents"`
+	}
+	if err := json.Unmarshal(data, &manifest); err != nil {
+		t.Fatal(err)
+	}
+	if manifest.Version != "1" || len(manifest.Documents) != 7 {
+		t.Fatalf("Milestone 11 surface documents: version=%q cases=%d", manifest.Version, len(manifest.Documents))
+	}
+	return manifest.Documents
+}
+
+func TestMilestone11NativeAnalysisAndRequirementsMatchCanonicalGo(t *testing.T) {
+	handle := spl_mapper_new()
+	defer spl_mapper_free(handle)
+	for _, surfaceCase := range loadMilestone11NativeSurfaceCases(t) {
+		t.Run(surfaceCase.ID, func(t *testing.T) {
+			wantAnalysis, err := analysis.Analyze(surfaceCase.Document)
+			if err != nil {
+				t.Fatal(err)
+			}
+			wantRequirements, err := analysis.Requirements(surfaceCase.Document)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if wantAnalysis.Status != analysis.Valid || !wantAnalysis.Coverage.SyntaxComplete || !wantAnalysis.Coverage.SemanticComplete || !wantRequirements.Coverage.Complete {
+				t.Fatalf("representative document is not complete: analysis=%+v requirements=%+v", wantAnalysis.Coverage, wantRequirements.Coverage)
+			}
+			if !reflect.DeepEqual(wantAnalysis.Requirements, *wantRequirements) {
+				t.Fatalf("canonical embedded requirements differ\nanalysis:   %#v\nstandalone: %#v", wantAnalysis.Requirements, wantRequirements)
+			}
+
+			payload := mustNativeTestJSON(t, surfaceCase.Document)
+			analysisResult := spl_mapper_analyze_query(handle, nativeTestCString(t, payload))
+			if analysisResult == nil {
+				t.Fatal("native analysis returned nil")
+			}
+			defer spl_result_free(analysisResult)
+			if analysisResult.error != nil || analysisResult.result == nil {
+				t.Fatalf("native analysis = error %q, result %q", nativeTestGoString(analysisResult.error), nativeTestGoString(analysisResult.result))
+			}
+			var gotAnalysis analysis.Result
+			if err := json.Unmarshal([]byte(nativeTestGoString(analysisResult.result)), &gotAnalysis); err != nil {
+				t.Fatal(err)
+			}
+			if !reflect.DeepEqual(&gotAnalysis, wantAnalysis) {
+				t.Fatalf("native analysis differs from Go\ngot:  %#v\nwant: %#v", &gotAnalysis, wantAnalysis)
+			}
+			if surfaceCase.ID == "dotted-identities" {
+				if len(gotAnalysis.Lineage) != 3 || len(gotAnalysis.References) != 4 {
+					t.Fatalf("native dotted lineage shape: %+v", gotAnalysis.Lineage)
+				}
+				last := gotAnalysis.Lineage[2]
+				path := analysis.FieldIdentity{Kind: "path", Segments: []string{"actor", "name"}}
+				atomic := analysis.FieldIdentity{Kind: "atomic", Segments: []string{"actor.name"}}
+				if len(last.After.Fields) != 1 || !reflect.DeepEqual(last.After.Fields[0].FieldIdentity, path) ||
+					!reflect.DeepEqual(last.After.Fields[0].OriginReferenceIDs, []string{gotAnalysis.References[1].ID}) ||
+					!reflect.DeepEqual(last.After.Removed, []analysis.FieldRemoval{{Name: "actor.name", FieldIdentity: atomic}}) ||
+					len(last.Transitions) != 1 || last.Transitions[0].OutputIdentity == nil ||
+					!reflect.DeepEqual(*last.Transitions[0].OutputIdentity, atomic) ||
+					last.Transitions[0].OutputReferenceID != gotAnalysis.References[3].ID {
+					t.Fatalf("native lost typed atomic removal ownership: %+v", last)
+				}
+			}
+
+			requirementsResult := spl_mapper_requirements_query(handle, nativeTestCString(t, payload))
+			if requirementsResult == nil {
+				t.Fatal("native requirements returned nil")
+			}
+			defer spl_result_free(requirementsResult)
+			if requirementsResult.error != nil || requirementsResult.result == nil {
+				t.Fatalf("native requirements = error %q, result %q", nativeTestGoString(requirementsResult.error), nativeTestGoString(requirementsResult.result))
+			}
+			var gotRequirements analysis.RequirementSet
+			if err := json.Unmarshal([]byte(nativeTestGoString(requirementsResult.result)), &gotRequirements); err != nil {
+				t.Fatal(err)
+			}
+			if !reflect.DeepEqual(&gotRequirements, wantRequirements) {
+				t.Fatalf("native requirements differ from Go\ngot:  %#v\nwant: %#v", &gotRequirements, wantRequirements)
+			}
+		})
+	}
+}
 
 func TestRequirementsExportReturnsOwnedJSON(t *testing.T) {
 	document := analysis.QueryDocument{Text: "search host=web"}

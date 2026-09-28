@@ -82,6 +82,12 @@
               "id": "ref-0",
               "original_name": "host",
               "normalized_name": "host",
+              "field_identity": {
+                "kind": "atomic",
+                "segments": [
+                  "host"
+                ]
+              },
               "kind": "field",
               "role": "read",
               "stage_id": "stage-0",
@@ -106,6 +112,12 @@
               "id": "ref-1",
               "original_name": "optional",
               "normalized_name": "optional",
+              "field_identity": {
+                "kind": "atomic",
+                "segments": [
+                  "optional"
+                ]
+              },
               "kind": "field",
               "role": "read",
               "stage_id": "stage-0",
@@ -130,6 +142,12 @@
               "id": "ref-2",
               "original_name": "absent",
               "normalized_name": "absent",
+              "field_identity": {
+                "kind": "atomic",
+                "segments": [
+                  "absent"
+                ]
+              },
               "kind": "field",
               "role": "read",
               "stage_id": "stage-0",
@@ -165,6 +183,12 @@
                 "fields": [
                   {
                     "name": "absent",
+                    "field_identity": {
+                      "kind": "atomic",
+                      "segments": [
+                        "absent"
+                      ]
+                    },
                     "origin_reference_ids": [
                       "ref-2"
                     ],
@@ -172,6 +196,12 @@
                   },
                   {
                     "name": "host",
+                    "field_identity": {
+                      "kind": "atomic",
+                      "segments": [
+                        "host"
+                      ]
+                    },
                     "origin_reference_ids": [
                       "ref-0"
                     ],
@@ -179,6 +209,12 @@
                   },
                   {
                     "name": "optional",
+                    "field_identity": {
+                      "kind": "atomic",
+                      "segments": [
+                        "optional"
+                      ]
+                    },
                     "origin_reference_ids": [
                       "ref-1"
                     ],
@@ -193,6 +229,12 @@
                 {
                   "operation": "project",
                   "output": "host",
+                  "output_identity": {
+                    "kind": "atomic",
+                    "segments": [
+                      "host"
+                    ]
+                  },
                   "input_reference_ids": [
                     "ref-0"
                   ],
@@ -202,6 +244,12 @@
                 {
                   "operation": "project",
                   "output": "optional",
+                  "output_identity": {
+                    "kind": "atomic",
+                    "segments": [
+                      "optional"
+                    ]
+                  },
                   "input_reference_ids": [
                     "ref-1"
                   ],
@@ -211,6 +259,12 @@
                 {
                   "operation": "project",
                   "output": "absent",
+                  "output_identity": {
+                    "kind": "atomic",
+                    "segments": [
+                      "absent"
+                    ]
+                  },
                   "input_reference_ids": [
                     "ref-2"
                   ],
@@ -250,6 +304,12 @@
                 "id": "req-1",
                 "kind": "field",
                 "identity": "host",
+                "field_identity": {
+                  "kind": "atomic",
+                  "segments": [
+                    "host"
+                  ]
+                },
                 "role": "read",
                 "necessity": "required",
                 "origin": "direct",
@@ -280,6 +340,12 @@
                 "id": "req-2",
                 "kind": "field",
                 "identity": "optional",
+                "field_identity": {
+                  "kind": "atomic",
+                  "segments": [
+                    "optional"
+                  ]
+                },
                 "role": "read",
                 "necessity": "required",
                 "origin": "direct",
@@ -310,6 +376,12 @@
                 "id": "req-3",
                 "kind": "field",
                 "identity": "absent",
+                "field_identity": {
+                  "kind": "atomic",
+                  "segments": [
+                    "absent"
+                  ]
+                },
                 "role": "read",
                 "necessity": "required",
                 "origin": "direct",
@@ -570,6 +642,12 @@
               "id": "ref-0",
               "original_name": "user.name",
               "normalized_name": "user.name",
+              "field_identity": {
+                "kind": "atomic",
+                "segments": [
+                  "user.name"
+                ]
+              },
               "kind": "field",
               "role": "read",
               "stage_id": "stage-0",
@@ -594,6 +672,12 @@
               "id": "ref-1",
               "original_name": "user.absent",
               "normalized_name": "user.absent",
+              "field_identity": {
+                "kind": "atomic",
+                "segments": [
+                  "user.absent"
+                ]
+              },
               "kind": "field",
               "role": "read",
               "stage_id": "stage-0",
@@ -629,6 +713,12 @@
                 "fields": [
                   {
                     "name": "user.absent",
+                    "field_identity": {
+                      "kind": "atomic",
+                      "segments": [
+                        "user.absent"
+                      ]
+                    },
                     "origin_reference_ids": [
                       "ref-1"
                     ],
@@ -636,6 +726,12 @@
                   },
                   {
                     "name": "user.name",
+                    "field_identity": {
+                      "kind": "atomic",
+                      "segments": [
+                        "user.name"
+                      ]
+                    },
                     "origin_reference_ids": [
                       "ref-0"
                     ],
@@ -650,6 +746,12 @@
                 {
                   "operation": "project",
                   "output": "user.name",
+                  "output_identity": {
+                    "kind": "atomic",
+                    "segments": [
+                      "user.name"
+                    ]
+                  },
                   "input_reference_ids": [
                     "ref-0"
                   ],
@@ -659,6 +761,12 @@
                 {
                   "operation": "project",
                   "output": "user.absent",
+                  "output_identity": {
+                    "kind": "atomic",
+                    "segments": [
+                      "user.absent"
+                    ]
+                  },
                   "input_reference_ids": [
                     "ref-1"
                   ],
@@ -698,6 +806,12 @@
                 "id": "req-1",
                 "kind": "field",
                 "identity": "user.name",
+                "field_identity": {
+                  "kind": "atomic",
+                  "segments": [
+                    "user.name"
+                  ]
+                },
                 "role": "read",
                 "necessity": "required",
                 "origin": "direct",
@@ -728,6 +842,12 @@
                 "id": "req-2",
                 "kind": "field",
                 "identity": "user.absent",
+                "field_identity": {
+                  "kind": "atomic",
+                  "segments": [
+                    "user.absent"
+                  ]
+                },
                 "role": "read",
                 "necessity": "required",
                 "origin": "direct",
@@ -989,6 +1109,12 @@
               "id": "ref-0",
               "original_name": "host",
               "normalized_name": "host",
+              "field_identity": {
+                "kind": "atomic",
+                "segments": [
+                  "host"
+                ]
+              },
               "kind": "field",
               "role": "read",
               "stage_id": "stage-0",
@@ -1013,6 +1139,12 @@
               "id": "ref-1",
               "original_name": "vendor.name",
               "normalized_name": "vendor.name",
+              "field_identity": {
+                "kind": "atomic",
+                "segments": [
+                  "vendor.name"
+                ]
+              },
               "kind": "field",
               "role": "read",
               "stage_id": "stage-0",
@@ -1048,6 +1180,12 @@
                 "fields": [
                   {
                     "name": "host",
+                    "field_identity": {
+                      "kind": "atomic",
+                      "segments": [
+                        "host"
+                      ]
+                    },
                     "origin_reference_ids": [
                       "ref-0"
                     ],
@@ -1055,6 +1193,12 @@
                   },
                   {
                     "name": "vendor.name",
+                    "field_identity": {
+                      "kind": "atomic",
+                      "segments": [
+                        "vendor.name"
+                      ]
+                    },
                     "origin_reference_ids": [
                       "ref-1"
                     ],
@@ -1069,6 +1213,12 @@
                 {
                   "operation": "project",
                   "output": "host",
+                  "output_identity": {
+                    "kind": "atomic",
+                    "segments": [
+                      "host"
+                    ]
+                  },
                   "input_reference_ids": [
                     "ref-0"
                   ],
@@ -1078,6 +1228,12 @@
                 {
                   "operation": "project",
                   "output": "vendor.name",
+                  "output_identity": {
+                    "kind": "atomic",
+                    "segments": [
+                      "vendor.name"
+                    ]
+                  },
                   "input_reference_ids": [
                     "ref-1"
                   ],
@@ -1117,6 +1273,12 @@
                 "id": "req-1",
                 "kind": "field",
                 "identity": "host",
+                "field_identity": {
+                  "kind": "atomic",
+                  "segments": [
+                    "host"
+                  ]
+                },
                 "role": "read",
                 "necessity": "required",
                 "origin": "direct",
@@ -1147,6 +1309,12 @@
                 "id": "req-2",
                 "kind": "field",
                 "identity": "vendor.name",
+                "field_identity": {
+                  "kind": "atomic",
+                  "segments": [
+                    "vendor.name"
+                  ]
+                },
                 "role": "read",
                 "necessity": "required",
                 "origin": "direct",
@@ -1360,6 +1528,12 @@
               "id": "ref-0",
               "original_name": "x_name",
               "normalized_name": "x_name",
+              "field_identity": {
+                "kind": "atomic",
+                "segments": [
+                  "x_name"
+                ]
+              },
               "kind": "field",
               "role": "read",
               "stage_id": "stage-0",
@@ -1384,6 +1558,12 @@
               "id": "ref-1",
               "original_name": "absent",
               "normalized_name": "absent",
+              "field_identity": {
+                "kind": "atomic",
+                "segments": [
+                  "absent"
+                ]
+              },
               "kind": "field",
               "role": "read",
               "stage_id": "stage-0",
@@ -1419,6 +1599,12 @@
                 "fields": [
                   {
                     "name": "absent",
+                    "field_identity": {
+                      "kind": "atomic",
+                      "segments": [
+                        "absent"
+                      ]
+                    },
                     "origin_reference_ids": [
                       "ref-1"
                     ],
@@ -1426,6 +1612,12 @@
                   },
                   {
                     "name": "x_name",
+                    "field_identity": {
+                      "kind": "atomic",
+                      "segments": [
+                        "x_name"
+                      ]
+                    },
                     "origin_reference_ids": [
                       "ref-0"
                     ],
@@ -1440,6 +1632,12 @@
                 {
                   "operation": "project",
                   "output": "x_name",
+                  "output_identity": {
+                    "kind": "atomic",
+                    "segments": [
+                      "x_name"
+                    ]
+                  },
                   "input_reference_ids": [
                     "ref-0"
                   ],
@@ -1449,6 +1647,12 @@
                 {
                   "operation": "project",
                   "output": "absent",
+                  "output_identity": {
+                    "kind": "atomic",
+                    "segments": [
+                      "absent"
+                    ]
+                  },
                   "input_reference_ids": [
                     "ref-1"
                   ],
@@ -1488,6 +1692,12 @@
                 "id": "req-1",
                 "kind": "field",
                 "identity": "x_name",
+                "field_identity": {
+                  "kind": "atomic",
+                  "segments": [
+                    "x_name"
+                  ]
+                },
                 "role": "read",
                 "necessity": "required",
                 "origin": "direct",
@@ -1518,6 +1728,12 @@
                 "id": "req-2",
                 "kind": "field",
                 "identity": "absent",
+                "field_identity": {
+                  "kind": "atomic",
+                  "segments": [
+                    "absent"
+                  ]
+                },
                 "role": "read",
                 "necessity": "required",
                 "origin": "direct",
@@ -1739,6 +1955,12 @@
               "id": "ref-0",
               "original_name": "host",
               "normalized_name": "host",
+              "field_identity": {
+                "kind": "atomic",
+                "segments": [
+                  "host"
+                ]
+              },
               "kind": "field",
               "role": "read",
               "stage_id": "stage-0",
@@ -1763,6 +1985,12 @@
               "id": "ref-1",
               "original_name": "absent",
               "normalized_name": "absent",
+              "field_identity": {
+                "kind": "atomic",
+                "segments": [
+                  "absent"
+                ]
+              },
               "kind": "field",
               "role": "read",
               "stage_id": "stage-0",
@@ -1798,6 +2026,12 @@
                 "fields": [
                   {
                     "name": "absent",
+                    "field_identity": {
+                      "kind": "atomic",
+                      "segments": [
+                        "absent"
+                      ]
+                    },
                     "origin_reference_ids": [
                       "ref-1"
                     ],
@@ -1805,6 +2039,12 @@
                   },
                   {
                     "name": "host",
+                    "field_identity": {
+                      "kind": "atomic",
+                      "segments": [
+                        "host"
+                      ]
+                    },
                     "origin_reference_ids": [
                       "ref-0"
                     ],
@@ -1819,6 +2059,12 @@
                 {
                   "operation": "project",
                   "output": "host",
+                  "output_identity": {
+                    "kind": "atomic",
+                    "segments": [
+                      "host"
+                    ]
+                  },
                   "input_reference_ids": [
                     "ref-0"
                   ],
@@ -1828,6 +2074,12 @@
                 {
                   "operation": "project",
                   "output": "absent",
+                  "output_identity": {
+                    "kind": "atomic",
+                    "segments": [
+                      "absent"
+                    ]
+                  },
                   "input_reference_ids": [
                     "ref-1"
                   ],
@@ -1867,6 +2119,12 @@
                 "id": "req-1",
                 "kind": "field",
                 "identity": "host",
+                "field_identity": {
+                  "kind": "atomic",
+                  "segments": [
+                    "host"
+                  ]
+                },
                 "role": "read",
                 "necessity": "required",
                 "origin": "direct",
@@ -1897,6 +2155,12 @@
                 "id": "req-2",
                 "kind": "field",
                 "identity": "absent",
+                "field_identity": {
+                  "kind": "atomic",
+                  "segments": [
+                    "absent"
+                  ]
+                },
                 "role": "read",
                 "necessity": "required",
                 "origin": "direct",
@@ -2144,6 +2408,12 @@
               "id": "ref-0",
               "original_name": "other",
               "normalized_name": "other",
+              "field_identity": {
+                "kind": "atomic",
+                "segments": [
+                  "other"
+                ]
+              },
               "kind": "field",
               "role": "read",
               "stage_id": "stage-0",
@@ -2179,6 +2449,12 @@
                 "fields": [
                   {
                     "name": "other",
+                    "field_identity": {
+                      "kind": "atomic",
+                      "segments": [
+                        "other"
+                      ]
+                    },
                     "origin_reference_ids": [
                       "ref-0"
                     ],
@@ -2193,6 +2469,12 @@
                 {
                   "operation": "project",
                   "output": "other",
+                  "output_identity": {
+                    "kind": "atomic",
+                    "segments": [
+                      "other"
+                    ]
+                  },
                   "input_reference_ids": [
                     "ref-0"
                   ],
@@ -2232,6 +2514,12 @@
                 "id": "req-1",
                 "kind": "field",
                 "identity": "other",
+                "field_identity": {
+                  "kind": "atomic",
+                  "segments": [
+                    "other"
+                  ]
+                },
                 "role": "read",
                 "necessity": "required",
                 "origin": "direct",
@@ -2458,6 +2746,12 @@
               "id": "ref-0",
               "original_name": "host",
               "normalized_name": "host",
+              "field_identity": {
+                "kind": "atomic",
+                "segments": [
+                  "host"
+                ]
+              },
               "kind": "field",
               "role": "read",
               "stage_id": "stage-0",
@@ -2493,6 +2787,12 @@
                 "fields": [
                   {
                     "name": "host",
+                    "field_identity": {
+                      "kind": "atomic",
+                      "segments": [
+                        "host"
+                      ]
+                    },
                     "origin_reference_ids": [
                       "ref-0"
                     ],
@@ -2507,6 +2807,12 @@
                 {
                   "operation": "project",
                   "output": "host",
+                  "output_identity": {
+                    "kind": "atomic",
+                    "segments": [
+                      "host"
+                    ]
+                  },
                   "input_reference_ids": [
                     "ref-0"
                   ],
@@ -2546,6 +2852,12 @@
                 "id": "req-1",
                 "kind": "field",
                 "identity": "host",
+                "field_identity": {
+                  "kind": "atomic",
+                  "segments": [
+                    "host"
+                  ]
+                },
                 "role": "read",
                 "necessity": "required",
                 "origin": "direct",
@@ -2777,6 +3089,12 @@
               "id": "ref-0",
               "original_name": "host",
               "normalized_name": "host",
+              "field_identity": {
+                "kind": "atomic",
+                "segments": [
+                  "host"
+                ]
+              },
               "kind": "field",
               "role": "read",
               "stage_id": "stage-0",
@@ -2812,6 +3130,12 @@
                 "fields": [
                   {
                     "name": "host",
+                    "field_identity": {
+                      "kind": "atomic",
+                      "segments": [
+                        "host"
+                      ]
+                    },
                     "origin_reference_ids": [
                       "ref-0"
                     ],
@@ -2826,6 +3150,12 @@
                 {
                   "operation": "project",
                   "output": "host",
+                  "output_identity": {
+                    "kind": "atomic",
+                    "segments": [
+                      "host"
+                    ]
+                  },
                   "input_reference_ids": [
                     "ref-0"
                   ],
@@ -2865,6 +3195,12 @@
                 "id": "req-1",
                 "kind": "field",
                 "identity": "host",
+                "field_identity": {
+                  "kind": "atomic",
+                  "segments": [
+                    "host"
+                  ]
+                },
                 "role": "read",
                 "necessity": "required",
                 "origin": "direct",
@@ -3098,6 +3434,12 @@
               "id": "ref-0",
               "original_name": "host",
               "normalized_name": "host",
+              "field_identity": {
+                "kind": "atomic",
+                "segments": [
+                  "host"
+                ]
+              },
               "kind": "field",
               "role": "read",
               "stage_id": "stage-0",
@@ -3133,6 +3475,12 @@
                 "fields": [
                   {
                     "name": "host",
+                    "field_identity": {
+                      "kind": "atomic",
+                      "segments": [
+                        "host"
+                      ]
+                    },
                     "origin_reference_ids": [
                       "ref-0"
                     ],
@@ -3147,6 +3495,12 @@
                 {
                   "operation": "project",
                   "output": "host",
+                  "output_identity": {
+                    "kind": "atomic",
+                    "segments": [
+                      "host"
+                    ]
+                  },
                   "input_reference_ids": [
                     "ref-0"
                   ],
@@ -3186,6 +3540,12 @@
                 "id": "req-1",
                 "kind": "field",
                 "identity": "host",
+                "field_identity": {
+                  "kind": "atomic",
+                  "segments": [
+                    "host"
+                  ]
+                },
                 "role": "read",
                 "necessity": "required",
                 "origin": "direct",
@@ -3383,6 +3743,12 @@
               "id": "ref-0",
               "original_name": "items.name",
               "normalized_name": "items.name",
+              "field_identity": {
+                "kind": "atomic",
+                "segments": [
+                  "items.name"
+                ]
+              },
               "kind": "field",
               "role": "read",
               "stage_id": "stage-0",
@@ -3418,6 +3784,12 @@
                 "fields": [
                   {
                     "name": "items.name",
+                    "field_identity": {
+                      "kind": "atomic",
+                      "segments": [
+                        "items.name"
+                      ]
+                    },
                     "origin_reference_ids": [
                       "ref-0"
                     ],
@@ -3432,6 +3804,12 @@
                 {
                   "operation": "project",
                   "output": "items.name",
+                  "output_identity": {
+                    "kind": "atomic",
+                    "segments": [
+                      "items.name"
+                    ]
+                  },
                   "input_reference_ids": [
                     "ref-0"
                   ],
@@ -3471,6 +3849,12 @@
                 "id": "req-1",
                 "kind": "field",
                 "identity": "items.name",
+                "field_identity": {
+                  "kind": "atomic",
+                  "segments": [
+                    "items.name"
+                  ]
+                },
                 "role": "read",
                 "necessity": "required",
                 "origin": "direct",
@@ -3685,6 +4069,12 @@
               "id": "ref-0",
               "original_name": "label",
               "normalized_name": "label",
+              "field_identity": {
+                "kind": "atomic",
+                "segments": [
+                  "label"
+                ]
+              },
               "kind": "field",
               "role": "create",
               "stage_id": "stage-0",
@@ -3709,6 +4099,12 @@
               "id": "ref-1",
               "original_name": "label",
               "normalized_name": "label",
+              "field_identity": {
+                "kind": "atomic",
+                "segments": [
+                  "label"
+                ]
+              },
               "kind": "field",
               "role": "read",
               "stage_id": "stage-1",
@@ -3746,6 +4142,12 @@
                 "fields": [
                   {
                     "name": "label",
+                    "field_identity": {
+                      "kind": "atomic",
+                      "segments": [
+                        "label"
+                      ]
+                    },
                     "origin_reference_ids": [
                       "ref-0"
                     ],
@@ -3760,6 +4162,12 @@
                 {
                   "operation": "create",
                   "output": "label",
+                  "output_identity": {
+                    "kind": "atomic",
+                    "segments": [
+                      "label"
+                    ]
+                  },
                   "input_reference_ids": [],
                   "output_reference_id": "ref-0",
                   "conditional": false
@@ -3773,6 +4181,12 @@
                 "fields": [
                   {
                     "name": "label",
+                    "field_identity": {
+                      "kind": "atomic",
+                      "segments": [
+                        "label"
+                      ]
+                    },
                     "origin_reference_ids": [
                       "ref-0"
                     ],
@@ -3787,6 +4201,12 @@
                 "fields": [
                   {
                     "name": "label",
+                    "field_identity": {
+                      "kind": "atomic",
+                      "segments": [
+                        "label"
+                      ]
+                    },
                     "origin_reference_ids": [
                       "ref-0"
                     ],
@@ -3801,6 +4221,12 @@
                 {
                   "operation": "project",
                   "output": "label",
+                  "output_identity": {
+                    "kind": "atomic",
+                    "segments": [
+                      "label"
+                    ]
+                  },
                   "input_reference_ids": [
                     "ref-1"
                   ],
@@ -4191,6 +4617,12 @@
               "id": "ref-0",
               "original_name": "host",
               "normalized_name": "host",
+              "field_identity": {
+                "kind": "atomic",
+                "segments": [
+                  "host"
+                ]
+              },
               "kind": "field",
               "role": "remove",
               "stage_id": "stage-0",
@@ -4215,6 +4647,12 @@
               "id": "ref-1",
               "original_name": "host",
               "normalized_name": "host",
+              "field_identity": {
+                "kind": "atomic",
+                "segments": [
+                  "host"
+                ]
+              },
               "kind": "field",
               "role": "read",
               "stage_id": "stage-1",
@@ -4249,7 +4687,15 @@
               "after": {
                 "fields": [],
                 "removed": [
-                  "host"
+                  {
+                    "name": "host",
+                    "field_identity": {
+                      "kind": "atomic",
+                      "segments": [
+                        "host"
+                      ]
+                    }
+                  }
                 ],
                 "open": true,
                 "uncertain": false
@@ -4258,6 +4704,12 @@
                 {
                   "operation": "remove",
                   "output": "host",
+                  "output_identity": {
+                    "kind": "atomic",
+                    "segments": [
+                      "host"
+                    ]
+                  },
                   "input_reference_ids": [],
                   "output_reference_id": "ref-0",
                   "conditional": false
@@ -4270,7 +4722,15 @@
               "before": {
                 "fields": [],
                 "removed": [
-                  "host"
+                  {
+                    "name": "host",
+                    "field_identity": {
+                      "kind": "atomic",
+                      "segments": [
+                        "host"
+                      ]
+                    }
+                  }
                 ],
                 "open": true,
                 "uncertain": false
@@ -4278,7 +4738,15 @@
               "after": {
                 "fields": [],
                 "removed": [
-                  "host"
+                  {
+                    "name": "host",
+                    "field_identity": {
+                      "kind": "atomic",
+                      "segments": [
+                        "host"
+                      ]
+                    }
+                  }
                 ],
                 "open": false,
                 "uncertain": false
@@ -4528,6 +4996,12 @@
               "id": "ref-0",
               "original_name": "label",
               "normalized_name": "label",
+              "field_identity": {
+                "kind": "atomic",
+                "segments": [
+                  "label"
+                ]
+              },
               "kind": "field",
               "role": "create",
               "stage_id": "stage-0",
@@ -4589,6 +5063,12 @@
                 "fields": [
                   {
                     "name": "label",
+                    "field_identity": {
+                      "kind": "atomic",
+                      "segments": [
+                        "label"
+                      ]
+                    },
                     "origin_reference_ids": [
                       "ref-0"
                     ],
@@ -4603,6 +5083,12 @@
                 {
                   "operation": "create",
                   "output": "label",
+                  "output_identity": {
+                    "kind": "atomic",
+                    "segments": [
+                      "label"
+                    ]
+                  },
                   "input_reference_ids": [],
                   "output_reference_id": "ref-0",
                   "conditional": false
@@ -4616,6 +5102,12 @@
                 "fields": [
                   {
                     "name": "label",
+                    "field_identity": {
+                      "kind": "atomic",
+                      "segments": [
+                        "label"
+                      ]
+                    },
                     "origin_reference_ids": [
                       "ref-0"
                     ],
@@ -4630,6 +5122,12 @@
                 "fields": [
                   {
                     "name": "host",
+                    "field_identity": {
+                      "kind": "atomic",
+                      "segments": [
+                        "host"
+                      ]
+                    },
                     "origin_reference_ids": [
                       "ref-1"
                     ],
@@ -4637,6 +5135,12 @@
                   },
                   {
                     "name": "label",
+                    "field_identity": {
+                      "kind": "atomic",
+                      "segments": [
+                        "label"
+                      ]
+                    },
                     "origin_reference_ids": [
                       "ref-0"
                     ],
@@ -4651,6 +5155,12 @@
                 {
                   "operation": "project",
                   "output": "host",
+                  "output_identity": {
+                    "kind": "atomic",
+                    "segments": [
+                      "host"
+                    ]
+                  },
                   "input_reference_ids": [
                     "ref-1"
                   ],
@@ -4660,6 +5170,12 @@
                 {
                   "operation": "project",
                   "output": "label",
+                  "output_identity": {
+                    "kind": "atomic",
+                    "segments": [
+                      "label"
+                    ]
+                  },
                   "input_reference_ids": [
                     "ref-1"
                   ],
@@ -5063,6 +5579,12 @@
               "id": "ref-1",
               "original_name": "total",
               "normalized_name": "total",
+              "field_identity": {
+                "kind": "atomic",
+                "segments": [
+                  "total"
+                ]
+              },
               "kind": "field",
               "role": "output",
               "stage_id": "stage-1",
@@ -5124,6 +5646,12 @@
                 "fields": [
                   {
                     "name": "host",
+                    "field_identity": {
+                      "kind": "atomic",
+                      "segments": [
+                        "host"
+                      ]
+                    },
                     "origin_reference_ids": [
                       "ref-0"
                     ],
@@ -5138,6 +5666,12 @@
                 {
                   "operation": "project",
                   "output": "host",
+                  "output_identity": {
+                    "kind": "atomic",
+                    "segments": [
+                      "host"
+                    ]
+                  },
                   "input_reference_ids": [
                     "ref-0"
                   ],
@@ -5153,6 +5687,12 @@
                 "fields": [
                   {
                     "name": "host",
+                    "field_identity": {
+                      "kind": "atomic",
+                      "segments": [
+                        "host"
+                      ]
+                    },
                     "origin_reference_ids": [
                       "ref-0"
                     ],
@@ -5167,6 +5707,12 @@
                 "fields": [
                   {
                     "name": "total",
+                    "field_identity": {
+                      "kind": "atomic",
+                      "segments": [
+                        "total"
+                      ]
+                    },
                     "origin_reference_ids": [
                       "ref-1"
                     ],
@@ -5181,6 +5727,12 @@
                 {
                   "operation": "aggregate",
                   "output": "total",
+                  "output_identity": {
+                    "kind": "atomic",
+                    "segments": [
+                      "total"
+                    ]
+                  },
                   "input_reference_ids": [],
                   "output_reference_id": "ref-1",
                   "conditional": false
@@ -5194,6 +5746,12 @@
                 "fields": [
                   {
                     "name": "total",
+                    "field_identity": {
+                      "kind": "atomic",
+                      "segments": [
+                        "total"
+                      ]
+                    },
                     "origin_reference_ids": [
                       "ref-1"
                     ],
@@ -5208,6 +5766,12 @@
                 "fields": [
                   {
                     "name": "total",
+                    "field_identity": {
+                      "kind": "atomic",
+                      "segments": [
+                        "total"
+                      ]
+                    },
                     "origin_reference_ids": [
                       "ref-1"
                     ],
@@ -5222,6 +5786,12 @@
                 {
                   "operation": "project",
                   "output": "total",
+                  "output_identity": {
+                    "kind": "atomic",
+                    "segments": [
+                      "total"
+                    ]
+                  },
                   "input_reference_ids": [
                     "ref-2"
                   ],
@@ -5652,6 +6222,12 @@
               "id": "ref-0",
               "original_name": "host",
               "normalized_name": "host",
+              "field_identity": {
+                "kind": "atomic",
+                "segments": [
+                  "host"
+                ]
+              },
               "kind": "field",
               "role": "read",
               "stage_id": "stage-1",
@@ -5730,6 +6306,12 @@
                 "fields": [
                   {
                     "name": "host",
+                    "field_identity": {
+                      "kind": "atomic",
+                      "segments": [
+                        "host"
+                      ]
+                    },
                     "origin_reference_ids": [
                       "ref-0"
                     ],
@@ -5744,6 +6326,12 @@
                 {
                   "operation": "project",
                   "output": "host",
+                  "output_identity": {
+                    "kind": "atomic",
+                    "segments": [
+                      "host"
+                    ]
+                  },
                   "input_reference_ids": [
                     "ref-0"
                   ],
@@ -5759,6 +6347,12 @@
                 "fields": [
                   {
                     "name": "host",
+                    "field_identity": {
+                      "kind": "atomic",
+                      "segments": [
+                        "host"
+                      ]
+                    },
                     "origin_reference_ids": [
                       "ref-0"
                     ],
@@ -5773,6 +6367,12 @@
                 "fields": [
                   {
                     "name": "host",
+                    "field_identity": {
+                      "kind": "atomic",
+                      "segments": [
+                        "host"
+                      ]
+                    },
                     "origin_reference_ids": [
                       "ref-0"
                     ],
@@ -5787,6 +6387,12 @@
                 {
                   "operation": "project",
                   "output": "host",
+                  "output_identity": {
+                    "kind": "atomic",
+                    "segments": [
+                      "host"
+                    ]
+                  },
                   "input_reference_ids": [
                     "ref-1"
                   ],
@@ -5871,6 +6477,12 @@
                 "id": "req-1",
                 "kind": "field",
                 "identity": "host",
+                "field_identity": {
+                  "kind": "atomic",
+                  "segments": [
+                    "host"
+                  ]
+                },
                 "role": "read",
                 "necessity": "conditional",
                 "origin": "direct",
@@ -6219,6 +6831,12 @@
               "id": "ref-0",
               "original_name": "absent",
               "normalized_name": "absent",
+              "field_identity": {
+                "kind": "atomic",
+                "segments": [
+                  "absent"
+                ]
+              },
               "kind": "field",
               "role": "filter",
               "stage_id": "stage-0",
@@ -6254,6 +6872,12 @@
                 "fields": [
                   {
                     "name": "absent",
+                    "field_identity": {
+                      "kind": "atomic",
+                      "segments": [
+                        "absent"
+                      ]
+                    },
                     "origin_reference_ids": [
                       "ref-0"
                     ],
@@ -6273,6 +6897,12 @@
                 "fields": [
                   {
                     "name": "absent",
+                    "field_identity": {
+                      "kind": "atomic",
+                      "segments": [
+                        "absent"
+                      ]
+                    },
                     "origin_reference_ids": [
                       "ref-0"
                     ],
@@ -6287,6 +6917,12 @@
                 "fields": [
                   {
                     "name": "absent",
+                    "field_identity": {
+                      "kind": "atomic",
+                      "segments": [
+                        "absent"
+                      ]
+                    },
                     "origin_reference_ids": [
                       "ref-0"
                     ],
@@ -6353,6 +6989,12 @@
                 "id": "req-1",
                 "kind": "field",
                 "identity": "absent",
+                "field_identity": {
+                  "kind": "atomic",
+                  "segments": [
+                    "absent"
+                  ]
+                },
                 "role": "filter",
                 "necessity": "required",
                 "origin": "direct",
@@ -6816,6 +7458,12 @@
               "id": "ref-0",
               "original_name": "label",
               "normalized_name": "label",
+              "field_identity": {
+                "kind": "atomic",
+                "segments": [
+                  "label"
+                ]
+              },
               "kind": "field",
               "role": "create",
               "stage_id": "stage-0",
@@ -6842,6 +7490,12 @@
               "id": "ref-1",
               "original_name": "'café'",
               "normalized_name": "café",
+              "field_identity": {
+                "kind": "atomic",
+                "segments": [
+                  "café"
+                ]
+              },
               "kind": "field",
               "role": "read",
               "stage_id": "stage-0",
@@ -6866,6 +7520,12 @@
               "id": "ref-2",
               "original_name": "missing",
               "normalized_name": "missing",
+              "field_identity": {
+                "kind": "atomic",
+                "segments": [
+                  "missing"
+                ]
+              },
               "kind": "field",
               "role": "read",
               "stage_id": "stage-1",
@@ -6901,6 +7561,12 @@
                 "fields": [
                   {
                     "name": "café",
+                    "field_identity": {
+                      "kind": "atomic",
+                      "segments": [
+                        "café"
+                      ]
+                    },
                     "origin_reference_ids": [
                       "ref-1"
                     ],
@@ -6908,6 +7574,12 @@
                   },
                   {
                     "name": "label",
+                    "field_identity": {
+                      "kind": "atomic",
+                      "segments": [
+                        "label"
+                      ]
+                    },
                     "origin_reference_ids": [
                       "ref-0",
                       "ref-1"
@@ -6923,6 +7595,12 @@
                 {
                   "operation": "create",
                   "output": "label",
+                  "output_identity": {
+                    "kind": "atomic",
+                    "segments": [
+                      "label"
+                    ]
+                  },
                   "input_reference_ids": [
                     "ref-1"
                   ],
@@ -6938,6 +7616,12 @@
                 "fields": [
                   {
                     "name": "café",
+                    "field_identity": {
+                      "kind": "atomic",
+                      "segments": [
+                        "café"
+                      ]
+                    },
                     "origin_reference_ids": [
                       "ref-1"
                     ],
@@ -6945,6 +7629,12 @@
                   },
                   {
                     "name": "label",
+                    "field_identity": {
+                      "kind": "atomic",
+                      "segments": [
+                        "label"
+                      ]
+                    },
                     "origin_reference_ids": [
                       "ref-0",
                       "ref-1"
@@ -6960,6 +7650,12 @@
                 "fields": [
                   {
                     "name": "missing",
+                    "field_identity": {
+                      "kind": "atomic",
+                      "segments": [
+                        "missing"
+                      ]
+                    },
                     "origin_reference_ids": [
                       "ref-2"
                     ],
@@ -6974,6 +7670,12 @@
                 {
                   "operation": "project",
                   "output": "missing",
+                  "output_identity": {
+                    "kind": "atomic",
+                    "segments": [
+                      "missing"
+                    ]
+                  },
                   "input_reference_ids": [
                     "ref-2"
                   ],
@@ -7013,6 +7715,12 @@
                 "id": "req-1",
                 "kind": "field",
                 "identity": "café",
+                "field_identity": {
+                  "kind": "atomic",
+                  "segments": [
+                    "café"
+                  ]
+                },
                 "role": "read",
                 "necessity": "required",
                 "origin": "direct",
@@ -7043,6 +7751,12 @@
                 "id": "req-2",
                 "kind": "field",
                 "identity": "missing",
+                "field_identity": {
+                  "kind": "atomic",
+                  "segments": [
+                    "missing"
+                  ]
+                },
                 "role": "read",
                 "necessity": "required",
                 "origin": "direct",
@@ -7575,6 +8289,12 @@
               "id": "ref-0",
               "original_name": "label",
               "normalized_name": "label",
+              "field_identity": {
+                "kind": "atomic",
+                "segments": [
+                  "label"
+                ]
+              },
               "kind": "field",
               "role": "create",
               "stage_id": "stage-0",
@@ -7636,6 +8356,12 @@
                 "fields": [
                   {
                     "name": "label",
+                    "field_identity": {
+                      "kind": "atomic",
+                      "segments": [
+                        "label"
+                      ]
+                    },
                     "origin_reference_ids": [
                       "ref-0"
                     ],
@@ -7650,6 +8376,12 @@
                 {
                   "operation": "create",
                   "output": "label",
+                  "output_identity": {
+                    "kind": "atomic",
+                    "segments": [
+                      "label"
+                    ]
+                  },
                   "input_reference_ids": [],
                   "output_reference_id": "ref-0",
                   "conditional": false
@@ -7663,6 +8395,12 @@
                 "fields": [
                   {
                     "name": "label",
+                    "field_identity": {
+                      "kind": "atomic",
+                      "segments": [
+                        "label"
+                      ]
+                    },
                     "origin_reference_ids": [
                       "ref-0"
                     ],
@@ -7677,6 +8415,12 @@
                 "fields": [
                   {
                     "name": "host",
+                    "field_identity": {
+                      "kind": "atomic",
+                      "segments": [
+                        "host"
+                      ]
+                    },
                     "origin_reference_ids": [
                       "ref-1"
                     ],
@@ -7684,6 +8428,12 @@
                   },
                   {
                     "name": "label",
+                    "field_identity": {
+                      "kind": "atomic",
+                      "segments": [
+                        "label"
+                      ]
+                    },
                     "origin_reference_ids": [
                       "ref-0"
                     ],
@@ -7691,6 +8441,12 @@
                   },
                   {
                     "name": "optional",
+                    "field_identity": {
+                      "kind": "atomic",
+                      "segments": [
+                        "optional"
+                      ]
+                    },
                     "origin_reference_ids": [
                       "ref-1"
                     ],
@@ -7705,6 +8461,12 @@
                 {
                   "operation": "project",
                   "output": "host",
+                  "output_identity": {
+                    "kind": "atomic",
+                    "segments": [
+                      "host"
+                    ]
+                  },
                   "input_reference_ids": [
                     "ref-1"
                   ],
@@ -7714,6 +8476,12 @@
                 {
                   "operation": "project",
                   "output": "label",
+                  "output_identity": {
+                    "kind": "atomic",
+                    "segments": [
+                      "label"
+                    ]
+                  },
                   "input_reference_ids": [
                     "ref-1"
                   ],
@@ -7723,6 +8491,12 @@
                 {
                   "operation": "project",
                   "output": "optional",
+                  "output_identity": {
+                    "kind": "atomic",
+                    "segments": [
+                      "optional"
+                    ]
+                  },
                   "input_reference_ids": [
                     "ref-1"
                   ],
@@ -8011,6 +8785,12 @@
               "id": "ref-0",
               "original_name": "host",
               "normalized_name": "host",
+              "field_identity": {
+                "kind": "atomic",
+                "segments": [
+                  "host"
+                ]
+              },
               "kind": "field",
               "role": "read",
               "stage_id": "stage-0",
@@ -8046,6 +8826,12 @@
                 "fields": [
                   {
                     "name": "host",
+                    "field_identity": {
+                      "kind": "atomic",
+                      "segments": [
+                        "host"
+                      ]
+                    },
                     "origin_reference_ids": [
                       "ref-0"
                     ],
@@ -8060,6 +8846,12 @@
                 {
                   "operation": "project",
                   "output": "host",
+                  "output_identity": {
+                    "kind": "atomic",
+                    "segments": [
+                      "host"
+                    ]
+                  },
                   "input_reference_ids": [
                     "ref-0"
                   ],
@@ -8099,6 +8891,12 @@
                 "id": "req-1",
                 "kind": "field",
                 "identity": "host",
+                "field_identity": {
+                  "kind": "atomic",
+                  "segments": [
+                    "host"
+                  ]
+                },
                 "role": "read",
                 "necessity": "required",
                 "origin": "direct",
@@ -8291,6 +9089,12 @@
               "id": "ref-0",
               "original_name": "time",
               "normalized_name": "time",
+              "field_identity": {
+                "kind": "atomic",
+                "segments": [
+                  "time"
+                ]
+              },
               "kind": "field",
               "role": "read",
               "stage_id": "stage-0",
@@ -8315,6 +9119,12 @@
               "id": "ref-1",
               "original_name": "actor.user.name",
               "normalized_name": "actor.user.name",
+              "field_identity": {
+                "kind": "atomic",
+                "segments": [
+                  "actor.user.name"
+                ]
+              },
               "kind": "field",
               "role": "read",
               "stage_id": "stage-0",
@@ -8339,6 +9149,12 @@
               "id": "ref-2",
               "original_name": "unmapped.vendor_field",
               "normalized_name": "unmapped.vendor_field",
+              "field_identity": {
+                "kind": "atomic",
+                "segments": [
+                  "unmapped.vendor_field"
+                ]
+              },
               "kind": "field",
               "role": "read",
               "stage_id": "stage-0",
@@ -8374,6 +9190,12 @@
                 "fields": [
                   {
                     "name": "actor.user.name",
+                    "field_identity": {
+                      "kind": "atomic",
+                      "segments": [
+                        "actor.user.name"
+                      ]
+                    },
                     "origin_reference_ids": [
                       "ref-1"
                     ],
@@ -8381,6 +9203,12 @@
                   },
                   {
                     "name": "time",
+                    "field_identity": {
+                      "kind": "atomic",
+                      "segments": [
+                        "time"
+                      ]
+                    },
                     "origin_reference_ids": [
                       "ref-0"
                     ],
@@ -8388,6 +9216,12 @@
                   },
                   {
                     "name": "unmapped.vendor_field",
+                    "field_identity": {
+                      "kind": "atomic",
+                      "segments": [
+                        "unmapped.vendor_field"
+                      ]
+                    },
                     "origin_reference_ids": [
                       "ref-2"
                     ],
@@ -8402,6 +9236,12 @@
                 {
                   "operation": "project",
                   "output": "time",
+                  "output_identity": {
+                    "kind": "atomic",
+                    "segments": [
+                      "time"
+                    ]
+                  },
                   "input_reference_ids": [
                     "ref-0"
                   ],
@@ -8411,6 +9251,12 @@
                 {
                   "operation": "project",
                   "output": "actor.user.name",
+                  "output_identity": {
+                    "kind": "atomic",
+                    "segments": [
+                      "actor.user.name"
+                    ]
+                  },
                   "input_reference_ids": [
                     "ref-1"
                   ],
@@ -8420,6 +9266,12 @@
                 {
                   "operation": "project",
                   "output": "unmapped.vendor_field",
+                  "output_identity": {
+                    "kind": "atomic",
+                    "segments": [
+                      "unmapped.vendor_field"
+                    ]
+                  },
                   "input_reference_ids": [
                     "ref-2"
                   ],
@@ -8459,6 +9311,12 @@
                 "id": "req-1",
                 "kind": "field",
                 "identity": "time",
+                "field_identity": {
+                  "kind": "atomic",
+                  "segments": [
+                    "time"
+                  ]
+                },
                 "role": "read",
                 "necessity": "required",
                 "origin": "direct",
@@ -8489,6 +9347,12 @@
                 "id": "req-2",
                 "kind": "field",
                 "identity": "actor.user.name",
+                "field_identity": {
+                  "kind": "atomic",
+                  "segments": [
+                    "actor.user.name"
+                  ]
+                },
                 "role": "read",
                 "necessity": "required",
                 "origin": "direct",
@@ -8519,6 +9383,12 @@
                 "id": "req-3",
                 "kind": "field",
                 "identity": "unmapped.vendor_field",
+                "field_identity": {
+                  "kind": "atomic",
+                  "segments": [
+                    "unmapped.vendor_field"
+                  ]
+                },
                 "role": "read",
                 "necessity": "required",
                 "origin": "direct",
@@ -8894,6 +9764,12 @@
               "id": "ref-0",
               "original_name": "time",
               "normalized_name": "time",
+              "field_identity": {
+                "kind": "atomic",
+                "segments": [
+                  "time"
+                ]
+              },
               "kind": "field",
               "role": "read",
               "stage_id": "stage-0",
@@ -8929,6 +9805,12 @@
                 "fields": [
                   {
                     "name": "time",
+                    "field_identity": {
+                      "kind": "atomic",
+                      "segments": [
+                        "time"
+                      ]
+                    },
                     "origin_reference_ids": [
                       "ref-0"
                     ],
@@ -8943,6 +9825,12 @@
                 {
                   "operation": "project",
                   "output": "time",
+                  "output_identity": {
+                    "kind": "atomic",
+                    "segments": [
+                      "time"
+                    ]
+                  },
                   "input_reference_ids": [
                     "ref-0"
                   ],
@@ -8982,6 +9870,12 @@
                 "id": "req-1",
                 "kind": "field",
                 "identity": "time",
+                "field_identity": {
+                  "kind": "atomic",
+                  "segments": [
+                    "time"
+                  ]
+                },
                 "role": "read",
                 "necessity": "required",
                 "origin": "direct",
@@ -9177,6 +10071,12 @@
               "id": "ref-0",
               "original_name": "cloud",
               "normalized_name": "cloud",
+              "field_identity": {
+                "kind": "atomic",
+                "segments": [
+                  "cloud"
+                ]
+              },
               "kind": "field",
               "role": "read",
               "stage_id": "stage-0",
@@ -9201,6 +10101,12 @@
               "id": "ref-1",
               "original_name": "time_dt",
               "normalized_name": "time_dt",
+              "field_identity": {
+                "kind": "atomic",
+                "segments": [
+                  "time_dt"
+                ]
+              },
               "kind": "field",
               "role": "read",
               "stage_id": "stage-0",
@@ -9236,6 +10142,12 @@
                 "fields": [
                   {
                     "name": "cloud",
+                    "field_identity": {
+                      "kind": "atomic",
+                      "segments": [
+                        "cloud"
+                      ]
+                    },
                     "origin_reference_ids": [
                       "ref-0"
                     ],
@@ -9243,6 +10155,12 @@
                   },
                   {
                     "name": "time_dt",
+                    "field_identity": {
+                      "kind": "atomic",
+                      "segments": [
+                        "time_dt"
+                      ]
+                    },
                     "origin_reference_ids": [
                       "ref-1"
                     ],
@@ -9257,6 +10175,12 @@
                 {
                   "operation": "project",
                   "output": "cloud",
+                  "output_identity": {
+                    "kind": "atomic",
+                    "segments": [
+                      "cloud"
+                    ]
+                  },
                   "input_reference_ids": [
                     "ref-0"
                   ],
@@ -9266,6 +10190,12 @@
                 {
                   "operation": "project",
                   "output": "time_dt",
+                  "output_identity": {
+                    "kind": "atomic",
+                    "segments": [
+                      "time_dt"
+                    ]
+                  },
                   "input_reference_ids": [
                     "ref-1"
                   ],
@@ -9305,6 +10235,12 @@
                 "id": "req-1",
                 "kind": "field",
                 "identity": "cloud",
+                "field_identity": {
+                  "kind": "atomic",
+                  "segments": [
+                    "cloud"
+                  ]
+                },
                 "role": "read",
                 "necessity": "required",
                 "origin": "direct",
@@ -9335,6 +10271,12 @@
                 "id": "req-2",
                 "kind": "field",
                 "identity": "time_dt",
+                "field_identity": {
+                  "kind": "atomic",
+                  "segments": [
+                    "time_dt"
+                  ]
+                },
                 "role": "read",
                 "necessity": "required",
                 "origin": "direct",
@@ -9627,6 +10569,12 @@
               "id": "ref-0",
               "original_name": "time",
               "normalized_name": "time",
+              "field_identity": {
+                "kind": "atomic",
+                "segments": [
+                  "time"
+                ]
+              },
               "kind": "field",
               "role": "read",
               "stage_id": "stage-0",
@@ -9651,6 +10599,12 @@
               "id": "ref-1",
               "original_name": "group",
               "normalized_name": "group",
+              "field_identity": {
+                "kind": "atomic",
+                "segments": [
+                  "group"
+                ]
+              },
               "kind": "field",
               "role": "read",
               "stage_id": "stage-0",
@@ -9686,6 +10640,12 @@
                 "fields": [
                   {
                     "name": "group",
+                    "field_identity": {
+                      "kind": "atomic",
+                      "segments": [
+                        "group"
+                      ]
+                    },
                     "origin_reference_ids": [
                       "ref-1"
                     ],
@@ -9693,6 +10653,12 @@
                   },
                   {
                     "name": "time",
+                    "field_identity": {
+                      "kind": "atomic",
+                      "segments": [
+                        "time"
+                      ]
+                    },
                     "origin_reference_ids": [
                       "ref-0"
                     ],
@@ -9707,6 +10673,12 @@
                 {
                   "operation": "project",
                   "output": "time",
+                  "output_identity": {
+                    "kind": "atomic",
+                    "segments": [
+                      "time"
+                    ]
+                  },
                   "input_reference_ids": [
                     "ref-0"
                   ],
@@ -9716,6 +10688,12 @@
                 {
                   "operation": "project",
                   "output": "group",
+                  "output_identity": {
+                    "kind": "atomic",
+                    "segments": [
+                      "group"
+                    ]
+                  },
                   "input_reference_ids": [
                     "ref-1"
                   ],
@@ -9755,6 +10733,12 @@
                 "id": "req-1",
                 "kind": "field",
                 "identity": "time",
+                "field_identity": {
+                  "kind": "atomic",
+                  "segments": [
+                    "time"
+                  ]
+                },
                 "role": "read",
                 "necessity": "required",
                 "origin": "direct",
@@ -9785,6 +10769,12 @@
                 "id": "req-2",
                 "kind": "field",
                 "identity": "group",
+                "field_identity": {
+                  "kind": "atomic",
+                  "segments": [
+                    "group"
+                  ]
+                },
                 "role": "read",
                 "necessity": "required",
                 "origin": "direct",
@@ -10212,6 +11202,12 @@
               "id": "ref-0",
               "original_name": "profiled",
               "normalized_name": "profiled",
+              "field_identity": {
+                "kind": "atomic",
+                "segments": [
+                  "profiled"
+                ]
+              },
               "kind": "field",
               "role": "read",
               "stage_id": "stage-0",
@@ -10236,6 +11232,12 @@
               "id": "ref-1",
               "original_name": "recommended",
               "normalized_name": "recommended",
+              "field_identity": {
+                "kind": "atomic",
+                "segments": [
+                  "recommended"
+                ]
+              },
               "kind": "field",
               "role": "read",
               "stage_id": "stage-0",
@@ -10271,6 +11273,12 @@
                 "fields": [
                   {
                     "name": "profiled",
+                    "field_identity": {
+                      "kind": "atomic",
+                      "segments": [
+                        "profiled"
+                      ]
+                    },
                     "origin_reference_ids": [
                       "ref-0"
                     ],
@@ -10278,6 +11286,12 @@
                   },
                   {
                     "name": "recommended",
+                    "field_identity": {
+                      "kind": "atomic",
+                      "segments": [
+                        "recommended"
+                      ]
+                    },
                     "origin_reference_ids": [
                       "ref-1"
                     ],
@@ -10292,6 +11306,12 @@
                 {
                   "operation": "project",
                   "output": "profiled",
+                  "output_identity": {
+                    "kind": "atomic",
+                    "segments": [
+                      "profiled"
+                    ]
+                  },
                   "input_reference_ids": [
                     "ref-0"
                   ],
@@ -10301,6 +11321,12 @@
                 {
                   "operation": "project",
                   "output": "recommended",
+                  "output_identity": {
+                    "kind": "atomic",
+                    "segments": [
+                      "recommended"
+                    ]
+                  },
                   "input_reference_ids": [
                     "ref-1"
                   ],
@@ -10340,6 +11366,12 @@
                 "id": "req-1",
                 "kind": "field",
                 "identity": "profiled",
+                "field_identity": {
+                  "kind": "atomic",
+                  "segments": [
+                    "profiled"
+                  ]
+                },
                 "role": "read",
                 "necessity": "required",
                 "origin": "direct",
@@ -10370,6 +11402,12 @@
                 "id": "req-2",
                 "kind": "field",
                 "identity": "recommended",
+                "field_identity": {
+                  "kind": "atomic",
+                  "segments": [
+                    "recommended"
+                  ]
+                },
                 "role": "read",
                 "necessity": "required",
                 "origin": "direct",
@@ -10653,6 +11691,12 @@
               "id": "ref-0",
               "original_name": "time",
               "normalized_name": "time",
+              "field_identity": {
+                "kind": "atomic",
+                "segments": [
+                  "time"
+                ]
+              },
               "kind": "field",
               "role": "read",
               "stage_id": "stage-0",
@@ -10677,6 +11721,12 @@
               "id": "ref-1",
               "original_name": "absent",
               "normalized_name": "absent",
+              "field_identity": {
+                "kind": "atomic",
+                "segments": [
+                  "absent"
+                ]
+              },
               "kind": "field",
               "role": "read",
               "stage_id": "stage-0",
@@ -10712,6 +11762,12 @@
                 "fields": [
                   {
                     "name": "absent",
+                    "field_identity": {
+                      "kind": "atomic",
+                      "segments": [
+                        "absent"
+                      ]
+                    },
                     "origin_reference_ids": [
                       "ref-1"
                     ],
@@ -10719,6 +11775,12 @@
                   },
                   {
                     "name": "time",
+                    "field_identity": {
+                      "kind": "atomic",
+                      "segments": [
+                        "time"
+                      ]
+                    },
                     "origin_reference_ids": [
                       "ref-0"
                     ],
@@ -10733,6 +11795,12 @@
                 {
                   "operation": "project",
                   "output": "time",
+                  "output_identity": {
+                    "kind": "atomic",
+                    "segments": [
+                      "time"
+                    ]
+                  },
                   "input_reference_ids": [
                     "ref-0"
                   ],
@@ -10742,6 +11810,12 @@
                 {
                   "operation": "project",
                   "output": "absent",
+                  "output_identity": {
+                    "kind": "atomic",
+                    "segments": [
+                      "absent"
+                    ]
+                  },
                   "input_reference_ids": [
                     "ref-1"
                   ],
@@ -10781,6 +11855,12 @@
                 "id": "req-1",
                 "kind": "field",
                 "identity": "time",
+                "field_identity": {
+                  "kind": "atomic",
+                  "segments": [
+                    "time"
+                  ]
+                },
                 "role": "read",
                 "necessity": "required",
                 "origin": "direct",
@@ -10811,6 +11891,12 @@
                 "id": "req-2",
                 "kind": "field",
                 "identity": "absent",
+                "field_identity": {
+                  "kind": "atomic",
+                  "segments": [
+                    "absent"
+                  ]
+                },
                 "role": "read",
                 "necessity": "required",
                 "origin": "direct",

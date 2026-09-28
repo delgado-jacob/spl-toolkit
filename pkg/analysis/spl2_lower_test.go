@@ -18,6 +18,367 @@ func spl2AnalyzeTest(t *testing.T, text string) *Result {
 	return r
 }
 
+func TestSPL2LowerSelectedCommandTransfers(t *testing.T) {
+	t.Run("where eval and fields closure", func(t *testing.T) {
+		r := spl2AnalyzeTest(t, `FROM synthetic_events | where synthetic_enabled=true | eval synthetic_scaled=synthetic_value*2 | fields synthetic_scaled | where synthetic_scaled>0`)
+		if r.Status != Valid || !r.Coverage.SemanticComplete || !r.Requirements.Coverage.Complete || len(r.Diagnostics) != 0 {
+			t.Fatalf("selected pipeline must be complete: %+v", r)
+		}
+		created := spl2Ref(t, r, "synthetic_scaled", "create")
+		read := spl2Ref(t, r, "synthetic_value", "read")
+		if !reflect.DeepEqual(created.OriginReferenceIDs, []string{read.ID}) {
+			t.Fatalf("eval origin = %v, want %s", created.OriginReferenceIDs, read.ID)
+		}
+		last := r.Lineage[len(r.Lineage)-2].After
+		if last.Open || len(last.Fields) != 1 || last.Fields[0].Name != "synthetic_scaled" {
+			t.Fatalf("fields include must close to exact selectors: %+v", last)
+		}
+		removed := spl2AnalyzeTest(t, `FROM synthetic_events | fields synthetic_region | where synthetic_value>0`)
+		if removed.Status != Invalid || spl2Ref(t, removed, "synthetic_value", "read").Binding != "unavailable" || !spl2HasCode(removed, CodeUnavailableField) {
+			t.Fatalf("closed fields projection retained an omitted source: %+v", removed)
+		}
+	})
+
+	t.Run("stats emits only groups and aggregate aliases", func(t *testing.T) {
+		r := spl2AnalyzeTest(t, `FROM synthetic_events | stats sum(synthetic_value) AS synthetic_total BY synthetic_region | where synthetic_total>0 AND synthetic_region!=""`)
+		if r.Status != Valid || !r.Coverage.SemanticComplete || len(r.Lineage[1].After.Fields) != 2 || r.Lineage[1].After.Open {
+			t.Fatalf("selected stats output: %+v", r)
+		}
+		for _, name := range []string{"synthetic_region", "synthetic_total"} {
+			if spl2Ref(t, r, name, "read").Binding == "unavailable" {
+				t.Fatalf("stats output %q not installed: %+v", name, r)
+			}
+		}
+		discarded := spl2AnalyzeTest(t, `FROM synthetic_events | stats sum(synthetic_value) AS synthetic_total BY synthetic_region | where synthetic_value>0`)
+		unavailable := false
+		for _, ref := range discarded.References {
+			unavailable = unavailable || ref.NormalizedName == "synthetic_value" && ref.Role == "read" && ref.Binding == "unavailable"
+		}
+		if discarded.Status != Invalid || !unavailable || !spl2HasCode(discarded, CodeUnavailableField) {
+			t.Fatalf("stats retained a discarded aggregate input: %+v", discarded)
+		}
+	})
+
+	t.Run("selected stats group identity collision", func(t *testing.T) {
+		r := spl2AnalyzeTest(t, `FROM synthetic_events | stats count() AS synthetic_count BY 'actor.name', actor.name`)
+		if r.Status != Valid || !r.Coverage.SemanticComplete {
+			t.Fatalf("distinct selected groups lost complete flow: %+v", r)
+		}
+		groupIDs := []string{}
+		for _, ref := range r.References {
+			if ref.Kind == "field" && ref.Role == "group" && ref.NormalizedName == "actor.name" {
+				groupIDs = append(groupIDs, ref.ID)
+			}
+		}
+		if len(groupIDs) != 2 {
+			t.Fatalf("colliding group reads = %+v", r.References)
+		}
+		state := r.Lineage[len(r.Lineage)-1].After
+		bindings := []FieldBinding{}
+		for _, field := range state.Fields {
+			if field.Name == "actor.name" {
+				bindings = append(bindings, field)
+			}
+		}
+		if state.Uncertain || len(bindings) != 2 || bindings[0].FieldIdentity.Kind != "atomic" || bindings[1].FieldIdentity.Kind != "path" || !reflect.DeepEqual(bindings[0].OriginReferenceIDs, []string{groupIDs[0]}) || !reflect.DeepEqual(bindings[1].OriginReferenceIDs, []string{groupIDs[1]}) {
+			t.Fatalf("distinct group state = %+v", state)
+		}
+		projects := map[string]bool{}
+		for _, transition := range r.Lineage[len(r.Lineage)-1].Transitions {
+			if transition.Operation == "project" && transition.Output == "actor.name" {
+				if transition.OutputIdentity == nil {
+					t.Fatalf("group transition lacks identity: %+v", transition)
+				}
+				projects[transition.OutputIdentity.Kind] = true
+			}
+		}
+		if !projects["atomic"] || !projects["path"] {
+			t.Fatalf("distinct group transitions = %+v", r.Lineage[len(r.Lineage)-1].Transitions)
+		}
+	})
+
+	t.Run("selected stats group and aggregate collision", func(t *testing.T) {
+		r := spl2AnalyzeTest(t, `FROM synthetic_dataset | stats count() AS 'actor.name' BY actor.name`)
+		if r.Status != Valid || !r.Coverage.SemanticComplete {
+			t.Fatalf("distinct group/output identities lost complete flow: %+v", r)
+		}
+		group := spl2Ref(t, r, "actor.name", "group")
+		output := spl2Ref(t, r, "actor.name", "output")
+		state := r.Lineage[len(r.Lineage)-1].After
+		if state.Uncertain || len(state.Fields) != 2 || state.Fields[0].FieldIdentity.Kind != "atomic" || state.Fields[1].FieldIdentity.Kind != "path" || !reflect.DeepEqual(state.Fields[0].OriginReferenceIDs, []string{output.ID}) || !reflect.DeepEqual(state.Fields[1].OriginReferenceIDs, []string{group.ID}) {
+			t.Fatalf("group/output bindings = %+v", state)
+		}
+		transitions := map[string]bool{}
+		for _, transition := range r.Lineage[len(r.Lineage)-1].Transitions {
+			if transition.Output == "actor.name" && transition.OutputIdentity != nil {
+				transitions[transition.Operation+":"+transition.OutputIdentity.Kind] = true
+			}
+		}
+		if !transitions["project:path"] || !transitions["aggregate:atomic"] {
+			t.Fatalf("group/output transitions = %+v", r.Lineage[len(r.Lineage)-1].Transitions)
+		}
+	})
+
+	t.Run("selected stats collision preserves other transition order", func(t *testing.T) {
+		r := spl2AnalyzeTest(t, `FROM synthetic_dataset | stats sum(synthetic_value) AS synthetic_total, count() AS 'actor.name' BY synthetic_region, actor.name`)
+		transitions := r.Lineage[len(r.Lineage)-1].Transitions
+		if len(transitions) != 4 || transitions[0].Operation != "project" || transitions[0].Output != "synthetic_region" || transitions[1].Operation != "project" || transitions[1].Output != "actor.name" || transitions[2].Operation != "aggregate" || transitions[2].Output != "synthetic_total" || transitions[3].Operation != "aggregate" || transitions[3].Output != "actor.name" {
+			t.Fatalf("selected stats transition order changed: %+v", transitions)
+		}
+	})
+
+	t.Run("sequential selected stats retain installed outputs", func(t *testing.T) {
+		r := spl2AnalyzeTest(t, `FROM [{synthetic_value:1,synthetic_region:"region"}] | stats sum(synthetic_value) AS synthetic_total BY synthetic_region | stats max(synthetic_total) AS synthetic_max BY synthetic_region`)
+		if r.Status != Valid || !r.Coverage.SemanticComplete || len(r.Diagnostics) != 0 {
+			t.Fatalf("sequential stats lost complete transfer state: %+v", r)
+		}
+		state := r.Lineage[len(r.Lineage)-1].After
+		fields := map[string]bool{}
+		for _, field := range state.Fields {
+			fields[field.Name] = true
+		}
+		if state.Open || len(state.Fields) != 2 || !fields["synthetic_region"] || !fields["synthetic_max"] {
+			t.Fatalf("sequential stats output = %+v", state)
+		}
+		transitions := r.Lineage[len(r.Lineage)-1].Transitions
+		if len(transitions) != 2 || transitions[0].Operation != "project" || transitions[0].Output != "synthetic_region" || transitions[1].Operation != "aggregate" || transitions[1].Output != "synthetic_max" {
+			t.Fatalf("sequential stats transitions = %+v", transitions)
+		}
+	})
+
+	t.Run("bin installs exact identity", func(t *testing.T) {
+		for _, query := range []string{
+			`FROM synthetic_events | bin span=5m synthetic_time | where synthetic_time>0`,
+			`FROM synthetic_events | bin span=5m synthetic_time AS synthetic_bucket | where synthetic_bucket>0`,
+		} {
+			r := spl2AnalyzeTest(t, query)
+			if r.Status != Valid || !r.Coverage.SemanticComplete || !r.Requirements.Coverage.Complete || len(r.Diagnostics) != 0 {
+				t.Fatalf("selected bin must be complete: %+v", r)
+			}
+			input := spl2Ref(t, r, "synthetic_time", "read")
+			transition := r.Lineage[1].Transitions[0]
+			if transition.Conditional || !reflect.DeepEqual(transition.InputReferenceIDs, []string{input.ID}) {
+				t.Fatalf("bin origin transfer: %+v", transition)
+			}
+		}
+	})
+
+	t.Run("bin preserves input availability", func(t *testing.T) {
+		conditional := spl2AnalyzeTest(t, `FROM [{synthetic_time:1},{synthetic_other:2}] | bin synthetic_time`)
+		input := spl2Ref(t, conditional, "synthetic_time", "read")
+		if input.Binding != "indeterminate" {
+			t.Fatalf("conditional bin input binding = %+v", input)
+		}
+		state := conditional.Lineage[len(conditional.Lineage)-1].After
+		if len(state.Fields) != 2 {
+			t.Fatalf("conditional bin shape = %+v", state)
+		}
+		foundConditional := false
+		for _, field := range state.Fields {
+			if field.Name == "synthetic_time" {
+				foundConditional = field.Conditional
+			}
+		}
+		if !foundConditional || len(conditional.Lineage[1].Transitions) != 1 || !conditional.Lineage[1].Transitions[0].Conditional {
+			t.Fatalf("bin erased conditionality: %+v", conditional.Lineage[1])
+		}
+
+		unavailable := spl2AnalyzeTest(t, `FROM [{synthetic_present:1}] | bin synthetic_missing`)
+		if ref := spl2Ref(t, unavailable, "synthetic_missing", "read"); ref.Binding != "unavailable" {
+			t.Fatalf("closed-source bin input = %+v", ref)
+		}
+		for _, field := range unavailable.Lineage[len(unavailable.Lineage)-1].After.Fields {
+			if field.Name == "synthetic_missing" {
+				t.Fatalf("unavailable bin input installed an output: %+v", unavailable)
+			}
+		}
+		for _, transition := range unavailable.Lineage[len(unavailable.Lineage)-1].Transitions {
+			if transition.Output == "synthetic_missing" {
+				t.Fatalf("unavailable bin input emitted a transition: %+v", transition)
+			}
+		}
+	})
+
+	t.Run("mvexpand preserves identity", func(t *testing.T) {
+		r := spl2AnalyzeTest(t, `FROM synthetic_events | mvexpand synthetic_values | where synthetic_values>0`)
+		if r.Status != Valid || !r.Coverage.SemanticComplete || !r.Requirements.Coverage.Complete || len(r.Diagnostics) != 0 || len(r.Lineage[1].Transitions) != 0 {
+			t.Fatalf("selected mvexpand must preserve exact identity: %+v", r)
+		}
+		refs := []Reference{}
+		for _, ref := range r.References {
+			if ref.NormalizedName == "synthetic_values" && ref.Role == "read" {
+				refs = append(refs, ref)
+			}
+		}
+		if len(refs) != 2 || refs[0].Binding != "source" || refs[1].Binding != "source" || !reflect.DeepEqual(refs[1].OriginReferenceIDs, []string{refs[0].ID}) {
+			t.Fatalf("mvexpand identity chain: %+v", refs)
+		}
+
+		unavailable := spl2AnalyzeTest(t, `FROM [{synthetic_present:1}] | mvexpand synthetic_missing`)
+		if unavailable.Status != Invalid || unavailable.Coverage.SemanticComplete || unavailable.Requirements.Coverage.Complete {
+			t.Fatalf("unavailable mvexpand received semantic credit: %+v", unavailable)
+		}
+		if ref := spl2Ref(t, unavailable, "synthetic_missing", "read"); ref.Binding != "unavailable" {
+			t.Fatalf("closed-source mvexpand input = %+v", ref)
+		}
+		for _, field := range unavailable.Lineage[len(unavailable.Lineage)-1].After.Fields {
+			if field.Name == "synthetic_missing" {
+				t.Fatalf("unavailable mvexpand installed a field: %+v", unavailable)
+			}
+		}
+		if len(unavailable.Lineage[len(unavailable.Lineage)-1].Transitions) != 0 {
+			t.Fatalf("unavailable mvexpand emitted a transition: %+v", unavailable.Lineage[len(unavailable.Lineage)-1].Transitions)
+		}
+	})
+
+	for _, query := range []string{
+		`FROM synthetic_events | bin synthetic_unknown=1 synthetic_time AS synthetic_bucket`,
+		`FROM synthetic_events | mvexpand synthetic_unknown=1 synthetic_values`,
+	} {
+		t.Run("unknown option "+query, func(t *testing.T) {
+			r := spl2AnalyzeTest(t, query)
+			if r.Status != Incomplete || r.Coverage.SemanticComplete || len(r.Diagnostics) != 1 || r.Diagnostics[0].Code != CodeUnsupportedSemantics {
+				t.Fatalf("unknown option boundary: %+v", r)
+			}
+			for _, ref := range r.References {
+				if ref.NormalizedName == "synthetic_unknown" || ref.NormalizedName == "synthetic_bucket" {
+					t.Fatalf("unknown option guessed field output: %+v", ref)
+				}
+			}
+			if strings.Contains(query, "bin ") {
+				spl2Ref(t, r, "synthetic_time", "read")
+			} else {
+				spl2Ref(t, r, "synthetic_values", "read")
+			}
+		})
+	}
+}
+
+func TestSPL2SelectedCommandDispatchUsesTypedPolicy(t *testing.T) {
+	policy, ok := spl2TypedPolicyFor("splunkd", "current")
+	if !ok {
+		t.Fatal("missing private splunkd/current typed policy")
+	}
+	want := map[string]spl2CommandHandler{
+		"where":    spl2WhereCommandHandler,
+		"eval":     spl2EvalCommandHandler,
+		"fields":   spl2FieldsCommandHandler,
+		"stats":    spl2StatsCommandHandler,
+		"bin":      spl2BinCommandHandler,
+		"mvexpand": spl2MvexpandCommandHandler,
+	}
+	if !reflect.DeepEqual(policy.commands, want) {
+		t.Fatalf("selected command handlers = %+v, want %+v", policy.commands, want)
+	}
+	for _, name := range []string{"search", "table", "eventstats", "synthetic_unknown"} {
+		if _, selected := policy.commands[name]; selected {
+			t.Fatalf("parser-only or neighboring command %q resolved through selected policy", name)
+		}
+	}
+
+	original := spl2TypedPolicies["splunkd/current"]
+	modified := cloneSPL2TypedPolicyForTest(original)
+	delete(modified.commands, "where")
+	spl2TypedPolicies["splunkd/current"] = modified
+	t.Cleanup(func() { spl2TypedPolicies["splunkd/current"] = original })
+	r := spl2AnalyzeTest(t, `FROM synthetic_events | where synthetic_value > 0`)
+	if r.Status != Incomplete || r.Coverage.SemanticComplete || !spl2HasCode(r, CodeUnsupportedSemantics) {
+		t.Fatalf("production dispatch ignored selected command policy: %+v", r)
+	}
+	for _, ref := range r.References {
+		if ref.NormalizedName == "synthetic_value" {
+			t.Fatalf("unselected command still executed selected transfer: %+v", ref)
+		}
+	}
+}
+
+func TestSPL2RejectedSelectedCommandEffects(t *testing.T) {
+	for _, tc := range []struct {
+		name, query, input string
+	}{
+		{"bin suffix option", `FROM main | bin synthetic_time span=15m`, "synthetic_time"},
+		{"bin fractional bins", `FROM main | bin bins=2.5 synthetic_value`, "synthetic_value"},
+		{"bin malformed alignment", `FROM main | bin span=12h aligntime=@d+ synthetic_time`, ""},
+		{"bin unknown option", `FROM main | bin synthetic_unknown=1 synthetic_value`, "synthetic_value"},
+		{"mvexpand suffix option", `FROM main | mvexpand synthetic_values limit=2`, "synthetic_values"},
+		{"mvexpand unknown option", `FROM main | mvexpand synthetic_unknown=1 synthetic_values`, "synthetic_values"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			r := spl2AnalyzeTest(t, tc.query)
+			if r.Status == Valid || r.Coverage.SemanticComplete {
+				t.Fatalf("rejected command was promoted: %+v", r)
+			}
+			if tc.input != "" {
+				spl2Ref(t, r, tc.input, "read")
+			}
+			for _, ref := range r.References {
+				if ref.Role == "output" {
+					t.Fatalf("rejected command guessed output: %+v", ref)
+				}
+			}
+			for _, lineage := range r.Lineage {
+				if len(lineage.Transitions) != 0 {
+					t.Fatalf("rejected command installed transition: %+v", lineage.Transitions)
+				}
+			}
+		})
+	}
+}
+
+func TestSPL2RejectedSelectedCommandsPreserveConservativeState(t *testing.T) {
+	for _, tc := range []struct {
+		name, query, input, absent string
+	}{
+		{"bin unknown option", `FROM [{synthetic_value:1,synthetic_other:2}] | bin synthetic_unknown=1 synthetic_value AS synthetic_bucket`, "synthetic_value", "synthetic_bucket"},
+		{"bin malformed suffix", `FROM [{synthetic_value:1,synthetic_other:2}] | bin synthetic_value span=15m`, "synthetic_value", ""},
+		{"mvexpand unknown option", `FROM [{synthetic_values:[1,2],synthetic_other:2}] | mvexpand synthetic_unknown=1 synthetic_values`, "synthetic_values", ""},
+		{"mvexpand malformed suffix", `FROM [{synthetic_values:[1,2],synthetic_other:2}] | mvexpand synthetic_values limit=2`, "synthetic_values", ""},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			r := spl2AnalyzeTest(t, tc.query)
+			if r.Status == Valid || r.Coverage.SemanticComplete || r.Requirements.Coverage.Complete {
+				t.Fatalf("rejected command received complete credit: %+v", r)
+			}
+			input := spl2Ref(t, r, tc.input, "read")
+			state := r.Lineage[len(r.Lineage)-1].After
+			foundInput, foundOther := false, false
+			for _, field := range state.Fields {
+				switch field.Name {
+				case tc.input:
+					foundInput = true
+					if !field.Conditional {
+						t.Fatalf("affected input remained unconditional: %+v", field)
+					}
+				case "synthetic_other":
+					foundOther = true
+					if field.Conditional {
+						t.Fatalf("unrelated identity became conditional: %+v", field)
+					}
+				case tc.absent:
+					if tc.absent != "" {
+						t.Fatalf("rejected command guessed output identity: %+v", field)
+					}
+				}
+			}
+			if !foundInput || !foundOther {
+				t.Fatalf("rejected command lost known identities: %+v", state)
+			}
+			if transitions := r.Lineage[len(r.Lineage)-1].Transitions; len(transitions) != 0 {
+				t.Fatalf("rejected command emitted transitions: %+v", transitions)
+			}
+			ownedGap := false
+			for _, gap := range r.Requirements.Gaps {
+				if gap.Code == CodeUnsupportedSemantics && reflect.DeepEqual(gap.ReferenceIDs, []string{input.ID}) {
+					ownedGap = true
+				}
+			}
+			if !ownedGap {
+				t.Fatalf("rejected effect gap does not own input %s: %+v", input.ID, r.Requirements.Gaps)
+			}
+		})
+	}
+}
+
 func TestSPL2LookupImplicitOutputUncertainty(t *testing.T) {
 	for _, pair := range []struct{ match, local string }{{"uid AS user", "user"}, {"id AS account", "account"}} {
 		r := spl2AnalyzeTest(t, "FROM main | lookup users "+pair.match+" | table "+pair.local)
@@ -131,7 +492,6 @@ func TestSPL2DeferredCommandOriginalRoles(t *testing.T) {
 		query                  string
 		reads, groups, outputs []string
 	}{
-		{`FROM main | bin span=15m _time AS slot`, []string{"_time"}, nil, []string{"slot"}},
 		{`FROM main | rex field=message offset_field=offsets @"(?<digits>\d+)"`, []string{"message"}, nil, []string{"offsets"}},
 		{`FROM main | spath input=payload output=user_name path="actor.name"`, []string{"payload"}, nil, []string{"user_name"}},
 		{`tstats aggregates=[sum(bytes)] datamodel_name='Traffic.All' predicate=(port=443) byfields=[host,source]`, []string{"bytes", "port"}, []string{"host", "source"}, nil},
@@ -139,7 +499,6 @@ func TestSPL2DeferredCommandOriginalRoles(t *testing.T) {
 		{`FROM main | timechart agg=(sum(bytes)) avg(size) BY host`, []string{"bytes", "size"}, []string{"host"}, nil},
 		{`FROM main | timechart agg=(max(bytes) AS peak) count() BY host`, []string{"bytes"}, []string{"host"}, []string{"peak"}},
 		{`FROM main | makemv delim=":" labels`, []string{"labels"}, nil, nil},
-		{`FROM main | mvexpand limit=2 tokens`, []string{"tokens"}, nil, nil},
 		{`FROM main | mvcombine delim=";" account`, []string{"account"}, nil, nil},
 	} {
 		t.Run(tc.query, func(t *testing.T) {
@@ -225,7 +584,6 @@ func TestSPL2DeferredOverwriteBoundaries(t *testing.T) {
 		{`rex field=first "(?<unknown>.*)"`, true, true},
 		{`spath input=first output=second path="name"`, false, true},
 		{`spath input=first`, true, true},
-		{`bin span=1 first AS second`, false, true},
 		{`makemv delim=":" first`, true, false},
 	} {
 		r := spl2AnalyzeTest(t, `FROM main | eval first="x", second="y" | `+tc.command)
@@ -266,21 +624,656 @@ func TestSPL2ExternalJobAndJoinIntentions(t *testing.T) {
 	if r.Status != Incomplete || len(r.Scopes) != 2 {
 		t.Fatalf("join scope: %+v", r)
 	}
-	for _, name := range []string{"L.id", "R.uid"} {
+	for _, name := range []string{"id", "uid"} {
 		ref := spl2Ref(t, r, name, "read")
-		if ref.Binding != "indeterminate" || ref.ScopeID != "scope-0" || len(ref.OriginReferenceIDs) != 0 {
+		if ref.Binding != "source" || ref.Resolution != "exact" || ref.ScopeID != "scope-0" || len(ref.OriginReferenceIDs) != 0 {
 			t.Fatalf("qualified join input: %+v", ref)
 		}
 	}
-	for _, line := range r.Lineage {
-		if line.ScopeID == "scope-0" && len(line.After.Fields) != 0 {
-			t.Fatalf("join installed qualified inputs: %+v", r)
+	var parentAfter *FieldState
+	for i := range r.Lineage {
+		if r.Lineage[i].StageID == "stage-1" && r.Lineage[i].ScopeID == "scope-0" {
+			parentAfter = &r.Lineage[i].After
 		}
 	}
-	if spl2Ref(t, r, "uid", "read").ScopeID != "scope-1" {
+	if parentAfter == nil || len(parentAfter.Fields) != 2 || parentAfter.Fields[0].Name != "id" || parentAfter.Fields[1].Name != "uid" || !parentAfter.Uncertain {
+		t.Fatalf("join qualified inputs: %+v", parentAfter)
+	}
+	childUID := Reference{}
+	for _, ref := range r.References {
+		if ref.OriginalName == "uid" && ref.Role == "read" {
+			childUID = ref
+		}
+	}
+	if childUID.ScopeID != "scope-1" {
 		t.Fatalf("child scope lost: %+v", r)
 	}
 	assertCorpusIntegrity(t, r)
+}
+
+func TestSPL2IfMergesSelectedBranches(t *testing.T) {
+	query := `FROM [{base:1, guard:true}] | if (guard=true) [eval shared=base, left_only=1] else [eval shared=base, right_only=1]`
+	r := spl2AnalyzeTest(t, query)
+	if r.Status != Valid || !r.Coverage.SemanticComplete {
+		t.Fatalf("selected if coverage = status %s coverage %+v diagnostics %+v", r.Status, r.Coverage, r.Diagnostics)
+	}
+	final := r.Lineage[len(r.Lineage)-1].After
+	want := map[string]bool{"base": false, "guard": false, "shared": false, "left_only": true, "right_only": true}
+	if len(final.Fields) != len(want) || !final.Uncertain {
+		t.Fatalf("selected if state = %+v", final)
+	}
+	for _, field := range final.Fields {
+		conditional, ok := want[field.Name]
+		if !ok || field.Conditional != conditional {
+			t.Errorf("selected if field = %+v want conditional=%t", field, conditional)
+		}
+	}
+	guard := spl2Ref(t, r, "guard", "read")
+	if guard.ScopeID != "scope-0" || guard.StageID != r.Lineage[len(r.Lineage)-1].StageID {
+		t.Errorf("guard ownership = %+v", guard)
+	}
+	childReads := 0
+	for _, ref := range r.References {
+		if ref.NormalizedName == "base" && ref.Role == "read" {
+			childReads++
+			if ref.ScopeID == "scope-0" {
+				t.Errorf("branch read escaped child scope: %+v", ref)
+			}
+		}
+	}
+	if childReads != 2 || len(r.Scopes) != 3 {
+		t.Fatalf("branch-local evidence = reads %d scopes %+v", childReads, r.Scopes)
+	}
+}
+
+func TestSPL2IfOmittedElseAndNestedConditional(t *testing.T) {
+	for _, tc := range []struct {
+		name, query string
+		field       string
+	}{
+		{name: "omitted else", query: `FROM [{guard:true}] | if (guard=true) [eval branch_only=1]`, field: "branch_only"},
+		{name: "nested", query: `FROM [{outer_flag:true, inner_flag:true}] | if (outer_flag=true) [if (inner_flag=true) [eval nested_only=1] else [eval nested_only=2]]`, field: "nested_only"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			r := spl2AnalyzeTest(t, tc.query)
+			if r.Status != Valid || !r.Coverage.SemanticComplete {
+				t.Fatalf("coverage = status %s coverage %+v diagnostics %+v", r.Status, r.Coverage, r.Diagnostics)
+			}
+			final := r.Lineage[len(r.Lineage)-1].After
+			found := false
+			for _, field := range final.Fields {
+				if field.Name == tc.field {
+					found = true
+					if !field.Conditional {
+						t.Errorf("%s should be conditional after unchanged outer path: %+v", tc.field, field)
+					}
+				}
+			}
+			if !found {
+				t.Fatalf("missing %s in %+v", tc.field, final)
+			}
+		})
+	}
+}
+
+func TestSPL2BranchMergesGuardedArms(t *testing.T) {
+	query := `FROM [{status:"ok", value:1}] | branch (status="ok") [eval common=value, ok_only=1], (status!="ok") [eval common=value, failed_only=1]`
+	r := spl2AnalyzeTest(t, query)
+	if r.Status != Valid || !r.Coverage.SemanticComplete {
+		t.Fatalf("guarded branch coverage = status %s coverage %+v diagnostics %+v", r.Status, r.Coverage, r.Diagnostics)
+	}
+	final := r.Lineage[len(r.Lineage)-1].After
+	want := map[string]bool{"status": false, "value": false, "common": false, "ok_only": true, "failed_only": true}
+	for _, field := range final.Fields {
+		conditional, ok := want[field.Name]
+		if !ok || field.Conditional != conditional {
+			t.Errorf("guarded branch field = %+v want conditional=%t", field, conditional)
+		}
+		delete(want, field.Name)
+	}
+	if len(want) != 0 || len(r.Scopes) != 3 {
+		t.Fatalf("guarded branch state = %+v scopes %+v missing %v", final, r.Scopes, want)
+	}
+}
+
+func TestSPL2BranchRejectsUnguardedLayout(t *testing.T) {
+	r := spl2AnalyzeTest(t, `FROM [{status:"ok"}] | branch [eval leaked=1], (status="ok") [eval selected=1]`)
+	if r.Status == Valid || r.Coverage.SemanticComplete || !spl2HasCode(r, CodeUnsupportedSemantics) {
+		t.Fatalf("unguarded branch received selected semantics: %+v", r)
+	}
+	for _, field := range r.Lineage[len(r.Lineage)-1].After.Fields {
+		if field.Name == "leaked" || field.Name == "selected" {
+			t.Fatalf("unguarded branch installed child output: %+v", r)
+		}
+	}
+}
+
+func TestSPL2UnionMergesExactDatasetsAndIndependentQueries(t *testing.T) {
+	query := `union synthetic_left, $synthetic_right, [FROM [{shared:1, child_only:1}]]`
+	r := spl2AnalyzeTest(t, query)
+	if r.Status != Valid || !r.Coverage.SemanticComplete {
+		t.Fatalf("selected union coverage = status %s coverage %+v diagnostics %+v", r.Status, r.Coverage, r.Diagnostics)
+	}
+	if !reflect.DeepEqual(r.Dependencies.Datasets, []string{"$synthetic_right", "synthetic_left"}) {
+		t.Fatalf("union dependencies = %v", r.Dependencies.Datasets)
+	}
+	final := r.Lineage[len(r.Lineage)-1].After
+	if !final.Open || !final.Uncertain {
+		t.Fatalf("union state = %+v", final)
+	}
+	for _, name := range []string{"shared", "child_only"} {
+		found := false
+		for _, field := range final.Fields {
+			if field.Name == name {
+				found = true
+				if !field.Conditional {
+					t.Errorf("union child field should be conditional: %+v", field)
+				}
+			}
+		}
+		if !found {
+			t.Errorf("union output missing %s: %+v", name, final)
+		}
+	}
+	if len(r.Scopes) != 2 || r.Scopes[1].Kind != "search" {
+		t.Fatalf("union child scope = %+v", r.Scopes)
+	}
+}
+
+func TestSPL2UnionDynamicOperandRetainsSiblingEvidence(t *testing.T) {
+	query := `union {kind:lower("synthetic")}, [FROM [{proved:1}]]`
+	r := spl2AnalyzeTest(t, query)
+	if r.Status != Incomplete || !spl2HasCode(r, CodeDynamicReference) {
+		t.Fatalf("dynamic union boundary = status %s diagnostics %+v", r.Status, r.Diagnostics)
+	}
+	proved := false
+	for _, field := range r.Lineage[len(r.Lineage)-1].After.Fields {
+		proved = proved || field.Name == "proved"
+	}
+	if !proved || len(r.Scopes) != 2 {
+		t.Fatalf("dynamic union erased sibling evidence: %+v", r)
+	}
+}
+
+func TestSPL2UnionResolvesLocalViewOperand(t *testing.T) {
+	r := spl2ProgramAnalyze(t, `$out = union $base, [FROM [{b:1}]]; $base = FROM [{a:1}];`)
+	if r.Status != Valid || !r.Coverage.SemanticComplete || !r.Requirements.Coverage.Complete {
+		t.Fatalf("local-view union = %+v", r)
+	}
+	for _, ref := range r.References {
+		if ref.Kind == "dataset" && ref.NormalizedName == "$base" {
+			t.Fatalf("local view leaked as dataset requirement: %+v", ref)
+		}
+	}
+	if spl2ProgramContains(r.Dependencies.Datasets, "$base") {
+		t.Fatalf("local view leaked as dependency: %+v", r.Dependencies)
+	}
+	foundView := false
+	for _, ref := range r.References {
+		foundView = foundView || ref.Kind == "view" && ref.NormalizedName == "$base" && ref.Role == "read"
+	}
+	if !foundView {
+		t.Fatalf("local view reference missing: %+v", r.References)
+	}
+	unionStageID := ""
+	for _, stage := range r.Stages {
+		if stage.Command == "union" {
+			unionStageID = stage.ID
+		}
+	}
+	unionFields := map[string]bool{}
+	for _, lineage := range r.Lineage {
+		if lineage.StageID != unionStageID {
+			continue
+		}
+		for _, field := range lineage.After.Fields {
+			unionFields[field.Name] = field.Conditional
+		}
+	}
+	if !reflect.DeepEqual(unionFields, map[string]bool{"a": true, "b": true}) {
+		t.Fatalf("local-view union fields = %+v", unionFields)
+	}
+}
+
+func TestSPL2UnionMergesOverlappingAndDisjointIndependentFields(t *testing.T) {
+	for _, tc := range []struct {
+		name, query string
+		wantScopes  int
+	}{
+		{name: "generating", query: `union [FROM [{shared:1, left_only:1}]], [FROM [{shared:2, right_only:1}]]`, wantScopes: 3},
+		{name: "pipelined", query: `FROM [{shared:1, left_only:1}] | union [FROM [{shared:2, right_only:1}]]`, wantScopes: 2},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			r := spl2AnalyzeTest(t, tc.query)
+			if r.Status != Valid || !r.Coverage.SemanticComplete {
+				t.Fatalf("independent union coverage = status %s coverage %+v diagnostics %+v", r.Status, r.Coverage, r.Diagnostics)
+			}
+			final := r.Lineage[len(r.Lineage)-1].After
+			want := map[string]bool{"shared": false, "left_only": true, "right_only": true}
+			if len(final.Fields) != len(want) || !final.Uncertain {
+				t.Fatalf("independent union state = %+v", final)
+			}
+			for _, field := range final.Fields {
+				conditional, ok := want[field.Name]
+				if !ok || field.Conditional != conditional {
+					t.Errorf("independent union field = %+v want conditional=%t", field, conditional)
+				}
+				delete(want, field.Name)
+			}
+			if len(want) != 0 || len(r.Scopes) != tc.wantScopes {
+				t.Fatalf("independent union missing fields %v scopes %+v", want, r.Scopes)
+			}
+		})
+	}
+}
+
+func TestSPL2PipelineJoinSelectedTypes(t *testing.T) {
+	for _, tc := range []struct {
+		joinType         string
+		leftConditional  bool
+		rightConditional bool
+	}{
+		{joinType: "inner"},
+		{joinType: "left", rightConditional: true},
+		{joinType: "outer", leftConditional: true, rightConditional: true},
+	} {
+		t.Run(tc.joinType, func(t *testing.T) {
+			query := `FROM [{left_key:1, left_value:2}] | join type=` + tc.joinType + ` left=L right=R where L.left_key=R.right_key [FROM [{right_key:1, right_value:3}]]`
+			r := spl2AnalyzeTest(t, query)
+			if r.Status != Valid || !r.Coverage.SemanticComplete {
+				t.Fatalf("join coverage = status %s coverage %+v diagnostics %+v", r.Status, r.Coverage, r.Diagnostics)
+			}
+			want := map[string]bool{
+				"left_key": tc.leftConditional, "left_value": tc.leftConditional,
+				"right_key": tc.rightConditional, "right_value": tc.rightConditional,
+			}
+			final := r.Lineage[len(r.Lineage)-1].After
+			if len(final.Fields) != len(want) || final.Uncertain {
+				t.Fatalf("join state = %+v", final)
+			}
+			for _, field := range final.Fields {
+				conditional, ok := want[field.Name]
+				if !ok || field.Conditional != conditional {
+					t.Errorf("join field = %+v want conditional=%t", field, conditional)
+				}
+			}
+			for _, identity := range []string{"left_key", "right_key"} {
+				ref := spl2Ref(t, r, identity, "read")
+				if ref.Binding == "unavailable" || ref.Resolution != "exact" || len(ref.OriginReferenceIDs) == 0 {
+					t.Errorf("join key %s = %+v", identity, ref)
+				}
+			}
+			if len(r.Scopes) != 2 || r.Scopes[1].Kind != "search" {
+				t.Fatalf("join right scope = %+v", r.Scopes)
+			}
+		})
+	}
+}
+
+func TestSPL2PipelineJoinRejectsUnselectedLayouts(t *testing.T) {
+	for _, query := range []string{
+		`FROM [{id:1}] | join left=L right=R where L.id=R.id [FROM [{id:1}]]`,
+		`FROM [{id:1}] | join type=left left=L where L.id=R.id [FROM [{id:1}]]`,
+		`FROM [{id:1}] | join type=right left=L right=R where L.id=R.id [FROM [{id:1}]]`,
+		`FROM [{id:1}] | join type=inner left=L right=R max=2 where L.id=R.id [FROM [{id:1}]]`,
+	} {
+		r := spl2AnalyzeTest(t, query)
+		if r.Status == Valid || r.Coverage.SemanticComplete {
+			t.Errorf("unselected join layout became complete for %q: %+v", query, r)
+		}
+		if spl2HasCode(r, CodeAmbiguousField) {
+			t.Errorf("unselected join layout claimed an output collision for %q: %+v", query, r.Diagnostics)
+		}
+	}
+}
+
+func TestSPL2PipelineUnselectedJoinRetainsQualifiedInputEvidence(t *testing.T) {
+	r := spl2AnalyzeTest(t, `FROM main | join left=L right=R where L.id=R.id AND L.region=R.region [FROM other]`)
+	if r.Status != Incomplete || r.Coverage.SemanticComplete || !spl2HasCode(r, CodeUnsupportedSemantics) || spl2HasCode(r, CodeAmbiguousField) {
+		t.Fatalf("unselected join claimed output ownership: status=%s coverage=%+v diagnostics=%+v", r.Status, r.Coverage, r.Diagnostics)
+	}
+	reads := map[string]Reference{}
+	for _, ref := range r.References {
+		if ref.Kind == "field" && ref.Role == "read" {
+			reads[ref.OriginalName] = ref
+		}
+	}
+	state := r.Lineage[len(r.Lineage)-1].After
+	if !state.Open || !state.Uncertain || len(state.Fields) != 4 {
+		t.Fatalf("unselected join state = %+v", state)
+	}
+	seen := map[string]bool{}
+	for _, field := range state.Fields {
+		key := field.FieldIdentity.Qualifier + "." + field.Name
+		ref, ok := reads[key]
+		if !ok || field.FieldIdentity.Kind != "path" || !reflect.DeepEqual(field.FieldIdentity.Segments, []string{field.Name}) || ref.Binding != "source" || ref.FieldIdentity == nil || !reflect.DeepEqual(*ref.FieldIdentity, field.FieldIdentity) || !reflect.DeepEqual(field.OriginReferenceIDs, []string{ref.ID}) {
+			t.Fatalf("unselected join invented an unqualified output field: field=%+v ref=%+v", field, ref)
+		}
+		seen[key] = true
+	}
+	for _, key := range []string{"L.id", "R.id", "L.region", "R.region"} {
+		if !seen[key] {
+			t.Errorf("missing qualified predicate read %s: %+v", key, state.Fields)
+		}
+	}
+}
+
+func TestSPL2PipelineJoinRejectsUnresolvedKeysAndOutputCollisions(t *testing.T) {
+	unavailable := spl2AnalyzeTest(t, `FROM [{left_key:1}] | join type=inner left=L right=R where L.missing=R.right_key [FROM [{right_key:1}]]`)
+	if unavailable.Status != Invalid || !spl2HasCode(unavailable, CodeUnavailableField) {
+		t.Fatalf("unavailable join key = %+v", unavailable)
+	}
+
+	unresolved := spl2AnalyzeTest(t, `FROM [{left_key:1}] | join type=inner left=L right=R where L.left_key=X.right_key [FROM [{right_key:1}]]`)
+	if unresolved.Status == Valid || unresolved.Coverage.SemanticComplete || !spl2HasCode(unresolved, CodeUnsupportedSemantics) {
+		t.Fatalf("unresolved join qualifier = %+v", unresolved)
+	}
+
+	collision := spl2AnalyzeTest(t, `FROM [{id:1, left_value:2}] | join type=inner left=L right=R where L.id=R.id [FROM [{id:1, right_value:3}]]`)
+	if collision.Status != Incomplete || collision.Coverage.SemanticComplete || !spl2HasCode(collision, CodeAmbiguousField) {
+		t.Fatalf("join output collision = %+v", collision)
+	}
+	state := collision.Lineage[len(collision.Lineage)-1].After
+	fields := map[string]FieldBinding{}
+	for _, field := range state.Fields {
+		fields[field.Name] = field
+	}
+	id := fields["id"]
+	if !state.Uncertain || len(fields) != 3 || len(id.OriginReferenceIDs) != 2 || fields["right_value"].Name == "" {
+		t.Fatalf("join collision state = %+v", state)
+	}
+	assertRequirementGap(t, collision.Requirements.Gaps, CodeAmbiguousField, id.OriginReferenceIDs, []string{CodeAmbiguousField})
+}
+
+func TestSPL2PipelineJoinOpenSourcesInstallSideOwnedKeys(t *testing.T) {
+	query := `FROM main | join type=left left=L right=R where L.id=R.uid [FROM other] | where uid>0`
+	r := spl2AnalyzeTest(t, query)
+	var joinAfter *FieldState
+	for i := range r.Lineage {
+		stage := r.Lineage[i]
+		if stage.ScopeID == "scope-0" && r.Stages[1].ID == stage.StageID {
+			joinAfter = &stage.After
+		}
+	}
+	if joinAfter == nil {
+		t.Fatalf("missing join lineage: %+v", r.Lineage)
+	}
+	uidConditional := false
+	for _, field := range joinAfter.Fields {
+		uidConditional = uidConditional || field.Name == "uid" && field.Conditional
+	}
+	if !uidConditional {
+		t.Fatalf("right key did not become a conditional left-join output: %+v", joinAfter)
+	}
+	downstream := Reference{}
+	for _, ref := range r.References {
+		if ref.OriginalName == "uid" && ref.Role == "read" {
+			downstream = ref
+		}
+	}
+	if downstream.Binding != "indeterminate" || len(downstream.OriginReferenceIDs) == 0 {
+		t.Fatalf("downstream right key = %+v", downstream)
+	}
+
+	collision := spl2AnalyzeTest(t, `FROM main | join type=inner left=L right=R where L.id=R.id [FROM other]`)
+	if collision.Status != Incomplete || !spl2HasCode(collision, CodeAmbiguousField) {
+		t.Fatalf("open-source join collision = %+v", collision)
+	}
+}
+
+func TestSPL2PipelineJoinKeepsDistinctInputIdentities(t *testing.T) {
+	query := `FROM main | where actor.name="x" AND 'actor.name'="x" | join type=inner left=L right=R where L.id=R.uid [FROM other]`
+	r := spl2AnalyzeTest(t, query)
+	for _, diagnostic := range r.Diagnostics {
+		if diagnostic.Code == CodeAmbiguousField {
+			t.Errorf("join invented input ambiguity: %+v", diagnostic)
+		}
+	}
+	state := r.Lineage[len(r.Lineage)-1].After
+	identities := map[string]bool{}
+	for _, field := range state.Fields {
+		if field.Name == "actor.name" {
+			identities[field.FieldIdentity.Kind] = true
+		}
+	}
+	if r.Status != Valid || !identities["atomic"] || !identities["path"] {
+		t.Fatalf("join lost distinct inputs: %+v", r)
+	}
+}
+
+func TestSPL2SelectedFlowRejectsDeferredHeldParserDiagnostic(t *testing.T) {
+	r := spl2ProgramAnalyze(t, `$out = FROM [{left_id:1}] | join type=INNER left=L right=R where L.left_id=R.right_id [FROM [{right_id:1, right_value:2}]];`)
+	if r.Status == Valid || r.Coverage.SemanticComplete {
+		t.Fatalf("held parser diagnostic received selected join effects: %+v", r)
+	}
+	joinStageID := ""
+	for _, stage := range r.Stages {
+		if stage.Command == "join" {
+			joinStageID = stage.ID
+		}
+	}
+	for _, lineage := range r.Lineage {
+		if lineage.StageID != joinStageID {
+			continue
+		}
+		for _, field := range lineage.After.Fields {
+			if field.Name == "right_id" || field.Name == "right_value" {
+				t.Fatalf("held join installed right output in parent lineage: %+v", lineage)
+			}
+		}
+	}
+}
+
+func TestSPL2SelectedAlternativeMergesOwnPrivateIdentityCollisions(t *testing.T) {
+	for _, tc := range []struct {
+		name, query string
+	}{
+		{name: "if", query: `FROM main | if (guard=true) [where actor.name="x"] else [where 'actor.name'="x"]`},
+		{name: "branch", query: `FROM main | branch (guard=true) [where actor.name="x"], (guard=false) [where 'actor.name'="x"]`},
+		{name: "union", query: `union [FROM main | where actor.name="x"], [FROM other | where 'actor.name'="x"]`},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			r := spl2AnalyzeTest(t, tc.query)
+			ambiguities := 0
+			for _, diagnostic := range r.Diagnostics {
+				if diagnostic.Code == CodeAmbiguousField {
+					ambiguities++
+				}
+			}
+			if r.Status != Valid || !r.Coverage.SemanticComplete || ambiguities != 0 {
+				t.Fatalf("selected merge identities = %+v", r)
+			}
+			state := r.Lineage[len(r.Lineage)-1].After
+			actorBindings := []FieldBinding{}
+			for _, field := range state.Fields {
+				if field.Name == "actor.name" {
+					actorBindings = append(actorBindings, field)
+				}
+			}
+			if !state.Uncertain || len(actorBindings) != 2 || actorBindings[0].FieldIdentity.Kind != "atomic" || actorBindings[1].FieldIdentity.Kind != "path" || !actorBindings[0].Conditional || !actorBindings[1].Conditional {
+				t.Fatalf("selected merge identity state = %+v", state)
+			}
+		})
+	}
+}
+
+func TestSPL2SelectedFlowForwardViewAlternatives(t *testing.T) {
+	for _, tc := range []struct {
+		name, command, query string
+	}{
+		{
+			name:    "if",
+			command: "if",
+			query: `$out = FROM synthetic_seed | if (guard=true) [FROM $left] else [FROM $right];
+$left = FROM synthetic_left | fields a;
+$right = FROM synthetic_right | fields b;`,
+		},
+		{
+			name:    "branch",
+			command: "branch",
+			query: `$out = FROM synthetic_seed | branch (guard=true) [FROM $left], (guard=false) [FROM $right];
+$left = FROM synthetic_left | fields a;
+$right = FROM synthetic_right | fields b;`,
+		},
+		{
+			name:    "union",
+			command: "union",
+			query: `$out = union $left, $right;
+$left = FROM synthetic_left | fields a;
+$right = FROM synthetic_right | fields b;`,
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			result, trace, err := analyzeRewriteWithTrace(QueryDocument{Text: tc.query, Language: "spl2"}, nil, nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+			trace.assertReferences(result.References)
+			if result.Status != Valid || !result.Coverage.SemanticComplete || !result.Requirements.Coverage.Complete {
+				t.Fatalf("forward-view %s = %+v", tc.command, result)
+			}
+			stageID := ""
+			for _, stage := range result.Stages {
+				if stage.Command == tc.command {
+					stageID = stage.ID
+					break
+				}
+			}
+			var state *FieldState
+			for i := range result.Lineage {
+				if result.Lineage[i].StageID == stageID {
+					state = &result.Lineage[i].After
+				}
+			}
+			if state == nil || state.Open || len(state.Fields) != 2 {
+				t.Fatalf("forward-view %s state = %+v", tc.command, state)
+			}
+			fields := map[string]FieldBinding{}
+			for _, field := range state.Fields {
+				fields[field.Name] = field
+			}
+			for _, name := range []string{"a", "b"} {
+				field, ok := fields[name]
+				if !ok || !field.Conditional || len(field.OriginReferenceIDs) != 1 {
+					t.Errorf("forward-view %s field %s = %+v", tc.command, name, field)
+				}
+			}
+			for _, dataset := range []string{"synthetic_left", "synthetic_right"} {
+				item := requirementItem(result.Requirements, "dataset", dataset, "read")
+				if item == nil || item.Necessity != "required" || len(item.Occurrences) != 1 {
+					t.Errorf("forward-view %s dataset %s = %+v", tc.command, dataset, item)
+				}
+			}
+			if tc.command != "union" {
+				guard := requirementItem(result.Requirements, "field", "guard", "read")
+				if guard == nil || guard.Necessity != "required" {
+					t.Errorf("forward-view %s guard = %+v", tc.command, guard)
+				}
+			}
+		})
+	}
+}
+
+func TestSPL2PipelineJoinForwardViewsKeepTraceSuffixOnce(t *testing.T) {
+	for _, tc := range []struct {
+		name, options string
+		valid         bool
+	}{
+		{name: "selected", options: "type=inner ", valid: true},
+		{name: "rejected", options: ""},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			query := `$out = FROM $left | join ` + tc.options + `left=L right=R where L.id=R.uid [FROM $right];
+$left = FROM synthetic_left | fields id;
+$right = FROM synthetic_right | fields uid, name;`
+			result, trace, err := analyzeRewriteWithTrace(QueryDocument{Text: query, Language: "spl2"}, nil, nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+			trace.assertReferences(result.References)
+			if tc.valid && (result.Status != Valid || !result.Coverage.SemanticComplete || !result.Requirements.Coverage.Complete) {
+				t.Fatalf("forward join = %+v", result)
+			}
+			if !tc.valid && (result.Status == Valid || result.Coverage.SemanticComplete) {
+				t.Fatalf("rejected forward join was promoted: %+v", result)
+			}
+			for _, dataset := range []string{"synthetic_left", "synthetic_right"} {
+				refs := 0
+				for _, ref := range result.References {
+					if ref.Kind == "dataset" && ref.Role == "read" && ref.NormalizedName == dataset {
+						refs++
+					}
+				}
+				if refs != 1 {
+					t.Errorf("forward join dataset %s references = %d", dataset, refs)
+				}
+			}
+			for _, identity := range []string{"synthetic_left", "synthetic_right"} {
+				item := requirementItem(result.Requirements, "dataset", identity, "read")
+				if item == nil || item.Necessity != "required" || len(item.Occurrences) != 1 {
+					t.Errorf("forward join dataset %s = %+v", identity, item)
+				}
+			}
+		})
+	}
+}
+
+func TestSPL2SelectedFlowRecoveryKeepsAlternativeRequirementsConditional(t *testing.T) {
+	for _, tc := range []struct {
+		name, query string
+		recovered   []string
+		lost        []string
+	}{
+		{
+			name:      "if",
+			query:     `FROM main | if (guard=true) [where left>0] elseif (oops=) [where bad>0] else [where right>0]`,
+			recovered: []string{"left"},
+			lost:      []string{"right"},
+		},
+		{
+			name:      "branch",
+			query:     `FROM main | branch (guard=true) [where left>0], (oops=) [where bad>0], (guard=false) [where right>0]`,
+			recovered: []string{"left", "right"},
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			result, trace, err := analyzeRewriteWithTrace(QueryDocument{Text: tc.query, Language: "spl2"}, nil, nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+			trace.assertReferences(result.References)
+			if result.Status == Valid || result.Coverage.SyntaxComplete || result.Coverage.SemanticComplete || result.Requirements.Coverage.Complete {
+				t.Fatalf("recovered selected flow received complete credit: %+v", result)
+			}
+			guard := requirementItem(result.Requirements, "field", "guard", "read")
+			if guard == nil || guard.Necessity != "required" {
+				t.Errorf("recovered %s guard = %+v", tc.name, guard)
+			}
+			for _, identity := range tc.recovered {
+				item := requirementItem(result.Requirements, "field", identity, "read")
+				if item == nil || item.Necessity != "conditional" {
+					t.Errorf("recovered %s alternative %s = %+v", tc.name, identity, item)
+				}
+			}
+			for _, identity := range tc.lost {
+				if item := requirementItem(result.Requirements, "field", identity, "read"); item != nil {
+					t.Errorf("unrepresented %s alternative %s was invented: %+v", tc.name, identity, item)
+				}
+			}
+			for _, ref := range result.References {
+				if (ref.NormalizedName == "left" || ref.NormalizedName == "right") && ref.ScopeID == "scope-0" {
+					t.Errorf("recovered child read escaped child scope: %+v", ref)
+				}
+			}
+			gap := false
+			for _, candidate := range result.Requirements.Gaps {
+				gap = gap || candidate.Code == CodeUnsupportedSemantics
+			}
+			if !gap {
+				t.Errorf("recovered %s lost-arm evidence has no command gap: %+v", tc.name, result.Requirements.Gaps)
+			}
+		})
+	}
 }
 
 func TestSPL2MetricsSelectorTypedPosition(t *testing.T) {
@@ -313,8 +1306,14 @@ func TestSPL2MetricsSelectorTypedPosition(t *testing.T) {
 }
 
 func TestSPL2UnresolvedMetricsSelectorKeepsItsRole(t *testing.T) {
-	for _, rhs := range []string{`"${catalog}"`, `lower(catalog)`, `catalog.name`} {
-		r := spl2AnalyzeTest(t, `mstats aggregates=[count()] predicate=(index=`+rhs+`)`)
+	for _, tc := range []struct {
+		rhs, field string
+	}{
+		{rhs: `"${catalog}"`, field: "catalog"},
+		{rhs: `lower(catalog)`, field: "catalog"},
+		{rhs: `catalog.name`, field: "catalog.name"},
+	} {
+		r := spl2AnalyzeTest(t, `mstats aggregates=[count()] predicate=(index=`+tc.rhs+`)`)
 		if r.Status != Incomplete || len(r.Dependencies.Indexes) != 0 {
 			t.Fatalf("unresolved selector promoted: %+v", r)
 		}
@@ -323,7 +1322,10 @@ func TestSPL2UnresolvedMetricsSelectorKeepsItsRole(t *testing.T) {
 				t.Fatalf("selector label became field: %+v", r)
 			}
 		}
-		spl2Ref(t, r, "catalog", "read")
+		ref := spl2Ref(t, r, tc.field, "read")
+		if tc.field == "catalog.name" && (ref.Resolution != "exact" || ref.Binding != "source") {
+			t.Fatalf("structural selector operand: %+v", ref)
+		}
 	}
 }
 
@@ -412,36 +1414,39 @@ func TestSPL2SequentialFullState(t *testing.T) {
 	}
 	ref := func(id, name, role, stage, bind string, start, end int, origins ...string) Reference {
 		kind := "field"
+		var identity *FieldIdentity
 		if name == "main" {
 			kind = "dataset"
+		} else {
+			identity = testAtomicIdentityPointer(name)
 		}
-		return Reference{ID: id, OriginalName: text[start:end], NormalizedName: name, Kind: kind, Role: role, StageID: stage, ScopeID: "scope-0", Location: loc(start, end), Resolution: "exact", Binding: bind, OriginReferenceIDs: append([]string{}, origins...)}
+		return Reference{ID: id, OriginalName: text[start:end], NormalizedName: name, FieldIdentity: identity, Kind: kind, Role: role, StageID: stage, ScopeID: "scope-0", Location: loc(start, end), Resolution: "exact", Binding: bind, OriginReferenceIDs: append([]string{}, origins...)}
 	}
 	field := func(name string, ids ...string) FieldBinding {
-		return FieldBinding{Name: name, OriginReferenceIDs: ids}
+		return FieldBinding{Name: name, FieldIdentity: testAtomicIdentity(name), OriginReferenceIDs: ids}
 	}
-	before := FieldState{Fields: []FieldBinding{}, Removed: []string{}, Open: true}
-	assigned := FieldState{Fields: []FieldBinding{field("bytes", "ref-2"), field("x", "ref-1", "ref-2"), field("y", "ref-3", "ref-4", "ref-1", "ref-2")}, Removed: []string{}, Open: true}
-	after := FieldState{Fields: []FieldBinding{field("y", "ref-3", "ref-4", "ref-1", "ref-2")}, Removed: []string{}}
+	before := FieldState{Fields: []FieldBinding{}, Removed: []FieldRemoval{}, Open: true}
+	assigned := FieldState{Fields: []FieldBinding{field("bytes", "ref-2"), field("x", "ref-1", "ref-2"), field("y", "ref-3", "ref-4", "ref-1", "ref-2")}, Removed: []FieldRemoval{}, Open: true}
+	after := FieldState{Fields: []FieldBinding{field("y", "ref-3", "ref-4", "ref-1", "ref-2")}, Removed: []FieldRemoval{}}
 	want := newResult(QueryDocument{Text: text, Language: "spl2", Profile: "splunkd", Version: "current"})
 	want.Status = Valid
 	want.Scopes = []Scope{{ID: "scope-0", Kind: "root", Location: loc(0, len(text))}}
 	want.Stages = []Stage{{"stage-0", "from", 0, "scope-0", loc(0, 9), true}, {"stage-1", "eval", 1, "scope-0", loc(12, 31), true}, {"stage-2", "table", 2, "scope-0", loc(34, 41), true}}
 	want.Dependencies.Datasets = []string{"main"}
 	want.References = []Reference{ref("ref-0", "main", "read", "stage-0", "not_applicable", 5, 9), ref("ref-1", "x", "create", "stage-1", "not_applicable", 17, 18, "ref-2"), ref("ref-2", "bytes", "read", "stage-1", "source", 19, 24), ref("ref-3", "y", "create", "stage-1", "not_applicable", 26, 27, "ref-4", "ref-1", "ref-2"), ref("ref-4", "x", "read", "stage-1", "derived", 28, 29, "ref-1", "ref-2"), ref("ref-5", "y", "read", "stage-2", "derived", 40, 41, "ref-3", "ref-4", "ref-1", "ref-2")}
-	want.Lineage = []Lineage{{StageID: "stage-0", ScopeID: "scope-0", Before: before, After: before, Transitions: []Transition{}}, {StageID: "stage-1", ScopeID: "scope-0", Before: before, After: assigned, Transitions: []Transition{{"create", "x", []string{"ref-2"}, "ref-1", false}, {"create", "y", []string{"ref-4"}, "ref-3", false}}}, {StageID: "stage-2", ScopeID: "scope-0", Before: assigned, After: after, Transitions: []Transition{{"project", "y", []string{"ref-5"}, "", false}}}}
+	want.Lineage = []Lineage{{StageID: "stage-0", ScopeID: "scope-0", Before: before, After: before, Transitions: []Transition{}}, {StageID: "stage-1", ScopeID: "scope-0", Before: before, After: assigned, Transitions: []Transition{{Operation: "create", Output: "x", OutputIdentity: &FieldIdentity{Kind: "atomic", Segments: []string{"x"}}, InputReferenceIDs: []string{"ref-2"}, OutputReferenceID: "ref-1"}, {Operation: "create", Output: "y", OutputIdentity: &FieldIdentity{Kind: "atomic", Segments: []string{"y"}}, InputReferenceIDs: []string{"ref-4"}, OutputReferenceID: "ref-3"}}}, {StageID: "stage-2", ScopeID: "scope-0", Before: assigned, After: after, Transitions: []Transition{{Operation: "project", Output: "y", OutputIdentity: &FieldIdentity{Kind: "atomic", Segments: []string{"y"}}, InputReferenceIDs: []string{"ref-5"}}}}}
 	want.Requirements = RequirementSet{
 		SchemaVersion: 1,
 		Query: RequirementQueryIdentity{
 			Language: "spl2", Profile: "splunkd", Version: "current",
 			QueryDigest: "sha256:159f5b7d4683ac55dd0efac524ba3ea30133c495a91e81af6c695b70d1e16afa",
 		},
-		CapabilityRevision: "sha256:f1391296cfbc616e9bb1b1828e2471e37b60a35c0555654c0734640e072a0437",
+		CapabilityRevision: "sha256:a765813624c6edfd754a4529556f5fd35288f464e759f8d969404a072bef1898",
 		QueryStatus:        Valid,
 		Coverage:           RequirementCoverage{Complete: true, Reasons: []string{}},
 		Items: []RequirementItem{
 			{ID: "req-1", Kind: "dataset", Identity: "main", Role: "read", Necessity: "required", Origin: "direct", Resolution: "exact", Occurrences: []RequirementOccurrence{{ReferenceID: "ref-0", OriginalName: "main", Binding: "not_applicable", StageID: "stage-0", ScopeID: "scope-0", Location: loc(5, 9)}}},
-			{ID: "req-2", Kind: "field", Identity: "bytes", Role: "read", Necessity: "required", Origin: "direct", Resolution: "exact", Occurrences: []RequirementOccurrence{{ReferenceID: "ref-2", OriginalName: "bytes", Binding: "source", StageID: "stage-1", ScopeID: "scope-0", Location: loc(19, 24)}}},
+			{ID: "req-2", Kind: "field", Identity: "bytes", FieldIdentity: testAtomicIdentityPointer("bytes"), Role: "read", Necessity: "required", Origin: "direct", Resolution: "exact", Occurrences: []RequirementOccurrence{{ReferenceID: "ref-2", OriginalName: "bytes", Binding: "source", StageID: "stage-1", ScopeID: "scope-0", Location: loc(19, 24)}}},
 		},
 		Gaps:        []RequirementGap{},
 		Diagnostics: []Diagnostic{},
@@ -490,8 +1495,12 @@ func TestSPL2OrdinaryReadAndTransferBoundaries(t *testing.T) {
 	})
 	t.Run("fields open", func(t *testing.T) {
 		r := spl2AnalyzeTest(t, `FROM main | eval x=bytes, y=x+1 | fields y`)
-		if r.Status != Incomplete || spl2Ref(t, r, "x", "read").Binding != "derived" {
+		if r.Status != Valid || !r.Coverage.SemanticComplete || !r.Requirements.Coverage.Complete || spl2Ref(t, r, "x", "read").Binding != "derived" {
 			t.Fatalf("%+v", r)
+		}
+		last := r.Lineage[len(r.Lineage)-1].After
+		if last.Open || last.Uncertain || len(last.Fields) != 1 || last.Fields[0].Name != "y" {
+			t.Fatalf("fields closure: %+v", last)
 		}
 	})
 	t.Run("internal removal", func(t *testing.T) {
@@ -500,7 +1509,7 @@ func TestSPL2OrdinaryReadAndTransferBoundaries(t *testing.T) {
 			t.Fatal(e)
 		}
 		last := r.Result.Lineage[len(r.Result.Lineage)-1].After
-		if r.Result.Status != Valid || len(last.Fields) != 2 || last.Fields[0].Name != "_raw" || !reflect.DeepEqual(last.Removed, []string{"_time"}) {
+		if r.Result.Status != Valid || len(last.Fields) != 1 || last.Fields[0].Name != "y" || !reflect.DeepEqual(last.Removed, []FieldRemoval{{Name: "_time", FieldIdentity: FieldIdentity{Kind: "atomic", Segments: []string{"_time"}}}}) {
 			t.Fatalf("%+v", r)
 		}
 	})
@@ -614,7 +1623,7 @@ func TestSPL2QuotedDotsAcrossSharedTransfers(t *testing.T) {
 				t.Fatal(err)
 			}
 			expected := "source"
-			if universe.Resolve != nil || (!universe.Complete && strings.HasPrefix(tail, "fields")) {
+			if universe.Resolve != nil {
 				expected = "indeterminate"
 			}
 			found := false
@@ -649,12 +1658,35 @@ func TestSPL2CommandSourceEvidence(t *testing.T) {
 		if r.Result.Status != Valid || !reflect.DeepEqual(r.Expansions, []FieldExpansion{{ReferenceID: "ref-2", Complete: true, Matches: []ExpandedField{{Name: "bits", Binding: "source"}, {Name: "bytes", Binding: "source"}}}}) {
 			t.Fatalf("%+v", r)
 		}
-		want := FieldState{Fields: []FieldBinding{{Name: "_raw", OriginReferenceIDs: []string{}}, {Name: "bits", OriginReferenceIDs: []string{"ref-2"}}, {Name: "bytes", OriginReferenceIDs: []string{"ref-2"}}}, Removed: []string{"_time"}}
+		want := FieldState{Fields: []FieldBinding{{Name: "bits", FieldIdentity: testAtomicIdentity("bits"), OriginReferenceIDs: []string{"ref-2"}}, {Name: "bytes", FieldIdentity: testAtomicIdentity("bytes"), OriginReferenceIDs: []string{"ref-2"}}}, Removed: []FieldRemoval{{Name: "_time", FieldIdentity: testAtomicIdentity("_time")}}}
 		if !reflect.DeepEqual(r.Result.Lineage[2].After, want) {
 			t.Fatalf("%+v", r.Result.Lineage)
 		}
 		if len(r.Result.References) != 3 {
 			t.Fatalf("fabricated internals %+v", r.Result.References)
+		}
+	})
+	t.Run("partial wildcard retains admitted member", func(t *testing.T) {
+		text := `FROM synthetic_events | fields 'synthetic_host*'`
+		r, err := AnalyzeWithSourceUniverse(QueryDocument{Text: text, Language: "spl2"}, SourceUniverse{
+			Fields:   []string{"synthetic_host"},
+			Complete: false,
+			Resolve: func(name string) SourceFieldAdmission {
+				if name == "synthetic_host" {
+					return SourceFieldAdmitted
+				}
+				return SourceFieldIndeterminate
+			},
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if r.Result.Status != Incomplete || len(r.Expansions) != 1 || r.Expansions[0].Complete || !reflect.DeepEqual(r.Expansions[0].Matches, []ExpandedField{{Name: "synthetic_host", Binding: "source"}}) {
+			t.Fatalf("partial wildcard evidence = %+v", r)
+		}
+		last := r.Result.Lineage[len(r.Result.Lineage)-1].After
+		if !last.Open || !last.Uncertain || len(last.Fields) != 1 || last.Fields[0].Name != "synthetic_host" {
+			t.Fatalf("partial wildcard state = %+v", last)
 		}
 	})
 	for _, command := range []string{`eventstats count() AS n`, `streamstats BY host current=true reset before code=500 window=3 count() AS n`, `stats allnum=true count() AS n`, `streamstats current=false count() AS n`} {

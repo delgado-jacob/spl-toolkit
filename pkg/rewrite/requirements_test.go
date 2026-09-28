@@ -186,7 +186,11 @@ func mutateFieldState(state *analysis.FieldState, marker string) {
 		state.Fields[0].Name = marker + "-field"
 		mutateStringCollection(&state.Fields[0].OriginReferenceIDs, marker+"-field-origin")
 	}
-	mutateStringCollection(&state.Removed, marker+"-removed")
+	if len(state.Removed) == 0 {
+		state.Removed = append(state.Removed, analysis.FieldRemoval{Name: marker + "-removed"})
+	} else {
+		state.Removed[0].Name = marker + "-removed"
+	}
 }
 
 func mutateAnalysisCollections(result *analysis.Result, marker string) {

@@ -92,6 +92,9 @@ func finalizeResult(result *Result) {
 	})
 	result.Status = Valid
 	seen := map[string]bool{}
+	for _, reason := range result.Coverage.Reasons {
+		seen[reason] = true
+	}
 	for _, stage := range result.Stages {
 		if !stage.SemanticComplete {
 			result.Coverage.SemanticComplete = false
@@ -113,4 +116,23 @@ func finalizeResult(result *Result) {
 	if result.Status != Invalid && (!result.Coverage.SyntaxComplete || !result.Coverage.SemanticComplete) {
 		result.Status = Incomplete
 	}
+	if result.rewrite != nil && result.rewrite.identityCoverageIncomplete && !result.Coverage.SemanticComplete {
+		hasSemanticDiagnostic := false
+		for _, diagnostic := range result.Diagnostics {
+			hasSemanticDiagnostic = hasSemanticDiagnostic || diagnostic.Code == CodeUnsupportedSemantics
+		}
+		if !hasSemanticDiagnostic {
+			result.Coverage.Reasons = removeCoverageReason(result.Coverage.Reasons, CodeUnsupportedSemantics)
+		}
+	}
+}
+
+func removeCoverageReason(reasons []string, target string) []string {
+	out := reasons[:0]
+	for _, reason := range reasons {
+		if reason != target {
+			out = append(out, reason)
+		}
+	}
+	return out
 }

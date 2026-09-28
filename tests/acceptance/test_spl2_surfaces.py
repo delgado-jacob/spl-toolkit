@@ -42,22 +42,47 @@ def canonical_projection(report):
                            {"start":r["location"]["start"]["offset"], "end":r["location"]["end"]["offset"]}
                            for r in report["references"]],
             "fields": [{"name": f["name"], "conditional": f["conditional"]} for f in after["fields"]],
-            "removed": after["removed"], "open": after["open"], "uncertain": after["uncertain"],
+            "removed": [item["name"] for item in after["removed"]], "open": after["open"], "uncertain": after["uncertain"],
             "stage_commands": [s["command"] for s in report["stages"]],
             "stage_complete": [s["semantic_complete"] for s in report["stages"]]}
+
+
+def test_canonical_projection_uses_removed_names_without_changing_typed_report():
+    typed_removal = {"name": "retired", "field_identity": {"kind": "atomic", "segments": ["retired"]}}
+    report = {"status": "valid", "coverage": {"syntax_complete": True, "semantic_complete": True},
+              "diagnostics": [], "references": [], "stages": [],
+              "lineage": [{"after": {"fields": [], "removed": [typed_removal], "open": False, "uncertain": False}}]}
+    assert canonical_projection(report)["removed"] == ["retired"]
+    assert report["lineage"][0]["after"]["removed"] == [typed_removal]
 
 
 def run_cli(cli, command, document, extra=()):
     document = {"source_id": ""} | document
     args = [str(cli), command, "--format", "json", *extra]
     args += [value for key, flag in SELECTORS if key in document for value in (flag, document[key])]
-    query_args = ["--query", document["text"]] if command == "analyze" else ["--stdin"]
-    result = subprocess.run(args + query_args, input=document["text"].encode("utf-8") if command != "analyze" else None,
+    direct_query = command in ("analyze", "requirements")
+    query_args = ["--query", document["text"]] if direct_query else ["--stdin"]
+    result = subprocess.run(args + query_args, input=None if direct_query else document["text"].encode("utf-8"),
                             capture_output=True, timeout=15)
     assert result.stdout, (document, result.returncode, result.stderr)
     report = json.loads(result.stdout)
-    assert (result.returncode, result.stderr) == (EXITS[report["status"]], b"")
+    status_key = "query_status" if command == "requirements" else "status"
+    assert (result.returncode, result.stderr) == (EXITS[report[status_key]], b"")
     return report
+
+
+def run_native_json(mapper, operation, payload):
+    native = getattr(mapper._lib, "spl_mapper_" + operation)
+    pointer = native(
+        mapper._mapper_id,
+        json.dumps(payload, ensure_ascii=False, separators=(",", ":")).encode("utf-8"),
+    )
+    try:
+        assert pointer and not pointer.contents.error, pointer.contents.error if pointer else None
+        return json.loads(pointer.contents.result)
+    finally:
+        if pointer:
+            mapper._lib.spl_result_free(pointer)
 
 
 def assert_document(report, document):
@@ -67,6 +92,37 @@ def assert_document(report, document):
         start, end = reference["location"]["start"]["offset"], reference["location"]["end"]["offset"]
         assert 0 <= start < end <= len(raw)
         assert raw[start:end].decode("utf-8") == reference["original_name"]
+
+
+def assert_dotted_identity_witness(report, requirements):
+    path = {"kind": "path", "segments": ["actor", "name"]}
+    atomic = {"kind": "atomic", "segments": ["actor.name"]}
+    assert report["status"] == "valid" and report["coverage"]["semantic_complete"]
+    references = report["references"]
+    assert len(references) == 4
+    assert [(ref["original_name"], ref["field_identity"]) for ref in references[1:]] == [
+        ("actor.name", path), ("'actor.name'", atomic), ("'actor.name'", atomic)]
+    assert [ref["role"] for ref in references[1:]] == ["read", "read", "remove"]
+    assert len({ref["id"] for ref in references[1:]}) == 3
+    items = requirements["items"]
+    assert len(items) == 3
+    assert [(item["identity"], item["field_identity"], item["occurrences"][0]["reference_id"])
+            for item in items[1:]] == [
+        ("actor.name", path, references[1]["id"]),
+        ("actor.name", atomic, references[2]["id"])]
+    assert report["requirements"] == requirements
+    assert len(report["lineage"]) == 3
+    projected = report["lineage"][1]
+    assert [(field["field_identity"], field["origin_reference_ids"]) for field in projected["after"]["fields"]] == [
+        (atomic, [references[2]["id"]]), (path, [references[1]["id"]])]
+    assert [(step["output_identity"], step["input_reference_ids"]) for step in projected["transitions"]] == [
+        (path, [references[1]["id"]]), (atomic, [references[2]["id"]])]
+    final = report["lineage"][2]
+    assert [(field["field_identity"], field["origin_reference_ids"]) for field in final["after"]["fields"]] == [
+        (path, [references[1]["id"]])]
+    assert final["after"]["removed"] == [{"name": "actor.name", "field_identity": atomic}]
+    assert [(step["operation"], step["output_identity"], step["output_reference_id"])
+            for step in final["transitions"]] == [("remove", atomic, references[3]["id"])]
 
 
 @pytest.fixture(scope="session")
@@ -81,7 +137,10 @@ def spl2_go_reports(tmp_path_factory):
         path = prepare_transport(source_root, tmp_path_factory.mktemp("spl2-go") / "reports.json")
         expected = digest(path)
     artifact, reports = load_transport(path, FIXTURES, expected, source_root)
-    return {"path": str(path), "sha256": expected, "bytes": path.stat().st_size, "source_hashes": artifact["source_hashes"], "reports": reports}
+    milestone11 = {entry["id"]: entry for entry in artifact["milestone11"]}
+    assert len(milestone11) == 7 and "dotted-identities" in milestone11
+    return {"path": str(path), "sha256": expected, "bytes": path.stat().st_size,
+            "source_hashes": artifact["source_hashes"], "reports": reports, "milestone11": milestone11}
 
 
 @pytest.fixture(scope="session")
@@ -91,8 +150,8 @@ def spl2_evidence(cli_path, spl2_go_reports):
     digest = lambda path: hashlib.sha256(path.read_bytes()).hexdigest()
     record = {"schema_version": 1, "fixture_hashes": {p.name: digest(p) for p in sorted(FIXTURES.glob("*.json"))},
               "artifacts": {str(p): digest(p) for p in (cli_path, required_absolute_path("SPL_SERVER"), library)},
-              "go_transport": {k:v for k,v in spl2_go_reports.items() if k != "reports"},
-              "corpus": [], "semantic_controls": [], "validation": [], "batches": [], "concurrent_calls": 0}
+              "go_transport": {k:v for k,v in spl2_go_reports.items() if k not in ("reports", "milestone11")},
+              "corpus": [], "milestone11": [], "semantic_controls": [], "validation": [], "batches": [], "concurrent_calls": 0}
     yield record
     if destination := os.environ.get("SPL_SPL2_EVIDENCE"):
         Path(destination).write_text(json.dumps(record, indent=2, sort_keys=True, ensure_ascii=False) + "\n", encoding="utf-8")
@@ -116,6 +175,41 @@ def test_spl2_corpus_full_report_parity(filename, cli_path, server_url, spl2_evi
             assert status == 200 and cli == http == native, case["id"]
             spl2_evidence["corpus"].append({"id": case["id"], "document": document,
                                            "canonical": case["canonical"], "cli": cli, "http": http, "native": native})
+
+
+def test_milestone11_representatives_match_go_across_all_analysis_surfaces(
+        cli_path, server_url, spl2_evidence, spl2_go_reports):
+    with open_mapper() as mapper:
+        for identity, expected in spl2_go_reports["milestone11"].items():
+            document = deepcopy(expected["document"])
+            options = {key: value for key, value in document.items() if key != "text"}
+
+            python_analysis = mapper.analyze_query(document["text"], **options)
+            c_analysis = run_native_json(mapper, "analyze_query", document)
+            http_status, http_analysis = post_json(server_url, "/query/analyze", document)
+            cli_analysis = run_cli(cli_path, "analyze", document)
+            assert http_status == 200
+            assert cli_analysis == http_analysis == c_analysis == python_analysis == expected["analysis"], identity
+
+            python_requirements = mapper.requirements_query(document["text"], **options)
+            c_requirements = run_native_json(mapper, "requirements_query", document)
+            http_status, http_requirements = post_json(server_url, "/query/requirements", document)
+            cli_requirements = run_cli(cli_path, "requirements", document)
+            assert http_status == 200
+            assert cli_requirements == http_requirements == c_requirements == python_requirements == expected["requirements"], identity
+
+            for analysis_report in (cli_analysis, http_analysis, c_analysis, python_analysis, expected["analysis"]):
+                assert analysis_report["requirements"] == expected["requirements"], identity
+            if identity == "dotted-identities":
+                for analysis_report, requirement_report in (
+                        (cli_analysis, cli_requirements), (http_analysis, http_requirements),
+                        (c_analysis, c_requirements), (python_analysis, python_requirements),
+                        (expected["analysis"], expected["requirements"])):
+                    assert_dotted_identity_witness(analysis_report, requirement_report)
+            spl2_evidence["milestone11"].append({
+                "id": identity, "document": document, "analysis": expected["analysis"],
+                "requirements": expected["requirements"],
+            })
 
 
 @pytest.mark.parametrize("query,status,output,binding,conditional", [
@@ -253,7 +347,10 @@ def test_spl2_owned_ocsf_path_boundary(language, query, cli_path, server_url, tm
         assert [o["outcome"] for o in native["outcomes"]] == ["required", "permitted_unspecified"]
     else:
         assert native["status"] == "incomplete"
-        assert [o["outcome"] for o in native["outcomes"]] == ["required", "indeterminate"]
+        assert [o["outcome"] for o in native["outcomes"]] == ["indeterminate"]
+        assert [d["code"] for d in native["diagnostics"]] == [
+            "SPL_INDETERMINATE_FIELD", "SPL_UNSUPPORTED_SEMANTICS", "SPL_UNSUPPORTED_SEMANTICS",
+        ]
     status, http = post_json(server_url, "/query/validate-schema", {"document": document, "target": target})
     args = cli_arguments(cli_path, target, tmp_path, case)[4:]
     cli = run_cli(cli_path, "validate-schema", document, args)

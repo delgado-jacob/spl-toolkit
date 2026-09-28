@@ -94,11 +94,80 @@ type SPL2ParserListener interface {
 	// EnterSqlOffsetClause is called when entering the sqlOffsetClause production.
 	EnterSqlOffsetClause(c *SqlOffsetClauseContext)
 
+	// EnterMultilineSqlSelectClause is called when entering the multilineSqlSelectClause production.
+	EnterMultilineSqlSelectClause(c *MultilineSqlSelectClauseContext)
+
+	// EnterMultilineSqlProjection is called when entering the multilineSqlProjection production.
+	EnterMultilineSqlProjection(c *MultilineSqlProjectionContext)
+
+	// EnterMultilineSqlFromClause is called when entering the multilineSqlFromClause production.
+	EnterMultilineSqlFromClause(c *MultilineSqlFromClauseContext)
+
+	// EnterMultilineSqlWhereClause is called when entering the multilineSqlWhereClause production.
+	EnterMultilineSqlWhereClause(c *MultilineSqlWhereClauseContext)
+
+	// EnterMultilineSqlPredicate is called when entering the multilineSqlPredicate production.
+	EnterMultilineSqlPredicate(c *MultilineSqlPredicateContext)
+
+	// EnterMultilineSqlGroupClause is called when entering the multilineSqlGroupClause production.
+	EnterMultilineSqlGroupClause(c *MultilineSqlGroupClauseContext)
+
+	// EnterMultilineSqlGroupKey is called when entering the multilineSqlGroupKey production.
+	EnterMultilineSqlGroupKey(c *MultilineSqlGroupKeyContext)
+
+	// EnterMultilineSqlSpanCall is called when entering the multilineSqlSpanCall production.
+	EnterMultilineSqlSpanCall(c *MultilineSqlSpanCallContext)
+
+	// EnterMultilineSqlOrderClause is called when entering the multilineSqlOrderClause production.
+	EnterMultilineSqlOrderClause(c *MultilineSqlOrderClauseContext)
+
+	// EnterMultilineSqlOrderTerm is called when entering the multilineSqlOrderTerm production.
+	EnterMultilineSqlOrderTerm(c *MultilineSqlOrderTermContext)
+
 	// EnterExistsPredicate is called when entering the existsPredicate production.
 	EnterExistsPredicate(c *ExistsPredicateContext)
 
 	// EnterDataset is called when entering the dataset production.
 	EnterDataset(c *DatasetContext)
+
+	// EnterDottedDataset is called when entering the dottedDataset production.
+	EnterDottedDataset(c *DottedDatasetContext)
+
+	// EnterDatasetPath is called when entering the datasetPath production.
+	EnterDatasetPath(c *DatasetPathContext)
+
+	// EnterDatasetParameter is called when entering the datasetParameter production.
+	EnterDatasetParameter(c *DatasetParameterContext)
+
+	// EnterStaticDatasetDescriptor is called when entering the staticDatasetDescriptor production.
+	EnterStaticDatasetDescriptor(c *StaticDatasetDescriptorContext)
+
+	// EnterDescriptorKindKey is called when entering the descriptorKindKey production.
+	EnterDescriptorKindKey(c *DescriptorKindKeyContext)
+
+	// EnterDescriptorPropertiesKey is called when entering the descriptorPropertiesKey production.
+	EnterDescriptorPropertiesKey(c *DescriptorPropertiesKeyContext)
+
+	// EnterDescriptorProperties is called when entering the descriptorProperties production.
+	EnterDescriptorProperties(c *DescriptorPropertiesContext)
+
+	// EnterDescriptorProperty is called when entering the descriptorProperty production.
+	EnterDescriptorProperty(c *DescriptorPropertyContext)
+
+	// EnterJsonObjectKey is called when entering the jsonObjectKey production.
+	EnterJsonObjectKey(c *JsonObjectKeyContext)
+
+	// EnterJsonLiteral is called when entering the jsonLiteral production.
+	EnterJsonLiteral(c *JsonLiteralContext)
+
+	// EnterJsonStringLiteral is called when entering the jsonStringLiteral production.
+	EnterJsonStringLiteral(c *JsonStringLiteralContext)
+
+	// EnterJsonArray is called when entering the jsonArray production.
+	EnterJsonArray(c *JsonArrayContext)
+
+	// EnterJsonObject is called when entering the jsonObject production.
+	EnterJsonObject(c *JsonObjectContext)
 
 	// EnterGenerator is called when entering the generator production.
 	EnterGenerator(c *GeneratorContext)
@@ -120,6 +189,12 @@ type SPL2ParserListener interface {
 
 	// EnterFieldSelector is called when entering the fieldSelector production.
 	EnterFieldSelector(c *FieldSelectorContext)
+
+	// EnterStructuralFieldSelector is called when entering the structuralFieldSelector production.
+	EnterStructuralFieldSelector(c *StructuralFieldSelectorContext)
+
+	// EnterFieldPath is called when entering the fieldPath production.
+	EnterFieldPath(c *FieldPathContext)
 
 	// EnterTableCommand is called when entering the tableCommand production.
 	EnterTableCommand(c *TableCommandContext)
@@ -165,6 +240,15 @@ type SPL2ParserListener interface {
 
 	// EnterAggregateGroup is called when entering the aggregateGroup production.
 	EnterAggregateGroup(c *AggregateGroupContext)
+
+	// EnterSelectedAggregateGroup is called when entering the selectedAggregateGroup production.
+	EnterSelectedAggregateGroup(c *SelectedAggregateGroupContext)
+
+	// EnterSelectedGroupTerm is called when entering the selectedGroupTerm production.
+	EnterSelectedGroupTerm(c *SelectedGroupTermContext)
+
+	// EnterSelectedSpanGroup is called when entering the selectedSpanGroup production.
+	EnterSelectedSpanGroup(c *SelectedSpanGroupContext)
 
 	// EnterGroupField is called when entering the groupField production.
 	EnterGroupField(c *GroupFieldContext)
@@ -301,6 +385,12 @@ type SPL2ParserListener interface {
 	// EnterUnionDataset is called when entering the unionDataset production.
 	EnterUnionDataset(c *UnionDatasetContext)
 
+	// EnterBranchCommand is called when entering the branchCommand production.
+	EnterBranchCommand(c *BranchCommandContext)
+
+	// EnterBranchArm is called when entering the branchArm production.
+	EnterBranchArm(c *BranchArmContext)
+
 	// EnterIfCommand is called when entering the ifCommand production.
 	EnterIfCommand(c *IfCommandContext)
 
@@ -391,8 +481,86 @@ type SPL2ParserListener interface {
 	// EnterModuleSuffix is called when entering the moduleSuffix production.
 	EnterModuleSuffix(c *ModuleSuffixContext)
 
+	// EnterTrailingPipelineBoundary is called when entering the trailingPipelineBoundary production.
+	EnterTrailingPipelineBoundary(c *TrailingPipelineBoundaryContext)
+
 	// EnterModuleDeclaration is called when entering the moduleDeclaration production.
 	EnterModuleDeclaration(c *ModuleDeclarationContext)
+
+	// EnterAnnotatedStatement is called when entering the annotatedStatement production.
+	EnterAnnotatedStatement(c *AnnotatedStatementContext)
+
+	// EnterModuleStatement is called when entering the moduleStatement production.
+	EnterModuleStatement(c *ModuleStatementContext)
+
+	// EnterUnsupportedModuleBoundary is called when entering the unsupportedModuleBoundary production.
+	EnterUnsupportedModuleBoundary(c *UnsupportedModuleBoundaryContext)
+
+	// EnterUnsupportedImportWildcard is called when entering the unsupportedImportWildcard production.
+	EnterUnsupportedImportWildcard(c *UnsupportedImportWildcardContext)
+
+	// EnterUnsupportedExportView is called when entering the unsupportedExportView production.
+	EnterUnsupportedExportView(c *UnsupportedExportViewContext)
+
+	// EnterUnsupportedFunctionTerminator is called when entering the unsupportedFunctionTerminator production.
+	EnterUnsupportedFunctionTerminator(c *UnsupportedFunctionTerminatorContext)
+
+	// EnterViewDeclaration is called when entering the viewDeclaration production.
+	EnterViewDeclaration(c *ViewDeclarationContext)
+
+	// EnterFunctionDeclaration is called when entering the functionDeclaration production.
+	EnterFunctionDeclaration(c *FunctionDeclarationContext)
+
+	// EnterFunctionParameters is called when entering the functionParameters production.
+	EnterFunctionParameters(c *FunctionParametersContext)
+
+	// EnterFunctionParameter is called when entering the functionParameter production.
+	EnterFunctionParameter(c *FunctionParameterContext)
+
+	// EnterReturnStatement is called when entering the returnStatement production.
+	EnterReturnStatement(c *ReturnStatementContext)
+
+	// EnterImportDeclaration is called when entering the importDeclaration production.
+	EnterImportDeclaration(c *ImportDeclarationContext)
+
+	// EnterImportSelection is called when entering the importSelection production.
+	EnterImportSelection(c *ImportSelectionContext)
+
+	// EnterImportWildcard is called when entering the importWildcard production.
+	EnterImportWildcard(c *ImportWildcardContext)
+
+	// EnterImportList is called when entering the importList production.
+	EnterImportList(c *ImportListContext)
+
+	// EnterAliasedImport is called when entering the aliasedImport production.
+	EnterAliasedImport(c *AliasedImportContext)
+
+	// EnterExportDeclaration is called when entering the exportDeclaration production.
+	EnterExportDeclaration(c *ExportDeclarationContext)
+
+	// EnterExportSelection is called when entering the exportSelection production.
+	EnterExportSelection(c *ExportSelectionContext)
+
+	// EnterExportList is called when entering the exportList production.
+	EnterExportList(c *ExportListContext)
+
+	// EnterAliasedExport is called when entering the aliasedExport production.
+	EnterAliasedExport(c *AliasedExportContext)
+
+	// EnterQualifiedName is called when entering the qualifiedName production.
+	EnterQualifiedName(c *QualifiedNameContext)
+
+	// EnterAnnotations is called when entering the annotations production.
+	EnterAnnotations(c *AnnotationsContext)
+
+	// EnterAnnotation is called when entering the annotation production.
+	EnterAnnotation(c *AnnotationContext)
+
+	// EnterAnnotationStatement is called when entering the annotationStatement production.
+	EnterAnnotationStatement(c *AnnotationStatementContext)
+
+	// EnterStatementTerminator is called when entering the statementTerminator production.
+	EnterStatementTerminator(c *StatementTerminatorContext)
 
 	// EnterSearchCommand is called when entering the searchCommand production.
 	EnterSearchCommand(c *SearchCommandContext)
@@ -505,8 +673,32 @@ type SPL2ParserListener interface {
 	// EnterPrimary is called when entering the primary production.
 	EnterPrimary(c *PrimaryContext)
 
+	// EnterMultilineOperator is called when entering the multilineOperator production.
+	EnterMultilineOperator(c *MultilineOperatorContext)
+
+	// EnterMultilineOperand is called when entering the multilineOperand production.
+	EnterMultilineOperand(c *MultilineOperandContext)
+
+	// EnterMultilineSimpleCall is called when entering the multilineSimpleCall production.
+	EnterMultilineSimpleCall(c *MultilineSimpleCallContext)
+
+	// EnterMultilineAtom is called when entering the multilineAtom production.
+	EnterMultilineAtom(c *MultilineAtomContext)
+
+	// EnterMultilineAccessPart is called when entering the multilineAccessPart production.
+	EnterMultilineAccessPart(c *MultilineAccessPartContext)
+
 	// EnterCall is called when entering the call production.
 	EnterCall(c *CallContext)
+
+	// EnterMultilineCall is called when entering the multilineCall production.
+	EnterMultilineCall(c *MultilineCallContext)
+
+	// EnterMultilineArguments is called when entering the multilineArguments production.
+	EnterMultilineArguments(c *MultilineArgumentsContext)
+
+	// EnterMultilineArgument is called when entering the multilineArgument production.
+	EnterMultilineArgument(c *MultilineArgumentContext)
 
 	// EnterArguments is called when entering the arguments production.
 	EnterArguments(c *ArgumentsContext)
@@ -649,11 +841,80 @@ type SPL2ParserListener interface {
 	// ExitSqlOffsetClause is called when exiting the sqlOffsetClause production.
 	ExitSqlOffsetClause(c *SqlOffsetClauseContext)
 
+	// ExitMultilineSqlSelectClause is called when exiting the multilineSqlSelectClause production.
+	ExitMultilineSqlSelectClause(c *MultilineSqlSelectClauseContext)
+
+	// ExitMultilineSqlProjection is called when exiting the multilineSqlProjection production.
+	ExitMultilineSqlProjection(c *MultilineSqlProjectionContext)
+
+	// ExitMultilineSqlFromClause is called when exiting the multilineSqlFromClause production.
+	ExitMultilineSqlFromClause(c *MultilineSqlFromClauseContext)
+
+	// ExitMultilineSqlWhereClause is called when exiting the multilineSqlWhereClause production.
+	ExitMultilineSqlWhereClause(c *MultilineSqlWhereClauseContext)
+
+	// ExitMultilineSqlPredicate is called when exiting the multilineSqlPredicate production.
+	ExitMultilineSqlPredicate(c *MultilineSqlPredicateContext)
+
+	// ExitMultilineSqlGroupClause is called when exiting the multilineSqlGroupClause production.
+	ExitMultilineSqlGroupClause(c *MultilineSqlGroupClauseContext)
+
+	// ExitMultilineSqlGroupKey is called when exiting the multilineSqlGroupKey production.
+	ExitMultilineSqlGroupKey(c *MultilineSqlGroupKeyContext)
+
+	// ExitMultilineSqlSpanCall is called when exiting the multilineSqlSpanCall production.
+	ExitMultilineSqlSpanCall(c *MultilineSqlSpanCallContext)
+
+	// ExitMultilineSqlOrderClause is called when exiting the multilineSqlOrderClause production.
+	ExitMultilineSqlOrderClause(c *MultilineSqlOrderClauseContext)
+
+	// ExitMultilineSqlOrderTerm is called when exiting the multilineSqlOrderTerm production.
+	ExitMultilineSqlOrderTerm(c *MultilineSqlOrderTermContext)
+
 	// ExitExistsPredicate is called when exiting the existsPredicate production.
 	ExitExistsPredicate(c *ExistsPredicateContext)
 
 	// ExitDataset is called when exiting the dataset production.
 	ExitDataset(c *DatasetContext)
+
+	// ExitDottedDataset is called when exiting the dottedDataset production.
+	ExitDottedDataset(c *DottedDatasetContext)
+
+	// ExitDatasetPath is called when exiting the datasetPath production.
+	ExitDatasetPath(c *DatasetPathContext)
+
+	// ExitDatasetParameter is called when exiting the datasetParameter production.
+	ExitDatasetParameter(c *DatasetParameterContext)
+
+	// ExitStaticDatasetDescriptor is called when exiting the staticDatasetDescriptor production.
+	ExitStaticDatasetDescriptor(c *StaticDatasetDescriptorContext)
+
+	// ExitDescriptorKindKey is called when exiting the descriptorKindKey production.
+	ExitDescriptorKindKey(c *DescriptorKindKeyContext)
+
+	// ExitDescriptorPropertiesKey is called when exiting the descriptorPropertiesKey production.
+	ExitDescriptorPropertiesKey(c *DescriptorPropertiesKeyContext)
+
+	// ExitDescriptorProperties is called when exiting the descriptorProperties production.
+	ExitDescriptorProperties(c *DescriptorPropertiesContext)
+
+	// ExitDescriptorProperty is called when exiting the descriptorProperty production.
+	ExitDescriptorProperty(c *DescriptorPropertyContext)
+
+	// ExitJsonObjectKey is called when exiting the jsonObjectKey production.
+	ExitJsonObjectKey(c *JsonObjectKeyContext)
+
+	// ExitJsonLiteral is called when exiting the jsonLiteral production.
+	ExitJsonLiteral(c *JsonLiteralContext)
+
+	// ExitJsonStringLiteral is called when exiting the jsonStringLiteral production.
+	ExitJsonStringLiteral(c *JsonStringLiteralContext)
+
+	// ExitJsonArray is called when exiting the jsonArray production.
+	ExitJsonArray(c *JsonArrayContext)
+
+	// ExitJsonObject is called when exiting the jsonObject production.
+	ExitJsonObject(c *JsonObjectContext)
 
 	// ExitGenerator is called when exiting the generator production.
 	ExitGenerator(c *GeneratorContext)
@@ -675,6 +936,12 @@ type SPL2ParserListener interface {
 
 	// ExitFieldSelector is called when exiting the fieldSelector production.
 	ExitFieldSelector(c *FieldSelectorContext)
+
+	// ExitStructuralFieldSelector is called when exiting the structuralFieldSelector production.
+	ExitStructuralFieldSelector(c *StructuralFieldSelectorContext)
+
+	// ExitFieldPath is called when exiting the fieldPath production.
+	ExitFieldPath(c *FieldPathContext)
 
 	// ExitTableCommand is called when exiting the tableCommand production.
 	ExitTableCommand(c *TableCommandContext)
@@ -720,6 +987,15 @@ type SPL2ParserListener interface {
 
 	// ExitAggregateGroup is called when exiting the aggregateGroup production.
 	ExitAggregateGroup(c *AggregateGroupContext)
+
+	// ExitSelectedAggregateGroup is called when exiting the selectedAggregateGroup production.
+	ExitSelectedAggregateGroup(c *SelectedAggregateGroupContext)
+
+	// ExitSelectedGroupTerm is called when exiting the selectedGroupTerm production.
+	ExitSelectedGroupTerm(c *SelectedGroupTermContext)
+
+	// ExitSelectedSpanGroup is called when exiting the selectedSpanGroup production.
+	ExitSelectedSpanGroup(c *SelectedSpanGroupContext)
 
 	// ExitGroupField is called when exiting the groupField production.
 	ExitGroupField(c *GroupFieldContext)
@@ -856,6 +1132,12 @@ type SPL2ParserListener interface {
 	// ExitUnionDataset is called when exiting the unionDataset production.
 	ExitUnionDataset(c *UnionDatasetContext)
 
+	// ExitBranchCommand is called when exiting the branchCommand production.
+	ExitBranchCommand(c *BranchCommandContext)
+
+	// ExitBranchArm is called when exiting the branchArm production.
+	ExitBranchArm(c *BranchArmContext)
+
 	// ExitIfCommand is called when exiting the ifCommand production.
 	ExitIfCommand(c *IfCommandContext)
 
@@ -946,8 +1228,86 @@ type SPL2ParserListener interface {
 	// ExitModuleSuffix is called when exiting the moduleSuffix production.
 	ExitModuleSuffix(c *ModuleSuffixContext)
 
+	// ExitTrailingPipelineBoundary is called when exiting the trailingPipelineBoundary production.
+	ExitTrailingPipelineBoundary(c *TrailingPipelineBoundaryContext)
+
 	// ExitModuleDeclaration is called when exiting the moduleDeclaration production.
 	ExitModuleDeclaration(c *ModuleDeclarationContext)
+
+	// ExitAnnotatedStatement is called when exiting the annotatedStatement production.
+	ExitAnnotatedStatement(c *AnnotatedStatementContext)
+
+	// ExitModuleStatement is called when exiting the moduleStatement production.
+	ExitModuleStatement(c *ModuleStatementContext)
+
+	// ExitUnsupportedModuleBoundary is called when exiting the unsupportedModuleBoundary production.
+	ExitUnsupportedModuleBoundary(c *UnsupportedModuleBoundaryContext)
+
+	// ExitUnsupportedImportWildcard is called when exiting the unsupportedImportWildcard production.
+	ExitUnsupportedImportWildcard(c *UnsupportedImportWildcardContext)
+
+	// ExitUnsupportedExportView is called when exiting the unsupportedExportView production.
+	ExitUnsupportedExportView(c *UnsupportedExportViewContext)
+
+	// ExitUnsupportedFunctionTerminator is called when exiting the unsupportedFunctionTerminator production.
+	ExitUnsupportedFunctionTerminator(c *UnsupportedFunctionTerminatorContext)
+
+	// ExitViewDeclaration is called when exiting the viewDeclaration production.
+	ExitViewDeclaration(c *ViewDeclarationContext)
+
+	// ExitFunctionDeclaration is called when exiting the functionDeclaration production.
+	ExitFunctionDeclaration(c *FunctionDeclarationContext)
+
+	// ExitFunctionParameters is called when exiting the functionParameters production.
+	ExitFunctionParameters(c *FunctionParametersContext)
+
+	// ExitFunctionParameter is called when exiting the functionParameter production.
+	ExitFunctionParameter(c *FunctionParameterContext)
+
+	// ExitReturnStatement is called when exiting the returnStatement production.
+	ExitReturnStatement(c *ReturnStatementContext)
+
+	// ExitImportDeclaration is called when exiting the importDeclaration production.
+	ExitImportDeclaration(c *ImportDeclarationContext)
+
+	// ExitImportSelection is called when exiting the importSelection production.
+	ExitImportSelection(c *ImportSelectionContext)
+
+	// ExitImportWildcard is called when exiting the importWildcard production.
+	ExitImportWildcard(c *ImportWildcardContext)
+
+	// ExitImportList is called when exiting the importList production.
+	ExitImportList(c *ImportListContext)
+
+	// ExitAliasedImport is called when exiting the aliasedImport production.
+	ExitAliasedImport(c *AliasedImportContext)
+
+	// ExitExportDeclaration is called when exiting the exportDeclaration production.
+	ExitExportDeclaration(c *ExportDeclarationContext)
+
+	// ExitExportSelection is called when exiting the exportSelection production.
+	ExitExportSelection(c *ExportSelectionContext)
+
+	// ExitExportList is called when exiting the exportList production.
+	ExitExportList(c *ExportListContext)
+
+	// ExitAliasedExport is called when exiting the aliasedExport production.
+	ExitAliasedExport(c *AliasedExportContext)
+
+	// ExitQualifiedName is called when exiting the qualifiedName production.
+	ExitQualifiedName(c *QualifiedNameContext)
+
+	// ExitAnnotations is called when exiting the annotations production.
+	ExitAnnotations(c *AnnotationsContext)
+
+	// ExitAnnotation is called when exiting the annotation production.
+	ExitAnnotation(c *AnnotationContext)
+
+	// ExitAnnotationStatement is called when exiting the annotationStatement production.
+	ExitAnnotationStatement(c *AnnotationStatementContext)
+
+	// ExitStatementTerminator is called when exiting the statementTerminator production.
+	ExitStatementTerminator(c *StatementTerminatorContext)
 
 	// ExitSearchCommand is called when exiting the searchCommand production.
 	ExitSearchCommand(c *SearchCommandContext)
@@ -1060,8 +1420,32 @@ type SPL2ParserListener interface {
 	// ExitPrimary is called when exiting the primary production.
 	ExitPrimary(c *PrimaryContext)
 
+	// ExitMultilineOperator is called when exiting the multilineOperator production.
+	ExitMultilineOperator(c *MultilineOperatorContext)
+
+	// ExitMultilineOperand is called when exiting the multilineOperand production.
+	ExitMultilineOperand(c *MultilineOperandContext)
+
+	// ExitMultilineSimpleCall is called when exiting the multilineSimpleCall production.
+	ExitMultilineSimpleCall(c *MultilineSimpleCallContext)
+
+	// ExitMultilineAtom is called when exiting the multilineAtom production.
+	ExitMultilineAtom(c *MultilineAtomContext)
+
+	// ExitMultilineAccessPart is called when exiting the multilineAccessPart production.
+	ExitMultilineAccessPart(c *MultilineAccessPartContext)
+
 	// ExitCall is called when exiting the call production.
 	ExitCall(c *CallContext)
+
+	// ExitMultilineCall is called when exiting the multilineCall production.
+	ExitMultilineCall(c *MultilineCallContext)
+
+	// ExitMultilineArguments is called when exiting the multilineArguments production.
+	ExitMultilineArguments(c *MultilineArgumentsContext)
+
+	// ExitMultilineArgument is called when exiting the multilineArgument production.
+	ExitMultilineArgument(c *MultilineArgumentContext)
 
 	// ExitArguments is called when exiting the arguments production.
 	ExitArguments(c *ArgumentsContext)

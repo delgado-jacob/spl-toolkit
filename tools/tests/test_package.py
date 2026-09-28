@@ -3,12 +3,14 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 from pathlib import Path, PurePosixPath, PureWindowsPath
 import platform
 import subprocess
 import sys
-import json
+import tarfile
 from types import SimpleNamespace
+import zipfile
 
 import pytest
 
@@ -68,7 +70,7 @@ def test_checkout_source_and_version_are_resolved_from_repository():
     assert support.read_version(PYTHON_DIR) == "0.1.1"
 
 
-def test_docker_build_context_covers_the_native_source_manifest():
+def test_docker_build_context_covers_native_sources_and_packaged_fixture():
     support = load_build_support()
     dockerfile = (ROOT / "Dockerfile").read_text(encoding="utf-8")
     builder = dockerfile.split("\nFROM python:", 1)[0]
@@ -85,7 +87,9 @@ def test_docker_build_context_covers_the_native_source_manifest():
     }
 
     missing = []
-    for relative in support.native_source_files(PYTHON_DIR / "native-source-files.txt"):
+    required = support.native_source_files(PYTHON_DIR / "native-source-files.txt")
+    required.append(support.LINUS_FIXTURE)
+    for relative in required:
         if not any(
             relative == PurePosixPath(path) or PurePosixPath(path) in relative.parents
             for path in copied
@@ -95,7 +99,7 @@ def test_docker_build_context_covers_the_native_source_manifest():
         ):
             missing.append(str(relative))
 
-    assert not missing, f"Docker build context is missing native sources: {missing}"
+    assert not missing, f"Docker build context is missing package inputs: {missing}"
 
 
 def test_staged_source_and_version_are_resolved_without_checkout(tmp_path: Path):
@@ -221,6 +225,20 @@ def test_release_tree_contains_only_allowed_native_source(tmp_path: Path):
     assert not list(release.rglob("*.so"))
     assert not list(release.rglob("*.dylib"))
     assert not list(release.rglob("*.dll"))
+
+
+def test_release_tree_contains_exact_packaged_linus_fixture(tmp_path: Path):
+    support = load_build_support()
+    distribution = support.NativeDistribution({"script_name": str(PYTHON_DIR / "setup.py")})
+    command = support.SourceDistribution(distribution)
+    command.ensure_finalized()
+    release = tmp_path / "release"
+
+    command.make_release_tree(str(release), [])
+
+    packaged = release / "spl_toolkit/testdata/spl2/linus-forms.json"
+    source = ROOT / "testdata/spl2/linus-forms.json"
+    assert packaged.read_bytes() == source.read_bytes()
 
 
 def test_parser_attribution_is_available_from_checkout_and_staged_sdist(tmp_path: Path):
@@ -459,6 +477,7 @@ def test_copied_capability_tests_do_not_require_checkout_version(tmp_path: Path)
             "PYTHONDONTWRITEBYTECODE": "1",
             "SPL_EXPECTED_VERSION": "9.9.9",
             "SPL_SPL2_FIXTURES": str((ROOT / "testdata/spl2").resolve()),
+            "SPL_MILESTONE11_DOCUMENTS": str((ROOT / "tests/acceptance/cli_examples.json").resolve()),
         },
         check=False,
         capture_output=True,
@@ -558,7 +577,7 @@ def test_required_test_copy_rejects_changed_requirement_test(
 
 def test_installed_runner_removes_source_injection(monkeypatch):
     checker = load_package_checker()
-    names = ("PYTHONPATH", "PYTHONHOME", "SPL_NATIVE_LIBRARY", "SPL_EXPECTED_VERSION")
+    names = ("PYTHONPATH", "PYTHONHOME", "SPL_NATIVE_LIBRARY", "SPL_EXPECTED_VERSION", "SPL_MILESTONE11_DOCUMENTS")
     for name in names:
         monkeypatch.setenv(name, "checkout-only")
     assert not set(names).intersection(checker.clean_env())
@@ -675,6 +694,10 @@ def test_installed_schema_fixtures_exist_before_both_suites(tmp_path: Path, monk
     monkeypatch.setattr(checker, "run", lambda command, **kwargs: commands.append(command))
     monkeypatch.setattr(checker, "verify_wheel_sources", lambda *args: payload_hashes)
     monkeypatch.setattr(checker, "verify_wheel_contracts", lambda *args: {"contract": "test"})
+    monkeypatch.setattr(
+        checker, "verify_wheel_linus_fixture",
+        lambda *args: checker.sha256(ROOT / "testdata/spl2/linus-forms.json"),
+    )
     monkeypatch.setattr(checker.subprocess, "run", lambda *args, **kwargs: subprocess.CompletedProcess(
         args, 0, stdout=json.dumps({"installed_module": str(directory / "module.py"),
                                    "loaded_library": str(library), "native_sha256": checker.sha256(library)}) + "\n"))
@@ -698,6 +721,9 @@ def test_installed_schema_fixtures_exist_before_both_suites(tmp_path: Path, monk
         assert spl2.is_absolute() and spl2.is_relative_to(outside)
         for original in (ROOT / "testdata/spl2").glob("*.json"):
             assert (spl2 / original.name).read_bytes() == original.read_bytes()
+        milestone11_documents = Path(env["SPL_MILESTONE11_DOCUMENTS"])
+        assert milestone11_documents.is_absolute() and milestone11_documents.is_relative_to(outside)
+        assert milestone11_documents.read_bytes() == (ROOT / "tests/acceptance/cli_examples.json").read_bytes()
         rewrite = Path(env["SPL_REWRITE_FIXTURES"])
         assert rewrite.is_absolute() and rewrite.is_relative_to(outside) and not rewrite.is_relative_to(ROOT)
         for relative in checker.REWRITE_FIXTURE_FILES:
@@ -735,6 +761,9 @@ def test_installed_schema_fixtures_exist_before_both_suites(tmp_path: Path, monk
     assert result["fixture_hashes"]["rewrite"] == {name: checker.sha256(ROOT / "testdata/rewrite" / name) for name in checker.REWRITE_FIXTURE_FILES}
     assert result["fixture_hashes"]["requirements"] == checker.sha256(
         ROOT / "testdata/requirements/cases.json"
+    )
+    assert result["fixture_hashes"]["milestone11_documents"] == checker.sha256(
+        ROOT / "tests/acceptance/cli_examples.json"
     )
     assert result["documentation_hashes"]["python/README.md"] == checker.sha256(
         ROOT / "python/README.md"
@@ -959,12 +988,121 @@ def test_rewrite_fixture_copy_rejects_missing_or_changed_input(tmp_path, monkeyp
 
 def test_spl2_fixture_copy_and_source_override(tmp_path, monkeypatch):
     checker = load_package_checker()
+    assert "linus-forms.json" in checker.SPL2_FIXTURE_FILES
     monkeypatch.setenv("SPL_SPL2_FIXTURES", "checkout-only")
     assert "SPL_SPL2_FIXTURES" not in checker.clean_env()
     destination = tmp_path / "spl2"
     hashes = checker.copy_spl2_fixtures(ROOT / "testdata/spl2", destination)
     assert hashes == {p.name: checker.sha256(p) for p in (ROOT / "testdata/spl2").glob("*.json")}
     assert hashes == {p.name: checker.sha256(p) for p in destination.glob("*.json")}
+    assert hashes["linus-forms.json"] == checker.verify_linus_fixture(destination / "linus-forms.json")
+
+
+def test_linus_fixture_rejects_external_source_metadata(tmp_path):
+    checker = load_package_checker()
+    fixture = json.loads((ROOT / "testdata/spl2/linus-forms.json").read_text(encoding="utf-8"))
+    fixture["obligations"][0]["source_path"] = "/external/linus_security_content/detections/private.yml"
+    path = tmp_path / "linus-forms.json"
+    path.write_text(json.dumps(fixture), encoding="utf-8")
+
+    with pytest.raises(AssertionError, match="external Linus source metadata"):
+        checker.verify_linus_fixture(path)
+
+
+def test_linus_fixture_hash_is_required_in_wheel_and_sdist_evidence():
+    checker = load_package_checker()
+    expected = checker.sha256(ROOT / "testdata/spl2/linus-forms.json")
+    wheel = {
+        "fixture_hashes": {"spl2": {"linus-forms.json": expected}},
+        "packaged_fixture_hashes": {"spl2": {"linus-forms.json": expected}},
+    }
+    rebuilt = {
+        "fixture_hashes": {"spl2": {"linus-forms.json": expected}},
+        "packaged_fixture_hashes": {"spl2": {"linus-forms.json": expected}},
+    }
+
+    checker.assert_linus_fixture_evidence(wheel, ROOT / "testdata/spl2/linus-forms.json", "wheel")
+    checker.assert_linus_fixture_evidence(rebuilt, ROOT / "testdata/spl2/linus-forms.json", "rebuilt sdist wheel")
+    for category in ("fixture_hashes", "packaged_fixture_hashes"):
+        missing = json.loads(json.dumps(rebuilt))
+        missing[category]["spl2"].clear()
+        with pytest.raises(AssertionError, match="rebuilt sdist wheel.*linus-forms.json"):
+            checker.assert_linus_fixture_evidence(
+                missing, ROOT / "testdata/spl2/linus-forms.json", "rebuilt sdist wheel"
+            )
+
+
+def test_wheel_and_sdist_contain_exact_private_linus_fixture(tmp_path: Path):
+    checker = load_package_checker()
+    source = ROOT / "testdata/spl2/linus-forms.json"
+    expected = checker.sha256(source)
+    wheel = tmp_path / "package.whl"
+    with zipfile.ZipFile(wheel, "w") as archive:
+        archive.writestr("spl_toolkit/testdata/spl2/linus-forms.json", source.read_bytes())
+    sdist_root = tmp_path / "spl_toolkit-0.1.1"
+    packaged = sdist_root / "spl_toolkit/testdata/spl2/linus-forms.json"
+    packaged.parent.mkdir(parents=True)
+    packaged.write_bytes(source.read_bytes())
+    sdist = tmp_path / "package.tar.gz"
+    with tarfile.open(sdist, "w:gz") as archive:
+        archive.add(sdist_root, arcname=sdist_root.name)
+
+    assert checker.verify_wheel_linus_fixture(wheel, source) == expected
+    assert checker.verify_sdist_linus_fixture(sdist, source) == expected
+
+
+def test_wheel_linus_fixture_rejects_duplicate_members(tmp_path: Path):
+    checker = load_package_checker()
+    source = ROOT / "testdata/spl2/linus-forms.json"
+    private = json.loads(source.read_text(encoding="utf-8"))
+    private["obligations"][0]["source_path"] = "/external/linus_security_content/detections/private.yml"
+    wheel = tmp_path / "package.whl"
+    with zipfile.ZipFile(wheel, "w") as archive:
+        archive.writestr(
+            "spl_toolkit/testdata/spl2/linus-forms.json", json.dumps(private).encode()
+        )
+        with pytest.warns(UserWarning, match="Duplicate name"):
+            archive.writestr(
+                "spl_toolkit/testdata/spl2/linus-forms.json", source.read_bytes()
+            )
+
+    with pytest.raises(AssertionError, match="wheel contains 2 packaged linus-forms.json members"):
+        checker.verify_wheel_linus_fixture(wheel, source)
+
+
+@pytest.mark.parametrize("artifact", ["wheel", "sdist"])
+@pytest.mark.parametrize("change", ["stale", "external"])
+def test_packaged_linus_fixture_rejects_changed_bytes_and_external_metadata(
+    tmp_path: Path, artifact: str, change: str,
+):
+    checker = load_package_checker()
+    source = ROOT / "testdata/spl2/linus-forms.json"
+    fixture = json.loads(source.read_text(encoding="utf-8"))
+    if change == "stale":
+        fixture["obligations"][0]["description"] += " stale"
+        message = "bytes/hash mismatch"
+    else:
+        fixture["obligations"][0]["source_path"] = "/external/linus_security_content/detections/private.yml"
+        message = "external Linus source metadata"
+    payload = json.dumps(fixture).encode()
+
+    if artifact == "wheel":
+        archive_path = tmp_path / "package.whl"
+        with zipfile.ZipFile(archive_path, "w") as archive:
+            archive.writestr("spl_toolkit/testdata/spl2/linus-forms.json", payload)
+        verify = checker.verify_wheel_linus_fixture
+    else:
+        archive_root = tmp_path / "spl_toolkit-0.1.1"
+        packaged = archive_root / "spl_toolkit/testdata/spl2/linus-forms.json"
+        packaged.parent.mkdir(parents=True)
+        packaged.write_bytes(payload)
+        archive_path = tmp_path / "package.tar.gz"
+        with tarfile.open(archive_path, "w:gz") as archive:
+            archive.add(archive_root, arcname=archive_root.name)
+        verify = checker.verify_sdist_linus_fixture
+
+    with pytest.raises(AssertionError, match=message):
+        verify(archive_path, source)
 
 
 def test_spl2_fixture_copy_rejects_missing_or_changed_input(tmp_path, monkeypatch):

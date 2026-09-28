@@ -123,11 +123,103 @@ func (v *BaseSPL2ParserVisitor) VisitSqlOffsetClause(ctx *SqlOffsetClauseContext
 	return v.VisitChildren(ctx)
 }
 
+func (v *BaseSPL2ParserVisitor) VisitMultilineSqlSelectClause(ctx *MultilineSqlSelectClauseContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitMultilineSqlProjection(ctx *MultilineSqlProjectionContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitMultilineSqlFromClause(ctx *MultilineSqlFromClauseContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitMultilineSqlWhereClause(ctx *MultilineSqlWhereClauseContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitMultilineSqlPredicate(ctx *MultilineSqlPredicateContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitMultilineSqlGroupClause(ctx *MultilineSqlGroupClauseContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitMultilineSqlGroupKey(ctx *MultilineSqlGroupKeyContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitMultilineSqlSpanCall(ctx *MultilineSqlSpanCallContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitMultilineSqlOrderClause(ctx *MultilineSqlOrderClauseContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitMultilineSqlOrderTerm(ctx *MultilineSqlOrderTermContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
 func (v *BaseSPL2ParserVisitor) VisitExistsPredicate(ctx *ExistsPredicateContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
 func (v *BaseSPL2ParserVisitor) VisitDataset(ctx *DatasetContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitDottedDataset(ctx *DottedDatasetContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitDatasetPath(ctx *DatasetPathContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitDatasetParameter(ctx *DatasetParameterContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitStaticDatasetDescriptor(ctx *StaticDatasetDescriptorContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitDescriptorKindKey(ctx *DescriptorKindKeyContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitDescriptorPropertiesKey(ctx *DescriptorPropertiesKeyContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitDescriptorProperties(ctx *DescriptorPropertiesContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitDescriptorProperty(ctx *DescriptorPropertyContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitJsonObjectKey(ctx *JsonObjectKeyContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitJsonLiteral(ctx *JsonLiteralContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitJsonStringLiteral(ctx *JsonStringLiteralContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitJsonArray(ctx *JsonArrayContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitJsonObject(ctx *JsonObjectContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
@@ -156,6 +248,14 @@ func (v *BaseSPL2ParserVisitor) VisitFieldSelection(ctx *FieldSelectionContext) 
 }
 
 func (v *BaseSPL2ParserVisitor) VisitFieldSelector(ctx *FieldSelectorContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitStructuralFieldSelector(ctx *StructuralFieldSelectorContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitFieldPath(ctx *FieldPathContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
@@ -216,6 +316,18 @@ func (v *BaseSPL2ParserVisitor) VisitAggregateAlias(ctx *AggregateAliasContext) 
 }
 
 func (v *BaseSPL2ParserVisitor) VisitAggregateGroup(ctx *AggregateGroupContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitSelectedAggregateGroup(ctx *SelectedAggregateGroupContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitSelectedGroupTerm(ctx *SelectedGroupTermContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitSelectedSpanGroup(ctx *SelectedSpanGroupContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
@@ -399,6 +511,14 @@ func (v *BaseSPL2ParserVisitor) VisitUnionDataset(ctx *UnionDatasetContext) inte
 	return v.VisitChildren(ctx)
 }
 
+func (v *BaseSPL2ParserVisitor) VisitBranchCommand(ctx *BranchCommandContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitBranchArm(ctx *BranchArmContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
 func (v *BaseSPL2ParserVisitor) VisitIfCommand(ctx *IfCommandContext) interface{} {
 	return v.VisitChildren(ctx)
 }
@@ -519,7 +639,111 @@ func (v *BaseSPL2ParserVisitor) VisitModuleSuffix(ctx *ModuleSuffixContext) inte
 	return v.VisitChildren(ctx)
 }
 
+func (v *BaseSPL2ParserVisitor) VisitTrailingPipelineBoundary(ctx *TrailingPipelineBoundaryContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
 func (v *BaseSPL2ParserVisitor) VisitModuleDeclaration(ctx *ModuleDeclarationContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitAnnotatedStatement(ctx *AnnotatedStatementContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitModuleStatement(ctx *ModuleStatementContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitUnsupportedModuleBoundary(ctx *UnsupportedModuleBoundaryContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitUnsupportedImportWildcard(ctx *UnsupportedImportWildcardContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitUnsupportedExportView(ctx *UnsupportedExportViewContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitUnsupportedFunctionTerminator(ctx *UnsupportedFunctionTerminatorContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitViewDeclaration(ctx *ViewDeclarationContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitFunctionDeclaration(ctx *FunctionDeclarationContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitFunctionParameters(ctx *FunctionParametersContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitFunctionParameter(ctx *FunctionParameterContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitReturnStatement(ctx *ReturnStatementContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitImportDeclaration(ctx *ImportDeclarationContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitImportSelection(ctx *ImportSelectionContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitImportWildcard(ctx *ImportWildcardContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitImportList(ctx *ImportListContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitAliasedImport(ctx *AliasedImportContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitExportDeclaration(ctx *ExportDeclarationContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitExportSelection(ctx *ExportSelectionContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitExportList(ctx *ExportListContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitAliasedExport(ctx *AliasedExportContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitQualifiedName(ctx *QualifiedNameContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitAnnotations(ctx *AnnotationsContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitAnnotation(ctx *AnnotationContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitAnnotationStatement(ctx *AnnotationStatementContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitStatementTerminator(ctx *StatementTerminatorContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
@@ -671,7 +895,39 @@ func (v *BaseSPL2ParserVisitor) VisitPrimary(ctx *PrimaryContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
+func (v *BaseSPL2ParserVisitor) VisitMultilineOperator(ctx *MultilineOperatorContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitMultilineOperand(ctx *MultilineOperandContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitMultilineSimpleCall(ctx *MultilineSimpleCallContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitMultilineAtom(ctx *MultilineAtomContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitMultilineAccessPart(ctx *MultilineAccessPartContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
 func (v *BaseSPL2ParserVisitor) VisitCall(ctx *CallContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitMultilineCall(ctx *MultilineCallContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitMultilineArguments(ctx *MultilineArgumentsContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseSPL2ParserVisitor) VisitMultilineArgument(ctx *MultilineArgumentContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 

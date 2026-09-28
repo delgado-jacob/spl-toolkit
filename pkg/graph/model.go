@@ -41,6 +41,8 @@ type Node struct {
 	Position         *int                     `json:"position,omitempty"`
 	SemanticComplete *bool                    `json:"semantic_complete,omitempty"`
 	Name             string                   `json:"name,omitempty"`
+	FieldIdentity    *analysis.FieldIdentity  `json:"field_identity,omitempty"`
+	OutputIdentity   *analysis.FieldIdentity  `json:"output_identity,omitempty"`
 	OriginalName     string                   `json:"original_name,omitempty"`
 	DependencyKind   string                   `json:"dependency_kind,omitempty"`
 	Role             string                   `json:"role,omitempty"`

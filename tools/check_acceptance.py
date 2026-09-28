@@ -64,6 +64,7 @@ TOOLING_FIXTURE_KEYS = {
     "sarif-cases.json", "example-corpus.json", "example-target.json",
     "example-corpus-missing-file.json", "../rewrite/forms.json",
 }
+LINUS_FIXTURE_SHA = hashlib.sha256((ROOT / "testdata/spl2/linus-forms.json").read_bytes()).hexdigest()
 COMMON_FIELDS = {"schema_version", "kind", "source_sha", "status"}
 KIND_FIELDS = {
     "native": {"target", "architecture", "environment"},
@@ -77,6 +78,7 @@ KIND_FIELDS = {
         "cli_examples", "surface_parity", "version_agreement", "required_test_files",
         "required_test_hashes",
         "wheel_contract_hashes", "tooling_source_hashes", "tooling_fixture_hashes",
+        "packaged_fixture_hashes",
         "machine_contract_tests", "fixture_hashes", "requirements_surface_evidence",
     },
     "go-floor": {"go_version"},
@@ -227,6 +229,22 @@ def _validate_requirements_evidence(record: dict, errors: list[str], label: str)
     for field, minimum in minimums.items():
         if type(evidence.get(field)) is not int or evidence[field] < minimum:
             errors.append(f"{label}: requirements_surface_evidence {field} is below {minimum}")
+
+
+def _validate_packaged_fixture_evidence(record: dict, errors: list[str], label: str) -> None:
+    packaged = record.get("packaged_fixture_hashes")
+    if (not isinstance(packaged, dict) or set(packaged) != {"spl2"}
+            or not isinstance(packaged["spl2"], dict)
+            or set(packaged["spl2"]) != {"linus-forms.json"}):
+        errors.append(f"{label}: packaged_fixture_hashes has incorrect paths")
+        return
+    digest = packaged["spl2"]["linus-forms.json"]
+    if not isinstance(digest, str) or digest != LINUS_FIXTURE_SHA:
+        errors.append(f"{label}: packaged_fixture_hashes differs from current source")
+    fixtures = record.get("fixture_hashes")
+    spl2 = fixtures.get("spl2") if isinstance(fixtures, dict) else None
+    if not isinstance(spl2, dict) or spl2.get("linus-forms.json") != digest:
+        errors.append(f"{label}: packaged_fixture_hashes differs from copied SPL2 fixture")
 
 
 def _normalized_architecture(value: object) -> str:
@@ -398,6 +416,7 @@ def validate_records(records: list[dict], source_sha: str) -> list[str]:
                     errors.append(f"{label}: {gate} must be passed")
             _validate_counts(record, errors, label)
             _validate_requirements_evidence(record, errors, label)
+            _validate_packaged_fixture_evidence(record, errors, label)
             _validate_required_test_hashes(record, errors, label)
             for field, expected in (
                 ("wheel_contract_hashes", WHEEL_CONTRACT_KEYS),

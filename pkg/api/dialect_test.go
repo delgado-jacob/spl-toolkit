@@ -249,12 +249,57 @@ func TestDialectMaintainedAPIExamples(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	encodedWant, err := json.Marshal(want)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var publicWant analysis.CapabilityManifest
+	if err = json.Unmarshal(encodedWant, &publicWant); err != nil {
+		t.Fatal(err)
+	}
 	var manifest analysis.CapabilityManifest
 	if w.Code != 200 {
 		t.Fatal(w.Code, w.Body)
 	}
-	if err = json.Unmarshal(w.Body.Bytes(), &manifest); err != nil || !reflect.DeepEqual(manifest, want) {
+	if err = json.Unmarshal(w.Body.Bytes(), &manifest); err != nil || !reflect.DeepEqual(manifest, publicWant) {
 		t.Fatalf("capabilities JSON mismatch: %v %s", err, w.Body)
+	}
+	var publicManifest map[string]any
+	if err = json.Unmarshal(w.Body.Bytes(), &publicManifest); err != nil {
+		t.Fatal(err)
+	}
+	for _, evidence := range publicManifest["evidence"].([]any) {
+		semantics, ok := evidence.(map[string]any)["observations"].(map[string]any)["semantics"].(map[string]any)
+		if !ok {
+			continue
+		}
+		for _, privateKey := range []string{"scopes", "lineage", "final_field_state"} {
+			if _, present := semantics[privateKey]; present {
+				t.Fatalf("private authored key %q escaped in public semantics", privateKey)
+			}
+		}
+		stages, _ := semantics["stages"].([]any)
+		for _, stage := range stages {
+			for _, privateKey := range []string{"id", "scope_id"} {
+				if _, present := stage.(map[string]any)[privateKey]; present {
+					t.Fatalf("private authored stage key %q escaped", privateKey)
+				}
+			}
+		}
+		references, _ := semantics["references"].([]any)
+		for _, reference := range references {
+			if _, present := reference.(map[string]any)["id"]; present {
+				t.Fatal("private authored reference key \"id\" escaped")
+			}
+		}
+		transitions, _ := semantics["transitions"].([]any)
+		for _, transition := range transitions {
+			for _, privateKey := range []string{"input_reference_ids", "output_reference_id", "conditional"} {
+				if _, present := transition.(map[string]any)[privateKey]; present {
+					t.Fatalf("private authored transition key %q escaped", privateKey)
+				}
+			}
+		}
 	}
 	if manifest.ToolkitVersion == "" || len(manifest.Records) == 0 || len(manifest.Evidence) == 0 {
 		t.Fatalf("incomplete SPL2 manifest: toolkit=%q records=%d evidence=%d", manifest.ToolkitVersion, len(manifest.Records), len(manifest.Evidence))
@@ -266,7 +311,7 @@ func TestDialectMaintainedAPIExamples(t *testing.T) {
 	if fresh.Code != 200 {
 		t.Fatal(fresh.Code, fresh.Body)
 	}
-	if err = json.Unmarshal(fresh.Body.Bytes(), &freshManifest); err != nil || !reflect.DeepEqual(freshManifest, want) {
+	if err = json.Unmarshal(fresh.Body.Bytes(), &freshManifest); err != nil || !reflect.DeepEqual(freshManifest, publicWant) {
 		t.Fatalf("SPL2 manifest mutation escaped into a later response: %v %s", err, fresh.Body)
 	}
 }

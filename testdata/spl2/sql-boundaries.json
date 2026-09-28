@@ -1619,16 +1619,20 @@
           "binding": "not_applicable",
           "scope_start": 23,
           "scope_end": 76
-        }
-      ],
-      "forbidden_references": [
+        },
         {
           "original_name": "o.item",
+          "normalized_name": "item",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
           "start": 68,
           "end": 74,
-          "binding": "source"
+          "scope_start": 23,
+          "scope_end": 76
         }
       ],
+      "forbidden_references": [],
       "required_fields": [],
       "forbidden_field_names": [
         "o.item"
@@ -1651,7 +1655,7 @@
         {
           "command": "where",
           "start": 56,
-          "semantic_complete": false,
+          "semantic_complete": true,
           "scope_start": 23,
           "scope_end": 76
         },
@@ -1724,10 +1728,10 @@
         },
         {
           "original_name": "o.item",
-          "normalized_name": "o.item",
+          "normalized_name": "item",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 68,
           "end": 74
         }
@@ -1748,7 +1752,7 @@
         false,
         true,
         true,
-        false
+        true
       ]
     }
   },
@@ -1825,16 +1829,20 @@
           "binding": "not_applicable",
           "scope_start": 23,
           "scope_end": 72
-        }
-      ],
-      "forbidden_references": [
+        },
         {
           "original_name": "o.item",
+          "normalized_name": "item",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
           "start": 55,
           "end": 61,
-          "binding": "source"
+          "scope_start": 23,
+          "scope_end": 72
         }
       ],
+      "forbidden_references": [],
       "required_fields": [],
       "forbidden_field_names": [
         "o.item"
@@ -1857,7 +1865,7 @@
         {
           "command": "where",
           "start": 46,
-          "semantic_complete": false,
+          "semantic_complete": true,
           "scope_start": 23,
           "scope_end": 72
         },
@@ -1921,10 +1929,10 @@
         },
         {
           "original_name": "o.item",
-          "normalized_name": "o.item",
+          "normalized_name": "item",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 55,
           "end": 61
         },
@@ -1953,7 +1961,7 @@
         true,
         false,
         true,
-        false,
+        true,
         true
       ]
     }
@@ -2030,16 +2038,20 @@
           "binding": "not_applicable",
           "scope_start": 23,
           "scope_end": 77
-        }
-      ],
-      "forbidden_references": [
+        },
         {
           "original_name": "o.item",
+          "normalized_name": "item",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
           "start": 70,
           "end": 76,
-          "binding": "source"
+          "scope_start": 23,
+          "scope_end": 77
         }
       ],
+      "forbidden_references": [],
       "required_fields": [],
       "forbidden_field_names": [
         "id"
@@ -2115,10 +2127,10 @@
         },
         {
           "original_name": "o.item",
-          "normalized_name": "o.item",
+          "normalized_name": "item",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 70,
           "end": 76
         }
@@ -2139,7 +2151,7 @@
         false,
         true,
         true,
-        false
+        true
       ]
     }
   },
@@ -3769,16 +3781,20 @@
           "binding": "not_applicable",
           "scope_start": 23,
           "scope_end": 81
-        }
-      ],
-      "forbidden_references": [
+        },
         {
           "original_name": "o.item",
+          "normalized_name": "item",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
           "start": 65,
           "end": 71,
-          "binding": "source"
+          "scope_start": 23,
+          "scope_end": 81
         }
       ],
+      "forbidden_references": [],
       "required_fields": [],
       "forbidden_field_names": [
         "id"
@@ -3854,10 +3870,10 @@
         },
         {
           "original_name": "o.item",
-          "normalized_name": "o.item",
+          "normalized_name": "item",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 65,
           "end": 71
         }
@@ -3879,7 +3895,7 @@
         false,
         true,
         true,
-        false,
+        true,
         true
       ]
     }
@@ -3957,17 +3973,26 @@
           "binding": "not_applicable",
           "scope_start": 54,
           "scope_end": 103
-        }
-      ],
-      "forbidden_references": [
+        },
         {
           "original_name": "o.item",
+          "normalized_name": "item",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
           "start": 96,
           "end": 102,
-          "binding": "source"
+          "scope_start": 54,
+          "scope_end": 103
         }
       ],
-      "required_fields": [],
+      "forbidden_references": [],
+      "required_fields": [
+        {
+          "name": "item",
+          "conditional": false
+        }
+      ],
       "forbidden_field_names": [
         "o.item"
       ],
@@ -3989,7 +4014,7 @@
         {
           "command": "where",
           "start": 87,
-          "semantic_complete": false,
+          "semantic_complete": true,
           "scope_start": 54,
           "scope_end": 103
         },
@@ -4087,10 +4112,10 @@
         },
         {
           "original_name": "o.item",
-          "normalized_name": "o.item",
+          "normalized_name": "item",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 96,
           "end": 102
         }
@@ -4120,7 +4145,7 @@
         false,
         true,
         true,
-        false
+        true
       ]
     }
   },
@@ -4196,17 +4221,26 @@
           "binding": "not_applicable",
           "scope_start": 23,
           "scope_end": 72
-        }
-      ],
-      "forbidden_references": [
+        },
         {
           "original_name": "o.item",
+          "normalized_name": "item",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
           "start": 65,
           "end": 71,
-          "binding": "source"
+          "scope_start": 23,
+          "scope_end": 72
         }
       ],
-      "required_fields": [],
+      "forbidden_references": [],
+      "required_fields": [
+        {
+          "name": "item",
+          "conditional": true
+        }
+      ],
       "forbidden_field_names": [
         "id"
       ],
@@ -4281,10 +4315,10 @@
         },
         {
           "original_name": "o.item",
-          "normalized_name": "o.item",
+          "normalized_name": "item",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 65,
           "end": 71
         },
@@ -4330,7 +4364,7 @@
         false,
         true,
         true,
-        false,
+        true,
         true,
         false
       ]
@@ -4583,16 +4617,20 @@
           "binding": "not_applicable",
           "scope_start": 23,
           "scope_end": 72
-        }
-      ],
-      "forbidden_references": [
+        },
         {
           "original_name": "z.item",
+          "normalized_name": "z.item",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
           "start": 65,
           "end": 71,
-          "binding": "source"
+          "scope_start": 23,
+          "scope_end": 72
         }
       ],
+      "forbidden_references": [],
       "required_fields": [],
       "forbidden_field_names": [
         "id"
@@ -4667,20 +4705,11 @@
           "end": 64
         },
         {
-          "original_name": "z",
-          "normalized_name": "z",
-          "kind": "field",
-          "role": "read",
-          "binding": "source",
-          "start": 65,
-          "end": 66
-        },
-        {
           "original_name": "z.item",
           "normalized_name": "z.item",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 65,
           "end": 71
         }
@@ -4701,7 +4730,7 @@
         false,
         true,
         true,
-        false
+        true
       ]
     }
   },
@@ -4777,16 +4806,20 @@
           "binding": "not_applicable",
           "scope_start": 23,
           "scope_end": 72
-        }
-      ],
-      "forbidden_references": [
+        },
         {
           "original_name": "o.item",
+          "normalized_name": "item",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
           "start": 65,
           "end": 71,
-          "binding": "source"
+          "scope_start": 23,
+          "scope_end": 72
         }
       ],
+      "forbidden_references": [],
       "required_fields": [],
       "forbidden_field_names": [
         "id"
@@ -4862,10 +4895,10 @@
         },
         {
           "original_name": "o.item",
-          "normalized_name": "o.item",
+          "normalized_name": "item",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 65,
           "end": 71
         }
@@ -4886,7 +4919,7 @@
         false,
         true,
         true,
-        false
+        true
       ]
     }
   },
@@ -5151,16 +5184,20 @@
           "binding": "not_applicable",
           "scope_start": 7,
           "scope_end": 56
-        }
-      ],
-      "forbidden_references": [
+        },
         {
           "original_name": "o.item",
+          "normalized_name": "item",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
           "start": 49,
           "end": 55,
-          "binding": "source"
+          "scope_start": 7,
+          "scope_end": 56
         }
       ],
+      "forbidden_references": [],
       "required_fields": [],
       "forbidden_field_names": [
         "id"
@@ -5227,10 +5264,10 @@
         },
         {
           "original_name": "o.item",
-          "normalized_name": "o.item",
+          "normalized_name": "item",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 49,
           "end": 55
         },
@@ -5259,7 +5296,7 @@
         false,
         true,
         true,
-        false,
+        true,
         true
       ]
     }
@@ -5347,22 +5384,31 @@
           "binding": "not_applicable",
           "scope_start": 38,
           "scope_end": 83
-        }
-      ],
-      "forbidden_references": [
-        {
-          "original_name": "o.item",
-          "start": 76,
-          "end": 82,
-          "binding": "source"
         },
         {
           "original_name": "o.item",
+          "normalized_name": "item",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 76,
+          "end": 82,
+          "scope_start": 38,
+          "scope_end": 83
+        },
+        {
+          "original_name": "o.item",
+          "normalized_name": "item",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
           "start": 108,
           "end": 114,
-          "binding": "source"
+          "scope_start": 23,
+          "scope_end": 115
         }
       ],
+      "forbidden_references": [],
       "required_fields": [],
       "forbidden_field_names": [
         "id"
@@ -5446,10 +5492,10 @@
         },
         {
           "original_name": "o.item",
-          "normalized_name": "o.item",
+          "normalized_name": "item",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 76,
           "end": 82
         },
@@ -5473,10 +5519,10 @@
         },
         {
           "original_name": "o.item",
-          "normalized_name": "o.item",
+          "normalized_name": "item",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 108,
           "end": 114
         }
@@ -5501,9 +5547,9 @@
         false,
         true,
         true,
-        false,
         true,
-        false
+        true,
+        true
       ]
     }
   },
@@ -5579,15 +5625,20 @@
           "binding": "not_applicable",
           "scope_start": 36,
           "scope_end": 85
+        },
+        {
+          "original_name": "o.item",
+          "normalized_name": "item",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 78,
+          "end": 84,
+          "scope_start": 36,
+          "scope_end": 85
         }
       ],
       "forbidden_references": [
-        {
-          "original_name": "o.item",
-          "start": 78,
-          "end": 84,
-          "binding": "source"
-        },
         {
           "original_name": "$v",
           "start": 31,
@@ -5680,10 +5731,10 @@
         },
         {
           "original_name": "o.item",
-          "normalized_name": "o.item",
+          "normalized_name": "item",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 78,
           "end": 84
         }
@@ -5709,7 +5760,7 @@
         false,
         true,
         true,
-        false
+        true
       ]
     }
   },
@@ -16146,6 +16197,17 @@
           "kind": "dataset",
           "role": "read",
           "binding": "not_applicable"
+        },
+        {
+          "original_name": "m.id",
+          "normalized_name": "id",
+          "kind": "field",
+          "role": "read",
+          "binding": "indeterminate",
+          "start": 71,
+          "end": 75,
+          "scope_start": 0,
+          "scope_end": 75
         }
       ],
       "forbidden_references": [
@@ -16171,12 +16233,6 @@
           "original_name": "u.realm",
           "start": 56,
           "end": 63,
-          "binding": "source"
-        },
-        {
-          "original_name": "m.id",
-          "start": 71,
-          "end": 75,
           "binding": "source"
         }
       ],
@@ -16232,7 +16288,7 @@
         },
         {
           "original_name": "m.id",
-          "normalized_name": "m.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
           "binding": "indeterminate",
@@ -16323,6 +16379,17 @@
           "kind": "dataset",
           "role": "read",
           "binding": "not_applicable"
+        },
+        {
+          "original_name": "m.id",
+          "normalized_name": "id",
+          "kind": "field",
+          "role": "read",
+          "binding": "indeterminate",
+          "start": 71,
+          "end": 75,
+          "scope_start": 0,
+          "scope_end": 75
         }
       ],
       "forbidden_references": [
@@ -16348,12 +16415,6 @@
           "original_name": "u.realm",
           "start": 56,
           "end": 63,
-          "binding": "source"
-        },
-        {
-          "original_name": "m.id",
-          "start": 71,
-          "end": 75,
           "binding": "source"
         }
       ],
@@ -16409,7 +16470,7 @@
         },
         {
           "original_name": "m.id",
-          "normalized_name": "m.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
           "binding": "indeterminate",
@@ -16500,6 +16561,17 @@
           "kind": "dataset",
           "role": "read",
           "binding": "not_applicable"
+        },
+        {
+          "original_name": "m.id",
+          "normalized_name": "id",
+          "kind": "field",
+          "role": "read",
+          "binding": "indeterminate",
+          "start": 77,
+          "end": 81,
+          "scope_start": 0,
+          "scope_end": 81
         }
       ],
       "forbidden_references": [
@@ -16525,12 +16597,6 @@
           "original_name": "u.realm",
           "start": 62,
           "end": 69,
-          "binding": "source"
-        },
-        {
-          "original_name": "m.id",
-          "start": 77,
-          "end": 81,
           "binding": "source"
         }
       ],
@@ -16586,7 +16652,7 @@
         },
         {
           "original_name": "m.id",
-          "normalized_name": "m.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
           "binding": "indeterminate",
@@ -16677,6 +16743,17 @@
           "kind": "dataset",
           "role": "read",
           "binding": "not_applicable"
+        },
+        {
+          "original_name": "m.id",
+          "normalized_name": "id",
+          "kind": "field",
+          "role": "read",
+          "binding": "indeterminate",
+          "start": 77,
+          "end": 81,
+          "scope_start": 0,
+          "scope_end": 81
         }
       ],
       "forbidden_references": [
@@ -16702,12 +16779,6 @@
           "original_name": "u.realm",
           "start": 62,
           "end": 69,
-          "binding": "source"
-        },
-        {
-          "original_name": "m.id",
-          "start": 77,
-          "end": 81,
           "binding": "source"
         }
       ],
@@ -16763,7 +16834,7 @@
         },
         {
           "original_name": "m.id",
-          "normalized_name": "m.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
           "binding": "indeterminate",
@@ -16854,6 +16925,17 @@
           "kind": "dataset",
           "role": "read",
           "binding": "not_applicable"
+        },
+        {
+          "original_name": "m.id",
+          "normalized_name": "id",
+          "kind": "field",
+          "role": "read",
+          "binding": "indeterminate",
+          "start": 76,
+          "end": 80,
+          "scope_start": 0,
+          "scope_end": 80
         }
       ],
       "forbidden_references": [
@@ -16879,12 +16961,6 @@
           "original_name": "u.realm",
           "start": 61,
           "end": 68,
-          "binding": "source"
-        },
-        {
-          "original_name": "m.id",
-          "start": 76,
-          "end": 80,
           "binding": "source"
         }
       ],
@@ -16940,7 +17016,7 @@
         },
         {
           "original_name": "m.id",
-          "normalized_name": "m.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
           "binding": "indeterminate",
@@ -17031,6 +17107,17 @@
           "kind": "dataset",
           "role": "read",
           "binding": "not_applicable"
+        },
+        {
+          "original_name": "m.id",
+          "normalized_name": "id",
+          "kind": "field",
+          "role": "read",
+          "binding": "indeterminate",
+          "start": 76,
+          "end": 80,
+          "scope_start": 0,
+          "scope_end": 80
         }
       ],
       "forbidden_references": [
@@ -17056,12 +17143,6 @@
           "original_name": "u.realm",
           "start": 61,
           "end": 68,
-          "binding": "source"
-        },
-        {
-          "original_name": "m.id",
-          "start": 76,
-          "end": 80,
           "binding": "source"
         }
       ],
@@ -17117,7 +17198,7 @@
         },
         {
           "original_name": "m.id",
-          "normalized_name": "m.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
           "binding": "indeterminate",
@@ -17208,6 +17289,17 @@
           "kind": "dataset",
           "role": "read",
           "binding": "not_applicable"
+        },
+        {
+          "original_name": "m.id",
+          "normalized_name": "id",
+          "kind": "field",
+          "role": "read",
+          "binding": "indeterminate",
+          "start": 82,
+          "end": 86,
+          "scope_start": 0,
+          "scope_end": 86
         }
       ],
       "forbidden_references": [
@@ -17233,12 +17325,6 @@
           "original_name": "u.realm",
           "start": 67,
           "end": 74,
-          "binding": "source"
-        },
-        {
-          "original_name": "m.id",
-          "start": 82,
-          "end": 86,
           "binding": "source"
         }
       ],
@@ -17294,7 +17380,7 @@
         },
         {
           "original_name": "m.id",
-          "normalized_name": "m.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
           "binding": "indeterminate",
@@ -17385,6 +17471,17 @@
           "kind": "dataset",
           "role": "read",
           "binding": "not_applicable"
+        },
+        {
+          "original_name": "m.id",
+          "normalized_name": "id",
+          "kind": "field",
+          "role": "read",
+          "binding": "indeterminate",
+          "start": 82,
+          "end": 86,
+          "scope_start": 0,
+          "scope_end": 86
         }
       ],
       "forbidden_references": [
@@ -17410,12 +17507,6 @@
           "original_name": "u.realm",
           "start": 67,
           "end": 74,
-          "binding": "source"
-        },
-        {
-          "original_name": "m.id",
-          "start": 82,
-          "end": 86,
           "binding": "source"
         }
       ],
@@ -17471,7 +17562,7 @@
         },
         {
           "original_name": "m.id",
-          "normalized_name": "m.id",
+          "normalized_name": "id",
           "kind": "field",
           "role": "read",
           "binding": "indeterminate",
@@ -18096,28 +18187,64 @@
           "normalized_name": "label",
           "kind": "field",
           "role": "read"
-        }
-      ],
-      "forbidden_references": [
-        {
-          "original_name": "a.'café'",
-          "start": 7,
-          "end": 16,
-          "binding": "source"
         },
         {
           "original_name": "a.'café'",
-          "start": 97,
-          "end": 106,
-          "binding": "source"
+          "normalized_name": "café",
+          "kind": "field",
+          "role": "read",
+          "binding": "indeterminate",
+          "start": 7,
+          "end": 16,
+          "scope_start": 0,
+          "scope_end": 206
+        },
+        {
+          "original_name": "payload.user.name",
+          "normalized_name": "payload.user.name",
+          "kind": "field",
+          "role": "read",
+          "binding": "indeterminate",
+          "start": 36,
+          "end": 53,
+          "scope_start": 0,
+          "scope_end": 206
         },
         {
           "original_name": "a.bytes",
+          "normalized_name": "bytes",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
           "start": 77,
           "end": 84,
-          "binding": "source"
+          "scope_start": 0,
+          "scope_end": 206
+        },
+        {
+          "original_name": "a.'café'",
+          "normalized_name": "café",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 97,
+          "end": 106,
+          "scope_start": 0,
+          "scope_end": 206
+        },
+        {
+          "original_name": "payload.user.name",
+          "normalized_name": "payload.user.name",
+          "kind": "field",
+          "role": "read",
+          "binding": "indeterminate",
+          "start": 117,
+          "end": 134,
+          "scope_start": 0,
+          "scope_end": 206
         }
       ],
+      "forbidden_references": [],
       "required_fields": [
         {
           "name": "label",
@@ -18142,7 +18269,7 @@
         {
           "command": "where",
           "start": 71,
-          "semantic_complete": false
+          "semantic_complete": true
         },
         {
           "command": "group",
@@ -18180,7 +18307,7 @@
       "references": [
         {
           "original_name": "a.'café'",
-          "normalized_name": "a.café",
+          "normalized_name": "café",
           "kind": "field",
           "role": "read",
           "binding": "indeterminate",
@@ -18206,15 +18333,6 @@
           "end": 35
         },
         {
-          "original_name": "payload",
-          "normalized_name": "payload",
-          "kind": "field",
-          "role": "read",
-          "binding": "indeterminate",
-          "start": 36,
-          "end": 43
-        },
-        {
           "original_name": "payload.user.name",
           "normalized_name": "payload.user.name",
           "kind": "field",
@@ -18234,19 +18352,19 @@
         },
         {
           "original_name": "a.bytes",
-          "normalized_name": "a.bytes",
+          "normalized_name": "bytes",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 77,
           "end": 84
         },
         {
           "original_name": "a.'café'",
-          "normalized_name": "a.café",
+          "normalized_name": "café",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 97,
           "end": 106
         },
@@ -18258,15 +18376,6 @@
           "binding": "indeterminate",
           "start": 107,
           "end": 116
-        },
-        {
-          "original_name": "payload",
-          "normalized_name": "payload",
-          "kind": "field",
-          "role": "read",
-          "binding": "indeterminate",
-          "start": 117,
-          "end": 124
         },
         {
           "original_name": "payload.user.name",
@@ -18328,7 +18437,7 @@
       "stage_complete": [
         false,
         true,
-        false,
+        true,
         false,
         true,
         true,
@@ -18463,6 +18572,39 @@
           "end": 218,
           "scope_start": 0,
           "scope_end": 220
+        },
+        {
+          "original_name": "o.item",
+          "normalized_name": "item",
+          "kind": "field",
+          "role": "read",
+          "binding": "indeterminate",
+          "start": 90,
+          "end": 96,
+          "scope_start": 0,
+          "scope_end": 220
+        },
+        {
+          "original_name": "o.item",
+          "normalized_name": "item",
+          "kind": "field",
+          "role": "read",
+          "binding": "indeterminate",
+          "start": 104,
+          "end": 110,
+          "scope_start": 0,
+          "scope_end": 220
+        },
+        {
+          "original_name": "o.item",
+          "normalized_name": "item",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 169,
+          "end": 175,
+          "scope_start": 131,
+          "scope_end": 176
         }
       ],
       "forbidden_references": [
@@ -18470,24 +18612,6 @@
           "original_name": "o.item",
           "start": 51,
           "end": 57,
-          "binding": "source"
-        },
-        {
-          "original_name": "o.item",
-          "start": 90,
-          "end": 96,
-          "binding": "source"
-        },
-        {
-          "original_name": "o.item",
-          "start": 104,
-          "end": 110,
-          "binding": "source"
-        },
-        {
-          "original_name": "o.item",
-          "start": 169,
-          "end": 175,
           "binding": "source"
         },
         {
@@ -18616,7 +18740,7 @@
         },
         {
           "original_name": "o.item",
-          "normalized_name": "o.item",
+          "normalized_name": "item",
           "kind": "field",
           "role": "read",
           "binding": "indeterminate",
@@ -18625,7 +18749,7 @@
         },
         {
           "original_name": "o.item",
-          "normalized_name": "o.item",
+          "normalized_name": "item",
           "kind": "field",
           "role": "read",
           "binding": "indeterminate",
@@ -18670,10 +18794,10 @@
         },
         {
           "original_name": "o.item",
-          "normalized_name": "o.item",
+          "normalized_name": "item",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 169,
           "end": 175
         },
@@ -18727,7 +18851,7 @@
         false,
         true,
         true,
-        false,
+        true,
         true,
         true,
         true,
@@ -19307,16 +19431,20 @@
           "kind": "field",
           "role": "output",
           "binding": "not_applicable"
-        }
-      ],
-      "forbidden_references": [
+        },
         {
           "original_name": "m._time",
+          "normalized_name": "_time",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
           "start": 24,
           "end": 31,
-          "binding": "source"
+          "scope_start": 0,
+          "scope_end": 55
         }
       ],
+      "forbidden_references": [],
       "required_fields": [
         {
           "name": "count",
@@ -19377,10 +19505,10 @@
         },
         {
           "original_name": "m._time",
-          "normalized_name": "m._time",
+          "normalized_name": "_time",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 24,
           "end": 31
         },
@@ -19486,16 +19614,20 @@
           "kind": "field",
           "role": "output",
           "binding": "not_applicable"
-        }
-      ],
-      "forbidden_references": [
+        },
         {
           "original_name": "payload.time.value",
+          "normalized_name": "payload.time.value",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
           "start": 19,
           "end": 37,
-          "binding": "source"
+          "scope_start": 0,
+          "scope_end": 61
         }
       ],
+      "forbidden_references": [],
       "required_fields": [
         {
           "name": "count",
@@ -19555,20 +19687,11 @@
           "end": 9
         },
         {
-          "original_name": "payload",
-          "normalized_name": "payload",
-          "kind": "field",
-          "role": "read",
-          "binding": "source",
-          "start": 19,
-          "end": 26
-        },
-        {
           "original_name": "payload.time.value",
           "normalized_name": "payload.time.value",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 19,
           "end": 37
         },
@@ -20182,16 +20305,20 @@
           "kind": "field",
           "role": "output",
           "binding": "not_applicable"
-        }
-      ],
-      "forbidden_references": [
+        },
         {
           "original_name": "m.'host*'",
+          "normalized_name": "host*",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
           "start": 24,
           "end": 33,
-          "binding": "source"
+          "scope_start": 0,
+          "scope_end": 48
         }
       ],
+      "forbidden_references": [],
       "required_fields": [
         {
           "name": "count",
@@ -20253,10 +20380,10 @@
         },
         {
           "original_name": "m.'host*'",
-          "normalized_name": "m.host*",
+          "normalized_name": "host*",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 24,
           "end": 33
         },
@@ -20362,16 +20489,20 @@
           "kind": "field",
           "role": "output",
           "binding": "not_applicable"
-        }
-      ],
-      "forbidden_references": [
+        },
         {
           "original_name": "m.'host*'",
+          "normalized_name": "host*",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
           "start": 39,
           "end": 48,
-          "binding": "source"
+          "scope_start": 0,
+          "scope_end": 48
         }
       ],
+      "forbidden_references": [],
       "required_fields": [
         {
           "name": "count",
@@ -20442,10 +20573,10 @@
         },
         {
           "original_name": "m.'host*'",
-          "normalized_name": "m.host*",
+          "normalized_name": "host*",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 39,
           "end": 48
         }
@@ -20542,16 +20673,20 @@
           "kind": "field",
           "role": "output",
           "binding": "not_applicable"
-        }
-      ],
-      "forbidden_references": [
+        },
         {
           "original_name": "m.'host\\u002a'",
+          "normalized_name": "host*",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
           "start": 24,
           "end": 38,
-          "binding": "source"
+          "scope_start": 0,
+          "scope_end": 53
         }
       ],
+      "forbidden_references": [],
       "required_fields": [
         {
           "name": "count",
@@ -20613,10 +20748,10 @@
         },
         {
           "original_name": "m.'host\\u002a'",
-          "normalized_name": "m.host*",
+          "normalized_name": "host*",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 24,
           "end": 38
         },
@@ -20722,16 +20857,20 @@
           "kind": "field",
           "role": "output",
           "binding": "not_applicable"
-        }
-      ],
-      "forbidden_references": [
+        },
         {
           "original_name": "m.'host\\u002a'",
+          "normalized_name": "host*",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
           "start": 39,
           "end": 53,
-          "binding": "source"
+          "scope_start": 0,
+          "scope_end": 53
         }
       ],
+      "forbidden_references": [],
       "required_fields": [
         {
           "name": "count",
@@ -20802,10 +20941,10 @@
         },
         {
           "original_name": "m.'host\\u002a'",
-          "normalized_name": "m.host*",
+          "normalized_name": "host*",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 39,
           "end": 53
         }
@@ -20902,16 +21041,20 @@
           "kind": "field",
           "role": "output",
           "binding": "not_applicable"
-        }
-      ],
-      "forbidden_references": [
+        },
         {
           "original_name": "m.payload.'host*'",
+          "normalized_name": "payload.host*",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
           "start": 24,
           "end": 41,
-          "binding": "source"
+          "scope_start": 0,
+          "scope_end": 56
         }
       ],
+      "forbidden_references": [],
       "required_fields": [
         {
           "name": "count",
@@ -20973,10 +21116,10 @@
         },
         {
           "original_name": "m.payload.'host*'",
-          "normalized_name": "m.payload.host*",
+          "normalized_name": "payload.host*",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 24,
           "end": 41
         },
@@ -21082,16 +21225,20 @@
           "kind": "field",
           "role": "output",
           "binding": "not_applicable"
-        }
-      ],
-      "forbidden_references": [
+        },
         {
           "original_name": "m.payload.'host*'",
+          "normalized_name": "payload.host*",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
           "start": 39,
           "end": 56,
-          "binding": "source"
+          "scope_start": 0,
+          "scope_end": 56
         }
       ],
+      "forbidden_references": [],
       "required_fields": [
         {
           "name": "count",
@@ -21162,10 +21309,10 @@
         },
         {
           "original_name": "m.payload.'host*'",
-          "normalized_name": "m.payload.host*",
+          "normalized_name": "payload.host*",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 39,
           "end": 56
         }
@@ -21980,16 +22127,20 @@
           "kind": "field",
           "role": "output",
           "binding": "not_applicable"
-        }
-      ],
-      "forbidden_references": [
+        },
         {
           "original_name": "m.host",
+          "normalized_name": "host",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
           "start": 24,
           "end": 30,
-          "binding": "source"
+          "scope_start": 0,
+          "scope_end": 45
         }
       ],
+      "forbidden_references": [],
       "required_fields": [
         {
           "name": "count",
@@ -22050,10 +22201,10 @@
         },
         {
           "original_name": "m.host",
-          "normalized_name": "m.host",
+          "normalized_name": "host",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 24,
           "end": 30
         },
@@ -22157,16 +22308,20 @@
           "kind": "field",
           "role": "output",
           "binding": "not_applicable"
-        }
-      ],
-      "forbidden_references": [
+        },
         {
           "original_name": "m.host",
+          "normalized_name": "host",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
           "start": 39,
           "end": 45,
-          "binding": "source"
+          "scope_start": 0,
+          "scope_end": 45
         }
       ],
+      "forbidden_references": [],
       "required_fields": [
         {
           "name": "count",
@@ -22236,10 +22391,10 @@
         },
         {
           "original_name": "m.host",
-          "normalized_name": "m.host",
+          "normalized_name": "host",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 39,
           "end": 45
         }

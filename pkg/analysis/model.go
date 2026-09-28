@@ -46,38 +46,52 @@ type Scope struct {
 	Location Location `json:"location"`
 }
 
+// FieldIdentity is the exact field identity represented in a public report.
+type FieldIdentity struct {
+	Kind      string   `json:"kind"`
+	Segments  []string `json:"segments"`
+	Qualifier string   `json:"qualifier,omitempty"`
+}
+
 // Reference role null_test retains a located non-consuming field inspection.
 // It does not require or establish existence, and does not waive other reads.
 type Reference struct {
-	ID                 string   `json:"id"`
-	OriginalName       string   `json:"original_name"`
-	NormalizedName     string   `json:"normalized_name"`
-	Kind               string   `json:"kind"`
-	Role               string   `json:"role"`
-	StageID            string   `json:"stage_id"`
-	ScopeID            string   `json:"scope_id"`
-	Location           Location `json:"location"`
-	Resolution         string   `json:"resolution"`
-	Binding            string   `json:"binding"`
-	OriginReferenceIDs []string `json:"origin_reference_ids"`
+	ID                 string         `json:"id"`
+	OriginalName       string         `json:"original_name"`
+	NormalizedName     string         `json:"normalized_name"`
+	FieldIdentity      *FieldIdentity `json:"field_identity,omitempty"`
+	Kind               string         `json:"kind"`
+	Role               string         `json:"role"`
+	StageID            string         `json:"stage_id"`
+	ScopeID            string         `json:"scope_id"`
+	Location           Location       `json:"location"`
+	Resolution         string         `json:"resolution"`
+	Binding            string         `json:"binding"`
+	OriginReferenceIDs []string       `json:"origin_reference_ids"`
 }
 type FieldBinding struct {
-	Name               string   `json:"name"`
-	OriginReferenceIDs []string `json:"origin_reference_ids"`
-	Conditional        bool     `json:"conditional"`
+	Name               string        `json:"name"`
+	FieldIdentity      FieldIdentity `json:"field_identity"`
+	OriginReferenceIDs []string      `json:"origin_reference_ids"`
+	Conditional        bool          `json:"conditional"`
+}
+type FieldRemoval struct {
+	Name          string        `json:"name"`
+	FieldIdentity FieldIdentity `json:"field_identity"`
 }
 type FieldState struct {
 	Fields    []FieldBinding `json:"fields"`
-	Removed   []string       `json:"removed"`
+	Removed   []FieldRemoval `json:"removed"`
 	Open      bool           `json:"open"`
 	Uncertain bool           `json:"uncertain"`
 }
 type Transition struct {
-	Operation         string   `json:"operation"`
-	Output            string   `json:"output"`
-	InputReferenceIDs []string `json:"input_reference_ids"`
-	OutputReferenceID string   `json:"output_reference_id"`
-	Conditional       bool     `json:"conditional"`
+	Operation         string         `json:"operation"`
+	Output            string         `json:"output"`
+	OutputIdentity    *FieldIdentity `json:"output_identity,omitempty"`
+	InputReferenceIDs []string       `json:"input_reference_ids"`
+	OutputReferenceID string         `json:"output_reference_id"`
+	Conditional       bool           `json:"conditional"`
 }
 type Lineage struct {
 	StageID        string       `json:"stage_id"`

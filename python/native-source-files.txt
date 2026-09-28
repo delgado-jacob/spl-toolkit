@@ -47,7 +47,9 @@ pkg/analysis/capabilitydata/ledger.json
 pkg/analysis/commands.go
 pkg/analysis/dependencies.go
 pkg/analysis/diagnostics.go
+pkg/analysis/field_identity.go
 pkg/analysis/flow.go
+pkg/analysis/flow_merge.go
 pkg/analysis/functions.go
 pkg/analysis/model.go
 pkg/analysis/options.go
@@ -71,9 +73,11 @@ pkg/analysis/spl2_expressions.go
 pkg/analysis/spl2_functions.go
 pkg/analysis/spl2_lower.go
 pkg/analysis/spl2_parse.go
+pkg/analysis/spl2_program.go
 pkg/analysis/spl2_recovery.go
 pkg/analysis/spl2_scopes.go
 pkg/analysis/spl2_sql.go
+pkg/analysis/spl2_symbols.go
 pkg/analysis/spl2_syntax.go
 pkg/analysis/spl_field_commands.go
 pkg/analysis/spl_tstats.go

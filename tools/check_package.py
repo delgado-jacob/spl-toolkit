@@ -26,11 +26,13 @@ from packaging.utils import parse_wheel_filename
 
 
 NATIVE_SUFFIXES = (".so", ".dylib", ".dll")
+PACKAGED_LINUS_FIXTURE = "spl_toolkit/testdata/spl2/linus-forms.json"
 SDIST_FIXED_FILES = {
     "LICENSE", "MANIFEST.in", "PARSER-LICENSE", "PKG-INFO", "README.md", "VERSION", "build_support.py",
     "native-source-files.txt", "pyproject.toml", "requirements-build.txt",
     "requirements-dev.txt", "setup.cfg", "setup.py", "spl_toolkit/__init__.py",
     "requirements-contracts-local-hashed.lock",
+    PACKAGED_LINUS_FIXTURE,
     "spl_toolkit/exceptions.py", "spl_toolkit/libspl_toolkit.h", "spl_toolkit/mapper.py",
     "spl_toolkit.egg-info/PKG-INFO", "spl_toolkit.egg-info/SOURCES.txt",
     "spl_toolkit.egg-info/dependency_links.txt", "spl_toolkit.egg-info/top_level.txt",
@@ -65,7 +67,7 @@ SPL2_FIXTURE_FILES = (
     "manifest.json", "provenance.json", "lexical-expressions.json", "frontend-boundaries.json",
     "pipeline-commands.json", "pipeline-boundaries.json", "sql-clauses.json", "sql-boundaries.json",
     "extended-commands.json", "extended-boundaries.json", "functions.json", "canonical-core.json",
-    "recovery-core.json",
+    "recovery-core.json", "linus-forms.json",
 )
 ACCEPTANCE_FILES = ("test_documented_cli.py", "test_surfaces.py", "test_analysis_surfaces.py", "test_requirements_surfaces.py", "test_validation_surfaces.py", "test_schema_surfaces.py", "test_spl2_surfaces.py", "test_rewrite_surfaces.py", "test_tooling_surfaces.py", "test_machine_contracts.py", "spl2_transport.py", "cli_examples.json")
 REQUIRED_PYTEST_PLUGIN = r'''\
@@ -158,7 +160,7 @@ def clean_env() -> dict[str, str]:
     env = os.environ.copy()
     for name in ("SPL_TOOLING_FIXTURES", "SPL_TOOLING_SOURCE_ROOT", "SPL_TOOLING_GO", "SPL_CONTRACT_GO", "SPL_REQUIREMENTS_GO_ROOT"):
         env.pop(name, None)
-    for name in ("PYTHONPATH", "PYTHONHOME", "SPL_NATIVE_LIBRARY", "SPL_EXPECTED_VERSION", "SPL_SCHEMA_FIXTURES", "SPL_REQUIREMENTS_FIXTURES", "SPL_REQUIREMENTS_EVIDENCE", "SPL_SPL2_FIXTURES", "SPL_SPL2_GO_REPORTS", "SPL_SPL2_GO_SHA256", "SPL_REWRITE_FIXTURES", "SPL_REWRITE_GO_REPORTS", "SPL_REWRITE_GO_SHA256", "SPL_REWRITE_EVIDENCE"):
+    for name in ("PYTHONPATH", "PYTHONHOME", "SPL_NATIVE_LIBRARY", "SPL_EXPECTED_VERSION", "SPL_SCHEMA_FIXTURES", "SPL_REQUIREMENTS_FIXTURES", "SPL_REQUIREMENTS_EVIDENCE", "SPL_SPL2_FIXTURES", "SPL_SPL2_GO_REPORTS", "SPL_SPL2_GO_SHA256", "SPL_MILESTONE11_DOCUMENTS", "SPL_REWRITE_FIXTURES", "SPL_REWRITE_GO_REPORTS", "SPL_REWRITE_GO_SHA256", "SPL_REWRITE_EVIDENCE"):
         env.pop(name, None)
     return env
 
@@ -249,12 +251,92 @@ def copy_spl2_fixtures(source: Path, destination: Path) -> dict[str, str]:
     hashes = {}
     for relative in SPL2_FIXTURE_FILES:
         original, copied = source / relative, destination / relative
-        expected = sha256(original)
+        expected = verify_linus_fixture(original) if relative == "linus-forms.json" else sha256(original)
         shutil.copy2(original, copied)
         if sha256(copied) != expected:
             raise AssertionError(f"SPL2 fixture hash mismatch: {relative}")
         hashes[relative] = expected
     return hashes
+
+
+def verify_linus_fixture_payload(payload: bytes) -> str:
+    """Require Linus-form bytes to remain generic and source-free."""
+    fixture = json.loads(payload)
+    if set(fixture) != {"schema_version", "authorship", "obligations"}:
+        raise AssertionError("external Linus source metadata is forbidden")
+    if fixture["schema_version"] != 1 or fixture["authorship"] != "locally-authored-synthetic":
+        raise AssertionError("Linus fixture must be a locally authored synthetic v1 contract")
+    obligations = fixture["obligations"]
+    if not isinstance(obligations, list) or not obligations:
+        raise AssertionError("Linus fixture obligations are required")
+    required = {"id", "family", "description", "query", "disposition", "source_keys"}
+    allowed = required | {"function"}
+    for obligation in obligations:
+        if not isinstance(obligation, dict) or not required <= set(obligation) or not set(obligation) <= allowed:
+            raise AssertionError("external Linus source metadata is forbidden")
+        if obligation["disposition"] != "included" or obligation["source_keys"] != ["linus_m11"]:
+            raise AssertionError("Linus fixture provenance must remain aggregate and synthetic")
+        if not isinstance(obligation["query"], str) or "synthetic" not in obligation["query"].lower():
+            raise AssertionError("external Linus source text is forbidden")
+    serialized = json.dumps(fixture, ensure_ascii=False).lower()
+    for forbidden in ("linus_security_content", "/detections/", "\\detections\\", "/users/", "\\users\\", ".yaml", ".yml"):
+        if forbidden in serialized:
+            raise AssertionError("external Linus source metadata is forbidden")
+    return hashlib.sha256(payload).hexdigest()
+
+
+def verify_linus_fixture(path: Path) -> str:
+    """Require the tracked Linus-form contract to remain generic and source-free."""
+    return verify_linus_fixture_payload(path.read_bytes())
+
+
+def verify_packaged_linus_payload(payload: bytes, source: Path, artifact: str) -> str:
+    """Bind an archive member exactly to the generic tracked fixture."""
+    actual = verify_linus_fixture_payload(payload)
+    expected_payload = source.read_bytes()
+    expected = verify_linus_fixture_payload(expected_payload)
+    if payload != expected_payload or actual != expected:
+        raise AssertionError(f"{artifact} linus-forms.json bytes/hash mismatch")
+    return actual
+
+
+def verify_wheel_linus_fixture(wheel: Path, source: Path) -> str:
+    with zipfile.ZipFile(wheel) as archive:
+        members = [
+            member for member in archive.infolist()
+            if not member.is_dir() and member.filename == PACKAGED_LINUS_FIXTURE
+        ]
+        if len(members) != 1:
+            raise AssertionError(f"wheel contains {len(members)} packaged linus-forms.json members")
+        payload = archive.read(members[0])
+    return verify_packaged_linus_payload(payload, source, "wheel")
+
+
+def verify_sdist_linus_fixture(sdist: Path, source: Path) -> str:
+    suffix = "/" + PACKAGED_LINUS_FIXTURE
+    with tarfile.open(sdist, "r:gz") as archive:
+        members = [
+            member for member in archive.getmembers()
+            if member.isfile() and (member.name == PACKAGED_LINUS_FIXTURE or member.name.endswith(suffix))
+        ]
+        if len(members) != 1:
+            raise AssertionError(f"sdist contains {len(members)} packaged linus-forms.json members")
+        extracted = archive.extractfile(members[0])
+        if extracted is None:
+            raise AssertionError("sdist packaged linus-forms.json is unreadable")
+        payload = extracted.read()
+    return verify_packaged_linus_payload(payload, source, "sdist")
+
+
+def assert_linus_fixture_evidence(evidence: dict[str, object], source: Path, artifact: str) -> None:
+    expected = verify_linus_fixture(source)
+    for category in ("fixture_hashes", "packaged_fixture_hashes"):
+        try:
+            actual = evidence[category]["spl2"]["linus-forms.json"]
+        except (KeyError, TypeError):
+            raise AssertionError(f"{artifact} evidence is missing linus-forms.json") from None
+        if actual != expected:
+            raise AssertionError(f"{artifact} linus-forms.json hash mismatch")
 
 
 def copy_rewrite_fixtures(source: Path, destination: Path) -> dict[str, str]:
@@ -445,6 +527,9 @@ def install_and_check(
 ) -> dict[str, object]:
     wheel_payload_hashes = verify_wheel_sources(wheel, docs_root)
     wheel_contract_hashes = verify_wheel_contracts(wheel, docs_root)
+    wheel_linus_hash = verify_wheel_linus_fixture(
+        wheel, docs_root / "testdata/spl2/linus-forms.json"
+    )
     python = create_test_environment(directory)
     env = clean_env()
     path_entries = [str(python.parent)]
@@ -488,6 +573,11 @@ def install_and_check(
     schema_hashes = copy_schema_fixtures(docs_root / "testdata/schemas", schema_fixtures)
     spl2_fixtures = outside_checkout / f"spl2-fixtures-{directory.name}"
     spl2_hashes = copy_spl2_fixtures(docs_root / "testdata/spl2", spl2_fixtures)
+    milestone11_documents = outside_checkout / f"milestone11-documents-{directory.name}.json"
+    shutil.copy2(docs_root / "tests/acceptance/cli_examples.json", milestone11_documents)
+    milestone11_documents_hash = sha256(milestone11_documents)
+    if milestone11_documents_hash != sha256(docs_root / "tests/acceptance/cli_examples.json"):
+        raise AssertionError("Milestone 11 representative document copy hash mismatch")
     rewrite_fixtures = outside_checkout / f"rewrite-fixtures-{directory.name}"
     rewrite_hashes = copy_rewrite_fixtures(docs_root / "testdata/rewrite", rewrite_fixtures)
     # The unmodified machine-contract suite needs a tiny standalone Go module
@@ -529,6 +619,7 @@ def install_and_check(
         "SPL_REQUIREMENTS_FIXTURES": str((requirements_fixtures / "cases.json").resolve()),
         "SPL_SCHEMA_FIXTURES": str(schema_fixtures.resolve()),
         "SPL_SPL2_FIXTURES": str(spl2_fixtures.resolve()),
+        "SPL_MILESTONE11_DOCUMENTS": str(milestone11_documents.resolve()),
         "SPL_REWRITE_FIXTURES": str(rewrite_fixtures.resolve()),
         "SPL_TOOLING_FIXTURES": str(tooling_fixtures.resolve()),
         "SPL_TOOLING_SOURCE_ROOT": str(tooling_root.resolve()),
@@ -594,11 +685,12 @@ def install_and_check(
         "wheel_sha256": sha256(wheel),
         "wheel_payload_hashes": wheel_payload_hashes,
         "wheel_contract_hashes": wheel_contract_hashes,
+        "packaged_fixture_hashes": {"spl2": {"linus-forms.json": wheel_linus_hash}},
         "tooling_source_hashes": tooling_source_hashes,
         "tooling_fixture_hashes": tooling_hashes,
         "machine_contract_tests": contract_counts,
         "source_header_sha256": sha256(docs_root / "python/spl_toolkit/libspl_toolkit.h"),
-        "fixture_hashes": {"baseline": sha256(fixture), "analysis": sha256(analysis_fixture), "requirements": requirements_hashes["cases.json"], "validation": sha256(validation_fixture), "schema": schema_hashes, "spl2": spl2_hashes, "rewrite": rewrite_hashes, "spl2_go_transport": go_transport_hash, "rewrite_go_transport": rewrite_transport_hash},
+        "fixture_hashes": {"baseline": sha256(fixture), "analysis": sha256(analysis_fixture), "requirements": requirements_hashes["cases.json"], "validation": sha256(validation_fixture), "schema": schema_hashes, "spl2": spl2_hashes, "milestone11_documents": milestone11_documents_hash, "rewrite": rewrite_hashes, "spl2_go_transport": go_transport_hash, "rewrite_go_transport": rewrite_transport_hash},
         "tests": {"required_native": native_counts, "surface_acceptance": surface_counts},
         "required_test_files": {"native": list(NATIVE_TESTS),
                                 "acceptance": [name for name in ACCEPTANCE_FILES if name.startswith("test_") and name.endswith(".py")]},
@@ -820,12 +912,16 @@ def _check_package(
             wheel, temp / "wheel-venv", outside, version,
             cli, server, fixture, root, go_transport, rewrite_transport,
         )
+        assert_linus_fixture_evidence(evidence, root / "testdata/spl2/linus-forms.json", "wheel")
 
         if wheel_only:
             source = None
         elif sdist is None:
             raise AssertionError("source distribution is required unless --wheel-only is used")
         else:
+            sdist_linus_hash = verify_sdist_linus_fixture(
+                sdist, root / "testdata/spl2/linus-forms.json"
+            )
             source = unpack_sdist(sdist, temp / "sdist")
         if source is not None:
             inspect_sdist(source)
@@ -837,7 +933,13 @@ def _check_package(
                 source_wheel, temp / "sdist-venv", outside, version,
                 cli, server, fixture, root, go_transport, rewrite_transport,
             )
+            assert_linus_fixture_evidence(
+                evidence["rebuilt_sdist"], root / "testdata/spl2/linus-forms.json", "rebuilt sdist wheel"
+            )
             evidence["rebuilt_sdist"]["sdist_source_hashes"] = source_hashes
+            evidence["rebuilt_sdist"]["sdist_packaged_fixture_hashes"] = {
+                "spl2": {"linus-forms.json": sdist_linus_hash}
+            }
             check_missing_compiler(source, temp / "failed-wheel", clean_env())
 
     after = git_status(root)

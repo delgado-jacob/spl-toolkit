@@ -76,6 +76,27 @@ func TestSPL2SQLSyntaxBoundaries(t *testing.T) {
 	}
 }
 
+func TestSPL2SQLFromFirstProjectionContinuationNewline(t *testing.T) {
+	query := "FROM synthetic_dataset\nWHERE synthetic_filter = 1\nSELECT synthetic_left,\nsynthetic_right"
+	parsed := spl2RequireNoDiagnostics(t, query)
+	command := parsed.tree.Pipeline().Start_().FromCommand()
+	if command == nil || command.SqlSelectClause() == nil || len(command.SqlSelectClause().AllProjection()) != 2 {
+		t.Fatalf("FROM-first projections lost typed ownership: %s", parsed.syntax.shape())
+	}
+
+	for _, malformed := range []string{
+		"FROM synthetic_dataset SELECT synthetic_left,\n",
+		"FROM synthetic_dataset SELECT synthetic_left\nsynthetic_right",
+	} {
+		t.Run(malformed, func(t *testing.T) {
+			candidate := parseSPL2Document(malformed)
+			if candidate.syntaxComplete || len(candidate.diagnostics) == 0 {
+				t.Fatalf("missing projection separator or expression was accepted: %+v", candidate.diagnostics)
+			}
+		})
+	}
+}
+
 func TestSPL2SQLSyntaxClauseOwnership(t *testing.T) {
 	text := "SELECT a.'café' AS label,'a.café',payload.user.name\r\nFROM main AS a\r\nWHERE a.bytes>0\r\nGROUP BY a.'café','a.café',payload.user.name\r\nHAVING label!=\"\"\r\nORDER BY label DESC\r\nLIMIT 2\r\nOFFSET 1 | table label"
 	p := parseSPL2Document(text)
@@ -231,5 +252,42 @@ func TestSPL2SQLSyntaxQualifiedGroupingWildcards(t *testing.T) {
 				}
 			})
 		}
+	}
+}
+
+func TestSPL2SelectedMultilineSQLAndDottedOwnership(t *testing.T) {
+	text := "SELECT\n" +
+		"  coalesce(\n" +
+		"    e.payload.user.name,\n" +
+		"    'payload.user.name'\n" +
+		"  ) AS 'display.name',\n" +
+		"  count() AS total\n" +
+		"FROM\n" +
+		"  catalog.events AS e\n" +
+		"WHERE\n" +
+		"  e.payload.status=\"ok\"\n" +
+		"GROUP BY\n" +
+		"  lower(e.payload.region),\n" +
+		"  span(e._time, 5m)\n" +
+		"ORDER BY\n" +
+		"  total DESC"
+	p := spl2RequireNoDiagnostics(t, text)
+	if got := len(spl2Nodes(p.syntax, "datasetPath")); got != 1 {
+		t.Fatalf("SQL dataset paths %d: %s", got, p.syntax.shape())
+	}
+	if got := len(spl2Nodes(p.syntax, "accessPart")) + len(spl2Nodes(p.syntax, "multilineAccessPart")); got != 8 {
+		t.Fatalf("SQL structural access parts %d: %s", got, p.syntax.shape())
+	}
+	aliases := spl2Nodes(p.syntax, "projectionAlias")
+	if len(aliases) != 2 {
+		t.Fatalf("projection aliases %d", len(aliases))
+	}
+	first := aliases[0]
+	if got := text[first.Location.Start.Offset:first.Location.End.Offset]; got != "'display.name'" || len(spl2Nodes(first, "accessPart")) != 0 {
+		t.Fatalf("quoted dotted projection alias became structural: %q", got)
+	}
+	span := spl2Nodes(p.syntax, "multilineSqlSpanCall")
+	if len(span) != 1 || text[span[0].Location.Start.Offset:span[0].Location.End.Offset] != "span(e._time, 5m)" {
+		t.Fatalf("SQL span ownership: %s", p.syntax.shape())
 	}
 }

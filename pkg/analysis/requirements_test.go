@@ -1123,8 +1123,9 @@ func TestCloneRequirementSetOwnsNestedSlices(t *testing.T) {
 	source := RequirementSet{
 		Coverage: RequirementCoverage{Reasons: []string{"reason"}},
 		Items: []RequirementItem{{
-			ID:          "req-1",
-			Occurrences: []RequirementOccurrence{{ReferenceID: "ref-1"}},
+			ID:            "req-1",
+			FieldIdentity: &FieldIdentity{Kind: "path", Segments: []string{"actor", "name"}},
+			Occurrences:   []RequirementOccurrence{{ReferenceID: "ref-1"}},
 		}},
 		Gaps: []RequirementGap{{
 			Code:            "gap",
@@ -1141,6 +1142,7 @@ func TestCloneRequirementSetOwnsNestedSlices(t *testing.T) {
 	cloned := cloneRequirementSet(source)
 	cloned.Coverage.Reasons[0] = "changed reason"
 	cloned.Items[0].ID = "req-changed"
+	cloned.Items[0].FieldIdentity.Segments[0] = "changed"
 	cloned.Items[0].Occurrences[0].ReferenceID = "ref-changed"
 	cloned.Gaps[0].Code = "changed gap"
 	cloned.Gaps[0].ReferenceIDs[0] = "ref-changed"

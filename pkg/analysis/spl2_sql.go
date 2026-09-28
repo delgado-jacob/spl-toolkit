@@ -59,7 +59,7 @@ func executeSPL2SQL(result *Result, parsed *spl2ParsedDocument, refinement *sour
 		}
 	}
 	scheduler.syncParserDiagnostics()
-	s := &spl2SemanticStage{semanticStage: &semanticStage{result: result, env: env, refinement: refinement}, parsed2: parsed, aliases: aliases}
+	s := &spl2SemanticStage{semanticStage: &semanticStage{result: result, env: env, refinement: refinement}, parsed2: parsed, aliases: aliases, program: scheduler.program}
 	phase := func(ctx antlr.ParserRuleContext, name string, run func()) {
 		if ctx == nil {
 			return
@@ -69,6 +69,7 @@ func executeSPL2SQL(result *Result, parsed *spl2ParsedDocument, refinement *sour
 		s.transitions = []Transition{}
 		before := s.env.snapshot()
 		scheduler.runChildren(ctx, s.env, aliases, scopeID, parent)
+		scheduler.assignParserDiagnostics(s.stage)
 		if spl2IntactSyntax(ctx) || (provedKey != nil && ctx == c.SqlGroupClause()) {
 			if (provedKey != nil || missingSelect != nil) && ctx == c.SqlGroupClause() {
 				local := *parsed
@@ -106,7 +107,14 @@ func executeSPL2SQL(result *Result, parsed *spl2ParsedDocument, refinement *sour
 			clear(aliases)
 		}
 		from := c.SqlFromClause()
-		s.dataset(from.Dataset())
+		dataset := from.Dataset()
+		resolved := false
+		if s.program != nil && dataset != nil {
+			resolved = s.program.resolveViewSource(s, dataset.DatasetParameter()) || s.program.resolveImportedDataset(s, dataset)
+		}
+		if !resolved && !s.exactDatasetSource(dataset) {
+			s.dataset(dataset)
+		}
 		s.joinDatasetIntentions(from)
 		if a := from.SourceAlias(); a != nil {
 			o := s.operand(a.Identifier())
@@ -139,7 +147,7 @@ func executeSPL2SQL(result *Result, parsed *spl2ParsedDocument, refinement *sour
 		}
 		s.applyAggregation(nil, groups, false)
 	})
-	aggregate := spl2SQLHasAggregate(c.SqlSelectClause())
+	aggregate := s.sqlHasAggregate(c.SqlSelectClause())
 	selectPhase := "evaluate"
 	if aggregate {
 		selectPhase = "aggregate"
@@ -167,10 +175,15 @@ func executeSPL2SQL(result *Result, parsed *spl2ParsedDocument, refinement *sour
 		s.applyPreparedProjection(selected, "table")
 		if selectedShape {
 			s.env.open, s.env.uncertain = false, false
-			fields := map[string]requirementField{}
+			fields := map[fieldIdentityKey]requirementField{}
 			for _, selection := range selected {
-				if field, ok := s.env.requirements.exactProjection(selection.Field.Name, selection.InputReferenceIDs); ok {
-					fields[selection.Field.Name] = field
+				identity := selection.Field.identity
+				if _, exact := identity.privateKey(); !exact {
+					identity = atomicFieldIdentity(selection.Field.Name)
+				}
+				if field, ok := s.env.requirements.exactIdentityProjection(identity, selection.InputReferenceIDs); ok {
+					key, _ := identity.privateKey()
+					fields[key] = field
 				}
 			}
 			s.env.requirements.fields = fields
@@ -190,11 +203,11 @@ func spl2SQLDirectField(tree antlr.Tree) spl2.IIdentifierContext {
 	return nil
 }
 
-func spl2SQLHasAggregate(tree antlr.Tree) bool {
+func (s *spl2SemanticStage) sqlHasAggregate(tree antlr.Tree) bool {
 	if tree == nil {
 		return false
 	}
-	if c, ok := tree.(spl2.ICallContext); ok && spl2Functions[c.Identifier().GetText()].aggregate {
+	if c, ok := tree.(spl2.ICallContext); ok && s.sqlCallAggregate(c) {
 		return true
 	}
 	// Child expressions own their own scheduling and aggregate context.
@@ -203,21 +216,30 @@ func spl2SQLHasAggregate(tree antlr.Tree) bool {
 		return false
 	}
 	for _, child := range tree.GetChildren() {
-		if spl2SQLHasAggregate(child) {
+		if s.sqlHasAggregate(child) {
 			return true
 		}
 	}
 	return false
 }
 
+func (s *spl2SemanticStage) sqlCallAggregate(call spl2.ICallContext) bool {
+	if call == nil {
+		return false
+	}
+	policy, selected := s.typedPolicy()
+	function, known := policy.functions[call.Identifier().GetText()]
+	return selected && known && function.signature.aggregate
+}
+
 // Compound aggregate results remain unproved. Read their real arguments with
 // the reviewed function policy, avoiding a false scalar-context contract error.
 func (s *spl2SemanticStage) sqlUnprovedAggregateExpression(tree antlr.Tree) spl2ExpressionEvidence {
-	if !spl2SQLHasAggregate(tree) {
+	if !s.sqlHasAggregate(tree) {
 		return s.expression(tree)
 	}
 	if c, ok := tree.(spl2.ICallContext); ok {
-		aggregate := spl2Functions[c.Identifier().GetText()].aggregate
+		aggregate := s.sqlCallAggregate(c)
 		out := s.callWithExpression(c, aggregate, s.sqlUnprovedAggregateExpression)
 		if !aggregate {
 			out.modeled, out.nonnull, out.requirementNonnull, out.exactNull, out.truth, out.domain = false, false, false, false, false, ""
@@ -247,8 +269,8 @@ func (s *spl2SemanticStage) prepareSQLSelection(clause spl2.ISqlSelectClauseCont
 		input = s.env
 	}
 	groups := map[string]bool{}
-	for name := range input.fields {
-		groups[name] = true
+	for _, field := range input.fields {
+		groups[field.Name] = true
 	}
 	for _, p := range clause.AllProjection() {
 		item := projection{ctx: p}
@@ -258,13 +280,13 @@ func (s *spl2SemanticStage) prepareSQLSelection(clause spl2.ISqlSelectClauseCont
 		if access != nil && len(access.AllAccessPart()) == 0 {
 			call = access.Primary().Call()
 		}
-		item.aggregate = call != nil && spl2Functions[call.Identifier().GetText()].aggregate
+		item.aggregate = s.sqlCallAggregate(call)
 		if item.aggregate {
 			s.env = pregroup
 			item.value = s.call(call, true)
 			item.countCertain = s.sqlCountOutputSound(p, call, item.value)
 			s.env = input
-		} else if spl2SQLHasAggregate(p.Expression()) {
+		} else if s.sqlHasAggregate(p.Expression()) {
 			s.env = pregroup
 			item.value = s.sqlUnprovedAggregateExpression(p.Expression())
 			s.env = input
@@ -321,7 +343,7 @@ func (s *spl2SemanticStage) prepareSQLSelection(clause spl2.ISqlSelectClauseCont
 		if !item.target.Sound {
 			continue
 		}
-		_, source := pregroup.fields[item.target.Name]
+		_, source := pregroup.field(item.target.fieldIdentity())
 		if source || counts[item.target.Name] > 1 {
 			collisions[item.target.Name] = true
 			s.unsupported(item.ctx, "SQL alias collision or sibling alias visibility is unproved")
@@ -459,10 +481,12 @@ func (s *spl2SemanticStage) sqlRestrictedExpression(tree antlr.Tree, visible map
 			if c.Identifier() != nil {
 				o := s.operand(c.Identifier())
 				if o.Sound && !visible[o.Name] {
-					f := s.env.fields[o.Name]
+					key, _ := o.fieldIdentity().privateKey()
+					f := s.env.fields[key]
 					f.Name = o.Name
+					f.identity = o.fieldIdentity()
 					f.Conditional = true
-					s.env.fields[o.Name] = f
+					s.env.fields[key] = f
 					s.env.requirements.markConditional(o.Name)
 					s.env.requirements.uncertain = true
 					hidden = append(hidden, o)
@@ -481,7 +505,7 @@ func (s *spl2SemanticStage) sqlRestrictedExpression(tree antlr.Tree, visible map
 		s.rewritePredicate(tree, "spl2", false, false)
 	}
 	var value spl2ExpressionEvidence
-	if spl2SQLHasAggregate(tree) {
+	if s.sqlHasAggregate(tree) {
 		s.unsupported(tree.(antlr.ParserRuleContext), "SQL postaggregate expression visibility is unproved")
 		value = s.sqlUnprovedAggregateExpression(tree)
 	} else {

@@ -99,11 +99,80 @@ type SPL2ParserVisitor interface {
 	// Visit a parse tree produced by SPL2Parser#sqlOffsetClause.
 	VisitSqlOffsetClause(ctx *SqlOffsetClauseContext) interface{}
 
+	// Visit a parse tree produced by SPL2Parser#multilineSqlSelectClause.
+	VisitMultilineSqlSelectClause(ctx *MultilineSqlSelectClauseContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#multilineSqlProjection.
+	VisitMultilineSqlProjection(ctx *MultilineSqlProjectionContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#multilineSqlFromClause.
+	VisitMultilineSqlFromClause(ctx *MultilineSqlFromClauseContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#multilineSqlWhereClause.
+	VisitMultilineSqlWhereClause(ctx *MultilineSqlWhereClauseContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#multilineSqlPredicate.
+	VisitMultilineSqlPredicate(ctx *MultilineSqlPredicateContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#multilineSqlGroupClause.
+	VisitMultilineSqlGroupClause(ctx *MultilineSqlGroupClauseContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#multilineSqlGroupKey.
+	VisitMultilineSqlGroupKey(ctx *MultilineSqlGroupKeyContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#multilineSqlSpanCall.
+	VisitMultilineSqlSpanCall(ctx *MultilineSqlSpanCallContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#multilineSqlOrderClause.
+	VisitMultilineSqlOrderClause(ctx *MultilineSqlOrderClauseContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#multilineSqlOrderTerm.
+	VisitMultilineSqlOrderTerm(ctx *MultilineSqlOrderTermContext) interface{}
+
 	// Visit a parse tree produced by SPL2Parser#existsPredicate.
 	VisitExistsPredicate(ctx *ExistsPredicateContext) interface{}
 
 	// Visit a parse tree produced by SPL2Parser#dataset.
 	VisitDataset(ctx *DatasetContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#dottedDataset.
+	VisitDottedDataset(ctx *DottedDatasetContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#datasetPath.
+	VisitDatasetPath(ctx *DatasetPathContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#datasetParameter.
+	VisitDatasetParameter(ctx *DatasetParameterContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#staticDatasetDescriptor.
+	VisitStaticDatasetDescriptor(ctx *StaticDatasetDescriptorContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#descriptorKindKey.
+	VisitDescriptorKindKey(ctx *DescriptorKindKeyContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#descriptorPropertiesKey.
+	VisitDescriptorPropertiesKey(ctx *DescriptorPropertiesKeyContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#descriptorProperties.
+	VisitDescriptorProperties(ctx *DescriptorPropertiesContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#descriptorProperty.
+	VisitDescriptorProperty(ctx *DescriptorPropertyContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#jsonObjectKey.
+	VisitJsonObjectKey(ctx *JsonObjectKeyContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#jsonLiteral.
+	VisitJsonLiteral(ctx *JsonLiteralContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#jsonStringLiteral.
+	VisitJsonStringLiteral(ctx *JsonStringLiteralContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#jsonArray.
+	VisitJsonArray(ctx *JsonArrayContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#jsonObject.
+	VisitJsonObject(ctx *JsonObjectContext) interface{}
 
 	// Visit a parse tree produced by SPL2Parser#generator.
 	VisitGenerator(ctx *GeneratorContext) interface{}
@@ -125,6 +194,12 @@ type SPL2ParserVisitor interface {
 
 	// Visit a parse tree produced by SPL2Parser#fieldSelector.
 	VisitFieldSelector(ctx *FieldSelectorContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#structuralFieldSelector.
+	VisitStructuralFieldSelector(ctx *StructuralFieldSelectorContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#fieldPath.
+	VisitFieldPath(ctx *FieldPathContext) interface{}
 
 	// Visit a parse tree produced by SPL2Parser#tableCommand.
 	VisitTableCommand(ctx *TableCommandContext) interface{}
@@ -170,6 +245,15 @@ type SPL2ParserVisitor interface {
 
 	// Visit a parse tree produced by SPL2Parser#aggregateGroup.
 	VisitAggregateGroup(ctx *AggregateGroupContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#selectedAggregateGroup.
+	VisitSelectedAggregateGroup(ctx *SelectedAggregateGroupContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#selectedGroupTerm.
+	VisitSelectedGroupTerm(ctx *SelectedGroupTermContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#selectedSpanGroup.
+	VisitSelectedSpanGroup(ctx *SelectedSpanGroupContext) interface{}
 
 	// Visit a parse tree produced by SPL2Parser#groupField.
 	VisitGroupField(ctx *GroupFieldContext) interface{}
@@ -306,6 +390,12 @@ type SPL2ParserVisitor interface {
 	// Visit a parse tree produced by SPL2Parser#unionDataset.
 	VisitUnionDataset(ctx *UnionDatasetContext) interface{}
 
+	// Visit a parse tree produced by SPL2Parser#branchCommand.
+	VisitBranchCommand(ctx *BranchCommandContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#branchArm.
+	VisitBranchArm(ctx *BranchArmContext) interface{}
+
 	// Visit a parse tree produced by SPL2Parser#ifCommand.
 	VisitIfCommand(ctx *IfCommandContext) interface{}
 
@@ -396,8 +486,86 @@ type SPL2ParserVisitor interface {
 	// Visit a parse tree produced by SPL2Parser#moduleSuffix.
 	VisitModuleSuffix(ctx *ModuleSuffixContext) interface{}
 
+	// Visit a parse tree produced by SPL2Parser#trailingPipelineBoundary.
+	VisitTrailingPipelineBoundary(ctx *TrailingPipelineBoundaryContext) interface{}
+
 	// Visit a parse tree produced by SPL2Parser#moduleDeclaration.
 	VisitModuleDeclaration(ctx *ModuleDeclarationContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#annotatedStatement.
+	VisitAnnotatedStatement(ctx *AnnotatedStatementContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#moduleStatement.
+	VisitModuleStatement(ctx *ModuleStatementContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#unsupportedModuleBoundary.
+	VisitUnsupportedModuleBoundary(ctx *UnsupportedModuleBoundaryContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#unsupportedImportWildcard.
+	VisitUnsupportedImportWildcard(ctx *UnsupportedImportWildcardContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#unsupportedExportView.
+	VisitUnsupportedExportView(ctx *UnsupportedExportViewContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#unsupportedFunctionTerminator.
+	VisitUnsupportedFunctionTerminator(ctx *UnsupportedFunctionTerminatorContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#viewDeclaration.
+	VisitViewDeclaration(ctx *ViewDeclarationContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#functionDeclaration.
+	VisitFunctionDeclaration(ctx *FunctionDeclarationContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#functionParameters.
+	VisitFunctionParameters(ctx *FunctionParametersContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#functionParameter.
+	VisitFunctionParameter(ctx *FunctionParameterContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#returnStatement.
+	VisitReturnStatement(ctx *ReturnStatementContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#importDeclaration.
+	VisitImportDeclaration(ctx *ImportDeclarationContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#importSelection.
+	VisitImportSelection(ctx *ImportSelectionContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#importWildcard.
+	VisitImportWildcard(ctx *ImportWildcardContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#importList.
+	VisitImportList(ctx *ImportListContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#aliasedImport.
+	VisitAliasedImport(ctx *AliasedImportContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#exportDeclaration.
+	VisitExportDeclaration(ctx *ExportDeclarationContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#exportSelection.
+	VisitExportSelection(ctx *ExportSelectionContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#exportList.
+	VisitExportList(ctx *ExportListContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#aliasedExport.
+	VisitAliasedExport(ctx *AliasedExportContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#qualifiedName.
+	VisitQualifiedName(ctx *QualifiedNameContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#annotations.
+	VisitAnnotations(ctx *AnnotationsContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#annotation.
+	VisitAnnotation(ctx *AnnotationContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#annotationStatement.
+	VisitAnnotationStatement(ctx *AnnotationStatementContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#statementTerminator.
+	VisitStatementTerminator(ctx *StatementTerminatorContext) interface{}
 
 	// Visit a parse tree produced by SPL2Parser#searchCommand.
 	VisitSearchCommand(ctx *SearchCommandContext) interface{}
@@ -510,8 +678,32 @@ type SPL2ParserVisitor interface {
 	// Visit a parse tree produced by SPL2Parser#primary.
 	VisitPrimary(ctx *PrimaryContext) interface{}
 
+	// Visit a parse tree produced by SPL2Parser#multilineOperator.
+	VisitMultilineOperator(ctx *MultilineOperatorContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#multilineOperand.
+	VisitMultilineOperand(ctx *MultilineOperandContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#multilineSimpleCall.
+	VisitMultilineSimpleCall(ctx *MultilineSimpleCallContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#multilineAtom.
+	VisitMultilineAtom(ctx *MultilineAtomContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#multilineAccessPart.
+	VisitMultilineAccessPart(ctx *MultilineAccessPartContext) interface{}
+
 	// Visit a parse tree produced by SPL2Parser#call.
 	VisitCall(ctx *CallContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#multilineCall.
+	VisitMultilineCall(ctx *MultilineCallContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#multilineArguments.
+	VisitMultilineArguments(ctx *MultilineArgumentsContext) interface{}
+
+	// Visit a parse tree produced by SPL2Parser#multilineArgument.
+	VisitMultilineArgument(ctx *MultilineArgumentContext) interface{}
 
 	// Visit a parse tree produced by SPL2Parser#arguments.
 	VisitArguments(ctx *ArgumentsContext) interface{}

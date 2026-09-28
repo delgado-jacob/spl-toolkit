@@ -79,6 +79,169 @@ func TestRequirementTraceIndexesStaySynchronized(t *testing.T) {
 	}
 }
 
+func TestRequirementTraceCloneOwnsExactIdentity(t *testing.T) {
+	trace := newRequirementTrace()
+	trace.recordReference(Reference{ID: "pending-0", Kind: "field", FieldIdentity: &FieldIdentity{Kind: "path", Segments: []string{"actor", "name"}}}, true, false, trace.nextEvent())
+	trace.reference("pending-0").fieldIdentity = pathFieldIdentity("", []string{"actor", "name"})
+	cloned := trace.clone()
+	cloned.references[0].reference.FieldIdentity.Segments[0] = "changed"
+	cloned.references[0].fieldIdentity.Segments[0] = "changed"
+	if got := trace.references[0]; got.reference.FieldIdentity.Segments[0] != "actor" || got.fieldIdentity.Segments[0] != "actor" {
+		t.Fatalf("trace clone aliases exact identity: %+v", got)
+	}
+}
+
+func TestRequirementTraceKeyUsesPrivateIdentityOnlyForExactFields(t *testing.T) {
+	identity := atomicFieldIdentity("actor[]")
+	for _, reference := range []Reference{
+		{Kind: "field", Resolution: "dynamic", NormalizedName: "actor[]"},
+		{Kind: "dataset", Resolution: "exact", NormalizedName: "actor[]"},
+	} {
+		key := requirementTraceKey(requirementTraceReference{reference: reference, fieldIdentity: identity})
+		if key.fieldKey != "" {
+			t.Errorf("non-exact-field trace key used private identity: %+v", key)
+		}
+	}
+	key := requirementTraceKey(requirementTraceReference{reference: Reference{Kind: "field", Resolution: "exact", NormalizedName: "actor[]"}, fieldIdentity: identity})
+	if key.fieldKey == "" {
+		t.Fatalf("exact-field trace key lost private identity: %+v", key)
+	}
+}
+
+func TestRequirementTraceSPL2DatasetParameterProjection(t *testing.T) {
+	for _, name := range []string{"$target_1", "$view"} {
+		t.Run(name, func(t *testing.T) {
+			result, err := Analyze(QueryDocument{Text: "FROM " + name, Language: "spl2", Profile: "splunkd", Version: "current"})
+			if err != nil {
+				t.Fatal(err)
+			}
+			if result.Status != Valid || !reflect.DeepEqual(result.Dependencies.Datasets, []string{name}) {
+				t.Fatalf("dataset parameter result = status %q dependencies %+v diagnostics %+v", result.Status, result.Dependencies, result.Diagnostics)
+			}
+			ref := spl2Ref(t, result, name, "read")
+			if ref.Kind != "dataset" || ref.Resolution != "exact" || ref.Binding != "not_applicable" || ref.OriginalName != name {
+				t.Fatalf("dataset parameter reference = %+v", ref)
+			}
+			item := requirementItem(result.Requirements, "dataset", name, "read")
+			if item == nil || item.Necessity != "required" || item.Resolution != "exact" || len(item.Occurrences) != 1 || item.Occurrences[0].ReferenceID != ref.ID {
+				t.Fatalf("dataset parameter requirement = %+v", item)
+			}
+		})
+	}
+}
+
+func TestRequirementTraceSPL2StaticDescriptorProjection(t *testing.T) {
+	tests := []struct {
+		name, query, identity string
+	}{
+		{
+			name:     "nested keys sort recursively",
+			query:    `FROM {kind: "index", properties: {z: 1, a: {b: 2, a: 1}, labels: ["b", "a"]}}`,
+			identity: `{"kind":"index","properties":{"a":{"a":1,"b":2},"labels":["b","a"],"z":1}}`,
+		},
+		{
+			name:     "optional properties",
+			query:    `FROM {kind: "index"}`,
+			identity: `{"kind":"index"}`,
+		},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			result, err := Analyze(QueryDocument{Text: tc.query, Language: "spl2"})
+			if err != nil {
+				t.Fatal(err)
+			}
+			if result.Status != Valid || !reflect.DeepEqual(result.Dependencies.Datasets, []string{tc.identity}) {
+				t.Fatalf("descriptor result = status %q dependencies %+v diagnostics %+v", result.Status, result.Dependencies, result.Diagnostics)
+			}
+			ref := spl2Ref(t, result, tc.identity, "read")
+			if ref.Kind != "dataset" || ref.OriginalName != tc.query[len("FROM "):] || ref.Resolution != "exact" {
+				t.Fatalf("descriptor reference = %+v", ref)
+			}
+			item := requirementItem(result.Requirements, "dataset", tc.identity, "read")
+			if item == nil || item.Necessity != "required" || len(item.Occurrences) != 1 || item.Occurrences[0].ReferenceID != ref.ID {
+				t.Fatalf("descriptor requirement = %+v", item)
+			}
+		})
+	}
+}
+
+func TestRequirementTraceSPL2DescriptorRejectsUnprovedIdentity(t *testing.T) {
+	for _, query := range []string{
+		`FROM {kind: "index", properties: {a: 1, "a": 2}}`,
+		`FROM {kind: "index", properties: {nested: {a: 1, "a": 2}}}`,
+		`FROM {properties: {name: "main"}}`,
+		`FROM {kind: $kind, properties: {name: "main"}}`,
+		`FROM {kind: "index", properties: {name: dataset_name}}`,
+		`FROM {kind: "index", properties: {name: coalesce(dataset.name, fallback)}}`,
+	} {
+		t.Run(query, func(t *testing.T) {
+			result, err := Analyze(QueryDocument{Text: query, Language: "spl2"})
+			if err != nil {
+				t.Fatal(err)
+			}
+			if result.Status == Valid || result.Requirements.Coverage.Complete || len(result.Dependencies.Datasets) != 0 {
+				t.Fatalf("dynamic descriptor result = status %q dependencies %+v requirements %+v", result.Status, result.Dependencies, result.Requirements)
+			}
+			var dynamic *Reference
+			for i := range result.References {
+				ref := &result.References[i]
+				if ref.Kind == "dataset" && ref.Resolution == "exact" {
+					t.Fatalf("unproved descriptor gained exact identity: %+v", ref)
+				}
+				if ref.Kind == "dataset" && ref.Resolution == "dynamic" {
+					if dynamic != nil {
+						t.Fatalf("duplicate dynamic descriptor references: %+v", result.References)
+					}
+					dynamic = ref
+				}
+			}
+			if dynamic == nil || dynamic.Location.Start.Offset != len("FROM ") || dynamic.Location.End.Offset != len(query) {
+				t.Fatalf("missing located dynamic descriptor reference: %+v", result.References)
+			}
+			item := requirementItem(result.Requirements, "dataset", dynamic.NormalizedName, "read")
+			if item == nil || item.Resolution != "dynamic" || item.Necessity != "conditional" || len(item.Occurrences) != 1 || item.Occurrences[0].ReferenceID != dynamic.ID {
+				t.Fatalf("dynamic descriptor requirement = %+v", item)
+			}
+		})
+	}
+}
+
+func TestRequirementTraceSPL2DynamicDescriptorRetainsChildEvidence(t *testing.T) {
+	query := `FROM {kind: "index", properties: {name: mystery(dataset.name, fallback)}}`
+	result, err := Analyze(QueryDocument{Text: query, Language: "spl2"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if result.Coverage.SyntaxComplete != true || result.Coverage.SemanticComplete || result.Requirements.Coverage.Complete || len(result.Dependencies.Datasets) != 0 {
+		t.Fatalf("dynamic descriptor coverage = analysis %+v requirements %+v dependencies %+v", result.Coverage, result.Requirements.Coverage, result.Dependencies)
+	}
+	for _, original := range []string{"dataset.name", "fallback"} {
+		found := false
+		for _, ref := range result.References {
+			if ref.Kind == "field" && ref.OriginalName == original {
+				found = true
+				break
+			}
+		}
+		if !found {
+			t.Fatalf("missing dynamic descriptor child %q: %+v", original, result.References)
+		}
+	}
+	foundCall := false
+	for _, diagnostic := range result.Diagnostics {
+		if diagnostic.Code == CodeUnsupportedFunction {
+			foundCall = true
+			if got := query[diagnostic.Location.Start.Offset:diagnostic.Location.End.Offset]; got != "mystery(dataset.name, fallback)" {
+				t.Fatalf("dynamic descriptor call diagnostic owns %q: %+v", got, diagnostic)
+			}
+		}
+	}
+	if !foundCall {
+		t.Fatalf("dynamic descriptor lost independently parsed call evidence: %+v", result.Diagnostics)
+	}
+}
+
 func TestSPL2ParserDamageSynchronizesRequirementStateBeforeDownstreamTransfers(t *testing.T) {
 	tests := []struct {
 		name            string
@@ -353,20 +516,24 @@ func TestRequirementTraceClassifiesFieldOrigins(t *testing.T) {
 func TestRequirementEnvironmentCloneOwnsState(t *testing.T) {
 	trace := newRequirementTrace()
 	env := newEnvironmentWithRequirementTrace(trace)
-	env.requirements.fields["host"] = requirementField{source: true, conditional: true, origins: []string{"pending-0"}}
-	env.requirements.removed["old"] = true
+	hostIdentity := atomicFieldIdentity("host")
+	hostKey, _ := hostIdentity.privateKey()
+	oldKey, _ := atomicFieldIdentity("old").privateKey()
+	newKey, _ := atomicFieldIdentity("new").privateKey()
+	env.requirements.fields[hostKey] = requirementField{identity: hostIdentity, source: true, conditional: true, origins: []string{"pending-0"}}
+	env.requirements.removed[oldKey] = true
 	clone := env.clone()
 
-	clonedField := clone.requirements.fields["host"]
+	clonedField := clone.requirements.fields[hostKey]
 	clonedField.origins[0] = "changed"
 	clonedField.conditional = false
-	clone.requirements.fields["host"] = clonedField
-	clone.requirements.removed["new"] = true
+	clone.requirements.fields[hostKey] = clonedField
+	clone.requirements.removed[newKey] = true
 	clone.requirements.open = false
 	clone.requirements.uncertain = true
 
-	field := env.requirements.fields["host"]
-	if !field.source || !field.conditional || !reflect.DeepEqual(field.origins, []string{"pending-0"}) || env.requirements.removed["new"] || !env.requirements.open || env.requirements.uncertain {
+	field := env.requirements.fields[hostKey]
+	if !field.source || !field.conditional || !reflect.DeepEqual(field.origins, []string{"pending-0"}) || env.requirements.removed[newKey] || !env.requirements.open || env.requirements.uncertain {
 		t.Fatalf("clone mutation changed source sidecar: %+v", env.requirements)
 	}
 	if clone.requirements.trace != trace {
@@ -399,15 +566,18 @@ func TestRequirementEnvironmentExactProjectionClonesOrSynthesizesConditionalFiel
 		Binding:            "indeterminate",
 		OriginReferenceIDs: []string{"pending-origin"},
 	}, false, true, trace.nextEvent())
+	trace.reference("pending-select").fieldIdentity = atomicFieldIdentity("host")
 
 	environment := newRequirementEnvironment(trace)
-	environment.fields["existing"] = requirementField{source: true, origins: []string{"pending-origin"}}
+	existingIdentity := atomicFieldIdentity("existing")
+	existingKey, _ := existingIdentity.privateKey()
+	environment.fields[existingKey] = requirementField{identity: existingIdentity, source: true, origins: []string{"pending-origin"}}
 	existing, ok := environment.exactProjection("existing", nil)
 	if !ok || !existing.source || existing.conditional || !reflect.DeepEqual(existing.origins, []string{"pending-origin"}) {
 		t.Fatalf("existing exact projection = %+v, %t", existing, ok)
 	}
 	existing.origins[0] = "changed"
-	if got := environment.fields["existing"].origins; !reflect.DeepEqual(got, []string{"pending-origin"}) {
+	if got := environment.fields[existingKey].origins; !reflect.DeepEqual(got, []string{"pending-origin"}) {
 		t.Fatalf("projected existing origins alias environment state: %v", got)
 	}
 
@@ -418,6 +588,11 @@ func TestRequirementEnvironmentExactProjectionClonesOrSynthesizesConditionalFiel
 	synthesized.origins[1] = "changed"
 	if got := trace.reference("pending-select").reference.OriginReferenceIDs; !reflect.DeepEqual(got, []string{"pending-origin"}) {
 		t.Fatalf("synthesized origins alias trace evidence: %v", got)
+	}
+	trace.recordReference(Reference{ID: "pending-other-identity", NormalizedName: "host", Kind: "field", Role: "read", Resolution: "exact", Binding: "indeterminate"}, false, true, trace.nextEvent())
+	trace.reference("pending-other-identity").fieldIdentity = pathFieldIdentity("", []string{"host"})
+	if field, ok := environment.exactProjection("host", []string{"pending-other-identity"}); ok {
+		t.Fatalf("different exact identity synthesized atomic field: %+v", field)
 	}
 
 	for _, reference := range []Reference{
@@ -800,6 +975,103 @@ func TestRequirementTraceWildcardRenameInvalidatesConcreteTargets(t *testing.T) 
 	}
 }
 
+func TestRequirementTraceWildcardRenameInvalidatesStructuralMatches(t *testing.T) {
+	result, trace, err := analyzeRewriteWithTrace(QueryDocument{
+		Text:     `FROM main | eval x=actor.name | rename 'actor.*' AS 'changed.*' | eval y=actor.name`,
+		Language: "spl2",
+	}, nil, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	renameState := result.Lineage[2].After
+	for _, field := range renameState.Fields {
+		if field.Name == "actor.name" {
+			t.Fatalf("wildcard rename retained structural binding: %+v", renameState)
+		}
+	}
+
+	var later *Reference
+	for i := range result.References {
+		candidate := &result.References[i]
+		if candidate.OriginalName == "actor.name" && candidate.Role == "read" && candidate.StageID == "stage-3" {
+			later = candidate
+		}
+	}
+	if later == nil || later.Binding != "indeterminate" {
+		t.Fatalf("post-rename structural read = %+v, want indeterminate", later)
+	}
+	entry := requirementTraceReferencesByID(trace)[later.ID]
+	if entry.reference.Binding != "indeterminate" || entry.directExternal || !entry.conditional {
+		t.Fatalf("post-rename structural requirement = %+v, want conditional indeterminate", entry)
+	}
+
+	final := result.Lineage[3]
+	var y *FieldBinding
+	for i := range final.After.Fields {
+		if final.After.Fields[i].Name == "y" {
+			y = &final.After.Fields[i]
+		}
+	}
+	if y == nil || !y.Conditional {
+		t.Fatalf("post-rename y binding = %+v, want conditional", y)
+	}
+	for _, transition := range final.Transitions {
+		if transition.Output == "y" && !transition.Conditional {
+			t.Fatalf("stale structural binding produced unconditional y: %+v", transition)
+		}
+	}
+	item := requirementItem(result.Requirements, "field", "actor.name", "read")
+	if item == nil {
+		t.Fatalf("missing actor.name requirement: %+v", result.Requirements.Items)
+	}
+	foundLater := false
+	for _, occurrence := range item.Occurrences {
+		if occurrence.ReferenceID == later.ID {
+			foundLater = true
+			if occurrence.Binding != "indeterminate" {
+				t.Fatalf("post-rename requirement occurrence = %+v", occurrence)
+			}
+		}
+	}
+	if !foundLater {
+		t.Fatalf("missing post-rename occurrence in %+v", item)
+	}
+}
+
+func TestRequirementTraceWildcardRenamePreservesClassicAtomicInvalidation(t *testing.T) {
+	result, trace, err := analyzeRewriteWithTrace(QueryDocument{Text: `search a1=1 | rename a* AS b | eval y=a1`}, nil, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var later *Reference
+	for i := range result.References {
+		candidate := &result.References[i]
+		if candidate.NormalizedName == "a1" && candidate.Role == "read" && candidate.StageID == "stage-2" {
+			later = candidate
+		}
+	}
+	if later == nil || later.Binding != "indeterminate" {
+		t.Fatalf("classic post-rename read = %+v, want indeterminate", later)
+	}
+	entry := requirementTraceReferencesByID(trace)[later.ID]
+	if entry.reference.Binding != "indeterminate" || entry.directExternal || !entry.conditional {
+		t.Fatalf("classic post-rename requirement = %+v, want conditional indeterminate", entry)
+	}
+	foundY := false
+	for _, field := range result.Lineage[2].After.Fields {
+		if field.Name == "y" {
+			foundY = true
+			if field.Conditional {
+				t.Fatalf("classic wildcard rename assignment changed conditionality: %+v", field)
+			}
+		}
+	}
+	if !foundY {
+		t.Fatalf("classic wildcard rename lost y: %+v", result.Lineage[2].After)
+	}
+}
+
 func TestRequirementTraceDatasetLiteralClosesAbsentField(t *testing.T) {
 	_, trace, err := analyzeRewriteWithTrace(QueryDocument{Text: "FROM [{a:1}] | table b", Language: "spl2"}, nil, nil)
 	if err != nil {
@@ -814,13 +1086,14 @@ func TestRequirementTraceDatasetLiteralClosesAbsentField(t *testing.T) {
 
 func TestRequirementTracePreservesConditionalFields(t *testing.T) {
 	for _, tc := range []struct {
-		name     string
-		document QueryDocument
-		field    string
+		name               string
+		document           QueryDocument
+		field, binding     string
+		requireConditional bool
 	}{
-		{"SPL OUTPUTNEW", QueryDocument{Text: "search user=* | lookup users user OUTPUTNEW role | table role"}, "role"},
-		{"SPL2 partial dataset field", QueryDocument{Text: "FROM [{a:1},{b:2}] | table a", Language: "spl2"}, "a"},
-		{"SPL2 deferred bin effect", QueryDocument{Text: "FROM main | eval a=host | bin a | table a", Language: "spl2"}, "a"},
+		{"SPL OUTPUTNEW", QueryDocument{Text: "search user=* | lookup users user OUTPUTNEW role | table role"}, "role", "indeterminate", true},
+		{"SPL2 partial dataset field", QueryDocument{Text: "FROM [{a:1},{b:2}] | table a", Language: "spl2"}, "a", "indeterminate", true},
+		{"SPL2 selected bin effect", QueryDocument{Text: "FROM main | eval a=host | bin a | table a", Language: "spl2"}, "a", "derived", false},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			result, trace, err := analyzeRewriteWithTrace(tc.document, nil, nil)
@@ -845,11 +1118,11 @@ func TestRequirementTracePreservesConditionalFields(t *testing.T) {
 			if public == nil || traced == nil {
 				t.Fatalf("missing final %s read: public=%+v trace=%+v", tc.field, result.References, trace.references)
 			}
-			if public.Binding != "indeterminate" {
-				t.Fatalf("public final read = %+v, want indeterminate", public)
+			if public.Binding != tc.binding {
+				t.Fatalf("public final read = %+v, want %s", public, tc.binding)
 			}
-			if traced.reference.Binding != "indeterminate" || traced.directExternal || !traced.conditional {
-				t.Fatalf("query-only final read = %+v, want conditional indeterminate evidence", traced)
+			if traced.reference.Binding != tc.binding || traced.directExternal || traced.conditional != tc.requireConditional {
+				t.Fatalf("query-only final read = %+v, want binding=%s conditional=%v", traced, tc.binding, tc.requireConditional)
 			}
 		})
 	}
@@ -1271,11 +1544,12 @@ func testSourceRefinement(fields []string, complete bool, resolve func(string) S
 func marshalRequirementTrace(t *testing.T, trace *requirementTrace) []byte {
 	t.Helper()
 	type referenceJSON struct {
-		PendingID      string    `json:"pending_id"`
-		Reference      Reference `json:"reference"`
-		DirectExternal bool      `json:"direct_external"`
-		Conditional    bool      `json:"conditional"`
-		EventOrdinal   int       `json:"event_ordinal"`
+		PendingID       string    `json:"pending_id"`
+		Reference       Reference `json:"reference"`
+		DirectExternal  bool      `json:"direct_external"`
+		Conditional     bool      `json:"conditional"`
+		PathConditional bool      `json:"path_conditional"`
+		EventOrdinal    int       `json:"event_ordinal"`
 	}
 	type diagnosticJSON struct {
 		Diagnostic          Diagnostic `json:"diagnostic"`
@@ -1295,7 +1569,7 @@ func marshalRequirementTrace(t *testing.T, trace *requirementTrace) []byte {
 		SemanticComplete: trace.semanticComplete,
 	}
 	for _, entry := range trace.references {
-		wire.References = append(wire.References, referenceJSON{entry.pendingID, entry.reference, entry.directExternal, entry.conditional, entry.eventOrdinal})
+		wire.References = append(wire.References, referenceJSON{entry.pendingID, entry.reference, entry.directExternal, entry.conditional, entry.pathConditional, entry.eventOrdinal})
 	}
 	for _, entry := range trace.diagnostics {
 		wire.Diagnostics = append(wire.Diagnostics, diagnosticJSON{entry.diagnostic, entry.incomplete, entry.pendingReferenceIDs, entry.eventOrdinal})
@@ -1305,4 +1579,261 @@ func marshalRequirementTrace(t *testing.T, trace *requirementTrace) []byte {
 		t.Fatal(err)
 	}
 	return encoded
+}
+
+func mergeTraceReference(id, identity string, offset int) Reference {
+	return Reference{
+		ID:                 id,
+		OriginalName:       identity,
+		NormalizedName:     identity,
+		Kind:               "dataset",
+		Role:               "read",
+		StageID:            "stage-0",
+		ScopeID:            "scope-0",
+		Location:           Location{Start: Position{Offset: offset}, End: Position{Offset: offset + 1}},
+		Resolution:         "exact",
+		Binding:            "not_applicable",
+		OriginReferenceIDs: []string{},
+	}
+}
+
+func appendMergeTraceReference(trace *requirementTrace, id, identity string, offset int) {
+	trace.recordReference(mergeTraceReference(id, identity, offset), true, false, trace.nextEvent())
+}
+
+func TestRequirementTraceForkKeepsSharedPrefixImmutableAndSuffixesIndependent(t *testing.T) {
+	base := newRequirementTrace()
+	appendMergeTraceReference(base, "pending-prefix", "prefix", 1)
+	left := base.forkBranch()
+	right := base.forkBranch()
+	appendMergeTraceReference(left, "pending-left", "left", 2)
+	appendMergeTraceReference(right, "pending-right", "right", 3)
+
+	if got := []string{base.references[0].pendingID}; len(base.references) != 1 || !reflect.DeepEqual(got, []string{"pending-prefix"}) {
+		t.Fatalf("base trace changed after forks: %+v", base.references)
+	}
+	if len(left.references) != 2 || left.references[1].pendingID != "pending-left" || len(right.references) != 2 || right.references[1].pendingID != "pending-right" {
+		t.Fatalf("fork suffixes leaked: left=%+v right=%+v", left.references, right.references)
+	}
+}
+
+func TestRequirementTraceMergeMakesEveryPathObligationRequired(t *testing.T) {
+	base := newRequirementTrace()
+	left := base.forkBranch()
+	right := base.forkBranch()
+	appendMergeTraceReference(left, "pending-left", "shared", 10)
+	appendMergeTraceReference(right, "pending-right", "shared", 20)
+
+	merged := mergeRequirementTraces(base, []requirementTracePath{
+		{Ordinal: 0, Trace: left, Reachable: true},
+		{Ordinal: 1, Trace: right, Reachable: true},
+	})
+	if len(merged.references) != 2 {
+		t.Fatalf("merged references = %+v", merged.references)
+	}
+	for _, entry := range merged.references {
+		if !entry.directExternal || entry.conditional || entry.pathConditional {
+			t.Fatalf("every-path obligation was not required: %+v", entry)
+		}
+	}
+	projected := mustProjectRequirements(t, merged)
+	if !projected.Coverage.Complete || len(projected.Gaps) != 0 || len(projected.Items) != 1 || projected.Items[0].Necessity != "required" || len(projected.Items[0].Occurrences) != 2 {
+		t.Fatalf("every-path projection = coverage %+v items %+v gaps %+v", projected.Coverage, projected.Items, projected.Gaps)
+	}
+}
+
+func TestRequirementTraceMergeMakesSubsetObligationConditional(t *testing.T) {
+	base := newRequirementTrace()
+	left := base.forkBranch()
+	right := base.forkBranch()
+	appendMergeTraceReference(left, "pending-left", "left-only", 10)
+
+	merged := mergeRequirementTraces(base, []requirementTracePath{
+		{Ordinal: 0, Trace: left, Reachable: true},
+		{Ordinal: 1, Trace: right, Reachable: true},
+	})
+	if len(merged.references) != 1 || merged.references[0].directExternal || merged.references[0].conditional || !merged.references[0].pathConditional {
+		t.Fatalf("subset obligation = %+v", merged.references)
+	}
+	projected := mustProjectRequirements(t, merged)
+	if !projected.Coverage.Complete || len(projected.Gaps) != 0 || len(projected.Items) != 1 || projected.Items[0].Necessity != "conditional" || len(projected.Items[0].Occurrences) != 1 {
+		t.Fatalf("subset projection = coverage %+v items %+v gaps %+v", projected.Coverage, projected.Items, projected.Gaps)
+	}
+}
+
+func TestRequirementTraceMergeSupportsNestedForks(t *testing.T) {
+	base := newRequirementTrace()
+	outer := base.forkBranch()
+	appendMergeTraceReference(outer, "pending-outer", "outer", 5)
+	innerLeft := outer.forkBranch()
+	innerRight := outer.forkBranch()
+	appendMergeTraceReference(innerLeft, "pending-inner-left", "inner", 10)
+	appendMergeTraceReference(innerRight, "pending-inner-right", "inner", 20)
+	mergedInner := mergeRequirementTraces(outer, []requirementTracePath{
+		{Ordinal: 0, Trace: innerLeft, Reachable: true},
+		{Ordinal: 1, Trace: innerRight, Reachable: true},
+	})
+	otherOuter := base.forkBranch()
+	appendMergeTraceReference(otherOuter, "pending-other", "other", 30)
+
+	mergedOuter := mergeRequirementTraces(base, []requirementTracePath{
+		{Ordinal: 0, Trace: mergedInner, Reachable: true},
+		{Ordinal: 1, Trace: otherOuter, Reachable: true},
+	})
+	want := []string{"pending-outer", "pending-inner-left", "pending-inner-right", "pending-other"}
+	got := make([]string, 0, len(mergedOuter.references))
+	for _, entry := range mergedOuter.references {
+		got = append(got, entry.pendingID)
+	}
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("nested merged order = %v want %v", got, want)
+	}
+	if mergedOuter.references[1].directExternal || mergedOuter.references[1].conditional || !mergedOuter.references[1].pathConditional || mergedOuter.references[2].directExternal || mergedOuter.references[2].conditional || !mergedOuter.references[2].pathConditional {
+		t.Fatalf("nested subset necessity was lost: %+v", mergedOuter.references)
+	}
+}
+
+func TestRequirementTraceMergeIgnoresUnreachablePaths(t *testing.T) {
+	base := newRequirementTrace()
+	reachable := base.forkBranch()
+	unreachable := base.forkBranch()
+	appendMergeTraceReference(reachable, "pending-live", "live", 10)
+	appendMergeTraceReference(unreachable, "pending-dead", "dead", 1)
+
+	merged := mergeRequirementTraces(base, []requirementTracePath{
+		{Ordinal: 0, Trace: unreachable, Reachable: false},
+		{Ordinal: 1, Trace: reachable, Reachable: true},
+	})
+	if len(merged.references) != 1 || merged.references[0].pendingID != "pending-live" || !merged.references[0].directExternal || merged.references[0].conditional || merged.references[0].pathConditional {
+		t.Fatalf("unreachable path contributed requirements: %+v", merged.references)
+	}
+	projected := mustProjectRequirements(t, merged)
+	if !projected.Coverage.Complete || len(projected.Items) != 1 || projected.Items[0].Identity != "live" || projected.Items[0].Necessity != "required" || len(projected.Gaps) != 0 {
+		t.Fatalf("unreachable-path projection = %+v", projected)
+	}
+}
+
+func TestRequirementTraceMergeKeepsOriginIndeterminacySeparateFromPathNecessity(t *testing.T) {
+	base := newRequirementTrace()
+	uncertain := base.forkBranch()
+	reference := mergeTraceReference("pending-uncertain", "uncertain", 10)
+	reference.Binding = "indeterminate"
+	uncertain.recordReference(reference, false, true, uncertain.nextEvent())
+	other := base.forkBranch()
+
+	merged := mergeRequirementTraces(base, []requirementTracePath{
+		{Ordinal: 0, Trace: uncertain, Reachable: true},
+		{Ordinal: 1, Trace: other, Reachable: true},
+	})
+	if len(merged.references) != 1 || !merged.references[0].conditional || merged.references[0].directExternal {
+		t.Fatalf("origin indeterminacy changed: %+v", merged.references)
+	}
+	projected := mustProjectRequirements(t, merged)
+	if projected.Coverage.Complete || len(projected.Gaps) != 1 || projected.Gaps[0].Code != CodeRequirementIndeterminate || projected.Items[0].Necessity != "conditional" {
+		t.Fatalf("origin-indeterminate projection = %+v", projected)
+	}
+}
+
+func TestRequirementTraceMergeRetainsIncompleteReachableChild(t *testing.T) {
+	base := newRequirementTrace()
+	complete := base.forkBranch()
+	incomplete := base.forkBranch()
+	incomplete.recordDiagnostic(Diagnostic{Code: CodeUnsupportedSemantics, Severity: "warning", Category: "unsupported_semantics", Message: "child gap", StageID: "stage-child"}, true, nil, incomplete.nextEvent())
+
+	merged := mergeRequirementTraces(base, []requirementTracePath{
+		{Ordinal: 0, Trace: complete, Reachable: true},
+		{Ordinal: 1, Trace: incomplete, Reachable: true},
+	})
+	projected := mustProjectRequirements(t, merged)
+	if projected.Coverage.Complete || len(projected.Gaps) != 1 || projected.Gaps[0].Code != CodeUnsupportedSemantics {
+		t.Fatalf("incomplete reachable child projection = %+v", projected)
+	}
+}
+
+func TestRequirementTraceMergeOrdersOccurrencesByLocationBranchAndEvent(t *testing.T) {
+	base := newRequirementTrace()
+	left := base.forkBranch()
+	right := base.forkBranch()
+	appendMergeTraceReference(left, "pending-late", "shared", 30)
+	appendMergeTraceReference(left, "pending-left-first", "shared", 10)
+	appendMergeTraceReference(left, "pending-left-second", "shared", 10)
+	appendMergeTraceReference(right, "pending-right", "shared", 10)
+
+	merged := mergeRequirementTraces(base, []requirementTracePath{
+		{Ordinal: 7, Trace: right, Reachable: true},
+		{Ordinal: 3, Trace: left, Reachable: true},
+	})
+	want := []string{"pending-left-first", "pending-left-second", "pending-right", "pending-late"}
+	got := make([]string, 0, len(merged.references))
+	for _, entry := range merged.references {
+		got = append(got, entry.pendingID)
+	}
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("merged occurrence order = %v want %v", got, want)
+	}
+}
+
+func TestRequirementTraceMergeIsRepeatableAndDoesNotMutateInputs(t *testing.T) {
+	base := newRequirementTrace()
+	appendMergeTraceReference(base, "pending-prefix", "prefix", 1)
+	left := base.forkBranch()
+	right := base.forkBranch()
+	appendMergeTraceReference(left, "pending-left", "shared", 10)
+	appendMergeTraceReference(right, "pending-right", "shared", 20)
+	baseBefore := marshalRequirementTrace(t, base)
+	leftBefore := marshalRequirementTrace(t, left)
+	rightBefore := marshalRequirementTrace(t, right)
+	paths := []requirementTracePath{
+		{Ordinal: 0, Trace: left, Reachable: true},
+		{Ordinal: 1, Trace: right, Reachable: true},
+	}
+
+	first := mergeRequirementTraces(base, paths)
+	second := mergeRequirementTraces(base, paths)
+	if !reflect.DeepEqual(marshalRequirementTrace(t, first), marshalRequirementTrace(t, second)) {
+		t.Fatalf("repeated trace merges differ: first=%+v second=%+v", first, second)
+	}
+	if !reflect.DeepEqual(marshalRequirementTrace(t, base), baseBefore) || !reflect.DeepEqual(marshalRequirementTrace(t, left), leftBefore) || !reflect.DeepEqual(marshalRequirementTrace(t, right), rightBefore) {
+		t.Fatal("trace merge mutated an input")
+	}
+}
+
+func TestRequirementTraceRebaseRetainsSuffixExactlyOnceWithoutMutation(t *testing.T) {
+	oldBase := newRequirementTrace()
+	appendMergeTraceReference(oldBase, "pending-prefix", "prefix", 1)
+	branch := oldBase.forkBranch()
+	appendMergeTraceReference(branch, "pending-child-first", "child", 5)
+	appendMergeTraceReference(branch, "pending-child-second", "child", 6)
+	newBase := oldBase.clone()
+	appendMergeTraceReference(newBase, "pending-lazy", "lazy", 20)
+	oldBefore := marshalRequirementTrace(t, oldBase)
+	branchBefore := marshalRequirementTrace(t, branch)
+	newBefore := marshalRequirementTrace(t, newBase)
+
+	rebased := rebaseRequirementTrace(oldBase, newBase, branch)
+	want := []string{"pending-prefix", "pending-lazy", "pending-child-first", "pending-child-second"}
+	got := make([]string, 0, len(rebased.references))
+	for _, entry := range rebased.references {
+		got = append(got, entry.pendingID)
+	}
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("rebased trace = %v want %v", got, want)
+	}
+	if !reflect.DeepEqual(marshalRequirementTrace(t, oldBase), oldBefore) || !reflect.DeepEqual(marshalRequirementTrace(t, branch), branchBefore) || !reflect.DeepEqual(marshalRequirementTrace(t, newBase), newBefore) {
+		t.Fatal("trace rebase mutated an input")
+	}
+}
+
+func TestRequirementTraceRebaseRejectsChangedPrefix(t *testing.T) {
+	oldBase := newRequirementTrace()
+	appendMergeTraceReference(oldBase, "pending-prefix", "prefix", 1)
+	branch := oldBase.forkBranch()
+	branch.references[0].reference.NormalizedName = "changed"
+
+	defer func() {
+		if recover() == nil {
+			t.Fatal("trace rebase silently accepted a changed immutable prefix")
+		}
+	}()
+	rebaseRequirementTrace(oldBase, oldBase, branch)
 }

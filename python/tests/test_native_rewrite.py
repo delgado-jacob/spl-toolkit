@@ -98,7 +98,9 @@ def expected_search(mode, language="spl"):
     for name, text, end in (("src", "search src=x", 12), ("user", "search user=x", 13)):
         document = {"text": text, "language": language, "profile": "splunkd", "version": "current", "source_id": "é😀\x00.spl"}
         empty = {"fields": [], "removed": [], "open": True, "uncertain": False}
-        source = {"fields": [{"name": name, "origin_reference_ids": ["ref-0"], "conditional": False}],
+        field_identity = {"kind": "atomic", "segments": [name]}
+        source = {"fields": [{"name": name, "field_identity": field_identity,
+                              "origin_reference_ids": ["ref-0"], "conditional": False}],
                   "removed": [], "open": True, "uncertain": False}
         reference_location = location(7, end - 2)
         requirements = {
@@ -112,12 +114,13 @@ def expected_search(mode, language="spl"):
             },
             "capability_revision": {
                 "spl": "sha256:08901c84ac8c420f59ddb86168c534f0e83484c05d3c8a81078a716c878a1733",
-                "spl2": "sha256:f1391296cfbc616e9bb1b1828e2471e37b60a35c0555654c0734640e072a0437",
+                "spl2": "sha256:a765813624c6edfd754a4529556f5fd35288f464e759f8d969404a072bef1898",
             }[language],
             "query_status": "valid",
             "coverage": {"complete": True, "reasons": []},
             "items": [{
                 "id": "req-1", "kind": "field", "identity": name,
+                "field_identity": field_identity,
                 "role": "filter" if language == "spl" else "read",
                 "necessity": "required", "origin": "direct", "resolution": "exact",
                 "occurrences": [{
@@ -135,6 +138,7 @@ def expected_search(mode, language="spl"):
                         "location": location(0, end), "semantic_complete": True}],
             "scopes": [{"id": "scope-0", "parent_id": "", "kind": "root", "stage_id": "", "location": location(0, end)}],
             "references": [{"id": "ref-0", "original_name": name, "normalized_name": name, "kind": "field",
+                            "field_identity": field_identity,
                             "role": "filter" if language == "spl" else "read", "stage_id": "stage-0", "scope_id": "scope-0", "location": reference_location,
                             "resolution": "exact", "binding": "source", "origin_reference_ids": []}],
             "lineage": [{"stage_id": "stage-0", "scope_id": "scope-0", "before": empty, "after": source, "transitions": []}],

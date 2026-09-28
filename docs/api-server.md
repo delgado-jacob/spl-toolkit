@@ -74,7 +74,7 @@ The full report includes SQL lineage `phase` and `execution_order`, with lexical
 {"text":"FROM main | mystery host","language":"spl2"}
 ```
 
-<!-- api-example: analyze-module /query/analyze invalid -->
+<!-- api-example: analyze-module /query/analyze valid -->
 ```json
 {"text":"$q = FROM main;","language":"spl2"}
 ```
@@ -84,7 +84,7 @@ The full report includes SQL lineage `phase` and `execution_order`, with lexical
 {"text":"FROM main | route output","language":"spl2"}
 ```
 
-Modules/declarations and known wrong-profile constructs carry located `SPL_UNSUPPORTED_MODULE` and `SPL_PROFILE_MISMATCH` findings with incomplete coverage. Unknown standalone syntax remains incomplete.
+Selected same-document view, function, annotation, import, and export declarations are analyzed through the module binder. Known wrong-profile constructs carry located `SPL_PROFILE_MISMATCH` findings with incomplete coverage. Unknown standalone syntax remains incomplete.
 
 `POST /api/v1/query/requirements` accepts the same strict query document and returns its canonical direct requirements without environment metadata, knowledge-object expansion, or compatibility proof:
 
@@ -97,7 +97,7 @@ Valid, invalid, and incomplete content returns HTTP 200. Input errors return 400
 
 `GET /api/v1/capabilities?language=spl2&profile=splunkd&version=current` returns the selected manifest, including `documentation_snapshot` for SPL2. The only query parameters are `language`, `profile`, and `version`; omitted or empty values use defaults. Unknown parameters/values, malformed encodings/Unicode, and duplicate or conflicting keys return 400, including repeated equal values. With no selectors it returns the SPL manifest. Query body/source identity are not capability selectors.
 
-The manifest contains five evidence-backed dimensions per record: syntax, semantics, requirements, linting, and safe rewriting. Their states are supported, partial, unsupported, not applicable, and unassessed. Summary counts obey `applicable = supported + partial + unsupported + unassessed`, `records = applicable + not_applicable`, and `covered = supported`; no composite score is emitted. The SPL response contains 105 records and 104 evidence cases. SPL2 contains 114 records and 124 evidence cases. Every advertised rewrite form has a matching ledger record and replayed success or boundary evidence. `grammar_registered` is a parser fact, not syntax coverage, and the legacy command/function projections do not replace the ledger. A tagged server reports the exact `VERSION` in `toolkit_version`; source Go execution may report `dev` without changing the semantic capability revision. The SPL revision is `sha256:08901c84ac8c420f59ddb86168c534f0e83484c05d3c8a81078a716c878a1733`; the SPL2 revision remains `sha256:f1391296cfbc616e9bb1b1828e2471e37b60a35c0555654c0734640e072a0437`.
+The manifest contains five evidence-backed dimensions per record: syntax, semantics, requirements, linting, and safe rewriting. Their states are supported, partial, unsupported, not applicable, and unassessed. Summary counts obey `applicable = supported + partial + unsupported + unassessed`, `records = applicable + not_applicable`, and `covered = supported`; no composite score is emitted. The SPL response contains 105 records and 104 evidence cases. SPL2 contains 140 records and 146 evidence cases. Every advertised rewrite form has a matching ledger record and replayed success or boundary evidence. `grammar_registered` is a parser fact, not syntax coverage, and the legacy command/function projections do not replace the ledger. A tagged server reports the exact `VERSION` in `toolkit_version`; source Go execution may report `dev` without changing the semantic capability revision. The SPL revision is `sha256:08901c84ac8c420f59ddb86168c534f0e83484c05d3c8a81078a716c878a1733`; the SPL2 revision is `sha256:a765813624c6edfd754a4529556f5fd35288f464e759f8d969404a072bef1898`.
 
 Evidence IDs join claims to typed local observations and provenance. Broader forms receive new IDs unless a reviewed scope correction changes the original boundary. The bounded SPL field-flow semantics support exact `tstats` sources, predicates, aggregates, groups, and supported literal options; exact modeled forms of `fillnull`, `rex`, `spath`, `bin`, `bucket`, `regex`, and `mvexpand`; and the selected function arities. Exact macros and branch children retain direct requirements and evidence, while expansion and branch merging remain incomplete. Dynamic operands, wildcard groups, `PREFIX(...)`, true result-shape modes, unsupported options, ambiguous or sed-mode `rex`, and `spath` auto-extraction also remain incomplete.
 

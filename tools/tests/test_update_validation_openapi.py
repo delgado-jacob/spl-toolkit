@@ -16,12 +16,71 @@ SCRIPT = Path(__file__).resolve().parents[1] / "update_validation_openapi.py"
 
 
 class ValidationOpenAPITests(unittest.TestCase):
+    def test_shared_analysis_schema_exposes_typed_field_identity(self):
+        shared = json.loads((SCRIPT.parents[1] / "contracts/v1/shared.schema.json").read_text())
+        definitions = shared["$defs"]
+        identity_ref = {"$ref": shared["$id"] + "#/$defs/analysis.FieldIdentity"}
+        identity = definitions["analysis.FieldIdentity"]
+        self.assertEqual(identity["required"], ["kind", "segments"])
+        self.assertEqual(identity["properties"]["segments"], {"type": "array", "items": {"type": "string"}, "minItems": 1})
+        self.assertEqual(definitions["analysis.Reference"]["properties"]["field_identity"], identity_ref)
+        self.assertNotIn("field_identity", definitions["analysis.Reference"]["required"])
+        self.assertEqual(definitions["analysis.FieldBinding"]["properties"]["field_identity"], identity_ref)
+        self.assertIn("field_identity", definitions["analysis.FieldBinding"]["required"])
+        removal = definitions["analysis.FieldState"]["properties"]["removed"]["items"]
+        self.assertEqual(removal, {"$ref": shared["$id"] + "#/$defs/analysis.FieldRemoval"})
+        self.assertEqual(definitions["analysis.FieldRemoval"]["properties"]["field_identity"], identity_ref)
+        self.assertEqual(definitions["analysis.Transition"]["properties"]["output_identity"], identity_ref)
+        self.assertEqual(definitions["analysis.RequirementItem"]["properties"]["field_identity"], identity_ref)
+        openapi = json.loads((SCRIPT.parents[1] / "docs/swagger.json").read_text())["components"]["schemas"]
+        generated_ref = {"$ref": "#/components/schemas/analysis.FieldIdentity"}
+        self.assertEqual(openapi["analysis.Reference"]["properties"]["field_identity"], generated_ref)
+        self.assertEqual(openapi["analysis.RequirementItem"]["properties"]["field_identity"], generated_ref)
+        self.assertEqual(openapi["analysis.FieldState"]["properties"]["removed"]["items"], {"$ref": "#/components/schemas/analysis.FieldRemoval"})
+        self.assertNotIn("field_identity", openapi["analysis.CapabilityRequirementExpectation"]["properties"])
+
     def test_capability_rewrite_evidence_declares_openapi_object_shape(self):
         source = (SCRIPT.parents[1] / "pkg/analysis/capability_model.go").read_text(encoding="utf-8")
         self.assertRegex(
             source,
             r'RewriteRequest\s+json\.RawMessage\s+`json:"rewrite_request,omitempty" swaggertype:"object"`',
         )
+
+    def test_capability_authored_fields_are_hidden_from_openapi(self):
+        source = (SCRIPT.parents[1] / "pkg/analysis/capability_model.go").read_text(encoding="utf-8")
+        private_fields = {
+            "CapabilityStageExpectation": (
+                ("ID", "string", "id,omitempty"),
+                ("ScopeID", "string", "scope_id,omitempty"),
+            ),
+            "CapabilityReferenceExpectation": (
+                ("ID", "string", "id,omitempty"),
+                ("FieldIdentity", r"\*FieldIdentity", "field_identity,omitempty"),
+            ),
+            "CapabilityTransitionExpectation": (
+                ("OutputIdentity", r"\*FieldIdentity", "output_identity,omitempty"),
+                ("InputReferenceIDs", r"\[\]string", "input_reference_ids,omitempty"),
+                ("OutputReferenceID", "string", "output_reference_id,omitempty"),
+                ("Conditional", "bool", "conditional,omitempty"),
+            ),
+            "CapabilitySemanticsObservation": (
+                ("Scopes", r"\[\]CapabilityScopeExpectation", "scopes,omitempty"),
+                ("Lineage", r"\[\]CapabilityLineageExpectation", "lineage,omitempty"),
+                ("FinalFieldState", r"\*CapabilityFieldStateExpectation", "final_field_state,omitempty"),
+            ),
+            "CapabilityRequirementExpectation": (
+                ("FieldIdentity", r"\*FieldIdentity", "field_identity,omitempty"),
+            ),
+        }
+        for struct_name, fields in private_fields.items():
+            body = re.search(rf"type {struct_name} struct \{{(.*?)\n\}}", source, re.DOTALL)
+            self.assertIsNotNone(body, struct_name)
+            for field, field_type, json_name in fields:
+                with self.subTest(struct=struct_name, field=field):
+                    self.assertRegex(
+                        body.group(1),
+                        rf'{field}\s+{field_type}\s+`json:"{json_name}" swaggerignore:"true"`',
+                    )
 
     def schema_accepts(self, schemas, name, instance):
         def valid(schema, value):
@@ -93,8 +152,12 @@ class ValidationOpenAPITests(unittest.TestCase):
         schemas["analysis.RequirementOccurrence"] = {"type": "object", "properties": {
             **{key: {"type": "string"} for key in ("reference_id", "original_name", "binding", "stage_id", "scope_id")},
             "location": {"$ref": "#/components/schemas/analysis.Location"}}}
+        schemas["analysis.FieldIdentity"] = {"type": "object", "properties": {
+            "kind": {"type": "string"}, "segments": {"type": "array", "items": {"type": "string"}},
+            "qualifier": {"type": "string"}}}
         schemas["analysis.RequirementItem"] = {"type": "object", "properties": {
             **{key: {"type": "string"} for key in ("id", "kind", "identity", "role", "necessity", "origin", "resolution")},
+            "field_identity": {"$ref": "#/components/schemas/analysis.FieldIdentity"},
             "occurrences": {"type": "array", "items": {"$ref": "#/components/schemas/analysis.RequirementOccurrence"}, "uniqueItems": False}}}
         schemas["analysis.RequirementGap"] = {"type": "object", "properties": {
             "code": {"type": "string"}, "message": {"type": "string"},

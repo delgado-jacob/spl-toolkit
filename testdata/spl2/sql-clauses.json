@@ -2528,6 +2528,17 @@
           "kind": "dataset",
           "role": "read",
           "binding": "not_applicable"
+        },
+        {
+          "original_name": "p.item",
+          "normalized_name": "item",
+          "kind": "field",
+          "role": "read",
+          "binding": "indeterminate",
+          "start": 62,
+          "end": 68,
+          "scope_start": 0,
+          "scope_end": 68
         }
       ],
       "forbidden_references": [
@@ -2541,12 +2552,6 @@
           "original_name": "i.id",
           "start": 50,
           "end": 54,
-          "binding": "source"
-        },
-        {
-          "original_name": "p.item",
-          "start": 62,
-          "end": 68,
           "binding": "source"
         }
       ],
@@ -2600,7 +2605,7 @@
         },
         {
           "original_name": "p.item",
-          "normalized_name": "p.item",
+          "normalized_name": "item",
           "kind": "field",
           "role": "read",
           "binding": "indeterminate",
@@ -2687,15 +2692,20 @@
           "kind": "dataset",
           "role": "read",
           "binding": "not_applicable"
+        },
+        {
+          "original_name": "p.item",
+          "normalized_name": "item",
+          "kind": "field",
+          "role": "read",
+          "binding": "indeterminate",
+          "start": 7,
+          "end": 13,
+          "scope_start": 0,
+          "scope_end": 97
         }
       ],
       "forbidden_references": [
-        {
-          "original_name": "p.item",
-          "start": 7,
-          "end": 13,
-          "binding": "source"
-        },
         {
           "original_name": "p.item",
           "start": 68,
@@ -2755,7 +2765,7 @@
       "references": [
         {
           "original_name": "p.item",
-          "normalized_name": "p.item",
+          "normalized_name": "item",
           "kind": "field",
           "role": "read",
           "binding": "indeterminate",
@@ -2856,6 +2866,17 @@
           "kind": "dataset",
           "role": "read",
           "binding": "not_applicable"
+        },
+        {
+          "original_name": "p.item",
+          "normalized_name": "p.item",
+          "kind": "field",
+          "role": "read",
+          "binding": "indeterminate",
+          "start": 57,
+          "end": 63,
+          "scope_start": 0,
+          "scope_end": 63
         }
       ],
       "forbidden_references": [
@@ -2863,12 +2884,6 @@
           "original_name": "p.item",
           "start": 38,
           "end": 44,
-          "binding": "source"
-        },
-        {
-          "original_name": "p.item",
-          "start": 57,
-          "end": 63,
           "binding": "source"
         },
         {
@@ -2926,15 +2941,6 @@
           "binding": "not_applicable",
           "start": 20,
           "end": 29
-        },
-        {
-          "original_name": "p",
-          "normalized_name": "p",
-          "kind": "field",
-          "role": "read",
-          "binding": "indeterminate",
-          "start": 57,
-          "end": 58
         },
         {
           "original_name": "p.item",
@@ -3012,15 +3018,20 @@
           "kind": "dataset",
           "role": "read",
           "binding": "not_applicable"
+        },
+        {
+          "original_name": "p.item",
+          "normalized_name": "item",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 7,
+          "end": 13,
+          "scope_start": 0,
+          "scope_end": 74
         }
       ],
       "forbidden_references": [
-        {
-          "original_name": "p.item",
-          "start": 7,
-          "end": 13,
-          "binding": "source"
-        },
         {
           "original_name": "p.item",
           "start": 63,
@@ -3072,10 +3083,10 @@
       "references": [
         {
           "original_name": "p.item",
-          "normalized_name": "p.item",
+          "normalized_name": "item",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 7,
           "end": 13
         },
@@ -6375,17 +6386,26 @@
           "binding": "not_applicable",
           "scope_start": 23,
           "scope_end": 72
-        }
-      ],
-      "forbidden_references": [
+        },
         {
           "original_name": "o.item",
+          "normalized_name": "item",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
           "start": 65,
           "end": 71,
-          "binding": "source"
+          "scope_start": 23,
+          "scope_end": 72
         }
       ],
-      "required_fields": [],
+      "forbidden_references": [],
+      "required_fields": [
+        {
+          "name": "item",
+          "conditional": true
+        }
+      ],
       "forbidden_field_names": [
         "o.item"
       ],
@@ -6407,7 +6427,7 @@
         {
           "command": "where",
           "start": 56,
-          "semantic_complete": false,
+          "semantic_complete": true,
           "scope_start": 23,
           "scope_end": 72
         },
@@ -6480,10 +6500,10 @@
         },
         {
           "original_name": "o.item",
-          "normalized_name": "o.item",
+          "normalized_name": "item",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 65,
           "end": 71
         },
@@ -6519,7 +6539,7 @@
         false,
         true,
         true,
-        false,
+        true,
         true
       ]
     }
@@ -6593,17 +6613,26 @@
           "binding": "not_applicable",
           "scope_start": 39,
           "scope_end": 104
-        }
-      ],
-      "forbidden_references": [
+        },
         {
           "original_name": "o.item",
+          "normalized_name": "item",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
           "start": 81,
           "end": 87,
-          "binding": "source"
+          "scope_start": 39,
+          "scope_end": 104
         }
       ],
-      "required_fields": [],
+      "forbidden_references": [],
+      "required_fields": [
+        {
+          "name": "item",
+          "conditional": true
+        }
+      ],
       "forbidden_field_names": [
         "o.item"
       ],
@@ -6625,7 +6654,7 @@
         {
           "command": "where",
           "start": 72,
-          "semantic_complete": false,
+          "semantic_complete": true,
           "scope_start": 39,
           "scope_end": 104
         },
@@ -6707,10 +6736,10 @@
         },
         {
           "original_name": "o.item",
-          "normalized_name": "o.item",
+          "normalized_name": "item",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 81,
           "end": 87
         },
@@ -6719,7 +6748,7 @@
           "normalized_name": "active",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 92,
           "end": 98
         }
@@ -6747,7 +6776,7 @@
         false,
         true,
         true,
-        false
+        true
       ]
     }
   },
@@ -6816,17 +6845,26 @@
           "binding": "not_applicable",
           "scope_start": 23,
           "scope_end": 80
-        }
-      ],
-      "forbidden_references": [
+        },
         {
           "original_name": "o.item",
+          "normalized_name": "item",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
           "start": 65,
           "end": 71,
-          "binding": "source"
+          "scope_start": 23,
+          "scope_end": 80
         }
       ],
-      "required_fields": [],
+      "forbidden_references": [],
+      "required_fields": [
+        {
+          "name": "item",
+          "conditional": true
+        }
+      ],
       "forbidden_field_names": [
         "id"
       ],
@@ -6901,10 +6939,10 @@
         },
         {
           "original_name": "o.item",
-          "normalized_name": "o.item",
+          "normalized_name": "item",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 65,
           "end": 71
         },
@@ -6941,7 +6979,7 @@
         false,
         true,
         true,
-        false,
+        true,
         true,
         true
       ]
@@ -7012,16 +7050,20 @@
           "binding": "not_applicable",
           "scope_start": 25,
           "scope_end": 74
-        }
-      ],
-      "forbidden_references": [
+        },
         {
           "original_name": "o.item",
+          "normalized_name": "item",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
           "start": 67,
           "end": 73,
-          "binding": "source"
+          "scope_start": 25,
+          "scope_end": 74
         }
       ],
+      "forbidden_references": [],
       "required_fields": [],
       "forbidden_field_names": [
         "id"
@@ -7104,10 +7146,10 @@
         },
         {
           "original_name": "o.item",
-          "normalized_name": "o.item",
+          "normalized_name": "item",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 67,
           "end": 73
         }
@@ -7128,7 +7170,7 @@
         false,
         true,
         true,
-        false
+        true
       ]
     }
   },
@@ -9395,12 +9437,10 @@
     "canonical_assertions": {
       "category": "representation",
       "basis": "Dataset alias events is not an event field. The qualified events.user operand remains unproved and cannot gain root-source binding. Its explicit original AS owner target is the sole exact static SELECT destination; no wildcard, computed destination, implicit unknown label or collision occurs. Preserve owner Conditional=true: input availability is not proved. Under the approved finite SELECT projection membership contract, exact output-name membership is independent of conditional presence, so final fields=[owner conditional], removed=[], open=false, uncertain=false. The earlier uncertain=true assertion conflated the qualified-input limitation with unknown projected membership. This version expressly supersedes that final-state inference while preserving report/stage semantic incompleteness, all codes, source/alias reference roles and exclusions. No source-universe expansion rule is imported or changed.",
-      "status": "incomplete",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "required_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "required_codes": [],
       "forbidden_codes": [
         "SPL_SYNTAX_ERROR",
         "SPL_UNAVAILABLE_FIELD",
@@ -9425,20 +9465,24 @@
           "kind": "field",
           "role": "create",
           "binding": "not_applicable"
-        }
-      ],
-      "forbidden_references": [
+        },
         {
           "original_name": "events.user",
+          "normalized_name": "user",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
           "start": 27,
           "end": 38,
-          "binding": "source"
+          "scope_start": 0,
+          "scope_end": 47
         }
       ],
+      "forbidden_references": [],
       "required_fields": [
         {
           "name": "owner",
-          "conditional": true
+          "conditional": false
         }
       ],
       "forbidden_field_names": [
@@ -9454,7 +9498,7 @@
         {
           "command": "select",
           "start": 20,
-          "semantic_complete": false
+          "semantic_complete": true
         }
       ],
       "max_scopes": 1,
@@ -9462,7 +9506,7 @@
         "fields": [
           {
             "name": "owner",
-            "conditional": true
+            "conditional": false
           }
         ],
         "removed": [],
@@ -9473,12 +9517,10 @@
     "canonical": {
       "phase": "analysis",
       "scope": "canonical-result",
-      "status": "incomplete",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "expected_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "expected_codes": [],
       "references": [
         {
           "original_name": "main",
@@ -9491,10 +9533,10 @@
         },
         {
           "original_name": "events.user",
-          "normalized_name": "events.user",
+          "normalized_name": "user",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 27,
           "end": 38
         },
@@ -9511,7 +9553,7 @@
       "fields": [
         {
           "name": "owner",
-          "conditional": true
+          "conditional": false
         }
       ],
       "removed": [],
@@ -9523,7 +9565,7 @@
       ],
       "stage_complete": [
         true,
-        false
+        true
       ]
     }
   },
@@ -13663,6 +13705,17 @@
           "kind": "dataset",
           "role": "read",
           "binding": "not_applicable"
+        },
+        {
+          "original_name": "m.uid",
+          "normalized_name": "uid",
+          "kind": "field",
+          "role": "read",
+          "binding": "indeterminate",
+          "start": 52,
+          "end": 57,
+          "scope_start": 0,
+          "scope_end": 57
         }
       ],
       "forbidden_references": [
@@ -13676,12 +13729,6 @@
           "original_name": "u.id",
           "start": 40,
           "end": 44,
-          "binding": "source"
-        },
-        {
-          "original_name": "m.uid",
-          "start": 52,
-          "end": 57,
           "binding": "source"
         }
       ],
@@ -13735,7 +13782,7 @@
         },
         {
           "original_name": "m.uid",
-          "normalized_name": "m.uid",
+          "normalized_name": "uid",
           "kind": "field",
           "role": "read",
           "binding": "indeterminate",
@@ -13822,15 +13869,20 @@
           "kind": "dataset",
           "role": "read",
           "binding": "not_applicable"
+        },
+        {
+          "original_name": "m.uid",
+          "normalized_name": "uid",
+          "kind": "field",
+          "role": "read",
+          "binding": "indeterminate",
+          "start": 7,
+          "end": 12,
+          "scope_start": 0,
+          "scope_end": 83
         }
       ],
       "forbidden_references": [
-        {
-          "original_name": "m.uid",
-          "start": 7,
-          "end": 12,
-          "binding": "source"
-        },
         {
           "original_name": "m.uid",
           "start": 53,
@@ -13890,7 +13942,7 @@
       "references": [
         {
           "original_name": "m.uid",
-          "normalized_name": "m.uid",
+          "normalized_name": "uid",
           "kind": "field",
           "role": "read",
           "binding": "indeterminate",
@@ -13991,6 +14043,17 @@
           "kind": "dataset",
           "role": "read",
           "binding": "not_applicable"
+        },
+        {
+          "original_name": "m.uid",
+          "normalized_name": "m.uid",
+          "kind": "field",
+          "role": "read",
+          "binding": "indeterminate",
+          "start": 47,
+          "end": 52,
+          "scope_start": 0,
+          "scope_end": 52
         }
       ],
       "forbidden_references": [
@@ -13998,12 +14061,6 @@
           "original_name": "m.uid",
           "start": 29,
           "end": 34,
-          "binding": "source"
-        },
-        {
-          "original_name": "m.uid",
-          "start": 47,
-          "end": 52,
           "binding": "source"
         },
         {
@@ -14061,15 +14118,6 @@
           "binding": "not_applicable",
           "start": 15,
           "end": 20
-        },
-        {
-          "original_name": "m",
-          "normalized_name": "m",
-          "kind": "field",
-          "role": "read",
-          "binding": "indeterminate",
-          "start": 47,
-          "end": 48
         },
         {
           "original_name": "m.uid",
@@ -14156,15 +14204,20 @@
           "kind": "dataset",
           "role": "read",
           "binding": "not_applicable"
+        },
+        {
+          "original_name": "m.uid",
+          "normalized_name": "m.uid",
+          "kind": "field",
+          "role": "read",
+          "binding": "indeterminate",
+          "start": 7,
+          "end": 12,
+          "scope_start": 0,
+          "scope_end": 54
         }
       ],
       "forbidden_references": [
-        {
-          "original_name": "m.uid",
-          "start": 7,
-          "end": 12,
-          "binding": "source"
-        },
         {
           "original_name": "m.uid",
           "start": 44,
@@ -14204,15 +14257,6 @@
         "SPL_UNSUPPORTED_SEMANTICS"
       ],
       "references": [
-        {
-          "original_name": "m",
-          "normalized_name": "m",
-          "kind": "field",
-          "role": "read",
-          "binding": "indeterminate",
-          "start": 7,
-          "end": 8
-        },
         {
           "original_name": "m.uid",
           "normalized_name": "m.uid",
@@ -14320,6 +14364,17 @@
           "kind": "dataset",
           "role": "read",
           "binding": "not_applicable"
+        },
+        {
+          "original_name": "m.uid",
+          "normalized_name": "uid",
+          "kind": "field",
+          "role": "read",
+          "binding": "indeterminate",
+          "start": 57,
+          "end": 62,
+          "scope_start": 0,
+          "scope_end": 62
         }
       ],
       "forbidden_references": [
@@ -14333,12 +14388,6 @@
           "original_name": "u.id",
           "start": 45,
           "end": 49,
-          "binding": "source"
-        },
-        {
-          "original_name": "m.uid",
-          "start": 57,
-          "end": 62,
           "binding": "source"
         }
       ],
@@ -14392,7 +14441,7 @@
         },
         {
           "original_name": "m.uid",
-          "normalized_name": "m.uid",
+          "normalized_name": "uid",
           "kind": "field",
           "role": "read",
           "binding": "indeterminate",
@@ -14479,15 +14528,20 @@
           "kind": "dataset",
           "role": "read",
           "binding": "not_applicable"
+        },
+        {
+          "original_name": "m.uid",
+          "normalized_name": "uid",
+          "kind": "field",
+          "role": "read",
+          "binding": "indeterminate",
+          "start": 7,
+          "end": 12,
+          "scope_start": 0,
+          "scope_end": 68
         }
       ],
       "forbidden_references": [
-        {
-          "original_name": "m.uid",
-          "start": 7,
-          "end": 12,
-          "binding": "source"
-        },
         {
           "original_name": "m.uid",
           "start": 58,
@@ -14533,7 +14587,7 @@
       "references": [
         {
           "original_name": "m.uid",
-          "normalized_name": "m.uid",
+          "normalized_name": "uid",
           "kind": "field",
           "role": "read",
           "binding": "indeterminate",
@@ -14634,6 +14688,17 @@
           "kind": "dataset",
           "role": "read",
           "binding": "not_applicable"
+        },
+        {
+          "original_name": "m.uid",
+          "normalized_name": "m.uid",
+          "kind": "field",
+          "role": "read",
+          "binding": "indeterminate",
+          "start": 52,
+          "end": 57,
+          "scope_start": 0,
+          "scope_end": 57
         }
       ],
       "forbidden_references": [
@@ -14641,12 +14706,6 @@
           "original_name": "m.uid",
           "start": 34,
           "end": 39,
-          "binding": "source"
-        },
-        {
-          "original_name": "m.uid",
-          "start": 52,
-          "end": 57,
           "binding": "source"
         },
         {
@@ -14704,15 +14763,6 @@
           "binding": "not_applicable",
           "start": 25,
           "end": 30
-        },
-        {
-          "original_name": "m",
-          "normalized_name": "m",
-          "kind": "field",
-          "role": "read",
-          "binding": "indeterminate",
-          "start": 52,
-          "end": 53
         },
         {
           "original_name": "m.uid",
@@ -14790,15 +14840,20 @@
           "kind": "dataset",
           "role": "read",
           "binding": "not_applicable"
+        },
+        {
+          "original_name": "m.uid",
+          "normalized_name": "uid",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 7,
+          "end": 12,
+          "scope_start": 0,
+          "scope_end": 62
         }
       ],
       "forbidden_references": [
-        {
-          "original_name": "m.uid",
-          "start": 7,
-          "end": 12,
-          "binding": "source"
-        },
         {
           "original_name": "m.uid",
           "start": 52,
@@ -14850,10 +14905,10 @@
       "references": [
         {
           "original_name": "m.uid",
-          "normalized_name": "m.uid",
+          "normalized_name": "uid",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 7,
           "end": 12
         },
@@ -14955,6 +15010,17 @@
           "kind": "dataset",
           "role": "read",
           "binding": "not_applicable"
+        },
+        {
+          "original_name": "m.uid",
+          "normalized_name": "uid",
+          "kind": "field",
+          "role": "read",
+          "binding": "indeterminate",
+          "start": 83,
+          "end": 88,
+          "scope_start": 0,
+          "scope_end": 88
         }
       ],
       "forbidden_references": [
@@ -14980,12 +15046,6 @@
           "original_name": "t.id",
           "start": 71,
           "end": 75,
-          "binding": "source"
-        },
-        {
-          "original_name": "m.uid",
-          "start": 83,
-          "end": 88,
           "binding": "source"
         }
       ],
@@ -15050,7 +15110,7 @@
         },
         {
           "original_name": "m.uid",
-          "normalized_name": "m.uid",
+          "normalized_name": "uid",
           "kind": "field",
           "role": "read",
           "binding": "indeterminate",
@@ -15146,15 +15206,20 @@
           "kind": "dataset",
           "role": "read",
           "binding": "not_applicable"
+        },
+        {
+          "original_name": "m.uid",
+          "normalized_name": "uid",
+          "kind": "field",
+          "role": "read",
+          "binding": "indeterminate",
+          "start": 7,
+          "end": 12,
+          "scope_start": 0,
+          "scope_end": 98
         }
       ],
       "forbidden_references": [
-        {
-          "original_name": "m.uid",
-          "start": 7,
-          "end": 12,
-          "binding": "source"
-        },
         {
           "original_name": "m.uid",
           "start": 52,
@@ -15214,7 +15279,7 @@
       "references": [
         {
           "original_name": "m.uid",
-          "normalized_name": "m.uid",
+          "normalized_name": "uid",
           "kind": "field",
           "role": "read",
           "binding": "indeterminate",
@@ -15469,15 +15534,20 @@
           "kind": "dataset",
           "role": "read",
           "binding": "not_applicable"
+        },
+        {
+          "original_name": "m.uid",
+          "normalized_name": "uid",
+          "kind": "field",
+          "role": "read",
+          "binding": "indeterminate",
+          "start": 7,
+          "end": 12,
+          "scope_start": 0,
+          "scope_end": 102
         }
       ],
       "forbidden_references": [
-        {
-          "original_name": "m.uid",
-          "start": 7,
-          "end": 12,
-          "binding": "source"
-        },
         {
           "original_name": "m.uid",
           "start": 47,
@@ -15544,7 +15614,7 @@
       "references": [
         {
           "original_name": "m.uid",
-          "normalized_name": "m.uid",
+          "normalized_name": "uid",
           "kind": "field",
           "role": "read",
           "binding": "indeterminate",
@@ -15655,17 +15725,26 @@
           "binding": "not_applicable",
           "scope_start": 21,
           "scope_end": 65
-        }
-      ],
-      "forbidden_references": [
+        },
         {
           "original_name": "m.uid",
+          "normalized_name": "uid",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
           "start": 59,
           "end": 64,
-          "binding": "source"
+          "scope_start": 21,
+          "scope_end": 65
         }
       ],
-      "required_fields": [],
+      "forbidden_references": [],
+      "required_fields": [
+        {
+          "name": "uid",
+          "conditional": true
+        }
+      ],
       "forbidden_field_names": [
         "m.uid"
       ],
@@ -15687,7 +15766,7 @@
         {
           "command": "where",
           "start": 50,
-          "semantic_complete": false,
+          "semantic_complete": true,
           "scope_start": 21,
           "scope_end": 65
         },
@@ -15760,10 +15839,10 @@
         },
         {
           "original_name": "m.uid",
-          "normalized_name": "m.uid",
+          "normalized_name": "uid",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 59,
           "end": 64
         },
@@ -15799,7 +15878,7 @@
         false,
         true,
         true,
-        false,
+        true,
         true
       ]
     }
@@ -15873,17 +15952,26 @@
           "binding": "not_applicable",
           "scope_start": 36,
           "scope_end": 80
-        }
-      ],
-      "forbidden_references": [
+        },
         {
           "original_name": "m.uid",
+          "normalized_name": "uid",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
           "start": 74,
           "end": 79,
-          "binding": "source"
+          "scope_start": 36,
+          "scope_end": 80
         }
       ],
-      "required_fields": [],
+      "forbidden_references": [],
+      "required_fields": [
+        {
+          "name": "uid",
+          "conditional": true
+        }
+      ],
       "forbidden_field_names": [
         "m.uid"
       ],
@@ -15905,7 +15993,7 @@
         {
           "command": "where",
           "start": 65,
-          "semantic_complete": false,
+          "semantic_complete": true,
           "scope_start": 36,
           "scope_end": 80
         },
@@ -15987,10 +16075,10 @@
         },
         {
           "original_name": "m.uid",
-          "normalized_name": "m.uid",
+          "normalized_name": "uid",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 74,
           "end": 79
         }
@@ -16018,7 +16106,7 @@
         false,
         true,
         true,
-        false
+        true
       ]
     }
   },
@@ -16087,16 +16175,20 @@
           "binding": "not_applicable",
           "scope_start": 16,
           "scope_end": 60
-        }
-      ],
-      "forbidden_references": [
+        },
         {
           "original_name": "m.uid",
+          "normalized_name": "m.uid",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
           "start": 54,
           "end": 59,
-          "binding": "source"
+          "scope_start": 16,
+          "scope_end": 60
         }
       ],
+      "forbidden_references": [],
       "required_fields": [],
       "forbidden_field_names": [
         "id"
@@ -16171,20 +16263,11 @@
           "end": 53
         },
         {
-          "original_name": "m",
-          "normalized_name": "m",
-          "kind": "field",
-          "role": "read",
-          "binding": "source",
-          "start": 54,
-          "end": 55
-        },
-        {
           "original_name": "m.uid",
           "normalized_name": "m.uid",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 54,
           "end": 59
         },
@@ -16220,7 +16303,7 @@
         false,
         true,
         true,
-        false,
+        true,
         true
       ]
     }
@@ -16290,17 +16373,26 @@
           "binding": "not_applicable",
           "scope_start": 32,
           "scope_end": 84
-        }
-      ],
-      "forbidden_references": [
+        },
         {
           "original_name": "m.uid",
+          "normalized_name": "uid",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
           "start": 70,
           "end": 75,
-          "binding": "source"
+          "scope_start": 32,
+          "scope_end": 84
         }
       ],
-      "required_fields": [],
+      "forbidden_references": [],
+      "required_fields": [
+        {
+          "name": "uid",
+          "conditional": true
+        }
+      ],
       "forbidden_field_names": [
         "id"
       ],
@@ -16384,10 +16476,10 @@
         },
         {
           "original_name": "m.uid",
-          "normalized_name": "m.uid",
+          "normalized_name": "uid",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 70,
           "end": 75
         }
@@ -16416,7 +16508,7 @@
         false,
         true,
         true,
-        false,
+        true,
         true
       ]
     }

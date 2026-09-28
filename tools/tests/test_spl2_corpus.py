@@ -38,6 +38,38 @@ class SPL2CorpusTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "source"):
             self.audit()
 
+    def test_supplemental_source_resolves_without_changing_v1_digest(self):
+        original = CHECK.canonical_provenance_digest(self.provenance)
+        self.assertIn("linus_m11", self.provenance["supplemental_sources"])
+        supplemental = copy.deepcopy(self.provenance)
+        supplemental["supplemental_sources"]["linus_m11"]["audited_commit"] = "f" * 40
+        self.assertEqual(CHECK.canonical_provenance_digest(supplemental), original)
+
+        self.manifest["enforce_final_floors"] = False
+        case = copy.deepcopy(self.cases[0])
+        case.pop("canonical")
+        case.update(id="T2.audit.supplemental", meaningful_id="T2.audit.supplemental",
+                    obligation_ids=["T2.audit.supplemental"], form_ids=["T2.audit.supplemental-form"],
+                    source_keys=["linus_m11"])
+        case["document"]["text"] = "FROM synthetic_events | where synthetic_value > 0"
+        self.cases.append(case)
+        self.provenance["forms"].append({"id":"T2.audit.supplemental-form", "source_keys":["linus_m11"], "disposition":"active", "owner":"test"})
+        self.provenance["obligations"].append({"id":case["id"], "form_id":"T2.audit.supplemental-form", "source_keys":["linus_m11"], "candidate":case["document"]["text"], "disposition":"active", "case_id":case["id"], "assembly":"standalone", "evidence":"supplemental-boundary"})
+        self.audit()
+
+    def test_canonical_digest_still_binds_primary_sources(self):
+        changed = copy.deepcopy(self.provenance)
+        changed["sources"]["start"]["retrieved"] = "2000-01-01"
+        self.assertNotEqual(
+            CHECK.canonical_provenance_digest(changed),
+            CHECK.canonical_provenance_digest(self.provenance),
+        )
+
+    def test_supplemental_source_exact_baseline_is_audited_separately(self):
+        self.provenance["supplemental_sources"]["linus_m11"]["audited_commit"] = "f" * 40
+        with self.assertRaisesRegex(ValueError, "supplemental source"):
+            self.audit()
+
     def test_mandatory_family_cannot_disappear(self):
         self.provenance["forms"] = [f for f in self.provenance["forms"] if f["id"] != "L11"]
         with self.assertRaisesRegex(ValueError, "family"):
@@ -177,6 +209,76 @@ class SPL2CorpusTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "held"):
             self.audit()
 
+
+class LinusSPL2FormMatrixTests(unittest.TestCase):
+    def setUp(self):
+        root = TOOLS.parent / "testdata/spl2"
+        self.manifest, self.provenance, _ = CHECK.load(root)
+        self.matrix = CHECK.load_linus_forms(root / self.manifest["supplemental_form_files"][0])
+
+    def audit(self):
+        return CHECK.audit_linus_forms(
+            self.matrix,
+            set(self.provenance["sources"]) | set(self.provenance["supplemental_sources"]),
+        )
+
+    def test_repository_matrix_has_required_family_floors_and_exact_functions(self):
+        counts = self.audit()
+        self.assertEqual(counts["obligations"], 65)
+        self.assertEqual(counts["families"], {
+            "M11.layout": 7,
+            "M11.dataset": 5,
+            "M11.field": 3,
+            "M11.pipeline": 6,
+            "M11.sql": 5,
+            "M11.aggregate": 4,
+            "M11.predicate": 5,
+            "M11.expression": 5,
+            "M11.function": 25,
+        })
+        self.assertEqual(counts["functions"], {
+            "abs", "any", "avg", "cidrmatch", "coalesce", "count", "dc",
+            "distinct_count", "json", "json_array_to_mv", "like", "lower", "match",
+            "max", "min", "mvindex", "round", "rtrim", "span", "sqrt", "stdev",
+            "strftime", "sum", "tonumber", "values",
+        })
+
+    def test_family_floor_cannot_shrink(self):
+        self.matrix["obligations"] = self.matrix["obligations"][1:]
+        with self.assertRaisesRegex(ValueError, "family floor|65 obligations"):
+            self.audit()
+
+    def test_function_set_is_exact(self):
+        function = next(o for o in self.matrix["obligations"] if o["family"] == "M11.function")
+        function["function"] = "upper"
+        with self.assertRaisesRegex(ValueError, "function set"):
+            self.audit()
+
+    def test_duplicate_form_id_is_rejected(self):
+        self.matrix["obligations"].append(copy.deepcopy(self.matrix["obligations"][0]))
+        with self.assertRaisesRegex(ValueError, "duplicate Linus form"):
+            self.audit()
+
+    def test_missing_source_key_is_rejected(self):
+        self.matrix["obligations"][0]["source_keys"] = ["missing-source"]
+        with self.assertRaisesRegex(ValueError, "unresolved source provenance"):
+            self.audit()
+
+    def test_linus_metadata_and_paths_are_rejected(self):
+        self.matrix["obligations"][0]["source_path"] = "detections/private-example.yaml"
+        with self.assertRaisesRegex(ValueError, "protected Linus metadata"):
+            self.audit()
+
+    def test_queries_require_locally_authored_synthetic_content(self):
+        self.matrix["obligations"][0]["query"] = "FROM production_events | where account_name=\"copied\""
+        with self.assertRaisesRegex(ValueError, "locally authored synthetic"):
+            self.audit()
+
+    def test_same_count_same_family_identity_rename_is_rejected(self):
+        self.matrix["obligations"][0]["id"] += "-renamed"
+        with self.assertRaisesRegex(ValueError, "approved Linus form matrix"):
+            self.audit()
+
 class SPL2CanonicalLayerTests(unittest.TestCase):
     setUp = SPL2CorpusTests.setUp
     audit = SPL2CorpusTests.audit
@@ -229,6 +331,19 @@ class SPL2CanonicalLayerTests(unittest.TestCase):
         case['canonical']['fields'].append({'name':'x', 'conditional':False})
         with self.assertRaisesRegex(ValueError, 'forbidden field'):
             self.audit()
+
+    def test_snapshot_forbidden_field_identity_is_typed(self):
+        case = self.snapshot_case()
+        case['canonical_assertions']['forbidden_field_identities'] = [{'kind':'atomic', 'segments':['x']}]
+        CHECK.audit_canonical_assertions(case)
+        for identity in ({'kind':'atomic', 'segments':[]},
+                         {'kind':'atomic', 'segments':['a', 'b']},
+                         {'kind':'path', 'segments':['x'], 'qualifier':''},
+                         {'kind':'atomic', 'segments':['x'], 'qualifier':'L'}):
+            with self.subTest(identity=identity):
+                case['canonical_assertions']['forbidden_field_identities'] = [identity]
+                with self.assertRaisesRegex(ValueError, 'invalid forbidden field identity'):
+                    CHECK.audit_canonical_assertions(case)
 
     def test_snapshot_requires_nonvacuous_soundness_assertions(self):
         case = self.snapshot_case()

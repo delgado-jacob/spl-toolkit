@@ -1,6 +1,63 @@
 package analysis
 
-import "testing"
+import (
+	"fmt"
+	"strings"
+	"testing"
+
+	"github.com/antlr4-go/antlr/v4"
+	"github.com/delgado-jacob/spl-toolkit/parser/spl2"
+)
+
+type spl2CountingCharStream struct {
+	antlr.CharStream
+	lookaheads int
+}
+
+func (s *spl2CountingCharStream) LA(offset int) int {
+	s.lookaheads++
+	return s.CharStream.LA(offset)
+}
+
+func spl2RequireNoDiagnostics(t *testing.T, text string) *spl2ParsedDocument {
+	t.Helper()
+	p := parseSPL2Document(text)
+	if !p.syntaxComplete || len(p.diagnostics) != 0 {
+		t.Fatalf("selected syntax rejected: %+v", p.diagnostics)
+	}
+	return p
+}
+
+func spl2RequireLocatedError(t *testing.T, text string) *spl2ParsedDocument {
+	t.Helper()
+	p := parseSPL2Document(text)
+	found := false
+	for _, diagnostic := range p.diagnostics {
+		if diagnostic.Severity != "error" {
+			continue
+		}
+		if diagnostic.Location.Start.Offset < 0 || diagnostic.Location.End.Offset > len(text) || diagnostic.Location.Start.Offset > diagnostic.Location.End.Offset {
+			t.Fatalf("unlocated diagnostic for %q: %+v", text, diagnostic)
+		}
+		found = true
+	}
+	if !found || p.syntaxComplete {
+		t.Fatalf("missing located error for %q: %+v", text, p.diagnostics)
+	}
+	return p
+}
+
+func spl2RequireTypedModule(t *testing.T, text string) *spl2ParsedDocument {
+	t.Helper()
+	p := parseSPL2Document(text)
+	if p.tree == nil || p.tree.ModuleDeclaration() == nil {
+		t.Fatalf("missing module declaration: %+v", p.diagnostics)
+	}
+	if len(p.diagnostics) != 0 || !p.syntaxComplete {
+		t.Fatalf("selected typed module rejected: %+v", p.diagnostics)
+	}
+	return p
+}
 
 func TestSPL2StartNegativeSource(t *testing.T) {
 	text := "failure index=app"
@@ -152,7 +209,8 @@ func TestSPL2LexSearchCommentBoundary(t *testing.T) {
 	}
 }
 func TestSPL2StartExcludedModule(t *testing.T) {
-	for _, text := range []string{"$saved = FROM main;", "import foo", "function f() {}", "FROM main; FROM other"} {
+	spl2RequireTypedModule(t, "$saved = FROM main;")
+	for _, text := range []string{"import foo", "function f() {}", "FROM main; FROM other"} {
 		p := parseSPL2Document(text)
 		found := false
 		for _, d := range p.diagnostics {
@@ -364,6 +422,288 @@ func TestSPL2ExpressionPrefixNotOwnership(t *testing.T) {
 			}
 			if len(spl2Nodes(p.syntax, "logicalNot")) != 1 {
 				t.Fatalf("prefix operator ownership %s", p.syntax.shape())
+			}
+		})
+	}
+}
+
+func TestSPL2SelectedDatasetParametersAndDottedPaths(t *testing.T) {
+	parameter := spl2RequireNoDiagnostics(t, "FROM $target_1 | fields synthetic_value")
+	if got := len(spl2Nodes(parameter.syntax, "datasetParameter")); got != 1 {
+		t.Fatalf("dataset parameters %d: %s", got, parameter.syntax.shape())
+	}
+	param := spl2Nodes(parameter.syntax, "datasetParameter")[0]
+	if text := parameter.source.text[param.Location.Start.Offset:param.Location.End.Offset]; text != "$target_1" {
+		t.Fatalf("dataset parameter source %q", text)
+	}
+
+	paths := spl2RequireNoDiagnostics(t, "FROM catalog.events | eval leaf=payload.user.name | stats count() AS 'metrics.total' BY payload.region")
+	if got := len(spl2Nodes(paths.syntax, "datasetPath")); got != 1 {
+		t.Fatalf("dataset paths %d: %s", got, paths.syntax.shape())
+	}
+	if got := len(spl2Nodes(paths.syntax, "accessPart")); got != 3 {
+		t.Fatalf("structural access parts %d: %s", got, paths.syntax.shape())
+	}
+	aliases := spl2Nodes(paths.syntax, "aggregateAlias")
+	if len(aliases) != 1 || len(spl2Nodes(aliases[0], "accessPart")) != 0 {
+		t.Fatalf("quoted dotted alias became structural: %s", paths.syntax.shape())
+	}
+	loc := aliases[0].Location
+	if got := paths.source.text[loc.Start.Offset:loc.End.Offset]; got != "'metrics.total'" {
+		t.Fatalf("atomic alias source %q", got)
+	}
+}
+
+func TestSPL2SelectedTypedModuleSyntax(t *testing.T) {
+	text := "@module(\"security\");\n" +
+		"@source(\"catalog\") import events as source from acme/security/events;\n" +
+		"import {users as identities, alerts} from acme/security;\n" +
+		"import * as security from acme/security;\n" +
+		"$view = FROM $target_1 | where source.enabled=true;\n" +
+		"@memoized() function normalize($value, $fallback) {\n" +
+		"  return coalesce($value, $fallback);\n" +
+		"}\n" +
+		"export view;\n" +
+		"export {view as detections, normalize};"
+	p := spl2RequireTypedModule(t, text)
+	for kind, want := range map[string]int{
+		"annotation":          3,
+		"annotationStatement": 1,
+		"importDeclaration":   3,
+		"qualifiedName":       3,
+		"viewDeclaration":     1,
+		"functionDeclaration": 1,
+		"functionParameter":   2,
+		"returnStatement":     1,
+		"exportDeclaration":   2,
+	} {
+		if got := len(spl2Nodes(p.syntax, kind)); got != want {
+			t.Errorf("%s count %d want %d: %s", kind, got, want, p.syntax.shape())
+		}
+	}
+	if got := len(spl2Nodes(p.syntax, "statementTerminator")); got != 8 {
+		t.Fatalf("statement terminators %d want 8", got)
+	}
+}
+
+func TestSPL2SelectedModuleBoundaries(t *testing.T) {
+	for _, text := range []string{
+		"$value = 1;",
+		"dataset events = {kind:\"index\"};",
+		"namespace security;",
+		"function query_rows($value) { return FROM events; }",
+		"function mutate($value) { $local=$value; return $local; }",
+		"$sink = FROM events | into output;",
+		"import events from acme/security",
+		"export events;;",
+		"export function helper($value) { return $value; }",
+	} {
+		t.Run(text, func(t *testing.T) {
+			p := spl2RequireLocatedError(t, text)
+			foundSyntax := false
+			for _, diagnostic := range p.diagnostics {
+				foundSyntax = foundSyntax || diagnostic.Code == CodeSyntaxError && diagnostic.Category == "syntax"
+			}
+			if !foundSyntax {
+				t.Fatal("malformed statement received only the generic module boundary")
+			}
+		})
+	}
+}
+
+func TestSPL2SelectedStatsLookaheadRespectsLexerBudget(t *testing.T) {
+	text := "FROM main | stats count() BY " + strings.Repeat("x+", lexerWorkLimit*8) + "x"
+	input := &spl2CountingCharStream{CharStream: antlr.NewInputStream(text)}
+	source := newSourceIndex(text)
+	parsed := &spl2ParsedDocument{source: source, diagnostics: []Diagnostic{}}
+	tracker := &lexerWorkTracker{}
+	lexer := spl2.NewSPL2Lexer(input)
+	lexer.RemoveErrorListeners()
+	lexer.AddErrorListener(&spl2SyntaxListener{DefaultErrorListener: antlr.NewDefaultErrorListener(), parsed: parsed, tracker: tracker})
+	parsed.tokens = preflightLexer(lexer, tracker, source)
+	if tracker.resourceLimit == nil || tracker.units != lexerWorkLimit {
+		t.Fatalf("dense stats grouping bypassed lexer admission: units=%d limit=%+v", tracker.units, tracker.resourceLimit)
+	}
+	if input.lookaheads > lexerWorkLimit*12 {
+		t.Fatalf("stats discriminator performed %d lookaheads before the 4,097th token rejection", input.lookaheads)
+	}
+	result := mustAnalyzeDocument(t, QueryDocument{Text: text, Language: "spl2"})
+	assertSingleResourceLimitLocation(t, result, *tracker.resourceLimit)
+}
+
+func TestSPL2SelectedStatsLookaheadStopsWhenLexicalErrorConsumesBudget(t *testing.T) {
+	tail := " " + strings.Repeat("x ", 2047) + "\x00y " + strings.Repeat("z ", lexerWorkLimit*16)
+	text := "FROM main | stats count() BY" + tail
+	input := &spl2CountingCharStream{CharStream: antlr.NewInputStream(text)}
+	source := newSourceIndex(text)
+	parsed := &spl2ParsedDocument{source: source, diagnostics: []Diagnostic{}}
+	tracker := &lexerWorkTracker{}
+	lexer := spl2.NewSPL2Lexer(input)
+	lexer.RemoveErrorListeners()
+	lexer.AddErrorListener(&spl2SyntaxListener{DefaultErrorListener: antlr.NewDefaultErrorListener(), parsed: parsed, tracker: tracker})
+	parsed.tokens = preflightLexer(lexer, tracker, source)
+	if tracker.resourceLimit == nil || tracker.units != lexerWorkLimit {
+		t.Fatalf("lexical-error stats grouping bypassed lexer admission: units=%d limit=%+v", tracker.units, tracker.resourceLimit)
+	}
+	if input.lookaheads > lexerWorkLimit*12 {
+		t.Fatalf("stats discriminator performed %d lookaheads after a lexical error consumed unit 4,096", input.lookaheads)
+	}
+	result := mustAnalyzeDocument(t, QueryDocument{Text: text, Language: "spl2"})
+	assertSingleResourceLimitLocation(t, result, *tracker.resourceLimit)
+}
+
+func TestSPL2SelectedStatsNestedBracketLookaheadSharesBudget(t *testing.T) {
+	for _, depth := range []int{11, 20} {
+		t.Run(fmt.Sprintf("depth-%d", depth), func(t *testing.T) {
+			tail := "[stats, BY+1]"
+			for range depth {
+				tail = "[" + tail + ", stats, BY+1]"
+			}
+			text := "FROM events | eval x=" + tail
+			spl2RequireNoDiagnostics(t, text)
+
+			input := &spl2CountingCharStream{CharStream: antlr.NewInputStream(text)}
+			source := newSourceIndex(text)
+			parsed := &spl2ParsedDocument{source: source, diagnostics: []Diagnostic{}}
+			tracker := &lexerWorkTracker{}
+			lexer := spl2.NewSPL2Lexer(input)
+			lexer.RemoveErrorListeners()
+			lexer.AddErrorListener(&spl2SyntaxListener{DefaultErrorListener: antlr.NewDefaultErrorListener(), parsed: parsed, tracker: tracker})
+			preflightLexer(lexer, tracker, source)
+			if tracker.resourceLimit != nil || len(parsed.diagnostics) != 0 {
+				t.Fatalf("valid nested array exhausted lexer work: limit=%+v diagnostics=%+v", tracker.resourceLimit, parsed.diagnostics)
+			}
+			if input.lookaheads > lexerWorkLimit*12 {
+				t.Fatalf("nested bracket classification performed %d lookaheads", input.lookaheads)
+			}
+		})
+	}
+}
+
+func TestSPL2SelectedStatsBelowLimitSubpipeSharesDocumentProbe(t *testing.T) {
+	text := "FROM events | appendpipe [stats count() BY " + strings.Repeat("x+", 1049) + "x]"
+	spl2RequireNoDiagnostics(t, text)
+
+	input := &spl2CountingCharStream{CharStream: antlr.NewInputStream(text)}
+	source := newSourceIndex(text)
+	parsed := &spl2ParsedDocument{source: source, diagnostics: []Diagnostic{}}
+	tracker := &lexerWorkTracker{}
+	lexer := spl2.NewSPL2Lexer(input)
+	lexer.RemoveErrorListeners()
+	lexer.AddErrorListener(&spl2SyntaxListener{DefaultErrorListener: antlr.NewDefaultErrorListener(), parsed: parsed, tracker: tracker})
+	preflightLexer(lexer, tracker, source)
+	if tracker.resourceLimit != nil || tracker.units != 2117 || len(parsed.diagnostics) != 0 {
+		t.Fatalf("below-limit subpipe admission: units=%d limit=%+v diagnostics=%+v", tracker.units, tracker.resourceLimit, parsed.diagnostics)
+	}
+	if input.lookaheads > lexerWorkLimit*12 {
+		t.Fatalf("below-limit subpipe classification performed %d lookaheads", input.lookaheads)
+	}
+}
+
+func TestSPL2SelectedStatsExactLexerBudgetRemainsClassified(t *testing.T) {
+	for _, tc := range []struct {
+		name string
+		text string
+	}{
+		{"top-level", "FROM events | stats count() BY " + strings.Repeat("x+", 2040) + "x "},
+		{"inherited-subpipe", "FROM events | appendpipe [stats count() BY " + strings.Repeat("x+", 2038) + "x] "},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			source := newSourceIndex(tc.text)
+			parsed := &spl2ParsedDocument{source: source, diagnostics: []Diagnostic{}}
+			tracker := &lexerWorkTracker{}
+			lexer := spl2.NewSPL2Lexer(antlr.NewInputStream(tc.text))
+			lexer.RemoveErrorListeners()
+			lexer.AddErrorListener(&spl2SyntaxListener{DefaultErrorListener: antlr.NewDefaultErrorListener(), parsed: parsed, tracker: tracker})
+			preflightLexer(lexer, tracker, source)
+			if tracker.resourceLimit != nil || tracker.units != lexerWorkLimit || len(parsed.diagnostics) != 0 {
+				t.Fatalf("exact-limit stats admission: units=%d limit=%+v diagnostics=%+v", tracker.units, tracker.resourceLimit, parsed.diagnostics)
+			}
+			spl2RequireNoDiagnostics(t, tc.text)
+		})
+	}
+}
+
+func TestSPL2SelectedStatsProbeErrorsAreRangeLocal(t *testing.T) {
+	for _, tc := range []struct {
+		name string
+		text string
+	}{
+		{"top-level-later-error", "FROM events | stats count() BY bytes+delta | eval x=1 \x00"},
+		{"inherited-subpipe-later-error", "FROM events | appendpipe [stats count() BY bytes+delta] | eval x=1 \x00"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			parsed := parseSPL2Document(tc.text)
+			if len(parsed.lexicalErrors) != 1 || len(parsed.diagnostics) != 1 {
+				t.Fatalf("later lexical error changed parser ownership: %+v", parsed.diagnostics)
+			}
+			if got := len(spl2Nodes(parsed.syntax, "selectedAggregateGroup")); got != 1 {
+				t.Fatalf("earlier selected group lost classification: got %d, syntax=%s", got, parsed.syntax.shape())
+			}
+		})
+	}
+
+	for _, tc := range []struct {
+		name string
+		text string
+	}{
+		{"top-level-group-error", "FROM events | stats count() BY bytes+\x00delta"},
+		{"inherited-subpipe-group-error", "FROM events | appendpipe [stats count() BY bytes+\x00delta]"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			parsed := parseSPL2Document(tc.text)
+			if len(parsed.lexicalErrors) != 1 || len(spl2Nodes(parsed.syntax, "selectedAggregateGroup")) != 0 {
+				t.Fatalf("damaged group was classified as selected: diagnostics=%+v syntax=%s", parsed.diagnostics, parsed.syntax.shape())
+			}
+		})
+	}
+}
+
+func TestSPL2SelectedStatsLongLowTokenTailsRemainAdmitted(t *testing.T) {
+	for _, tc := range []struct {
+		name   string
+		query  string
+		groups []string
+	}{
+		{"whitespace", "FROM main | stats count() BY " + strings.Repeat(" ", 5000) + "bytes+delta", []string{"bytes", "delta"}},
+		{"literal", `FROM main | stats count() BY if(ready, "` + strings.Repeat("x", 5000) + `", "other")`, []string{"ready"}},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			spl2RequireNoDiagnostics(t, tc.query)
+			result := spl2AnalyzeTest(t, tc.query)
+			if result.Status != Valid || !result.Coverage.SyntaxComplete || !result.Coverage.SemanticComplete || !result.Requirements.Coverage.Complete {
+				t.Fatalf("low-token selected grouping was not completely analyzed: %+v", result)
+			}
+			if spl2HasCode(result, CodeAnalysisResourceLimit) || spl2HasCode(result, CodeUnsupportedSemantics) {
+				t.Fatalf("low-token selected grouping retained a temporary limitation: %+v", result.Diagnostics)
+			}
+			groupRefs := map[string]bool{}
+			for _, ref := range result.References {
+				if ref.Role == "group" && ref.Binding == "source" && ref.Resolution == "exact" {
+					groupRefs[ref.NormalizedName] = true
+				}
+			}
+			groupRequirements := map[string]bool{}
+			for _, item := range result.Requirements.Items {
+				if item.Role == "group" && item.Resolution == "exact" {
+					groupRequirements[item.Identity] = true
+				}
+			}
+			for _, group := range tc.groups {
+				if !groupRefs[group] || !groupRequirements[group] {
+					t.Fatalf("missing exact group evidence for %q: refs=%+v requirements=%+v", group, result.References, result.Requirements)
+				}
+			}
+			after := result.Lineage[len(result.Lineage)-1].After
+			if after.Open || after.Uncertain || len(after.Fields) != 2 {
+				t.Fatalf("group plus aggregate output is not closed: %+v", after)
+			}
+			count := false
+			for _, field := range after.Fields {
+				count = count || field.Name == "count"
+			}
+			if !count {
+				t.Fatalf("closed output lacks aggregate: %+v", after)
 			}
 		})
 	}

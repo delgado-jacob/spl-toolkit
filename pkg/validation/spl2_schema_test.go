@@ -57,8 +57,8 @@ func TestSPL2SchemaCanonicalBoundaries(t *testing.T) {
 		{"open source", `FROM main SELECT host`, `{"type":"object"}`, analysis.Valid, true, []string{"permitted_unspecified"}},
 		{"conditional source", `FROM main SELECT host`, `{"anyOf":[{"type":"object","properties":{"host":true},"additionalProperties":false},{"type":"object","additionalProperties":false}]}`, analysis.Incomplete, false, []string{"conditional"}},
 		{"quoted literal against nested only", `FROM main SELECT 'actor.name'`, `{"type":"object","properties":{"actor":{"type":"object","properties":{"name":true},"additionalProperties":false}},"additionalProperties":false}`, analysis.Incomplete, false, []string{"indeterminate"}},
-		{"navigation against dotted literal only", `FROM main SELECT actor.name`, `{"type":"object","properties":{"actor.name":true},"additionalProperties":false}`, analysis.Invalid, false, []string{"missing", "indeterminate"}},
-		{"navigation base survives", `FROM main SELECT actor.name`, `{"type":"object","properties":{"actor":{"type":"object","properties":{"name":true},"additionalProperties":false}},"additionalProperties":false}`, analysis.Incomplete, false, []string{"optional", "indeterminate"}},
+		{"navigation against dotted literal only", `FROM main SELECT actor.name`, `{"type":"object","properties":{"actor.name":true},"additionalProperties":false}`, analysis.Incomplete, false, []string{"indeterminate"}},
+		{"navigation base survives", `FROM main SELECT actor.name`, `{"type":"object","properties":{"actor":{"type":"object","properties":{"name":true},"additionalProperties":false}},"additionalProperties":false}`, analysis.Incomplete, false, []string{"indeterminate"}},
 		{"literal local source", `FROM [{host:"a"}] SELECT host`, `false`, analysis.Valid, true, []string{"matching"}},
 		{"derived output", `FROM main SELECT 1 AS local | table local`, `false`, analysis.Valid, true, []string{"matching"}},
 		{"conditional local key", `FROM [{host:"a"},{other:1}] SELECT host`, `false`, analysis.Incomplete, false, []string{"indeterminate"}},
@@ -98,7 +98,7 @@ func TestSPL2SchemaCanonicalBoundaries(t *testing.T) {
 func TestSPL2SchemaWildcardPartialEvidence(t *testing.T) {
 	// These controls preserve the accepted shared fields/internal-retention
 	// policy. Schema admission is separate from source environment conditionality:
-	// an partial unobserved source loses certainty before candidate expansion, while
+	// an admitted partial source retains candidate evidence, while
 	// a prior exact read and the local derived output retain independent evidence.
 	// A closed root with generic true leaves still has unbounded descendant names.
 	for _, tt := range []struct {
@@ -106,8 +106,8 @@ func TestSPL2SchemaWildcardPartialEvidence(t *testing.T) {
 		matches                  []string
 	}{
 		{true, false, true, []string{"host", "local"}},
-		{true, false, false, []string{"local"}},
-		{false, false, false, []string{"local"}},
+		{true, false, false, []string{"host", "local"}},
+		{false, false, false, []string{"host", "local"}},
 		{false, true, false, []string{"host", "local"}},
 	} {
 		schema := `{"type":"object","properties":{"host":true,"actor.name":true}}`

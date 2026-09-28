@@ -83,14 +83,27 @@ type spl2ScopeScheduler struct {
 	initialDiagnosticCount int
 	children               []spl2ChildScope
 	executed               map[int]bool
+	program                *spl2Program
 }
 
-// Stage registration assigns parser-recovery diagnostics to their canonical
-// owners. Keep the query-only copies and incomplete-stage index current before
-// field transfers consume that ownership. Synchronization changes neither
-// diagnostic cardinality nor semantic event order.
+type spl2ChildExecution struct {
+	Environment *environment
+	Trace       *requirementTrace
+	Ordinal     int
+}
+
+// Keep parser-recovery ownership and the incomplete-stage index current before
+// field transfers consume them. Synchronization changes neither diagnostic
+// cardinality nor semantic event order.
 func (q *spl2ScopeScheduler) syncParserDiagnostics() {
 	q.trace.syncParserDiagnostics(q.result.Diagnostics[:q.initialDiagnosticCount])
+}
+
+func (q *spl2ScopeScheduler) assignParserDiagnostics(stage int) {
+	if q.program != nil {
+		q.program.assignParserDiagnosticsToOwner(stage, q.result.Stages[stage].Location)
+	}
+	q.syncParserDiagnostics()
 }
 
 func spl2PipelineContexts(tree antlr.Tree) []antlr.ParserRuleContext {
@@ -128,9 +141,8 @@ func (q *spl2ScopeScheduler) pipeline(sites []spl2CommandSite, env *environment,
 		}
 		location, command := site.location, site.command
 		index := registerSPL2Stage(q.result, location, command, position, scopeID)
-		q.syncParserDiagnostics()
 		position++
-		s := &spl2SemanticStage{semanticStage: &semanticStage{result: q.result, stage: index, env: env, transitions: []Transition{}, refinement: q.refinement}, parsed2: q.parsed, aliases: aliases}
+		s := &spl2SemanticStage{semanticStage: &semanticStage{result: q.result, stage: index, env: env, transitions: []Transition{}, refinement: q.refinement}, parsed2: q.parsed, aliases: aliases, locals: map[string]bool{}, program: q.program}
 		before := env.snapshot()
 		if _, ok := ctx.(*spl2.TimewrapCommandContext); ok && spl2IntactSyntax(ctx) && siteIndex > 0 {
 			_, fromStart := sites[0].context.(*spl2.FromCommandContext)
@@ -152,20 +164,41 @@ func (q *spl2ScopeScheduler) pipeline(sites []spl2CommandSite, env *environment,
 				s.diagnosticAt(CodeSyntaxError, "error", "contract", "Timewrap requires a preceding timechart command", q.parsed.source.location(token.GetStart(), token.GetStop()+1), true)
 			}
 		}
-		if ctx != nil {
+		selectedFlowShape := ctx != nil && spl2IntactSyntax(ctx) && q.selectedFlowCommandContext(ctx)
+		selectedFlow := selectedFlowShape && s.commandEffectSound(ctx)
+		recoveryContext := q.selectedFlowRecoveryContext(ctx, command, location)
+		recoveredSelectedFlow := !selectedFlow && q.prepareSelectedFlowRecovery(recoveryContext, parent)
+		childrenRun := false
+		if ctx != nil && !selectedFlow && !recoveredSelectedFlow {
 			q.runChildren(ctx, env, aliases, scopeID, parent)
+			childrenRun = true
 		}
-		if ctx != nil && spl2IntactSyntax(ctx) {
-			s.command(ctx)
+		q.assignParserDiagnostics(index)
+		if selectedFlow && !s.commandEffectSound(ctx) {
+			selectedFlow = false
+			recoveredSelectedFlow = q.prepareSelectedFlowRecovery(recoveryContext, parent)
+			if !childrenRun && !recoveredSelectedFlow {
+				q.runChildren(ctx, env, aliases, scopeID, parent)
+			}
+		}
+		if selectedFlow {
+			q.lowerSelectedFlowCommand(s, ctx, aliases, scopeID, parent)
+		} else if recoveredSelectedFlow {
+			q.lowerRecoveredSelectedFlowCommand(s, recoveryContext, aliases, scopeID, parent, location)
+		} else if ctx != nil && spl2IntactSyntax(ctx) {
+			if q.program == nil || !q.program.bindCommand(s, ctx) {
+				s.command(ctx)
+			}
 		} else {
+			pendingReferenceIDs := []string{}
 			if ctx != nil {
-				s.recoveredInputs(ctx)
+				pendingReferenceIDs = s.recoveredInputs(ctx)
 			}
 			message := "Recovered SPL2 command effects are not yet modeled"
 			if ctx == nil {
 				message = "Standalone command effects are unproved"
 			}
-			s.diagnosticAt(CodeUnsupportedSemantics, "warning", "unsupported_semantics", message, location, true)
+			s.diagnosticAtOwned(CodeUnsupportedSemantics, "warning", "unsupported_semantics", message, location, true, pendingReferenceIDs)
 		}
 		if !q.result.Stages[index].SemanticComplete {
 			s.env.uncertain = true
@@ -179,38 +212,192 @@ func (q *spl2ScopeScheduler) pipeline(sites []spl2CommandSite, env *environment,
 	return env
 }
 
+func (q *spl2ScopeScheduler) selectedFlowRecoveryContext(ctx antlr.ParserRuleContext, command string, location Location) antlr.ParserRuleContext {
+	switch ctx.(type) {
+	case *spl2.IfCommandContext, *spl2.BranchCommandContext:
+		return ctx
+	}
+	if q.parsed == nil || q.parsed.tree == nil || command != "if" && command != "branch" {
+		return nil
+	}
+	var found antlr.ParserRuleContext
+	var visit func(antlr.Tree)
+	visit = func(tree antlr.Tree) {
+		if tree == nil || found != nil {
+			return
+		}
+		candidate, selected := tree.(antlr.ParserRuleContext)
+		if selected {
+			switch candidate.(type) {
+			case *spl2.IfCommandContext:
+				selected = command == "if"
+			case *spl2.BranchCommandContext:
+				selected = command == "branch"
+			default:
+				selected = false
+			}
+		}
+		if selected {
+			candidateLocation := q.parsed.source.contextLocation(candidate)
+			if candidateLocation.Start.Offset == location.Start.Offset && candidateLocation.End.Offset <= location.End.Offset {
+				found = candidate
+				return
+			}
+		}
+		for _, child := range tree.GetChildren() {
+			visit(child)
+		}
+	}
+	visit(q.parsed.tree)
+	return found
+}
+
+func (q *spl2ScopeScheduler) prepareSelectedFlowRecovery(ctx antlr.ParserRuleContext, parent int) bool {
+	proved := 0
+	switch command := ctx.(type) {
+	case *spl2.IfCommandContext:
+		expressions, children := command.AllExpression(), command.AllInheritedSubpipe()
+		for i := 0; i < len(expressions) && i < len(children); i++ {
+			if spl2IntactSyntax(expressions[i]) && spl2IntactSyntax(children[i]) {
+				proved++
+			}
+		}
+	case *spl2.BranchCommandContext:
+		for _, arm := range command.AllBranchArm() {
+			if arm.Expression() != nil && arm.InheritedSubpipe() != nil && spl2IntactSyntax(arm.Expression()) && spl2IntactSyntax(arm.InheritedSubpipe()) {
+				proved++
+			}
+		}
+		if proved < 2 {
+			return false
+		}
+	default:
+		return false
+	}
+	if proved == 0 {
+		return false
+	}
+	q.registerSelectedFlowRecoveryChildren(ctx, parent)
+	return true
+}
+
+func (q *spl2ScopeScheduler) registerSelectedFlowRecoveryChildren(ctx antlr.ParserRuleContext, parent int) {
+	registered := spl2ChildScopesIn(q.parsed, []antlr.Tree{ctx})
+	indexes := make(map[int]int, len(registered))
+	for i, child := range registered {
+		globalParent := parent
+		if child.parent >= 0 {
+			globalParent = indexes[child.parent]
+		}
+		index := -1
+		for existing := range q.children {
+			if q.children[existing].owner == child.owner && q.children[existing].parent == globalParent {
+				index = existing
+				break
+			}
+		}
+		if index < 0 {
+			child.parent = globalParent
+			q.children = append(q.children, child)
+			index = len(q.children) - 1
+		}
+		indexes[i] = index
+	}
+}
+
+func (q *spl2ScopeScheduler) selectedFlowCommandContext(ctx antlr.ParserRuleContext) bool {
+	switch ctx.(type) {
+	case *spl2.IfCommandContext, *spl2.BranchCommandContext, *spl2.UnionCommandContext, *spl2.JoinCommandContext:
+		return true
+	default:
+		return false
+	}
+}
+
+func (q *spl2ScopeScheduler) executeDirectChild(owner antlr.ParserRuleContext, env *environment, aliases map[string]bool, scopeID string, parent int) (spl2ChildExecution, bool) {
+	if owner == nil {
+		return spl2ChildExecution{}, false
+	}
+	for i, child := range q.children {
+		if child.parent != parent || q.executed[i] || child.owner != owner {
+			continue
+		}
+		return q.executeChild(i, env, aliases, scopeID, parent)
+	}
+	return spl2ChildExecution{}, false
+}
+
 func (q *spl2ScopeScheduler) runChildren(ctx antlr.ParserRuleContext, env *environment, aliases map[string]bool, scopeID string, parent int) {
 	for i, child := range q.children {
 		if child.parent != parent || q.executed[i] || !spl2Within(child.owner, ctx) {
 			continue
 		}
-		q.executed[i] = true
-		ownerStage := ""
-		// The phase/stage is already registered, even when SQL lexical registration
-		// precedes execution. Prefer the narrowest containing clause.
-		for _, stage := range q.result.Stages {
-			if stage.ScopeID == scopeID && stage.Location.Start.Offset <= child.location.Start.Offset && stage.Location.End.Offset >= child.location.End.Offset {
-				ownerStage = stage.ID
-			}
+		execution, ok := q.executeChild(i, env, aliases, scopeID, parent)
+		if !ok || env.requirements.trace == nil || execution.Trace == nil {
+			continue
 		}
-		id := fmt.Sprintf("scope-%d", len(q.result.Scopes))
-		q.result.Scopes = append(q.result.Scopes, Scope{ID: id, ParentID: scopeID, Kind: child.kind, StageID: ownerStage, Location: child.location})
-		input := newEnvironmentWithRequirementTrace(env.requirements.trace)
-		localAliases := map[string]bool{}
-		if child.input == "inherited" {
-			input = env.clone()
-		}
-		if child.input != "independent" {
-			for name, value := range aliases {
-				localAliases[name] = value
-			}
-		}
-		if sql, ok := child.body.(spl2SQLCommand); ok {
-			executeSPL2SQL(q.result, q.parsed, q.refinement, sql, input, localAliases, q, id, i, 0)
-		} else {
-			q.pipeline(spl2Sites(spl2PipelineContexts(child.body), q.parsed.source), input, localAliases, id, i)
+		merged := mergeRequirementTraces(env.requirements.trace, []requirementTracePath{{Ordinal: execution.Ordinal, Trace: execution.Trace, Reachable: true}})
+		*env.requirements.trace = *merged
+	}
+}
+
+func (q *spl2ScopeScheduler) executeChild(index int, env *environment, aliases map[string]bool, scopeID string, parent int) (spl2ChildExecution, bool) {
+	if index < 0 || index >= len(q.children) || env == nil || q.executed[index] {
+		return spl2ChildExecution{}, false
+	}
+	child := q.children[index]
+	if child.parent != parent {
+		return spl2ChildExecution{}, false
+	}
+	q.executed[index] = true
+	ownerStage := ""
+	// The phase/stage is already registered, even when SQL lexical registration
+	// precedes execution. Prefer the narrowest containing clause.
+	for _, stage := range q.result.Stages {
+		if stage.ScopeID == scopeID && stage.Location.Start.Offset <= child.location.Start.Offset && stage.Location.End.Offset >= child.location.End.Offset {
+			ownerStage = stage.ID
 		}
 	}
+	id := fmt.Sprintf("scope-%d", len(q.result.Scopes))
+	q.result.Scopes = append(q.result.Scopes, Scope{ID: id, ParentID: scopeID, Kind: child.kind, StageID: ownerStage, Location: child.location})
+
+	var canonicalBefore *requirementTrace
+	if env.requirements.trace != nil && q.trace != nil && env.requirements.trace != q.trace {
+		canonicalBefore = q.trace.clone()
+	}
+	var fork *requirementTrace
+	input := newEnvironmentWithRequirementTrace(nil)
+	localAliases := map[string]bool{}
+	if child.input == "inherited" {
+		input = env.forkBranch()
+		fork = input.requirements.trace
+	} else if env.requirements.trace != nil {
+		fork = env.requirements.trace.forkBranch()
+		input.requirements.trace = fork
+	}
+	if child.input != "independent" {
+		for name, value := range aliases {
+			localAliases[name] = value
+		}
+	}
+	output := input
+	if sql, ok := child.body.(spl2SQLCommand); ok {
+		output = executeSPL2SQL(q.result, q.parsed, q.refinement, sql, input, localAliases, q, id, index, 0)
+	} else {
+		output = q.pipeline(spl2Sites(spl2PipelineContexts(child.body), q.parsed.source), input, localAliases, id, index)
+	}
+	q.syncParserDiagnostics()
+	if canonicalBefore != nil {
+		env.requirements.trace = rebaseRequirementTrace(canonicalBefore, q.trace, env.requirements.trace)
+	}
+	if env.requirements.trace != nil && env.requirements.trace != q.trace {
+		env.requirements.trace.syncParserDiagnostics(q.result.Diagnostics[:q.initialDiagnosticCount])
+	}
+	outputTrace := output.requirements.trace
+	if outputTrace != nil {
+		outputTrace.syncParserDiagnostics(q.result.Diagnostics[:q.initialDiagnosticCount])
+	}
+	return spl2ChildExecution{Environment: output, Trace: outputTrace, Ordinal: index}, true
 }
 
 func spl2Within(child, owner antlr.ParserRuleContext) bool {

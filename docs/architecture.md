@@ -29,7 +29,7 @@ Requirement items represent direct external obligations. Source-bound consuming 
 
 Grammar registration is stored separately from syntax claims. The legacy command/function projection may expose registration as `syntax_supported`, but the ledger grants coverage only from supported evidence. Linting also has its own evidence boundary; parser or semantic diagnostics do not establish lint coverage. Evidence IDs bind records to the embedded static cases. A broader form gets a new ID unless a reviewed scope correction changes the original boundary. The selected semantic revision covers selectors, snapshot, legacy projections, rewrite forms, records, summary, and evidence, excluding only the display-oriented toolkit version.
 
-Source Go builds may expose toolkit version `dev`; tagged CLI, server, native, and packaged builds use the exact `VERSION` while retaining the same semantic revision. The current SPL revision is `sha256:08901c84ac8c420f59ddb86168c534f0e83484c05d3c8a81078a716c878a1733`; the SPL2 revision remains `sha256:f1391296cfbc616e9bb1b1828e2471e37b60a35c0555654c0734640e072a0437`. The embedded corpus proves deterministic local toolkit behavior. The toolkit does not execute SPL, evaluate regular expressions, compare result rows, model acceleration, load macro definitions, or certify runtime compatibility. It also does not prove authorization or upstream support.
+Source Go builds may expose toolkit version `dev`; tagged CLI, server, native, and packaged builds use the exact `VERSION` while retaining the same semantic revision. The current SPL revision is `sha256:08901c84ac8c420f59ddb86168c534f0e83484c05d3c8a81078a716c878a1733`; the SPL2 revision is `sha256:a765813624c6edfd754a4529556f5fd35288f464e759f8d969404a072bef1898`. The embedded corpus proves deterministic local toolkit behavior. The toolkit does not execute SPL, evaluate regular expressions, compare result rows, model acceleration, load macro definitions, or certify runtime compatibility. It also does not prove authorization or upstream support.
 
 Lexer admission allows 4,096 work units. Real errors from one lexer call are counted in listener order before the returned non-EOF token; EOF does not count. SPL2 closure inspection runs after admitted EOF and accounts for its synthetic unterminated-literal error before parser construction. The first event that would consume unit 4,097 records the omitted source range and returns the canonical incomplete resource-limit result before parser prediction. Long sparse documents remain admitted when they stay within the work budget.
 
@@ -57,7 +57,7 @@ REST mapping configurations are request-scoped and may be cached by configuratio
 
 Discovery is intentionally flat. It does not model stages, structured references, lineage, schemas, or read/write roles. Macro recovery is deliberately limited: when unsupported macro syntax causes parse errors, the result contains recovered macros and empty arrays for other categories.
 
-Generated parser sources are committed build inputs. Runtime code and build configuration do not depend on temporary planning artifacts. Standalone SPL2 has its own generated ANTLR lexer/parser and typed syntax ownership. SPL2 modules remain excluded.
+Generated parser sources are committed build inputs. Runtime code and build configuration do not depend on temporary planning artifacts. SPL2 has its own generated ANTLR lexer/parser and typed syntax ownership. Selected same-document declarations bind after parsing; external modules are not loaded.
 
 ## Canonical analysis and validation
 
@@ -81,7 +81,26 @@ receives located operands and prepared projections; it does not inspect SPL2
 grammar objects. SQL scheduling separates source/filter/group/evaluation from
 final projection, preserving lexical references while recording actual lineage
 phases. Independent children start with source environments; inherited subpipes
-receive copies. Unproved parent merges never install guessed child outputs.
+receive copies. Selected `if`, guarded `branch`, `union`, and qualified pipeline
+`join` forms merge field environments and forked requirement traces. Alternative
+paths preserve conditional presence; a selected join composes matched sides and
+adds unmatched sides according to its join type. Unproved merges do not install
+guessed child outputs.
+
+SPL2 field identities distinguish quoted atomic dotted names from structural
+paths in private environment keys and public `field_identity` values on
+references, bindings, removals and exact field requirements. Proved transitions
+carry `output_identity`. Distinct identities may share a display name without
+merging origins or making semantics incomplete. Genuinely unproved join-output
+ownership stays bounded and incomplete. Static dataset descriptors use
+canonical JSON identities for exact dependencies and requirements. Dynamic
+descriptors keep located conditional evidence without an exact dependency.
+
+Local views are bound lazily with cycle detection and summarized field flow.
+Pure scalar functions substitute positional parameter evidence at calls. Import
+and export names occupy their own symbol roles; unresolved external imports keep
+requirement coverage incomplete, and use of an imported member also makes its
+analysis incomplete. All of this remains within one submitted document.
 
 The corpus retains separate raw syntax and canonical-result expectations. Its
 auditor checks immutable provenance, assembly rules, original obligations, held

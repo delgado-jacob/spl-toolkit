@@ -2,9 +2,231 @@ package analysis
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 	"testing"
 )
+
+func TestSPL2CurrentFunctionPolicyCoversObservedForms(t *testing.T) {
+	policy, ok := spl2TypedPolicyFor("splunkd", "current")
+	if !ok {
+		t.Fatal("missing private splunkd/current typed policy")
+	}
+	want := []string{"abs", "any", "avg", "cidrmatch", "coalesce", "count", "dc", "distinct_count", "json", "json_array_to_mv", "like", "lower", "match", "max", "min", "mvindex", "round", "rtrim", "span", "sqrt", "stdev", "strftime", "sum", "tonumber", "values"}
+	got := make([]string, 0, len(want))
+	for _, name := range want {
+		if _, exists := policy.functions[name]; exists {
+			got = append(got, name)
+		}
+	}
+	sort.Strings(got)
+	sort.Strings(want)
+	if strings.Join(got, " ") != strings.Join(want, " ") {
+		t.Fatalf("observed function policy = %v, want %v", got, want)
+	}
+	for _, name := range []string{"where", "eval", "fields", "stats", "bin", "mvexpand"} {
+		if _, ok := policy.commands[name]; !ok {
+			t.Fatalf("missing selected command %q from private policy", name)
+		}
+	}
+	for _, name := range []string{"avg", "count", "dc", "distinct_count", "max", "min", "stdev", "sum", "values"} {
+		if policy.functions[name].position != spl2AggregateFunction || !policy.functions[name].signature.aggregate {
+			t.Fatalf("aggregate policy for %q = %+v", name, policy.functions[name])
+		}
+	}
+	if function := policy.functions["if"]; function.signature.min != 3 || function.signature.max != 3 || function.signature.aggregate {
+		t.Fatalf("scalar wrapper policy = %+v", function)
+	}
+}
+
+func TestSPL2FunctionNullabilityComesFromTypedPolicy(t *testing.T) {
+	original := spl2TypedPolicies["splunkd/current"]
+	modified := cloneSPL2TypedPolicyForTest(original)
+	match := modified.functions["match"]
+	match.nullability = spl2NullabilityAlways
+	modified.functions["match"] = match
+	spl2TypedPolicies["splunkd/current"] = modified
+	t.Cleanup(func() { spl2TypedPolicies["splunkd/current"] = original })
+
+	r := spl2AnalyzeTest(t, `FROM synthetic_events | eval synthetic_result=match("sample", "^sample")`)
+	if r.Status != Valid || !r.Coverage.SemanticComplete {
+		t.Fatalf("modified private policy was not selected: %+v", r)
+	}
+	for _, field := range r.Lineage[len(r.Lineage)-1].After.Fields {
+		if field.Name == "synthetic_result" {
+			if field.Conditional {
+				t.Fatalf("production evaluation ignored the policy nullability strategy: %+v", field)
+			}
+			return
+		}
+	}
+	t.Fatalf("missing policy-controlled output: %+v", r)
+}
+
+func cloneSPL2TypedPolicyForTest(policy spl2TypedPolicy) spl2TypedPolicy {
+	clone := spl2TypedPolicy{
+		functions: make(map[string]spl2FunctionPolicy, len(policy.functions)),
+		commands:  make(map[string]spl2CommandHandler, len(policy.commands)),
+	}
+	for name, function := range policy.functions {
+		clone.functions[name] = function
+	}
+	for name, handler := range policy.commands {
+		clone.commands[name] = handler
+	}
+	return clone
+}
+
+func TestSPL2MatchDoesNotProveNonnullOutput(t *testing.T) {
+	for _, query := range []string{
+		`FROM main | eval result=match(name,"^a")`,
+		`FROM main | eval result=match(path,"/tmp/")`,
+	} {
+		r := spl2AnalyzeTest(t, query)
+		if r.Status != Valid || !r.Coverage.SemanticComplete {
+			t.Fatalf("match policy coverage: %+v", r)
+		}
+		fields := r.Lineage[len(r.Lineage)-1].After.Fields
+		found := false
+		for _, field := range fields {
+			if field.Name == "result" {
+				found = true
+				if !field.Conditional {
+					t.Fatalf("match result gained an unproved nonnull guarantee: %+v", field)
+				}
+			}
+		}
+		if !found {
+			t.Fatalf("missing match result: %+v", r)
+		}
+	}
+}
+
+func TestSPL2ObservedFunctionFormsAreModeled(t *testing.T) {
+	tests := []struct {
+		name   string
+		query  string
+		inputs []string
+		role   string
+	}{
+		{"abs", `FROM synthetic_events | eval synthetic_out=abs(synthetic_value)`, []string{"synthetic_value"}, "read"},
+		{"any", `FROM synthetic_events | eval synthetic_out=any(synthetic_values, $synthetic_member -> $synthetic_member > synthetic_floor)`, []string{"synthetic_values", "synthetic_floor"}, "read"},
+		{"avg", `FROM synthetic_events | stats avg(synthetic_value) AS synthetic_out`, []string{"synthetic_value"}, "read"},
+		{"cidrmatch", `FROM synthetic_events | eval synthetic_out=cidrmatch("198.51.100.0/24", synthetic_address)`, []string{"synthetic_address"}, "read"},
+		{"coalesce", `FROM synthetic_events | eval synthetic_out=coalesce(synthetic_primary, synthetic_fallback)`, []string{"synthetic_primary", "synthetic_fallback"}, "read"},
+		{"count", `FROM synthetic_events | stats count() AS synthetic_out`, nil, "read"},
+		{"dc", `FROM synthetic_events | stats dc(synthetic_value) AS synthetic_out`, []string{"synthetic_value"}, "read"},
+		{"distinct_count", `FROM synthetic_events | stats distinct_count(synthetic_value) AS synthetic_out`, []string{"synthetic_value"}, "read"},
+		{"json", `FROM synthetic_events | eval synthetic_out=json(synthetic_object)`, []string{"synthetic_object"}, "read"},
+		{"json_array_to_mv", `FROM synthetic_events | eval synthetic_out=json_array_to_mv(synthetic_json_array)`, []string{"synthetic_json_array"}, "read"},
+		{"like", `FROM synthetic_events | eval synthetic_out=like(synthetic_label, "sample%")`, []string{"synthetic_label"}, "read"},
+		{"lower", `FROM synthetic_events | eval synthetic_out=lower(synthetic_label)`, []string{"synthetic_label"}, "read"},
+		{"match", `FROM synthetic_events | eval synthetic_out=match(synthetic_label, "^sample")`, []string{"synthetic_label"}, "read"},
+		{"max", `FROM synthetic_events | stats max(synthetic_value) AS synthetic_out`, []string{"synthetic_value"}, "read"},
+		{"min", `FROM synthetic_events | stats min(synthetic_value) AS synthetic_out`, []string{"synthetic_value"}, "read"},
+		{"mvindex", `FROM synthetic_events | eval synthetic_out=mvindex(synthetic_values, 0)`, []string{"synthetic_values"}, "read"},
+		{"round", `FROM synthetic_events | eval synthetic_out=round(synthetic_value, 2)`, []string{"synthetic_value"}, "read"},
+		{"rtrim", `FROM synthetic_events | eval synthetic_out=rtrim(synthetic_label, ".")`, []string{"synthetic_label"}, "read"},
+		{"span", `FROM synthetic_events | stats count() AS synthetic_count BY span(synthetic_time, 10m)`, []string{"synthetic_time"}, "group"},
+		{"sqrt", `FROM synthetic_events | eval synthetic_out=sqrt(synthetic_value)`, []string{"synthetic_value"}, "read"},
+		{"stdev", `FROM synthetic_events | stats stdev(synthetic_value) AS synthetic_out`, []string{"synthetic_value"}, "read"},
+		{"strftime", `FROM synthetic_events | eval synthetic_out=strftime(synthetic_time, "%Y-%m-%d")`, []string{"synthetic_time"}, "read"},
+		{"sum", `FROM synthetic_events | stats sum(synthetic_value) AS synthetic_out`, []string{"synthetic_value"}, "read"},
+		{"tonumber", `FROM synthetic_events | eval synthetic_out=tonumber(synthetic_label)`, []string{"synthetic_label"}, "read"},
+		{"values", `FROM synthetic_events | stats values(synthetic_label) AS synthetic_out`, []string{"synthetic_label"}, "read"},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			r := spl2AnalyzeTest(t, tc.query)
+			if r.Status != Valid || !r.Coverage.SyntaxComplete || !r.Coverage.SemanticComplete || !r.Requirements.Coverage.Complete || len(r.Diagnostics) != 0 {
+				t.Fatalf("observed form must be fully modeled: %+v", r)
+			}
+			for _, input := range tc.inputs {
+				ref := spl2Ref(t, r, input, tc.role)
+				if ref.Binding != "source" || ref.Resolution != "exact" {
+					t.Fatalf("input %q lost exact source ownership: %+v", input, ref)
+				}
+				if item := requirementItem(r.Requirements, "field", input, tc.role); item == nil || item.Necessity != "required" || item.Resolution != "exact" {
+					t.Fatalf("input %q requirement = %+v", input, item)
+				}
+			}
+			for _, ref := range r.References {
+				if strings.Contains(ref.OriginalName, "$synthetic_member") || strings.Contains(ref.NormalizedName, "synthetic_member") {
+					t.Fatalf("lambda local escaped into field references: %+v", ref)
+				}
+			}
+			for _, item := range r.Requirements.Items {
+				if strings.Contains(item.Identity, "synthetic_member") {
+					t.Fatalf("lambda local escaped into requirements: %+v", item)
+				}
+			}
+			assertCorpusIntegrity(t, r)
+		})
+	}
+}
+
+func TestSPL2ObservedFunctionBoundaries(t *testing.T) {
+	for _, query := range []string{
+		`FROM synthetic_events | eval synthetic_out=any(synthetic_values)`,
+		`FROM synthetic_events | eval synthetic_out=cidrmatch(synthetic_address)`,
+		`FROM synthetic_events | eval synthetic_out=json()`,
+		`FROM synthetic_events | eval synthetic_out=json_array_to_mv(synthetic_json_array, 1)`,
+		`FROM synthetic_events | eval synthetic_out=like(synthetic_label)`,
+		`FROM synthetic_events | eval synthetic_out=mvindex(synthetic_values)`,
+		`FROM synthetic_events | eval synthetic_out=sqrt(synthetic_value, 2)`,
+		`FROM synthetic_events | eval synthetic_out=strftime(synthetic_time)`,
+		`FROM synthetic_events | stats stdev() AS synthetic_out`,
+	} {
+		r := spl2AnalyzeTest(t, query)
+		if r.Status != Invalid || !spl2HasCode(r, CodeSyntaxError) {
+			t.Fatalf("invalid selected signature accepted for %q: %+v", query, r)
+		}
+	}
+	for _, query := range []string{
+		`FROM synthetic_events | eval synthetic_out=stdev(synthetic_value)`,
+		`FROM synthetic_events | stats sqrt(synthetic_value) AS synthetic_out`,
+	} {
+		r := spl2AnalyzeTest(t, query)
+		if r.Status != Invalid || !spl2HasCode(r, CodeSyntaxError) {
+			t.Fatalf("invalid aggregate position accepted for %q: %+v", query, r)
+		}
+	}
+	r := spl2AnalyzeTest(t, `FROM synthetic_events | eval synthetic_out=synthetic_unknown(synthetic_value)`)
+	if r.Status != Incomplete || !spl2HasCode(r, CodeUnsupportedFunction) || spl2Ref(t, r, "synthetic_value", "read").Binding != "source" {
+		t.Fatalf("unknown function boundary lost input evidence: %+v", r)
+	}
+}
+
+func TestSPL2AnyLambdaShapeIsEnforced(t *testing.T) {
+	t.Run("non-lambda argument", func(t *testing.T) {
+		r := spl2AnalyzeTest(t, `FROM synthetic_events | eval synthetic_out=any(synthetic_values, synthetic_member)`)
+		if r.Status != Invalid || !spl2HasCode(r, CodeSyntaxError) || r.Coverage.SemanticComplete || r.Requirements.Coverage.Complete {
+			t.Fatalf("non-lambda any argument was accepted: %+v", r)
+		}
+		for _, name := range []string{"synthetic_values", "synthetic_member"} {
+			if ref := spl2Ref(t, r, name, "read"); ref.Binding != "source" {
+				t.Fatalf("rejected lambda shape lost parsed input %q: %+v", name, ref)
+			}
+		}
+	})
+
+	t.Run("unbound local", func(t *testing.T) {
+		r := spl2AnalyzeTest(t, `FROM synthetic_events | eval synthetic_out=any(synthetic_values, $synthetic_member -> $synthetic_missing > 0)`)
+		if r.Status != Incomplete || !spl2HasCode(r, CodeUnsupportedSemantics) || r.Coverage.SemanticComplete || r.Requirements.Coverage.Complete {
+			t.Fatalf("unbound lambda local was accepted: %+v", r)
+		}
+		for _, ref := range r.References {
+			if strings.Contains(ref.OriginalName, "synthetic_missing") || strings.Contains(ref.NormalizedName, "synthetic_missing") {
+				t.Fatalf("unbound lambda local escaped into field references: %+v", ref)
+			}
+		}
+		for _, item := range r.Requirements.Items {
+			if strings.Contains(item.Identity, "synthetic_missing") {
+				t.Fatalf("unbound lambda local escaped into requirements: %+v", item)
+			}
+		}
+	})
+}
 
 func TestSPL2NestedLenNumericPresence(t *testing.T) {
 	r := spl2AnalyzeTest(t, `FROM main | eval n=abs(len("abc")) | table n`)

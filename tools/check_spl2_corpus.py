@@ -16,6 +16,43 @@ import sys
 # Activations, case aliases, assembly and owner/disposition state are excluded.
 # New supplemental task witnesses live outside the original C/L/Q/B/E/F/I IDs.
 CANONICAL_PROVENANCE_SHA256_V1 = "3345cf5712b1bdbf467d1651784fdb8bccc596805038da0d54e7a123384e3a4e"
+APPROVED_LINUS_FORM_SHA256_V1 = "209f470a49eca9f5866ca0bdb380f3d3ebbd598d3bbcf8eda4a976aa78f292d4"
+
+LINUS_FORM_FLOORS = {
+    "M11.layout": 7,
+    "M11.dataset": 5,
+    "M11.field": 3,
+    "M11.pipeline": 6,
+    "M11.sql": 5,
+    "M11.aggregate": 4,
+    "M11.predicate": 5,
+    "M11.expression": 5,
+    "M11.function": 25,
+}
+LINUS_FUNCTIONS = {
+    "abs", "any", "avg", "cidrmatch", "coalesce", "count", "dc",
+    "distinct_count", "json", "json_array_to_mv", "like", "lower", "match",
+    "max", "min", "mvindex", "round", "rtrim", "span", "sqrt", "stdev",
+    "strftime", "sum", "tonumber", "values",
+}
+PROTECTED_LINUS_KEYS = {
+    "detection", "detection_id", "detection_name", "file", "metadata", "name",
+    "path", "repository_path", "source_path", "title", "yaml",
+}
+LINUS_M11_SOURCE = {
+    "authority": "aggregate-only-local-audit",
+    "audited_commit": "a00742a733fb0ad96fd007940498d1d7138ae4a6",
+    "toolkit_base": "ec9f626c03f67fe783c3dfc1d409ff75a12bbca9",
+    "spl2_grammar_ref": "4d3b7850a47c7f493f4e4c3cae8c3f30ae4cc5fe",
+    "inventory": {
+        "yaml_documents": 53,
+        "top_level_search_block_scalars": 49,
+        "standalone_programs": 45,
+        "predicate_fragments": 4,
+        "form_obligations": 65,
+        "function_obligations": 25,
+    },
+}
 
 
 def original_id(identity):
@@ -59,6 +96,22 @@ def load(root: Path):
     return manifest, provenance, cases
 
 
+def load_linus_forms(path: Path):
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def canonical_linus_form_digest(matrix):
+    projection = {
+        "schema_version": matrix["schema_version"],
+        "authorship": matrix["authorship"],
+        "obligations": sorted(matrix["obligations"], key=lambda obligation: obligation["id"]),
+    }
+    encoded = json.dumps(
+        projection, sort_keys=True, ensure_ascii=False, separators=(",", ":"),
+    ).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+
+
 def require(condition, message):
     if not condition:
         raise ValueError(message)
@@ -70,6 +123,61 @@ def unique(records, label):
         require(record["id"] not in result, f"duplicate {label}: {record['id']}")
         result[record["id"]] = record
     return result
+
+
+def audit_linus_forms(matrix, source_keys):
+    require(isinstance(matrix, dict) and set(matrix) == {"schema_version", "authorship", "obligations"},
+            "invalid Linus form matrix")
+    require(matrix["schema_version"] == 1, "unknown Linus form matrix schema")
+    require(matrix["authorship"] == "locally-authored-synthetic",
+            "Linus form source text must be locally authored synthetic content")
+    obligations = matrix["obligations"]
+    require(isinstance(obligations, list) and len(obligations) >= 65,
+            "Linus form matrix requires at least 65 obligations")
+    by_id = {}
+    queries = set()
+    families = {family: 0 for family in LINUS_FORM_FLOORS}
+    functions = set()
+    for obligation in obligations:
+        require(isinstance(obligation, dict), "Linus form obligation must be an object")
+        protected = set(obligation) & PROTECTED_LINUS_KEYS
+        require(not protected, "protected Linus metadata or path is forbidden in form matrix")
+        family = obligation.get("family")
+        require(isinstance(family, str) and family in families, "unknown Linus form family")
+        expected_keys = {"id", "family", "description", "query", "disposition", "source_keys"}
+        if family == "M11.function":
+            expected_keys.add("function")
+        require(set(obligation) == expected_keys, "invalid Linus form obligation fields")
+        identity = obligation["id"]
+        require(isinstance(identity, str) and identity.startswith("M11.") and identity.startswith(family + "."),
+                "invalid stable M11 form identity")
+        require(identity not in by_id, f"duplicate Linus form: {identity}")
+        by_id[identity] = obligation
+        families[family] += 1
+        require(obligation["disposition"] == "included", "Linus form needs explicit included disposition")
+        require(isinstance(obligation["description"], str) and obligation["description"].strip(),
+                "Linus form needs a description")
+        record_sources = obligation["source_keys"]
+        require(isinstance(record_sources, list) and record_sources and
+                all(isinstance(key, str) for key in record_sources) and set(record_sources) <= set(source_keys),
+                f"unresolved source provenance: {identity}")
+        query = obligation["query"]
+        require(isinstance(query, str) and query.strip() == query and "synthetic_" in query and
+                not any(token in query.lower() for token in ("detections/", ".yaml", ".yml", "/users/", "linus")),
+                "Linus form source text must be locally authored synthetic content")
+        require(query not in queries, "duplicate synthetic query must use one narrow form")
+        queries.add(query)
+        if family == "M11.function":
+            function = obligation["function"]
+            require(isinstance(function, str) and function, "function form needs a function name")
+            functions.add(function)
+    for family, floor in LINUS_FORM_FLOORS.items():
+        require(families[family] >= floor, f"unmet Linus form family floor: {family}")
+    require(functions == LINUS_FUNCTIONS and families["M11.function"] == len(LINUS_FUNCTIONS),
+            "Linus form function set must be exact")
+    digest = canonical_linus_form_digest(matrix)
+    require(digest == APPROVED_LINUS_FORM_SHA256_V1, "approved Linus form matrix identity changed")
+    return {"obligations": len(obligations), "families": families, "functions": functions, "digest": digest}
 
 
 # Fixed context assemblies preserve every original candidate byte. These are
@@ -154,7 +262,7 @@ def audit_canonical_assertions(case):
     arrays = {"required_codes", "forbidden_codes", "required_references", "forbidden_references",
               "required_fields", "forbidden_field_names", "required_stages"}
     keys = arrays | {"category", "basis", "status", "syntax_complete", "semantic_complete", "max_scopes", "final_state"}
-    require(keys <= set(a) <= keys | {"required_scopes"}, "invalid independent assertion keys")
+    require(keys <= set(a) <= keys | {"required_scopes", "forbidden_field_identities"}, "invalid independent assertion keys")
     require(a["category"] in {"recovery", "representation"} and isinstance(a["basis"], str) and a["basis"].strip(), "snapshot needs independent eligibility basis")
     require(a["status"] in {"valid", "invalid", "incomplete"}, "invalid independent status")
     require(type(a["syntax_complete"]) is bool and type(a["semantic_complete"]) is bool, "independent coverage must be boolean")
@@ -165,6 +273,13 @@ def audit_canonical_assertions(case):
     require(any(a[k] for k in ("required_references", "forbidden_references", "required_fields", "forbidden_field_names", "required_stages")), "snapshot needs nonvacuous soundness assertions")
     for key in ("required_codes", "forbidden_codes", "forbidden_field_names"):
         require(all(isinstance(v, str) and v for v in a[key]), "independent names/codes must be nonempty strings")
+    forbidden_identities = a.get("forbidden_field_identities", [])
+    require(isinstance(forbidden_identities, list), "forbidden field identities must be an array")
+    for identity in forbidden_identities:
+        require(isinstance(identity, dict) and {"kind", "segments"} <= set(identity) <= {"kind", "segments", "qualifier"}, "invalid forbidden field identity")
+        require(identity["kind"] in {"atomic", "path"} and isinstance(identity["segments"], list) and identity["segments"] and all(isinstance(segment, str) and segment for segment in identity["segments"]), "invalid forbidden field identity")
+        require(identity["kind"] != "atomic" or len(identity["segments"]) == 1, "invalid forbidden field identity")
+        require("qualifier" not in identity or identity["kind"] == "path" and isinstance(identity["qualifier"], str) and identity["qualifier"], "invalid forbidden field identity")
     require(not set(a["required_codes"]) & set(a["forbidden_codes"]), "contradictory independent codes")
     expected, raw = case["canonical"], case["document"]["text"].encode("utf-8")
     for key in ("status", "syntax_complete", "semantic_complete"):
@@ -231,7 +346,10 @@ def audit(manifest, provenance, cases):
         key = json.dumps(case["document"], sort_keys=True, ensure_ascii=False)
         require(key not in queries, "duplicate query must use obligation aliases")
         queries.add(key)
-    sources = provenance["sources"]
+    supplemental_sources = provenance.get("supplemental_sources", {})
+    require(isinstance(supplemental_sources, dict) and supplemental_sources.get("linus_m11") == LINUS_M11_SOURCE,
+            "Linus M11 supplemental source baseline changed")
+    sources = set(provenance["sources"]) | set(supplemental_sources)
     forms = unique(provenance["forms"], "form")
     mandatory = {f"C{i:02}" for i in range(1, 36)} | {f"L{i:02}" for i in range(1, 26)}
     require(mandatory <= forms.keys(), "missing mandatory family disposition")
@@ -251,7 +369,7 @@ def audit(manifest, provenance, cases):
     for hold in holds.values():
         require(hold["disposition"] == "held" and hold["floor_credit"] is False, "held record receives floor credit")
     for record in [*forms.values(), *obligations.values(), *holds.values(), *cases]:
-        require(record["source_keys"] and set(record["source_keys"]) <= sources.keys(), f"unresolved source provenance: {record.get('id')}")
+        require(record["source_keys"] and set(record["source_keys"]) <= sources, f"unresolved source provenance: {record.get('id')}")
     for form in forms.values():
         require(form["disposition"] in {"active", "partial", "pending"}, "missing form disposition")
     require(canonical_provenance_digest(provenance) == CANONICAL_PROVENANCE_SHA256_V1,
@@ -323,7 +441,18 @@ def audit(manifest, provenance, cases):
 
 def main():
     try:
-        result = audit(*load(Path(__file__).resolve().parents[1] / "testdata/spl2"))
+        root = Path(__file__).resolve().parents[1] / "testdata/spl2"
+        manifest, provenance, cases = load(root)
+        result = audit(manifest, provenance, cases)
+        form_results = [
+            audit_linus_forms(
+                load_linus_forms(root / name),
+                set(provenance["sources"]) | set(provenance.get("supplemental_sources", {})),
+            )
+            for name in manifest.get("supplemental_form_files", [])
+        ]
+        if form_results:
+            result["supplemental_form_obligations"] = sum(item["obligations"] for item in form_results)
     except (ValueError, KeyError, OSError) as error:
         print(f"SPL2 corpus audit failed: {error}", file=sys.stderr)
         return 1

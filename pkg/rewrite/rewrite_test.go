@@ -116,9 +116,12 @@ func explicitAliasReport(mode Mode) *Result {
 		{"search src=x | stats sum(src) AS total | table total", "src", "sha256:bf7f94f7e98b4ee7bdd32070fa2f2738ebb75df11ceb5bd9ade0a30d64fae951", [3]int{12, 38, 52}, [3]int{0, 15, 41}, [4][2]int{{7, 10}, {25, 28}, {33, 38}, {47, 52}}},
 		{"search user=x | stats sum(user) AS total | table total", "user", "sha256:40e312d04c889b1fb1e8ef4f8996b5efe32606abd72ced915c8c0c3c15ee678b", [3]int{13, 40, 54}, [3]int{0, 16, 43}, [4][2]int{{7, 11}, {26, 30}, {35, 40}, {49, 54}}},
 	} {
-		empty := analysis.FieldState{Fields: []analysis.FieldBinding{}, Removed: []string{}, Open: true}
-		source := analysis.FieldState{Fields: []analysis.FieldBinding{{Name: expected.name, OriginReferenceIDs: []string{"ref-0"}}}, Removed: []string{}, Open: true}
-		total := analysis.FieldState{Fields: []analysis.FieldBinding{{Name: "total", OriginReferenceIDs: []string{"ref-2", "ref-1", "ref-0"}}}, Removed: []string{}}
+		identity := func(name string) *analysis.FieldIdentity {
+			return &analysis.FieldIdentity{Kind: "atomic", Segments: []string{name}}
+		}
+		empty := analysis.FieldState{Fields: []analysis.FieldBinding{}, Removed: []analysis.FieldRemoval{}, Open: true}
+		source := analysis.FieldState{Fields: []analysis.FieldBinding{{Name: expected.name, FieldIdentity: *identity(expected.name), OriginReferenceIDs: []string{"ref-0"}}}, Removed: []analysis.FieldRemoval{}, Open: true}
+		total := analysis.FieldState{Fields: []analysis.FieldBinding{{Name: "total", FieldIdentity: *identity("total"), OriginReferenceIDs: []string{"ref-2", "ref-1", "ref-0"}}}, Removed: []analysis.FieldRemoval{}}
 		analyses[i] = &analysis.Result{
 			SchemaVersion: 1, Document: analysis.QueryDocument{Text: expected.text, Language: "spl", Profile: "splunkd", Version: "current", SourceID: "source.spl"}, Status: analysis.Valid,
 			Coverage: analysis.Coverage{SyntaxComplete: true, SemanticComplete: true, Reasons: []string{}},
@@ -129,15 +132,15 @@ func explicitAliasReport(mode Mode) *Result {
 			},
 			Scopes: []analysis.Scope{{ID: "scope-0", Kind: "root", Location: loc(0, expected.ends[2])}},
 			References: []analysis.Reference{
-				{ID: "ref-0", OriginalName: expected.name, NormalizedName: expected.name, Kind: "field", Role: "filter", StageID: "stage-0", ScopeID: "scope-0", Location: loc(expected.refs[0][0], expected.refs[0][1]), Resolution: "exact", Binding: "source", OriginReferenceIDs: []string{}},
-				{ID: "ref-1", OriginalName: expected.name, NormalizedName: expected.name, Kind: "field", Role: "read", StageID: "stage-1", ScopeID: "scope-0", Location: loc(expected.refs[1][0], expected.refs[1][1]), Resolution: "exact", Binding: "source", OriginReferenceIDs: []string{"ref-0"}},
-				{ID: "ref-2", OriginalName: "total", NormalizedName: "total", Kind: "field", Role: "output", StageID: "stage-1", ScopeID: "scope-0", Location: loc(expected.refs[2][0], expected.refs[2][1]), Resolution: "exact", Binding: "not_applicable", OriginReferenceIDs: []string{"ref-1", "ref-0"}},
-				{ID: "ref-3", OriginalName: "total", NormalizedName: "total", Kind: "field", Role: "read", StageID: "stage-2", ScopeID: "scope-0", Location: loc(expected.refs[3][0], expected.refs[3][1]), Resolution: "exact", Binding: "derived", OriginReferenceIDs: []string{"ref-2", "ref-1", "ref-0"}},
+				{ID: "ref-0", OriginalName: expected.name, NormalizedName: expected.name, FieldIdentity: identity(expected.name), Kind: "field", Role: "filter", StageID: "stage-0", ScopeID: "scope-0", Location: loc(expected.refs[0][0], expected.refs[0][1]), Resolution: "exact", Binding: "source", OriginReferenceIDs: []string{}},
+				{ID: "ref-1", OriginalName: expected.name, NormalizedName: expected.name, FieldIdentity: identity(expected.name), Kind: "field", Role: "read", StageID: "stage-1", ScopeID: "scope-0", Location: loc(expected.refs[1][0], expected.refs[1][1]), Resolution: "exact", Binding: "source", OriginReferenceIDs: []string{"ref-0"}},
+				{ID: "ref-2", OriginalName: "total", NormalizedName: "total", FieldIdentity: identity("total"), Kind: "field", Role: "output", StageID: "stage-1", ScopeID: "scope-0", Location: loc(expected.refs[2][0], expected.refs[2][1]), Resolution: "exact", Binding: "not_applicable", OriginReferenceIDs: []string{"ref-1", "ref-0"}},
+				{ID: "ref-3", OriginalName: "total", NormalizedName: "total", FieldIdentity: identity("total"), Kind: "field", Role: "read", StageID: "stage-2", ScopeID: "scope-0", Location: loc(expected.refs[3][0], expected.refs[3][1]), Resolution: "exact", Binding: "derived", OriginReferenceIDs: []string{"ref-2", "ref-1", "ref-0"}},
 			},
 			Lineage: []analysis.Lineage{
 				{StageID: "stage-0", ScopeID: "scope-0", Before: empty, After: source, Transitions: []analysis.Transition{}},
-				{StageID: "stage-1", ScopeID: "scope-0", Before: source, After: total, Transitions: []analysis.Transition{{Operation: "aggregate", Output: "total", InputReferenceIDs: []string{"ref-1"}, OutputReferenceID: "ref-2"}}},
-				{StageID: "stage-2", ScopeID: "scope-0", Before: total, After: total, Transitions: []analysis.Transition{{Operation: "project", Output: "total", InputReferenceIDs: []string{"ref-3"}}}},
+				{StageID: "stage-1", ScopeID: "scope-0", Before: source, After: total, Transitions: []analysis.Transition{{Operation: "aggregate", Output: "total", OutputIdentity: identity("total"), InputReferenceIDs: []string{"ref-1"}, OutputReferenceID: "ref-2"}}},
+				{StageID: "stage-2", ScopeID: "scope-0", Before: total, After: total, Transitions: []analysis.Transition{{Operation: "project", Output: "total", OutputIdentity: identity("total"), InputReferenceIDs: []string{"ref-3"}}}},
 			},
 			Dependencies: analysis.Dependencies{Indexes: []string{}, Sources: []string{}, SourceTypes: []string{}, Datasets: []string{}, Lookups: []string{}, DataModels: []string{}, Macros: []string{}}, Diagnostics: []analysis.Diagnostic{},
 			Requirements: analysis.RequirementSet{
@@ -149,8 +152,8 @@ func explicitAliasReport(mode Mode) *Result {
 				QueryStatus:        analysis.Valid,
 				Coverage:           analysis.RequirementCoverage{Complete: true, Reasons: []string{}},
 				Items: []analysis.RequirementItem{
-					{ID: "req-1", Kind: "field", Identity: expected.name, Role: "filter", Necessity: "required", Origin: "direct", Resolution: "exact", Occurrences: []analysis.RequirementOccurrence{{ReferenceID: "ref-0", OriginalName: expected.name, Binding: "source", StageID: "stage-0", ScopeID: "scope-0", Location: loc(expected.refs[0][0], expected.refs[0][1])}}},
-					{ID: "req-2", Kind: "field", Identity: expected.name, Role: "read", Necessity: "required", Origin: "direct", Resolution: "exact", Occurrences: []analysis.RequirementOccurrence{{ReferenceID: "ref-1", OriginalName: expected.name, Binding: "source", StageID: "stage-1", ScopeID: "scope-0", Location: loc(expected.refs[1][0], expected.refs[1][1])}}},
+					{ID: "req-1", Kind: "field", Identity: expected.name, FieldIdentity: identity(expected.name), Role: "filter", Necessity: "required", Origin: "direct", Resolution: "exact", Occurrences: []analysis.RequirementOccurrence{{ReferenceID: "ref-0", OriginalName: expected.name, Binding: "source", StageID: "stage-0", ScopeID: "scope-0", Location: loc(expected.refs[0][0], expected.refs[0][1])}}},
+					{ID: "req-2", Kind: "field", Identity: expected.name, FieldIdentity: identity(expected.name), Role: "read", Necessity: "required", Origin: "direct", Resolution: "exact", Occurrences: []analysis.RequirementOccurrence{{ReferenceID: "ref-1", OriginalName: expected.name, Binding: "source", StageID: "stage-1", ScopeID: "scope-0", Location: loc(expected.refs[1][0], expected.refs[1][1])}}},
 				},
 				Gaps:        []analysis.RequirementGap{},
 				Diagnostics: []analysis.Diagnostic{},
