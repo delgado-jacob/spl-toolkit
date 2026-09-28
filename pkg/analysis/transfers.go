@@ -92,6 +92,11 @@ func (s *semanticStage) operandReference(operand locatedOperand, kind, role stri
 		return ""
 	}
 	id := s.referenceAt(operand.Location, operand.Name, kind, role, operand.Resolution)
+	if kind == "field" && operand.Resolution == "exact" {
+		if identity, exact := operand.fieldIdentity().public(); exact {
+			s.result.References[len(s.result.References)-1].FieldIdentity = &identity
+		}
+	}
 	if trace := s.env.requirements.trace; trace != nil {
 		entry := trace.reference(id)
 		if kind == "field" {

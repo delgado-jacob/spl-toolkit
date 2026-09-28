@@ -172,7 +172,7 @@ func TestMergeFlowEnvironmentsOmittedElseIncludesParentPath(t *testing.T) {
 	}
 }
 
-func TestMergeFlowEnvironmentsCollapsesAtomicStructuralCollision(t *testing.T) {
+func TestMergeFlowEnvironmentsPreservesAtomicStructuralIdentities(t *testing.T) {
 	parent := closedMergeEnvironment()
 	atomic := parent.clone()
 	structural := parent.clone()
@@ -184,8 +184,8 @@ func TestMergeFlowEnvironmentsCollapsesAtomicStructuralCollision(t *testing.T) {
 		{Ordinal: 1, Environment: structural, Reachable: true},
 	}, false)
 	state := merged.snapshot()
-	if len(state.Fields) != 1 || state.Fields[0].Name != "actor.name" || !state.Fields[0].Conditional || !state.Uncertain || !reflect.DeepEqual(state.Fields[0].OriginReferenceIDs, []string{"ref-2", "ref-8"}) {
-		t.Fatalf("collision merge = %+v", state)
+	if len(state.Fields) != 2 || state.Uncertain || state.Fields[0].FieldIdentity.Kind != "atomic" || state.Fields[1].FieldIdentity.Kind != "path" || !state.Fields[0].Conditional || !state.Fields[1].Conditional || !reflect.DeepEqual(state.Fields[0].OriginReferenceIDs, []string{"ref-2"}) || !reflect.DeepEqual(state.Fields[1].OriginReferenceIDs, []string{"ref-8"}) {
+		t.Fatalf("identity merge = %+v", state)
 	}
 	if !merged.requirements.ambiguous["actor.name"] || !merged.requirements.uncertain {
 		t.Fatalf("requirement collision merge = %+v", merged.requirements)
@@ -273,7 +273,7 @@ func TestComposeFlowEnvironmentsCombinesSameIdentityOrigins(t *testing.T) {
 	}
 }
 
-func TestComposeFlowEnvironmentsReportsPrivatePublicCollision(t *testing.T) {
+func TestComposeFlowEnvironmentsReportsJoinOutputCollision(t *testing.T) {
 	left := closedMergeEnvironment()
 	right := closedMergeEnvironment()
 	installMergeField(left, atomicFieldIdentity("actor.name"), []string{"ref-1"})
@@ -281,8 +281,8 @@ func TestComposeFlowEnvironmentsReportsPrivatePublicCollision(t *testing.T) {
 
 	composed, collisions, ok := composeFlowEnvironments(left, right)
 	state := composed.snapshot()
-	if !ok || !reflect.DeepEqual(collisions, []string{"actor.name"}) || len(state.Fields) != 1 || state.Fields[0].Name != "actor.name" || !state.Uncertain || !reflect.DeepEqual(state.Fields[0].OriginReferenceIDs, []string{"ref-1", "ref-2"}) {
-		t.Fatalf("private/public composition = state %+v collisions=%v ok=%t", state, collisions, ok)
+	if !ok || !reflect.DeepEqual(collisions, []string{"actor.name"}) || len(state.Fields) != 2 || state.Uncertain || state.Fields[0].FieldIdentity.Kind != "atomic" || state.Fields[1].FieldIdentity.Kind != "path" || !reflect.DeepEqual(state.Fields[0].OriginReferenceIDs, []string{"ref-1"}) || !reflect.DeepEqual(state.Fields[1].OriginReferenceIDs, []string{"ref-2"}) {
+		t.Fatalf("join composition = state %+v collisions=%v ok=%t", state, collisions, ok)
 	}
 }
 

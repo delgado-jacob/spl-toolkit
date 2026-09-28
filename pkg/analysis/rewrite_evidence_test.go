@@ -489,7 +489,18 @@ func TestRewriteRenderLookupAndDependencies(t *testing.T) {
 	}
 }
 func TestRewriteEvidenceRefusalsAndCopies(t *testing.T) {
-	s := rewriteTestSession(t, "spl2", `FROM main | where actor.name="bob" | table 'actor.name'`)
+	query := `FROM main | where actor.name="bob" | table 'actor.name'`
+	ordinary, err := Analyze(QueryDocument{Language: "spl2", Text: query})
+	if err != nil {
+		t.Fatal(err)
+	}
+	s, err := PrepareRewrite(QueryDocument{Language: "spl2", Text: query}, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !ordinary.Coverage.SemanticComplete || !rewriteAnalysesMatch(ordinary, s.Evidence().Analysis, CodeUnsupportedSemantics) {
+		t.Fatalf("rewrite-only structural limitation changed analysis: ordinary=%+v rewrite=%+v", ordinary.Coverage, s.Evidence().Analysis.Coverage)
+	}
 	for _, site := range s.Evidence().Sites {
 		if site.Kind == "field" && site.Location.Start.Offset == 18 && site.Eligibility == "eligible" {
 			t.Fatalf("unresolved navigation root eligible: %+v", site)

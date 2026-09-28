@@ -68,7 +68,7 @@ func TestSPL2StructuralAndQuotedDottedRequirementsStayDistinct(t *testing.T) {
 		`FROM main | eval x=actor.name+'actor.name'`,
 	} {
 		t.Run(query, func(t *testing.T) {
-			result, trace, err := analyzeRewriteWithTrace(QueryDocument{Text: query, Language: "spl2"}, nil, nil)
+			result, _, err := analyzeRewriteWithTrace(QueryDocument{Text: query, Language: "spl2"}, nil, nil)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -98,12 +98,14 @@ func TestSPL2StructuralAndQuotedDottedRequirementsStayDistinct(t *testing.T) {
 					t.Errorf("mixed occurrence = %+v, expected binding %q", occurrence, bindings[occurrence.ReferenceID])
 				}
 			}
-			wantOwners := []string{quoted.ID, structural.ID}
-			if structural.Location.Start.Offset < quoted.Location.Start.Offset {
-				wantOwners = []string{structural.ID, quoted.ID}
+			if result.Status != Valid || !result.Coverage.SemanticComplete {
+				t.Fatalf("mixed exact field analysis = status %q coverage %+v diagnostics %+v", result.Status, result.Coverage, result.Diagnostics)
 			}
-			assertRequirementGap(t, result.Requirements.Gaps, CodeAmbiguousField, wantOwners, []string{CodeAmbiguousField})
-			assertTraceDiagnosticOwner(t, trace, result.Diagnostics[0].Message, wantOwners)
+			for _, diagnostic := range result.Diagnostics {
+				if diagnostic.Code == CodeAmbiguousField {
+					t.Fatalf("distinct exact fields reported as ambiguous: %+v", diagnostic)
+				}
+			}
 		})
 	}
 

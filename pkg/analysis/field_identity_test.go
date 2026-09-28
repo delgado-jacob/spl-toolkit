@@ -1,6 +1,7 @@
 package analysis
 
 import (
+	"encoding/json"
 	"reflect"
 	"testing"
 )
@@ -58,60 +59,87 @@ func TestFieldIdentityPrivateEncodingIsDisjointFromAtomicSpelling(t *testing.T) 
 	}
 }
 
-func TestFieldIdentityPublicCollisionIsExplicitAndConservative(t *testing.T) {
-	query := `FROM main | eval atomic='actor.name', structural=actor.name | fields - 'actor.name'`
+func TestFieldIdentityPublicProjectionKeepsAtomicAndPathSeparate(t *testing.T) {
+	query := `FROM main | fields actor.name, 'actor.name'`
 	result, _, err := analyzeRewriteWithTrace(QueryDocument{Text: query, Language: "spl2"}, nil, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if result.Status != Incomplete || result.Coverage.SemanticComplete || result.Requirements.Coverage.Complete {
-		t.Fatalf("coverage = analysis %q/%+v requirements %+v", result.Status, result.Coverage, result.Requirements.Coverage)
-	}
-
 	reads := []Reference{}
 	for _, ref := range result.References {
 		if ref.Kind == "field" && ref.Role == "read" && ref.NormalizedName == "actor.name" {
 			reads = append(reads, ref)
 		}
 	}
-	if len(reads) != 2 || reads[0].OriginalName == reads[1].OriginalName {
-		t.Fatalf("colliding reads = %+v", reads)
+	if len(reads) != 2 || reads[0].ID != "ref-1" || reads[1].ID != "ref-2" || reads[0].OriginalName != "actor.name" || reads[1].OriginalName != "'actor.name'" {
+		t.Fatalf("projection reads = %+v", reads)
 	}
-	wantOrigins := []string{reads[0].ID, reads[1].ID}
-	collisionDiagnostics := 0
-	for _, diagnostic := range result.Diagnostics {
-		if diagnostic.Code == CodeAmbiguousField {
-			collisionDiagnostics++
-			if diagnostic.Category != "unsupported_semantics" {
-				t.Fatalf("ambiguity category = %q", diagnostic.Category)
-			}
+	for i, want := range []Location{
+		{Start: Position{Offset: 19, Line: 1, Column: 20}, End: Position{Offset: 29, Line: 1, Column: 30}},
+		{Start: Position{Offset: 31, Line: 1, Column: 32}, End: Position{Offset: 43, Line: 1, Column: 44}},
+	} {
+		if reads[i].Location != want {
+			t.Fatalf("read %s location = %+v, want %+v", reads[i].ID, reads[i].Location, want)
 		}
 	}
-	if collisionDiagnostics != 1 {
-		t.Fatalf("ambiguity diagnostics = %d: %+v", collisionDiagnostics, result.Diagnostics)
+	if result.Status != Valid || !result.Coverage.SemanticComplete {
+		t.Fatalf("analysis = status %q coverage %+v diagnostics %+v", result.Status, result.Coverage, result.Diagnostics)
 	}
-
-	evalState := result.Lineage[1].After
+	for _, diagnostic := range result.Diagnostics {
+		if diagnostic.Code == CodeAmbiguousField {
+			t.Fatalf("exact identities reported as ambiguous: %+v", diagnostic)
+		}
+	}
+	state := result.Lineage[len(result.Lineage)-1].After
 	bindings := []FieldBinding{}
-	for _, field := range evalState.Fields {
+	for _, field := range state.Fields {
 		if field.Name == "actor.name" {
 			bindings = append(bindings, field)
 		}
 	}
-	if !evalState.Uncertain || len(bindings) != 1 || !reflect.DeepEqual(bindings[0].OriginReferenceIDs, wantOrigins) {
-		t.Fatalf("collision state = %+v, want one actor.name with origins %v", evalState, wantOrigins)
+	if state.Uncertain || len(bindings) != 2 {
+		t.Fatalf("projection state = %+v, want two certain actor.name bindings", state)
 	}
-	for _, lineage := range result.Lineage {
-		for _, transition := range lineage.Transitions {
-			if transition.Output == "actor.name" {
-				t.Fatalf("ambiguous identity produced transition: %+v", transition)
-			}
-		}
+	if !reflect.DeepEqual(bindings[0].OriginReferenceIDs, []string{"ref-2"}) || !reflect.DeepEqual(bindings[1].OriginReferenceIDs, []string{"ref-1"}) {
+		t.Fatalf("projection origins = %+v", bindings)
 	}
-	assertRequirementGap(t, result.Requirements.Gaps, CodeAmbiguousField, wantOrigins, []string{CodeAmbiguousField})
+
+	// Check the public JSON contract without depending on a private encoded key.
+	var projection struct {
+		References []struct {
+			FieldIdentity *struct {
+				Kind     string   `json:"kind"`
+				Segments []string `json:"segments"`
+			} `json:"field_identity"`
+		} `json:"references"`
+		Lineage []struct {
+			After struct {
+				Fields []struct {
+					FieldIdentity *struct {
+						Kind     string   `json:"kind"`
+						Segments []string `json:"segments"`
+					} `json:"field_identity"`
+				} `json:"fields"`
+			} `json:"after"`
+		} `json:"lineage"`
+	}
+	encoded, err := json.Marshal(result)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := json.Unmarshal(encoded, &projection); err != nil {
+		t.Fatal(err)
+	}
+	if len(projection.References) < 3 || projection.References[1].FieldIdentity == nil || projection.References[2].FieldIdentity == nil || projection.References[1].FieldIdentity.Kind != "path" || !reflect.DeepEqual(projection.References[1].FieldIdentity.Segments, []string{"actor", "name"}) || projection.References[2].FieldIdentity.Kind != "atomic" || !reflect.DeepEqual(projection.References[2].FieldIdentity.Segments, []string{"actor.name"}) {
+		t.Fatalf("public reference identities = %+v", projection.References)
+	}
+	publicFields := projection.Lineage[len(projection.Lineage)-1].After.Fields
+	if len(publicFields) != 2 || publicFields[0].FieldIdentity == nil || publicFields[1].FieldIdentity == nil || publicFields[0].FieldIdentity.Kind != "atomic" || !reflect.DeepEqual(publicFields[0].FieldIdentity.Segments, []string{"actor.name"}) || publicFields[1].FieldIdentity.Kind != "path" || !reflect.DeepEqual(publicFields[1].FieldIdentity.Segments, []string{"actor", "name"}) {
+		t.Fatalf("public binding identities = %+v", publicFields)
+	}
 }
 
-func TestFieldIdentityCollisionSurvivesPriorUncertainty(t *testing.T) {
+func TestFieldIdentityPriorUncertaintyDoesNotMergeOrigins(t *testing.T) {
 	tests := []struct {
 		name  string
 		query string
@@ -134,7 +162,6 @@ func TestFieldIdentityCollisionSurvivesPriorUncertainty(t *testing.T) {
 			if len(reads) != 2 {
 				t.Fatalf("colliding exact reads = %+v", reads)
 			}
-			wantOrigins := []string{reads[0].ID, reads[1].ID}
 			state := result.Lineage[len(result.Lineage)-1].After
 			bindings := []FieldBinding{}
 			for _, field := range state.Fields {
@@ -142,34 +169,27 @@ func TestFieldIdentityCollisionSurvivesPriorUncertainty(t *testing.T) {
 					bindings = append(bindings, field)
 				}
 			}
-			if len(bindings) != 1 || !state.Uncertain || !reflect.DeepEqual(bindings[0].OriginReferenceIDs, wantOrigins) {
-				t.Fatalf("collision state = %+v, want origins %v", state, wantOrigins)
+			if len(bindings) == 0 || !state.Uncertain {
+				t.Fatalf("prior uncertainty was lost: %+v", state)
 			}
-			ambiguities := 0
+			for _, binding := range bindings {
+				if reflect.DeepEqual(binding.OriginReferenceIDs, []string{reads[0].ID, reads[1].ID}) {
+					t.Fatalf("distinct origins were merged: %+v", state)
+				}
+				if binding.FieldIdentity.Kind == "atomic" && !reflect.DeepEqual(binding.FieldIdentity.Segments, []string{"actor.name"}) || binding.FieldIdentity.Kind == "path" && !reflect.DeepEqual(binding.FieldIdentity.Segments, []string{"actor", "name"}) {
+					t.Fatalf("binding identity = %+v", binding)
+				}
+			}
 			for _, diagnostic := range result.Diagnostics {
 				if diagnostic.Code == CodeAmbiguousField {
-					ambiguities++
-					if diagnostic.Category != "unsupported_semantics" {
-						t.Fatalf("ambiguity category = %q", diagnostic.Category)
-					}
+					t.Fatalf("distinct identities reported as ambiguous: %+v", diagnostic)
 				}
 			}
-			if ambiguities != 1 {
-				t.Fatalf("ambiguity diagnostics = %d: %+v", ambiguities, result.Diagnostics)
-			}
-			for _, lineage := range result.Lineage {
-				for _, transition := range lineage.Transitions {
-					if transition.Output == "actor.name" {
-						t.Fatalf("ambiguous identity produced transition: %+v", transition)
-					}
-				}
-			}
-			assertRequirementGap(t, result.Requirements.Gaps, CodeAmbiguousField, wantOrigins, []string{CodeAmbiguousField})
 		})
 	}
 }
 
-func TestFieldIdentityProjectionCollisionPreservesSourceOrder(t *testing.T) {
+func TestFieldIdentityProjectionPreservesSourceOrder(t *testing.T) {
 	for _, query := range []string{
 		`FROM main | fields actor.name, 'actor.name'`,
 		`FROM main | fields 'actor.name', actor.name`,
@@ -189,7 +209,6 @@ func TestFieldIdentityProjectionCollisionPreservesSourceOrder(t *testing.T) {
 			if len(reads) != 2 {
 				t.Fatalf("colliding projection reads = %+v", reads)
 			}
-			wantOrigins := []string{reads[0].ID, reads[1].ID}
 			state := result.Lineage[len(result.Lineage)-1].After
 			bindings := []FieldBinding{}
 			for _, field := range state.Fields {
@@ -197,36 +216,37 @@ func TestFieldIdentityProjectionCollisionPreservesSourceOrder(t *testing.T) {
 					bindings = append(bindings, field)
 				}
 			}
-			if len(bindings) != 1 || !state.Uncertain || !reflect.DeepEqual(bindings[0].OriginReferenceIDs, wantOrigins) {
-				t.Fatalf("projection state = %+v, want one uncertain actor.name with origins %v", state, wantOrigins)
+			if len(bindings) != 2 || state.Uncertain || result.Status != Valid {
+				t.Fatalf("projection state = %+v status=%q", state, result.Status)
 			}
-			ambiguities := 0
+			for _, binding := range bindings {
+				wantID := reads[0].ID
+				if binding.FieldIdentity.Kind == "atomic" && reads[0].OriginalName == "actor.name" || binding.FieldIdentity.Kind == "path" && reads[0].OriginalName != "actor.name" {
+					wantID = reads[1].ID
+				}
+				if !reflect.DeepEqual(binding.OriginReferenceIDs, []string{wantID}) {
+					t.Fatalf("projection binding = %+v, want origin %s", binding, wantID)
+				}
+			}
 			for _, diagnostic := range result.Diagnostics {
-				if diagnostic.Code != CodeAmbiguousField {
-					continue
-				}
-				ambiguities++
-				if diagnostic.Category != "unsupported_semantics" {
-					t.Fatalf("ambiguity category = %q", diagnostic.Category)
+				if diagnostic.Code == CodeAmbiguousField {
+					t.Fatalf("exact projection reported ambiguity: %+v", diagnostic)
 				}
 			}
-			if ambiguities != 1 {
-				t.Fatalf("ambiguity diagnostics = %d: %+v", ambiguities, result.Diagnostics)
-			}
+			projects := 0
 			for _, transition := range result.Lineage[len(result.Lineage)-1].Transitions {
 				if transition.Operation == "project" && transition.Output == "actor.name" {
-					t.Fatalf("ambiguous projection emitted an identity-specific transition: %+v", transition)
+					projects++
 				}
 			}
-			assertRequirementGap(t, result.Requirements.Gaps, CodeAmbiguousField, wantOrigins, []string{CodeAmbiguousField})
-			if result.Requirements.Coverage.Complete {
-				t.Fatalf("ambiguous projection requirements are complete: %+v", result.Requirements.Coverage)
+			if projects != 2 {
+				t.Fatalf("projection transitions = %+v", result.Lineage[len(result.Lineage)-1].Transitions)
 			}
 		})
 	}
 }
 
-func TestFieldIdentitySnapshotCombinesConditionalityAndOrigins(t *testing.T) {
+func TestFieldIdentitySnapshotKeepsConditionalityAndOriginsSeparate(t *testing.T) {
 	environment := newEnvironment()
 	atomic := atomicFieldIdentity("actor.name")
 	structural := pathFieldIdentity("", []string{"actor", "name"})
@@ -235,13 +255,15 @@ func TestFieldIdentitySnapshotCombinesConditionalityAndOrigins(t *testing.T) {
 
 	state := environment.snapshot()
 	want := FieldState{
-		Fields:    []FieldBinding{{Name: "actor.name", OriginReferenceIDs: []string{"ref-atomic", "ref-path"}, Conditional: true}},
-		Removed:   []string{},
-		Open:      true,
-		Uncertain: true,
+		Fields: []FieldBinding{
+			{Name: "actor.name", FieldIdentity: FieldIdentity{Kind: "atomic", Segments: []string{"actor.name"}}, OriginReferenceIDs: []string{"ref-atomic"}},
+			{Name: "actor.name", FieldIdentity: FieldIdentity{Kind: "path", Segments: []string{"actor", "name"}}, OriginReferenceIDs: []string{"ref-path"}, Conditional: true},
+		},
+		Removed: []string{},
+		Open:    true,
 	}
 	if !reflect.DeepEqual(state, want) {
-		t.Fatalf("collision snapshot = %+v, want %+v", state, want)
+		t.Fatalf("identity snapshot = %+v, want %+v", state, want)
 	}
 }
 
@@ -266,7 +288,7 @@ func TestFieldIdentityDynamicNavigationKeepsStablePublicSpelling(t *testing.T) {
 				if ref.OriginalName != tc.original {
 					continue
 				}
-				if ref.NormalizedName != tc.normalized || ref.Resolution != "dynamic" || ref.Binding != "indeterminate" {
+				if ref.NormalizedName != tc.normalized || ref.Resolution != "dynamic" || ref.Binding != "indeterminate" || ref.FieldIdentity != nil {
 					t.Fatalf("dynamic reference = %+v, want normalized=%q dynamic/indeterminate", ref, tc.normalized)
 				}
 				for _, lineage := range result.Lineage {
@@ -285,6 +307,34 @@ func TestFieldIdentityDynamicNavigationKeepsStablePublicSpelling(t *testing.T) {
 			}
 			t.Fatalf("missing dynamic reference %q in %+v", tc.original, result.References)
 		})
+	}
+}
+
+func TestFieldIdentityQualifiedJoinReferencesKeepQualifier(t *testing.T) {
+	result, err := Analyze(QueryDocument{Text: `FROM main | join type=inner left=L right=R where L.id=R.uid [FROM other | table uid]`, Language: "spl2"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, tc := range []struct {
+		original string
+		identity FieldIdentity
+	}{
+		{original: "L.id", identity: FieldIdentity{Kind: "path", Segments: []string{"id"}, Qualifier: "L"}},
+		{original: "R.uid", identity: FieldIdentity{Kind: "path", Segments: []string{"uid"}, Qualifier: "R"}},
+	} {
+		found := false
+		for _, ref := range result.References {
+			if ref.Kind != "field" || ref.OriginalName != tc.original {
+				continue
+			}
+			found = true
+			if ref.FieldIdentity == nil || !reflect.DeepEqual(*ref.FieldIdentity, tc.identity) {
+				t.Fatalf("qualified join reference = %+v, want %+v", ref, tc.identity)
+			}
+		}
+		if !found {
+			t.Fatalf("missing qualified join reference %q in %+v", tc.original, result.References)
+		}
 	}
 }
 
@@ -370,7 +420,7 @@ func TestFieldIdentityWildcardRemovalUsesMatchedPrivateIdentity(t *testing.T) {
 	}
 }
 
-func TestFieldIdentityWildcardRemovalCollapsesPublicCollision(t *testing.T) {
+func TestFieldIdentityWildcardRemovalRetainsBothTransitions(t *testing.T) {
 	query := `FROM main | eval structural=actor.name, atomic='actor.name' | fields - 'actor.*'`
 	result, _, err := analyzeRewriteWithTrace(QueryDocument{Text: query, Language: "spl2"}, nil, nil)
 	if err != nil {
@@ -389,27 +439,18 @@ func TestFieldIdentityWildcardRemovalCollapsesPublicCollision(t *testing.T) {
 	if len(reads) != 2 {
 		t.Fatalf("colliding wildcard inputs = %+v", reads)
 	}
-	wantOrigins := []string{reads[0].ID, reads[1].ID}
 	removals := 0
 	for _, transition := range result.Lineage[len(result.Lineage)-1].Transitions {
 		if transition.Operation == "remove" && transition.Output == "actor.name" {
 			removals++
 		}
 	}
-	if removals != 0 {
-		t.Fatalf("ambiguous wildcard emitted %d identity-specific removals: %+v", removals, result.Lineage[len(result.Lineage)-1].Transitions)
+	if removals != 2 {
+		t.Fatalf("wildcard emitted %d removals: %+v", removals, result.Lineage[len(result.Lineage)-1].Transitions)
 	}
-	ambiguities := 0
 	for _, diagnostic := range result.Diagnostics {
 		if diagnostic.Code == CodeAmbiguousField {
-			ambiguities++
-			if diagnostic.Category != "unsupported_semantics" {
-				t.Fatalf("ambiguity category = %q", diagnostic.Category)
-			}
+			t.Fatalf("exact wildcard identities reported as ambiguous: %+v", diagnostic)
 		}
 	}
-	if ambiguities != 1 || result.Requirements.Coverage.Complete {
-		t.Fatalf("collision evidence = diagnostics %+v requirements %+v", result.Diagnostics, result.Requirements.Coverage)
-	}
-	assertRequirementGap(t, result.Requirements.Gaps, CodeAmbiguousField, wantOrigins, []string{CodeAmbiguousField})
 }

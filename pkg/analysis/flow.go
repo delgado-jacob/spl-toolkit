@@ -36,21 +36,15 @@ func newEnvironmentWithRequirementTrace(trace *requirementTrace) *environment {
 func copyIDs(ids []string) []string { return append([]string{}, ids...) }
 func (e *environment) snapshot() FieldState {
 	s := FieldState{Fields: []FieldBinding{}, Removed: []string{}, Open: e.open, Uncertain: e.uncertain}
-	projected := map[string]int{}
+	liveNames := map[string]bool{}
 	for _, key := range e.orderedFieldKeys() {
 		f, exists := e.fields[key]
 		if !exists {
 			continue
 		}
-		if index, found := projected[f.Name]; found {
-			binding := &s.Fields[index]
-			binding.OriginReferenceIDs = uniqueIDs(binding.OriginReferenceIDs, f.OriginReferenceIDs)
-			binding.Conditional = binding.Conditional || f.Conditional
-			s.Uncertain = true
-			continue
-		}
 		f.OriginReferenceIDs = copyIDs(f.OriginReferenceIDs)
-		projected[f.Name] = len(s.Fields)
+		f.FieldIdentity, _ = f.identity.public()
+		liveNames[f.Name] = true
 		s.Fields = append(s.Fields, f.FieldBinding)
 	}
 	removed := map[string]bool{}
@@ -61,9 +55,9 @@ func (e *environment) snapshot() FieldState {
 		identity := e.identities[key]
 		name := identity.PublicName
 		if name == "" {
-			name = string(key)
+			continue
 		}
-		if _, live := projected[name]; live {
+		if liveNames[name] {
 			continue
 		}
 		if !removed[name] {
@@ -71,7 +65,12 @@ func (e *environment) snapshot() FieldState {
 			removed[name] = true
 		}
 	}
-	sort.Slice(s.Fields, func(i, j int) bool { return s.Fields[i].Name < s.Fields[j].Name })
+	sort.Slice(s.Fields, func(i, j int) bool {
+		if s.Fields[i].Name != s.Fields[j].Name {
+			return s.Fields[i].Name < s.Fields[j].Name
+		}
+		return fieldIdentityLess(s.Fields[i].FieldIdentity, s.Fields[j].FieldIdentity)
+	})
 	sort.Strings(s.Removed)
 	return s
 }
@@ -142,6 +141,7 @@ func (e *environment) registerIdentityField(field trackedField) (bool, []string)
 	}
 	field.OriginReferenceIDs = copyIDs(field.OriginReferenceIDs)
 	field.identity = field.identity.clone()
+	field.FieldIdentity, _ = field.identity.public()
 	e.fields[key] = field
 	e.identities[key] = field.identity.clone()
 	return e.detectCollision(field.Name)
@@ -200,27 +200,30 @@ func (e *environment) hasOtherIdentity(identity fieldIdentity) bool {
 }
 
 func (e *environment) detectCollision(publicName string) (bool, []string) {
-	identities := map[fieldIdentityKey]bool{}
 	origins := []string{}
 	for _, key := range e.orderedFieldKeys() {
 		field, exists := e.fields[key]
 		if !exists || field.Name != publicName {
 			continue
 		}
-		identityKey, exact := field.identity.privateKey()
-		if !exact {
-			identityKey, _ = atomicFieldIdentity(field.Name).privateKey()
-		}
-		identities[identityKey] = true
 		origins = uniqueIDs(origins, field.OriginReferenceIDs)
 	}
-	if len(identities) < 2 {
-		return false, origins
+	return false, origins
+}
+
+func fieldIdentityLess(a, b FieldIdentity) bool {
+	if a.Kind != b.Kind {
+		return a.Kind < b.Kind
 	}
-	first := !e.ambiguous[publicName]
-	e.ambiguous[publicName] = true
-	e.uncertain = true
-	return first, origins
+	if a.Qualifier != b.Qualifier {
+		return a.Qualifier < b.Qualifier
+	}
+	for i := 0; i < len(a.Segments) && i < len(b.Segments); i++ {
+		if a.Segments[i] != b.Segments[i] {
+			return a.Segments[i] < b.Segments[i]
+		}
+	}
+	return len(a.Segments) < len(b.Segments)
 }
 
 func (e *environment) orderedFieldKeys() []fieldIdentityKey {

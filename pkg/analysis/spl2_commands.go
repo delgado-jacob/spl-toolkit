@@ -793,6 +793,9 @@ func (s *spl2SemanticStage) selectedJoinReference(operand locatedOperand, source
 		return ""
 	}
 	ref := &s.result.References[len(s.result.References)-1]
+	if publicIdentity, exact := operand.Identity.public(); exact {
+		ref.FieldIdentity = &publicIdentity
+	}
 	requirementBinding, directExternal, requirementConditional := "not_applicable", false, false
 	if trace := s.env.requirements.trace; trace != nil {
 		entry := trace.reference(id)

@@ -69,3 +69,14 @@ func (i fieldIdentity) clone() fieldIdentity {
 	i.Segments = append([]string{}, i.Segments...)
 	return i
 }
+
+func (i fieldIdentity) public() (FieldIdentity, bool) {
+	if _, exact := i.privateKey(); !exact {
+		return FieldIdentity{}, false
+	}
+	kind := "path"
+	if i.Kind == fieldIdentityAtomic {
+		kind = "atomic"
+	}
+	return FieldIdentity{Kind: kind, Segments: append([]string{}, i.Segments...), Qualifier: i.Qualifier}, true
+}

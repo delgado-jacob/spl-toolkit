@@ -379,6 +379,18 @@ func (s *RewriteSession) Verify(candidate *RewriteSession, rendered *RewriteRend
 		if !reflect.DeepEqual(ids, next.OriginReferenceIDs) {
 			return fail("origin_correspondence", "Candidate changes canonical origins", ref.Location)
 		}
+		expectedIdentity := ref.FieldIdentity
+		if effect, changed := effects[ref.ID]; changed && ref.Kind == "field" {
+			if expectedIdentity == nil || expectedIdentity.Kind != "atomic" || effect.Name == nil {
+				return fail("identity_unproved", "Changed field identity is not an exact atomic field", ref.Location)
+			}
+			updated := *expectedIdentity
+			updated.Segments = []string{*effect.Name}
+			expectedIdentity = &updated
+		}
+		if !reflect.DeepEqual(expectedIdentity, next.FieldIdentity) {
+			return fail("identity_correspondence", "Candidate changes canonical field identity", ref.Location)
+		}
 		oldSite, newSite := originalSites[ref.ID], candidateSites[mapping[ref.ID]]
 		if oldSite != nil && newSite != nil {
 			oldPoint, newPoint := oldSite.public.Point, newSite.public.Point
@@ -461,6 +473,9 @@ func (s *RewriteSession) rewriteFieldStateEqual(original, candidate FieldState, 
 			id := field.OriginReferenceIDs[0]
 			if effect, ok := effects[id]; ok && effect.Name != nil && refs[id].NormalizedName == field.Name {
 				field.Name = *effect.Name
+				if field.FieldIdentity.Kind == "atomic" {
+					field.FieldIdentity.Segments = []string{*effect.Name}
+				}
 			}
 		}
 		for j, id := range field.OriginReferenceIDs {
@@ -484,7 +499,12 @@ func (s *RewriteSession) rewriteFieldStateEqual(original, candidate FieldState, 
 			}
 		}
 	}
-	sort.Slice(expected.Fields, func(i, j int) bool { return expected.Fields[i].Name < expected.Fields[j].Name })
+	sort.Slice(expected.Fields, func(i, j int) bool {
+		if expected.Fields[i].Name != expected.Fields[j].Name {
+			return expected.Fields[i].Name < expected.Fields[j].Name
+		}
+		return fieldIdentityLess(expected.Fields[i].FieldIdentity, expected.Fields[j].FieldIdentity)
+	})
 	sort.Strings(expected.Removed)
 	return reflect.DeepEqual(expected, candidate)
 }
