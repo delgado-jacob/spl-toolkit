@@ -36,7 +36,7 @@ func loadMilestone11SurfaceCases(t *testing.T) []milestone11SurfaceCase {
 	if err := json.Unmarshal(data, &manifest); err != nil {
 		t.Fatal(err)
 	}
-	if manifest.Version != "1" || len(manifest.Documents) != 6 {
+	if manifest.Version != "1" || len(manifest.Documents) != 7 {
 		t.Fatalf("Milestone 11 surface documents: version=%q cases=%d", manifest.Version, len(manifest.Documents))
 	}
 	return manifest.Documents
@@ -157,6 +157,22 @@ func TestMilestone11AnalysisAndRequirementsCLIMatchCanonicalGo(t *testing.T) {
 			}
 			if !reflect.DeepEqual(&gotRequirements, wantRequirements) {
 				t.Fatalf("CLI requirements differ from Go\ngot:  %#v\nwant: %#v", &gotRequirements, wantRequirements)
+			}
+			if surfaceCase.ID == "dotted-identities" {
+				path := analysis.FieldIdentity{Kind: "path", Segments: []string{"actor", "name"}}
+				atomic := analysis.FieldIdentity{Kind: "atomic", Segments: []string{"actor.name"}}
+				if len(gotAnalysis.References) != 4 || gotAnalysis.References[1].FieldIdentity == nil || gotAnalysis.References[2].FieldIdentity == nil ||
+					!reflect.DeepEqual(*gotAnalysis.References[1].FieldIdentity, path) || !reflect.DeepEqual(*gotAnalysis.References[2].FieldIdentity, atomic) ||
+					gotAnalysis.References[1].ID == gotAnalysis.References[2].ID {
+					t.Fatalf("CLI collapsed dotted references: %+v", gotAnalysis.References)
+				}
+				items := gotRequirements.Items
+				if len(items) != 3 || items[1].FieldIdentity == nil || items[2].FieldIdentity == nil ||
+					len(items[1].Occurrences) != 1 || len(items[2].Occurrences) != 1 ||
+					!reflect.DeepEqual(*items[1].FieldIdentity, path) || !reflect.DeepEqual(*items[2].FieldIdentity, atomic) ||
+					items[1].Occurrences[0].ReferenceID != gotAnalysis.References[1].ID || items[2].Occurrences[0].ReferenceID != gotAnalysis.References[2].ID {
+					t.Fatalf("CLI collapsed dotted requirements: %+v", items)
+				}
 			}
 		})
 	}

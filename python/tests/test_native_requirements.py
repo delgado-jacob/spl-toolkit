@@ -43,6 +43,23 @@ def test_requirements_matches_every_canonical_fixture_and_embedded_analysis():
             assert standalone == mapper.analyze_query(query, **document)["requirements"], case["id"]
 
 
+def test_requirements_keep_structural_and_atomic_dotted_reads_distinct():
+    query = "FROM main | fields actor.name, 'actor.name' | fields - 'actor.name'"
+    with SPLMapper(**mapper_kwargs()) as mapper:
+        analysis = mapper.analyze_query(query, language="spl2")
+        requirements = mapper.requirements_query(query, language="spl2")
+    assert requirements == analysis["requirements"]
+    assert requirements["query_status"] == "valid" and requirements["coverage"]["complete"]
+    path = {"kind": "path", "segments": ["actor", "name"]}
+    atomic = {"kind": "atomic", "segments": ["actor.name"]}
+    items = requirements["items"]
+    assert len(items) == 3
+    assert [(item["identity"], item["field_identity"], item["occurrences"][0]["reference_id"])
+            for item in items[1:]] == [
+        ("actor.name", path, analysis["references"][1]["id"]),
+        ("actor.name", atomic, analysis["references"][2]["id"])]
+
+
 def test_requirements_defaults_and_explicit_selectors():
     query = "search host=web"
     with SPLMapper(**mapper_kwargs()) as mapper:

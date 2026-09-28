@@ -235,6 +235,9 @@ func main() {
  m["resource-analysis"]=must(analysis.Analyze(limitedDocument))
  m["resource-requirements"]=must(analysis.Requirements(limitedDocument))
  m["spl2-analysis"]=must(analysis.Analyze(analysis.QueryDocument{Text:"from main | where host=\"web\" | select host",Language:"spl2"}))
+ dotted:=analysis.QueryDocument{Text:"FROM main | fields actor.name, 'actor.name' | fields - 'actor.name'",Language:"spl2"}
+ m["dotted-analysis"]=must(analysis.Analyze(dotted))
+ m["dotted-requirements"]=must(analysis.Requirements(dotted))
  m["spl2-capabilities"]=must(analysis.CapabilitiesFor(analysis.CapabilityOptions{Language:"spl2"}))
  m["unsupported"]=must(analysis.Analyze(analysis.QueryDocument{Text:"search host=web | mystery host"}))
  m["unknown-corpus"]=must(corpus.Scan(corpus.Request{SchemaVersion:1,Documents:[]corpus.RequestDocument{{ID:"unknown",Document:analysis.QueryDocument{Text:"search host=web | mystery host"}}}}))
@@ -323,6 +326,25 @@ def test_requirement_contract_and_additive_v1_compatibility(schemas, emitted):
     archived_snapshot = copy.deepcopy(emitted["document-view"])
     del archived_snapshot["requirements"]
     assert not errors(schemas, "document-view", archived_snapshot)
+
+
+def test_structural_and_atomic_dotted_identity_machine_contracts(schemas, emitted):
+    analysis_report = emitted["dotted-analysis"]
+    requirements = emitted["dotted-requirements"]
+    assert not errors(schemas, "analysis", analysis_report)
+    assert not errors(schemas, "requirements", requirements)
+    assert analysis_report["requirements"] == requirements
+    path = {"kind": "path", "segments": ["actor", "name"]}
+    atomic = {"kind": "atomic", "segments": ["actor.name"]}
+    assert [reference["field_identity"] for reference in analysis_report["references"][1:]] == [path, atomic, atomic]
+    assert [item["field_identity"] for item in requirements["items"][1:]] == [path, atomic]
+    assert [field["field_identity"] for field in analysis_report["lineage"][1]["after"]["fields"]] == [atomic, path]
+    assert [field["field_identity"] for field in analysis_report["lineage"][2]["after"]["fields"]] == [path]
+    assert analysis_report["lineage"][2]["after"]["removed"] == [{"name": "actor.name", "field_identity": atomic}]
+    assert analysis_report["lineage"][2]["transitions"][0]["output_identity"] == atomic
+    invalid = copy.deepcopy(analysis_report)
+    del invalid["lineage"][2]["after"]["removed"][0]["field_identity"]
+    assert errors(schemas, "analysis", invalid)
 
 
 def test_resource_limit_contracts(schemas, emitted):

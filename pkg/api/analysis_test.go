@@ -37,7 +37,7 @@ func loadMilestone11APISurfaceCases(t *testing.T) []milestone11APISurfaceCase {
 	if err := json.Unmarshal(data, &manifest); err != nil {
 		t.Fatal(err)
 	}
-	if manifest.Version != "1" || len(manifest.Documents) != 6 {
+	if manifest.Version != "1" || len(manifest.Documents) != 7 {
 		t.Fatalf("Milestone 11 surface documents: version=%q cases=%d", manifest.Version, len(manifest.Documents))
 	}
 	return manifest.Documents
@@ -131,6 +131,26 @@ func TestMilestone11AnalysisAndRequirementsRESTMatchCanonicalGo(t *testing.T) {
 			}
 			if !reflect.DeepEqual(&gotAnalysis, wantAnalysis) {
 				t.Fatalf("REST analysis differs from Go\ngot:  %#v\nwant: %#v", &gotAnalysis, wantAnalysis)
+			}
+			if surfaceCase.ID == "dotted-identities" {
+				if len(gotAnalysis.Lineage) != 3 || len(gotAnalysis.Lineage[1].After.Fields) != 2 || len(gotAnalysis.References) != 4 {
+					t.Fatalf("REST dotted projection shape: %+v", gotAnalysis.Lineage)
+				}
+				fields := gotAnalysis.Lineage[1].After.Fields
+				path := analysis.FieldIdentity{Kind: "path", Segments: []string{"actor", "name"}}
+				atomic := analysis.FieldIdentity{Kind: "atomic", Segments: []string{"actor.name"}}
+				byIdentity := map[string][]string{}
+				for _, field := range fields {
+					if field.Name != "actor.name" {
+						t.Fatalf("REST changed public field name: %+v", field)
+					}
+					byIdentity[field.FieldIdentity.Kind] = field.OriginReferenceIDs
+				}
+				if !reflect.DeepEqual(fields[0].FieldIdentity, atomic) || !reflect.DeepEqual(fields[1].FieldIdentity, path) ||
+					!reflect.DeepEqual(byIdentity["path"], []string{gotAnalysis.References[1].ID}) ||
+					!reflect.DeepEqual(byIdentity["atomic"], []string{gotAnalysis.References[2].ID}) {
+					t.Fatalf("REST lost separate dotted origins: %+v", fields)
+				}
 			}
 
 			response = serveAnalysisRequest(t, http.MethodPost, "/api/v1/query/requirements", body, "application/json")

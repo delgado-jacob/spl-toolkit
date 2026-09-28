@@ -29,7 +29,7 @@ func loadMilestone11NativeSurfaceCases(t *testing.T) []milestone11NativeSurfaceC
 	if err := json.Unmarshal(data, &manifest); err != nil {
 		t.Fatal(err)
 	}
-	if manifest.Version != "1" || len(manifest.Documents) != 6 {
+	if manifest.Version != "1" || len(manifest.Documents) != 7 {
 		t.Fatalf("Milestone 11 surface documents: version=%q cases=%d", manifest.Version, len(manifest.Documents))
 	}
 	return manifest.Documents
@@ -70,6 +70,22 @@ func TestMilestone11NativeAnalysisAndRequirementsMatchCanonicalGo(t *testing.T) 
 			}
 			if !reflect.DeepEqual(&gotAnalysis, wantAnalysis) {
 				t.Fatalf("native analysis differs from Go\ngot:  %#v\nwant: %#v", &gotAnalysis, wantAnalysis)
+			}
+			if surfaceCase.ID == "dotted-identities" {
+				if len(gotAnalysis.Lineage) != 3 || len(gotAnalysis.References) != 4 {
+					t.Fatalf("native dotted lineage shape: %+v", gotAnalysis.Lineage)
+				}
+				last := gotAnalysis.Lineage[2]
+				path := analysis.FieldIdentity{Kind: "path", Segments: []string{"actor", "name"}}
+				atomic := analysis.FieldIdentity{Kind: "atomic", Segments: []string{"actor.name"}}
+				if len(last.After.Fields) != 1 || !reflect.DeepEqual(last.After.Fields[0].FieldIdentity, path) ||
+					!reflect.DeepEqual(last.After.Fields[0].OriginReferenceIDs, []string{gotAnalysis.References[1].ID}) ||
+					!reflect.DeepEqual(last.After.Removed, []analysis.FieldRemoval{{Name: "actor.name", FieldIdentity: atomic}}) ||
+					len(last.Transitions) != 1 || last.Transitions[0].OutputIdentity == nil ||
+					!reflect.DeepEqual(*last.Transitions[0].OutputIdentity, atomic) ||
+					last.Transitions[0].OutputReferenceID != gotAnalysis.References[3].ID {
+					t.Fatalf("native lost typed atomic removal ownership: %+v", last)
+				}
 			}
 
 			requirementsResult := spl_mapper_requirements_query(handle, nativeTestCString(t, payload))

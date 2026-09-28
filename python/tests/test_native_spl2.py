@@ -31,7 +31,7 @@ def milestone11_documents():
     assert path.is_absolute(), 'SPL_MILESTONE11_DOCUMENTS must be absolute'
     manifest = json.loads(path.read_text(encoding='utf-8'))
     documents = manifest.get('milestone11_documents')
-    assert isinstance(documents, list) and len(documents) == 6
+    assert isinstance(documents, list) and len(documents) == 7
     assert len({item['id'] for item in documents}) == len(documents)
     return documents
 

@@ -85,6 +85,37 @@ def assert_document(report, document):
         assert raw[start:end].decode("utf-8") == reference["original_name"]
 
 
+def assert_dotted_identity_witness(report, requirements):
+    path = {"kind": "path", "segments": ["actor", "name"]}
+    atomic = {"kind": "atomic", "segments": ["actor.name"]}
+    assert report["status"] == "valid" and report["coverage"]["semantic_complete"]
+    references = report["references"]
+    assert len(references) == 4
+    assert [(ref["original_name"], ref["field_identity"]) for ref in references[1:]] == [
+        ("actor.name", path), ("'actor.name'", atomic), ("'actor.name'", atomic)]
+    assert [ref["role"] for ref in references[1:]] == ["read", "read", "remove"]
+    assert len({ref["id"] for ref in references[1:]}) == 3
+    items = requirements["items"]
+    assert len(items) == 3
+    assert [(item["identity"], item["field_identity"], item["occurrences"][0]["reference_id"])
+            for item in items[1:]] == [
+        ("actor.name", path, references[1]["id"]),
+        ("actor.name", atomic, references[2]["id"])]
+    assert report["requirements"] == requirements
+    assert len(report["lineage"]) == 3
+    projected = report["lineage"][1]
+    assert [(field["field_identity"], field["origin_reference_ids"]) for field in projected["after"]["fields"]] == [
+        (atomic, [references[2]["id"]]), (path, [references[1]["id"]])]
+    assert [(step["output_identity"], step["input_reference_ids"]) for step in projected["transitions"]] == [
+        (path, [references[1]["id"]]), (atomic, [references[2]["id"]])]
+    final = report["lineage"][2]
+    assert [(field["field_identity"], field["origin_reference_ids"]) for field in final["after"]["fields"]] == [
+        (path, [references[1]["id"]])]
+    assert final["after"]["removed"] == [{"name": "actor.name", "field_identity": atomic}]
+    assert [(step["operation"], step["output_identity"], step["output_reference_id"])
+            for step in final["transitions"]] == [("remove", atomic, references[3]["id"])]
+
+
 @pytest.fixture(scope="session")
 def spl2_go_reports(tmp_path_factory):
     root = Path(__file__).resolve().parents[2]
@@ -98,6 +129,7 @@ def spl2_go_reports(tmp_path_factory):
         expected = digest(path)
     artifact, reports = load_transport(path, FIXTURES, expected, source_root)
     milestone11 = {entry["id"]: entry for entry in artifact["milestone11"]}
+    assert len(milestone11) == 7 and "dotted-identities" in milestone11
     return {"path": str(path), "sha256": expected, "bytes": path.stat().st_size,
             "source_hashes": artifact["source_hashes"], "reports": reports, "milestone11": milestone11}
 
@@ -159,6 +191,12 @@ def test_milestone11_representatives_match_go_across_all_analysis_surfaces(
 
             for analysis_report in (cli_analysis, http_analysis, c_analysis, python_analysis, expected["analysis"]):
                 assert analysis_report["requirements"] == expected["requirements"], identity
+            if identity == "dotted-identities":
+                for analysis_report, requirement_report in (
+                        (cli_analysis, cli_requirements), (http_analysis, http_requirements),
+                        (c_analysis, c_requirements), (python_analysis, python_requirements),
+                        (expected["analysis"], expected["requirements"])):
+                    assert_dotted_identity_witness(analysis_report, requirement_report)
             spl2_evidence["milestone11"].append({
                 "id": identity, "document": document, "analysis": expected["analysis"],
                 "requirements": expected["requirements"],
