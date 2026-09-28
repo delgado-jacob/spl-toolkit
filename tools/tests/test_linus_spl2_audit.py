@@ -138,6 +138,23 @@ class LinusSPL2AuditTests(unittest.TestCase):
                     AUDIT.validate_standalone_attribution(status, complete, diagnostics)
                 self.assertNotIn("private", str(raised.exception))
 
+    def test_standalone_requirement_attribution_confines_definite_unavailable_to_invalid(self):
+        unavailable = [{"code": "SPL_UNAVAILABLE_FIELD", "category": "unavailable_field"}]
+        note = [{"code": "SPL_GENERIC_NOTE", "category": "coverage"}]
+        for status, diagnostics in (("valid", note), ("incomplete", note), ("invalid", unavailable)):
+            with self.subTest(status=status):
+                AUDIT.validate_standalone_requirement_attribution(status, diagnostics)
+        for status, diagnostics in (
+            ("valid", unavailable),
+            ("incomplete", unavailable),
+            ("invalid", note),
+            ("invalid", [{"code": "SPL_UNAVAILABLE_FIELD", "category": "unsupported_semantics"}]),
+        ):
+            with self.subTest(status=status, diagnostics=diagnostics):
+                with self.assertRaises(AUDIT.AuditError) as raised:
+                    AUDIT.validate_standalone_requirement_attribution(status, diagnostics)
+                self.assertNotIn("private", str(raised.exception))
+
     def test_exact_ref_attribution_gate_rejects_shifted_unavailable_with_unchanged_aggregate(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
@@ -192,6 +209,68 @@ class LinusSPL2AuditTests(unittest.TestCase):
                     runner=runner(shift_unavailable=True), enforce_field_attribution=True,
                 )
             self.assertNotIn(str(content), str(raised.exception))
+
+    def test_exact_ref_requirements_gate_rejects_shifted_unavailable_with_unchanged_aggregate(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            content = root / "content"
+            content.mkdir()
+            self.make_content(content)
+            forms = root / "forms.json"
+            self.write_forms(forms)
+            classes = [
+                AUDIT.classify_query(document.query)
+                for document in AUDIT.extract_yaml_documents(content)
+                if document.query
+            ]
+            invalid_index, other_index = [
+                index for index, classification in enumerate(classes)
+                if classification == "standalone"
+            ][:2]
+
+            def runner(other_status, shift_unavailable=False):
+                calls = []
+                successful = self.successful_runner(calls)
+
+                def run(args, **kwargs):
+                    query_index = len(calls) // 2
+                    completed = successful(args, **kwargs)
+                    if args[1] != "requirements" or query_index not in {invalid_index, other_index}:
+                        return completed
+                    status = "invalid" if query_index == invalid_index else other_status
+                    unavailable = (query_index == invalid_index) != shift_unavailable
+                    diagnostic = (
+                        {"code": "SPL_UNAVAILABLE_FIELD", "category": "unavailable_field"}
+                        if unavailable else {"code": "SPL_GENERIC_NOTE", "category": "coverage"}
+                    )
+                    report = {
+                        "query_status": "invalid" if status == "invalid" else "valid",
+                        "coverage": {"complete": status != "incomplete"},
+                        "diagnostics": [diagnostic],
+                    }
+                    return subprocess.CompletedProcess(args, AUDIT.STATUS_EXITS[status], json.dumps(report), "")
+
+                return run
+
+            for other_status in ("valid", "incomplete"):
+                with self.subTest(other_status=other_status):
+                    baseline = AUDIT.audit(content, root / "toolkit", forms, runner=runner(other_status))
+                    AUDIT.audit(
+                        content, root / "toolkit", forms,
+                        runner=runner(other_status), enforce_field_attribution=True,
+                    )
+                    shifted = AUDIT.audit(
+                        content, root / "toolkit", forms,
+                        runner=runner(other_status, shift_unavailable=True),
+                    )
+                    self.assertEqual(shifted, baseline)
+                    with self.assertRaises(AUDIT.AuditError) as raised:
+                        AUDIT.audit(
+                            content, root / "toolkit", forms,
+                            runner=runner(other_status, shift_unavailable=True),
+                            enforce_field_attribution=True,
+                        )
+                    self.assertNotIn(str(content), str(raised.exception))
 
     def test_malformed_diagnostic_code_fails_cli_with_sanitized_error(self):
         with tempfile.TemporaryDirectory() as temporary:

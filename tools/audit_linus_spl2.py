@@ -383,6 +383,19 @@ def validate_standalone_attribution(status: str, semantic_complete: bool, diagno
         raise AuditError("exact-ref standalone field attribution differs from the confirmed baseline")
 
 
+def validate_standalone_requirement_attribution(status: str, diagnostics: list[dict]) -> None:
+    """Keep definite unavailable fields on invalid exact-ref requirement reports."""
+    unavailable = False
+    for diagnostic in diagnostics:
+        if diagnostic.get("code") != "SPL_UNAVAILABLE_FIELD":
+            continue
+        if diagnostic.get("category") != "unavailable_field":
+            raise AuditError("exact-ref standalone field attribution differs from the confirmed baseline")
+        unavailable = True
+    if unavailable != (status == "invalid"):
+        raise AuditError("exact-ref standalone field attribution differs from the confirmed baseline")
+
+
 def audit(
     content_root: Path,
     toolkit_bin: Path,
@@ -467,8 +480,11 @@ def audit(
             except (OSError, subprocess.SubprocessError) as error:
                 raise AuditError(f"toolkit {operation} could not be executed") from error
             status, diagnostics, syntax_complete, semantic_complete = parse_toolkit_result(operation, completed)
-            if enforce_field_attribution and origin == "content" and classification == "standalone" and operation == "analyze":
-                validate_standalone_attribution(status, semantic_complete, diagnostics)
+            if enforce_field_attribution and origin == "content" and classification == "standalone":
+                if operation == "analyze":
+                    validate_standalone_attribution(status, semantic_complete, diagnostics)
+                else:
+                    validate_standalone_requirement_attribution(status, diagnostics)
             status_counts[operation][status] += 1
             if origin == "content":
                 content_status_classes[classification][operation][status] += 1
