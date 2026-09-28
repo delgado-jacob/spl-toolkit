@@ -208,6 +208,23 @@ func TestCapabilitySemanticComparisonRejectsStructuredFactMismatches(t *testing.
 				observation.Transitions[0].InputReferenceIDs[0] = "ref-0"
 			},
 		},
+		{
+			name: "wrong exact output identity",
+			mutate: func(observation *analysis.CapabilitySemanticsObservation) {
+				observation.Transitions[0].OutputIdentity.Kind = "path"
+			},
+		},
+		{
+			name: "wrong exact reference identity",
+			mutate: func(observation *analysis.CapabilitySemanticsObservation) {
+				for i := range observation.References {
+					if observation.References[i].FieldIdentity != nil {
+						observation.References[i].FieldIdentity.Kind = "path"
+						return
+					}
+				}
+			},
+		},
 	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
@@ -218,6 +235,50 @@ func TestCapabilitySemanticComparisonRejectsStructuredFactMismatches(t *testing.
 			}
 		})
 	}
+}
+
+func TestCapabilityRequirementComparisonRejectsExactIdentityMismatch(t *testing.T) {
+	set, err := analysis.Requirements(analysis.QueryDocument{
+		Text: "FROM main | where actor.name=1 AND 'actor.name'=1", Language: "spl2", Profile: "splunkd", Version: "current",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	items := requirementItemFacts(set.Items)
+	expected := analysis.CapabilityRequirementsObservation{QueryStatus: set.QueryStatus, Complete: set.Coverage.Complete, Items: items, GapCodes: requirementGapCodes(set.Gaps)}
+	if comparison := compareRequirements(expected, set); !comparison.passed {
+		t.Fatalf("exact requirement facts failed to match: %+v", comparison)
+	}
+	expected.Items[1].FieldIdentity.Kind = "atomic"
+	if comparison := compareRequirements(expected, set); comparison.passed {
+		t.Fatal("requirement evidence accepted a mismatched exact identity")
+	}
+}
+
+func TestCapabilitySemanticComparisonRejectsRemovalIdentityMismatch(t *testing.T) {
+	manifest, err := analysis.CapabilitiesFor(analysis.CapabilityOptions{Language: "spl2", Profile: "splunkd", Version: "current"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, evidence := range manifest.Evidence {
+		if evidence.ID != "spl2.fields.exact-field-list.positive" {
+			continue
+		}
+		result, err := analysis.Analyze(evidence.Document)
+		if err != nil {
+			t.Fatal(err)
+		}
+		expected := *evidence.Observations.Semantics
+		if comparison := compareSemantics(expected, result); !comparison.passed {
+			t.Fatalf("typed removal evidence failed to match: %+v", comparison)
+		}
+		expected.FinalFieldState.Removed[0].FieldIdentity.Kind = "path"
+		if comparison := compareSemantics(expected, result); comparison.passed {
+			t.Fatal("semantic evidence accepted a mismatched removed identity")
+		}
+		return
+	}
+	t.Fatal("missing exact field-list evidence")
 }
 
 func TestAdvertisedRewriteFormsHaveLedgerEvidence(t *testing.T) {
@@ -607,7 +668,7 @@ func compareSemantics(expected analysis.CapabilitySemanticsObservation, result *
 		containsAll(actual.Dependencies, expected.Dependencies) &&
 		containsAllLineage(actual.Lineage, expected.Lineage) &&
 		containsAllTransitions(actual.Transitions, expected.Transitions, structured) &&
-		(expected.FinalFieldState == nil || reflect.DeepEqual(actual.FinalFieldState, expected.FinalFieldState)) &&
+		capabilityFieldStateMatches(actual.FinalFieldState, expected.FinalFieldState) &&
 		containsAll(actual.Diagnostics, diagnosticFacts(expected.Diagnostics))
 	return evidenceDimensionResult{passed: passed, expected: formatValue(expected), actual: formatValue(actual)}
 }
@@ -625,11 +686,11 @@ func compareRequirements(expected analysis.CapabilityRequirementsObservation, se
 		Items:       requirementItemFacts(set.Items),
 		GapCodes:    requirementGapCodes(set.Gaps),
 	}
-	itemsMatch := containsAll(actual.Items, expected.Items)
+	itemsMatch := containsAllRequirementFacts(actual.Items, expected.Items, false)
 	if expected.Complete {
 		// A complete requirement claim is an exact obligation set, not a lower
 		// bound. This prevents supported records from hiding unexpected items.
-		itemsMatch = slices.Equal(expected.Items, actual.Items)
+		itemsMatch = containsAllRequirementFacts(actual.Items, expected.Items, true)
 	}
 	passed := expected.QueryStatus == actual.QueryStatus &&
 		expected.Complete == actual.Complete &&
@@ -968,6 +1029,7 @@ func referenceFacts(references []analysis.Reference) []analysis.CapabilityRefere
 	for _, reference := range references {
 		facts = append(facts, analysis.CapabilityReferenceExpectation{
 			ID:             reference.ID,
+			FieldIdentity:  clonePublicFieldIdentity(reference.FieldIdentity),
 			NormalizedName: reference.NormalizedName,
 			Kind:           reference.Kind,
 			Role:           reference.Role,
@@ -1003,6 +1065,7 @@ func transitionFacts(lineage []analysis.Lineage) []analysis.CapabilityTransition
 			facts = append(facts, analysis.CapabilityTransitionExpectation{
 				Operation:         transition.Operation,
 				Output:            transition.Output,
+				OutputIdentity:    clonePublicFieldIdentity(transition.OutputIdentity),
 				InputReferenceIDs: slices.Clone(transition.InputReferenceIDs),
 				OutputReferenceID: transition.OutputReferenceID,
 				Conditional:       transition.Conditional,
@@ -1040,13 +1103,14 @@ func fieldStateFact(state analysis.FieldState) analysis.CapabilityFieldStateExpe
 	for _, field := range state.Fields {
 		fields = append(fields, analysis.CapabilityFieldExpectation{
 			Name:               field.Name,
+			FieldIdentity:      clonePublicFieldIdentity(&field.FieldIdentity),
 			OriginReferenceIDs: slices.Clone(field.OriginReferenceIDs),
 			Conditional:        field.Conditional,
 		})
 	}
-	removed := make([]string, 0, len(state.Removed))
+	removed := make([]analysis.CapabilityFieldRemovalExpectation, 0, len(state.Removed))
 	for _, removal := range state.Removed {
-		removed = append(removed, removal.Name)
+		removed = append(removed, analysis.CapabilityFieldRemovalExpectation{Name: removal.Name, FieldIdentity: clonePublicFieldIdentity(&removal.FieldIdentity)})
 	}
 	return analysis.CapabilityFieldStateExpectation{
 		Fields:    fields,
@@ -1060,14 +1124,24 @@ func requirementItemFacts(items []analysis.RequirementItem) []analysis.Capabilit
 	facts := make([]analysis.CapabilityRequirementExpectation, 0, len(items))
 	for _, item := range items {
 		facts = append(facts, analysis.CapabilityRequirementExpectation{
-			Kind:       item.Kind,
-			Identity:   item.Identity,
-			Role:       item.Role,
-			Necessity:  item.Necessity,
-			Resolution: item.Resolution,
+			Kind:          item.Kind,
+			Identity:      item.Identity,
+			FieldIdentity: clonePublicFieldIdentity(item.FieldIdentity),
+			Role:          item.Role,
+			Necessity:     item.Necessity,
+			Resolution:    item.Resolution,
 		})
 	}
 	return facts
+}
+
+func clonePublicFieldIdentity(identity *analysis.FieldIdentity) *analysis.FieldIdentity {
+	if identity == nil {
+		return nil
+	}
+	cloned := *identity
+	cloned.Segments = slices.Clone(identity.Segments)
+	return &cloned
 }
 
 func requirementGapCodes(gaps []analysis.RequirementGap) []string {
@@ -1149,6 +1223,9 @@ func containsAllReferences(actual, selected []analysis.CapabilityReferenceExpect
 			candidate := actual[i]
 			candidateID := candidate.ID
 			candidate.ID = ""
+			if expected.FieldIdentity == nil {
+				candidate.FieldIdentity = nil
+			}
 			if !used[i] && reflect.DeepEqual(candidate, expected) && (expectedID == "" || candidateID == expectedID) {
 				used[i], found = true, true
 				if ordered {
@@ -1173,10 +1250,56 @@ func containsAllLineage(actual, selected []analysis.CapabilityLineageExpectation
 			if candidate.StageID != expected.StageID || candidate.ScopeID != expected.ScopeID {
 				continue
 			}
-			if expected.Before != nil && !reflect.DeepEqual(candidate.Before, expected.Before) || expected.After != nil && !reflect.DeepEqual(candidate.After, expected.After) {
+			if !capabilityFieldStateMatches(candidate.Before, expected.Before) || !capabilityFieldStateMatches(candidate.After, expected.After) {
 				continue
 			}
 			next, found = i+1, true
+			break
+		}
+		if !found {
+			return false
+		}
+	}
+	return true
+}
+
+func capabilityFieldStateMatches(actual, expected *analysis.CapabilityFieldStateExpectation) bool {
+	if expected == nil {
+		return true
+	}
+	if actual == nil || actual.Open != expected.Open || actual.Uncertain != expected.Uncertain || len(actual.Fields) != len(expected.Fields) || len(actual.Removed) != len(expected.Removed) {
+		return false
+	}
+	for i, field := range expected.Fields {
+		candidate := actual.Fields[i]
+		if field.Name != candidate.Name || !slices.Equal(field.OriginReferenceIDs, candidate.OriginReferenceIDs) || field.Conditional != candidate.Conditional || field.FieldIdentity != nil && !reflect.DeepEqual(field.FieldIdentity, candidate.FieldIdentity) {
+			return false
+		}
+	}
+	for i, removal := range expected.Removed {
+		candidate := actual.Removed[i]
+		if removal.Name != candidate.Name || removal.FieldIdentity != nil && !reflect.DeepEqual(removal.FieldIdentity, candidate.FieldIdentity) {
+			return false
+		}
+	}
+	return true
+}
+
+func containsAllRequirementFacts(actual, selected []analysis.CapabilityRequirementExpectation, exact bool) bool {
+	if exact && len(actual) != len(selected) {
+		return false
+	}
+	used := make([]bool, len(actual))
+	for position, expected := range selected {
+		found := false
+		for i, candidate := range actual {
+			if used[i] || exact && i != position || candidate.Kind != expected.Kind || candidate.Identity != expected.Identity || candidate.Role != expected.Role || candidate.Necessity != expected.Necessity || candidate.Resolution != expected.Resolution {
+				continue
+			}
+			if expected.FieldIdentity != nil && !reflect.DeepEqual(candidate.FieldIdentity, expected.FieldIdentity) {
+				continue
+			}
+			used[i], found = true, true
 			break
 		}
 		if !found {
@@ -1196,7 +1319,7 @@ func containsAllTransitions(actual, selected []analysis.CapabilityTransitionExpe
 			if used[i] || candidate.Operation != expected.Operation || candidate.Output != expected.Output {
 				continue
 			}
-			if expected.InputReferenceIDs != nil && !slices.Equal(candidate.InputReferenceIDs, expected.InputReferenceIDs) || expected.OutputReferenceID != "" && candidate.OutputReferenceID != expected.OutputReferenceID || structured && candidate.Conditional != expected.Conditional {
+			if expected.InputReferenceIDs != nil && !slices.Equal(candidate.InputReferenceIDs, expected.InputReferenceIDs) || expected.OutputReferenceID != "" && candidate.OutputReferenceID != expected.OutputReferenceID || structured && candidate.Conditional != expected.Conditional || expected.OutputIdentity != nil && !reflect.DeepEqual(candidate.OutputIdentity, expected.OutputIdentity) {
 				continue
 			}
 			if !used[i] {

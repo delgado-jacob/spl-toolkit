@@ -88,7 +88,8 @@ func TestCapabilitiesPublicWirePreservesV1SemanticShape(t *testing.T) {
 		Evidence []struct {
 			ID           string `json:"id"`
 			Observations struct {
-				Semantics map[string]any `json:"semantics"`
+				Semantics    map[string]any `json:"semantics"`
+				Requirements map[string]any `json:"requirements"`
 			} `json:"observations"`
 		} `json:"evidence"`
 	}
@@ -104,6 +105,7 @@ func TestCapabilitiesPublicWirePreservesV1SemanticShape(t *testing.T) {
 	wantStageKeys := []string{"command", "semantic_complete"}
 	wantReferenceKeys := []string{"binding", "kind", "location", "normalized_name", "resolution", "role"}
 	wantTransitionKeys := []string{"operation", "output"}
+	wantRequirementKeys := []string{"identity", "kind", "necessity", "resolution", "role"}
 	foundPrivateAuthoredEvidence := false
 	for i, evidence := range manifest.Evidence {
 		if evidence.Observations.Semantics == nil {
@@ -123,6 +125,11 @@ func TestCapabilitiesPublicWirePreservesV1SemanticShape(t *testing.T) {
 		for j, transition := range semantics["transitions"].([]any) {
 			assertCapabilityJSONKeys(t, fmt.Sprintf("%s transition %d", evidence.ID, j), transition.(map[string]any), wantTransitionKeys)
 		}
+		if requirements := wire.Evidence[i].Observations.Requirements; requirements != nil {
+			for j, item := range requirements["items"].([]any) {
+				assertCapabilityJSONKeys(t, fmt.Sprintf("%s requirement %d", evidence.ID, j), item.(map[string]any), wantRequirementKeys)
+			}
+		}
 		wantPublic := cloneCapabilityEvidence(evidence).Observations.Semantics
 		wantPublic.Scopes = nil
 		wantPublic.Lineage = nil
@@ -133,10 +140,12 @@ func TestCapabilitiesPublicWirePreservesV1SemanticShape(t *testing.T) {
 		}
 		for j := range wantPublic.References {
 			wantPublic.References[j].ID = ""
+			wantPublic.References[j].FieldIdentity = nil
 		}
 		for j := range wantPublic.Transitions {
 			wantPublic.Transitions[j].InputReferenceIDs = nil
 			wantPublic.Transitions[j].OutputReferenceID = ""
+			wantPublic.Transitions[j].OutputIdentity = nil
 			wantPublic.Transitions[j].Conditional = false
 		}
 		if gotPublic := decoded.Evidence[i].Observations.Semantics; !reflect.DeepEqual(gotPublic, wantPublic) {

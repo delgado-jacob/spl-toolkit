@@ -703,6 +703,8 @@ components:
       properties:
         conditional:
           type: boolean
+        field_identity:
+          $ref: '#/components/schemas/analysis.FieldIdentity'
         name:
           type: string
         origin_reference_ids:
@@ -710,6 +712,25 @@ components:
             type: string
           type: array
           uniqueItems: false
+      type: object
+    analysis.FieldIdentity:
+      properties:
+        kind:
+          type: string
+        qualifier:
+          type: string
+        segments:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+      type: object
+    analysis.FieldRemoval:
+      properties:
+        field_identity:
+          $ref: '#/components/schemas/analysis.FieldIdentity'
+        name:
+          type: string
       type: object
     analysis.FieldState:
       properties:
@@ -722,7 +743,7 @@ components:
           type: boolean
         removed:
           items:
-            type: string
+            $ref: '#/components/schemas/analysis.FieldRemoval'
           type: array
           uniqueItems: false
         uncertain:
@@ -803,6 +824,8 @@ components:
       properties:
         binding:
           type: string
+        field_identity:
+          $ref: '#/components/schemas/analysis.FieldIdentity'
         id:
           type: string
         kind:
@@ -865,6 +888,8 @@ components:
     analysis.RequirementItem:
       additionalProperties: true
       properties:
+        field_identity:
+          $ref: '#/components/schemas/analysis.FieldIdentity'
         id:
           pattern: ^req-[1-9][0-9]*$
           type: string
@@ -1125,6 +1150,8 @@ components:
           type: string
         output:
           type: string
+        output_identity:
+          $ref: '#/components/schemas/analysis.FieldIdentity'
         output_reference_id:
           type: string
       type: object
@@ -2698,6 +2725,8 @@ components:
       properties:
         conditional:
           type: boolean
+        field_identity:
+          $ref: '#/components/schemas/tooling.analysis.FieldIdentity'
         name:
           type: string
         origin_reference_ids:
@@ -2706,8 +2735,39 @@ components:
           type: array
       required:
       - name
+      - field_identity
       - origin_reference_ids
       - conditional
+      type: object
+    tooling.analysis.FieldIdentity:
+      additionalProperties: true
+      properties:
+        kind:
+          enum:
+          - atomic
+          - path
+          type: string
+        qualifier:
+          type: string
+        segments:
+          items:
+            type: string
+          minItems: 1
+          type: array
+      required:
+      - kind
+      - segments
+      type: object
+    tooling.analysis.FieldRemoval:
+      additionalProperties: true
+      properties:
+        field_identity:
+          $ref: '#/components/schemas/tooling.analysis.FieldIdentity'
+        name:
+          type: string
+      required:
+      - name
+      - field_identity
       type: object
     tooling.analysis.FieldState:
       additionalProperties: true
@@ -2720,7 +2780,7 @@ components:
           type: boolean
         removed:
           items:
-            type: string
+            $ref: '#/components/schemas/tooling.analysis.FieldRemoval'
           type: array
         uncertain:
           type: boolean
@@ -2813,6 +2873,8 @@ components:
       properties:
         binding:
           type: string
+        field_identity:
+          $ref: '#/components/schemas/tooling.analysis.FieldIdentity'
         id:
           type: string
         kind:
@@ -2956,6 +3018,8 @@ components:
           type: string
         output:
           type: string
+        output_identity:
+          $ref: '#/components/schemas/tooling.analysis.FieldIdentity'
         output_reference_id:
           type: string
       required:

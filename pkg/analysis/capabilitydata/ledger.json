@@ -8428,22 +8428,18 @@
           "limitations": []
         },
         "semantics": {
-          "state": "unsupported",
+          "state": "supported",
           "evidence_ids": [
-            "spl2.field.identity-collision.incomplete"
+            "spl2.field.identity-collision.positive"
           ],
-          "limitations": [
-            "Neighboring dynamic or ambiguous form remains explicit and incomplete."
-          ]
+          "limitations": []
         },
         "requirements": {
-          "state": "unsupported",
+          "state": "supported",
           "evidence_ids": [
-            "spl2.field.identity-collision.incomplete"
+            "spl2.field.identity-collision.positive"
           ],
-          "limitations": [
-            "Neighboring dynamic or ambiguous form remains explicit and incomplete."
-          ]
+          "limitations": []
         },
         "linting": {
           "state": "unassessed",

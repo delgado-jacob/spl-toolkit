@@ -54,6 +54,129 @@ func TestDecodeCapabilityAssetsAcceptsOptionalStructuredSemanticExpectations(t *
 	}
 }
 
+func TestCapabilityFieldStateDistinguishesEqualDisplayIdentities(t *testing.T) {
+	var state CapabilityFieldStateExpectation
+	data := []byte(`{"fields":[{"name":"actor.name","field_identity":{"kind":"atomic","segments":["actor.name"]},"origin_reference_ids":["reference-1"],"conditional":false},{"name":"actor.name","field_identity":{"kind":"path","segments":["actor","name"]},"origin_reference_ids":["reference-2"],"conditional":false}],"removed":[],"open":false,"uncertain":false}`)
+	if err := json.Unmarshal(data, &state); err != nil {
+		t.Fatalf("decode typed field state: %v", err)
+	}
+	if err := validateCapabilityFieldState("identity", &state, map[string]int{"reference-1": 0, "reference-2": 1}, nil); err != nil {
+		t.Fatalf("distinct identities with equal display names were rejected: %v", err)
+	}
+	state.Fields = state.Fields[1:]
+	state.Removed = []CapabilityFieldRemovalExpectation{{Name: "actor.name", FieldIdentity: &FieldIdentity{Kind: "atomic", Segments: []string{"actor.name"}}}}
+	if err := validateCapabilityFieldState("identity", &state, map[string]int{"reference-1": 0, "reference-2": 1}, nil); err != nil {
+		t.Fatalf("path field and atomic removal with equal display names were rejected: %v", err)
+	}
+	state.Removed[0].FieldIdentity = &FieldIdentity{Kind: "path", Segments: []string{"actor", "name"}}
+	if err := validateCapabilityFieldState("identity", &state, map[string]int{"reference-1": 0, "reference-2": 1}, nil); err == nil {
+		t.Fatal("same exact identity was accepted as both present and removed")
+	}
+}
+
+func TestCapabilityTransitionIdentityMustMatchOutputReference(t *testing.T) {
+	_, cases, err := loadEmbeddedCapabilityData()
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, evidence := range cases {
+		if evidence.ID != "spl2.fields.exact-field-list.positive" {
+			continue
+		}
+		cloned := cloneCapabilityEvidence(evidence)
+		cloned.Observations.Semantics.Transitions[0].OutputIdentity.Kind = "path"
+		if err := validateCapabilityEvidenceObservation(cloned, "semantics"); err == nil {
+			t.Fatal("transition and output reference with different exact identities were accepted")
+		}
+		return
+	}
+	t.Fatal("missing exact field-list evidence")
+}
+
+func TestCapabilityIdentityCollisionEvidenceIsPositive(t *testing.T) {
+	_, cases, err := loadEmbeddedCapabilityData()
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, evidence := range cases {
+		if evidence.ID != "spl2.field.identity-collision.positive" {
+			continue
+		}
+		if evidence.Classification != CapabilityEvidencePositive || evidence.Observations.Semantics == nil || !evidence.Observations.Semantics.Complete || evidence.Observations.Requirements == nil || !evidence.Observations.Requirements.Complete {
+			t.Fatalf("identity collision evidence is not complete positive proof: %+v", evidence)
+		}
+		if len(evidence.Observations.Requirements.Items) != 3 {
+			t.Fatalf("identity collision evidence has %d requirements, want dataset and two fields", len(evidence.Observations.Requirements.Items))
+		}
+		path := evidence.Observations.Requirements.Items[1].FieldIdentity
+		atomic := evidence.Observations.Requirements.Items[2].FieldIdentity
+		if path == nil || path.Kind != "path" || !slices.Equal(path.Segments, []string{"actor", "name"}) || atomic == nil || atomic.Kind != "atomic" || !slices.Equal(atomic.Segments, []string{"actor.name"}) {
+			t.Fatalf("identity collision evidence lacks separate exact field requirements: %+v", evidence.Observations.Requirements.Items)
+		}
+		fields := evidence.Observations.Semantics.FinalFieldState.Fields
+		if len(fields) != 2 || fields[0].FieldIdentity == nil || fields[0].FieldIdentity.Kind != "atomic" || !slices.Equal(fields[0].OriginReferenceIDs, []string{"ref-2"}) || fields[1].FieldIdentity == nil || fields[1].FieldIdentity.Kind != "path" || !slices.Equal(fields[1].OriginReferenceIDs, []string{"ref-1"}) {
+			t.Fatalf("identity collision evidence merged field origins: %+v", fields)
+		}
+		cloned := cloneCapabilityEvidence(evidence)
+		cloned.Observations.Semantics.References[1].FieldIdentity.Segments[0] = "changed"
+		cloned.Observations.Semantics.FinalFieldState.Fields[0].FieldIdentity.Segments[0] = "changed"
+		cloned.Observations.Requirements.Items[1].FieldIdentity.Segments[0] = "changed"
+		if evidence.Observations.Semantics.References[1].FieldIdentity.Segments[0] == "changed" || evidence.Observations.Semantics.FinalFieldState.Fields[0].FieldIdentity.Segments[0] == "changed" || evidence.Observations.Requirements.Items[1].FieldIdentity.Segments[0] == "changed" {
+			t.Fatal("capability evidence clone aliases private field identities")
+		}
+		return
+	}
+	t.Fatal("missing positive identity-collision evidence")
+}
+
+func TestCapabilityIdentityCollisionProofIsDistinctFromMerge(t *testing.T) {
+	_, cases, err := loadEmbeddedCapabilityData()
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, evidence := range cases {
+		if evidence.ID == "spl2.field.identity-collision.positive" {
+			if capabilitySemanticsHaveMergeFacts(evidence.Observations.Semantics) {
+				t.Fatal("two exact fields sharing a display name were counted as merge proof")
+			}
+			if err := validateCapabilitySemanticProof(evidence.Observations.Semantics, capabilityProofIdentity); err != nil {
+				t.Fatalf("distinct exact identities did not satisfy their proof category: %v", err)
+			}
+			cloned := cloneCapabilityEvidence(evidence)
+			cloned.Observations.Semantics.FinalFieldState.Fields[1].FieldIdentity = cloneFieldIdentityPointer(cloned.Observations.Semantics.FinalFieldState.Fields[0].FieldIdentity)
+			if err := validateCapabilitySemanticProof(cloned.Observations.Semantics, capabilityProofIdentity); err == nil {
+				t.Fatal("equal exact identities satisfied collision proof")
+			}
+			return
+		}
+	}
+	t.Fatal("missing identity collision evidence")
+}
+
+func TestCapabilityRevisionIncludesPrivateRequirementIdentity(t *testing.T) {
+	manifest, err := CapabilitiesFor(CapabilityOptions{Language: "spl2", Profile: "splunkd", Version: "current"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	baseline := capabilityRevisionTestDigest(t, manifest)
+	publicBaseline := string(mustJSON(t, manifest))
+	cloned := cloneCapabilityManifest(manifest)
+	for i := range cloned.Evidence {
+		if cloned.Evidence[i].ID != "spl2.field.identity-collision.positive" {
+			continue
+		}
+		cloned.Evidence[i].Observations.Requirements.Items[1].FieldIdentity.Segments[0] = "changed"
+		if capabilityRevisionTestDigest(t, cloned) == baseline {
+			t.Fatal("private requirement identity did not affect capability revision")
+		}
+		if string(mustJSON(t, cloned)) != publicBaseline {
+			t.Fatal("private requirement identity changed public capability JSON")
+		}
+		return
+	}
+	t.Fatal("missing identity collision evidence")
+}
+
 func TestCapabilityStructuredSemanticExpectationsValidation(t *testing.T) {
 	valid := validStructuredCapabilityEvidence()
 	if err := validateCapabilityEvidenceObservation(valid, "semantics"); err != nil {
@@ -392,7 +515,7 @@ func TestCapabilityRevisionIncludesPrivateSemanticProof(t *testing.T) {
 		{"lineage state", func(observation *CapabilitySemanticsObservation) bool {
 			for i := range observation.Lineage {
 				if observation.Lineage[i].After != nil {
-					observation.Lineage[i].After.Removed = append(observation.Lineage[i].After.Removed, "revision-only")
+					observation.Lineage[i].After.Removed = append(observation.Lineage[i].After.Removed, CapabilityFieldRemovalExpectation{Name: "revision-only"})
 					return true
 				}
 			}
@@ -417,7 +540,7 @@ func TestCapabilityRevisionIncludesPrivateSemanticProof(t *testing.T) {
 			return true
 		}},
 		{"final state", func(observation *CapabilitySemanticsObservation) bool {
-			observation.FinalFieldState.Removed = append(observation.FinalFieldState.Removed, "revision-only")
+			observation.FinalFieldState.Removed = append(observation.FinalFieldState.Removed, CapabilityFieldRemovalExpectation{Name: "revision-only"})
 			return true
 		}},
 		{"expanded transition references", func(observation *CapabilitySemanticsObservation) bool {
@@ -979,9 +1102,9 @@ func TestMilestone10CapabilityClaimsStayBounded(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	const wantSPL2Revision = "sha256:69b166318f99909d0ffbad378f0369fd9377a1f56945e2c3c0b69eaa32c03e95"
+	const wantSPL2Revision = "sha256:a765813624c6edfd754a4529556f5fd35288f464e759f8d969404a072bef1898"
 	if spl2Revision != wantSPL2Revision {
-		t.Errorf("SPL2 capability revision = %q, want preserved %q", spl2Revision, wantSPL2Revision)
+		t.Errorf("SPL2 capability revision = %q, want %q", spl2Revision, wantSPL2Revision)
 	}
 }
 
@@ -1845,13 +1968,13 @@ func TestCapabilityDataClonesAreDeep(t *testing.T) {
 	evidenceClone.Observations.Semantics.Stages[0].Command = "mutated"
 	evidenceClone.Observations.Semantics.Transitions[0].InputReferenceIDs[0] = "mutated"
 	evidenceClone.Observations.Semantics.Lineage[0].After.Fields[0].OriginReferenceIDs[0] = "mutated"
-	evidenceClone.Observations.Semantics.FinalFieldState.Removed[0] = "mutated"
+	evidenceClone.Observations.Semantics.FinalFieldState.Removed[0].Name = "mutated"
 	evidenceClone.Observations.Requirements.Items[0].Identity = "mutated"
 	evidenceClone.RewriteRequest[0] = '['
 	if evidence.Observations.Semantics.Stages[0].Command == "mutated" ||
 		evidence.Observations.Semantics.Transitions[0].InputReferenceIDs[0] == "mutated" ||
 		evidence.Observations.Semantics.Lineage[0].After.Fields[0].OriginReferenceIDs[0] == "mutated" ||
-		evidence.Observations.Semantics.FinalFieldState.Removed[0] == "mutated" ||
+		evidence.Observations.Semantics.FinalFieldState.Removed[0].Name == "mutated" ||
 		evidence.Observations.Requirements.Items[0].Identity == "mutated" ||
 		evidence.RewriteRequest[0] == '[' {
 		t.Fatal("evidence clone aliases nested authored data")
@@ -2037,7 +2160,7 @@ func validStructuredCapabilityEvidence() CapabilityEvidence {
 	}
 	before := &CapabilityFieldStateExpectation{
 		Fields:    []CapabilityFieldExpectation{{Name: "alpha", OriginReferenceIDs: []string{"reference-1"}}},
-		Removed:   []string{},
+		Removed:   []CapabilityFieldRemovalExpectation{},
 		Open:      true,
 		Uncertain: false,
 	}
@@ -2046,7 +2169,7 @@ func validStructuredCapabilityEvidence() CapabilityEvidence {
 			{Name: "alpha", OriginReferenceIDs: []string{"reference-1"}},
 			{Name: "beta", OriginReferenceIDs: []string{"reference-1", "reference-2"}, Conditional: true},
 		},
-		Removed:   []string{"discarded"},
+		Removed:   []CapabilityFieldRemovalExpectation{{Name: "discarded"}},
 		Open:      false,
 		Uncertain: true,
 	}

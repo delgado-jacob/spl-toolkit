@@ -157,6 +157,27 @@
       ],
       "additionalProperties": true
     },
+    "analysis.FieldIdentity": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": ["atomic", "path"]
+        },
+        "segments": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "qualifier": {
+          "type": "string"
+        }
+      },
+      "required": ["kind", "segments"],
+      "additionalProperties": true
+    },
     "analysis.Reference": {
       "type": "object",
       "properties": {
@@ -168,6 +189,9 @@
         },
         "normalized_name": {
           "type": "string"
+        },
+        "field_identity": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.FieldIdentity"
         },
         "kind": {
           "type": "string"
@@ -218,6 +242,9 @@
         "name": {
           "type": "string"
         },
+        "field_identity": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.FieldIdentity"
+        },
         "origin_reference_ids": {
           "type": "array",
           "items": {
@@ -230,9 +257,23 @@
       },
       "required": [
         "name",
+        "field_identity",
         "origin_reference_ids",
         "conditional"
       ],
+      "additionalProperties": true
+    },
+    "analysis.FieldRemoval": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "field_identity": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.FieldIdentity"
+        }
+      },
+      "required": ["name", "field_identity"],
       "additionalProperties": true
     },
     "analysis.FieldState": {
@@ -247,7 +288,7 @@
         "removed": {
           "type": "array",
           "items": {
-            "type": "string"
+            "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.FieldRemoval"
           }
         },
         "open": {
@@ -273,6 +314,9 @@
         },
         "output": {
           "type": "string"
+        },
+        "output_identity": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.FieldIdentity"
         },
         "input_reference_ids": {
           "type": "array",
@@ -539,6 +583,9 @@
         },
         "identity": {
           "type": "string"
+        },
+        "field_identity": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.FieldIdentity"
         },
         "role": {
           "type": "string"

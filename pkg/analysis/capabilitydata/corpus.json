@@ -10051,25 +10051,25 @@
       }
     },
     {
-      "id": "spl2.field.identity-collision.incomplete",
-      "classification": "incomplete",
+      "id": "spl2.field.identity-collision.positive",
+      "classification": "positive",
       "document": {
         "text": "FROM main | where actor.name=\"x\" AND 'actor.name'=\"x\"",
         "language": "spl2",
         "profile": "splunkd",
         "version": "current",
-        "source_id": "capability:spl2.field.identity-collision.incomplete"
+        "source_id": "capability:spl2.field.identity-collision.positive"
       },
       "observations": {
         "semantics": {
-          "status": "incomplete",
-          "complete": false,
+          "status": "valid",
+          "complete": true,
           "stages": [
             {
               "id": "stage-1",
               "command": "where",
               "scope_id": "scope-0",
-              "semantic_complete": false
+              "semantic_complete": true
             }
           ],
           "scopes": [
@@ -10116,6 +10116,10 @@
             {
               "id": "ref-1",
               "normalized_name": "actor.name",
+              "field_identity": {
+                "kind": "path",
+                "segments": ["actor", "name"]
+              },
               "kind": "field",
               "role": "read",
               "resolution": "exact",
@@ -10136,6 +10140,10 @@
             {
               "id": "ref-2",
               "normalized_name": "actor.name",
+              "field_identity": {
+                "kind": "atomic",
+                "segments": ["actor.name"]
+              },
               "kind": "field",
               "role": "read",
               "resolution": "exact",
@@ -10174,16 +10182,30 @@
                 "fields": [
                   {
                     "name": "actor.name",
+                    "field_identity": {
+                      "kind": "atomic",
+                      "segments": ["actor.name"]
+                    },
                     "origin_reference_ids": [
-                      "ref-1",
                       "ref-2"
+                    ],
+                    "conditional": false
+                  },
+                  {
+                    "name": "actor.name",
+                    "field_identity": {
+                      "kind": "path",
+                      "segments": ["actor", "name"]
+                    },
+                    "origin_reference_ids": [
+                      "ref-1"
                     ],
                     "conditional": false
                   }
                 ],
                 "removed": [],
                 "open": true,
-                "uncertain": true
+                "uncertain": false
               }
             }
           ],
@@ -10192,40 +10214,36 @@
             "fields": [
               {
                 "name": "actor.name",
+                "field_identity": {
+                  "kind": "atomic",
+                  "segments": ["actor.name"]
+                },
                 "origin_reference_ids": [
-                  "ref-1",
                   "ref-2"
+                ],
+                "conditional": false
+              },
+              {
+                "name": "actor.name",
+                "field_identity": {
+                  "kind": "path",
+                  "segments": ["actor", "name"]
+                },
+                "origin_reference_ids": [
+                  "ref-1"
                 ],
                 "conditional": false
               }
             ],
             "removed": [],
             "open": true,
-            "uncertain": true
+            "uncertain": false
           },
-          "diagnostics": [
-            {
-              "code": "SPL_AMBIGUOUS_FIELD",
-              "category": "unsupported_semantics",
-              "severity": "warning",
-              "location": {
-                "start": {
-                  "offset": 37,
-                  "line": 1,
-                  "column": 38
-                },
-                "end": {
-                  "offset": 49,
-                  "line": 1,
-                  "column": 50
-                }
-              }
-            }
-          ]
+          "diagnostics": []
         },
         "requirements": {
-          "query_status": "incomplete",
-          "complete": false,
+          "query_status": "valid",
+          "complete": true,
           "items": [
             {
               "kind": "dataset",
@@ -10237,14 +10255,27 @@
             {
               "kind": "field",
               "identity": "actor.name",
+              "field_identity": {
+                "kind": "path",
+                "segments": ["actor", "name"]
+              },
+              "role": "read",
+              "necessity": "required",
+              "resolution": "exact"
+            },
+            {
+              "kind": "field",
+              "identity": "actor.name",
+              "field_identity": {
+                "kind": "atomic",
+                "segments": ["actor.name"]
+              },
               "role": "read",
               "necessity": "required",
               "resolution": "exact"
             }
           ],
-          "gap_codes": [
-            "SPL_AMBIGUOUS_FIELD"
-          ]
+          "gap_codes": []
         }
       },
       "provenance": {
@@ -11043,6 +11074,10 @@
             {
               "id": "ref-1",
               "normalized_name": "host",
+              "field_identity": {
+                "kind": "atomic",
+                "segments": ["host"]
+              },
               "kind": "field",
               "role": "remove",
               "resolution": "exact",
@@ -11080,7 +11115,13 @@
               "after": {
                 "fields": [],
                 "removed": [
-                  "host"
+                  {
+                    "name": "host",
+                    "field_identity": {
+                      "kind": "atomic",
+                      "segments": ["host"]
+                    }
+                  }
                 ],
                 "open": true,
                 "uncertain": false
@@ -11091,13 +11132,23 @@
             {
               "operation": "remove",
               "output": "host",
+              "output_identity": {
+                "kind": "atomic",
+                "segments": ["host"]
+              },
               "output_reference_id": "ref-1"
             }
           ],
           "final_field_state": {
             "fields": [],
             "removed": [
-              "host"
+              {
+                "name": "host",
+                "field_identity": {
+                  "kind": "atomic",
+                  "segments": ["host"]
+                }
+              }
             ],
             "open": true,
             "uncertain": false

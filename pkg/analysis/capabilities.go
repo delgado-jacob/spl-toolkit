@@ -39,11 +39,20 @@ type capabilityRevisionEvidence struct {
 }
 
 type capabilityRevisionEvidenceObservations struct {
-	Syntax        *CapabilitySyntaxObservation            `json:"syntax,omitempty"`
-	Semantics     *capabilityRevisionSemanticsObservation `json:"semantics,omitempty"`
-	Requirements  *CapabilityRequirementsObservation      `json:"requirements,omitempty"`
-	Linting       *CapabilityLintingObservation           `json:"linting,omitempty"`
-	SafeRewriting *CapabilityRewriteObservation           `json:"safe_rewriting,omitempty"`
+	Syntax        *CapabilitySyntaxObservation               `json:"syntax,omitempty"`
+	Semantics     *capabilityRevisionSemanticsObservation    `json:"semantics,omitempty"`
+	Requirements  *capabilityRevisionRequirementsObservation `json:"requirements,omitempty"`
+	Linting       *CapabilityLintingObservation              `json:"linting,omitempty"`
+	SafeRewriting *CapabilityRewriteObservation              `json:"safe_rewriting,omitempty"`
+}
+
+type capabilityRevisionRequirementExpectation CapabilityRequirementExpectation
+
+type capabilityRevisionRequirementsObservation struct {
+	QueryStatus Status                                     `json:"query_status"`
+	Complete    bool                                       `json:"complete"`
+	Items       []capabilityRevisionRequirementExpectation `json:"items"`
+	GapCodes    []string                                   `json:"gap_codes"`
 }
 
 type capabilityRevisionStageExpectation CapabilityStageExpectation
@@ -193,7 +202,7 @@ func capabilityRevisionEvidenceFor(evidence []CapabilityEvidence) []capabilityRe
 			Observations: capabilityRevisionEvidenceObservations{
 				Syntax:        item.Observations.Syntax,
 				Semantics:     capabilityRevisionSemanticsFor(item.Observations.Semantics),
-				Requirements:  item.Observations.Requirements,
+				Requirements:  capabilityRevisionRequirementsFor(item.Observations.Requirements),
 				Linting:       item.Observations.Linting,
 				SafeRewriting: item.Observations.SafeRewriting,
 			},
@@ -202,6 +211,22 @@ func capabilityRevisionEvidenceFor(evidence []CapabilityEvidence) []capabilityRe
 		}
 	}
 	return out
+}
+
+func capabilityRevisionRequirementsFor(observation *CapabilityRequirementsObservation) *capabilityRevisionRequirementsObservation {
+	if observation == nil {
+		return nil
+	}
+	items := make([]capabilityRevisionRequirementExpectation, len(observation.Items))
+	for i, item := range observation.Items {
+		items[i] = capabilityRevisionRequirementExpectation(item)
+	}
+	return &capabilityRevisionRequirementsObservation{
+		QueryStatus: observation.QueryStatus,
+		Complete:    observation.Complete,
+		Items:       items,
+		GapCodes:    observation.GapCodes,
+	}
 }
 
 func capabilityRevisionSemanticsFor(observation *CapabilitySemanticsObservation) *capabilityRevisionSemanticsObservation {
@@ -250,7 +275,7 @@ func capabilityRevisionProofRequirementsFor(records []CapabilityRecord, proofReq
 }
 
 func capabilityRevisionProofCategories(requirement capabilitySemanticProofRequirement) []string {
-	categories := make([]string, 0, 6)
+	categories := make([]string, 0, 7)
 	for _, category := range []struct {
 		flag capabilitySemanticProofRequirement
 		name string
@@ -261,6 +286,7 @@ func capabilityRevisionProofCategories(requirement capabilitySemanticProofRequir
 		{capabilityProofTransitions, "transitions"},
 		{capabilityProofFinalState, "final_state"},
 		{capabilityProofMerge, "merge"},
+		{capabilityProofIdentity, "identity"},
 	} {
 		if requirement&category.flag != 0 {
 			categories = append(categories, category.name)

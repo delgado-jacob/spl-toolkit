@@ -63,6 +63,7 @@ const (
 	capabilityProofTransitions
 	capabilityProofFinalState
 	capabilityProofMerge
+	capabilityProofIdentity
 
 	capabilityProofScopedLineage = capabilityProofScope | capabilityProofLineage | capabilityProofFinalState
 	capabilityProofField         = capabilityProofScopedLineage | capabilityProofOrigins
@@ -86,7 +87,7 @@ var milestone11SemanticProofRequirements = map[string]capabilitySemanticProofReq
 	"spl2.dataset.dataset.dynamic-descriptor":              capabilityProofScopedLineage,
 	"spl2.dataset.dataset.parameter":                       capabilityProofField,
 	"spl2.dataset.dataset.static-descriptor":               capabilityProofScopedLineage,
-	"spl2.expression.field.identity-collision":             capabilityProofField | capabilityProofMerge,
+	"spl2.expression.field.identity-collision":             capabilityProofField | capabilityProofIdentity,
 	"spl2.expression.field.quoted-dotted-atom":             capabilityProofField,
 	"spl2.expression.field.structural-path":                capabilityProofField,
 	"spl2.expression.function-call.invalid-selected-arity": capabilityProofFieldTransfer,
@@ -355,6 +356,9 @@ func validateCapabilitySemanticProof(observation *CapabilitySemanticsObservation
 	if requirement&capabilityProofMerge != 0 && !capabilitySemanticsHaveMergeFacts(observation) {
 		return fmt.Errorf("merge proof is required")
 	}
+	if requirement&capabilityProofIdentity != 0 && !capabilitySemanticsHaveIdentityCollisionFacts(observation) {
+		return fmt.Errorf("distinct field-identity proof is required")
+	}
 	return nil
 }
 
@@ -408,6 +412,20 @@ func capabilitySemanticsHaveMergeFacts(observation *CapabilitySemanticsObservati
 		found = found || transition.Conditional
 	}
 	return found
+}
+
+func capabilitySemanticsHaveIdentityCollisionFacts(observation *CapabilitySemanticsObservation) bool {
+	if observation.FinalFieldState == nil {
+		return false
+	}
+	fields := observation.FinalFieldState.Fields
+	for i := 1; i < len(fields); i++ {
+		left, right := fields[i-1], fields[i]
+		if left.Name == right.Name && left.FieldIdentity != nil && right.FieldIdentity != nil && !capabilityFieldIdentitiesEqual(left.FieldIdentity, right.FieldIdentity) && len(left.OriginReferenceIDs) != 0 && len(right.OriginReferenceIDs) != 0 {
+			return true
+		}
+	}
+	return false
 }
 
 func validateCapabilityEvidence(evidence CapabilityEvidence) error {
@@ -592,6 +610,12 @@ func validateCapabilityEvidenceObservation(evidence CapabilityEvidence, dimensio
 			if err := validateCapabilityLocation(evidence.Document, reference.Location); err != nil {
 				return fmt.Errorf("reference %d: %w", i, err)
 			}
+			if err := validateCapabilityFieldIdentity(reference.FieldIdentity, reference.NormalizedName); err != nil {
+				return fmt.Errorf("reference %d: %w", i, err)
+			}
+			if reference.FieldIdentity != nil && (reference.Kind != "field" || reference.Resolution != "exact") {
+				return fmt.Errorf("reference %d has identity outside an exact field", i)
+			}
 		}
 		for i, dependency := range observation.Dependencies {
 			if err := requireCapabilityFields("dependency", dependency.Kind, dependency.Name); err != nil {
@@ -600,6 +624,9 @@ func validateCapabilityEvidenceObservation(evidence CapabilityEvidence, dimensio
 		}
 		for i, transition := range observation.Transitions {
 			if err := requireCapabilityFields("transition", transition.Operation, transition.Output); err != nil {
+				return fmt.Errorf("transition %d: %w", i, err)
+			}
+			if err := validateCapabilityFieldIdentity(transition.OutputIdentity, transition.Output); err != nil {
 				return fmt.Errorf("transition %d: %w", i, err)
 			}
 		}
@@ -627,6 +654,12 @@ func validateCapabilityEvidenceObservation(evidence CapabilityEvidence, dimensio
 		for i, item := range observation.Items {
 			if err := requireCapabilityFields("requirement item", item.Kind, item.Identity, item.Role, item.Necessity, item.Resolution); err != nil {
 				return fmt.Errorf("item %d: %w", i, err)
+			}
+			if err := validateCapabilityFieldIdentity(item.FieldIdentity, item.Identity); err != nil {
+				return fmt.Errorf("item %d: %w", i, err)
+			}
+			if item.FieldIdentity != nil && (item.Kind != "field" || item.Resolution != "exact") {
+				return fmt.Errorf("item %d has identity outside an exact field", i)
 			}
 		}
 		return validateNonemptyStrings("gap code", observation.GapCodes)
@@ -694,6 +727,7 @@ func validateCapabilityStructuredSemantics(document QueryDocument, observation *
 	}
 
 	referenceRoles := make(map[string]string, len(observation.References))
+	referenceIdentities := make(map[string]*FieldIdentity, len(observation.References))
 	referenceOrder := make(map[string]int, len(observation.References))
 	for i, reference := range observation.References {
 		if strings.TrimSpace(reference.ID) == "" {
@@ -703,6 +737,7 @@ func validateCapabilityStructuredSemantics(document QueryDocument, observation *
 			return fmt.Errorf("reference %d has duplicate ID %q", i, reference.ID)
 		}
 		referenceRoles[reference.ID] = reference.Role
+		referenceIdentities[reference.ID] = reference.FieldIdentity
 		referenceOrder[reference.ID] = i
 	}
 	scopeIDs := make(map[string]struct{}, len(observation.Scopes))
@@ -782,6 +817,9 @@ func validateCapabilityStructuredSemantics(document QueryDocument, observation *
 			if role != "output" && role != "create" && role != "remove" {
 				return fmt.Errorf("transition %d output reference %q has role %q", i, transition.OutputReferenceID, role)
 			}
+			if referenceIdentity := referenceIdentities[transition.OutputReferenceID]; referenceIdentity != nil && transition.OutputIdentity != nil && !capabilityFieldIdentitiesEqual(referenceIdentity, transition.OutputIdentity) {
+				return fmt.Errorf("transition %d output identity differs from reference %q", i, transition.OutputReferenceID)
+			}
 		}
 	}
 
@@ -798,16 +836,18 @@ func validateCapabilityFieldState(label string, state *CapabilityFieldStateExpec
 	if state.Fields == nil || state.Removed == nil {
 		return fmt.Errorf("%s fields and removed must be exact arrays", label)
 	}
-	previousName := ""
-	fieldNames := make(map[string]struct{}, len(state.Fields))
+	var previousField CapabilityFieldExpectation
 	for i, field := range state.Fields {
 		if strings.TrimSpace(field.Name) == "" {
 			return fmt.Errorf("%s field %d requires a name", label, i)
 		}
-		if i > 0 && strings.Compare(previousName, field.Name) >= 0 {
-			return fmt.Errorf("%s fields are not in canonical name order at indexes %d and %d", label, i-1, i)
+		if err := validateCapabilityFieldIdentity(field.FieldIdentity, field.Name); err != nil {
+			return fmt.Errorf("%s field %d: %w", label, i, err)
 		}
-		if field.OriginReferenceIDs == nil || !orderedCapabilityOriginReferenceIDs(field.Name, field.OriginReferenceIDs, referenceOrder, transitions) {
+		if i > 0 && !capabilityFieldExpectationLess(previousField.Name, previousField.FieldIdentity, field.Name, field.FieldIdentity) {
+			return fmt.Errorf("%s fields are not in canonical identity order at indexes %d and %d", label, i-1, i)
+		}
+		if field.OriginReferenceIDs == nil || !orderedCapabilityOriginReferenceIDs(field.Name, field.FieldIdentity, field.OriginReferenceIDs, referenceOrder, transitions) {
 			return fmt.Errorf("%s field %d origin reference IDs must be an exact canonical array", label, i)
 		}
 		for _, id := range field.OriginReferenceIDs {
@@ -815,30 +855,66 @@ func validateCapabilityFieldState(label string, state *CapabilityFieldStateExpec
 				return fmt.Errorf("%s field %d names unknown origin reference ID %q", label, i, id)
 			}
 		}
-		fieldNames[field.Name] = struct{}{}
-		previousName = field.Name
+		previousField = field
 	}
-	if !strictlyIncreasingStrings(state.Removed) {
-		return fmt.Errorf("%s removed fields are not in canonical order", label)
-	}
-	for _, name := range state.Removed {
-		if strings.TrimSpace(name) == "" {
+	for i, removal := range state.Removed {
+		if strings.TrimSpace(removal.Name) == "" {
 			return fmt.Errorf("%s removed field must not be empty", label)
 		}
-		if _, present := fieldNames[name]; present {
-			return fmt.Errorf("%s field %q cannot be both present and removed", label, name)
+		if err := validateCapabilityFieldIdentity(removal.FieldIdentity, removal.Name); err != nil {
+			return fmt.Errorf("%s removal %d: %w", label, i, err)
+		}
+		if i > 0 && !capabilityFieldExpectationLess(state.Removed[i-1].Name, state.Removed[i-1].FieldIdentity, removal.Name, removal.FieldIdentity) {
+			return fmt.Errorf("%s removed fields are not in canonical identity order", label)
+		}
+		for _, field := range state.Fields {
+			if field.Name == removal.Name && (field.FieldIdentity == nil || removal.FieldIdentity == nil || capabilityFieldIdentitiesEqual(field.FieldIdentity, removal.FieldIdentity)) {
+				return fmt.Errorf("%s field %q cannot be both present and removed", label, removal.Name)
+			}
 		}
 	}
 	return nil
 }
 
-func orderedCapabilityOriginReferenceIDs(fieldName string, values []string, referenceOrder map[string]int, transitions []CapabilityTransitionExpectation) bool {
+func validateCapabilityFieldIdentity(identity *FieldIdentity, name string) error {
+	if identity == nil {
+		return nil
+	}
+	if len(identity.Segments) == 0 || (identity.Kind != "atomic" && identity.Kind != "path") {
+		return fmt.Errorf("field identity requires atomic or path kind and nonempty segments")
+	}
+	for _, segment := range identity.Segments {
+		if segment == "" {
+			return fmt.Errorf("field identity has an empty segment")
+		}
+	}
+	if identity.Kind == "atomic" && (len(identity.Segments) != 1 || identity.Qualifier != "") || strings.Join(identity.Segments, ".") != name {
+		return fmt.Errorf("field identity does not match name %q", name)
+	}
+	return nil
+}
+
+func capabilityFieldIdentitiesEqual(left, right *FieldIdentity) bool {
+	return left.Kind == right.Kind && left.Qualifier == right.Qualifier && slices.Equal(left.Segments, right.Segments)
+}
+
+func capabilityFieldExpectationLess(leftName string, leftIdentity *FieldIdentity, rightName string, rightIdentity *FieldIdentity) bool {
+	if leftName != rightName {
+		return leftName < rightName
+	}
+	if leftIdentity == nil || rightIdentity == nil {
+		return false
+	}
+	return fieldIdentityLess(*leftIdentity, *rightIdentity)
+}
+
+func orderedCapabilityOriginReferenceIDs(fieldName string, fieldIdentity *FieldIdentity, values []string, referenceOrder map[string]int, transitions []CapabilityTransitionExpectation) bool {
 	if orderedCapabilityReferenceIDs(values, referenceOrder) {
 		return true
 	}
 	producers := make([]CapabilityTransitionExpectation, 0, 2)
 	for _, transition := range transitions {
-		if transition.Output == fieldName && transition.OutputReferenceID != "" && slices.Contains(values, transition.OutputReferenceID) {
+		if transition.Output == fieldName && (fieldIdentity == nil || transition.OutputIdentity != nil && capabilityFieldIdentitiesEqual(fieldIdentity, transition.OutputIdentity)) && transition.OutputReferenceID != "" && slices.Contains(values, transition.OutputReferenceID) {
 			producers = append(producers, transition)
 		}
 	}
