@@ -42,9 +42,18 @@ def canonical_projection(report):
                            {"start":r["location"]["start"]["offset"], "end":r["location"]["end"]["offset"]}
                            for r in report["references"]],
             "fields": [{"name": f["name"], "conditional": f["conditional"]} for f in after["fields"]],
-            "removed": after["removed"], "open": after["open"], "uncertain": after["uncertain"],
+            "removed": [item["name"] for item in after["removed"]], "open": after["open"], "uncertain": after["uncertain"],
             "stage_commands": [s["command"] for s in report["stages"]],
             "stage_complete": [s["semantic_complete"] for s in report["stages"]]}
+
+
+def test_canonical_projection_uses_removed_names_without_changing_typed_report():
+    typed_removal = {"name": "retired", "field_identity": {"kind": "atomic", "segments": ["retired"]}}
+    report = {"status": "valid", "coverage": {"syntax_complete": True, "semantic_complete": True},
+              "diagnostics": [], "references": [], "stages": [],
+              "lineage": [{"after": {"fields": [], "removed": [typed_removal], "open": False, "uncertain": False}}]}
+    assert canonical_projection(report)["removed"] == ["retired"]
+    assert report["lineage"][0]["after"]["removed"] == [typed_removal]
 
 
 def run_cli(cli, command, document, extra=()):
