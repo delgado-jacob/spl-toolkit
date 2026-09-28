@@ -32,14 +32,15 @@ type RequirementOccurrence struct {
 }
 
 type RequirementItem struct {
-	ID          string                  `json:"id"`
-	Kind        string                  `json:"kind"`
-	Identity    string                  `json:"identity"`
-	Role        string                  `json:"role"`
-	Necessity   string                  `json:"necessity"`
-	Origin      string                  `json:"origin"`
-	Resolution  string                  `json:"resolution"`
-	Occurrences []RequirementOccurrence `json:"occurrences"`
+	ID            string                  `json:"id"`
+	Kind          string                  `json:"kind"`
+	Identity      string                  `json:"identity"`
+	FieldIdentity *FieldIdentity          `json:"field_identity,omitempty"`
+	Role          string                  `json:"role"`
+	Necessity     string                  `json:"necessity"`
+	Origin        string                  `json:"origin"`
+	Resolution    string                  `json:"resolution"`
+	Occurrences   []RequirementOccurrence `json:"occurrences"`
 }
 
 type RequirementGap struct {
@@ -98,6 +99,11 @@ func cloneRequirementSet(in RequirementSet) RequirementSet {
 	out.Items = append([]RequirementItem{}, in.Items...)
 	for i := range out.Items {
 		out.Items[i].Occurrences = append([]RequirementOccurrence{}, in.Items[i].Occurrences...)
+		if in.Items[i].FieldIdentity != nil {
+			identity := *in.Items[i].FieldIdentity
+			identity.Segments = append([]string{}, identity.Segments...)
+			out.Items[i].FieldIdentity = &identity
+		}
 	}
 	out.Gaps = append([]RequirementGap{}, in.Gaps...)
 	for i := range out.Gaps {
@@ -201,6 +207,7 @@ func projectRequirements(document QueryDocument, trace *requirementTrace) (Requi
 
 	type groupKey struct {
 		kind, identity, role, resolution string
+		fieldKey                         fieldIdentityKey
 	}
 	type gapCandidate struct {
 		gap          RequirementGap
@@ -240,14 +247,18 @@ func projectRequirements(document QueryDocument, trace *requirementTrace) (Requi
 		}
 		reference := entry.reference
 		if reference.NormalizedName != "" {
-			key := groupKey{reference.Kind, reference.NormalizedName, reference.Role, reference.Resolution}
+			fieldKey, exactField := entry.fieldIdentity.privateKey()
+			key := groupKey{kind: reference.Kind, identity: reference.NormalizedName, role: reference.Role, resolution: reference.Resolution}
+			if reference.Kind == "field" && exactField {
+				key.fieldKey = fieldKey
+			}
 			index, found := groups[key]
 			if !found {
 				necessity := "required"
 				if entry.conditional || entry.pathConditional {
 					necessity = "conditional"
 				}
-				set.Items = append(set.Items, RequirementItem{
+				item := RequirementItem{
 					Kind:        reference.Kind,
 					Identity:    reference.NormalizedName,
 					Role:        reference.Role,
@@ -255,7 +266,12 @@ func projectRequirements(document QueryDocument, trace *requirementTrace) (Requi
 					Origin:      "direct",
 					Resolution:  reference.Resolution,
 					Occurrences: []RequirementOccurrence{},
-				})
+				}
+				if reference.Kind == "field" && exactField {
+					identity, _ := entry.fieldIdentity.public()
+					item.FieldIdentity = &identity
+				}
+				set.Items = append(set.Items, item)
 				index = len(set.Items) - 1
 				groups[key] = index
 			} else if entry.directExternal {

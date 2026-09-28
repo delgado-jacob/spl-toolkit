@@ -799,6 +799,9 @@ func (s *spl2SemanticStage) selectedJoinReference(operand locatedOperand, source
 	requirementBinding, directExternal, requirementConditional := "not_applicable", false, false
 	if trace := s.env.requirements.trace; trace != nil {
 		entry := trace.reference(id)
+		entry.fieldIdentity = identity.clone()
+		entry.reference.FieldIdentity = ref.FieldIdentity
+		entry.reference = cloneTraceReference(entry.reference)
 		requirementBinding, directExternal, requirementConditional = source.requirements.readIdentity(entry.reference, identity)
 		entry.reference.Binding = requirementBinding
 		entry.directExternal = directExternal

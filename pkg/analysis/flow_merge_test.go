@@ -207,7 +207,7 @@ func TestMergeFlowEnvironmentsPreservesAtomicStructuralIdentities(t *testing.T) 
 	if len(state.Fields) != 2 || state.Uncertain || state.Fields[0].FieldIdentity.Kind != "atomic" || state.Fields[1].FieldIdentity.Kind != "path" || !state.Fields[0].Conditional || !state.Fields[1].Conditional || !reflect.DeepEqual(state.Fields[0].OriginReferenceIDs, []string{"ref-2"}) || !reflect.DeepEqual(state.Fields[1].OriginReferenceIDs, []string{"ref-8"}) {
 		t.Fatalf("identity merge = %+v", state)
 	}
-	if !merged.requirements.ambiguous["actor.name"] || !merged.requirements.uncertain {
+	if !merged.requirements.ambiguous["actor.name"] || merged.requirements.uncertain {
 		t.Fatalf("requirement collision merge = %+v", merged.requirements)
 	}
 }

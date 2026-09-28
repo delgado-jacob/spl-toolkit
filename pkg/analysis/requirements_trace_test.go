@@ -79,6 +79,18 @@ func TestRequirementTraceIndexesStaySynchronized(t *testing.T) {
 	}
 }
 
+func TestRequirementTraceCloneOwnsExactIdentity(t *testing.T) {
+	trace := newRequirementTrace()
+	trace.recordReference(Reference{ID: "pending-0", Kind: "field", FieldIdentity: &FieldIdentity{Kind: "path", Segments: []string{"actor", "name"}}}, true, false, trace.nextEvent())
+	trace.reference("pending-0").fieldIdentity = pathFieldIdentity("", []string{"actor", "name"})
+	cloned := trace.clone()
+	cloned.references[0].reference.FieldIdentity.Segments[0] = "changed"
+	cloned.references[0].fieldIdentity.Segments[0] = "changed"
+	if got := trace.references[0]; got.reference.FieldIdentity.Segments[0] != "actor" || got.fieldIdentity.Segments[0] != "actor" {
+		t.Fatalf("trace clone aliases exact identity: %+v", got)
+	}
+}
+
 func TestRequirementTraceSPL2DatasetParameterProjection(t *testing.T) {
 	for _, name := range []string{"$target_1", "$view"} {
 		t.Run(name, func(t *testing.T) {
@@ -537,6 +549,7 @@ func TestRequirementEnvironmentExactProjectionClonesOrSynthesizesConditionalFiel
 		Binding:            "indeterminate",
 		OriginReferenceIDs: []string{"pending-origin"},
 	}, false, true, trace.nextEvent())
+	trace.reference("pending-select").fieldIdentity = atomicFieldIdentity("host")
 
 	environment := newRequirementEnvironment(trace)
 	existingIdentity := atomicFieldIdentity("existing")
@@ -558,6 +571,11 @@ func TestRequirementEnvironmentExactProjectionClonesOrSynthesizesConditionalFiel
 	synthesized.origins[1] = "changed"
 	if got := trace.reference("pending-select").reference.OriginReferenceIDs; !reflect.DeepEqual(got, []string{"pending-origin"}) {
 		t.Fatalf("synthesized origins alias trace evidence: %v", got)
+	}
+	trace.recordReference(Reference{ID: "pending-other-identity", NormalizedName: "host", Kind: "field", Role: "read", Resolution: "exact", Binding: "indeterminate"}, false, true, trace.nextEvent())
+	trace.reference("pending-other-identity").fieldIdentity = pathFieldIdentity("", []string{"host"})
+	if field, ok := environment.exactProjection("host", []string{"pending-other-identity"}); ok {
+		t.Fatalf("different exact identity synthesized atomic field: %+v", field)
 	}
 
 	for _, reference := range []Reference{

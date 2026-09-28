@@ -68,13 +68,30 @@ func TestSPL2StructuralAndQuotedDottedRequirementsStayDistinct(t *testing.T) {
 		`FROM main | eval x=actor.name+'actor.name'`,
 	} {
 		t.Run(query, func(t *testing.T) {
-			result, _, err := analyzeRewriteWithTrace(QueryDocument{Text: query, Language: "spl2"}, nil, nil)
+			result, trace, err := analyzeRewriteWithTrace(QueryDocument{Text: query, Language: "spl2"}, nil, nil)
 			if err != nil {
 				t.Fatal(err)
 			}
-			item := requirementItem(result.Requirements, "field", "actor.name", "read")
-			if item == nil || item.Necessity != "required" || len(item.Occurrences) != 2 {
-				t.Fatalf("mixed requirement item = %+v", item)
+			items := []RequirementItem{}
+			for _, item := range result.Requirements.Items {
+				if item.Kind == "field" && item.Identity == "actor.name" && item.Role == "read" {
+					items = append(items, item)
+				}
+			}
+			if len(items) != 2 || items[0].ID != "req-2" || items[1].ID != "req-3" || len(items[0].Occurrences) != 1 || len(items[1].Occurrences) != 1 || items[0].Occurrences[0].Location.Start.Offset >= items[1].Occurrences[0].Location.Start.Offset {
+				t.Fatalf("mixed exact requirements must retain first occurrence order: %+v", result.Requirements.Items)
+			}
+			for _, item := range items {
+				if item.Necessity != "required" || len(item.Occurrences) != 1 {
+					t.Fatalf("mixed requirement item = %+v", item)
+				}
+				want := FieldIdentity{Kind: "path", Segments: []string{"actor", "name"}}
+				if strings.HasPrefix(item.Occurrences[0].OriginalName, "'") {
+					want = FieldIdentity{Kind: "atomic", Segments: []string{"actor.name"}}
+				}
+				if item.FieldIdentity == nil || !reflect.DeepEqual(*item.FieldIdentity, want) {
+					t.Fatalf("mixed requirement identity = %+v, want %+v", item, want)
+				}
 			}
 
 			refs := append([]Reference{}, structuralReadReferences(result, "actor.name")...)
@@ -92,10 +109,24 @@ func TestSPL2StructuralAndQuotedDottedRequirementsStayDistinct(t *testing.T) {
 			if quoted == nil || quoted.Binding != "source" || structural.Binding != "source" {
 				t.Fatalf("mixed bindings: quoted=%+v structural=%+v", quoted, structural)
 			}
+			for _, ref := range []Reference{*quoted, structural} {
+				var traced *requirementTraceReference
+				for i := range trace.references {
+					if trace.references[i].reference.ID == ref.ID {
+						traced = &trace.references[i]
+						break
+					}
+				}
+				if traced == nil || traced.reference.FieldIdentity == nil || !reflect.DeepEqual(traced.reference.FieldIdentity, ref.FieldIdentity) {
+					t.Fatalf("trace lost exact field identity: trace=%+v public=%+v", traced, ref)
+				}
+			}
 			bindings := map[string]string{quoted.ID: "source", structural.ID: "source"}
-			for _, occurrence := range item.Occurrences {
-				if occurrence.Binding != bindings[occurrence.ReferenceID] {
-					t.Errorf("mixed occurrence = %+v, expected binding %q", occurrence, bindings[occurrence.ReferenceID])
+			for _, item := range items {
+				for _, occurrence := range item.Occurrences {
+					if occurrence.Binding != bindings[occurrence.ReferenceID] {
+						t.Errorf("mixed occurrence = %+v, expected binding %q", occurrence, bindings[occurrence.ReferenceID])
+					}
 				}
 			}
 			if result.Status != Valid || !result.Coverage.SemanticComplete {
@@ -120,6 +151,84 @@ func TestSPL2StructuralAndQuotedDottedRequirementsStayDistinct(t *testing.T) {
 	for _, diagnostic := range result.Diagnostics {
 		if diagnostic.Code == CodeAmbiguousField {
 			t.Fatalf("quoted atomic field acquired ambiguity diagnostic: %+v", diagnostic)
+		}
+	}
+}
+
+func TestSPL2StructuralRequirementAfterAtomicProjectionIsUnavailable(t *testing.T) {
+	result, err := Analyze(QueryDocument{Text: `FROM main | fields 'actor.name' | where actor.name=1`, Language: "spl2"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	ref := structuralReadReferences(result, "actor.name")
+	if len(ref) != 1 || ref[0].Binding != "unavailable" || result.Status != Invalid || !result.Coverage.SemanticComplete || !result.Requirements.Coverage.Complete || result.Requirements.QueryStatus != Invalid {
+		t.Fatalf("structural read after atomic projection: refs=%+v analysis=%+v requirements=%+v", ref, result, result.Requirements)
+	}
+	for _, gap := range result.Requirements.Gaps {
+		if gap.Code == CodeRequirementIndeterminate {
+			t.Fatalf("exact missing field acquired indeterminate requirement gap: %+v", result.Requirements)
+		}
+	}
+}
+
+func TestSPL2StructuralRequirementAfterAtomicAggregateOutputIsUnavailable(t *testing.T) {
+	result, err := Analyze(QueryDocument{Text: `FROM main | stats count() AS 'actor.name' | where actor.name=1`, Language: "spl2"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	refs := structuralReadReferences(result, "actor.name")
+	if len(refs) != 1 || refs[0].Binding != "unavailable" || result.Status != Invalid || !result.Coverage.SemanticComplete || result.Requirements.QueryStatus != Invalid || !result.Requirements.Coverage.Complete {
+		t.Fatalf("structural read after atomic aggregate: refs=%+v analysis=%+v requirements=%+v", refs, result, result.Requirements)
+	}
+}
+
+func TestSPL2StructuralRequirementCollisionDoesNotHideMissingField(t *testing.T) {
+	result, err := Analyze(QueryDocument{Text: `FROM main | fields actor.name, 'actor.name' | where missing=1`, Language: "spl2"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if result.Status != Invalid || !result.Coverage.SemanticComplete || result.Requirements.QueryStatus != Invalid || !result.Requirements.Coverage.Complete {
+		t.Fatalf("exact missing field status = analysis %s coverage %+v requirements %+v", result.Status, result.Coverage, result.Requirements)
+	}
+	ref := spl2Ref(t, result, "missing", "read")
+	if ref.Binding != "unavailable" {
+		t.Fatalf("missing field binding = %+v", ref)
+	}
+	if requirementItem(result.Requirements, "field", "missing", "read") != nil {
+		t.Fatalf("unavailable field became a direct obligation: %+v", result.Requirements.Items)
+	}
+	foundUnavailable := false
+	for _, diagnostic := range result.Requirements.Diagnostics {
+		foundUnavailable = foundUnavailable || diagnostic.Code == CodeUnavailableField
+	}
+	if !foundUnavailable {
+		t.Fatalf("embedded requirements lost unavailable-field diagnostic: %+v", result.Requirements.Diagnostics)
+	}
+	for _, gap := range result.Requirements.Gaps {
+		if gap.Code == CodeRequirementIndeterminate {
+			t.Fatalf("exact missing field acquired indeterminate requirement gap: %+v", result.Requirements)
+		}
+	}
+}
+
+func TestSPL2StructuralRequirementBranchIdentityNecessity(t *testing.T) {
+	query := `FROM main | branch (flag=true) [where actor.name=1], (flag=false) [where 'actor.name'=1]`
+	result, err := Analyze(QueryDocument{Text: query, Language: "spl2"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	items := []RequirementItem{}
+	for _, item := range result.Requirements.Items {
+		if item.Kind == "field" && item.Identity == "actor.name" && item.Role == "read" {
+			items = append(items, item)
+		}
+	}
+	if result.Status != Valid || !result.Requirements.Coverage.Complete || len(items) != 2 {
+		t.Fatalf("branch identity requirements = %+v", result.Requirements)
+	}
+	for _, item := range items {
+		if item.Necessity != "conditional" || len(item.Occurrences) != 1 {
+			t.Errorf("branch identity requirement = %+v", item)
 		}
 	}
 }
@@ -313,7 +422,7 @@ func TestSPL2StructuralRequirementsPipelineJoinSelected(t *testing.T) {
 			trace.assertReferences(result.References)
 			for _, identity := range []string{"synthetic_id", "synthetic_uid"} {
 				item := requirementItem(result.Requirements, "field", identity, "read")
-				if item == nil || item.Necessity != "required" {
+				if item == nil || item.Necessity != "required" || item.FieldIdentity == nil || item.FieldIdentity.Kind != "atomic" || !reflect.DeepEqual(item.FieldIdentity.Segments, []string{identity}) {
 					t.Errorf("join key %s = %+v", identity, item)
 				}
 			}

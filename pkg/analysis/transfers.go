@@ -108,6 +108,9 @@ func (s *semanticStage) operandReference(operand locatedOperand, kind, role stri
 	if trace := s.env.requirements.trace; trace != nil {
 		entry := trace.reference(id)
 		if kind == "field" {
+			entry.fieldIdentity = operand.fieldIdentity().clone()
+			entry.reference.FieldIdentity = s.result.References[len(s.result.References)-1].FieldIdentity
+			entry.reference = cloneTraceReference(entry.reference)
 			entry.reference.Binding, entry.directExternal, entry.conditional = s.env.requirements.readIdentity(entry.reference, operand.fieldIdentity())
 		} else {
 			entry.directExternal, entry.conditional = requirementReferencePolicy(entry.reference)

@@ -90,6 +90,15 @@ func TestSnapshotRequirementSetDetached(t *testing.T) {
 	}
 }
 
+func TestSnapshotRequirementFieldIdentityDetached(t *testing.T) {
+	source := analysis.RequirementSet{Items: []analysis.RequirementItem{{FieldIdentity: &analysis.FieldIdentity{Kind: "path", Segments: []string{"actor", "name"}}}}}
+	copy := cloneRequirementSet(source)
+	copy.Items[0].FieldIdentity.Segments[0] = "changed"
+	if source.Items[0].FieldIdentity.Segments[0] != "actor" {
+		t.Fatalf("requirement identity aliases source: %+v", source.Items[0])
+	}
+}
+
 func mutateSnapshotRequirements(set *analysis.RequirementSet) {
 	set.Coverage.Reasons[0] = "mutated"
 	set.Items[0].Identity = "mutated"
