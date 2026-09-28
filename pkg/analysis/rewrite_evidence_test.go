@@ -593,6 +593,40 @@ func TestRewriteRenderUnknownAndCollision(t *testing.T) {
 		t.Fatalf("unrelated complete original scope lost evidence: %+v", p)
 	}
 }
+
+func TestRewriteStructuralCollisionRemainsIneligible(t *testing.T) {
+	query := `FROM main | fields actor.name, 'actor.name'`
+	ordinary, err := Analyze(QueryDocument{Text: query, Language: "spl2"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if ordinary.Status != Valid || !ordinary.Coverage.SemanticComplete {
+		t.Fatalf("structural collision is not semantically complete: %+v", ordinary.Coverage)
+	}
+	session, err := PrepareRewrite(QueryDocument{Text: query, Language: "spl2"}, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	pathRefs := map[string]bool{}
+	for _, reference := range ordinary.References {
+		if reference.Kind == "field" && reference.FieldIdentity != nil && reference.FieldIdentity.Kind == "path" {
+			pathRefs[reference.ID] = true
+		}
+	}
+	found := false
+	for _, site := range session.Evidence().Sites {
+		if !pathRefs[site.ReferenceID] {
+			continue
+		}
+		found = true
+		if site.Eligibility == "eligible" {
+			t.Fatalf("structural path became rewrite-eligible from semantic completeness: %+v", site)
+		}
+	}
+	if !found {
+		t.Fatal("structural path has no located rewrite refusal")
+	}
+}
 func TestRewriteCapabilities(t *testing.T) {
 	for _, lang := range []string{"spl", "spl2"} {
 		m, err := CapabilitiesFor(CapabilityOptions{Language: lang})

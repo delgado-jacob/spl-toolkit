@@ -3649,6 +3649,12 @@
         "name": {
           "type": "string"
         },
+        "field_identity": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.FieldIdentity"
+        },
+        "output_identity": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.FieldIdentity"
+        },
         "original_name": {
           "type": "string"
         },
