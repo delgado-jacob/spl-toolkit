@@ -70,7 +70,7 @@ def test_checkout_source_and_version_are_resolved_from_repository():
     assert support.read_version(PYTHON_DIR) == "0.1.1"
 
 
-def test_docker_build_context_covers_the_native_source_manifest():
+def test_docker_build_context_covers_native_sources_and_packaged_fixture():
     support = load_build_support()
     dockerfile = (ROOT / "Dockerfile").read_text(encoding="utf-8")
     builder = dockerfile.split("\nFROM python:", 1)[0]
@@ -87,7 +87,9 @@ def test_docker_build_context_covers_the_native_source_manifest():
     }
 
     missing = []
-    for relative in support.native_source_files(PYTHON_DIR / "native-source-files.txt"):
+    required = support.native_source_files(PYTHON_DIR / "native-source-files.txt")
+    required.append(support.LINUS_FIXTURE)
+    for relative in required:
         if not any(
             relative == PurePosixPath(path) or PurePosixPath(path) in relative.parents
             for path in copied
@@ -97,7 +99,7 @@ def test_docker_build_context_covers_the_native_source_manifest():
         ):
             missing.append(str(relative))
 
-    assert not missing, f"Docker build context is missing native sources: {missing}"
+    assert not missing, f"Docker build context is missing package inputs: {missing}"
 
 
 def test_staged_source_and_version_are_resolved_without_checkout(tmp_path: Path):

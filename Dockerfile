@@ -11,6 +11,7 @@ COPY grammar ./grammar
 COPY parser ./parser
 COPY pkg ./pkg
 COPY python ./python
+COPY testdata/spl2/linus-forms.json ./testdata/spl2/linus-forms.json
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends python3 python3-pip python3-venv \
