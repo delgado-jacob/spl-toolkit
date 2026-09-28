@@ -91,6 +91,23 @@ func TestRequirementTraceCloneOwnsExactIdentity(t *testing.T) {
 	}
 }
 
+func TestRequirementTraceKeyUsesPrivateIdentityOnlyForExactFields(t *testing.T) {
+	identity := atomicFieldIdentity("actor[]")
+	for _, reference := range []Reference{
+		{Kind: "field", Resolution: "dynamic", NormalizedName: "actor[]"},
+		{Kind: "dataset", Resolution: "exact", NormalizedName: "actor[]"},
+	} {
+		key := requirementTraceKey(requirementTraceReference{reference: reference, fieldIdentity: identity})
+		if key.fieldKey != "" {
+			t.Errorf("non-exact-field trace key used private identity: %+v", key)
+		}
+	}
+	key := requirementTraceKey(requirementTraceReference{reference: Reference{Kind: "field", Resolution: "exact", NormalizedName: "actor[]"}, fieldIdentity: identity})
+	if key.fieldKey == "" {
+		t.Fatalf("exact-field trace key lost private identity: %+v", key)
+	}
+}
+
 func TestRequirementTraceSPL2DatasetParameterProjection(t *testing.T) {
 	for _, name := range []string{"$target_1", "$view"} {
 		t.Run(name, func(t *testing.T) {

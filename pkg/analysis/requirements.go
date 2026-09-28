@@ -247,9 +247,10 @@ func projectRequirements(document QueryDocument, trace *requirementTrace) (Requi
 		}
 		reference := entry.reference
 		if reference.NormalizedName != "" {
-			fieldKey, exactField := entry.fieldIdentity.privateKey()
+			fieldKey, privateExact := entry.fieldIdentity.privateKey()
+			exactField := reference.Kind == "field" && reference.Resolution == "exact" && privateExact
 			key := groupKey{kind: reference.Kind, identity: reference.NormalizedName, role: reference.Role, resolution: reference.Resolution}
-			if reference.Kind == "field" && exactField {
+			if exactField {
 				key.fieldKey = fieldKey
 			}
 			index, found := groups[key]
@@ -267,7 +268,7 @@ func projectRequirements(document QueryDocument, trace *requirementTrace) (Requi
 					Resolution:  reference.Resolution,
 					Occurrences: []RequirementOccurrence{},
 				}
-				if reference.Kind == "field" && exactField {
+				if exactField {
 					identity, _ := entry.fieldIdentity.public()
 					item.FieldIdentity = &identity
 				}

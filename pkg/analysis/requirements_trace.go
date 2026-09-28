@@ -264,7 +264,10 @@ func rebaseRequirementTrace(oldBase, newBase, branch *requirementTrace) *require
 }
 
 func requirementTraceKey(entry requirementTraceReference) requirementTraceMergeKey {
-	fieldKey, _ := entry.fieldIdentity.privateKey()
+	var fieldKey fieldIdentityKey
+	if entry.reference.Kind == "field" && entry.reference.Resolution == "exact" {
+		fieldKey, _ = entry.fieldIdentity.privateKey()
+	}
 	return requirementTraceMergeKey{
 		kind:       entry.reference.Kind,
 		identity:   entry.reference.NormalizedName,

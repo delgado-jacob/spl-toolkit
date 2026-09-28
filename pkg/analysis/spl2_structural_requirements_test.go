@@ -1,6 +1,7 @@
 package analysis
 
 import (
+	"encoding/json"
 	"reflect"
 	"sort"
 	"strings"
@@ -59,6 +60,28 @@ func TestSPL2StructuralRequirementTraceParity(t *testing.T) {
 				t.Errorf("exact structural identity became uncertain: %+v", result.Lineage[len(result.Lineage)-1])
 			}
 		})
+	}
+}
+
+func TestSPL2StructuralRequirementDynamicFieldHasNoExactIdentity(t *testing.T) {
+	result, err := Analyze(QueryDocument{Text: `FROM main | where actor[key]=1`, Language: "spl2"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	ref := spl2Ref(t, result, "actor[]", "read")
+	if ref.Resolution != "dynamic" || ref.FieldIdentity != nil {
+		t.Fatalf("dynamic reference claimed exact identity: %+v", ref)
+	}
+	item := requirementItem(result.Requirements, "field", "actor[]", "read")
+	if item == nil || item.Resolution != "dynamic" || item.FieldIdentity != nil {
+		t.Fatalf("dynamic requirement claimed exact identity: %+v", item)
+	}
+	encoded, err := json.Marshal(item)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(string(encoded), `"field_identity"`) {
+		t.Fatalf("dynamic requirement serialized exact identity: %s", encoded)
 	}
 }
 
