@@ -153,6 +153,50 @@ func TestCapabilityIdentityCollisionProofIsDistinctFromMerge(t *testing.T) {
 	t.Fatal("missing identity collision evidence")
 }
 
+func TestCapabilityIdentityCollisionRequirementClaimNeedsDistinctTypedProof(t *testing.T) {
+	for _, tc := range []struct {
+		name   string
+		mutate func([]map[string]any)
+	}{
+		{"both identities omitted", func(fields []map[string]any) {
+			delete(fields[0], "field_identity")
+			delete(fields[1], "field_identity")
+		}},
+		{"one identity omitted", func(fields []map[string]any) {
+			delete(fields[0], "field_identity")
+		}},
+		{"identities collapsed", func(fields []map[string]any) {
+			fields[1]["field_identity"] = fields[0]["field_identity"]
+		}},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			corpus := embeddedCapabilityCorpusMap(t)
+			var fields []map[string]any
+			for _, item := range corpus["cases"].([]any) {
+				evidence := item.(map[string]any)
+				if evidence["id"] != "spl2.field.identity-collision.positive" {
+					continue
+				}
+				items := evidence["observations"].(map[string]any)["requirements"].(map[string]any)["items"].([]any)
+				for _, item := range items {
+					requirement := item.(map[string]any)
+					if requirement["kind"] == "field" {
+						fields = append(fields, requirement)
+					}
+				}
+				break
+			}
+			if len(fields) != 2 {
+				t.Fatalf("identity collision evidence has %d field requirements", len(fields))
+			}
+			tc.mutate(fields)
+			if _, _, err := decodeCapabilityAssets(embeddedCapabilityLedger, mustJSON(t, corpus)); err == nil {
+				t.Fatal("supported identity-collision requirements claim accepted non-distinct field evidence")
+			}
+		})
+	}
+}
+
 func TestCapabilityRevisionIncludesPrivateRequirementIdentity(t *testing.T) {
 	manifest, err := CapabilitiesFor(CapabilityOptions{Language: "spl2", Profile: "splunkd", Version: "current"})
 	if err != nil {

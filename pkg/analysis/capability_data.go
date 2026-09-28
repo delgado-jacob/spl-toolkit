@@ -331,6 +331,40 @@ func validateCapabilityRecord(record CapabilityRecord, evidence map[string]Capab
 			}
 		}
 	}
+	if record.ID == "spl2.expression.field.identity-collision" && record.Dimensions.Requirements.State == CapabilitySupported {
+		for _, evidenceID := range record.Dimensions.Requirements.EvidenceIDs {
+			if err := validateCapabilityIdentityCollisionRequirementProof(evidence[evidenceID].Observations.Requirements); err != nil {
+				return fmt.Errorf("requirements evidence %q: %w", evidenceID, err)
+			}
+		}
+	}
+	return nil
+}
+
+func validateCapabilityIdentityCollisionRequirementProof(observation *CapabilityRequirementsObservation) error {
+	if observation == nil || !observation.Complete || observation.QueryStatus != Valid {
+		return fmt.Errorf("complete valid identity-collision requirement proof is required")
+	}
+	fields := make([]CapabilityRequirementExpectation, 0, 2)
+	for _, item := range observation.Items {
+		if item.Kind == "field" {
+			fields = append(fields, item)
+		}
+	}
+	if len(fields) != 2 {
+		return fmt.Errorf("two distinct exact same-display field requirements are required")
+	}
+	left, right := fields[0], fields[1]
+	if left.Identity != right.Identity || left.FieldIdentity == nil || right.FieldIdentity == nil ||
+		left.Role != "read" || right.Role != "read" ||
+		left.Necessity != "required" || right.Necessity != "required" ||
+		left.Resolution != "exact" || right.Resolution != "exact" ||
+		capabilityFieldIdentitiesEqual(left.FieldIdentity, right.FieldIdentity) {
+		return fmt.Errorf("two distinct exact same-display field requirements are required")
+	}
+	if left.FieldIdentity.Kind == right.FieldIdentity.Kind {
+		return fmt.Errorf("atomic and path field requirements are both required")
+	}
 	return nil
 }
 
