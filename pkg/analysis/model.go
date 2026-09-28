@@ -75,18 +75,23 @@ type FieldBinding struct {
 	OriginReferenceIDs []string      `json:"origin_reference_ids"`
 	Conditional        bool          `json:"conditional"`
 }
+type FieldRemoval struct {
+	Name          string        `json:"name"`
+	FieldIdentity FieldIdentity `json:"field_identity"`
+}
 type FieldState struct {
 	Fields    []FieldBinding `json:"fields"`
-	Removed   []string       `json:"removed"`
+	Removed   []FieldRemoval `json:"removed"`
 	Open      bool           `json:"open"`
 	Uncertain bool           `json:"uncertain"`
 }
 type Transition struct {
-	Operation         string   `json:"operation"`
-	Output            string   `json:"output"`
-	InputReferenceIDs []string `json:"input_reference_ids"`
-	OutputReferenceID string   `json:"output_reference_id"`
-	Conditional       bool     `json:"conditional"`
+	Operation         string         `json:"operation"`
+	Output            string         `json:"output"`
+	OutputIdentity    *FieldIdentity `json:"output_identity,omitempty"`
+	InputReferenceIDs []string       `json:"input_reference_ids"`
+	OutputReferenceID string         `json:"output_reference_id"`
+	Conditional       bool           `json:"conditional"`
 }
 type Lineage struct {
 	StageID        string       `json:"stage_id"`

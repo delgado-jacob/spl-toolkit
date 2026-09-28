@@ -139,6 +139,26 @@ func TestMergeFlowEnvironmentsRemovalRequiresEveryPath(t *testing.T) {
 	}
 }
 
+func TestFlowMergeKeepsTypedRemovalBesideOtherIdentity(t *testing.T) {
+	parent := closedMergeEnvironment()
+	atomic := atomicFieldIdentity("actor.name")
+	path := pathFieldIdentity("", []string{"actor", "name"})
+	left := parent.clone()
+	right := parent.clone()
+	left.removeIdentity(atomic)
+	right.removeIdentity(atomic)
+	installMergeField(left, path, []string{"ref-path"})
+
+	merged := mergeFlowEnvironments(parent, []flowMergePath{
+		{Ordinal: 0, Environment: left, Reachable: true},
+		{Ordinal: 1, Environment: right, Reachable: true},
+	}, false)
+	state := merged.snapshot()
+	if len(state.Fields) != 1 || state.Fields[0].FieldIdentity.Kind != "path" || !state.Fields[0].Conditional || !reflect.DeepEqual(state.Removed, []FieldRemoval{{Name: "actor.name", FieldIdentity: FieldIdentity{Kind: "atomic", Segments: []string{"actor.name"}}}}) {
+		t.Fatalf("alternative merge lost typed membership: %+v", state)
+	}
+}
+
 func TestMergeFlowEnvironmentsPropagatesOpenAndUncertainInputs(t *testing.T) {
 	parent := closedMergeEnvironment()
 	closed := parent.clone()

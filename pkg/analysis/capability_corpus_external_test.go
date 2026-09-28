@@ -1044,9 +1044,13 @@ func fieldStateFact(state analysis.FieldState) analysis.CapabilityFieldStateExpe
 			Conditional:        field.Conditional,
 		})
 	}
+	removed := make([]string, 0, len(state.Removed))
+	for _, removal := range state.Removed {
+		removed = append(removed, removal.Name)
+	}
 	return analysis.CapabilityFieldStateExpectation{
 		Fields:    fields,
-		Removed:   slices.Clone(state.Removed),
+		Removed:   removed,
 		Open:      state.Open,
 		Uncertain: state.Uncertain,
 	}

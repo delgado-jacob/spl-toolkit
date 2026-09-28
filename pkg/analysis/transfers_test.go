@@ -245,7 +245,7 @@ func TestLocatedTransferExactNullRemovesWithoutReadOrCreation(t *testing.T) {
 	if _, known := s.env.fields[fieldKey]; known || !s.env.removed[fieldKey] {
 		t.Fatal("null did not preserve canonical tombstone", s.env)
 	}
-	want := []Transition{{Operation: "remove", Output: "field", InputReferenceIDs: []string{}, OutputReferenceID: r.References[0].ID}}
+	want := []Transition{{Operation: "remove", Output: "field", OutputIdentity: &FieldIdentity{Kind: "atomic", Segments: []string{"field"}}, InputReferenceIDs: []string{}, OutputReferenceID: r.References[0].ID}}
 	if !reflect.DeepEqual(s.transitions, want) {
 		t.Fatal("null changed removal evidence", s.transitions)
 	}

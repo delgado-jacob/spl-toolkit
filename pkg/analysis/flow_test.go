@@ -161,8 +161,8 @@ func TestFlowFieldsInternalMembership(t *testing.T) {
 		}
 		if tc.removed {
 			found := false
-			for _, name := range r.Lineage[len(r.Lineage)-1].After.Removed {
-				found = found || name == "_time"
+			for _, removal := range r.Lineage[len(r.Lineage)-1].After.Removed {
+				found = found || removal.Name == "_time"
 			}
 			if !found {
 				t.Fatal("removed internal tombstone lost")
@@ -318,9 +318,17 @@ func TestFlowWildcardExclusionsAreNonConsuming(t *testing.T) {
 				}
 			}
 			last := r.Lineage[len(r.Lineage)-1].After
-			if len(last.Fields) != 1 || last.Fields[0].Name != "keep" || last.Open != tc.open || last.Uncertain != tc.uncertain || !reflect.DeepEqual(last.Removed, tc.removed) {
+			if len(last.Fields) != 1 || last.Fields[0].Name != "keep" || last.Open != tc.open || last.Uncertain != tc.uncertain || !reflect.DeepEqual(fieldRemovalNames(last.Removed), tc.removed) {
 				t.Fatal("changed removal transfer", last)
 			}
 		})
 	}
+}
+
+func fieldRemovalNames(removals []FieldRemoval) []string {
+	names := make([]string, 0, len(removals))
+	for _, removal := range removals {
+		names = append(names, removal.Name)
+	}
+	return names
 }

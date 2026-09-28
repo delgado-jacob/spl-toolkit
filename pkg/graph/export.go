@@ -359,8 +359,14 @@ func copyState(s analysis.FieldState) analysis.FieldState {
 	s.Fields = append([]analysis.FieldBinding{}, s.Fields...)
 	for i := range s.Fields {
 		s.Fields[i].OriginReferenceIDs = append([]string{}, s.Fields[i].OriginReferenceIDs...)
+		s.Fields[i].FieldIdentity.Segments = append([]string{}, s.Fields[i].FieldIdentity.Segments...)
 	}
-	s.Removed = append([]string{}, s.Removed...)
+	removed := make([]analysis.FieldRemoval, len(s.Removed))
+	for i, removal := range s.Removed {
+		removed[i] = removal
+		removed[i].FieldIdentity.Segments = append([]string{}, removal.FieldIdentity.Segments...)
+	}
+	s.Removed = removed
 	return s
 }
 func hasString(items []string, want string) bool {

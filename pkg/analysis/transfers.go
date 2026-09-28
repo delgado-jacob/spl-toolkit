@@ -43,6 +43,14 @@ type lookupOutput struct {
 	PreserveExisting bool
 }
 
+func transitionOutputIdentity(identity fieldIdentity) *FieldIdentity {
+	publicIdentity, exact := identity.public()
+	if !exact {
+		return nil
+	}
+	return &publicIdentity
+}
+
 func (s *semanticStage) diagnosticAt(code, severity, category, message string, location Location, incomplete bool) {
 	s.diagnosticAtOwned(code, severity, category, message, location, incomplete, nil)
 }
@@ -201,7 +209,8 @@ func (s *semanticStage) createAtWithRequirementConditional(operand locatedOperan
 	if collision {
 		s.fieldIdentityCollision(name, operand.Location, owners)
 	}
-	s.appendTransition(Transition{Operation: operation, Output: name, InputReferenceIDs: copyIDs(inputs), OutputReferenceID: id, Conditional: conditional})
+	outputIdentity := transitionOutputIdentity(operand.fieldIdentity())
+	s.appendTransition(Transition{Operation: operation, Output: name, OutputIdentity: outputIdentity, InputReferenceIDs: copyIDs(inputs), OutputReferenceID: id, Conditional: conditional})
 	return id
 }
 func (s *semanticStage) selectorAt(operand locatedOperand, role string, allowWildcard bool) ([]fieldIdentity, []string) {
@@ -305,7 +314,8 @@ func (s *semanticStage) applyProjection(selectors []locatedOperand, mode string,
 		for _, identity := range identities {
 			if exclude {
 				s.env.removeIdentity(identity)
-				s.appendTransition(Transition{Operation: "remove", Output: identity.PublicName, InputReferenceIDs: copyIDs(ids)})
+				outputIdentity := transitionOutputIdentity(identity)
+				s.appendTransition(Transition{Operation: "remove", Output: identity.PublicName, OutputIdentity: outputIdentity, InputReferenceIDs: copyIDs(ids)})
 			} else if f, ok := s.projectedIdentityField(identity, ids); ok {
 				selected = append(selected, preparedSelection{Field: f, InputReferenceIDs: ids, EmitProjectTransition: true})
 			}
@@ -380,7 +390,8 @@ func (s *semanticStage) applyPreparedProjection(selected []preparedSelection, mo
 	}
 	for _, selection := range selected {
 		if selection.EmitProjectTransition {
-			s.appendTransition(Transition{Operation: "project", Output: selection.Field.Name, InputReferenceIDs: copyIDs(selection.InputReferenceIDs)})
+			outputIdentity := transitionOutputIdentity(selection.Field.identity)
+			s.appendTransition(Transition{Operation: "project", Output: selection.Field.Name, OutputIdentity: outputIdentity, InputReferenceIDs: copyIDs(selection.InputReferenceIDs)})
 		}
 	}
 	s.env.rewriteProject(s.env.fields)
@@ -619,11 +630,13 @@ func (s *semanticStage) applyAggregation(outputs []aggregateOutput, groups []loc
 			}
 		}
 		for _, identity := range identities {
+			var outputIdentity *FieldIdentity
 			if field, ok := s.projectedIdentityField(identity, ids); ok {
 				key, _ := identity.privateKey()
 				output.fields[key] = field
+				outputIdentity = transitionOutputIdentity(identity)
 			}
-			s.appendTransition(Transition{Operation: "project", Output: identity.PublicName, InputReferenceIDs: copyIDs(ids)})
+			s.appendTransition(Transition{Operation: "project", Output: identity.PublicName, OutputIdentity: outputIdentity, InputReferenceIDs: copyIDs(ids)})
 		}
 	}
 	if !preserveInput {
@@ -677,7 +690,8 @@ func (s *semanticStage) removeAt(operand locatedOperand) {
 	s.rewriteRemoval(id, operand)
 	s.env.removeIdentity(operand.fieldIdentity())
 	s.env.requirements.removeIdentity(operand.fieldIdentity())
-	s.appendTransition(Transition{Operation: "remove", Output: operand.Name, InputReferenceIDs: []string{}, OutputReferenceID: id})
+	outputIdentity := transitionOutputIdentity(operand.fieldIdentity())
+	s.appendTransition(Transition{Operation: "remove", Output: operand.Name, OutputIdentity: outputIdentity, InputReferenceIDs: []string{}, OutputReferenceID: id})
 }
 
 // applySource starts an independent external dataset without carrying prior fields.
@@ -686,9 +700,6 @@ func (s *semanticStage) applySource() {
 }
 
 func (s *semanticStage) appendTransition(transition Transition) {
-	if s.env.ambiguous[transition.Output] {
-		return
-	}
 	s.transitions = append(s.transitions, transition)
 }
 

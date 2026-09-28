@@ -259,7 +259,7 @@ func TestFieldIdentitySnapshotKeepsConditionalityAndOriginsSeparate(t *testing.T
 			{Name: "actor.name", FieldIdentity: FieldIdentity{Kind: "atomic", Segments: []string{"actor.name"}}, OriginReferenceIDs: []string{"ref-atomic"}},
 			{Name: "actor.name", FieldIdentity: FieldIdentity{Kind: "path", Segments: []string{"actor", "name"}}, OriginReferenceIDs: []string{"ref-path"}, Conditional: true},
 		},
-		Removed: []string{},
+		Removed: []FieldRemoval{},
 		Open:    true,
 	}
 	if !reflect.DeepEqual(state, want) {
@@ -343,9 +343,10 @@ func TestFieldIdentityExactRemovalKeepsOtherPrivateIdentityAvailable(t *testing.
 		name         string
 		query        string
 		readOriginal string
+		removedKind  string
 	}{
-		{name: "atomic removal keeps structural", query: `FROM main | fields - 'actor.name' | eval x=actor.name`, readOriginal: "actor.name"},
-		{name: "structural removal keeps atomic", query: `FROM main | fields - actor.name | eval x='actor.name'`, readOriginal: "'actor.name'"},
+		{name: "atomic removal keeps structural", query: `FROM main | fields - 'actor.name' | eval x=actor.name`, readOriginal: "actor.name", removedKind: "atomic"},
+		{name: "structural removal keeps atomic", query: `FROM main | fields - actor.name | eval x='actor.name'`, readOriginal: "'actor.name'", removedKind: "path"},
 	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
@@ -368,15 +369,14 @@ func TestFieldIdentityExactRemovalKeepsOtherPrivateIdentityAvailable(t *testing.
 				t.Fatalf("surviving requirement identity = %+v", entry)
 			}
 			state := result.Lineage[len(result.Lineage)-1].After
+			removals := publicRemovalIdentities(t, state)
+			if len(removals) != 1 || removals[0].Name != "actor.name" || removals[0].FieldIdentity.Kind != tc.removedKind {
+				t.Fatalf("typed removal = %+v, want %s actor.name", removals, tc.removedKind)
+			}
 			count := 0
 			for _, field := range state.Fields {
 				if field.Name == "actor.name" {
 					count++
-				}
-			}
-			for _, removed := range state.Removed {
-				if removed == "actor.name" {
-					t.Fatalf("live public field also reported removed: %+v", state)
 				}
 			}
 			if count != 1 {
@@ -413,7 +413,7 @@ func TestFieldIdentityWildcardRemovalUsesMatchedPrivateIdentity(t *testing.T) {
 	}
 	foundRemoved := false
 	for _, removed := range state.Removed {
-		foundRemoved = foundRemoved || removed == "actor.name"
+		foundRemoved = foundRemoved || removed.Name == "actor.name"
 	}
 	if !foundRemoved {
 		t.Fatalf("structural removal missing from public state: %+v", state)
@@ -427,8 +427,8 @@ func TestFieldIdentityWildcardRemovalRetainsBothTransitions(t *testing.T) {
 		t.Fatal(err)
 	}
 	state := result.Lineage[len(result.Lineage)-1].After
-	if !reflect.DeepEqual(state.Removed, []string{"actor.name"}) {
-		t.Fatalf("wildcard removal state = %+v, want one conservative actor.name removal", state)
+	if len(state.Removed) != 2 {
+		t.Fatalf("wildcard removal state = %+v, want two exact actor.name removals", state)
 	}
 	reads := []Reference{}
 	for _, ref := range result.References {
@@ -448,9 +448,115 @@ func TestFieldIdentityWildcardRemovalRetainsBothTransitions(t *testing.T) {
 	if removals != 2 {
 		t.Fatalf("wildcard emitted %d removals: %+v", removals, result.Lineage[len(result.Lineage)-1].Transitions)
 	}
+	publicRemovals := publicRemovalIdentities(t, state)
+	if len(publicRemovals) != 2 || publicRemovals[0].FieldIdentity.Kind != "atomic" || publicRemovals[1].FieldIdentity.Kind != "path" {
+		t.Fatalf("wildcard typed removals = %+v", publicRemovals)
+	}
+	publicTransitions := publicTransitionIdentities(t, result.Lineage[len(result.Lineage)-1].Transitions)
+	removedKinds := map[string]bool{}
+	for _, transition := range publicTransitions {
+		if transition.Operation == "remove" && transition.Output == "actor.name" {
+			removedKinds[transition.OutputIdentity.Kind] = true
+		}
+	}
+	if !removedKinds["atomic"] || !removedKinds["path"] {
+		t.Fatalf("wildcard typed transitions = %+v", publicTransitions)
+	}
 	for _, diagnostic := range result.Diagnostics {
 		if diagnostic.Code == CodeAmbiguousField {
 			t.Fatalf("exact wildcard identities reported as ambiguous: %+v", diagnostic)
 		}
 	}
+}
+
+func TestFieldIdentityWildcardSelectionHasTypedTransitions(t *testing.T) {
+	result, _, err := analyzeRewriteWithTrace(QueryDocument{Text: `FROM main | eval structural=actor.name, atomic='actor.name' | fields 'actor.*'`, Language: "spl2"}, nil, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	transitions := publicTransitionIdentities(t, result.Lineage[len(result.Lineage)-1].Transitions)
+	kinds := map[string]bool{}
+	for _, transition := range transitions {
+		if transition.Operation == "project" && transition.Output == "actor.name" {
+			kinds[transition.OutputIdentity.Kind] = true
+		}
+	}
+	if !kinds["atomic"] || !kinds["path"] {
+		t.Fatalf("wildcard typed selection transitions = %+v", transitions)
+	}
+}
+
+func TestFieldIdentityAggregateAliasHasTypedTransition(t *testing.T) {
+	result, _, err := analyzeRewriteWithTrace(QueryDocument{Text: `FROM main | stats count() AS 'actor.name' BY actor.name`, Language: "spl2"}, nil, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	transitions := publicTransitionIdentities(t, result.Lineage[len(result.Lineage)-1].Transitions)
+	kinds := map[string]bool{}
+	for _, transition := range transitions {
+		if transition.Output == "actor.name" {
+			kinds[transition.Operation+":"+transition.OutputIdentity.Kind] = true
+		}
+	}
+	if !kinds["project:path"] || !kinds["aggregate:atomic"] {
+		t.Fatalf("typed aggregate group and alias transitions = %+v", transitions)
+	}
+}
+
+func TestFieldIdentityUnprovedGroupDoesNotClaimExactOutput(t *testing.T) {
+	result, _, err := analyzeRewriteWithTrace(QueryDocument{Text: `FROM [{known:1}] | stats count() AS n BY missing`, Language: "spl2"}, nil, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, transition := range result.Lineage[len(result.Lineage)-1].Transitions {
+		if transition.Operation == "project" && transition.Output == "missing" {
+			if transition.OutputIdentity != nil {
+				t.Fatalf("unproved group claimed exact output: %+v", transition)
+			}
+			return
+		}
+	}
+	t.Fatal("missing group transition was unexpectedly removed")
+}
+
+func publicRemovalIdentities(t *testing.T, state FieldState) []struct {
+	Name          string        `json:"name"`
+	FieldIdentity FieldIdentity `json:"field_identity"`
+} {
+	t.Helper()
+	var public struct {
+		Removed []struct {
+			Name          string        `json:"name"`
+			FieldIdentity FieldIdentity `json:"field_identity"`
+		} `json:"removed"`
+	}
+	encoded, err := json.Marshal(state)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := json.Unmarshal(encoded, &public); err != nil {
+		t.Fatalf("public removals lack typed entries: %v", err)
+	}
+	return public.Removed
+}
+
+func publicTransitionIdentities(t *testing.T, transitions []Transition) []struct {
+	Operation      string        `json:"operation"`
+	Output         string        `json:"output"`
+	OutputIdentity FieldIdentity `json:"output_identity"`
+} {
+	t.Helper()
+	var public []struct {
+		Operation      string        `json:"operation"`
+		Output         string        `json:"output"`
+		OutputIdentity FieldIdentity `json:"output_identity"`
+	}
+	encoded, err := json.Marshal(transitions)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := json.Unmarshal(encoded, &public); err != nil {
+		t.Fatal(err)
+	}
+	return public
 }

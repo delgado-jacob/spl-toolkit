@@ -1279,10 +1279,12 @@ func (s *spl2SemanticStage) aggregates(calls []spl2.IAggregateContext, keys []sp
 			}
 		}
 		for _, group := range expressionGroups {
-			s.appendTransition(Transition{Operation: "project", Output: group.Target.Name, InputReferenceIDs: copyIDs(group.InputReferenceIDs), Conditional: group.Conditional})
+			outputIdentity := transitionOutputIdentity(group.Target.fieldIdentity())
+			s.appendTransition(Transition{Operation: "project", Output: group.Target.Name, OutputIdentity: outputIdentity, InputReferenceIDs: copyIDs(group.InputReferenceIDs), Conditional: group.Conditional})
 		}
 		for _, output := range installedOutputs {
-			s.appendTransition(Transition{Operation: "aggregate", Output: output.Target.Name, InputReferenceIDs: copyIDs(output.InputReferenceIDs), OutputReferenceID: output.OutputReferenceID, Conditional: output.Conditional})
+			outputIdentity := transitionOutputIdentity(output.Target.fieldIdentity())
+			s.appendTransition(Transition{Operation: "aggregate", Output: output.Target.Name, OutputIdentity: outputIdentity, InputReferenceIDs: copyIDs(output.InputReferenceIDs), OutputReferenceID: output.OutputReferenceID, Conditional: output.Conditional})
 		}
 		return
 	}

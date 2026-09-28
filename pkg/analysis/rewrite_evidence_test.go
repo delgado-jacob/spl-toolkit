@@ -673,6 +673,21 @@ func TestRewriteRenderRemovalMustPreserveFieldState(t *testing.T) {
 		t.Fatal("changing only the removal silently retained the earlier source field")
 	}
 }
+
+func TestRewriteTypedRemovalDoesNotMatchUntypedSite(t *testing.T) {
+	s := rewriteTestSession(t, "spl2", `FROM main | fields - 'actor.name'`)
+	removal := rewriteFind(t, s, "field", "actor.name", 0)
+	for i := range s.result.References {
+		if s.result.References[i].ID == removal.ReferenceID {
+			s.result.References[i].FieldIdentity = nil
+		}
+	}
+	index := len(s.result.Lineage) - 1
+	state := s.result.Lineage[index].After
+	if len(state.Removed) != 1 || !s.rewriteFieldStateEqual(state, state, map[string]string{}, map[string]RewriteIdentity{removal.ReferenceID: rewriteName("replacement")}, s.result.Lineage[index].ScopeID, index, true) {
+		t.Fatalf("untyped rewrite site matched exact removal: %+v", state)
+	}
+}
 func TestRewriteRenderConditionalImplicitConsumer(t *testing.T) {
 	s := rewriteTestSession(t, "spl2", `FROM main | stats sum(bytes) | lookup people id | table 'sum(bytes)'`)
 	site := rewriteFind(t, s, "field", "bytes", 0)

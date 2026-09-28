@@ -75,6 +75,11 @@ func cloneReferences(in []analysis.Reference) []analysis.Reference {
 	for i, reference := range in {
 		out[i] = reference
 		out[i].OriginReferenceIDs = append([]string{}, reference.OriginReferenceIDs...)
+		if reference.FieldIdentity != nil {
+			identity := *reference.FieldIdentity
+			identity.Segments = append([]string{}, identity.Segments...)
+			out[i].FieldIdentity = &identity
+		}
 	}
 	return out
 }
@@ -89,6 +94,11 @@ func cloneLineage(in []analysis.Lineage) []analysis.Lineage {
 		for j, transition := range lineage.Transitions {
 			out[i].Transitions[j] = transition
 			out[i].Transitions[j].InputReferenceIDs = append([]string{}, transition.InputReferenceIDs...)
+			if transition.OutputIdentity != nil {
+				identity := *transition.OutputIdentity
+				identity.Segments = append([]string{}, identity.Segments...)
+				out[i].Transitions[j].OutputIdentity = &identity
+			}
 		}
 		if lineage.ExecutionOrder != nil {
 			order := *lineage.ExecutionOrder
@@ -104,8 +114,13 @@ func cloneFieldState(in analysis.FieldState) analysis.FieldState {
 	for i, field := range in.Fields {
 		out.Fields[i] = field
 		out.Fields[i].OriginReferenceIDs = append([]string{}, field.OriginReferenceIDs...)
+		out.Fields[i].FieldIdentity.Segments = append([]string{}, field.FieldIdentity.Segments...)
 	}
-	out.Removed = append([]string{}, in.Removed...)
+	out.Removed = make([]analysis.FieldRemoval, len(in.Removed))
+	for i, removal := range in.Removed {
+		out.Removed[i] = removal
+		out.Removed[i].FieldIdentity.Segments = append([]string{}, removal.FieldIdentity.Segments...)
+	}
 	return out
 }
 

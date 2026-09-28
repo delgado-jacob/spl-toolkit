@@ -309,7 +309,8 @@ func (s *semanticStage) applyTstatsPartialAggregation(outputs []aggregateOutput,
 	for _, group := range retained {
 		s.env.install(group.operand.Name, group.origins, true)
 		s.env.requirements.install(group.operand.Name, group.requirementOrigins, true)
-		s.transitions = append(s.transitions, Transition{Operation: "project", Output: group.operand.Name, InputReferenceIDs: []string{group.inputReferenceID}, Conditional: true})
+		outputIdentity := transitionOutputIdentity(group.operand.fieldIdentity())
+		s.transitions = append(s.transitions, Transition{Operation: "project", Output: group.operand.Name, OutputIdentity: outputIdentity, InputReferenceIDs: []string{group.inputReferenceID}, Conditional: true})
 	}
 	for _, output := range outputs {
 		s.createAtWithRequirementConditional(output.Target, "output", "aggregate", output.InputReferenceIDs, true, true)

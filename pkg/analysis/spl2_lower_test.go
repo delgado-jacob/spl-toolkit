@@ -61,8 +61,8 @@ func TestSPL2LowerSelectedCommandTransfers(t *testing.T) {
 
 	t.Run("selected stats group identity collision", func(t *testing.T) {
 		r := spl2AnalyzeTest(t, `FROM synthetic_events | stats count() AS synthetic_count BY 'actor.name', actor.name`)
-		if r.Status != Incomplete || r.Coverage.SemanticComplete || r.Requirements.Coverage.Complete {
-			t.Fatalf("colliding selected groups received complete credit: %+v", r)
+		if r.Status != Valid || !r.Coverage.SemanticComplete {
+			t.Fatalf("distinct selected groups lost complete flow: %+v", r)
 		}
 		groupIDs := []string{}
 		for _, ref := range r.References {
@@ -73,15 +73,6 @@ func TestSPL2LowerSelectedCommandTransfers(t *testing.T) {
 		if len(groupIDs) != 2 {
 			t.Fatalf("colliding group reads = %+v", r.References)
 		}
-		ambiguities := 0
-		for _, diagnostic := range r.Diagnostics {
-			if diagnostic.Code == CodeAmbiguousField {
-				ambiguities++
-			}
-		}
-		if ambiguities != 1 {
-			t.Fatalf("ambiguity diagnostics = %d: %+v", ambiguities, r.Diagnostics)
-		}
 		state := r.Lineage[len(r.Lineage)-1].After
 		bindings := []FieldBinding{}
 		for _, field := range state.Fields {
@@ -89,53 +80,50 @@ func TestSPL2LowerSelectedCommandTransfers(t *testing.T) {
 				bindings = append(bindings, field)
 			}
 		}
-		if !state.Uncertain || len(bindings) != 1 || !reflect.DeepEqual(bindings[0].OriginReferenceIDs, groupIDs) {
-			t.Fatalf("colliding group state = %+v, want combined origins %v", state, groupIDs)
+		if state.Uncertain || len(bindings) != 2 || bindings[0].FieldIdentity.Kind != "atomic" || bindings[1].FieldIdentity.Kind != "path" || !reflect.DeepEqual(bindings[0].OriginReferenceIDs, []string{groupIDs[0]}) || !reflect.DeepEqual(bindings[1].OriginReferenceIDs, []string{groupIDs[1]}) {
+			t.Fatalf("distinct group state = %+v", state)
 		}
+		projects := map[string]bool{}
 		for _, transition := range r.Lineage[len(r.Lineage)-1].Transitions {
 			if transition.Operation == "project" && transition.Output == "actor.name" {
-				t.Fatalf("ambiguous group emitted an identity-specific transition: %+v", transition)
+				if transition.OutputIdentity == nil {
+					t.Fatalf("group transition lacks identity: %+v", transition)
+				}
+				projects[transition.OutputIdentity.Kind] = true
 			}
 		}
-		assertRequirementGap(t, r.Requirements.Gaps, CodeAmbiguousField, groupIDs, []string{CodeAmbiguousField})
+		if !projects["atomic"] || !projects["path"] {
+			t.Fatalf("distinct group transitions = %+v", r.Lineage[len(r.Lineage)-1].Transitions)
+		}
 	})
 
 	t.Run("selected stats group and aggregate collision", func(t *testing.T) {
 		r := spl2AnalyzeTest(t, `FROM synthetic_dataset | stats count() AS 'actor.name' BY actor.name`)
-		if r.Status != Incomplete || r.Coverage.SemanticComplete || r.Requirements.Coverage.Complete {
-			t.Fatalf("group/output collision received complete credit: %+v", r)
+		if r.Status != Valid || !r.Coverage.SemanticComplete {
+			t.Fatalf("distinct group/output identities lost complete flow: %+v", r)
 		}
 		group := spl2Ref(t, r, "actor.name", "group")
 		output := spl2Ref(t, r, "actor.name", "output")
-		ambiguities := 0
-		for _, diagnostic := range r.Diagnostics {
-			if diagnostic.Code == CodeAmbiguousField {
-				ambiguities++
-				if diagnostic.Category != "unsupported_semantics" {
-					t.Fatalf("ambiguity category = %q", diagnostic.Category)
-				}
-			}
-		}
-		if ambiguities != 1 {
-			t.Fatalf("ambiguity diagnostics = %d: %+v", ambiguities, r.Diagnostics)
-		}
 		state := r.Lineage[len(r.Lineage)-1].After
-		if !state.Uncertain || len(state.Fields) != 1 || state.Fields[0].Name != "actor.name" || !reflect.DeepEqual(state.Fields[0].OriginReferenceIDs, []string{group.ID, output.ID}) {
-			t.Fatalf("collided public binding = %+v, want origins %s/%s", state, group.ID, output.ID)
+		if state.Uncertain || len(state.Fields) != 2 || state.Fields[0].FieldIdentity.Kind != "atomic" || state.Fields[1].FieldIdentity.Kind != "path" || !reflect.DeepEqual(state.Fields[0].OriginReferenceIDs, []string{output.ID}) || !reflect.DeepEqual(state.Fields[1].OriginReferenceIDs, []string{group.ID}) {
+			t.Fatalf("group/output bindings = %+v", state)
 		}
+		transitions := map[string]bool{}
 		for _, transition := range r.Lineage[len(r.Lineage)-1].Transitions {
-			if transition.Output == "actor.name" {
-				t.Fatalf("collided identity emitted an unrepresentable transition: %+v", transition)
+			if transition.Output == "actor.name" && transition.OutputIdentity != nil {
+				transitions[transition.Operation+":"+transition.OutputIdentity.Kind] = true
 			}
 		}
-		assertRequirementGap(t, r.Requirements.Gaps, CodeAmbiguousField, []string{group.ID, output.ID}, []string{CodeAmbiguousField})
+		if !transitions["project:path"] || !transitions["aggregate:atomic"] {
+			t.Fatalf("group/output transitions = %+v", r.Lineage[len(r.Lineage)-1].Transitions)
+		}
 	})
 
 	t.Run("selected stats collision preserves other transition order", func(t *testing.T) {
 		r := spl2AnalyzeTest(t, `FROM synthetic_dataset | stats sum(synthetic_value) AS synthetic_total, count() AS 'actor.name' BY synthetic_region, actor.name`)
 		transitions := r.Lineage[len(r.Lineage)-1].Transitions
-		if len(transitions) != 2 || transitions[0].Operation != "project" || transitions[0].Output != "synthetic_region" || transitions[1].Operation != "aggregate" || transitions[1].Output != "synthetic_total" {
-			t.Fatalf("noncolliding transition order changed: %+v", transitions)
+		if len(transitions) != 4 || transitions[0].Operation != "project" || transitions[0].Output != "synthetic_region" || transitions[1].Operation != "project" || transitions[1].Output != "actor.name" || transitions[2].Operation != "aggregate" || transitions[2].Output != "synthetic_total" || transitions[3].Operation != "aggregate" || transitions[3].Output != "actor.name" {
+			t.Fatalf("selected stats transition order changed: %+v", transitions)
 		}
 	})
 
@@ -999,27 +987,23 @@ func TestSPL2PipelineJoinOpenSourcesInstallSideOwnedKeys(t *testing.T) {
 	}
 }
 
-func TestSPL2PipelineJoinDoesNotReownInputAmbiguity(t *testing.T) {
+func TestSPL2PipelineJoinKeepsDistinctInputIdentities(t *testing.T) {
 	query := `FROM main | where actor.name="x" AND 'actor.name'="x" | join type=inner left=L right=R where L.id=R.uid [FROM other]`
 	r := spl2AnalyzeTest(t, query)
-	ambiguities := 0
 	for _, diagnostic := range r.Diagnostics {
-		if diagnostic.Code != CodeAmbiguousField {
-			continue
-		}
-		ambiguities++
-		if diagnostic.Location.Start.Offset >= strings.Index(query, " | join") {
-			t.Errorf("join re-owned input ambiguity: %+v", diagnostic)
+		if diagnostic.Code == CodeAmbiguousField {
+			t.Errorf("join invented input ambiguity: %+v", diagnostic)
 		}
 	}
-	gaps := 0
-	for _, gap := range r.Requirements.Gaps {
-		if gap.Code == CodeAmbiguousField {
-			gaps++
+	state := r.Lineage[len(r.Lineage)-1].After
+	identities := map[string]bool{}
+	for _, field := range state.Fields {
+		if field.Name == "actor.name" {
+			identities[field.FieldIdentity.Kind] = true
 		}
 	}
-	if ambiguities != 1 || gaps != 1 {
-		t.Fatalf("input ambiguity cardinality = diagnostics %d gaps %d: %+v", ambiguities, gaps, r)
+	if r.Status != Valid || !identities["atomic"] || !identities["path"] {
+		t.Fatalf("join lost distinct inputs: %+v", r)
 	}
 }
 
@@ -1062,8 +1046,8 @@ func TestSPL2SelectedAlternativeMergesOwnPrivateIdentityCollisions(t *testing.T)
 					ambiguities++
 				}
 			}
-			if r.Status != Incomplete || r.Coverage.SemanticComplete || r.Requirements.Coverage.Complete || ambiguities != 1 {
-				t.Fatalf("selected merge collision = %+v", r)
+			if r.Status != Valid || !r.Coverage.SemanticComplete || ambiguities != 0 {
+				t.Fatalf("selected merge identities = %+v", r)
 			}
 			state := r.Lineage[len(r.Lineage)-1].After
 			actorBindings := []FieldBinding{}
@@ -1072,10 +1056,9 @@ func TestSPL2SelectedAlternativeMergesOwnPrivateIdentityCollisions(t *testing.T)
 					actorBindings = append(actorBindings, field)
 				}
 			}
-			if !state.Uncertain || len(actorBindings) != 1 || len(actorBindings[0].OriginReferenceIDs) != 2 {
-				t.Fatalf("selected merge collision state = %+v", state)
+			if !state.Uncertain || len(actorBindings) != 2 || actorBindings[0].FieldIdentity.Kind != "atomic" || actorBindings[1].FieldIdentity.Kind != "path" || !actorBindings[0].Conditional || !actorBindings[1].Conditional {
+				t.Fatalf("selected merge identity state = %+v", state)
 			}
-			assertRequirementGap(t, r.Requirements.Gaps, CodeAmbiguousField, actorBindings[0].OriginReferenceIDs, []string{CodeAmbiguousField})
 		})
 	}
 }
@@ -1397,24 +1380,27 @@ func TestSPL2SequentialFullState(t *testing.T) {
 	}
 	ref := func(id, name, role, stage, bind string, start, end int, origins ...string) Reference {
 		kind := "field"
+		var identity *FieldIdentity
 		if name == "main" {
 			kind = "dataset"
+		} else {
+			identity = testAtomicIdentityPointer(name)
 		}
-		return Reference{ID: id, OriginalName: text[start:end], NormalizedName: name, Kind: kind, Role: role, StageID: stage, ScopeID: "scope-0", Location: loc(start, end), Resolution: "exact", Binding: bind, OriginReferenceIDs: append([]string{}, origins...)}
+		return Reference{ID: id, OriginalName: text[start:end], NormalizedName: name, FieldIdentity: identity, Kind: kind, Role: role, StageID: stage, ScopeID: "scope-0", Location: loc(start, end), Resolution: "exact", Binding: bind, OriginReferenceIDs: append([]string{}, origins...)}
 	}
 	field := func(name string, ids ...string) FieldBinding {
-		return FieldBinding{Name: name, OriginReferenceIDs: ids}
+		return FieldBinding{Name: name, FieldIdentity: testAtomicIdentity(name), OriginReferenceIDs: ids}
 	}
-	before := FieldState{Fields: []FieldBinding{}, Removed: []string{}, Open: true}
-	assigned := FieldState{Fields: []FieldBinding{field("bytes", "ref-2"), field("x", "ref-1", "ref-2"), field("y", "ref-3", "ref-4", "ref-1", "ref-2")}, Removed: []string{}, Open: true}
-	after := FieldState{Fields: []FieldBinding{field("y", "ref-3", "ref-4", "ref-1", "ref-2")}, Removed: []string{}}
+	before := FieldState{Fields: []FieldBinding{}, Removed: []FieldRemoval{}, Open: true}
+	assigned := FieldState{Fields: []FieldBinding{field("bytes", "ref-2"), field("x", "ref-1", "ref-2"), field("y", "ref-3", "ref-4", "ref-1", "ref-2")}, Removed: []FieldRemoval{}, Open: true}
+	after := FieldState{Fields: []FieldBinding{field("y", "ref-3", "ref-4", "ref-1", "ref-2")}, Removed: []FieldRemoval{}}
 	want := newResult(QueryDocument{Text: text, Language: "spl2", Profile: "splunkd", Version: "current"})
 	want.Status = Valid
 	want.Scopes = []Scope{{ID: "scope-0", Kind: "root", Location: loc(0, len(text))}}
 	want.Stages = []Stage{{"stage-0", "from", 0, "scope-0", loc(0, 9), true}, {"stage-1", "eval", 1, "scope-0", loc(12, 31), true}, {"stage-2", "table", 2, "scope-0", loc(34, 41), true}}
 	want.Dependencies.Datasets = []string{"main"}
 	want.References = []Reference{ref("ref-0", "main", "read", "stage-0", "not_applicable", 5, 9), ref("ref-1", "x", "create", "stage-1", "not_applicable", 17, 18, "ref-2"), ref("ref-2", "bytes", "read", "stage-1", "source", 19, 24), ref("ref-3", "y", "create", "stage-1", "not_applicable", 26, 27, "ref-4", "ref-1", "ref-2"), ref("ref-4", "x", "read", "stage-1", "derived", 28, 29, "ref-1", "ref-2"), ref("ref-5", "y", "read", "stage-2", "derived", 40, 41, "ref-3", "ref-4", "ref-1", "ref-2")}
-	want.Lineage = []Lineage{{StageID: "stage-0", ScopeID: "scope-0", Before: before, After: before, Transitions: []Transition{}}, {StageID: "stage-1", ScopeID: "scope-0", Before: before, After: assigned, Transitions: []Transition{{"create", "x", []string{"ref-2"}, "ref-1", false}, {"create", "y", []string{"ref-4"}, "ref-3", false}}}, {StageID: "stage-2", ScopeID: "scope-0", Before: assigned, After: after, Transitions: []Transition{{"project", "y", []string{"ref-5"}, "", false}}}}
+	want.Lineage = []Lineage{{StageID: "stage-0", ScopeID: "scope-0", Before: before, After: before, Transitions: []Transition{}}, {StageID: "stage-1", ScopeID: "scope-0", Before: before, After: assigned, Transitions: []Transition{{Operation: "create", Output: "x", OutputIdentity: &FieldIdentity{Kind: "atomic", Segments: []string{"x"}}, InputReferenceIDs: []string{"ref-2"}, OutputReferenceID: "ref-1"}, {Operation: "create", Output: "y", OutputIdentity: &FieldIdentity{Kind: "atomic", Segments: []string{"y"}}, InputReferenceIDs: []string{"ref-4"}, OutputReferenceID: "ref-3"}}}, {StageID: "stage-2", ScopeID: "scope-0", Before: assigned, After: after, Transitions: []Transition{{Operation: "project", Output: "y", OutputIdentity: &FieldIdentity{Kind: "atomic", Segments: []string{"y"}}, InputReferenceIDs: []string{"ref-5"}}}}}
 	want.Requirements = RequirementSet{
 		SchemaVersion: 1,
 		Query: RequirementQueryIdentity{
@@ -1489,7 +1475,7 @@ func TestSPL2OrdinaryReadAndTransferBoundaries(t *testing.T) {
 			t.Fatal(e)
 		}
 		last := r.Result.Lineage[len(r.Result.Lineage)-1].After
-		if r.Result.Status != Valid || len(last.Fields) != 1 || last.Fields[0].Name != "y" || !reflect.DeepEqual(last.Removed, []string{"_time"}) {
+		if r.Result.Status != Valid || len(last.Fields) != 1 || last.Fields[0].Name != "y" || !reflect.DeepEqual(last.Removed, []FieldRemoval{{Name: "_time", FieldIdentity: FieldIdentity{Kind: "atomic", Segments: []string{"_time"}}}}) {
 			t.Fatalf("%+v", r)
 		}
 	})
@@ -1638,7 +1624,7 @@ func TestSPL2CommandSourceEvidence(t *testing.T) {
 		if r.Result.Status != Valid || !reflect.DeepEqual(r.Expansions, []FieldExpansion{{ReferenceID: "ref-2", Complete: true, Matches: []ExpandedField{{Name: "bits", Binding: "source"}, {Name: "bytes", Binding: "source"}}}}) {
 			t.Fatalf("%+v", r)
 		}
-		want := FieldState{Fields: []FieldBinding{{Name: "bits", OriginReferenceIDs: []string{"ref-2"}}, {Name: "bytes", OriginReferenceIDs: []string{"ref-2"}}}, Removed: []string{"_time"}}
+		want := FieldState{Fields: []FieldBinding{{Name: "bits", FieldIdentity: testAtomicIdentity("bits"), OriginReferenceIDs: []string{"ref-2"}}, {Name: "bytes", FieldIdentity: testAtomicIdentity("bytes"), OriginReferenceIDs: []string{"ref-2"}}}, Removed: []FieldRemoval{{Name: "_time", FieldIdentity: testAtomicIdentity("_time")}}}
 		if !reflect.DeepEqual(r.Result.Lineage[2].After, want) {
 			t.Fatalf("%+v", r.Result.Lineage)
 		}

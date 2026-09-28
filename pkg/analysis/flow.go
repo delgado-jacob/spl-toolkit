@@ -35,8 +35,7 @@ func newEnvironmentWithRequirementTrace(trace *requirementTrace) *environment {
 }
 func copyIDs(ids []string) []string { return append([]string{}, ids...) }
 func (e *environment) snapshot() FieldState {
-	s := FieldState{Fields: []FieldBinding{}, Removed: []string{}, Open: e.open, Uncertain: e.uncertain}
-	liveNames := map[string]bool{}
+	s := FieldState{Fields: []FieldBinding{}, Removed: []FieldRemoval{}, Open: e.open, Uncertain: e.uncertain}
 	for _, key := range e.orderedFieldKeys() {
 		f, exists := e.fields[key]
 		if !exists {
@@ -44,10 +43,8 @@ func (e *environment) snapshot() FieldState {
 		}
 		f.OriginReferenceIDs = copyIDs(f.OriginReferenceIDs)
 		f.FieldIdentity, _ = f.identity.public()
-		liveNames[f.Name] = true
 		s.Fields = append(s.Fields, f.FieldBinding)
 	}
-	removed := map[string]bool{}
 	for _, key := range e.orderedRemovedKeys() {
 		if !e.removed[key] {
 			continue
@@ -57,12 +54,11 @@ func (e *environment) snapshot() FieldState {
 		if name == "" {
 			continue
 		}
-		if liveNames[name] {
+		if _, live := e.fields[key]; live {
 			continue
 		}
-		if !removed[name] {
-			s.Removed = append(s.Removed, name)
-			removed[name] = true
+		if publicIdentity, exact := identity.public(); exact {
+			s.Removed = append(s.Removed, FieldRemoval{Name: name, FieldIdentity: publicIdentity})
 		}
 	}
 	sort.Slice(s.Fields, func(i, j int) bool {
@@ -71,7 +67,12 @@ func (e *environment) snapshot() FieldState {
 		}
 		return fieldIdentityLess(s.Fields[i].FieldIdentity, s.Fields[j].FieldIdentity)
 	})
-	sort.Strings(s.Removed)
+	sort.Slice(s.Removed, func(i, j int) bool {
+		if s.Removed[i].Name != s.Removed[j].Name {
+			return s.Removed[i].Name < s.Removed[j].Name
+		}
+		return fieldIdentityLess(s.Removed[i].FieldIdentity, s.Removed[j].FieldIdentity)
+	})
 	return s
 }
 func (e *environment) clone() *environment {

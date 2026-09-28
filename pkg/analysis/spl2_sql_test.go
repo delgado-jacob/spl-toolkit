@@ -10,6 +10,15 @@ import (
 	"github.com/delgado-jacob/spl-toolkit/parser/spl2"
 )
 
+func testAtomicIdentity(name string) FieldIdentity {
+	return FieldIdentity{Kind: "atomic", Segments: []string{name}}
+}
+
+func testAtomicIdentityPointer(name string) *FieldIdentity {
+	identity := testAtomicIdentity(name)
+	return &identity
+}
+
 func TestSPL2SQLSelectedLinusForms(t *testing.T) {
 	tests := []struct {
 		name  string
@@ -88,10 +97,10 @@ func TestSPL2SQLLexicalStagesAndProjectionRead(t *testing.T) {
 		}
 	}
 	assertSQLPhases(t, r, []string{"source", "filter", "evaluate", "project"}, []string{"stage-1", "stage-2", "stage-0", "stage-0"})
-	open := FieldState{Fields: []FieldBinding{}, Removed: []string{}, Open: true}
-	filtered := FieldState{Fields: []FieldBinding{{Name: "bytes", OriginReferenceIDs: []string{"ref-2"}}}, Removed: []string{}, Open: true}
-	evaluated := FieldState{Fields: []FieldBinding{{Name: "bytes", OriginReferenceIDs: []string{"ref-2"}}, {Name: "host", OriginReferenceIDs: []string{"ref-0"}}}, Removed: []string{}, Open: true}
-	projected := FieldState{Fields: []FieldBinding{{Name: "host", OriginReferenceIDs: []string{"ref-0"}}}, Removed: []string{}}
+	open := FieldState{Fields: []FieldBinding{}, Removed: []FieldRemoval{}, Open: true}
+	filtered := FieldState{Fields: []FieldBinding{{Name: "bytes", FieldIdentity: testAtomicIdentity("bytes"), OriginReferenceIDs: []string{"ref-2"}}}, Removed: []FieldRemoval{}, Open: true}
+	evaluated := FieldState{Fields: []FieldBinding{{Name: "bytes", FieldIdentity: testAtomicIdentity("bytes"), OriginReferenceIDs: []string{"ref-2"}}, {Name: "host", FieldIdentity: testAtomicIdentity("host"), OriginReferenceIDs: []string{"ref-0"}}}, Removed: []FieldRemoval{}, Open: true}
+	projected := FieldState{Fields: []FieldBinding{{Name: "host", FieldIdentity: testAtomicIdentity("host"), OriginReferenceIDs: []string{"ref-0"}}}, Removed: []FieldRemoval{}}
 	wantStates := []FieldState{open, filtered, evaluated, projected}
 	for i, l := range r.Lineage {
 		before := open
@@ -102,7 +111,7 @@ func TestSPL2SQLLexicalStagesAndProjectionRead(t *testing.T) {
 			t.Fatalf("phase %d before/after = %+v / %+v", i, l.Before, l.After)
 		}
 	}
-	if !reflect.DeepEqual(r.Lineage[3].Transitions, []Transition{{Operation: "project", Output: "host", InputReferenceIDs: []string{"ref-0"}}}) {
+	if !reflect.DeepEqual(r.Lineage[3].Transitions, []Transition{{Operation: "project", Output: "host", OutputIdentity: testAtomicIdentityPointer("host"), InputReferenceIDs: []string{"ref-0"}}}) {
 		t.Fatalf("project reused read: %+v", r.Lineage[3])
 	}
 	want := newResult(QueryDocument{Text: text, Language: "spl2", Profile: "splunkd", Version: "current"})
@@ -111,16 +120,16 @@ func TestSPL2SQLLexicalStagesAndProjectionRead(t *testing.T) {
 	want.Scopes = []Scope{{ID: "scope-0", Kind: "root", Location: loc(0, 35)}}
 	want.Dependencies.Datasets = []string{"main"}
 	want.References = []Reference{
-		{ID: "ref-0", OriginalName: "host", NormalizedName: "host", Kind: "field", Role: "read", StageID: "stage-0", ScopeID: "scope-0", Location: loc(7, 11), Resolution: "exact", Binding: "source", OriginReferenceIDs: []string{}},
+		{ID: "ref-0", OriginalName: "host", NormalizedName: "host", FieldIdentity: testAtomicIdentityPointer("host"), Kind: "field", Role: "read", StageID: "stage-0", ScopeID: "scope-0", Location: loc(7, 11), Resolution: "exact", Binding: "source", OriginReferenceIDs: []string{}},
 		{ID: "ref-1", OriginalName: "main", NormalizedName: "main", Kind: "dataset", Role: "read", StageID: "stage-1", ScopeID: "scope-0", Location: loc(17, 21), Resolution: "exact", Binding: "not_applicable", OriginReferenceIDs: []string{}},
-		{ID: "ref-2", OriginalName: "bytes", NormalizedName: "bytes", Kind: "field", Role: "read", StageID: "stage-2", ScopeID: "scope-0", Location: loc(28, 33), Resolution: "exact", Binding: "source", OriginReferenceIDs: []string{}},
+		{ID: "ref-2", OriginalName: "bytes", NormalizedName: "bytes", FieldIdentity: testAtomicIdentityPointer("bytes"), Kind: "field", Role: "read", StageID: "stage-2", ScopeID: "scope-0", Location: loc(28, 33), Resolution: "exact", Binding: "source", OriginReferenceIDs: []string{}},
 	}
 	orders := []int{0, 1, 2, 3}
 	want.Lineage = []Lineage{
 		{StageID: "stage-1", ScopeID: "scope-0", Before: open, After: open, Transitions: []Transition{}, Phase: "source", ExecutionOrder: &orders[0]},
 		{StageID: "stage-2", ScopeID: "scope-0", Before: open, After: filtered, Transitions: []Transition{}, Phase: "filter", ExecutionOrder: &orders[1]},
 		{StageID: "stage-0", ScopeID: "scope-0", Before: filtered, After: evaluated, Transitions: []Transition{}, Phase: "evaluate", ExecutionOrder: &orders[2]},
-		{StageID: "stage-0", ScopeID: "scope-0", Before: evaluated, After: projected, Transitions: []Transition{{Operation: "project", Output: "host", InputReferenceIDs: []string{"ref-0"}}}, Phase: "project", ExecutionOrder: &orders[3]},
+		{StageID: "stage-0", ScopeID: "scope-0", Before: evaluated, After: projected, Transitions: []Transition{{Operation: "project", Output: "host", OutputIdentity: testAtomicIdentityPointer("host"), InputReferenceIDs: []string{"ref-0"}}}, Phase: "project", ExecutionOrder: &orders[3]},
 	}
 	want.Requirements = RequirementSet{
 		SchemaVersion: 1,
@@ -183,11 +192,11 @@ func TestSPL2SQLAliasPreparationAndVisibility(t *testing.T) {
 	if len(r.References) != 4 || spl2Ref(t, r, "user", "read").Binding != "source" || spl2Ref(t, r, "owner", "read").Binding != "indeterminate" {
 		t.Fatalf("refs %+v", r.References)
 	}
-	owner := FieldBinding{Name: "owner", OriginReferenceIDs: []string{"ref-1", "ref-0"}, Conditional: true}
-	if !reflect.DeepEqual(r.Lineage[1].After.Fields, []FieldBinding{owner, {Name: "user", OriginReferenceIDs: []string{"ref-0"}}}) || !reflect.DeepEqual(r.Lineage[3].After, FieldState{Fields: []FieldBinding{owner}, Removed: []string{}}) {
+	owner := FieldBinding{Name: "owner", FieldIdentity: testAtomicIdentity("owner"), OriginReferenceIDs: []string{"ref-1", "ref-0"}, Conditional: true}
+	if !reflect.DeepEqual(r.Lineage[1].After.Fields, []FieldBinding{owner, {Name: "user", FieldIdentity: testAtomicIdentity("user"), OriginReferenceIDs: []string{"ref-0"}}}) || !reflect.DeepEqual(r.Lineage[3].After, FieldState{Fields: []FieldBinding{owner}, Removed: []FieldRemoval{}}) {
 		t.Fatalf("states %+v", r.Lineage)
 	}
-	if !reflect.DeepEqual(r.Lineage[3].Transitions, []Transition{{Operation: "project", Output: "owner", InputReferenceIDs: []string{"ref-1"}}}) {
+	if !reflect.DeepEqual(r.Lineage[3].Transitions, []Transition{{Operation: "project", Output: "owner", OutputIdentity: testAtomicIdentityPointer("owner"), InputReferenceIDs: []string{"ref-1"}}}) {
 		t.Fatalf("alias project %+v", r.Lineage[3])
 	}
 	where := spl2AnalyzeTest(t, "SELECT user AS owner FROM main WHERE owner>0 ORDER BY owner")
@@ -235,14 +244,14 @@ func TestSPL2SQLAggregateOnlyHaving(t *testing.T) {
 			if created.ID != createID || created.StageID != selectID || read.StageID != "stage-2" || read.Binding != "derived" || !reflect.DeepEqual(read.OriginReferenceIDs, []string{createID}) {
 				t.Fatalf("HAVING did not consume selected aggregate: %+v", r.References)
 			}
-			field := FieldBinding{Name: "n", OriginReferenceIDs: []string{createID}}
-			closed := FieldState{Fields: []FieldBinding{field}, Removed: []string{}}
+			field := FieldBinding{Name: "n", FieldIdentity: testAtomicIdentity("n"), OriginReferenceIDs: []string{createID}}
+			closed := FieldState{Fields: []FieldBinding{field}, Removed: []FieldRemoval{}}
 			for _, phase := range r.Lineage[1:] {
 				if !reflect.DeepEqual(phase.After, closed) {
 					t.Fatalf("aggregate presence/projection: %+v", phase)
 				}
 			}
-			if !reflect.DeepEqual(r.Lineage[1].Transitions, []Transition{{Operation: "aggregate", Output: "n", InputReferenceIDs: []string{}, OutputReferenceID: createID}}) || !reflect.DeepEqual(r.Lineage[3].Transitions, []Transition{{Operation: "project", Output: "n", InputReferenceIDs: []string{createID}}}) {
+			if !reflect.DeepEqual(r.Lineage[1].Transitions, []Transition{{Operation: "aggregate", Output: "n", OutputIdentity: testAtomicIdentityPointer("n"), InputReferenceIDs: []string{}, OutputReferenceID: createID}}) || !reflect.DeepEqual(r.Lineage[3].Transitions, []Transition{{Operation: "project", Output: "n", OutputIdentity: testAtomicIdentityPointer("n"), InputReferenceIDs: []string{createID}}}) {
 				t.Fatalf("phase transition ownership %+v", r.Lineage)
 			}
 			assertCorpusIntegrity(t, r)
@@ -284,12 +293,12 @@ func TestSPL2SQLGroupedAggregatePhases(t *testing.T) {
 	if spl2Ref(t, r, "host", "group").Binding != "source" || spl2Ref(t, r, "host", "read").Binding != "source" || spl2Ref(t, r, "total", "read").Binding != "indeterminate" {
 		t.Fatalf("bindings %+v", r.References)
 	}
-	host := FieldBinding{Name: "host", OriginReferenceIDs: []string{"ref-5"}}
-	total := FieldBinding{Name: "total", OriginReferenceIDs: []string{"ref-2", "ref-1"}, Conditional: true}
-	if !reflect.DeepEqual(r.Lineage[2].After, FieldState{Fields: []FieldBinding{host}, Removed: []string{}}) || !reflect.DeepEqual(r.Lineage[3].Before, r.Lineage[2].After) || !reflect.DeepEqual(r.Lineage[3].After, FieldState{Fields: []FieldBinding{host, total}, Removed: []string{}}) {
+	host := FieldBinding{Name: "host", FieldIdentity: testAtomicIdentity("host"), OriginReferenceIDs: []string{"ref-5"}}
+	total := FieldBinding{Name: "total", FieldIdentity: testAtomicIdentity("total"), OriginReferenceIDs: []string{"ref-2", "ref-1"}, Conditional: true}
+	if !reflect.DeepEqual(r.Lineage[2].After, FieldState{Fields: []FieldBinding{host}, Removed: []FieldRemoval{}}) || !reflect.DeepEqual(r.Lineage[3].Before, r.Lineage[2].After) || !reflect.DeepEqual(r.Lineage[3].After, FieldState{Fields: []FieldBinding{host, total}, Removed: []FieldRemoval{}}) {
 		t.Fatalf("group/aggregate states %+v", r.Lineage)
 	}
-	if !reflect.DeepEqual(r.Lineage[3].Transitions, []Transition{{Operation: "aggregate", Output: "total", InputReferenceIDs: []string{"ref-1"}, OutputReferenceID: "ref-2", Conditional: true}}) || !reflect.DeepEqual(r.Lineage[6].Transitions, []Transition{{Operation: "project", Output: "host", InputReferenceIDs: []string{"ref-0"}}, {Operation: "project", Output: "total", InputReferenceIDs: []string{"ref-2"}}}) {
+	if !reflect.DeepEqual(r.Lineage[3].Transitions, []Transition{{Operation: "aggregate", Output: "total", OutputIdentity: testAtomicIdentityPointer("total"), InputReferenceIDs: []string{"ref-1"}, OutputReferenceID: "ref-2", Conditional: true}}) || !reflect.DeepEqual(r.Lineage[6].Transitions, []Transition{{Operation: "project", Output: "host", OutputIdentity: testAtomicIdentityPointer("host"), InputReferenceIDs: []string{"ref-0"}}, {Operation: "project", Output: "total", OutputIdentity: testAtomicIdentityPointer("total"), InputReferenceIDs: []string{"ref-2"}}}) {
 		t.Fatalf("aggregate/project provenance %+v", r.Lineage)
 	}
 	for i := 1; i < len(r.Lineage); i++ {
@@ -354,7 +363,7 @@ func TestSPL2SQLExpressionEvidenceAndSourceIdentity(t *testing.T) {
 			}
 			state := r.Lineage[len(r.Lineage)-1].After
 			if c.removed {
-				if len(state.Fields) != 0 || !reflect.DeepEqual(state.Removed, []string{c.name}) {
+				if len(state.Fields) != 0 || !reflect.DeepEqual(state.Removed, []FieldRemoval{{Name: c.name, FieldIdentity: FieldIdentity{Kind: "atomic", Segments: []string{c.name}}}}) {
 					t.Fatalf("%+v", state)
 				}
 			} else if len(state.Fields) != 1 || state.Fields[0].Name != c.name || state.Fields[0].Conditional != c.conditional {
@@ -401,7 +410,7 @@ func TestSPL2SQLEquivalentFormsRetainOwnLocations(t *testing.T) {
 	} {
 		t.Run(c.text, func(t *testing.T) {
 			r := spl2AnalyzeTest(t, c.text)
-			want := FieldState{Fields: []FieldBinding{{Name: "host", OriginReferenceIDs: []string{c.hostID}}}, Removed: []string{}}
+			want := FieldState{Fields: []FieldBinding{{Name: "host", FieldIdentity: testAtomicIdentity("host"), OriginReferenceIDs: []string{c.hostID}}}, Removed: []FieldRemoval{}}
 			if r.Status != Valid || !reflect.DeepEqual(r.Lineage[len(r.Lineage)-1].After, want) {
 				t.Fatalf("%+v", r)
 			}
@@ -432,7 +441,7 @@ func TestSPL2SQLEquivalentFormsRetainOwnLocations(t *testing.T) {
 
 func TestFinalizeSQLPhaseAndSourceExpansionIDs(t *testing.T) {
 	doc := QueryDocument{Text: `SELECT 1 AS 'actor.local',host FROM main | fields '*'`, Language: "spl2"}
-	wantState := FieldState{Fields: []FieldBinding{{Name: "actor.local", OriginReferenceIDs: []string{"ref-0"}}, {Name: "host", OriginReferenceIDs: []string{"ref-1"}}}, Removed: []string{}}
+	wantState := FieldState{Fields: []FieldBinding{{Name: "actor.local", FieldIdentity: testAtomicIdentity("actor.local"), OriginReferenceIDs: []string{"ref-0"}}, {Name: "host", FieldIdentity: testAtomicIdentity("host"), OriginReferenceIDs: []string{"ref-1"}}}, Removed: []FieldRemoval{}}
 	for _, u := range []SourceUniverse{{Fields: []string{"actor.name", "host"}, Complete: true}, {Fields: []string{"actor.name", "host"}}, {Fields: []string{"actor.name", "host"}, Complete: true, Resolve: func(string) SourceFieldAdmission { return SourceFieldAdmitted }}} {
 		r, err := AnalyzeWithSourceUniverse(doc, u)
 		if err != nil || r.Result.Status != Valid || !reflect.DeepEqual(r.Result.Lineage[3].After, wantState) {
@@ -442,7 +451,7 @@ func TestFinalizeSQLPhaseAndSourceExpansionIDs(t *testing.T) {
 		if !reflect.DeepEqual(r.Expansions, want) {
 			t.Fatalf("expansions %+v", r.Expansions)
 		}
-		if !reflect.DeepEqual(r.Result.Lineage[2].Transitions, []Transition{{Operation: "project", Output: "actor.local", InputReferenceIDs: []string{"ref-0"}}, {Operation: "project", Output: "host", InputReferenceIDs: []string{"ref-1"}}}) {
+		if !reflect.DeepEqual(r.Result.Lineage[2].Transitions, []Transition{{Operation: "project", Output: "actor.local", OutputIdentity: testAtomicIdentityPointer("actor.local"), InputReferenceIDs: []string{"ref-0"}}, {Operation: "project", Output: "host", OutputIdentity: testAtomicIdentityPointer("host"), InputReferenceIDs: []string{"ref-1"}}}) {
 			t.Fatalf("project %+v", r.Result.Lineage[2])
 		}
 		assertCorpusIntegrity(t, r.Result)
@@ -511,7 +520,7 @@ func TestSPL2SQLAggregateWildcardKeepsSourceGuards(t *testing.T) {
 		t.Fatalf("%+v %v", r, err)
 	}
 	want := []FieldExpansion{{ReferenceID: "ref-0", Complete: false, Matches: []ExpandedField{{Name: "actor", Binding: "source"}}}}
-	if !reflect.DeepEqual(r.Expansions, want) || !reflect.DeepEqual(r.Result.Lineage[2].After, FieldState{Fields: []FieldBinding{{Name: "n", OriginReferenceIDs: []string{"ref-1", "ref-0"}, Conditional: true}}, Removed: []string{}, Uncertain: true}) {
+	if !reflect.DeepEqual(r.Expansions, want) || !reflect.DeepEqual(r.Result.Lineage[2].After, FieldState{Fields: []FieldBinding{{Name: "n", FieldIdentity: testAtomicIdentity("n"), OriginReferenceIDs: []string{"ref-1", "ref-0"}, Conditional: true}}, Removed: []FieldRemoval{}, Uncertain: true}) {
 		t.Fatalf("guard/IDs %+v %+v", r.Expansions, r.Result.Lineage)
 	}
 	assertCorpusIntegrity(t, r.Result)

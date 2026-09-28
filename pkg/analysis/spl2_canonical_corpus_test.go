@@ -557,7 +557,7 @@ func spl2CanonicalProjection(r *Result) spl2CanonicalExpectation {
 	}
 	if len(r.Lineage) > 0 {
 		after := r.Lineage[len(r.Lineage)-1].After
-		got.Removed = after.Removed
+		got.Removed = fieldRemovalNames(after.Removed)
 		got.Open = after.Open
 		got.Uncertain = after.Uncertain
 		for _, f := range after.Fields {
