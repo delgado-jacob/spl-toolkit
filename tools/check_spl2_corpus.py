@@ -278,6 +278,7 @@ def audit_canonical_assertions(case):
     for identity in forbidden_identities:
         require(isinstance(identity, dict) and {"kind", "segments"} <= set(identity) <= {"kind", "segments", "qualifier"}, "invalid forbidden field identity")
         require(identity["kind"] in {"atomic", "path"} and isinstance(identity["segments"], list) and identity["segments"] and all(isinstance(segment, str) and segment for segment in identity["segments"]), "invalid forbidden field identity")
+        require(identity["kind"] != "atomic" or len(identity["segments"]) == 1, "invalid forbidden field identity")
         require("qualifier" not in identity or identity["kind"] == "path" and isinstance(identity["qualifier"], str) and identity["qualifier"], "invalid forbidden field identity")
     require(not set(a["required_codes"]) & set(a["forbidden_codes"]), "contradictory independent codes")
     expected, raw = case["canonical"], case["document"]["text"].encode("utf-8")

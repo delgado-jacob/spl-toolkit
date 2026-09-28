@@ -337,6 +337,7 @@ class SPL2CanonicalLayerTests(unittest.TestCase):
         case['canonical_assertions']['forbidden_field_identities'] = [{'kind':'atomic', 'segments':['x']}]
         CHECK.audit_canonical_assertions(case)
         for identity in ({'kind':'atomic', 'segments':[]},
+                         {'kind':'atomic', 'segments':['a', 'b']},
                          {'kind':'path', 'segments':['x'], 'qualifier':''},
                          {'kind':'atomic', 'segments':['x'], 'qualifier':'L'}):
             with self.subTest(identity=identity):
