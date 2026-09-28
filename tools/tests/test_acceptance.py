@@ -17,6 +17,7 @@ from tools.check_acceptance import load_records, validate_records
 SHA = "a" * 40
 HASH = "b" * 64
 ROOT = Path(__file__).resolve().parents[2]
+LINUS_FIXTURE_SHA = hashlib.sha256((ROOT / "testdata/spl2/linus-forms.json").read_bytes()).hexdigest()
 TARGETS = {
     "linux-amd64": "x86_64",
     "darwin-amd64": "x86_64",
@@ -130,7 +131,8 @@ def passing_records() -> list[dict]:
                     }
                     for suite, paths in REQUIRED_TEST_HASH_PATHS.items()
                 },
-                "fixture_hashes": {"requirements": HASH},
+                "fixture_hashes": {"requirements": HASH, "spl2": {"linus-forms.json": LINUS_FIXTURE_SHA}},
+                "packaged_fixture_hashes": {"spl2": {"linus-forms.json": LINUS_FIXTURE_SHA}},
                 "requirements_surface_evidence": {
                     "schema_version": 1,
                     "fixture_sha256": HASH,
@@ -167,8 +169,30 @@ def test_complete_current_evidence_passes():
     assert validate_records(passing_records(), SHA) == []
 
 
+def test_packaged_linus_fixture_evidence_is_required_and_bound_to_current_source():
+    original = passing_records()
+    index = next(i for i, record in enumerate(original) if record["kind"] == "installed-wheel")
+
+    records = copy.deepcopy(original)
+    del records[index]["packaged_fixture_hashes"]
+    assert any("missing fields: packaged_fixture_hashes" in error for error in validate_records(records, SHA))
+
+    records = copy.deepcopy(original)
+    records[index]["packaged_fixture_hashes"]["spl2"]["linus-forms.json"] = HASH
+    assert any("packaged_fixture_hashes" in error for error in validate_records(records, SHA))
+
+    records = copy.deepcopy(original)
+    records[index]["packaged_fixture_hashes"]["spl2"]["unexpected.json"] = HASH
+    assert any("packaged_fixture_hashes" in error for error in validate_records(records, SHA))
+
+    records = copy.deepcopy(original)
+    records[index]["fixture_hashes"]["spl2"]["linus-forms.json"] = HASH
+    assert any("copied SPL2 fixture" in error for error in validate_records(records, SHA))
+
+
 def test_exact_source_hash_inputs_are_stable_in_windows_checkout(tmp_path: Path):
     relative_paths = set(check_acceptance.TOOLING_SOURCE_HASHES)
+    relative_paths.add("testdata/spl2/linus-forms.json")
     relative_paths.update(
         path.relative_to(ROOT).as_posix()
         for paths in check_acceptance.REQUIRED_TEST_HASH_PATHS.values()
