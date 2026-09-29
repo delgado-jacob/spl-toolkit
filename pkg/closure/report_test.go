@@ -247,3 +247,58 @@ func reportPointerExists(t *testing.T, report *Report, pointer string) bool {
 	}
 	return true
 }
+
+func TestBOMRootMacroSelfCycleIsIncomplete(t *testing.T) {
+	macro := macroDef("m0", "m", "`m`")
+	report, err := Evaluate(evalRequest("`m`", []Collection{{Kind: "macro", Coverage: "complete"}}, macro))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(report.BOM) != 1 || report.BOM[0].ObjectID != "m0" {
+		t.Fatalf("BOM: %+v", report.BOM)
+	}
+	cycle := false
+	for _, edge := range report.Graph.Edges {
+		if edge.Resolution == "cycle" {
+			cycle = true
+		}
+	}
+	if !cycle || !report.BOM[0].Incomplete {
+		t.Fatalf("cycle edge/BOM mismatch: graph=%+v BOM=%+v gaps=%+v", report.Graph.Edges, report.BOM, report.Gaps)
+	}
+	if !strings.Contains(FormatInventory(report), "m (m0) [incomplete]") {
+		t.Fatalf("inventory cycle: %s", FormatInventory(report))
+	}
+}
+
+func TestBOMMissingMacroOverloadDoesNotTaintResolvedObject(t *testing.T) {
+	zero := macroDef("m0", "m", "eval x=1")
+	report, err := Evaluate(evalRequest("`m` | `m(1)`", []Collection{{Kind: "macro", Coverage: "complete"}}, zero))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(report.BOM) != 1 || report.BOM[0].ObjectID != "m0" {
+		t.Fatalf("BOM: %+v", report.BOM)
+	}
+	if report.BOM[0].Incomplete {
+		t.Fatalf("missing arity-one overload tainted m/0: BOM=%+v traversal=%+v gaps=%+v", report.BOM, report.Traversal, report.Gaps)
+	}
+	inventory := FormatInventory(report)
+	if !strings.Contains(inventory, "missing_object") || strings.Contains(inventory, "m (m0) [incomplete]") {
+		t.Fatalf("inventory overload: %s", inventory)
+	}
+}
+
+func TestBOMPartialCollectionMarksResolvedOccurrence(t *testing.T) {
+	users := evalDef("users", "lookup", "users", "")
+	report, err := Evaluate(evalRequest("| lookup users user OUTPUT role", []Collection{{Kind: "lookup", Coverage: "partial"}}, users))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(report.BOM) != 1 || report.BOM[0].ObjectID != "users" || !report.BOM[0].Incomplete {
+		t.Fatalf("partial collection object: BOM=%+v traversal=%+v gaps=%+v", report.BOM, report.Traversal, report.Gaps)
+	}
+	if !strings.Contains(FormatInventory(report), "users (users) [incomplete]") || !strings.Contains(FormatInventory(report), "collection_incomplete") {
+		t.Fatalf("inventory partial collection: %s", FormatInventory(report))
+	}
+}

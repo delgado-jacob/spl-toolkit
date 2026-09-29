@@ -60,6 +60,7 @@ func projectReport(report *Report) {
 	graph := DependencyGraph{Nodes: []GraphNode{{ID: "root", Kind: "query", EvidencePointer: "/query"}}, Edges: []GraphEdge{}}
 	nodes := map[string]GraphNode{"root": graph.Nodes[0]}
 	entries := map[string]*BOMEntry{}
+	cycleObjects := map[string]bool{}
 	addObject := func(id, pointer string) {
 		nodeID := objectNodeID(id)
 		if _, exists := nodes[nodeID]; !exists {
@@ -96,6 +97,16 @@ func projectReport(report *Report) {
 			graphEdge.InvocationNodeIDs = append(graphEdge.InvocationNodeIDs, instanceNodeID(frame.InstanceID))
 		}
 		graph.Edges = append(graph.Edges, graphEdge)
+		if edge.Resolution == "cycle" {
+			cycleObjects[edge.FromObjectID] = true
+			cycleObjects[edge.Source.ObjectID] = true
+			for _, id := range edge.CyclePath {
+				cycleObjects[id] = true
+			}
+			for _, frame := range edge.InvocationChain {
+				cycleObjects[frame.ObjectID] = true
+			}
+		}
 		if to == "" {
 			continue
 		}
@@ -118,15 +129,25 @@ func projectReport(report *Report) {
 		}
 		entry.Occurrences = append(entry.Occurrences, occurrence)
 	}
+	markIncomplete := func(id string) {
+		if entry := entries[id]; entry != nil {
+			entry.Incomplete = true
+		}
+	}
+	for id := range cycleObjects {
+		markIncomplete(id)
+	}
 	for _, gap := range report.Gaps {
-		for id, entry := range entries {
-			if gap.Kind == entry.Kind && gap.Name == entry.Name {
-				entry.Incomplete = true
-			}
-			for _, pathID := range gap.Path {
-				if pathID == id {
-					entry.Incomplete = true
-				}
+		markIncomplete(gap.Source.ObjectID)
+		for _, id := range gap.Path {
+			markIncomplete(id)
+		}
+		if gap.Kind == "" || gap.Name == "" {
+			continue
+		}
+		for _, edge := range report.Traversal {
+			if edge.ToObjectID != "" && edge.Kind == gap.Kind && edge.Name == gap.Name && edge.Source == gap.Source && edge.Property == gap.Property {
+				markIncomplete(edge.ToObjectID)
 			}
 		}
 	}
