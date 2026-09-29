@@ -3,8 +3,12 @@ package closure
 import (
 	"crypto/sha256"
 	"encoding/hex"
+	"runtime"
+	"runtime/debug"
+	"strconv"
 	"strings"
 	"testing"
+	"time"
 	"unicode/utf8"
 
 	"github.com/delgado-jacob/spl-toolkit/pkg/analysis"
@@ -295,4 +299,55 @@ func TestExpandOverlappingPlaceholderNamesDeterministic(t *testing.T) {
 			}
 		}
 	}
+}
+
+func TestExpandUnusedArgumentFanoutRetainsBoundedMemory(t *testing.T) {
+	const arguments = 256
+	names := make([]string, arguments)
+	var query strings.Builder
+	query.WriteString("`outer(")
+	for i := range names {
+		if i > 0 {
+			query.WriteByte(',')
+		}
+		names[i] = "arg" + strconv.Itoa(i)
+		query.WriteString("`large(" + strconv.Itoa(i) + ")`")
+	}
+	query.WriteString(")`")
+	req := macroRequest(query.String(), macroDef("outer", "outer", "eval x=1", names...), macroDef("large", "large", strings.Repeat("x", 512<<10)+"$n$", "n"))
+	previousLimit := debug.SetMemoryLimit(32 << 20)
+	defer debug.SetMemoryLimit(previousLimit)
+	runtime.GC()
+	var baseline runtime.MemStats
+	runtime.ReadMemStats(&baseline)
+	stop := make(chan struct{})
+	peak := make(chan uint64, 1)
+	go func() {
+		ticker := time.NewTicker(time.Millisecond)
+		defer ticker.Stop()
+		highest := baseline.HeapAlloc
+		for {
+			select {
+			case <-stop:
+				peak <- highest
+				return
+			case <-ticker.C:
+				var stats runtime.MemStats
+				runtime.ReadMemStats(&stats)
+				if stats.HeapAlloc > highest {
+					highest = stats.HeapAlloc
+				}
+			}
+		}
+	}()
+	got := expandMacros(req)
+	close(stop)
+	highest := <-peak
+	if got.Text != "eval x=1" || len(got.Gaps) != 0 {
+		t.Fatalf("unused fanout: text=%q gaps=%+v", got.Text, got.Gaps)
+	}
+	if highest > baseline.HeapAlloc+(64<<20) {
+		t.Fatalf("retained heap grew by %d MiB", (highest-baseline.HeapAlloc)>>20)
+	}
+	assertCovered(t, got)
 }

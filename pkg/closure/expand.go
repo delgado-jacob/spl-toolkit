@@ -153,28 +153,36 @@ func (x *macroExpander) expandCall(input expansion, call macroInvocation, active
 	}
 	active[def.ID] = true
 	defer delete(active, def.ID)
-	substitutions := make(map[string]expansion, len(values))
 	names := make([]string, 0, len(values))
 	for name := range values {
 		names = append(names, name)
 	}
 	sort.Slice(names, func(i, j int) bool { return values[names[i]].Span.Start < values[names[j]].Span.Start })
-	for _, name := range names {
-		arg := values[name]
-		raw := input.slice(arg.ValueSpan.Start, arg.ValueSpan.End).withFrame(frame)
-		substitutions[name] = x.expand(raw, active, depth+1)
-	}
 	definition := directExpansion(def.Document.Text, sourceInterval{Kind: "definition", SourceID: def.SourceID, ObjectID: def.ID, Start: 0, End: len(def.Document.Text)})
 	for _, ancestor := range nameOrigins[0].InvocationChain {
 		definition = definition.withFrame(ancestor)
 	}
 	definition = definition.withFrame(frame)
-	substituted := substitute(definition, substitutions)
+	expanded := make(map[string]expansion)
+	argument := func(name string) expansion {
+		if value, found := expanded[name]; found {
+			return value
+		}
+		arg := values[name]
+		raw := input.slice(arg.ValueSpan.Start, arg.ValueSpan.End).withFrame(frame)
+		value := x.expand(raw, active, depth+1)
+		expanded[name] = value
+		return value
+	}
+	substituted := substituteWith(definition, names, argument)
 	for _, name := range names {
-		if strings.Contains(def.Document.Text, "$"+name+"$") {
+		if _, used := expanded[name]; used {
 			continue
 		}
-		for _, gap := range substitutions[name].Gaps {
+		arg := values[name]
+		raw := input.slice(arg.ValueSpan.Start, arg.ValueSpan.End).withFrame(frame)
+		unused := x.expand(raw, active, depth+1)
+		for _, gap := range unused.Gaps {
 			gap.EffectiveStart, gap.EffectiveEnd = 0, 0
 			substituted.Gaps = append(substituted.Gaps, gap)
 		}
@@ -220,11 +228,22 @@ func macroValues(call macroInvocation, def Definition) (map[string]macroArgument
 }
 
 func substitute(definition expansion, values map[string]expansion) expansion {
+	names := make([]string, 0, len(values))
+	for name := range values {
+		names = append(names, name)
+	}
+	return substituteWith(definition, names, func(name string) expansion { return values[name] })
+}
+
+// substituteWith requests an argument only when its placeholder is reached.
+// The caller may cache used arguments for repeated placeholders and inspect
+// unused arguments separately without retaining their expanded text.
+func substituteWith(definition expansion, names []string, valueFor func(string) expansion) expansion {
 	var out expansion
 	cursor := 0
 	for cursor < len(definition.Text) {
 		next, end, name := len(definition.Text), len(definition.Text), ""
-		for candidate := range values {
+		for _, candidate := range names {
 			pattern := "$" + candidate + "$"
 			at := strings.Index(definition.Text[cursor:], pattern)
 			if at < 0 {
@@ -242,7 +261,7 @@ func substitute(definition expansion, values map[string]expansion) expansion {
 			return out
 		}
 		placeholder := definition.Origins(next, end)
-		value := values[name]
+		value := valueFor(name)
 		if len(placeholder) == 1 {
 			value = value.withPlaceholder(placeholder[0].Source)
 		}
