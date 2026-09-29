@@ -98,16 +98,25 @@ func macroCommentEnd(source string, start int) (int, bool) {
 func scanMacroAt(source string, start int) macroInvocation {
 	var nested []macroInvocation
 	parens, brackets := 0, 0
+	triviaBeforeTick := false
 	for i := start + 1; i < len(source); {
 		if source[i] == '\'' || source[i] == '"' {
 			i = macroQuotedEnd(source, i)
+			triviaBeforeTick = false
 			continue
 		}
 		if source[i] == '/' {
 			if end, ok := macroCommentEnd(source, i); ok {
 				i = end
+				triviaBeforeTick = true
 				continue
 			}
+		}
+		r, width := utf8.DecodeRuneInString(source[i:])
+		if unicode.IsSpace(r) {
+			i += width
+			triviaBeforeTick = true
+			continue
 		}
 		switch source[i] {
 		case '(':
@@ -133,20 +142,22 @@ func scanMacroAt(source string, start int) macroInvocation {
 			if trial.Unsupported == "" {
 				return trial
 			}
-			if parens > 0 {
+			boundary := triviaBeforeTick
+			if parens > 0 || boundary {
 				child := scanMacroAt(source, i)
 				if child.Unsupported == "" {
-					nested = append(nested, child)
-					i = child.Span.End
-					continue
-				}
-				// This tick may start another malformed invocation. A lexical
-				// boundary lets the outer scanner classify it independently.
-				if i > start+1 {
-					previous, _ := utf8.DecodeLastRuneInString(source[:i])
-					if unicode.IsSpace(previous) {
-						return macroUnclosedBeforeNested(start, i, nested)
+					if parens > 0 {
+						nested = append(nested, child)
+						i = child.Span.End
+						triviaBeforeTick = false
+						continue
 					}
+					// The previous form is malformed and this is a separate
+					// invocation at a lexical boundary in the same stage.
+					return macroUnclosedBeforeNested(start, i, nested)
+				}
+				if parens > 0 && boundary {
+					return macroUnclosedBeforeNested(start, i, nested)
 				}
 			}
 			if len(nested) > 0 {
@@ -154,7 +165,8 @@ func scanMacroAt(source string, start int) macroInvocation {
 			}
 			return trial
 		}
-		i++
+		i += width
+		triviaBeforeTick = false
 	}
 	return macroUnclosedBeforeNested(start, len(source), nested)
 }
@@ -270,7 +282,7 @@ func macroNestedEnd(nested []macroInvocation, start int) (int, bool) {
 }
 
 func macroArguments(source string, start, end int, nested []macroInvocation) ([]macroArgument, bool) {
-	if macroTrim(source, macroSpan{start, end}).Start == end {
+	if macroOnlyTrivia(source[start:end]) {
 		return nil, true
 	}
 	var args []macroArgument
@@ -288,6 +300,10 @@ func macroArguments(source string, start, end int, nested []macroInvocation) ([]
 				return nil, false
 			}
 			i = quotedEnd - 1
+		case '/':
+			if commentEnd, ok := macroCommentEnd(source[:end], i); ok {
+				i = commentEnd - 1
+			}
 		case '(', '[':
 			stack = append(stack, source[i])
 		case ')', ']':
@@ -334,6 +350,10 @@ func macroParseArgument(source string, span macroSpan, nested []macroInvocation)
 		switch source[i] {
 		case '\'', '"':
 			i = macroQuotedEnd(source[:span.End], i) - 1
+		case '/':
+			if commentEnd, ok := macroCommentEnd(source[:span.End], i); ok {
+				i = commentEnd - 1
+			}
 		case '(', '[':
 			stack = append(stack, source[i])
 		case ')', ']':
@@ -348,11 +368,14 @@ func macroParseArgument(source string, span macroSpan, nested []macroInvocation)
 	}
 	if equalCount == 1 && equal > span.Start && equal+1 < span.End &&
 		source[equal-1] != '>' && source[equal-1] != '<' && source[equal-1] != '!' && source[equal+1] != '=' {
-		name := macroTrim(source, macroSpan{span.Start, equal})
-		if name.Start < name.End && macroNameStart(source, name.Start) && macroNameEnd(source, name.Start, name.End) == name.End {
-			arg.NameSpan = name
-			arg.Name = source[name.Start:name.End]
-			arg.ValueSpan = macroTrim(source, macroSpan{equal + 1, span.End})
+		nameStart := macroSkipTrivia(source, span.Start, equal)
+		if nameStart < equal && macroNameStart(source, nameStart) {
+			nameEnd := macroNameEnd(source, nameStart, equal)
+			if macroOnlyTrivia(source[nameEnd:equal]) {
+				arg.NameSpan = macroSpan{nameStart, nameEnd}
+				arg.Name = source[nameStart:nameEnd]
+				arg.ValueSpan = macroTrim(source, macroSpan{equal + 1, span.End})
+			}
 		}
 	}
 	if arg.ValueSpan.Start == arg.ValueSpan.End {
@@ -469,6 +492,22 @@ func macroStageRegion(source string, span macroSpan) macroSpan {
 		}
 	}
 	return region
+}
+
+func macroSkipTrivia(source string, start, end int) int {
+	for start < end {
+		r, width := utf8.DecodeRuneInString(source[start:end])
+		if unicode.IsSpace(r) {
+			start += width
+			continue
+		}
+		if commentEnd, ok := macroCommentEnd(source[:end], start); ok {
+			start = commentEnd
+			continue
+		}
+		break
+	}
+	return start
 }
 
 func macroOnlyTrivia(source string) bool {

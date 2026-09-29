@@ -227,3 +227,52 @@ func TestMacroScanRootStageAfterSubquery(t *testing.T) {
 		t.Fatalf("calls = %+v", calls)
 	}
 }
+
+func TestMacroScanCommentsInArgumentSyntax(t *testing.T) {
+	for _, tc := range []struct {
+		source, value, name string
+		arity               int
+	}{
+		{"`m(1/*,*/+2)`", "1/*,*/+2", "", 1},
+		{"`m(x/*comment*/=1)`", "1", "x", 1},
+		{"`m(x/*=*/=1)`", "1", "x", 1},
+		{"`m((1/*)*/+2))`", "(1/*)*/+2)", "", 1},
+		{"`m(1//,\n+2)`", "1//,\n+2", "", 1},
+		{"`m(x//comment\n=1)`", "1", "x", 1},
+		{"`m(/*,=*/)`", "", "", 0},
+	} {
+		t.Run(tc.source, func(t *testing.T) {
+			calls := scanMacroInvocations(tc.source)
+			if len(calls) != 1 || calls[0].Unsupported != "" || len(calls[0].Arguments) != tc.arity {
+				t.Fatalf("calls = %+v", calls)
+			}
+			if tc.arity == 0 {
+				return
+			}
+			arg := calls[0].Arguments[0]
+			if arg.Name != tc.name || tc.source[arg.ValueSpan.Start:arg.ValueSpan.End] != tc.value {
+				t.Fatalf("argument = %+v", arg)
+			}
+			if tc.name != "" && tc.source[arg.NameSpan.Start:arg.NameSpan.End] != tc.name {
+				t.Fatalf("name span = %+v", arg.NameSpan)
+			}
+		})
+	}
+}
+
+func TestMacroScanRecoversAfterMissingCloseInSameStage(t *testing.T) {
+	for _, source := range []string{
+		"search `bad(a) `good()`",
+		"search `bad(a)/*gap*/`good()`",
+	} {
+		t.Run(source, func(t *testing.T) {
+			calls := scanMacroInvocations(source)
+			if len(calls) != 2 || calls[0].Unsupported == "" || calls[1].Unsupported != "" || calls[1].Name != "good" {
+				t.Fatalf("calls = %+v", calls)
+			}
+			if calls[0].Span.End != strings.Index(source, "`good") || source[calls[1].Span.Start:calls[1].Span.End] != "`good()`" {
+				t.Fatalf("ranges = %+v", calls)
+			}
+		})
+	}
+}
