@@ -482,7 +482,8 @@ func (p *spl2Program) useImport(stage *spl2SemanticStage, binding *spl2ImportBin
 	}
 	location := p.parsed.source.contextLocation(owner)
 	kind := "module_member"
-	if len(functionCall) != 0 && functionCall[0] {
+	// A wildcard container names a module namespace, not a function.
+	if len(functionCall) != 0 && functionCall[0] && !binding.container {
 		kind = "function"
 	}
 	reference := stage.referenceAt(location, name, kind, "read", "exact")

@@ -123,3 +123,27 @@ func TestKnowledgeRequirementsSavedSearchKeepsDatasetProjection(t *testing.T) {
 		t.Fatalf("dataset compatibility projection = %+v", result.Dependencies)
 	}
 }
+
+func TestKnowledgeRequirementsWildcardImportAliasIsNotFunction(t *testing.T) {
+	query := `import * as external from vendor/security;
+$output = FROM synthetic_events | eval result=external(value);`
+	result := spl2ProgramAnalyze(t, query)
+	if result.Requirements.Coverage.Complete || result.Coverage.SemanticComplete {
+		t.Fatalf("wildcard import alias call became complete: status %s coverage %+v requirements %+v", result.Status, result.Coverage, result.Requirements.Coverage)
+	}
+	for _, reference := range result.References {
+		if reference.Kind == "function" && reference.NormalizedName == "vendor/security" {
+			t.Fatalf("wildcard import alias became an external function: %+v", reference)
+		}
+	}
+	module := false
+	for _, item := range result.Requirements.Items {
+		if item.Kind == "function" {
+			t.Fatalf("wildcard import alias became a function requirement: %+v", item)
+		}
+		module = module || item.Kind == "module" && item.Identity == "vendor/security"
+	}
+	if !module {
+		t.Fatalf("external module obligation was lost: %+v", result.Requirements.Items)
+	}
+}

@@ -74,11 +74,11 @@ command-specific options. Parser acceptance is separate from complete field
 effects. The capability manifest lists evidence and limitations by form.
 
 The evidence ledger is more granular than that legacy inventory projection. The
-current SPL2 manifest has 140 form records and 146 evidence cases. Syntax has 89
+current SPL2 manifest has 141 form records and 149 evidence cases. Syntax has 90
 supported, 19 unsupported and 32 unassessed records. Semantics has 76 supported,
-38 unsupported and 26 unassessed records. Requirements has 46 supported, 6
-unsupported and 88 unassessed; linting has 140 unassessed. Safe rewriting has
-14 supported, 3 unsupported and 123 unassessed. Supported is the
+39 unsupported and 26 unassessed records. Requirements has 46 supported, 7
+unsupported and 88 unassessed; linting has 141 unassessed. Safe rewriting has
+14 supported, 3 unsupported and 124 unassessed. Supported is the
 only state counted as covered; partial, unsupported and unassessed remain in the
 applicable denominator. Not-applicable records are outside that denominator. No
 composite score is produced.
