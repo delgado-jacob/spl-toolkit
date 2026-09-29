@@ -717,7 +717,7 @@ func (p *spl2Program) validateFunctionExpression(function *spl2FunctionSymbol, n
 			return
 		}
 		if imported := p.imports[name]; imported != nil {
-			p.useImport(stage, imported, context.Identifier(), "")
+			p.useImport(stage, imported, context.Identifier(), "", true)
 			function.incomplete = true
 			return
 		}

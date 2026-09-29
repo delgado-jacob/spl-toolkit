@@ -65,6 +65,32 @@ $output = FROM synthetic_events | eval result=norm(value);`
 	}
 }
 
+func TestKnowledgeRequirementsImportedCallInsideLocalFunction(t *testing.T) {
+	query := `import {normalize as norm} from vendor/security;
+function wrap($x) { return norm($x); }
+$output = FROM synthetic_events | eval result=wrap(value);`
+	result := spl2ProgramAnalyze(t, query)
+	var reference *Reference
+	for i := range result.References {
+		candidate := &result.References[i]
+		if candidate.Kind == "function" && candidate.NormalizedName == "vendor/security.normalize" {
+			reference = candidate
+		}
+	}
+	if reference == nil || reference.Resolution != "exact" || query[reference.Location.Start.Offset:reference.Location.End.Offset] != "norm" {
+		t.Fatalf("imported call reference = %+v, all references = %+v", reference, result.References)
+	}
+	found := false
+	for _, item := range result.Requirements.Items {
+		if item.Kind == "function" && item.Identity == "vendor/security.normalize" && item.Resolution == "exact" && len(item.Occurrences) == 1 && item.Occurrences[0].ReferenceID == reference.ID {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatalf("imported call requirement missing: %+v", result.Requirements.Items)
+	}
+}
+
 func TestKnowledgeRequirementsLocalAndBuiltinSPL2Functions(t *testing.T) {
 	query := `function normalize($input) { return lower($input); }
 $output = FROM synthetic_events | eval result=normalize(value);`

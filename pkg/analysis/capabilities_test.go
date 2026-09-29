@@ -337,6 +337,13 @@ func legacySPLCapabilities() CapabilityManifest {
 			Name: "fillnull", SyntaxSupported: true, SemanticSupported: true,
 			Limitations: []string{"Exact field targets with an optional literal fill value."},
 		},
+		"from": {
+			Name: "from", SyntaxSupported: true, SemanticSupported: false,
+			Limitations: []string{
+				"One exact dataset operand; datamodel:model.dataset yields overlapping located root-model and dataset references. Field effects are unmodeled.",
+				"The saved-search identity is exact, but field effects are unmodeled.",
+			},
+		},
 		"join": {
 			Name: "join", SyntaxSupported: true, SemanticSupported: false,
 			Limitations: []string{"Branch merging is unmodeled.", "Branch merging remains unmodeled; direct child and parent requirements are retained."},

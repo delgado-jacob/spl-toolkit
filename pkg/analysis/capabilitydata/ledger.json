@@ -608,7 +608,7 @@
             "spl.from.saved-search.semantics.incomplete"
           ],
           "limitations": [
-            "One exact dataset operand; datamodel:model.dataset yields overlapping located root-model and dataset references. Field effects are unmodeled."
+            "The saved-search identity is exact, but field effects are unmodeled."
           ]
         },
         "requirements": {
@@ -617,7 +617,7 @@
             "spl.from.saved-search.requirements.incomplete"
           ],
           "limitations": [
-            "One exact dataset operand; datamodel:model.dataset yields overlapping located root-model and dataset references. Field effects are unmodeled."
+            "The saved-search identity is exact, but field effects are unmodeled."
           ]
         },
         "linting": {

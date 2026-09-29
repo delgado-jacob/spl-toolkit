@@ -244,7 +244,9 @@ $output = FROM $base | eval key=normalize(host);
 export output;
 ```
 
-Imports are recorded as module and member references, but external modules are
+Imports produce direct module requirements. Imported member uses are
+source-located; a call to a named imported function also produces an exact
+function requirement for its external module and member. External modules are
 not fetched or bound. An unused import can leave analysis `valid` and semantic
 coverage complete while requirement coverage is incomplete. Using an imported
 member makes the affected analysis incomplete with `SPL_UNRESOLVED_MODULE`.
