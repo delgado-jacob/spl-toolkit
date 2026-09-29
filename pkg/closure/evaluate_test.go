@@ -117,8 +117,8 @@ func TestEvaluateCoverageKnownAbsentAndUnknown(t *testing.T) {
 	if e != nil {
 		t.Fatal(e)
 	}
-	if r.Status != analysis.Valid || !r.Coverage.Complete {
-		t.Fatalf("supplied lookup/unrelated collection: %+v %+v", r.Coverage, r.Gaps)
+	if r.Status != analysis.Incomplete || r.Coverage.Collections || !edgeWith(r, "lookup", "missing", "l") {
+		t.Fatalf("supplied lookup in partial collection: status=%s coverage=%+v edges=%+v gaps=%+v", r.Status, r.Coverage, r.Traversal, r.Gaps)
 	}
 }
 func TestEvaluateBindingValidationAndAmbiguity(t *testing.T) {
@@ -345,5 +345,98 @@ func TestEvaluateDynamicSavedSearchKeepsUnknownEdge(t *testing.T) {
 	}
 	if !found {
 		t.Fatalf("dynamic edge missing: %+v", report.Traversal)
+	}
+}
+
+func TestEvaluateFoundObjectRequiresRelevantCollectionCoverage(t *testing.T) {
+	lookup := evalDef("l", "lookup", "users", "")
+	for _, tc := range []struct {
+		name        string
+		collections []Collection
+		complete    bool
+	}{
+		{"complete", []Collection{{Kind: "lookup", Coverage: "complete"}, {Kind: "macro", Coverage: "partial"}}, true},
+		{"partial", []Collection{{Kind: "lookup", Coverage: "partial"}}, false},
+		{"unavailable", []Collection{{Kind: "lookup", Coverage: "unavailable"}}, false},
+		{"omitted", nil, false},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			report, err := Evaluate(evalRequest("| lookup users user OUTPUT role", tc.collections, lookup))
+			if err != nil {
+				t.Fatal(err)
+			}
+			if !edgeWith(report, "lookup", "users", "l") || report.Traversal[0].Resolution != "resolved" || report.Coverage.Collections != tc.complete || report.Coverage.Complete != tc.complete {
+				t.Fatalf("coverage=%+v edges=%+v gaps=%+v", report.Coverage, report.Traversal, report.Gaps)
+			}
+			want := analysis.Incomplete
+			if tc.complete {
+				want = analysis.Valid
+			}
+			if report.Status != want {
+				t.Fatalf("status=%s want=%s", report.Status, want)
+			}
+		})
+	}
+}
+func TestEvaluateMacroOriginParentAndCycle(t *testing.T) {
+	macro := macroDef("m", "m", "lookup $name$ user OUTPUT role", "name")
+	lookup := evalDef("l", "lookup", "L", "", Relation{Kind: "macro", Name: "m", Property: stringPointer("/back")})
+	req := evalRequest("`m(L)`", []Collection{{Kind: "macro", Coverage: "complete"}, {Kind: "lookup", Coverage: "complete"}}, macro, lookup)
+	report, err := Evaluate(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var lookupEdge *TraversalEdge
+	for i := range report.Traversal {
+		edge := &report.Traversal[i]
+		if edge.Kind == "lookup" && edge.Name == "L" {
+			lookupEdge = edge
+			break
+		}
+	}
+	if lookupEdge == nil {
+		t.Fatalf("lookup edge absent: %+v", report.Traversal)
+	}
+	if lookupEdge.FromObjectID != "m" || len(lookupEdge.Path) != 1 || lookupEdge.Path[0] != "m" || len(lookupEdge.InvocationChain) != 1 || lookupEdge.InvocationChain[0].ObjectID != "m" || lookupEdge.InvocationChain[0].InstanceID == "" {
+		t.Fatalf("semantic parent/instance: %+v", lookupEdge)
+	}
+	rootOrigin, placeholder := false, false
+	for _, origin := range lookupEdge.Origins {
+		rootOrigin = rootOrigin || origin.Kind == "query" && origin.SourceID == "root.spl" && origin.Start == 3 && origin.End == 4
+		placeholder = placeholder || origin.Kind == "definition" && origin.ObjectID == "m" && origin.Start == 7 && origin.End == 13
+	}
+	if !rootOrigin || !placeholder {
+		t.Fatalf("source argument and placeholder not retained: %+v", lookupEdge.Origins)
+	}
+	cycle := false
+	for _, edge := range report.Traversal {
+		if edge.Kind == "macro" && edge.Name == "m" && edge.FromObjectID == "l" && strings.Join(edge.CyclePath, ",") == "m,l,m" {
+			cycle = true
+		}
+	}
+	if !cycle || report.Status != analysis.Incomplete || report.Coverage.Complete {
+		t.Fatalf("macro/lookup cycle: status=%s coverage=%+v edges=%+v", report.Status, report.Coverage, report.Traversal)
+	}
+}
+func TestEvaluateRepeatedMacroFramesStayDistinct(t *testing.T) {
+	macro := macroDef("m", "m", "lookup $name$ user OUTPUT role", "name")
+	a := evalDef("a", "lookup", "A", "")
+	b := evalDef("b", "lookup", "B", "")
+	report, err := Evaluate(evalRequest("`m(A)` | `m(B)`", []Collection{{Kind: "macro", Coverage: "complete"}, {Kind: "lookup", Coverage: "complete"}}, macro, a, b))
+	if err != nil {
+		t.Fatal(err)
+	}
+	ids := map[string]bool{}
+	for _, edge := range report.Traversal {
+		if edge.Kind != "lookup" {
+			continue
+		}
+		if edge.FromObjectID != "m" || len(edge.InvocationChain) != 1 {
+			t.Fatalf("macro parent/frames: %+v", edge)
+		}
+		ids[edge.InvocationChain[0].InstanceID] = true
+	}
+	if len(ids) != 2 {
+		t.Fatalf("distinct macro instances=%v edges=%+v", ids, report.Traversal)
 	}
 }

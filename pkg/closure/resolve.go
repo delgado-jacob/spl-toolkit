@@ -149,7 +149,14 @@ func (e *evaluator) boundTarget(edge TraversalEdge, candidates []Definition) (De
 	}
 	return Definition{}, false
 }
+func (e *evaluator) checkCollection(edge TraversalEdge) {
+	if e.collections[edge.Kind] == "complete" {
+		return
+	}
+	e.addGap(ClosureGap{Code: "collection_incomplete", Kind: edge.Kind, Name: edge.Name, Source: edge.Source, Property: edge.Property, Path: append([]string{}, edge.Path...)}, "collections")
+}
 func (e *evaluator) resolve(edge TraversalEdge, arity *int, explicit bool) {
+	e.checkCollection(edge)
 	candidates := []Definition{}
 	for _, o := range e.req.Bundle.Objects {
 		if o.Kind != edge.Kind || o.Name != edge.Name {
@@ -256,9 +263,6 @@ func (e *evaluator) visit(def Definition) {
 		return
 	}
 	if def.Kind == "dataset" && def.Document == nil {
-		if e.collections["dataset"] != "complete" {
-			e.addGap(ClosureGap{Code: "dataset_collection_incomplete", Kind: def.Kind, Name: def.Name, Source: SourceInterval{Kind: "definition", SourceID: def.SourceID, ObjectID: def.ID}, Path: append([]string{}, e.active...)}, "collections")
-		}
 		return
 	}
 	if !queryBearing(def.Kind) {

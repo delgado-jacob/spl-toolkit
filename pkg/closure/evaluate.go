@@ -71,22 +71,34 @@ type ClosureDiagnostic struct {
 	Diagnostic analysis.Diagnostic `json:"diagnostic"`
 }
 type TraversalEdge struct {
-	ID           string           `json:"id"`
-	FromObjectID string           `json:"from_object_id,omitempty"`
-	Kind         string           `json:"kind"`
-	Name         string           `json:"name"`
-	Source       SourceInterval   `json:"source"`
-	Property     string           `json:"property,omitempty"`
-	ReferenceID  string           `json:"reference_id,omitempty"`
-	Resolution   string           `json:"resolution"`
-	ToObjectID   string           `json:"to_object_id,omitempty"`
-	Path         []string         `json:"path"`
-	CyclePath    []string         `json:"cycle_path"`
-	Origins      []SourceInterval `json:"origins"`
+	ID              string            `json:"id"`
+	FromObjectID    string            `json:"from_object_id,omitempty"`
+	Kind            string            `json:"kind"`
+	Name            string            `json:"name"`
+	Source          SourceInterval    `json:"source"`
+	Property        string            `json:"property,omitempty"`
+	ReferenceID     string            `json:"reference_id,omitempty"`
+	Resolution      string            `json:"resolution"`
+	ToObjectID      string            `json:"to_object_id,omitempty"`
+	Path            []string          `json:"path"`
+	CyclePath       []string          `json:"cycle_path"`
+	InvocationChain []InvocationFrame `json:"invocation_chain"`
+	Origins         []SourceInterval  `json:"origins"`
 }
 
 func publicInterval(s sourceInterval) SourceInterval {
 	return SourceInterval{Kind: s.Kind, SourceID: s.SourceID, ObjectID: s.ObjectID, Start: s.Start, End: s.End}
+}
+func publicFrames(in []invocationFrame) []InvocationFrame {
+	out := make([]InvocationFrame, 0, len(in))
+	for _, f := range in {
+		frame := InvocationFrame{ObjectID: f.ObjectID, InstanceID: f.InstanceID, Invocation: []SourceInterval{}}
+		for _, v := range f.Invocation {
+			frame.Invocation = append(frame.Invocation, publicInterval(v))
+		}
+		out = append(out, frame)
+	}
+	return out
 }
 func publicProvenance(in []provenanceSegment) []ProvenanceSegment {
 	out := make([]ProvenanceSegment, 0, len(in))
@@ -99,13 +111,7 @@ func publicProvenance(in []provenanceSegment) []ProvenanceSegment {
 		for _, v := range s.Placeholders {
 			p.Placeholders = append(p.Placeholders, publicInterval(v))
 		}
-		for _, f := range s.InvocationChain {
-			frame := InvocationFrame{ObjectID: f.ObjectID, InstanceID: f.InstanceID, Invocation: []SourceInterval{}}
-			for _, v := range f.Invocation {
-				frame.Invocation = append(frame.Invocation, publicInterval(v))
-			}
-			p.InvocationChain = append(p.InvocationChain, frame)
-		}
+		p.InvocationChain = publicFrames(s.InvocationChain)
 		out = append(out, p)
 	}
 	return out
@@ -194,6 +200,9 @@ func (e *evaluator) addEdge(edge TraversalEdge) {
 	}
 	if edge.CyclePath == nil {
 		edge.CyclePath = []string{}
+	}
+	if edge.InvocationChain == nil {
+		edge.InvocationChain = []InvocationFrame{}
 	}
 	if edge.Origins == nil {
 		edge.Origins = []SourceInterval{}

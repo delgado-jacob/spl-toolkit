@@ -52,31 +52,54 @@ func (e *evaluator) inspectExpansion(expanded expansion, owner sourceInterval, r
 				continue
 			}
 			origins := expanded.Origins(ref.Location.Start.Offset, ref.Location.End.Offset)
-			evidence := make([]SourceInterval, 0, len(origins))
+			evidence := []SourceInterval{}
+			seenEvidence := map[SourceInterval]bool{}
+			addOrigin := func(v sourceInterval) {
+				value := publicInterval(v)
+				if !seenEvidence[value] {
+					evidence = append(evidence, value)
+					seenEvidence[value] = true
+				}
+			}
+			var chain []invocationFrame
 			for _, origin := range origins {
-				evidence = append(evidence, publicInterval(origin.Source))
+				addOrigin(origin.Source)
+				if len(origin.Placeholders) > 0 {
+					for _, placeholder := range origin.Placeholders {
+						addOrigin(placeholder)
+					}
+				} else if origin.Placeholder != nil {
+					addOrigin(*origin.Placeholder)
+				}
+				if len(origin.InvocationChain) > len(chain) {
+					chain = origin.InvocationChain
+				}
 			}
 			source := SourceInterval{Kind: owner.Kind, SourceID: owner.SourceID, ObjectID: owner.ObjectID, Start: owner.Start, End: owner.End}
 			if len(evidence) > 0 {
 				source = evidence[0]
 			}
 			path := append([]string{}, e.active...)
-			if len(origins) > 0 {
-				for _, frame := range origins[0].InvocationChain {
-					if len(path) == 0 || path[len(path)-1] != frame.ObjectID {
-						path = append(path, frame.ObjectID)
-					}
+			for _, frame := range chain {
+				if len(path) == 0 || path[len(path)-1] != frame.ObjectID {
+					path = append(path, frame.ObjectID)
 				}
 			}
-			from := source.ObjectID
-			if from == "" {
-				from = owner.ObjectID
+			from := owner.ObjectID
+			if source.ObjectID != "" {
+				from = source.ObjectID
 			}
-			edge := TraversalEdge{FromObjectID: from, Kind: kind, Name: name, Source: source, ReferenceID: ref.ID, Path: path, Origins: evidence}
+			if len(chain) > 0 {
+				from = chain[len(chain)-1].ObjectID
+			}
+			edge := TraversalEdge{FromObjectID: from, Kind: kind, Name: name, Source: source, ReferenceID: ref.ID, Path: path, InvocationChain: publicFrames(chain), Origins: evidence}
 			if item.Resolution != "exact" || ref.Resolution != "exact" || len(evidence) == 0 || strings.Contains(name, "*") {
 				edge.Resolution = "dynamic"
 			}
+			prior := e.active
+			e.active = append([]string{}, path...)
 			e.resolve(edge, nil, false)
+			e.active = prior
 		}
 	}
 	// Macro definition bodies may be inserted more than once with different
@@ -112,7 +135,7 @@ func (e *evaluator) inspectExpansion(expanded expansion, owner sourceInterval, r
 			for _, prior := range segment.InvocationChain[:index] {
 				path = append(path, prior.ObjectID)
 			}
-			edge := TraversalEdge{FromObjectID: parent.ID, Kind: "macro", Name: target.Name, Source: source, Path: path, Origins: origins}
+			edge := TraversalEdge{FromObjectID: parent.ID, Kind: "macro", Name: target.Name, Source: source, Path: path, InvocationChain: publicFrames(segment.InvocationChain[:index+1]), Origins: origins}
 			edge.ToObjectID = target.ID
 			edge.Resolution = "resolved"
 			matches := 0
@@ -124,8 +147,12 @@ func (e *evaluator) inspectExpansion(expanded expansion, owner sourceInterval, r
 			if matches > 1 {
 				edge.Resolution = "bound"
 			}
+			e.checkCollection(edge)
 			e.addEdge(edge)
+			prior := e.active
+			e.active = append([]string{}, path...)
 			e.visit(target)
+			e.active = prior
 		}
 	}
 }
@@ -173,6 +200,13 @@ func (e *evaluator) expansionGapEdge(gap opaqueGap, owner sourceInterval, expand
 				}
 			}
 			edge.CyclePath = append(append([]string{}, path[index:]...), targetID)
+			for _, segment := range expanded.Segments {
+				if segment.EffectiveStart <= gap.EffectiveStart && segment.EffectiveEnd >= gap.EffectiveEnd {
+					edge.InvocationChain = publicFrames(segment.InvocationChain)
+					break
+				}
+			}
+			e.checkCollection(edge)
 			e.addEdge(edge)
 			return
 		}
