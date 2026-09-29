@@ -1,0 +1,188 @@
+package closure
+
+import (
+	"github.com/delgado-jacob/spl-toolkit/pkg/analysis"
+	"strings"
+)
+
+func (e *evaluator) inspectExpansion(expanded expansion, owner sourceInterval, result *analysis.Result, root bool) {
+	for _, gap := range expanded.Gaps {
+		source := SourceInterval{Kind: owner.Kind, SourceID: owner.SourceID, ObjectID: owner.ObjectID, Start: owner.Start, End: owner.End}
+		if len(gap.Origins) > 0 {
+			source = publicInterval(gap.Origins[0])
+		}
+		dimension := "expansion"
+		e.addGap(ClosureGap{Code: "expansion_" + gap.Reason, Source: source, Path: append([]string{}, e.active...)}, dimension)
+		e.expansionGapEdge(gap, owner, expanded)
+	}
+	if result.Status != analysis.Valid || !result.Requirements.Coverage.Complete {
+		dimension := "definitions"
+		if root {
+			dimension = "effective"
+		}
+		e.addGap(ClosureGap{Code: "analysis_incomplete", Source: SourceInterval{Kind: owner.Kind, SourceID: owner.SourceID, ObjectID: owner.ObjectID, Start: owner.Start, End: owner.End}, Path: append([]string{}, e.active...)}, dimension)
+	}
+	for _, d := range result.Diagnostics {
+		origin := expanded.Origins(d.Location.Start.Offset, d.Location.End.Offset)
+		source := SourceInterval{Kind: owner.Kind, SourceID: owner.SourceID, ObjectID: owner.ObjectID, Start: owner.Start, End: owner.End}
+		if len(origin) > 0 {
+			source = publicInterval(origin[0].Source)
+		}
+		e.report.Diagnostics = append(e.report.Diagnostics, ClosureDiagnostic{Source: source, Diagnostic: d})
+	}
+	refs := map[string]analysis.Reference{}
+	for _, r := range result.References {
+		refs[r.ID] = r
+	}
+	for _, item := range result.Requirements.Items {
+		if !isObjectKind(item.Kind) || item.Kind == "macro" {
+			continue
+		}
+		kind, name := item.Kind, item.Identity
+		if skipLegacyDataset(kind, name) {
+			if item.Resolution == "exact" {
+				continue
+			}
+			kind = "saved_search"
+			name = name[len("savedsearch:"):]
+		}
+		for _, occ := range item.Occurrences {
+			ref, found := refs[occ.ReferenceID]
+			if !found {
+				continue
+			}
+			origins := expanded.Origins(ref.Location.Start.Offset, ref.Location.End.Offset)
+			evidence := make([]SourceInterval, 0, len(origins))
+			for _, origin := range origins {
+				evidence = append(evidence, publicInterval(origin.Source))
+			}
+			source := SourceInterval{Kind: owner.Kind, SourceID: owner.SourceID, ObjectID: owner.ObjectID, Start: owner.Start, End: owner.End}
+			if len(evidence) > 0 {
+				source = evidence[0]
+			}
+			path := append([]string{}, e.active...)
+			if len(origins) > 0 {
+				for _, frame := range origins[0].InvocationChain {
+					if len(path) == 0 || path[len(path)-1] != frame.ObjectID {
+						path = append(path, frame.ObjectID)
+					}
+				}
+			}
+			from := source.ObjectID
+			if from == "" {
+				from = owner.ObjectID
+			}
+			edge := TraversalEdge{FromObjectID: from, Kind: kind, Name: name, Source: source, ReferenceID: ref.ID, Path: path, Origins: evidence}
+			if item.Resolution != "exact" || ref.Resolution != "exact" || len(evidence) == 0 || strings.Contains(name, "*") {
+				edge.Resolution = "dynamic"
+			}
+			e.resolve(edge, nil, false)
+		}
+	}
+	// Macro definition bodies may be inserted more than once with different
+	// arguments. Each expansion frame is an instance, even when its body was
+	// already analyzed as part of the effective query.
+	instances := map[string]bool{}
+	for _, segment := range expanded.Segments {
+		for index, frame := range segment.InvocationChain {
+			if instances[frame.InstanceID] {
+				continue
+			}
+			instances[frame.InstanceID] = true
+			if len(frame.Invocation) == 0 {
+				continue
+			}
+			source := publicInterval(frame.Invocation[0])
+			if source.Kind != "definition" {
+				continue
+			} // original root/query body calls are scanned below
+			parent, ok := e.objects[source.ObjectID]
+			if !ok || parent.Kind != "macro" {
+				continue
+			}
+			target, ok := e.objects[frame.ObjectID]
+			if !ok {
+				continue
+			}
+			origins := make([]SourceInterval, 0, len(frame.Invocation))
+			for _, v := range frame.Invocation {
+				origins = append(origins, publicInterval(v))
+			}
+			path := append([]string{}, e.active...)
+			for _, prior := range segment.InvocationChain[:index] {
+				path = append(path, prior.ObjectID)
+			}
+			edge := TraversalEdge{FromObjectID: parent.ID, Kind: "macro", Name: target.Name, Source: source, Path: path, Origins: origins}
+			edge.ToObjectID = target.ID
+			edge.Resolution = "resolved"
+			matches := 0
+			for _, candidate := range e.req.Bundle.Objects {
+				if candidate.Kind == "macro" && candidate.Name == target.Name && candidate.Arity != nil && target.Arity != nil && *candidate.Arity == *target.Arity {
+					matches++
+				}
+			}
+			if matches > 1 {
+				edge.Resolution = "bound"
+			}
+			e.addEdge(edge)
+			e.visit(target)
+		}
+	}
+}
+
+func (e *evaluator) expansionGapEdge(gap opaqueGap, owner sourceInterval, expanded expansion) {
+	if len(gap.Origins) == 0 {
+		return
+	}
+	source := gap.Origins[0]
+	if source.Kind != "definition" {
+		return
+	}
+	def, ok := e.objects[source.ObjectID]
+	if !ok || def.Document == nil || def.Kind != "macro" {
+		return
+	}
+	for _, call := range allMacroCalls(scanMacroInvocations(def.Document.Text)) {
+		if call.Span.Start != source.Start || call.Span.End != source.End {
+			continue
+		}
+		edge := TraversalEdge{FromObjectID: def.ID, Kind: "macro", Name: call.Name, Source: publicInterval(source), Path: append([]string{}, e.active...), Origins: []SourceInterval{publicInterval(source)}}
+		if gap.Reason == "cycle" {
+			edge.Resolution = "cycle"
+			path := []string{}
+			for _, segment := range expanded.Segments {
+				if segment.EffectiveStart <= gap.EffectiveStart && segment.EffectiveEnd >= gap.EffectiveEnd {
+					for _, frame := range segment.InvocationChain {
+						path = append(path, frame.ObjectID)
+					}
+					break
+				}
+			}
+			targetID := ""
+			for _, candidate := range e.req.Bundle.Objects {
+				if candidate.Kind == "macro" && candidate.Name == call.Name && candidate.Arity != nil && *candidate.Arity == len(call.Arguments) {
+					targetID = candidate.ID
+					break
+				}
+			}
+			index := 0
+			for i, id := range path {
+				if id == targetID {
+					index = i
+					break
+				}
+			}
+			edge.CyclePath = append(append([]string{}, path[index:]...), targetID)
+			e.addEdge(edge)
+			return
+		}
+		if call.Unsupported != "" {
+			edge.Resolution = "dynamic"
+			e.resolve(edge, nil, false)
+			return
+		}
+		arity := len(call.Arguments)
+		e.resolve(edge, &arity, false)
+		return
+	}
+}
