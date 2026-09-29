@@ -440,3 +440,100 @@ func TestEvaluateRepeatedMacroFramesStayDistinct(t *testing.T) {
 		t.Fatalf("distinct macro instances=%v edges=%+v", ids, report.Traversal)
 	}
 }
+
+func TestEvaluateRelationOnlyMacroBodyKeepsKnownEdges(t *testing.T) {
+	macro := macroDef("m", "m", "lookup secret user OUTPUT role")
+	users := evalDef("users", "lookup", "users", "", Relation{Kind: "macro", Name: "m", Property: stringPointer("/macro")})
+	report, err := Evaluate(evalRequest("| lookup users user OUTPUT role", []Collection{{Kind: "lookup", Coverage: "complete"}, {Kind: "macro", Coverage: "complete"}}, users, macro))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !edgeWith(report, "lookup", "users", "users") || !edgeWith(report, "macro", "m", "m") {
+		t.Fatalf("reachable edges: %+v", report.Traversal)
+	}
+	missing, contextGap := false, false
+	for _, edge := range report.Traversal {
+		if edge.Kind == "lookup" && edge.Name == "secret" && edge.FromObjectID == "m" && edge.Resolution == "missing" {
+			missing = true
+		}
+	}
+	for _, gap := range report.Gaps {
+		if gap.Code == "macro_context_missing" && gap.Kind == "macro" && gap.Name == "m" {
+			contextGap = true
+		}
+	}
+	if !missing || !contextGap || report.Status != analysis.Incomplete || report.Coverage.Complete {
+		t.Fatalf("relation-only macro closure: status=%s coverage=%+v edges=%+v gaps=%+v", report.Status, report.Coverage, report.Traversal, report.Gaps)
+	}
+}
+
+func TestEvaluateRepeatedDefinitionBodyKeepsOccurrencePaths(t *testing.T) {
+	users := evalDef("users", "lookup", "users", "")
+	child := evalDef("child", "saved_search", "Child", "lookup users user OUTPUT role")
+	a := evalDef("a", "saved_search", "A", "search index=main", Relation{Kind: "saved_search", Name: "Child", Property: stringPointer("/child")})
+	b := evalDef("b", "saved_search", "B", "search index=main", Relation{Kind: "saved_search", Name: "Child", Property: stringPointer("/child")})
+	collections := []Collection{{Kind: "saved_search", Coverage: "complete"}, {Kind: "lookup", Coverage: "complete"}}
+	report, err := Evaluate(evalRequest("| from savedsearch:A | from savedsearch:B", collections, a, b, child, users))
+	if err != nil {
+		t.Fatal(err)
+	}
+	paths := map[string]bool{}
+	ids := map[string]bool{}
+	analysisCount := 0
+	for _, edge := range report.Traversal {
+		if edge.FromObjectID == "child" && edge.Kind == "lookup" && edge.Name == "users" {
+			paths[strings.Join(edge.Path, "/")] = true
+			ids[edge.ID] = true
+		}
+	}
+	for _, body := range report.DefinitionAnalyses {
+		if body.ObjectID == "child" {
+			analysisCount++
+		}
+	}
+	if !paths["a/child"] || !paths["b/child"] || len(ids) != 2 || analysisCount != 1 {
+		t.Fatalf("DAG occurrences/body: paths=%v ids=%v analyses=%d edges=%+v", paths, ids, analysisCount, report.Traversal)
+	}
+}
+func TestResolveBodyAnalysisMemo(t *testing.T) {
+	def := evalDef("child", "saved_search", "Child", "lookup users user OUTPUT role")
+	req := evalRequest("", []Collection{{Kind: "saved_search", Coverage: "complete"}}, def)
+	e := &evaluator{req: req, directCache: map[string]*analysis.Result{}, bodyCache: map[string]bodyEvaluation{}, expandedByResult: map[*analysis.Result]expansion{}}
+	first, err := e.bodyFor(def)
+	if err != nil {
+		t.Fatal(err)
+	}
+	second, err := e.bodyFor(def)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if first.direct != second.direct || first.effective != second.effective || len(e.bodyCache) != 1 {
+		t.Fatalf("body analysis was not reused: first=%p/%p second=%p/%p cache=%d", first.direct, first.effective, second.direct, second.effective, len(e.bodyCache))
+	}
+}
+
+func TestEvaluateCachedBodyRebasesMacroInstances(t *testing.T) {
+	macro := macroDef("m", "m", "lookup users user OUTPUT role")
+	users := evalDef("users", "lookup", "users", "")
+	child := evalDef("child", "saved_search", "Child", "`m`")
+	a := evalDef("a", "saved_search", "A", "search index=main", Relation{Kind: "saved_search", Name: "Child", Property: stringPointer("/child")})
+	b := evalDef("b", "saved_search", "B", "search index=main", Relation{Kind: "saved_search", Name: "Child", Property: stringPointer("/child")})
+	collections := []Collection{{Kind: "saved_search", Coverage: "complete"}, {Kind: "macro", Coverage: "complete"}, {Kind: "lookup", Coverage: "complete"}}
+	report, err := Evaluate(evalRequest("| from savedsearch:A | from savedsearch:B", collections, a, b, child, macro, users))
+	if err != nil {
+		t.Fatal(err)
+	}
+	instances := map[string]bool{}
+	for _, edge := range report.Traversal {
+		if edge.FromObjectID != "m" || edge.Kind != "lookup" || edge.Name != "users" {
+			continue
+		}
+		if len(edge.InvocationChain) != 1 {
+			t.Fatalf("missing macro frame: %+v", edge)
+		}
+		instances[edge.InvocationChain[0].InstanceID] = true
+	}
+	if len(instances) != 2 {
+		t.Fatalf("cached body reused expansion instance ID: %v edges=%+v", instances, report.Traversal)
+	}
+}

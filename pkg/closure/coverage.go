@@ -148,10 +148,10 @@ func (e *evaluator) inspectExpansion(expanded expansion, owner sourceInterval, r
 				edge.Resolution = "bound"
 			}
 			e.checkCollection(edge)
-			e.addEdge(edge)
+			occurrenceID := e.addEdge(edge)
 			prior := e.active
 			e.active = append([]string{}, path...)
-			e.visit(target)
+			e.visit(target, false, occurrenceID)
 			e.active = prior
 		}
 	}

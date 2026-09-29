@@ -210,9 +210,9 @@ func (e *evaluator) resolve(edge TraversalEdge, arity *int, explicit bool) {
 			}
 		}
 	}
-	e.addEdge(edge)
+	occurrenceID := e.addEdge(edge)
 	if target.ID != "" && edge.Resolution != "cycle" {
-		e.visit(target)
+		e.visit(target, edge.Kind == "macro" && arity == nil, occurrenceID)
 	}
 }
 func (e *evaluator) inspectOriginalMacros(doc analysis.QueryDocument, owner sourceInterval, path []string) {
@@ -231,7 +231,7 @@ func (e *evaluator) inspectOriginalMacros(doc analysis.QueryDocument, owner sour
 		e.resolve(edge, &arity, false)
 	}
 }
-func (e *evaluator) visit(def Definition) {
+func (e *evaluator) visit(def Definition, contextFreeMacro bool, occurrenceID string) {
 	e.active = append(e.active, def.ID)
 	defer func() { e.active = e.active[:len(e.active)-1] }()
 	for _, relation := range def.Relations {
@@ -247,18 +247,31 @@ func (e *evaluator) visit(def Definition) {
 		e.resolve(edge, nil, true)
 	}
 	if def.Kind == "macro" {
-		if def.Document != nil && !e.bodyDone[def.ID] {
-			direct := e.directCache[def.ID]
-			if direct == nil {
-				var err error
-				direct, err = analysis.Analyze(*def.Document)
-				if err != nil {
-					return
-				}
-				e.directCache[def.ID] = direct
+		if def.Document == nil {
+			if contextFreeMacro {
+				e.addGap(ClosureGap{Code: "macro_context_missing", Kind: def.Kind, Name: def.Name, Source: SourceInterval{Kind: "definition", SourceID: def.SourceID, ObjectID: def.ID}, Path: append([]string{}, e.active...)}, "expansion")
 			}
+			return
+		}
+		direct := e.directCache[def.ID]
+		if direct == nil {
+			var err error
+			direct, err = analysis.Analyze(*def.Document)
+			if err != nil {
+				e.addGap(ClosureGap{Code: "definition_analysis_error", Kind: def.Kind, Name: def.Name, Source: SourceInterval{Kind: "definition", SourceID: def.SourceID, ObjectID: def.ID}, Path: append([]string{}, e.active...)}, "definitions")
+				return
+			}
+			e.directCache[def.ID] = direct
+		}
+		if !e.bodyDone[def.ID] {
 			e.report.DefinitionAnalyses = append(e.report.DefinitionAnalyses, DefinitionAnalysis{ObjectID: def.ID, DirectAnalysis: direct})
 			e.bodyDone[def.ID] = true
+		}
+		if contextFreeMacro {
+			owner := sourceInterval{Kind: "definition", SourceID: def.SourceID, ObjectID: def.ID, Start: 0, End: len(def.Document.Text)}
+			e.addGap(ClosureGap{Code: "macro_context_missing", Kind: def.Kind, Name: def.Name, Source: publicInterval(owner), Path: append([]string{}, e.active...)}, "expansion")
+			e.inspectExpansion(directExpansion(def.Document.Text, owner), owner, direct, false)
+			e.inspectOriginalMacros(*def.Document, owner, e.active)
 		}
 		return
 	}
@@ -272,13 +285,37 @@ func (e *evaluator) visit(def Definition) {
 		e.addGap(ClosureGap{Code: "missing_definition_body", Kind: def.Kind, Name: def.Name, Source: SourceInterval{Kind: "definition", SourceID: def.SourceID, ObjectID: def.ID}, Path: append([]string{}, e.active...)}, "definitions")
 		return
 	}
+	body, err := e.bodyFor(def)
+	if err != nil {
+		e.addGap(ClosureGap{Code: "definition_analysis_error", Kind: def.Kind, Name: def.Name, Source: SourceInterval{Kind: "definition", SourceID: def.SourceID, ObjectID: def.ID}, Path: append([]string{}, e.active...)}, "definitions")
+		return
+	}
+	if !e.bodyDone[def.ID] {
+		e.report.DefinitionAnalyses = append(e.report.DefinitionAnalyses, DefinitionAnalysis{ObjectID: def.ID, DirectAnalysis: body.direct, EffectiveAnalysis: body.effective})
+		e.bodyDone[def.ID] = true
+	}
+	expanded := body.expanded.forOccurrence(occurrenceID)
+	owner := sourceInterval{Kind: "definition", SourceID: def.SourceID, ObjectID: def.ID, Start: 0, End: len(def.Document.Text)}
+	e.inspectExpansion(expanded, owner, body.effective, false)
+	e.inspectOriginalMacros(*def.Document, owner, e.active)
+}
+
+type bodyEvaluation struct {
+	direct    *analysis.Result
+	effective *analysis.Result
+	expanded  expansion
+}
+
+func (e *evaluator) bodyFor(def Definition) (bodyEvaluation, error) {
+	if cached, found := e.bodyCache[def.ID]; found {
+		return cached, nil
+	}
 	direct := e.directCache[def.ID]
 	if direct == nil {
 		var err error
 		direct, err = analysis.Analyze(*def.Document)
 		if err != nil {
-			e.addGap(ClosureGap{Code: "definition_analysis_error", Kind: def.Kind, Name: def.Name, Source: SourceInterval{Kind: "definition", SourceID: def.SourceID, ObjectID: def.ID}, Path: append([]string{}, e.active...)}, "definitions")
-			return
+			return bodyEvaluation{}, err
 		}
 		e.directCache[def.ID] = direct
 	}
@@ -291,16 +328,33 @@ func (e *evaluator) visit(def Definition) {
 	effectiveDoc.Text = expanded.Text
 	effective, err := analysis.Analyze(effectiveDoc)
 	if err != nil {
-		e.addGap(ClosureGap{Code: "definition_analysis_error", Kind: def.Kind, Name: def.Name, Source: SourceInterval{Kind: "definition", SourceID: def.SourceID, ObjectID: def.ID}, Path: append([]string{}, e.active...)}, "definitions")
-		return
+		return bodyEvaluation{}, err
+	}
+	body := bodyEvaluation{direct: direct, effective: effective, expanded: expanded}
+	if e.bodyCache == nil {
+		e.bodyCache = map[string]bodyEvaluation{}
+	}
+	e.bodyCache[def.ID] = body
+	if e.expandedByResult == nil {
+		e.expandedByResult = map[*analysis.Result]expansion{}
 	}
 	e.expandedByResult[effective] = expanded
-	if !e.bodyDone[def.ID] {
-		e.report.DefinitionAnalyses = append(e.report.DefinitionAnalyses, DefinitionAnalysis{ObjectID: def.ID, DirectAnalysis: direct, EffectiveAnalysis: effective})
-		e.bodyDone[def.ID] = true
+	return body, nil
+}
+func (cached expansion) forOccurrence(occurrenceID string) expansion {
+	if occurrenceID == "" {
+		return cached
 	}
-	e.inspectExpansion(expanded, sourceInterval{Kind: "definition", SourceID: def.SourceID, ObjectID: def.ID, Start: 0, End: len(def.Document.Text)}, effective, false)
-	e.inspectOriginalMacros(*def.Document, sourceInterval{Kind: "definition", SourceID: def.SourceID, ObjectID: def.ID}, e.active)
+	out := cached
+	out.Segments = append([]provenanceSegment{}, cached.Segments...)
+	for i := range out.Segments {
+		chain := append([]invocationFrame{}, out.Segments[i].InvocationChain...)
+		for j := range chain {
+			chain[j].InstanceID = occurrenceID + "/" + chain[j].InstanceID
+		}
+		out.Segments[i].InvocationChain = chain
+	}
+	return out
 }
 func queryBearing(kind string) bool {
 	switch kind {

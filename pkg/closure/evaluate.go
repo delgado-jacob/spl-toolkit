@@ -123,6 +123,7 @@ type evaluator struct {
 	objects          map[string]Definition
 	collections      map[string]string
 	directCache      map[string]*analysis.Result
+	bodyCache        map[string]bodyEvaluation
 	active           []string
 	bodyDone         map[string]bool
 	expandedByResult map[*analysis.Result]expansion
@@ -162,7 +163,7 @@ func Evaluate(input Request) (*Report, error) {
 		return nil, inputError("analyze effective document: %v", err)
 	}
 	report := &Report{SchemaVersion: 1, Query: direct.Requirements.Query, BundleDigest: digest, ScopeID: bundle.ScopeID, DirectAnalysis: direct, DirectRequirements: direct.Requirements, EffectiveAnalysis: effective, DefinitionAnalyses: []DefinitionAnalysis{}, Provenance: publicProvenance(expanded.Segments), Coverage: ClosureCoverage{EffectiveQuery: true, TraversedDefinitions: true, Resolution: true, Collections: true, Expansion: true, Reasons: []string{}}, Gaps: []ClosureGap{}, Diagnostics: []ClosureDiagnostic{}, Traversal: []TraversalEdge{}}
-	e := &evaluator{req: req, report: report, objects: map[string]Definition{}, collections: map[string]string{}, directCache: cache, bodyDone: map[string]bool{}, expandedByResult: map[*analysis.Result]expansion{effective: expanded}}
+	e := &evaluator{req: req, report: report, objects: map[string]Definition{}, collections: map[string]string{}, directCache: cache, bodyCache: map[string]bodyEvaluation{}, bodyDone: map[string]bool{}, expandedByResult: map[*analysis.Result]expansion{effective: expanded}}
 	for _, o := range bundle.Objects {
 		e.objects[o.ID] = o
 	}
@@ -193,7 +194,7 @@ func (e *evaluator) addGap(g ClosureGap, dimension string) {
 		e.report.Coverage.Expansion = false
 	}
 }
-func (e *evaluator) addEdge(edge TraversalEdge) {
+func (e *evaluator) addEdge(edge TraversalEdge) string {
 	edge.ID = fmt.Sprintf("edge-%d", len(e.report.Traversal)+1)
 	if edge.Path == nil {
 		edge.Path = []string{}
@@ -208,6 +209,7 @@ func (e *evaluator) addEdge(edge TraversalEdge) {
 		edge.Origins = []SourceInterval{}
 	}
 	e.report.Traversal = append(e.report.Traversal, edge)
+	return edge.ID
 }
 func (e *evaluator) finalize() {
 	coverage := &e.report.Coverage
