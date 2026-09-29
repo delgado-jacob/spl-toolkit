@@ -37,3 +37,42 @@ func TestProvenanceZeroWidthLimitSurvivesSubstitution(t *testing.T) {
 	}
 	assertCovered(t, got)
 }
+
+func TestProvenanceNestedPlaceholderIntervals(t *testing.T) {
+	req := macroRequest("`outer(`inner(7)`)`", macroDef("outer", "outer", "$x$", "x"), macroDef("inner", "inner", "$y$", "y"))
+	got := expandMacros(req)
+	if got.Text != "7" || len(got.Gaps) != 0 || len(got.Segments) != 1 {
+		t.Fatalf("nested expansion: %+v", got)
+	}
+	seg := got.Segments[0]
+	queryOffset := strings.Index(req.Document.Text, "7")
+	if seg.Source.Kind != "query" || seg.Source.Start != queryOffset || seg.Source.End != queryOffset+1 {
+		t.Fatalf("query source: %+v", seg.Source)
+	}
+	if len(seg.Placeholders) != 2 || seg.Placeholders[0].ObjectID != "outer" || seg.Placeholders[0].Start != 0 || seg.Placeholders[0].End != 3 || seg.Placeholders[1].ObjectID != "inner" || seg.Placeholders[1].Start != 0 || seg.Placeholders[1].End != 3 {
+		t.Fatalf("placeholder ancestry: %+v", seg.Placeholders)
+	}
+	if seg.Placeholder == nil || *seg.Placeholder != seg.Placeholders[0] {
+		t.Fatalf("immediate placeholder: %+v", seg)
+	}
+}
+
+func TestProvenanceRepeatedNestedPlaceholderDoesNotAccumulate(t *testing.T) {
+	got := expandMacros(macroRequest("`outer(`inner(7)`)`", macroDef("outer", "outer", "$x$+$x$", "x"), macroDef("inner", "inner", "$y$", "y")))
+	if got.Text != "7+7" || len(got.Gaps) != 0 {
+		t.Fatalf("repeated nested text: %+v", got)
+	}
+	var substituted int
+	for _, seg := range got.Segments {
+		if seg.Source.Kind != "query" {
+			continue
+		}
+		substituted++
+		if len(seg.Placeholders) != 2 || seg.Placeholders[0].ObjectID != "outer" || seg.Placeholders[1].ObjectID != "inner" {
+			t.Fatalf("placeholder ancestry accumulated: %+v", seg.Placeholders)
+		}
+	}
+	if substituted != 2 {
+		t.Fatalf("substituted segments=%d", substituted)
+	}
+}

@@ -21,7 +21,8 @@ type provenanceSegment struct {
 	EffectiveEnd    int
 	Source          sourceInterval
 	InvocationChain []invocationFrame
-	Placeholder     *sourceInterval
+	Placeholder     *sourceInterval  // outermost placeholder, retained for occurrence matching
+	Placeholders    []sourceInterval // outermost to innermost substitution sites
 }
 
 type opaqueGap struct {
@@ -132,7 +133,16 @@ func (e expansion) withFrame(frame invocationFrame) expansion {
 	return e
 }
 func (e expansion) withPlaceholder(source sourceInterval) expansion {
+	e.Segments = append([]provenanceSegment(nil), e.Segments...)
 	for i := range e.Segments {
+		prior := e.Segments[i].Placeholders
+		if len(prior) == 0 && e.Segments[i].Placeholder != nil {
+			prior = []sourceInterval{*e.Segments[i].Placeholder}
+		}
+		all := make([]sourceInterval, 0, len(prior)+1)
+		all = append(all, source)
+		all = append(all, prior...)
+		e.Segments[i].Placeholders = all
 		s := source
 		e.Segments[i].Placeholder = &s
 	}

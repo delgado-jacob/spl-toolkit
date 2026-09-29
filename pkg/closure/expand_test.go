@@ -271,3 +271,28 @@ func TestExpandUnusedOpaqueArgumentSurvivesFollowingCall(t *testing.T) {
 	}
 	assertCovered(t, got)
 }
+
+func TestExpandSubstitutionBoundedBeforeRecursiveScan(t *testing.T) {
+	value := strings.Repeat("x", maxExpansionBytes-128)
+	definition := directExpansion(strings.Repeat("$x$", 16), sourceInterval{Kind: "definition", ObjectID: "outer", Start: 0, End: 16 * len("$x$")})
+	arg := directExpansion(value, sourceInterval{Kind: "query", Start: 0, End: len(value)})
+	got := substitute(definition, map[string]expansion{"x": arg})
+	if len(got.Text) != maxExpansionBytes || len(got.Gaps) != 1 || got.Gaps[0].Reason != "limit" || got.Gaps[0].EffectiveStart != maxExpansionBytes || got.Gaps[0].EffectiveEnd != maxExpansionBytes {
+		t.Fatalf("unbounded substitution: bytes=%d gaps=%+v", len(got.Text), got.Gaps)
+	}
+	assertCovered(t, got)
+}
+
+func TestExpandOverlappingPlaceholderNamesDeterministic(t *testing.T) {
+	for _, tc := range []struct {
+		args []string
+		want string
+	}{{[]string{"x", "x$y"}, "2"}, {[]string{"x$y", "x"}, "1"}} {
+		for i := 0; i < 64; i++ {
+			got := expandMacros(macroRequest("`m(1,2)`", macroDef("m", "m", "$x$y$", tc.args...)))
+			if got.Text != tc.want || len(got.Gaps) != 0 {
+				t.Fatalf("args=%v run=%d got=%+v", tc.args, i, got)
+			}
+		}
+	}
+}

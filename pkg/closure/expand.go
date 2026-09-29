@@ -34,7 +34,7 @@ func (x *macroExpander) expand(input expansion, active map[string]bool, depth in
 	cursor := 0
 	for _, call := range calls {
 		if call.Span.Start > cursor {
-			if !x.appendLimited(&out, input.slice(cursor, call.Span.Start)) {
+			if !appendLimited(&out, input.slice(cursor, call.Span.Start)) {
 				return out
 			}
 		}
@@ -45,13 +45,13 @@ func (x *macroExpander) expand(input expansion, active map[string]bool, depth in
 			part.addGap(reason, site)
 		}
 		retainSiteZeroGaps(&part, site)
-		if !x.appendLimited(&out, part) {
+		if !appendLimited(&out, part) {
 			return out
 		}
 		cursor = call.Span.End
 	}
 	if cursor < len(input.Text) || len(input.Text) == 0 {
-		x.appendLimited(&out, input.slice(cursor, len(input.Text)))
+		appendLimited(&out, input.slice(cursor, len(input.Text)))
 	}
 	return out
 }
@@ -90,7 +90,7 @@ func retainSiteZeroGaps(part *expansion, site expansion) {
 	}
 }
 
-func (x *macroExpander) appendLimited(out *expansion, part expansion) bool {
+func appendLimited(out *expansion, part expansion) bool {
 	remaining := maxExpansionBytes - len(out.Text)
 	if len(part.Text) <= remaining {
 		out.append(part)
@@ -226,26 +226,32 @@ func substitute(definition expansion, values map[string]expansion) expansion {
 		next, end, name := len(definition.Text), len(definition.Text), ""
 		for candidate := range values {
 			pattern := "$" + candidate + "$"
-			if at := strings.Index(definition.Text[cursor:], pattern); at >= 0 && cursor+at < next {
-				next = cursor + at
-				end = next + len(pattern)
-				name = candidate
+			at := strings.Index(definition.Text[cursor:], pattern)
+			if at < 0 {
+				continue
+			}
+			position := cursor + at
+			if position < next || (position == next && (len(pattern) > end-next || (len(pattern) == end-next && candidate < name))) {
+				next, end, name = position, position+len(pattern), candidate
 			}
 		}
 		if name == "" {
 			break
 		}
-		out.append(definition.slice(cursor, next))
+		if !appendLimited(&out, definition.slice(cursor, next)) {
+			return out
+		}
 		placeholder := definition.Origins(next, end)
 		value := values[name]
 		if len(placeholder) == 1 {
-			out.append(value.withPlaceholder(placeholder[0].Source))
-		} else {
-			out.append(value)
+			value = value.withPlaceholder(placeholder[0].Source)
+		}
+		if !appendLimited(&out, value) {
+			return out
 		}
 		cursor = end
 	}
-	out.append(definition.slice(cursor, len(definition.Text)))
+	appendLimited(&out, definition.slice(cursor, len(definition.Text)))
 	return out
 }
 
