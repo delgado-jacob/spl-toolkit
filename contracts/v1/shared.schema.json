@@ -5152,17 +5152,10 @@
                 }
               },
               {
-                "if": {
+                "not": {
                   "required": [
                     "arguments"
                   ]
-                },
-                "then": {
-                  "properties": {
-                    "arguments": {
-                      "maxItems": 0
-                    }
-                  }
                 }
               }
             ]

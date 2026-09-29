@@ -3171,13 +3171,9 @@ components:
           - not:
               required:
               - validation
-          - if:
+          - not:
               required:
               - arguments
-            then:
-              properties:
-                arguments:
-                  maxItems: 0
         if:
           properties:
             kind:

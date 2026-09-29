@@ -731,6 +731,13 @@ class ValidationOpenAPITests(unittest.TestCase):
             self.assertTrue(canonical.is_valid(relation))
             self.assertTrue(openapi.is_valid(relation))
             self.assertTrue(openapi.is_valid(omitted_relations))
+            macro = copy.deepcopy(fixture)
+            macro["bundle"]["objects"][0].update(kind="macro", arity=0)
+            self.assertTrue(canonical.is_valid(macro))
+            self.assertTrue(openapi.is_valid(macro))
+            macro["bundle"]["objects"][0].update(arguments=[], eval_based=False, validation="")
+            self.assertTrue(canonical.is_valid(macro))
+            self.assertTrue(openapi.is_valid(macro))
             cases = []
             for name, mutation in (
                 ("unknown root", lambda x: x.update(extra=True)),
@@ -740,6 +747,11 @@ class ValidationOpenAPITests(unittest.TestCase):
                 ("null objects", lambda x: x["bundle"].update(objects=None)),
                 ("unknown object", lambda x: x["bundle"]["objects"][0].update(extra=True)),
                 ("null relations", lambda x: x["bundle"]["objects"][0].update(relations=None)),
+                ("non-macro arity", lambda x: x["bundle"]["objects"][0].update(arity=0)),
+                ("non-macro empty arguments", lambda x: x["bundle"]["objects"][0].update(arguments=[])),
+                ("non-macro false eval_based", lambda x: x["bundle"]["objects"][0].update(eval_based=False)),
+                ("non-macro empty validation", lambda x: x["bundle"]["objects"][0].update(validation="")),
+                ("macro missing arity", lambda x: x["bundle"]["objects"][0].update(kind="macro")),
                 ("bad selector", lambda x: x["document"].update(profile="cloud")),
                 ("bad binding", lambda x: x.update(bindings=[{"document_digest":"bad","kind":"lookup","start":0,"end":1,"object_id":"lookup-users"}])),
                 ("negative relation range", lambda x: x["bundle"]["objects"][0]["relations"].append({"kind":"lookup","name":"aux","start":-1,"end":1})),

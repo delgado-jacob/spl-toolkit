@@ -74,6 +74,25 @@ func TestBundleDigestCanonicalOrderAndNoMutation(t *testing.T) {
 	}
 }
 
+func TestDecodeMacroMetadataOptional(t *testing.T) {
+	withoutOptional := strings.Replace(orderedRequest, `,"arguments":[],"eval_based":false,"validation":"opaque"`, "", 1)
+	if withoutOptional == orderedRequest {
+		t.Fatal("macro fixture did not contain optional metadata")
+	}
+	request, err := DecodeRequest([]byte(withoutOptional))
+	if err != nil {
+		t.Fatal(err)
+	}
+	macro := request.Bundle.Objects[1]
+	if macro.Arity == nil || *macro.Arity != 0 || macro.Arguments == nil || macro.EvalBased != nil || macro.Validation != nil {
+		t.Fatalf("optional macro metadata: %+v", macro)
+	}
+	withEmptyValidation := strings.Replace(orderedRequest, `"validation":"opaque"`, `"validation":""`, 1)
+	if _, err := DecodeRequest([]byte(withEmptyValidation)); err != nil {
+		t.Fatalf("empty macro validation is allowed: %v", err)
+	}
+}
+
 func TestDecodeAbsentRelationTargetIsContent(t *testing.T) {
 	request, err := DecodeRequest([]byte(orderedRequest))
 	if err != nil {
@@ -97,8 +116,12 @@ func TestDecodeRejectsMalformedInput(t *testing.T) {
 		{"trailing value", base + ` {}`},
 		{"unsupported selector", strings.Replace(base, `"language":"spl"`, `"language":"sql"`, 1)},
 		{"duplicate object id", strings.Replace(base, `"objects":[`, `"objects":[{"id":"lookup-1","kind":"lookup","name":"other","source_id":"other"},`, 1)},
+		{"missing macro arity", strings.Replace(base, `"arity":0,`, ``, 1)},
 		{"inconsistent macro arity", strings.Replace(base, `"arity":0`, `"arity":1`, 1)},
+		{"arity on non-macro", strings.Replace(base, `"name":"users","source_id":"users.csv"`, `"name":"users","source_id":"users.csv","arity":0`, 1)},
 		{"arguments on non-macro", strings.Replace(base, `"name":"users","source_id":"users.csv"`, `"name":"users","source_id":"users.csv","arguments":[]`, 1)},
+		{"eval_based on non-macro", strings.Replace(base, `"name":"users","source_id":"users.csv"`, `"name":"users","source_id":"users.csv","eval_based":false`, 1)},
+		{"validation on non-macro", strings.Replace(base, `"name":"users","source_id":"users.csv"`, `"name":"users","source_id":"users.csv","validation":""`, 1)},
 		{"repeated argument names", strings.Replace(base, `"arity":0,"arguments":[]`, `"arity":2,"arguments":["x","x"]`, 1)},
 		{"contradictory collection", strings.Replace(base, `"collections":[`, `"collections":[{"kind":"macro","coverage":"partial"},`, 1)},
 		{"invalid coverage", strings.Replace(base, `"coverage":"partial"`, `"coverage":"unknown"`, 1)},
