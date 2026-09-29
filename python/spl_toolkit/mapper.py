@@ -160,7 +160,7 @@ class SPLMapper:
         self._lib.spl_mapper_rewrite.restype = ctypes.POINTER(SPLResult)
         self._lib.spl_mapper_rewrite_batch.argtypes = [ctypes.c_int, ctypes.c_char_p]
         self._lib.spl_mapper_rewrite_batch.restype = ctypes.POINTER(SPLResult)
-        for operation in ("scan_corpus", "export_graph", "export_sarif", "impact_schema",
+        for operation in ("closure_query", "scan_corpus", "export_graph", "export_sarif", "impact_schema",
                           "impact_mapping", "document_view"):
             native = getattr(self._lib, "spl_mapper_" + operation)
             native.argtypes = [ctypes.c_int, ctypes.c_char_p]
@@ -415,6 +415,10 @@ class SPLMapper:
         if validation_target is not None:
             request["validation_target"] = validation_target
         return self._validate_fields_request(self._lib.spl_mapper_rewrite_batch, request, operation="rewrite")
+
+    def closure_query(self, request: dict) -> dict:
+        """Evaluate a caller-supplied knowledge-object closure request."""
+        return self._validate_fields_request(self._lib.spl_mapper_closure_query, request, operation="closure")
 
     def scan_corpus(self, request: dict) -> dict:
         """Scan an inline corpus request with explicit document IDs and optional target."""

@@ -197,6 +197,7 @@ func (s *Server) setupRoutes() {
 	s.mux.HandleFunc("POST /api/v1/query/validate-schema", s.handleValidateSchema)
 	s.mux.HandleFunc("POST /api/v1/query/validate-schema/batch", s.handleValidateSchemaBatch)
 	s.mux.HandleFunc("POST /api/v1/query/rewrite", s.handleRewrite)
+	s.mux.HandleFunc("POST /api/v1/query/closure", s.handleClosure)
 	s.mux.HandleFunc("POST /api/v1/query/rewrite/batch", s.handleRewriteBatch)
 	s.mux.HandleFunc("POST /api/v1/query/document", s.handleDocument)
 	s.mux.HandleFunc("POST /api/v1/corpus/scan", s.handleToolingScan)

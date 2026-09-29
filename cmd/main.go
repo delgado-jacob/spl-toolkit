@@ -28,6 +28,7 @@ Commands:
   validate-fields   Validate fields against a local catalog
   validate-schema   Validate fields against local JSON Schema or OCSF
   rewrite           Safely preview or apply explicit rewrite rules
+  closure           Evaluate caller-supplied knowledge-object dependencies
   capabilities      Show supported analysis commands and limitations
   demo              Run demonstration examples
   help              Show this help message
