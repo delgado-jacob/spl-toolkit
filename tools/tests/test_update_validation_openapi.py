@@ -1,5 +1,6 @@
 import copy
 import json
+import os
 from pathlib import Path
 import re
 import subprocess
@@ -314,7 +315,7 @@ class ValidationOpenAPITests(unittest.TestCase):
             self.assertEqual(spec["paths"]["/unrelated"], original["paths"]["/unrelated"])
             self.assertEqual(set(spec["paths"]) - set(original["paths"]), {
                 "/corpus/scan", "/corpus/graph", "/corpus/sarif",
-                "/corpus/impact-schema", "/corpus/impact-mapping", "/query/document"})
+                "/corpus/impact-schema", "/corpus/impact-mapping", "/query/document", "/query/closure"})
             self.assertEqual(spec["paths"]["/query/document"]["post"]["requestBody"]["content"]["application/json"]["schema"],
                              {"$ref": "#/components/schemas/tooling.QueryDocumentRequest"})
             self.assertIs(schemas["tooling.corpus.Request"]["additionalProperties"], False)
@@ -591,7 +592,7 @@ class ValidationOpenAPITests(unittest.TestCase):
                 self.assertIs(schemas[name]["additionalProperties"], True)
             self.assertEqual(schemas["analysis.RequirementSet"]["properties"]["schema_version"], {"type": "integer", "const": 1})
             self.assertEqual(schemas["analysis.RequirementSet"]["properties"]["query_status"]["enum"], ["valid", "invalid", "incomplete"])
-            self.assertEqual(schemas["analysis.RequirementItem"]["properties"]["kind"]["enum"], ["field", "index", "source", "sourcetype", "dataset", "data_model", "lookup", "macro"])
+            self.assertEqual(schemas["analysis.RequirementItem"]["properties"]["kind"]["enum"], ["field", "index", "source", "sourcetype", "dataset", "data_model", "lookup", "macro", "saved_search", "module", "function"])
             self.assertEqual(schemas["analysis.RequirementItem"]["properties"]["necessity"]["enum"], ["required", "conditional"])
             self.assertEqual(schemas["analysis.RequirementItem"]["properties"]["origin"], {"const": "direct"})
             self.assertEqual(schemas["analysis.RequirementItem"]["properties"]["resolution"]["enum"], ["exact", "wildcard", "dynamic"])
@@ -696,6 +697,144 @@ class ValidationOpenAPITests(unittest.TestCase):
                  for key in ("offset", "line", "column")},
                 {"offset": 0, "line": 1, "column": 1},
             )
+
+    def test_closure_request_contract_and_openapi_reject_malformed_inputs(self):
+        contracts = SCRIPT.parents[1] / "contracts/v1"
+        sources = [json.loads(path.read_text()) for path in contracts.glob("*.schema.json")]
+        registry = Registry().with_resources((schema["$id"], Resource.from_contents(schema)) for schema in sources)
+        request_schema = next(schema for schema in sources if schema["$id"].endswith("/closure-request.schema.json"))
+        canonical = jsonschema.Draft202012Validator(request_schema, registry=registry)
+        fixture = json.loads((SCRIPT.parents[1] / "testdata/closure/cases.json").read_text())["cases"][0]["request"]
+        self.assertTrue(canonical.is_valid(fixture))
+        omitted_relations = copy.deepcopy(fixture)
+        omitted_relations["bundle"]["objects"][0].pop("relations")
+        self.assertTrue(canonical.is_valid(omitted_relations))
+        definitions = next(schema for schema in sources if schema["$id"].endswith("/definitions.schema.json"))
+        self.assertTrue(jsonschema.Draft202012Validator(definitions, registry=registry).is_valid(fixture["bundle"]))
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self.fixture(root)
+            result = self.run_script(root)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            spec = json.loads((root / "swagger.json").read_text())
+            operation = spec["paths"]["/query/closure"]["post"]
+            self.assertEqual(operation["requestBody"]["content"]["application/json"]["schema"],
+                             {"$ref": "#/components/schemas/tooling.closure.Request"})
+            self.assertEqual(operation["responses"]["200"]["content"]["application/json"]["schema"],
+                             {"$ref": "#/components/schemas/tooling.closure.Report"})
+            self.assertEqual(set(operation["responses"]), {"200", "400"})
+            spec["$schema"] = "https://json-schema.org/draft/2020-12/schema"
+            spec["$ref"] = "#/components/schemas/tooling.closure.Request"
+            openapi = jsonschema.Draft202012Validator(spec)
+            relation = copy.deepcopy(fixture)
+            relation["bundle"]["objects"][0]["relations"] = [{"kind": "lookup", "name": "aux", "property": "/field"}]
+            self.assertTrue(canonical.is_valid(relation))
+            self.assertTrue(openapi.is_valid(relation))
+            self.assertTrue(openapi.is_valid(omitted_relations))
+            cases = []
+            for name, mutation in (
+                ("unknown root", lambda x: x.update(extra=True)),
+                ("wrong version", lambda x: x.update(schema_version=2)),
+                ("null bindings", lambda x: x.update(bindings=None)),
+                ("missing collections", lambda x: x["bundle"].pop("collections")),
+                ("null objects", lambda x: x["bundle"].update(objects=None)),
+                ("unknown object", lambda x: x["bundle"]["objects"][0].update(extra=True)),
+                ("null relations", lambda x: x["bundle"]["objects"][0].update(relations=None)),
+                ("bad selector", lambda x: x["document"].update(profile="cloud")),
+                ("bad binding", lambda x: x.update(bindings=[{"document_digest":"bad","kind":"lookup","start":0,"end":1,"object_id":"lookup-users"}])),
+                ("negative relation range", lambda x: x["bundle"]["objects"][0]["relations"].append({"kind":"lookup","name":"aux","start":-1,"end":1})),
+                ("incomplete relation range", lambda x: x["bundle"]["objects"][0]["relations"].append({"kind":"lookup","name":"aux","start":0})),
+                ("bad relation pointer", lambda x: x["bundle"]["objects"][0]["relations"].append({"kind":"lookup","name":"aux","property":"/bad~x"})),
+                ("ambiguous relation evidence", lambda x: x["bundle"]["objects"][0]["relations"].append({"kind":"lookup","name":"aux","start":0,"end":1,"property":"/field"})),
+            ):
+                invalid = copy.deepcopy(fixture)
+                mutation(invalid)
+                cases.append((name, invalid))
+            for name, invalid in cases:
+                with self.subTest(name=name):
+                    self.assertFalse(canonical.is_valid(invalid))
+                    self.assertFalse(openapi.is_valid(invalid))
+
+    def test_closure_report_projections_accept_runtime_json(self):
+        contracts = SCRIPT.parents[1] / "contracts/v1"
+        sources = [json.loads(path.read_text()) for path in contracts.glob("*.schema.json")]
+        registry = Registry().with_resources((schema["$id"], Resource.from_contents(schema)) for schema in sources)
+        by_name = {Path(schema["$id"]).name: schema for schema in sources}
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            program = root / "closure_report.go"
+            program.write_text('''package main
+import (
+    "encoding/json"
+    "os"
+    "github.com/delgado-jacob/spl-toolkit/pkg/closure"
+)
+func main() {
+    input, err := os.ReadFile("testdata/closure/cases.json")
+    if err != nil { panic(err) }
+    var cases struct { Cases []struct { Request json.RawMessage `json:"request"` } `json:"cases"` }
+    if err := json.Unmarshal(input, &cases); err != nil { panic(err) }
+    reports := []closure.Report{}
+    for _, entry := range cases.Cases {
+        request, err := closure.DecodeRequest(entry.Request)
+        if err != nil { panic(err) }
+        report, err := closure.Evaluate(request)
+        if err != nil { panic(err) }
+        reports = append(reports, *report)
+    }
+    var withoutRelations map[string]any
+    if err := json.Unmarshal(cases.Cases[0].Request, &withoutRelations); err != nil { panic(err) }
+    bundle := withoutRelations["bundle"].(map[string]any)
+    objects := bundle["objects"].([]any)
+    delete(objects[0].(map[string]any), "relations")
+    raw, err := json.Marshal(withoutRelations)
+    if err != nil { panic(err) }
+    omitted, err := closure.DecodeRequest(raw)
+    if err != nil { panic(err) }
+    omittedReport, err := closure.Evaluate(omitted)
+    if err != nil { panic(err) }
+    reports = append(reports, *omittedReport)
+    zero := 0
+    macro := closure.Request{SchemaVersion:1, Bundle:closure.DefinitionBundle{
+        SchemaVersion:1, ScopeID:"synthetic", Collections:[]closure.Collection{{Kind:"macro", Coverage:"complete"}},
+        Objects:[]closure.Definition{{ID:"macro-m", Kind:"macro", Name:"m", SourceID:"macros.conf",
+            Arity:&zero, Arguments:[]string{}, Relations:[]closure.Relation{}}}}}
+    macro.Document.Text = "`m`"
+    macro.Document.SourceID = "query.spl"
+    macro.Document.Language = "spl"
+    report, err := closure.Evaluate(macro)
+    if err != nil { panic(err) }
+    reports = append(reports, *report)
+    if err := json.NewEncoder(os.Stdout).Encode(reports); err != nil { panic(err) }
+}
+''')
+            process = subprocess.run(["go", "run", str(program)], cwd=SCRIPT.parents[1],
+                                     env={**os.environ, "GOWORK": "off", "GOCACHE": str(root / "go-cache")}, text=True, capture_output=True)
+            self.assertEqual(process.returncode, 0, process.stderr)
+            reports = json.loads(process.stdout)
+            spec = json.loads((SCRIPT.parents[1] / "docs/swagger.json").read_text())
+            spec["$schema"] = "https://json-schema.org/draft/2020-12/schema"
+            spec["$ref"] = "#/components/schemas/tooling.closure.Report"
+            for report in reports:
+                for name, value in (("closure.schema.json", report),
+                                    ("closure-graph.schema.json", report["graph"]),
+                                    ("detection-bom.schema.json", report["bom"])):
+                    with self.subTest(status=report["status"], name=name):
+                        self.assertTrue(jsonschema.Draft202012Validator(by_name[name], registry=registry).is_valid(value))
+                self.assertTrue(jsonschema.Draft202012Validator(spec).is_valid(report))
+            report = reports[0]
+            for name, mutation in (
+                ("unknown report member", lambda x: x.update(extra=True)),
+                ("missing graph", lambda x: x.pop("graph")),
+                ("unknown edge with target", lambda x: x["graph"]["edges"][0].update(unknown=True)),
+                ("empty occurrence path", lambda x: x["bom"][0]["occurrences"][0].update(path=[])),
+                ("unknown resolution", lambda x: x["graph"]["edges"][0].update(resolution="guessed")),
+            ):
+                invalid = copy.deepcopy(report)
+                mutation(invalid)
+                with self.subTest(name=name):
+                    self.assertFalse(jsonschema.Draft202012Validator(by_name["closure.schema.json"], registry=registry).is_valid(invalid))
+                    self.assertFalse(jsonschema.Draft202012Validator(spec).is_valid(invalid))
 
     def test_unexpected_shape_fails_without_writes(self):
         for failure in ("missing schema", "template mismatch", "yaml mismatch", "catalog type drift", "rewrite identity drift"):

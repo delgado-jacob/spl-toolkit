@@ -905,6 +905,9 @@ components:
           - data_model
           - lookup
           - macro
+          - saved_search
+          - module
+          - function
           type: string
         necessity:
           enum:
@@ -3028,6 +3031,708 @@ components:
       - input_reference_ids
       - output_reference_id
       - conditional
+      type: object
+    tooling.closure.BOMEntry:
+      additionalProperties: false
+      properties:
+        direct:
+          type: boolean
+        incomplete:
+          type: boolean
+        kind:
+          $ref: '#/components/schemas/tooling.closure.ObjectKind'
+        name:
+          pattern: \S
+          type: string
+        object_id:
+          pattern: \S
+          type: string
+        occurrences:
+          items:
+            $ref: '#/components/schemas/tooling.closure.BOMOccurrence'
+          minItems: 1
+          type: array
+        transitive:
+          type: boolean
+      required:
+      - object_id
+      - kind
+      - name
+      - direct
+      - transitive
+      - incomplete
+      - occurrences
+      type: object
+    tooling.closure.BOMOccurrence:
+      additionalProperties: false
+      description: Path lists object IDs from the query to the reached object, including
+        the reached object. Edge and instance IDs refer to traversal and graph evidence;
+        runtime validates references.
+      properties:
+        edge_id:
+          pattern: ^edge-[1-9][0-9]*$
+          type: string
+        instance_ids:
+          items:
+            pattern: \S
+            type: string
+          type: array
+        path:
+          items:
+            pattern: \S
+            type: string
+          minItems: 1
+          type: array
+      required:
+      - edge_id
+      - path
+      - instance_ids
+      type: object
+    tooling.closure.Binding:
+      additionalProperties: false
+      description: Half-open UTF-8 byte range; runtime validates the referenced document
+        and exact occurrence.
+      properties:
+        document_digest:
+          pattern: ^sha256:[0-9a-f]{64}$
+          type: string
+        end:
+          minimum: 1
+          type: integer
+        kind:
+          $ref: '#/components/schemas/tooling.closure.ObjectKind'
+        object_id:
+          pattern: \S
+          type: string
+        start:
+          minimum: 0
+          type: integer
+      required:
+      - document_digest
+      - kind
+      - start
+      - end
+      - object_id
+      type: object
+    tooling.closure.Collection:
+      additionalProperties: false
+      properties:
+        coverage:
+          enum:
+          - complete
+          - partial
+          - unavailable
+          type: string
+        kind:
+          $ref: '#/components/schemas/tooling.closure.ObjectKind'
+      required:
+      - kind
+      - coverage
+      type: object
+    tooling.closure.Coverage:
+      additionalProperties: false
+      properties:
+        collections:
+          type: boolean
+        complete:
+          type: boolean
+        effective_query:
+          type: boolean
+        expansion:
+          type: boolean
+        reasons:
+          items:
+            type: string
+          type: array
+        resolution:
+          type: boolean
+        traversed_definitions:
+          type: boolean
+      required:
+      - complete
+      - effective_query
+      - traversed_definitions
+      - resolution
+      - collections
+      - expansion
+      - reasons
+      type: object
+    tooling.closure.Definition:
+      additionalProperties: false
+      allOf:
+      - else:
+          allOf:
+          - not:
+              required:
+              - arity
+          - not:
+              required:
+              - eval_based
+          - not:
+              required:
+              - validation
+          - if:
+              required:
+              - arguments
+            then:
+              properties:
+                arguments:
+                  maxItems: 0
+        if:
+          properties:
+            kind:
+              const: macro
+          required:
+          - kind
+        then:
+          required:
+          - arity
+      description: Macro arity and arguments must agree; the runtime validates this
+        and exact relation byte ranges.
+      properties:
+        app:
+          type: string
+        arguments:
+          items:
+            pattern: \S
+            type: string
+          type: array
+          uniqueItems: true
+        arity:
+          minimum: 0
+          type: integer
+        document:
+          $ref: '#/components/schemas/tooling.QueryDocumentRequest'
+        eval_based:
+          type: boolean
+        id:
+          pattern: \S
+          type: string
+        kind:
+          $ref: '#/components/schemas/tooling.closure.ObjectKind'
+        name:
+          pattern: \S
+          type: string
+        owner:
+          type: string
+        relations:
+          items:
+            $ref: '#/components/schemas/tooling.closure.Relation'
+          type: array
+        sharing:
+          type: string
+        source_id:
+          pattern: \S
+          type: string
+        validation:
+          type: string
+      required:
+      - id
+      - kind
+      - name
+      - source_id
+      type: object
+    tooling.closure.DefinitionAnalysis:
+      additionalProperties: false
+      properties:
+        direct_analysis:
+          $ref: '#/components/schemas/analysis.Result'
+        effective_analysis:
+          anyOf:
+          - $ref: '#/components/schemas/analysis.Result'
+          - type: 'null'
+        object_id:
+          pattern: \S
+          type: string
+      required:
+      - object_id
+      - direct_analysis
+      type: object
+    tooling.closure.DefinitionBundle:
+      additionalProperties: false
+      description: Caller-supplied scoped definitions. Runtime rejects duplicate IDs
+        and collection kinds.
+      properties:
+        collections:
+          items:
+            $ref: '#/components/schemas/tooling.closure.Collection'
+          type: array
+        objects:
+          items:
+            $ref: '#/components/schemas/tooling.closure.Definition'
+          type: array
+        schema_version:
+          const: 1
+          type: integer
+        scope_id:
+          pattern: \S
+          type: string
+      required:
+      - schema_version
+      - scope_id
+      - collections
+      - objects
+      type: object
+    tooling.closure.DependencyGraph:
+      additionalProperties: false
+      properties:
+        edges:
+          items:
+            $ref: '#/components/schemas/tooling.closure.GraphEdge'
+          type: array
+        nodes:
+          items:
+            $ref: '#/components/schemas/tooling.closure.GraphNode'
+          minItems: 1
+          type: array
+      required:
+      - nodes
+      - edges
+      type: object
+    tooling.closure.Diagnostic:
+      additionalProperties: false
+      properties:
+        diagnostic:
+          $ref: '#/components/schemas/analysis.Diagnostic'
+        source:
+          $ref: '#/components/schemas/tooling.closure.SourceInterval'
+      required:
+      - source
+      - diagnostic
+      type: object
+    tooling.closure.Gap:
+      additionalProperties: false
+      properties:
+        code:
+          $ref: '#/components/schemas/tooling.closure.GapCode'
+        kind:
+          $ref: '#/components/schemas/tooling.closure.ObjectKind'
+        name:
+          type: string
+        path:
+          items:
+            pattern: \S
+            type: string
+          type: array
+        property:
+          pattern: ^/(?:[^~]|~[01])*$
+          type: string
+        source:
+          $ref: '#/components/schemas/tooling.closure.SourceInterval'
+      required:
+      - code
+      - source
+      - path
+      type: object
+    tooling.closure.GapCode:
+      enum:
+      - analysis_incomplete
+      - collection_incomplete
+      - dynamic_reference
+      - missing_object
+      - unknown_object
+      - missing_relation_target
+      - ambiguous_object
+      - cycle
+      - macro_context_missing
+      - definition_analysis_error
+      - missing_definition_body
+      - expansion_missing
+      - expansion_ambiguous
+      - expansion_dynamic
+      - expansion_cycle
+      - expansion_limit
+      - expansion_eval_based
+      - expansion_validation_held
+      type: string
+    tooling.closure.GraphEdge:
+      additionalProperties: false
+      allOf:
+      - else:
+          required:
+          - to
+        if:
+          properties:
+            unknown:
+              const: true
+          required:
+          - unknown
+        then:
+          not:
+            required:
+            - to
+      description: From, to, and invocation node IDs refer to graph nodes; traversal
+        pointer and edge ID refer to the same report traversal entry. Runtime validates
+        all references.
+      properties:
+        cycle_path:
+          items:
+            pattern: \S
+            type: string
+          type: array
+        from:
+          pattern: \S
+          type: string
+        id:
+          pattern: ^edge-[1-9][0-9]*$
+          type: string
+        invocation_node_ids:
+          items:
+            pattern: \S
+            type: string
+          type: array
+        kind:
+          $ref: '#/components/schemas/tooling.closure.ObjectKind'
+        name:
+          pattern: \S
+          type: string
+        path:
+          items:
+            pattern: \S
+            type: string
+          type: array
+        property:
+          pattern: ^/(?:[^~]|~[01])*$
+          type: string
+        resolution:
+          $ref: '#/components/schemas/tooling.closure.Resolution'
+        source:
+          $ref: '#/components/schemas/tooling.closure.SourceInterval'
+        to:
+          pattern: \S
+          type: string
+        traversal_pointer:
+          pattern: ^/traversal/(0|[1-9][0-9]*)$
+          type: string
+        unknown:
+          type: boolean
+      required:
+      - id
+      - from
+      - unknown
+      - kind
+      - name
+      - resolution
+      - traversal_pointer
+      - source
+      - path
+      - cycle_path
+      - invocation_node_ids
+      type: object
+    tooling.closure.GraphNode:
+      additionalProperties: false
+      description: Evidence pointer identifies the source query, traversal entry,
+        or invocation frame in the report.
+      properties:
+        evidence_pointer:
+          pattern: ^/(?:[^~]|~[01])*$
+          type: string
+        id:
+          pattern: \S
+          type: string
+        instance_id:
+          pattern: \S
+          type: string
+        kind:
+          enum:
+          - query
+          - object
+          - expansion
+          type: string
+        object_id:
+          pattern: \S
+          type: string
+      required:
+      - id
+      - kind
+      - evidence_pointer
+      type: object
+    tooling.closure.InvocationFrame:
+      additionalProperties: false
+      properties:
+        instance_id:
+          pattern: \S
+          type: string
+        invocation:
+          items:
+            $ref: '#/components/schemas/tooling.closure.SourceInterval'
+          type: array
+        object_id:
+          pattern: \S
+          type: string
+      required:
+      - object_id
+      - instance_id
+      - invocation
+      type: object
+    tooling.closure.ObjectKind:
+      enum:
+      - macro
+      - lookup
+      - data_model
+      - dataset
+      - saved_search
+      - event_type
+      - tag
+      - calculated_field
+      - field_extraction
+      - module
+      - function
+      - external_command
+      type: string
+    tooling.closure.ProvenanceSegment:
+      additionalProperties: false
+      description: Effective half-open byte interval and original source provenance.
+      properties:
+        effective_end:
+          minimum: 0
+          type: integer
+        effective_start:
+          minimum: 0
+          type: integer
+        invocation_chain:
+          items:
+            $ref: '#/components/schemas/tooling.closure.InvocationFrame'
+          type: array
+        placeholder:
+          $ref: '#/components/schemas/tooling.closure.SourceInterval'
+        placeholders:
+          items:
+            $ref: '#/components/schemas/tooling.closure.SourceInterval'
+          type: array
+        source:
+          $ref: '#/components/schemas/tooling.closure.SourceInterval'
+      required:
+      - effective_start
+      - effective_end
+      - source
+      - invocation_chain
+      - placeholders
+      type: object
+    tooling.closure.Relation:
+      additionalProperties: false
+      description: Relation evidence is one half-open UTF-8 byte range in the definition
+        document or one JSON Pointer property. Runtime checks range bounds and byte
+        boundaries.
+      oneOf:
+      - not:
+          required:
+          - property
+        required:
+        - start
+        - end
+      - not:
+          anyOf:
+          - required:
+            - start
+          - required:
+            - end
+        required:
+        - property
+      properties:
+        end:
+          minimum: 1
+          type: integer
+        kind:
+          $ref: '#/components/schemas/tooling.closure.ObjectKind'
+        name:
+          pattern: \S
+          type: string
+        property:
+          pattern: ^/(?:[^~]|~[01])*$
+          type: string
+        start:
+          minimum: 0
+          type: integer
+      required:
+      - kind
+      - name
+      type: object
+    tooling.closure.Report:
+      additionalProperties: false
+      properties:
+        bom:
+          items:
+            $ref: '#/components/schemas/tooling.closure.BOMEntry'
+          type: array
+        bundle_digest:
+          pattern: ^sha256:[0-9a-f]{64}$
+          type: string
+        coverage:
+          $ref: '#/components/schemas/tooling.closure.Coverage'
+        definition_analyses:
+          items:
+            $ref: '#/components/schemas/tooling.closure.DefinitionAnalysis'
+          type: array
+        diagnostics:
+          items:
+            $ref: '#/components/schemas/tooling.closure.Diagnostic'
+          type: array
+        direct_analysis:
+          $ref: '#/components/schemas/analysis.Result'
+        direct_requirements:
+          $ref: '#/components/schemas/analysis.RequirementSet'
+        effective_analysis:
+          $ref: '#/components/schemas/analysis.Result'
+        gaps:
+          items:
+            $ref: '#/components/schemas/tooling.closure.Gap'
+          type: array
+        graph:
+          $ref: '#/components/schemas/tooling.closure.DependencyGraph'
+        provenance:
+          items:
+            $ref: '#/components/schemas/tooling.closure.ProvenanceSegment'
+          type: array
+        query:
+          $ref: '#/components/schemas/analysis.RequirementQueryIdentity'
+        schema_version:
+          const: 1
+          type: integer
+        scope_id:
+          pattern: \S
+          type: string
+        status:
+          enum:
+          - valid
+          - invalid
+          - incomplete
+          type: string
+        traversal:
+          items:
+            $ref: '#/components/schemas/tooling.closure.TraversalEdge'
+          type: array
+      required:
+      - schema_version
+      - query
+      - bundle_digest
+      - scope_id
+      - status
+      - direct_analysis
+      - direct_requirements
+      - effective_analysis
+      - definition_analyses
+      - provenance
+      - coverage
+      - gaps
+      - diagnostics
+      - traversal
+      - graph
+      - bom
+      type: object
+    tooling.closure.Request:
+      additionalProperties: false
+      description: Optional bindings are normalized to an empty array when omitted.
+        Null and unknown members are invalid.
+      properties:
+        bindings:
+          items:
+            $ref: '#/components/schemas/tooling.closure.Binding'
+          type: array
+        bundle:
+          $ref: '#/components/schemas/tooling.closure.DefinitionBundle'
+        document:
+          $ref: '#/components/schemas/tooling.QueryDocumentRequest'
+        schema_version:
+          const: 1
+          type: integer
+      required:
+      - schema_version
+      - document
+      - bundle
+      type: object
+    tooling.closure.Resolution:
+      enum:
+      - resolved
+      - bound
+      - missing
+      - unknown
+      - ambiguous
+      - cycle
+      - dynamic
+      - wildcard
+      type: string
+    tooling.closure.SourceInterval:
+      additionalProperties: false
+      description: Half-open UTF-8 byte offsets into the indicated source; runtime
+        validates ordering and source identity.
+      properties:
+        end:
+          minimum: 0
+          type: integer
+        kind:
+          enum:
+          - query
+          - definition
+          type: string
+        object_id:
+          pattern: \S
+          type: string
+        source_id:
+          type: string
+        start:
+          minimum: 0
+          type: integer
+      required:
+      - kind
+      - source_id
+      - start
+      - end
+      type: object
+    tooling.closure.TraversalEdge:
+      additionalProperties: false
+      properties:
+        cycle_path:
+          items:
+            pattern: \S
+            type: string
+          type: array
+        from_object_id:
+          pattern: \S
+          type: string
+        id:
+          pattern: ^edge-[1-9][0-9]*$
+          type: string
+        invocation_chain:
+          items:
+            $ref: '#/components/schemas/tooling.closure.InvocationFrame'
+          type: array
+        kind:
+          $ref: '#/components/schemas/tooling.closure.ObjectKind'
+        name:
+          pattern: \S
+          type: string
+        origins:
+          items:
+            $ref: '#/components/schemas/tooling.closure.SourceInterval'
+          type: array
+        path:
+          items:
+            pattern: \S
+            type: string
+          type: array
+        property:
+          pattern: ^/(?:[^~]|~[01])*$
+          type: string
+        reference_id:
+          type: string
+        resolution:
+          $ref: '#/components/schemas/tooling.closure.Resolution'
+        source:
+          $ref: '#/components/schemas/tooling.closure.SourceInterval'
+        to_object_id:
+          pattern: \S
+          type: string
+      required:
+      - id
+      - kind
+      - name
+      - source
+      - resolution
+      - path
+      - cycle_path
+      - invocation_chain
+      - origins
       type: object
     tooling.corpus.AcquisitionError:
       additionalProperties: true
@@ -5406,6 +6111,36 @@ paths:
                 $ref: '#/components/schemas/api.ErrorResponse'
           description: Malformed JSON or unsupported document options
       summary: Analyze an SPL or standalone SPL2 query
+      tags:
+      - query
+  /query/closure:
+    post:
+      description: Strict inline JSON request with a scoped definition bundle and
+        optional occurrence bindings. Unknown or duplicate members, nulls, malformed
+        Unicode, and trailing JSON are input errors. Content statuses valid, invalid,
+        and incomplete return 200 with the canonical report, provenance, graph, and
+        bill of materials. Cross-document byte ranges and evidence references are
+        validated by the runtime.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/tooling.closure.Request'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/tooling.closure.Report'
+          description: Canonical closure report
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api.ErrorResponse'
+          description: Malformed request
+      summary: Evaluate knowledge-object dependency closure
       tags:
       - query
   /query/discover:

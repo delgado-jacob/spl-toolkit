@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/detection-bom.schema.json",
+  "title": "SPL Toolkit detection bill of materials v1",
+  "type": "array",
+  "items": {
+    "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/closure.BOMEntry"
+  }
+}
