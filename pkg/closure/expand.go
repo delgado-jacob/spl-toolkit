@@ -22,6 +22,9 @@ type macroExpander struct {
 // held. A byte limit truncates output at the limit and records a zero-width gap.
 func expandMacros(req Request) expansion {
 	input := directExpansion(req.Document.Text, sourceInterval{Kind: "query", SourceID: req.Document.SourceID, Start: 0, End: len(req.Document.Text)})
+	if req.Document.Language != "" && req.Document.Language != "spl" {
+		return input
+	}
 	return (&macroExpander{request: req}).expand(input, map[string]bool{}, 0)
 }
 
@@ -30,8 +33,10 @@ func (x *macroExpander) expand(input expansion, active map[string]bool, depth in
 	var out expansion
 	cursor := 0
 	for _, call := range calls {
-		if !x.appendLimited(&out, input.slice(cursor, call.Span.Start)) {
-			return out
+		if call.Span.Start > cursor {
+			if !x.appendLimited(&out, input.slice(cursor, call.Span.Start)) {
+				return out
+			}
 		}
 		site := input.slice(call.Span.Start, call.Span.End)
 		part, reason := x.expandCall(input, call, active, depth)
@@ -39,13 +44,50 @@ func (x *macroExpander) expand(input expansion, active map[string]bool, depth in
 			part = expansion{}
 			part.addGap(reason, site)
 		}
+		retainSiteZeroGaps(&part, site)
 		if !x.appendLimited(&out, part) {
 			return out
 		}
 		cursor = call.Span.End
 	}
-	x.appendLimited(&out, input.slice(cursor, len(input.Text)))
+	if cursor < len(input.Text) || len(input.Text) == 0 {
+		x.appendLimited(&out, input.slice(cursor, len(input.Text)))
+	}
 	return out
+}
+
+// A prior expansion may have left a zero-width gap inside this call. The
+// replacement must carry that evidence even if the call discards its text.
+func retainSiteZeroGaps(part *expansion, site expansion) {
+	for _, gap := range site.Gaps {
+		if gap.EffectiveStart != gap.EffectiveEnd {
+			continue
+		}
+		duplicate := false
+		for _, existing := range part.Gaps {
+			if existing.Reason != gap.Reason || len(existing.Origins) != len(gap.Origins) {
+				continue
+			}
+			same := true
+			for i := range gap.Origins {
+				if existing.Origins[i] != gap.Origins[i] {
+					same = false
+					break
+				}
+			}
+			if same {
+				duplicate = true
+				break
+			}
+		}
+		if duplicate {
+			continue
+		}
+		// Replacement changes the call's length; anchor prior uncertainty
+		// at its start so output truncation cannot discard it.
+		gap.EffectiveStart, gap.EffectiveEnd = 0, 0
+		part.Gaps = append(part.Gaps, gap)
+	}
 }
 
 func (x *macroExpander) appendLimited(out *expansion, part expansion) bool {
@@ -97,6 +139,9 @@ func (x *macroExpander) expandCall(input expansion, call macroInvocation, active
 	if def.Document == nil {
 		return expansion{}, "missing"
 	}
+	if def.Document.Language != "" && def.Document.Language != "spl" {
+		return expansion{}, "dynamic"
+	}
 	origin := input.Origins(call.Span.Start, call.Span.End)
 	frame := invocationFrame{ObjectID: def.ID, InstanceID: fmt.Sprintf("expansion-%d", x.calls), Invocation: make([]sourceInterval, 0, len(origin))}
 	for _, s := range origin {
@@ -125,6 +170,15 @@ func (x *macroExpander) expandCall(input expansion, call macroInvocation, active
 	}
 	definition = definition.withFrame(frame)
 	substituted := substitute(definition, substitutions)
+	for _, name := range names {
+		if strings.Contains(def.Document.Text, "$"+name+"$") {
+			continue
+		}
+		for _, gap := range substitutions[name].Gaps {
+			gap.EffectiveStart, gap.EffectiveEnd = 0, 0
+			substituted.Gaps = append(substituted.Gaps, gap)
+		}
+	}
 	return x.expand(substituted, active, depth+1), ""
 }
 

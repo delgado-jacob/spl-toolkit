@@ -227,3 +227,47 @@ func TestExpandLiteralDollarAndNamedArgumentOrder(t *testing.T) {
 	}
 	assertCovered(t, got)
 }
+
+func TestExpandOnlyClassicSPL(t *testing.T) {
+	req := macroRequest("`m`", macroDef("m", "m", "eval x=1"))
+	req.Document.Language = "spl2"
+	got := expandMacros(req)
+	if got.Text != "`m`" || len(got.Gaps) != 0 {
+		t.Fatalf("SPL2 root changed: %+v", got)
+	}
+	assertCovered(t, got)
+	req.Document.Language = "spl"
+	req.Bundle.Objects[0].Document.Language = "spl2"
+	got = expandMacros(req)
+	if got.Text != "`m`" || len(got.Gaps) != 1 || got.Gaps[0].Reason != "dynamic" {
+		t.Fatalf("SPL2 definition expanded: %+v", got)
+	}
+	assertCovered(t, got)
+}
+
+func TestMacroCycleImmediateEmptyPrefix(t *testing.T) {
+	got := expandMacros(macroRequest("`loop`", macroDef("loop-object", "loop", "`loop`")))
+	if got.Text != "`loop`" || len(got.Gaps) != 1 || got.Gaps[0].Reason != "cycle" {
+		t.Fatalf("immediate cycle: %+v", got)
+	}
+	if len(got.Segments) != 1 || len(got.Segments[0].InvocationChain) != 1 || got.Segments[0].InvocationChain[0].ObjectID != "loop-object" {
+		t.Fatalf("cycle path: %+v", got.Segments)
+	}
+	assertCovered(t, got)
+}
+
+func TestExpandUnusedOpaqueArgumentKeepsGap(t *testing.T) {
+	got := expandMacros(macroRequest("`outer(`missing`)`", macroDef("outer", "outer", "eval x=1", "x")))
+	if got.Text != "eval x=1" || len(got.Gaps) != 1 || got.Gaps[0].Reason != "missing" || got.Gaps[0].EffectiveStart != got.Gaps[0].EffectiveEnd {
+		t.Fatalf("unused argument gap: %+v", got)
+	}
+	assertCovered(t, got)
+}
+
+func TestExpandUnusedOpaqueArgumentSurvivesFollowingCall(t *testing.T) {
+	got := expandMacros(macroRequest("`outer(`missing`)`", macroDef("outer", "outer", "`good`", "x"), macroDef("good", "good", "eval x=1")))
+	if got.Text != "eval x=1" || len(got.Gaps) != 1 || got.Gaps[0].Reason != "missing" || got.Gaps[0].EffectiveStart != got.Gaps[0].EffectiveEnd {
+		t.Fatalf("unused gap across call: %+v", got)
+	}
+	assertCovered(t, got)
+}

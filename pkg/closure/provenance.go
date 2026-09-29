@@ -76,7 +76,7 @@ func (e expansion) slice(start, end int) expansion {
 	if end > len(e.Text) {
 		end = len(e.Text)
 	}
-	if end <= start {
+	if end < start {
 		return expansion{}
 	}
 	out := expansion{Text: e.Text[start:end]}
@@ -86,6 +86,17 @@ func (e expansion) slice(start, end int) expansion {
 		out.Segments = append(out.Segments, s)
 	}
 	for _, g := range e.Gaps {
+		// A point gap belongs to the slice ending at that byte. The first
+		// slice also owns a gap at byte zero.
+		if g.EffectiveStart == g.EffectiveEnd {
+			point := g.EffectiveStart
+			if !((point > start && point <= end) || (point == 0 && start == 0) || (start == end && point == start)) {
+				continue
+			}
+			g.EffectiveStart, g.EffectiveEnd = point-start, point-start
+			out.Gaps = append(out.Gaps, g)
+			continue
+		}
 		if g.EffectiveEnd <= start || g.EffectiveStart >= end {
 			continue
 		}

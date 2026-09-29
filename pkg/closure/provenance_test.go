@@ -1,6 +1,9 @@
 package closure
 
-import "testing"
+import (
+	"strings"
+	"testing"
+)
 
 func TestProvenanceUnicodeOffsetsAndCrossSegmentReference(t *testing.T) {
 	got := expandMacros(macroRequest("é `m(λ)` z", macroDef("m", "m", "$x$+$x$", "x")))
@@ -24,4 +27,13 @@ func TestProvenanceUnicodeOffsetsAndCrossSegmentReference(t *testing.T) {
 	if len(got.Origins(99, 101)) != 0 {
 		t.Fatal("out of range had origins")
 	}
+}
+
+func TestProvenanceZeroWidthLimitSurvivesSubstitution(t *testing.T) {
+	huge := strings.Repeat("x", maxExpansionBytes) + "y"
+	got := expandMacros(macroRequest("`outer(`inner`)`", macroDef("outer", "outer", "$x$", "x"), macroDef("inner", "inner", huge)))
+	if len(got.Text) != maxExpansionBytes || len(got.Gaps) != 1 || got.Gaps[0].Reason != "limit" || got.Gaps[0].EffectiveStart != len(got.Text) || got.Gaps[0].EffectiveEnd != len(got.Text) {
+		t.Fatalf("nested limit lost: text=%d gaps=%+v", len(got.Text), got.Gaps)
+	}
+	assertCovered(t, got)
 }
