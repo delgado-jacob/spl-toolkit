@@ -399,7 +399,50 @@ func macroPosition(source string, span macroSpan) string {
 			return ""
 		}
 	}
-	left, right := 0, len(source)
+	region := macroStageRegion(source, span)
+	left, right := region.Start, region.End
+	depth := 0
+pipes:
+	for i := region.Start; i < region.End; i++ {
+		if source[i] == '\'' || source[i] == '"' {
+			i = macroQuotedEnd(source, i) - 1
+			continue
+		}
+		if source[i] == '/' {
+			if end, ok := macroCommentEnd(source, i); ok {
+				i = end - 1
+				continue
+			}
+		}
+		switch source[i] {
+		case '[':
+			depth++
+		case ']':
+			if depth > 0 {
+				depth--
+			}
+		case '|':
+			if depth == 0 {
+				if i < span.Start {
+					left = i + 1
+				} else if i >= span.End {
+					right = i
+					break pipes
+				}
+			}
+		}
+	}
+	if macroOnlyTrivia(source[left:span.Start]) && macroOnlyTrivia(source[span.End:right]) {
+		return "stage"
+	}
+	return "fragment"
+}
+
+// macroStageRegion finds the nearest balanced subquery containing the call.
+// Its brackets are stage boundaries; brackets in quoted text are ignored.
+func macroStageRegion(source string, span macroSpan) macroSpan {
+	region := macroSpan{0, len(source)}
+	var opens []int
 	for i := 0; i < len(source); i++ {
 		if source[i] == '\'' || source[i] == '"' {
 			i = macroQuotedEnd(source, i) - 1
@@ -411,19 +454,21 @@ func macroPosition(source string, span macroSpan) string {
 				continue
 			}
 		}
-		if source[i] == '|' {
-			if i < span.Start {
-				left = i + 1
-			} else if i >= span.End {
-				right = i
-				break
+		switch source[i] {
+		case '[':
+			opens = append(opens, i)
+		case ']':
+			if len(opens) == 0 {
+				continue
+			}
+			open := opens[len(opens)-1]
+			opens = opens[:len(opens)-1]
+			if open < span.Start && i >= span.End && open+1 > region.Start {
+				region = macroSpan{open + 1, i}
 			}
 		}
 	}
-	if macroOnlyTrivia(source[left:span.Start]) && macroOnlyTrivia(source[span.End:right]) {
-		return "stage"
-	}
-	return "fragment"
+	return region
 }
 
 func macroOnlyTrivia(source string) bool {

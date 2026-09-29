@@ -191,3 +191,39 @@ func TestMacroScanSameStageMalformedRecovery(t *testing.T) {
 		t.Fatalf("ranges = %+v", calls)
 	}
 }
+
+func TestMacroScanSubqueryStagePosition(t *testing.T) {
+	for _, source := range []string{
+		"search [ search host=web | `inner()` ]",
+		"search [ `inner()` | stats count ]",
+	} {
+		calls := scanMacroInvocations(source)
+		if len(calls) != 1 || calls[0].Name != "inner" || calls[0].Unsupported != "" || calls[0].Position != "stage" {
+			t.Fatalf("source %q: calls = %+v", source, calls)
+		}
+	}
+	fragment := scanMacroInvocations("search [ search host=`inner()` ]")
+	if len(fragment) != 1 || fragment[0].Unsupported != "" || fragment[0].Position != "fragment" {
+		t.Fatalf("subquery fragment = %+v", fragment)
+	}
+}
+
+func TestMacroScanNestedArgumentSubqueryStagePosition(t *testing.T) {
+	source := "`outer([ search host=web | `inner()` ])`"
+	calls := scanMacroInvocations(source)
+	if len(calls) != 1 || calls[0].Unsupported != "" || calls[0].Position != "stage" || len(calls[0].Nested) != 1 {
+		t.Fatalf("outer = %+v", calls)
+	}
+	inner := calls[0].Nested[0]
+	if inner.Name != "inner" || inner.Unsupported != "" || inner.Position != "stage" || source[inner.Span.Start:inner.Span.End] != "`inner()`" {
+		t.Fatalf("inner = %+v", inner)
+	}
+}
+
+func TestMacroScanRootStageAfterSubquery(t *testing.T) {
+	source := "search [ search host=web | stats count ] | `root()`"
+	calls := scanMacroInvocations(source)
+	if len(calls) != 1 || calls[0].Name != "root" || calls[0].Unsupported != "" || calls[0].Position != "stage" {
+		t.Fatalf("calls = %+v", calls)
+	}
+}
