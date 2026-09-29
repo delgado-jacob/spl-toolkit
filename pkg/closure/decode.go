@@ -2,7 +2,6 @@ package closure
 
 import (
 	"bytes"
-	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
@@ -335,7 +334,7 @@ func decodeDefinition(v any) (Definition, error) {
 	return o, nil
 }
 func decodeBundle(v any) (DefinitionBundle, error) {
-	m, err := fields(v, []string{"schema_version", "scope_id"}, "schema_version", "scope_id", "collections", "objects")
+	m, err := fields(v, []string{"schema_version", "scope_id", "collections", "objects"}, "schema_version", "scope_id", "collections", "objects")
 	if err != nil {
 		return DefinitionBundle{}, err
 	}
@@ -348,7 +347,7 @@ func decodeBundle(v any) (DefinitionBundle, error) {
 		return DefinitionBundle{}, err
 	}
 	b := DefinitionBundle{SchemaVersion: version, ScopeID: scope, Collections: []Collection{}, Objects: []Definition{}}
-	values, err := arrayField(m, "collections", false)
+	values, err := arrayField(m, "collections", true)
 	if err != nil {
 		return DefinitionBundle{}, err
 	}
@@ -359,7 +358,7 @@ func decodeBundle(v any) (DefinitionBundle, error) {
 		}
 		b.Collections = append(b.Collections, c)
 	}
-	values, err = arrayField(m, "objects", false)
+	values, err = arrayField(m, "objects", true)
 	if err != nil {
 		return DefinitionBundle{}, err
 	}
@@ -408,7 +407,7 @@ func DecodeRequest(data []byte) (Request, error) {
 	if err != nil {
 		return Request{}, err
 	}
-	m, err := fields(value, []string{"schema_version", "document", "bundle", "bindings"}, "schema_version", "document", "bundle", "bindings")
+	m, err := fields(value, []string{"schema_version", "document", "bundle"}, "schema_version", "document", "bundle", "bindings")
 	if err != nil {
 		return Request{}, err
 	}
@@ -427,7 +426,7 @@ func DecodeRequest(data []byte) (Request, error) {
 	if err != nil {
 		return Request{}, err
 	}
-	values, err := arrayField(m, "bindings", true)
+	values, err := arrayField(m, "bindings", false)
 	if err != nil {
 		return Request{}, err
 	}
@@ -436,8 +435,6 @@ func DecodeRequest(data []byte) (Request, error) {
 	for _, object := range bundle.Objects {
 		objects[object.ID] = object
 	}
-	sum := sha256.Sum256([]byte(document.Text))
-	digest := "sha256:" + hex.EncodeToString(sum[:])
 	for _, value := range values {
 		binding, err := decodeBinding(value)
 		if err != nil {
@@ -447,14 +444,22 @@ func DecodeRequest(data []byte) (Request, error) {
 			return Request{}, err
 		}
 		object, found := objects[binding.ObjectID]
-		if !found || object.Kind != binding.Kind || binding.DocumentDigest != digest || !validRange(document.Text, binding.Start, binding.End) {
-			return Request{}, inputError("binding has invalid object, digest, or source range")
+		if !found || object.Kind != binding.Kind || !validDigest(binding.DocumentDigest) || binding.Start < 0 || binding.End <= binding.Start {
+			return Request{}, inputError("binding has invalid object, digest, or range")
 		}
 		bindings = append(bindings, binding)
 	}
 	return Request{SchemaVersion: 1, Document: document, Bundle: bundle, Bindings: bindings}, nil
 }
 
+func validDigest(value string) bool {
+	const prefix = "sha256:"
+	if !strings.HasPrefix(value, prefix) || len(value) != len(prefix)+64 {
+		return false
+	}
+	_, err := hex.DecodeString(value[len(prefix):])
+	return err == nil
+}
 func validRange(text string, start, end int) bool {
 	return start >= 0 && end > start && end <= len(text) && utf8.ValidString(text[:start]) && utf8.ValidString(text[:end])
 }

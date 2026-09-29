@@ -92,7 +92,7 @@ func TestDecodeRejectsMalformedInput(t *testing.T) {
 		{"unknown root member", strings.Replace(base, `"bindings":[]`, `"path":"x","bindings":[]`, 1)},
 		{"null document", strings.Replace(base, `"document":{"text":"`+"`expand`"+`","language":"spl"}`, `"document":null`, 1)},
 		{"null collections", strings.Replace(base, `"collections":[{"kind":"lookup","coverage":"partial"},{"kind":"macro","coverage":"complete"}]`, `"collections":null`, 1)},
-		{"null objects", `{"schema_version":1,"document":{"text":""},"bundle":{"schema_version":1,"scope_id":"s","objects":null},"bindings":[]}`},
+		{"null objects", `{"schema_version":1,"document":{"text":""},"bundle":{"schema_version":1,"scope_id":"s","collections":[],"objects":null},"bindings":[]}`},
 		{"null bindings", strings.Replace(base, `"bindings":[]`, `"bindings":null`, 1)},
 		{"trailing value", base + ` {}`},
 		{"unsupported selector", strings.Replace(base, `"language":"spl"`, `"language":"sql"`, 1)},
@@ -138,8 +138,11 @@ func TestDecodeBindingStructureAndKindVocabulary(t *testing.T) {
 	for _, tc := range []struct{ name, raw string }{
 		{"wrong object", strings.Replace(raw, `"object_id":"macro-1"`, `"object_id":"absent"`, 1)},
 		{"wrong kind", strings.Replace(raw, `"kind":"macro","start":0`, `"kind":"lookup","start":0`, 1)},
-		{"range outside document", strings.Replace(raw, `"end":8,"object_id"`, `"end":9,"object_id"`, 1)},
-		{"stale digest", strings.Replace(raw, digest, `sha256:`+strings.Repeat("0", 64), 1)},
+		{"negative range", strings.Replace(raw, `"start":0,"end":8`, `"start":-1,"end":8`, 1)},
+		{"empty range", strings.Replace(raw, `"start":0,"end":8`, `"start":8,"end":8`, 1)},
+		{"short digest", strings.Replace(raw, digest, `sha256:bad`, 1)},
+		{"nonhex digest", strings.Replace(raw, digest, `sha256:`+strings.Repeat("z", 64), 1)},
+		{"wrong prefix", strings.Replace(raw, digest, `md5:`+strings.Repeat("0", 64), 1)},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			if r, e := DecodeRequest([]byte(tc.raw)); !IsInputError(e) || !reflect.DeepEqual(r, Request{}) {
@@ -169,5 +172,45 @@ func TestDecodeObjectsDoNotRequireCollectionCoverage(t *testing.T) {
 				t.Fatalf("supplied object rejected: %+v, %v", r.Bundle.Objects, err)
 			}
 		})
+	}
+}
+
+func TestDecodeOptionalBindingsAndRequiredBundleArrays(t *testing.T) {
+	omitted := strings.Replace(orderedRequest, `,"bindings":[]`, ``, 1)
+	got, err := DecodeRequest([]byte(omitted))
+	if err != nil || got.Bindings == nil || len(got.Bindings) != 0 {
+		t.Fatalf("omitted bindings: %+v, %v", got.Bindings, err)
+	}
+	empty := `{"schema_version":1,"document":{"text":""},"bundle":{"schema_version":1,"scope_id":"s","collections":[],"objects":[]}}`
+	got, err = DecodeRequest([]byte(empty))
+	if err != nil || got.Bundle.Collections == nil || got.Bundle.Objects == nil {
+		t.Fatalf("empty arrays: %+v, %v", got.Bundle, err)
+	}
+	for _, tc := range []struct{ name, raw string }{
+		{"missing collections", strings.Replace(empty, `"collections":[],`, ``, 1)},
+		{"missing objects", strings.Replace(empty, `,"objects":[]`, ``, 1)},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			r, e := DecodeRequest([]byte(tc.raw))
+			if !IsInputError(e) || !reflect.DeepEqual(r, Request{}) {
+				t.Fatalf("got %+v, %v", r, e)
+			}
+		})
+	}
+}
+
+func TestDecodeBindingDefersDocumentOccurrence(t *testing.T) {
+	sum := sha256.Sum256([]byte("lookup users | lookup missing"))
+	definitionDigest := "sha256:" + hex.EncodeToString(sum[:])
+	binding := fmt.Sprintf(`"bindings":[{"document_digest":%q,"kind":"macro","start":0,"end":12,"object_id":"macro-1"}]`, definitionDigest)
+	raw := strings.Replace(orderedRequest, `"bindings":[]`, binding, 1)
+	got, err := DecodeRequest([]byte(raw))
+	if err != nil || len(got.Bindings) != 1 {
+		t.Fatalf("definition binding: %+v, %v", got.Bindings, err)
+	}
+	stale := strings.Replace(raw, definitionDigest, `sha256:`+strings.Repeat("0", 64), 1)
+	got, err = DecodeRequest([]byte(stale))
+	if err != nil || len(got.Bindings) != 1 {
+		t.Fatalf("structurally valid digest should be deferred: %+v, %v", got.Bindings, err)
 	}
 }
