@@ -3,6 +3,7 @@ package closure
 import (
 	"fmt"
 	"sort"
+	"strings"
 )
 
 // DependencyGraph projects the traversal without inferring additional dependencies.
@@ -142,11 +143,13 @@ func projectReport(report *Report) {
 		for _, id := range gap.Path {
 			markIncomplete(id)
 		}
-		if gap.Kind == "" || gap.Name == "" {
-			continue
-		}
 		for _, edge := range report.Traversal {
-			if edge.ToObjectID != "" && edge.Kind == gap.Kind && edge.Name == gap.Name && edge.Source == gap.Source && edge.Property == gap.Property {
+			if edge.ToObjectID == "" || edge.Source != gap.Source || edge.Property != gap.Property {
+				continue
+			}
+			sameReference := gap.Kind != "" && gap.Name != "" && edge.Kind == gap.Kind && edge.Name == gap.Name
+			heldMacro := strings.HasPrefix(gap.Code, "expansion_") && edge.Kind == "macro"
+			if sameReference || heldMacro {
 				markIncomplete(edge.ToObjectID)
 			}
 		}

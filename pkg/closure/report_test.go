@@ -261,7 +261,31 @@ func TestBOMRootMacroSelfCycleIsIncomplete(t *testing.T) {
 	for _, edge := range report.Graph.Edges {
 		if edge.Resolution == "cycle" {
 			cycle = true
+			if edge.To != "object:m0" || edge.Unknown {
+				t.Fatalf("proven cycle target is unknown: %+v", edge)
+			}
 		}
+	}
+	cycleEdgeID := ""
+	for _, edge := range report.Traversal {
+		if edge.Resolution == "cycle" {
+			if edge.ToObjectID != "m0" {
+				t.Fatalf("cycle traversal target: %+v", edge)
+			}
+			cycleEdgeID = edge.ID
+		}
+	}
+	if len(report.BOM[0].Occurrences) != 2 || cycleEdgeID == "" {
+		t.Fatalf("cycle occurrence omitted: %+v", report.BOM[0])
+	}
+	occurrenceFound := false
+	for _, occurrence := range report.BOM[0].Occurrences {
+		if occurrence.EdgeID == cycleEdgeID {
+			occurrenceFound = true
+		}
+	}
+	if !occurrenceFound {
+		t.Fatalf("BOM omits cycle traversal %s: %+v", cycleEdgeID, report.BOM[0])
 	}
 	if !cycle || !report.BOM[0].Incomplete {
 		t.Fatalf("cycle edge/BOM mismatch: graph=%+v BOM=%+v gaps=%+v", report.Graph.Edges, report.BOM, report.Gaps)
@@ -300,5 +324,74 @@ func TestBOMPartialCollectionMarksResolvedOccurrence(t *testing.T) {
 	}
 	if !strings.Contains(FormatInventory(report), "users (users) [incomplete]") || !strings.Contains(FormatInventory(report), "collection_incomplete") {
 		t.Fatalf("inventory partial collection: %s", FormatInventory(report))
+	}
+}
+
+func TestBOMHeldRootMacroExpansionIsIncomplete(t *testing.T) {
+	cases := []struct {
+		name       string
+		definition Definition
+		reason     string
+	}{
+		{name: "missing_body", definition: func() Definition { d := macroDef("m0", "m", ""); d.Document = nil; return d }(), reason: "expansion_missing"},
+		{name: "eval_based", definition: func() Definition { d := macroDef("m0", "m", "eval x=1"); value := true; d.EvalBased = &value; return d }(), reason: "expansion_eval_based"},
+		{name: "validation_held", definition: func() Definition {
+			d := macroDef("m0", "m", "eval x=1")
+			value := "isnum($x$)"
+			d.Validation = &value
+			return d
+		}(), reason: "expansion_validation_held"},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			report, err := Evaluate(evalRequest("`m`", []Collection{{Kind: "macro", Coverage: "complete"}}, tc.definition))
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(report.BOM) != 1 || report.BOM[0].ObjectID != "m0" {
+				t.Fatalf("BOM: %+v", report.BOM)
+			}
+			foundGap := false
+			for _, gap := range report.Gaps {
+				if gap.Code == tc.reason {
+					foundGap = true
+				}
+			}
+			if !foundGap || !report.BOM[0].Incomplete {
+				t.Fatalf("held expansion status: gap=%t BOM=%+v traversal=%+v gaps=%+v", foundGap, report.BOM, report.Traversal, report.Gaps)
+			}
+			if !strings.Contains(FormatInventory(report), "m (m0) [incomplete]") || !strings.Contains(FormatInventory(report), tc.reason) {
+				t.Fatalf("inventory held expansion: %s", FormatInventory(report))
+			}
+		})
+	}
+}
+
+func TestGraphBoundCycleUsesActiveTarget(t *testing.T) {
+	a := macroDef("a", "m", "`m` | eval a=1")
+	b := macroDef("b", "m", "eval b=1 | `m`")
+	root := "`m`"
+	nested := strings.Index(b.Document.Text, "`m`")
+	req := evalRequest(root, []Collection{{Kind: "macro", Coverage: "complete"}}, a, b)
+	req.Bindings = []Binding{
+		bindingFor(root, 0, len(root), "a"),
+		bindingFor(a.Document.Text, 0, len(root), "b"),
+		bindingFor(b.Document.Text, nested, nested+len(root), "b"),
+	}
+	report, err := Evaluate(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	found := false
+	for _, edge := range report.Graph.Edges {
+		if edge.Resolution == "cycle" {
+			found = true
+			if edge.To != "object:b" || edge.Unknown || !reflect.DeepEqual(edge.CyclePath, []string{"b", "b"}) {
+				t.Fatalf("bound cycle target: %+v", edge)
+			}
+		}
+	}
+	if !found {
+		t.Fatalf("cycle edge absent: %+v", report.Graph.Edges)
 	}
 }

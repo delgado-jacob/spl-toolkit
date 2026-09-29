@@ -185,21 +185,33 @@ func (e *evaluator) expansionGapEdge(gap opaqueGap, owner sourceInterval, expand
 					break
 				}
 			}
-			targetID := ""
+			active := map[string]bool{}
+			for _, id := range path {
+				active[id] = true
+			}
+			candidates := []Definition{}
 			for _, candidate := range e.req.Bundle.Objects {
-				if candidate.Kind == "macro" && candidate.Name == call.Name && candidate.Arity != nil && *candidate.Arity == len(call.Arguments) {
-					targetID = candidate.ID
-					break
+				if candidate.Kind == "macro" && candidate.Name == call.Name && candidate.Arity != nil && *candidate.Arity == len(call.Arguments) && active[candidate.ID] {
+					candidates = append(candidates, candidate)
 				}
 			}
-			index := 0
-			for i, id := range path {
-				if id == targetID {
-					index = i
-					break
+			targetID := ""
+			if len(candidates) == 1 {
+				targetID = candidates[0].ID
+			} else if len(candidates) > 1 {
+				if bound, ok := e.boundTarget(edge, candidates); ok {
+					targetID = bound.ID
 				}
 			}
-			edge.CyclePath = append(append([]string{}, path[index:]...), targetID)
+			if targetID != "" {
+				edge.ToObjectID = targetID
+				for i, id := range path {
+					if id == targetID {
+						edge.CyclePath = append(append([]string{}, path[i:]...), targetID)
+						break
+					}
+				}
+			}
 			for _, segment := range expanded.Segments {
 				if segment.EffectiveStart <= gap.EffectiveStart && segment.EffectiveEnd >= gap.EffectiveEnd {
 					edge.InvocationChain = publicFrames(segment.InvocationChain)
