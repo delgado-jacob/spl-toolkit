@@ -96,13 +96,32 @@ func macroCommentEnd(source string, start int) (int, bool) {
 
 func scanMacroAt(source string, start int) macroInvocation {
 	end := len(source)
+	brackets := 0
 	for i := start + 1; i < len(source); {
 		if source[i] == '\'' || source[i] == '"' {
 			i = macroQuotedEnd(source, i)
 			continue
 		}
-		if source[i] == '`' {
+		switch source[i] {
+		case '[':
+			brackets++
+		case ']':
+			if brackets > 0 {
+				brackets--
+			}
+		case '|':
+			// A pipe outside a subquery cannot occur in a macro argument
+			// expression. Stop before it so a later stage can still be scanned.
+			if brackets == 0 {
+				return macroInvocation{
+					Span:        macroSpan{start, i},
+					Unsupported: "unclosed macro invocation before pipeline separator",
+				}
+			}
+		case '`':
 			end = i + 1
+		}
+		if end != len(source) {
 			break
 		}
 		i++
@@ -252,7 +271,7 @@ func macroParseArgument(source string, span macroSpan) (macroArgument, bool) {
 	}
 	arg := macroArgument{Span: span, ValueSpan: span}
 	var stack []byte
-	equal := -1
+	equal, equalCount := -1, 0
 	for i := span.Start; i < span.End; i++ {
 		switch source[i] {
 		case '\'', '"':
@@ -265,20 +284,21 @@ func macroParseArgument(source string, span macroSpan) (macroArgument, bool) {
 			}
 		case '=':
 			if len(stack) == 0 {
-				if equal >= 0 {
-					return macroArgument{}, false
-				}
-				equal = i
+				equal, equalCount = i, equalCount+1
 			}
 		}
 	}
-	if equal >= 0 {
+	if equalCount == 1 && equal > span.Start && equal+1 < span.End &&
+		source[equal-1] != '>' && source[equal-1] != '<' && source[equal-1] != '!' && source[equal+1] != '=' {
 		name := macroTrim(source, macroSpan{span.Start, equal})
-		value := macroTrim(source, macroSpan{equal + 1, span.End})
-		if name.Start == name.End || value.Start == value.End || !macroNameStart(source, name.Start) || macroNameEnd(source, name.Start, name.End) != name.End {
-			return macroArgument{}, false
+		if name.Start < name.End && macroNameStart(source, name.Start) && macroNameEnd(source, name.Start, name.End) == name.End {
+			arg.NameSpan = name
+			arg.Name = source[name.Start:name.End]
+			arg.ValueSpan = macroTrim(source, macroSpan{equal + 1, span.End})
 		}
-		arg.NameSpan, arg.Name, arg.ValueSpan = name, source[name.Start:name.End], value
+	}
+	if arg.ValueSpan.Start == arg.ValueSpan.End {
+		return macroArgument{}, false
 	}
 	return arg, macroExpression(source[arg.ValueSpan.Start:arg.ValueSpan.End])
 }

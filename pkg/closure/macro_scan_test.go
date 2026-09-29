@@ -121,3 +121,42 @@ func TestMacroScanQuotedName(t *testing.T) {
 		t.Fatalf("name span = %q", got)
 	}
 }
+
+func TestMacroScanRecoversAfterMalformedDelimiter(t *testing.T) {
+	source := "search `bad(a | `good()` | eval literal=\"`quoted()`\""
+	calls := scanMacroInvocations(source)
+	if len(calls) != 2 {
+		t.Fatalf("calls = %+v", calls)
+	}
+	if calls[0].Unsupported == "" || calls[0].Span.Start != strings.Index(source, "`bad") || calls[0].Span.End != strings.Index(source, "|") {
+		t.Fatalf("malformed call = %+v", calls[0])
+	}
+	if calls[1].Name != "good" || calls[1].Unsupported != "" || source[calls[1].Span.Start:calls[1].Span.End] != "`good()`" {
+		t.Fatalf("recovered call = %+v", calls[1])
+	}
+}
+
+func TestMacroScanComparisonArgumentsRemainPositional(t *testing.T) {
+	source := "`filter(score>=10,status!=0,age<=18,field=\"user\")`"
+	calls := scanMacroInvocations(source)
+	if len(calls) != 1 || calls[0].Unsupported != "" || len(calls[0].Arguments) != 4 {
+		t.Fatalf("calls = %+v", calls)
+	}
+	for i, want := range []string{"score>=10", "status!=0", "age<=18"} {
+		arg := calls[0].Arguments[i]
+		if arg.Name != "" || arg.NameSpan != (macroSpan{}) || source[arg.Span.Start:arg.Span.End] != want || arg.ValueSpan != arg.Span {
+			t.Fatalf("comparison argument %d = %+v", i, arg)
+		}
+	}
+	if arg := calls[0].Arguments[3]; arg.Name != "field" || source[arg.ValueSpan.Start:arg.ValueSpan.End] != `"user"` {
+		t.Fatalf("named argument = %+v", arg)
+	}
+}
+
+func TestMacroScanPipeInsideArgumentIsNotRecoveryBoundary(t *testing.T) {
+	source := "`filter([ search host=web | stats count ], \"a|b\")` | `next()`"
+	calls := scanMacroInvocations(source)
+	if len(calls) != 2 || calls[0].Unsupported != "" || len(calls[0].Arguments) != 2 || calls[1].Name != "next" {
+		t.Fatalf("calls = %+v", calls)
+	}
+}
