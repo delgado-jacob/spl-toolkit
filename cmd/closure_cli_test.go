@@ -121,3 +121,34 @@ func TestClosureCLIRejectsRequestAndOutputErrors(t *testing.T) {
 		}
 	}
 }
+
+func TestClosureCLIRejectsInvalidUTF8BeforeCanonicalRequest(t *testing.T) {
+	bundle := closureCLIFile(t, "bundle.json", closure.DefinitionBundle{SchemaVersion: 1, ScopeID: "synthetic", Collections: []closure.Collection{}, Objects: []closure.Definition{}})
+	invalid := string([]byte{0xff})
+	file := filepath.Join(t.TempDir(), "invalid.spl")
+	if err := os.WriteFile(file, []byte{0xff}, 0600); err != nil {
+		t.Fatal(err)
+	}
+	for _, test := range []struct {
+		name  string
+		args  []string
+		stdin string
+	}{
+		{name: "file", args: []string{"--file", file}},
+		{name: "stdin", args: []string{"--stdin"}, stdin: invalid},
+		{name: "inline", args: []string{"--query", invalid}},
+		{name: "source id", args: []string{"--query", "search host=x", "--source-id", invalid}},
+		{name: "language", args: []string{"--query", "search host=x", "--language", invalid}},
+		{name: "profile", args: []string{"--query", "search host=x", "--profile", invalid}},
+		{name: "version", args: []string{"--query", "search host=x", "--compatibility-version", invalid}},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			args := append([]string{"closure", "--bundle", bundle, "--format=json"}, test.args...)
+			var stdout, stderr bytes.Buffer
+			code := runCLIWithInput(args, strings.NewReader(test.stdin), &stdout, &stderr)
+			if code != 2 || stdout.Len() != 0 || !strings.Contains(stderr.String(), "valid UTF-8") {
+				t.Fatalf("code=%d stdout_bytes=%d stderr=%q", code, stdout.Len(), stderr.String())
+			}
+		})
+	}
+}

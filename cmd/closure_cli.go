@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"unicode/utf8"
 
 	"github.com/delgado-jacob/spl-toolkit/pkg/analysis"
 	"github.com/delgado-jacob/spl-toolkit/pkg/closure"
@@ -59,6 +60,14 @@ func runClosureCLI(o map[string]string, stdin io.Reader, stdout, stderr io.Write
 			return fail(fmt.Errorf("read query: %w", err))
 		}
 		query = string(raw)
+	}
+	if !utf8.ValidString(query) {
+		return fail(fmt.Errorf("query must be valid UTF-8"))
+	}
+	for _, name := range []string{"source-id", "language", "profile", "compatibility-version"} {
+		if !utf8.ValidString(o[name]) {
+			return fail(fmt.Errorf("--%s must be valid UTF-8", name))
+		}
 	}
 	bundle, err := os.ReadFile(o["bundle"])
 	if err != nil {
