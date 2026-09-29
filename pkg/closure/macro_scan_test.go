@@ -160,3 +160,34 @@ func TestMacroScanPipeInsideArgumentIsNotRecoveryBoundary(t *testing.T) {
 		t.Fatalf("calls = %+v", calls)
 	}
 }
+
+func TestMacroScanNestedInvocation(t *testing.T) {
+	source := "`outer(`inner()`, \"quoted `false()`\")`"
+	calls := scanMacroInvocations(source)
+	if len(calls) != 1 || calls[0].Name != "outer" || calls[0].Unsupported != "" || len(calls[0].Arguments) != 2 {
+		t.Fatalf("outer = %+v", calls)
+	}
+	outer := calls[0]
+	if outer.Span != (macroSpan{0, len(source)}) || len(outer.Nested) != 1 || outer.Nested[0].Name != "inner" || outer.Nested[0].Unsupported != "" {
+		t.Fatalf("nested calls = %+v", outer)
+	}
+	inner := outer.Nested[0]
+	if got := source[inner.Span.Start:inner.Span.End]; got != "`inner()`" || inner.Span != outer.Arguments[0].Span || inner.Position != "fragment" {
+		t.Fatalf("inner = %+v, text %q", inner, got)
+	}
+	if source[outer.Arguments[1].Span.Start:outer.Arguments[1].Span.End] != "\"quoted `false()`\"" {
+		t.Fatalf("quoted argument = %+v", outer.Arguments[1])
+	}
+}
+
+func TestMacroScanSameStageMalformedRecovery(t *testing.T) {
+	source := "search `bad(a `good()` \"quoted `false()`\""
+	calls := scanMacroInvocations(source)
+	if len(calls) != 2 || calls[0].Unsupported == "" || calls[1].Unsupported != "" || calls[1].Name != "good" {
+		t.Fatalf("calls = %+v", calls)
+	}
+	if calls[0].Span.Start != strings.Index(source, "`bad") || calls[0].Span.End != strings.Index(source, "`good") ||
+		source[calls[1].Span.Start:calls[1].Span.End] != "`good()`" || len(calls[0].Nested) != 0 {
+		t.Fatalf("ranges = %+v", calls)
+	}
+}

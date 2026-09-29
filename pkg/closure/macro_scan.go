@@ -28,7 +28,8 @@ type macroInvocation struct {
 	Name        string
 	NameSpan    macroSpan
 	Arguments   []macroArgument
-	Position    string // stage or fragment
+	Nested      []macroInvocation // calls inside argument expressions, in source order
+	Position    string            // stage or fragment
 	Unsupported string
 }
 
@@ -95,14 +96,26 @@ func macroCommentEnd(source string, start int) (int, bool) {
 }
 
 func scanMacroAt(source string, start int) macroInvocation {
-	end := len(source)
-	brackets := 0
+	var nested []macroInvocation
+	parens, brackets := 0, 0
 	for i := start + 1; i < len(source); {
 		if source[i] == '\'' || source[i] == '"' {
 			i = macroQuotedEnd(source, i)
 			continue
 		}
+		if source[i] == '/' {
+			if end, ok := macroCommentEnd(source, i); ok {
+				i = end
+				continue
+			}
+		}
 		switch source[i] {
+		case '(':
+			parens++
+		case ')':
+			if parens > 0 {
+				parens--
+			}
 		case '[':
 			brackets++
 		case ']':
@@ -113,26 +126,53 @@ func scanMacroAt(source string, start int) macroInvocation {
 			// A pipe outside a subquery cannot occur in a macro argument
 			// expression. Stop before it so a later stage can still be scanned.
 			if brackets == 0 {
-				return macroInvocation{
-					Span:        macroSpan{start, i},
-					Unsupported: "unclosed macro invocation before pipeline separator",
-				}
+				return macroUnclosedBeforeNested(start, i, nested)
 			}
 		case '`':
-			end = i + 1
-		}
-		if end != len(source) {
-			break
+			trial := macroParseForm(source, macroSpan{start, i + 1}, nested)
+			if trial.Unsupported == "" {
+				return trial
+			}
+			if parens > 0 {
+				child := scanMacroAt(source, i)
+				if child.Unsupported == "" {
+					nested = append(nested, child)
+					i = child.Span.End
+					continue
+				}
+				// This tick may start another malformed invocation. A lexical
+				// boundary lets the outer scanner classify it independently.
+				if i > start+1 {
+					previous, _ := utf8.DecodeLastRuneInString(source[:i])
+					if unicode.IsSpace(previous) {
+						return macroUnclosedBeforeNested(start, i, nested)
+					}
+				}
+			}
+			if len(nested) > 0 {
+				return macroUnclosedBeforeNested(start, i, nested)
+			}
+			return trial
 		}
 		i++
 	}
-	call := macroInvocation{Span: macroSpan{start, end}}
-	if end == len(source) && (end == start+1 || source[end-1] != '`') {
-		call.Unsupported = "unclosed backtick invocation"
-		return call
+	return macroUnclosedBeforeNested(start, len(source), nested)
+}
+
+func macroUnclosedBeforeNested(start, end int, nested []macroInvocation) macroInvocation {
+	if len(nested) > 0 && nested[0].Span.Start < end {
+		end = nested[0].Span.Start
 	}
-	bodyEnd := end - 1
-	i := macroSkipSpace(source, start+1, bodyEnd)
+	return macroInvocation{
+		Span:        macroSpan{start, end},
+		Unsupported: "unclosed macro invocation",
+	}
+}
+
+func macroParseForm(source string, span macroSpan, nested []macroInvocation) macroInvocation {
+	call := macroInvocation{Span: span}
+	bodyEnd := span.End - 1
+	i := macroSkipSpace(source, span.Start+1, bodyEnd)
 	nameStart := i
 	if i < bodyEnd && source[i] == '\'' {
 		i = macroQuotedEnd(source[:bodyEnd], i)
@@ -155,13 +195,14 @@ func scanMacroAt(source string, start int) macroInvocation {
 			call.Unsupported = "unrecognized macro argument syntax"
 			return call
 		}
-		args, ok := macroArguments(source, i+1, bodyEnd-1)
+		args, ok := macroArguments(source, i+1, bodyEnd-1, nested)
 		if !ok {
 			call.Unsupported = "unrecognized macro argument syntax"
 			return call
 		}
 		call.Arguments = args
 	}
+	call.Nested = nested
 	call.Position = macroPosition(source, call.Span)
 	if call.Position == "" {
 		call.Unsupported = "unrecognized macro insertion position"
@@ -219,7 +260,16 @@ func macroNameEnd(source string, i, end int) int {
 	return i
 }
 
-func macroArguments(source string, start, end int) ([]macroArgument, bool) {
+func macroNestedEnd(nested []macroInvocation, start int) (int, bool) {
+	for _, child := range nested {
+		if child.Span.Start == start {
+			return child.Span.End, true
+		}
+	}
+	return 0, false
+}
+
+func macroArguments(source string, start, end int, nested []macroInvocation) ([]macroArgument, bool) {
 	if macroTrim(source, macroSpan{start, end}).Start == end {
 		return nil, true
 	}
@@ -227,6 +277,10 @@ func macroArguments(source string, start, end int) ([]macroArgument, bool) {
 	var stack []byte
 	part := start
 	for i := start; i < end; i++ {
+		if childEnd, ok := macroNestedEnd(nested, i); ok {
+			i = childEnd - 1
+			continue
+		}
 		switch source[i] {
 		case '\'', '"':
 			quotedEnd := macroQuotedEnd(source[:end], i)
@@ -243,7 +297,7 @@ func macroArguments(source string, start, end int) ([]macroArgument, bool) {
 			stack = stack[:len(stack)-1]
 		case ',':
 			if len(stack) == 0 {
-				arg, ok := macroParseArgument(source, macroSpan{part, i})
+				arg, ok := macroParseArgument(source, macroSpan{part, i}, nested)
 				if !ok {
 					return nil, false
 				}
@@ -257,14 +311,14 @@ func macroArguments(source string, start, end int) ([]macroArgument, bool) {
 	if len(stack) != 0 {
 		return nil, false
 	}
-	arg, ok := macroParseArgument(source, macroSpan{part, end})
+	arg, ok := macroParseArgument(source, macroSpan{part, end}, nested)
 	if !ok {
 		return nil, false
 	}
 	return append(args, arg), true
 }
 
-func macroParseArgument(source string, span macroSpan) (macroArgument, bool) {
+func macroParseArgument(source string, span macroSpan, nested []macroInvocation) (macroArgument, bool) {
 	span = macroTrim(source, span)
 	if span.Start == span.End {
 		return macroArgument{}, false
@@ -273,6 +327,10 @@ func macroParseArgument(source string, span macroSpan) (macroArgument, bool) {
 	var stack []byte
 	equal, equalCount := -1, 0
 	for i := span.Start; i < span.End; i++ {
+		if childEnd, ok := macroNestedEnd(nested, i); ok {
+			i = childEnd - 1
+			continue
+		}
 		switch source[i] {
 		case '\'', '"':
 			i = macroQuotedEnd(source[:span.End], i) - 1
