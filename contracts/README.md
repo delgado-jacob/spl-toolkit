@@ -60,14 +60,14 @@ Evidence IDs must resolve to typed cases in the same manifest. Stable IDs retain
 the exact reviewed scope; a broadened form receives a new ID unless a reviewed
 scope correction changes the original boundary. `grammar_registered` is a parser
 fact independent of syntax coverage. Linting likewise requires its own evidence.
-The current manifests contain 105 SPL records with 104 evidence cases and 114 SPL2
-records with 124 evidence cases. SPL requirements have 19 supported, 5 unsupported,
-and 81 unassessed records. Safe rewriting has 17 supported, 2 unsupported and 86
-unassessed SPL records; SPL2 has 14 supported, 3 unsupported and 97 unassessed
+The current manifests contain 106 SPL records with 107 evidence cases and 141 SPL2
+records with 149 evidence cases. SPL requirements have 19 supported, 6 unsupported,
+and 81 unassessed records. Safe rewriting has 17 supported, 2 unsupported and 87
+unassessed SPL records; SPL2 has 14 supported, 3 unsupported and 124 unassessed
 records. The current SPL revision is
 `sha256:b0ae8b8965e1925460f7d304f046c83f37ccc80c10c32075142d94b363c73732`;
-the SPL2 revision remains
-`sha256:f1391296cfbc616e9bb1b1828e2471e37b60a35c0555654c0734640e072a0437`.
+the SPL2 revision is
+`sha256:6495f77a0747f04e9690f5360cf4d024cf95a727bf05ab7cb7c9e1a96e1383dc`.
 
 The SPL ledger includes bounded field-flow semantics for exact `tstats`, selected
 field commands, and selected function arities. Exact macros produce direct macro
