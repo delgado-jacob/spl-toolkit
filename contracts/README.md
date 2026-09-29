@@ -65,7 +65,7 @@ records with 124 evidence cases. SPL requirements have 19 supported, 5 unsupport
 and 81 unassessed records. Safe rewriting has 17 supported, 2 unsupported and 86
 unassessed SPL records; SPL2 has 14 supported, 3 unsupported and 97 unassessed
 records. The current SPL revision is
-`sha256:08901c84ac8c420f59ddb86168c534f0e83484c05d3c8a81078a716c878a1733`;
+`sha256:b0ae8b8965e1925460f7d304f046c83f37ccc80c10c32075142d94b363c73732`;
 the SPL2 revision remains
 `sha256:f1391296cfbc616e9bb1b1828e2471e37b60a35c0555654c0734640e072a0437`.
 

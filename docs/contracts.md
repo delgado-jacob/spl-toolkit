@@ -71,9 +71,9 @@ records parser registration separately from syntax coverage, and ordinary parser
 or semantic diagnostics do not count as lint evidence. Current exact totals are
 105 SPL records with 104 evidence cases and 140 SPL2 records with 146 evidence
 cases. The current SPL revision is
-`sha256:08901c84ac8c420f59ddb86168c534f0e83484c05d3c8a81078a716c878a1733`;
+`sha256:b0ae8b8965e1925460f7d304f046c83f37ccc80c10c32075142d94b363c73732`;
 the SPL2 revision is
-`sha256:a765813624c6edfd754a4529556f5fd35288f464e759f8d969404a072bef1898`.
+`sha256:6495f77a0747f04e9690f5360cf4d024cf95a727bf05ab7cb7c9e1a96e1383dc`.
 
 The SPL records cover bounded field-flow semantics for exact `tstats`, selected
 field commands, and selected function arities. Exact macro invocations emit a

@@ -17,7 +17,7 @@ func TestCorpusDependencies(t *testing.T) {
 		{`| inputlookup users`, Dependencies{Lookups: []string{"users"}}, nil},
 		{`| datamodel Web All_Traffic search`, Dependencies{DataModels: []string{"Web"}, Datasets: []string{"Web.All_Traffic"}}, []struct{ kind, name, original string }{{"data_model", "Web", "Web"}, {"dataset", "Web.All_Traffic", "All_Traffic"}}},
 		{`| from datamodel:Network_Traffic.All_Traffic`, Dependencies{DataModels: []string{"Network_Traffic"}, Datasets: []string{"Network_Traffic.All_Traffic"}}, []struct{ kind, name, original string }{{"data_model", "Network_Traffic", "Network_Traffic"}, {"dataset", "Network_Traffic.All_Traffic", "Network_Traffic.All_Traffic"}}},
-		{`| from savedsearch:Daily`, Dependencies{Datasets: []string{"savedsearch:Daily"}}, nil},
+		{`| from savedsearch:Daily`, Dependencies{Datasets: []string{"savedsearch:Daily"}}, []struct{ kind, name, original string }{{"saved_search", "Daily", "Daily"}}},
 		{`| tstats count FROM datamodel=Authentication.Authentication WHERE nodename=Authentication.Authentication BY user`, Dependencies{DataModels: []string{"Authentication"}, Datasets: []string{"Authentication.Authentication"}}, []struct{ kind, name, original string }{{"data_model", "Authentication", "Authentication"}, {"dataset", "Authentication.Authentication", "Authentication.Authentication"}}},
 		{`| tstats count FROM datamodel=Authentication`, Dependencies{DataModels: []string{"Authentication"}}, []struct{ kind, name, original string }{{"data_model", "Authentication", "Authentication"}}},
 	} {

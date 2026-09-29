@@ -578,7 +578,10 @@
             "dataset",
             "data_model",
             "lookup",
-            "macro"
+            "macro",
+            "saved_search",
+            "module",
+            "function"
           ]
         },
         "identity": {

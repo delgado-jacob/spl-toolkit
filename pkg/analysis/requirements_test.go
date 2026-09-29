@@ -133,7 +133,7 @@ func TestProjectRequirementsFieldPolicy(t *testing.T) {
 }
 
 func TestProjectRequirementsKnowledgePolicy(t *testing.T) {
-	for i, kind := range []string{"index", "source", "sourcetype", "dataset", "data_model", "lookup", "macro"} {
+	for i, kind := range []string{"index", "source", "sourcetype", "dataset", "data_model", "lookup", "macro", "saved_search", "module", "function"} {
 		t.Run(kind+" exact", func(t *testing.T) {
 			trace := newRequirementTrace()
 			reference := testRequirementReference("ref-0", kind, kind+"-name", "read", "not_applicable", "exact", i)

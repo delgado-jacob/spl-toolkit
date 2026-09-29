@@ -104,6 +104,27 @@ func (s *semanticStage) qualifiedCatalog(ctx antlr.ParserRuleContext, from bool)
 	name := normalizedName(raw)
 	prefix := 0
 	if from {
+		if strings.HasPrefix(strings.ToLower(name), "savedsearch:") {
+			component := name[len("savedsearch:"):]
+			if !plainCatalogComponent(component) || strings.Contains(component, "$") || strings.Contains(raw, "\\") {
+				resolution := "dynamic"
+				if strings.Contains(component, "*") {
+					resolution = "wildcard"
+				}
+				s.referenceAt(s.parsed.source.contextLocation(ctx), name, "dataset", "read", resolution)
+				s.addDependency(name, "dataset")
+				s.diagnostic(CodeUnsupportedSemantics, "saved search requires an exact catalog component", ctx)
+				return
+			}
+			// Keep the existing dataset projection for callers of Dependencies.
+			s.dependency(ctx, name, "dataset")
+			start := ctx.GetStart().GetStart() + len([]rune("savedsearch:"))
+			if len(raw) > 0 && (raw[0] == '\'' || raw[0] == '"') {
+				start++
+			}
+			s.referenceAt(s.parsed.source.location(start, start+len([]rune(component))), component, "saved_search", "read", "exact")
+			return
+		}
 		if !strings.HasPrefix(strings.ToLower(name), "datamodel:") {
 			s.dependency(ctx, name, "dataset")
 			return

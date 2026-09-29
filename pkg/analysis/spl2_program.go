@@ -463,7 +463,7 @@ func (p *spl2Program) resolveImportedDataset(stage *spl2SemanticStage, dataset s
 	return false
 }
 
-func (p *spl2Program) useImport(stage *spl2SemanticStage, binding *spl2ImportBinding, owner antlr.ParserRuleContext, suffix string) string {
+func (p *spl2Program) useImport(stage *spl2SemanticStage, binding *spl2ImportBinding, owner antlr.ParserRuleContext, suffix string, functionCall ...bool) string {
 	if binding == nil || owner == nil {
 		return ""
 	}
@@ -481,7 +481,11 @@ func (p *spl2Program) useImport(stage *spl2SemanticStage, binding *spl2ImportBin
 		name += "." + member
 	}
 	location := p.parsed.source.contextLocation(owner)
-	reference := stage.referenceAt(location, name, "module_member", "read", "exact")
+	kind := "module_member"
+	if len(functionCall) != 0 && functionCall[0] {
+		kind = "function"
+	}
+	reference := stage.referenceAt(location, name, kind, "read", "exact")
 	pending := []string{}
 	if binding.declaration.moduleRef != "" {
 		pending = append(pending, binding.declaration.moduleRef)
@@ -569,7 +573,7 @@ func (p *spl2Program) bindCall(stage *spl2SemanticStage, call spl2.ICallContext,
 		out.ids = uniqueIDs(out.ids, value.ids)
 	}
 	if imported != nil {
-		p.useImport(stage, imported, call.Identifier(), "")
+		p.useImport(stage, imported, call.Identifier(), "", true)
 		return out, true
 	}
 	return out, false

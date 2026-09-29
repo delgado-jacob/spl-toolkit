@@ -2157,6 +2157,140 @@
       }
     },
     {
+      "id": "spl.from.saved-search.requirements.incomplete",
+      "classification": "incomplete",
+      "document": {
+        "text": "| from savedsearch:Daily",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.from.saved-search.requirements.incomplete"
+      },
+      "observations": {
+        "requirements": {
+          "query_status": "incomplete",
+          "complete": false,
+          "items": [
+            {
+              "kind": "dataset",
+              "identity": "savedsearch:Daily",
+              "role": "read",
+              "necessity": "required",
+              "resolution": "exact"
+            },
+            {
+              "kind": "saved_search",
+              "identity": "Daily",
+              "role": "read",
+              "necessity": "required",
+              "resolution": "exact"
+            }
+          ],
+          "gap_codes": [
+            "SPL_UNSUPPORTED_SEMANTICS"
+          ]
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Locally observed parser, semantic, or direct requirement boundary."
+      }
+    },
+    {
+      "id": "spl.from.saved-search.semantics.incomplete",
+      "classification": "incomplete",
+      "document": {
+        "text": "| from savedsearch:Daily",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.from.saved-search.semantics.incomplete"
+      },
+      "observations": {
+        "semantics": {
+          "status": "incomplete",
+          "complete": false,
+          "stages": [
+            {
+              "command": "from",
+              "semantic_complete": false
+            }
+          ],
+          "references": [
+            {
+              "normalized_name": "savedsearch:Daily",
+              "kind": "dataset",
+              "role": "read",
+              "resolution": "exact",
+              "binding": "not_applicable",
+              "location": {
+                "start": {
+                  "offset": 7,
+                  "line": 1,
+                  "column": 8
+                },
+                "end": {
+                  "offset": 24,
+                  "line": 1,
+                  "column": 25
+                }
+              }
+            },
+            {
+              "normalized_name": "Daily",
+              "kind": "saved_search",
+              "role": "read",
+              "resolution": "exact",
+              "binding": "not_applicable",
+              "location": {
+                "start": {
+                  "offset": 19,
+                  "line": 1,
+                  "column": 20
+                },
+                "end": {
+                  "offset": 24,
+                  "line": 1,
+                  "column": 25
+                }
+              }
+            }
+          ],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Locally observed parser, semantic, or direct requirement boundary."
+      }
+    },
+    {
+      "id": "spl.from.saved-search.syntax.positive",
+      "classification": "positive",
+      "document": {
+        "text": "| from savedsearch:Daily",
+        "language": "spl",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl.from.saved-search.syntax.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Locally observed parser, semantic, or direct requirement boundary."
+      }
+    },
+    {
       "id": "spl.head.numeric-limit.positive",
       "classification": "positive",
       "document": {
@@ -16341,6 +16475,135 @@
         "source_family": "toolkit",
         "reference": "pkg/analysis",
         "note": "Locally authored replay through the canonical analyzer."
+      }
+    },
+    {
+      "id": "spl2.module.imported-function.requirements.incomplete",
+      "classification": "incomplete",
+      "document": {
+        "text": "import {normalize as norm} from vendor/security;\n$output = FROM synthetic_events | eval result=norm(value);",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.module.imported-function.requirements.incomplete"
+      },
+      "observations": {
+        "requirements": {
+          "query_status": "incomplete",
+          "complete": false,
+          "items": [
+            {
+              "kind": "module",
+              "identity": "vendor/security",
+              "role": "read",
+              "necessity": "required",
+              "resolution": "exact"
+            },
+            {
+              "kind": "function",
+              "identity": "vendor/security.normalize",
+              "role": "read",
+              "necessity": "required",
+              "resolution": "exact"
+            }
+          ],
+          "gap_codes": [
+            "SPL_UNRESOLVED_MODULE"
+          ]
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Locally observed parser, semantic, or direct requirement boundary."
+      }
+    },
+    {
+      "id": "spl2.module.imported-function.semantics.incomplete",
+      "classification": "incomplete",
+      "document": {
+        "text": "import {normalize as norm} from vendor/security;\n$output = FROM synthetic_events | eval result=norm(value);",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.module.imported-function.semantics.incomplete"
+      },
+      "observations": {
+        "semantics": {
+          "status": "incomplete",
+          "complete": false,
+          "references": [
+            {
+              "normalized_name": "vendor/security",
+              "kind": "module",
+              "role": "read",
+              "resolution": "exact",
+              "binding": "not_applicable",
+              "location": {
+                "start": {
+                  "offset": 32,
+                  "line": 1,
+                  "column": 33
+                },
+                "end": {
+                  "offset": 47,
+                  "line": 1,
+                  "column": 48
+                }
+              }
+            },
+            {
+              "normalized_name": "vendor/security.normalize",
+              "kind": "function",
+              "role": "read",
+              "resolution": "exact",
+              "binding": "not_applicable",
+              "location": {
+                "start": {
+                  "offset": 95,
+                  "line": 2,
+                  "column": 47
+                },
+                "end": {
+                  "offset": 99,
+                  "line": 2,
+                  "column": 51
+                }
+              }
+            }
+          ],
+          "stages": [],
+          "dependencies": [],
+          "transitions": [],
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Locally observed parser, semantic, or direct requirement boundary."
+      }
+    },
+    {
+      "id": "spl2.module.imported-function.syntax.positive",
+      "classification": "positive",
+      "document": {
+        "text": "import {normalize as norm} from vendor/security;\n$output = FROM synthetic_events | eval result=norm(value);",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.module.imported-function.syntax.positive"
+      },
+      "observations": {
+        "syntax": {
+          "complete": true,
+          "diagnostics": []
+        }
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Locally observed parser, semantic, or direct requirement boundary."
       }
     },
     {
