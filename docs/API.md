@@ -236,12 +236,13 @@ knowledge-object identity.
 Definition IDs distinguish objects even when kind and name match. An optional
 binding selects one object for an exact occurrence using `document_digest`
 (`sha256:` of the exact original UTF-8 query or definition text), `kind`,
-half-open `start`/`end` byte offsets, and `object_id`. The decoder checks that
-the target exists, the kind matches, the byte range is valid, and the original
-document contains a matching exact reference. Conflicting bindings for one
-occurrence are rejected. Without a binding, same-name candidates remain
-ambiguous. The bundle digest hashes normalized supplied definitions; digests
-identify input snapshots and are not signatures or authorization.
+half-open `start`/`end` byte offsets, and `object_id`. The decoder checks
+target existence, kind, digest format, and range shape. Evaluation checks
+the range against the original document, verifies a matching exact reference,
+and rejects conflicting bindings for one occurrence. Without a binding,
+same-name candidates remain ambiguous. The bundle digest hashes normalized
+supplied definitions; digests identify input snapshots and are not signatures
+or authorization.
 
 Static classic SPL macro expansion uses supplied bodies, positional or named
 arguments, and exact call sites. Unsupported or dynamic calls, ambiguous
