@@ -174,7 +174,7 @@ func Evaluate(input Request) (*Report, error) {
 		e.collections[c.Kind] = c.Coverage
 	}
 	e.inspectExpansion(expanded, sourceInterval{Kind: "query", SourceID: document.SourceID, Start: 0, End: len(document.Text)}, effective, true)
-	e.inspectOriginalMacros(document, sourceInterval{Kind: "query", SourceID: document.SourceID, Start: 0, End: len(document.Text)}, nil)
+	e.inspectOriginalMacros(document, sourceInterval{Kind: "query", SourceID: document.SourceID, Start: 0, End: len(document.Text)}, nil, false)
 	e.finalize()
 	projectReport(report)
 	return report, nil

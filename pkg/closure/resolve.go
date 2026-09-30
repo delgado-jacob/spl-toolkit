@@ -156,6 +156,9 @@ func (e *evaluator) checkCollection(edge TraversalEdge) {
 	e.addGap(ClosureGap{Code: "collection_incomplete", Kind: edge.Kind, Name: edge.Name, Source: edge.Source, Property: edge.Property, Path: append([]string{}, edge.Path...)}, "collections")
 }
 func (e *evaluator) resolve(edge TraversalEdge, arity *int, explicit bool) {
+	e.resolveWithMacroContext(edge, arity, explicit, false)
+}
+func (e *evaluator) resolveWithMacroContext(edge TraversalEdge, arity *int, explicit, contextFreeMacro bool) {
 	e.checkCollection(edge)
 	candidates := []Definition{}
 	for _, o := range e.req.Bundle.Objects {
@@ -212,10 +215,10 @@ func (e *evaluator) resolve(edge TraversalEdge, arity *int, explicit bool) {
 	}
 	occurrenceID := e.addEdge(edge)
 	if target.ID != "" && edge.Resolution != "cycle" {
-		e.visit(target, edge.Kind == "macro" && arity == nil, occurrenceID)
+		e.visit(target, edge.Kind == "macro" && (contextFreeMacro || arity == nil), occurrenceID)
 	}
 }
-func (e *evaluator) inspectOriginalMacros(doc analysis.QueryDocument, owner sourceInterval, path []string) {
+func (e *evaluator) inspectOriginalMacros(doc analysis.QueryDocument, owner sourceInterval, path []string, contextFreeMacro bool) {
 	if doc.Language != "spl" {
 		return
 	}
@@ -228,7 +231,7 @@ func (e *evaluator) inspectOriginalMacros(doc analysis.QueryDocument, owner sour
 			continue
 		}
 		arity := len(call.Arguments)
-		e.resolve(edge, &arity, false)
+		e.resolveWithMacroContext(edge, &arity, false, contextFreeMacro)
 	}
 }
 func (e *evaluator) visit(def Definition, contextFreeMacro bool, occurrenceID string) {
@@ -280,7 +283,7 @@ func (e *evaluator) visit(def Definition, contextFreeMacro bool, occurrenceID st
 		}
 		if contextFreeMacro || def.Validation != nil && *def.Validation != "" {
 			e.inspectExpansion(directExpansion(def.Document.Text, owner), owner, direct, false)
-			e.inspectOriginalMacros(*def.Document, owner, e.active)
+			e.inspectOriginalMacros(*def.Document, owner, e.active, true)
 		}
 		return
 	}
@@ -306,7 +309,7 @@ func (e *evaluator) visit(def Definition, contextFreeMacro bool, occurrenceID st
 	expanded := body.expanded.forOccurrence(occurrenceID)
 	owner := sourceInterval{Kind: "definition", SourceID: def.SourceID, ObjectID: def.ID, Start: 0, End: len(def.Document.Text)}
 	e.inspectExpansion(expanded, owner, body.effective, false)
-	e.inspectOriginalMacros(*def.Document, owner, e.active)
+	e.inspectOriginalMacros(*def.Document, owner, e.active, false)
 }
 
 type bodyEvaluation struct {

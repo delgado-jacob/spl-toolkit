@@ -100,6 +100,73 @@ func TestEvaluateValidationHeldMacroTraversesKnownBodyFacts(t *testing.T) {
 	t.Fatalf("known lookup absent from BOM: %+v", report.BOM)
 }
 
+func TestEvaluateValidationHeldNestedMacroTraversesKnownBodyFacts(t *testing.T) {
+	outer := macroDef("m", "m", "`n`")
+	validation := "isnum($x$)"
+	outer.Validation = &validation
+	inner := macroDef("n", "n", "lookup users user OUTPUT role | `m`")
+	users := evalDef("users", "lookup", "users", "")
+	report, err := Evaluate(evalRequest("`m`", []Collection{{Kind: "macro", Coverage: "complete"}, {Kind: "lookup", Coverage: "complete"}}, outer, inner, users))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if report.Status != analysis.Incomplete || report.Coverage.Complete || report.Coverage.Expansion {
+		t.Fatalf("held nested closure claimed complete: status=%s coverage=%+v", report.Status, report.Coverage)
+	}
+	lookupEdges, cycleEdges := 0, 0
+	for _, edge := range report.Traversal {
+		if edge.Kind == "lookup" && edge.Name == "users" && edge.ToObjectID == "users" {
+			if edge.FromObjectID != "n" || strings.Join(edge.Path, "/") != "m/n" {
+				t.Fatalf("nested lookup lost its source path: %+v", edge)
+			}
+			lookupEdges++
+		}
+		if edge.Kind == "macro" && edge.Resolution == "cycle" && edge.ToObjectID == "m" {
+			cycleEdges++
+		}
+	}
+	if !edgeWith(report, "macro", "n", "n") || lookupEdges != 1 || cycleEdges != 1 {
+		t.Fatalf("nested facts or cycle missing: %+v", report.Traversal)
+	}
+	graphLookup := 0
+	for _, edge := range report.Graph.Edges {
+		if edge.Kind == "lookup" && edge.To == "object:users" {
+			graphLookup++
+		}
+	}
+	if graphLookup != 1 {
+		t.Fatalf("nested graph lookup: %+v", report.Graph.Edges)
+	}
+	for _, entry := range report.BOM {
+		if entry.ObjectID == "users" {
+			if !entry.Transitive || len(entry.Occurrences) != 1 {
+				t.Fatalf("nested lookup BOM: %+v", entry)
+			}
+			return
+		}
+	}
+	t.Fatalf("nested lookup absent from BOM: %+v", report.BOM)
+}
+
+func TestEvaluateExpandedNestedMacroDoesNotDuplicateBodyFacts(t *testing.T) {
+	outer := macroDef("m", "m", "`n`")
+	inner := macroDef("n", "n", "lookup users user OUTPUT role")
+	users := evalDef("users", "lookup", "users", "")
+	report, err := Evaluate(evalRequest("`m`", []Collection{{Kind: "macro", Coverage: "complete"}, {Kind: "lookup", Coverage: "complete"}}, outer, inner, users))
+	if err != nil {
+		t.Fatal(err)
+	}
+	lookups := 0
+	for _, edge := range report.Traversal {
+		if edge.Kind == "lookup" && edge.ToObjectID == "users" {
+			lookups++
+		}
+	}
+	if report.Status != analysis.Valid || lookups != 1 {
+		t.Fatalf("normal expansion duplicated body facts: status=%s traversal=%+v", report.Status, report.Traversal)
+	}
+}
+
 func TestEvaluateEvalBasedMacroBodyStaysOpaqueThroughRelation(t *testing.T) {
 	macro := macroDef("m", "m", "lookup hidden user OUTPUT role")
 	evalBased := true
