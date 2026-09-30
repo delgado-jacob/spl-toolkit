@@ -286,7 +286,7 @@ valid/invalid/incomplete and 2 for request or execution errors. REST returns
 HTTP 200 for each content status, 400 for input errors, and 500 for unexpected
 internal errors. See [CLI usage](cli.md#knowledge-object-closure), [REST
 usage](api-server.md#knowledge-object-closure), and the [v1
-schemas](../contracts/README.md).
+schemas](https://github.com/delgado-jacob/spl-toolkit/blob/main/contracts/README.md).
 
 ## Document, positions, and report format
 
