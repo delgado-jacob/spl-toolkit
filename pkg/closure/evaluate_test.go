@@ -54,6 +54,68 @@ func TestEvaluateMacroEffectiveFlowAndLookup(t *testing.T) {
 		t.Fatalf("effective analysis/provenance: %+v %+v", report.EffectiveAnalysis, report.Provenance)
 	}
 }
+
+func TestEvaluateValidationHeldMacroTraversesKnownBodyFacts(t *testing.T) {
+	macro := macroDef("m", "m", "lookup users user OUTPUT role | `m`")
+	validation := "isnum($x$)"
+	macro.Validation = &validation
+	lookup := evalDef("users", "lookup", "users", "")
+	report, err := Evaluate(evalRequest("`m` | `m`", []Collection{{Kind: "macro", Coverage: "complete"}, {Kind: "lookup", Coverage: "complete"}}, macro, lookup))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if report.Status != analysis.Incomplete || report.Coverage.Complete || report.Coverage.Expansion {
+		t.Fatalf("validation-held macro claimed complete: status=%s coverage=%+v gaps=%+v", report.Status, report.Coverage, report.Gaps)
+	}
+	lookupEdges := map[string]bool{}
+	graphEdges := map[string]bool{}
+	cycles := 0
+	for _, edge := range report.Traversal {
+		if edge.Kind == "lookup" && edge.Name == "users" && edge.ToObjectID == "users" {
+			if edge.FromObjectID != "m" || edge.Source.ObjectID != "m" || len(edge.Path) != 1 || edge.Path[0] != "m" {
+				t.Fatalf("lookup body evidence lost its macro path: %+v", edge)
+			}
+			lookupEdges[edge.ID] = true
+		}
+		if edge.Kind == "macro" && edge.Resolution == "cycle" && edge.ToObjectID == "m" {
+			cycles++
+		}
+	}
+	for _, edge := range report.Graph.Edges {
+		if edge.Kind == "lookup" && edge.Name == "users" && edge.To == "object:users" {
+			graphEdges[edge.ID] = true
+		}
+	}
+	if len(lookupEdges) != 2 || len(graphEdges) != 2 || cycles != 2 || len(report.DefinitionAnalyses) != 1 {
+		t.Fatalf("known body facts not traversed per macro occurrence: traversal=%+v graph=%+v definition analyses=%+v", report.Traversal, report.Graph.Edges, report.DefinitionAnalyses)
+	}
+	for _, entry := range report.BOM {
+		if entry.ObjectID == "users" {
+			if !entry.Transitive || entry.Direct || len(entry.Occurrences) != 2 {
+				t.Fatalf("known lookup BOM occurrence missing: %+v", entry)
+			}
+			return
+		}
+	}
+	t.Fatalf("known lookup absent from BOM: %+v", report.BOM)
+}
+
+func TestEvaluateEvalBasedMacroBodyStaysOpaqueThroughRelation(t *testing.T) {
+	macro := macroDef("m", "m", "lookup hidden user OUTPUT role")
+	evalBased := true
+	macro.EvalBased = &evalBased
+	macro.Relations = []Relation{{Kind: "lookup", Name: "declared", Property: stringPointer("/declared")}}
+	parent := evalDef("parent", "saved_search", "Parent", "search index=main", Relation{Kind: "macro", Name: "m", Property: stringPointer("/macro")})
+	declared := evalDef("declared", "lookup", "declared", "")
+	hidden := evalDef("hidden", "lookup", "hidden", "")
+	report, err := Evaluate(evalRequest("| from savedsearch:Parent", []Collection{{Kind: "saved_search", Coverage: "complete"}, {Kind: "macro", Coverage: "complete"}, {Kind: "lookup", Coverage: "complete"}}, parent, macro, declared, hidden))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !edgeWith(report, "lookup", "declared", "declared") || edgeWith(report, "lookup", "hidden", "hidden") {
+		t.Fatalf("eval-based body traversal or declared relation lost: %+v", report.Traversal)
+	}
+}
 func TestEvaluateDiagnosticPreservesCrossSegmentOrigins(t *testing.T) {
 	query := "search index=main | `x` z"
 	macro := macroDef("x", "x", "lookup users")
