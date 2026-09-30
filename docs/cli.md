@@ -184,7 +184,9 @@ Save that JSON as `bundle.json`, then run `spl-toolkit closure --bundle bundle.j
 
 `--format json` writes the full canonical report. `graph` writes only
 `report.graph`, `bom` writes only `report.bom`, and the default `text` groups
-direct and transitive BOM entries and prints partial reasons. `--output FILE`
+direct and transitive BOM entries and prints partial reasons. Graph edges carry
+ordered `origins` as well as `source`; their `traversal_pointer` resolves only
+in the full report. `--output FILE`
 writes the selected form to a file even when content is invalid or incomplete.
 Exit 0 means valid, 1 means invalid, 3 means incomplete, and 2 means an input,
 option, I/O, or internal error. Content statuses are reports; input errors have

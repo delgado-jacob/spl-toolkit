@@ -11,6 +11,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/delgado-jacob/spl-toolkit/pkg/analysis"
 	"github.com/delgado-jacob/spl-toolkit/pkg/closure"
 )
 
@@ -109,6 +110,33 @@ func TestClosureCLIFormatsSourcesAndTransport(t *testing.T) {
 			}
 		}
 	}
+}
+
+func TestClosureCLIGraphRetainsOrderedOrigins(t *testing.T) {
+	one := 1
+	bundle := closure.DefinitionBundle{SchemaVersion: 1, ScopeID: "synthetic", Collections: []closure.Collection{{Kind: "macro", Coverage: "complete"}, {Kind: "lookup", Coverage: "complete"}}, Objects: []closure.Definition{
+		{ID: "m", Kind: "macro", Name: "m", SourceID: "macros.conf", Document: &analysis.QueryDocument{Text: "lookup us$x$ user OUTPUT role", Language: "spl", SourceID: "macros.conf"}, Arity: &one, Arguments: []string{"x"}, Relations: []closure.Relation{}},
+		{ID: "users", Kind: "lookup", Name: "users", SourceID: "lookups.conf", Relations: []closure.Relation{}},
+	}}
+	path := closureCLIFile(t, "bundle.json", bundle)
+	var out, errOut bytes.Buffer
+	code := runCLIWithInput([]string{"closure", "--bundle", path, "--query", "`m(ers)`", "--format=graph"}, strings.NewReader(""), &out, &errOut)
+	if code != 0 || errOut.Len() != 0 {
+		t.Fatalf("code=%d stderr=%s", code, &errOut)
+	}
+	var graph closure.DependencyGraph
+	if err := json.Unmarshal(out.Bytes(), &graph); err != nil {
+		t.Fatal(err)
+	}
+	for _, edge := range graph.Edges {
+		if edge.Kind == "lookup" && edge.Name == "users" {
+			if len(edge.Origins) < 3 || edge.Source != edge.Origins[0] || edge.Origins[1].Kind != "query" {
+				t.Fatalf("CLI graph lost ordered origins: %+v", edge)
+			}
+			return
+		}
+	}
+	t.Fatalf("CLI graph omitted lookup edge: %+v", graph.Edges)
 }
 
 func TestClosureCLIRejectsRequestAndOutputErrors(t *testing.T) {

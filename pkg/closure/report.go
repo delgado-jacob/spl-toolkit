@@ -22,19 +22,20 @@ type GraphNode struct {
 
 // A graph edge with Unknown set has no target node. Its resolution explains why.
 type GraphEdge struct {
-	ID                string         `json:"id"`
-	From              string         `json:"from"`
-	To                string         `json:"to,omitempty"`
-	Unknown           bool           `json:"unknown"`
-	Kind              string         `json:"kind"`
-	Name              string         `json:"name"`
-	Resolution        string         `json:"resolution"`
-	TraversalPointer  string         `json:"traversal_pointer"`
-	Source            SourceInterval `json:"source"`
-	Property          string         `json:"property,omitempty"`
-	Path              []string       `json:"path"`
-	CyclePath         []string       `json:"cycle_path"`
-	InvocationNodeIDs []string       `json:"invocation_node_ids"`
+	ID                string           `json:"id"`
+	From              string           `json:"from"`
+	To                string           `json:"to,omitempty"`
+	Unknown           bool             `json:"unknown"`
+	Kind              string           `json:"kind"`
+	Name              string           `json:"name"`
+	Resolution        string           `json:"resolution"`
+	TraversalPointer  string           `json:"traversal_pointer"`
+	Source            SourceInterval   `json:"source"`
+	Origins           []SourceInterval `json:"origins"`
+	Property          string           `json:"property,omitempty"`
+	Path              []string         `json:"path"`
+	CyclePath         []string         `json:"cycle_path"`
+	InvocationNodeIDs []string         `json:"invocation_node_ids"`
 }
 
 type BOMEntry struct {
@@ -92,7 +93,7 @@ func projectReport(report *Report) {
 			addObject(edge.ToObjectID, pointer)
 			to = objectNodeID(edge.ToObjectID)
 		}
-		graphEdge := GraphEdge{ID: edge.ID, From: from, To: to, Unknown: to == "", Kind: edge.Kind, Name: edge.Name, Resolution: edge.Resolution, TraversalPointer: pointer, Source: edge.Source, Property: edge.Property, Path: append([]string{}, edge.Path...), CyclePath: append([]string{}, edge.CyclePath...), InvocationNodeIDs: []string{}}
+		graphEdge := GraphEdge{ID: edge.ID, From: from, To: to, Unknown: to == "", Kind: edge.Kind, Name: edge.Name, Resolution: edge.Resolution, TraversalPointer: pointer, Source: edge.Source, Origins: append([]SourceInterval{}, edge.Origins...), Property: edge.Property, Path: append([]string{}, edge.Path...), CyclePath: append([]string{}, edge.CyclePath...), InvocationNodeIDs: []string{}}
 		for j, frame := range edge.InvocationChain {
 			addFrame(frame, fmt.Sprintf("%s/invocation_chain/%d", pointer, j))
 			graphEdge.InvocationNodeIDs = append(graphEdge.InvocationNodeIDs, instanceNodeID(frame.InstanceID))

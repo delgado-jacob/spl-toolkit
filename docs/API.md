@@ -270,6 +270,9 @@ resolution, object path, and cycle path where
 applicable. Source IDs are opaque caller labels. Use
 `source.kind`, `source_id`, `object_id`, `start`, and `end` together when
 showing an origin; effective offsets alone do not identify a source file.
+Each graph edge retains the traversal edge's ordered `origins` alongside its
+first-origin `source`, so a standalone graph can show every source segment.
+`traversal_pointer` resolves against the full report, not the graph projection.
 
 `coverage` reports `effective_query`, `traversed_definitions`, `resolution`,
 `collections`, and `expansion`, plus `complete` and ordered reasons. Complete

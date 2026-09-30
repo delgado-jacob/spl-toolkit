@@ -780,6 +780,7 @@ import (
     "encoding/json"
     "os"
     "github.com/delgado-jacob/spl-toolkit/pkg/closure"
+    "github.com/delgado-jacob/spl-toolkit/pkg/analysis"
 )
 func main() {
     input, err := os.ReadFile("testdata/closure/cases.json")
@@ -817,6 +818,22 @@ func main() {
     report, err := closure.Evaluate(macro)
     if err != nil { panic(err) }
     reports = append(reports, *report)
+    one := 1
+    parameterized := closure.Request{SchemaVersion:1, Bundle:closure.DefinitionBundle{
+        SchemaVersion:1, ScopeID:"synthetic", Collections:[]closure.Collection{
+            {Kind:"macro", Coverage:"complete"}, {Kind:"lookup", Coverage:"complete"}},
+        Objects:[]closure.Definition{
+            {ID:"macro-x", Kind:"macro", Name:"m", SourceID:"macros.conf",
+                Document:&analysis.QueryDocument{Text:"lookup us$x$ user OUTPUT role", Language:"spl", SourceID:"macros.conf"},
+                Arity:&one, Arguments:[]string{"x"}, Relations:[]closure.Relation{}},
+            {ID:"lookup-users", Kind:"lookup", Name:"users", SourceID:"lookups.conf", Relations:[]closure.Relation{}},
+        }}}
+    parameterized.Document.Text = "`m(ers)`"
+    parameterized.Document.SourceID = "query.spl"
+    parameterized.Document.Language = "spl"
+    report, err = closure.Evaluate(parameterized)
+    if err != nil { panic(err) }
+    reports = append(reports, *report)
     if err := json.NewEncoder(os.Stdout).Encode(reports); err != nil { panic(err) }
 }
 ''')
@@ -834,6 +851,18 @@ func main() {
                     with self.subTest(status=report["status"], name=name):
                         self.assertTrue(jsonschema.Draft202012Validator(by_name[name], registry=registry).is_valid(value))
                 self.assertTrue(jsonschema.Draft202012Validator(spec).is_valid(report))
+            parameterized = reports[-1]
+            lookup_edge = next(edge for edge in parameterized["graph"]["edges"]
+                               if edge["kind"] == "lookup" and edge["name"] == "users")
+            traversal_index = int(lookup_edge["traversal_pointer"].rsplit("/", 1)[1])
+            self.assertGreaterEqual(len(lookup_edge["origins"]), 3)
+            self.assertEqual(lookup_edge["origins"], parameterized["traversal"][traversal_index]["origins"])
+            self.assertEqual(lookup_edge["source"], lookup_edge["origins"][0])
+            graph_without_origins = copy.deepcopy(parameterized["graph"])
+            next(edge for edge in graph_without_origins["edges"]
+                 if edge["kind"] == "lookup" and edge["name"] == "users").pop("origins")
+            self.assertFalse(jsonschema.Draft202012Validator(
+                by_name["closure-graph.schema.json"], registry=registry).is_valid(graph_without_origins))
             report = reports[0]
             for name, mutation in (
                 ("unknown report member", lambda x: x.update(extra=True)),

@@ -3364,7 +3364,8 @@ components:
             - to
       description: From, to, and invocation node IDs refer to graph nodes; traversal
         pointer and edge ID refer to the same report traversal entry. Runtime validates
-        all references.
+        all references. Origins retain ordered source ranges in a standalone graph;
+        the traversal pointer resolves in the full report.
       properties:
         cycle_path:
           items:
@@ -3387,6 +3388,10 @@ components:
         name:
           pattern: \S
           type: string
+        origins:
+          items:
+            $ref: '#/components/schemas/tooling.closure.SourceInterval'
+          type: array
         path:
           items:
             pattern: \S
@@ -3416,6 +3421,7 @@ components:
       - resolution
       - traversal_pointer
       - source
+      - origins
       - path
       - cycle_path
       - invocation_node_ids

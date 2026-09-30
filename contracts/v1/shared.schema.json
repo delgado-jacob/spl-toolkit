@@ -5650,6 +5650,12 @@
         "source": {
           "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/closure.SourceInterval"
         },
+        "origins": {
+          "type": "array",
+          "items": {
+            "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/closure.SourceInterval"
+          }
+        },
         "property": {
           "type": "string",
           "pattern": "^/(?:[^~]|~[01])*$"
@@ -5685,6 +5691,7 @@
         "resolution",
         "traversal_pointer",
         "source",
+        "origins",
         "path",
         "cycle_path",
         "invocation_node_ids"
@@ -5716,7 +5723,7 @@
           }
         }
       ],
-      "description": "From, to, and invocation node IDs refer to graph nodes; traversal pointer and edge ID refer to the same report traversal entry. Runtime validates all references."
+      "description": "From, to, and invocation node IDs refer to graph nodes; traversal pointer and edge ID refer to the same report traversal entry. Runtime validates all references. Origins retain ordered source ranges in a standalone graph; the traversal pointer resolves in the full report."
     },
     "closure.DependencyGraph": {
       "type": "object",

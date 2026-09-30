@@ -55,6 +55,45 @@ func TestReportDeterministicProjections(t *testing.T) {
 	}
 }
 
+func TestStandaloneGraphRetainsOrderedTraversalOrigins(t *testing.T) {
+	macro := macroDef("m", "m", "lookup us$x$ user OUTPUT role", "x")
+	lookup := evalDef("users", "lookup", "users", "")
+	report, err := Evaluate(evalRequest("`m(ers)`", []Collection{{Kind: "macro", Coverage: "complete"}, {Kind: "lookup", Coverage: "complete"}}, macro, lookup))
+	if err != nil {
+		t.Fatal(err)
+	}
+	raw, err := json.Marshal(report.Graph)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var graph DependencyGraph
+	if err := json.Unmarshal(raw, &graph); err != nil {
+		t.Fatal(err)
+	}
+	for _, edge := range graph.Edges {
+		if edge.Kind != "lookup" || edge.Name != "users" {
+			continue
+		}
+		var index int
+		if _, err := fmt.Sscanf(edge.TraversalPointer, "/traversal/%d", &index); err != nil || index >= len(report.Traversal) {
+			t.Fatalf("invalid traversal pointer: %+v", edge)
+		}
+		traversal := report.Traversal[index]
+		if len(traversal.Origins) < 3 || !reflect.DeepEqual(edge.Origins, traversal.Origins) || edge.Source != edge.Origins[0] {
+			t.Fatalf("graph origins=%+v traversal origins=%+v source=%+v", edge.Origins, traversal.Origins, edge.Source)
+		}
+		if edge.Origins[0].Kind != "definition" || edge.Origins[1].Kind != "query" || edge.Origins[2].Kind != "definition" {
+			t.Fatalf("unexpected ordered origins: %+v", edge.Origins)
+		}
+		report.Traversal[index].Origins[0].Start = -1
+		if report.Graph.Edges[index].Origins[0].Start < 0 {
+			t.Fatal("graph origins alias traversal origins")
+		}
+		return
+	}
+	t.Fatalf("lookup edge missing from standalone graph: %+v", graph.Edges)
+}
+
 func TestGraphEvidenceAndUnknownEdges(t *testing.T) {
 	req := evalRequest("| lookup users user OUTPUT role | lookup missing user OUTPUT role", []Collection{{Kind: "lookup", Coverage: "complete"}}, evalDef("users", "lookup", "users", ""))
 	report, err := Evaluate(req)
