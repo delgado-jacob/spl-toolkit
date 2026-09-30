@@ -582,6 +582,57 @@
       }
     },
     {
+      "id": "spl.command.from.saved-search",
+      "language": "spl",
+      "profile": "splunkd",
+      "kind": "command",
+      "name": "from",
+      "form": "saved-search",
+      "grammar_registered": true,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Parser-owned knowledge reference and direct requirement evidence."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl.from.saved-search.syntax.positive"
+          ],
+          "limitations": []
+        },
+        "semantics": {
+          "state": "unsupported",
+          "evidence_ids": [
+            "spl.from.saved-search.semantics.incomplete"
+          ],
+          "limitations": [
+            "The saved-search identity is exact, but field effects are unmodeled."
+          ]
+        },
+        "requirements": {
+          "state": "unsupported",
+          "evidence_ids": [
+            "spl.from.saved-search.requirements.incomplete"
+          ],
+          "limitations": [
+            "The saved-search identity is exact, but field effects are unmodeled."
+          ]
+        },
+        "linting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        }
+      }
+    },
+    {
       "id": "spl.command.head.numeric-limit",
       "language": "spl",
       "profile": "splunkd",
@@ -11266,6 +11317,57 @@
           ],
           "limitations": [
             "Neighboring dynamic or ambiguous form remains explicit and incomplete."
+          ]
+        },
+        "linting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        }
+      }
+    },
+    {
+      "id": "spl2.module.module.imported-function",
+      "language": "spl2",
+      "profile": "splunkd",
+      "kind": "module",
+      "name": "module",
+      "form": "imported-function",
+      "grammar_registered": true,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis",
+        "note": "Parser-owned knowledge reference and direct requirement evidence."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.module.imported-function.syntax.positive"
+          ],
+          "limitations": []
+        },
+        "semantics": {
+          "state": "unsupported",
+          "evidence_ids": [
+            "spl2.module.imported-function.semantics.incomplete"
+          ],
+          "limitations": [
+            "The imported module and function identities are exact, but external resolution is unavailable."
+          ]
+        },
+        "requirements": {
+          "state": "unsupported",
+          "evidence_ids": [
+            "spl2.module.imported-function.requirements.incomplete"
+          ],
+          "limitations": [
+            "The imported module and function identities are exact, but external resolution is unavailable."
           ]
         },
         "linting": {

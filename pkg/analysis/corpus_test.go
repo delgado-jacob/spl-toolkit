@@ -137,7 +137,7 @@ func TestCorpusSemanticReview(t *testing.T) {
 		"partial_recovery":          {Invalid, "host,good,host,count,user", "count,user", 3, 1, false, false},
 		"invalid_precedence":        {Invalid, "a,a,a", "", 4, 1, true, true},
 		"dependencies":              {Incomplete, "main,/var/log/a,syslog,Network_Traffic,Network_Traffic.All_Traffic,Web,Web.All_Traffic,count,Authentication,Authentication.Authentication,users", "", 8, 4, true, false},
-		"saved_dataset":             {Incomplete, "savedsearch:Daily", "", 1, 1, true, true},
+		"saved_dataset":             {Incomplete, "savedsearch:Daily,Daily", "", 1, 1, true, true},
 		"quoted_asterisk":           {Valid, "a*,a*", "a*", 2, 1, true, false},
 		"wildcard_exclusion_closed": {Valid, "a1,a2,keep,a1,a2,keep,a*,z*", "keep", 3, 1, false, false},
 		"wildcard_exclusion_open":   {Incomplete, "a1,keep,a*,z*", "keep", 2, 1, true, true},

@@ -53,7 +53,7 @@ func spl2ProgramRequireV1RequirementKinds(t *testing.T, result *Result) {
 	}
 	for _, item := range result.Requirements.Items {
 		switch item.Kind {
-		case "module", "module_member", "function", "view", "symbol", "annotation":
+		case "module_member", "view", "symbol", "annotation":
 			t.Fatalf("symbol binding invented a requirement kind: %+v", item)
 		}
 	}
@@ -851,7 +851,7 @@ $output = FROM synthetic_events | eval result=norm(value);`
 			t.Fatalf("used member result = %+v", result)
 		}
 		spl2ProgramRequireV1RequirementKinds(t, result)
-		if got := spl2ProgramReferences(result, "module_member", "vendor/security.normalize", "read"); len(got) != 1 || got[0].OriginalName != "norm" {
+		if got := spl2ProgramReferences(result, "function", "vendor/security.normalize", "read"); len(got) != 1 || got[0].OriginalName != "norm" {
 			t.Fatalf("used imported member reference = %+v", got)
 		}
 		if got := spl2ProgramReferences(result, "field", "norm", ""); len(got) != 0 {

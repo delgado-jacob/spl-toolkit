@@ -28,6 +28,7 @@ const toolingHelp = `Developer tooling (offline, read-only sources):
   impact-schema --directory DIR | --manifest FILE --before-target FILE --after-target FILE [--format text|json] [--output FILE]
   impact-mapping --directory DIR | --manifest FILE --before-rules FILE --after-rules FILE [--before-target FILE] [--after-target FILE] [--format text|json] [--output FILE]
   document QUERY | --query QUERY | --file FILE | --stdin [--language spl|spl2] [--profile splunkd] [--compatibility-version current] [--source-id ID] [--format json] [--output FILE]
+  closure QUERY | --query QUERY | --file FILE | --stdin --bundle FILE [--bindings FILE] [--language spl|spl2] [--profile splunkd] [--compatibility-version current] [--source-id ID] [--format text|json|graph|bom] [--output FILE]
   lsp --stdio [--profile splunkd] [--compatibility-version current] [--target FILE]
 Targets are canonical inline field_list/json_schema/ocsf JSON wrappers; rule files are versioned rule sets.
 Manifest files are versioned documents with literal text or contained relative file paths.
@@ -51,6 +52,8 @@ func parseToolingOptions(command string, args []string) (map[string]string, erro
 		names = append(names, "before-target", "after-target", "before-rules", "after-rules")
 	case "document":
 		names = []string{"query", "file", "stdin", "language", "profile", "compatibility-version", "source-id", "format", "output"}
+	case "closure":
+		names = []string{"query", "file", "stdin", "bundle", "bindings", "language", "profile", "compatibility-version", "source-id", "format", "output"}
 	case "lsp":
 		names = []string{"stdio", "profile", "compatibility-version", "target"}
 	}
@@ -60,7 +63,7 @@ func parseToolingOptions(command string, args []string) (map[string]string, erro
 	o := map[string]string{}
 	for i := 0; i < len(args); i++ {
 		a := args[i]
-		if a == "--" && command == "document" && i+2 == len(args) {
+		if a == "--" && (command == "document" || command == "closure") && i+2 == len(args) {
 			a = args[i+1]
 			i++
 			if _, ok := o["query"]; ok {
@@ -70,7 +73,7 @@ func parseToolingOptions(command string, args []string) (map[string]string, erro
 			continue
 		}
 		if !strings.HasPrefix(a, "--") {
-			if command == "document" && !strings.HasPrefix(a, "-") {
+			if (command == "document" || command == "closure") && !strings.HasPrefix(a, "-") {
 				if _, ok := o["query"]; ok {
 					return nil, fmt.Errorf("duplicate query")
 				}
@@ -103,7 +106,7 @@ func parseToolingOptions(command string, args []string) (map[string]string, erro
 		if v == "" && n != "query" && n != "source-id" && n != "language" && n != "profile" && n != "compatibility-version" {
 			return nil, fmt.Errorf("empty --%s", n)
 		}
-		if (n == "directory" || n == "manifest" || n == "file" || n == "target" || strings.HasSuffix(n, "-target") || strings.HasSuffix(n, "-rules")) && v == "-" {
+		if (n == "directory" || n == "manifest" || n == "file" || n == "bundle" || n == "bindings" || n == "target" || strings.HasSuffix(n, "-target") || strings.HasSuffix(n, "-rules")) && v == "-" {
 			return nil, fmt.Errorf("--%s requires a local path", n)
 		}
 		o[n] = v
@@ -120,6 +123,9 @@ func runToolingCLI(command string, args []string, stdin io.Reader, stdout, stder
 		return writeGeneratedCLIResult([]byte(toolingHelp), stdout, stderr)
 	}
 	fail := func(err error) int { return writeCLIError(stderr, o["format"], err.Error(), 2) }
+	if command == "closure" {
+		return runClosureCLI(o, stdin, stdout, stderr)
+	}
 	if command == "lsp" {
 		if o["stdio"] == "" {
 			return fail(fmt.Errorf("lsp requires --stdio"))

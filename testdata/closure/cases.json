@@ -1,0 +1,31 @@
+{
+  "cases": [
+    {
+      "name": "resolved_lookup",
+      "request": {
+        "schema_version": 1,
+        "document": {"text": "| lookup users user OUTPUT role", "language": "spl", "source_id": "query.spl"},
+        "bundle": {
+          "schema_version": 1,
+          "scope_id": "synthetic",
+          "collections": [{"kind": "lookup", "coverage": "complete"}],
+          "objects": [{"id": "lookup-users", "kind": "lookup", "name": "users", "source_id": "lookups.conf", "relations": []}]
+        },
+        "bindings": []
+      },
+      "want_status": "valid",
+      "want_bom_ids": ["lookup-users"]
+    },
+    {
+      "name": "unknown_lookup",
+      "request": {
+        "schema_version": 1,
+        "document": {"text": "| lookup unknown user OUTPUT role", "language": "spl", "source_id": "query.spl"},
+        "bundle": {"schema_version": 1, "scope_id": "synthetic", "collections": [{"kind": "lookup", "coverage": "partial"}], "objects": []},
+        "bindings": []
+      },
+      "want_status": "incomplete",
+      "want_bom_ids": []
+    }
+  ]
+}

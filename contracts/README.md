@@ -16,6 +16,11 @@ runtime schema location existed when these contracts were introduced.
 | `capabilities.schema.json` | Per-dialect capability manifest | |
 | `analysis.schema.json` | Canonical analysis result | |
 | `requirements.schema.json` | Canonical direct query requirements | |
+| `definitions.schema.json` | Caller-supplied definition bundle and collection promises | |
+| `closure-request.schema.json` | Strict inline knowledge-object closure request | |
+| `closure.schema.json` | Canonical closure report | |
+| `closure-graph.schema.json` | Dependency graph projection | |
+| `detection-bom.schema.json` | Detection bill of materials projection | |
 | `field-validation.schema.json` | Field-list validation report | `Request`, `BatchRequest`, `BatchReport`, `Catalog` |
 | `schema-validation.schema.json` | JSON Schema or OCSF field-validation report | `Request`, `BatchRequest`, `BatchReport`, `Target` |
 | `rewrite.schema.json` | Rewrite result | `Request`, `BatchRequest`, `BatchReport`, `RuleSet`, `Rule`, `ValidationTarget` |
@@ -60,14 +65,14 @@ Evidence IDs must resolve to typed cases in the same manifest. Stable IDs retain
 the exact reviewed scope; a broadened form receives a new ID unless a reviewed
 scope correction changes the original boundary. `grammar_registered` is a parser
 fact independent of syntax coverage. Linting likewise requires its own evidence.
-The current manifests contain 105 SPL records with 104 evidence cases and 114 SPL2
-records with 124 evidence cases. SPL requirements have 19 supported, 5 unsupported,
-and 81 unassessed records. Safe rewriting has 17 supported, 2 unsupported and 86
-unassessed SPL records; SPL2 has 14 supported, 3 unsupported and 97 unassessed
+The current manifests contain 106 SPL records with 107 evidence cases and 141 SPL2
+records with 149 evidence cases. SPL requirements have 19 supported, 6 unsupported,
+and 81 unassessed records. Safe rewriting has 17 supported, 2 unsupported and 87
+unassessed SPL records; SPL2 has 14 supported, 3 unsupported and 124 unassessed
 records. The current SPL revision is
-`sha256:08901c84ac8c420f59ddb86168c534f0e83484c05d3c8a81078a716c878a1733`;
-the SPL2 revision remains
-`sha256:f1391296cfbc616e9bb1b1828e2471e37b60a35c0555654c0734640e072a0437`.
+`sha256:8a612f2064da24552a68faec261968731a6f1f1c7279ffabb77a59c7dfdb2008`;
+the SPL2 revision is
+`sha256:6495f77a0747f04e9690f5360cf4d024cf95a727bf05ab7cb7c9e1a96e1383dc`.
 
 The SPL ledger includes bounded field-flow semantics for exact `tstats`, selected
 field commands, and selected function arities. Exact macros produce direct macro
@@ -101,6 +106,22 @@ Positions retain zero-based UTF-8 byte offsets and one-based Unicode code-point
 line/columns. LSP UTF-16 conversion is a separate adapter contract. Graph IDs,
 locations and static dependency names are evidence scoped to the report revision,
 not persistent catalog identities.
+
+## Closure coverage
+
+The closure request combines a query document with a caller-supplied definition
+bundle and optional occurrence bindings. A bundle's `scope_id` identifies the
+caller's visibility scope. Per-kind `complete`, `partial`, and `unavailable`
+collection values are caller promises; the toolkit cannot verify that the bundle
+matches a live Splunk instance. Bindings identify exact original-document
+references by SHA256 text digest, kind, half-open UTF-8 byte range, and object
+ID. The report retains direct and effective analysis, source-mapped traversal,
+graph and BOM projections, and five separate coverage dimensions.
+`coverage.complete` requires all dimensions and no gaps or definite invalid
+analysis. Macro limits and held forms are in the [API
+contract](../docs/API.md#knowledge-object-closure). Graph and BOM schemas
+validate projections of the report, not independent discovery or runtime
+readiness.
 
 ## Offline validation
 

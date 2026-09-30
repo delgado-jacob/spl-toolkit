@@ -1,6 +1,6 @@
 # SPL Toolkit Python bindings
 
-This package provides Python 3.11+ bindings for SPL Toolkit 0.1.1's offline mapping, discovery, structured analysis, safe rewriting, field-list validation, and JSON Schema/OCSF field declaration APIs. Wheels include the native Go library and do not require Go at installation or runtime.
+This package provides Python 3.11+ bindings for SPL Toolkit 0.1.1's offline mapping, discovery, structured analysis, caller-supplied knowledge-object closure, safe rewriting, field-list validation, and JSON Schema/OCSF field declaration APIs. Wheels include the native Go library and do not require Go at installation or runtime.
 
 ```python
 from spl_toolkit import SPLMapper
@@ -54,9 +54,9 @@ Reports preserve source text and source ID and expose ordered stages/scopes, ref
 
 Capabilities expose `records`, `summary`, and `evidence` in addition to the legacy command/function projections. Records keep syntax, semantics, requirements, linting, and safe rewriting separate, using supported, partial, unsupported, not applicable, and unassessed states. For each dimension, applicable equals supported plus partial plus unsupported plus unassessed; records equal applicable plus not applicable; covered equals supported. The manifest has no percentage or composite score.
 
-The SPL snapshot contains 105 records and 104 evidence cases; SPL2 has 140 records and 146 evidence cases. SPL syntax is 76 supported, 1 unsupported, and 28 unassessed; semantics is 68 supported, 9 unsupported, and 28 unassessed; requirements are 19 supported, 5 unsupported, and 81 unassessed; linting has 105 unassessed records; and safe rewriting is 17 supported, 2 unsupported, and 86 unassessed. SPL2 syntax is 89 supported, 19 unsupported, and 32 unassessed; semantics is 76 supported, 38 unsupported, and 26 unassessed; requirements are 46 supported, 6 unsupported, and 88 unassessed; linting has 140 unassessed; and safe rewriting has 14 supported, 3 unsupported, and 123 unassessed. Evidence IDs resolve to typed local observations and provenance. A broadened form receives a new ID unless a reviewed scope correction changes the original boundary. `grammar_registered` records parser registration only. It does not grant syntax coverage, and ordinary analysis diagnostics do not grant lint coverage.
+The SPL snapshot contains 106 records and 107 evidence cases; SPL2 has 141 records and 149 evidence cases. SPL syntax is 77 supported, 1 unsupported, and 28 unassessed; semantics is 68 supported, 10 unsupported, and 28 unassessed; requirements are 19 supported, 6 unsupported, and 81 unassessed; linting has 106 unassessed records; and safe rewriting is 17 supported, 2 unsupported, and 87 unassessed. SPL2 syntax is 90 supported, 19 unsupported, and 32 unassessed; semantics is 76 supported, 39 unsupported, and 26 unassessed; requirements are 46 supported, 7 unsupported, and 88 unassessed; linting has 141 unassessed; and safe rewriting has 14 supported, 3 unsupported, and 124 unassessed. Evidence IDs resolve to typed local observations and provenance. A broadened form receives a new ID unless a reviewed scope correction changes the original boundary. `grammar_registered` records parser registration only. It does not grant syntax coverage, and ordinary analysis diagnostics do not grant lint coverage.
 
-Source Go tests may report toolkit version `dev`. Tagged native libraries and Python packages report the exact `VERSION` and retain the same semantic capability revision because `toolkit_version` is the only manifest field excluded from that revision. The revision includes selectors, documentation snapshot, legacy projections, rewrite, records, summary, and evidence. The SPL revision is `sha256:08901c84ac8c420f59ddb86168c534f0e83484c05d3c8a81078a716c878a1733`; the SPL2 revision is `sha256:a765813624c6edfd754a4529556f5fd35288f464e759f8d969404a072bef1898`.
+Source Go tests may report toolkit version `dev`. Tagged native libraries and Python packages report the exact `VERSION` and retain the same semantic capability revision because `toolkit_version` is the only manifest field excluded from that revision. The revision includes selectors, documentation snapshot, legacy projections, rewrite, records, summary, and evidence. The SPL revision is `sha256:8a612f2064da24552a68faec261968731a6f1f1c7279ffabb77a59c7dfdb2008`; the SPL2 revision is `sha256:6495f77a0747f04e9690f5360cf4d024cf95a727bf05ab7cb7c9e1a96e1383dc`.
 
 The bounded SPL field-flow semantics support exact `tstats` data-model sources, predicates, registered aggregates, aliases, groups, and supported literal options; exact modeled forms of `fillnull`, `rex`, `spath`, `bin`, `bucket`, `regex`, and `mvexpand`; and the selected evaluation and aggregate function arities. Exact macros produce direct macro requirements and source-located unresolved-expansion gaps. Branch children retain evidence and direct requirements, while merged output fields remain uncertain.
 
@@ -96,6 +96,37 @@ Validation and rewrite can refine their public analysis against a supplied targe
 Canonical analysis admits at most 4,096 lexer work units. A query that would consume unit 4,097 returns a successful dictionary with incomplete status and coverage, one `SPL_ANALYSIS_RESOURCE_LIMIT` diagnostic and gap, the full-text digest, and no partial requirement evidence. Long sparse input remains admitted when it stays within the work budget. Preview, apply, and batch rewrite return an incomplete no-op for a resource-limited original; apply never commits. The [API reference](https://github.com/delgado-jacob/spl-toolkit/blob/main/docs/API.md#canonical-lexer-work-boundary) defines exact ordering, SPL2 closure accounting, messages, half-open ranges, and the fixture-specific response-size checks.
 
 The method uses the owned native call `spl_mapper_requirements_query`. Mapper admission and close guards match the other operations, and the wrapper releases every returned `SPLResult` with `spl_result_free`, including decoding and native error paths. Repeated calls return detached Python values.
+
+## Knowledge-object closure
+
+`SPLMapper.closure_query(request)` accepts the strict version 1 inline request
+and returns the canonical Go closure report as a dictionary. Supply a query
+`document`, a `bundle` with `scope_id`, per-kind collection coverage and
+definitions, and optional occurrence `bindings`. For example:
+
+```python
+with SPLMapper() as mapper:
+    report = mapper.closure_query({
+        "schema_version": 1,
+        "document": {"text": "| lookup users user OUTPUT role", "source_id": "query.spl"},
+        "bundle": {"schema_version": 1, "scope_id": "local-example",
+                   "collections": [{"kind": "lookup", "coverage": "complete"}],
+                   "objects": [{"id": "lookup-users", "kind": "lookup",
+                                "name": "users", "source_id": "lookups.conf",
+                                "relations": []}]},
+        "bindings": [],
+    })
+    assert report["status"] == "valid"
+```
+
+Invalid and incomplete query content returns a report; malformed requests raise
+`SPLMapperError`. The wrapper releases the owned native result. Direct C callers
+use `spl_mapper_closure_query(int mapperID, char* requestJSON)` and free every
+non-null `SPLResult*` with `spl_result_free`. `coverage.complete` is scoped to
+the supplied collection promises, traversed definitions, exact resolution, and
+bounded macro expansion. It is not a live Splunk inventory or execution check.
+See the [closure API
+contract](https://github.com/delgado-jacob/spl-toolkit/blob/main/docs/API.md#knowledge-object-closure).
 
 ## Safe rewrite
 

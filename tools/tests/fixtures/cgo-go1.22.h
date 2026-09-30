@@ -128,6 +128,7 @@ extern SPLResult* spl_mapper_export_sarif(int mapperID, char* requestJSON);
 extern SPLResult* spl_mapper_impact_schema(int mapperID, char* requestJSON);
 extern SPLResult* spl_mapper_impact_mapping(int mapperID, char* requestJSON);
 extern SPLResult* spl_mapper_document_view(int mapperID, char* requestJSON);
+extern SPLResult* spl_mapper_closure_query(int mapperID, char* requestJSON);
 extern SPLResult* spl_mapper_rewrite(int mapperID, char* requestJSON);
 extern SPLResult* spl_mapper_rewrite_batch(int mapperID, char* requestJSON);
 extern SPLResult* spl_mapper_capabilities_for(int mapperID, char* optionsJSON);

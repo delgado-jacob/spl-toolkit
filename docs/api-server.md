@@ -22,6 +22,7 @@ Routes are under `/api/v1`:
 | POST | `/query/validate` | legacy SPL syntax validation |
 | POST | `/query/analyze` | canonical SPL/SPL2 analysis |
 | POST | `/query/requirements` | canonical direct query requirements |
+| POST | `/query/closure` | caller-supplied knowledge-object closure |
 | GET | `/capabilities` | selected canonical capability manifest |
 | POST | `/query/validate-fields` | canonical local field validation |
 | POST | `/query/validate-fields/batch` | ordered local field validation batch |
@@ -95,9 +96,30 @@ Selected same-document view, function, annotation, import, and export declaratio
 
 Valid, invalid, and incomplete content returns HTTP 200. Input errors return 400.
 
+### Knowledge-object closure
+
+`POST /api/v1/query/closure` accepts the strict version 1 closure request. It
+requires `Content-Type: application/json` and uses the 1 MiB request body limit.
+The request supplies one query `document`, a `bundle` with caller-scoped
+collection coverage and definitions, and optional occurrence `bindings`:
+
+<!-- api-example: closure-resolved /query/closure valid -->
+```json
+{"schema_version":1,"document":{"text":"| lookup users user OUTPUT role","source_id":"query.spl"},"bundle":{"schema_version":1,"scope_id":"local-example","collections":[{"kind":"lookup","coverage":"complete"}],"objects":[{"id":"lookup-users","kind":"lookup","name":"users","source_id":"lookups.conf","relations":[]}]},"bindings":[]}
+```
+
+Valid, invalid, and incomplete closure reports return HTTP 200 with the same
+canonical JSON as Go and Python. Malformed JSON, duplicate or unknown members,
+invalid bindings, and unsupported selectors return 400. The report includes
+source-mapped traversal, graph and BOM projections, and separate coverage
+dimensions. A `complete` collection is a caller promise about the supplied
+scope, not a server check against live Splunk. See the [closure API
+contract](API.md#knowledge-object-closure) for binding identity, macro limits,
+source ranges, and status rules.
+
 `GET /api/v1/capabilities?language=spl2&profile=splunkd&version=current` returns the selected manifest, including `documentation_snapshot` for SPL2. The only query parameters are `language`, `profile`, and `version`; omitted or empty values use defaults. Unknown parameters/values, malformed encodings/Unicode, and duplicate or conflicting keys return 400, including repeated equal values. With no selectors it returns the SPL manifest. Query body/source identity are not capability selectors.
 
-The manifest contains five evidence-backed dimensions per record: syntax, semantics, requirements, linting, and safe rewriting. Their states are supported, partial, unsupported, not applicable, and unassessed. Summary counts obey `applicable = supported + partial + unsupported + unassessed`, `records = applicable + not_applicable`, and `covered = supported`; no composite score is emitted. The SPL response contains 105 records and 104 evidence cases. SPL2 contains 140 records and 146 evidence cases. Every advertised rewrite form has a matching ledger record and replayed success or boundary evidence. `grammar_registered` is a parser fact, not syntax coverage, and the legacy command/function projections do not replace the ledger. A tagged server reports the exact `VERSION` in `toolkit_version`; source Go execution may report `dev` without changing the semantic capability revision. The SPL revision is `sha256:08901c84ac8c420f59ddb86168c534f0e83484c05d3c8a81078a716c878a1733`; the SPL2 revision is `sha256:a765813624c6edfd754a4529556f5fd35288f464e759f8d969404a072bef1898`.
+The manifest contains five evidence-backed dimensions per record: syntax, semantics, requirements, linting, and safe rewriting. Their states are supported, partial, unsupported, not applicable, and unassessed. Summary counts obey `applicable = supported + partial + unsupported + unassessed`, `records = applicable + not_applicable`, and `covered = supported`; no composite score is emitted. The SPL response contains 106 records and 107 evidence cases. SPL2 contains 141 records and 149 evidence cases. Every advertised rewrite form has a matching ledger record and replayed success or boundary evidence. `grammar_registered` is a parser fact, not syntax coverage, and the legacy command/function projections do not replace the ledger. A tagged server reports the exact `VERSION` in `toolkit_version`; source Go execution may report `dev` without changing the semantic capability revision. The SPL revision is `sha256:8a612f2064da24552a68faec261968731a6f1f1c7279ffabb77a59c7dfdb2008`; the SPL2 revision is `sha256:6495f77a0747f04e9690f5360cf4d024cf95a727bf05ab7cb7c9e1a96e1383dc`.
 
 Evidence IDs join claims to typed local observations and provenance. Broader forms receive new IDs unless a reviewed scope correction changes the original boundary. The bounded SPL field-flow semantics support exact `tstats` sources, predicates, aggregates, groups, and supported literal options; exact modeled forms of `fillnull`, `rex`, `spath`, `bin`, `bucket`, `regex`, and `mvexpand`; and the selected function arities. Exact macros and branch children retain direct requirements and evidence, while expansion and branch merging remain incomplete. Dynamic operands, wildcard groups, `PREFIX(...)`, true result-shape modes, unsupported options, ambiguous or sed-mode `rex`, and `spath` auto-extraction also remain incomplete.
 

@@ -330,6 +330,12 @@ func TestAnalysisOpenAPIDocument(t *testing.T) {
 	if raw := string(spec.Paths["/query/analyze"]); !strings.Contains(raw, "analysis.Result") {
 		t.Errorf("analyze response does not reference canonical report: %s", raw)
 	}
+	closure := string(spec.Paths["/query/closure"])
+	for _, expected := range []string{"tooling.closure.Request", "tooling.closure.Report", `"200"`, `"400"`} {
+		if !strings.Contains(closure, expected) {
+			t.Errorf("closure operation missing %s: %s", expected, closure)
+		}
+	}
 }
 
 func TestRequirementsRESTContentStatuses(t *testing.T) {

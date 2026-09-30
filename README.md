@@ -7,6 +7,7 @@ SPL Toolkit 0.1.1 is an offline library and command-line tool for bounded operat
 - validate queries against the bundled legacy grammar;
 - analyze query field-flow semantics, located references, lineage, dependencies, and coverage;
 - report direct external query requirements with source evidence and explicit gaps;
+- evaluate caller-supplied knowledge-object closure into a dependency graph and detection BOM;
 - scan dedicated query corpora, export graph/SARIF evidence, compare schema/mapping changes, and serve local editor diagnostics and highlights;
 - validate source field obligations against an offline field catalog, singly or in ordered batches;
 - preview or apply explicit source-identity rewrites with linked-edit proof, audit trails, and optional destination validation;
@@ -36,7 +37,7 @@ spl-toolkit capabilities --format json
 
 Analysis emits report format `1` with original source, located references, scope/stage IDs, lineage, dependencies, diagnostics, and explicit coverage. Exit codes are 0 valid, 1 invalid, 3 incomplete, and 2 usage/options/I/O errors. Structural validity does not prove external schema membership or successful Splunk execution. Go, native Python, CLI, and REST share the canonical report.
 
-The capability manifest also publishes an evidence-backed language ledger. Each record reports `syntax`, `semantics`, `requirements`, `linting`, and `safe_rewriting` as `supported`, `partial`, `unsupported`, `not_applicable`, or `unassessed`, with stable evidence IDs and explicit limitations. The current snapshots contain 105 SPL records backed by 104 evidence cases and 140 SPL2 records backed by 146 evidence cases. Counts use strict denominators, publish no percentage or composite score, and keep `grammar_registered` separate from syntax coverage. Every advertised rewrite form has a matching ledger record and executable success or boundary evidence. The SPL capability revision is `sha256:08901c84ac8c420f59ddb86168c534f0e83484c05d3c8a81078a716c878a1733`; the SPL2 revision is `sha256:a765813624c6edfd754a4529556f5fd35288f464e759f8d969404a072bef1898`.
+The capability manifest also publishes an evidence-backed language ledger. Each record reports `syntax`, `semantics`, `requirements`, `linting`, and `safe_rewriting` as `supported`, `partial`, `unsupported`, `not_applicable`, or `unassessed`, with stable evidence IDs and explicit limitations. The current snapshots contain 106 SPL records backed by 107 evidence cases and 141 SPL2 records backed by 149 evidence cases. Counts use strict denominators, publish no percentage or composite score, and keep `grammar_registered` separate from syntax coverage. Every advertised rewrite form has a matching ledger record and executable success or boundary evidence. The SPL capability revision is `sha256:8a612f2064da24552a68faec261968731a6f1f1c7279ffabb77a59c7dfdb2008`; the SPL2 revision is `sha256:6495f77a0747f04e9690f5360cf4d024cf95a727bf05ab7cb7c9e1a96e1383dc`.
 
 The bounded SPL field-flow semantics include exact `tstats` model and dataset sources, predicates, registered aggregates, aliases, groups, and supported literal options; exact target forms of `fillnull`, `rex`, `spath`, `bin`, `bucket`, `regex`, and `mvexpand`; the selected multivalue, time, comparison, constant, and aggregate functions; and retained parent and child evidence for `join`, `append`, and `appendpipe`. Inline macros, dynamic catalog or field identities, wildcard `tstats` groups, `PREFIX(...)`, result-shape modes set to true, unsupported options, ambiguous or sed-mode `rex`, `spath` auto-extraction, and branch merge effects remain incomplete. These new command operands are not safe-rewrite sites.
 
@@ -53,6 +54,28 @@ See the [structured analysis API](docs/API.md) for Go/Python examples, REST rout
 The operation is deterministic and offline. It does not expand knowledge objects, inspect events or environment metadata, assess compatibility, resolve placeholders, generate query variants, or execute queries. Query and capability digests identify the submitted data and selected capability contract. They are not authentication, authorization, signatures, or execution permission.
 
 Use [`spl-toolkit requirements`](docs/cli.md#query-requirements), `POST /api/v1/query/requirements`, `SPLMapper.requirements_query(...)`, or the canonical Go API. See the [requirement report contract](docs/API.md#query-requirements) for the complete shape, examples, status rules, 4,096-unit lexer work boundary, and native ownership contract.
+
+## Knowledge-object closure
+
+`closure` evaluates a query against a caller-supplied definition bundle. It
+follows exact references through definitions and static macro bodies, then
+returns direct and effective analysis, a located traversal, a dependency graph,
+and a detection bill of materials (BOM). Each collection declares `complete`,
+`partial`, or `unavailable` coverage for its object kind within the caller's
+`scope_id`; a missing object under partial coverage remains unknown. Optional
+occurrence bindings choose among same-name definitions by original-document
+digest and byte range. They do not change the query text.
+
+Use [`spl-toolkit closure`](docs/cli.md#knowledge-object-closure),
+`POST /api/v1/query/closure`, `SPLMapper.closure_query(request)`, or
+`closure.DecodeRequest` and `closure.Evaluate` in Go. `coverage.complete` means
+the supplied scope had complete required collections, every traversed
+query-bearing definition was analyzed, exact references resolved, and expansion
+had no gaps. It does not attest to a live Splunk inventory, authorization,
+execution, or deployment. Direct `analyze` and `requirements` keep their
+query-only macro limits; use the [closure
+contract](docs/API.md#knowledge-object-closure) for bundle and source-map
+details.
 
 ## Field-list validation
 

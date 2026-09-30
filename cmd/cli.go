@@ -85,7 +85,7 @@ func runCLIWithInput(args []string, stdin io.Reader, stdout, stderr io.Writer) i
 		return runValidationCLI(args[1:], stdin, stdout, stderr)
 	case "rewrite":
 		return runRewriteCLI(args[1:], stdin, stdout, stderr)
-	case "scan", "graph", "impact-schema", "impact-mapping", "lsp", "document":
+	case "scan", "graph", "impact-schema", "impact-mapping", "lsp", "document", "closure":
 		return runToolingCLI(command, args[1:], stdin, stdout, stderr)
 	case "map", "discover", "validate", "analyze", "requirements", "capabilities":
 		return runQueryCommand(command, args[1:], stdout, stderr)

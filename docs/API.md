@@ -81,7 +81,7 @@ func main() {
 | `gaps` | Ordered explanations for incomplete requirement discovery |
 | `diagnostics` | Detached canonical query-only diagnostics |
 
-Each item has `id`, `kind`, `identity`, `role`, `necessity`, `origin`, `resolution`, and `occurrences`. Exact SPL2 field items also carry `field_identity`, distinguishing an atomic name from a structural path with the same display string. IDs are `req-N`; necessity is `required` or `conditional`; origin is `direct`; and resolution records the canonical `exact`, `wildcard`, or `dynamic` state. Initial knowledge-object kinds are `index`, `source`, `sourcetype`, `dataset`, `data_model`, `lookup`, and `macro`. Each occurrence has `reference_id`, `original_name`, query-only `binding`, `stage_id`, `scope_id`, and `location`.
+Each item has `id`, `kind`, `identity`, `role`, `necessity`, `origin`, `resolution`, and `occurrences`. Exact SPL2 field items also carry `field_identity`, distinguishing an atomic name from a structural path with the same display string. IDs are `req-N`; necessity is `required` or `conditional`; origin is `direct`; and resolution records the canonical `exact`, `wildcard`, or `dynamic` state. Direct knowledge-object kinds include `index`, `source`, `sourcetype`, `dataset`, `data_model`, `saved_search`, `lookup`, `macro`, `module`, and `function`. Each occurrence has `reference_id`, `original_name`, query-only `binding`, `stage_id`, `scope_id`, and `location`.
 
 Each gap has `code`, `message`, ordered `reference_ids`, and ordered `diagnostic_codes`. Diagnostic fields are `code`, `severity`, `category`, `message`, `location`, `stage_id`, and `scope_id`. Locations use the source-indexed half-open ranges described below. Every collection is an array, including when empty. The standalone set omits full query text; occurrences retain the spelling and range for their evidence.
 
@@ -99,7 +99,7 @@ Requirements describe direct obligations visible in the submitted query. Extract
 
 Both digests use `sha256:<64 lowercase hex>`. `query_digest` is SHA-256 over the exact valid UTF-8 query-text bytes. It excludes source ID, language, profile, and compatibility version. Query text is not whitespace-normalized, repaired, or line-ending-normalized.
 
-`capability_revision` is SHA-256 over compact Go `encoding/json` output for the normalized semantic capability payload, without indentation or a trailing newline. It includes `schema_version`, the language/profile/version selectors, `documentation_snapshot` when present, the legacy `commands` and `functions` projections, `rewrite`, `records`, `summary`, and `evidence`. Of the fields in the emitted manifest, only `toolkit_version` is excluded. A source Go build may therefore report `toolkit_version: "dev"` while tagged CLI, server, native, and packaged surfaces report the exact `VERSION`; both retain the same semantic revision when their capability payloads match. The current SPL revision is `sha256:08901c84ac8c420f59ddb86168c534f0e83484c05d3c8a81078a716c878a1733`; the SPL2 revision is `sha256:a765813624c6edfd754a4529556f5fd35288f464e759f8d969404a072bef1898`.
+`capability_revision` is SHA-256 over compact Go `encoding/json` output for the normalized semantic capability payload, without indentation or a trailing newline. It includes `schema_version`, the language/profile/version selectors, `documentation_snapshot` when present, the legacy `commands` and `functions` projections, `rewrite`, `records`, `summary`, and `evidence`. Of the fields in the emitted manifest, only `toolkit_version` is excluded. A source Go build may therefore report `toolkit_version: "dev"` while tagged CLI, server, native, and packaged surfaces report the exact `VERSION`; both retain the same semantic revision when their capability payloads match. The current SPL revision is `sha256:8a612f2064da24552a68faec261968731a6f1f1c7279ffabb77a59c7dfdb2008`; the SPL2 revision is `sha256:6495f77a0747f04e9690f5360cf4d024cf95a727bf05ab7cb7c9e1a96e1383dc`.
 
 These digests identify supplied data. They are not authentication, authorization, signatures, proof of environment compatibility, or permission to execute a query.
 
@@ -200,6 +200,94 @@ curl -sS http://localhost:8080/api/v1/capabilities
 
 `GET /api/v1/capabilities` returns the direct capability manifest. Malformed JSON, invalid Unicode, duplicate or unknown properties, trailing JSON, and unsupported options return HTTP 400 transport errors instead of analysis reports. The existing JSON content-type policy, 1 MiB request-body limit, and middleware protections apply. Query processing opens no server-side file or network resource. See [REST server usage](api-server.md) for deployment and legacy endpoints.
 
+## Knowledge-object closure
+
+The Go entry points are `closure.DecodeRequest(rawJSON)` and
+`closure.Evaluate(request)`. Both return an error for malformed inputs; query
+findings appear in the returned report. The strict request has integer
+`schema_version: 1`, one `document` QueryDocument, a `bundle`, and optional
+`bindings`. The same JSON request is accepted by `POST /api/v1/query/closure`,
+the native `spl_mapper_closure_query` function, and
+`SPLMapper.closure_query(request)`. The CLI reads the bundle and optional
+bindings from local files before constructing this request.
+
+A bundle has integer `schema_version: 1`, a nonblank caller-owned `scope_id`,
+`collections`, and `objects`. Each collection names an object kind and declares
+`complete`, `partial`, or `unavailable` coverage within that scope. `complete`
+is the caller's promise that all definitions visible to the query for that kind
+are present. An absent reference in a complete collection gets a
+`missing_object` gap; an absent reference in a partial or unavailable collection
+stays `unknown`. Omitted collection kinds have no complete coverage promise. The
+engine does not collect definitions from Splunk.
+
+An object has a stable bundle-local `id`, `kind`, `name`, opaque `source_id`,
+optional app/owner/sharing metadata, optional query `document`, and optional
+explicit `relations`. Macro objects also require `arity` and matching
+`arguments`; `eval_based` and `validation` metadata can hold expansion.
+Supported kinds are `macro`, `lookup`, `data_model`, `dataset`, `saved_search`,
+`event_type`, `tag`, `calculated_field`, `field_extraction`, `module`,
+`function`, and `external_command`. Query-bearing saved searches, event types,
+modules, and functions need bodies for complete traversal. A dataset without a
+body can still be a resolved catalog object. Explicit relations name additional
+dependency edges; their source is either a valid original-document byte range or
+a property pointer. A generic event-type or tag predicate is not itself an exact
+knowledge-object identity.
+
+Definition IDs distinguish objects even when kind and name match. An optional
+binding selects one object for an exact occurrence using `document_digest`
+(`sha256:` of the exact original UTF-8 query or definition text), `kind`,
+half-open `start`/`end` byte offsets, and `object_id`. The decoder checks
+target existence, kind, digest format, and range shape. Evaluation checks
+the range against the original document, verifies a matching exact reference,
+and rejects conflicting bindings for one occurrence. Without a binding,
+same-name candidates remain ambiguous. The bundle digest hashes normalized
+supplied definitions; digests identify input snapshots and are not signatures
+or authorization.
+
+Static classic SPL macro expansion uses supplied bodies, positional or named
+arguments, and exact call sites. Unsupported or dynamic calls, ambiguous
+definitions, cycles, eval-based macros, validation metadata, and missing bodies
+leave explicit expansion gaps. Expansion is bounded to depth 32, 4,096 calls,
+and 1 MiB of effective text. SPL2 does not gain classic SPL macro expansion.
+Direct `analysis.Analyze` and `analysis.Requirements` retain their query-only
+unresolved-macro behavior; closure records both the direct report and the
+effective report after supported expansion. A `from savedsearch:` reference can
+still leave effective analysis incomplete because its command effects are
+unproved, even when traversal finds the saved search.
+
+The canonical report has `direct_analysis`, `direct_requirements`,
+`effective_analysis`, `definition_analyses`, `traversal`, `provenance`, `graph`,
+`bom`, `coverage`, `gaps`, and `diagnostics`. `graph` and `bom` project the same
+traversal; neither discovers extra resources. Provenance maps half-open
+zero-based UTF-8 ranges in effective text to original `query` or `definition`
+source ranges. Each segment can retain an invocation chain and placeholder
+origins. Closure diagnostics carry ordered `origins` for every source segment
+intersected by their effective range, including placeholder sites when present;
+`source` repeats the first origin when one exists. A zero-width diagnostic
+at an internal boundary maps to the following segment; at EOF it maps to the
+preceding segment's end. Traversal edges carry original source intervals,
+resolution, object path, and cycle path where
+applicable. Source IDs are opaque caller labels. Use
+`source.kind`, `source_id`, `object_id`, `start`, and `end` together when
+showing an origin; effective offsets alone do not identify a source file.
+Each graph edge retains the traversal edge's ordered `origins` alongside its
+first-origin `source`, so a standalone graph can show every source segment.
+`traversal_pointer` resolves against the full report, not the graph projection.
+
+`coverage` reports `effective_query`, `traversed_definitions`, `resolution`,
+`collections`, and `expansion`, plus `complete` and ordered reasons. Complete
+closure requires all five dimensions, no gaps, and no definite invalid analysis.
+Invalid takes precedence over incomplete for a definite syntax or semantic error
+outside opaque expansion; unresolved or held evidence remains incomplete.
+Complete means complete against the supplied bundle and scope only. It does not
+prove the collection promise is true of a live Splunk instance, that fields
+exist in events, or that the query will execute. The CLI uses exit 0/1/3 for
+valid/invalid/incomplete and 2 for request or execution errors. REST returns
+HTTP 200 for each content status, 400 for input errors, and 500 for unexpected
+internal errors. See [CLI usage](cli.md#knowledge-object-closure), [REST
+usage](api-server.md#knowledge-object-closure), and the [v1
+schemas](https://github.com/delgado-jacob/spl-toolkit/blob/main/contracts/README.md).
+
 ## Document, positions, and report format
 
 Query Documents have `text`, `language`, `profile`, `version`, and `source_id`. Empty compatibility options normalize to `spl`, `splunkd`, and `current`; source ID defaults to an empty string. `version` selects the compatibility contract, while integer `schema_version: 1` identifies the machine report format. This is separate from the package version.
@@ -258,8 +346,8 @@ For every dimension, `applicable = supported + partial + unsupported + unassesse
 
 | Language | Records | Evidence cases | Syntax | Semantics | Requirements | Linting | Safe rewriting |
 |---|---:|---:|---|---|---|---|---|
-| SPL | 105 | 104 | 76 supported, 1 unsupported, 28 unassessed | 68 supported, 9 unsupported, 28 unassessed | 19 supported, 5 unsupported, 81 unassessed | 105 unassessed | 17 supported, 2 unsupported, 86 unassessed |
-| SPL2 | 140 | 146 | 89 supported, 19 unsupported, 32 unassessed | 76 supported, 38 unsupported, 26 unassessed | 46 supported, 6 unsupported, 88 unassessed | 140 unassessed | 14 supported, 3 unsupported, 123 unassessed |
+| SPL | 106 | 107 | 77 supported, 1 unsupported, 28 unassessed | 68 supported, 10 unsupported, 28 unassessed | 19 supported, 6 unsupported, 81 unassessed | 106 unassessed | 17 supported, 2 unsupported, 87 unassessed |
+| SPL2 | 141 | 149 | 90 supported, 19 unsupported, 32 unassessed | 76 supported, 39 unsupported, 26 unassessed | 46 supported, 7 unsupported, 88 unassessed | 141 unassessed | 14 supported, 3 unsupported, 124 unassessed |
 
 Evidence IDs resolve to typed local documents, observations, classifications, and provenance in the same manifest. Record and evidence IDs remain stable for the exact reviewed scope. A broadened form receives a new ID unless a reviewed scope correction establishes that the original ID was wrong. `grammar_registered` records parser registration only and never adds coverage. For example, SPL2 record `spl2.command.spl1.quoted-pipeline` has `grammar_registered: true`, but its syntax state is `unsupported`, so it contributes zero covered syntax. Linting is equally separate: analysis diagnostics do not become lint evidence. Both current manifests leave the full linting denominator unassessed.
 

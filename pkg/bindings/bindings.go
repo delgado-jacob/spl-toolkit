@@ -47,6 +47,7 @@ import (
 	"github.com/delgado-jacob/spl-toolkit/internal/buildinfo"
 	"github.com/delgado-jacob/spl-toolkit/internal/jsoninput"
 	"github.com/delgado-jacob/spl-toolkit/pkg/analysis"
+	"github.com/delgado-jacob/spl-toolkit/pkg/closure"
 	"github.com/delgado-jacob/spl-toolkit/pkg/corpus"
 	"github.com/delgado-jacob/spl-toolkit/pkg/document"
 	"github.com/delgado-jacob/spl-toolkit/pkg/graph"
@@ -370,6 +371,17 @@ func spl_mapper_document_view(mapperID C.int, requestJSON *C.char) *C.SPLResult 
 			return nil, err
 		}
 		return document.New(report, document.RevisionContext{ToolVersion: buildinfo.Version, ContractVersion: "1"})
+	})
+}
+
+//export spl_mapper_closure_query
+func spl_mapper_closure_query(mapperID C.int, requestJSON *C.char) *C.SPLResult {
+	return ownedMapperJSONResult(mapperID, func() (any, error) {
+		request, err := closure.DecodeRequest([]byte(C.GoString(requestJSON)))
+		if err != nil {
+			return nil, err
+		}
+		return closure.Evaluate(request)
 	})
 }
 

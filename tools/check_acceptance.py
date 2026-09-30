@@ -21,7 +21,7 @@ EXPECTED_MACHINE_CONTRACT_COUNT = 13
 REQUIRED_TEST_FILES = {
     "native": {"test_native_abi.py", "test_native_mapper.py", "test_native_analysis.py",
                "test_native_validation.py", "test_native_schema_validation.py", "test_native_spl2.py",
-               "test_native_rewrite.py", "test_native_requirements.py"},
+               "test_native_rewrite.py", "test_native_requirements.py", "test_native_closure.py"},
     "acceptance": {"test_documented_cli.py", "test_surfaces.py", "test_analysis_surfaces.py",
                    "test_requirements_surfaces.py", "test_validation_surfaces.py", "test_schema_surfaces.py",
                    "test_spl2_surfaces.py", "test_rewrite_surfaces.py"},
@@ -29,6 +29,7 @@ REQUIRED_TEST_FILES = {
 REQUIRED_TEST_HASH_PATHS = {
     "native": {
         "test_native_requirements.py": ROOT / "python/tests/test_native_requirements.py",
+        "test_native_closure.py": ROOT / "python/tests/test_native_closure.py",
         "test_native_analysis.py": ROOT / "python/tests/test_native_analysis.py",
         "test_native_spl2.py": ROOT / "python/tests/test_native_spl2.py",
     },

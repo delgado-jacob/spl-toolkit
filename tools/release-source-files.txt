@@ -3,6 +3,7 @@ README.md
 VERSION
 cmd/analysis.go
 cmd/cli.go
+cmd/closure_cli.go
 cmd/main.go
 cmd/rewrite_cli.go
 cmd/schema_validation_cli.go
@@ -15,7 +16,12 @@ contracts/sarif/PROVENANCE.md
 contracts/sarif/sarif-schema-2.1.0.json
 contracts/v1/analysis.schema.json
 contracts/v1/capabilities.schema.json
+contracts/v1/closure-graph.schema.json
+contracts/v1/closure-request.schema.json
+contracts/v1/closure.schema.json
 contracts/v1/corpus.schema.json
+contracts/v1/definitions.schema.json
+contracts/v1/detection-bom.schema.json
 contracts/v1/document-view.schema.json
 contracts/v1/field-validation.schema.json
 contracts/v1/graph.schema.json
@@ -131,6 +137,7 @@ pkg/analysis/spl_field_commands.go
 pkg/analysis/spl_tstats.go
 pkg/analysis/transfers.go
 pkg/api/analysis.go
+pkg/api/closure.go
 pkg/api/handlers.go
 pkg/api/models.go
 pkg/api/rewrite.go
@@ -140,6 +147,17 @@ pkg/api/tooling.go
 pkg/api/validation.go
 pkg/bindings/bindings.go
 pkg/bindings/registry.go
+pkg/closure/coverage.go
+pkg/closure/decode.go
+pkg/closure/digest.go
+pkg/closure/evaluate.go
+pkg/closure/expand.go
+pkg/closure/inventory.go
+pkg/closure/macro_scan.go
+pkg/closure/model.go
+pkg/closure/provenance.go
+pkg/closure/report.go
+pkg/closure/resolve.go
 pkg/corpus/aggregate.go
 pkg/corpus/identity.go
 pkg/corpus/model.go

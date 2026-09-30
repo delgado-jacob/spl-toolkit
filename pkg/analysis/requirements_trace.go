@@ -530,7 +530,7 @@ func requirementReferencePolicy(reference Reference) (directExternal, conditiona
 		return false, false
 	}
 	switch reference.Kind {
-	case "index", "source", "sourcetype", "dataset", "data_model", "lookup", "macro":
+	case "index", "source", "sourcetype", "dataset", "data_model", "lookup", "macro", "saved_search", "module", "function":
 		if reference.Resolution == "exact" {
 			return true, false
 		}

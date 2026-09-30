@@ -79,9 +79,9 @@ Exit 0; stdout is empty and the file contains the complete selected manifest. Te
 
 JSON capability output includes evidence-backed `records`, `summary`, and `evidence` alongside the legacy command/function projections. Each record reports syntax, semantics, requirements, linting, and safe rewriting as supported, partial, unsupported, not applicable, or unassessed. For each dimension, applicable equals supported plus partial plus unsupported plus unassessed; total records equal applicable plus not applicable; covered equals supported. Partial and unsupported records therefore receive zero covered credit. No percentage or composite score is printed.
 
-The SPL manifest has 105 records and 104 evidence cases. Its current syntax summary is 76 supported, 1 unsupported, and 28 unassessed; semantics is 68 supported, 9 unsupported, and 28 unassessed; requirements are 19 supported, 5 unsupported, and 81 unassessed; linting has 105 unassessed records; and safe rewriting is 17 supported, 2 unsupported, and 86 unassessed. The SPL2 manifest has 140 records and 146 evidence cases: syntax is 89 supported, 19 unsupported, and 32 unassessed; semantics is 76 supported, 38 unsupported, and 26 unassessed; requirements are 46 supported, 6 unsupported, and 88 unassessed. Linting has 140 unassessed records. Safe rewriting has 14 supported, 3 unsupported, and 123 unassessed records. Every advertised rewrite record cites a replayed local success or boundary case.
+The SPL manifest has 106 records and 107 evidence cases. Its current syntax summary is 77 supported, 1 unsupported, and 28 unassessed; semantics is 68 supported, 10 unsupported, and 28 unassessed; requirements are 19 supported, 6 unsupported, and 81 unassessed; linting has 106 unassessed records; and safe rewriting is 17 supported, 2 unsupported, and 87 unassessed. The SPL2 manifest has 141 records and 149 evidence cases: syntax is 90 supported, 19 unsupported, and 32 unassessed; semantics is 76 supported, 39 unsupported, and 26 unassessed; requirements are 46 supported, 7 unsupported, and 88 unassessed. Linting has 141 unassessed records. Safe rewriting has 14 supported, 3 unsupported, and 124 unassessed records. Every advertised rewrite record cites a replayed local success or boundary case.
 
-`grammar_registered` reports parser registration, not syntax coverage. Evidence IDs name typed local corpus cases; a broadened form receives a new ID unless a reviewed scope correction changes the original scope. Source Go execution may show toolkit version `dev`; tagged CLI output uses the exact `VERSION` and the same semantic revision. The SPL revision is `sha256:08901c84ac8c420f59ddb86168c534f0e83484c05d3c8a81078a716c878a1733`; the SPL2 revision is `sha256:a765813624c6edfd754a4529556f5fd35288f464e759f8d969404a072bef1898`.
+`grammar_registered` reports parser registration, not syntax coverage. Evidence IDs name typed local corpus cases; a broadened form receives a new ID unless a reviewed scope correction changes the original scope. Source Go execution may show toolkit version `dev`; tagged CLI output uses the exact `VERSION` and the same semantic revision. The SPL revision is `sha256:8a612f2064da24552a68faec261968731a6f1f1c7279ffabb77a59c7dfdb2008`; the SPL2 revision is `sha256:6495f77a0747f04e9690f5360cf4d024cf95a727bf05ab7cb7c9e1a96e1383dc`.
 
 The bounded SPL field-flow semantics cover exact `tstats` sources, predicates, registered aggregates, groups, aliases, and supported literal options; exact modeled forms of `fillnull`, `rex`, `spath`, `bin`, `bucket`, `regex`, and `mvexpand`; and the selected function arities. Exact macros produce direct macro requirements and source-located unresolved-expansion gaps. Branch children retain evidence and direct requirements, but merged output fields remain uncertain. Dynamic identities, wildcard groups, `PREFIX(...)`, true result-shape modes, unsupported options, ambiguous or sed-mode `rex`, `spath` auto-extraction, macro expansion, and branch merging remain incomplete. New typed operands are not safe-rewrite sites.
 
@@ -164,6 +164,43 @@ Text output prints `Query status` and `Requirement coverage` independently, foll
 Canonical analysis admits at most 4,096 lexer work units. A query that would consume unit 4,097 still emits an incomplete report and exits 3. It has one `SPL_ANALYSIS_RESOURCE_LIMIT` diagnostic and gap and no partial requirement evidence. Long sparse input remains eligible for ordinary analysis when it stays within the work-unit boundary. See the [API contract](API.md#canonical-lexer-work-boundary) for ordering, SPL2 closure accounting, exact messages and locations, and rewrite behavior.
 
 Portable CLI acceptance uses a compact 4,097-work-unit query because operating systems can reject large process command lines before the CLI starts. The 64 KiB and 256 KiB resource-limit fixtures run through non-argv interfaces instead. This transport constraint does not change the analyzer budget or add file, stdin, or batch input: `analyze` and `requirements` still accept one positional or `--query` value.
+
+## Knowledge-object closure
+
+`closure` requires `--bundle FILE` and exactly one positional query, `--query`,
+`--file FILE`, or `--stdin`. `--bindings FILE` supplies optional occurrence
+bindings. `--language spl|spl2`, `--profile splunkd`,
+`--compatibility-version current`, and `--source-id ID` identify the submitted
+document. The CLI reads
+files as UTF-8 snapshots; file paths do not become source IDs. The bundle must
+be a version 1 definition bundle with a caller-defined `scope_id`,
+`collections`, and `objects`.
+
+```json
+{"schema_version":1,"scope_id":"local-example","collections":[{"kind":"lookup","coverage":"complete"}],"objects":[{"id":"lookup-users","kind":"lookup","name":"users","source_id":"lookups.conf","relations":[]}]}
+```
+
+Save that JSON as `bundle.json`, then run `spl-toolkit closure --bundle bundle.json --query '| lookup users user OUTPUT role' --source-id query.spl --format json`.
+
+`--format json` writes the full canonical report. `graph` writes only
+`report.graph`, `bom` writes only `report.bom`, and the default `text` groups
+direct and transitive BOM entries and prints partial reasons. Graph edges carry
+ordered `origins` as well as `source`; their `traversal_pointer` resolves only
+in the full report. `--output FILE`
+writes the selected form to a file even when content is invalid or incomplete.
+Exit 0 means valid, 1 means invalid, 3 means incomplete, and 2 means an input,
+option, I/O, or internal error. Content statuses are reports; input errors have
+no report.
+
+A complete collection promises that the caller supplied every visible definition
+of that kind in `scope_id`. A partial or unavailable collection cannot justify
+an absent-object conclusion. The optional binding array contains
+`document_digest`, `kind`, `start`, `end`, and `object_id`; ranges identify
+exact occurrences in the original query or definition body, using zero-based,
+half-open UTF-8 bytes. See the [closure API](API.md#knowledge-object-closure)
+for binding validation, macro limits, source maps, status, and the meaning of
+complete coverage. This offline result does not prove the caller's inventory
+matches a live Splunk instance.
 
 ## Local field validation
 

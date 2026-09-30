@@ -109,10 +109,20 @@ def add_tooling(spec):
                    for code, message in (("400", "Invalid input, content type or body limit"), ("500", "Internal failure"))},
             },
         }}
+    spec["paths"]["/query/closure"] = {"post": {
+        "summary": "Evaluate knowledge-object dependency closure",
+        "description": "Strict inline JSON request with a scoped definition bundle and optional occurrence bindings. Unknown or duplicate members, nulls, malformed Unicode, and trailing JSON are input errors. Content statuses valid, invalid, and incomplete return 200 with the canonical report, provenance, graph, and bill of materials. Cross-document byte ranges and evidence references are validated by the runtime.",
+        "tags": ["query"],
+        "requestBody": {"required": True, "content": {"application/json": {"schema": reference("closure.Request")}}},
+        "responses": {
+            "200": {"description": "Canonical closure report", "content": {"application/json": {"schema": reference("closure.Report")}}},
+            "400": {"description": "Malformed request", "content": {"application/json": {"schema": {"$ref": PREFIX + "api.ErrorResponse"}}}},
+        },
+    }}
     visited = set()
     while needed - visited:
         name = sorted(needed - visited)[0]
-        schemas["tooling." + name] = convert(shared["$defs"][name])
+        schemas["tooling." + name] = convert(shared["$defs"][name], preserve_analysis=name.startswith("closure."))
         visited.add(name)
     snapshot = schemas.get("tooling.document.Snapshot")
     if (not isinstance(snapshot, dict)

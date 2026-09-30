@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"github.com/delgado-jacob/spl-toolkit/pkg/analysis"
+	"github.com/delgado-jacob/spl-toolkit/pkg/closure"
 	"github.com/delgado-jacob/spl-toolkit/pkg/rewrite"
 	"github.com/delgado-jacob/spl-toolkit/pkg/validation"
 	"net/http/httptest"
@@ -115,7 +116,7 @@ func TestDialectMaintainedAPIExamples(t *testing.T) {
 		t.Fatal(err)
 	}
 	examples := apiExamplePattern.FindAllSubmatch(data, -1)
-	if len(examples) != 17 || bytes.Count(data, []byte("```json")) != len(examples) {
+	if len(examples) != 18 || bytes.Count(data, []byte("```json")) != len(examples) {
 		t.Fatalf("request marker coverage: %d", len(examples))
 	}
 	seen := map[string]bool{}
@@ -144,6 +145,15 @@ func TestDialectMaintainedAPIExamples(t *testing.T) {
 					t.Fatal(e)
 				}
 				want = report
+			case "/query/closure":
+				request, e := closure.DecodeRequest(body)
+				if e != nil {
+					t.Fatal(e)
+				}
+				want, e = closure.Evaluate(request)
+				if e != nil {
+					t.Fatal(e)
+				}
 			case "/query/requirements":
 				var doc analysis.QueryDocument
 				if err := json.Unmarshal(body, &doc); err != nil {
@@ -324,7 +334,7 @@ func TestDialectMaintainedAPIExamplesAcceptWindowsLineEndings(t *testing.T) {
 	lfData := bytes.ReplaceAll(data, []byte("\r\n"), []byte("\n"))
 	for _, source := range [][]byte{lfData, bytes.ReplaceAll(lfData, []byte("\n"), []byte("\r\n"))} {
 		examples := apiExamplePattern.FindAllSubmatch(source, -1)
-		if len(examples) != 17 || bytes.Count(source, []byte("```json")) != len(examples) {
+		if len(examples) != 18 || bytes.Count(source, []byte("```json")) != len(examples) {
 			t.Fatalf("request marker coverage with Windows line endings: %d", len(examples))
 		}
 	}
