@@ -5,6 +5,41 @@ import (
 	"strings"
 )
 
+// diagnosticProvenance maps a point to the segment starting there, or to the
+// preceding segment at EOF. A point retains the selected segment's placeholders.
+func diagnosticProvenance(expanded expansion, start, end int) []provenanceSegment {
+	if start != end {
+		return expanded.Origins(start, end)
+	}
+	if start < 0 || start > len(expanded.Text) {
+		return nil
+	}
+	var selected *provenanceSegment
+	for i := range expanded.Segments {
+		segment := &expanded.Segments[i]
+		if segment.EffectiveStart <= start && start < segment.EffectiveEnd {
+			selected = segment
+			break
+		}
+	}
+	if selected == nil && start == len(expanded.Text) {
+		for i := len(expanded.Segments) - 1; i >= 0; i-- {
+			if expanded.Segments[i].EffectiveEnd == start {
+				selected = &expanded.Segments[i]
+				break
+			}
+		}
+	}
+	if selected == nil {
+		return nil
+	}
+	point := selected.Source.Start + start - selected.EffectiveStart
+	segment := *selected
+	segment.EffectiveStart, segment.EffectiveEnd = start, start
+	segment.Source.Start, segment.Source.End = point, point
+	return []provenanceSegment{segment}
+}
+
 func (e *evaluator) inspectExpansion(expanded expansion, owner sourceInterval, result *analysis.Result, root bool) {
 	for _, gap := range expanded.Gaps {
 		source := SourceInterval{Kind: owner.Kind, SourceID: owner.SourceID, ObjectID: owner.ObjectID, Start: owner.Start, End: owner.End}
@@ -32,7 +67,7 @@ func (e *evaluator) inspectExpansion(expanded expansion, owner sourceInterval, r
 				seen[value] = true
 			}
 		}
-		for _, segment := range expanded.Origins(d.Location.Start.Offset, d.Location.End.Offset) {
+		for _, segment := range diagnosticProvenance(expanded, d.Location.Start.Offset, d.Location.End.Offset) {
 			addOrigin(segment.Source)
 			for _, placeholder := range segment.Placeholders {
 				addOrigin(placeholder)

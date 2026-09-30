@@ -263,8 +263,10 @@ zero-based UTF-8 ranges in effective text to original `query` or `definition`
 source ranges. Each segment can retain an invocation chain and placeholder
 origins. Closure diagnostics carry ordered `origins` for every source segment
 intersected by their effective range, including placeholder sites when present;
-`source` repeats the first origin when one exists. Traversal edges carry
-original source intervals, resolution, object path, and cycle path where
+`source` repeats the first origin when one exists. A zero-width diagnostic
+at an internal boundary maps to the following segment; at EOF it maps to the
+preceding segment's end. Traversal edges carry original source intervals,
+resolution, object path, and cycle path where
 applicable. Source IDs are opaque caller labels. Use
 `source.kind`, `source_id`, `object_id`, `start`, and `end` together when
 showing an origin; effective offsets alone do not identify a source file.
