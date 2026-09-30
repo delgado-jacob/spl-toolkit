@@ -30,6 +30,7 @@ REQUIRED_TEST_HASH_PATHS = {
         "test_native_requirements.py": ROOT / "python/tests/test_native_requirements.py",
         "test_native_analysis.py": ROOT / "python/tests/test_native_analysis.py",
         "test_native_spl2.py": ROOT / "python/tests/test_native_spl2.py",
+        "test_native_closure.py": ROOT / "python/tests/test_native_closure.py",
     },
     "acceptance": {
         "test_requirements_surfaces.py": ROOT / "tests/acceptance/test_requirements_surfaces.py",
@@ -149,7 +150,7 @@ def passing_records() -> list[dict]:
                 "required_test_files": {
                     "native": ["test_native_abi.py", "test_native_mapper.py", "test_native_analysis.py",
                                "test_native_validation.py", "test_native_schema_validation.py", "test_native_spl2.py",
-                               "test_native_rewrite.py", "test_native_requirements.py"],
+                               "test_native_rewrite.py", "test_native_requirements.py", "test_native_closure.py"],
                     "acceptance": ["test_documented_cli.py", "test_surfaces.py", "test_analysis_surfaces.py",
                                    "test_validation_surfaces.py", "test_schema_surfaces.py", "test_spl2_surfaces.py",
                                    "test_rewrite_surfaces.py", "test_requirements_surfaces.py"],

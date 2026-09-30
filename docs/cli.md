@@ -165,6 +165,41 @@ Canonical analysis admits at most 4,096 lexer work units. A query that would con
 
 Portable CLI acceptance uses a compact 4,097-work-unit query because operating systems can reject large process command lines before the CLI starts. The 64 KiB and 256 KiB resource-limit fixtures run through non-argv interfaces instead. This transport constraint does not change the analyzer budget or add file, stdin, or batch input: `analyze` and `requirements` still accept one positional or `--query` value.
 
+## Knowledge-object closure
+
+`closure` requires `--bundle FILE` and exactly one positional query, `--query`,
+`--file FILE`, or `--stdin`. `--bindings FILE` supplies optional occurrence
+bindings. `--language spl|spl2`, `--profile splunkd`,
+`--compatibility-version current`, and `--source-id ID` identify the submitted
+document. The CLI reads
+files as UTF-8 snapshots; file paths do not become source IDs. The bundle must
+be a version 1 definition bundle with a caller-defined `scope_id`,
+`collections`, and `objects`.
+
+```json
+{"schema_version":1,"scope_id":"local-example","collections":[{"kind":"lookup","coverage":"complete"}],"objects":[{"id":"lookup-users","kind":"lookup","name":"users","source_id":"lookups.conf","relations":[]}]}
+```
+
+Save that JSON as `bundle.json`, then run `spl-toolkit closure --bundle bundle.json --query '| lookup users user OUTPUT role' --source-id query.spl --format json`.
+
+`--format json` writes the full canonical report. `graph` writes only
+`report.graph`, `bom` writes only `report.bom`, and the default `text` groups
+direct and transitive BOM entries and prints partial reasons. `--output FILE`
+writes the selected form to a file even when content is invalid or incomplete.
+Exit 0 means valid, 1 means invalid, 3 means incomplete, and 2 means an input,
+option, I/O, or internal error. Content statuses are reports; input errors have
+no report.
+
+A complete collection promises that the caller supplied every visible definition
+of that kind in `scope_id`. A partial or unavailable collection cannot justify
+an absent-object conclusion. The optional binding array contains
+`document_digest`, `kind`, `start`, `end`, and `object_id`; ranges identify
+exact occurrences in the original query or definition body, using zero-based,
+half-open UTF-8 bytes. See the [closure API](API.md#knowledge-object-closure)
+for binding validation, macro limits, source maps, status, and the meaning of
+complete coverage. This offline result does not prove the caller's inventory
+matches a live Splunk instance.
+
 ## Local field validation
 
 `validate-fields` checks the canonical field obligations against a local catalog. It requires `--fields FILE` and exactly one positional/`--query` value, `--file FILE`, `--stdin`, or `--batch FILE`. The legacy `validate` command retains its syntax/configuration behavior.

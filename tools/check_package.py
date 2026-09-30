@@ -39,7 +39,8 @@ SDIST_FIXED_FILES = {
     "tests/test_mapper.py", "tests/test_native_abi.py", "tests/test_native_mapper.py",
     "tests/test_native_analysis.py", "tests/test_native_validation.py", "tests/test_native_schema_validation.py",
     "tests/test_native_spl2.py", "tests/test_native_rewrite.py", "tests/test_native_requirements.py",
-    "tests/test_native_tooling.py",
+    "tests/test_native_tooling.py", "tests/test_native_closure.py",
+    "tests/test_closure_surfaces.py",
 }
 INSTALL_SCRIPT = """
 import importlib.metadata, pathlib, sys
@@ -53,7 +54,7 @@ with SPLMapper() as mapper:
     mapper.load_mappings([{'source':'src_ip','target':'source_ip'}])
     assert mapper.map_query('search src_ip=1') == 'search source_ip=1'
 """
-NATIVE_TESTS = ("test_native_abi.py", "test_native_mapper.py", "test_native_analysis.py", "test_native_validation.py", "test_native_schema_validation.py", "test_native_spl2.py", "test_native_rewrite.py", "test_native_requirements.py", "test_native_tooling.py")
+NATIVE_TESTS = ("test_native_abi.py", "test_native_mapper.py", "test_native_analysis.py", "test_native_validation.py", "test_native_schema_validation.py", "test_native_spl2.py", "test_native_rewrite.py", "test_native_requirements.py", "test_native_tooling.py", "test_native_closure.py")
 REQUIREMENTS_FIXTURE_FILES = ("cases.json",)
 REWRITE_FIXTURE_FILES = ("cases.json", "conditions.json", "corpus.json", "edits.json", "example-rules.json", "forms.json", "requests.json")
 SCHEMA_FIXTURE_FILES = (
@@ -160,7 +161,7 @@ def clean_env() -> dict[str, str]:
     env = os.environ.copy()
     for name in ("SPL_TOOLING_FIXTURES", "SPL_TOOLING_SOURCE_ROOT", "SPL_TOOLING_GO", "SPL_CONTRACT_GO", "SPL_REQUIREMENTS_GO_ROOT"):
         env.pop(name, None)
-    for name in ("PYTHONPATH", "PYTHONHOME", "SPL_NATIVE_LIBRARY", "SPL_EXPECTED_VERSION", "SPL_SCHEMA_FIXTURES", "SPL_REQUIREMENTS_FIXTURES", "SPL_REQUIREMENTS_EVIDENCE", "SPL_SPL2_FIXTURES", "SPL_SPL2_GO_REPORTS", "SPL_SPL2_GO_SHA256", "SPL_MILESTONE11_DOCUMENTS", "SPL_REWRITE_FIXTURES", "SPL_REWRITE_GO_REPORTS", "SPL_REWRITE_GO_SHA256", "SPL_REWRITE_EVIDENCE"):
+    for name in ("PYTHONPATH", "PYTHONHOME", "SPL_NATIVE_LIBRARY", "SPL_EXPECTED_VERSION", "SPL_SCHEMA_FIXTURES", "SPL_REQUIREMENTS_FIXTURES", "SPL_REQUIREMENTS_EVIDENCE", "SPL_SPL2_FIXTURES", "SPL_SPL2_GO_REPORTS", "SPL_SPL2_GO_SHA256", "SPL_MILESTONE11_DOCUMENTS", "SPL_REWRITE_FIXTURES", "SPL_REWRITE_GO_REPORTS", "SPL_REWRITE_GO_SHA256", "SPL_REWRITE_EVIDENCE", "SPL_CLOSURE_FIXTURES", "SPL_CLOSURE_GO_ROOT"):
         env.pop(name, None)
     return env
 
@@ -488,6 +489,7 @@ def verify_sdist_sources(source: Path, root: Path) -> dict[str, str]:
             "requirements-build.txt", "requirements-dev.txt", "requirements-contracts-local-hashed.lock",
             "tests/test_native_analysis.py", "tests/test_native_schema_validation.py", "tests/test_native_spl2.py", "tests/test_native_rewrite.py",
             "tests/test_native_requirements.py", "tests/test_native_tooling.py",
+            "tests/test_native_closure.py",
         )
     }
     for relative in manifest.read_text(encoding="utf-8").splitlines():
@@ -569,6 +571,10 @@ def install_and_check(
     requirements_hashes = copy_requirements_fixtures(
         docs_root / "testdata" / "requirements", requirements_fixtures
     )
+    closure_fixture = outside_checkout / f"closure-cases-{directory.name}.json"
+    shutil.copy2(docs_root / "testdata/closure/cases.json", closure_fixture)
+    if sha256(closure_fixture) != sha256(docs_root / "testdata/closure/cases.json"):
+        raise AssertionError("closure fixture copy hash mismatch")
     schema_fixtures = outside_checkout / f"schema-fixtures-{directory.name}"
     schema_hashes = copy_schema_fixtures(docs_root / "testdata/schemas", schema_fixtures)
     spl2_fixtures = outside_checkout / f"spl2-fixtures-{directory.name}"
@@ -617,6 +623,8 @@ def install_and_check(
         "SPL_EXPECTED_VERSION": expected_version,
         "SPL_ANALYSIS_FIXTURES": str(analysis_fixture.resolve()),
         "SPL_REQUIREMENTS_FIXTURES": str((requirements_fixtures / "cases.json").resolve()),
+        "SPL_CLOSURE_FIXTURES": str(closure_fixture.resolve()),
+        "SPL_CLOSURE_GO_ROOT": str(tooling_root.resolve()),
         "SPL_SCHEMA_FIXTURES": str(schema_fixtures.resolve()),
         "SPL_SPL2_FIXTURES": str(spl2_fixtures.resolve()),
         "SPL_MILESTONE11_DOCUMENTS": str(milestone11_documents.resolve()),
@@ -701,6 +709,7 @@ def install_and_check(
                     "test_native_requirements.py",
                     "test_native_analysis.py",
                     "test_native_spl2.py",
+                    "test_native_closure.py",
                 )
             },
             "acceptance": {

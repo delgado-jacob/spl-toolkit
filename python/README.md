@@ -1,6 +1,6 @@
 # SPL Toolkit Python bindings
 
-This package provides Python 3.11+ bindings for SPL Toolkit 0.1.1's offline mapping, discovery, structured analysis, safe rewriting, field-list validation, and JSON Schema/OCSF field declaration APIs. Wheels include the native Go library and do not require Go at installation or runtime.
+This package provides Python 3.11+ bindings for SPL Toolkit 0.1.1's offline mapping, discovery, structured analysis, caller-supplied knowledge-object closure, safe rewriting, field-list validation, and JSON Schema/OCSF field declaration APIs. Wheels include the native Go library and do not require Go at installation or runtime.
 
 ```python
 from spl_toolkit import SPLMapper
@@ -96,6 +96,37 @@ Validation and rewrite can refine their public analysis against a supplied targe
 Canonical analysis admits at most 4,096 lexer work units. A query that would consume unit 4,097 returns a successful dictionary with incomplete status and coverage, one `SPL_ANALYSIS_RESOURCE_LIMIT` diagnostic and gap, the full-text digest, and no partial requirement evidence. Long sparse input remains admitted when it stays within the work budget. Preview, apply, and batch rewrite return an incomplete no-op for a resource-limited original; apply never commits. The [API reference](https://github.com/delgado-jacob/spl-toolkit/blob/main/docs/API.md#canonical-lexer-work-boundary) defines exact ordering, SPL2 closure accounting, messages, half-open ranges, and the fixture-specific response-size checks.
 
 The method uses the owned native call `spl_mapper_requirements_query`. Mapper admission and close guards match the other operations, and the wrapper releases every returned `SPLResult` with `spl_result_free`, including decoding and native error paths. Repeated calls return detached Python values.
+
+## Knowledge-object closure
+
+`SPLMapper.closure_query(request)` accepts the strict version 1 inline request
+and returns the canonical Go closure report as a dictionary. Supply a query
+`document`, a `bundle` with `scope_id`, per-kind collection coverage and
+definitions, and optional occurrence `bindings`. For example:
+
+```python
+with SPLMapper() as mapper:
+    report = mapper.closure_query({
+        "schema_version": 1,
+        "document": {"text": "| lookup users user OUTPUT role", "source_id": "query.spl"},
+        "bundle": {"schema_version": 1, "scope_id": "local-example",
+                   "collections": [{"kind": "lookup", "coverage": "complete"}],
+                   "objects": [{"id": "lookup-users", "kind": "lookup",
+                                "name": "users", "source_id": "lookups.conf",
+                                "relations": []}]},
+        "bindings": [],
+    })
+    assert report["status"] == "valid"
+```
+
+Invalid and incomplete query content returns a report; malformed requests raise
+`SPLMapperError`. The wrapper releases the owned native result. Direct C callers
+use `spl_mapper_closure_query(int mapperID, char* requestJSON)` and free every
+non-null `SPLResult*` with `spl_result_free`. `coverage.complete` is scoped to
+the supplied collection promises, traversed definitions, exact resolution, and
+bounded macro expansion. It is not a live Splunk inventory or execution check.
+See the [closure API
+contract](https://github.com/delgado-jacob/spl-toolkit/blob/main/docs/API.md#knowledge-object-closure).
 
 ## Safe rewrite
 

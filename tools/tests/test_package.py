@@ -728,6 +728,9 @@ def test_installed_schema_fixtures_exist_before_both_suites(tmp_path: Path, monk
         assert rewrite.is_absolute() and rewrite.is_relative_to(outside) and not rewrite.is_relative_to(ROOT)
         for relative in checker.REWRITE_FIXTURE_FILES:
             assert (rewrite / relative).read_bytes() == (ROOT / "testdata/rewrite" / relative).read_bytes()
+        closure = Path(env["SPL_CLOSURE_FIXTURES"])
+        assert closure.is_relative_to(outside) and closure.read_bytes() == (ROOT / "testdata/closure/cases.json").read_bytes()
+        assert Path(env["SPL_CLOSURE_GO_ROOT"]).is_relative_to(outside)
         requirements = Path(env["SPL_REQUIREMENTS_FIXTURES"])
         assert requirements.is_absolute() and requirements.is_file()
         assert requirements.is_relative_to(outside)
@@ -779,6 +782,9 @@ def test_installed_schema_fixtures_exist_before_both_suites(tmp_path: Path, monk
             "test_native_spl2.py": checker.sha256(
                 ROOT / "python/tests/test_native_spl2.py"
             ),
+            "test_native_closure.py": checker.sha256(
+                ROOT / "python/tests/test_native_closure.py"
+            ),
         },
         "acceptance": {
             "test_requirements_surfaces.py": checker.sha256(
@@ -812,7 +818,7 @@ def test_sdist_source_verification_requires_exact_handwritten_sources_and_native
     command.ensure_finalized()
     release = tmp_path / "release"
     command.make_release_tree(str(release), [])
-    for relative in ("native-source-files.txt", "spl_toolkit/mapper.py", "spl_toolkit/libspl_toolkit.h", "tests/test_native_analysis.py", "tests/test_native_schema_validation.py", "tests/test_native_spl2.py", "tests/test_native_rewrite.py", "tests/test_native_requirements.py", "tests/test_native_tooling.py", "build_support.py", "MANIFEST.in", "setup.py", "pyproject.toml", "requirements-build.txt", "requirements-dev.txt", "requirements-contracts-local-hashed.lock"):
+    for relative in ("native-source-files.txt", "spl_toolkit/mapper.py", "spl_toolkit/libspl_toolkit.h", "tests/test_native_analysis.py", "tests/test_native_schema_validation.py", "tests/test_native_spl2.py", "tests/test_native_rewrite.py", "tests/test_native_requirements.py", "tests/test_native_tooling.py", "tests/test_native_closure.py", "build_support.py", "MANIFEST.in", "setup.py", "pyproject.toml", "requirements-build.txt", "requirements-dev.txt", "requirements-contracts-local-hashed.lock"):
         destination = release / relative
         destination.parent.mkdir(parents=True, exist_ok=True)
         destination.write_bytes((PYTHON_DIR / relative).read_bytes())

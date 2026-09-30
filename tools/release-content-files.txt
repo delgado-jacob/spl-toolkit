@@ -6,7 +6,12 @@ contracts/sarif/PROVENANCE.md
 contracts/sarif/sarif-schema-2.1.0.json
 contracts/v1/analysis.schema.json
 contracts/v1/capabilities.schema.json
+contracts/v1/closure-graph.schema.json
+contracts/v1/closure-request.schema.json
+contracts/v1/closure.schema.json
 contracts/v1/corpus.schema.json
+contracts/v1/definitions.schema.json
+contracts/v1/detection-bom.schema.json
 contracts/v1/document-view.schema.json
 contracts/v1/field-validation.schema.json
 contracts/v1/graph.schema.json

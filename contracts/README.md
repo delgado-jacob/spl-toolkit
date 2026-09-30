@@ -16,6 +16,11 @@ runtime schema location existed when these contracts were introduced.
 | `capabilities.schema.json` | Per-dialect capability manifest | |
 | `analysis.schema.json` | Canonical analysis result | |
 | `requirements.schema.json` | Canonical direct query requirements | |
+| `definitions.schema.json` | Caller-supplied definition bundle and collection promises | |
+| `closure-request.schema.json` | Strict inline knowledge-object closure request | |
+| `closure.schema.json` | Canonical closure report | |
+| `closure-graph.schema.json` | Dependency graph projection | |
+| `detection-bom.schema.json` | Detection bill of materials projection | |
 | `field-validation.schema.json` | Field-list validation report | `Request`, `BatchRequest`, `BatchReport`, `Catalog` |
 | `schema-validation.schema.json` | JSON Schema or OCSF field-validation report | `Request`, `BatchRequest`, `BatchReport`, `Target` |
 | `rewrite.schema.json` | Rewrite result | `Request`, `BatchRequest`, `BatchReport`, `RuleSet`, `Rule`, `ValidationTarget` |
@@ -101,6 +106,22 @@ Positions retain zero-based UTF-8 byte offsets and one-based Unicode code-point
 line/columns. LSP UTF-16 conversion is a separate adapter contract. Graph IDs,
 locations and static dependency names are evidence scoped to the report revision,
 not persistent catalog identities.
+
+## Closure coverage
+
+The closure request combines a query document with a caller-supplied definition
+bundle and optional occurrence bindings. A bundle's `scope_id` identifies the
+caller's visibility scope. Per-kind `complete`, `partial`, and `unavailable`
+collection values are caller promises; the toolkit cannot verify that the bundle
+matches a live Splunk instance. Bindings identify exact original-document
+references by SHA256 text digest, kind, half-open UTF-8 byte range, and object
+ID. The report retains direct and effective analysis, source-mapped traversal,
+graph and BOM projections, and five separate coverage dimensions.
+`coverage.complete` requires all dimensions and no gaps or definite invalid
+analysis. Macro limits and held forms are in the [API
+contract](../docs/API.md#knowledge-object-closure). Graph and BOM schemas
+validate projections of the report, not independent discovery or runtime
+readiness.
 
 ## Offline validation
 

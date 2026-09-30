@@ -200,6 +200,85 @@ curl -sS http://localhost:8080/api/v1/capabilities
 
 `GET /api/v1/capabilities` returns the direct capability manifest. Malformed JSON, invalid Unicode, duplicate or unknown properties, trailing JSON, and unsupported options return HTTP 400 transport errors instead of analysis reports. The existing JSON content-type policy, 1 MiB request-body limit, and middleware protections apply. Query processing opens no server-side file or network resource. See [REST server usage](api-server.md) for deployment and legacy endpoints.
 
+## Knowledge-object closure
+
+The Go entry points are `closure.DecodeRequest(rawJSON)` and
+`closure.Evaluate(request)`. Both return an error for malformed inputs; query
+findings appear in the returned report. The strict request has integer
+`schema_version: 1`, one `document` QueryDocument, a `bundle`, and optional
+`bindings`. The same JSON request is accepted by `POST /api/v1/query/closure`,
+the native `spl_mapper_closure_query` function, and
+`SPLMapper.closure_query(request)`. The CLI reads the bundle and optional
+bindings from local files before constructing this request.
+
+A bundle has integer `schema_version: 1`, a nonblank caller-owned `scope_id`,
+`collections`, and `objects`. Each collection names an object kind and declares
+`complete`, `partial`, or `unavailable` coverage within that scope. `complete`
+is the caller's promise that all definitions visible to the query for that kind
+are present. An absent reference in a complete collection gets a
+`missing_object` gap; an absent reference in a partial or unavailable collection
+stays `unknown`. Omitted collection kinds have no complete coverage promise. The
+engine does not collect definitions from Splunk.
+
+An object has a stable bundle-local `id`, `kind`, `name`, opaque `source_id`,
+optional app/owner/sharing metadata, optional query `document`, and optional
+explicit `relations`. Macro objects also require `arity` and matching
+`arguments`; `eval_based` and `validation` metadata can hold expansion.
+Supported kinds are `macro`, `lookup`, `data_model`, `dataset`, `saved_search`,
+`event_type`, `tag`, `calculated_field`, `field_extraction`, `module`,
+`function`, and `external_command`. Query-bearing saved searches, event types,
+modules, and functions need bodies for complete traversal. A dataset without a
+body can still be a resolved catalog object. Explicit relations name additional
+dependency edges; their source is either a valid original-document byte range or
+a property pointer. A generic event-type or tag predicate is not itself an exact
+knowledge-object identity.
+
+Definition IDs distinguish objects even when kind and name match. An optional
+binding selects one object for an exact occurrence using `document_digest`
+(`sha256:` of the exact original UTF-8 query or definition text), `kind`,
+half-open `start`/`end` byte offsets, and `object_id`. The decoder checks that
+the target exists, the kind matches, the byte range is valid, and the original
+document contains a matching exact reference. Conflicting bindings for one
+occurrence are rejected. Without a binding, same-name candidates remain
+ambiguous. The bundle digest hashes normalized supplied definitions; digests
+identify input snapshots and are not signatures or authorization.
+
+Static classic SPL macro expansion uses supplied bodies, positional or named
+arguments, and exact call sites. Unsupported or dynamic calls, ambiguous
+definitions, cycles, eval-based macros, validation metadata, and missing bodies
+leave explicit expansion gaps. Expansion is bounded to depth 32, 4,096 calls,
+and 1 MiB of effective text. SPL2 does not gain classic SPL macro expansion.
+Direct `analysis.Analyze` and `analysis.Requirements` retain their query-only
+unresolved-macro behavior; closure records both the direct report and the
+effective report after supported expansion. A `from savedsearch:` reference can
+still leave effective analysis incomplete because its command effects are
+unproved, even when traversal finds the saved search.
+
+The canonical report has `direct_analysis`, `direct_requirements`,
+`effective_analysis`, `definition_analyses`, `traversal`, `provenance`, `graph`,
+`bom`, `coverage`, `gaps`, and `diagnostics`. `graph` and `bom` project the same
+traversal; neither discovers extra resources. Provenance maps half-open
+zero-based UTF-8 ranges in effective text to original `query` or `definition`
+source ranges. Each segment can retain an invocation chain and placeholder
+origins. Traversal edges carry original source intervals, resolution, object
+path, and cycle path where applicable. Source IDs are opaque caller labels. Use
+`source.kind`, `source_id`, `object_id`, `start`, and `end` together when
+showing an origin; effective offsets alone do not identify a source file.
+
+`coverage` reports `effective_query`, `traversed_definitions`, `resolution`,
+`collections`, and `expansion`, plus `complete` and ordered reasons. Complete
+closure requires all five dimensions, no gaps, and no definite invalid analysis.
+Invalid takes precedence over incomplete for a definite syntax or semantic error
+outside opaque expansion; unresolved or held evidence remains incomplete.
+Complete means complete against the supplied bundle and scope only. It does not
+prove the collection promise is true of a live Splunk instance, that fields
+exist in events, or that the query will execute. The CLI uses exit 0/1/3 for
+valid/invalid/incomplete and 2 for request or execution errors. REST returns
+HTTP 200 for each content status, 400 for input errors, and 500 for unexpected
+internal errors. See [CLI usage](cli.md#knowledge-object-closure), [REST
+usage](api-server.md#knowledge-object-closure), and the [v1
+schemas](../contracts/README.md).
+
 ## Document, positions, and report format
 
 Query Documents have `text`, `language`, `profile`, `version`, and `source_id`. Empty compatibility options normalize to `spl`, `splunkd`, and `current`; source ID defaults to an empty string. `version` selects the compatibility contract, while integer `schema_version: 1` identifies the machine report format. This is separate from the package version.

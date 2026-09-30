@@ -7,11 +7,23 @@ layout: page
 
 The [contract registry](https://github.com/delgado-jacob/spl-toolkit/blob/main/contracts/README.md) lists every v1 schema and request
 entry point. It covers QueryDocument, capabilities, analysis, direct query
-requirements, field-list and JSON Schema/OCSF validation, rewrite, corpus,
-manifest, graph, impact, advanced document view and LSP configuration. Python
+requirements, caller-supplied knowledge-object closure, field-list and JSON
+Schema/OCSF validation, rewrite, corpus, manifest, graph, impact, advanced
+document view and LSP configuration. Python
 wheels include these schemas under
 `spl_toolkit/contracts`; source/release artifacts retain their provenance and
 third-party notices. The product version remains 0.1.1.
+
+The closure family uses `definitions.schema.json` for the supplied scope,
+collections, and objects; `closure-request.schema.json` for the inline request;
+`closure.schema.json` for the full report; and `closure-graph.schema.json` and
+`detection-bom.schema.json` for its two projections. A `complete` collection is
+a caller assertion about one object kind in `scope_id`. Report completeness
+requires effective-query, traversed-definition, resolution, collection, and
+expansion coverage with no gaps or definite invalid finding. Bindings use the
+exact original-document SHA256 digest and half-open UTF-8 byte range; source-map
+ranges retain query or definition origin. These schemas validate local values,
+not inventory truth, live execution, authorization, or deployment.
 
 Owned contracts use JSON Schema Draft 2020-12 and integer `schema_version: 1`.
 The named family establishes what that integer versions. The unmodified official

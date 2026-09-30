@@ -22,6 +22,7 @@ Routes are under `/api/v1`:
 | POST | `/query/validate` | legacy SPL syntax validation |
 | POST | `/query/analyze` | canonical SPL/SPL2 analysis |
 | POST | `/query/requirements` | canonical direct query requirements |
+| POST | `/query/closure` | caller-supplied knowledge-object closure |
 | GET | `/capabilities` | selected canonical capability manifest |
 | POST | `/query/validate-fields` | canonical local field validation |
 | POST | `/query/validate-fields/batch` | ordered local field validation batch |
@@ -94,6 +95,27 @@ Selected same-document view, function, annotation, import, and export declaratio
 ```
 
 Valid, invalid, and incomplete content returns HTTP 200. Input errors return 400.
+
+### Knowledge-object closure
+
+`POST /api/v1/query/closure` accepts the strict version 1 closure request. It
+requires `Content-Type: application/json` and uses the 1 MiB request body limit.
+The request supplies one query `document`, a `bundle` with caller-scoped
+collection coverage and definitions, and optional occurrence `bindings`:
+
+<!-- api-example: closure-resolved /query/closure valid -->
+```json
+{"schema_version":1,"document":{"text":"| lookup users user OUTPUT role","source_id":"query.spl"},"bundle":{"schema_version":1,"scope_id":"local-example","collections":[{"kind":"lookup","coverage":"complete"}],"objects":[{"id":"lookup-users","kind":"lookup","name":"users","source_id":"lookups.conf","relations":[]}]},"bindings":[]}
+```
+
+Valid, invalid, and incomplete closure reports return HTTP 200 with the same
+canonical JSON as Go and Python. Malformed JSON, duplicate or unknown members,
+invalid bindings, and unsupported selectors return 400. The report includes
+source-mapped traversal, graph and BOM projections, and separate coverage
+dimensions. A `complete` collection is a caller promise about the supplied
+scope, not a server check against live Splunk. See the [closure API
+contract](API.md#knowledge-object-closure) for binding identity, macro limits,
+source ranges, and status rules.
 
 `GET /api/v1/capabilities?language=spl2&profile=splunkd&version=current` returns the selected manifest, including `documentation_snapshot` for SPL2. The only query parameters are `language`, `profile`, and `version`; omitted or empty values use defaults. Unknown parameters/values, malformed encodings/Unicode, and duplicate or conflicting keys return 400, including repeated equal values. With no selectors it returns the SPL manifest. Query body/source identity are not capability selectors.
 
