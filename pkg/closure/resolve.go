@@ -253,6 +253,13 @@ func (e *evaluator) visit(def Definition, contextFreeMacro bool, occurrenceID st
 			}
 			return
 		}
+		if def.EvalBased != nil && *def.EvalBased {
+			if contextFreeMacro {
+				owner := sourceInterval{Kind: "definition", SourceID: def.SourceID, ObjectID: def.ID, Start: 0, End: len(def.Document.Text)}
+				e.addGap(ClosureGap{Code: "macro_context_missing", Kind: def.Kind, Name: def.Name, Source: publicInterval(owner), Path: append([]string{}, e.active...)}, "expansion")
+			}
+			return
+		}
 		direct := e.directCache[def.ID]
 		if direct == nil {
 			var err error
@@ -271,7 +278,7 @@ func (e *evaluator) visit(def Definition, contextFreeMacro bool, occurrenceID st
 		if contextFreeMacro {
 			e.addGap(ClosureGap{Code: "macro_context_missing", Kind: def.Kind, Name: def.Name, Source: publicInterval(owner), Path: append([]string{}, e.active...)}, "expansion")
 		}
-		if (def.EvalBased == nil || !*def.EvalBased) && (contextFreeMacro || def.Validation != nil && *def.Validation != "") {
+		if contextFreeMacro || def.Validation != nil && *def.Validation != "" {
 			e.inspectExpansion(directExpansion(def.Document.Text, owner), owner, direct, false)
 			e.inspectOriginalMacros(*def.Document, owner, e.active)
 		}

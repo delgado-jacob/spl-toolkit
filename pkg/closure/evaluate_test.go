@@ -115,6 +115,14 @@ func TestEvaluateEvalBasedMacroBodyStaysOpaqueThroughRelation(t *testing.T) {
 	if !edgeWith(report, "lookup", "declared", "declared") || edgeWith(report, "lookup", "hidden", "hidden") {
 		t.Fatalf("eval-based body traversal or declared relation lost: %+v", report.Traversal)
 	}
+	for _, body := range report.DefinitionAnalyses {
+		if body.ObjectID == "m" {
+			t.Fatalf("eval-based text exposed as exact body analysis: %+v", body)
+		}
+	}
+	if report.Status != analysis.Incomplete || report.Coverage.Expansion {
+		t.Fatalf("eval-based relation claimed complete: status=%s coverage=%+v", report.Status, report.Coverage)
+	}
 }
 func TestEvaluateDiagnosticPreservesCrossSegmentOrigins(t *testing.T) {
 	query := "search index=main | `x` z"
