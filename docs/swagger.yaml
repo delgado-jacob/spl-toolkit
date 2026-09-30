@@ -3290,10 +3290,15 @@ components:
       properties:
         diagnostic:
           $ref: '#/components/schemas/analysis.Diagnostic'
+        origins:
+          items:
+            $ref: '#/components/schemas/tooling.closure.SourceInterval'
+          type: array
         source:
           $ref: '#/components/schemas/tooling.closure.SourceInterval'
       required:
       - source
+      - origins
       - diagnostic
       type: object
     tooling.closure.Gap:

@@ -261,8 +261,11 @@ The canonical report has `direct_analysis`, `direct_requirements`,
 traversal; neither discovers extra resources. Provenance maps half-open
 zero-based UTF-8 ranges in effective text to original `query` or `definition`
 source ranges. Each segment can retain an invocation chain and placeholder
-origins. Traversal edges carry original source intervals, resolution, object
-path, and cycle path where applicable. Source IDs are opaque caller labels. Use
+origins. Closure diagnostics carry ordered `origins` for every source segment
+intersected by their effective range, including placeholder sites when present;
+`source` repeats the first origin when one exists. Traversal edges carry
+original source intervals, resolution, object path, and cycle path where
+applicable. Source IDs are opaque caller labels. Use
 `source.kind`, `source_id`, `object_id`, `start`, and `end` together when
 showing an origin; effective offsets alone do not identify a source file.
 

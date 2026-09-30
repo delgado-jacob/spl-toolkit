@@ -5460,12 +5460,19 @@
         "source": {
           "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/closure.SourceInterval"
         },
+        "origins": {
+          "type": "array",
+          "items": {
+            "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/closure.SourceInterval"
+          }
+        },
         "diagnostic": {
           "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.Diagnostic"
         }
       },
       "required": [
         "source",
+        "origins",
         "diagnostic"
       ],
       "additionalProperties": false

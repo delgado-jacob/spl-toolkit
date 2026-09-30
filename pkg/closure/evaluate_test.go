@@ -54,6 +54,57 @@ func TestEvaluateMacroEffectiveFlowAndLookup(t *testing.T) {
 		t.Fatalf("effective analysis/provenance: %+v %+v", report.EffectiveAnalysis, report.Provenance)
 	}
 }
+func TestEvaluateDiagnosticPreservesCrossSegmentOrigins(t *testing.T) {
+	query := "search index=main | `x` z"
+	macro := macroDef("x", "x", "lookup users")
+	report, err := Evaluate(evalRequest(query, []Collection{{Kind: "macro", Coverage: "complete"}}, macro))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, d := range report.Diagnostics {
+		if d.Diagnostic.Code != "SPL_UNSUPPORTED_SEMANTICS" {
+			continue
+		}
+		if len(d.Origins) != 2 {
+			t.Fatalf("cross-segment diagnostic lost original contributors: %+v", d)
+		}
+		if got := d.Origins[0]; got.Kind != "definition" || got.ObjectID != "x" || got.SourceID != "x.conf" || got.Start != 7 || got.End != 12 {
+			t.Fatalf("macro contributor: %+v", got)
+		}
+		if got := d.Origins[1]; got.Kind != "query" || got.SourceID != "root.spl" || got.Start != strings.Index(query, " z") || got.End != len(query) {
+			t.Fatalf("query contributor: %+v", got)
+		}
+		if d.Source != d.Origins[0] {
+			t.Fatalf("convenience source must be first contributor: %+v", d)
+		}
+		return
+	}
+	t.Fatalf("expected crossing diagnostic: %+v", report.Diagnostics)
+}
+
+func TestEvaluateDiagnosticRetainsPlaceholderOrigin(t *testing.T) {
+	query := "search index=main | `m(users)` z"
+	body := "lookup $name$"
+	macro := macroDef("m", "m", body, "name")
+	report, err := Evaluate(evalRequest(query, []Collection{{Kind: "macro", Coverage: "complete"}}, macro))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, d := range report.Diagnostics {
+		if d.Diagnostic.Code != "SPL_UNSUPPORTED_SEMANTICS" {
+			continue
+		}
+		argument := SourceInterval{Kind: "query", SourceID: "root.spl", Start: strings.Index(query, "users"), End: strings.Index(query, "users") + len("users")}
+		placeholder := SourceInterval{Kind: "definition", SourceID: "m.conf", ObjectID: "m", Start: strings.Index(body, "$name$"), End: len(body)}
+		trailing := SourceInterval{Kind: "query", SourceID: "root.spl", Start: strings.Index(query, " z"), End: len(query)}
+		if len(d.Origins) != 3 || d.Origins[0] != argument || d.Origins[1] != placeholder || d.Origins[2] != trailing {
+			t.Fatalf("substitution and trailing contributors: %+v", d)
+		}
+		return
+	}
+	t.Fatalf("expected substituted crossing diagnostic: %+v", report.Diagnostics)
+}
+
 func TestEvaluateSavedSearchAndEventTypeTransitive(t *testing.T) {
 	leaf := evalDef("l", "lookup", "users", "")
 	child := evalDef("child", "event_type", "Child", "lookup users user OUTPUT role")

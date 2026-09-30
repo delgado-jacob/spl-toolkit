@@ -23,12 +23,29 @@ func (e *evaluator) inspectExpansion(expanded expansion, owner sourceInterval, r
 		e.addGap(ClosureGap{Code: "analysis_incomplete", Source: SourceInterval{Kind: owner.Kind, SourceID: owner.SourceID, ObjectID: owner.ObjectID, Start: owner.Start, End: owner.End}, Path: append([]string{}, e.active...)}, dimension)
 	}
 	for _, d := range result.Diagnostics {
-		origin := expanded.Origins(d.Location.Start.Offset, d.Location.End.Offset)
-		source := SourceInterval{Kind: owner.Kind, SourceID: owner.SourceID, ObjectID: owner.ObjectID, Start: owner.Start, End: owner.End}
-		if len(origin) > 0 {
-			source = publicInterval(origin[0].Source)
+		origins := []SourceInterval{}
+		seen := map[SourceInterval]bool{}
+		addOrigin := func(v sourceInterval) {
+			value := publicInterval(v)
+			if !seen[value] {
+				origins = append(origins, value)
+				seen[value] = true
+			}
 		}
-		e.report.Diagnostics = append(e.report.Diagnostics, ClosureDiagnostic{Source: source, Diagnostic: d})
+		for _, segment := range expanded.Origins(d.Location.Start.Offset, d.Location.End.Offset) {
+			addOrigin(segment.Source)
+			for _, placeholder := range segment.Placeholders {
+				addOrigin(placeholder)
+			}
+			if len(segment.Placeholders) == 0 && segment.Placeholder != nil {
+				addOrigin(*segment.Placeholder)
+			}
+		}
+		source := SourceInterval{Kind: owner.Kind, SourceID: owner.SourceID, ObjectID: owner.ObjectID, Start: owner.Start, End: owner.End}
+		if len(origins) > 0 {
+			source = origins[0]
+		}
+		e.report.Diagnostics = append(e.report.Diagnostics, ClosureDiagnostic{Source: source, Origins: origins, Diagnostic: d})
 	}
 	refs := map[string]analysis.Reference{}
 	for _, r := range result.References {

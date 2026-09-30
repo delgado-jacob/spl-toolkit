@@ -70,6 +70,7 @@ type ClosureGap struct {
 }
 type ClosureDiagnostic struct {
 	Source     SourceInterval      `json:"source"`
+	Origins    []SourceInterval    `json:"origins"`
 	Diagnostic analysis.Diagnostic `json:"diagnostic"`
 }
 type TraversalEdge struct {
