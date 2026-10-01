@@ -25,7 +25,9 @@ Source distributions contain the native Go sources needed to build a wheel. Buil
 
 The current source build includes safe `rewrite` / `rewrite_batch` APIs and their native exports. Rebuild and reinstall the wheel after changing native or Python sources; an older library with the same package version does not establish availability of additive APIs. The [rewrite guide](rewrite.md) and `python/examples/basic_usage.py` use the actual packaged library. Source-native and installed-wheel verification are separate checks.
 
-Supported native release targets are Linux x86-64, macOS x86-64, macOS arm64, and Windows x86-64. Use a wheel matching the operating system and architecture. See the [tested compatibility matrix](compatibility.md) for exact Python versions, runner images, toolchains, wheel tags, and acceptance evidence. The Python wrapper raises `ConfigurationError` if package and native versions differ.
+Supported native release targets are Linux x86-64, Apple Silicon macOS arm64, and Windows x86-64. Use a wheel matching the operating system and architecture. See [compatibility](compatibility.md) for current release targets and Python versions, and historical runner, toolchain, wheel-tag, and acceptance evidence. The Python wrapper raises `ConfigurationError` if package and native versions differ.
+
+Intel macOS is unsupported starting October 1, 2026. Previously published Intel artifacts remain available, but future releases do not build or validate them. Source compilation may still work on Intel Macs without a compatibility guarantee.
 
 Verify from source with:
 

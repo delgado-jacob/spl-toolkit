@@ -230,7 +230,7 @@ def _runner_identity(expected: dict[str, str]) -> dict[str, object]:
     if not diagnostic and image_os:
         expected_image_os = (
             "ubuntu24" if configured == "ubuntu-24.04"
-            else "macos15" if configured in ("macos-15", "macos-15-intel")
+            else "macos15" if configured == "macos-15"
             else "win22" if configured == "windows-2022"
             else None
         )

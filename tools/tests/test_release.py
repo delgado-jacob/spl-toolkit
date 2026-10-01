@@ -354,6 +354,18 @@ def test_diagnostic_runner_identity_is_structurally_non_accepting(monkeypatch):
     assert reproducible._result_status(identity) == "diagnostic-passed"
 
 
+def test_release_environment_rejects_intel_macos_before_invoking_tools(monkeypatch):
+    config = json.loads((ROOT / "tools/release-env.json").read_text(encoding="utf-8"))
+
+    def unexpected_tool_invocation(_command):
+        pytest.fail("unsupported target must be rejected before invoking release tools")
+
+    monkeypatch.setattr(release, "_version_output", unexpected_tool_invocation)
+
+    with pytest.raises(RuntimeError, match="^unsupported release target: darwin-amd64$"):
+        release.validate_environment(config, "darwin-amd64")
+
+
 def test_release_environment_rejects_wrong_effective_go_target(monkeypatch):
     config = {
         "go": "1.26.8",

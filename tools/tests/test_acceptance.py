@@ -20,7 +20,6 @@ ROOT = Path(__file__).resolve().parents[2]
 LINUS_FIXTURE_SHA = hashlib.sha256((ROOT / "testdata/spl2/linus-forms.json").read_bytes()).hexdigest()
 TARGETS = {
     "linux-amd64": "x86_64",
-    "darwin-amd64": "x86_64",
     "darwin-arm64": "arm64",
     "windows-amd64": "x86_64",
 }
@@ -45,7 +44,6 @@ ENVIRONMENT_FIXTURE_SHA = hashlib.sha256((ROOT / "testdata/environment/cases.jso
 def release_environment(target: str, architecture: str) -> dict:
     runner = {
         "linux-amd64": "ubuntu-24.04",
-        "darwin-amd64": "macos-15-intel",
         "darwin-arm64": "macos-15",
         "windows-amd64": "windows-2022",
     }[target]
@@ -71,7 +69,7 @@ def release_environment(target: str, architecture: str) -> dict:
         "sdk": "/Applications/Xcode_16.4.app/SDK" if darwin else None,
         "zlib": "1.2.12",
         "wheel_platform": {
-            "linux-amd64": "linux_x86_64", "darwin-amd64": "macosx_15_0_x86_64",
+            "linux-amd64": "linux_x86_64",
             "darwin-arm64": "macosx_15_0_arm64", "windows-amd64": "win_amd64",
         }[target],
         "source_date_epoch": 1788652800,
@@ -378,9 +376,20 @@ def test_capability_source_hash_closure_fails_closed(failure: str):
     assert any("tooling_source_hashes" in error for error in errors)
 
 
-def test_missing_arm64_is_not_complete():
-    records = [r for r in passing_records() if not (r["kind"] == "native" and r.get("target") == "darwin-arm64")]
-    assert any("darwin-arm64" in error and "native" in error for error in validate_records(records, SHA))
+@pytest.mark.parametrize("target", TARGETS)
+def test_missing_target_is_not_complete(target):
+    records = [r for r in passing_records() if not (r["kind"] == "native" and r.get("target") == target)]
+    assert any(target in error and "native" in error for error in validate_records(records, SHA))
+
+
+@pytest.mark.parametrize("target", TARGETS)
+@pytest.mark.parametrize("python_version", PYTHONS)
+def test_missing_installed_combination_is_not_complete(target, python_version):
+    records = [r for r in passing_records() if not (
+        r["kind"] == "installed-wheel" and r.get("target") == target
+        and r.get("python_version") == python_version
+    )]
+    assert any(target in error and python_version in error for error in validate_records(records, SHA))
 
 
 def test_mismatched_source_is_rejected():
@@ -437,7 +446,7 @@ def test_release_environment_is_required_and_cross_checked():
     native = next(r for r in records if r["kind"] == "native" and r["target"] == "linux-amd64")
     reproducibility = next(r for r in records if r["kind"] == "reproducibility" and r["target"] == "darwin-arm64")
     native["environment"] = {"pinned_environment": True}
-    reproducibility["environment"]["target"] = "darwin-amd64"
+    reproducibility["environment"]["target"] = "linux-amd64"
     reproducibility["environment"]["artifacts"] = {"wheel.whl": "d" * 64}
 
     errors = validate_records(records, SHA)
