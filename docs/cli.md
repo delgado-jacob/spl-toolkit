@@ -169,6 +169,7 @@ Portable CLI acceptance uses a compact 4,097-work-unit query because operating s
 
 Validate a local snapshot, a field-schema bundle, or both:
 
+<!-- cli-example: environment-partial -->
 ```bash
 spl-toolkit environment validate --snapshot examples/environment/partial-snapshot.json --schemas examples/environment/fields.json --format json
 ```
