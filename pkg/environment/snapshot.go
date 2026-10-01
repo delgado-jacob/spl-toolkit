@@ -390,24 +390,8 @@ func ValidateArtifacts(snapshotJSON, schemaBundleJSON []byte) (*Report, error) {
 		return &Report{SchemaVersion: 1, Status: "invalid", Coverage: []CoverageEntry{}, Diagnostics: []Diagnostic{{Code: "artifact_missing", Severity: "error", Artifact: "request", Message: "at least one artifact is required"}}}, nil
 	}
 	report := &Report{SchemaVersion: 1, Status: "valid", Coverage: []CoverageEntry{}, Diagnostics: []Diagnostic{}}
-	merge := func(part *Report) {
-		if part == nil {
-			return
-		}
-		if part.Status == "invalid" {
-			report.Status = "invalid"
-		} else if part.Status == "partial" && report.Status == "valid" {
-			report.Status = "partial"
-		}
-		if part.SnapshotDigest != "" {
-			report.SnapshotDigest = part.SnapshotDigest
-		}
-		if part.SchemaBundleDigest != "" {
-			report.SchemaBundleDigest = part.SchemaBundleDigest
-		}
-		report.Coverage = append(report.Coverage, part.Coverage...)
-		report.Diagnostics = append(report.Diagnostics, part.Diagnostics...)
-	}
+	var preparedSnapshot *PreparedSnapshot
+	var preparedBundle *PreparedSchemaBundle
 	if snapshotJSON != nil {
 		var snapshot Snapshot
 		var part *Report
@@ -416,13 +400,14 @@ func ValidateArtifacts(snapshotJSON, schemaBundleJSON []byte) (*Report, error) {
 		} else if err := validateSnapshotRawShape(snapshotJSON); err != nil {
 			_, part, _ = invalidSnapshot("", err)
 		} else {
-			_, preparedReport, prepareErr := PrepareSnapshot(snapshot)
+			prepared, preparedReport, prepareErr := PrepareSnapshot(snapshot)
 			if prepareErr != nil {
 				return nil, prepareErr
 			}
+			preparedSnapshot = prepared
 			part = preparedReport
 		}
-		merge(part)
+		mergeEnvironmentReport(report, part)
 	}
 	if schemaBundleJSON != nil {
 		var bundle SchemaBundle
@@ -432,13 +417,18 @@ func ValidateArtifacts(snapshotJSON, schemaBundleJSON []byte) (*Report, error) {
 		} else if err := validateSchemaBundleRawShape(schemaBundleJSON); err != nil {
 			_, part, _ = invalidSchemaBundle("", err)
 		} else {
-			_, preparedReport, prepareErr := PrepareSchemaBundle(bundle)
+			prepared, preparedReport, prepareErr := PrepareSchemaBundle(bundle)
 			if prepareErr != nil {
 				return nil, prepareErr
 			}
+			preparedBundle = prepared
 			part = preparedReport
 		}
-		merge(part)
+		mergeEnvironmentReport(report, part)
+	}
+	if preparedSnapshot != nil && preparedBundle != nil {
+		_, paired, err := Pair(preparedSnapshot, preparedBundle)
+		return paired, err
 	}
 	return report, nil
 }
