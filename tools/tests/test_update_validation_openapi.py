@@ -315,7 +315,8 @@ class ValidationOpenAPITests(unittest.TestCase):
             self.assertEqual(spec["paths"]["/unrelated"], original["paths"]["/unrelated"])
             self.assertEqual(set(spec["paths"]) - set(original["paths"]), {
                 "/corpus/scan", "/corpus/graph", "/corpus/sarif",
-                "/corpus/impact-schema", "/corpus/impact-mapping", "/query/document", "/query/closure"})
+                "/corpus/impact-schema", "/corpus/impact-mapping", "/query/document", "/query/closure",
+                "/environment/validate"})
             self.assertEqual(spec["paths"]["/query/document"]["post"]["requestBody"]["content"]["application/json"]["schema"],
                              {"$ref": "#/components/schemas/tooling.QueryDocumentRequest"})
             self.assertIs(schemas["tooling.corpus.Request"]["additionalProperties"], False)
@@ -906,3 +907,23 @@ func main() {
                 result = self.run_script(root)
                 self.assertNotEqual(result.returncode, 0)
                 self.assertEqual(before, {p.name: p.read_bytes() for p in root.iterdir()})
+
+
+    def test_environment_route_uses_strict_canonical_contracts(self):
+        spec = json.loads((SCRIPT.parents[1] / "docs/swagger.json").read_text())
+        route = spec["paths"]["/environment/validate"]["post"]
+        request = route["requestBody"]["content"]["application/json"]["schema"]
+        self.assertEqual(request, {"$ref": "#/components/schemas/tooling.environment.ValidationRequest"})
+        for code in ("200", "400"):
+            self.assertEqual(route["responses"][code]["content"]["application/json"]["schema"],
+                             {"$ref": "#/components/schemas/tooling.environment.Report"})
+        schemas = spec["components"]["schemas"]
+        shared = json.loads((SCRIPT.parents[1] / "contracts/v1/shared.schema.json").read_text())
+        expected = {"tooling." + name for name in shared["$defs"] if name.startswith("environment.")}
+        self.assertEqual({name for name in schemas if name.startswith("tooling.environment.")}, expected)
+        self.assertFalse({name for name in schemas if name.startswith(("closure.", "environment."))})
+        self.assertNotIn("api.EnvironmentValidationRequest", schemas)
+        self.assertEqual(schemas["tooling.environment.ValidationRequest"]["additionalProperties"], False)
+        self.assertEqual(schemas["tooling.environment.SchemaEntry"]["oneOf"][0]["properties"]["kind"], {"const": "field_list"})
+        self.assertIn("/query/closure", spec["paths"])
+        self.assertIn("analysis.Result", schemas)

@@ -808,3 +808,74 @@ def test_eager_reference_closure_rejects_unused_bad_resources(schemas):
         with pytest.raises(Unresolvable):
             for address in references(unused, "https://example.invalid/root"):
                 registry.resolver().lookup(address)
+
+
+def test_environment_snapshot_bundle_request_and_report_contracts(schemas):
+    cases = json.loads((ROOT / "testdata/environment/cases.json").read_text())
+    for case in cases:
+        snapshot = case["snapshot"]
+        bundle = case["schema_bundle"]
+        assert not errors(schemas, "environment-snapshot", snapshot), case["name"]
+        assert not errors(schemas, "field-schema-bundle", bundle), case["name"]
+        request = {"schema_version": 1, "snapshot": snapshot, "schema_bundle": bundle}
+        assert not errors(schemas, "environment-validation", request, "Request"), case["name"]
+
+    snapshot = cases[0]["snapshot"]
+    bundle = cases[0]["schema_bundle"]
+    for family, source in (("environment-snapshot", snapshot), ("field-schema-bundle", bundle)):
+        wrong = copy.deepcopy(source)
+        wrong["schema_version"] = 2
+        assert errors(schemas, family, wrong)
+        wrong = copy.deepcopy(source)
+        wrong["unexpected"] = True
+        assert errors(schemas, family, wrong)
+        wrong = copy.deepcopy(source)
+        wrong["provenance" if family == "field-schema-bundle" else "origin"] = None
+        assert errors(schemas, family, wrong)
+    for changed in (
+        {"schema_version": 2, "snapshot": snapshot},
+        {"schema_version": 1},
+        {"schema_version": 1, "snapshot": None},
+        {"schema_version": 1, "snapshot": snapshot, "extra": True},
+    ):
+        assert errors(schemas, "environment-validation", changed, "Request")
+    wrong = copy.deepcopy(snapshot)
+    wrong["capture_scope"]["namespace"] = {"all": True, "values": ["default"]}
+    assert errors(schemas, "environment-snapshot", wrong)
+    wrong = copy.deepcopy(snapshot)
+    wrong["collections"][0]["reason"] = None
+    assert errors(schemas, "environment-snapshot", wrong)
+    wrong = copy.deepcopy(bundle)
+    wrong["schemas"][0]["target"] = {"kind": "json_schema", "schema": True}
+    assert errors(schemas, "field-schema-bundle", wrong)
+    wrong = copy.deepcopy(bundle)
+    wrong["schemas"][0] = {"id": "crossed", "kind": "json_schema", "target": {"kind": "ocsf", "catalog": {}, "selection": {"version": "1", "class": "a"}}, "provenance": bundle["provenance"]}
+    assert errors(schemas, "field-schema-bundle", wrong)
+    utc_offset = copy.deepcopy(snapshot)
+    utc_offset["capture"]["start"] = "2026-10-01T12:00:00+00:00"
+    utc_offset["objects"][0]["provenance"]["observed_at"] = "2026-10-01T12:02:00+00:00"
+    assert not errors(schemas, "environment-snapshot", utc_offset)
+    empty_reason = copy.deepcopy(snapshot)
+    empty_reason["collections"][0]["reason"] = ""
+    assert not errors(schemas, "environment-snapshot", empty_reason)
+    wrong = copy.deepcopy(bundle)
+    wrong["schemas"][0]["catalog"]["extra"] = True
+    assert errors(schemas, "field-schema-bundle", wrong)
+    extensible = copy.deepcopy(bundle)
+    extensible["schemas"][0] = {"id": "schema", "kind": "json_schema", "target": {"kind": "json_schema", "schema": {"type": "object", "x-custom": {"value": 1}}}, "provenance": bundle["provenance"]}
+    assert not errors(schemas, "field-schema-bundle", extensible)
+    extensible["schemas"][0] = {"id": "ocsf", "kind": "ocsf", "target": {"kind": "ocsf", "catalog": {"compile_version": 1, "classes": {"a": {"x-vendor": {"hint": None}}}}, "selection": {"version": "1.6.0", "class": "a"}}, "provenance": bundle["provenance"]}
+    assert not errors(schemas, "field-schema-bundle", extensible)
+    report = {"schema_version": 1, "status": "partial", "snapshot_digest": "sha256:" + "a" * 64, "coverage": [{"artifact": "snapshot", "kind": "index", "coverage": "unavailable", "reason": "omitted"}], "diagnostics": [{"code": "collection_unavailable", "severity": "warning", "artifact": "snapshot", "path": "/collections", "message": "index omitted"}]}
+    assert not errors(schemas, "environment-validation", report)
+    for field, value in (("schema_version", 2), ("status", "incomplete"), ("coverage", None), ("diagnostics", None)):
+        wrong = copy.deepcopy(report)
+        wrong[field] = value
+        assert errors(schemas, "environment-validation", wrong)
+    for field in ("schema_version", "status", "coverage", "diagnostics"):
+        wrong = copy.deepcopy(report)
+        del wrong[field]
+        assert errors(schemas, "environment-validation", wrong)
+    wrong = copy.deepcopy(report)
+    wrong["snapshot_digest"] = "sha256:bad"
+    assert errors(schemas, "environment-validation", wrong)

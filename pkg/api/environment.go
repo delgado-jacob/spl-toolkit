@@ -1,6 +1,7 @@
 package api
 
 import (
+	"encoding/json"
 	"net/http"
 
 	"github.com/delgado-jacob/spl-toolkit/pkg/environment"
@@ -36,7 +37,7 @@ func (s *Server) handleValidateEnvironment(w http.ResponseWriter, r *http.Reques
 
 // EnvironmentValidationRequest is a documentation shape; ValidateJSON handles strict runtime decoding.
 type EnvironmentValidationRequest struct {
-	SchemaVersion int                       `json:"schema_version"`
-	Snapshot      *environment.Snapshot     `json:"snapshot,omitempty"`
-	SchemaBundle  *environment.SchemaBundle `json:"schema_bundle,omitempty"`
+	SchemaVersion int             `json:"schema_version"`
+	Snapshot      json.RawMessage `json:"snapshot,omitempty" swaggertype:"object"`
+	SchemaBundle  json.RawMessage `json:"schema_bundle,omitempty" swaggertype:"object"`
 }

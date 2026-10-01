@@ -4207,6 +4207,570 @@ components:
       - dependencies
       - diagnostics
       type: object
+    tooling.environment.Capability:
+      additionalProperties: false
+      properties:
+        id:
+          pattern: \S
+          type: string
+        provenance:
+          $ref: '#/components/schemas/tooling.environment.Provenance'
+        state:
+          enum:
+          - available
+          - unavailable
+          - unknown
+        version:
+          pattern: \S
+          type: string
+      required:
+      - id
+      - version
+      - state
+      - provenance
+      type: object
+    tooling.environment.CaptureInterval:
+      additionalProperties: false
+      properties:
+        end:
+          format: date-time
+          pattern: (?:Z|\+00:00)$
+          type: string
+        start:
+          format: date-time
+          pattern: (?:Z|\+00:00)$
+          type: string
+      required:
+      - start
+      - end
+      type: object
+    tooling.environment.CaptureScope:
+      additionalProperties: false
+      properties:
+        app:
+          $ref: '#/components/schemas/tooling.environment.Selector'
+        namespace:
+          $ref: '#/components/schemas/tooling.environment.Selector'
+        owner:
+          $ref: '#/components/schemas/tooling.environment.Selector'
+      required:
+      - namespace
+      - app
+      - owner
+      type: object
+    tooling.environment.Collection:
+      additionalProperties: false
+      allOf:
+      - else:
+          properties:
+            reason:
+              pattern: \S
+          required:
+          - reason
+        if:
+          properties:
+            coverage:
+              const: complete
+          required:
+          - coverage
+        then:
+          properties:
+            reason:
+              const: ''
+      properties:
+        coverage:
+          enum:
+          - complete
+          - partial
+          - unavailable
+        kind:
+          enum:
+          - index
+          - source
+          - sourcetype
+          - dataset
+          - data_model
+          - lookup
+          - macro
+          - saved_search
+          - event_type
+          - tag
+          - calculated_field
+          - field_extraction
+          - module
+          - function
+          - external_command
+          type: string
+        reason:
+          type: string
+      required:
+      - kind
+      - coverage
+      type: object
+    tooling.environment.CoverageEntry:
+      additionalProperties: false
+      properties:
+        artifact:
+          enum:
+          - snapshot
+          - schema_bundle
+        coverage:
+          enum:
+          - complete
+          - partial
+          - unavailable
+        kind:
+          enum:
+          - index
+          - source
+          - sourcetype
+          - dataset
+          - data_model
+          - lookup
+          - macro
+          - saved_search
+          - event_type
+          - tag
+          - calculated_field
+          - field_extraction
+          - module
+          - function
+          - external_command
+          type: string
+        object_id:
+          type: string
+        reason:
+          type: string
+        schema_id:
+          type: string
+      required:
+      - artifact
+      - kind
+      - coverage
+      type: object
+    tooling.environment.Diagnostic:
+      additionalProperties: false
+      properties:
+        artifact:
+          enum:
+          - request
+          - snapshot
+          - schema_bundle
+        byte_offset:
+          minimum: 0
+          type: integer
+        code:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        severity:
+          enum:
+          - error
+          - warning
+      required:
+      - code
+      - severity
+      - artifact
+      - path
+      - message
+      type: object
+    tooling.environment.Object:
+      additionalProperties: false
+      properties:
+        app:
+          type: string
+        arguments:
+          items:
+            pattern: \S
+            type: string
+          type: array
+        arity:
+          minimum: 0
+          type: integer
+        document:
+          additionalProperties: false
+          properties:
+            language:
+              enum:
+              - ''
+              - spl
+              - spl2
+            profile:
+              enum:
+              - ''
+              - splunkd
+            source_id:
+              type: string
+            text:
+              type: string
+            version:
+              enum:
+              - ''
+              - current
+          required:
+          - text
+          type: object
+        eval_based:
+          type: boolean
+        id:
+          pattern: \S
+          type: string
+        kind:
+          enum:
+          - index
+          - source
+          - sourcetype
+          - dataset
+          - data_model
+          - lookup
+          - macro
+          - saved_search
+          - event_type
+          - tag
+          - calculated_field
+          - field_extraction
+          - module
+          - function
+          - external_command
+          type: string
+        name:
+          pattern: \S
+          type: string
+        namespace:
+          type: string
+        owner:
+          type: string
+        provenance:
+          $ref: '#/components/schemas/tooling.environment.Provenance'
+        relations:
+          items:
+            $ref: '#/components/schemas/tooling.closure.Relation'
+          type: array
+        sharing:
+          type: string
+        validation:
+          type: string
+      required:
+      - id
+      - kind
+      - name
+      - provenance
+      type: object
+    tooling.environment.ObjectIdentity:
+      additionalProperties: false
+      properties:
+        app:
+          type: string
+        kind:
+          enum:
+          - index
+          - source
+          - sourcetype
+          - dataset
+          - data_model
+          - lookup
+          - macro
+          - saved_search
+          - event_type
+          - tag
+          - calculated_field
+          - field_extraction
+          - module
+          - function
+          - external_command
+          type: string
+        name:
+          pattern: \S
+          type: string
+        namespace:
+          type: string
+        owner:
+          type: string
+      required:
+      - kind
+      - name
+      type: object
+    tooling.environment.Origin:
+      additionalProperties: false
+      properties:
+        instance_id:
+          pattern: \S
+          type: string
+        producer:
+          pattern: \S
+          type: string
+        producer_version:
+          pattern: \S
+          type: string
+        product_version:
+          pattern: \S
+          type: string
+      required:
+      - instance_id
+      - product_version
+      - producer
+      - producer_version
+      type: object
+    tooling.environment.Provenance:
+      additionalProperties: false
+      properties:
+        observed_at:
+          format: date-time
+          pattern: (?:Z|\+00:00)$
+          type: string
+        source_id:
+          pattern: \S
+          type: string
+        source_kind:
+          pattern: \S
+          type: string
+      required:
+      - source_kind
+      - source_id
+      - observed_at
+      type: object
+    tooling.environment.Report:
+      additionalProperties: true
+      properties:
+        coverage:
+          items:
+            $ref: '#/components/schemas/tooling.environment.CoverageEntry'
+          type: array
+        diagnostics:
+          items:
+            $ref: '#/components/schemas/tooling.environment.Diagnostic'
+          type: array
+        schema_bundle_digest:
+          pattern: ^sha256:[0-9a-f]{64}$
+          type: string
+        schema_version:
+          const: 1
+        snapshot_digest:
+          pattern: ^sha256:[0-9a-f]{64}$
+          type: string
+        status:
+          enum:
+          - valid
+          - partial
+          - invalid
+      required:
+      - schema_version
+      - status
+      - coverage
+      - diagnostics
+      type: object
+    tooling.environment.SchemaBinding:
+      additionalProperties: false
+      allOf:
+      - else:
+          properties:
+            reason:
+              const: ''
+        if:
+          properties:
+            source_coverage:
+              const: partial
+          required:
+          - source_coverage
+        then:
+          properties:
+            reason:
+              pattern: \S
+          required:
+          - reason
+      properties:
+        expected:
+          $ref: '#/components/schemas/tooling.environment.ObjectIdentity'
+        object_id:
+          pattern: \S
+          type: string
+        reason:
+          type: string
+        schema_id:
+          pattern: \S
+          type: string
+        source_coverage:
+          enum:
+          - complete
+          - partial
+      required:
+      - schema_id
+      - object_id
+      - expected
+      - source_coverage
+      type: object
+    tooling.environment.SchemaBundle:
+      additionalProperties: false
+      properties:
+        bindings:
+          items:
+            $ref: '#/components/schemas/tooling.environment.SchemaBinding'
+          type: array
+        bundle_id:
+          pattern: \S
+          type: string
+        digest:
+          pattern: ^sha256:[0-9a-f]{64}$
+          type: string
+        provenance:
+          $ref: '#/components/schemas/tooling.environment.Provenance'
+        schema_version:
+          const: 1
+        schemas:
+          items:
+            $ref: '#/components/schemas/tooling.environment.SchemaEntry'
+          type: array
+      required:
+      - schema_version
+      - bundle_id
+      - provenance
+      - schemas
+      - bindings
+      type: object
+    tooling.environment.SchemaEntry:
+      oneOf:
+      - additionalProperties: false
+        properties:
+          catalog:
+            $ref: '#/components/schemas/tooling.FieldCatalogRequest'
+          id:
+            pattern: \S
+            type: string
+          kind:
+            const: field_list
+          provenance:
+            $ref: '#/components/schemas/tooling.environment.Provenance'
+        required:
+        - id
+        - kind
+        - catalog
+        - provenance
+        type: object
+      - additionalProperties: false
+        properties:
+          id:
+            pattern: \S
+            type: string
+          kind:
+            const: json_schema
+          provenance:
+            $ref: '#/components/schemas/tooling.environment.Provenance'
+          target:
+            allOf:
+            - $ref: '#/components/schemas/tooling.SchemaTargetRequest'
+            - properties:
+                kind:
+                  const: json_schema
+              required:
+              - kind
+        required:
+        - id
+        - kind
+        - target
+        - provenance
+        type: object
+      - additionalProperties: false
+        properties:
+          id:
+            pattern: \S
+            type: string
+          kind:
+            const: ocsf
+          provenance:
+            $ref: '#/components/schemas/tooling.environment.Provenance'
+          target:
+            allOf:
+            - $ref: '#/components/schemas/tooling.SchemaTargetRequest'
+            - properties:
+                kind:
+                  const: ocsf
+              required:
+              - kind
+        required:
+        - id
+        - kind
+        - target
+        - provenance
+        type: object
+    tooling.environment.Selector:
+      oneOf:
+      - additionalProperties: false
+        properties:
+          all:
+            const: true
+        required:
+        - all
+        type: object
+      - additionalProperties: false
+        properties:
+          values:
+            items:
+              pattern: \S
+              type: string
+            minItems: 1
+            type: array
+            uniqueItems: true
+        required:
+        - values
+        type: object
+    tooling.environment.Snapshot:
+      additionalProperties: false
+      properties:
+        capabilities:
+          items:
+            $ref: '#/components/schemas/tooling.environment.Capability'
+          type: array
+        capture:
+          $ref: '#/components/schemas/tooling.environment.CaptureInterval'
+        capture_scope:
+          $ref: '#/components/schemas/tooling.environment.CaptureScope'
+        collections:
+          items:
+            $ref: '#/components/schemas/tooling.environment.Collection'
+          type: array
+        digest:
+          pattern: ^sha256:[0-9a-f]{64}$
+          type: string
+        objects:
+          items:
+            $ref: '#/components/schemas/tooling.environment.Object'
+          type: array
+        origin:
+          $ref: '#/components/schemas/tooling.environment.Origin'
+        schema_version:
+          const: 1
+        scope_id:
+          pattern: \S
+          type: string
+      required:
+      - schema_version
+      - scope_id
+      - capture_scope
+      - origin
+      - capture
+      - capabilities
+      - collections
+      - objects
+      type: object
+    tooling.environment.ValidationRequest:
+      additionalProperties: false
+      anyOf:
+      - required:
+        - snapshot
+      - required:
+        - schema_bundle
+      properties:
+        schema_bundle:
+          $ref: '#/components/schemas/tooling.environment.SchemaBundle'
+        schema_version:
+          const: 1
+        snapshot:
+          $ref: '#/components/schemas/tooling.environment.Snapshot'
+      required:
+      - schema_version
+      type: object
     tooling.graph.Edge:
       additionalProperties: true
       properties:
@@ -6018,6 +6582,42 @@ paths:
       summary: Get API documentation
       tags:
       - docs
+  /environment/validate:
+    post:
+      description: Strict inline snapshot and/or schema bundle. Requires schema_version
+        1 and at least one artifact. Unknown or duplicate members, nulls, malformed
+        Unicode, and trailing JSON are input errors. Body limit is 8 MiB. Valid and
+        partial reports return 200; invalid artifacts return 400 with the canonical
+        report.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/tooling.environment.ValidationRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/tooling.environment.Report'
+          description: Valid or partial canonical report
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/tooling.environment.Report'
+          description: Invalid artifact or request; content type and size errors use
+            ErrorResponse
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api.ErrorResponse'
+          description: Internal failure
+      summary: Validate offline environment artifacts
+      tags:
+      - environment
   /health:
     get:
       description: Check if the SPL Toolkit API service is healthy and responsive
