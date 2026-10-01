@@ -130,6 +130,8 @@ type PreparedSchemaBundle struct {
 type CoverageEntry struct {
 	Artifact string `json:"artifact"`
 	Kind     string `json:"kind"`
+	SchemaID string `json:"schema_id,omitempty"`
+	ObjectID string `json:"object_id,omitempty"`
 	Coverage string `json:"coverage"`
 	Reason   string `json:"reason,omitempty"`
 }

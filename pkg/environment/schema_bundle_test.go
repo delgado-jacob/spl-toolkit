@@ -148,6 +148,31 @@ func TestSchemaBundleDistinctPairsWithNULIdentifiers(t *testing.T) {
 	}
 }
 
+func TestSchemaBundleCoverageIdentityAndOrder(t *testing.T) {
+	bundle := bundleFixture(t)
+	bundle.Schemas = bundle.Schemas[:2]
+	bundle.Schemas[0].ID = "a/b"
+	bundle.Schemas[1].ID = "a"
+	bundle.Bindings = bundle.Bindings[:2]
+	bundle.Bindings[0].SchemaID, bundle.Bindings[0].ObjectID = "a/b", "c"
+	bundle.Bindings[1].SchemaID, bundle.Bindings[1].ObjectID = "a", "b/c"
+	bundle.Bindings[0].SourceCoverage = "partial"
+	bundle.Bindings[0].Reason = "sampled source"
+	_, first, err := PrepareSchemaBundle(bundle)
+	if err != nil || first.Status != "partial" || len(first.Coverage) != 2 {
+		t.Fatalf("first report: %v %#v", err, first)
+	}
+	if first.Coverage[0].SchemaID != "a" || first.Coverage[0].ObjectID != "b/c" || first.Coverage[0].Kind != "sourcetype" || first.Coverage[0].Coverage != "complete" ||
+		first.Coverage[1].SchemaID != "a/b" || first.Coverage[1].ObjectID != "c" || first.Coverage[1].Kind != "sourcetype" || first.Coverage[1].Coverage != "partial" {
+		t.Fatalf("binding coverage identity lost: %#v", first.Coverage)
+	}
+	bundle.Bindings[0], bundle.Bindings[1] = bundle.Bindings[1], bundle.Bindings[0]
+	_, reordered, err := PrepareSchemaBundle(bundle)
+	if err != nil || !reflect.DeepEqual(first, reordered) {
+		t.Fatalf("reordering changed report: %v\nfirst=%#v\nsecond=%#v", err, first, reordered)
+	}
+}
+
 func TestSchemaBundleArtifactValidation(t *testing.T) {
 	bundle := fixtureRaw(t, bundleFixture(t))
 	snapshot := fixtureRaw(t, snapshotFixture())

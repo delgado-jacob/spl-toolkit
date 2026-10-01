@@ -158,11 +158,9 @@ func normalizeSchemaBundle(input SchemaBundle) (SchemaBundle, map[string]prepare
 			if err := nonblank(binding.Reason, "partial source reason"); err != nil {
 				return SchemaBundle{}, nil, nil, nil, at(path+"/reason", err)
 			}
-			diagnostics = append(diagnostics, Diagnostic{Code: "source_partial", Severity: "warning", Artifact: "schema_bundle", Path: path + "/source_coverage", Message: fmt.Sprintf("%s binding for %s is partial: %s", binding.SchemaID, binding.ObjectID, binding.Reason)})
 		} else if binding.Reason != "" {
 			return SchemaBundle{}, nil, nil, nil, at(path+"/reason", fmt.Errorf("complete source cannot have a reason"))
 		}
-		coverage = append(coverage, CoverageEntry{Artifact: "schema_bundle", Kind: binding.SchemaID + "/" + binding.ObjectID, Coverage: binding.SourceCoverage, Reason: binding.Reason})
 		out.Bindings = append(out.Bindings, binding)
 	}
 	sort.Slice(out.Bindings, func(i, j int) bool {
@@ -172,8 +170,12 @@ func normalizeSchemaBundle(input SchemaBundle) (SchemaBundle, map[string]prepare
 		}
 		return a.ObjectID < b.ObjectID
 	})
-	sort.Slice(coverage, func(i, j int) bool { return coverage[i].Kind < coverage[j].Kind })
-	sort.Slice(diagnostics, func(i, j int) bool { return diagnostics[i].Message < diagnostics[j].Message })
+	for _, binding := range out.Bindings {
+		coverage = append(coverage, CoverageEntry{Artifact: "schema_bundle", Kind: binding.Expected.Kind, SchemaID: binding.SchemaID, ObjectID: binding.ObjectID, Coverage: binding.SourceCoverage, Reason: binding.Reason})
+		if binding.SourceCoverage == "partial" {
+			diagnostics = append(diagnostics, Diagnostic{Code: "source_partial", Severity: "warning", Artifact: "schema_bundle", Path: "/bindings", Message: fmt.Sprintf("%s binding for %s is partial: %s", binding.SchemaID, binding.ObjectID, binding.Reason)})
+		}
+	}
 	return out, targets, coverage, diagnostics, nil
 }
 
