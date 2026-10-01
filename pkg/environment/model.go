@@ -2,8 +2,11 @@
 package environment
 
 import (
+	"encoding/json"
+
 	"github.com/delgado-jacob/spl-toolkit/pkg/analysis"
 	"github.com/delgado-jacob/spl-toolkit/pkg/closure"
+	"github.com/delgado-jacob/spl-toolkit/pkg/validation"
 )
 
 // Selector names an entire capture dimension or a finite set of exact values.
@@ -76,6 +79,52 @@ type Snapshot struct {
 	Capabilities  []Capability    `json:"capabilities"`
 	Collections   []Collection    `json:"collections"`
 	Objects       []Object        `json:"objects"`
+}
+
+// SchemaBundle records offline schema evidence independently of a snapshot.
+type SchemaBundle struct {
+	SchemaVersion int             `json:"schema_version"`
+	BundleID      string          `json:"bundle_id"`
+	Digest        string          `json:"digest,omitempty"`
+	Provenance    Provenance      `json:"provenance"`
+	Schemas       []SchemaEntry   `json:"schemas"`
+	Bindings      []SchemaBinding `json:"bindings"`
+}
+
+type SchemaEntry struct {
+	ID         string          `json:"id"`
+	Kind       string          `json:"kind"`
+	Catalog    json.RawMessage `json:"catalog,omitempty"`
+	Target     json.RawMessage `json:"target,omitempty"`
+	Provenance Provenance      `json:"provenance"`
+}
+
+type ObjectIdentity struct {
+	Kind      string `json:"kind"`
+	Name      string `json:"name"`
+	Namespace string `json:"namespace,omitempty"`
+	App       string `json:"app,omitempty"`
+	Owner     string `json:"owner,omitempty"`
+}
+
+type SchemaBinding struct {
+	SchemaID       string         `json:"schema_id"`
+	ObjectID       string         `json:"object_id"`
+	Expected       ObjectIdentity `json:"expected"`
+	SourceCoverage string         `json:"source_coverage"`
+	Reason         string         `json:"reason,omitempty"`
+}
+
+type preparedBundleTarget struct {
+	field  *validation.PreparedFieldCatalog
+	schema *validation.PreparedSchemaTarget
+}
+
+// PreparedSchemaBundle owns normalized evidence and reusable compiled targets.
+type PreparedSchemaBundle struct {
+	bundle  SchemaBundle
+	report  Report
+	targets map[string]preparedBundleTarget
 }
 
 type CoverageEntry struct {

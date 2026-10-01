@@ -389,23 +389,58 @@ func ValidateArtifacts(snapshotJSON, schemaBundleJSON []byte) (*Report, error) {
 	if snapshotJSON == nil && schemaBundleJSON == nil {
 		return &Report{SchemaVersion: 1, Status: "invalid", Coverage: []CoverageEntry{}, Diagnostics: []Diagnostic{{Code: "artifact_missing", Severity: "error", Artifact: "request", Message: "at least one artifact is required"}}}, nil
 	}
-	if snapshotJSON == nil {
-		return &Report{SchemaVersion: 1, Status: "invalid", Coverage: []CoverageEntry{}, Diagnostics: []Diagnostic{{Code: "schema_bundle_unsupported", Severity: "error", Artifact: "schema_bundle", Message: "schema bundle preparation is unavailable"}}}, nil
+	report := &Report{SchemaVersion: 1, Status: "valid", Coverage: []CoverageEntry{}, Diagnostics: []Diagnostic{}}
+	merge := func(part *Report) {
+		if part == nil {
+			return
+		}
+		if part.Status == "invalid" {
+			report.Status = "invalid"
+		} else if part.Status == "partial" && report.Status == "valid" {
+			report.Status = "partial"
+		}
+		if part.SnapshotDigest != "" {
+			report.SnapshotDigest = part.SnapshotDigest
+		}
+		if part.SchemaBundleDigest != "" {
+			report.SchemaBundleDigest = part.SchemaBundleDigest
+		}
+		report.Coverage = append(report.Coverage, part.Coverage...)
+		report.Diagnostics = append(report.Diagnostics, part.Diagnostics...)
 	}
-	var snapshot Snapshot
-	if err := decodeStrictJSON(snapshotJSON, &snapshot); err != nil {
-		_, report, _ := invalidSnapshot("", err)
-		return report, nil
+	if snapshotJSON != nil {
+		var snapshot Snapshot
+		var part *Report
+		if err := decodeStrictJSON(snapshotJSON, &snapshot); err != nil {
+			_, part, _ = invalidSnapshot("", err)
+		} else if err := validateSnapshotRawShape(snapshotJSON); err != nil {
+			_, part, _ = invalidSnapshot("", err)
+		} else {
+			_, preparedReport, prepareErr := PrepareSnapshot(snapshot)
+			if prepareErr != nil {
+				return nil, prepareErr
+			}
+			part = preparedReport
+		}
+		merge(part)
 	}
-	if err := validateSnapshotRawShape(snapshotJSON); err != nil {
-		_, report, _ := invalidSnapshot("", err)
-		return report, nil
+	if schemaBundleJSON != nil {
+		var bundle SchemaBundle
+		var part *Report
+		if err := decodeStrictJSON(schemaBundleJSON, &bundle); err != nil {
+			_, part, _ = invalidSchemaBundle("", err)
+		} else if err := validateSchemaBundleRawShape(schemaBundleJSON); err != nil {
+			_, part, _ = invalidSchemaBundle("", err)
+		} else {
+			_, preparedReport, prepareErr := PrepareSchemaBundle(bundle)
+			if prepareErr != nil {
+				return nil, prepareErr
+			}
+			part = preparedReport
+		}
+		merge(part)
 	}
-	_, report, err := PrepareSnapshot(snapshot)
-	if err != nil || report.Status == "invalid" || schemaBundleJSON == nil {
-		return report, err
-	}
-	return &Report{SchemaVersion: 1, Status: "invalid", SnapshotDigest: report.SnapshotDigest, Coverage: report.Coverage, Diagnostics: []Diagnostic{{Code: "schema_bundle_unsupported", Severity: "error", Artifact: "schema_bundle", Message: "schema bundle preparation is unavailable"}}}, nil
+	return report, nil
 }
 
 // ValidateJSON validates an inline environment validation request.
