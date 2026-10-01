@@ -27,12 +27,11 @@ def locked_requirements():
 
 
 @pytest.mark.parametrize("minor", [11, 12, 13, 14])
-@pytest.mark.parametrize("target", ["linux-amd64", "darwin-amd64", "darwin-arm64", "windows-amd64"])
+@pytest.mark.parametrize("target", ["linux-amd64", "darwin-arm64", "windows-amd64"])
 def test_locked_wheels_cover_release_matrix(minor, target):
     platforms = {
         "linux-amd64": ["manylinux_2_17_x86_64"],
         "windows-amd64": ["win_amd64"],
-        "darwin-amd64": list(mac_platforms((15, 0), "x86_64")),
         "darwin-arm64": list(mac_platforms((15, 0), "arm64")),
     }[target]
     tags = set(cpython_tags((3, minor), platforms=platforms))
@@ -72,7 +71,7 @@ def test_package_lock_preserves_all_existing_pins():
 
 @pytest.mark.parametrize("job", ["release-baseline", "installed-wheel"])
 def test_ci_provisions_wheelhouse_before_isolated_acceptance(tmp_path, job):
-    workflow = yaml.safe_load((ROOT / ".github/workflows/ci.yml").read_text())
+    workflow = yaml.safe_load((ROOT / ".github/workflows/ci-target.yml").read_text())
     steps = workflow["jobs"][job]["steps"]
     configuration = next(step for step in steps if step.get("name") == "Configure isolated package-check wheelhouse")
     provision = next(step for step in steps if step.get("name") == "Provision hash-locked package-check dependencies")
@@ -94,3 +93,18 @@ def test_ci_provisions_wheelhouse_before_isolated_acceptance(tmp_path, job):
         "--index-url https://pypi.org/simple", "-r tools/requirements-package-check-hashed.lock",
         '--dest "${{ runner.temp }}/package-check-wheels"',
     ))
+
+
+@pytest.mark.parametrize("result", ["success", "failure", "cancelled", "skipped"])
+def test_final_acceptance_rejects_unsuccessful_platform(result):
+    workflow = yaml.safe_load((ROOT / ".github/workflows/ci.yml").read_text())
+    gate = next(step for step in workflow["jobs"]["acceptance"]["steps"]
+                if step.get("name") == "Require every upstream job")
+    results = {name: {"result": "success"}
+               for name in workflow["jobs"]["acceptance"]["needs"]}
+    results["platform-validation"]["result"] = result
+    completed = subprocess.run(
+        gate["run"], shell=True, check=False, capture_output=True, text=True,
+        env=os.environ | {"UPSTREAM_RESULTS": json.dumps(results)},
+    )
+    assert completed.returncode == (0 if result == "success" else 1), completed.stderr

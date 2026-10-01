@@ -618,7 +618,6 @@ def go_reports(requirement_cases, special_documents, tmp_path_factory) -> dict[s
     helper.write_text(GO_HELPER, encoding="utf-8")
     env = os.environ.copy()
     env["GOWORK"] = "off"
-    env["GOCACHE"] = str(tmp_path_factory.mktemp("requirements-go-cache"))
     completed = subprocess.run(
         [os.environ.get("SPL_TOOLING_GO", "go"), "run", "-mod=readonly", str(helper)],
         cwd=root,
