@@ -205,6 +205,7 @@ func (s *Server) setupRoutes() {
 	s.mux.HandleFunc("POST /api/v1/corpus/sarif", s.handleToolingSARIF)
 	s.mux.HandleFunc("POST /api/v1/corpus/impact-schema", s.handleToolingSchema)
 	s.mux.HandleFunc("POST /api/v1/corpus/impact-mapping", s.handleToolingMapping)
+	s.mux.HandleFunc("POST /api/v1/environment/validate", s.handleValidateEnvironment)
 	s.mux.HandleFunc("GET /api/v1/capabilities", s.handleCapabilities)
 
 	// Mapping configuration endpoints

@@ -119,11 +119,48 @@ def add_tooling(spec):
             "400": {"description": "Malformed request", "content": {"application/json": {"schema": {"$ref": PREFIX + "api.ErrorResponse"}}}},
         },
     }}
+    spec["paths"]["/environment/validate"] = {"post": {
+        "summary": "Validate offline environment artifacts",
+        "description": "Strict inline snapshot and/or schema bundle. Requires schema_version 1 and at least one artifact. Unknown or duplicate members, nulls, malformed Unicode, and trailing JSON are input errors. Body limit is 8 MiB. Valid and partial reports return 200; invalid artifacts return 400 with the canonical report.",
+        "tags": ["environment"],
+        "requestBody": {"required": True, "content": {"application/json": {"schema": reference("environment.ValidationRequest")}}},
+        "responses": {
+            "200": {"description": "Valid or partial canonical report", "content": {"application/json": {"schema": reference("environment.Report")}}},
+            "400": {"description": "Invalid artifact or request; content type and size errors use ErrorResponse", "content": {"application/json": {"schema": {"oneOf": [
+                reference("environment.Report"),
+                {"allOf": [{"$ref": PREFIX + "api.ErrorResponse"},
+                           {"type": "object", "required": ["error", "message", "code"],
+                            "properties": {"error": {"const": True}, "code": {"const": 400}}}]},
+            ]}}}},
+            "500": {"description": "Internal failure", "content": {"application/json": {"schema": {"$ref": PREFIX + "api.ErrorResponse"}}}},
+        },
+    }}
     visited = set()
     while needed - visited:
         name = sorted(needed - visited)[0]
         schemas["tooling." + name] = convert(shared["$defs"][name], preserve_analysis=name.startswith("closure."))
         visited.add(name)
+    # Swag walks Go package imports while resolving the documentation-only
+    # environment DTO. These generated types are superseded by the strict
+    # tooling.environment definitions and are not referenced by any route.
+    generated_only = {name for name in schemas if name.startswith(("closure.", "environment."))}
+    generated_only.add("api.EnvironmentValidationRequest")
+    def component_refs(value):
+        if isinstance(value, dict):
+            ref = value.get("$ref", "")
+            if isinstance(ref, str) and ref.startswith(PREFIX):
+                yield ref.removeprefix(PREFIX)
+            for child in value.values():
+                yield from component_refs(child)
+        elif isinstance(value, list):
+            for child in value:
+                yield from component_refs(child)
+    retained = {name: value for name, value in schemas.items() if name not in generated_only}
+    external_refs = set(component_refs({"paths": spec["paths"], "schemas": retained})) & generated_only
+    if external_refs:
+        raise ValueError(f"unexpected generated environment references: {sorted(external_refs)}")
+    for name in generated_only:
+        schemas.pop(name, None)
     snapshot = schemas.get("tooling.document.Snapshot")
     if (not isinstance(snapshot, dict)
             or snapshot.get("properties", {}).get("requirements") != requirement_ref

@@ -4,6 +4,7 @@ VERSION
 cmd/analysis.go
 cmd/cli.go
 cmd/closure_cli.go
+cmd/environment_cli.go
 cmd/main.go
 cmd/rewrite_cli.go
 cmd/schema_validation_cli.go
@@ -23,6 +24,9 @@ contracts/v1/corpus.schema.json
 contracts/v1/definitions.schema.json
 contracts/v1/detection-bom.schema.json
 contracts/v1/document-view.schema.json
+contracts/v1/environment-snapshot.schema.json
+contracts/v1/environment-validation.schema.json
+contracts/v1/field-schema-bundle.schema.json
 contracts/v1/field-validation.schema.json
 contracts/v1/graph.schema.json
 contracts/v1/impact.schema.json
@@ -42,6 +46,8 @@ docs/docs.go
 docs/rewrite.md
 docs/spl2.md
 docs/tooling.md
+examples/environment/fields.json
+examples/environment/partial-snapshot.json
 examples/go/basic/main.go
 examples/go/tooling/main.go
 examples/tooling/after-rules.json
@@ -138,6 +144,7 @@ pkg/analysis/spl_tstats.go
 pkg/analysis/transfers.go
 pkg/api/analysis.go
 pkg/api/closure.go
+pkg/api/environment.go
 pkg/api/handlers.go
 pkg/api/models.go
 pkg/api/rewrite.go
@@ -170,6 +177,14 @@ pkg/corpusio/manifest.go
 pkg/document/model.go
 pkg/document/query.go
 pkg/document/snapshot.go
+pkg/environment/closure.go
+pkg/environment/decode.go
+pkg/environment/digest.go
+pkg/environment/model.go
+pkg/environment/prepare.go
+pkg/environment/report.go
+pkg/environment/schema_bundle.go
+pkg/environment/snapshot.go
 pkg/graph/export.go
 pkg/graph/identity.go
 pkg/graph/model.go

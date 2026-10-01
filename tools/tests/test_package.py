@@ -731,6 +731,9 @@ def test_installed_schema_fixtures_exist_before_both_suites(tmp_path: Path, monk
         closure = Path(env["SPL_CLOSURE_FIXTURES"])
         assert closure.is_relative_to(outside) and closure.read_bytes() == (ROOT / "testdata/closure/cases.json").read_bytes()
         assert Path(env["SPL_CLOSURE_GO_ROOT"]).is_relative_to(outside)
+        environment = Path(env["SPL_ENVIRONMENT_FIXTURES"])
+        assert environment.is_absolute() and environment.is_relative_to(outside)
+        assert (environment / "cases.json").read_bytes() == (ROOT / "testdata/environment/cases.json").read_bytes()
         requirements = Path(env["SPL_REQUIREMENTS_FIXTURES"])
         assert requirements.is_absolute() and requirements.is_file()
         assert requirements.is_relative_to(outside)
@@ -739,6 +742,9 @@ def test_installed_schema_fixtures_exist_before_both_suites(tmp_path: Path, monk
         requirement_go_root = Path(env["SPL_REQUIREMENTS_GO_ROOT"])
         assert requirement_go_root.is_absolute() and requirement_go_root.is_relative_to(outside)
         assert (requirement_go_root / "go.mod").read_bytes() == (ROOT / "go.mod").read_bytes()
+        assert (requirement_go_root / "testdata/environment/cases.json").read_bytes() == (
+            ROOT / "testdata/environment/cases.json"
+        ).read_bytes()
         if "SPL_SCHEMA_EVIDENCE" in env:
             Path(env["SPL_SCHEMA_EVIDENCE"]).write_text("{}")
             Path(env["SPL_SPL2_EVIDENCE"]).write_text("{}")
@@ -765,6 +771,10 @@ def test_installed_schema_fixtures_exist_before_both_suites(tmp_path: Path, monk
     assert result["fixture_hashes"]["requirements"] == checker.sha256(
         ROOT / "testdata/requirements/cases.json"
     )
+    assert result["fixture_hashes"]["environment"] == {
+        "cases.json": checker.sha256(ROOT / "testdata/environment/cases.json")
+    }
+    assert result["tooling_environment_fixture_hashes"] == result["fixture_hashes"]["environment"]
     assert result["fixture_hashes"]["milestone11_documents"] == checker.sha256(
         ROOT / "tests/acceptance/cli_examples.json"
     )
@@ -785,6 +795,9 @@ def test_installed_schema_fixtures_exist_before_both_suites(tmp_path: Path, monk
             "test_native_closure.py": checker.sha256(
                 ROOT / "python/tests/test_native_closure.py"
             ),
+            "test_native_environment.py": checker.sha256(
+                ROOT / "python/tests/test_native_environment.py"
+            ),
         },
         "acceptance": {
             "test_requirements_surfaces.py": checker.sha256(
@@ -792,6 +805,9 @@ def test_installed_schema_fixtures_exist_before_both_suites(tmp_path: Path, monk
             ),
             "test_analysis_surfaces.py": checker.sha256(
                 ROOT / "tests/acceptance/test_analysis_surfaces.py"
+            ),
+            "test_environment_surfaces.py": checker.sha256(
+                ROOT / "tests/acceptance/test_environment_surfaces.py"
             ),
         },
     }
@@ -809,6 +825,12 @@ def test_schema_source_override_is_removed(monkeypatch):
     assert "SPL_SCHEMA_FIXTURES" not in checker.clean_env()
 
 
+def test_environment_source_override_is_removed(monkeypatch):
+    checker = load_package_checker()
+    monkeypatch.setenv("SPL_ENVIRONMENT_FIXTURES", "checkout-only")
+    assert "SPL_ENVIRONMENT_FIXTURES" not in checker.clean_env()
+
+
 @pytest.mark.parametrize("changed_name", ["_native_src/pkg/validation/schema_validate.go", "build_support.py", "requirements-contracts-local-hashed.lock"])
 def test_sdist_source_verification_requires_exact_handwritten_sources_and_native_test(tmp_path: Path, changed_name):
     checker = load_package_checker()
@@ -818,7 +840,7 @@ def test_sdist_source_verification_requires_exact_handwritten_sources_and_native
     command.ensure_finalized()
     release = tmp_path / "release"
     command.make_release_tree(str(release), [])
-    for relative in ("native-source-files.txt", "spl_toolkit/mapper.py", "spl_toolkit/libspl_toolkit.h", "tests/test_native_analysis.py", "tests/test_native_schema_validation.py", "tests/test_native_spl2.py", "tests/test_native_rewrite.py", "tests/test_native_requirements.py", "tests/test_native_tooling.py", "tests/test_native_closure.py", "build_support.py", "MANIFEST.in", "setup.py", "pyproject.toml", "requirements-build.txt", "requirements-dev.txt", "requirements-contracts-local-hashed.lock"):
+    for relative in ("native-source-files.txt", "spl_toolkit/mapper.py", "spl_toolkit/libspl_toolkit.h", "tests/test_native_analysis.py", "tests/test_native_schema_validation.py", "tests/test_native_spl2.py", "tests/test_native_rewrite.py", "tests/test_native_requirements.py", "tests/test_native_tooling.py", "tests/test_native_closure.py", "tests/test_native_environment.py", "build_support.py", "MANIFEST.in", "setup.py", "pyproject.toml", "requirements-build.txt", "requirements-dev.txt", "requirements-contracts-local-hashed.lock"):
         destination = release / relative
         destination.parent.mkdir(parents=True, exist_ok=True)
         destination.write_bytes((PYTHON_DIR / relative).read_bytes())

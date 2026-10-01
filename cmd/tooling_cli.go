@@ -56,6 +56,8 @@ func parseToolingOptions(command string, args []string) (map[string]string, erro
 		names = []string{"query", "file", "stdin", "bundle", "bindings", "language", "profile", "compatibility-version", "source-id", "format", "output"}
 	case "lsp":
 		names = []string{"stdio", "profile", "compatibility-version", "target"}
+	case "environment-validate":
+		names = []string{"snapshot", "schemas", "format", "output"}
 	}
 	for _, n := range names {
 		allowed[n] = true

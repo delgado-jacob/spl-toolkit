@@ -50,6 +50,7 @@ import (
 	"github.com/delgado-jacob/spl-toolkit/pkg/closure"
 	"github.com/delgado-jacob/spl-toolkit/pkg/corpus"
 	"github.com/delgado-jacob/spl-toolkit/pkg/document"
+	"github.com/delgado-jacob/spl-toolkit/pkg/environment"
 	"github.com/delgado-jacob/spl-toolkit/pkg/graph"
 	"github.com/delgado-jacob/spl-toolkit/pkg/impact"
 	"github.com/delgado-jacob/spl-toolkit/pkg/mapper"
@@ -289,6 +290,13 @@ func spl_mapper_validate_schema_batch(mapperID C.int, requestJSON *C.char) *C.SP
 			return nil, err
 		}
 		return validation.ValidateSchemaBatch(request.Documents, request.Target)
+	})
+}
+
+//export spl_mapper_validate_environment
+func spl_mapper_validate_environment(mapperID C.int, requestJSON *C.char) *C.SPLResult {
+	return ownedMapperJSONResult(mapperID, func() (any, error) {
+		return environment.ValidateJSON([]byte(C.GoString(requestJSON)))
 	})
 }
 

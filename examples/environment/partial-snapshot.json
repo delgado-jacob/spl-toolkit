@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "scope_id": "local-example",
+  "capture_scope": {
+    "namespace": {"all": true},
+    "app": {"all": true},
+    "owner": {"all": true}
+  },
+  "origin": {
+    "instance_id": "synthetic-instance",
+    "product_version": "9.4",
+    "producer": "local-example",
+    "producer_version": "1"
+  },
+  "capture": {
+    "start": "2026-10-01T12:00:00Z",
+    "end": "2026-10-01T12:05:00Z"
+  },
+  "capabilities": [],
+  "collections": [
+    {"kind": "sourcetype", "coverage": "complete"}
+  ],
+  "objects": [
+    {
+      "id": "source-a",
+      "kind": "sourcetype",
+      "name": "events",
+      "provenance": {
+        "source_kind": "local-example",
+        "source_id": "synthetic-source",
+        "observed_at": "2026-10-01T12:02:00Z"
+      }
+    }
+  ]
+}

@@ -25,6 +25,18 @@ exact original-document SHA256 digest and half-open UTF-8 byte range; source-map
 ranges retain query or definition origin. These schemas validate local values,
 not inventory truth, live execution, authorization, or deployment.
 
+The environment family uses `environment-snapshot.schema.json` for a strict
+offline capture, `field-schema-bundle.schema.json` for independently supplied
+field evidence, and `environment-validation.schema.json` for the canonical
+report and its `#/$defs/Request` inline input. A snapshot's per-kind collection
+coverage is a producer promise within its capture scope. Each schema binding
+has separate source coverage; it cannot make an open schema projection
+conclusive. Computed snapshot and bundle digests identify normalized supplied
+content independently. `valid` means the supplied claims are internally
+consistent with no coverage gaps; `partial` preserves unknown evidence; and
+`invalid` records malformed or contradictory input. Schema checks cannot prove
+collection truth, live query compatibility, authorization, or execution.
+
 Owned contracts use JSON Schema Draft 2020-12 and integer `schema_version: 1`.
 The named family establishes what that integer versions. The unmodified official
 OASIS SARIF Errata 01 schema uses Draft 4 and SARIF `version: "2.1.0"`.

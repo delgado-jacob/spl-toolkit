@@ -1,6 +1,6 @@
 # SPL Toolkit Python bindings
 
-This package provides Python 3.11+ bindings for SPL Toolkit 0.1.1's offline mapping, discovery, structured analysis, caller-supplied knowledge-object closure, safe rewriting, field-list validation, and JSON Schema/OCSF field declaration APIs. Wheels include the native Go library and do not require Go at installation or runtime.
+This package provides Python 3.11+ bindings for SPL Toolkit 0.1.1's offline mapping, discovery, structured analysis, caller-supplied knowledge-object closure, environment artifact validation, safe rewriting, field-list validation, and JSON Schema/OCSF field declaration APIs. Wheels include the native Go library and do not require Go at installation or runtime.
 
 ```python
 from spl_toolkit import SPLMapper
@@ -96,6 +96,37 @@ Validation and rewrite can refine their public analysis against a supplied targe
 Canonical analysis admits at most 4,096 lexer work units. A query that would consume unit 4,097 returns a successful dictionary with incomplete status and coverage, one `SPL_ANALYSIS_RESOURCE_LIMIT` diagnostic and gap, the full-text digest, and no partial requirement evidence. Long sparse input remains admitted when it stays within the work budget. Preview, apply, and batch rewrite return an incomplete no-op for a resource-limited original; apply never commits. The [API reference](https://github.com/delgado-jacob/spl-toolkit/blob/main/docs/API.md#canonical-lexer-work-boundary) defines exact ordering, SPL2 closure accounting, messages, half-open ranges, and the fixture-specific response-size checks.
 
 The method uses the owned native call `spl_mapper_requirements_query`. Mapper admission and close guards match the other operations, and the wrapper releases every returned `SPLResult` with `spl_result_free`, including decoding and native error paths. Repeated calls return detached Python values.
+
+## Offline environment validation
+
+`SPLMapper.validate_environment(request)` accepts an inline version 1 request
+containing a `snapshot`, a `schema_bundle`, or both. It returns the canonical
+Go report as a detached dictionary, including `status`, computed digests when
+available, `coverage`, and `diagnostics`. From the repository checkout:
+
+```python
+import json
+from spl_toolkit import SPLMapper
+
+with open("examples/environment/partial-snapshot.json", encoding="utf-8") as source:
+    snapshot = json.load(source)
+with open("examples/environment/fields.json", encoding="utf-8") as source:
+    schemas = json.load(source)
+with SPLMapper() as mapper:
+    report = mapper.validate_environment({
+        "schema_version": 1, "snapshot": snapshot, "schema_bundle": schemas,
+    })
+    print(report["status"])  # partial
+```
+
+The Python method accepts data, not paths. Invalid artifact content returns an
+`invalid` report; serialization errors and native handle errors raise
+`SPLMapperError`. The wrapper releases each owned native result, including on
+decoding errors. Direct C callers use
+`spl_mapper_validate_environment(int mapperID, char* requestJSON)` and free
+every non-null `SPLResult*` with `spl_result_free`. Collection completeness and
+field source coverage describe producer claims. The operation does not fetch a
+live inventory, read event rows, or assess whether a query can execute.
 
 ## Knowledge-object closure
 

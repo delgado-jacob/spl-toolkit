@@ -30,6 +30,26 @@ CAPABILITY_SOURCE_FILES = {
 }
 
 
+def test_environment_contract_and_sources_are_release_inputs():
+    roots = {
+        "contracts/v1/environment-snapshot.schema.json",
+        "contracts/v1/field-schema-bundle.schema.json",
+        "contracts/v1/environment-validation.schema.json",
+    }
+    core = {f"pkg/environment/{path.name}" for path in (ROOT / "pkg/environment").glob("*.go")
+            if not path.name.endswith("_test.go")}
+    adapters = {"cmd/environment_cli.go", "pkg/api/environment.go"}
+    native = set((ROOT / "python/native-source-files.txt").read_text(encoding="utf-8").splitlines())
+    content = set((ROOT / "tools/release-content-files.txt").read_text(encoding="utf-8").splitlines())
+    sources = set((ROOT / "tools/release-source-files.txt").read_text(encoding="utf-8").splitlines())
+
+    assert roots | core <= native & sources
+    assert adapters <= sources
+    assert roots <= content
+    assert not (core | adapters) & content
+    assert {"examples/environment/partial-snapshot.json", "examples/environment/fields.json"} <= content & sources
+
+
 def test_requirement_contract_and_sources_are_release_inputs():
     expected = {
         "contracts/v1/requirements.schema.json",

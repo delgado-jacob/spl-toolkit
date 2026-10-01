@@ -17,6 +17,18 @@ delegating all analysis and binding interpretation to canonical packages.
 CLI, REST and owned native/Python adapters compose these operations without
 adding semantic engines. See [tooling](tooling.md) and [contracts](contracts.md).
 
+## Offline environment preparation
+
+`pkg/environment` owns strict offline snapshot and independent schema-bundle
+decoding, normalization, digests, coverage reports, and reusable prepared
+indexes. It compiles field evidence through `pkg/validation` and adapts
+validated objects to `pkg/closure` without changing query analysis or closure
+semantics. Pairing checks a binding's stable ID and typed identity against a
+snapshot and retains unresolved evidence. The CLI, REST, native C, and Python
+surfaces serialize the canonical report; only the Go API exposes the prepared
+handle. Collection coverage and source coverage remain producer promises.
+No path in this operation exports from Splunk or evaluates query compatibility.
+
 ## Canonical requirements and parser admission
 
 `pkg/analysis` owns both structured analysis and direct query requirements. `Analyze` normalizes the query document, preflights bounded lexer work, runs the selected SPL or SPL2 parser only after admission, and finalizes canonical references and diagnostics. A deterministic projector then creates `Result.Requirements` from analysis-owned evidence. `Requirements` performs one `Analyze` call and returns a deeply detached copy of that embedded set. It does not parse again, replay field transfers, or classify text spans.

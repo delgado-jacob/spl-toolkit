@@ -21,6 +21,9 @@ runtime schema location existed when these contracts were introduced.
 | `closure.schema.json` | Canonical closure report | |
 | `closure-graph.schema.json` | Dependency graph projection | |
 | `detection-bom.schema.json` | Detection bill of materials projection | |
+| `environment-snapshot.schema.json` | Strict offline capture input | |
+| `field-schema-bundle.schema.json` | Strict independent field evidence input | |
+| `environment-validation.schema.json` | Canonical artifact validation report | `Request` |
 | `field-validation.schema.json` | Field-list validation report | `Request`, `BatchRequest`, `BatchReport`, `Catalog` |
 | `schema-validation.schema.json` | JSON Schema or OCSF field-validation report | `Request`, `BatchRequest`, `BatchReport`, `Target` |
 | `rewrite.schema.json` | Rewrite result | `Request`, `BatchRequest`, `BatchReport`, `RuleSet`, `Rule`, `ValidationTarget` |
@@ -122,6 +125,20 @@ analysis. Macro limits and held forms are in the [API
 contract](../docs/API.md#knowledge-object-closure). Graph and BOM schemas
 validate projections of the report, not independent discovery or runtime
 readiness.
+
+## Environment artifacts
+
+The snapshot names a capture scope, source provenance, interval, capabilities,
+per-kind collection promises, and captured objects. The field-schema bundle
+holds field-list, JSON Schema, or OCSF entries and explicit object bindings.
+Its digest is independent of the snapshot digest, so the same prepared bundle
+can be checked against a later capture. `environment-validation.schema.json`
+validates a standalone report at its root and an inline request at `#/$defs/Request`.
+The request supplies at least one artifact. Computed digests identify normalized
+supplied content; they are not signatures. `valid` means the declarations are
+internally consistent and have no reported coverage gaps. `partial` retains
+omitted, unavailable, partial, or unresolved evidence. Neither status proves
+that the capture matches a live Splunk instance or that a query can execute.
 
 ## Offline validation
 

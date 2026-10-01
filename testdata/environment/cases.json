@@ -1,0 +1,97 @@
+[
+  {
+    "name": "complete",
+    "status": "valid",
+    "snapshot": {
+      "schema_version": 1,
+      "scope_id": "capture-a",
+      "capture_scope": {"namespace": {"all": true}, "app": {"all": true}, "owner": {"all": true}},
+      "origin": {"instance_id": "instance-a", "product_version": "9.4", "producer": "fixture", "producer_version": "1"},
+      "capture": {"start": "2026-10-01T12:00:00Z", "end": "2026-10-01T12:05:00Z"},
+      "capabilities": [],
+      "collections": [
+        {"kind": "index", "coverage": "complete"},
+        {"kind": "source", "coverage": "complete"},
+        {"kind": "sourcetype", "coverage": "complete"},
+        {"kind": "dataset", "coverage": "complete"},
+        {"kind": "data_model", "coverage": "complete"},
+        {"kind": "lookup", "coverage": "complete"},
+        {"kind": "macro", "coverage": "complete"},
+        {"kind": "saved_search", "coverage": "complete"},
+        {"kind": "event_type", "coverage": "complete"},
+        {"kind": "tag", "coverage": "complete"},
+        {"kind": "calculated_field", "coverage": "complete"},
+        {"kind": "field_extraction", "coverage": "complete"},
+        {"kind": "module", "coverage": "complete"},
+        {"kind": "function", "coverage": "complete"},
+        {"kind": "external_command", "coverage": "complete"}
+      ],
+      "objects": [{"id": "source-a", "kind": "sourcetype", "name": "events", "provenance": {"source_kind": "fixture", "source_id": "source-a", "observed_at": "2026-10-01T12:02:00Z"}}]
+    },
+    "schema_bundle": {
+      "schema_version": 1,
+      "bundle_id": "bundle-a",
+      "provenance": {"source_kind": "fixture", "source_id": "schema-source", "observed_at": "2026-10-01T12:00:00Z"},
+      "schemas": [{"id": "fields", "kind": "field_list", "catalog": {"fields": ["host"], "optional_fields": [], "identity": "local", "version": "1"}, "provenance": {"source_kind": "fixture", "source_id": "schema-source", "observed_at": "2026-10-01T12:00:00Z"}}],
+      "bindings": [{"schema_id": "fields", "object_id": "source-a", "expected": {"kind": "sourcetype", "name": "events"}, "source_coverage": "complete"}]
+    }
+  },
+  {
+    "name": "partial",
+    "status": "partial",
+    "snapshot": {
+      "schema_version": 1,
+      "scope_id": "capture-a",
+      "capture_scope": {"namespace": {"all": true}, "app": {"all": true}, "owner": {"all": true}},
+      "origin": {"instance_id": "instance-a", "product_version": "9.4", "producer": "fixture", "producer_version": "1"},
+      "capture": {"start": "2026-10-01T12:00:00Z", "end": "2026-10-01T12:05:00Z"},
+      "capabilities": [],
+      "collections": [{"kind": "sourcetype", "coverage": "complete"}],
+      "objects": [{"id": "source-a", "kind": "sourcetype", "name": "events", "provenance": {"source_kind": "fixture", "source_id": "source-a", "observed_at": "2026-10-01T12:02:00Z"}}]
+    },
+    "schema_bundle": {
+      "schema_version": 1,
+      "bundle_id": "bundle-a",
+      "provenance": {"source_kind": "fixture", "source_id": "schema-source", "observed_at": "2026-10-01T12:00:00Z"},
+      "schemas": [{"id": "fields", "kind": "field_list", "catalog": {"fields": ["host"], "optional_fields": [], "identity": "local", "version": "1"}, "provenance": {"source_kind": "fixture", "source_id": "schema-source", "observed_at": "2026-10-01T12:00:00Z"}}],
+      "bindings": [{"schema_id": "fields", "object_id": "source-a", "expected": {"kind": "sourcetype", "name": "events"}, "source_coverage": "complete"}]
+    }
+  },
+  {
+    "name": "invalid",
+    "status": "invalid",
+    "snapshot": {
+      "schema_version": 1,
+      "scope_id": "capture-a",
+      "capture_scope": {"namespace": {"all": true}, "app": {"all": true}, "owner": {"all": true}},
+      "origin": {"instance_id": "instance-a", "product_version": "9.4", "producer": "fixture", "producer_version": "1"},
+      "capture": {"start": "2026-10-01T12:00:00Z", "end": "2026-10-01T12:05:00Z"},
+      "capabilities": [],
+      "collections": [
+        {"kind": "index", "coverage": "complete"},
+        {"kind": "source", "coverage": "complete"},
+        {"kind": "sourcetype", "coverage": "complete"},
+        {"kind": "dataset", "coverage": "complete"},
+        {"kind": "data_model", "coverage": "complete"},
+        {"kind": "lookup", "coverage": "complete"},
+        {"kind": "macro", "coverage": "complete"},
+        {"kind": "saved_search", "coverage": "complete"},
+        {"kind": "event_type", "coverage": "complete"},
+        {"kind": "tag", "coverage": "complete"},
+        {"kind": "calculated_field", "coverage": "complete"},
+        {"kind": "field_extraction", "coverage": "complete"},
+        {"kind": "module", "coverage": "complete"},
+        {"kind": "function", "coverage": "complete"},
+        {"kind": "external_command", "coverage": "complete"}
+      ],
+      "objects": []
+    },
+    "schema_bundle": {
+      "schema_version": 1,
+      "bundle_id": "bundle-a",
+      "provenance": {"source_kind": "fixture", "source_id": "schema-source", "observed_at": "2026-10-01T12:00:00Z"},
+      "schemas": [{"id": "fields", "kind": "field_list", "catalog": {"fields": ["host"], "optional_fields": [], "identity": "local", "version": "1"}, "provenance": {"source_kind": "fixture", "source_id": "schema-source", "observed_at": "2026-10-01T12:00:00Z"}}],
+      "bindings": [{"schema_id": "fields", "object_id": "missing-lookup", "expected": {"kind": "lookup", "name": "missing"}, "source_coverage": "complete"}]
+    }
+  }
+]
