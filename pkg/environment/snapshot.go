@@ -9,6 +9,7 @@ import (
 	"time"
 	"unicode/utf8"
 
+	"github.com/delgado-jacob/spl-toolkit/internal/capabilityselector"
 	"github.com/delgado-jacob/spl-toolkit/pkg/closure"
 )
 
@@ -23,7 +24,61 @@ var kindSet = func() map[string]bool {
 var queryKinds = map[string]bool{"dataset": true, "data_model": true, "lookup": true, "macro": true, "saved_search": true, "event_type": true, "tag": true, "calculated_field": true, "field_extraction": true, "module": true, "function": true, "external_command": true}
 
 func invalidSnapshot(path string, err error) (*PreparedSnapshot, *Report, error) {
+	if path == "" {
+		located, offset := inputLocation(err)
+		path = located
+		if path == "" {
+			path = inferSnapshotPath(err)
+		}
+		return nil, &Report{SchemaVersion: 1, Status: "invalid", Coverage: []CoverageEntry{}, Diagnostics: []Diagnostic{{Code: "snapshot_invalid", Severity: "error", Artifact: "snapshot", Path: path, ByteOffset: offset, Message: err.Error()}}}, nil
+	}
 	return nil, &Report{SchemaVersion: 1, Status: "invalid", Coverage: []CoverageEntry{}, Diagnostics: []Diagnostic{{Code: "snapshot_invalid", Severity: "error", Artifact: "snapshot", Path: path, Message: err.Error()}}}, nil
+}
+func inferSnapshotPath(err error) string {
+	message := err.Error()
+	switch {
+	case strings.Contains(message, "schema_version"):
+		return "/schema_version"
+	case strings.Contains(message, "scope_id"):
+		return "/scope_id"
+	case strings.Contains(message, "namespace selector"):
+		return "/capture_scope/namespace"
+	case strings.Contains(message, "app selector"):
+		return "/capture_scope/app"
+	case strings.Contains(message, "owner selector"):
+		return "/capture_scope/owner"
+	case strings.Contains(message, "capture start"), strings.Contains(message, "capture.start"):
+		return "/capture/start"
+	case strings.Contains(message, "capture end"), strings.Contains(message, "capture.end"):
+		return "/capture/end"
+	case strings.Contains(message, "capability"):
+		return "/capabilities"
+	case strings.Contains(message, "collection"):
+		return "/collections"
+	case strings.Contains(message, "object"), strings.Contains(message, "macro"), strings.Contains(message, "relation"), strings.Contains(message, "document"), strings.Contains(message, "observation"):
+		return "/objects"
+	case strings.Contains(message, "instance_id"), strings.Contains(message, "product_version"), strings.Contains(message, "producer"):
+		return "/origin"
+	default:
+		return ""
+	}
+}
+func validRelationPointer(pointer string) bool {
+	if !strings.HasPrefix(pointer, "/") {
+		return false
+	}
+	for i := 0; i < len(pointer); i++ {
+		if pointer[i] == '~' {
+			if i+1 >= len(pointer) || (pointer[i+1] != '0' && pointer[i+1] != '1') {
+				return false
+			}
+			i++
+		}
+	}
+	return true
+}
+func validRelationRange(text string, start, end int) bool {
+	return start >= 0 && end > start && end <= len(text) && utf8.ValidString(text[:start]) && utf8.ValidString(text[:end])
 }
 func nonblank(value, name string) error {
 	if strings.TrimSpace(value) == "" || !utf8.ValidString(value) {
@@ -220,7 +275,7 @@ func normalizeSnapshot(input Snapshot) (Snapshot, []CoverageEntry, []Diagnostic,
 	sort.Slice(out.Collections, func(i, j int) bool { return out.Collections[i].Kind < out.Collections[j].Kind })
 	out.Objects = make([]Object, 0, len(input.Objects))
 	ids := map[string]bool{}
-	for _, o := range input.Objects {
+	for objectIndex, o := range input.Objects {
 		for _, field := range []struct{ name, value string }{{"object id", o.ID}, {"object name", o.Name}} {
 			if err := nonblank(field.value, field.name); err != nil {
 				return Snapshot{}, nil, nil, err
@@ -258,19 +313,29 @@ func normalizeSnapshot(input Snapshot) (Snapshot, []CoverageEntry, []Diagnostic,
 		if o.Kind != "macro" && (o.Arity != nil || len(o.Arguments) > 0 || o.EvalBased != nil || o.Validation != nil) {
 			return Snapshot{}, nil, nil, fmt.Errorf("macro metadata on non-macro object")
 		}
-		if o.Kind == "macro" && o.Arity != nil {
-			if *o.Arity < 0 || len(o.Arguments) != *o.Arity {
-				return Snapshot{}, nil, nil, fmt.Errorf("macro arity and arguments are inconsistent")
+		if o.Kind == "macro" {
+			if o.Arity == nil || *o.Arity < 0 || len(o.Arguments) != *o.Arity {
+				return Snapshot{}, nil, nil, at(fmt.Sprintf("/objects/%d/arity", objectIndex), fmt.Errorf("macro arity and arguments are inconsistent"))
 			}
 		}
+		seenArguments := map[string]bool{}
 		for _, arg := range o.Arguments {
 			if err := nonblank(arg, "macro argument"); err != nil {
-				return Snapshot{}, nil, nil, err
+				return Snapshot{}, nil, nil, at(fmt.Sprintf("/objects/%d/arguments", objectIndex), err)
 			}
+			if seenArguments[arg] {
+				return Snapshot{}, nil, nil, at(fmt.Sprintf("/objects/%d/arguments", objectIndex), fmt.Errorf("repeated macro argument %q", arg))
+			}
+			seenArguments[arg] = true
 		}
 		if o.Document != nil {
+			selection, err := capabilityselector.Normalize(o.Document.Language, o.Document.Profile, o.Document.Version)
+			if err != nil {
+				return Snapshot{}, nil, nil, at(fmt.Sprintf("/objects/%d/document", objectIndex), err)
+			}
+			o.Document.Language, o.Document.Profile, o.Document.Version = selection.Language, selection.Profile, selection.Version
 			if err := optionalText(o.Document.Text, "document text"); err != nil {
-				return Snapshot{}, nil, nil, err
+				return Snapshot{}, nil, nil, at(fmt.Sprintf("/objects/%d/document/text", objectIndex), err)
 			}
 		}
 		if o.Validation != nil {
@@ -278,12 +343,20 @@ func normalizeSnapshot(input Snapshot) (Snapshot, []CoverageEntry, []Diagnostic,
 				return Snapshot{}, nil, nil, err
 			}
 		}
-		for _, r := range o.Relations {
+		for relationIndex, r := range o.Relations {
+			relationPath := fmt.Sprintf("/objects/%d/relations/%d", objectIndex, relationIndex)
 			if !queryKinds[r.Kind] {
-				return Snapshot{}, nil, nil, fmt.Errorf("unsupported relation kind %q", r.Kind)
+				return Snapshot{}, nil, nil, at(relationPath+"/kind", fmt.Errorf("unsupported relation kind %q", r.Kind))
 			}
 			if err := nonblank(r.Name, "relation name"); err != nil {
-				return Snapshot{}, nil, nil, err
+				return Snapshot{}, nil, nil, at(relationPath+"/name", err)
+			}
+			if r.Property != nil {
+				if r.Start != nil || r.End != nil || !validRelationPointer(*r.Property) {
+					return Snapshot{}, nil, nil, at(relationPath, fmt.Errorf("invalid relation property evidence"))
+				}
+			} else if r.Start == nil || r.End == nil || o.Document == nil || !validRelationRange(o.Document.Text, *r.Start, *r.End) {
+				return Snapshot{}, nil, nil, at(relationPath, fmt.Errorf("invalid relation source evidence"))
 			}
 		}
 		o.Provenance, err = normalizeProvenance(o.Provenance, from, to)
@@ -328,14 +401,19 @@ func PrepareSnapshot(value Snapshot) (*PreparedSnapshot, *Report, error) {
 		return nil, nil, err
 	}
 	if value.Digest != "" && value.Digest != digest {
-		return invalidSnapshot("/digest", fmt.Errorf("asserted snapshot digest does not match computed digest"))
+		_, report, _ := invalidSnapshot("/digest", fmt.Errorf("asserted snapshot digest does not match computed digest"))
+		report.SnapshotDigest = digest
+		return nil, report, nil
 	}
 	status := "valid"
 	if len(diagnostics) > 0 {
 		status = "partial"
 	}
 	report := Report{SchemaVersion: 1, Status: status, SnapshotDigest: digest, Coverage: coverage, Diagnostics: diagnostics}
-	return &PreparedSnapshot{snapshot: normalized, report: report}, &report, nil
+	stored := report
+	stored.Coverage = append([]CoverageEntry{}, report.Coverage...)
+	stored.Diagnostics = append([]Diagnostic{}, report.Diagnostics...)
+	return &PreparedSnapshot{snapshot: normalized, report: stored}, &report, nil
 }
 
 // ValidateArtifacts validates supplied artifact bytes. Nil means absent.

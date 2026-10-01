@@ -213,3 +213,62 @@ func TestSnapshotTypedInputRejectsInvalidUnicodeAndDoesNotMutate(t *testing.T) {
 		t.Fatalf("invalid typed UTF-8 accepted: %v %#v", err, report)
 	}
 }
+
+func TestSnapshotRejectsUnsafeDefinitionEvidence(t *testing.T) {
+	cases := []struct {
+		name   string
+		change func(map[string]any)
+	}{
+		{"missing document text", func(o map[string]any) { o["document"] = map[string]any{} }},
+		{"out of range relation", func(o map[string]any) {
+			o["relations"] = []any{map[string]any{"kind": "macro", "name": "child", "start": -1, "end": 4}}
+		}},
+		{"mixed relation evidence", func(o map[string]any) {
+			o["relations"] = []any{map[string]any{"kind": "macro", "name": "child", "start": 0, "end": 1, "property": "/x"}}
+		}},
+		{"invalid relation pointer", func(o map[string]any) {
+			o["relations"] = []any{map[string]any{"kind": "macro", "name": "child", "property": "/bad~x"}}
+		}},
+		{"missing macro arity", func(o map[string]any) { delete(o, "arity") }},
+		{"repeated argument", func(o map[string]any) { o["arity"] = 2; o["arguments"] = []any{"x", "x"} }},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			v := snapshotFixture()
+			o := macroFixture("m", "name", "abcd")
+			tc.change(o)
+			v["objects"] = []any{o}
+			r := fixtureReport(t, v)
+			if r.Status != "invalid" {
+				t.Fatalf("accepted unsafe evidence: %#v", r)
+			}
+			if !strings.HasPrefix(r.Diagnostics[0].Path, "/objects") {
+				t.Fatalf("location = %q", r.Diagnostics[0].Path)
+			}
+		})
+	}
+}
+func TestSnapshotReportIsolationAndDigestMismatch(t *testing.T) {
+	var value Snapshot
+	if err := json.Unmarshal(fixtureRaw(t, snapshotFixture()), &value); err != nil {
+		t.Fatal(err)
+	}
+	prepared, report, err := PrepareSnapshot(value)
+	if err != nil || prepared == nil || report.Status != "valid" {
+		t.Fatalf("prepare: %v %#v", err, report)
+	}
+	report.Coverage[0].Coverage = "unavailable"
+	if prepared.Report().Coverage[0].Coverage != "complete" {
+		t.Fatal("caller report mutated prepared report")
+	}
+	detached := prepared.Report()
+	detached.Coverage[1].Coverage = "unavailable"
+	if prepared.Report().Coverage[1].Coverage != "complete" {
+		t.Fatal("prepared Report accessor leaked mutable slice")
+	}
+	value.Digest = "sha256:" + strings.Repeat("0", 64)
+	prepared, report, err = PrepareSnapshot(value)
+	if err != nil || prepared != nil || report.Status != "invalid" || !strings.HasPrefix(report.SnapshotDigest, "sha256:") || report.Diagnostics[0].Path != "/digest" {
+		t.Fatalf("digest mismatch: %v %#v", err, report)
+	}
+}
