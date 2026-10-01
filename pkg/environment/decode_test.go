@@ -69,3 +69,18 @@ func TestInlineRequestDuplicateKeepsLocation(t *testing.T) {
 		t.Fatalf("request location lost: %#v", diagnostic)
 	}
 }
+
+func TestSnapshotWrongTypeKeepsNestedLocation(t *testing.T) {
+	raw := []byte(strings.Replace(string(fixtureRaw(t, snapshotFixture())), `"instance_id":"instance-a"`, `"instance_id":123`, 1))
+	report, err := ValidateArtifacts(raw, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if report.Status != "invalid" || len(report.Diagnostics) != 1 {
+		t.Fatalf("wrong-type report: %#v", report)
+	}
+	diagnostic := report.Diagnostics[0]
+	if diagnostic.Path != "/origin/instance_id" || diagnostic.ByteOffset == nil {
+		t.Fatalf("nested location lost: %#v", diagnostic)
+	}
+}

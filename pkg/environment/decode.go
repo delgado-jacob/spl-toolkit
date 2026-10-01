@@ -116,6 +116,14 @@ func decodeStrictJSON(raw []byte, target any) error {
 	d.UseNumber()
 	d.DisallowUnknownFields()
 	if err := d.Decode(target); err != nil {
+		var typeError *json.UnmarshalTypeError
+		if errors.As(err, &typeError) && typeError.Field != "" {
+			path := ""
+			for _, part := range strings.Split(typeError.Field, ".") {
+				path += "/" + pointerPart(part)
+			}
+			return atOffset(path, typeError.Offset, fmt.Errorf("invalid artifact: %w", err))
+		}
 		return atOffset("", d.InputOffset(), fmt.Errorf("invalid artifact: %w", err))
 	}
 	if _, err := d.Token(); err != io.EOF {
