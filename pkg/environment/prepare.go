@@ -37,8 +37,8 @@ func Pair(snapshot *PreparedSnapshot, schemas *PreparedSchemaBundle) (*PreparedE
 		env.collections[collection.Kind] = collection
 	}
 	if schemas != nil {
-		for i, binding := range schemas.bundle.Bindings {
-			path := fmt.Sprintf("/bindings/%d", i)
+		for _, binding := range schemas.bundle.Bindings {
+			path := "/bindings"
 			if object, found := env.objects[binding.ObjectID]; found {
 				if !sameObjectIdentity(object, binding.Expected) {
 					report.Diagnostics = append(report.Diagnostics, Diagnostic{Code: "binding_identity_mismatch", Severity: "error", Artifact: "schema_bundle", Path: path, Message: fmt.Sprintf("object %q identity differs from schema %q binding", binding.ObjectID, binding.SchemaID)})

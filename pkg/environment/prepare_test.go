@@ -197,3 +197,40 @@ func TestPairRetainsValidBindingsAndValidationSurfaces(t *testing.T) {
 		t.Fatalf("standalone invalid diagnostics lost: %v %#v", err, invalid)
 	}
 }
+
+func TestPairLinkageDiagnosticsUseStableBindingPath(t *testing.T) {
+	bundle := bundleFixture(t)
+	bundle.Schemas = bundle.Schemas[:2]
+	bundle.Bindings = []SchemaBinding{
+		{SchemaID: "fields", ObjectID: "missing-z", Expected: ObjectIdentity{Kind: "macro", Name: "z", Namespace: "search", App: "main", Owner: "nobody"}, SourceCoverage: "complete"},
+		{SchemaID: "closed", ObjectID: "missing-a", Expected: ObjectIdentity{Kind: "macro", Name: "a", Namespace: "search", App: "main", Owner: "nobody"}, SourceCoverage: "complete"},
+	}
+	snapshot := snapshotFixture()
+	first, err := ValidateArtifacts(fixtureRaw(t, snapshot), fixtureRaw(t, bundle))
+	if err != nil || first.Status != "invalid" {
+		t.Fatalf("first report: %v %#v", err, first)
+	}
+	linkages := 0
+	for _, diagnostic := range first.Diagnostics {
+		if diagnostic.Code == "binding_object_absent" {
+			linkages++
+			if diagnostic.Path != "/bindings" {
+				t.Fatalf("sorted binding index points at wrong input: %#v", diagnostic)
+			}
+		}
+	}
+	if linkages != 2 {
+		t.Fatalf("expected two linkage diagnostics: %#v", first.Diagnostics)
+	}
+	bundle.Bindings[0], bundle.Bindings[1] = bundle.Bindings[1], bundle.Bindings[0]
+	second, err := ValidateArtifacts(fixtureRaw(t, snapshot), fixtureRaw(t, bundle))
+	if err != nil || !reflect.DeepEqual(first, second) {
+		t.Fatalf("binding order changed report: %v\nfirst=%#v\nsecond=%#v", err, first, second)
+	}
+	formatted := FormatReport(first)
+	for _, expected := range []string{"Status: invalid", "Snapshot digest: sha256:", "Schema bundle digest: sha256:", "Coverage: schema_bundle macro", "binding_object_absent"} {
+		if !strings.Contains(formatted, expected) {
+			t.Fatalf("plain report omitted %q: %s", expected, formatted)
+		}
+	}
+}
