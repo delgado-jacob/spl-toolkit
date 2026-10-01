@@ -879,3 +879,38 @@ def test_environment_snapshot_bundle_request_and_report_contracts(schemas):
     wrong = copy.deepcopy(report)
     wrong["snapshot_digest"] = "sha256:bad"
     assert errors(schemas, "environment-validation", wrong)
+
+
+def test_environment_kind_and_ocsf_selection_boundaries(schemas):
+    case = json.loads((ROOT / "testdata/environment/cases.json").read_text())[0]
+    snapshot = case["snapshot"]
+    bundle = case["schema_bundle"]
+
+    index_with_query = copy.deepcopy(snapshot)
+    index_with_query["objects"][0]["kind"] = "index"
+    index_with_query["objects"][0]["document"] = {"text": "index=main"}
+    assert errors(schemas, "environment-snapshot", index_with_query)
+
+    macro_without_arity = copy.deepcopy(snapshot)
+    macro_without_arity["objects"][0]["kind"] = "macro"
+    macro_without_arity["objects"][0]["namespace"] = "search"
+    assert errors(schemas, "environment-snapshot", macro_without_arity)
+    macro_without_arity["objects"][0]["arity"] = 0
+    assert not errors(schemas, "environment-snapshot", macro_without_arity)
+    saved_search = copy.deepcopy(snapshot)
+    saved_search["objects"][0]["kind"] = "saved_search"
+    saved_search["objects"][0]["document"] = {"text": "index=main | stats count"}
+    assert not errors(schemas, "environment-snapshot", saved_search)
+    wrong = copy.deepcopy(saved_search)
+    wrong["objects"][0]["arity"] = 0
+    assert errors(schemas, "environment-snapshot", wrong)
+
+    for selection in ({"version": "1.6.0", "class": ""},
+                      {"version": "1.6.0", "class_uid": 2 ** 64}):
+        wrong = copy.deepcopy(bundle)
+        wrong["schemas"][0] = {
+            "id": "ocsf", "kind": "ocsf",
+            "target": {"kind": "ocsf", "catalog": {"compile_version": 1, "extensions": {"custom": {"description": None}}}, "selection": selection},
+            "provenance": bundle["provenance"],
+        }
+        assert errors(schemas, "field-schema-bundle", wrong), selection

@@ -6270,7 +6270,89 @@
         "name",
         "provenance"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "enum": [
+                  "index",
+                  "source",
+                  "sourcetype"
+                ]
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "not": {
+              "required": [
+                "document"
+              ]
+            },
+            "properties": {
+              "namespace": {
+                "const": ""
+              },
+              "app": {
+                "const": ""
+              },
+              "owner": {
+                "const": ""
+              },
+              "relations": {
+                "maxItems": 0
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "macro"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "required": [
+              "arity"
+            ]
+          },
+          "else": {
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "arity"
+                  ]
+                },
+                {
+                  "required": [
+                    "eval_based"
+                  ]
+                },
+                {
+                  "required": [
+                    "validation"
+                  ]
+                }
+              ]
+            },
+            "properties": {
+              "arguments": {
+                "maxItems": 0
+              }
+            }
+          }
+        }
+      ]
     },
     "environment.Snapshot": {
       "type": "object",
@@ -6416,6 +6498,32 @@
                   "required": [
                     "kind"
                   ]
+                },
+                {
+                  "properties": {
+                    "selection": {
+                      "properties": {
+                        "class_uid": {
+                          "type": "integer",
+                          "minimum": -9223372036854775808,
+                          "maximum": 9223372036854775807
+                        },
+                        "category_uid": {
+                          "type": "integer",
+                          "minimum": -9223372036854775808,
+                          "maximum": 9223372036854775807
+                        },
+                        "class": {
+                          "type": "string",
+                          "pattern": "\\S"
+                        },
+                        "category": {
+                          "type": "string",
+                          "pattern": "\\S"
+                        }
+                      }
+                    }
+                  }
                 }
               ]
             },

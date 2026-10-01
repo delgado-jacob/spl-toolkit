@@ -4378,6 +4378,50 @@ components:
       type: object
     tooling.environment.Object:
       additionalProperties: false
+      allOf:
+      - if:
+          properties:
+            kind:
+              enum:
+              - index
+              - source
+              - sourcetype
+          required:
+          - kind
+        then:
+          not:
+            required:
+            - document
+          properties:
+            app:
+              const: ''
+            namespace:
+              const: ''
+            owner:
+              const: ''
+            relations:
+              maxItems: 0
+      - else:
+          not:
+            anyOf:
+            - required:
+              - arity
+            - required:
+              - eval_based
+            - required:
+              - validation
+          properties:
+            arguments:
+              maxItems: 0
+        if:
+          properties:
+            kind:
+              const: macro
+          required:
+          - kind
+        then:
+          required:
+          - arity
       properties:
         app:
           type: string
@@ -4688,6 +4732,23 @@ components:
                   const: ocsf
               required:
               - kind
+            - properties:
+                selection:
+                  properties:
+                    category:
+                      pattern: \S
+                      type: string
+                    category_uid:
+                      maximum: 9223372036854775807
+                      minimum: -9223372036854775808
+                      type: integer
+                    class:
+                      pattern: \S
+                      type: string
+                    class_uid:
+                      maximum: 9223372036854775807
+                      minimum: -9223372036854775808
+                      type: integer
         required:
         - id
         - kind
@@ -6606,7 +6667,20 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/tooling.environment.Report'
+                oneOf:
+                - $ref: '#/components/schemas/tooling.environment.Report'
+                - allOf:
+                  - $ref: '#/components/schemas/api.ErrorResponse'
+                  - properties:
+                      code:
+                        const: 400
+                      error:
+                        const: true
+                    required:
+                    - error
+                    - message
+                    - code
+                    type: object
           description: Invalid artifact or request; content type and size errors use
             ErrorResponse
         '500':

@@ -914,9 +914,24 @@ func main() {
         route = spec["paths"]["/environment/validate"]["post"]
         request = route["requestBody"]["content"]["application/json"]["schema"]
         self.assertEqual(request, {"$ref": "#/components/schemas/tooling.environment.ValidationRequest"})
-        for code in ("200", "400"):
-            self.assertEqual(route["responses"][code]["content"]["application/json"]["schema"],
-                             {"$ref": "#/components/schemas/tooling.environment.Report"})
+        self.assertEqual(route["responses"]["200"]["content"]["application/json"]["schema"],
+                         {"$ref": "#/components/schemas/tooling.environment.Report"})
+        bad_request_schema = route["responses"]["400"]["content"]["application/json"]["schema"]
+        self.assertEqual(bad_request_schema, {"oneOf": [
+            {"$ref": "#/components/schemas/tooling.environment.Report"},
+            {"allOf": [{"$ref": "#/components/schemas/api.ErrorResponse"},
+                       {"type": "object", "required": ["error", "message", "code"],
+                        "properties": {"error": {"const": True}, "code": {"const": 400}}}]},
+        ]})
+        response_validator = jsonschema.Draft202012Validator({
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "components": spec["components"], **bad_request_schema,
+        })
+        self.assertTrue(response_validator.is_valid({
+            "schema_version": 1, "status": "invalid", "coverage": [], "diagnostics": [],
+        }))
+        self.assertTrue(response_validator.is_valid({"error": True, "message": "bad content type", "code": 400}))
+        self.assertFalse(response_validator.is_valid({"unrelated": True}))
         schemas = spec["components"]["schemas"]
         shared = json.loads((SCRIPT.parents[1] / "contracts/v1/shared.schema.json").read_text())
         expected = {"tooling." + name for name in shared["$defs"] if name.startswith("environment.")}

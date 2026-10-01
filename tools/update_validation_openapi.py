@@ -126,7 +126,12 @@ def add_tooling(spec):
         "requestBody": {"required": True, "content": {"application/json": {"schema": reference("environment.ValidationRequest")}}},
         "responses": {
             "200": {"description": "Valid or partial canonical report", "content": {"application/json": {"schema": reference("environment.Report")}}},
-            "400": {"description": "Invalid artifact or request; content type and size errors use ErrorResponse", "content": {"application/json": {"schema": reference("environment.Report")}}},
+            "400": {"description": "Invalid artifact or request; content type and size errors use ErrorResponse", "content": {"application/json": {"schema": {"oneOf": [
+                reference("environment.Report"),
+                {"allOf": [{"$ref": PREFIX + "api.ErrorResponse"},
+                           {"type": "object", "required": ["error", "message", "code"],
+                            "properties": {"error": {"const": True}, "code": {"const": 400}}}]},
+            ]}}}},
             "500": {"description": "Internal failure", "content": {"application/json": {"schema": {"$ref": PREFIX + "api.ErrorResponse"}}}},
         },
     }}
