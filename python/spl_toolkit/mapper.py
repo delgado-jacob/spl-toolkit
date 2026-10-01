@@ -156,6 +156,8 @@ class SPLMapper:
         self._lib.spl_mapper_validate_schema.restype = ctypes.POINTER(SPLResult)
         self._lib.spl_mapper_validate_schema_batch.argtypes = [ctypes.c_int, ctypes.c_char_p]
         self._lib.spl_mapper_validate_schema_batch.restype = ctypes.POINTER(SPLResult)
+        self._lib.spl_mapper_validate_environment.argtypes = [ctypes.c_int, ctypes.c_char_p]
+        self._lib.spl_mapper_validate_environment.restype = ctypes.POINTER(SPLResult)
         self._lib.spl_mapper_rewrite.argtypes = [ctypes.c_int, ctypes.c_char_p]
         self._lib.spl_mapper_rewrite.restype = ctypes.POINTER(SPLResult)
         self._lib.spl_mapper_rewrite_batch.argtypes = [ctypes.c_int, ctypes.c_char_p]
@@ -398,6 +400,11 @@ class SPLMapper:
         """Validate a nonempty list of documents against an explicit schema target."""
         return self._validate_fields_request(
             self._lib.spl_mapper_validate_schema_batch, {"documents": documents, "target": target})
+
+    def validate_environment(self, request: dict) -> dict:
+        """Validate inline environment artifacts and return the canonical report."""
+        return self._validate_fields_request(
+            self._lib.spl_mapper_validate_environment, request, operation="environment validation")
 
     def rewrite(self, query, rules, *, mode="preview", validation_target=None,
                 language="spl", profile="splunkd", version="current", source_id="") -> dict:
