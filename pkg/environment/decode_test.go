@@ -55,3 +55,17 @@ func TestSnapshotExactMembersAndLocations(t *testing.T) {
 		})
 	}
 }
+
+func TestInlineRequestDuplicateKeepsLocation(t *testing.T) {
+	report, err := ValidateJSON([]byte(`{"schema_version":1,"schema_version":1,"snapshot":{}}`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if report.Status != "invalid" || len(report.Diagnostics) != 1 {
+		t.Fatalf("request report: %#v", report)
+	}
+	diagnostic := report.Diagnostics[0]
+	if diagnostic.Artifact != "request" || diagnostic.Path != "/schema_version" || diagnostic.ByteOffset == nil {
+		t.Fatalf("request location lost: %#v", diagnostic)
+	}
+}

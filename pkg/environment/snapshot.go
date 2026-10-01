@@ -27,41 +27,9 @@ func invalidSnapshot(path string, err error) (*PreparedSnapshot, *Report, error)
 	if path == "" {
 		located, offset := inputLocation(err)
 		path = located
-		if path == "" {
-			path = inferSnapshotPath(err)
-		}
 		return nil, &Report{SchemaVersion: 1, Status: "invalid", Coverage: []CoverageEntry{}, Diagnostics: []Diagnostic{{Code: "snapshot_invalid", Severity: "error", Artifact: "snapshot", Path: path, ByteOffset: offset, Message: err.Error()}}}, nil
 	}
 	return nil, &Report{SchemaVersion: 1, Status: "invalid", Coverage: []CoverageEntry{}, Diagnostics: []Diagnostic{{Code: "snapshot_invalid", Severity: "error", Artifact: "snapshot", Path: path, Message: err.Error()}}}, nil
-}
-func inferSnapshotPath(err error) string {
-	message := err.Error()
-	switch {
-	case strings.Contains(message, "schema_version"):
-		return "/schema_version"
-	case strings.Contains(message, "scope_id"):
-		return "/scope_id"
-	case strings.Contains(message, "namespace selector"):
-		return "/capture_scope/namespace"
-	case strings.Contains(message, "app selector"):
-		return "/capture_scope/app"
-	case strings.Contains(message, "owner selector"):
-		return "/capture_scope/owner"
-	case strings.Contains(message, "capture start"), strings.Contains(message, "capture.start"):
-		return "/capture/start"
-	case strings.Contains(message, "capture end"), strings.Contains(message, "capture.end"):
-		return "/capture/end"
-	case strings.Contains(message, "capability"):
-		return "/capabilities"
-	case strings.Contains(message, "collection"):
-		return "/collections"
-	case strings.Contains(message, "object"), strings.Contains(message, "macro"), strings.Contains(message, "relation"), strings.Contains(message, "document"), strings.Contains(message, "observation"):
-		return "/objects"
-	case strings.Contains(message, "instance_id"), strings.Contains(message, "product_version"), strings.Contains(message, "producer"):
-		return "/origin"
-	default:
-		return ""
-	}
 }
 func validRelationPointer(pointer string) bool {
 	if !strings.HasPrefix(pointer, "/") {
@@ -128,18 +96,18 @@ func normalizeTime(value, name string) (string, time.Time, error) {
 	}
 	return parsed.UTC().Format(time.RFC3339Nano), parsed.UTC(), nil
 }
-func normalizeProvenance(p Provenance, start, end time.Time) (Provenance, error) {
+func normalizeProvenance(p Provenance, start, end time.Time, path string) (Provenance, error) {
 	for _, field := range []struct{ name, value string }{{"source_kind", p.SourceKind}, {"source_id", p.SourceID}} {
 		if err := nonblank(field.value, field.name); err != nil {
-			return Provenance{}, err
+			return Provenance{}, at(path+"/"+field.name, err)
 		}
 	}
-	observed, at, err := normalizeTime(p.ObservedAt, "observed_at")
+	observed, observedTime, err := normalizeTime(p.ObservedAt, "observed_at")
 	if err != nil {
-		return Provenance{}, err
+		return Provenance{}, at(path+"/observed_at", err)
 	}
-	if at.Before(start) || at.After(end) {
-		return Provenance{}, fmt.Errorf("observation is outside capture interval")
+	if observedTime.Before(start) || observedTime.After(end) {
+		return Provenance{}, at(path+"/observed_at", fmt.Errorf("observation is outside capture interval"))
 	}
 	p.ObservedAt = observed
 	return p, nil
@@ -188,59 +156,59 @@ func normalizeSnapshot(input Snapshot) (Snapshot, []CoverageEntry, []Diagnostic,
 	}
 
 	if input.SchemaVersion != 1 {
-		return Snapshot{}, nil, nil, fmt.Errorf("schema_version must be integer 1")
+		return Snapshot{}, nil, nil, at("/schema_version", fmt.Errorf("schema_version must be integer 1"))
 	}
 	if err := nonblank(input.ScopeID, "scope_id"); err != nil {
-		return Snapshot{}, nil, nil, err
+		return Snapshot{}, nil, nil, at("/scope_id", err)
 	}
 	out := cloneSnapshot(input)
 	var err error
 	out.CaptureScope.Namespace, err = normalizeSelector(input.CaptureScope.Namespace, "namespace")
 	if err != nil {
-		return Snapshot{}, nil, nil, err
+		return Snapshot{}, nil, nil, at("/capture_scope/namespace", err)
 	}
 	out.CaptureScope.App, err = normalizeSelector(input.CaptureScope.App, "app")
 	if err != nil {
-		return Snapshot{}, nil, nil, err
+		return Snapshot{}, nil, nil, at("/capture_scope/app", err)
 	}
 	out.CaptureScope.Owner, err = normalizeSelector(input.CaptureScope.Owner, "owner")
 	if err != nil {
-		return Snapshot{}, nil, nil, err
+		return Snapshot{}, nil, nil, at("/capture_scope/owner", err)
 	}
 	for _, field := range []struct{ name, value string }{{"instance_id", out.Origin.InstanceID}, {"product_version", out.Origin.ProductVersion}, {"producer", out.Origin.Producer}, {"producer_version", out.Origin.ProducerVersion}} {
 		if err := nonblank(field.value, field.name); err != nil {
-			return Snapshot{}, nil, nil, err
+			return Snapshot{}, nil, nil, at("/origin/"+field.name, err)
 		}
 	}
 	start, from, err := normalizeTime(out.Capture.Start, "capture.start")
 	if err != nil {
-		return Snapshot{}, nil, nil, err
+		return Snapshot{}, nil, nil, at("/capture/start", err)
 	}
 	end, to, err := normalizeTime(out.Capture.End, "capture.end")
 	if err != nil {
-		return Snapshot{}, nil, nil, err
+		return Snapshot{}, nil, nil, at("/capture/end", err)
 	}
 	if from.After(to) {
-		return Snapshot{}, nil, nil, fmt.Errorf("capture start is after end")
+		return Snapshot{}, nil, nil, at("/capture", fmt.Errorf("capture start is after end"))
 	}
 	out.Capture = CaptureInterval{Start: start, End: end}
 	out.Capabilities = make([]Capability, 0, len(input.Capabilities))
 	caps := map[string]bool{}
-	for _, cap := range input.Capabilities {
+	for capabilityIndex, cap := range input.Capabilities {
 		if err := nonblank(cap.ID, "capability id"); err != nil {
-			return Snapshot{}, nil, nil, err
+			return Snapshot{}, nil, nil, at(fmt.Sprintf("/capabilities/%d/id", capabilityIndex), err)
 		}
 		if err := nonblank(cap.Version, "capability version"); err != nil {
-			return Snapshot{}, nil, nil, err
+			return Snapshot{}, nil, nil, at(fmt.Sprintf("/capabilities/%d/version", capabilityIndex), err)
 		}
 		if caps[cap.ID] {
-			return Snapshot{}, nil, nil, fmt.Errorf("duplicate capability fact %q", cap.ID)
+			return Snapshot{}, nil, nil, at(fmt.Sprintf("/capabilities/%d/id", capabilityIndex), fmt.Errorf("duplicate capability fact %q", cap.ID))
 		}
 		caps[cap.ID] = true
 		if cap.State != "available" && cap.State != "unavailable" && cap.State != "unknown" {
-			return Snapshot{}, nil, nil, fmt.Errorf("unsupported capability state %q", cap.State)
+			return Snapshot{}, nil, nil, at(fmt.Sprintf("/capabilities/%d/state", capabilityIndex), fmt.Errorf("unsupported capability state %q", cap.State))
 		}
-		cap.Provenance, err = normalizeProvenance(cap.Provenance, from, to)
+		cap.Provenance, err = normalizeProvenance(cap.Provenance, from, to, fmt.Sprintf("/capabilities/%d/provenance", capabilityIndex))
 		if err != nil {
 			return Snapshot{}, nil, nil, err
 		}
@@ -249,25 +217,25 @@ func normalizeSnapshot(input Snapshot) (Snapshot, []CoverageEntry, []Diagnostic,
 	sort.Slice(out.Capabilities, func(i, j int) bool { return out.Capabilities[i].ID < out.Capabilities[j].ID })
 	out.Collections = make([]Collection, 0, len(input.Collections))
 	collections := map[string]Collection{}
-	for _, c := range input.Collections {
+	for collectionIndex, c := range input.Collections {
 		if !kindSet[c.Kind] {
-			return Snapshot{}, nil, nil, fmt.Errorf("unsupported collection kind %q", c.Kind)
+			return Snapshot{}, nil, nil, at(fmt.Sprintf("/collections/%d/kind", collectionIndex), fmt.Errorf("unsupported collection kind %q", c.Kind))
 		}
 		if _, found := collections[c.Kind]; found {
-			return Snapshot{}, nil, nil, fmt.Errorf("duplicate collection kind %q", c.Kind)
+			return Snapshot{}, nil, nil, at(fmt.Sprintf("/collections/%d/kind", collectionIndex), fmt.Errorf("duplicate collection kind %q", c.Kind))
 		}
 		if c.Coverage != "complete" && c.Coverage != "partial" && c.Coverage != "unavailable" {
-			return Snapshot{}, nil, nil, fmt.Errorf("invalid collection coverage %q", c.Coverage)
+			return Snapshot{}, nil, nil, at(fmt.Sprintf("/collections/%d/coverage", collectionIndex), fmt.Errorf("invalid collection coverage %q", c.Coverage))
 		}
 		if c.Coverage != "complete" {
 			if err := nonblank(c.Reason, "collection reason"); err != nil {
-				return Snapshot{}, nil, nil, err
+				return Snapshot{}, nil, nil, at(fmt.Sprintf("/collections/%d/reason", collectionIndex), err)
 			}
 		} else if c.Reason != "" {
-			return Snapshot{}, nil, nil, fmt.Errorf("complete collection cannot have a reason")
+			return Snapshot{}, nil, nil, at(fmt.Sprintf("/collections/%d/reason", collectionIndex), fmt.Errorf("complete collection cannot have a reason"))
 		}
 		if (c.Kind == "index" || c.Kind == "source" || c.Kind == "sourcetype") && c.Coverage == "complete" && (out.CaptureScope.Namespace.All == nil || out.CaptureScope.App.All == nil || out.CaptureScope.Owner.All == nil) {
-			return Snapshot{}, nil, nil, fmt.Errorf("complete %s collection cannot use restricted scope", c.Kind)
+			return Snapshot{}, nil, nil, at(fmt.Sprintf("/collections/%d", collectionIndex), fmt.Errorf("complete %s collection cannot use restricted scope", c.Kind))
 		}
 		collections[c.Kind] = c
 		out.Collections = append(out.Collections, c)
@@ -276,42 +244,42 @@ func normalizeSnapshot(input Snapshot) (Snapshot, []CoverageEntry, []Diagnostic,
 	out.Objects = make([]Object, 0, len(input.Objects))
 	ids := map[string]bool{}
 	for objectIndex, o := range input.Objects {
-		for _, field := range []struct{ name, value string }{{"object id", o.ID}, {"object name", o.Name}} {
-			if err := nonblank(field.value, field.name); err != nil {
-				return Snapshot{}, nil, nil, err
+		for _, field := range []struct{ key, value string }{{"id", o.ID}, {"name", o.Name}} {
+			if err := nonblank(field.value, "object "+field.key); err != nil {
+				return Snapshot{}, nil, nil, at(fmt.Sprintf("/objects/%d/%s", objectIndex, field.key), err)
 			}
 		}
 		if ids[o.ID] {
-			return Snapshot{}, nil, nil, fmt.Errorf("duplicate object id %q", o.ID)
+			return Snapshot{}, nil, nil, at(fmt.Sprintf("/objects/%d/id", objectIndex), fmt.Errorf("duplicate object id %q", o.ID))
 		}
 		ids[o.ID] = true
 		if !kindSet[o.Kind] {
-			return Snapshot{}, nil, nil, fmt.Errorf("unsupported object kind %q", o.Kind)
+			return Snapshot{}, nil, nil, at(fmt.Sprintf("/objects/%d/kind", objectIndex), fmt.Errorf("unsupported object kind %q", o.Kind))
 		}
 		c, found := collections[o.Kind]
 		if !found {
-			return Snapshot{}, nil, nil, fmt.Errorf("object %q has omitted collection", o.ID)
+			return Snapshot{}, nil, nil, at(fmt.Sprintf("/objects/%d/kind", objectIndex), fmt.Errorf("object %q has omitted collection", o.ID))
 		}
 		if c.Coverage == "unavailable" {
-			return Snapshot{}, nil, nil, fmt.Errorf("unavailable collection %q contains object", o.Kind)
+			return Snapshot{}, nil, nil, at(fmt.Sprintf("/objects/%d/kind", objectIndex), fmt.Errorf("unavailable collection %q contains object", o.Kind))
 		}
 		if o.Kind == "index" || o.Kind == "source" || o.Kind == "sourcetype" {
 			if o.Namespace != "" || o.App != "" || o.Owner != "" {
-				return Snapshot{}, nil, nil, fmt.Errorf("%s object has inapplicable context", o.Kind)
+				return Snapshot{}, nil, nil, at(fmt.Sprintf("/objects/%d", objectIndex), fmt.Errorf("%s object has inapplicable context", o.Kind))
 			}
 		} else if !inScope(out.CaptureScope.Namespace, o.Namespace) || !inScope(out.CaptureScope.App, o.App) || !inScope(out.CaptureScope.Owner, o.Owner) {
-			return Snapshot{}, nil, nil, fmt.Errorf("object %q is outside capture scope", o.ID)
+			return Snapshot{}, nil, nil, at(fmt.Sprintf("/objects/%d", objectIndex), fmt.Errorf("object %q is outside capture scope", o.ID))
 		}
 		for _, field := range []struct{ name, value string }{{"namespace", o.Namespace}, {"app", o.App}, {"owner", o.Owner}, {"sharing", o.Sharing}} {
 			if err := optionalText(field.value, field.name); err != nil {
-				return Snapshot{}, nil, nil, err
+				return Snapshot{}, nil, nil, at(fmt.Sprintf("/objects/%d/%s", objectIndex, field.name), err)
 			}
 		}
 		if !queryKinds[o.Kind] && (o.Document != nil || o.Arity != nil || len(o.Arguments) > 0 || o.EvalBased != nil || o.Validation != nil || len(o.Relations) > 0) {
-			return Snapshot{}, nil, nil, fmt.Errorf("query metadata on %s object", o.Kind)
+			return Snapshot{}, nil, nil, at(fmt.Sprintf("/objects/%d", objectIndex), fmt.Errorf("query metadata on %s object", o.Kind))
 		}
 		if o.Kind != "macro" && (o.Arity != nil || len(o.Arguments) > 0 || o.EvalBased != nil || o.Validation != nil) {
-			return Snapshot{}, nil, nil, fmt.Errorf("macro metadata on non-macro object")
+			return Snapshot{}, nil, nil, at(fmt.Sprintf("/objects/%d", objectIndex), fmt.Errorf("macro metadata on non-macro object"))
 		}
 		if o.Kind == "macro" {
 			if o.Arity == nil || *o.Arity < 0 || len(o.Arguments) != *o.Arity {
@@ -340,7 +308,7 @@ func normalizeSnapshot(input Snapshot) (Snapshot, []CoverageEntry, []Diagnostic,
 		}
 		if o.Validation != nil {
 			if err := optionalText(*o.Validation, "macro validation"); err != nil {
-				return Snapshot{}, nil, nil, err
+				return Snapshot{}, nil, nil, at(fmt.Sprintf("/objects/%d/validation", objectIndex), err)
 			}
 		}
 		for relationIndex, r := range o.Relations {
@@ -359,7 +327,7 @@ func normalizeSnapshot(input Snapshot) (Snapshot, []CoverageEntry, []Diagnostic,
 				return Snapshot{}, nil, nil, at(relationPath, fmt.Errorf("invalid relation source evidence"))
 			}
 		}
-		o.Provenance, err = normalizeProvenance(o.Provenance, from, to)
+		o.Provenance, err = normalizeProvenance(o.Provenance, from, to, fmt.Sprintf("/objects/%d/provenance", objectIndex))
 		if err != nil {
 			return Snapshot{}, nil, nil, err
 		}
@@ -448,7 +416,8 @@ func ValidateJSON(raw []byte) (*Report, error) {
 		SchemaBundle  json.RawMessage `json:"schema_bundle"`
 	}
 	if err := decodeStrictJSON(raw, &request); err != nil {
-		return &Report{SchemaVersion: 1, Status: "invalid", Coverage: []CoverageEntry{}, Diagnostics: []Diagnostic{{Code: "request_invalid", Severity: "error", Artifact: "request", Message: err.Error()}}}, nil
+		path, offset := inputLocation(err)
+		return &Report{SchemaVersion: 1, Status: "invalid", Coverage: []CoverageEntry{}, Diagnostics: []Diagnostic{{Code: "request_invalid", Severity: "error", Artifact: "request", Path: path, ByteOffset: offset, Message: err.Error()}}}, nil
 	}
 	if request.SchemaVersion != 1 {
 		return &Report{SchemaVersion: 1, Status: "invalid", Coverage: []CoverageEntry{}, Diagnostics: []Diagnostic{{Code: "request_invalid", Severity: "error", Artifact: "request", Path: "/schema_version", Message: "schema_version must be integer 1"}}}, nil

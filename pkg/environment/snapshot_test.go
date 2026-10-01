@@ -272,3 +272,50 @@ func TestSnapshotReportIsolationAndDigestMismatch(t *testing.T) {
 		t.Fatalf("digest mismatch: %v %#v", err, report)
 	}
 }
+
+func TestSnapshotProvenanceLocations(t *testing.T) {
+	cases := []struct {
+		name, want string
+		change     func(map[string]any)
+	}{
+		{"capability observation", "/capabilities/0/provenance/observed_at", func(v map[string]any) {
+			v["capabilities"] = []any{map[string]any{"id": "cap", "version": "1", "state": "available", "provenance": map[string]any{"source_kind": "product", "source_id": "facts", "observed_at": "2026-10-01T13:00:00Z"}}}
+		}},
+		{"object observation", "/objects/0/provenance/observed_at", func(v map[string]any) {
+			o := macroFixture("m", "name", "x")
+			o["provenance"].(map[string]any)["observed_at"] = "2026-10-01T13:00:00Z"
+			v["objects"] = []any{o}
+		}},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			v := snapshotFixture()
+			tc.change(v)
+			r := fixtureReport(t, v)
+			if r.Status != "invalid" || len(r.Diagnostics) != 1 || r.Diagnostics[0].Path != tc.want {
+				t.Fatalf("want %s: %#v", tc.want, r)
+			}
+		})
+	}
+}
+
+func TestSnapshotSemanticLocations(t *testing.T) {
+	cases := []struct {
+		name, want string
+		change     func(map[string]any)
+	}{
+		{"origin producer", "/origin/producer", func(v map[string]any) { v["origin"].(map[string]any)["producer"] = "" }},
+		{"invalid collection coverage", "/collections/0/coverage", func(v map[string]any) { v["collections"].([]any)[0].(map[string]any)["coverage"] = "unknown" }},
+		{"reversed interval", "/capture", func(v map[string]any) { v["capture"].(map[string]any)["end"] = "2026-10-01T11:00:00Z" }},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			v := snapshotFixture()
+			tc.change(v)
+			r := fixtureReport(t, v)
+			if r.Status != "invalid" || len(r.Diagnostics) != 1 || r.Diagnostics[0].Path != tc.want {
+				t.Fatalf("want %s: %#v", tc.want, r)
+			}
+		})
+	}
+}
