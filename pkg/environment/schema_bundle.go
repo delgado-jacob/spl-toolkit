@@ -123,7 +123,7 @@ func normalizeSchemaBundle(input SchemaBundle) (SchemaBundle, map[string]prepare
 	sort.Slice(out.Schemas, func(i, j int) bool { return out.Schemas[i].ID < out.Schemas[j].ID })
 	coverage := []CoverageEntry{}
 	diagnostics := []Diagnostic{}
-	seen := map[string]bool{}
+	seen := map[struct{ schemaID, objectID string }]bool{}
 	for i, binding := range input.Bindings {
 		path := fmt.Sprintf("/bindings/%d", i)
 		if err := nonblank(binding.SchemaID, "schema_id"); err != nil {
@@ -135,7 +135,7 @@ func normalizeSchemaBundle(input SchemaBundle) (SchemaBundle, map[string]prepare
 		if err := nonblank(binding.ObjectID, "object_id"); err != nil {
 			return SchemaBundle{}, nil, nil, nil, at(path+"/object_id", err)
 		}
-		key := binding.SchemaID + "\x00" + binding.ObjectID
+		key := struct{ schemaID, objectID string }{binding.SchemaID, binding.ObjectID}
 		if seen[key] {
 			return SchemaBundle{}, nil, nil, nil, at(path, fmt.Errorf("duplicate schema-object binding"))
 		}

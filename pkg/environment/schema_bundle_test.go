@@ -130,6 +130,24 @@ func TestSchemaBundleRejectsConflicts(t *testing.T) {
 	}
 }
 
+func TestSchemaBundleDistinctPairsWithNULIdentifiers(t *testing.T) {
+	bundle := bundleFixture(t)
+	bundle.Schemas = bundle.Schemas[:2]
+	bundle.Schemas[0].ID = "a\x00b"
+	bundle.Schemas[1].ID = "a"
+	bundle.Bindings = bundle.Bindings[:2]
+	bundle.Bindings[0].SchemaID, bundle.Bindings[0].ObjectID = "a\x00b", "c"
+	bundle.Bindings[1].SchemaID, bundle.Bindings[1].ObjectID = "a", "b\x00c"
+	prepared, report, err := PrepareSchemaBundle(bundle)
+	if err != nil || prepared == nil || report.Status != "valid" || len(report.Coverage) != 2 {
+		t.Fatalf("distinct pairs rejected: %v %#v", err, report)
+	}
+	artifactReport, err := ValidateArtifacts(nil, fixtureRaw(t, bundle))
+	if err != nil || artifactReport.Status != "valid" {
+		t.Fatalf("distinct serialized pairs rejected: %v %#v", err, artifactReport)
+	}
+}
+
 func TestSchemaBundleArtifactValidation(t *testing.T) {
 	bundle := fixtureRaw(t, bundleFixture(t))
 	snapshot := fixtureRaw(t, snapshotFixture())
