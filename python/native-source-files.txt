@@ -13,6 +13,9 @@ contracts/v1/corpus.schema.json
 contracts/v1/definitions.schema.json
 contracts/v1/detection-bom.schema.json
 contracts/v1/document-view.schema.json
+contracts/v1/environment-snapshot.schema.json
+contracts/v1/environment-validation.schema.json
+contracts/v1/field-schema-bundle.schema.json
 contracts/v1/field-validation.schema.json
 contracts/v1/graph.schema.json
 contracts/v1/impact.schema.json
@@ -112,6 +115,14 @@ pkg/corpusio/manifest.go
 pkg/document/model.go
 pkg/document/query.go
 pkg/document/snapshot.go
+pkg/environment/closure.go
+pkg/environment/decode.go
+pkg/environment/digest.go
+pkg/environment/model.go
+pkg/environment/prepare.go
+pkg/environment/report.go
+pkg/environment/schema_bundle.go
+pkg/environment/snapshot.go
 pkg/graph/export.go
 pkg/graph/identity.go
 pkg/graph/model.go

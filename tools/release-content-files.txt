@@ -13,6 +13,9 @@ contracts/v1/corpus.schema.json
 contracts/v1/definitions.schema.json
 contracts/v1/detection-bom.schema.json
 contracts/v1/document-view.schema.json
+contracts/v1/environment-snapshot.schema.json
+contracts/v1/environment-validation.schema.json
+contracts/v1/field-schema-bundle.schema.json
 contracts/v1/field-validation.schema.json
 contracts/v1/graph.schema.json
 contracts/v1/impact.schema.json
@@ -31,6 +34,8 @@ docs/contracts.md
 docs/rewrite.md
 docs/spl2.md
 docs/tooling.md
+examples/environment/fields.json
+examples/environment/partial-snapshot.json
 examples/go/basic/main.go
 examples/go/tooling/main.go
 examples/tooling/after-rules.json

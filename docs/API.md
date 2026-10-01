@@ -200,6 +200,51 @@ curl -sS http://localhost:8080/api/v1/capabilities
 
 `GET /api/v1/capabilities` returns the direct capability manifest. Malformed JSON, invalid Unicode, duplicate or unknown properties, trailing JSON, and unsupported options return HTTP 400 transport errors instead of analysis reports. The existing JSON content-type policy, 1 MiB request-body limit, and middleware protections apply. Query processing opens no server-side file or network resource. See [REST server usage](api-server.md) for deployment and legacy endpoints.
 
+## Offline environment artifacts
+
+`pkg/environment` strictly decodes and prepares two independent version 1
+inputs. A snapshot records an opaque `scope_id`, namespace/app/owner capture
+selectors, origin and UTC capture interval, product capability facts, per-kind
+collection coverage, and objects with provenance. A schema bundle records
+field-list, JSON Schema, or OCSF targets and bindings to typed object identities.
+`PrepareSnapshot` and `PrepareSchemaBundle` return detached prepared inputs and
+canonical reports. `Pair` checks the bindings against a prepared snapshot and
+returns reusable object, collection, and binding indexes for valid or partial
+evidence. A schema bundle can be paired with a later snapshot when its IDs and
+expected identities still agree. `ValidateArtifacts` accepts raw bytes for
+either or both artifacts and returns the same canonical report without exposing
+the prepared handle.
+
+```bash
+spl-toolkit environment validate --snapshot examples/environment/partial-snapshot.json --schemas examples/environment/fields.json --format json
+```
+
+The CLI accepts `--snapshot` and `--schemas` as local file paths, with at least
+one required. It returns 0 for valid, 1 for invalid artifact content, 3 for
+partial evidence, and 2 for usage, file, output, or internal errors. It emits
+the report for all three content statuses. The stateless
+`POST /api/v1/environment/validate` accepts an inline `{"schema_version":1,
+"snapshot":{...},"schema_bundle":{...}}` request with at least one artifact.
+It returns HTTP 200 for valid or partial reports and 400 with the canonical
+invalid report for invalid content. The existing JSON content type and 8 MiB
+body limit apply; transport errors retain their separate error response.
+`SPLMapper.validate_environment(request)` and the owned C function
+`spl_mapper_validate_environment(int mapperID, char* requestJSON)` return the
+same report; direct C callers release every non-null `SPLResult*` through
+`spl_result_free`.
+
+The report carries `schema_version: 1`, `status`, computed artifact digests
+when available, `coverage` entries, and diagnostics with artifact and path or
+byte location. Digests use `sha256:<64 lowercase hex>` over normalized supplied
+content, excluding any asserted digest; they identify data and are not
+signatures. `valid` means the declarations are internally consistent and have
+no coverage gaps. `partial` retains omitted, unavailable, partial, or unresolved
+evidence. A binding to an absent object in a complete, in-scope collection or
+to a different typed identity is invalid. Collection completeness and binding
+source coverage are producer claims. This operation does not inspect live
+Splunk inventory, execute SPL, validate event rows, or decide whether a query
+is compatible with the captured environment.
+
 ## Knowledge-object closure
 
 The Go entry points are `closure.DecodeRequest(rawJSON)` and

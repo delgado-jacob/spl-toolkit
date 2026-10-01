@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "bundle_id": "local-fields",
+  "provenance": {
+    "source_kind": "local-example",
+    "source_id": "synthetic-schema-source",
+    "observed_at": "2026-10-01T12:00:00Z"
+  },
+  "schemas": [
+    {
+      "id": "events-fields",
+      "kind": "field_list",
+      "catalog": {
+        "fields": ["host"],
+        "optional_fields": [],
+        "identity": "local-example",
+        "version": "1"
+      },
+      "provenance": {
+        "source_kind": "local-example",
+        "source_id": "synthetic-schema-source",
+        "observed_at": "2026-10-01T12:00:00Z"
+      }
+    }
+  ],
+  "bindings": [
+    {
+      "schema_id": "events-fields",
+      "object_id": "source-a",
+      "expected": {"kind": "sourcetype", "name": "events"},
+      "source_coverage": "partial",
+      "reason": "the synthetic field source is sampled"
+    }
+  ]
+}

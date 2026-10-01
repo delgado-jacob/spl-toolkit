@@ -130,6 +130,7 @@ extern SPLResult* spl_mapper_validate_fields(int mapperID, char* requestJSON);
 extern SPLResult* spl_mapper_validate_fields_batch(int mapperID, char* requestJSON);
 extern SPLResult* spl_mapper_validate_schema(int mapperID, char* requestJSON);
 extern SPLResult* spl_mapper_validate_schema_batch(int mapperID, char* requestJSON);
+extern SPLResult* spl_mapper_validate_environment(int mapperID, char* requestJSON);
 extern SPLResult* spl_mapper_scan_corpus(int mapperID, char* requestJSON);
 extern SPLResult* spl_mapper_export_graph(int mapperID, char* requestJSON);
 extern SPLResult* spl_mapper_export_sarif(int mapperID, char* requestJSON);

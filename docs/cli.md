@@ -165,6 +165,24 @@ Canonical analysis admits at most 4,096 lexer work units. A query that would con
 
 Portable CLI acceptance uses a compact 4,097-work-unit query because operating systems can reject large process command lines before the CLI starts. The 64 KiB and 256 KiB resource-limit fixtures run through non-argv interfaces instead. This transport constraint does not change the analyzer budget or add file, stdin, or batch input: `analyze` and `requirements` still accept one positional or `--query` value.
 
+## Offline environment validation
+
+Validate a local snapshot, a field-schema bundle, or both:
+
+```bash
+spl-toolkit environment validate --snapshot examples/environment/partial-snapshot.json --schemas examples/environment/fields.json --format json
+```
+
+The examples are synthetic. This paired report has `status: partial` because
+most object kinds are omitted from the capture and the field source is sampled.
+The CLI writes the canonical report before returning exit 3. Exit 0 means valid,
+1 means an invalid artifact, and 2 means a usage, file, output, or internal
+failure. `--format text` is the default; `--output FILE` writes either format
+to a file. At least one of `--snapshot FILE` or `--schemas FILE` is required.
+These inputs are local paths; `-` is not accepted. The operation reads no live
+Splunk service or event rows. See the [environment API](API.md#offline-environment-artifacts)
+for status, digest, and coverage semantics.
+
 ## Knowledge-object closure
 
 `closure` requires `--bundle FILE` and exactly one positional query, `--query`,

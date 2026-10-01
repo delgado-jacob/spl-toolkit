@@ -8,6 +8,7 @@ SPL Toolkit 0.1.1 is an offline library and command-line tool for bounded operat
 - analyze query field-flow semantics, located references, lineage, dependencies, and coverage;
 - report direct external query requirements with source evidence and explicit gaps;
 - evaluate caller-supplied knowledge-object closure into a dependency graph and detection BOM;
+- validate offline environment snapshots and independently supplied field-schema bundles, retaining partial capture evidence;
 - scan dedicated query corpora, export graph/SARIF evidence, compare schema/mapping changes, and serve local editor diagnostics and highlights;
 - validate source field obligations against an offline field catalog, singly or in ordered batches;
 - preview or apply explicit source-identity rewrites with linked-edit proof, audit trails, and optional destination validation;
@@ -54,6 +55,24 @@ See the [structured analysis API](docs/API.md) for Go/Python examples, REST rout
 The operation is deterministic and offline. It does not expand knowledge objects, inspect events or environment metadata, assess compatibility, resolve placeholders, generate query variants, or execute queries. Query and capability digests identify the submitted data and selected capability contract. They are not authentication, authorization, signatures, or execution permission.
 
 Use [`spl-toolkit requirements`](docs/cli.md#query-requirements), `POST /api/v1/query/requirements`, `SPLMapper.requirements_query(...)`, or the canonical Go API. See the [requirement report contract](docs/API.md#query-requirements) for the complete shape, examples, status rules, 4,096-unit lexer work boundary, and native ownership contract.
+
+## Offline environment artifacts
+
+Validate a captured snapshot and independent field evidence with
+[`environment validate`](docs/cli.md#offline-environment-validation):
+
+```bash
+spl-toolkit environment validate --snapshot examples/environment/partial-snapshot.json --schemas examples/environment/fields.json --format json
+```
+
+The synthetic example reports `partial`: it omits most object kinds and its
+field source is sampled. A complete collection is the producer's claim within
+the named capture scope. The validator checks internal consistency and binding
+identity, then reports computed digests, coverage, and diagnostics. Go callers
+can prepare the artifacts once and reuse their detached indexes. CLI, REST,
+native C, and Python expose the same report. See the [environment API](docs/API.md#offline-environment-artifacts)
+for status rules and transport details. This offline operation does not prove
+live inventory completeness, query compatibility, authorization, or execution.
 
 ## Knowledge-object closure
 
