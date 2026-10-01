@@ -5,6 +5,20 @@ layout: page
 
 # Compatibility
 
+## Current release support
+
+Supported native releases target Linux x86-64, Apple Silicon macOS arm64, and Windows x86-64. Each target retains validation under Python `3.11.9`, `3.12.10`, `3.13.7`, and `3.14.0`.
+
+| Release target | GitHub runner | Wheel tag |
+|---|---|---|
+| Linux x86-64 | `ubuntu-24.04` | `linux_x86_64` |
+| Apple Silicon macOS arm64 | `macos-15` | `macosx_15_0_arm64` |
+| Windows x86-64 | `windows-2022` | `win_amd64` |
+
+Intel macOS is unsupported starting October 1, 2026. Previously published Intel artifacts and their historical acceptance records remain available. Future releases do not build or validate Intel artifacts. Source compilation may still work on Intel Macs without a compatibility guarantee.
+
+This policy defines the required release matrix. The historical evidence below records acceptance of earlier source revisions and does not certify the current revision.
+
 ## Developer tooling contracts
 
 SPL Toolkit 0.1.1 adds corpus, graph, impact and document-view report families at
@@ -13,8 +27,8 @@ synchronization, diagnostics and document highlights. SARIF targets 2.1.0 Errata
 01 with Unicode code-point columns; editor positions use UTF-16. Public source
 offsets remain UTF-8 bytes. See [contracts](contracts.md) for additive-output and
 strict-request compatibility rules, and [tooling](tooling.md) for limits and
-real-consumer recipes. The four release targets and Python 3.11+ support policy
-remain unchanged; local consumer checks do not certify the entire matrix.
+real-consumer recipes. The current three-target release policy appears above; Python 3.11+ remains
+the source/API floor. Local consumer checks do not certify the entire matrix.
 
 ## Structured analysis contract and local verification
 

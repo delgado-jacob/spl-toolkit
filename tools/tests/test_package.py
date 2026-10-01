@@ -26,8 +26,8 @@ CAPABILITY_SOURCE_FILES = {
 
 
 def test_installed_wheel_job_bootstraps_package_checker_dependencies():
-    workflow = (ROOT / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
-    installed_job = workflow.split("  installed-wheel:\n", 1)[1].split("\n  go-floor:\n", 1)[0]
+    workflow = (ROOT / ".github" / "workflows" / "ci-target.yml").read_text(encoding="utf-8")
+    installed_job = workflow.split("  installed-wheel:\n", 1)[1]
     bootstrap = (
         "python -m pip install --disable-pip-version-check "
         "-r python/requirements-build.txt"
