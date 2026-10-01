@@ -27,6 +27,7 @@ Commands:
   requirements [query]  Report direct external query requirements
   validate-fields   Validate fields against a local catalog
   validate-schema   Validate fields against local JSON Schema or OCSF
+  environment validate  Validate local environment snapshot and schema bundle
   rewrite           Safely preview or apply explicit rewrite rules
   closure           Evaluate caller-supplied knowledge-object dependencies
   capabilities      Show supported analysis commands and limitations
@@ -71,6 +72,11 @@ Additional validate-schema options:
   --ocsf-extension NAME     Full compiled extension set (repeatable)
 Choose exactly one --schema or --ocsf-catalog; target options cannot be mixed.
 OCSF requires exactly one --ocsf-class or --ocsf-category selector.
+
+Environment validation options:
+  environment validate --snapshot FILE [--schemas FILE] [--format text|json] [--output FILE]
+  environment validate --schemas FILE [--format text|json] [--output FILE]
+Both inputs must be local files. Reports omit local paths.
 
 Additional rewrite options:
   --rules FILE      Required local versioned rewrite rule set (not -)
