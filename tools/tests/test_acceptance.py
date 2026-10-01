@@ -31,12 +31,15 @@ REQUIRED_TEST_HASH_PATHS = {
         "test_native_analysis.py": ROOT / "python/tests/test_native_analysis.py",
         "test_native_spl2.py": ROOT / "python/tests/test_native_spl2.py",
         "test_native_closure.py": ROOT / "python/tests/test_native_closure.py",
+        "test_native_environment.py": ROOT / "python/tests/test_native_environment.py",
     },
     "acceptance": {
         "test_requirements_surfaces.py": ROOT / "tests/acceptance/test_requirements_surfaces.py",
         "test_analysis_surfaces.py": ROOT / "tests/acceptance/test_analysis_surfaces.py",
+        "test_environment_surfaces.py": ROOT / "tests/acceptance/test_environment_surfaces.py",
     },
 }
+ENVIRONMENT_FIXTURE_SHA = hashlib.sha256((ROOT / "testdata/environment/cases.json").read_bytes()).hexdigest()
 
 
 def release_environment(target: str, architecture: str) -> dict:
@@ -124,6 +127,7 @@ def passing_records() -> list[dict]:
                     "sarif-cases.json", "example-corpus.json", "example-target.json",
                     "example-corpus-missing-file.json", "../rewrite/forms.json",
                 )},
+                "tooling_environment_fixture_hashes": {"cases.json": ENVIRONMENT_FIXTURE_SHA},
                 "machine_contract_tests": {"collected": 13, "passed": 13, "failed": 0, "skipped": 0},
                 "required_test_hashes": {
                     suite: {
@@ -132,7 +136,8 @@ def passing_records() -> list[dict]:
                     }
                     for suite, paths in REQUIRED_TEST_HASH_PATHS.items()
                 },
-                "fixture_hashes": {"requirements": HASH, "spl2": {"linus-forms.json": LINUS_FIXTURE_SHA}},
+                "fixture_hashes": {"requirements": HASH, "spl2": {"linus-forms.json": LINUS_FIXTURE_SHA},
+                                   "environment": {"cases.json": ENVIRONMENT_FIXTURE_SHA}},
                 "packaged_fixture_hashes": {"spl2": {"linus-forms.json": LINUS_FIXTURE_SHA}},
                 "requirements_surface_evidence": {
                     "schema_version": 1,
@@ -150,10 +155,11 @@ def passing_records() -> list[dict]:
                 "required_test_files": {
                     "native": ["test_native_abi.py", "test_native_mapper.py", "test_native_analysis.py",
                                "test_native_validation.py", "test_native_schema_validation.py", "test_native_spl2.py",
-                               "test_native_rewrite.py", "test_native_requirements.py", "test_native_closure.py"],
+                               "test_native_rewrite.py", "test_native_requirements.py", "test_native_closure.py",
+                               "test_native_environment.py"],
                     "acceptance": ["test_documented_cli.py", "test_surfaces.py", "test_analysis_surfaces.py",
                                    "test_validation_surfaces.py", "test_schema_surfaces.py", "test_spl2_surfaces.py",
-                                   "test_rewrite_surfaces.py", "test_requirements_surfaces.py"],
+                                   "test_rewrite_surfaces.py", "test_requirements_surfaces.py", "test_environment_surfaces.py"],
                 },
                 "cli_examples": "passed", "surface_parity": "passed", "version_agreement": "passed",
             })
@@ -168,6 +174,22 @@ def passing_records() -> list[dict]:
 
 def test_complete_current_evidence_passes():
     assert validate_records(passing_records(), SHA) == []
+
+
+def test_environment_evidence_requires_current_fixture_and_installed_tests():
+    for field in ("tooling_environment_fixture_hashes", "fixture_hashes"):
+        records = passing_records()
+        installed = next(record for record in records if record["kind"] == "installed-wheel")
+        hashes = installed[field] if field == "tooling_environment_fixture_hashes" else installed[field]["environment"]
+        hashes["cases.json"] = "d" * 64
+        assert any(field in error and "current source" in error for error in validate_records(records, SHA))
+
+    for suite, filename in (("native", "test_native_environment.py"),
+                            ("acceptance", "test_environment_surfaces.py")):
+        records = passing_records()
+        installed = next(record for record in records if record["kind"] == "installed-wheel")
+        installed["required_test_files"][suite].remove(filename)
+        assert any(f"missing required suite {filename}" in error for error in validate_records(records, SHA))
 
 
 def test_packaged_linus_fixture_evidence_is_required_and_bound_to_current_source():
@@ -194,6 +216,7 @@ def test_packaged_linus_fixture_evidence_is_required_and_bound_to_current_source
 def test_exact_source_hash_inputs_are_stable_in_windows_checkout(tmp_path: Path):
     relative_paths = set(check_acceptance.TOOLING_SOURCE_HASHES)
     relative_paths.add("testdata/spl2/linus-forms.json")
+    relative_paths.add("testdata/environment/cases.json")
     relative_paths.update(
         path.relative_to(ROOT).as_posix()
         for paths in check_acceptance.REQUIRED_TEST_HASH_PATHS.values()
