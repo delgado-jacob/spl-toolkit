@@ -914,3 +914,32 @@ def test_environment_kind_and_ocsf_selection_boundaries(schemas):
             "provenance": bundle["provenance"],
         }
         assert errors(schemas, "field-schema-bundle", wrong), selection
+
+
+def test_environment_scope_identity_and_macro_argument_contracts(schemas):
+    case = json.loads((ROOT / "testdata/environment/cases.json").read_text())[0]
+    snapshot = case["snapshot"]
+    bundle = case["schema_bundle"]
+
+    for selector in ("namespace", "app", "owner"):
+        restricted = copy.deepcopy(snapshot)
+        restricted["capture_scope"][selector] = {"values": ["search"]}
+        assert errors(schemas, "environment-snapshot", restricted), selector
+        for collection in restricted["collections"]:
+            if collection["kind"] in ("index", "source", "sourcetype"):
+                collection.update(coverage="partial", reason="restricted capture")
+        assert not errors(schemas, "environment-snapshot", restricted), selector
+
+    for context in ("namespace", "app", "owner"):
+        wrong = copy.deepcopy(bundle)
+        wrong["bindings"][0]["expected"][context] = "search"
+        assert errors(schemas, "field-schema-bundle", wrong), context
+    scoped_binding = copy.deepcopy(bundle)
+    scoped_binding["bindings"][0]["expected"] = {"kind": "macro", "name": "daily", "app": "search"}
+    assert not errors(schemas, "field-schema-bundle", scoped_binding)
+
+    macro = copy.deepcopy(snapshot)
+    macro["objects"][0].update(kind="macro", arity=2, arguments=["host", "host"])
+    assert errors(schemas, "environment-snapshot", macro)
+    macro["objects"][0]["arguments"] = ["host", "source"]
+    assert not errors(schemas, "environment-snapshot", macro)

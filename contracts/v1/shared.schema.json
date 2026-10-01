@@ -6249,7 +6249,8 @@
           "items": {
             "type": "string",
             "pattern": "\\S"
-          }
+          },
+          "uniqueItems": true
         },
         "eval_based": {
           "type": "boolean"
@@ -6406,7 +6407,62 @@
         "collections",
         "objects"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "collections": {
+                "contains": {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "enum": [
+                        "index",
+                        "source",
+                        "sourcetype"
+                      ]
+                    },
+                    "coverage": {
+                      "const": "complete"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "coverage"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "collections"
+            ]
+          },
+          "then": {
+            "properties": {
+              "capture_scope": {
+                "properties": {
+                  "namespace": {
+                    "required": [
+                      "all"
+                    ]
+                  },
+                  "app": {
+                    "required": [
+                      "all"
+                    ]
+                  },
+                  "owner": {
+                    "required": [
+                      "all"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
     },
     "environment.SchemaEntry": {
       "oneOf": [
@@ -6582,7 +6638,38 @@
         "kind",
         "name"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "enum": [
+                  "index",
+                  "source",
+                  "sourcetype"
+                ]
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "properties": {
+              "namespace": {
+                "const": ""
+              },
+              "app": {
+                "const": ""
+              },
+              "owner": {
+                "const": ""
+              }
+            }
+          }
+        }
+      ]
     },
     "environment.SchemaBinding": {
       "type": "object",

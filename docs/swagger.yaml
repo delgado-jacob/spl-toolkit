@@ -4430,6 +4430,7 @@ components:
             pattern: \S
             type: string
           type: array
+          uniqueItems: true
         arity:
           minimum: 0
           type: integer
@@ -4504,6 +4505,24 @@ components:
       type: object
     tooling.environment.ObjectIdentity:
       additionalProperties: false
+      allOf:
+      - if:
+          properties:
+            kind:
+              enum:
+              - index
+              - source
+              - sourcetype
+          required:
+          - kind
+        then:
+          properties:
+            app:
+              const: ''
+            namespace:
+              const: ''
+            owner:
+              const: ''
       properties:
         app:
           type: string
@@ -4778,6 +4797,38 @@ components:
         type: object
     tooling.environment.Snapshot:
       additionalProperties: false
+      allOf:
+      - if:
+          properties:
+            collections:
+              contains:
+                properties:
+                  coverage:
+                    const: complete
+                  kind:
+                    enum:
+                    - index
+                    - source
+                    - sourcetype
+                required:
+                - kind
+                - coverage
+                type: object
+          required:
+          - collections
+        then:
+          properties:
+            capture_scope:
+              properties:
+                app:
+                  required:
+                  - all
+                namespace:
+                  required:
+                  - all
+                owner:
+                  required:
+                  - all
       properties:
         capabilities:
           items:
