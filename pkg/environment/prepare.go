@@ -3,6 +3,8 @@ package environment
 import (
 	"encoding/json"
 	"fmt"
+
+	"github.com/delgado-jacob/spl-toolkit/pkg/validation"
 )
 
 // PreparedEnvironment owns detached indexes for one snapshot and its compatible bindings.
@@ -114,6 +116,31 @@ func (p *PreparedEnvironment) Bindings(objectID string) []SchemaBinding {
 		return []SchemaBinding{}
 	}
 	return append([]SchemaBinding{}, p.bindings[objectID]...)
+}
+
+func (p *PreparedEnvironment) boundTarget(objectID, schemaID string) (preparedBundleTarget, bool) {
+	if p == nil || p.schemas == nil {
+		return preparedBundleTarget{}, false
+	}
+	for _, binding := range p.bindings[objectID] {
+		if binding.SchemaID == schemaID {
+			target, found := p.schemas.targets[schemaID]
+			return target, found
+		}
+	}
+	return preparedBundleTarget{}, false
+}
+
+// FieldCatalog returns the compiled field list for a resolved object binding.
+func (p *PreparedEnvironment) FieldCatalog(objectID, schemaID string) (*validation.PreparedFieldCatalog, bool) {
+	target, found := p.boundTarget(objectID, schemaID)
+	return target.field, found && target.field != nil
+}
+
+// SchemaTarget returns the compiled JSON Schema or OCSF target for a resolved object binding.
+func (p *PreparedEnvironment) SchemaTarget(objectID, schemaID string) (*validation.PreparedSchemaTarget, bool) {
+	target, found := p.boundTarget(objectID, schemaID)
+	return target.schema, found && target.schema != nil
 }
 
 // Report returns a detached copy of the pairing report.

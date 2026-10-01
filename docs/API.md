@@ -215,6 +215,15 @@ expected identities still agree. `ValidateArtifacts` accepts raw bytes for
 either or both artifacts and returns the same canonical report without exposing
 the prepared handle.
 
+Go callers can use `PreparedEnvironment.Bindings(objectID)` to inspect each
+resolved binding and its source coverage. `FieldCatalog(objectID, schemaID)`
+returns a reusable `*validation.PreparedFieldCatalog` for a resolved field-list
+binding. `SchemaTarget(objectID, schemaID)` returns a reusable
+`*validation.PreparedSchemaTarget` for a resolved JSON Schema or OCSF binding.
+Both lookups return `false` for an unresolved, unbound, or wrong-kind schema.
+Call the returned target's `Validate(document)` method for each query document;
+the prepared targets are shared across calls without recompiling the bundle.
+
 ```bash
 spl-toolkit environment validate --snapshot examples/environment/partial-snapshot.json --schemas examples/environment/fields.json --format json
 ```
