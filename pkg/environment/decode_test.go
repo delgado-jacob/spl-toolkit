@@ -84,3 +84,21 @@ func TestSnapshotWrongTypeKeepsNestedLocation(t *testing.T) {
 		t.Fatalf("nested location lost: %#v", diagnostic)
 	}
 }
+
+func TestSnapshotWrongTypeInsideArrayUsesByteOffset(t *testing.T) {
+	value := snapshotFixture()
+	object := macroFixture("m", "name", "x")
+	object["document"].(map[string]any)["text"] = 123
+	value["objects"] = []any{object}
+	report, err := ValidateArtifacts(fixtureRaw(t, value), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if report.Status != "invalid" || len(report.Diagnostics) != 1 {
+		t.Fatalf("wrong-type report: %#v", report)
+	}
+	diagnostic := report.Diagnostics[0]
+	if diagnostic.Path != "" || diagnostic.ByteOffset == nil {
+		t.Fatalf("array error location must use byte offset: %#v", diagnostic)
+	}
+}

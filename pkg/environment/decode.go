@@ -118,10 +118,7 @@ func decodeStrictJSON(raw []byte, target any) error {
 	if err := d.Decode(target); err != nil {
 		var typeError *json.UnmarshalTypeError
 		if errors.As(err, &typeError) && typeError.Field != "" {
-			path := ""
-			for _, part := range strings.Split(typeError.Field, ".") {
-				path += "/" + pointerPart(part)
-			}
+			path := typeErrorPointer(typeError.Field, reflect.TypeOf(target))
 			return atOffset(path, typeError.Offset, fmt.Errorf("invalid artifact: %w", err))
 		}
 		return atOffset("", d.InputOffset(), fmt.Errorf("invalid artifact: %w", err))
@@ -130,6 +127,38 @@ func decodeStrictJSON(raw []byte, target any) error {
 		return atOffset("", d.InputOffset(), fmt.Errorf("expected exactly one JSON value"))
 	}
 	return nil
+}
+
+// UnmarshalTypeError.Field omits array indexes. Return no path if a field
+// traverses an array, leaving the decoder's exact byte offset as the location.
+func typeErrorPointer(field string, typ reflect.Type) string {
+	path := ""
+	for _, part := range strings.Split(field, ".") {
+		for typ.Kind() == reflect.Pointer {
+			typ = typ.Elem()
+		}
+		if typ.Kind() != reflect.Struct {
+			return ""
+		}
+		found := false
+		for i := 0; i < typ.NumField(); i++ {
+			member := typ.Field(i)
+			tag := strings.Split(member.Tag.Get("json"), ",")[0]
+			if tag == part {
+				typ = member.Type
+				found = true
+				break
+			}
+		}
+		if !found {
+			return ""
+		}
+		if typ.Kind() == reflect.Slice || typ.Kind() == reflect.Array {
+			return ""
+		}
+		path += "/" + pointerPart(part)
+	}
+	return path
 }
 
 func validateExactMembers(value any, typ reflect.Type, path string) error {
