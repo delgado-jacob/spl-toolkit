@@ -140,7 +140,7 @@ func normalizeObservation(input *ObservationScope, objects []Object, collections
 				return nil, at("/observation/window/latest", err)
 			}
 		}
-		if !earliest.IsZero() && !latest.IsZero() && !earliest.Before(latest) {
+		if out.Window.Earliest != "" && out.Window.Latest != "" && !earliest.Before(latest) {
 			return nil, at("/observation/window", fmt.Errorf("bounds must be strictly ordered"))
 		}
 	default:

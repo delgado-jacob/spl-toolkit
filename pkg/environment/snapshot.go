@@ -267,7 +267,7 @@ func normalizeSnapshot(input Snapshot) (Snapshot, []CoverageEntry, []Diagnostic,
 			return Snapshot{}, nil, nil, at(fmt.Sprintf("/objects/%d/kind", objectIndex), fmt.Errorf("unavailable collection %q contains object", o.Kind))
 		}
 		if o.Kind == "index" || o.Kind == "source" || o.Kind == "sourcetype" {
-			if o.Namespace != "" || o.App != "" || o.Owner != "" {
+			if o.Namespace != "" || o.App != "" || o.Owner != "" || (input.SchemaVersion == 2 && o.Sharing != "") {
 				return Snapshot{}, nil, nil, at(fmt.Sprintf("/objects/%d", objectIndex), fmt.Errorf("%s object has inapplicable context", o.Kind))
 			}
 		} else if !inScope(out.CaptureScope.Namespace, o.Namespace) || !inScope(out.CaptureScope.App, o.App) || !inScope(out.CaptureScope.Owner, o.Owner) {

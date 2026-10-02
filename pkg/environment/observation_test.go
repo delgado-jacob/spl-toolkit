@@ -366,3 +366,55 @@ func TestSnapshotV2RequiredObservationArraysJSON(t *testing.T) {
 		}
 	}
 }
+
+func TestSnapshotV2ZeroTimeBounds(t *testing.T) {
+	for _, window := range []ObservationWindow{
+		{Mode: "bounded", Earliest: "0002-01-01T00:00:00Z", Latest: "0001-01-01T00:00:00Z"},
+		{Mode: "bounded", Earliest: "0001-01-01T00:00:00Z", Latest: "0001-01-01T00:00:00Z"},
+	} {
+		t.Run(window.Earliest+"/"+window.Latest, func(t *testing.T) {
+			value := observedFixture(t)
+			value.Observation.Window = window
+			report, err := ValidateArtifacts(fixtureRaw(t, value), nil)
+			if err != nil || report.Status != "invalid" || report.Diagnostics[0].Path != "/observation/window" {
+				t.Fatalf("unordered zero-time bounds accepted: %v %#v", err, report)
+			}
+		})
+	}
+	value := observedFixture(t)
+	value.Observation.Window = ObservationWindow{Mode: "bounded", Earliest: "0001-01-01T00:00:00Z", Latest: "0002-01-01T00:00:00Z"}
+	if got := fixtureReport(t, value); got.Status != "valid" {
+		t.Fatalf("ordered zero-time bounds rejected: %#v", got)
+	}
+	value.Observation.Window = ObservationWindow{Mode: "bounded", Latest: "0001-01-01T00:00:00Z"}
+	if got := fixtureReport(t, value); got.Status != "valid" {
+		t.Fatalf("single zero-time bound rejected: %#v", got)
+	}
+}
+func TestSnapshotV2ObservedSharingContext(t *testing.T) {
+	for _, kind := range []string{"index", "source", "sourcetype"} {
+		t.Run(kind, func(t *testing.T) {
+			value := observedFixture(t)
+			if kind == "source" {
+				object := value.Objects[1]
+				object.Kind = "source"
+				object.ID = "source-audit"
+				value.Objects = append(value.Objects, object)
+				value.Observation.Captures[0].ObjectIDs = []string{object.ID}
+			}
+			for i := range value.Objects {
+				if value.Objects[i].Kind == kind {
+					value.Objects[i].Sharing = "app"
+				}
+			}
+			if got := fixtureReport(t, value); got.Status != "invalid" || !strings.HasPrefix(got.Diagnostics[0].Path, "/objects/") {
+				t.Fatalf("v2 observed ACL context accepted: %#v", got)
+			}
+			value.SchemaVersion = 1
+			value.Observation = nil
+			if got := fixtureReport(t, value); got.Status != "valid" {
+				t.Fatalf("v1 sharing behavior changed: %#v", got)
+			}
+		})
+	}
+}
