@@ -3,9 +3,12 @@ package environment
 import (
 	"encoding/json"
 	"fmt"
+	"regexp"
 	"sort"
 	"time"
 )
+
+var observationWindowTimestampPattern = regexp.MustCompile(`^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\.[0-9]{1,9})?(Z|[+-]00:00)$`)
 
 type ObservationWindow struct {
 	Mode     string `json:"mode"`
@@ -129,12 +132,18 @@ func normalizeObservation(input *ObservationScope, objects []Object, collections
 		}
 		var earliest, latest time.Time
 		if out.Window.Earliest != "" {
+			if !observationWindowTimestampPattern.MatchString(out.Window.Earliest) {
+				return nil, at("/observation/window/earliest", fmt.Errorf("earliest must be an RFC3339Nano UTC timestamp"))
+			}
 			out.Window.Earliest, earliest, err = normalizeTime(out.Window.Earliest, "earliest")
 			if err != nil {
 				return nil, at("/observation/window/earliest", err)
 			}
 		}
 		if out.Window.Latest != "" {
+			if !observationWindowTimestampPattern.MatchString(out.Window.Latest) {
+				return nil, at("/observation/window/latest", fmt.Errorf("latest must be an RFC3339Nano UTC timestamp"))
+			}
 			out.Window.Latest, latest, err = normalizeTime(out.Window.Latest, "latest")
 			if err != nil {
 				return nil, at("/observation/window/latest", err)

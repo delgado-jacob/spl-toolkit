@@ -447,3 +447,78 @@ func TestSnapshotV2MissingCaptureDiagnosticDeterminism(t *testing.T) {
 		t.Fatalf("missing capture did not use canonical index order: %v %#v", err, report)
 	}
 }
+
+func TestSnapshotV2RejectsNonRFC3339ObservationBounds(t *testing.T) {
+	for name, timestamp := range map[string]string{
+		"single digit hour":           "2026-01-01T0:00:00Z",
+		"comma fraction":              "2026-01-01T00:00:00,123Z",
+		"excess fractional precision": "2026-01-01T00:00:00.1234567891Z",
+	} {
+		for _, bound := range []string{"earliest", "latest"} {
+			t.Run(name+"/"+bound, func(t *testing.T) {
+				value := observedFixture(t)
+				value.Observation.Window = ObservationWindow{Mode: "bounded"}
+				if bound == "earliest" {
+					value.Observation.Window.Earliest = timestamp
+				} else {
+					value.Observation.Window.Latest = timestamp
+				}
+				t.Run("PrepareSnapshot", func(t *testing.T) {
+					prepared, report, err := PrepareSnapshot(value)
+					if err != nil || prepared != nil || report.Status != "invalid" || len(report.Diagnostics) != 1 || report.Diagnostics[0].Path != "/observation/window/"+bound {
+						t.Fatalf("non-RFC3339 bound accepted: err=%v status=%s diagnostics=%#v", err, report.Status, report.Diagnostics)
+					}
+				})
+				t.Run("ValidateArtifacts", func(t *testing.T) {
+					report, err := ValidateArtifacts(fixtureRaw(t, value), nil)
+					if err != nil || report.Status != "invalid" || len(report.Diagnostics) != 1 || report.Diagnostics[0].Path != "/observation/window/"+bound {
+						t.Fatalf("serialized non-RFC3339 bound accepted: err=%v status=%s diagnostics=%#v", err, report.Status, report.Diagnostics)
+					}
+				})
+			})
+		}
+	}
+}
+
+func TestSnapshotV2NormalizesUTCObservationBounds(t *testing.T) {
+	type windowCase struct {
+		name                     string
+		earliest, latest         string
+		wantEarliest, wantLatest string
+	}
+	cases := []windowCase{
+		{"earliest UTC offset", "2026-01-01T00:00:00+00:00", "", "2026-01-01T00:00:00Z", ""},
+		{"latest UTC offset", "", "2026-01-01T00:00:00+00:00", "", "2026-01-01T00:00:00Z"},
+		{"negative zero offset", "2026-01-01T00:00:00-00:00", "", "2026-01-01T00:00:00Z", ""},
+		{"ordered nanosecond pair", "2026-01-01T00:00:00.123456788+00:00", "2026-01-01T00:00:00.123456789Z", "2026-01-01T00:00:00.123456788Z", "2026-01-01T00:00:00.123456789Z"},
+		{"trailing zero normalization", "2026-01-01T00:00:00.123000000+00:00", "", "2026-01-01T00:00:00.123Z", ""},
+	}
+	for precision := 1; precision <= 9; precision++ {
+		fraction := "123456789"[:precision]
+		canonical := "2026-01-01T00:00:00." + fraction + "Z"
+		cases = append(cases,
+			windowCase{"earliest fraction " + fraction, "2026-01-01T00:00:00." + fraction + "+00:00", "", canonical, ""},
+			windowCase{"latest fraction " + fraction, "", canonical, "", canonical},
+		)
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			value := observedFixture(t)
+			value.Observation.Window = ObservationWindow{Mode: "bounded", Earliest: tc.earliest, Latest: tc.latest}
+			prepared, report, err := PrepareSnapshot(value)
+			if err != nil || prepared == nil || report.Status != "valid" {
+				t.Fatalf("valid UTC bounds rejected: %v %#v", err, report)
+			}
+			want := ObservationWindow{Mode: "bounded", Earliest: tc.wantEarliest, Latest: tc.wantLatest}
+			if got := prepared.Snapshot().Observation.Window; got != want {
+				t.Fatalf("normalized window = %#v, want %#v", got, want)
+			}
+			for _, snapshot := range []Snapshot{value, prepared.Snapshot()} {
+				serializedReport, err := ValidateArtifacts(fixtureRaw(t, snapshot), nil)
+				if err != nil || serializedReport.Status != "valid" || serializedReport.SnapshotDigest != report.SnapshotDigest {
+					t.Fatalf("serialized UTC bounds changed validity or digest: %v %#v", err, serializedReport)
+				}
+			}
+		})
+	}
+}
