@@ -226,9 +226,9 @@ const helpText = `Usage: spl-toolkit-export --management-url URL (--credential-e
 
 func validateArtifactPaths(o Options) error {
 	type checkedPath struct {
-		path   string
-		info   os.FileInfo
-		output bool
+		path, base   string
+		info, parent os.FileInfo
+		output       bool
 	}
 	paths := []checkedPath{}
 	for _, candidate := range []struct {
@@ -242,16 +242,27 @@ func validateArtifactPaths(o Options) error {
 		if err != nil {
 			return err
 		}
-		info, err := os.Stat(absolute)
+		// Stat the supplied path: cleaning symlink/.. changes its filesystem target.
+		info, err := os.Stat(candidate.path)
 		if err != nil && !os.IsNotExist(err) {
 			return err
 		}
+		directory, base := filepath.Split(candidate.path)
+		if directory == "" {
+			directory = "."
+		}
+		parent, err := os.Stat(directory)
+		if err != nil {
+			return err
+		}
 		for _, previous := range paths {
-			if (candidate.output || previous.output) && (absolute == previous.path || info != nil && previous.info != nil && os.SameFile(info, previous.info)) {
+			if (candidate.output || previous.output) && (absolute == previous.path ||
+				info != nil && previous.info != nil && os.SameFile(info, previous.info) ||
+				base == previous.base && os.SameFile(parent, previous.parent)) {
 				return failure("artifact_path_collision")
 			}
 		}
-		paths = append(paths, checkedPath{absolute, info, candidate.output})
+		paths = append(paths, checkedPath{path: absolute, base: base, info: info, parent: parent, output: candidate.output})
 	}
 	return nil
 }
@@ -281,7 +292,12 @@ func writeArtifacts(o Options, result *Result, stdout io.Writer) error {
 		if artifact.destination == "" {
 			continue
 		}
-		f, err := os.CreateTemp(filepath.Dir(artifact.destination), ".splunk-export-*")
+		// Split preserves symlink/.. semantics; Dir would clean the path.
+		directory, _ := filepath.Split(artifact.destination)
+		if directory == "" {
+			directory = "."
+		}
+		f, err := os.CreateTemp(directory, ".splunk-export-*")
 		if err != nil {
 			return err
 		}
@@ -308,6 +324,11 @@ func writeArtifacts(o Options, result *Result, stdout io.Writer) error {
 		}
 	}
 	for _, stage := range stages {
+		// Recheck after each commit so initially absent case-insensitive aliases
+		// cannot let the report overwrite the newly committed snapshot.
+		if err = validateArtifactPaths(o); err != nil {
+			return err
+		}
 		if err = os.Rename(stage.path, stage.destination); err != nil {
 			return err
 		}
