@@ -21,6 +21,7 @@ type jobFixture struct {
 	jobs            map[string]bool
 	operations      []string
 	status          string
+	statusSequence  []string
 	results         string
 	submissionDelay time.Duration
 	unexpectedSID   bool
@@ -147,7 +148,10 @@ func newJobFixture(t *testing.T, f *jobFixture) (*Client, *jobFixture) {
 			f.onStatus = nil
 			onStatus()
 		}
-		if f.status != "" {
+		if len(f.statusSequence) > 0 {
+			fmt.Fprint(w, f.statusSequence[0])
+			f.statusSequence = f.statusSequence[1:]
+		} else if f.status != "" {
 			fmt.Fprint(w, f.status)
 		} else {
 			count := f.rowCount
@@ -564,5 +568,144 @@ func TestOwnedJobEndProbeDeadlineRetainsRows(t *testing.T) {
 	defer f.mu.Unlock()
 	if strings.Join(f.operations, ",") != "submit,status,results,results,finalize,status,delete" {
 		t.Fatalf("probe repeated during salvage or deletion misplaced: %v", f.operations)
+	}
+}
+
+func TestOwnedJobStartupStatusesBeforeResultCount(t *testing.T) {
+	startup := `{"entry":[{"content":{"isDone":false,"isFailed":false,"isFinalized":false,"isZombie":false,"dispatchState":"PARSING","messages":[]}}]}`
+	c, f := newJobFixture(t, &jobFixture{statusSequence: []string{
+		startup, startup,
+		`{"entry":[{"content":{"isDone":true,"dispatchState":"DONE","resultCount":1}}]}`,
+	}})
+	r := c.runDiscoveryJob(context.Background(), discoveryQuery{search: "fixture query"})
+	if r.Coverage != "complete" || len(r.Rows) != 1 || len(r.Diagnostics) != 0 || r.CleanupFailed {
+		t.Fatalf("startup polling: %+v", r)
+	}
+	f.assertClean(t)
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	if strings.Join(f.operations, ",") != "submit,status,status,status,results,delete" {
+		t.Fatalf("results read before terminal count or startup polling stopped: %v", f.operations)
+	}
+}
+
+func TestJobStatusAllowsAbsentCountOnlyInExplicitActiveStates(t *testing.T) {
+	for _, tc := range []struct {
+		name, dispatch string
+		valid          bool
+	}{
+		{"queued", `,"dispatchState":"QUEUED"`, true},
+		{"parsing", `,"dispatchState":"PARSING"`, true},
+		{"running", `,"dispatchState":"RUNNING"`, true},
+		{"finalizing", `,"dispatchState":"FINALIZING"`, true},
+		{"pause", `,"dispatchState":"PAUSE"`, true},
+		{"absent", "", false},
+		{"unknown", `,"dispatchState":"UNKNOWN"`, false},
+		{"done", `,"dispatchState":"DONE"`, false},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			body := fmt.Sprintf(`{"entry":[{"content":{"isDone":false,"isFailed":false,"isFinalized":false,"isZombie":false%s}}]}`, tc.dispatch)
+			c, _ := newJobFixture(t, &jobFixture{status: body})
+			state, err := c.jobStatus(context.Background(), "fixture", &JobResult{Coverage: "complete"})
+			if (err == nil) != tc.valid || tc.valid && (state.done || state.failed || state.finalized || state.zombie) {
+				t.Fatalf("active status: state=%+v err=%v", state, err)
+			}
+		})
+	}
+}
+
+func TestOwnedJobRejectsInvalidTerminalCounts(t *testing.T) {
+	for _, terminal := range []struct{ name, fields string }{
+		{"done", `"isDone":true,"dispatchState":"PARSING"`},
+		{"failed", `"isDone":false,"isFailed":true,"dispatchState":"PARSING"`},
+		{"finalized", `"isDone":false,"isFinalized":true,"dispatchState":"PARSING"`},
+		{"zombie", `"isDone":false,"isZombie":true,"dispatchState":"PARSING"`},
+		{"dispatch-failed", `"isDone":false,"dispatchState":"FAILED"`},
+		{"dispatch-internal-error", `"isDone":false,"dispatchState":"INTERNAL_ERROR"`},
+		{"dispatch-bad-input", `"isDone":false,"dispatchState":"BAD_INPUT_CANCEL"`},
+		{"dispatch-finalized", `"isDone":false,"dispatchState":"FINALIZED"`},
+		{"dispatch-zombie", `"isDone":false,"dispatchState":"ZOMBIE"`},
+	} {
+		for _, count := range []struct{ name, field string }{
+			{"absent", ""},
+			{"null", `,"resultCount":null`},
+			{"malformed", `,"resultCount":"banana"`},
+			{"negative", `,"resultCount":-1`},
+			{"fractional", `,"resultCount":1.5`},
+			{"overflow", `,"resultCount":9223372036854775808`},
+		} {
+			t.Run(terminal.name+"/"+count.name, func(t *testing.T) {
+				body := fmt.Sprintf(`{"entry":[{"content":{%s%s}}]}`, terminal.fields, count.field)
+				c, f := newJobFixture(t, &jobFixture{status: body})
+				r := c.runDiscoveryJob(context.Background(), discoveryQuery{search: "fixture query"})
+				if r.Coverage != "unavailable" || r.Reason != "job_status_invalid" || len(r.Rows) != 0 || r.CleanupFailed {
+					t.Fatalf("invalid terminal count: %+v", r)
+				}
+				f.assertClean(t)
+				f.mu.Lock()
+				defer f.mu.Unlock()
+				if strings.Join(f.operations, ",") != "submit,status,delete" {
+					t.Fatalf("invalid count retrieved results or missed cleanup: %v", f.operations)
+				}
+			})
+		}
+	}
+}
+
+func TestJobStatusRejectsPresentInvalidActiveCounts(t *testing.T) {
+	for _, count := range []string{"null", `"banana"`, "-1", "1.5", "9223372036854775808"} {
+		t.Run(count, func(t *testing.T) {
+			body := fmt.Sprintf(`{"entry":[{"content":{"isDone":false,"dispatchState":"PARSING","resultCount":%s}}]}`, count)
+			c, _ := newJobFixture(t, &jobFixture{status: body})
+			if _, err := c.jobStatus(context.Background(), "fixture", &JobResult{Coverage: "complete"}); err == nil {
+				t.Fatal("present invalid active count accepted")
+			}
+		})
+	}
+}
+
+func TestOwnedJobStartupTimeoutSkipsUnknownCountResults(t *testing.T) {
+	c, f := newJobFixture(t, &jobFixture{status: `{"entry":[{"content":{"isDone":false,"dispatchState":"PARSING"}}]}`})
+	c.options.JobTimeout = 1100 * time.Millisecond
+	r := c.runDiscoveryJob(context.Background(), discoveryQuery{search: "fixture query"})
+	if r.Coverage != "unavailable" || r.Reason != "job_timeout" || len(r.Rows) != 0 || r.CleanupFailed || len(r.Diagnostics) != 1 || r.Diagnostics[0].Code != "job_timeout" {
+		t.Fatalf("startup timeout: %+v", r)
+	}
+	f.assertClean(t)
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	if f.dispatchForm.Get("max_time") != "1" {
+		t.Fatalf("startup timeout did not dispatch with integer budget: %v", f.dispatchForm)
+	}
+	ops := strings.Join(f.operations, ",")
+	if !strings.HasPrefix(ops, "submit,status,status,") || !strings.HasSuffix(ops, "finalize,status,delete") || strings.Contains(ops, "results") {
+		t.Fatalf("unknown count retrieved results or missed timeout cleanup: %s", ops)
+	}
+}
+
+func TestJobSalvageUnknownCountPreservesPartialEvidence(t *testing.T) {
+	c, f := newJobFixture(t, &jobFixture{status: `{"entry":[{"content":{"isDone":false,"dispatchState":"RUNNING"}}]}`})
+	sid := "spl-toolkit-export-fixture"
+	c.owned[sid] = true
+	f.mu.Lock()
+	f.jobs[sid] = true
+	f.mu.Unlock()
+	ctx, cancel := context.WithTimeout(context.Background(), cleanupTimeout)
+	t.Cleanup(cancel)
+	r := JobResult{Coverage: "complete", Rows: []map[string]json.RawMessage{{"name": json.RawMessage(`"retained"`)}}}
+	r.gap("job_warning")
+	originalDiagnostic := r.Diagnostics[0]
+	c.salvage(ctx, sid, &r)
+	if err := c.deleteOwnedJob(ctx, sid); err != nil {
+		t.Fatal(err)
+	}
+	if r.Coverage != "partial" || r.Reason != "job_warning" || len(r.Rows) != 1 || string(r.Rows[0]["name"]) != `"retained"` || len(r.Diagnostics) != 2 || r.Diagnostics[0] != originalDiagnostic || r.Diagnostics[1].Code != "job_timeout" {
+		t.Fatalf("unknown-count salvage lost existing evidence or added invalid-status gap: %+v", r)
+	}
+	f.assertClean(t)
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	if strings.Join(f.operations, ",") != "finalize,status,delete" {
+		t.Fatalf("unknown-count salvage read results: %v", f.operations)
 	}
 }

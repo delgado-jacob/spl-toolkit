@@ -184,6 +184,7 @@ func (c *Client) runDiscoveryJob(parent context.Context, query discoveryQuery) (
 type jobState struct {
 	done, failed, finalized, zombie bool
 	count                           int
+	countKnown                      bool
 }
 type serverMessage struct {
 	Type string `json:"type"`
@@ -320,10 +321,22 @@ func (c *Client) jobStatus(ctx context.Context, sid string, result *JobResult) (
 			state.zombie = true
 		}
 	}
-	if state.count, err = normalizedCount(fields["resultCount"]); err != nil {
-		return state, err
+	if raw, present := fields["resultCount"]; present {
+		if state.count, err = normalizedCount(raw); err != nil {
+			return state, err
+		}
+		state.countKnown = true
+		return state, nil
 	}
-	return state, nil
+	// Startup statuses may omit the count; only explicit active states with no
+	// terminal flags establish that it is safe to continue polling.
+	if !state.done && !state.failed && !state.finalized && !state.zombie {
+		switch strings.ToUpper(dispatch) {
+		case "QUEUED", "PARSING", "RUNNING", "FINALIZING", "PAUSE":
+			return state, nil
+		}
+	}
+	return state, failure("job_status_invalid")
 }
 func isRequestTimeout(err error) bool {
 	var failure *requestFailure
@@ -416,7 +429,7 @@ func (c *Client) salvage(cleanup context.Context, sid string, result *JobResult)
 	}
 	state, err := c.jobStatus(ctx, sid, result)
 	if err == nil {
-		if c.jobRows(ctx, sid, state.count, result, true) != nil {
+		if state.countKnown && c.jobRows(ctx, sid, state.count, result, true) != nil {
 			result.gap("job_results_invalid")
 		}
 	} else {
