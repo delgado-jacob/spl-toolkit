@@ -7,6 +7,7 @@ import (
 	"io"
 	"math"
 	"net/url"
+	"regexp"
 	"sort"
 	"strings"
 	"time"
@@ -16,6 +17,10 @@ import (
 
 var ErrHelp = errors.New("exporter help requested")
 var ErrVersion = errors.New("exporter version requested")
+
+// time.Parse accepts a single-digit hour, comma fractions, and truncates excess
+// fraction digits; acquisition inputs must preserve the stricter CLI contract.
+var windowTimestampPattern = regexp.MustCompile(`^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\.[0-9]{1,9})?(Z|[+-]00:00)$`)
 
 type Options struct {
 	ManagementURL                                               string
@@ -149,6 +154,9 @@ func (o Options) validate() error {
 	}{{o.Window.Earliest, &earliest}, {o.Window.Latest, &latest}} {
 		if bound.value == "" {
 			continue
+		}
+		if !windowTimestampPattern.MatchString(bound.value) {
+			return errors.New("window bounds must be absolute UTC timestamps")
 		}
 		parsed, err := time.Parse(time.RFC3339Nano, bound.value)
 		_, offset := parsed.Zone()

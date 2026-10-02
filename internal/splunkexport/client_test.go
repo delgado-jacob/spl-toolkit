@@ -285,3 +285,26 @@ func TestTransportYearOneBounds(t *testing.T) {
 		}
 	}
 }
+
+func TestTransportStrictRFC3339WindowLexemes(t *testing.T) {
+	base := []string{"--management-url", "https://example.test", "--credential-env", "MISSING"}
+	for _, bound := range []string{"--earliest", "--latest"} {
+		t.Run(bound, func(t *testing.T) {
+			for _, value := range []string{"2026-01-01T0:00:00Z", "2026-01-01T00:00:00,123Z", "2026-01-01T00:00:00.1234567890Z", "2026-01-01T00:00:00.0000000001+00:00"} {
+				t.Run(value, func(t *testing.T) {
+					if _, err := ParseOptions(append(base, bound, value)); err == nil {
+						t.Fatal("non-contractual timestamp accepted")
+					}
+				})
+			}
+			for _, value := range []string{"2026-01-01T00:00:00Z", "2026-01-01T00:00:00+00:00", "2026-01-01T00:00:00.1Z", "2026-01-01T00:00:00.123456789Z", "2026-01-01T00:00:00.123456789+00:00"} {
+				t.Run(value, func(t *testing.T) {
+					o, err := ParseOptions(append(base, bound, value))
+					if err != nil || o.Window.Mode != "bounded" {
+						t.Fatalf("contractual UTC timestamp rejected: %v", err)
+					}
+				})
+			}
+		})
+	}
+}
