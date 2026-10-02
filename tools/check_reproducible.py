@@ -56,7 +56,7 @@ def _promote_accepted(output: Path, result: dict[str, object]) -> None:
         raise RuntimeError(f"accepted staging output already exists: {staging}")
     shutil.copytree(source, staging)
     if os.name != "nt":
-        for role in ("cli", "server"):
+        for role in ("cli", "server", "exporter"):
             name = payloads.get(role)
             if not isinstance(name, str) or name not in hashes:
                 raise RuntimeError(f"accepted {role} payload is missing from verified hashes")
@@ -116,6 +116,13 @@ def _git(root: Path, *args: str) -> str:
 def _run_payloads(output: Path, version: str, fixture: Path) -> dict[str, str]:
     cli = next(output.glob(f"spl-toolkit-{version}-*"))
     server = next(output.glob(f"spl-toolkit-server-{version}-*"))
+    exporter = next(output.glob(f"spl-toolkit-export-{version}-*"))
+    help_output = subprocess.run([str(exporter), "--help"], check=True, text=True, capture_output=True).stdout
+    if "Usage: spl-toolkit-export" not in help_output:
+        raise RuntimeError("accepted exporter help is unavailable")
+    exporter_version = subprocess.run([str(exporter), "--version"], check=True, text=True, capture_output=True).stdout.strip()
+    if exporter_version != version:
+        raise RuntimeError("accepted exporter reports the wrong version")
     native = next(path for path in output.glob(f"libspl_toolkit-{version}-*") if path.suffix in (".so", ".dylib", ".dll"))
     cli_version = subprocess.run([str(cli), "version"], check=True, text=True, capture_output=True).stdout.strip()
     if version not in cli_version:
@@ -177,7 +184,7 @@ def _run_payloads(output: Path, version: str, fixture: Path) -> dict[str, str]:
         except subprocess.TimeoutExpired:
             process.kill()
             process.wait()
-    return {"cli": cli.name, "server": server.name, "native": native.name}
+    return {"cli": cli.name, "server": server.name, "exporter": exporter.name, "native": native.name}
 
 
 def _run_package_check(source: Path, sdist: Path, wheel_dir: Path, version: str, log: Path) -> None:

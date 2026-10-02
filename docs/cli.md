@@ -165,6 +165,10 @@ Canonical analysis admits at most 4,096 lexer work units. A query that would con
 
 Portable CLI acceptance uses a compact 4,097-work-unit query because operating systems can reject large process command lines before the CLI starts. The 64 KiB and 256 KiB resource-limit fixtures run through non-argv interfaces instead. This transport constraint does not change the analyzer budget or add file, stdin, or batch input: `analyze` and `requirements` still accept one positional or `--query` value.
 
+## Live environment acquisition
+
+Build `spl-toolkit-export` with `make build-exporter` or `make build-all`. Its [exporter guide](splunk-exporter.md) covers existing token/session authentication, scope, metadata observation, limits, staged output and exit codes. It emits Snapshot v2; analysis and the validation command below remain offline.
+
 ## Offline environment validation
 
 Validate a local snapshot, a field-schema bundle, or both:

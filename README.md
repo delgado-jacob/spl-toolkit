@@ -16,6 +16,8 @@ SPL Toolkit 0.1.1 is an offline library and command-line tool for bounded operat
 
 The Go implementation is canonical. The Python package includes the native Go library, and the REST server calls the same Go APIs. Structured analysis supports bounded SPL and SPL2 contracts under splunkd/current; SPL2 requires explicit selection. SPL2 includes selected same-document declarations and branch merges. Safe rewriting has its own narrower evidence contract. The toolkit does not provide event instance validation, expression typechecking, raw-to-data-model translation, learned mappings, external SPL2 module resolution, or complete Splunk syntax coverage.
 
+The separate [Splunk exporter](docs/splunk-exporter.md) acquires bounded live inventory and definitions as Snapshot v2. Build it with `make build-exporter`; the offline readers accept Snapshot v1 and v2.
+
 ## Developer tooling
 
 `scan`, `graph`, `impact-schema`, `impact-mapping`, `document`, and `lsp --stdio`

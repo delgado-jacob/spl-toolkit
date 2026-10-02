@@ -35,6 +35,9 @@ def test_environment_contract_and_sources_are_release_inputs():
         "contracts/v1/environment-snapshot.schema.json",
         "contracts/v1/field-schema-bundle.schema.json",
         "contracts/v1/environment-validation.schema.json",
+        "contracts/v1/environment-export-report.schema.json",
+        "contracts/v2/environment-snapshot.schema.json",
+        "contracts/v2/shared.schema.json",
     }
     core = {f"pkg/environment/{path.name}" for path in (ROOT / "pkg/environment").glob("*.go")
             if not path.name.endswith("_test.go")}
@@ -45,9 +48,16 @@ def test_environment_contract_and_sources_are_release_inputs():
 
     assert roots | core <= native & sources
     assert adapters <= sources
+    collector = {p.relative_to(ROOT).as_posix()
+                 for directory in ("internal/splunkexport", "cmd/splunk-export")
+                 for p in (ROOT / directory).glob("*.go") if not p.name.endswith("_test.go")}
+    assert collector <= sources
+    assert not collector & (native | content)
     assert roots <= content
     assert not (core | adapters) & content
-    assert {"examples/environment/partial-snapshot.json", "examples/environment/fields.json"} <= content & sources
+    assert {"examples/environment/partial-snapshot.json", "examples/environment/fields.json",
+            "examples/environment/observed-partial-snapshot.json",
+            "examples/environment/export-report.json", "docs/splunk-exporter.md"} <= content & sources
 
 
 def test_requirement_contract_and_sources_are_release_inputs():
@@ -105,6 +115,20 @@ def test_requirement_contract_reaches_wheel_through_native_source_manifest(tmp_p
     relative = Path("contracts/v1/requirements.schema.json")
     staged = Path(command.build_lib) / "spl_toolkit" / relative
     assert staged.read_bytes() == (ROOT / relative).read_bytes()
+    from referencing import Registry, Resource
+    from referencing.exceptions import NoSuchResource
+    import jsonschema
+    package_contracts = Path(command.build_lib) / "spl_toolkit/contracts"
+    def deny(uri):
+        raise NoSuchResource(ref=uri)
+    documents = [json.loads(p.read_text()) for p in package_contracts.rglob("*.schema.json")]
+    registry = Registry(retrieve=deny).with_resources((d["$id"], Resource.from_contents(d)) for d in documents)
+    for version, filename in (("v1", "partial-snapshot.json"), ("v2", "observed-partial-snapshot.json")):
+        schema = json.loads((package_contracts / version / "environment-snapshot.schema.json").read_text())
+        instance = json.loads((ROOT / "examples/environment" / filename).read_text())
+        validator = jsonschema.Draft202012Validator(schema, registry=registry, format_checker=jsonschema.FormatChecker())
+        assert list(validator.iter_errors(instance)) == []
+
 
 
 def test_staged_sdist_native_source_closure_compiles_through_build_py(
@@ -529,18 +553,20 @@ def test_verified_payloads_are_promoted_with_result_and_environment(tmp_path: Pa
     evidence.mkdir()
     (build / "cli").write_bytes(b"verified")
     (build / "unix-server").write_bytes(b"server")
+    (build / "unix-exporter").write_bytes(b"exporter")
+    (build / "unix-exporter").chmod(0o644)
     (build / "mode-case.txt").write_bytes(b"plain")
     (build / "artifact.whl").write_bytes(b"wheel")
     (build / "unix-server").chmod(0o644)
     (build / "mode-case.txt").chmod(0o644)
-    hashes = {name: reproducible._sha256(build / name) for name in ("cli", "unix-server", "mode-case.txt", "artifact.whl")}
+    hashes = {name: reproducible._sha256(build / name) for name in ("cli", "unix-server", "unix-exporter", "mode-case.txt", "artifact.whl")}
     environment = {"pinned_environment": True, "artifacts": hashes}
     (evidence / "environment.json").write_text(json.dumps(environment), encoding="utf-8")
     result = {
         "source_sha": "a" * 40, "target": "linux-amd64", "status": "passed",
         "failed_checks": [], "artifact_hashes": hashes,
         "environment": environment,
-        "accepted_payloads": {"cli": "cli", "server": "unix-server", "native": "mode-case.txt"},
+        "accepted_payloads": {"cli": "cli", "server": "unix-server", "exporter": "unix-exporter", "native": "mode-case.txt"},
     }
 
     reproducible._promote_accepted(output, result)
@@ -549,6 +575,7 @@ def test_verified_payloads_are_promoted_with_result_and_environment(tmp_path: Pa
     assert (accepted / "result.json").is_file()
     assert (accepted / "environment.json").is_file()
     assert (accepted / "unix-server").stat().st_mode & 0o111
+    assert (accepted / "unix-exporter").stat().st_mode & 0o111
     assert not ((accepted / "mode-case.txt").stat().st_mode & 0o111)
 
 
@@ -558,3 +585,54 @@ def test_failed_reproducibility_result_is_never_promoted(tmp_path: Path):
     with pytest.raises(RuntimeError, match="cannot promote"):
         reproducible._promote_accepted(output, {"status": "failed", "failed_checks": ["bad"]})
     assert not (output / "accepted").exists()
+
+
+def test_exporter_builds_from_release_source_archive(tmp_path: Path):
+    release.package_tooling_content(ROOT, tmp_path, "0.1.1", EPOCH)
+    source = tmp_path / "source"
+    source.mkdir()
+    with tarfile.open(tmp_path / "spl-toolkit-source-0.1.1.tar.gz", "r:gz") as archive:
+        archive.extractall(source)
+    binary = tmp_path / "exporter"
+    env = release.os.environ | {"GOWORK": "off", "CGO_ENABLED": "0", "GOTOOLCHAIN": "local",
+                                "GOCACHE": str(tmp_path / "cache"), "GOPROXY": "off", "GOSUMDB": "off"}
+    release.subprocess.run(["go", "build", "-mod=readonly", "-trimpath", "-ldflags",
+                            f"-X={release.VERSION_SYMBOL}=0.1.1", "-o", str(binary),
+                            "./cmd/splunk-export"], cwd=source, env=env, check=True)
+    for flag, expected in (("--help", "Usage: spl-toolkit-export"), ("--version", "0.1.1")):
+        output = release.subprocess.run([str(binary), flag], cwd=tmp_path, env=env,
+                                         check=True, text=True, capture_output=True).stdout
+        assert expected in output
+
+
+def test_release_build_includes_cgo_free_versioned_exporter(tmp_path: Path, monkeypatch):
+    support = release._load_build_support(ROOT)
+    commands = []
+    monkeypatch.setattr(release, "validate_environment", lambda *args: {"pinned_environment": False})
+    monkeypatch.setattr(release, "_release_build_environment", lambda *args: release.os.environ.copy())
+    monkeypatch.setattr(release, "verify_wheel_native", lambda *args: None)
+    monkeypatch.setattr(support, "_native_build_plan", lambda *args: (["native-build"], {}))
+    def build_native(_source, output, _version):
+        output.parent.mkdir(parents=True, exist_ok=True)
+        output.write_bytes(b"native")
+        output.with_suffix(".h").write_bytes(b"header")
+    monkeypatch.setattr(support, "build_native", build_native)
+    monkeypatch.setattr(release, "_load_build_support", lambda *args: support)
+    def run(command, *, cwd, env, log):
+        commands.append((command, env.copy()))
+        if command[0] == "go":
+            Path(command[command.index("-o") + 1]).write_bytes(b"binary")
+        else:
+            out = Path(command[command.index("--outdir") + 1])
+            platform = release.json.loads((ROOT / "tools/release-env.json").read_text())["targets"][release._target_name()]["wheel_platform"]
+            _write_wheel(out / f"spl_toolkit-0.1.1-py3-none-{platform}.whl", (2020, 1, 1, 0, 0, 0), b"native")
+            _write_sdist(out / "spl_toolkit-0.1.1.tar.gz", stamp=EPOCH, reverse=False)
+    monkeypatch.setattr(release, "_run", run)
+    output = tmp_path / "release"
+    environment = release.build_release(ROOT, output, EPOCH)
+    exporter_command, exporter_env = next((c, e) for c, e in commands if c[-1] == "./cmd/splunk-export")
+    exporter = Path(exporter_command[exporter_command.index("-o") + 1])
+    assert exporter.name.startswith("spl-toolkit-export-0.1.1-")
+    assert exporter_env["CGO_ENABLED"] == "0"
+    assert f"-X={release.VERSION_SYMBOL}=0.1.1" in exporter_command[exporter_command.index("-ldflags") + 1]
+    assert environment["artifacts"][exporter.name] == hashlib.sha256(b"binary").hexdigest()

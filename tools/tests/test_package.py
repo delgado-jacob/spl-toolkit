@@ -411,6 +411,7 @@ def test_release_tree_contains_complete_analysis_and_validation_source_closure(t
     required.extend(p for p in (ROOT / "pkg/validation").glob("*.go") if not p.name.endswith("_test.go"))
     required.extend(p for p in (ROOT / "pkg/rewrite").glob("*.go") if not p.name.endswith("_test.go"))
     required.extend((ROOT / "parser/spl2").glob("*.go"))
+    required.extend(p for p in (ROOT / "pkg/environment").glob("*.go") if not p.name.endswith("_test.go"))
     required.append(ROOT / "internal/jsoninput/unicode.go")
     for path in required:
         assert (release / "_native_src" / path.relative_to(ROOT)).read_bytes() == path.read_bytes()
@@ -745,6 +746,10 @@ def test_installed_schema_fixtures_exist_before_both_suites(tmp_path: Path, monk
         assert (requirement_go_root / "testdata/environment/cases.json").read_bytes() == (
             ROOT / "testdata/environment/cases.json"
         ).read_bytes()
+        for filename in ("observed-partial-snapshot.json", "export-report.json"):
+            assert (requirement_go_root / "examples/environment" / filename).read_bytes() == (
+                ROOT / "examples/environment" / filename
+            ).read_bytes()
         if "SPL_SCHEMA_EVIDENCE" in env:
             Path(env["SPL_SCHEMA_EVIDENCE"]).write_text("{}")
             Path(env["SPL_SPL2_EVIDENCE"]).write_text("{}")

@@ -408,7 +408,7 @@ def validate_records(records: list[dict], source_sha: str) -> list[str]:
             if not isinstance(checks, dict) or set(checks) != {"clean_source", "payloads", "package"} or any(value != "passed" for value in checks.values()):
                 errors.append(f"{label}: reproducibility checks are incomplete")
             payloads = record.get("accepted_payloads")
-            if not isinstance(payloads, dict) or set(payloads) != {"cli", "server", "native"} or not all(isinstance(v, str) and v for v in payloads.values()):
+            if not isinstance(payloads, dict) or set(payloads) != {"cli", "server", "exporter", "native"} or not all(isinstance(v, str) and v for v in payloads.values()):
                 errors.append(f"{label}: accepted_payloads is invalid")
         elif kind == "installed-wheel":
             if record.get("python_version") not in PYTHON_VERSIONS:

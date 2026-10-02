@@ -56,7 +56,7 @@ class CleanBuildTests(unittest.TestCase):
             {
                 "Makefile": (
                     "build:\n\t@printf changed > tracked.txt\n"
-                    "build-server build-shared test:\n\t@true\n"
+                    "build-server build-exporter build-shared test:\n\t@true\n"
                 ),
                 "tracked.txt": "original\n",
             }
@@ -65,12 +65,20 @@ class CleanBuildTests(unittest.TestCase):
         self.assertEqual(result.returncode, 1, result.stdout)
         self.assertIn("tracked.txt", result.stdout)
 
+    def test_exporter_failure_is_part_of_clean_build_acceptance(self) -> None:
+        result = self.run_check({"Makefile": (
+            "build build-server build-shared test:\n\t@true\n"
+            "build-exporter:\n\t@exit 7\n"
+        )})
+        self.assertEqual(result.returncode, 2, result.stdout)
+        self.assertIn("build command failed", result.stdout)
+
     def test_returns_the_build_subprocess_failure(self) -> None:
         result = self.run_check(
             {
                 "Makefile": (
                     "build:\n\t@exit 7\n"
-                    "build-server build-shared test:\n\t@true\n"
+                    "build-server build-exporter build-shared test:\n\t@true\n"
                 )
             }
         )

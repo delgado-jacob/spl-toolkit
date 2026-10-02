@@ -98,7 +98,7 @@ def passing_records() -> list[dict]:
                 "schema_version": 1, "kind": "reproducibility", "source_sha": SHA,
                 "status": "passed", "target": target, "architecture": architecture,
                 "wheel_sha256": HASH, "artifact_hashes": {"wheel.whl": HASH},
-                "accepted_payloads": {"cli": "cli", "server": "server", "native": "native"},
+                "accepted_payloads": {"cli": "cli", "server": "server", "exporter": "exporter", "native": "native"},
                 "environment": environment,
                 "checks": {"clean_source": "passed", "payloads": "passed", "package": "passed"},
             },
@@ -480,3 +480,16 @@ def test_task9_validated_pinned_local_environment_remains_acceptable():
     )
 
     assert validate_records(records, SHA) == []
+
+
+@pytest.mark.parametrize("failure", ["missing", "unknown", "blank"])
+def test_reproducibility_requires_exporter_payload(failure):
+    records = passing_records()
+    payloads = next(record for record in records if record["kind"] == "reproducibility")["accepted_payloads"]
+    if failure == "missing":
+        del payloads["exporter"]
+    elif failure == "unknown":
+        payloads["other"] = payloads.pop("exporter")
+    else:
+        payloads["exporter"] = ""
+    assert any("accepted_payloads is invalid" in error for error in validate_records(records, SHA))

@@ -441,9 +441,11 @@ def build_release(source: Path, output: Path, epoch: int) -> dict[str, object]:
     go_base = ["go", "build", "-mod=readonly", "-trimpath", "-buildvcs=false", "-ldflags", go_ldflags]
     cli = output / f"spl-toolkit-{version}-{target}{executable_suffix}"
     server = output / f"spl-toolkit-server-{version}-{target}{executable_suffix}"
+    exporter = output / f"spl-toolkit-export-{version}-{target}{executable_suffix}"
     cgo0 = env | {"CGO_ENABLED": "0"}
     _run(go_base + ["-o", str(cli), "./cmd"], cwd=source, env=cgo0, log=evidence / "cli-build.log")
     _run(go_base + ["-o", str(server), "./cmd/server"], cwd=source, env=cgo0, log=evidence / "server-build.log")
+    _run(go_base + ["-o", str(exporter), "./cmd/splunk-export"], cwd=source, env=cgo0, log=evidence / "exporter-build.log")
     native_suffix = Path(support.native_library_name()).suffix
     native = output / f"libspl_toolkit-{version}-{target}{native_suffix}"
     native_build = evidence / "native" / support.native_library_name()

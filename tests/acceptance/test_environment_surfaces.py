@@ -44,8 +44,39 @@ def native_raw(mapper, raw):
         mapper._lib.spl_result_free(pointer)
 
 
+GO_REPORT_HELPER = r"""
+package main
+import (
+    "encoding/json"
+    "io"
+    "os"
+    "github.com/delgado-jacob/spl-toolkit/pkg/environment"
+)
+func main() {
+    raw, err := io.ReadAll(os.Stdin); if err != nil { panic(err) }
+    report, err := environment.ValidateJSON(raw); if err != nil { panic(err) }
+    if err := json.NewEncoder(os.Stdout).Encode(report); err != nil { panic(err) }
+}
+"""
+
+
+@pytest.fixture(scope="module")
+def environment_go_reporter(tmp_path_factory):
+    # Reuse the package checker's isolated native-source closure, as the installed
+    # closure/requirements suites do; no checkout module or Python import is needed.
+    root = required_absolute_path("SPL_TOOLING_SOURCE_ROOT")
+    directory = tmp_path_factory.mktemp("environment-go")
+    helper = directory / "main.go"
+    helper.write_text(GO_REPORT_HELPER, encoding="utf-8")
+    binary = directory / ("environment-report.exe" if os.name == "nt" else "environment-report")
+    env = dict(os.environ, GOWORK="off")
+    subprocess.run([os.environ.get("SPL_TOOLING_GO", "go"), "build", "-mod=readonly", "-o", str(binary), str(helper)],
+                   cwd=root, env=env, check=True, capture_output=True)
+    return binary, root, env
+
+
 @pytest.mark.parametrize("case", CASES, ids=lambda case: case["name"])
-def test_environment_full_report_parity(case, cli_path, server_url, tmp_path):
+def test_environment_full_report_parity(case, cli_path, server_url, environment_go_reporter, tmp_path):
     snapshot = tmp_path / "snapshot.json"
     schemas = tmp_path / "schemas.json"
     snapshot.write_text(json.dumps(case["snapshot"]), encoding="utf-8")
@@ -63,7 +94,10 @@ def test_environment_full_report_parity(case, cli_path, server_url, tmp_path):
         python_report = mapper.validate_environment(request)
         c_report = native_raw(mapper, raw)
     assert http_status == (400 if case["status"] == "invalid" else 200)
-    assert cli_report == http_report == c_report == python_report
+    binary, root, env = environment_go_reporter
+    go_output = subprocess.run([str(binary)], input=raw, cwd=root, env=env,
+                               check=True, capture_output=True, timeout=10).stdout
+    assert json.loads(go_output) == cli_report == http_report == c_report == python_report
     assert cli_report["status"] == case["status"]
 
 

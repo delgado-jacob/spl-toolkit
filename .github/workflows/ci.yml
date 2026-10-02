@@ -47,6 +47,7 @@ jobs:
           python tools/check_go.py
           go build -mod=readonly -o "$RUNNER_TEMP/spl-toolkit" ./cmd
           go build -mod=readonly -o "$RUNNER_TEMP/spl-toolkit-server" ./cmd/server
+          CGO_ENABLED=0 go build -mod=readonly -o "$RUNNER_TEMP/spl-toolkit-export" ./cmd/splunk-export
           python -c "import json,subprocess; from pathlib import Path; sha=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(); Path('build/evidence/go-floor.json').write_text(json.dumps({'schema_version':1,'kind':'go-floor','source_sha':sha,'status':'passed','go_version':'1.22.12'},sort_keys=True)+'\\n')"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with: {name: evidence-go-floor, path: build/evidence/go-floor.json, if-no-files-found: error}

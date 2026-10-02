@@ -5,7 +5,7 @@ layout: page
 
 # Machine contracts
 
-The [contract registry](https://github.com/delgado-jacob/spl-toolkit/blob/main/contracts/README.md) lists every v1 schema and request
+The [contract registry](https://github.com/delgado-jacob/spl-toolkit/blob/main/contracts/README.md) lists every v1 and v2 schema and request
 entry point. It covers QueryDocument, capabilities, analysis, direct query
 requirements, caller-supplied knowledge-object closure, field-list and JSON
 Schema/OCSF validation, rewrite, corpus, manifest, graph, impact, advanced
@@ -37,7 +37,9 @@ consistent with no coverage gaps; `partial` preserves unknown evidence; and
 `invalid` records malformed or contradictory input. Schema checks cannot prove
 collection truth, live query compatibility, authorization, or execution.
 
-Owned contracts use JSON Schema Draft 2020-12 and integer `schema_version: 1`.
+Observed Snapshot v2 uses `v2/environment-snapshot.schema.json` and `v2/shared.schema.json`, retaining unchanged v1 object/provenance references. The [exporter](splunk-exporter.md) acquisition report uses `v1/environment-export-report.schema.json`. Register both directories locally; source/release artifacts and native Python wheels carry both versions. Snapshot v1 remains supported. Observation is scoped to method, index/datatype, visibility and bucket-overlap window; complete observed absence means `not_observed`, not configured absence. The validation envelope and report remain v1.
+
+Owned contracts use JSON Schema Draft 2020-12 and integer schema versions. Snapshot v2 uses `schema_version: 2`; existing report families retain `schema_version: 1`.
 The named family establishes what that integer versions. The unmodified official
 OASIS SARIF Errata 01 schema uses Draft 4 and SARIF `version: "2.1.0"`.
 Register all declared IDs locally and deny unknown retrieval. Schema IDs are

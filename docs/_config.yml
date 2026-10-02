@@ -28,6 +28,7 @@ header_pages:
   - quickstart.md
   - cli.md
   - rewrite.md
+  - splunk-exporter.md
   - configuration.md
   - api/index.md
   - api-server.md

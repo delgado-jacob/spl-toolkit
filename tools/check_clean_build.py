@@ -74,6 +74,7 @@ def windows_build(source: Path, env: dict[str, str]) -> None:
     commands = [
         ["go", "build", "-mod=readonly", "-trimpath", "-o", "build/spl-toolkit", "./cmd"],
         ["go", "build", "-mod=readonly", "-trimpath", "-o", "build/spl-toolkit-server", "./cmd/server"],
+        ["go", "build", "-mod=readonly", "-trimpath", "-o", "build/spl-toolkit-export.exe", "./cmd/splunk-export"],
         [
             "go", "build", "-mod=readonly", "-trimpath", "-buildmode=c-shared",
             "-o", "build/libspl_toolkit.dll", "./pkg/bindings",
@@ -101,7 +102,7 @@ def check(repository: Path, ref: str) -> None:
         if os.name == "nt" and shutil.which("make") is None:
             windows_build(source, env)
         else:
-            subprocess.run(["make", "build", "build-server", "build-shared", "test"],
+            subprocess.run(["make", "build", "build-server", "build-exporter", "build-shared", "test"],
                            cwd=source, env=env, check=True)
         try:
             assert hashes(source, tracked_names) == before, "build changed tracked source"

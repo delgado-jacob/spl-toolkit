@@ -13,6 +13,7 @@ contracts/v1/corpus.schema.json
 contracts/v1/definitions.schema.json
 contracts/v1/detection-bom.schema.json
 contracts/v1/document-view.schema.json
+contracts/v1/environment-export-report.schema.json
 contracts/v1/environment-snapshot.schema.json
 contracts/v1/environment-validation.schema.json
 contracts/v1/field-schema-bundle.schema.json
@@ -26,6 +27,8 @@ contracts/v1/requirements.schema.json
 contracts/v1/rewrite.schema.json
 contracts/v1/schema-validation.schema.json
 contracts/v1/shared.schema.json
+contracts/v2/environment-snapshot.schema.json
+contracts/v2/shared.schema.json
 docs/API.md
 docs/architecture.md
 docs/cli.md
@@ -33,8 +36,11 @@ docs/compatibility.md
 docs/contracts.md
 docs/rewrite.md
 docs/spl2.md
+docs/splunk-exporter.md
 docs/tooling.md
+examples/environment/export-report.json
 examples/environment/fields.json
+examples/environment/observed-partial-snapshot.json
 examples/environment/partial-snapshot.json
 examples/go/basic/main.go
 examples/go/tooling/main.go

@@ -200,9 +200,13 @@ curl -sS http://localhost:8080/api/v1/capabilities
 
 `GET /api/v1/capabilities` returns the direct capability manifest. Malformed JSON, invalid Unicode, duplicate or unknown properties, trailing JSON, and unsupported options return HTTP 400 transport errors instead of analysis reports. The existing JSON content-type policy, 1 MiB request-body limit, and middleware protections apply. Query processing opens no server-side file or network resource. See [REST server usage](api-server.md) for deployment and legacy endpoints.
 
+## Live acquisition companion
+
+The separate [Splunk exporter](splunk-exporter.md) emits observed Snapshot v2 and an acquisition report v1. Live transport and jobs belong to that command; the canonical environment API and all toolkit surfaces consume supplied artifacts offline.
+
 ## Offline environment artifacts
 
-`pkg/environment` strictly decodes and prepares two independent version 1
+`pkg/environment` strictly decodes and prepares independent
 inputs. A snapshot records an opaque `scope_id`, namespace/app/owner capture
 selectors, origin and UTC capture interval, product capability facts, per-kind
 collection coverage, and objects with provenance. A schema bundle records
@@ -231,8 +235,11 @@ spl-toolkit environment validate --snapshot examples/environment/partial-snapsho
 The CLI accepts `--snapshot` and `--schemas` as local file paths, with at least
 one required. It returns 0 for valid, 1 for invalid artifact content, 3 for
 partial evidence, and 2 for usage, file, output, or internal errors. It emits
-the report for all three content statuses. The stateless
-`POST /api/v1/environment/validate` accepts an inline `{"schema_version":1,
+the report for all three content statuses.
+
+Snapshot v1 remains supported; observed Snapshot v2 separates source/sourcetype observation from configured inventory and treats complete observed absence as `not_observed`. Missing observed binding targets remain unresolved warnings. Snapshot v2 requires upgraded readers. The validation request envelope, schema bundle and report retain version 1.
+
+The stateless `POST /api/v1/environment/validate` accepts an inline `{"schema_version":1,
 "snapshot":{...},"schema_bundle":{...}}` request with at least one artifact.
 It returns HTTP 200 for valid or partial reports and 400 with the canonical
 invalid report for invalid content. The existing JSON content type and 8 MiB

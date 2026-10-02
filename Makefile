@@ -1,6 +1,6 @@
 # SPL Toolkit - Build and Release Automation
 
-.PHONY: build build-server build-shared build-all test test-coverage clean install lint fmt deps deps-update python-deps python-build python-test python-install python-wheel python-sdist python-dist release-prep release-build release tag help generate-docs
+.PHONY: build build-server build-exporter build-shared build-all test test-coverage clean install lint fmt deps deps-update python-deps python-build python-test python-install python-wheel python-sdist python-dist release-prep release-build release tag help generate-docs
 
 # Go variables
 GOCMD=go
@@ -15,6 +15,7 @@ GOFMT=gofmt
 # Binary names
 BINARY_NAME=spl-toolkit
 SERVER_BINARY_NAME=spl-toolkit-server
+EXPORTER_BINARY_NAME=spl-toolkit-export
 SHARED_LIB_NAME=libspl_toolkit
 
 # Build directories
@@ -78,11 +79,15 @@ build-server: ## Build the REST API server binary
 	mkdir -p $(BUILD_DIR)
 	$(GOBUILD) -mod=readonly -trimpath -ldflags "$(VERSION_LDFLAGS)" -o $(BUILD_DIR)/$(SERVER_BINARY_NAME) ./cmd/server
 
+build-exporter: ## Build the bounded Splunk acquisition command
+	mkdir -p $(BUILD_DIR)
+	CGO_ENABLED=0 $(GOBUILD) -mod=readonly -trimpath -ldflags "$(VERSION_LDFLAGS)" -o $(BUILD_DIR)/$(EXPORTER_BINARY_NAME) ./cmd/splunk-export
+
 build-shared: ## Build shared library for Python bindings
 	mkdir -p $(BUILD_DIR)
 	$(NATIVE_BUILD_ENV) $(GOBUILD) -mod=readonly -trimpath -buildmode=c-shared -ldflags "$(VERSION_LDFLAGS)" -o $(BUILD_DIR)/$(SHARED_LIB_NAME)$(SHARED_EXT) ./pkg/bindings
 
-build-all: build build-server build-shared ## Build CLI, server binary, and shared library
+build-all: build build-server build-exporter build-shared ## Build CLI, server, exporter, and shared library
 
 python-deps: ## Install pinned Python development dependencies
 	$(PIP) install -r python/requirements-dev.txt

@@ -19,6 +19,10 @@ Intel macOS is unsupported starting October 1, 2026. Previously published Intel 
 
 This policy defines the required release matrix. The historical evidence below records acceptance of earlier source revisions and does not certify the current revision.
 
+## Environment exporter compatibility
+
+The [bounded exporter](splunk-exporter.md) emits Snapshot v2 and an acquisition report v1. Upgrade Snapshot-v1-only readers before consumption. The offline Go, CLI, REST, native C and Python readers support both snapshot versions; validation envelopes, schema bundles and validation reports remain v1. Complete observed absence means `not_observed` within the method/index/datatype/window and exporting-principal scope. This is a local artifact compatibility boundary, not verified Splunk Cloud support or new release/live acceptance evidence.
+
 ## Developer tooling contracts
 
 SPL Toolkit 0.1.1 adds corpus, graph, impact and document-view report families at
