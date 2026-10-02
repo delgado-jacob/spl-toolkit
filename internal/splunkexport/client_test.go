@@ -17,7 +17,7 @@ import (
 func testOptions(t *testing.T, address string) Options {
 	t.Helper()
 	t.Setenv("EXPORT_TEST_TOKEN", "synthetic-secret")
-	return Options{ManagementURL: address, AuthMode: "bearer", CredentialEnv: "EXPORT_TEST_TOKEN", InstanceID: "fixture", RequestTimeout: time.Second, JobTimeout: time.Second, OverallTimeout: time.Second, MaxRows: 10}
+	return Options{ManagementURL: address, AuthMode: "bearer", CredentialEnv: "EXPORT_TEST_TOKEN", InstanceID: "fixture", RequestTimeout: time.Second, JobTimeout: 2 * time.Second, OverallTimeout: 2 * time.Second, MaxRows: 10}
 }
 func fixtureCA(t *testing.T, s *httptest.Server) string {
 	t.Helper()

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"strconv"
 	"strings"
 	"sync"
@@ -29,19 +30,26 @@ type jobFixture struct {
 	probeOffset     int
 	probeResponse   string
 	probeDelay      time.Duration
+	dispatchForm    url.Values
+	onStatus        func()
 }
 
 func newJobFixture(t *testing.T, f *jobFixture) (*Client, *jobFixture) {
 	t.Helper()
 	f.jobs = map[string]bool{"unrelated-job": true}
+	var c *Client
 	s := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		f.mu.Lock()
 		defer f.mu.Unlock()
 		if r.Method == "POST" && r.URL.Path == "/services/search/jobs" {
 			r.ParseForm()
 			id := r.Form.Get("id")
+			f.dispatchForm = r.PostForm
 			if !strings.HasPrefix(id, "spl-toolkit-export-") || len(strings.TrimPrefix(id, "spl-toolkit-export-")) != 32 {
 				t.Error("missing preallocated owned SID")
+			}
+			if !c.owns(id) {
+				t.Error("SID not registered before submission")
 			}
 			f.jobs[id] = true
 			f.operations = append(f.operations, "submit")
@@ -58,8 +66,13 @@ func newJobFixture(t *testing.T, f *jobFixture) (*Client, *jobFixture) {
 					t.Errorf("%s=%q", k, r.Form.Get(k))
 				}
 			}
-			if r.Form.Get("max_time") == "" || r.Form.Get("auto_cancel") == "" {
-				t.Error("missing time limits")
+			for _, key := range []string{"max_time", "auto_cancel"} {
+				seconds, err := strconv.ParseInt(r.Form.Get(key), 10, 64)
+				if err != nil || seconds < 1 {
+					t.Errorf("%s must be positive whole seconds: %q", key, r.Form.Get(key))
+					w.WriteHeader(http.StatusBadRequest)
+					return
+				}
 			}
 			if f.submissionDelay > 0 {
 				f.mu.Unlock()
@@ -129,6 +142,11 @@ func newJobFixture(t *testing.T, f *jobFixture) (*Client, *jobFixture) {
 			return
 		}
 		f.operations = append(f.operations, "status")
+		if f.onStatus != nil {
+			onStatus := f.onStatus
+			f.onStatus = nil
+			onStatus()
+		}
 		if f.status != "" {
 			fmt.Fprint(w, f.status)
 		} else {
@@ -160,6 +178,83 @@ func (f *jobFixture) assertClean(t *testing.T) {
 		t.Errorf("owned jobs remain: %d", len(f.jobs))
 	}
 }
+func TestOwnedJobDispatchUsesIntegerRemainingBudget(t *testing.T) {
+	for _, limit := range []string{"job", "overall", "parent"} {
+		t.Run(limit, func(t *testing.T) {
+			c, f := newJobFixture(t, &jobFixture{})
+			c.options.JobTimeout = 10 * time.Second
+			c.options.OverallTimeout = 10 * time.Second
+			const budget = 2750 * time.Millisecond
+			ctx := context.Background()
+			switch limit {
+			case "job":
+				c.options.JobTimeout = budget
+			case "overall":
+				c.options.OverallTimeout = budget
+			case "parent":
+				var cancel context.CancelFunc
+				ctx, cancel = context.WithTimeout(ctx, budget)
+				t.Cleanup(cancel)
+			}
+			c.options.Window.Earliest = "2026-01-01T00:00:00.123456789Z"
+			c.options.Window.Latest = "2026-01-02T00:00:00.987654321Z"
+			r := c.runDiscoveryJob(ctx, discoveryQuery{search: "fixture query"})
+			if r.Coverage != "complete" || len(r.Rows) != 1 || r.CleanupFailed {
+				t.Fatalf("integer dispatch failed: %+v", r)
+			}
+			f.assertClean(t)
+			f.mu.Lock()
+			defer f.mu.Unlock()
+			if f.dispatchForm.Get("max_time") != "2" || f.dispatchForm.Get("auto_cancel") != "3" {
+				t.Fatalf("dispatch exceeded budget or lost cancellation bound: %v", f.dispatchForm)
+			}
+			if f.dispatchForm.Get("earliest_time") != "1767225600.123456789" || f.dispatchForm.Get("latest_time") != "1767312000.987654321" {
+				t.Fatal("event-time fractions lost")
+			}
+		})
+	}
+}
+
+func TestOwnedJobInsufficientBudgetDoesNotDispatch(t *testing.T) {
+	for _, limit := range []string{"job", "overall", "parent", "one-second-job", "cancelled-parent"} {
+		t.Run(limit, func(t *testing.T) {
+			c, f := newJobFixture(t, &jobFixture{})
+			ctx := context.Background()
+			switch limit {
+			case "job":
+				c.options.JobTimeout = 500 * time.Millisecond
+			case "overall":
+				c.options.OverallTimeout = 500 * time.Millisecond
+			case "parent":
+				var cancel context.CancelFunc
+				ctx, cancel = context.WithTimeout(ctx, 500*time.Millisecond)
+				t.Cleanup(cancel)
+			case "one-second-job":
+				c.options.JobTimeout = time.Second
+			case "cancelled-parent":
+				var cancel context.CancelFunc
+				ctx, cancel = context.WithCancel(ctx)
+				cancel()
+			}
+			r := c.runDiscoveryJob(ctx, discoveryQuery{search: "fixture query"})
+			if r.Coverage != "unavailable" || r.Reason != "job_timeout" || len(r.Rows) != 0 || r.CleanupFailed || len(r.Diagnostics) != 1 || r.Diagnostics[0].Code != "job_timeout" {
+				t.Fatalf("insufficient dispatch budget: %+v", r)
+			}
+			f.assertClean(t)
+			f.mu.Lock()
+			defer f.mu.Unlock()
+			if len(f.operations) != 0 {
+				t.Fatalf("unsubmitted job contacted server: %v", f.operations)
+			}
+			c.ownedMu.Lock()
+			defer c.ownedMu.Unlock()
+			if len(c.owned) != 0 {
+				t.Fatalf("unsubmitted owned jobs: %d", len(c.owned))
+			}
+		})
+	}
+}
+
 func TestOwnedJobSuccessDeletes(t *testing.T) {
 	c, f := newJobFixture(t, &jobFixture{})
 	r := c.runDiscoveryJob(context.Background(), discoveryQuery{search: "fixture query"})
@@ -187,7 +282,7 @@ func TestOwnedJobFailureRetainsWarning(t *testing.T) {
 }
 func TestOwnedJobDeadlineFinalizesBeforeDelete(t *testing.T) {
 	c, f := newJobFixture(t, &jobFixture{status: `{"entry":[{"content":{"isDone":false,"resultCount":1}}]}`})
-	c.options.JobTimeout = 20 * time.Millisecond
+	c.options.JobTimeout = 1100 * time.Millisecond
 	r := c.runDiscoveryJob(context.Background(), discoveryQuery{search: "fixture query"})
 	if r.Coverage != "partial" || len(r.Rows) != 1 {
 		t.Fatalf("salvage: %+v", r)
@@ -217,14 +312,20 @@ func TestOwnedJobCancellationLeavesUnrelatedJob(t *testing.T) {
 		t.Fatal("unexpected SID accepted")
 	}
 	f.assertClean(t)
-	c2, f2 := newJobFixture(t, &jobFixture{status: `{"entry":[{"content":{"isDone":false,"resultCount":1}}]}`})
-	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Millisecond)
+	ctx, cancel := context.WithCancel(context.Background())
 	t.Cleanup(cancel)
+	c2, f2 := newJobFixture(t, &jobFixture{status: `{"entry":[{"content":{"isDone":false,"resultCount":1}}]}`, onStatus: cancel})
 	r = c2.runDiscoveryJob(ctx, discoveryQuery{search: "fixture query"})
 	if r.Coverage == "complete" {
 		t.Fatal("cancelled job complete")
 	}
 	f2.assertClean(t)
+	f2.mu.Lock()
+	defer f2.mu.Unlock()
+	ops := strings.Join(f2.operations, ",")
+	if !strings.HasPrefix(ops, "submit,status,") || !strings.HasSuffix(ops, "finalize,status,results,delete") {
+		t.Fatalf("cancellation did not salvage dispatched job: %s", ops)
+	}
 }
 func TestOwnedJobGapsAndPagination(t *testing.T) {
 	for _, tc := range []struct {

@@ -83,6 +83,20 @@ func (c *Client) runDiscoveryJob(parent context.Context, query discoveryQuery) (
 	result.Diagnostics = []Diagnostic{}
 	result.Coverage = "complete"
 	result.ObservedAt = time.Now().UTC().Format(time.RFC3339Nano)
+	overall, cancelOverall := context.WithTimeout(parent, c.options.OverallTimeout)
+	defer cancelOverall()
+	ctx, cancel := context.WithTimeout(overall, c.options.JobTimeout)
+	defer cancel()
+	deadline, _ := ctx.Deadline()
+	remaining := time.Until(deadline)
+	// Splunk requires whole seconds; zero removes the server time limit.
+	// Check before allocating an owned SID so unsubmitted jobs need no cleanup.
+	maxTime := int64(remaining / time.Second)
+	if ctx.Err() != nil || maxTime < 1 {
+		result.gap("job_timeout")
+		return
+	}
+	seconds := int64(math.Ceil(remaining.Seconds()))
 	entropy := make([]byte, 16)
 	if _, err := rand.Read(entropy); err != nil {
 		result.gap("job_id_failed")
@@ -108,21 +122,7 @@ func (c *Client) runDiscoveryJob(parent context.Context, query discoveryQuery) (
 			result.Diagnostics = append(result.Diagnostics, Diagnostic{Code: "job_cleanup_failed", Severity: "warning", Message: "Owned discovery job cleanup failed."})
 		}
 	}()
-	overall, cancelOverall := context.WithTimeout(parent, c.options.OverallTimeout)
-	defer cancelOverall()
-	ctx, cancel := context.WithTimeout(overall, c.options.JobTimeout)
-	defer cancel()
-	deadline, _ := ctx.Deadline()
-	remaining := time.Until(deadline)
-	if remaining <= 0 {
-		result.gap("job_timeout")
-		return
-	}
-	seconds := int64(math.Ceil(remaining.Seconds()))
-	if seconds < 1 {
-		seconds = 1
-	}
-	form := url.Values{"id": {sid}, "search": {query.search}, "exec_mode": {"normal"}, "search_mode": {"normal"}, "max_time": {strconv.FormatFloat(remaining.Seconds(), 'f', -1, 64)}, "auto_cancel": {strconv.FormatInt(seconds, 10)}, "enable_lookups": {"false"}, "allow_partial_results": {"true"}, "max_count": {strconv.Itoa(c.options.MaxRows + 1)}, "earliest_time": {"0"}}
+	form := url.Values{"id": {sid}, "search": {query.search}, "exec_mode": {"normal"}, "search_mode": {"normal"}, "max_time": {strconv.FormatInt(maxTime, 10)}, "auto_cancel": {strconv.FormatInt(seconds, 10)}, "enable_lookups": {"false"}, "allow_partial_results": {"true"}, "max_count": {strconv.Itoa(c.options.MaxRows + 1)}, "earliest_time": {"0"}}
 	if c.options.Window.Earliest != "" {
 		form.Set("earliest_time", epochBound(c.options.Window.Earliest))
 	}
