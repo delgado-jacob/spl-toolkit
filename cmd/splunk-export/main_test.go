@@ -175,6 +175,15 @@ func TestCommandPreservesInputsThroughSymlinkParentTraversal(t *testing.T) {
 			if err := os.Symlink(filepath.Join(b, "sub"), link); err != nil {
 				t.Skip(err)
 			}
+			rawParent := link + string(os.PathSeparator) + ".."
+			resolvedParent, parentErr := os.Stat(rawParent)
+			targetParent, targetErr := os.Stat(b)
+			if targetErr != nil {
+				t.Fatal(targetErr)
+			}
+			if parentErr != nil || !os.SameFile(resolvedParent, targetParent) {
+				t.Skip("filesystem does not resolve symlink parent traversal to the target parent")
+			}
 			protected := filepath.Join(b, input)
 			inputBytes := []byte("synthetic-input")
 			if input == "ca" {
@@ -281,6 +290,15 @@ func TestCommandStagesInFilesystemDestinationDirectory(t *testing.T) {
 	link := filepath.Join(a, "link")
 	if err := os.Symlink(filepath.Join(b, "sub"), link); err != nil {
 		t.Skip(err)
+	}
+	rawParent := link + string(os.PathSeparator) + ".."
+	resolvedParent, parentErr := os.Stat(rawParent)
+	targetParent, targetErr := os.Stat(b)
+	if targetErr != nil {
+		t.Fatal(targetErr)
+	}
+	if parentErr != nil || !os.SameFile(resolvedParent, targetParent) {
+		t.Skip("filesystem does not resolve symlink parent traversal to the target parent")
 	}
 	if err := os.Chmod(a, 0500); err != nil {
 		t.Skip(err)
