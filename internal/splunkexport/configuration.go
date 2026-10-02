@@ -192,14 +192,14 @@ func configurationPageWarning(page configurationPage) bool {
 func configurationNeedsDetail(kind, name string, content configurationContent) bool {
 	switch kind {
 	case "macro":
-		if len(content.Arguments) > 0 && string(content.Arguments) != "null" {
-			if _, _, _, valid := configurationMacroIdentity(name, content.Arguments); !valid {
-				return false
-			}
+		// A zero-argument stanza needs neither args nor optional iseval.
+		// An advertised invalid args value cannot be repaired by inheritance.
+		base, arity, _, valid := configurationMacroIdentity(name, content.Arguments)
+		if base == "" || !valid && len(content.Arguments) > 0 {
+			return false
 		}
-		_, args := configurationString(content.Arguments)
 		definition, ok := configurationString(content.Definition)
-		return !args || !ok || strings.TrimSpace(definition) == "" || len(content.EvalBased) == 0 || string(content.EvalBased) == "null"
+		return arity > 0 && len(content.Arguments) == 0 || !ok || strings.TrimSpace(definition) == ""
 	case "saved_search", "event_type":
 		search, ok := configurationString(content.Search)
 		return !ok || strings.TrimSpace(search) == ""
@@ -254,7 +254,7 @@ func configurationMergeContent(kind, name string, list, detail configurationCont
 		if oldOK && newOK && oldEval != nil && newEval != nil && *oldEval != *newEval {
 			return list, true
 		}
-		if len(list.EvalBased) > 0 && string(list.EvalBased) != "null" {
+		if len(list.EvalBased) > 0 {
 			detail.EvalBased = list.EvalBased
 		}
 	} else {
@@ -291,11 +291,19 @@ func configurationMacroIdentity(name string, rawArguments json.RawMessage) (stri
 	} else if strings.ContainsAny(name, "()") {
 		return "", 0, nil, false
 	}
+	// macros.conf defines a bare stanza as zero-arity and ignores its args
+	// setting. Only omission or a JSON string is supported evidence here.
+	if len(rawArguments) == 0 {
+		return base, arity, []string{}, arity == 0
+	}
 	raw, ok := configurationString(rawArguments)
 	if !ok {
 		return "", 0, nil, false
 	}
 	args := []string{}
+	if arity == 0 {
+		return base, arity, args, true
+	}
 	seen := map[string]bool{}
 	if strings.TrimSpace(raw) != "" {
 		for _, value := range strings.Split(raw, ",") {
@@ -346,6 +354,12 @@ func configurationMappedObject(instanceID string, adapter configurationAdapter, 
 		object.Arity = &arity
 		object.Arguments = args
 		eval, valid := configurationBoolean(content.EvalBased)
+		if len(content.EvalBased) == 0 {
+			// macros.conf defaults iseval to false after any necessary detail
+			// merge. Explicit null remains unknown rather than a default.
+			value := false
+			eval = &value
+		}
 		if !valid {
 			diagnostics = append(diagnostics, "macro_metadata_invalid")
 		}

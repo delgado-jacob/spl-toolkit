@@ -23,6 +23,8 @@ import (
 // paging and unpaged tag shapes follow these official references:
 // https://help.splunk.com/en/splunk-cloud-platform/leverage-rest-apis/rest-api-reference/10.4.2604/knowledge-endpoints/knowledge-endpoint-descriptions
 // https://help.splunk.com/en/splunk-cloud-platform/leverage-rest-apis/rest-api-tutorials/9.2.2406/rest-api-tutorials/managing-knowledge-objects
+// Macro default semantics follow the macros.conf specification:
+// https://help.splunk.com/en/data-management/splunk-enterprise-admin-manual/9.0/welcome-to-splunk-enterprise-administration/configuration-file-reference/9.0.0-configuration-file-reference/macros.conf
 var configurationFamilies = []string{"configs/conf-macros", "saved/searches", "saved/eventtypes", "data/transforms/lookups", "datamodel/model", "search/tags", "data/props/calcfields", "data/props/extractions", "data/transforms/extractions"}
 
 type configurationRequest struct {
@@ -226,6 +228,51 @@ func TestConfigurationQueryDefinitionsAndClosure(t *testing.T) {
 	}
 }
 
+func TestConfigurationMacroOmittedDefaultsCompleteFeedAndClosure(t *testing.T) {
+	definition := "search index=synthetic | eval marker=\"literal\"\n"
+	entries := make([]map[string]any, 100)
+	for i := range entries {
+		content := map[string]any{"definition": definition}
+		switch i % 3 {
+		case 1:
+			content["args"] = ""
+		case 2:
+			// macros.conf ignores args for zero-argument stanzas.
+			content["args"] = "ignored,ignored"
+		}
+		entries[i] = configurationEntry(fmt.Sprintf("default_macro_%03d", i), content)
+	}
+	c, requests := newConfigurationFixture(t, func(w http.ResponseWriter, r *http.Request, family string) {
+		if family == "configs/conf-macros" {
+			configurationFeed(w, r, entries)
+			return
+		}
+		if strings.HasPrefix(family, "configs/conf-macros/") {
+			t.Error("documented defaults must not require detail")
+			http.NotFound(w, r)
+			return
+		}
+		configurationFeed(w, r, nil)
+	})
+	result := c.collectConfiguration(context.Background(), "synthetic")
+	if result.Err != nil || len(result.Objects) != 100 || collectionCoverage(result.Collections, "macro") != "complete" {
+		t.Fatalf("omitted defaults lost macro evidence: retained=%d coverage=%s err=%v", len(result.Objects), collectionCoverage(result.Collections, "macro"), result.Err)
+	}
+	for _, object := range result.Objects {
+		if object.Arity == nil || *object.Arity != 0 || !reflect.DeepEqual(object.Arguments, []string{}) || object.EvalBased == nil || *object.EvalBased || object.Validation != nil || object.Document == nil || object.Document.Text != definition {
+			t.Fatalf("documented defaults or definition changed: %+v", object)
+		}
+	}
+	if len(*requests) != len(configurationFamilies) {
+		t.Fatalf("unexpected requests for omitted defaults: %d", len(*requests))
+	}
+	bundle := configurationBundle(t, c, result)
+	report, err := closure.Evaluate(closure.Request{SchemaVersion: 1, Document: analysis.QueryDocument{Text: "`default_macro_000` | stats count", Language: "spl", Profile: "splunkd", Version: "current", SourceID: "synthetic-root"}, Bundle: bundle})
+	if err != nil || report == nil || !report.Coverage.Complete || report.EffectiveAnalysis == nil || len(report.Traversal) != 1 || report.Traversal[0].Resolution != "resolved" {
+		t.Fatalf("defaulted macro did not expand offline: %v %+v", err, report)
+	}
+}
+
 func TestConfigurationOpaqueDefinitionsAndExtractionFamilyIdentity(t *testing.T) {
 	c, _ := newConfigurationFixture(t, func(w http.ResponseWriter, r *http.Request, family string) {
 		entries := []map[string]any{}
@@ -405,10 +452,10 @@ func TestConfigurationMacroInvalidArityAndMissingDefinition(t *testing.T) {
 			configurationFeed(w, r, nil)
 			return
 		}
-		configurationFeed(w, r, []map[string]any{configurationEntry("valid", map[string]any{"definition": "index=main", "args": "", "iseval": 0}), configurationEntry("missing", map[string]any{"args": "", "iseval": 0}), configurationEntry("bad(2)", map[string]any{"definition": "index=main", "args": "one"}), configurationEntry("implicit", map[string]any{"definition": "index=main", "args": "one"}), configurationEntry("bad(x)", map[string]any{"definition": "index=main", "args": ""}), configurationEntry("repeated(2)", map[string]any{"definition": "index=main", "args": "a,a"})})
+		configurationFeed(w, r, []map[string]any{configurationEntry("valid", map[string]any{"definition": "index=main", "args": "", "iseval": 0}), configurationEntry("missing", map[string]any{"args": "", "iseval": 0}), configurationEntry("bad(2)", map[string]any{"definition": "index=main", "args": "one"}), configurationEntry("implicit", map[string]any{"definition": "index=main", "args": "one"}), configurationEntry("bad(x)", map[string]any{"definition": "index=main", "args": ""}), configurationEntry("repeated(2)", map[string]any{"definition": "index=main", "args": "a,a"}), configurationEntry("null_args", map[string]any{"definition": "index=main", "args": nil}), configurationEntry("array_args", map[string]any{"definition": "index=main", "args": []string{}}), configurationEntry("boolean_args", map[string]any{"definition": "index=main", "args": false}), configurationEntry("number_args", map[string]any{"definition": "index=main", "args": 0})})
 	})
 	result := c.collectConfiguration(context.Background(), "synthetic")
-	if !reflect.DeepEqual(objectNames(result.Objects, "macro"), []string{"missing", "valid"}) || collectionCoverage(result.Collections, "macro") != "partial" || !configurationHasDiagnostic(result.Diagnostics, "macro_arity_invalid", "macro") || !configurationHasDiagnostic(result.Diagnostics, "definition_unavailable", "macro") || !configurationHasDiagnostic(result.Diagnostics, "configuration_detail_unavailable", "macro") {
+	if !reflect.DeepEqual(objectNames(result.Objects, "macro"), []string{"implicit", "missing", "valid"}) || collectionCoverage(result.Collections, "macro") != "partial" || !configurationHasDiagnostic(result.Diagnostics, "macro_arity_invalid", "macro") || !configurationHasDiagnostic(result.Diagnostics, "definition_unavailable", "macro") || !configurationHasDiagnostic(result.Diagnostics, "configuration_detail_unavailable", "macro") {
 		t.Fatal(result)
 	}
 	missing := configurationObject(t, result.Objects, "macro", "missing", nil)
@@ -615,12 +662,22 @@ func TestConfigurationArtifactBudgetIsFatal(t *testing.T) {
 }
 
 func TestConfigurationMacroMetadataCannotInventExpansion(t *testing.T) {
-	for _, mode := range []string{"true", "false", "unknown-eval", "missing-eval", "bad-validation"} {
+	for _, mode := range []string{"true", "false", "unknown-eval", "missing-eval", "null-eval", "array-eval", "object-eval", "number-eval", "bad-validation"} {
 		t.Run(mode, func(t *testing.T) {
-			c, _ := newConfigurationFixture(t, func(w http.ResponseWriter, r *http.Request, family string) {
+			c, requests := newConfigurationFixture(t, func(w http.ResponseWriter, r *http.Request, family string) {
 				content := map[string]any{"definition": "index=main", "args": "", "iseval": mode}
 				if mode == "missing-eval" {
 					delete(content, "iseval")
+				}
+				switch mode {
+				case "null-eval":
+					content["iseval"] = nil
+				case "array-eval":
+					content["iseval"] = []string{"false"}
+				case "object-eval":
+					content["iseval"] = map[string]any{"value": false}
+				case "number-eval":
+					content["iseval"] = 2
 				}
 				if mode == "bad-validation" {
 					content["iseval"] = 0
@@ -639,13 +696,99 @@ func TestConfigurationMacroMetadataCannotInventExpansion(t *testing.T) {
 			})
 			result := c.collectConfiguration(context.Background(), "synthetic")
 			o := configurationObject(t, result.Objects, "macro", "macro", nil)
-			valid := mode == "true" || mode == "false"
+			valid := mode == "true" || mode == "false" || mode == "missing-eval"
 			if valid {
 				if o.EvalBased == nil || *o.EvalBased != (mode == "true") || o.Document == nil {
 					t.Fatal(o)
 				}
 			} else if o.Document != nil || !configurationHasDiagnostic(result.Diagnostics, "definition_unavailable", "macro") {
 				t.Fatalf("unsafe macro metadata became expandable: %+v", o)
+			}
+			if len(*requests) != len(configurationFamilies) {
+				t.Fatalf("optional eval metadata requested detail: %d", len(*requests))
+			}
+			if mode == "null-eval" && (o.EvalBased != nil || !configurationHasDiagnostic(result.Diagnostics, "macro_metadata_unavailable", "macro")) {
+				t.Fatalf("explicit null became a default: %+v", o)
+			}
+			if !valid && mode != "null-eval" && !configurationHasDiagnostic(result.Diagnostics, "macro_metadata_invalid", "macro") {
+				t.Fatalf("malformed metadata did not retain its gap: %+v", result.Diagnostics)
+			}
+			configurationBundle(t, c, result)
+		})
+	}
+}
+
+func TestConfigurationMacroInvalidArgumentsCannotBeRepairedByDetail(t *testing.T) {
+	for _, name := range []string{"macro", "macro(1)"} {
+		for _, args := range []any{nil, []string{"index"}, false, 1} {
+			t.Run(fmt.Sprintf("%s/%T", name, args), func(t *testing.T) {
+				c, requests := newConfigurationFixture(t, func(w http.ResponseWriter, r *http.Request, family string) {
+					if family == "configs/conf-macros" {
+						// The missing body would otherwise require detail.
+						configurationFeed(w, r, []map[string]any{configurationEntry(name, map[string]any{"args": args})})
+						return
+					}
+					if strings.HasPrefix(family, "configs/conf-macros/") {
+						json.NewEncoder(w).Encode(map[string]any{"entry": []any{configurationEntry(name, map[string]any{"args": "index", "definition": "search index=synthetic", "iseval": false})}})
+						return
+					}
+					configurationFeed(w, r, nil)
+				})
+				result := c.collectConfiguration(context.Background(), "synthetic")
+				if len(result.Objects) != 0 || !configurationHasDiagnostic(result.Diagnostics, "macro_arity_invalid", "macro") || collectionCoverage(result.Collections, "macro") != "unavailable" || len(*requests) != len(configurationFamilies) {
+					t.Fatalf("invalid args repaired by detail: objects=%d requests=%d diagnostics=%+v", len(result.Objects), len(*requests), result.Diagnostics)
+				}
+				configurationBundle(t, c, result)
+			})
+		}
+	}
+}
+
+func TestConfigurationMacroNecessaryDetailPreservesMetadataEvidence(t *testing.T) {
+	for _, mode := range []string{"missing-positive-args", "missing-definition", "detail-eval", "null-eval", "malformed-eval"} {
+		t.Run(mode, func(t *testing.T) {
+			name := "macro"
+			list := map[string]any{"args": ""}
+			detail := map[string]any{"args": "", "definition": "search index=synthetic\n", "validation": ""}
+			switch mode {
+			case "missing-positive-args":
+				name = "macro(1)"
+				list = map[string]any{"definition": detail["definition"]}
+				detail["args"] = "index"
+			case "detail-eval":
+				detail["iseval"] = true
+			case "null-eval":
+				list["iseval"] = nil
+				detail["iseval"] = false
+			case "malformed-eval":
+				list["iseval"] = []bool{false}
+				detail["iseval"] = false
+			}
+			c, requests := newConfigurationFixture(t, func(w http.ResponseWriter, r *http.Request, family string) {
+				if family == "configs/conf-macros/"+url.PathEscape(name) {
+					json.NewEncoder(w).Encode(map[string]any{"entry": []any{configurationEntry(name, detail)}})
+					return
+				}
+				if family == "configs/conf-macros" {
+					configurationFeed(w, r, []map[string]any{configurationEntry(name, list)})
+					return
+				}
+				configurationFeed(w, r, nil)
+			})
+			result := c.collectConfiguration(context.Background(), "synthetic")
+			o := configurationObject(t, result.Objects, "macro", "macro", nil)
+			if len(*requests) != len(configurationFamilies)+1 {
+				t.Fatalf("necessary detail requests: %d", len(*requests))
+			}
+			if mode == "null-eval" || mode == "malformed-eval" {
+				if o.EvalBased != nil || o.Document != nil {
+					t.Fatalf("detail overwrote explicit metadata evidence: %+v", o)
+				}
+			} else if o.EvalBased == nil || *o.EvalBased != (mode == "detail-eval") || o.Document == nil || o.Document.Text != detail["definition"] || o.Validation == nil || *o.Validation != "" {
+				t.Fatalf("necessary detail lost supported evidence: %+v", o)
+			}
+			if mode == "missing-positive-args" && (o.Arity == nil || *o.Arity != 1 || !reflect.DeepEqual(o.Arguments, []string{"index"})) {
+				t.Fatalf("positive arity detail was not mapped: %+v", o)
 			}
 			configurationBundle(t, c, result)
 		})
@@ -654,19 +797,18 @@ func TestConfigurationMacroMetadataCannotInventExpansion(t *testing.T) {
 
 func TestConfigurationDetailDoesNotOverwriteConflictingListEvidence(t *testing.T) {
 	c, _ := newConfigurationFixture(t, func(w http.ResponseWriter, r *http.Request, family string) {
-		if family == "configs/conf-macros/macro" {
-			json.NewEncoder(w).Encode(map[string]any{"entry": []any{configurationEntry("macro", map[string]any{"definition": "index=other", "args": "", "iseval": 0})}})
+		if family == "configs/conf-macros/"+url.PathEscape("macro(1)") {
+			json.NewEncoder(w).Encode(map[string]any{"entry": []any{configurationEntry("macro(1)", map[string]any{"definition": "index=other", "args": "index", "iseval": 0})}})
 			return
 		}
 		if family != "configs/conf-macros" {
 			configurationFeed(w, r, nil)
 			return
 		}
-		configurationFeed(w, r, []map[string]any{configurationEntry("macro", map[string]any{"definition": "index=main", "args": ""})})
+		configurationFeed(w, r, []map[string]any{configurationEntry("macro(1)", map[string]any{"definition": "index=main"}), configurationEntry("valid", map[string]any{"definition": "index=main", "args": "", "iseval": 0})})
 	})
 	result := c.collectConfiguration(context.Background(), "synthetic")
-	o := configurationObject(t, result.Objects, "macro", "macro", nil)
-	if o.Document != nil || !configurationHasDiagnostic(result.Diagnostics, "definition_conflict", "macro") || collectionCoverage(result.Collections, "macro") != "partial" {
+	if !reflect.DeepEqual(objectNames(result.Objects, "macro"), []string{"valid"}) || !configurationHasDiagnostic(result.Diagnostics, "definition_conflict", "macro") || collectionCoverage(result.Collections, "macro") != "partial" {
 		t.Fatalf("conflicting detail trusted: %+v", result)
 	}
 	configurationBundle(t, c, result)
