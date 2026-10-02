@@ -6780,7 +6780,14 @@
           "const": 1
         },
         "snapshot": {
-          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/environment.Snapshot"
+          "oneOf": [
+            {
+              "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/environment.Snapshot"
+            },
+            {
+              "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v2/shared.schema.json#/$defs/environment.SnapshotV2"
+            }
+          ]
         },
         "schema_bundle": {
           "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/environment.SchemaBundle"

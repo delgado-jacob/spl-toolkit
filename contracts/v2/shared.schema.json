@@ -1,0 +1,690 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/delgado-jacob/spl-toolkit/contracts/v2/shared.schema.json",
+  "title": "SPL Toolkit observed environment contracts v2",
+  "$defs": {
+    "environment.ObservationWindow": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "enum": [
+            "all_retained",
+            "bounded"
+          ]
+        },
+        "earliest": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]{1,9})?(Z|[+-]00:00)$"
+        },
+        "latest": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]{1,9})?(Z|[+-]00:00)$"
+        }
+      },
+      "required": [
+        "mode"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "mode": {
+                "const": "all_retained"
+              }
+            },
+            "required": [
+              "mode"
+            ]
+          },
+          "then": {
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "earliest"
+                  ]
+                },
+                {
+                  "required": [
+                    "latest"
+                  ]
+                }
+              ]
+            }
+          },
+          "else": {
+            "anyOf": [
+              {
+                "required": [
+                  "earliest"
+                ]
+              },
+              {
+                "required": [
+                  "latest"
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "environment.ObservationIndex": {
+      "type": "object",
+      "properties": {
+        "index_id": {
+          "type": "string",
+          "pattern": "\\S"
+        },
+        "catalog_datatypes": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "event",
+              "metric"
+            ]
+          }
+        },
+        "required_datatypes": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "event",
+              "metric"
+            ]
+          },
+          "minItems": 1
+        }
+      },
+      "required": [
+        "index_id",
+        "catalog_datatypes",
+        "required_datatypes"
+      ],
+      "additionalProperties": false
+    },
+    "environment.IndexEnumeration": {
+      "type": "object",
+      "properties": {
+        "method": {
+          "const": "distributed_rest"
+        },
+        "peer_scope": {
+          "const": "configured_search_peers"
+        },
+        "coverage": {
+          "enum": [
+            "complete",
+            "partial",
+            "unavailable"
+          ]
+        },
+        "reason": {
+          "type": "string"
+        },
+        "provenance": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/environment.Provenance"
+        }
+      },
+      "required": [
+        "method",
+        "peer_scope",
+        "coverage",
+        "provenance"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "coverage": {
+                "const": "complete"
+              }
+            },
+            "required": [
+              "coverage"
+            ]
+          },
+          "then": {
+            "properties": {
+              "reason": {
+                "const": ""
+              }
+            }
+          },
+          "else": {
+            "required": [
+              "reason"
+            ],
+            "properties": {
+              "reason": {
+                "pattern": "\\S"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "environment.ObservationCapture": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "enum": [
+            "source",
+            "sourcetype"
+          ]
+        },
+        "index_id": {
+          "type": "string",
+          "pattern": "\\S"
+        },
+        "datatype": {
+          "enum": [
+            "event",
+            "metric"
+          ]
+        },
+        "object_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "\\S"
+          }
+        },
+        "coverage": {
+          "enum": [
+            "complete",
+            "partial",
+            "unavailable"
+          ]
+        },
+        "reason": {
+          "type": "string"
+        },
+        "provenance": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/environment.Provenance"
+        }
+      },
+      "required": [
+        "kind",
+        "index_id",
+        "datatype",
+        "object_ids",
+        "coverage",
+        "provenance"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "coverage": {
+                "const": "complete"
+              }
+            },
+            "required": [
+              "coverage"
+            ]
+          },
+          "then": {
+            "properties": {
+              "reason": {
+                "const": ""
+              }
+            }
+          },
+          "else": {
+            "required": [
+              "reason"
+            ],
+            "properties": {
+              "reason": {
+                "pattern": "\\S"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "coverage": {
+                "const": "unavailable"
+              }
+            },
+            "required": [
+              "coverage"
+            ]
+          },
+          "then": {
+            "properties": {
+              "object_ids": {
+                "maxItems": 0
+              }
+            }
+          }
+        }
+      ]
+    },
+    "environment.ObservationScope": {
+      "type": "object",
+      "properties": {
+        "index_selection": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/environment.Selector"
+        },
+        "enumeration": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v2/shared.schema.json#/$defs/environment.IndexEnumeration"
+        },
+        "indexes": {
+          "type": "array",
+          "items": {
+            "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v2/shared.schema.json#/$defs/environment.ObservationIndex"
+          }
+        },
+        "unmatched_indexes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "\\S"
+          }
+        },
+        "method": {
+          "const": "splunk_metadata"
+        },
+        "visibility": {
+          "const": "exporting_principal"
+        },
+        "window": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v2/shared.schema.json#/$defs/environment.ObservationWindow"
+        },
+        "time_precision": {
+          "const": "bucket_overlap"
+        },
+        "absence_meaning": {
+          "const": "not_observed"
+        },
+        "captures": {
+          "type": "array",
+          "items": {
+            "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v2/shared.schema.json#/$defs/environment.ObservationCapture"
+          }
+        }
+      },
+      "required": [
+        "index_selection",
+        "enumeration",
+        "indexes",
+        "unmatched_indexes",
+        "method",
+        "visibility",
+        "window",
+        "time_precision",
+        "absence_meaning",
+        "captures"
+      ],
+      "additionalProperties": false,
+      "description": "Observed inventory scoped to the exporting principal and bucket-overlap window. Runtime validates object associations, selected indexes, datatype requirements, capture coverage rollups, provenance intervals, and ordered time bounds. JSON Schema shape success does not prove remote exhaustiveness.",
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "index_selection": {
+                "required": [
+                  "all"
+                ]
+              }
+            },
+            "required": [
+              "index_selection"
+            ]
+          },
+          "then": {
+            "properties": {
+              "unmatched_indexes": {
+                "maxItems": 0
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "enumeration": {
+                "properties": {
+                  "coverage": {
+                    "const": "unavailable"
+                  }
+                },
+                "required": [
+                  "coverage"
+                ]
+              }
+            },
+            "required": [
+              "enumeration"
+            ]
+          },
+          "then": {
+            "properties": {
+              "indexes": {
+                "maxItems": 0
+              }
+            }
+          }
+        }
+      ]
+    },
+    "environment.SnapshotV2": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": 2
+        },
+        "scope_id": {
+          "type": "string",
+          "pattern": "\\S"
+        },
+        "digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "capture_scope": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/environment.CaptureScope"
+        },
+        "origin": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/environment.Origin"
+        },
+        "capture": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/environment.CaptureInterval"
+        },
+        "capabilities": {
+          "type": "array",
+          "items": {
+            "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/environment.Capability"
+          }
+        },
+        "collections": {
+          "type": "array",
+          "items": {
+            "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/environment.Collection"
+          }
+        },
+        "objects": {
+          "type": "array",
+          "items": {
+            "allOf": [
+              {
+                "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/environment.Object"
+              },
+              {
+                "if": {
+                  "properties": {
+                    "kind": {
+                      "enum": [
+                        "index",
+                        "source",
+                        "sourcetype"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "kind"
+                  ]
+                },
+                "then": {
+                  "properties": {
+                    "sharing": {
+                      "const": ""
+                    }
+                  },
+                  "not": {
+                    "anyOf": [
+                      {
+                        "required": [
+                          "document"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "arity"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "arguments"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "eval_based"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "validation"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "relations"
+                        ]
+                      }
+                    ]
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "observation": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v2/shared.schema.json#/$defs/environment.ObservationScope"
+        }
+      },
+      "required": [
+        "schema_version",
+        "scope_id",
+        "capture_scope",
+        "origin",
+        "capture",
+        "capabilities",
+        "collections",
+        "objects"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "collections": {
+                "contains": {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "enum": [
+                        "index",
+                        "source",
+                        "sourcetype"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "kind"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "collections"
+            ]
+          },
+          "then": {
+            "required": [
+              "observation"
+            ]
+          }
+        }
+      ],
+      "description": "Snapshot v2 adds explicit observed inventory scope; configured knowledge objects retain the v1 object contract. Runtime validates linkage, coverage, canonical digest, and chronology. Shape validation alone does not establish remote exhaustiveness."
+    },
+    "environment.ExportLimits": {
+      "type": "object",
+      "properties": {
+        "request_timeout_seconds": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "job_timeout_seconds": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "overall_timeout_seconds": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "max_rows": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "max_response_bytes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "max_artifact_bytes": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "request_timeout_seconds",
+        "job_timeout_seconds",
+        "overall_timeout_seconds",
+        "max_rows",
+        "max_response_bytes",
+        "max_artifact_bytes"
+      ],
+      "additionalProperties": false
+    },
+    "environment.ExportDiagnostic": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string",
+          "pattern": "\\S"
+        },
+        "severity": {
+          "enum": [
+            "error",
+            "warning",
+            "info"
+          ]
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "index",
+            "source",
+            "sourcetype",
+            "dataset",
+            "data_model",
+            "lookup",
+            "macro",
+            "saved_search",
+            "event_type",
+            "tag",
+            "calculated_field",
+            "field_extraction",
+            "module",
+            "function",
+            "external_command"
+          ]
+        },
+        "index_id": {
+          "type": "string",
+          "pattern": "\\S"
+        },
+        "datatype": {
+          "enum": [
+            "event",
+            "metric"
+          ]
+        },
+        "message": {
+          "type": "string",
+          "pattern": "\\S"
+        }
+      },
+      "required": [
+        "code",
+        "severity",
+        "message"
+      ],
+      "additionalProperties": false
+    },
+    "environment.ExportReport": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": 1
+        },
+        "status": {
+          "enum": [
+            "complete",
+            "partial"
+          ]
+        },
+        "scope_id": {
+          "type": "string",
+          "pattern": "\\S"
+        },
+        "allow_insecure": {
+          "type": "boolean"
+        },
+        "origin": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/environment.Origin"
+        },
+        "capture": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/environment.CaptureInterval"
+        },
+        "snapshot_digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "observation": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v2/shared.schema.json#/$defs/environment.ObservationScope"
+        },
+        "limits": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v2/shared.schema.json#/$defs/environment.ExportLimits"
+        },
+        "collections": {
+          "type": "array",
+          "items": {
+            "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/environment.Collection"
+          }
+        },
+        "diagnostics": {
+          "type": "array",
+          "items": {
+            "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v2/shared.schema.json#/$defs/environment.ExportDiagnostic"
+          }
+        }
+      },
+      "required": [
+        "schema_version",
+        "status",
+        "scope_id",
+        "allow_insecure",
+        "origin",
+        "capture",
+        "snapshot_digest",
+        "observation",
+        "limits",
+        "collections",
+        "diagnostics"
+      ],
+      "additionalProperties": false,
+      "description": "Exporter acquisition report v1 for Snapshot v2. Coverage and diagnostics describe acquisition by the exporting principal; runtime linkage and remote completeness are separate validation boundaries."
+    }
+  }
+}

@@ -4879,7 +4879,9 @@ components:
         schema_version:
           const: 1
         snapshot:
-          $ref: '#/components/schemas/tooling.environment.Snapshot'
+          oneOf:
+          - $ref: '#/components/schemas/tooling.environment.Snapshot'
+          - $ref: '#/components/schemas/tooling.v2.environment.SnapshotV2'
       required:
       - schema_version
       type: object
@@ -5946,6 +5948,334 @@ components:
       - extensions
       - limitations
       type: object
+    tooling.v2.environment.IndexEnumeration:
+      additionalProperties: false
+      allOf:
+      - else:
+          properties:
+            reason:
+              pattern: \S
+          required:
+          - reason
+        if:
+          properties:
+            coverage:
+              const: complete
+          required:
+          - coverage
+        then:
+          properties:
+            reason:
+              const: ''
+      properties:
+        coverage:
+          enum:
+          - complete
+          - partial
+          - unavailable
+        method:
+          const: distributed_rest
+        peer_scope:
+          const: configured_search_peers
+        provenance:
+          $ref: '#/components/schemas/tooling.environment.Provenance'
+        reason:
+          type: string
+      required:
+      - method
+      - peer_scope
+      - coverage
+      - provenance
+      type: object
+    tooling.v2.environment.ObservationCapture:
+      additionalProperties: false
+      allOf:
+      - else:
+          properties:
+            reason:
+              pattern: \S
+          required:
+          - reason
+        if:
+          properties:
+            coverage:
+              const: complete
+          required:
+          - coverage
+        then:
+          properties:
+            reason:
+              const: ''
+      - if:
+          properties:
+            coverage:
+              const: unavailable
+          required:
+          - coverage
+        then:
+          properties:
+            object_ids:
+              maxItems: 0
+      properties:
+        coverage:
+          enum:
+          - complete
+          - partial
+          - unavailable
+        datatype:
+          enum:
+          - event
+          - metric
+        index_id:
+          pattern: \S
+          type: string
+        kind:
+          enum:
+          - source
+          - sourcetype
+        object_ids:
+          items:
+            pattern: \S
+            type: string
+          type: array
+        provenance:
+          $ref: '#/components/schemas/tooling.environment.Provenance'
+        reason:
+          type: string
+      required:
+      - kind
+      - index_id
+      - datatype
+      - object_ids
+      - coverage
+      - provenance
+      type: object
+    tooling.v2.environment.ObservationIndex:
+      additionalProperties: false
+      properties:
+        catalog_datatypes:
+          items:
+            enum:
+            - event
+            - metric
+          type: array
+        index_id:
+          pattern: \S
+          type: string
+        required_datatypes:
+          items:
+            enum:
+            - event
+            - metric
+          minItems: 1
+          type: array
+      required:
+      - index_id
+      - catalog_datatypes
+      - required_datatypes
+      type: object
+    tooling.v2.environment.ObservationScope:
+      additionalProperties: false
+      allOf:
+      - if:
+          properties:
+            index_selection:
+              required:
+              - all
+          required:
+          - index_selection
+        then:
+          properties:
+            unmatched_indexes:
+              maxItems: 0
+      - if:
+          properties:
+            enumeration:
+              properties:
+                coverage:
+                  const: unavailable
+              required:
+              - coverage
+          required:
+          - enumeration
+        then:
+          properties:
+            indexes:
+              maxItems: 0
+      description: Observed inventory scoped to the exporting principal and bucket-overlap
+        window. Runtime validates object associations, selected indexes, datatype
+        requirements, capture coverage rollups, provenance intervals, and ordered
+        time bounds. JSON Schema shape success does not prove remote exhaustiveness.
+      properties:
+        absence_meaning:
+          const: not_observed
+        captures:
+          items:
+            $ref: '#/components/schemas/tooling.v2.environment.ObservationCapture'
+          type: array
+        enumeration:
+          $ref: '#/components/schemas/tooling.v2.environment.IndexEnumeration'
+        index_selection:
+          $ref: '#/components/schemas/tooling.environment.Selector'
+        indexes:
+          items:
+            $ref: '#/components/schemas/tooling.v2.environment.ObservationIndex'
+          type: array
+        method:
+          const: splunk_metadata
+        time_precision:
+          const: bucket_overlap
+        unmatched_indexes:
+          items:
+            pattern: \S
+            type: string
+          type: array
+        visibility:
+          const: exporting_principal
+        window:
+          $ref: '#/components/schemas/tooling.v2.environment.ObservationWindow'
+      required:
+      - index_selection
+      - enumeration
+      - indexes
+      - unmatched_indexes
+      - method
+      - visibility
+      - window
+      - time_precision
+      - absence_meaning
+      - captures
+      type: object
+    tooling.v2.environment.ObservationWindow:
+      additionalProperties: false
+      allOf:
+      - else:
+          anyOf:
+          - required:
+            - earliest
+          - required:
+            - latest
+        if:
+          properties:
+            mode:
+              const: all_retained
+          required:
+          - mode
+        then:
+          not:
+            anyOf:
+            - required:
+              - earliest
+            - required:
+              - latest
+      properties:
+        earliest:
+          format: date-time
+          pattern: ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\.[0-9]{1,9})?(Z|[+-]00:00)$
+          type: string
+        latest:
+          format: date-time
+          pattern: ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\.[0-9]{1,9})?(Z|[+-]00:00)$
+          type: string
+        mode:
+          enum:
+          - all_retained
+          - bounded
+      required:
+      - mode
+      type: object
+    tooling.v2.environment.SnapshotV2:
+      additionalProperties: false
+      allOf:
+      - if:
+          properties:
+            collections:
+              contains:
+                properties:
+                  kind:
+                    enum:
+                    - index
+                    - source
+                    - sourcetype
+                required:
+                - kind
+                type: object
+          required:
+          - collections
+        then:
+          required:
+          - observation
+      description: Snapshot v2 adds explicit observed inventory scope; configured
+        knowledge objects retain the v1 object contract. Runtime validates linkage,
+        coverage, canonical digest, and chronology. Shape validation alone does not
+        establish remote exhaustiveness.
+      properties:
+        capabilities:
+          items:
+            $ref: '#/components/schemas/tooling.environment.Capability'
+          type: array
+        capture:
+          $ref: '#/components/schemas/tooling.environment.CaptureInterval'
+        capture_scope:
+          $ref: '#/components/schemas/tooling.environment.CaptureScope'
+        collections:
+          items:
+            $ref: '#/components/schemas/tooling.environment.Collection'
+          type: array
+        digest:
+          pattern: ^sha256:[0-9a-f]{64}$
+          type: string
+        objects:
+          items:
+            allOf:
+            - $ref: '#/components/schemas/tooling.environment.Object'
+            - if:
+                properties:
+                  kind:
+                    enum:
+                    - index
+                    - source
+                    - sourcetype
+                required:
+                - kind
+              then:
+                not:
+                  anyOf:
+                  - required:
+                    - document
+                  - required:
+                    - arity
+                  - required:
+                    - arguments
+                  - required:
+                    - eval_based
+                  - required:
+                    - validation
+                  - required:
+                    - relations
+                properties:
+                  sharing:
+                    const: ''
+          type: array
+        observation:
+          $ref: '#/components/schemas/tooling.v2.environment.ObservationScope'
+        origin:
+          $ref: '#/components/schemas/tooling.environment.Origin'
+        schema_version:
+          const: 2
+        scope_id:
+          pattern: \S
+          type: string
+      required:
+      - schema_version
+      - scope_id
+      - capture_scope
+      - origin
+      - capture
+      - capabilities
+      - collections
+      - objects
+      type: object
     tooling.validation.Coverage:
       additionalProperties: true
       properties:
@@ -6696,11 +7026,13 @@ paths:
       - docs
   /environment/validate:
     post:
-      description: Strict inline snapshot and/or schema bundle. Requires schema_version
-        1 and at least one artifact. Unknown or duplicate members, nulls, malformed
-        Unicode, and trailing JSON are input errors. Body limit is 8 MiB. Valid and
-        partial reports return 200; invalid artifacts return 400 with the canonical
-        report.
+      description: Strict inline snapshot and/or schema bundle. Request envelope,
+        schema bundle, and validation report retain schema_version 1; nested snapshot
+        accepts schema_version 1 or 2. Snapshot v2 observation shape does not prove
+        remote exhaustiveness. Requires at least one artifact. Unknown or duplicate
+        members, nulls, malformed Unicode, and trailing JSON are input errors. Body
+        limit is 8 MiB. Valid and partial reports return 200; invalid artifacts return
+        400 with the canonical report.
       requestBody:
         content:
           application/json:

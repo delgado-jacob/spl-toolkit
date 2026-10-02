@@ -1,0 +1,179 @@
+{
+  "schema_version": 1,
+  "status": "partial",
+  "scope_id": "synthetic-observed-example",
+  "allow_insecure": false,
+  "origin": {
+    "instance_id": "synthetic-instance",
+    "product_version": "9.4",
+    "producer": "synthetic-example",
+    "producer_version": "1"
+  },
+  "capture": {
+    "start": "2026-10-01T12:00:00Z",
+    "end": "2026-10-01T12:05:00Z"
+  },
+  "snapshot_digest": "sha256:479334d9d30c28998cda432a50b7b09fd6b8c3fcf9ecd2d7e70ceb3df08d660a",
+  "observation": {
+    "index_selection": {
+      "all": true
+    },
+    "enumeration": {
+      "method": "distributed_rest",
+      "peer_scope": "configured_search_peers",
+      "coverage": "complete",
+      "provenance": {
+        "source_kind": "fixture",
+        "source_id": "observed-inventory",
+        "observed_at": "2026-10-01T12:01:00Z"
+      }
+    },
+    "indexes": [
+      {
+        "index_id": "index-main",
+        "catalog_datatypes": [
+          "event"
+        ],
+        "required_datatypes": [
+          "event"
+        ]
+      }
+    ],
+    "unmatched_indexes": [],
+    "method": "splunk_metadata",
+    "visibility": "exporting_principal",
+    "window": {
+      "mode": "all_retained"
+    },
+    "time_precision": "bucket_overlap",
+    "absence_meaning": "not_observed",
+    "captures": [
+      {
+        "kind": "source",
+        "index_id": "index-main",
+        "datatype": "event",
+        "object_ids": [],
+        "coverage": "complete",
+        "provenance": {
+          "source_kind": "fixture",
+          "source_id": "observed-inventory",
+          "observed_at": "2026-10-01T12:01:00Z"
+        }
+      },
+      {
+        "kind": "sourcetype",
+        "index_id": "index-main",
+        "datatype": "event",
+        "object_ids": [
+          "sourcetype-audit"
+        ],
+        "coverage": "complete",
+        "provenance": {
+          "source_kind": "fixture",
+          "source_id": "observed-inventory",
+          "observed_at": "2026-10-01T12:01:00Z"
+        }
+      }
+    ]
+  },
+  "limits": {
+    "request_timeout_seconds": 30,
+    "job_timeout_seconds": 120,
+    "overall_timeout_seconds": 300,
+    "max_rows": 10000,
+    "max_response_bytes": 8388608,
+    "max_artifact_bytes": 33554432
+  },
+  "collections": [
+    {
+      "kind": "index",
+      "coverage": "complete"
+    },
+    {
+      "kind": "source",
+      "coverage": "complete"
+    },
+    {
+      "kind": "sourcetype",
+      "coverage": "complete"
+    },
+    {
+      "kind": "dataset",
+      "coverage": "unavailable",
+      "reason": "adapter_unsupported"
+    },
+    {
+      "kind": "data_model",
+      "coverage": "complete"
+    },
+    {
+      "kind": "lookup",
+      "coverage": "complete"
+    },
+    {
+      "kind": "macro",
+      "coverage": "complete"
+    },
+    {
+      "kind": "saved_search",
+      "coverage": "complete"
+    },
+    {
+      "kind": "event_type",
+      "coverage": "complete"
+    },
+    {
+      "kind": "tag",
+      "coverage": "complete"
+    },
+    {
+      "kind": "calculated_field",
+      "coverage": "complete"
+    },
+    {
+      "kind": "field_extraction",
+      "coverage": "complete"
+    },
+    {
+      "kind": "module",
+      "coverage": "unavailable",
+      "reason": "adapter_unsupported"
+    },
+    {
+      "kind": "function",
+      "coverage": "unavailable",
+      "reason": "adapter_unsupported"
+    },
+    {
+      "kind": "external_command",
+      "coverage": "unavailable",
+      "reason": "adapter_unsupported"
+    }
+  ],
+  "diagnostics": [
+    {
+      "code": "adapter_unsupported",
+      "severity": "warning",
+      "kind": "dataset",
+      "message": "adapter_unsupported"
+    },
+    {
+      "code": "adapter_unsupported",
+      "severity": "warning",
+      "kind": "module",
+      "message": "adapter_unsupported"
+    },
+    {
+      "code": "adapter_unsupported",
+      "severity": "warning",
+      "kind": "function",
+      "message": "adapter_unsupported"
+    },
+    {
+      "code": "adapter_unsupported",
+      "severity": "warning",
+      "kind": "external_command",
+      "message": "adapter_unsupported"
+    }
+  ]
+}

@@ -21,7 +21,13 @@ def add_tooling(spec):
     """Embed reviewed owned contracts without changing legacy generated types."""
     source = Path(__file__).resolve().parents[1] / "contracts/v1/shared.schema.json"
     shared = json.loads(source.read_text(encoding="utf-8"))
+    shared_v2 = json.loads((source.parents[1] / "v2/shared.schema.json").read_text(encoding="utf-8"))
+    origins = {document["$id"] + "#/$defs/": (version, document)
+               for version, document in (("v1", shared), ("v2", shared_v2))}
     origin = shared["$id"] + "#/$defs/"
+
+    def component(version, name):
+        return "tooling." + ("v2." if version == "v2" else "") + name
     schemas = spec["components"]["schemas"]
     needed = set()
 
@@ -36,24 +42,27 @@ def add_tooling(spec):
         }
         if "$ref" in result:
             ref = result["$ref"]
-            if not ref.startswith(origin):
+            matching = next((base for base in origins if ref.startswith(base)), None)
+            if matching is None:
                 raise ValueError("unexpected external tooling contract reference")
-            name = ref.removeprefix(origin)
-            if name.startswith("analysis.Requirement"):
-                result["$ref"] = PREFIX + name
+            version, _ = origins[matching]
+            name, separator, tail = ref.removeprefix(matching).partition("/")
+            suffix = separator + tail
+            if version == "v1" and name.startswith("analysis.Requirement"):
+                result["$ref"] = PREFIX + name + suffix
                 return result
-            if preserve_analysis and name.startswith("analysis."):
+            if version == "v1" and preserve_analysis and name.startswith("analysis."):
                 if name not in schemas:
                     raise ValueError(f"missing generated analysis dependency: {name}")
-                result["$ref"] = PREFIX + name
+                result["$ref"] = PREFIX + name + suffix
                 return result
-            needed.add(name)
-            result["$ref"] = PREFIX + "tooling." + name
+            needed.add((matching, name))
+            result["$ref"] = PREFIX + component(version, name) + suffix
         return result
 
     def reference(name):
-        needed.add(name)
-        return {"$ref": PREFIX + "tooling." + name}
+        needed.add((origin, name))
+        return {"$ref": PREFIX + component("v1", name)}
 
     requirement_names = (
         "analysis.RequirementQueryIdentity",
@@ -121,7 +130,7 @@ def add_tooling(spec):
     }}
     spec["paths"]["/environment/validate"] = {"post": {
         "summary": "Validate offline environment artifacts",
-        "description": "Strict inline snapshot and/or schema bundle. Requires schema_version 1 and at least one artifact. Unknown or duplicate members, nulls, malformed Unicode, and trailing JSON are input errors. Body limit is 8 MiB. Valid and partial reports return 200; invalid artifacts return 400 with the canonical report.",
+        "description": "Strict inline snapshot and/or schema bundle. Request envelope, schema bundle, and validation report retain schema_version 1; nested snapshot accepts schema_version 1 or 2. Snapshot v2 observation shape does not prove remote exhaustiveness. Requires at least one artifact. Unknown or duplicate members, nulls, malformed Unicode, and trailing JSON are input errors. Body limit is 8 MiB. Valid and partial reports return 200; invalid artifacts return 400 with the canonical report.",
         "tags": ["environment"],
         "requestBody": {"required": True, "content": {"application/json": {"schema": reference("environment.ValidationRequest")}}},
         "responses": {
@@ -137,9 +146,10 @@ def add_tooling(spec):
     }}
     visited = set()
     while needed - visited:
-        name = sorted(needed - visited)[0]
-        schemas["tooling." + name] = convert(shared["$defs"][name], preserve_analysis=name.startswith("closure."))
-        visited.add(name)
+        base, name = sorted(needed - visited)[0]
+        version, document = origins[base]
+        schemas[component(version, name)] = convert(document["$defs"][name], preserve_analysis=version == "v1" and name.startswith("closure."))
+        visited.add((base, name))
     # Swag walks Go package imports while resolving the documentation-only
     # environment DTO. These generated types are superseded by the strict
     # tooling.environment definitions and are not referenced by any route.
@@ -196,6 +206,11 @@ def update(directory: Path) -> None:
         }
     else:
         document = copy.deepcopy(generated_document)
+    # Pinned Swag sorts raw DTO properties, while the canonical source has its
+    # own order. Keep the request-only copies stable across reconciliation.
+    document = {"type": document.pop("type"), "properties": document.pop("properties"), **document}
+    document["properties"] = {key: document["properties"][key]
+                              for key in shared["$defs"]["analysis.QueryDocument"]["properties"]}
     if any(value != {"type": "string"} for value in document["properties"].values()):
         raise ValueError("unexpected pinned query document property shape")
     document.update(required=["text"], additionalProperties=False)

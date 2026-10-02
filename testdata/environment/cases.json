@@ -93,5 +93,878 @@
       "schemas": [{"id": "fields", "kind": "field_list", "catalog": {"fields": ["host"], "optional_fields": [], "identity": "local", "version": "1"}, "provenance": {"source_kind": "fixture", "source_id": "schema-source", "observed_at": "2026-10-01T12:00:00Z"}}],
       "bindings": [{"schema_id": "fields", "object_id": "missing-lookup", "expected": {"kind": "lookup", "name": "missing"}, "source_coverage": "complete"}]
     }
+  },
+  {
+    "name": "observed-v2-complete",
+    "status": "valid",
+    "snapshot": {
+      "schema_version": 2,
+      "scope_id": "capture-a",
+      "capture_scope": {
+        "namespace": {
+          "all": true
+        },
+        "app": {
+          "all": true
+        },
+        "owner": {
+          "all": true
+        }
+      },
+      "origin": {
+        "instance_id": "instance-a",
+        "product_version": "9.4",
+        "producer": "fixture",
+        "producer_version": "1"
+      },
+      "capture": {
+        "start": "2026-10-01T12:00:00Z",
+        "end": "2026-10-01T12:05:00Z"
+      },
+      "capabilities": [],
+      "collections": [
+        {
+          "kind": "index",
+          "coverage": "complete"
+        },
+        {
+          "kind": "source",
+          "coverage": "complete"
+        },
+        {
+          "kind": "sourcetype",
+          "coverage": "complete"
+        },
+        {
+          "kind": "dataset",
+          "coverage": "complete"
+        },
+        {
+          "kind": "data_model",
+          "coverage": "complete"
+        },
+        {
+          "kind": "lookup",
+          "coverage": "complete"
+        },
+        {
+          "kind": "macro",
+          "coverage": "complete"
+        },
+        {
+          "kind": "saved_search",
+          "coverage": "complete"
+        },
+        {
+          "kind": "event_type",
+          "coverage": "complete"
+        },
+        {
+          "kind": "tag",
+          "coverage": "complete"
+        },
+        {
+          "kind": "calculated_field",
+          "coverage": "complete"
+        },
+        {
+          "kind": "field_extraction",
+          "coverage": "complete"
+        },
+        {
+          "kind": "module",
+          "coverage": "complete"
+        },
+        {
+          "kind": "function",
+          "coverage": "complete"
+        },
+        {
+          "kind": "external_command",
+          "coverage": "complete"
+        }
+      ],
+      "objects": [
+        {
+          "id": "index-main",
+          "kind": "index",
+          "name": "main",
+          "provenance": {
+            "source_kind": "fixture",
+            "source_id": "observed-inventory",
+            "observed_at": "2026-10-01T12:01:00Z"
+          }
+        },
+        {
+          "id": "sourcetype-audit",
+          "kind": "sourcetype",
+          "name": "audit",
+          "provenance": {
+            "source_kind": "fixture",
+            "source_id": "observed-inventory",
+            "observed_at": "2026-10-01T12:01:00Z"
+          }
+        }
+      ],
+      "observation": {
+        "index_selection": {
+          "all": true
+        },
+        "enumeration": {
+          "method": "distributed_rest",
+          "peer_scope": "configured_search_peers",
+          "coverage": "complete",
+          "provenance": {
+            "source_kind": "fixture",
+            "source_id": "observed-inventory",
+            "observed_at": "2026-10-01T12:01:00Z"
+          }
+        },
+        "indexes": [
+          {
+            "index_id": "index-main",
+            "catalog_datatypes": [
+              "event"
+            ],
+            "required_datatypes": [
+              "event"
+            ]
+          }
+        ],
+        "unmatched_indexes": [],
+        "method": "splunk_metadata",
+        "visibility": "exporting_principal",
+        "window": {
+          "mode": "all_retained"
+        },
+        "time_precision": "bucket_overlap",
+        "absence_meaning": "not_observed",
+        "captures": [
+          {
+            "kind": "source",
+            "index_id": "index-main",
+            "datatype": "event",
+            "object_ids": [],
+            "coverage": "complete",
+            "provenance": {
+              "source_kind": "fixture",
+              "source_id": "observed-inventory",
+              "observed_at": "2026-10-01T12:01:00Z"
+            }
+          },
+          {
+            "kind": "sourcetype",
+            "index_id": "index-main",
+            "datatype": "event",
+            "object_ids": [
+              "sourcetype-audit"
+            ],
+            "coverage": "complete",
+            "provenance": {
+              "source_kind": "fixture",
+              "source_id": "observed-inventory",
+              "observed_at": "2026-10-01T12:01:00Z"
+            }
+          }
+        ]
+      }
+    },
+    "schema_bundle": {
+      "schema_version": 1,
+      "bundle_id": "bundle-a",
+      "provenance": {
+        "source_kind": "fixture",
+        "source_id": "schema-source",
+        "observed_at": "2026-10-01T12:00:00Z"
+      },
+      "schemas": [
+        {
+          "id": "fields",
+          "kind": "field_list",
+          "catalog": {
+            "fields": [
+              "host"
+            ],
+            "optional_fields": [],
+            "identity": "local",
+            "version": "1"
+          },
+          "provenance": {
+            "source_kind": "fixture",
+            "source_id": "schema-source",
+            "observed_at": "2026-10-01T12:00:00Z"
+          }
+        }
+      ],
+      "bindings": [
+        {
+          "schema_id": "fields",
+          "object_id": "sourcetype-audit",
+          "expected": {
+            "kind": "sourcetype",
+            "name": "audit"
+          },
+          "source_coverage": "complete"
+        }
+      ]
+    }
+  },
+  {
+    "name": "observed-v2-partial",
+    "status": "partial",
+    "snapshot": {
+      "schema_version": 2,
+      "scope_id": "capture-a",
+      "capture_scope": {
+        "namespace": {
+          "all": true
+        },
+        "app": {
+          "all": true
+        },
+        "owner": {
+          "all": true
+        }
+      },
+      "origin": {
+        "instance_id": "instance-a",
+        "product_version": "9.4",
+        "producer": "fixture",
+        "producer_version": "1"
+      },
+      "capture": {
+        "start": "2026-10-01T12:00:00Z",
+        "end": "2026-10-01T12:05:00Z"
+      },
+      "capabilities": [],
+      "collections": [
+        {
+          "kind": "index",
+          "coverage": "complete"
+        },
+        {
+          "kind": "source",
+          "coverage": "complete"
+        },
+        {
+          "kind": "sourcetype",
+          "coverage": "complete"
+        },
+        {
+          "kind": "dataset",
+          "coverage": "unavailable",
+          "reason": "adapter_unsupported"
+        },
+        {
+          "kind": "data_model",
+          "coverage": "complete"
+        },
+        {
+          "kind": "lookup",
+          "coverage": "complete"
+        },
+        {
+          "kind": "macro",
+          "coverage": "complete"
+        },
+        {
+          "kind": "saved_search",
+          "coverage": "complete"
+        },
+        {
+          "kind": "event_type",
+          "coverage": "complete"
+        },
+        {
+          "kind": "tag",
+          "coverage": "complete"
+        },
+        {
+          "kind": "calculated_field",
+          "coverage": "complete"
+        },
+        {
+          "kind": "field_extraction",
+          "coverage": "complete"
+        },
+        {
+          "kind": "module",
+          "coverage": "unavailable",
+          "reason": "adapter_unsupported"
+        },
+        {
+          "kind": "function",
+          "coverage": "unavailable",
+          "reason": "adapter_unsupported"
+        },
+        {
+          "kind": "external_command",
+          "coverage": "unavailable",
+          "reason": "adapter_unsupported"
+        }
+      ],
+      "objects": [
+        {
+          "id": "index-main",
+          "kind": "index",
+          "name": "main",
+          "provenance": {
+            "source_kind": "fixture",
+            "source_id": "observed-inventory",
+            "observed_at": "2026-10-01T12:01:00Z"
+          }
+        },
+        {
+          "id": "sourcetype-audit",
+          "kind": "sourcetype",
+          "name": "audit",
+          "provenance": {
+            "source_kind": "fixture",
+            "source_id": "observed-inventory",
+            "observed_at": "2026-10-01T12:01:00Z"
+          }
+        }
+      ],
+      "observation": {
+        "index_selection": {
+          "all": true
+        },
+        "enumeration": {
+          "method": "distributed_rest",
+          "peer_scope": "configured_search_peers",
+          "coverage": "complete",
+          "provenance": {
+            "source_kind": "fixture",
+            "source_id": "observed-inventory",
+            "observed_at": "2026-10-01T12:01:00Z"
+          }
+        },
+        "indexes": [
+          {
+            "index_id": "index-main",
+            "catalog_datatypes": [
+              "event"
+            ],
+            "required_datatypes": [
+              "event"
+            ]
+          }
+        ],
+        "unmatched_indexes": [],
+        "method": "splunk_metadata",
+        "visibility": "exporting_principal",
+        "window": {
+          "mode": "all_retained"
+        },
+        "time_precision": "bucket_overlap",
+        "absence_meaning": "not_observed",
+        "captures": [
+          {
+            "kind": "source",
+            "index_id": "index-main",
+            "datatype": "event",
+            "object_ids": [],
+            "coverage": "complete",
+            "provenance": {
+              "source_kind": "fixture",
+              "source_id": "observed-inventory",
+              "observed_at": "2026-10-01T12:01:00Z"
+            }
+          },
+          {
+            "kind": "sourcetype",
+            "index_id": "index-main",
+            "datatype": "event",
+            "object_ids": [
+              "sourcetype-audit"
+            ],
+            "coverage": "complete",
+            "provenance": {
+              "source_kind": "fixture",
+              "source_id": "observed-inventory",
+              "observed_at": "2026-10-01T12:01:00Z"
+            }
+          }
+        ]
+      }
+    },
+    "schema_bundle": {
+      "schema_version": 1,
+      "bundle_id": "bundle-a",
+      "provenance": {
+        "source_kind": "fixture",
+        "source_id": "schema-source",
+        "observed_at": "2026-10-01T12:00:00Z"
+      },
+      "schemas": [
+        {
+          "id": "fields",
+          "kind": "field_list",
+          "catalog": {
+            "fields": [
+              "host"
+            ],
+            "optional_fields": [],
+            "identity": "local",
+            "version": "1"
+          },
+          "provenance": {
+            "source_kind": "fixture",
+            "source_id": "schema-source",
+            "observed_at": "2026-10-01T12:00:00Z"
+          }
+        }
+      ],
+      "bindings": [
+        {
+          "schema_id": "fields",
+          "object_id": "sourcetype-audit",
+          "expected": {
+            "kind": "sourcetype",
+            "name": "audit"
+          },
+          "source_coverage": "complete"
+        }
+      ]
+    }
+  },
+  {
+    "name": "observed-v2-invalid-reference",
+    "status": "invalid",
+    "snapshot": {
+      "schema_version": 2,
+      "scope_id": "capture-a",
+      "capture_scope": {
+        "namespace": {
+          "all": true
+        },
+        "app": {
+          "all": true
+        },
+        "owner": {
+          "all": true
+        }
+      },
+      "origin": {
+        "instance_id": "instance-a",
+        "product_version": "9.4",
+        "producer": "fixture",
+        "producer_version": "1"
+      },
+      "capture": {
+        "start": "2026-10-01T12:00:00Z",
+        "end": "2026-10-01T12:05:00Z"
+      },
+      "capabilities": [],
+      "collections": [
+        {
+          "kind": "index",
+          "coverage": "complete"
+        },
+        {
+          "kind": "source",
+          "coverage": "complete"
+        },
+        {
+          "kind": "sourcetype",
+          "coverage": "complete"
+        },
+        {
+          "kind": "dataset",
+          "coverage": "complete"
+        },
+        {
+          "kind": "data_model",
+          "coverage": "complete"
+        },
+        {
+          "kind": "lookup",
+          "coverage": "complete"
+        },
+        {
+          "kind": "macro",
+          "coverage": "complete"
+        },
+        {
+          "kind": "saved_search",
+          "coverage": "complete"
+        },
+        {
+          "kind": "event_type",
+          "coverage": "complete"
+        },
+        {
+          "kind": "tag",
+          "coverage": "complete"
+        },
+        {
+          "kind": "calculated_field",
+          "coverage": "complete"
+        },
+        {
+          "kind": "field_extraction",
+          "coverage": "complete"
+        },
+        {
+          "kind": "module",
+          "coverage": "complete"
+        },
+        {
+          "kind": "function",
+          "coverage": "complete"
+        },
+        {
+          "kind": "external_command",
+          "coverage": "complete"
+        }
+      ],
+      "objects": [
+        {
+          "id": "index-main",
+          "kind": "index",
+          "name": "main",
+          "provenance": {
+            "source_kind": "fixture",
+            "source_id": "observed-inventory",
+            "observed_at": "2026-10-01T12:01:00Z"
+          }
+        },
+        {
+          "id": "sourcetype-audit",
+          "kind": "sourcetype",
+          "name": "audit",
+          "provenance": {
+            "source_kind": "fixture",
+            "source_id": "observed-inventory",
+            "observed_at": "2026-10-01T12:01:00Z"
+          }
+        }
+      ],
+      "observation": {
+        "index_selection": {
+          "all": true
+        },
+        "enumeration": {
+          "method": "distributed_rest",
+          "peer_scope": "configured_search_peers",
+          "coverage": "complete",
+          "provenance": {
+            "source_kind": "fixture",
+            "source_id": "observed-inventory",
+            "observed_at": "2026-10-01T12:01:00Z"
+          }
+        },
+        "indexes": [
+          {
+            "index_id": "index-main",
+            "catalog_datatypes": [
+              "event"
+            ],
+            "required_datatypes": [
+              "event"
+            ]
+          }
+        ],
+        "unmatched_indexes": [],
+        "method": "splunk_metadata",
+        "visibility": "exporting_principal",
+        "window": {
+          "mode": "all_retained"
+        },
+        "time_precision": "bucket_overlap",
+        "absence_meaning": "not_observed",
+        "captures": [
+          {
+            "kind": "source",
+            "index_id": "index-main",
+            "datatype": "event",
+            "object_ids": [],
+            "coverage": "complete",
+            "provenance": {
+              "source_kind": "fixture",
+              "source_id": "observed-inventory",
+              "observed_at": "2026-10-01T12:01:00Z"
+            }
+          },
+          {
+            "kind": "sourcetype",
+            "index_id": "index-main",
+            "datatype": "event",
+            "object_ids": [
+              "missing-observation"
+            ],
+            "coverage": "complete",
+            "provenance": {
+              "source_kind": "fixture",
+              "source_id": "observed-inventory",
+              "observed_at": "2026-10-01T12:01:00Z"
+            }
+          }
+        ]
+      }
+    },
+    "schema_bundle": {
+      "schema_version": 1,
+      "bundle_id": "bundle-a",
+      "provenance": {
+        "source_kind": "fixture",
+        "source_id": "schema-source",
+        "observed_at": "2026-10-01T12:00:00Z"
+      },
+      "schemas": [
+        {
+          "id": "fields",
+          "kind": "field_list",
+          "catalog": {
+            "fields": [
+              "host"
+            ],
+            "optional_fields": [],
+            "identity": "local",
+            "version": "1"
+          },
+          "provenance": {
+            "source_kind": "fixture",
+            "source_id": "schema-source",
+            "observed_at": "2026-10-01T12:00:00Z"
+          }
+        }
+      ],
+      "bindings": [
+        {
+          "schema_id": "fields",
+          "object_id": "sourcetype-audit",
+          "expected": {
+            "kind": "sourcetype",
+            "name": "audit"
+          },
+          "source_coverage": "complete"
+        }
+      ]
+    }
+  },
+  {
+    "name": "observed-v2-unobserved-binding",
+    "status": "partial",
+    "snapshot": {
+      "schema_version": 2,
+      "scope_id": "capture-a",
+      "capture_scope": {
+        "namespace": {
+          "all": true
+        },
+        "app": {
+          "all": true
+        },
+        "owner": {
+          "all": true
+        }
+      },
+      "origin": {
+        "instance_id": "instance-a",
+        "product_version": "9.4",
+        "producer": "fixture",
+        "producer_version": "1"
+      },
+      "capture": {
+        "start": "2026-10-01T12:00:00Z",
+        "end": "2026-10-01T12:05:00Z"
+      },
+      "capabilities": [],
+      "collections": [
+        {
+          "kind": "index",
+          "coverage": "complete"
+        },
+        {
+          "kind": "source",
+          "coverage": "complete"
+        },
+        {
+          "kind": "sourcetype",
+          "coverage": "complete"
+        },
+        {
+          "kind": "dataset",
+          "coverage": "complete"
+        },
+        {
+          "kind": "data_model",
+          "coverage": "complete"
+        },
+        {
+          "kind": "lookup",
+          "coverage": "complete"
+        },
+        {
+          "kind": "macro",
+          "coverage": "complete"
+        },
+        {
+          "kind": "saved_search",
+          "coverage": "complete"
+        },
+        {
+          "kind": "event_type",
+          "coverage": "complete"
+        },
+        {
+          "kind": "tag",
+          "coverage": "complete"
+        },
+        {
+          "kind": "calculated_field",
+          "coverage": "complete"
+        },
+        {
+          "kind": "field_extraction",
+          "coverage": "complete"
+        },
+        {
+          "kind": "module",
+          "coverage": "complete"
+        },
+        {
+          "kind": "function",
+          "coverage": "complete"
+        },
+        {
+          "kind": "external_command",
+          "coverage": "complete"
+        }
+      ],
+      "objects": [
+        {
+          "id": "index-main",
+          "kind": "index",
+          "name": "main",
+          "provenance": {
+            "source_kind": "fixture",
+            "source_id": "observed-inventory",
+            "observed_at": "2026-10-01T12:01:00Z"
+          }
+        },
+        {
+          "id": "sourcetype-audit",
+          "kind": "sourcetype",
+          "name": "audit",
+          "provenance": {
+            "source_kind": "fixture",
+            "source_id": "observed-inventory",
+            "observed_at": "2026-10-01T12:01:00Z"
+          }
+        }
+      ],
+      "observation": {
+        "index_selection": {
+          "all": true
+        },
+        "enumeration": {
+          "method": "distributed_rest",
+          "peer_scope": "configured_search_peers",
+          "coverage": "complete",
+          "provenance": {
+            "source_kind": "fixture",
+            "source_id": "observed-inventory",
+            "observed_at": "2026-10-01T12:01:00Z"
+          }
+        },
+        "indexes": [
+          {
+            "index_id": "index-main",
+            "catalog_datatypes": [
+              "event"
+            ],
+            "required_datatypes": [
+              "event"
+            ]
+          }
+        ],
+        "unmatched_indexes": [],
+        "method": "splunk_metadata",
+        "visibility": "exporting_principal",
+        "window": {
+          "mode": "all_retained"
+        },
+        "time_precision": "bucket_overlap",
+        "absence_meaning": "not_observed",
+        "captures": [
+          {
+            "kind": "source",
+            "index_id": "index-main",
+            "datatype": "event",
+            "object_ids": [],
+            "coverage": "complete",
+            "provenance": {
+              "source_kind": "fixture",
+              "source_id": "observed-inventory",
+              "observed_at": "2026-10-01T12:01:00Z"
+            }
+          },
+          {
+            "kind": "sourcetype",
+            "index_id": "index-main",
+            "datatype": "event",
+            "object_ids": [
+              "sourcetype-audit"
+            ],
+            "coverage": "complete",
+            "provenance": {
+              "source_kind": "fixture",
+              "source_id": "observed-inventory",
+              "observed_at": "2026-10-01T12:01:00Z"
+            }
+          }
+        ]
+      }
+    },
+    "schema_bundle": {
+      "schema_version": 1,
+      "bundle_id": "bundle-a",
+      "provenance": {
+        "source_kind": "fixture",
+        "source_id": "schema-source",
+        "observed_at": "2026-10-01T12:00:00Z"
+      },
+      "schemas": [
+        {
+          "id": "fields",
+          "kind": "field_list",
+          "catalog": {
+            "fields": [
+              "host"
+            ],
+            "optional_fields": [],
+            "identity": "local",
+            "version": "1"
+          },
+          "provenance": {
+            "source_kind": "fixture",
+            "source_id": "schema-source",
+            "observed_at": "2026-10-01T12:00:00Z"
+          }
+        }
+      ],
+      "bindings": [
+        {
+          "schema_id": "fields",
+          "object_id": "unobserved-sourcetype",
+          "expected": {
+            "kind": "sourcetype",
+            "name": "unobserved"
+          },
+          "source_coverage": "complete"
+        },
+        {
+          "schema_id": "fields",
+          "object_id": "unobserved-source",
+          "expected": {
+            "kind": "source",
+            "name": "unobserved-source"
+          },
+          "source_coverage": "complete"
+        }
+      ]
+    }
   }
 ]

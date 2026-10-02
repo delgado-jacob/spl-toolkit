@@ -1,14 +1,14 @@
-# Machine contracts v1
+# Machine contracts
 
 These JSON Schemas describe serialized canonical Go values and strict request
 objects. They validate JSON instances independently of the M4 field-projection
 engine. They do not execute SPL, resolve live resources, or prove query equivalence.
 
 Owned schemas use Draft 2020-12. Their absolute GitHub-based `$id` values are stable
-registry identities, not retrieval endpoints. Load every file in `v1/` into a
-local registry before validating; network retrieval is neither needed nor allowed.
-Shared wire definitions reside only in `v1/shared.schema.json`. No competing
-runtime schema location existed when these contracts were introduced.
+registry identities, not retrieval endpoints. Load every schema in `v1/` and
+`v2/` into a local registry before validating; network retrieval is neither needed
+nor allowed. Shared wire definitions reside in `v1/shared.schema.json` and
+`v2/shared.schema.json`; v2 references unchanged v1 object and provenance IDs.
 
 | Named schema | Root instance | Additional entry points under `$defs` |
 | --- | --- | --- |
@@ -21,7 +21,9 @@ runtime schema location existed when these contracts were introduced.
 | `closure.schema.json` | Canonical closure report | |
 | `closure-graph.schema.json` | Dependency graph projection | |
 | `detection-bom.schema.json` | Detection bill of materials projection | |
-| `environment-snapshot.schema.json` | Strict offline capture input | |
+| `v1/environment-snapshot.schema.json` | Strict offline Snapshot v1 input | |
+| `v2/environment-snapshot.schema.json` | Strict offline observed Snapshot v2 input | |
+| `v1/environment-export-report.schema.json` | Exporter acquisition report v1 for Snapshot v2 | |
 | `field-schema-bundle.schema.json` | Strict independent field evidence input | |
 | `environment-validation.schema.json` | Canonical artifact validation report | `Request` |
 | `field-validation.schema.json` | Field-list validation report | `Request`, `BatchRequest`, `BatchReport`, `Catalog` |
@@ -139,6 +141,26 @@ supplied content; they are not signatures. `valid` means the declarations are
 internally consistent and have no reported coverage gaps. `partial` retains
 omitted, unavailable, partial, or unresolved evidence. Neither status proves
 that the capture matches a live Splunk instance or that a query can execute.
+
+The validation request envelope, schema bundle, and validation report keep
+`schema_version: 1`; the nested snapshot accepts either version 1 or 2. Snapshot
+v1 is unchanged. Snapshot v2 separates observed index/source/sourcetype evidence
+from configured knowledge-object inventory. Its observation records selected
+indexes, event/metric datatype attempts, exporting-principal visibility, and
+bucket-overlap time bounds. Complete observed capture means a missing source or
+sourcetype was not observed; an absent binding remains an unresolved warning.
+Configured collection absence retains its existing semantics.
+
+The exporter acquisition report has its own version 1 schema and embeds the v2
+observation with fixed v1 origin/capture references. The
+[synthetic partial snapshot](../examples/environment/observed-partial-snapshot.json)
+and matching [export report](../examples/environment/export-report.json) explicitly
+record unsupported dataset, module, function, and external-command acquisition.
+The complete v2 parity fixture supplies all kinds independently; it is not an
+initial exporter support claim. JSON Schema checks shape and conditional members;
+runtime validation checks cross-references, datatype sets, capture rollups,
+provenance intervals, chronological bounds, and canonical digests. Neither shape
+success nor runtime consistency proves remote exhaustiveness.
 
 ## Offline validation
 

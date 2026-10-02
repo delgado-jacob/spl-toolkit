@@ -66,13 +66,13 @@ def schemas():
         validator.check_schema(schema)
         for ref in references(schema, identity):
             registry.resolver().lookup(ref)  # Eager closure, including unused branches.
-        result[path.name] = validator(schema, registry=registry,
+        result[path.relative_to(CONTRACTS).as_posix()] = validator(schema, registry=registry,
                                      format_checker=jsonschema.FormatChecker())
     return result
 
 
-def errors(schemas, family, instance, definition=None):
-    name = f"{family}.schema.json" if family != "sarif" else "sarif-schema-2.1.0.json"
+def errors(schemas, family, instance, definition=None, *, version="v1"):
+    name = f"{version}/{family}.schema.json" if family != "sarif" else "sarif/sarif-schema-2.1.0.json"
     validator = schemas[name]
     if definition:
         validator = validator.evolve(
@@ -126,8 +126,8 @@ def forbidden_capability_score_paths(value, path=()):
     return found
 
 
-def shared_errors(schemas, definition, instance):
-    validator = schemas["shared.schema.json"]
+def shared_errors(schemas, definition, instance, *, version="v1"):
+    validator = schemas[f"{version}/shared.schema.json"]
     validator = validator.evolve(
         schema={"$ref": validator.schema["$id"] + "#/$defs/" + definition})
     return list(validator.iter_errors(instance))
@@ -815,7 +815,7 @@ def test_environment_snapshot_bundle_request_and_report_contracts(schemas):
     for case in cases:
         snapshot = case["snapshot"]
         bundle = case["schema_bundle"]
-        assert not errors(schemas, "environment-snapshot", snapshot), case["name"]
+        assert not errors(schemas, "environment-snapshot", snapshot, version=f"v{snapshot['schema_version']}"), case["name"]
         assert not errors(schemas, "field-schema-bundle", bundle), case["name"]
         request = {"schema_version": 1, "snapshot": snapshot, "schema_bundle": bundle}
         assert not errors(schemas, "environment-validation", request, "Request"), case["name"]
@@ -943,3 +943,71 @@ def test_environment_scope_identity_and_macro_argument_contracts(schemas):
     assert errors(schemas, "environment-snapshot", macro)
     macro["objects"][0]["arguments"] = ["host", "source"]
     assert not errors(schemas, "environment-snapshot", macro)
+
+
+def test_environment_snapshot_versions_and_published_export_examples(schemas):
+    cases = json.loads((ROOT / "testdata/environment/cases.json").read_text())
+    for case in cases:
+        snapshot = case["snapshot"]
+        version = snapshot["schema_version"]
+        assert errors(schemas, "environment-snapshot", snapshot, version=f"v{3 - version}")
+        assert not errors(schemas, "environment-validation", {"schema_version": 1, "snapshot": snapshot}, "Request")
+    snapshot = json.loads((ROOT / "examples/environment/observed-partial-snapshot.json").read_text())
+    report = json.loads((ROOT / "examples/environment/export-report.json").read_text())
+    assert not errors(schemas, "environment-snapshot", snapshot, version="v2")
+    assert not errors(schemas, "environment-export-report", report)
+    assert report["snapshot_digest"] == snapshot["digest"]
+    assert report["observation"] == snapshot["observation"]
+    assert report["collections"] == snapshot["collections"]
+    assert {item["kind"] for item in report["collections"] if item.get("reason") == "adapter_unsupported"} == {"dataset", "module", "function", "external_command"}
+    for member in report:
+        wrong = copy.deepcopy(report)
+        del wrong[member]
+        assert errors(schemas, "environment-export-report", wrong), member
+    for member, value in (("schema_version", 2), ("status", "valid"), ("observation", None), ("limits", {}), ("snapshot_digest", "sha256:bad")):
+        wrong = copy.deepcopy(report)
+        wrong[member] = value
+        assert errors(schemas, "environment-export-report", wrong), member
+
+
+def test_observed_v2_shape_boundaries(schemas):
+    cases = json.loads((ROOT / "testdata/environment/cases.json").read_text())
+    original = next(c["snapshot"] for c in cases if c["name"] == "observed-v2-complete")
+    validate = lambda value: errors(schemas, "environment-snapshot", value, version="v2")
+    for field in original["observation"]:
+        wrong = copy.deepcopy(original)
+        del wrong["observation"][field]
+        assert validate(wrong), field
+    for value in (None, {}, {"mode": "bounded"}, {"mode": "all_retained", "earliest": "2026-10-01T00:00:00Z"}):
+        wrong = copy.deepcopy(original)
+        wrong["observation"]["window"] = value
+        assert validate(wrong), value
+    for bound in ("2026-10-01T0:00:00Z", "2026-10-01T00:00:00,1Z", "2026-10-01T00:00:00.1234567890Z", "2026-10-01T00:00:00+01:00", ""):
+        wrong = copy.deepcopy(original)
+        wrong["observation"]["window"] = {"mode": "bounded", "earliest": bound}
+        assert validate(wrong), bound
+    for bound in ("2026-10-01T00:00:00Z", "2026-10-01T00:00:00.123456789+00:00", "2026-10-01T00:00:00-00:00"):
+        value = copy.deepcopy(original)
+        value["observation"]["window"] = {"mode": "bounded", "latest": bound}
+        assert not validate(value), bound
+    for field, value in (("sharing", "app"), ("arguments", []), ("relations", []), ("document", {"text": "index=main"})):
+        wrong = copy.deepcopy(original)
+        wrong["objects"][0][field] = value
+        assert validate(wrong), field
+    for field, value in (("method", "other"), ("visibility", "other"), ("time_precision", "exact"), ("absence_meaning", "absent"), ("indexes", None), ("captures", None)):
+        wrong = copy.deepcopy(original)
+        wrong["observation"][field] = value
+        assert validate(wrong), field
+    for coverage, reason, valid in (("complete", "", True), ("complete", "failure", False), ("partial", "", False), ("unavailable", "timeout", True)):
+        value = copy.deepcopy(original)
+        capture = value["observation"]["captures"][0]
+        capture.update(coverage=coverage, reason=reason)
+        assert (not validate(value)) == valid, (coverage, reason)
+    duplicates = copy.deepcopy(original)
+    duplicates["observation"]["indexes"][0]["catalog_datatypes"] *= 2
+    duplicates["observation"]["indexes"][0]["required_datatypes"] *= 2
+    duplicates["observation"]["captures"][1]["object_ids"] *= 2
+    assert not validate(duplicates)
+    # Shape success does not establish object linkage, capture rollups, or remote exhaustiveness.
+    invalid_ref = next(c["snapshot"] for c in cases if c["name"] == "observed-v2-invalid-reference")
+    assert not validate(invalid_ref)

@@ -1,5 +1,6 @@
 import copy
 import json
+import importlib.util
 import os
 from pathlib import Path
 import re
@@ -7,6 +8,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest import mock
 
 import jsonschema
 from referencing import Registry, Resource
@@ -942,3 +944,76 @@ func main() {
         self.assertEqual(schemas["tooling.environment.SchemaEntry"]["oneOf"][0]["properties"]["kind"], {"const": "field_list"})
         self.assertIn("/query/closure", spec["paths"])
         self.assertIn("analysis.Result", schemas)
+
+
+class ObservedEnvironmentOpenAPITests(unittest.TestCase):
+    def module(self):
+        definition = importlib.util.spec_from_file_location("environment_openapi_generator", SCRIPT)
+        module = importlib.util.module_from_spec(definition)
+        definition.loader.exec_module(module)
+        return module
+
+    def test_two_authored_origins_preserve_suffix_refs_and_deny_unknown_unused_branches(self):
+        spec = json.loads((SCRIPT.parents[1] / "docs/swagger.json").read_text())
+        shared_paths = [SCRIPT.parents[1] / f"contracts/{version}/shared.schema.json" for version in ("v1", "v2")]
+        sources = {path: json.loads(path.read_text()) for path in shared_paths}
+        v1_origin = sources[shared_paths[0]]["$id"] + "#/$defs/"
+        v2_origin = sources[shared_paths[1]]["$id"] + "#/$defs/"
+        sources[shared_paths[1]]["$defs"]["environment.SnapshotV2"]["properties"]["suffix_probe"] = {
+            "$ref": v1_origin + "environment.Origin/properties/instance_id"}
+        module = self.module()
+        def read_source(path, **kwargs):
+            return json.dumps(sources[path])
+        with mock.patch.object(Path, "read_text", read_source):
+            module.add_tooling(spec)
+        generated = spec["components"]["schemas"]
+        self.assertEqual(generated["tooling.v2.environment.SnapshotV2"]["properties"]["suffix_probe"], {
+            "$ref": "#/components/schemas/tooling.environment.Origin/properties/instance_id"})
+        self.assertEqual(generated["tooling.environment.ValidationRequest"]["properties"]["snapshot"], {"oneOf": [
+            {"$ref": "#/components/schemas/tooling.environment.Snapshot"},
+            {"$ref": "#/components/schemas/tooling.v2.environment.SnapshotV2"}]})
+        self.assertEqual(generated["tooling.v2.environment.ObservationCapture"]["properties"]["provenance"], {
+            "$ref": "#/components/schemas/tooling.environment.Provenance"})
+        for address in ("https://unregistered.invalid/unused", v2_origin.replace("/v2/", "/v3/") + "environment.SnapshotV2"):
+            sources[shared_paths[1]]["$defs"]["environment.SnapshotV2"]["$defs"] = {"unused": {"$ref": address}}
+            with mock.patch.object(Path, "read_text", read_source):
+                with self.assertRaisesRegex(ValueError, "unexpected external tooling contract reference"):
+                    module.add_tooling(copy.deepcopy(spec))
+
+    def test_pinned_swag_document_order_is_byte_stable_on_second_reconciliation(self):
+        helper = ValidationOpenAPITests()
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            spec = helper.fixture(root)
+            for name in ("analysis.QueryDocument", "api.AnalysisRequest"):
+                document = spec["components"]["schemas"][name]
+                spec["components"]["schemas"][name] = {
+                    "properties": {key: document["properties"][key] for key in sorted(document["properties"])},
+                    "type": "object"}
+            (root / "swagger.json").write_text(json.dumps(spec), encoding="utf-8")
+            (root / "swagger.yaml").write_text(yaml.safe_dump(spec), encoding="utf-8")
+            (root / "docs.go").write_text('package docs\nconst docTemplate = `{\n    "components": ' + json.dumps(spec["components"]) + ',\n    "paths": ' + json.dumps(spec["paths"]) + ',\n    "info": {"title": "{{.Title}}"}\n}`\n', encoding="utf-8")
+            first = helper.run_script(root)
+            self.assertEqual(first.returncode, 0, first.stderr)
+            files = [root / name for name in ("swagger.json", "swagger.yaml", "docs.go")]
+            before = {path: path.read_bytes() for path in files}
+            second = helper.run_script(root)
+            self.assertEqual(second.returncode, 0, second.stderr)
+            self.assertEqual(before, {path: path.read_bytes() for path in files})
+
+    def test_generated_request_accepts_snapshot_union_and_retains_envelope_version(self):
+        spec = json.loads((SCRIPT.parents[1] / "docs/swagger.json").read_text())
+        schemas = spec["components"]["schemas"]
+        validator = jsonschema.Draft202012Validator({
+            "components": spec["components"], "$ref": "#/components/schemas/tooling.environment.ValidationRequest"})
+        cases = json.loads((SCRIPT.parents[1] / "testdata/environment/cases.json").read_text())
+        for case in cases:
+            request = {"schema_version": 1, "snapshot": case["snapshot"], "schema_bundle": case["schema_bundle"]}
+            self.assertTrue(validator.is_valid(request), case["name"])
+            request["schema_version"] = 2
+            self.assertFalse(validator.is_valid(request), case["name"])
+        self.assertEqual(schemas["tooling.environment.Snapshot"]["properties"]["schema_version"], {"const": 1})
+        self.assertEqual(schemas["tooling.v2.environment.SnapshotV2"]["properties"]["schema_version"], {"const": 2})
+        description = spec["paths"]["/environment/validate"]["post"]["description"]
+        self.assertIn("nested snapshot accepts schema_version 1 or 2", description)
+        self.assertIn("Body limit is 8 MiB", description)

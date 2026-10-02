@@ -32,8 +32,8 @@ func environmentCases(t *testing.T) []environmentCase {
 	if err := json.Unmarshal(raw, &cases); err != nil {
 		t.Fatal(err)
 	}
-	if len(cases) != 3 {
-		t.Fatalf("want three environment cases, got %d", len(cases))
+	if len(cases) != 7 {
+		t.Fatalf("want seven environment cases, got %d", len(cases))
 	}
 	return cases
 }
@@ -45,6 +45,26 @@ func TestEnvironmentCLIAndHTTPParity(t *testing.T) {
 			want, err := environment.ValidateArtifacts(tc.Snapshot, tc.SchemaBundle)
 			if err != nil || want.Status != tc.Status {
 				t.Fatalf("fixture: %v %#v", err, want)
+			}
+			if tc.Name == "observed-v2-unobserved-binding" {
+				unresolved := 0
+				for _, diagnostic := range want.Diagnostics {
+					if diagnostic.Code == "binding_unresolved" && diagnostic.Severity == "warning" {
+						unresolved++
+					}
+				}
+				if unresolved != 2 {
+					t.Fatalf("complete source/sourcetype observation must retain unresolved warnings: %#v", want)
+				}
+			}
+			if tc.Name == "invalid" {
+				found := false
+				for _, diagnostic := range want.Diagnostics {
+					found = found || diagnostic.Code == "binding_object_absent" && diagnostic.Severity == "error"
+				}
+				if !found {
+					t.Fatalf("configured absence must retain error semantics: %#v", want)
+				}
 			}
 			wantJSON, err := json.Marshal(want)
 			if err != nil {
