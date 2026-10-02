@@ -408,7 +408,7 @@ func TestConfigurationMacroInvalidArityAndMissingDefinition(t *testing.T) {
 		configurationFeed(w, r, []map[string]any{configurationEntry("valid", map[string]any{"definition": "index=main", "args": "", "iseval": 0}), configurationEntry("missing", map[string]any{"args": "", "iseval": 0}), configurationEntry("bad(2)", map[string]any{"definition": "index=main", "args": "one"}), configurationEntry("implicit", map[string]any{"definition": "index=main", "args": "one"}), configurationEntry("bad(x)", map[string]any{"definition": "index=main", "args": ""}), configurationEntry("repeated(2)", map[string]any{"definition": "index=main", "args": "a,a"})})
 	})
 	result := c.collectConfiguration(context.Background(), "synthetic")
-	if !reflect.DeepEqual(objectNames(result.Objects, "macro"), []string{"missing", "valid"}) || collectionCoverage(result.Collections, "macro") != "partial" || !configurationHasDiagnostic(result.Diagnostics, "macro_arity_invalid", "macro") || !configurationHasDiagnostic(result.Diagnostics, "definition_unavailable", "macro") {
+	if !reflect.DeepEqual(objectNames(result.Objects, "macro"), []string{"missing", "valid"}) || collectionCoverage(result.Collections, "macro") != "partial" || !configurationHasDiagnostic(result.Diagnostics, "macro_arity_invalid", "macro") || !configurationHasDiagnostic(result.Diagnostics, "definition_unavailable", "macro") || !configurationHasDiagnostic(result.Diagnostics, "configuration_detail_unavailable", "macro") {
 		t.Fatal(result)
 	}
 	missing := configurationObject(t, result.Objects, "macro", "missing", nil)
@@ -477,10 +477,22 @@ func TestConfigurationPaginationRetainsEarlierEvidence(t *testing.T) {
 }
 
 func TestConfigurationDetailUsesFixedFamilyAndValidatesIdentity(t *testing.T) {
-	for _, mode := range []string{"complete", "missing", "wrong-name", "conflict"} {
+	for _, mode := range []string{"complete", "missing", "denied", "failed", "invalid-json", "wrong-name", "conflict"} {
 		t.Run(mode, func(t *testing.T) {
 			c, requests := newConfigurationFixture(t, func(w http.ResponseWriter, r *http.Request, family string) {
 				if family == "saved/searches/detail%2Freport" {
+					if mode == "denied" || mode == "failed" {
+						status := http.StatusForbidden
+						if mode == "failed" {
+							status = http.StatusServiceUnavailable
+						}
+						http.Error(w, "discard-me", status)
+						return
+					}
+					if mode == "invalid-json" {
+						fmt.Fprint(w, "{")
+						return
+					}
 					name := "detail/report"
 					if mode == "wrong-name" {
 						name = "wrong"
@@ -512,6 +524,14 @@ func TestConfigurationDetailUsesFixedFamilyAndValidatesIdentity(t *testing.T) {
 				}
 			} else if o.Document != nil || !configurationHasDiagnostic(result.Diagnostics, "definition_unavailable", "saved_search") {
 				t.Fatal(result)
+			}
+			expectedCoverage := "partial"
+			failedDetail := mode != "complete" && mode != "missing"
+			if !failedDetail {
+				expectedCoverage = "complete"
+			}
+			if len(result.Objects) != 1 || o.Owner != "nobody" || o.App != "search" || collectionCoverage(result.Collections, "saved_search") != expectedCoverage || configurationHasDiagnostic(result.Diagnostics, "configuration_detail_unavailable", "saved_search") != failedDetail {
+				t.Fatalf("detail acquisition must retain list identity with honest coverage: %+v", result)
 			}
 			if len(*requests) != 10 {
 				t.Fatalf("detail protocol %+v", *requests)

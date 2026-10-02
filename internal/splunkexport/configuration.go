@@ -467,6 +467,8 @@ func (c *Client) collectConfiguration(ctx context.Context, instanceID string) Co
 							} else {
 								content = merged
 							}
+						} else {
+							gap("configuration_detail_unavailable", adapter.kind)
 						}
 					}
 					acquisition := path + "/" + url.PathEscape(name)
