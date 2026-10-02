@@ -25,6 +25,10 @@ type jobFixture struct {
 	unexpectedSID   bool
 	deleteFails     bool
 	rowCount        int
+	maxRows         int
+	probeOffset     int
+	probeResponse   string
+	probeDelay      time.Duration
 }
 
 func newJobFixture(t *testing.T, f *jobFixture) (*Client, *jobFixture) {
@@ -42,6 +46,9 @@ func newJobFixture(t *testing.T, f *jobFixture) (*Client, *jobFixture) {
 			f.jobs[id] = true
 			f.operations = append(f.operations, "submit")
 			for k, want := range map[string]string{"exec_mode": "normal", "search_mode": "normal", "enable_lookups": "false", "allow_partial_results": "true", "max_count": func() string {
+				if f.maxRows > 0 {
+					return strconv.Itoa(f.maxRows + 1)
+				}
 				if f.rowCount == 501 {
 					return "601"
 				}
@@ -89,6 +96,18 @@ func newJobFixture(t *testing.T, f *jobFixture) (*Client, *jobFixture) {
 		}
 		if strings.HasSuffix(r.URL.Path, "/results") {
 			f.operations = append(f.operations, "results")
+			if f.probeDelay > 0 && r.URL.Query().Get("offset") == strconv.Itoa(f.probeOffset) {
+				f.mu.Unlock()
+				select {
+				case <-r.Context().Done():
+				case <-time.After(f.probeDelay):
+				}
+				f.mu.Lock()
+			}
+			if f.probeResponse != "" && r.URL.Query().Get("offset") == strconv.Itoa(f.probeOffset) {
+				fmt.Fprint(w, f.probeResponse)
+				return
+			}
 			if f.results != "" {
 				fmt.Fprint(w, f.results)
 				return
@@ -379,5 +398,70 @@ func TestOwnedJobSalvageReservesSharedCleanupBudget(t *testing.T) {
 	defer mu.Unlock()
 	if strings.Join(operations, ",") != "finalize,delete" {
 		t.Fatal(operations)
+	}
+}
+
+func TestOwnedJobFullFinalPageCountConsistency(t *testing.T) {
+	for _, tc := range []struct {
+		name                      string
+		reported, actual, maxRows int
+		complete                  bool
+	}{{"500-complete", 500, 500, 600, true}, {"500-underreported", 500, 501, 600, false}, {"1000-complete", 1000, 1000, 1100, true}, {"1000-underreported", 1000, 1001, 1100, false}, {"at-row-cap-underreported", 500, 501, 500, false}} {
+		t.Run(tc.name, func(t *testing.T) {
+			c, f := newJobFixture(t, &jobFixture{maxRows: tc.maxRows, rowCount: tc.actual, status: fmt.Sprintf(`{"entry":[{"content":{"isDone":true,"resultCount":%d}}]}`, tc.reported)})
+			c.options.MaxRows = tc.maxRows
+			r := c.runDiscoveryJob(context.Background(), discoveryQuery{search: "fixture"})
+			if (r.Coverage == "complete") != tc.complete || len(r.Rows) != tc.reported {
+				t.Fatalf("full final page: coverage=%s reason=%s rows=%d", r.Coverage, r.Reason, len(r.Rows))
+			}
+			if !tc.complete && (r.Reason == "" || len(r.Diagnostics) == 0) {
+				t.Fatal("count mismatch was not diagnosed")
+			}
+			f.assertClean(t)
+			f.mu.Lock()
+			defer f.mu.Unlock()
+			pages := 0
+			for _, op := range f.operations {
+				if op == "results" {
+					pages++
+				}
+			}
+			if pages != tc.reported/resultPageSize+1 {
+				t.Fatalf("full-page end probe omitted: %d requests", pages)
+			}
+		})
+	}
+}
+func TestOwnedJobEndProbeValidatesPageEvidence(t *testing.T) {
+	for _, tc := range []struct{ name, body string }{{"preview", `{"preview":true,"init_offset":500,"results":[]}`}, {"offset", `{"preview":false,"init_offset":0,"results":[]}`}, {"warning", `{"preview":false,"init_offset":500,"results":[],"messages":[{"type":"WARN","text":"synthetic-secret"}]}`}, {"extra-limit", `{"preview":false,"init_offset":500,"results":[{"name":"one"},{"name":"two"}]}`}} {
+		t.Run(tc.name, func(t *testing.T) {
+			c, f := newJobFixture(t, &jobFixture{maxRows: 600, rowCount: 500, probeOffset: 500, probeResponse: tc.body})
+			c.options.MaxRows = 600
+			r := c.runDiscoveryJob(context.Background(), discoveryQuery{search: "fixture"})
+			if r.Coverage != "partial" || len(r.Rows) != 500 {
+				t.Fatalf("probe evidence ignored: coverage=%s reason=%s rows=%d", r.Coverage, r.Reason, len(r.Rows))
+			}
+			data, _ := json.Marshal(r.Diagnostics)
+			if strings.Contains(string(data), "synthetic-secret") {
+				t.Fatal("probe message leaked")
+			}
+			f.assertClean(t)
+		})
+	}
+}
+
+func TestOwnedJobEndProbeDeadlineRetainsRows(t *testing.T) {
+	c, f := newJobFixture(t, &jobFixture{maxRows: 600, rowCount: 500, probeOffset: 500, probeDelay: time.Second})
+	c.options.MaxRows = 600
+	c.http.Timeout = 20 * time.Millisecond
+	r := c.runDiscoveryJob(context.Background(), discoveryQuery{search: "fixture"})
+	if r.Coverage != "partial" || len(r.Rows) != 500 || r.CleanupFailed {
+		t.Fatalf("probe timeout: coverage=%s reason=%s rows=%d cleanup=%v", r.Coverage, r.Reason, len(r.Rows), r.CleanupFailed)
+	}
+	f.assertClean(t)
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	if strings.Join(f.operations, ",") != "submit,status,results,results,finalize,status,delete" {
+		t.Fatalf("probe repeated during salvage or deletion misplaced: %v", f.operations)
 	}
 }

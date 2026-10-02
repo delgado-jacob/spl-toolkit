@@ -343,9 +343,15 @@ func (c *Client) jobRows(ctx context.Context, sid string, count int, result *Job
 		assembled += len(b)
 	}
 	emptyPage := target == 0 && len(result.Rows) == 0
-	for offset := len(result.Rows); offset < target || emptyPage; {
+	// Short final pages already request one extra row. A full final page needs
+	// one bounded end probe before its reported count can establish completeness.
+	probeEnd := !salvage && count <= c.options.MaxRows && target > 0 && target%resultPageSize == 0
+	for offset := len(result.Rows); offset < target || emptyPage || probeEnd && offset == target && result.Coverage == "complete"; {
 		emptyPage = false
 		expected := target - offset
+		if expected == 0 {
+			probeEnd = false
+		}
 		if expected > resultPageSize {
 			expected = resultPageSize
 		}
