@@ -289,7 +289,9 @@ func normalizeObservation(input *ObservationScope, objects []Object, collections
 		}
 		out.Captures = append(out.Captures, capture)
 	}
-	for id, index := range indexes {
+	sort.Slice(out.Indexes, func(i, j int) bool { return out.Indexes[i].IndexID < out.Indexes[j].IndexID })
+	for _, index := range out.Indexes {
+		id := index.IndexID
 		for _, datatype := range index.RequiredDatatypes {
 			for _, kind := range []string{"source", "sourcetype"} {
 				if _, declared := collections[kind]; !declared {
@@ -323,7 +325,6 @@ func normalizeObservation(input *ObservationScope, objects []Object, collections
 			return nil, at("/collections", fmt.Errorf("observation requires %s collection", kind))
 		}
 	}
-	sort.Slice(out.Indexes, func(i, j int) bool { return out.Indexes[i].IndexID < out.Indexes[j].IndexID })
 	sort.Slice(out.Captures, func(i, j int) bool {
 		a, b := out.Captures[i], out.Captures[j]
 		if a.Kind != b.Kind {

@@ -418,3 +418,32 @@ func TestSnapshotV2ObservedSharingContext(t *testing.T) {
 		})
 	}
 }
+
+func TestSnapshotV2MissingCaptureDiagnosticDeterminism(t *testing.T) {
+	value := observedFixture(t)
+	index := value.Objects[0]
+	index.ID = "index-other"
+	index.Name = "other"
+	value.Objects = append(value.Objects, index)
+	value.Observation.Indexes = append(value.Observation.Indexes, ObservationIndex{IndexID: index.ID, CatalogDatatypes: []string{"event"}, RequiredDatatypes: []string{"event"}})
+	value.Observation.Indexes[0], value.Observation.Indexes[1] = value.Observation.Indexes[1], value.Observation.Indexes[0]
+	value.Observation.Captures = []ObservationCapture{}
+	raw := fixtureRaw(t, value)
+	var first []byte
+	for i := 0; i < 200; i++ {
+		report, err := ValidateArtifacts(raw, nil)
+		if err != nil || report.Status != "invalid" || len(report.Diagnostics) != 1 {
+			t.Fatalf("missing captures: %v %#v", err, report)
+		}
+		encoded := fixtureRaw(t, report)
+		if i == 0 {
+			first = encoded
+		} else if string(encoded) != string(first) {
+			t.Fatalf("identical invalid input produced different report at iteration %d:\n%s\n%s", i, first, encoded)
+		}
+	}
+	report, err := ValidateArtifacts(raw, nil)
+	if err != nil || report.Diagnostics[0].Message != "missing required source capture for index-main/event" {
+		t.Fatalf("missing capture did not use canonical index order: %v %#v", err, report)
+	}
+}
