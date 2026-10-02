@@ -10,6 +10,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -69,7 +70,7 @@ func TestCommandOutputAndReportSeparation(t *testing.T) {
 		t.Fatal(stderr.String())
 	}
 	info, _ := os.Stat(path)
-	if info.Mode().Perm() != 0600 {
+	if runtime.GOOS != "windows" && info.Mode().Perm() != 0600 {
 		t.Fatalf("report permissions %v", info.Mode())
 	}
 	output := filepath.Join(t.TempDir(), "snapshot.json")
