@@ -254,6 +254,16 @@ func validateSnapshotRawShape(raw []byte) error {
 			return at("/"+pointerPart(key), fmt.Errorf("%s must be an array", key))
 		}
 	}
+	var version int
+	_ = json.Unmarshal(root["schema_version"], &version)
+	if observation, found := root["observation"]; found {
+		if version == 1 {
+			return at("/observation", fmt.Errorf("Snapshot v1 forbids observation"))
+		}
+		if err := validateObservationRawShape(observation); err != nil {
+			return err
+		}
+	}
 	var scope map[string]json.RawMessage
 	if err := json.Unmarshal(root["capture_scope"], &scope); err != nil || scope == nil {
 		return fmt.Errorf("capture_scope must be an object")

@@ -155,8 +155,11 @@ func normalizeSnapshot(input Snapshot) (Snapshot, []CoverageEntry, []Diagnostic,
 		return Snapshot{}, nil, nil, fmt.Errorf("snapshot contains invalid UTF-8")
 	}
 
-	if input.SchemaVersion != 1 {
-		return Snapshot{}, nil, nil, at("/schema_version", fmt.Errorf("schema_version must be integer 1"))
+	if input.SchemaVersion != 1 && input.SchemaVersion != 2 {
+		return Snapshot{}, nil, nil, at("/schema_version", fmt.Errorf("schema_version must be integer 1 or 2"))
+	}
+	if input.SchemaVersion == 1 && input.Observation != nil {
+		return Snapshot{}, nil, nil, at("/observation", fmt.Errorf("Snapshot v1 forbids observation"))
 	}
 	if err := nonblank(input.ScopeID, "scope_id"); err != nil {
 		return Snapshot{}, nil, nil, at("/scope_id", err)
@@ -234,7 +237,7 @@ func normalizeSnapshot(input Snapshot) (Snapshot, []CoverageEntry, []Diagnostic,
 		} else if c.Reason != "" {
 			return Snapshot{}, nil, nil, at(fmt.Sprintf("/collections/%d/reason", collectionIndex), fmt.Errorf("complete collection cannot have a reason"))
 		}
-		if (c.Kind == "index" || c.Kind == "source" || c.Kind == "sourcetype") && c.Coverage == "complete" && (out.CaptureScope.Namespace.All == nil || out.CaptureScope.App.All == nil || out.CaptureScope.Owner.All == nil) {
+		if input.SchemaVersion == 1 && (c.Kind == "index" || c.Kind == "source" || c.Kind == "sourcetype") && c.Coverage == "complete" && (out.CaptureScope.Namespace.All == nil || out.CaptureScope.App.All == nil || out.CaptureScope.Owner.All == nil) {
 			return Snapshot{}, nil, nil, at(fmt.Sprintf("/collections/%d", collectionIndex), fmt.Errorf("complete %s collection cannot use restricted scope", c.Kind))
 		}
 		collections[c.Kind] = c
@@ -274,6 +277,9 @@ func normalizeSnapshot(input Snapshot) (Snapshot, []CoverageEntry, []Diagnostic,
 			if err := optionalText(field.value, field.name); err != nil {
 				return Snapshot{}, nil, nil, at(fmt.Sprintf("/objects/%d/%s", objectIndex, field.name), err)
 			}
+		}
+		if input.SchemaVersion == 2 && observedKind(o.Kind) && (o.Arguments != nil || o.Relations != nil) {
+			return Snapshot{}, nil, nil, at(fmt.Sprintf("/objects/%d", objectIndex), fmt.Errorf("query metadata on %s object", o.Kind))
 		}
 		if !queryKinds[o.Kind] && (o.Document != nil || o.Arity != nil || len(o.Arguments) > 0 || o.EvalBased != nil || o.Validation != nil || len(o.Relations) > 0) {
 			return Snapshot{}, nil, nil, at(fmt.Sprintf("/objects/%d", objectIndex), fmt.Errorf("query metadata on %s object", o.Kind))
@@ -340,6 +346,12 @@ func normalizeSnapshot(input Snapshot) (Snapshot, []CoverageEntry, []Diagnostic,
 		out.Objects = append(out.Objects, o)
 	}
 	sort.Slice(out.Objects, func(i, j int) bool { return out.Objects[i].ID < out.Objects[j].ID })
+	if input.SchemaVersion == 2 {
+		out.Observation, err = normalizeObservation(input.Observation, out.Objects, collections, from, to)
+		if err != nil {
+			return Snapshot{}, nil, nil, err
+		}
+	}
 	coverage := make([]CoverageEntry, 0, len(objectKinds))
 	diagnostics := []Diagnostic{}
 	for _, kind := range objectKinds {

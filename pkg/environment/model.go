@@ -70,15 +70,16 @@ type Object struct {
 }
 
 type Snapshot struct {
-	SchemaVersion int             `json:"schema_version"`
-	ScopeID       string          `json:"scope_id"`
-	Digest        string          `json:"digest,omitempty"`
-	CaptureScope  CaptureScope    `json:"capture_scope"`
-	Origin        Origin          `json:"origin"`
-	Capture       CaptureInterval `json:"capture"`
-	Capabilities  []Capability    `json:"capabilities"`
-	Collections   []Collection    `json:"collections"`
-	Objects       []Object        `json:"objects"`
+	SchemaVersion int               `json:"schema_version"`
+	ScopeID       string            `json:"scope_id"`
+	Digest        string            `json:"digest,omitempty"`
+	CaptureScope  CaptureScope      `json:"capture_scope"`
+	Origin        Origin            `json:"origin"`
+	Capture       CaptureInterval   `json:"capture"`
+	Capabilities  []Capability      `json:"capabilities"`
+	Collections   []Collection      `json:"collections"`
+	Objects       []Object          `json:"objects"`
+	Observation   *ObservationScope `json:"observation,omitempty"`
 }
 
 // SchemaBundle records offline schema evidence independently of a snapshot.
