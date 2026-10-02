@@ -117,4 +117,40 @@ func TestPairedTargetsReuseAcrossDocuments(t *testing.T) {
 	if environmentWithMismatch, mismatchReport, err := environment.Pair(preparedMismatch, preparedBundle); err != nil || environmentWithMismatch != nil || mismatchReport.Status != "invalid" {
 		t.Fatalf("mismatched binding should not produce a prepared environment: %v %#v", err, mismatchReport)
 	}
+
+	observed := snapshot
+	observed.SchemaVersion = 2
+	observed.Collections = append([]environment.Collection{{Kind: "index", Coverage: "complete"}}, snapshot.Collections...)
+	observed.Objects = append([]environment.Object{{ID: "index-main", Kind: "index", Name: "main", Provenance: snapshot.Objects[0].Provenance}}, snapshot.Objects...)
+	yes := true
+	observed.Observation = &environment.ObservationScope{
+		IndexSelection: environment.Selector{All: &yes},
+		Enumeration:    environment.IndexEnumeration{Method: "distributed_rest", PeerScope: "configured_search_peers", Coverage: "complete", Provenance: snapshot.Objects[0].Provenance},
+		Indexes:        []environment.ObservationIndex{{IndexID: "index-main", CatalogDatatypes: []string{"event"}, RequiredDatatypes: []string{"event"}}}, UnmatchedIndexes: []string{},
+		Method: "splunk_metadata", Visibility: "exporting_principal", Window: environment.ObservationWindow{Mode: "all_retained"}, TimePrecision: "bucket_overlap", AbsenceMeaning: "not_observed",
+		Captures: []environment.ObservationCapture{{Kind: "sourcetype", IndexID: "index-main", Datatype: "event", ObjectIDs: []string{"source-a"}, Coverage: "complete", Provenance: snapshot.Objects[0].Provenance}},
+	}
+	for _, captured := range []bool{true, false} {
+		if !captured {
+			observed.Objects = observed.Objects[:1]
+			observed.Observation.Captures[0].ObjectIDs = []string{}
+		}
+		preparedObserved, observedReport, err := environment.PrepareSnapshot(observed)
+		if err != nil || preparedObserved == nil || observedReport.Status != "partial" {
+			t.Fatalf("prepare v2 observation: %v %#v", err, observedReport)
+		}
+		observedEnvironment, observedReport, err := environment.Pair(preparedObserved, preparedBundle)
+		if err != nil || observedEnvironment == nil || observedReport.Status != "partial" {
+			t.Fatalf("pair v2 captured=%v: %v %#v", captured, err, observedReport)
+		}
+		observedFields, fieldsOK := observedEnvironment.FieldCatalog("source-a", "events-fields")
+		observedClosed, schemaOK := observedEnvironment.SchemaTarget("source-a", "closed")
+		if captured {
+			if !fieldsOK || observedFields != fields || !schemaOK || observedClosed != closed {
+				t.Fatal("same v1 bundle lost reusable targets for a v2 captured identity")
+			}
+		} else if fieldsOK || observedFields != nil || schemaOK || observedClosed != nil || len(observedEnvironment.Bindings("source-a")) != 0 {
+			t.Fatal("schemas proved presence of an unobserved sourcetype")
+		}
+	}
 }

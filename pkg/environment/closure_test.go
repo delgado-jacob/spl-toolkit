@@ -2,6 +2,7 @@ package environment
 
 import (
 	"encoding/json"
+	"fmt"
 	"reflect"
 	"testing"
 
@@ -86,6 +87,74 @@ func TestDefinitionBundleScopeFence(t *testing.T) {
 			outReport, err := closure.Evaluate(closure.Request{SchemaVersion: 1, Document: analysis.QueryDocument{Text: "`absent`", SourceID: "detection-out", Language: "spl"}, Bundle: outBundle, Bindings: []closure.Binding{}})
 			if err != nil || outReport == nil || outReport.Coverage.Complete {
 				t.Fatalf("out-of-scope detection claimed complete closure: %v %#v", err, outReport)
+			}
+		})
+	}
+}
+
+func TestDefinitionBundleSnapshotVersionParity(t *testing.T) {
+	selected := func(value string) Selector { return Selector{Values: []string{value}} }
+	scope := CaptureScope{Namespace: selected("search"), App: selected("main"), Owner: selected("nobody")}
+	macro := preparedPairSnapshot(t, "first", "eval x=1").Snapshot().Objects[0]
+	saved := Object{ID: "saved-daily", Kind: "saved_search", Name: "Daily", Namespace: "search", App: "main", Owner: "nobody", Provenance: macro.Provenance, Document: &analysis.QueryDocument{Text: "`first`", Language: "spl"}}
+	var first closure.DefinitionBundle
+	firstReports := map[string]*closure.Report{}
+	for _, version := range []int{1, 2} {
+		t.Run(fmt.Sprintf("v%d", version), func(t *testing.T) {
+			value := observedFixture(t)
+			value.CaptureScope = scope
+			value.Objects = append(value.Objects, macro, saved)
+			if version == 1 {
+				value.SchemaVersion, value.Observation = 1, nil
+				for _, kind := range []string{"index", "source", "sourcetype"} {
+					setObservedCollection(&value, kind, "partial", "global inventory sampled")
+				}
+			}
+			prepared, report, err := PrepareSnapshot(value)
+			if err != nil || prepared == nil {
+				t.Fatalf("prepare snapshot: %v %#v", err, report)
+			}
+			env, report, err := Pair(prepared, nil)
+			if err != nil || env == nil {
+				t.Fatalf("pair: %v %#v", err, report)
+			}
+			bundle, err := env.DefinitionBundle(scope)
+			if err != nil || bundle.SchemaVersion != 1 || len(bundle.Objects) != 2 {
+				t.Fatalf("definition bundle: %v %#v", err, bundle)
+			}
+			if version == 1 {
+				first = bundle
+			} else if !reflect.DeepEqual(bundle, first) {
+				t.Fatalf("snapshot version changed definitions:\nv1=%#v\nv2=%#v", first, bundle)
+			}
+			for _, query := range []string{"`first`", "| from savedsearch:Daily"} {
+				result, err := closure.Evaluate(closure.Request{SchemaVersion: 1, Document: analysis.QueryDocument{Text: query, Language: "spl"}, Bundle: bundle, Bindings: []closure.Binding{}})
+				if err != nil || result == nil || !result.Coverage.Resolution || !result.Coverage.Collections || !result.Coverage.TraversedDefinitions {
+					t.Fatalf("definition resolution for %q: %v %#v", query, err, result)
+				}
+				if query == "`first`" && !result.Coverage.Complete {
+					t.Fatalf("macro closure incomplete: %#v", result.Coverage)
+				}
+				if version == 1 {
+					firstReports[query] = result
+				} else if !reflect.DeepEqual(result, firstReports[query]) {
+					t.Fatalf("snapshot version changed closure for %q", query)
+				}
+			}
+			outside := scope
+			outside.App = selected("other")
+			outBundle, err := env.DefinitionBundle(outside)
+			if err != nil || len(outBundle.Objects) != 0 {
+				t.Fatalf("out-of-scope definitions: %v %#v", err, outBundle)
+			}
+			for _, collection := range outBundle.Collections {
+				if collection.Coverage != "partial" {
+					t.Fatalf("out-of-scope collection promised completeness: %#v", collection)
+				}
+			}
+			result, err := closure.Evaluate(closure.Request{SchemaVersion: 1, Document: analysis.QueryDocument{Text: "| from savedsearch:Daily", Language: "spl"}, Bundle: outBundle, Bindings: []closure.Binding{}})
+			if err != nil || result == nil || result.Coverage.Collections || result.Coverage.Resolution {
+				t.Fatalf("out-of-scope closure claimed collection or resolution coverage: %v %#v", err, result)
 			}
 		})
 	}

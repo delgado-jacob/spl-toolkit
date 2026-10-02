@@ -51,7 +51,7 @@ func Pair(snapshot *PreparedSnapshot, schemas *PreparedSchemaBundle) (*PreparedE
 				continue
 			}
 			collection, declared := env.collections[binding.Expected.Kind]
-			if bindingInScope(snapshot.snapshot.CaptureScope, binding.Expected) && declared && collection.Coverage == "complete" {
+			if bindingInScope(snapshot.snapshot.CaptureScope, binding.Expected) && declared && collection.Coverage == "complete" && !hasObservedAbsence(snapshot.snapshot, binding.Expected.Kind) {
 				report.Diagnostics = append(report.Diagnostics, Diagnostic{Code: "binding_object_absent", Severity: "error", Artifact: "schema_bundle", Path: path, Message: fmt.Sprintf("object %q is absent from complete %s collection", binding.ObjectID, binding.Expected.Kind)})
 				report.Status = "invalid"
 			} else {
@@ -73,6 +73,10 @@ func Pair(snapshot *PreparedSnapshot, schemas *PreparedSchemaBundle) (*PreparedE
 	}
 	env.report = copyEnvironmentReport(report)
 	return env, &report, nil
+}
+
+func hasObservedAbsence(snapshot Snapshot, kind string) bool {
+	return snapshot.SchemaVersion == 2 && snapshot.Observation != nil && snapshot.Observation.AbsenceMeaning == "not_observed" && (kind == "source" || kind == "sourcetype")
 }
 
 func sameObjectIdentity(object Object, expected ObjectIdentity) bool {

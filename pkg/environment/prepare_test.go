@@ -2,6 +2,7 @@ package environment
 
 import (
 	"encoding/json"
+	"fmt"
 	"reflect"
 	"strings"
 	"sync"
@@ -232,5 +233,147 @@ func TestPairLinkageDiagnosticsUseStableBindingPath(t *testing.T) {
 		if !strings.Contains(formatted, expected) {
 			t.Fatalf("plain report omitted %q: %s", expected, formatted)
 		}
+	}
+}
+
+func TestPairObservedAbsence(t *testing.T) {
+	for _, kind := range []string{"source", "sourcetype", "index"} {
+		for _, version := range []int{1, 2} {
+			t.Run(fmt.Sprintf("%s/v%d", kind, version), func(t *testing.T) {
+				value := observedFixture(t)
+				if version == 1 {
+					value.SchemaVersion, value.Observation = 1, nil
+				}
+				bundle := bundleFixture(t)
+				bundle.Schemas = bundle.Schemas[:2]
+				bundle.Bindings = []SchemaBinding{
+					{SchemaID: "fields", ObjectID: "missing", Expected: ObjectIdentity{Kind: kind, Name: "missing"}, SourceCoverage: "complete"},
+					{SchemaID: "closed", ObjectID: "missing", Expected: ObjectIdentity{Kind: kind, Name: "missing"}, SourceCoverage: "complete"},
+				}
+				preparedBundle, bundleReport, err := PrepareSchemaBundle(bundle)
+				if err != nil || preparedBundle == nil || bundleReport.Status != "valid" {
+					t.Fatalf("prepare bundle: %v %#v", err, bundleReport)
+				}
+				prepared, snapshotReport, err := PrepareSnapshot(value)
+				if err != nil || prepared == nil || snapshotReport.Status != "valid" {
+					t.Fatalf("prepare snapshot: %v %#v", err, snapshotReport)
+				}
+				env, report, err := Pair(prepared, preparedBundle)
+				if version == 2 && kind != "index" {
+					if err != nil || env == nil || report.Status != "partial" || !hasDiagnostic(report, "binding_unresolved") || hasDiagnostic(report, "binding_object_absent") {
+						t.Fatalf("observed absence must stay unresolved: %v %#v", err, report)
+					}
+					if len(env.Bindings("missing")) != 0 {
+						t.Fatal("unobserved object received bindings")
+					}
+					if target, ok := env.FieldCatalog("missing", "fields"); ok || target != nil {
+						t.Fatal("unobserved object exposed a field catalog")
+					}
+					if target, ok := env.SchemaTarget("missing", "closed"); ok || target != nil {
+						t.Fatal("unobserved object exposed a schema target")
+					}
+				} else if err != nil || env != nil || report.Status != "invalid" || !hasDiagnostic(report, "binding_object_absent") {
+					t.Fatalf("complete catalog absence must stay invalid: %v %#v", err, report)
+				}
+				if report.SchemaVersion != 1 || report.SnapshotDigest != snapshotReport.SnapshotDigest || report.SchemaBundleDigest != bundleReport.SchemaBundleDigest {
+					t.Fatalf("pair report changed artifact identities: %#v", report)
+				}
+			})
+		}
+	}
+}
+
+func TestPairReusesSchemaBundleAcrossSnapshotVersions(t *testing.T) {
+	bundle := bundleFixture(t)
+	bundle.Schemas = bundle.Schemas[:2]
+	identity := ObjectIdentity{Kind: "sourcetype", Name: "audit"}
+	bundle.Bindings = []SchemaBinding{
+		{SchemaID: "fields", ObjectID: "sourcetype-audit", Expected: identity, SourceCoverage: "partial", Reason: "field source sampled"},
+		{SchemaID: "closed", ObjectID: "sourcetype-audit", Expected: identity, SourceCoverage: "complete"},
+	}
+	preparedBundle, bundleReport, err := PrepareSchemaBundle(bundle)
+	if err != nil || preparedBundle == nil || bundleReport.Status != "partial" {
+		t.Fatalf("prepare bundle: %v %#v", err, bundleReport)
+	}
+	var previous *PreparedEnvironment
+	var v1Digest string
+	for _, capture := range []struct {
+		name     string
+		version  int
+		coverage string
+	}{
+		{"v1", 1, "complete"}, {"v2-complete", 2, "complete"}, {"v2-partial", 2, "partial"},
+	} {
+		t.Run(capture.name, func(t *testing.T) {
+			value := observedFixture(t)
+			if capture.version == 1 {
+				value.SchemaVersion, value.Observation = 1, nil
+			} else if capture.coverage == "partial" {
+				value.Observation.Captures[1].Coverage = "partial"
+				value.Observation.Captures[1].Reason = "metadata interrupted"
+				setObservedCollection(&value, "sourcetype", "partial", "metadata interrupted")
+			}
+			prepared, snapshotReport, err := PrepareSnapshot(value)
+			if err != nil || prepared == nil || snapshotReport.Status == "invalid" {
+				t.Fatalf("prepare snapshot: %v %#v", err, snapshotReport)
+			}
+			if capture.version == 1 {
+				v1Digest = snapshotReport.SnapshotDigest
+			} else {
+				if snapshotReport.SnapshotDigest == v1Digest {
+					t.Fatal("v2 observation did not distinguish snapshot digest")
+				}
+				copyOfSnapshot := prepared.Snapshot()
+				copyOfSnapshot.Observation.AbsenceMeaning = "mutated"
+				copyOfSnapshot.Observation.Captures[1].ObjectIDs[0] = "mutated"
+				if again := prepared.Snapshot(); again.Observation.AbsenceMeaning != "not_observed" || again.Observation.Captures[1].ObjectIDs[0] != "sourcetype-audit" {
+					t.Fatal("snapshot accessor leaked observation state")
+				}
+			}
+			env, report, err := Pair(prepared, preparedBundle)
+			if err != nil || env == nil || report.Status != "partial" || len(env.Bindings("sourcetype-audit")) != 2 {
+				t.Fatalf("captured binding must resolve: %v %#v", err, report)
+			}
+			if object, ok := env.Object("sourcetype-audit"); !ok || object.Name != "audit" || object.ID != "sourcetype-audit" {
+				t.Fatalf("captured identity changed: %#v", object)
+			}
+			if collection, ok := env.Collection("sourcetype"); !ok || collection.Coverage != capture.coverage {
+				t.Fatalf("schema evidence changed acquisition coverage: %#v", collection)
+			}
+			for _, binding := range env.Bindings("sourcetype-audit") {
+				if binding.SchemaID == "fields" && (binding.SourceCoverage != "partial" || binding.Reason != "field source sampled") || binding.SchemaID == "closed" && binding.SourceCoverage != "complete" {
+					t.Fatalf("acquisition changed independent schema evidence: %#v", binding)
+				}
+			}
+			fields, fieldsOK := env.FieldCatalog("sourcetype-audit", "fields")
+			closed, closedOK := env.SchemaTarget("sourcetype-audit", "closed")
+			if !fieldsOK || fields == nil || !closedOK || closed == nil {
+				t.Fatal("captured object lost compiled targets")
+			}
+			if previous != nil {
+				priorFields, _ := previous.FieldCatalog("sourcetype-audit", "fields")
+				priorClosed, _ := previous.SchemaTarget("sourcetype-audit", "closed")
+				if fields != priorFields || closed != priorClosed {
+					t.Fatal("pairing recompiled reusable schema targets")
+				}
+			}
+			previous = env
+			if report.SnapshotDigest != snapshotReport.SnapshotDigest || report.SchemaBundleDigest != bundleReport.SchemaBundleDigest || preparedBundle.Bundle().SchemaVersion != 1 {
+				t.Fatalf("pairing changed artifact identities: %#v", report)
+			}
+			mismatch := prepared.Snapshot()
+			for i := range mismatch.Objects {
+				if mismatch.Objects[i].ID == "sourcetype-audit" {
+					mismatch.Objects[i].Name = "different"
+				}
+			}
+			preparedMismatch, mismatchReport, err := PrepareSnapshot(mismatch)
+			if err != nil || preparedMismatch == nil {
+				t.Fatalf("prepare identity mismatch: %v %#v", err, mismatchReport)
+			}
+			if bad, report, err := Pair(preparedMismatch, preparedBundle); err != nil || bad != nil || report.Status != "invalid" || !hasDiagnostic(report, "binding_identity_mismatch") {
+				t.Fatalf("same ID with wrong identity accepted: %v %#v", err, report)
+			}
+		})
 	}
 }
