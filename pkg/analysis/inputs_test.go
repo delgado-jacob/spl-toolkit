@@ -277,9 +277,15 @@ func addExactInputTestEvidence(want *Result, sourceReference Reference, fieldRef
 	fact.occurrence.ID = inputOccurrenceID(fact)
 	want.Inputs = []QueryInput{{ID: opaqueInputID(fact.kind, identity), Kind: fact.kind, Name: fact.name, Identity: identity, Evidence: InputCoverage{State: "complete", Reasons: []InputReason{}}, Occurrences: []InputOccurrence{fact.occurrence}}}
 	want.InputCoverage = InputCoverage{State: "complete", Reasons: []InputReason{}}
-	want.FieldAttributionCoverage = InputCoverage{State: "partial", Reasons: []InputReason{}}
-	for _, ref := range fieldReferences {
-		want.FieldAttributionCoverage.Reasons = append(want.FieldAttributionCoverage.Reasons, InputReason{Code: "field_attribution_incomplete", Message: "source field ownership has not been proved", Location: ref.Location, StageID: ref.StageID, ScopeID: ref.ScopeID, ReferenceIDs: []string{ref.ID}})
+	want.FieldAttributionCoverage = InputCoverage{State: "complete", Reasons: []InputReason{}}
+	for i := range want.Requirements.Items {
+		item := &want.Requirements.Items[i]
+		item.InputID = want.Inputs[0].ID
+		item.Ownership = InputOwnership{State: "proved", CandidateInputIDs: []string{item.InputID}}
+		for j := range item.Occurrences {
+			item.Occurrences[j].InputOccurrenceIDs = []string{fact.occurrence.ID}
+			item.Occurrences[j].Necessity = item.Necessity
+		}
 	}
 	want.Correlation = CorrelationGraph{Outcome: "not_applicable", Coverage: InputCoverage{State: "not_applicable", Reasons: []InputReason{}}, Nodes: []CorrelationNode{{InputID: want.Inputs[0].ID, OccurrenceID: fact.occurrence.ID}}, Edges: []CorrelationEdge{}, Components: [][]string{{fact.occurrence.ID}}}
 	want.Requirements.Inputs = cloneInputs(want.Inputs)
@@ -529,5 +535,260 @@ func assertInputSourceEvidenceResourceLimit(t *testing.T, query string) {
 	}
 	if !reflect.DeepEqual(result.Inputs, result.Requirements.Inputs) || !reflect.DeepEqual(result.InputCoverage, result.Requirements.InputCoverage) || !reflect.DeepEqual(result.FieldAttributionCoverage, result.Requirements.FieldAttributionCoverage) || !reflect.DeepEqual(result.Correlation, result.Requirements.Correlation) {
 		t.Fatal("result and requirements disagree")
+	}
+}
+
+func TestRequirementSourceOwnershipTransfers(t *testing.T) {
+	for _, query := range []string{
+		`from $events | eval copied=id | rename copied AS key | stats count(key) AS total | fields total`,
+		`from $events | rename id AS key | where key=1 | eval key=null() | fields other`,
+		`from $events | where isnull(id)`,
+	} {
+		r, err := Analyze(QueryDocument{Text: query, Language: "spl2"})
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, item := range r.Requirements.Items {
+			if item.Kind != "field" {
+				continue
+			}
+			if item.Identity != "id" && item.Identity != "other" {
+				t.Fatalf("derived destination became external obligation: %+v", item)
+			}
+			if item.InputID != r.Inputs[0].ID || item.Ownership.State != "proved" {
+				t.Fatalf("source ownership lost: %+v", item)
+			}
+			for _, occurrence := range item.Occurrences {
+				if !reflect.DeepEqual(occurrence.InputOccurrenceIDs, []string{r.Inputs[0].Occurrences[0].ID}) {
+					t.Fatalf("source occurrence lost: %+v", occurrence)
+				}
+			}
+		}
+		if strings.Contains(query, "isnull") && len(r.Requirements.Items) != 1 {
+			t.Fatalf("null test created field obligation: %+v", r.Requirements.Items)
+		}
+	}
+}
+
+func TestRequirementSourceOwnershipQualifiedJoin(t *testing.T) {
+	r, err := Analyze(QueryDocument{Text: `from $events | join type=inner left=e right=u where e.id=u.id [from $users]`, Language: "spl2"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	owners := map[string]bool{}
+	for _, item := range r.Requirements.Items {
+		if item.Kind != "field" {
+			continue
+		}
+		owners[item.InputID] = true
+		if item.Identity != "id" || item.FieldIdentity.Kind != "atomic" || !reflect.DeepEqual(item.FieldIdentity.Segments, []string{"id"}) {
+			t.Fatalf("source key is not atomic: %+v", item)
+		}
+		if len(item.Occurrences) != 1 || len(item.Occurrences[0].InputOccurrenceIDs) != 1 {
+			t.Fatalf("join owners collapsed: %+v", item)
+		}
+		ref := r.References[referenceOrdinal(t, item.Occurrences[0].ReferenceID)]
+		if ref.FieldIdentity.Qualifier == "" || !strings.Contains(ref.OriginalName, ".id") {
+			t.Fatalf("qualified original identity lost: %+v", ref)
+		}
+	}
+	if len(owners) != 2 || owners[""] || r.FieldAttributionCoverage.State != "complete" {
+		t.Fatalf("join ownership incomplete: %+v", r.Requirements)
+	}
+}
+func referenceOrdinal(t *testing.T, id string) int {
+	t.Helper()
+	ordinal, ok := canonicalReferenceOrdinal(id)
+	if !ok {
+		t.Fatalf("bad canonical reference %q", id)
+	}
+	return ordinal
+}
+
+func TestRequirementSourceOwnershipDerivedJoinKey(t *testing.T) {
+	r, err := Analyze(QueryDocument{Text: `from $events | eval key=id | join type=inner left=e right=u where e.key=u.key [from $users | eval key=id]`, Language: "spl2"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	owners := map[string]bool{}
+	for _, item := range r.Requirements.Items {
+		if item.Kind == "field" {
+			if item.Identity != "id" {
+				t.Fatalf("derived join key is an external obligation: %+v", item)
+			}
+			owners[item.InputID] = true
+		}
+	}
+	if len(owners) != 2 || owners[""] {
+		t.Fatalf("derived source owners lost: %+v", r.Requirements.Items)
+	}
+}
+
+func TestRequirementSourceOwnershipAmbiguousUnqualified(t *testing.T) {
+	r, err := Analyze(QueryDocument{Text: `from $events | join type=inner left=e right=u where e.id=u.id [from $users] | where id=1`, Language: "spl2"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, item := range r.Requirements.Items {
+		if item.Kind == "field" && item.InputID == "" {
+			if item.InputID != "" || item.Ownership.State != "unproved" || len(item.Ownership.CandidateInputIDs) != 2 || len(item.Occurrences[0].InputOccurrenceIDs) != 2 || item.Necessity != "conditional" {
+				t.Fatalf("unqualified collision chose owner: %+v", item)
+			}
+			if r.FieldAttributionCoverage.State != "partial" {
+				t.Fatal("ambiguous ownership claims complete coverage")
+			}
+			return
+		}
+	}
+	t.Fatal("missing ambiguous field obligation")
+}
+
+func TestRequirementSourceOwnershipBranchInputsRemainDistinct(t *testing.T) {
+	r, err := Analyze(QueryDocument{Text: `from $seed | branch (guard=true) [from $events | where id=1], (guard=false) [from $users | where id=1]`, Language: "spl2"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	owners := map[string]bool{}
+	for _, item := range r.Requirements.Items {
+		if item.Kind == "field" && item.Identity == "id" {
+			owners[item.InputID] = true
+			if item.Necessity != "conditional" || item.Occurrences[0].Necessity != "conditional" {
+				t.Fatalf("alternative source read was promoted: %+v", item)
+			}
+		}
+	}
+	if len(owners) != 2 || owners[""] {
+		t.Fatalf("branch sources collapsed: %+v", r.Requirements.Items)
+	}
+}
+
+func TestRequirementSourceOwnershipViewSummaryTerminalLinks(t *testing.T) {
+	r, err := Analyze(QueryDocument{Text: `$base = from $events | fields id; $middle = from $base | rename id AS key; $a = from $middle | where key=1; $b = from $middle | where key=2;`, Language: "spl2"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	published := map[string]bool{}
+	for _, input := range r.Inputs {
+		for _, occurrence := range input.Occurrences {
+			published[occurrence.ID] = true
+		}
+	}
+	if len(published) != 2 {
+		t.Fatalf("unexpected terminal inputs: %+v", r.Inputs)
+	}
+	for _, item := range r.Requirements.Items {
+		if item.Kind != "field" {
+			continue
+		}
+		for _, occurrence := range item.Occurrences {
+			if len(occurrence.InputOccurrenceIDs) == 0 {
+				t.Fatalf("lost view ownership: %+v", item)
+			}
+			for _, id := range occurrence.InputOccurrenceIDs {
+				if !published[id] {
+					t.Fatalf("owner links unpublished declaration occurrence %s", id)
+				}
+			}
+		}
+	}
+	clone := cloneRequirementSet(r.Requirements)
+	for i := range clone.Items {
+		if len(clone.Items[i].Occurrences[0].InputOccurrenceIDs) > 0 {
+			old := r.Requirements.Items[i].Occurrences[0].InputOccurrenceIDs[0]
+			clone.Items[i].Occurrences[0].InputOccurrenceIDs[0] = "changed"
+			clone.Items[i].Ownership.CandidateInputIDs[0] = "changed"
+			if r.Requirements.Items[i].Occurrences[0].InputOccurrenceIDs[0] != old || r.Requirements.Items[i].Ownership.CandidateInputIDs[0] == "changed" {
+				t.Fatal("ownership clone aliases result")
+			}
+			break
+		}
+	}
+}
+
+func TestRequirementSourceOwnershipMultipleOriginsStayDerived(t *testing.T) {
+	for _, query := range []string{
+		`from $events | eval created=id+name | where created=1`,
+		`from $events | eval left_key=id | join type=inner left=e right=u where e.left_key=u.right_key [from $users | eval right_key=id] | eval created=left_key+right_key | where created=1`,
+	} {
+		r, err := Analyze(QueryDocument{Text: query, Language: "spl2"})
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, item := range r.Requirements.Items {
+			if item.Kind == "field" && item.Identity == "created" {
+				t.Fatalf("known derived value became external: %+v", item)
+			}
+		}
+		read := false
+		for _, ref := range r.References {
+			if ref.NormalizedName == "created" && ref.Role == "read" {
+				read = true
+				if ref.Binding != "derived" || len(ref.OriginReferenceIDs) < 2 {
+					t.Fatalf("derived origins lost: %+v", ref)
+				}
+			}
+		}
+		if !read {
+			t.Fatal("missing derived read")
+		}
+	}
+}
+
+func TestRequirementSourceOwnershipQualifiedTypedIdentities(t *testing.T) {
+	r, err := Analyze(QueryDocument{Text: `from main AS e | eval a=id, b=e.id, c=e.actor.name, d='actor.name'`, Language: "spl2"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	forms := map[string]RequirementItem{}
+	for _, item := range r.Requirements.Items {
+		if item.Kind != "field" {
+			continue
+		}
+		if item.InputID != r.Inputs[0].ID || item.FieldIdentity.Qualifier != "" {
+			t.Fatalf("proved source retained alias or lost owner: %+v", item)
+		}
+		forms[item.FieldIdentity.Kind+":"+item.Identity] = item
+	}
+	if len(forms) != 3 || len(forms["atomic:id"].Occurrences) != 2 || forms["path:actor.name"].FieldIdentity == nil || forms["atomic:actor.name"].FieldIdentity == nil {
+		t.Fatalf("typed source identities collapsed: %+v", forms)
+	}
+}
+
+func TestRequirementSourceOwnershipRepeatedLogicalInputCandidates(t *testing.T) {
+	r, err := Analyze(QueryDocument{Text: `from $events | join type=inner left=e right=u where e.id=u.id [from $events] | where id=1`, Language: "spl2"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, item := range r.Requirements.Items {
+		if item.Kind != "field" {
+			continue
+		}
+		if item.InputID != r.Inputs[0].ID || item.Ownership.State != "proved" || len(item.Occurrences) != 3 {
+			t.Fatalf("repeated logical owner collapsed context: %+v", item)
+		}
+		if len(item.Occurrences[0].InputOccurrenceIDs) != 1 || len(item.Occurrences[1].InputOccurrenceIDs) != 1 || len(item.Occurrences[2].InputOccurrenceIDs) != 2 {
+			t.Fatalf("source supply was invented: %+v", item.Occurrences)
+		}
+		return
+	}
+	t.Fatal("missing repeated source requirement")
+}
+
+func TestRequirementSourceOwnershipViewNewFieldsHaveDetachedContexts(t *testing.T) {
+	r, err := Analyze(QueryDocument{Text: `$base = from $events; $consumer = from $base | eval a=id, b=name;`, Language: "spl2"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	count := 0
+	for _, item := range r.Requirements.Items {
+		if item.Kind == "field" {
+			count++
+			if item.InputID != r.Inputs[0].ID || len(item.Occurrences[0].InputOccurrenceIDs) != 1 || item.Occurrences[0].InputOccurrenceIDs[0] != r.Inputs[0].Occurrences[0].ID {
+				t.Fatalf("new view field context lost: %+v", item)
+			}
+		}
+	}
+	if count != 2 {
+		t.Fatalf("unexpected view field obligations: %+v", r.Requirements.Items)
 	}
 }

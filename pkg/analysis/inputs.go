@@ -140,8 +140,12 @@ func (s *semanticStage) recordInput(kind, name, form, value, referenceID, alias 
 	}
 	fact := inputFact{sourceID: s.result.Document.SourceID, kind: kind, name: name, identity: InputIdentity{Form: form, Value: value}, occurrence: InputOccurrence{ReferenceID: referenceID, OriginalReferenceID: referenceID, StageID: st.ID, ScopeID: st.ScopeID, Alias: alias, Location: location, UseSiteLocations: []Location{}, UseSiteReferenceIDs: []string{}}}
 	s.env.inputs = mergeInputFacts(s.env.inputs, []inputFact{fact})
+	s.env.requirements.inputs = mergeInputFacts(s.env.requirements.inputs, []inputFact{fact})
 	if trace := s.env.requirements.trace; trace != nil {
 		trace.inputs = mergeInputFacts(trace.inputs, []inputFact{fact})
+		if referenceID != "" {
+			trace.reference(referenceID).owners = []sourceOwner{{input: fact}}
+		}
 	}
 }
 
@@ -290,6 +294,12 @@ func inputAttributionCoverage(trace *requirementTrace) InputCoverage {
 	coverage := InputCoverage{State: "not_applicable", Reasons: []InputReason{}}
 	for _, entry := range trace.references {
 		if entry.reference.Kind == "field" && (entry.directExternal || entry.conditional || entry.pathConditional) {
+			if coverage.State == "not_applicable" {
+				coverage.State = "complete"
+			}
+			if _, _, proved := provedSourceOwner(entry.owners); proved && entry.reference.Resolution == "exact" {
+				continue
+			}
 			coverage.State = "partial"
 			r := entry.reference
 			coverage.Reasons = append(coverage.Reasons, InputReason{Code: "field_attribution_incomplete", Message: "source field ownership has not been proved", Location: r.Location, StageID: r.StageID, ScopeID: r.ScopeID, ReferenceIDs: []string{r.ID}})

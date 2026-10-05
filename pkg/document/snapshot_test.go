@@ -294,8 +294,9 @@ func TestSnapshotInputEvidenceDetached(t *testing.T) {
 	snapshot.Inputs[0].Occurrences[0].UseSiteReferenceIDs[0] = "changed"
 	snapshot.Requirements.Inputs[0].Occurrences[0].UseSiteReferenceIDs[0] = "changed"
 	snapshot.Correlation.Components[0][0] = "changed"
-	snapshot.Requirements.FieldAttributionCoverage.Reasons[0].ReferenceIDs[0] = "changed"
-	if result.Inputs[0].Occurrences[0].UseSiteLocations[0].Start.Offset == 999 || result.Inputs[0].Occurrences[0].UseSiteReferenceIDs[0] == "changed" || result.Requirements.Inputs[0].Occurrences[0].UseSiteReferenceIDs[0] == "changed" || result.Correlation.Components[0][0] == "changed" || result.Requirements.FieldAttributionCoverage.Reasons[0].ReferenceIDs[0] == "changed" {
+	snapshot.Requirements.Items[0].Ownership.CandidateInputIDs[0] = "changed"
+	snapshot.Requirements.Items[0].Occurrences[0].InputOccurrenceIDs[0] = "changed"
+	if result.Inputs[0].Occurrences[0].UseSiteLocations[0].Start.Offset == 999 || result.Inputs[0].Occurrences[0].UseSiteReferenceIDs[0] == "changed" || result.Requirements.Inputs[0].Occurrences[0].UseSiteReferenceIDs[0] == "changed" || result.Correlation.Components[0][0] == "changed" || result.Requirements.Items[0].Ownership.CandidateInputIDs[0] == "changed" || result.Requirements.Items[0].Occurrences[0].InputOccurrenceIDs[0] == "changed" {
 		t.Fatal("snapshot query evidence aliases analysis result")
 	}
 }

@@ -300,6 +300,8 @@ func (s *semanticStage) applyTstatsPartialAggregation(outputs []aggregateOutput,
 
 	trace := s.env.requirements.trace
 	output := newEnvironmentWithRequirementTrace(trace)
+	output.inputs = cloneInputFacts(s.env.inputs)
+	output.requirements.inputs = cloneInputFacts(s.env.requirements.inputs)
 	output.rewrite = s.env.rewrite.clone()
 	output.open = true
 	output.uncertain = true

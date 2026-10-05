@@ -802,6 +802,7 @@ func (s *spl2SemanticStage) selectedJoinReference(operand locatedOperand, source
 		entry.fieldIdentity = identity.clone()
 		entry.reference.FieldIdentity = ref.FieldIdentity
 		entry.reference = cloneTraceReference(entry.reference)
+		entry.owners = source.requirements.sourceOwners(identity)
 		requirementBinding, directExternal, requirementConditional = source.requirements.readIdentity(entry.reference, identity)
 		entry.reference.Binding = requirementBinding
 		entry.directExternal = directExternal
@@ -1751,4 +1752,5 @@ func (s *spl2SemanticStage) datasetInputIntention(dataset spl2.IDatasetContext) 
 	source.semanticStage = &semantic
 	source.exactDatasetSource(dataset)
 	s.env.inputs = mergeInputFacts(s.env.inputs, source.env.inputs)
+	s.env.requirements.inputs = mergeInputFacts(s.env.requirements.inputs, source.env.requirements.inputs)
 }

@@ -23,15 +23,19 @@ type RequirementCoverage struct {
 }
 
 type RequirementOccurrence struct {
-	ReferenceID  string   `json:"reference_id"`
-	OriginalName string   `json:"original_name"`
-	Binding      string   `json:"binding"`
-	StageID      string   `json:"stage_id"`
-	ScopeID      string   `json:"scope_id"`
-	Location     Location `json:"location"`
+	InputOccurrenceIDs []string `json:"input_occurrence_ids"`
+	Necessity          string   `json:"necessity"`
+	ReferenceID        string   `json:"reference_id"`
+	OriginalName       string   `json:"original_name"`
+	Binding            string   `json:"binding"`
+	StageID            string   `json:"stage_id"`
+	ScopeID            string   `json:"scope_id"`
+	Location           Location `json:"location"`
 }
 
 type RequirementItem struct {
+	InputID       string                  `json:"input_id,omitempty"`
+	Ownership     InputOwnership          `json:"ownership"`
 	ID            string                  `json:"id"`
 	Kind          string                  `json:"kind"`
 	Identity      string                  `json:"identity"`
@@ -107,6 +111,10 @@ func cloneRequirementSet(in RequirementSet) RequirementSet {
 	out.Items = append([]RequirementItem{}, in.Items...)
 	for i := range out.Items {
 		out.Items[i].Occurrences = append([]RequirementOccurrence{}, in.Items[i].Occurrences...)
+		out.Items[i].Ownership.CandidateInputIDs = copyIDs(in.Items[i].Ownership.CandidateInputIDs)
+		for j := range out.Items[i].Occurrences {
+			out.Items[i].Occurrences[j].InputOccurrenceIDs = copyIDs(in.Items[i].Occurrences[j].InputOccurrenceIDs)
+		}
 		if in.Items[i].FieldIdentity != nil {
 			identity := *in.Items[i].FieldIdentity
 			identity.Segments = append([]string{}, identity.Segments...)
@@ -213,9 +221,11 @@ func projectRequirements(document QueryDocument, trace *requirementTrace) (Requi
 		Diagnostics:        []Diagnostic{},
 	}
 
+	set.Inputs, set.InputCoverage = projectInputs(trace)
 	type groupKey struct {
 		kind, identity, role, resolution string
 		fieldKey                         fieldIdentityKey
+		ownerKey                         string
 	}
 	type gapCandidate struct {
 		gap          RequirementGap
@@ -255,19 +265,27 @@ func projectRequirements(document QueryDocument, trace *requirementTrace) (Requi
 		}
 		reference := entry.reference
 		if reference.NormalizedName != "" {
-			fieldKey, privateExact := entry.fieldIdentity.privateKey()
+			sourceIdentity := requirementSourceIdentity(entry)
+			fieldKey, privateExact := sourceIdentity.privateKey()
 			exactField := reference.Kind == "field" && reference.Resolution == "exact" && privateExact
 			key := groupKey{kind: reference.Kind, identity: reference.NormalizedName, role: reference.Role, resolution: reference.Resolution}
 			if exactField {
 				key.fieldKey = fieldKey
+				if _, _, proved := provedSourceOwner(entry.owners); proved {
+					key.identity = sourceIdentity.PublicName
+				}
 			}
+			key.ownerKey = requirementOwnerKey(entry)
 			index, found := groups[key]
 			if !found {
 				necessity := "required"
 				if entry.conditional || entry.pathConditional {
 					necessity = "conditional"
 				}
+				inputID, ownership := projectInputOwnership(entry.owners)
 				item := RequirementItem{
+					InputID:     inputID,
+					Ownership:   ownership,
 					Kind:        reference.Kind,
 					Identity:    reference.NormalizedName,
 					Role:        reference.Role,
@@ -277,7 +295,8 @@ func projectRequirements(document QueryDocument, trace *requirementTrace) (Requi
 					Occurrences: []RequirementOccurrence{},
 				}
 				if exactField {
-					identity, _ := entry.fieldIdentity.public()
+					item.Identity = key.identity
+					identity, _ := sourceIdentity.public()
 					item.FieldIdentity = &identity
 				}
 				set.Items = append(set.Items, item)
@@ -286,13 +305,19 @@ func projectRequirements(document QueryDocument, trace *requirementTrace) (Requi
 			} else if entry.directExternal {
 				set.Items[index].Necessity = "required"
 			}
+			occurrenceNecessity := "conditional"
+			if entry.directExternal {
+				occurrenceNecessity = "required"
+			}
 			set.Items[index].Occurrences = append(set.Items[index].Occurrences, RequirementOccurrence{
-				ReferenceID:  reference.ID,
-				OriginalName: reference.OriginalName,
-				Binding:      reference.Binding,
-				StageID:      reference.StageID,
-				ScopeID:      reference.ScopeID,
-				Location:     reference.Location,
+				InputOccurrenceIDs: projectedOwnerOccurrenceIDs(entry.owners, set.Inputs),
+				Necessity:          occurrenceNecessity,
+				ReferenceID:        reference.ID,
+				OriginalName:       reference.OriginalName,
+				Binding:            reference.Binding,
+				StageID:            reference.StageID,
+				ScopeID:            reference.ScopeID,
+				Location:           reference.Location,
 			})
 		}
 		if entry.conditional {
@@ -361,7 +386,6 @@ func projectRequirements(document QueryDocument, trace *requirementTrace) (Requi
 	if set.QueryStatus != Invalid && (!trace.syntaxComplete || !trace.semanticComplete) {
 		set.QueryStatus = Incomplete
 	}
-	set.Inputs, set.InputCoverage = projectInputs(trace)
 	set.FieldAttributionCoverage = inputAttributionCoverage(trace)
 	set.Correlation = initialCorrelation(set.Inputs, set.InputCoverage)
 	return set, nil

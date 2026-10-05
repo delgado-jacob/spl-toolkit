@@ -936,6 +936,7 @@ func TestRequirementTypesJSONShape(t *testing.T) {
 			Reasons:  []string{"SPL_REQUIREMENT_DYNAMIC"},
 		},
 		Items: []RequirementItem{{
+			Ownership:  InputOwnership{State: "unproved", CandidateInputIDs: []string{}},
 			ID:         "req-1",
 			Kind:       "field",
 			Identity:   "host",
@@ -944,11 +945,13 @@ func TestRequirementTypesJSONShape(t *testing.T) {
 			Origin:     "direct",
 			Resolution: "exact",
 			Occurrences: []RequirementOccurrence{{
-				ReferenceID:  "ref-1",
-				OriginalName: "Host",
-				Binding:      "source",
-				StageID:      "stage-0",
-				ScopeID:      "scope-0",
+				InputOccurrenceIDs: []string{},
+				Necessity:          "required",
+				ReferenceID:        "ref-1",
+				OriginalName:       "Host",
+				Binding:            "source",
+				StageID:            "stage-0",
+				ScopeID:            "scope-0",
 				Location: Location{
 					Start: Position{Offset: 7, Line: 1, Column: 8},
 					End:   Position{Offset: 11, Line: 1, Column: 12},
@@ -983,7 +986,7 @@ func TestRequirementTypesJSONShape(t *testing.T) {
 	if err := json.Unmarshal(encoded, &got); err != nil {
 		t.Fatal(err)
 	}
-	const expected = `{"inputs":null,"input_coverage":{"state":"","reasons":null},"field_attribution_coverage":{"state":"","reasons":null},"correlation":{"outcome":"","coverage":{"state":"","reasons":null},"nodes":null,"edges":null,"components":null},"schema_version":1,"query":{"source_id":"queries/example.spl","language":"spl","profile":"splunkd","version":"current","query_digest":"sha256:query"},"capability_revision":"sha256:capability","query_status":"incomplete","coverage":{"complete":false,"reasons":["SPL_REQUIREMENT_DYNAMIC"]},"items":[{"id":"req-1","kind":"field","identity":"host","role":"read","necessity":"required","origin":"direct","resolution":"exact","occurrences":[{"reference_id":"ref-1","original_name":"Host","binding":"source","stage_id":"stage-0","scope_id":"scope-0","location":{"start":{"offset":7,"line":1,"column":8},"end":{"offset":11,"line":1,"column":12}}}]}],"gaps":[{"code":"SPL_REQUIREMENT_DYNAMIC","message":"dynamic requirement","reference_ids":["ref-1"],"diagnostic_codes":["SPL_DYNAMIC_REFERENCE"]}],"diagnostics":[{"code":"SPL_DYNAMIC_REFERENCE","severity":"warning","category":"semantic","message":"dynamic reference","location":{"start":{"offset":7,"line":1,"column":8},"end":{"offset":11,"line":1,"column":12}},"stage_id":"stage-0","scope_id":"scope-0"}]}`
+	const expected = `{"inputs":null,"input_coverage":{"state":"","reasons":null},"field_attribution_coverage":{"state":"","reasons":null},"correlation":{"outcome":"","coverage":{"state":"","reasons":null},"nodes":null,"edges":null,"components":null},"schema_version":1,"query":{"source_id":"queries/example.spl","language":"spl","profile":"splunkd","version":"current","query_digest":"sha256:query"},"capability_revision":"sha256:capability","query_status":"incomplete","coverage":{"complete":false,"reasons":["SPL_REQUIREMENT_DYNAMIC"]},"items":[{"ownership":{"state":"unproved","candidate_input_ids":[]},"id":"req-1","kind":"field","identity":"host","role":"read","necessity":"required","origin":"direct","resolution":"exact","occurrences":[{"input_occurrence_ids":[],"necessity":"required","reference_id":"ref-1","original_name":"Host","binding":"source","stage_id":"stage-0","scope_id":"scope-0","location":{"start":{"offset":7,"line":1,"column":8},"end":{"offset":11,"line":1,"column":12}}}]}],"gaps":[{"code":"SPL_REQUIREMENT_DYNAMIC","message":"dynamic requirement","reference_ids":["ref-1"],"diagnostic_codes":["SPL_DYNAMIC_REFERENCE"]}],"diagnostics":[{"code":"SPL_DYNAMIC_REFERENCE","severity":"warning","category":"semantic","message":"dynamic reference","location":{"start":{"offset":7,"line":1,"column":8},"end":{"offset":11,"line":1,"column":12}},"stage_id":"stage-0","scope_id":"scope-0"}]}`
 	var want any
 	if err := json.Unmarshal([]byte(expected), &want); err != nil {
 		t.Fatal(err)

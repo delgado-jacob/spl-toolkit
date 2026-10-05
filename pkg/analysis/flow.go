@@ -12,6 +12,7 @@ const (
 type trackedField struct {
 	FieldBinding
 	identity   fieldIdentity
+	owners     []sourceOwner
 	source     bool
 	valueState fieldValueState
 }
@@ -91,6 +92,7 @@ func (e *environment) cloneWithRequirementTrace(trace *requirementTrace) *enviro
 	for k, v := range e.fields {
 		v.OriginReferenceIDs = copyIDs(v.OriginReferenceIDs)
 		v.identity = v.identity.clone()
+		v.owners = cloneSourceOwners(v.owners)
 		n.fields[k] = v
 	}
 	n.fieldOrder = append([]fieldIdentityKey{}, e.fieldOrder...)
@@ -128,7 +130,7 @@ func (e *environment) installIdentity(identity fieldIdentity, ids []string, cond
 	if !source {
 		e.rewriteInvalidate(identity.PublicName)
 	}
-	collision, origins := e.registerIdentityField(trackedField{FieldBinding: FieldBinding{Name: identity.PublicName, OriginReferenceIDs: copyIDs(ids), Conditional: conditional}, identity: identity.clone(), source: source})
+	collision, origins := e.registerIdentityField(trackedField{FieldBinding: FieldBinding{Name: identity.PublicName, OriginReferenceIDs: copyIDs(ids), Conditional: conditional}, identity: identity.clone(), owners: traceSourceOwners(e.requirements.trace, ids), source: source})
 	delete(e.removed, key)
 	return collision, origins
 }
@@ -144,6 +146,7 @@ func (e *environment) registerIdentityField(field trackedField) (bool, []string)
 	}
 	field.OriginReferenceIDs = copyIDs(field.OriginReferenceIDs)
 	field.identity = field.identity.clone()
+	field.owners = cloneSourceOwners(field.owners)
 	field.FieldIdentity, _ = field.identity.public()
 	e.fields[key] = field
 	e.identities[key] = field.identity.clone()

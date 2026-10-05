@@ -23,6 +23,7 @@ type requirementTraceReference struct {
 	pendingID       string
 	reference       Reference
 	fieldIdentity   fieldIdentity
+	owners          []sourceOwner
 	directExternal  bool
 	conditional     bool
 	pathConditional bool
@@ -44,6 +45,7 @@ type requirementTracePath struct {
 
 type requirementField struct {
 	identity    fieldIdentity
+	owners      []sourceOwner
 	source      bool
 	unavailable bool
 	conditional bool
@@ -52,6 +54,7 @@ type requirementField struct {
 
 type requirementEnvironment struct {
 	trace     *requirementTrace
+	inputs    []inputFact
 	fields    map[fieldIdentityKey]requirementField
 	removed   map[fieldIdentityKey]bool
 	ambiguous map[string]bool
@@ -89,6 +92,7 @@ func (t *requirementTrace) clone() *requirementTrace {
 	for i, entry := range t.references {
 		entry.reference = cloneTraceReference(entry.reference)
 		entry.fieldIdentity = cloneRequirementTraceIdentity(entry.fieldIdentity)
+		entry.owners = cloneSourceOwners(entry.owners)
 		out.references[i] = entry
 	}
 	for i, entry := range t.diagnostics {
@@ -112,6 +116,7 @@ type requirementTraceMergeKey struct {
 	kind       string
 	identity   string
 	fieldKey   fieldIdentityKey
+	ownerKey   string
 	role       string
 	resolution string
 }
@@ -149,6 +154,7 @@ func mergeRequirementTraces(base *requirementTrace, paths []requirementTracePath
 			copy := entry
 			copy.reference = cloneTraceReference(entry.reference)
 			copy.fieldIdentity = cloneRequirementTraceIdentity(entry.fieldIdentity)
+			copy.owners = cloneSourceOwners(entry.owners)
 			events = append(events, requirementTraceMergeEvent{
 				branchOrdinal: path.Ordinal,
 				eventOrdinal:  entry.eventOrdinal,
@@ -217,6 +223,7 @@ func mergeRequirementTraces(base *requirementTrace, paths []requirementTracePath
 				}
 			}
 			merged.recordReference(entry.reference, entry.directExternal, entry.conditional, ordinal)
+			merged.references[len(merged.references)-1].owners = cloneSourceOwners(entry.owners)
 			merged.references[len(merged.references)-1].pathConditional = entry.pathConditional
 			merged.references[len(merged.references)-1].fieldIdentity = cloneRequirementTraceIdentity(entry.fieldIdentity)
 			continue
@@ -248,6 +255,7 @@ func rebaseRequirementTrace(oldBase, newBase, branch *requirementTrace) *require
 		copy := entry
 		copy.reference = cloneTraceReference(entry.reference)
 		copy.fieldIdentity = cloneRequirementTraceIdentity(entry.fieldIdentity)
+		copy.owners = cloneSourceOwners(entry.owners)
 		events = append(events, requirementTraceMergeEvent{eventOrdinal: entry.eventOrdinal, reference: &copy})
 	}
 	for i := len(oldBase.diagnostics); i < len(branch.diagnostics); i++ {
@@ -262,6 +270,7 @@ func rebaseRequirementTrace(oldBase, newBase, branch *requirementTrace) *require
 		if event.reference != nil {
 			entry := *event.reference
 			rebased.recordReference(entry.reference, entry.directExternal, entry.conditional, ordinal)
+			rebased.references[len(rebased.references)-1].owners = cloneSourceOwners(entry.owners)
 			rebased.references[len(rebased.references)-1].pathConditional = entry.pathConditional
 			rebased.references[len(rebased.references)-1].fieldIdentity = cloneRequirementTraceIdentity(entry.fieldIdentity)
 			continue
@@ -275,12 +284,13 @@ func rebaseRequirementTrace(oldBase, newBase, branch *requirementTrace) *require
 func requirementTraceKey(entry requirementTraceReference) requirementTraceMergeKey {
 	var fieldKey fieldIdentityKey
 	if entry.reference.Kind == "field" && entry.reference.Resolution == "exact" {
-		fieldKey, _ = entry.fieldIdentity.privateKey()
+		fieldKey, _ = requirementSourceIdentity(entry).privateKey()
 	}
 	return requirementTraceMergeKey{
 		kind:       entry.reference.Kind,
-		identity:   entry.reference.NormalizedName,
+		identity:   requirementSourceIdentity(entry).PublicName,
 		fieldKey:   fieldKey,
+		ownerKey:   requirementOwnerKey(entry),
 		role:       entry.reference.Role,
 		resolution: entry.reference.Resolution,
 	}
@@ -346,6 +356,7 @@ func (t *requirementTrace) remapReferences(mapping map[string]string) {
 		}
 		entry.reference.ID = id
 		remapTraceIDs(entry.reference.OriginReferenceIDs, mapping)
+		remapSourceOwnerReferences(entry.owners, mapping)
 	}
 	for i := range t.diagnostics {
 		remapTraceIDs(t.diagnostics[i].pendingReferenceIDs, mapping)
@@ -394,6 +405,7 @@ func (t *requirementTrace) remapStages(mapping map[string]string) {
 	}
 	remapInputStages(t.inputs, mapping)
 	for i := range t.references {
+		remapSourceOwnerStages(t.references[i].owners, mapping)
 		if id := t.references[i].reference.StageID; id != "" {
 			t.references[i].reference.StageID = mapping[id]
 		}
@@ -478,6 +490,7 @@ func traceOrigins(trace *requirementTrace, ids []string) []string {
 func newRequirementEnvironment(trace *requirementTrace) requirementEnvironment {
 	return requirementEnvironment{
 		trace:     trace,
+		inputs:    []inputFact{},
 		fields:    map[fieldIdentityKey]requirementField{},
 		removed:   map[fieldIdentityKey]bool{},
 		ambiguous: map[string]bool{},
@@ -487,11 +500,13 @@ func newRequirementEnvironment(trace *requirementTrace) requirementEnvironment {
 
 func (e requirementEnvironment) clone() requirementEnvironment {
 	out := newRequirementEnvironment(e.trace)
+	out.inputs = cloneInputFacts(e.inputs)
 	out.open = e.open
 	out.uncertain = e.uncertain
 	for name, field := range e.fields {
 		field.origins = append([]string{}, field.origins...)
 		field.identity = field.identity.clone()
+		field.owners = cloneSourceOwners(field.owners)
 		out.fields[name] = field
 	}
 	for name, removed := range e.removed {
@@ -523,7 +538,13 @@ func (e *requirementEnvironment) readIdentity(reference Reference, identity fiel
 		return classified("indeterminate", false, true)
 	}
 	field, known := e.fields[key]
+	owners := cloneSourceOwners(field.owners)
+	if !known {
+		owners = sourceOwnersForIdentity(e.inputs, identity)
+	}
 	switch {
+	case len(owners) > 0 && !sourceOwnersProved(owners) && (!known || field.source):
+		return classified("indeterminate", false, true)
 	case known && field.conditional:
 		return classified("indeterminate", false, true)
 	case known:
@@ -537,7 +558,7 @@ func (e *requirementEnvironment) readIdentity(reference Reference, identity fiel
 		return classified("unavailable", false, false)
 	default:
 		if !nullTest {
-			e.fields[key] = requirementField{identity: identity.clone(), source: true, origins: []string{reference.ID}}
+			e.fields[key] = requirementField{identity: identity.clone(), source: true, owners: cloneSourceOwners(owners), origins: []string{reference.ID}}
 			e.detectCollision(reference.NormalizedName)
 		}
 		return classified("source", true, false)
@@ -568,7 +589,7 @@ func (e *requirementEnvironment) installIdentity(identity fieldIdentity, origins
 	if !exact {
 		return
 	}
-	e.registerIdentityField(requirementField{identity: identity.clone(), source: source, conditional: conditional, origins: append([]string{}, origins...)})
+	e.registerIdentityField(requirementField{identity: identity.clone(), owners: traceSourceOwners(e.trace, origins), source: source, conditional: conditional, origins: append([]string{}, origins...)})
 	delete(e.removed, key)
 }
 
@@ -579,6 +600,7 @@ func (e *requirementEnvironment) registerIdentityField(field requirementField) {
 	}
 	field.identity = field.identity.clone()
 	field.origins = append([]string{}, field.origins...)
+	field.owners = cloneSourceOwners(field.owners)
 	e.fields[key] = field
 	e.detectCollision(field.identity.PublicName)
 }
@@ -651,6 +673,7 @@ func (e *requirementEnvironment) exactProjection(name string, referenceIDs []str
 func (e *requirementEnvironment) exactIdentityProjection(identity fieldIdentity, referenceIDs []string) (requirementField, bool) {
 	key, _ := identity.privateKey()
 	if field, ok := e.fields[key]; ok {
+		field.owners = cloneSourceOwners(field.owners)
 		field.origins = append([]string{}, field.origins...)
 		return field, true
 	}
@@ -673,7 +696,7 @@ func (e *requirementEnvironment) exactIdentityProjection(identity fieldIdentity,
 	if len(matching) == 0 {
 		return requirementField{}, false
 	}
-	return requirementField{identity: identity.clone(), conditional: true, origins: traceOrigins(e.trace, matching)}, true
+	return requirementField{identity: identity.clone(), owners: traceSourceOwners(e.trace, matching), source: true, conditional: true, origins: traceOrigins(e.trace, matching)}, true
 }
 
 func (e *requirementEnvironment) applyProjection(selectors []locatedOperand, referenceIDs [][]string, mode string, retainKnownInternals bool, stageID string) {

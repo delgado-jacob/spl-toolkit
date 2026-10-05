@@ -582,7 +582,7 @@ func TestRequirementEnvironmentExactProjectionClonesOrSynthesizesConditionalFiel
 	}
 
 	synthesized, ok := environment.exactProjection("host", []string{"pending-select"})
-	if !ok || synthesized.source || !synthesized.conditional || !reflect.DeepEqual(synthesized.origins, []string{"pending-select", "pending-origin"}) {
+	if !ok || !synthesized.source || !synthesized.conditional || !reflect.DeepEqual(synthesized.origins, []string{"pending-select", "pending-origin"}) {
 		t.Fatalf("synthesized exact projection = %+v, %t", synthesized, ok)
 	}
 	synthesized.origins[1] = "changed"
@@ -1836,4 +1836,27 @@ func TestRequirementTraceRebaseRejectsChangedPrefix(t *testing.T) {
 		}
 	}()
 	rebaseRequirementTrace(oldBase, oldBase, branch)
+}
+
+func TestRequirementTraceSourceOwnershipCloneAndRemap(t *testing.T) {
+	trace := newRequirementTrace()
+	trace.recordReference(Reference{ID: "pending-source", Kind: "dataset", NormalizedName: "$events", Role: "read", StageID: "stage-old"}, true, false, trace.nextEvent())
+	trace.recordReference(Reference{ID: "pending-read", Kind: "field", NormalizedName: "id", Role: "read", StageID: "stage-old"}, true, false, trace.nextEvent())
+	fact := inputFact{kind: "named_placeholder", identity: InputIdentity{Form: "parameter", Value: "$events"}, occurrence: InputOccurrence{ReferenceID: "pending-source", OriginalReferenceID: "pending-source", StageID: "stage-old", UseSiteLocations: []Location{{Start: Position{Offset: 5}}}, UseSiteReferenceIDs: []string{"pending-source"}}}
+	trace.inputs = cloneInputFacts([]inputFact{fact})
+	trace.reference("pending-read").owners = cloneSourceOwners([]sourceOwner{{input: fact, identity: atomicFieldIdentity("id")}})
+	cloned := trace.clone()
+	cloned.references[1].owners[0].identity.Segments[0] = "changed"
+	cloned.references[1].owners[0].input.occurrence.UseSiteLocations[0].Start.Offset = 999
+	cloned.references[1].owners[0].input.occurrence.UseSiteReferenceIDs[0] = "changed"
+	owner := trace.references[1].owners[0]
+	if owner.identity.Segments[0] != "id" || owner.input.occurrence.UseSiteLocations[0].Start.Offset != 5 || owner.input.occurrence.UseSiteReferenceIDs[0] != "pending-source" {
+		t.Fatal("trace owner clone changed its immutable prefix")
+	}
+	trace.remapReferences(map[string]string{"pending-source": "ref-0", "pending-read": "ref-1"})
+	trace.remapStages(map[string]string{"stage-old": "stage-0"})
+	owner = trace.references[1].owners[0]
+	if owner.input.occurrence.ReferenceID != "ref-0" || owner.input.occurrence.OriginalReferenceID != "ref-0" || owner.input.occurrence.UseSiteReferenceIDs[0] != "ref-0" || owner.input.occurrence.StageID != "stage-0" {
+		t.Fatalf("owner context remap lost links: %+v", owner)
+	}
 }

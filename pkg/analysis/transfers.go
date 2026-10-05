@@ -111,6 +111,7 @@ func (s *semanticStage) operandReference(operand locatedOperand, kind, role stri
 			entry.fieldIdentity = operand.fieldIdentity().clone()
 			entry.reference.FieldIdentity = s.result.References[len(s.result.References)-1].FieldIdentity
 			entry.reference = cloneTraceReference(entry.reference)
+			entry.owners = s.env.requirements.sourceOwners(operand.fieldIdentity())
 			entry.reference.Binding, entry.directExternal, entry.conditional = s.env.requirements.readIdentity(entry.reference, operand.fieldIdentity())
 		} else {
 			entry.directExternal, entry.conditional = requirementReferencePolicy(entry.reference)
@@ -207,6 +208,7 @@ func (s *semanticStage) createAtWithRequirementConditional(operand locatedOperan
 		entry := trace.reference(id)
 		entry.reference.Binding = "definition"
 		entry.reference.OriginReferenceIDs = traceOrigins(trace, inputs)
+		entry.owners = traceSourceOwners(trace, inputs)
 		s.env.requirements.installIdentity(operand.fieldIdentity(), uniqueIDs([]string{id}, entry.reference.OriginReferenceIDs), requirementConditional, false)
 	}
 	if collision {
@@ -623,6 +625,7 @@ func (s *semanticStage) applyAggregation(outputs []aggregateOutput, groups []loc
 	stageID := s.result.Stages[s.stage].ID
 	output := newEnvironmentWithRequirementTrace(s.env.requirements.trace)
 	output.inputs = cloneInputFacts(s.env.inputs)
+	output.requirements.inputs = cloneInputFacts(s.env.requirements.inputs)
 	output.open = false
 	output.requirements.open = false
 	for _, operand := range groups {

@@ -58,6 +58,10 @@ func cloneRequirementSet(in analysis.RequirementSet) analysis.RequirementSet {
 	out.Items = append([]analysis.RequirementItem{}, in.Items...)
 	for i := range out.Items {
 		out.Items[i].Occurrences = append([]analysis.RequirementOccurrence{}, in.Items[i].Occurrences...)
+		out.Items[i].Ownership.CandidateInputIDs = append([]string{}, in.Items[i].Ownership.CandidateInputIDs...)
+		for j := range out.Items[i].Occurrences {
+			out.Items[i].Occurrences[j].InputOccurrenceIDs = append([]string{}, in.Items[i].Occurrences[j].InputOccurrenceIDs...)
+		}
 		if in.Items[i].FieldIdentity != nil {
 			identity := *in.Items[i].FieldIdentity
 			identity.Segments = append([]string{}, identity.Segments...)

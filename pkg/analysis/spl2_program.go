@@ -449,6 +449,7 @@ func (p *spl2Program) resolveViewSource(stage *spl2SemanticStage, parameter spl2
 			alias = spl2DatasetAlias(dataset)
 		}
 		stage.env.inputs = situatedViewInputs(summary.inputs, useReference, stage.result.Stages[stage.stage], location, alias)
+		stage.env.situateSourceOwners(useReference, stage.result.Stages[stage.stage], location, alias)
 		if callerTrace != nil {
 			callerTrace.inputs = mergeInputFacts(callerTrace.inputs, situatedViewInputs(view.sourceInputs, useReference, stage.result.Stages[stage.stage], location, alias))
 		}
