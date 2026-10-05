@@ -30,7 +30,7 @@ type jobFixture struct {
 	maxRows         int
 	probeOffset     int
 	probeResponse   string
-	probeDelay      time.Duration
+	probeStall      bool
 	dispatchForm    url.Values
 	onStatus        func()
 }
@@ -110,12 +110,9 @@ func newJobFixture(t *testing.T, f *jobFixture) (*Client, *jobFixture) {
 		}
 		if strings.HasSuffix(r.URL.Path, "/results") {
 			f.operations = append(f.operations, "results")
-			if f.probeDelay > 0 && r.URL.Query().Get("offset") == strconv.Itoa(f.probeOffset) {
+			if f.probeStall && r.URL.Query().Get("offset") == strconv.Itoa(f.probeOffset) {
 				f.mu.Unlock()
-				select {
-				case <-r.Context().Done():
-				case <-time.After(f.probeDelay):
-				}
+				<-r.Context().Done()
 				f.mu.Lock()
 			}
 			if f.probeResponse != "" && r.URL.Query().Get("offset") == strconv.Itoa(f.probeOffset) {
@@ -220,7 +217,7 @@ func TestOwnedJobDispatchUsesIntegerRemainingBudget(t *testing.T) {
 }
 
 func TestOwnedJobInsufficientBudgetDoesNotDispatch(t *testing.T) {
-	for _, limit := range []string{"job", "overall", "parent", "one-second-job", "cancelled-parent"} {
+	for _, limit := range []string{"job", "overall", "parent", "subsecond-job", "cancelled-parent"} {
 		t.Run(limit, func(t *testing.T) {
 			c, f := newJobFixture(t, &jobFixture{})
 			ctx := context.Background()
@@ -233,8 +230,9 @@ func TestOwnedJobInsufficientBudgetDoesNotDispatch(t *testing.T) {
 				var cancel context.CancelFunc
 				ctx, cancel = context.WithTimeout(ctx, 500*time.Millisecond)
 				t.Cleanup(cancel)
-			case "one-second-job":
-				c.options.JobTimeout = time.Second
+			case "subsecond-job":
+				// Exactly one second can still dispatch before a coarse clock ticks.
+				c.options.JobTimeout = 900 * time.Millisecond
 			case "cancelled-parent":
 				var cancel context.CancelFunc
 				ctx, cancel = context.WithCancel(ctx)
@@ -421,7 +419,8 @@ func TestOwnedJobRequestDeadlineSalvages(t *testing.T) {
 	}))
 	t.Cleanup(s.Close)
 	o := testOptions(t, s.URL)
-	o.RequestTimeout = 20 * time.Millisecond
+	// Leave headroom for TLS submission; only the first status request stalls.
+	o.RequestTimeout = 500 * time.Millisecond
 	o.CAFile = fixtureCA(t, s)
 	c, err := NewClient(o)
 	if err != nil {
@@ -556,9 +555,10 @@ func TestOwnedJobEndProbeValidatesPageEvidence(t *testing.T) {
 }
 
 func TestOwnedJobEndProbeDeadlineRetainsRows(t *testing.T) {
-	c, f := newJobFixture(t, &jobFixture{maxRows: 600, rowCount: 500, probeOffset: 500, probeDelay: time.Second})
+	c, f := newJobFixture(t, &jobFixture{maxRows: 600, rowCount: 500, probeOffset: 500, probeStall: true})
 	c.options.MaxRows = 600
-	c.http.Timeout = 20 * time.Millisecond
+	// Leave headroom for submission and the first results page; the probe stalls.
+	c.http.Timeout = 500 * time.Millisecond
 	r := c.runDiscoveryJob(context.Background(), discoveryQuery{search: "fixture"})
 	if r.Coverage != "partial" || len(r.Rows) != 500 || r.CleanupFailed {
 		t.Fatalf("probe timeout: coverage=%s reason=%s rows=%d cleanup=%v", r.Coverage, r.Reason, len(r.Rows), r.CleanupFailed)
