@@ -6613,7 +6613,18 @@
           ]
         }
       ],
-      "field_input_pairs": [],
+      "field_input_pairs": [
+        {
+          "input": "explicit_dataset:missing",
+          "field_identity": {
+            "kind": "atomic",
+            "segments": [
+              "id"
+            ]
+          },
+          "necessity": "required"
+        }
+      ],
       "excluded_source_fields": [],
       "correlation": {
         "outcome": "not applicable",
@@ -6622,13 +6633,28 @@
       },
       "compatibility": {
         "outcome": "unsatisfied",
-        "reason_codes": []
+        "reason_codes": [
+          "schema_not_supplied"
+        ]
       },
       "requirement_outcomes": [
         {
           "kind": "dataset",
           "identity": "missing",
           "outcome": "missing"
+        },
+        {
+          "kind": "field",
+          "identity": "id",
+          "field_identity": {
+            "kind": "atomic",
+            "segments": [
+              "id"
+            ]
+          },
+          "input": "explicit_dataset:missing",
+          "necessity": "required",
+          "outcome": "indeterminate"
         }
       ]
     }
@@ -6816,7 +6842,9 @@
       },
       "compatibility": {
         "outcome": "unsatisfied",
-        "reason_codes": []
+        "reason_codes": [
+          "schema_not_supplied"
+        ]
       },
       "requirement_outcomes": [
         {
@@ -6830,6 +6858,12 @@
           },
           "input": "named_placeholder:$events",
           "necessity": "required",
+          "outcome": "indeterminate"
+        },
+        {
+          "kind": "dataset",
+          "identity": "$events",
+          "input": "named_placeholder:$events",
           "outcome": "missing"
         }
       ]
