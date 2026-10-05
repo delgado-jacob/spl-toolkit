@@ -414,7 +414,7 @@ func (p *spl2Program) resolveViewSource(stage *spl2SemanticStage, parameter spl2
 	}
 	location := p.parsed.source.contextLocation(parameter)
 	callerTrace := stage.env.requirements.trace
-	stage.referenceAt(location, name, "view", "read", "exact")
+	useReference := stage.referenceAt(location, name, "view", "read", "exact")
 	var canonicalBefore *requirementTrace
 	if callerTrace != nil && p.trace != nil && callerTrace != p.trace {
 		canonicalBefore = p.trace.clone()
@@ -426,6 +426,14 @@ func (p *spl2Program) resolveViewSource(stage *spl2SemanticStage, parameter spl2
 	}
 	if summary != nil {
 		stage.env = summary.cloneWithRequirementTrace(callerTrace)
+		alias := ""
+		if dataset, ok := parameter.GetParent().(spl2.IDatasetContext); ok {
+			alias = spl2DatasetAlias(dataset)
+		}
+		stage.env.inputs = situatedViewInputs(summary.inputs, useReference, stage.result.Stages[stage.stage], location, alias)
+		if callerTrace != nil {
+			callerTrace.inputs = mergeInputFacts(callerTrace.inputs, stage.env.inputs)
+		}
 	}
 	if !complete {
 		if view.parserTainted && len(p.viewStack) > 0 {
@@ -443,7 +451,8 @@ func (p *spl2Program) resolveImportedDataset(stage *spl2SemanticStage, dataset s
 	if identifier := dataset.Identifier(); identifier != nil {
 		name := spl2ProgramIdentifier(identifier)
 		if binding := p.imports[name]; binding != nil {
-			p.useImport(stage, binding, identifier, "")
+			id := p.useImport(stage, binding, identifier, "")
+			stage.recordInput("unresolved_source", identifier.GetText(), "unresolved", name, id, spl2DatasetAlias(dataset), stage.parsed2.source.contextLocation(identifier))
 			return true
 		}
 	}
@@ -457,7 +466,8 @@ func (p *spl2Program) resolveImportedDataset(stage *spl2SemanticStage, dataset s
 		for _, identifier := range dotted.DatasetPath().AllIdentifier() {
 			parts = append(parts, spl2ProgramIdentifier(identifier))
 		}
-		p.useImport(stage, binding, dotted, strings.Join(parts, "."))
+		id := p.useImport(stage, binding, dotted, strings.Join(parts, "."))
+		stage.recordInput("unresolved_source", dotted.GetText(), "unresolved", dotted.GetText(), id, spl2DatasetAlias(dataset), stage.parsed2.source.contextLocation(dotted))
 		return true
 	}
 	return false

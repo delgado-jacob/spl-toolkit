@@ -108,6 +108,7 @@ func analyzeParsed(result *Result, parsed *parsedDocument, refinement *sourceRef
 			positions[scopeID]++
 			result.Stages = append(result.Stages, stage)
 			state := &semanticStage{result: result, parsed: parsed, stage: len(result.Stages) - 1, env: environments[scopeID], transitions: []Transition{}, refinement: refinement}
+			state.implicitInput()
 			before := state.env.snapshot()
 			branchInputs[stageID] = state.env.clone()
 			if _, damaged := stageContext.(*parser.AnalysisStageContext); damaged || damagedStage(stage.Location) || unsafeBoundaries[stageContext.GetStart().GetTokenIndex()] {

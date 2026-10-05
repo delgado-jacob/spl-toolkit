@@ -121,18 +121,22 @@ type Diagnostic struct {
 	ScopeID  string   `json:"scope_id"`
 }
 type Result struct {
-	rewrite       *RewriteSession
-	SchemaVersion int            `json:"schema_version"`
-	Document      QueryDocument  `json:"document"`
-	Status        Status         `json:"status"`
-	Coverage      Coverage       `json:"coverage"`
-	Stages        []Stage        `json:"stages"`
-	Scopes        []Scope        `json:"scopes"`
-	References    []Reference    `json:"references"`
-	Lineage       []Lineage      `json:"lineage"`
-	Dependencies  Dependencies   `json:"dependencies"`
-	Diagnostics   []Diagnostic   `json:"diagnostics"`
-	Requirements  RequirementSet `json:"requirements"`
+	Inputs                   []QueryInput     `json:"inputs"`
+	InputCoverage            InputCoverage    `json:"input_coverage"`
+	FieldAttributionCoverage InputCoverage    `json:"field_attribution_coverage"`
+	Correlation              CorrelationGraph `json:"correlation"`
+	rewrite                  *RewriteSession
+	SchemaVersion            int            `json:"schema_version"`
+	Document                 QueryDocument  `json:"document"`
+	Status                   Status         `json:"status"`
+	Coverage                 Coverage       `json:"coverage"`
+	Stages                   []Stage        `json:"stages"`
+	Scopes                   []Scope        `json:"scopes"`
+	References               []Reference    `json:"references"`
+	Lineage                  []Lineage      `json:"lineage"`
+	Dependencies             Dependencies   `json:"dependencies"`
+	Diagnostics              []Diagnostic   `json:"diagnostics"`
+	Requirements             RequirementSet `json:"requirements"`
 }
 type Capability struct {
 	Name              string   `json:"name"`

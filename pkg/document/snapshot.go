@@ -27,25 +27,33 @@ func New(result *analysis.Result, context RevisionContext) (*Snapshot, error) {
 	}
 
 	view := &Snapshot{
-		SchemaVersion: result.SchemaVersion,
-		Revision:      context,
-		SourceHash:    sourceHash(result.Document.Text),
-		Document:      result.Document,
-		Status:        result.Status,
-		Coverage:      cloneCoverage(result.Coverage),
-		Stages:        append([]analysis.Stage{}, result.Stages...),
-		Scopes:        append([]analysis.Scope{}, result.Scopes...),
-		References:    cloneReferences(result.References),
-		Lineage:       cloneLineage(result.Lineage),
-		Dependencies:  cloneDependencies(result.Dependencies),
-		Diagnostics:   append([]analysis.Diagnostic{}, result.Diagnostics...),
-		Requirements:  cloneRequirementSet(result.Requirements),
+		Inputs:                   cloneInputs(result.Inputs),
+		InputCoverage:            cloneInputCoverage(result.InputCoverage),
+		FieldAttributionCoverage: cloneInputCoverage(result.FieldAttributionCoverage),
+		Correlation:              cloneCorrelation(result.Correlation),
+		SchemaVersion:            result.SchemaVersion,
+		Revision:                 context,
+		SourceHash:               sourceHash(result.Document.Text),
+		Document:                 result.Document,
+		Status:                   result.Status,
+		Coverage:                 cloneCoverage(result.Coverage),
+		Stages:                   append([]analysis.Stage{}, result.Stages...),
+		Scopes:                   append([]analysis.Scope{}, result.Scopes...),
+		References:               cloneReferences(result.References),
+		Lineage:                  cloneLineage(result.Lineage),
+		Dependencies:             cloneDependencies(result.Dependencies),
+		Diagnostics:              append([]analysis.Diagnostic{}, result.Diagnostics...),
+		Requirements:             cloneRequirementSet(result.Requirements),
 	}
 	return view, nil
 }
 
 func cloneRequirementSet(in analysis.RequirementSet) analysis.RequirementSet {
 	out := in
+	out.Inputs = cloneInputs(in.Inputs)
+	out.InputCoverage = cloneInputCoverage(in.InputCoverage)
+	out.FieldAttributionCoverage = cloneInputCoverage(in.FieldAttributionCoverage)
+	out.Correlation = cloneCorrelation(in.Correlation)
 	out.Coverage.Reasons = append([]string{}, in.Coverage.Reasons...)
 	out.Items = append([]analysis.RequirementItem{}, in.Items...)
 	for i := range out.Items {
@@ -140,3 +148,45 @@ func cloneDependencies(in analysis.Dependencies) analysis.Dependencies {
 		Macros:      append([]string{}, in.Macros...),
 	}
 }
+
+func cloneInputCoverage(in analysis.InputCoverage) analysis.InputCoverage {
+	out := in
+	out.Reasons = append([]analysis.InputReason{}, in.Reasons...)
+	for i := range out.Reasons {
+		out.Reasons[i].ReferenceIDs = copyInputIDs(in.Reasons[i].ReferenceIDs)
+	}
+	return out
+}
+func cloneInputs(in []analysis.QueryInput) []analysis.QueryInput {
+	out := append([]analysis.QueryInput{}, in...)
+	for i := range out {
+		out[i].Evidence = cloneInputCoverage(in[i].Evidence)
+		out[i].Occurrences = append([]analysis.InputOccurrence{}, in[i].Occurrences...)
+		for j := range out[i].Occurrences {
+			o := &out[i].Occurrences[j]
+			o.UseSiteLocations = append([]analysis.Location{}, o.UseSiteLocations...)
+			o.UseSiteReferenceIDs = copyInputIDs(o.UseSiteReferenceIDs)
+		}
+	}
+	return out
+}
+
+func cloneCorrelation(in analysis.CorrelationGraph) analysis.CorrelationGraph {
+	out := in
+	out.Coverage = cloneInputCoverage(in.Coverage)
+	out.Nodes = append([]analysis.CorrelationNode{}, in.Nodes...)
+	out.Edges = append([]analysis.CorrelationEdge{}, in.Edges...)
+	out.Components = make([][]string, len(in.Components))
+	for i := range out.Components {
+		out.Components[i] = copyInputIDs(in.Components[i])
+	}
+	for i := range out.Edges {
+		out.Edges[i].Left.FieldIdentity.Segments = copyInputIDs(in.Edges[i].Left.FieldIdentity.Segments)
+		out.Edges[i].Right.FieldIdentity.Segments = copyInputIDs(in.Edges[i].Right.FieldIdentity.Segments)
+		out.Edges[i].Left.ReferenceIDs = copyInputIDs(in.Edges[i].Left.ReferenceIDs)
+		out.Edges[i].Right.ReferenceIDs = copyInputIDs(in.Edges[i].Right.ReferenceIDs)
+	}
+	return out
+}
+
+func copyInputIDs(in []string) []string { return append([]string{}, in...) }

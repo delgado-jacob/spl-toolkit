@@ -101,5 +101,9 @@ func resourceLimitedAnalysis(document QueryDocument, location Location) (*Result
 		return nil, nil, err
 	}
 	result.Requirements = requirements
+	result.Inputs = cloneInputs(requirements.Inputs)
+	result.InputCoverage = cloneInputCoverage(requirements.InputCoverage)
+	result.FieldAttributionCoverage = cloneInputCoverage(requirements.FieldAttributionCoverage)
+	result.Correlation = cloneCorrelation(requirements.Correlation)
 	return result, trace, nil
 }

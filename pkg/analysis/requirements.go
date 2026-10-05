@@ -51,14 +51,18 @@ type RequirementGap struct {
 }
 
 type RequirementSet struct {
-	SchemaVersion      int                      `json:"schema_version"`
-	Query              RequirementQueryIdentity `json:"query"`
-	CapabilityRevision string                   `json:"capability_revision"`
-	QueryStatus        Status                   `json:"query_status"`
-	Coverage           RequirementCoverage      `json:"coverage"`
-	Items              []RequirementItem        `json:"items"`
-	Gaps               []RequirementGap         `json:"gaps"`
-	Diagnostics        []Diagnostic             `json:"diagnostics"`
+	Inputs                   []QueryInput             `json:"inputs"`
+	InputCoverage            InputCoverage            `json:"input_coverage"`
+	FieldAttributionCoverage InputCoverage            `json:"field_attribution_coverage"`
+	Correlation              CorrelationGraph         `json:"correlation"`
+	SchemaVersion            int                      `json:"schema_version"`
+	Query                    RequirementQueryIdentity `json:"query"`
+	CapabilityRevision       string                   `json:"capability_revision"`
+	QueryStatus              Status                   `json:"query_status"`
+	Coverage                 RequirementCoverage      `json:"coverage"`
+	Items                    []RequirementItem        `json:"items"`
+	Gaps                     []RequirementGap         `json:"gaps"`
+	Diagnostics              []Diagnostic             `json:"diagnostics"`
 }
 
 type requirementOwnedDiagnosticKey struct {
@@ -95,6 +99,10 @@ func capabilityRevision(document QueryDocument) (string, error) {
 
 func cloneRequirementSet(in RequirementSet) RequirementSet {
 	out := in
+	out.Inputs = cloneInputs(in.Inputs)
+	out.InputCoverage = cloneInputCoverage(in.InputCoverage)
+	out.FieldAttributionCoverage = cloneInputCoverage(in.FieldAttributionCoverage)
+	out.Correlation = cloneCorrelation(in.Correlation)
 	out.Coverage.Reasons = append([]string{}, in.Coverage.Reasons...)
 	out.Items = append([]RequirementItem{}, in.Items...)
 	for i := range out.Items {
@@ -353,6 +361,9 @@ func projectRequirements(document QueryDocument, trace *requirementTrace) (Requi
 	if set.QueryStatus != Invalid && (!trace.syntaxComplete || !trace.semanticComplete) {
 		set.QueryStatus = Incomplete
 	}
+	set.Inputs, set.InputCoverage = projectInputs(trace)
+	set.FieldAttributionCoverage = inputAttributionCoverage(trace)
+	set.Correlation = initialCorrelation(set.Inputs, set.InputCoverage)
 	return set, nil
 }
 

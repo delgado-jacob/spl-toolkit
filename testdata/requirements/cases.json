@@ -27,7 +27,11 @@
         },
         "items": [],
         "gaps": [],
-        "diagnostics": []
+        "diagnostics": [],
+        "inputs": [{"id":"input-8768c9c38cb771adfebcb7c59b03a4c9d6075ab5f537fa63f9b66c95ef49dfe2","kind":"implicit_stream","name":"","identity":{"form":"implicit","value":""},"evidence":{"state":"complete","reasons":[]},"occurrences":[{"id":"occurrence-4ad0313cccd41b3bac86200892d26d4fb70dfabfd8698d0e4bfec00fbcf43819","reference_id":"","original_reference_id":"","stage_id":"stage-0","scope_id":"scope-0","alias":"","location":{"start":{"offset":0,"line":1,"column":1},"end":{"offset":12,"line":1,"column":13}},"use_site_locations":[],"use_site_reference_ids":[]}]}],
+        "input_coverage": {"state":"complete","reasons":[]},
+        "field_attribution_coverage": {"state":"not_applicable","reasons":[]},
+        "correlation": {"outcome":"not_applicable","coverage":{"state":"not_applicable","reasons":[]},"nodes":[{"input_id":"input-8768c9c38cb771adfebcb7c59b03a4c9d6075ab5f537fa63f9b66c95ef49dfe2","occurrence_id":"occurrence-4ad0313cccd41b3bac86200892d26d4fb70dfabfd8698d0e4bfec00fbcf43819"}],"edges":[],"components":[["occurrence-4ad0313cccd41b3bac86200892d26d4fb70dfabfd8698d0e4bfec00fbcf43819"]]}
       }
     },
     {
@@ -148,7 +152,11 @@
           }
         ],
         "gaps": [],
-        "diagnostics": []
+        "diagnostics": [],
+        "inputs": [{"id":"input-8768c9c38cb771adfebcb7c59b03a4c9d6075ab5f537fa63f9b66c95ef49dfe2","kind":"implicit_stream","name":"","identity":{"form":"implicit","value":""},"evidence":{"state":"complete","reasons":[]},"occurrences":[{"id":"occurrence-cdbf7387e6c1bf92abcbcbf89ebf301b2c25bfc204bb45b72c0d6f20104f283e","reference_id":"","original_reference_id":"","stage_id":"stage-0","scope_id":"scope-0","alias":"","location":{"start":{"offset":0,"line":1,"column":1},"end":{"offset":12,"line":1,"column":13}},"use_site_locations":[],"use_site_reference_ids":[]}]}],
+        "input_coverage": {"state":"complete","reasons":[]},
+        "field_attribution_coverage": {"state":"partial","reasons":[{"code":"field_attribution_incomplete","message":"source field ownership has not been proved","location":{"start":{"offset":7,"line":1,"column":8},"end":{"offset":10,"line":1,"column":11}},"stage_id":"stage-0","scope_id":"scope-0","reference_ids":["ref-0"]},{"code":"field_attribution_incomplete","message":"source field ownership has not been proved","location":{"start":{"offset":28,"line":1,"column":29},"end":{"offset":31,"line":1,"column":32}},"stage_id":"stage-1","scope_id":"scope-0","reference_ids":["ref-2"]},{"code":"field_attribution_incomplete","message":"source field ownership has not been proved","location":{"start":{"offset":40,"line":1,"column":41},"end":{"offset":43,"line":1,"column":44}},"stage_id":"stage-2","scope_id":"scope-0","reference_ids":["ref-3"]}]},
+        "correlation": {"outcome":"not_applicable","coverage":{"state":"not_applicable","reasons":[]},"nodes":[{"input_id":"input-8768c9c38cb771adfebcb7c59b03a4c9d6075ab5f537fa63f9b66c95ef49dfe2","occurrence_id":"occurrence-cdbf7387e6c1bf92abcbcbf89ebf301b2c25bfc204bb45b72c0d6f20104f283e"}],"edges":[],"components":[["occurrence-cdbf7387e6c1bf92abcbcbf89ebf301b2c25bfc204bb45b72c0d6f20104f283e"]]}
       }
     },
     {
@@ -255,7 +263,11 @@
             "stage_id": "stage-0",
             "scope_id": "scope-0"
           }
-        ]
+        ],
+        "inputs": [{"id":"input-8768c9c38cb771adfebcb7c59b03a4c9d6075ab5f537fa63f9b66c95ef49dfe2","kind":"implicit_stream","name":"","identity":{"form":"implicit","value":""},"evidence":{"state":"complete","reasons":[]},"occurrences":[{"id":"occurrence-4cecc4772df360a7e398ff9173aef248b9a13e142410ed6ccca79f4fba3d0ad0","reference_id":"","original_reference_id":"","stage_id":"stage-0","scope_id":"scope-0","alias":"","location":{"start":{"offset":2,"line":1,"column":3},"end":{"offset":9,"line":1,"column":10}},"use_site_locations":[],"use_site_reference_ids":[]}]}],
+        "input_coverage": {"state":"partial","reasons":[{"code":"SPL_UNSUPPORTED_COMMAND","message":"command \"mystery\" has unmodeled field effects","location":{"start":{"offset":2,"line":1,"column":3},"end":{"offset":9,"line":1,"column":10}},"stage_id":"stage-0","scope_id":"scope-0","reference_ids":[]}]},
+        "field_attribution_coverage": {"state":"partial","reasons":[{"code":"field_attribution_incomplete","message":"source field ownership has not been proved","location":{"start":{"offset":18,"line":1,"column":19},"end":{"offset":22,"line":1,"column":23}},"stage_id":"stage-1","scope_id":"scope-0","reference_ids":["ref-0"]}]},
+        "correlation": {"outcome":"indeterminate","coverage":{"state":"partial","reasons":[{"code":"SPL_UNSUPPORTED_COMMAND","message":"command \"mystery\" has unmodeled field effects","location":{"start":{"offset":2,"line":1,"column":3},"end":{"offset":9,"line":1,"column":10}},"stage_id":"stage-0","scope_id":"scope-0","reference_ids":[]}]},"nodes":[{"input_id":"input-8768c9c38cb771adfebcb7c59b03a4c9d6075ab5f537fa63f9b66c95ef49dfe2","occurrence_id":"occurrence-4cecc4772df360a7e398ff9173aef248b9a13e142410ed6ccca79f4fba3d0ad0"}],"edges":[],"components":[["occurrence-4cecc4772df360a7e398ff9173aef248b9a13e142410ed6ccca79f4fba3d0ad0"]]}
       }
     },
     {
@@ -385,7 +397,11 @@
             "stage_id": "stage-1",
             "scope_id": "scope-0"
           }
-        ]
+        ],
+        "inputs": [{"id":"input-8768c9c38cb771adfebcb7c59b03a4c9d6075ab5f537fa63f9b66c95ef49dfe2","kind":"implicit_stream","name":"","identity":{"form":"implicit","value":""},"evidence":{"state":"complete","reasons":[]},"occurrences":[{"id":"occurrence-9f931a62ef3c962390caaf4a09381b0c65aa5dddc0b5049ac6ad0ede6edb08ec","reference_id":"","original_reference_id":"","stage_id":"stage-0","scope_id":"scope-0","alias":"","location":{"start":{"offset":0,"line":1,"column":1},"end":{"offset":12,"line":1,"column":13}},"use_site_locations":[],"use_site_reference_ids":[]}]}],
+        "input_coverage": {"state":"complete","reasons":[]},
+        "field_attribution_coverage": {"state":"partial","reasons":[{"code":"field_attribution_incomplete","message":"source field ownership has not been proved","location":{"start":{"offset":7,"line":1,"column":8},"end":{"offset":10,"line":1,"column":11}},"stage_id":"stage-0","scope_id":"scope-0","reference_ids":["ref-0"]},{"code":"field_attribution_incomplete","message":"source field ownership has not been proved","location":{"start":{"offset":21,"line":1,"column":22},"end":{"offset":23,"line":1,"column":24}},"stage_id":"stage-1","scope_id":"scope-0","reference_ids":["ref-1"]}]},
+        "correlation": {"outcome":"not_applicable","coverage":{"state":"not_applicable","reasons":[]},"nodes":[{"input_id":"input-8768c9c38cb771adfebcb7c59b03a4c9d6075ab5f537fa63f9b66c95ef49dfe2","occurrence_id":"occurrence-9f931a62ef3c962390caaf4a09381b0c65aa5dddc0b5049ac6ad0ede6edb08ec"}],"edges":[],"components":[["occurrence-9f931a62ef3c962390caaf4a09381b0c65aa5dddc0b5049ac6ad0ede6edb08ec"]]}
       }
     },
     {
@@ -505,7 +521,11 @@
           }
         ],
         "gaps": [],
-        "diagnostics": []
+        "diagnostics": [],
+        "inputs": [{"id":"input-8768c9c38cb771adfebcb7c59b03a4c9d6075ab5f537fa63f9b66c95ef49dfe2","kind":"implicit_stream","name":"","identity":{"form":"implicit","value":""},"evidence":{"state":"complete","reasons":[]},"occurrences":[{"id":"occurrence-617ef642c1305a958261341462c21f6544fd62669f7c850ff93049d2f470ed14","reference_id":"","original_reference_id":"","stage_id":"stage-0","scope_id":"scope-0","alias":"","location":{"start":{"offset":0,"line":1,"column":1},"end":{"offset":43,"line":1,"column":44}},"use_site_locations":[],"use_site_reference_ids":[]}]}],
+        "input_coverage": {"state":"complete","reasons":[]},
+        "field_attribution_coverage": {"state":"not_applicable","reasons":[]},
+        "correlation": {"outcome":"not_applicable","coverage":{"state":"not_applicable","reasons":[]},"nodes":[{"input_id":"input-8768c9c38cb771adfebcb7c59b03a4c9d6075ab5f537fa63f9b66c95ef49dfe2","occurrence_id":"occurrence-617ef642c1305a958261341462c21f6544fd62669f7c850ff93049d2f470ed14"}],"edges":[],"components":[["occurrence-617ef642c1305a958261341462c21f6544fd62669f7c850ff93049d2f470ed14"]]}
       }
     },
     {
@@ -601,7 +621,11 @@
           }
         ],
         "gaps": [],
-        "diagnostics": []
+        "diagnostics": [],
+        "inputs": [{"id":"input-8768c9c38cb771adfebcb7c59b03a4c9d6075ab5f537fa63f9b66c95ef49dfe2","kind":"implicit_stream","name":"","identity":{"form":"implicit","value":""},"evidence":{"state":"complete","reasons":[]},"occurrences":[{"id":"occurrence-efc1a2d36fc37668d5232308bf32abe21d5a2ccbe1b09563eafa9a82f849685a","reference_id":"","original_reference_id":"","stage_id":"stage-0","scope_id":"scope-0","alias":"","location":{"start":{"offset":2,"line":1,"column":3},"end":{"offset":19,"line":1,"column":20}},"use_site_locations":[],"use_site_reference_ids":[]}]}],
+        "input_coverage": {"state":"complete","reasons":[]},
+        "field_attribution_coverage": {"state":"partial","reasons":[{"code":"field_attribution_incomplete","message":"source field ownership has not been proved","location":{"start":{"offset":28,"line":1,"column":29},"end":{"offset":30,"line":1,"column":31}},"stage_id":"stage-1","scope_id":"scope-0","reference_ids":["ref-1"]}]},
+        "correlation": {"outcome":"not_applicable","coverage":{"state":"not_applicable","reasons":[]},"nodes":[{"input_id":"input-8768c9c38cb771adfebcb7c59b03a4c9d6075ab5f537fa63f9b66c95ef49dfe2","occurrence_id":"occurrence-efc1a2d36fc37668d5232308bf32abe21d5a2ccbe1b09563eafa9a82f849685a"}],"edges":[],"components":[["occurrence-efc1a2d36fc37668d5232308bf32abe21d5a2ccbe1b09563eafa9a82f849685a"]]}
       }
     },
     {
@@ -693,7 +717,11 @@
             "stage_id": "stage-0",
             "scope_id": "scope-0"
           }
-        ]
+        ],
+        "inputs": [{"id":"input-8768c9c38cb771adfebcb7c59b03a4c9d6075ab5f537fa63f9b66c95ef49dfe2","kind":"implicit_stream","name":"","identity":{"form":"implicit","value":""},"evidence":{"state":"complete","reasons":[]},"occurrences":[{"id":"occurrence-45177500f8655e7d7b1c9cc8c22b92d6ef80b936ff9e0b23195e19c16851e79f","reference_id":"","original_reference_id":"","stage_id":"stage-0","scope_id":"scope-0","alias":"","location":{"start":{"offset":2,"line":1,"column":3},"end":{"offset":22,"line":1,"column":23}},"use_site_locations":[],"use_site_reference_ids":[]}]}],
+        "input_coverage": {"state":"complete","reasons":[]},
+        "field_attribution_coverage": {"state":"partial","reasons":[{"code":"field_attribution_incomplete","message":"command \"datamodel\" has unmodeled field effects","location":{"start":{"offset":2,"line":1,"column":3},"end":{"offset":22,"line":1,"column":23}},"stage_id":"stage-0","scope_id":"scope-0","reference_ids":[]}]},
+        "correlation": {"outcome":"not_applicable","coverage":{"state":"not_applicable","reasons":[]},"nodes":[{"input_id":"input-8768c9c38cb771adfebcb7c59b03a4c9d6075ab5f537fa63f9b66c95ef49dfe2","occurrence_id":"occurrence-45177500f8655e7d7b1c9cc8c22b92d6ef80b936ff9e0b23195e19c16851e79f"}],"edges":[],"components":[["occurrence-45177500f8655e7d7b1c9cc8c22b92d6ef80b936ff9e0b23195e19c16851e79f"]]}
       }
     },
     {
@@ -868,7 +896,11 @@
             "stage_id": "stage-1",
             "scope_id": "scope-0"
           }
-        ]
+        ],
+        "inputs": [{"id":"input-8768c9c38cb771adfebcb7c59b03a4c9d6075ab5f537fa63f9b66c95ef49dfe2","kind":"implicit_stream","name":"","identity":{"form":"implicit","value":""},"evidence":{"state":"complete","reasons":[]},"occurrences":[{"id":"occurrence-71a4919bce429f95395cc4fb36ac6a22f366e2e4361a4e19c83c489f43c6167b","reference_id":"","original_reference_id":"","stage_id":"stage-0","scope_id":"scope-0","alias":"","location":{"start":{"offset":0,"line":1,"column":1},"end":{"offset":15,"line":1,"column":16}},"use_site_locations":[],"use_site_reference_ids":[]}]}],
+        "input_coverage": {"state":"partial","reasons":[{"code":"SPL_DYNAMIC_REFERENCE","message":"macro expansion is unresolved","location":{"start":{"offset":18,"line":1,"column":19},"end":{"offset":32,"line":1,"column":33}},"stage_id":"stage-1","scope_id":"scope-0","reference_ids":["ref-1"]}]},
+        "field_attribution_coverage": {"state":"partial","reasons":[{"code":"field_attribution_incomplete","message":"source field ownership has not been proved","location":{"start":{"offset":7,"line":1,"column":8},"end":{"offset":11,"line":1,"column":12}},"stage_id":"stage-0","scope_id":"scope-0","reference_ids":["ref-0"]},{"code":"field_attribution_incomplete","message":"source field ownership has not been proved","location":{"start":{"offset":50,"line":1,"column":51},"end":{"offset":54,"line":1,"column":55}},"stage_id":"stage-2","scope_id":"scope-0","reference_ids":["ref-3"]}]},
+        "correlation": {"outcome":"indeterminate","coverage":{"state":"partial","reasons":[{"code":"SPL_DYNAMIC_REFERENCE","message":"macro expansion is unresolved","location":{"start":{"offset":18,"line":1,"column":19},"end":{"offset":32,"line":1,"column":33}},"stage_id":"stage-1","scope_id":"scope-0","reference_ids":["ref-1"]}]},"nodes":[{"input_id":"input-8768c9c38cb771adfebcb7c59b03a4c9d6075ab5f537fa63f9b66c95ef49dfe2","occurrence_id":"occurrence-71a4919bce429f95395cc4fb36ac6a22f366e2e4361a4e19c83c489f43c6167b"}],"edges":[],"components":[["occurrence-71a4919bce429f95395cc4fb36ac6a22f366e2e4361a4e19c83c489f43c6167b"]]}
       }
     },
     {
@@ -970,7 +1002,11 @@
           }
         ],
         "gaps": [],
-        "diagnostics": []
+        "diagnostics": [],
+        "inputs": [{"id":"input-8768c9c38cb771adfebcb7c59b03a4c9d6075ab5f537fa63f9b66c95ef49dfe2","kind":"implicit_stream","name":"","identity":{"form":"implicit","value":""},"evidence":{"state":"complete","reasons":[]},"occurrences":[{"id":"occurrence-d528887d8a961c898a6271f5433ea1dc07074c6fbcf9cd4703aa4e3807cb5b38","reference_id":"","original_reference_id":"","stage_id":"stage-0","scope_id":"scope-0","alias":"","location":{"start":{"offset":0,"line":1,"column":1},"end":{"offset":13,"line":1,"column":14}},"use_site_locations":[],"use_site_reference_ids":[]}]}],
+        "input_coverage": {"state":"complete","reasons":[]},
+        "field_attribution_coverage": {"state":"partial","reasons":[{"code":"field_attribution_incomplete","message":"source field ownership has not been proved","location":{"start":{"offset":7,"line":1,"column":8},"end":{"offset":11,"line":1,"column":12}},"stage_id":"stage-0","scope_id":"scope-0","reference_ids":["ref-0"]},{"code":"field_attribution_incomplete","message":"source field ownership has not been proved","location":{"start":{"offset":23,"line":1,"column":24},"end":{"offset":27,"line":1,"column":28}},"stage_id":"stage-1","scope_id":"scope-0","reference_ids":["ref-1"]}]},
+        "correlation": {"outcome":"not_applicable","coverage":{"state":"not_applicable","reasons":[]},"nodes":[{"input_id":"input-8768c9c38cb771adfebcb7c59b03a4c9d6075ab5f537fa63f9b66c95ef49dfe2","occurrence_id":"occurrence-d528887d8a961c898a6271f5433ea1dc07074c6fbcf9cd4703aa4e3807cb5b38"}],"edges":[],"components":[["occurrence-d528887d8a961c898a6271f5433ea1dc07074c6fbcf9cd4703aa4e3807cb5b38"]]}
       }
     },
     {
@@ -1057,7 +1093,11 @@
             "stage_id": "stage-2",
             "scope_id": "scope-0"
           }
-        ]
+        ],
+        "inputs": [{"id":"input-8768c9c38cb771adfebcb7c59b03a4c9d6075ab5f537fa63f9b66c95ef49dfe2","kind":"implicit_stream","name":"","identity":{"form":"implicit","value":""},"evidence":{"state":"complete","reasons":[]},"occurrences":[{"id":"occurrence-b459d124a697e5b5292db03f71ddc5ea7609bf1bdd9ee730ec5c420853bb0673","reference_id":"","original_reference_id":"","stage_id":"stage-0","scope_id":"scope-0","alias":"","location":{"start":{"offset":0,"line":1,"column":1},"end":{"offset":13,"line":1,"column":14}},"use_site_locations":[],"use_site_reference_ids":[]}]}],
+        "input_coverage": {"state":"complete","reasons":[]},
+        "field_attribution_coverage": {"state":"partial","reasons":[{"code":"field_attribution_incomplete","message":"source field ownership has not been proved","location":{"start":{"offset":7,"line":1,"column":8},"end":{"offset":11,"line":1,"column":12}},"stage_id":"stage-0","scope_id":"scope-0","reference_ids":["ref-0"]}]},
+        "correlation": {"outcome":"not_applicable","coverage":{"state":"not_applicable","reasons":[]},"nodes":[{"input_id":"input-8768c9c38cb771adfebcb7c59b03a4c9d6075ab5f537fa63f9b66c95ef49dfe2","occurrence_id":"occurrence-b459d124a697e5b5292db03f71ddc5ea7609bf1bdd9ee730ec5c420853bb0673"}],"edges":[],"components":[["occurrence-b459d124a697e5b5292db03f71ddc5ea7609bf1bdd9ee730ec5c420853bb0673"]]}
       }
     },
     {
@@ -1118,7 +1158,11 @@
             "stage_id": "",
             "scope_id": ""
           }
-        ]
+        ],
+        "inputs": [{"id":"input-8768c9c38cb771adfebcb7c59b03a4c9d6075ab5f537fa63f9b66c95ef49dfe2","kind":"implicit_stream","name":"","identity":{"form":"implicit","value":""},"evidence":{"state":"complete","reasons":[]},"occurrences":[{"id":"occurrence-fa628c43fe057c3a1fffa36ce059e77c82a45ea907d1cb2dc4ea2ad22c667044","reference_id":"","original_reference_id":"","stage_id":"stage-0","scope_id":"scope-0","alias":"","location":{"start":{"offset":0,"line":1,"column":1},"end":{"offset":12,"line":1,"column":13}},"use_site_locations":[],"use_site_reference_ids":[]}]}],
+        "input_coverage": {"state":"partial","reasons":[{"code":"SPL_SYNTAX_ERROR","message":"no viable alternative at input 'search host='","location":{"start":{"offset":12,"line":1,"column":13},"end":{"offset":12,"line":1,"column":13}},"stage_id":"","scope_id":"","reference_ids":[]}]},
+        "field_attribution_coverage": {"state":"partial","reasons":[{"code":"field_attribution_incomplete","message":"no viable alternative at input 'search host='","location":{"start":{"offset":12,"line":1,"column":13},"end":{"offset":12,"line":1,"column":13}},"stage_id":"","scope_id":"","reference_ids":[]}]},
+        "correlation": {"outcome":"indeterminate","coverage":{"state":"partial","reasons":[{"code":"SPL_SYNTAX_ERROR","message":"no viable alternative at input 'search host='","location":{"start":{"offset":12,"line":1,"column":13},"end":{"offset":12,"line":1,"column":13}},"stage_id":"","scope_id":"","reference_ids":[]}]},"nodes":[{"input_id":"input-8768c9c38cb771adfebcb7c59b03a4c9d6075ab5f537fa63f9b66c95ef49dfe2","occurrence_id":"occurrence-fa628c43fe057c3a1fffa36ce059e77c82a45ea907d1cb2dc4ea2ad22c667044"}],"edges":[],"components":[["occurrence-fa628c43fe057c3a1fffa36ce059e77c82a45ea907d1cb2dc4ea2ad22c667044"]]}
       }
     },
     {
@@ -1324,7 +1368,11 @@
             "stage_id": "stage-1",
             "scope_id": "scope-0"
           }
-        ]
+        ],
+        "inputs": [{"id":"input-8768c9c38cb771adfebcb7c59b03a4c9d6075ab5f537fa63f9b66c95ef49dfe2","kind":"implicit_stream","name":"","identity":{"form":"implicit","value":""},"evidence":{"state":"complete","reasons":[]},"occurrences":[{"id":"occurrence-f72924e3fd0e1dbd7c76bebbe786810df66bb351d72909f7ec6fa0f1936414bb","reference_id":"","original_reference_id":"","stage_id":"stage-0","scope_id":"scope-0","alias":"","location":{"start":{"offset":0,"line":1,"column":1},"end":{"offset":13,"line":1,"column":14}},"use_site_locations":[],"use_site_reference_ids":[]},{"id":"occurrence-d622ac92591e711a5285e4e80622ac7e7a5e85c8d7663c257b096741281e259a","reference_id":"","original_reference_id":"","stage_id":"stage-2","scope_id":"scope-1","alias":"","location":{"start":{"offset":25,"line":1,"column":26},"end":{"offset":39,"line":1,"column":40}},"use_site_locations":[],"use_site_reference_ids":[]}]}],
+        "input_coverage": {"state":"complete","reasons":[]},
+        "field_attribution_coverage": {"state":"partial","reasons":[{"code":"field_attribution_incomplete","message":"source field ownership has not been proved","location":{"start":{"offset":7,"line":1,"column":8},"end":{"offset":11,"line":1,"column":12}},"stage_id":"stage-0","scope_id":"scope-0","reference_ids":["ref-0"]},{"code":"field_attribution_incomplete","message":"source field ownership has not been proved","location":{"start":{"offset":32,"line":1,"column":33},"end":{"offset":37,"line":1,"column":38}},"stage_id":"stage-2","scope_id":"scope-1","reference_ids":["ref-1"]},{"code":"field_attribution_incomplete","message":"source field ownership has not been proved","location":{"start":{"offset":48,"line":1,"column":49},"end":{"offset":53,"line":1,"column":54}},"stage_id":"stage-3","scope_id":"scope-1","reference_ids":["ref-2"]},{"code":"field_attribution_incomplete","message":"source field ownership has not been proved","location":{"start":{"offset":64,"line":1,"column":65},"end":{"offset":68,"line":1,"column":69}},"stage_id":"stage-4","scope_id":"scope-0","reference_ids":["ref-3"]}]},
+        "correlation": {"outcome":"indeterminate","coverage":{"state":"partial","reasons":[{"code":"correlation_incomplete","message":"no complete source correlation proof is available","location":{"start":{"offset":0,"line":1,"column":1},"end":{"offset":13,"line":1,"column":14}},"stage_id":"stage-0","scope_id":"scope-0","reference_ids":[]}]},"nodes":[{"input_id":"input-8768c9c38cb771adfebcb7c59b03a4c9d6075ab5f537fa63f9b66c95ef49dfe2","occurrence_id":"occurrence-f72924e3fd0e1dbd7c76bebbe786810df66bb351d72909f7ec6fa0f1936414bb"},{"input_id":"input-8768c9c38cb771adfebcb7c59b03a4c9d6075ab5f537fa63f9b66c95ef49dfe2","occurrence_id":"occurrence-d622ac92591e711a5285e4e80622ac7e7a5e85c8d7663c257b096741281e259a"}],"edges":[],"components":[["occurrence-f72924e3fd0e1dbd7c76bebbe786810df66bb351d72909f7ec6fa0f1936414bb"],["occurrence-d622ac92591e711a5285e4e80622ac7e7a5e85c8d7663c257b096741281e259a"]]}
       }
     },
     {
@@ -1445,7 +1493,11 @@
           }
         ],
         "gaps": [],
-        "diagnostics": []
+        "diagnostics": [],
+        "inputs": [{"id":"input-8768c9c38cb771adfebcb7c59b03a4c9d6075ab5f537fa63f9b66c95ef49dfe2","kind":"implicit_stream","name":"","identity":{"form":"implicit","value":""},"evidence":{"state":"complete","reasons":[]},"occurrences":[{"id":"occurrence-6dd392729d3a3edda039d7acde3e5837c24ccb4d32d522482d93609d75b38b63","reference_id":"","original_reference_id":"","stage_id":"stage-0","scope_id":"scope-0","alias":"","location":{"start":{"offset":0,"line":1,"column":1},"end":{"offset":17,"line":1,"column":16}},"use_site_locations":[],"use_site_reference_ids":[]}]}],
+        "input_coverage": {"state":"complete","reasons":[]},
+        "field_attribution_coverage": {"state":"partial","reasons":[{"code":"field_attribution_incomplete","message":"source field ownership has not been proved","location":{"start":{"offset":7,"line":1,"column":8},"end":{"offset":12,"line":1,"column":12}},"stage_id":"stage-0","scope_id":"scope-0","reference_ids":["ref-0"]},{"code":"field_attribution_incomplete","message":"source field ownership has not been proved","location":{"start":{"offset":32,"line":2,"column":14},"end":{"offset":37,"line":2,"column":18}},"stage_id":"stage-1","scope_id":"scope-0","reference_ids":["ref-2"]},{"code":"field_attribution_incomplete","message":"source field ownership has not been proved","location":{"start":{"offset":46,"line":2,"column":27},"end":{"offset":51,"line":2,"column":31}},"stage_id":"stage-2","scope_id":"scope-0","reference_ids":["ref-3"]}]},
+        "correlation": {"outcome":"not_applicable","coverage":{"state":"not_applicable","reasons":[]},"nodes":[{"input_id":"input-8768c9c38cb771adfebcb7c59b03a4c9d6075ab5f537fa63f9b66c95ef49dfe2","occurrence_id":"occurrence-6dd392729d3a3edda039d7acde3e5837c24ccb4d32d522482d93609d75b38b63"}],"edges":[],"components":[["occurrence-6dd392729d3a3edda039d7acde3e5837c24ccb4d32d522482d93609d75b38b63"]]}
       }
     },
     {
@@ -1541,7 +1593,11 @@
           }
         ],
         "gaps": [],
-        "diagnostics": []
+        "diagnostics": [],
+        "inputs": [{"id":"input-8ac384853013f7d39d4167255809183373405f8827c5662b17f3e820b505120c","kind":"explicit_dataset","name":"main","identity":{"form":"identifier","value":"main"},"evidence":{"state":"complete","reasons":[]},"occurrences":[{"id":"occurrence-a7e842fb8a0fe15f24fe115fa5bfe769ca6965f09189dc095240bd58f684310e","reference_id":"ref-1","original_reference_id":"ref-1","stage_id":"stage-1","scope_id":"scope-0","alias":"","location":{"start":{"offset":25,"line":1,"column":26},"end":{"offset":29,"line":1,"column":30}},"use_site_locations":[],"use_site_reference_ids":[]}]}],
+        "input_coverage": {"state":"complete","reasons":[]},
+        "field_attribution_coverage": {"state":"partial","reasons":[{"code":"field_attribution_incomplete","message":"source field ownership has not been proved","location":{"start":{"offset":7,"line":1,"column":8},"end":{"offset":19,"line":1,"column":20}},"stage_id":"stage-0","scope_id":"scope-0","reference_ids":["ref-0"]}]},
+        "correlation": {"outcome":"not_applicable","coverage":{"state":"not_applicable","reasons":[]},"nodes":[{"input_id":"input-8ac384853013f7d39d4167255809183373405f8827c5662b17f3e820b505120c","occurrence_id":"occurrence-a7e842fb8a0fe15f24fe115fa5bfe769ca6965f09189dc095240bd58f684310e"}],"edges":[],"components":[["occurrence-a7e842fb8a0fe15f24fe115fa5bfe769ca6965f09189dc095240bd58f684310e"]]}
       }
     },
     {
@@ -1637,7 +1693,11 @@
           }
         ],
         "gaps": [],
-        "diagnostics": []
+        "diagnostics": [],
+        "inputs": [{"id":"input-8ac384853013f7d39d4167255809183373405f8827c5662b17f3e820b505120c","kind":"explicit_dataset","name":"main","identity":{"form":"identifier","value":"main"},"evidence":{"state":"complete","reasons":[]},"occurrences":[{"id":"occurrence-21957cac969d25a4e01fbcde90a62f63a7bfaae030fa0d38b62f97b464110f35","reference_id":"ref-0","original_reference_id":"ref-0","stage_id":"stage-0","scope_id":"scope-0","alias":"","location":{"start":{"offset":5,"line":1,"column":6},"end":{"offset":9,"line":1,"column":10}},"use_site_locations":[],"use_site_reference_ids":[]}]}],
+        "input_coverage": {"state":"complete","reasons":[]},
+        "field_attribution_coverage": {"state":"partial","reasons":[{"code":"field_attribution_incomplete","message":"source field ownership has not been proved","location":{"start":{"offset":23,"line":1,"column":24},"end":{"offset":28,"line":1,"column":29}},"stage_id":"stage-1","scope_id":"scope-0","reference_ids":["ref-2"]}]},
+        "correlation": {"outcome":"not_applicable","coverage":{"state":"not_applicable","reasons":[]},"nodes":[{"input_id":"input-8ac384853013f7d39d4167255809183373405f8827c5662b17f3e820b505120c","occurrence_id":"occurrence-21957cac969d25a4e01fbcde90a62f63a7bfaae030fa0d38b62f97b464110f35"}],"edges":[],"components":[["occurrence-21957cac969d25a4e01fbcde90a62f63a7bfaae030fa0d38b62f97b464110f35"]]}
       }
     },
     {
@@ -1687,7 +1747,11 @@
             "stage_id": "stage-1",
             "scope_id": "scope-0"
           }
-        ]
+        ],
+        "inputs": [],
+        "input_coverage": {"state":"not_applicable","reasons":[]},
+        "field_attribution_coverage": {"state":"not_applicable","reasons":[]},
+        "correlation": {"outcome":"not_applicable","coverage":{"state":"not_applicable","reasons":[]},"nodes":[],"edges":[],"components":[]}
       }
     },
     {
@@ -2129,7 +2193,11 @@
             "stage_id": "stage-5",
             "scope_id": "scope-0"
           }
-        ]
+        ],
+        "inputs": [{"id":"input-8768c9c38cb771adfebcb7c59b03a4c9d6075ab5f537fa63f9b66c95ef49dfe2","kind":"implicit_stream","name":"","identity":{"form":"implicit","value":""},"evidence":{"state":"complete","reasons":[]},"occurrences":[{"id":"occurrence-6635e3c36aa8b2df697c1708cd39eaceb130078135a222840df394751ad91ca1","reference_id":"","original_reference_id":"","stage_id":"stage-0","scope_id":"scope-0","alias":"","location":{"start":{"offset":0,"line":1,"column":1},"end":{"offset":48,"line":1,"column":49}},"use_site_locations":[],"use_site_reference_ids":[]},{"id":"occurrence-37671706e633c0ee5becd1fd90dd777ba1c96b5b2a979babebffa59e1acf4fdd","reference_id":"","original_reference_id":"","stage_id":"stage-2","scope_id":"scope-1","alias":"","location":{"start":{"offset":62,"line":1,"column":63},"end":{"offset":104,"line":1,"column":105}},"use_site_locations":[],"use_site_reference_ids":[]},{"id":"occurrence-fde90671ad1bb4604127776bc9e59e9a95084a1e90db914173f2eb2479a71cdc","reference_id":"","original_reference_id":"","stage_id":"stage-4","scope_id":"scope-2","alias":"","location":{"start":{"offset":120,"line":1,"column":121},"end":{"offset":152,"line":1,"column":153}},"use_site_locations":[],"use_site_reference_ids":[]},{"id":"occurrence-6e7e7dfe1908701fa17d920a37c7dc897916ec3b8dd27ae339ff1ecbf7f27f57","reference_id":"","original_reference_id":"","stage_id":"stage-6","scope_id":"scope-3","alias":"","location":{"start":{"offset":168,"line":1,"column":169},"end":{"offset":225,"line":1,"column":226}},"use_site_locations":[],"use_site_reference_ids":[]},{"id":"occurrence-153721f78fc8b351c8ea518698417a5398147fab29ea53d385935148a996b254","reference_id":"","original_reference_id":"","stage_id":"stage-7","scope_id":"scope-0","alias":"","location":{"start":{"offset":230,"line":1,"column":231},"end":{"offset":247,"line":1,"column":248}},"use_site_locations":[],"use_site_reference_ids":[]}]}],
+        "input_coverage": {"state":"complete","reasons":[]},
+        "field_attribution_coverage": {"state":"partial","reasons":[{"code":"field_attribution_incomplete","message":"command \"append\" has unmodeled field effects","location":{"start":{"offset":51,"line":1,"column":52},"end":{"offset":106,"line":1,"column":107}},"stage_id":"stage-1","scope_id":"scope-0","reference_ids":[]},{"code":"field_attribution_incomplete","message":"command \"from\" has unmodeled field effects","location":{"start":{"offset":62,"line":1,"column":63},"end":{"offset":104,"line":1,"column":105}},"stage_id":"stage-2","scope_id":"scope-1","reference_ids":[]},{"code":"field_attribution_incomplete","message":"command \"append\" has unmodeled field effects","location":{"start":{"offset":109,"line":1,"column":110},"end":{"offset":154,"line":1,"column":155}},"stage_id":"stage-3","scope_id":"scope-0","reference_ids":[]},{"code":"field_attribution_incomplete","message":"command \"datamodel\" has unmodeled field effects","location":{"start":{"offset":120,"line":1,"column":121},"end":{"offset":152,"line":1,"column":153}},"stage_id":"stage-4","scope_id":"scope-2","reference_ids":[]},{"code":"field_attribution_incomplete","message":"command \"append\" has unmodeled field effects","location":{"start":{"offset":157,"line":1,"column":158},"end":{"offset":227,"line":1,"column":228}},"stage_id":"stage-5","scope_id":"scope-0","reference_ids":[]}]},
+        "correlation": {"outcome":"indeterminate","coverage":{"state":"partial","reasons":[{"code":"correlation_incomplete","message":"no complete source correlation proof is available","location":{"start":{"offset":0,"line":1,"column":1},"end":{"offset":48,"line":1,"column":49}},"stage_id":"stage-0","scope_id":"scope-0","reference_ids":[]}]},"nodes":[{"input_id":"input-8768c9c38cb771adfebcb7c59b03a4c9d6075ab5f537fa63f9b66c95ef49dfe2","occurrence_id":"occurrence-6635e3c36aa8b2df697c1708cd39eaceb130078135a222840df394751ad91ca1"},{"input_id":"input-8768c9c38cb771adfebcb7c59b03a4c9d6075ab5f537fa63f9b66c95ef49dfe2","occurrence_id":"occurrence-37671706e633c0ee5becd1fd90dd777ba1c96b5b2a979babebffa59e1acf4fdd"},{"input_id":"input-8768c9c38cb771adfebcb7c59b03a4c9d6075ab5f537fa63f9b66c95ef49dfe2","occurrence_id":"occurrence-fde90671ad1bb4604127776bc9e59e9a95084a1e90db914173f2eb2479a71cdc"},{"input_id":"input-8768c9c38cb771adfebcb7c59b03a4c9d6075ab5f537fa63f9b66c95ef49dfe2","occurrence_id":"occurrence-6e7e7dfe1908701fa17d920a37c7dc897916ec3b8dd27ae339ff1ecbf7f27f57"},{"input_id":"input-8768c9c38cb771adfebcb7c59b03a4c9d6075ab5f537fa63f9b66c95ef49dfe2","occurrence_id":"occurrence-153721f78fc8b351c8ea518698417a5398147fab29ea53d385935148a996b254"}],"edges":[],"components":[["occurrence-6635e3c36aa8b2df697c1708cd39eaceb130078135a222840df394751ad91ca1"],["occurrence-37671706e633c0ee5becd1fd90dd777ba1c96b5b2a979babebffa59e1acf4fdd"],["occurrence-fde90671ad1bb4604127776bc9e59e9a95084a1e90db914173f2eb2479a71cdc"],["occurrence-6e7e7dfe1908701fa17d920a37c7dc897916ec3b8dd27ae339ff1ecbf7f27f57"],["occurrence-153721f78fc8b351c8ea518698417a5398147fab29ea53d385935148a996b254"]]}
       }
     },
     {
@@ -2257,7 +2325,11 @@
             "stage_id": "stage-1",
             "scope_id": "scope-0"
           }
-        ]
+        ],
+        "inputs": [{"id":"input-8ac384853013f7d39d4167255809183373405f8827c5662b17f3e820b505120c","kind":"explicit_dataset","name":"main","identity":{"form":"identifier","value":"main"},"evidence":{"state":"complete","reasons":[]},"occurrences":[{"id":"occurrence-bea5a9a980786dcf8c2880bfc8747260e32013ed33f7d5f496a7ecbc7432403a","reference_id":"ref-0","original_reference_id":"ref-0","stage_id":"stage-0","scope_id":"scope-0","alias":"","location":{"start":{"offset":5,"line":1,"column":6},"end":{"offset":9,"line":1,"column":10}},"use_site_locations":[],"use_site_reference_ids":[]}]}],
+        "input_coverage": {"state":"complete","reasons":[]},
+        "field_attribution_coverage": {"state":"partial","reasons":[{"code":"field_attribution_incomplete","message":"source field ownership has not been proved","location":{"start":{"offset":29,"line":1,"column":30},"end":{"offset":30,"line":1,"column":31}},"stage_id":"stage-1","scope_id":"scope-0","reference_ids":["ref-1"]}]},
+        "correlation": {"outcome":"not_applicable","coverage":{"state":"not_applicable","reasons":[]},"nodes":[{"input_id":"input-8ac384853013f7d39d4167255809183373405f8827c5662b17f3e820b505120c","occurrence_id":"occurrence-bea5a9a980786dcf8c2880bfc8747260e32013ed33f7d5f496a7ecbc7432403a"}],"edges":[],"components":[["occurrence-bea5a9a980786dcf8c2880bfc8747260e32013ed33f7d5f496a7ecbc7432403a"]]}
       }
     },
     {
@@ -2483,7 +2555,11 @@
             "stage_id": "stage-2",
             "scope_id": "scope-0"
           }
-        ]
+        ],
+        "inputs": [{"id":"input-8ac384853013f7d39d4167255809183373405f8827c5662b17f3e820b505120c","kind":"explicit_dataset","name":"main","identity":{"form":"identifier","value":"main"},"evidence":{"state":"complete","reasons":[]},"occurrences":[{"id":"occurrence-f4f68f4c5a0719cc49522fdad62d615fa5b2909ac3bdde080dee4bf69af8715a","reference_id":"ref-0","original_reference_id":"ref-0","stage_id":"stage-0","scope_id":"scope-0","alias":"","location":{"start":{"offset":5,"line":1,"column":6},"end":{"offset":9,"line":1,"column":10}},"use_site_locations":[],"use_site_reference_ids":[]}]}],
+        "input_coverage": {"state":"partial","reasons":[{"code":"SPL_SYNTAX_ERROR","message":"extraneous input '(' expecting {DISTINCT, HAVING, GROUPBY, ORDER, ORDERBY, LIMIT, OFFSET, ASC, DESC, 'by', JOIN, INNER, LEFT, OUTER, ON, EXISTS, 'index', 'as', 'rename', 'stats', 'eventstats', 'streamstats', 'lookup', 'sort', 'dedup', 'head', 'reverse', 'BY', 'OUTPUT', 'OUTPUTNEW', 'allnum', 'delim', 'partitions', 'span', 'current', 'reset', 'before', 'after', 'onchange', 'window', 'keepempty', 'consecutive', 'keeplast', 'while', 'auto', 'ip', 'num', 'str', 'TERM', 'CASE', 'earliest', 'latest', '_index_earliest', '_index_latest', 'timeformat', 'starttime', 'endtime', 'now', 'append', 'appendpipe', 'appendcols', 'union', 'if', 'elseif', 'else', 'bin', 'spath', 'loadjob', 'tstats', 'mstats', 'timechart', 'timewrap', 'makemv', 'mvexpand', 'mvcombine', 'fillnull', 'right', 'run_in_preview', 'max', 'bins', 'minspan', 'start', 'end', 'aligntime', FIELD, MAX_MATCH, OFFSET_FIELD, MODE, SED, 'input', 'path', 'output', 'aggregates', 'predicate', 'byfields', 'datamodel_name', 'sep', 'format', 'partial', 'cont', 'fixedrange', 'agg', 'usenull', 'useother', 'nullstr', 'otherstr', 'align', 'tokenizer', 'value', 'type', SQUOTE, LOG_SPAN, IDENTIFIER}","location":{"start":{"offset":34,"line":1,"column":35},"end":{"offset":35,"line":1,"column":36}},"stage_id":"stage-2","scope_id":"scope-0","reference_ids":[]}]},
+        "field_attribution_coverage": {"state":"partial","reasons":[{"code":"field_attribution_incomplete","message":"source field ownership has not been proved","location":{"start":{"offset":54,"line":1,"column":55},"end":{"offset":59,"line":1,"column":60}},"stage_id":"stage-3","scope_id":"scope-0","reference_ids":["ref-2"]}]},
+        "correlation": {"outcome":"indeterminate","coverage":{"state":"partial","reasons":[{"code":"SPL_SYNTAX_ERROR","message":"extraneous input '(' expecting {DISTINCT, HAVING, GROUPBY, ORDER, ORDERBY, LIMIT, OFFSET, ASC, DESC, 'by', JOIN, INNER, LEFT, OUTER, ON, EXISTS, 'index', 'as', 'rename', 'stats', 'eventstats', 'streamstats', 'lookup', 'sort', 'dedup', 'head', 'reverse', 'BY', 'OUTPUT', 'OUTPUTNEW', 'allnum', 'delim', 'partitions', 'span', 'current', 'reset', 'before', 'after', 'onchange', 'window', 'keepempty', 'consecutive', 'keeplast', 'while', 'auto', 'ip', 'num', 'str', 'TERM', 'CASE', 'earliest', 'latest', '_index_earliest', '_index_latest', 'timeformat', 'starttime', 'endtime', 'now', 'append', 'appendpipe', 'appendcols', 'union', 'if', 'elseif', 'else', 'bin', 'spath', 'loadjob', 'tstats', 'mstats', 'timechart', 'timewrap', 'makemv', 'mvexpand', 'mvcombine', 'fillnull', 'right', 'run_in_preview', 'max', 'bins', 'minspan', 'start', 'end', 'aligntime', FIELD, MAX_MATCH, OFFSET_FIELD, MODE, SED, 'input', 'path', 'output', 'aggregates', 'predicate', 'byfields', 'datamodel_name', 'sep', 'format', 'partial', 'cont', 'fixedrange', 'agg', 'usenull', 'useother', 'nullstr', 'otherstr', 'align', 'tokenizer', 'value', 'type', SQUOTE, LOG_SPAN, IDENTIFIER}","location":{"start":{"offset":34,"line":1,"column":35},"end":{"offset":35,"line":1,"column":36}},"stage_id":"stage-2","scope_id":"scope-0","reference_ids":[]}]},"nodes":[{"input_id":"input-8ac384853013f7d39d4167255809183373405f8827c5662b17f3e820b505120c","occurrence_id":"occurrence-f4f68f4c5a0719cc49522fdad62d615fa5b2909ac3bdde080dee4bf69af8715a"}],"edges":[],"components":[["occurrence-f4f68f4c5a0719cc49522fdad62d615fa5b2909ac3bdde080dee4bf69af8715a"]]}
       }
     },
     {
@@ -2580,7 +2656,11 @@
           }
         ],
         "gaps": [],
-        "diagnostics": []
+        "diagnostics": [],
+        "inputs": [{"id":"input-8ac384853013f7d39d4167255809183373405f8827c5662b17f3e820b505120c","kind":"explicit_dataset","name":"main","identity":{"form":"identifier","value":"main"},"evidence":{"state":"complete","reasons":[]},"occurrences":[{"id":"occurrence-cf6323277c51d51a3db14fae5fab1b36f4af2e30652c12708930bacda62ff7cf","reference_id":"ref-0","original_reference_id":"ref-0","stage_id":"stage-0","scope_id":"scope-0","alias":"","location":{"start":{"offset":5,"line":1,"column":6},"end":{"offset":9,"line":1,"column":10}},"use_site_locations":[],"use_site_reference_ids":[]}]}],
+        "input_coverage": {"state":"complete","reasons":[]},
+        "field_attribution_coverage": {"state":"partial","reasons":[{"code":"field_attribution_incomplete","message":"source field ownership has not been proved","location":{"start":{"offset":19,"line":1,"column":20},"end":{"offset":29,"line":1,"column":30}},"stage_id":"stage-1","scope_id":"scope-0","reference_ids":["ref-2"]}]},
+        "correlation": {"outcome":"not_applicable","coverage":{"state":"not_applicable","reasons":[]},"nodes":[{"input_id":"input-8ac384853013f7d39d4167255809183373405f8827c5662b17f3e820b505120c","occurrence_id":"occurrence-cf6323277c51d51a3db14fae5fab1b36f4af2e30652c12708930bacda62ff7cf"}],"edges":[],"components":[["occurrence-cf6323277c51d51a3db14fae5fab1b36f4af2e30652c12708930bacda62ff7cf"]]}
       }
     },
     {
@@ -2742,7 +2822,11 @@
           }
         ],
         "gaps": [],
-        "diagnostics": []
+        "diagnostics": [],
+        "inputs": [{"id":"input-8768c9c38cb771adfebcb7c59b03a4c9d6075ab5f537fa63f9b66c95ef49dfe2","kind":"implicit_stream","name":"","identity":{"form":"implicit","value":""},"evidence":{"state":"complete","reasons":[]},"occurrences":[{"id":"occurrence-78d7621fcc104ea32aa8fa4c6e59c389eed36f0e3af0de4da6c583fa7366d0b4","reference_id":"","original_reference_id":"","stage_id":"stage-0","scope_id":"scope-0","alias":"","location":{"start":{"offset":2,"line":1,"column":3},"end":{"offset":120,"line":1,"column":121}},"use_site_locations":[],"use_site_reference_ids":[]}]}],
+        "input_coverage": {"state":"complete","reasons":[]},
+        "field_attribution_coverage": {"state":"partial","reasons":[{"code":"field_attribution_incomplete","message":"source field ownership has not been proved","location":{"start":{"offset":73,"line":1,"column":74},"end":{"offset":91,"line":1,"column":92}},"stage_id":"stage-0","scope_id":"scope-0","reference_ids":["ref-3"]},{"code":"field_attribution_incomplete","message":"source field ownership has not been proved","location":{"start":{"offset":105,"line":1,"column":106},"end":{"offset":120,"line":1,"column":121}},"stage_id":"stage-0","scope_id":"scope-0","reference_ids":["ref-4"]}]},
+        "correlation": {"outcome":"not_applicable","coverage":{"state":"not_applicable","reasons":[]},"nodes":[{"input_id":"input-8768c9c38cb771adfebcb7c59b03a4c9d6075ab5f537fa63f9b66c95ef49dfe2","occurrence_id":"occurrence-78d7621fcc104ea32aa8fa4c6e59c389eed36f0e3af0de4da6c583fa7366d0b4"}],"edges":[],"components":[["occurrence-78d7621fcc104ea32aa8fa4c6e59c389eed36f0e3af0de4da6c583fa7366d0b4"]]}
       }
     },
     {
@@ -3207,7 +3291,11 @@
             "diagnostic_codes": []
           }
         ],
-        "diagnostics": []
+        "diagnostics": [],
+        "inputs": [{"id":"input-8768c9c38cb771adfebcb7c59b03a4c9d6075ab5f537fa63f9b66c95ef49dfe2","kind":"implicit_stream","name":"","identity":{"form":"implicit","value":""},"evidence":{"state":"complete","reasons":[]},"occurrences":[{"id":"occurrence-dba7d1ab0c29d5359765254424b0bef29b3ab9e630a06249c90ea2177bb81ae5","reference_id":"","original_reference_id":"","stage_id":"stage-0","scope_id":"scope-0","alias":"","location":{"start":{"offset":0,"line":1,"column":1},"end":{"offset":22,"line":1,"column":23}},"use_site_locations":[],"use_site_reference_ids":[]}]}],
+        "input_coverage": {"state":"complete","reasons":[]},
+        "field_attribution_coverage": {"state":"partial","reasons":[{"code":"field_attribution_incomplete","message":"source field ownership has not been proved","location":{"start":{"offset":7,"line":1,"column":8},"end":{"offset":13,"line":1,"column":14}},"stage_id":"stage-0","scope_id":"scope-0","reference_ids":["ref-0"]},{"code":"field_attribution_incomplete","message":"source field ownership has not been proved","location":{"start":{"offset":16,"line":1,"column":17},"end":{"offset":20,"line":1,"column":21}},"stage_id":"stage-0","scope_id":"scope-0","reference_ids":["ref-1"]},{"code":"field_attribution_incomplete","message":"source field ownership has not been proved","location":{"start":{"offset":35,"line":1,"column":36},"end":{"offset":39,"line":1,"column":40}},"stage_id":"stage-1","scope_id":"scope-0","reference_ids":["ref-2"]},{"code":"field_attribution_incomplete","message":"source field ownership has not been proved","location":{"start":{"offset":76,"line":1,"column":77},"end":{"offset":80,"line":1,"column":81}},"stage_id":"stage-2","scope_id":"scope-0","reference_ids":["ref-4"]},{"code":"field_attribution_incomplete","message":"source field ownership has not been proved","location":{"start":{"offset":140,"line":1,"column":141},"end":{"offset":147,"line":1,"column":148}},"stage_id":"stage-3","scope_id":"scope-0","reference_ids":["ref-7"]},{"code":"field_attribution_incomplete","message":"source field ownership has not been proved","location":{"start":{"offset":162,"line":1,"column":163},"end":{"offset":167,"line":1,"column":168}},"stage_id":"stage-4","scope_id":"scope-0","reference_ids":["ref-8"]},{"code":"field_attribution_incomplete","message":"source field ownership has not been proved","location":{"start":{"offset":191,"line":1,"column":192},"end":{"offset":197,"line":1,"column":198}},"stage_id":"stage-5","scope_id":"scope-0","reference_ids":["ref-10"]},{"code":"field_attribution_incomplete","message":"source field ownership has not been proved","location":{"start":{"offset":220,"line":1,"column":221},"end":{"offset":226,"line":1,"column":227}},"stage_id":"stage-6","scope_id":"scope-0","reference_ids":["ref-11"]},{"code":"field_attribution_incomplete","message":"source field ownership has not been proved","location":{"start":{"offset":235,"line":1,"column":236},"end":{"offset":239,"line":1,"column":240}},"stage_id":"stage-7","scope_id":"scope-0","reference_ids":["ref-12"]},{"code":"field_attribution_incomplete","message":"source field ownership has not been proved","location":{"start":{"offset":240,"line":1,"column":241},"end":{"offset":248,"line":1,"column":249}},"stage_id":"stage-7","scope_id":"scope-0","reference_ids":["ref-13"]},{"code":"field_attribution_incomplete","message":"source field ownership has not been proved","location":{"start":{"offset":249,"line":1,"column":250},"end":{"offset":256,"line":1,"column":257}},"stage_id":"stage-7","scope_id":"scope-0","reference_ids":["ref-14"]},{"code":"field_attribution_incomplete","message":"source field ownership has not been proved","location":{"start":{"offset":269,"line":1,"column":270},"end":{"offset":275,"line":1,"column":276}},"stage_id":"stage-7","scope_id":"scope-0","reference_ids":["ref-16"]},{"code":"field_attribution_incomplete","message":"source field ownership has not been proved","location":{"start":{"offset":276,"line":1,"column":277},"end":{"offset":282,"line":1,"column":283}},"stage_id":"stage-7","scope_id":"scope-0","reference_ids":["ref-17"]}]},
+        "correlation": {"outcome":"not_applicable","coverage":{"state":"not_applicable","reasons":[]},"nodes":[{"input_id":"input-8768c9c38cb771adfebcb7c59b03a4c9d6075ab5f537fa63f9b66c95ef49dfe2","occurrence_id":"occurrence-dba7d1ab0c29d5359765254424b0bef29b3ab9e630a06249c90ea2177bb81ae5"}],"edges":[],"components":[["occurrence-dba7d1ab0c29d5359765254424b0bef29b3ab9e630a06249c90ea2177bb81ae5"]]}
       }
     },
     {
@@ -3671,7 +3759,11 @@
           }
         ],
         "gaps": [],
-        "diagnostics": []
+        "diagnostics": [],
+        "inputs": [{"id":"input-8768c9c38cb771adfebcb7c59b03a4c9d6075ab5f537fa63f9b66c95ef49dfe2","kind":"implicit_stream","name":"","identity":{"form":"implicit","value":""},"evidence":{"state":"complete","reasons":[]},"occurrences":[{"id":"occurrence-a7a2da26c48df1c995be167f1af7b6d3c938718b27b4e4b6d20d06b0ee55f3ce","reference_id":"","original_reference_id":"","stage_id":"stage-0","scope_id":"scope-0","alias":"","location":{"start":{"offset":0,"line":1,"column":1},"end":{"offset":47,"line":1,"column":48}},"use_site_locations":[],"use_site_reference_ids":[]}]}],
+        "input_coverage": {"state":"complete","reasons":[]},
+        "field_attribution_coverage": {"state":"partial","reasons":[{"code":"field_attribution_incomplete","message":"source field ownership has not been proved","location":{"start":{"offset":7,"line":1,"column":8},"end":{"offset":13,"line":1,"column":14}},"stage_id":"stage-0","scope_id":"scope-0","reference_ids":["ref-0"]},{"code":"field_attribution_incomplete","message":"source field ownership has not been proved","location":{"start":{"offset":16,"line":1,"column":17},"end":{"offset":21,"line":1,"column":22}},"stage_id":"stage-0","scope_id":"scope-0","reference_ids":["ref-1"]},{"code":"field_attribution_incomplete","message":"source field ownership has not been proved","location":{"start":{"offset":24,"line":1,"column":25},"end":{"offset":29,"line":1,"column":30}},"stage_id":"stage-0","scope_id":"scope-0","reference_ids":["ref-2"]},{"code":"field_attribution_incomplete","message":"source field ownership has not been proved","location":{"start":{"offset":32,"line":1,"column":33},"end":{"offset":36,"line":1,"column":37}},"stage_id":"stage-0","scope_id":"scope-0","reference_ids":["ref-3"]},{"code":"field_attribution_incomplete","message":"source field ownership has not been proved","location":{"start":{"offset":39,"line":1,"column":40},"end":{"offset":45,"line":1,"column":46}},"stage_id":"stage-0","scope_id":"scope-0","reference_ids":["ref-4"]},{"code":"field_attribution_incomplete","message":"source field ownership has not been proved","location":{"start":{"offset":70,"line":1,"column":71},"end":{"offset":76,"line":1,"column":77}},"stage_id":"stage-1","scope_id":"scope-0","reference_ids":["ref-6"]},{"code":"field_attribution_incomplete","message":"source field ownership has not been proved","location":{"start":{"offset":94,"line":1,"column":95},"end":{"offset":100,"line":1,"column":101}},"stage_id":"stage-1","scope_id":"scope-0","reference_ids":["ref-8"]},{"code":"field_attribution_incomplete","message":"source field ownership has not been proved","location":{"start":{"offset":164,"line":1,"column":165},"end":{"offset":169,"line":1,"column":170}},"stage_id":"stage-1","scope_id":"scope-0","reference_ids":["ref-11"]},{"code":"field_attribution_incomplete","message":"source field ownership has not been proved","location":{"start":{"offset":190,"line":1,"column":191},"end":{"offset":196,"line":1,"column":197}},"stage_id":"stage-1","scope_id":"scope-0","reference_ids":["ref-13"]},{"code":"field_attribution_incomplete","message":"source field ownership has not been proved","location":{"start":{"offset":280,"line":1,"column":281},"end":{"offset":285,"line":1,"column":286}},"stage_id":"stage-2","scope_id":"scope-0","reference_ids":["ref-18"]},{"code":"field_attribution_incomplete","message":"source field ownership has not been proved","location":{"start":{"offset":306,"line":1,"column":307},"end":{"offset":311,"line":1,"column":312}},"stage_id":"stage-2","scope_id":"scope-0","reference_ids":["ref-20"]},{"code":"field_attribution_incomplete","message":"source field ownership has not been proved","location":{"start":{"offset":326,"line":1,"column":327},"end":{"offset":330,"line":1,"column":331}},"stage_id":"stage-2","scope_id":"scope-0","reference_ids":["ref-22"]},{"code":"field_attribution_incomplete","message":"source field ownership has not been proved","location":{"start":{"offset":339,"line":1,"column":340},"end":{"offset":343,"line":1,"column":344}},"stage_id":"stage-3","scope_id":"scope-0","reference_ids":["ref-23"]}]},
+        "correlation": {"outcome":"not_applicable","coverage":{"state":"not_applicable","reasons":[]},"nodes":[{"input_id":"input-8768c9c38cb771adfebcb7c59b03a4c9d6075ab5f537fa63f9b66c95ef49dfe2","occurrence_id":"occurrence-a7a2da26c48df1c995be167f1af7b6d3c938718b27b4e4b6d20d06b0ee55f3ce"}],"edges":[],"components":[["occurrence-a7a2da26c48df1c995be167f1af7b6d3c938718b27b4e4b6d20d06b0ee55f3ce"]]}
       }
     },
     {
@@ -3968,7 +4060,11 @@
             "stage_id": "stage-4",
             "scope_id": "scope-1"
           }
-        ]
+        ],
+        "inputs": [{"id":"input-8768c9c38cb771adfebcb7c59b03a4c9d6075ab5f537fa63f9b66c95ef49dfe2","kind":"implicit_stream","name":"","identity":{"form":"implicit","value":""},"evidence":{"state":"complete","reasons":[]},"occurrences":[{"id":"occurrence-67d33bf7420e63663fc87ae4832ffc79ee36e8a5d68b8baacdb0620871d205c1","reference_id":"","original_reference_id":"","stage_id":"stage-0","scope_id":"scope-0","alias":"","location":{"start":{"offset":0,"line":1,"column":1},"end":{"offset":15,"line":1,"column":16}},"use_site_locations":[],"use_site_reference_ids":[]},{"id":"occurrence-490910e2ea56a9b293d6875524fb794919999fef029ac1986a12baf7f71317b0","reference_id":"","original_reference_id":"","stage_id":"stage-2","scope_id":"scope-1","alias":"","location":{"start":{"offset":27,"line":1,"column":28},"end":{"offset":53,"line":1,"column":54}},"use_site_locations":[],"use_site_reference_ids":[]}]}],
+        "input_coverage": {"state":"partial","reasons":[{"code":"SPL_DYNAMIC_REFERENCE","message":"macro expansion is unresolved","location":{"start":{"offset":75,"line":1,"column":76},"end":{"offset":90,"line":1,"column":91}},"stage_id":"stage-4","scope_id":"scope-1","reference_ids":["ref-5"]}]},
+        "field_attribution_coverage": {"state":"partial","reasons":[{"code":"field_attribution_incomplete","message":"source field ownership has not been proved","location":{"start":{"offset":7,"line":1,"column":8},"end":{"offset":13,"line":1,"column":14}},"stage_id":"stage-0","scope_id":"scope-0","reference_ids":["ref-0"]},{"code":"field_attribution_incomplete","message":"source field ownership has not been proved","location":{"start":{"offset":46,"line":1,"column":47},"end":{"offset":51,"line":1,"column":52}},"stage_id":"stage-2","scope_id":"scope-1","reference_ids":["ref-2"]},{"code":"field_attribution_incomplete","message":"source field ownership has not been proved","location":{"start":{"offset":67,"line":1,"column":68},"end":{"offset":72,"line":1,"column":73}},"stage_id":"stage-3","scope_id":"scope-1","reference_ids":["ref-4"]},{"code":"field_attribution_incomplete","message":"source field ownership has not been proved","location":{"start":{"offset":101,"line":1,"column":102},"end":{"offset":107,"line":1,"column":108}},"stage_id":"stage-5","scope_id":"scope-0","reference_ids":["ref-6"]}]},
+        "correlation": {"outcome":"indeterminate","coverage":{"state":"partial","reasons":[{"code":"correlation_incomplete","message":"no complete source correlation proof is available","location":{"start":{"offset":0,"line":1,"column":1},"end":{"offset":15,"line":1,"column":16}},"stage_id":"stage-0","scope_id":"scope-0","reference_ids":[]},{"code":"SPL_DYNAMIC_REFERENCE","message":"macro expansion is unresolved","location":{"start":{"offset":75,"line":1,"column":76},"end":{"offset":90,"line":1,"column":91}},"stage_id":"stage-4","scope_id":"scope-1","reference_ids":["ref-5"]}]},"nodes":[{"input_id":"input-8768c9c38cb771adfebcb7c59b03a4c9d6075ab5f537fa63f9b66c95ef49dfe2","occurrence_id":"occurrence-67d33bf7420e63663fc87ae4832ffc79ee36e8a5d68b8baacdb0620871d205c1"},{"input_id":"input-8768c9c38cb771adfebcb7c59b03a4c9d6075ab5f537fa63f9b66c95ef49dfe2","occurrence_id":"occurrence-490910e2ea56a9b293d6875524fb794919999fef029ac1986a12baf7f71317b0"}],"edges":[],"components":[["occurrence-67d33bf7420e63663fc87ae4832ffc79ee36e8a5d68b8baacdb0620871d205c1"],["occurrence-490910e2ea56a9b293d6875524fb794919999fef029ac1986a12baf7f71317b0"]]}
       }
     }
   ]

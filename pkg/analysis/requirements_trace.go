@@ -8,6 +8,7 @@ import (
 )
 
 type requirementTrace struct {
+	inputs                  []inputFact
 	references              []requirementTraceReference
 	diagnostics             []requirementTraceDiagnostic
 	pendingReferenceIndexes map[string]int
@@ -73,6 +74,7 @@ func (t *requirementTrace) clone() *requirementTrace {
 		return nil
 	}
 	out := &requirementTrace{
+		inputs:                  cloneInputFacts(t.inputs),
 		references:              make([]requirementTraceReference, len(t.references)),
 		diagnostics:             make([]requirementTraceDiagnostic, len(t.diagnostics)),
 		pendingReferenceIndexes: make(map[string]int, len(t.pendingReferenceIndexes)),
@@ -185,6 +187,9 @@ func mergeRequirementTraces(base *requirementTrace, paths []requirementTracePath
 
 	merged := base.clone()
 	for _, path := range reachable {
+		merged.inputs = mergeInputFacts(merged.inputs, path.Trace.inputs)
+	}
+	for _, path := range reachable {
 		merged.syntaxComplete = merged.syntaxComplete && path.Trace.syntaxComplete
 		merged.semanticComplete = merged.semanticComplete && path.Trace.semanticComplete
 		for stageID := range path.Trace.incompleteStageIDs {
@@ -227,6 +232,7 @@ func rebaseRequirementTrace(oldBase, newBase, branch *requirementTrace) *require
 	}
 	assertRequirementTracePrefix(oldBase, branch)
 	rebased := newBase.clone()
+	rebased.inputs = mergeInputFacts(rebased.inputs, branch.inputs)
 	rebased.syntaxComplete = rebased.syntaxComplete && branch.syntaxComplete
 	rebased.semanticComplete = rebased.semanticComplete && branch.semanticComplete
 	for stageID := range branch.incompleteStageIDs {
@@ -278,6 +284,9 @@ func requirementTraceKey(entry requirementTraceReference) requirementTraceMergeK
 }
 
 func assertRequirementTracePrefix(base, branch *requirementTrace) {
+	if len(branch.inputs) < len(base.inputs) || len(base.inputs) > 0 && !reflect.DeepEqual(branch.inputs[:len(base.inputs)], base.inputs) {
+		panic("requirement trace branch changed its immutable input prefix")
+	}
 	if len(branch.references) < len(base.references) || len(branch.diagnostics) < len(base.diagnostics) {
 		panic("requirement trace branch does not contain its base prefix")
 	}
@@ -320,6 +329,7 @@ func (t *requirementTrace) recordDiagnostic(diagnostic Diagnostic, incomplete bo
 }
 
 func (t *requirementTrace) remapReferences(mapping map[string]string) {
+	remapInputReferences(t.inputs, mapping)
 	seen := map[string]bool{}
 	for i := range t.references {
 		entry := &t.references[i]
@@ -374,6 +384,7 @@ func (t *requirementTrace) syncParserDiagnostics(diagnostics []Diagnostic) {
 }
 
 func (t *requirementTrace) remapStages(mapping map[string]string) {
+	remapInputStages(t.inputs, mapping)
 	for i := range t.references {
 		if id := t.references[i].reference.StageID; id != "" {
 			t.references[i].reference.StageID = mapping[id]

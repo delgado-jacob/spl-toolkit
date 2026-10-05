@@ -1431,7 +1431,7 @@ func (s *spl2SemanticStage) nextCommandToken(ctx antlr.ParserRuleContext) antlr.
 func (s *spl2SemanticStage) joinDatasetIntentions(from spl2.ISqlFromClauseContext) {
 	for _, join := range from.AllSqlJoinClause() {
 		if dataset := join.Dataset(); dataset != nil {
-			s.exactDatasetSource(dataset)
+			s.datasetInputIntention(dataset)
 		}
 	}
 }
@@ -1543,7 +1543,7 @@ func (s *spl2SemanticStage) timechartInputs(c *spl2.TimechartCommandContext) {
 func (s *spl2SemanticStage) unionDatasetIntentions(c *spl2.UnionCommandContext) {
 	for _, input := range c.AllUnionDataset() {
 		if dataset := input.Dataset(); dataset != nil {
-			s.exactDatasetSource(dataset)
+			s.datasetInputIntention(dataset)
 		}
 	}
 }
@@ -1552,13 +1552,21 @@ func (s *spl2SemanticStage) exactDatasetSource(dataset spl2.IDatasetContext) boo
 	if dataset == nil {
 		return false
 	}
+	// Lexical Dataset bindings precede external source discovery, including
+	// dependency-only joined sources. Scalar locals never become inputs here.
+	if s.program != nil && (s.program.resolveViewSource(s, dataset.DatasetParameter()) || s.program.resolveImportedDataset(s, dataset)) {
+		return true
+	}
 	var owner antlr.ParserRuleContext
 	name := ""
+	form := ""
 	switch {
 	case dataset.Identifier() != nil:
+		form = "identifier"
 		owner = dataset.Identifier()
 		name = s.operand(owner).Name
 	case dataset.DottedDataset() != nil:
+		form = "dotted"
 		owner = dataset.DottedDataset()
 		parts := []string{}
 		identifiers := []spl2.IIdentifierContext{dataset.DottedDataset().Identifier()}
@@ -1572,11 +1580,13 @@ func (s *spl2SemanticStage) exactDatasetSource(dataset spl2.IDatasetContext) boo
 		}
 		name = strings.Join(parts, ".")
 	case dataset.DatasetParameter() != nil:
+		form = "parameter"
 		owner = dataset.DatasetParameter()
 		if spl2IntactSyntax(owner) {
 			name = owner.GetText()
 		}
 	case dataset.StaticDatasetDescriptor() != nil:
+		form = "descriptor"
 		owner = dataset.StaticDatasetDescriptor()
 		canonical, ok := spl2CanonicalDatasetDescriptor(dataset.StaticDatasetDescriptor())
 		if !ok {
@@ -1595,7 +1605,12 @@ func (s *spl2SemanticStage) exactDatasetSource(dataset spl2.IDatasetContext) boo
 	}
 	location := s.parsed2.source.contextLocation(owner)
 	operand := locatedOperand{Name: name, Location: location, Resolution: "exact", Sound: true, rewrite: s.rewriteSPL2Owner(owner)}
-	if s.operandReference(operand, "dataset", "read") != "" {
+	if id := s.operandReference(operand, "dataset", "read"); id != "" {
+		kind := "explicit_dataset"
+		if form == "parameter" {
+			kind = "named_placeholder"
+		}
+		s.recordInput(kind, name, form, name, id, spl2DatasetAlias(dataset), location)
 		s.addDependency(name, "dataset")
 	}
 	return true
@@ -1606,6 +1621,11 @@ func (s *spl2SemanticStage) dynamicDatasetSource(owner antlr.ParserRuleContext) 
 	name := s.result.Document.Text[location.Start.Offset:location.End.Offset]
 	operand := locatedOperand{Name: name, Location: location, Resolution: "dynamic", Sound: name != "", rewrite: s.rewriteSPL2Owner(owner)}
 	id := s.operandReference(operand, "dataset", "read")
+	alias := ""
+	if dataset, ok := owner.GetParent().(spl2.IDatasetContext); ok {
+		alias = spl2DatasetAlias(dataset)
+	}
+	s.recordInput("unresolved_source", name, "descriptor", name, id, alias, location)
 	if id == "" {
 		s.diagnosticAt(CodeDynamicReference, "warning", "unsupported_semantics", "Dynamic dataset descriptor identity is unresolved", location, true)
 		return
@@ -1700,4 +1720,35 @@ func spl2StaticJSONString(literal spl2.IJsonStringLiteralContext) (string, bool)
 		return "", false
 	}
 	return spl2DecodeKey(literal.GetText())
+}
+
+// Aliases describe occurrences and never enter logical source identities.
+func spl2DatasetAlias(dataset spl2.IDatasetContext) string {
+	if dataset == nil {
+		return ""
+	}
+	var alias spl2.ISourceAliasContext
+	switch parent := dataset.GetParent().(type) {
+	case spl2.ISqlFromClauseContext:
+		alias = parent.SourceAlias()
+	case spl2.ISqlJoinClauseContext:
+		alias = parent.SourceAlias()
+	}
+	if alias == nil || alias.Identifier() == nil || !spl2IntactSyntax(alias) {
+		return ""
+	}
+	name, ok := spl2DecodeKey(alias.Identifier().GetText())
+	if !ok {
+		return ""
+	}
+	return name
+}
+
+func (s *spl2SemanticStage) datasetInputIntention(dataset spl2.IDatasetContext) {
+	source := *s
+	semantic := *s.semanticStage
+	semantic.env = s.env.clone()
+	source.semanticStage = &semantic
+	source.exactDatasetSource(dataset)
+	s.env.inputs = mergeInputFacts(s.env.inputs, source.env.inputs)
 }

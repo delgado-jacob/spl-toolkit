@@ -382,3 +382,9 @@ func rewriteCapabilities(language string) *RewriteCapabilityManifest {
 	}
 	return m
 }
+
+// CapabilityRevisionFor returns the same normalized contract revision included
+// in current-producer requirement reports.
+func CapabilityRevisionFor(options CapabilityOptions) (string, error) {
+	return capabilityRevisionFor(options)
+}

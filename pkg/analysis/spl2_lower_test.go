@@ -1451,6 +1451,7 @@ func TestSPL2SequentialFullState(t *testing.T) {
 		Gaps:        []RequirementGap{},
 		Diagnostics: []Diagnostic{},
 	}
+	addExactInputTestEvidence(want, want.References[0], want.References[2])
 	if !reflect.DeepEqual(got, want) {
 		g, _ := json.MarshalIndent(got, "", "  ")
 		w, _ := json.MarshalIndent(want, "", "  ")

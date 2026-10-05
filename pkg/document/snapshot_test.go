@@ -280,3 +280,22 @@ func referenceIDs(references []analysis.Reference) []string {
 func testRevisionContext(targetDigest string) RevisionContext {
 	return RevisionContext{ToolVersion: "0.1.1", ContractVersion: "analysis-report-v1", TargetDigest: targetDigest}
 }
+
+func TestSnapshotInputEvidenceDetached(t *testing.T) {
+	result, err := analysis.Analyze(analysis.QueryDocument{Text: "$base = FROM $events | fields id;\n$consumer = FROM $base | fields id;", Language: "spl2"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	snapshot, err := New(result, testRevisionContext("target-a"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	snapshot.Inputs[0].Occurrences[0].UseSiteLocations[0].Start.Offset = 999
+	snapshot.Inputs[0].Occurrences[0].UseSiteReferenceIDs[0] = "changed"
+	snapshot.Requirements.Inputs[0].Occurrences[0].UseSiteReferenceIDs[0] = "changed"
+	snapshot.Correlation.Components[0][0] = "changed"
+	snapshot.Requirements.FieldAttributionCoverage.Reasons[0].ReferenceIDs[0] = "changed"
+	if result.Inputs[0].Occurrences[0].UseSiteLocations[0].Start.Offset == 999 || result.Inputs[0].Occurrences[0].UseSiteReferenceIDs[0] == "changed" || result.Requirements.Inputs[0].Occurrences[0].UseSiteReferenceIDs[0] == "changed" || result.Correlation.Components[0][0] == "changed" || result.Requirements.FieldAttributionCoverage.Reasons[0].ReferenceIDs[0] == "changed" {
+		t.Fatal("snapshot query evidence aliases analysis result")
+	}
+}

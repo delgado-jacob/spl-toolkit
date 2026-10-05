@@ -143,6 +143,7 @@ func (q *spl2ScopeScheduler) pipeline(sites []spl2CommandSite, env *environment,
 		index := registerSPL2Stage(q.result, location, command, position, scopeID)
 		position++
 		s := &spl2SemanticStage{semanticStage: &semanticStage{result: q.result, stage: index, env: env, transitions: []Transition{}, refinement: q.refinement}, parsed2: q.parsed, aliases: aliases, locals: map[string]bool{}, program: q.program}
+		s.implicitInput()
 		before := env.snapshot()
 		if _, ok := ctx.(*spl2.TimewrapCommandContext); ok && spl2IntactSyntax(ctx) && siteIndex > 0 {
 			_, fromStart := sites[0].context.(*spl2.FromCommandContext)

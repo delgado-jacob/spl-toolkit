@@ -16,6 +16,7 @@ type trackedField struct {
 	valueState fieldValueState
 }
 type environment struct {
+	inputs          []inputFact
 	rewrite         *rewriteFlow
 	fields          map[fieldIdentityKey]trackedField
 	fieldOrder      []fieldIdentityKey
@@ -81,6 +82,7 @@ func (e *environment) clone() *environment {
 
 func (e *environment) cloneWithRequirementTrace(trace *requirementTrace) *environment {
 	n := newEnvironmentWithRequirementTrace(trace)
+	n.inputs = cloneInputFacts(e.inputs)
 	n.rewrite = e.rewrite.clone()
 	n.open = e.open
 	n.uncertain = e.uncertain

@@ -77,6 +77,10 @@ func analyzeRewriteWithTrace(document QueryDocument, refinement *sourceRefinemen
 		return nil, nil, err
 	}
 	result.Requirements = requirements
+	result.Inputs = cloneInputs(requirements.Inputs)
+	result.InputCoverage = cloneInputCoverage(requirements.InputCoverage)
+	result.FieldAttributionCoverage = cloneInputCoverage(requirements.FieldAttributionCoverage)
+	result.Correlation = cloneCorrelation(requirements.Correlation)
 	return result, trace, nil
 }
 func finalizeResult(result *Result) {

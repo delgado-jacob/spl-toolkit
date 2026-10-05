@@ -148,6 +148,7 @@ func TestSPL2SQLLexicalStagesAndProjectionRead(t *testing.T) {
 		Gaps:        []RequirementGap{},
 		Diagnostics: []Diagnostic{},
 	}
+	addExactInputTestEvidence(want, want.References[1], want.References[2], want.References[0])
 	if !reflect.DeepEqual(r, want) {
 		t.Fatalf("complete SQL report differs: %+v", r)
 	}

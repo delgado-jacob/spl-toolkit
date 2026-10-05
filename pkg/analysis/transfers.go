@@ -622,6 +622,7 @@ func (s *semanticStage) recordRejectedRenameTarget(target locatedOperand, input 
 func (s *semanticStage) applyAggregation(outputs []aggregateOutput, groups []locatedOperand, preserveInput bool) {
 	stageID := s.result.Stages[s.stage].ID
 	output := newEnvironmentWithRequirementTrace(s.env.requirements.trace)
+	output.inputs = cloneInputFacts(s.env.inputs)
 	output.open = false
 	output.requirements.open = false
 	for _, operand := range groups {
@@ -700,6 +701,10 @@ func (s *semanticStage) removeAt(operand locatedOperand) {
 // applySource starts an independent external dataset without carrying prior fields.
 func (s *semanticStage) applySource() {
 	s.env = newEnvironmentWithRequirementTrace(s.env.requirements.trace)
+	if s.result.Document.Language == "spl" {
+		stage := s.result.Stages[s.stage]
+		s.recordInput("implicit_stream", "", "implicit", "", "", "", stage.Location)
+	}
 }
 
 func (s *semanticStage) appendTransition(transition Transition) {

@@ -27,6 +27,7 @@ func composeFlowEnvironments(left, right *environment) (*environment, []string, 
 		trace = right.requirements.trace.clone()
 	}
 	composed := left.cloneWithRequirementTrace(trace)
+	composed.inputs = mergeInputFacts(left.inputs, right.inputs)
 	composed.open = left.open || right.open
 	composed.uncertain = left.uncertain || right.uncertain
 	composed.requirements.open = left.requirements.open || right.requirements.open
@@ -184,6 +185,9 @@ func mergeFlowEnvironments(parent *environment, paths []flowMergePath, includePa
 		mergedTrace = mergeRequirementTraces(parent.requirements.trace, tracePaths)
 	}
 	merged := newEnvironmentWithRequirementTrace(mergedTrace)
+	for _, path := range reachable {
+		merged.inputs = mergeInputFacts(merged.inputs, path.Environment.inputs)
+	}
 	merged.open = false
 	merged.requirements.open = false
 	if parent != nil {
