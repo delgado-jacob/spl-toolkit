@@ -9,6 +9,7 @@ import (
 
 type requirementTrace struct {
 	inputs                  []inputFact
+	sourceEvidenceBudget    *sourceEvidenceWorkBudget
 	references              []requirementTraceReference
 	diagnostics             []requirementTraceDiagnostic
 	pendingReferenceIndexes map[string]int
@@ -60,6 +61,7 @@ type requirementEnvironment struct {
 
 func newRequirementTrace() *requirementTrace {
 	return &requirementTrace{
+		sourceEvidenceBudget:    &sourceEvidenceWorkBudget{},
 		references:              []requirementTraceReference{},
 		diagnostics:             []requirementTraceDiagnostic{},
 		pendingReferenceIndexes: map[string]int{},
@@ -75,6 +77,7 @@ func (t *requirementTrace) clone() *requirementTrace {
 	}
 	out := &requirementTrace{
 		inputs:                  cloneInputFacts(t.inputs),
+		sourceEvidenceBudget:    t.sourceEvidenceBudget,
 		references:              make([]requirementTraceReference, len(t.references)),
 		diagnostics:             make([]requirementTraceDiagnostic, len(t.diagnostics)),
 		pendingReferenceIndexes: make(map[string]int, len(t.pendingReferenceIndexes)),
@@ -384,6 +387,11 @@ func (t *requirementTrace) syncParserDiagnostics(diagnostics []Diagnostic) {
 }
 
 func (t *requirementTrace) remapStages(mapping map[string]string) {
+	if budget := t.sourceEvidenceBudget; budget != nil && budget.failure != nil {
+		if id, ok := mapping[budget.failure.StageID]; ok {
+			budget.failure.StageID = id
+		}
+	}
 	remapInputStages(t.inputs, mapping)
 	for i := range t.references {
 		if id := t.references[i].reference.StageID; id != "" {

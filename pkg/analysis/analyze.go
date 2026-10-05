@@ -71,6 +71,7 @@ func analyzeRewriteWithTrace(document QueryDocument, refinement *sourceRefinemen
 		}
 		analyzeParsed(result, parsed, refinement, trace)
 	}
+	trace.finishSourceEvidence(result)
 	finalizeResult(result)
 	requirements, err := projectRequirements(normalized, trace)
 	if err != nil {

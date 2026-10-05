@@ -4,6 +4,48 @@ import "github.com/antlr4-go/antlr/v4"
 
 const lexerWorkLimit = 4096
 
+// Semantic source expansion uses the same bounded work scale as lexical input.
+// Each new active-source or discovery fact consumes one unit before copying.
+const sourceEvidenceWorkLimit = lexerWorkLimit
+
+const sourceEvidenceResourceLimitMessage = "source discovery stopped because further copying would exceed the 4,096-unit source-evidence work limit"
+
+type sourceEvidenceWorkBudget struct {
+	units   int
+	failure *Diagnostic
+}
+
+func (t *requirementTrace) reserveSourceEvidence(units int, stage Stage, location Location) bool {
+	if t == nil || units == 0 {
+		return true
+	}
+	budget := t.sourceEvidenceBudget
+	if budget == nil {
+		budget = &sourceEvidenceWorkBudget{}
+		t.sourceEvidenceBudget = budget
+	}
+	if budget.failure == nil && units <= sourceEvidenceWorkLimit-budget.units {
+		budget.units += units
+		return true
+	}
+	if budget.failure == nil {
+		budget.failure = &Diagnostic{Code: CodeAnalysisResourceLimit, Severity: "warning", Category: "resource_limit", Message: sourceEvidenceResourceLimitMessage, Location: location, StageID: stage.ID, ScopeID: stage.ScopeID}
+	}
+	return false
+}
+
+// Publish once from the canonical owner after branch merges and ID finalization.
+// The shared budget never changes immutable branch reference/diagnostic prefixes.
+func (t *requirementTrace) finishSourceEvidence(result *Result) {
+	if t == nil || t.sourceEvidenceBudget == nil || t.sourceEvidenceBudget.failure == nil {
+		return
+	}
+	diagnostic := *t.sourceEvidenceBudget.failure
+	result.Diagnostics = append(result.Diagnostics, diagnostic)
+	result.Coverage.SemanticComplete = false
+	t.recordDiagnostic(diagnostic, true, nil, t.nextEvent())
+}
+
 const (
 	analysisResourceLimitMessage    = "analysis stopped before parser prediction after reaching the 4,096-unit lexer work limit"
 	requirementResourceLimitMessage = "requirement coverage is incomplete because analysis exceeded the 4,096-unit lexer work limit"

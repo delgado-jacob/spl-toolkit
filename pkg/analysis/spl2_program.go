@@ -295,6 +295,7 @@ func (p *spl2Program) markDeclarationIncomplete(declaration *spl2ProgramDeclarat
 	p.result.Stages[declaration.stage].SemanticComplete = false
 }
 
+// bindView returns a borrowed summary; source-use callers copy after reserving evidence work.
 func (p *spl2Program) bindView(view *spl2ViewSymbol) (*environment, bool) {
 	if view == nil || view.invalid || view.body == nil {
 		if view != nil {
@@ -308,7 +309,7 @@ func (p *spl2Program) bindView(view *spl2ViewSymbol) (*environment, bool) {
 			return nil, false
 		}
 		complete := !view.invalid && !view.parserTainted && !view.summary.uncertain && !view.summary.requirements.uncertain
-		return view.summary.clone(), complete
+		return view.summary, complete
 	case spl2BindingVisiting:
 		p.markViewCycle(view)
 		return nil, false
@@ -355,9 +356,9 @@ func (p *spl2Program) bindView(view *spl2ViewSymbol) (*environment, bool) {
 		p.markDeclarationIncomplete(view.declaration)
 		view.summary.uncertain = true
 		view.summary.requirements.uncertain = true
-		return view.summary.clone(), false
+		return view.summary, false
 	}
-	return view.summary.clone(), true
+	return view.summary, true
 }
 
 func (p *spl2Program) claimedParserDiagnosticWithin(owner Location) bool {
@@ -436,6 +437,10 @@ func (p *spl2Program) resolveViewSource(stage *spl2SemanticStage, parameter spl2
 	if canonicalBefore != nil {
 		callerTrace = rebaseRequirementTrace(canonicalBefore, p.trace, callerTrace)
 		stage.env.requirements.trace = callerTrace
+	}
+	if summary != nil && !callerTrace.reserveSourceEvidence(len(summary.inputs)+len(view.sourceInputs), stage.result.Stages[stage.stage], location) {
+		p.markStageIncomplete(stage)
+		return true
 	}
 	if summary != nil {
 		stage.env = summary.cloneWithRequirementTrace(callerTrace)

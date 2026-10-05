@@ -129,6 +129,12 @@ func cloneInputs(in []QueryInput) []QueryInput {
 }
 func (s *semanticStage) recordInput(kind, name, form, value, referenceID, alias string, location Location) {
 	st := s.result.Stages[s.stage]
+	if !s.env.requirements.trace.reserveSourceEvidence(2, st, location) {
+		s.result.Stages[s.stage].SemanticComplete = false
+		s.env.uncertain = true
+		s.env.requirements.uncertain = true
+		return
+	}
 	if kind == "unresolved_source" {
 		value = orderedStringSliceKey([]string{s.result.Document.SourceID, value, strconv.Itoa(location.Start.Offset), strconv.Itoa(location.End.Offset)})
 	}
@@ -174,17 +180,20 @@ func projectInputs(trace *requirementTrace) ([]QueryInput, InputCoverage) {
 		}
 	}
 	facts := mergeInputFacts(nil, trace.inputs)
+	// Index shorter use chains once instead of comparing every pair of facts.
+	superseded := map[string]bool{}
+	for _, fact := range facts {
+		if fact.occurrence.OriginalReferenceID == "" {
+			continue
+		}
+		for length := range fact.occurrence.UseSiteLocations {
+			superseded[inputUsePrefixKey(fact.occurrence.OriginalReferenceID, fact.occurrence.UseSiteLocations[:length])] = true
+		}
+	}
 	groups := map[string]int{}
 	for _, fact := range facts {
 		// A view declaration's source occurrence is replaced by each terminal use.
-		superseded := false
-		for _, other := range facts {
-			if fact.occurrence.OriginalReferenceID != "" && fact.occurrence.OriginalReferenceID == other.occurrence.OriginalReferenceID && len(fact.occurrence.UseSiteLocations) < len(other.occurrence.UseSiteLocations) && locationsPrefix(fact.occurrence.UseSiteLocations, other.occurrence.UseSiteLocations) {
-				superseded = true
-				break
-			}
-		}
-		if superseded {
+		if fact.occurrence.OriginalReferenceID != "" && superseded[inputUsePrefixKey(fact.occurrence.OriginalReferenceID, fact.occurrence.UseSiteLocations)] {
 			continue
 		}
 		id := opaqueInputID(fact.kind, fact.identity)
@@ -234,13 +243,12 @@ func projectInputs(trace *requirementTrace) ([]QueryInput, InputCoverage) {
 	}
 	return inputs, coverage
 }
-func locationsPrefix(a, b []Location) bool {
-	for i := range a {
-		if a[i] != b[i] {
-			return false
-		}
+func inputUsePrefixKey(referenceID string, locations []Location) string {
+	values := []string{referenceID}
+	for _, location := range locations {
+		values = append(values, strconv.Itoa(location.Start.Offset), strconv.Itoa(location.Start.Line), strconv.Itoa(location.Start.Column), strconv.Itoa(location.End.Offset), strconv.Itoa(location.End.Line), strconv.Itoa(location.End.Column))
 	}
-	return true
+	return orderedStringSliceKey(values)
 }
 
 // situatedViewInputs reuses semantic source summaries without replaying bodies.
@@ -285,6 +293,13 @@ func inputAttributionCoverage(trace *requirementTrace) InputCoverage {
 			coverage.State = "partial"
 			r := entry.reference
 			coverage.Reasons = append(coverage.Reasons, InputReason{Code: "field_attribution_incomplete", Message: "source field ownership has not been proved", Location: r.Location, StageID: r.StageID, ScopeID: r.ScopeID, ReferenceIDs: []string{r.ID}})
+		}
+	}
+	for _, entry := range trace.diagnostics {
+		diagnostic := entry.diagnostic
+		if diagnostic.Code == CodeAnalysisResourceLimit && diagnostic.Message == sourceEvidenceResourceLimitMessage {
+			coverage.State = "partial"
+			coverage.Reasons = append(coverage.Reasons, InputReason{Code: diagnostic.Code, Message: diagnostic.Message, Location: diagnostic.Location, StageID: diagnostic.StageID, ScopeID: diagnostic.ScopeID, ReferenceIDs: copyIDs(entry.pendingReferenceIDs)})
 		}
 	}
 	if coverage.State == "not_applicable" && (!trace.syntaxComplete || !trace.semanticComplete) {

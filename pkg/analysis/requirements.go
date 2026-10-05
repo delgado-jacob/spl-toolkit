@@ -326,7 +326,7 @@ func projectRequirements(document QueryDocument, trace *requirementTrace) (Requi
 			continue
 		}
 		message := entry.diagnostic.Message
-		if entry.diagnostic.Code == CodeAnalysisResourceLimit {
+		if entry.diagnostic.Code == CodeAnalysisResourceLimit && entry.diagnostic.Message == analysisResourceLimitMessage {
 			message = requirementResourceLimitMessage
 		}
 		gapCandidates = append(gapCandidates, gapCandidate{RequirementGap{

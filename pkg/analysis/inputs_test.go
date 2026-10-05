@@ -2,6 +2,7 @@ package analysis
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"reflect"
 	"strings"
@@ -430,5 +431,76 @@ func TestInputViewSummarySituatesEveryUnderlyingSource(t *testing.T) {
 				t.Fatal("result and requirements source summaries differ")
 			}
 		})
+	}
+}
+
+func TestInputSourceEvidenceResourceLimit(t *testing.T) {
+	for _, depth := range []int{12, 15} {
+		t.Run(fmt.Sprintf("depth_%d", depth), func(t *testing.T) { testInputSourceEvidenceResourceLimit(t, depth) })
+	}
+}
+
+func testInputSourceEvidenceResourceLimit(t *testing.T, maxDepth int) {
+	t.Helper()
+	query := "$v0 = FROM $events;"
+	for depth := 1; depth <= maxDepth; depth++ {
+		query += fmt.Sprintf("$v%d = union $v%d, $v%d;", depth, depth-1, depth-1)
+	}
+	result, trace, err := analyzeRewriteWithTrace(QueryDocument{Text: query, Language: "spl2"}, nil, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !result.Coverage.SyntaxComplete || result.Status != Incomplete || result.InputCoverage.State != "partial" || result.FieldAttributionCoverage.State != "partial" || result.Correlation.Outcome != "indeterminate" || result.Correlation.Coverage.State != "partial" {
+		t.Fatalf("expanded evidence claimed complete: status=%s input=%s attribution=%s correlation=%s/%s", result.Status, result.InputCoverage.State, result.FieldAttributionCoverage.State, result.Correlation.Outcome, result.Correlation.Coverage.State)
+	}
+	if trace.sourceEvidenceBudget == nil || trace.sourceEvidenceBudget.failure == nil || trace.sourceEvidenceBudget.units > sourceEvidenceWorkLimit {
+		t.Fatal("source evidence was materialized without a bounded reservation")
+	}
+	if result.Requirements.Coverage.Complete || result.Requirements.QueryStatus != Incomplete {
+		t.Fatal("requirements claimed exhaustive evidence")
+	}
+	for _, coverage := range []InputCoverage{result.InputCoverage, result.FieldAttributionCoverage, result.Correlation.Coverage} {
+		if len(coverage.Reasons) == 0 {
+			t.Fatal("partial evidence has no located reason")
+		}
+	}
+	t.Logf("reserved units=%d, trace facts=%d, source inputs=%d", trace.sourceEvidenceBudget.units, len(trace.inputs), len(result.Inputs))
+	if len(result.Inputs) != 1 || len(result.Inputs[0].Occurrences) == 0 || len(trace.inputs) > sourceEvidenceWorkLimit {
+		t.Fatalf("known facts missing or unbounded: inputs=%d facts=%d", len(result.Inputs), len(trace.inputs))
+	}
+	found := false
+	for _, diagnostic := range result.Diagnostics {
+		if diagnostic.Code != CodeAnalysisResourceLimit {
+			continue
+		}
+		found = true
+		if !strings.Contains(diagnostic.Message, "source-evidence") || strings.Contains(diagnostic.Message, "lexer") || !strings.HasPrefix(query[diagnostic.Location.Start.Offset:diagnostic.Location.End.Offset], "$v") || diagnostic.StageID == "" || diagnostic.ScopeID == "" {
+			t.Fatalf("inaccurate or unlocated semantic limit: %#v", diagnostic)
+		}
+	}
+	if !found {
+		t.Fatal("missing source-evidence resource diagnostic")
+	}
+	repeated, err := Analyze(QueryDocument{Text: query, Language: "spl2"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(result.Inputs, repeated.Inputs) || !reflect.DeepEqual(result.InputCoverage, repeated.InputCoverage) {
+		t.Fatal("budgeted discovery is not deterministic")
+	}
+	found = false
+	for _, gap := range result.Requirements.Gaps {
+		if gap.Code == CodeAnalysisResourceLimit {
+			found = true
+			if !strings.Contains(gap.Message, "source-evidence") || strings.Contains(gap.Message, "lexer") {
+				t.Fatalf("inaccurate resource gap: %#v", gap)
+			}
+		}
+	}
+	if !found {
+		t.Fatal("missing requirement resource gap")
+	}
+	if !reflect.DeepEqual(result.Inputs, result.Requirements.Inputs) || !reflect.DeepEqual(result.InputCoverage, result.Requirements.InputCoverage) || !reflect.DeepEqual(result.FieldAttributionCoverage, result.Requirements.FieldAttributionCoverage) || !reflect.DeepEqual(result.Correlation, result.Requirements.Correlation) {
+		t.Fatal("result and requirements disagree")
 	}
 }
