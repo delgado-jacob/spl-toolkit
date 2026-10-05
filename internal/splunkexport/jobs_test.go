@@ -452,6 +452,18 @@ func TestOwnedJobNumericVariants(t *testing.T) {
 	}
 	f.assertClean(t)
 }
+
+// Observe request deadlines without replacing the TLS transport.
+type jobRequestObserver struct {
+	*http.Transport
+	observe func(*http.Request)
+}
+
+func (o jobRequestObserver) RoundTrip(r *http.Request) (*http.Response, error) {
+	o.observe(r)
+	return o.Transport.RoundTrip(r)
+}
+
 func TestOwnedJobSalvageReservesSharedCleanupBudget(t *testing.T) {
 	var mu sync.Mutex
 	var operations []string
@@ -484,10 +496,26 @@ func TestOwnedJobSalvageReservesSharedCleanupBudget(t *testing.T) {
 	t.Cleanup(c.Close)
 	sid := "spl-toolkit-export-fixture"
 	c.owned[sid] = true
-	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
+	const budget = time.Second
+	ctx, cancel := context.WithTimeout(context.Background(), budget)
 	t.Cleanup(cancel)
 	result := JobResult{Coverage: "complete"}
-	started := time.Now()
+	cleanupDeadline, _ := ctx.Deadline()
+	var finalizeDeadline, deleteDeadline time.Time
+	c.http.Transport = jobRequestObserver{
+		Transport: c.http.Transport.(*http.Transport),
+		observe: func(r *http.Request) {
+			deadline, ok := r.Context().Deadline()
+			if !ok {
+				t.Error("cleanup request has no deadline")
+			}
+			if r.Method == http.MethodDelete {
+				deleteDeadline = deadline
+			} else if strings.HasSuffix(r.URL.Path, "/control") {
+				finalizeDeadline = deadline
+			}
+		},
+	}
 	c.salvage(ctx, sid, &result)
 	if ctx.Err() != nil {
 		t.Fatal("salvage consumed entire cleanup budget")
@@ -495,8 +523,19 @@ func TestOwnedJobSalvageReservesSharedCleanupBudget(t *testing.T) {
 	if err = c.deleteOwnedJob(ctx, sid); err != nil {
 		t.Fatalf("reserved DELETE failed: %v", err)
 	}
-	if time.Since(started) > 100*time.Millisecond {
-		t.Fatal("cleanup exceeded shared budget")
+	// Inspect the actual request bounds; elapsed test time includes scheduling
+	// after a successful response and does not prove which deadline was used.
+	// Allow scheduling and context-creation overhead while requiring a
+	// substantial reserve for DELETE and a bounded finalize request.
+	reserved := cleanupDeadline.Sub(finalizeDeadline)
+	if finalizeDeadline.IsZero() || reserved < budget/3 || reserved > 2*budget/3 {
+		t.Fatalf("finalize did not reserve cleanup budget: %s", reserved)
+	}
+	if !deleteDeadline.Equal(cleanupDeadline) {
+		t.Fatalf("DELETE did not use the original shared deadline: got %s, want %s", deleteDeadline, cleanupDeadline)
+	}
+	if c.owns(sid) {
+		t.Fatal("successful DELETE retained owned job")
 	}
 	mu.Lock()
 	defer mu.Unlock()
