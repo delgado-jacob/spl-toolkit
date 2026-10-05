@@ -257,15 +257,21 @@ func TestTransportCanonicalUTCWindow(t *testing.T) {
 	}
 }
 func TestTransportStreamingBodyDeadline(t *testing.T) {
+	release := make(chan struct{})
+	streamed := make(chan struct{})
 	s := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, `{"incomplete":`)
 		w.(http.Flusher).Flush()
-		<-r.Context().Done()
+		close(streamed)
+		// Keep EOF from racing the client deadline when its request is canceled.
+		<-release
 	}))
 	t.Cleanup(s.Close)
+	// Cleanup runs in reverse order, releasing the handler before server close.
+	t.Cleanup(func() { close(release) })
 	o := testOptions(t, s.URL)
 	o.CAFile = fixtureCA(t, s)
-	o.RequestTimeout = 20 * time.Millisecond
+	o.RequestTimeout = 500 * time.Millisecond
 	c, err := NewClient(o)
 	if err != nil {
 		t.Fatal(err)
@@ -273,6 +279,11 @@ func TestTransportStreamingBodyDeadline(t *testing.T) {
 	t.Cleanup(c.Close)
 	var out any
 	err = c.getJSON(context.Background(), "/services/server/info", nil, &out)
+	select {
+	case <-streamed:
+	default:
+		t.Fatal("request timed out before the streaming body started")
+	}
 	if err == nil || err.Error() != "request_timeout" {
 		t.Fatalf("streaming timeout: %v", err)
 	}
