@@ -812,7 +812,7 @@ func (s *spl2SemanticStage) selectedJoinReference(operand locatedOperand, source
 	binding, origins := "source", []string{}
 	field, known := source.field(identity)
 	switch {
-	case known && field.Conditional || source.uncertain:
+	case known && (field.Conditional || field.ownerCollision) || source.uncertain:
 		binding = "indeterminate"
 		if known {
 			origins = copyIDs(field.OriginReferenceIDs)

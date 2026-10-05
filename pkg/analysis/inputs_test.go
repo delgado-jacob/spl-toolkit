@@ -839,3 +839,43 @@ func TestRequirementSourceOwnershipPreservesUnavailableTransfers(t *testing.T) {
 		})
 	}
 }
+
+func TestRequirementSourceOwnershipMixedCompositionStaysAmbiguous(t *testing.T) {
+	base := `from $events | eval id=seed | join type=inner left=e right=u where e.key=u.key [from $users | fields key,id] | fields id`
+	for _, query := range []string{base, base + ` | where id=1`, `$base = ` + base + `; $consumer = from $base | fields id;`} {
+		r, trace, err := analyzeRewriteWithTrace(QueryDocument{Text: query, Language: "spl2"}, nil, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		last := r.References[len(r.References)-1]
+		if !r.Coverage.SyntaxComplete || last.NormalizedName != "id" || last.Binding != "indeterminate" || r.FieldAttributionCoverage.State != "partial" {
+			t.Fatalf("mixed source ownership was erased: reference=%+v attribution=%+v", last, r.FieldAttributionCoverage)
+		}
+		alternatives := map[string]bool{}
+		for _, entry := range trace.references {
+			if entry.reference.ID == last.ID {
+				for _, owner := range entry.owners {
+					alternatives[owner.input.name+":"+owner.identity.PublicName] = true
+				}
+			}
+		}
+		if len(alternatives) != 2 || !alternatives["$events:seed"] || !alternatives["$users:id"] {
+			t.Fatalf("source-relative alternatives lost: %+v", alternatives)
+		}
+		found := false
+		for _, item := range r.Requirements.Items {
+			for _, occurrence := range item.Occurrences {
+				if occurrence.ReferenceID != last.ID {
+					continue
+				}
+				found = true
+				if item.Identity != "id" || item.InputID != "" || item.Ownership.State != "unproved" || item.Necessity != "conditional" || occurrence.Necessity != "conditional" || occurrence.Binding != "indeterminate" || len(item.Ownership.CandidateInputIDs) != 2 || len(occurrence.InputOccurrenceIDs) != 2 {
+					t.Fatalf("collision invented a destination proof or lost alternatives: %+v", item)
+				}
+			}
+		}
+		if !found {
+			t.Fatal("final colliding read lost its located candidate evidence")
+		}
+	}
+}

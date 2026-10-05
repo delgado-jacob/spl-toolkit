@@ -44,12 +44,13 @@ type requirementTracePath struct {
 }
 
 type requirementField struct {
-	identity    fieldIdentity
-	owners      []sourceOwner
-	source      bool
-	unavailable bool
-	conditional bool
-	origins     []string
+	identity       fieldIdentity
+	owners         []sourceOwner
+	ownerCollision bool // Simultaneous alternatives, rather than expression origins.
+	source         bool
+	unavailable    bool
+	conditional    bool
+	origins        []string
 }
 
 type requirementEnvironment struct {
@@ -543,7 +544,7 @@ func (e *requirementEnvironment) readIdentity(reference Reference, identity fiel
 		owners = sourceOwnersForIdentity(e.inputs, identity)
 	}
 	switch {
-	case known && field.conditional:
+	case known && (field.conditional || field.ownerCollision):
 		return classified("indeterminate", false, true)
 	case known:
 		if field.source {

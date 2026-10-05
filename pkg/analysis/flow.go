@@ -11,10 +11,11 @@ const (
 
 type trackedField struct {
 	FieldBinding
-	identity   fieldIdentity
-	owners     []sourceOwner
-	source     bool
-	valueState fieldValueState
+	identity       fieldIdentity
+	owners         []sourceOwner
+	ownerCollision bool
+	source         bool
+	valueState     fieldValueState
 }
 type environment struct {
 	inputs          []inputFact

@@ -68,7 +68,7 @@ func sourceOwnersForIdentity(inputs []inputFact, identity fieldIdentity) []sourc
 func (e *requirementEnvironment) sourceOwners(identity fieldIdentity) []sourceOwner {
 	if field, known := e.field(identity); known {
 		owners := cloneSourceOwners(field.owners)
-		if field.conditional && !field.source {
+		if field.ownerCollision || field.conditional && !field.source {
 			for i := range owners {
 				owners[i].unresolved = true
 			}

@@ -59,6 +59,7 @@ func composeFlowEnvironments(left, right *environment) (*environment, []string, 
 			recordCollision(rightField.Name)
 		}
 		if leftField, sameIdentity := composed.fields[key]; sameIdentity {
+			leftField.ownerCollision = leftField.ownerCollision || rightField.ownerCollision || sourceOwnerKey(leftField.owners) != sourceOwnerKey(rightField.owners)
 			leftField.owners = mergeSourceOwners(leftField.owners, rightField.owners)
 			leftField.OriginReferenceIDs = uniqueIDs(leftField.OriginReferenceIDs, rightField.OriginReferenceIDs)
 			leftField.Conditional = leftField.Conditional && rightField.Conditional
@@ -76,6 +77,7 @@ func composeFlowEnvironments(left, right *environment) (*environment, []string, 
 
 	for key, rightField := range right.requirements.fields {
 		if leftField, sameIdentity := composed.requirements.fields[key]; sameIdentity {
+			leftField.ownerCollision = leftField.ownerCollision || rightField.ownerCollision || sourceOwnerKey(leftField.owners) != sourceOwnerKey(rightField.owners)
 			leftField.owners = mergeSourceOwners(leftField.owners, rightField.owners)
 			leftField.origins = uniqueIDs(leftField.origins, rightField.origins)
 			leftField.conditional = leftField.conditional && rightField.conditional
@@ -269,6 +271,7 @@ func mergeTrackedIdentity(merged *environment, paths []flowMergePath, key fieldI
 			if present == 1 {
 				field = candidate
 			}
+			field.ownerCollision = field.ownerCollision || candidate.ownerCollision
 			orderedOrigins := orderedReferenceIDs(candidate.OriginReferenceIDs)
 			if firstOrigins == nil {
 				firstOrigins = orderedOrigins
@@ -347,6 +350,7 @@ func mergeRequirementIdentity(merged *requirementEnvironment, paths []flowMergeP
 			if present == 1 {
 				field = candidate
 			}
+			field.ownerCollision = field.ownerCollision || candidate.ownerCollision
 			orderedOrigins := orderedReferenceIDs(candidate.origins)
 			if firstOrigins == nil {
 				firstOrigins = orderedOrigins

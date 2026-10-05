@@ -136,13 +136,13 @@ func (s *semanticStage) readAt(operand locatedOperand, role string) string {
 	f, known := s.env.field(identity)
 	key, exactIdentity := identity.privateKey()
 	switch {
-	case known && !f.Conditional:
+	case known && !f.Conditional && !f.ownerCollision:
 		ref.Binding = "derived"
 		if f.source {
 			ref.Binding = "source"
 		}
 		ref.OriginReferenceIDs = copyIDs(f.OriginReferenceIDs)
-	case s.env.uncertain || (known && f.Conditional):
+	case s.env.uncertain || (known && (f.Conditional || f.ownerCollision)):
 		ref.Binding = "indeterminate"
 		if known {
 			ref.OriginReferenceIDs = copyIDs(f.OriginReferenceIDs)
