@@ -150,3 +150,58 @@ func TestPipelineJoinCorrelationCloneDetached(t *testing.T) {
 		t.Fatal("correlation key evidence aliases clone")
 	}
 }
+
+func TestPipelineJoinCorrelationConstantKeys(t *testing.T) {
+	for _, tc := range []struct {
+		name, query, predicate, attribution string
+		nodes, edges                        int
+	}{
+		{"left constant", `from $events | eval k=1 | join left=e right=u where e.k=u.uid [from $users]`, "e.k=u.uid", "complete", 2, 0},
+		{"right constant", `from $events | join left=e right=u where e.id=u.k [from $users | eval k=1]`, "e.id=u.k", "complete", 2, 0},
+		{"both constants", `from $events | where id>0 | eval k=1 | join left=e right=u where e.k=u.k [from $users | where uid>0 | eval k=1]`, "e.k=u.k", "complete", 2, 0},
+		{"earlier edge", `from $events | fields id | join left=e right=u where e.id=u.uid [from $users | fields uid] | eval k=1 | join left=p right=a where p.k=a.aid [from $accounts]`, "p.k=a.aid", "complete", 3, 1},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			r := spl2AnalyzeTest(t, tc.query)
+			graph := r.Correlation
+			if graph.Outcome != "indeterminate" || graph.Coverage.State != "partial" || len(graph.Nodes) != tc.nodes || len(graph.Edges) != tc.edges || r.FieldAttributionCoverage.State != tc.attribution {
+				t.Fatalf("constant-key proof: graph %+v attribution %+v", graph, r.FieldAttributionCoverage)
+			}
+			found := false
+			for _, reason := range graph.Coverage.Reasons {
+				if reason.Code != "correlation_incomplete" {
+					continue
+				}
+				if tc.query[reason.Location.Start.Offset:reason.Location.End.Offset] != tc.predicate || len(reason.ReferenceIDs) != 2 || reason.StageID == "" || reason.ScopeID == "" {
+					t.Fatalf("unlocated predicate uncertainty: %+v", reason)
+				}
+				for _, id := range reason.ReferenceIDs {
+					ref := r.References[referenceOrdinal(t, id)]
+					if ref.Kind != "field" || ref.Role != "read" || !strings.Contains(tc.predicate, ref.OriginalName) || tc.query[ref.Location.Start.Offset:ref.Location.End.Offset] != ref.OriginalName {
+						t.Fatalf("lost key evidence: %+v", ref)
+					}
+				}
+				found = true
+			}
+			if !found {
+				t.Fatal("missing supplying-occurrence uncertainty")
+			}
+			for _, item := range r.Requirements.Items {
+				if item.Kind == "field" && item.Identity == "k" {
+					t.Fatalf("constant key became an external requirement: %+v", item)
+				}
+			}
+		})
+	}
+}
+func TestPipelineJoinCorrelationGeneratedRowsStayNotApplicable(t *testing.T) {
+	for _, query := range []string{
+		`from [{k:1}] | join left=e right=u where e.k=u.uid [from [{uid:1}]]`,
+		`$unused = from $events; $out = from [{k:1}] | join left=e right=u where e.k=u.uid [from [{uid:1}]];`,
+	} {
+		r := spl2AnalyzeTest(t, query)
+		if r.Correlation.Outcome != "not applicable" || r.Correlation.Coverage.State != "not_applicable" || len(r.Correlation.Coverage.Reasons) != 0 || len(r.Correlation.Edges) != 0 {
+			t.Fatalf("generated-only join gained source uncertainty: %+v", r.Correlation)
+		}
+	}
+}

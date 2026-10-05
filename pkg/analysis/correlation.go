@@ -93,7 +93,7 @@ func supplyingOccurrence(owners []sourceOwner) (sourceOwner, bool) {
 	}
 	return cloneSourceOwners([]sourceOwner{first})[0], true
 }
-func (s *spl2SemanticStage) recordJoinCorrelations(command *spl2.JoinCommandContext, ids []string) {
+func (s *spl2SemanticStage) recordJoinCorrelations(command *spl2.JoinCommandContext, ids []string, rightEnvironment *environment) {
 	trace := s.env.requirements.trace
 	if trace == nil {
 		return
@@ -104,9 +104,10 @@ func (s *spl2SemanticStage) recordJoinCorrelations(command *spl2.JoinCommandCont
 		if left.reference.FieldIdentity.Qualifier != selection.leftAlias {
 			left, right = right, left
 		}
-		// Constant rows have no external source to connect. Unavailable reads cannot
-		// establish a predicate even when the surrounding syntax is selected.
-		if (len(left.owners) == 0 || len(right.owners) == 0) && left.reference.Binding != "unavailable" && right.reference.Binding != "unavailable" {
+		// A generated-only join has no external occurrence obligation. Constant
+		// keys on external rows still require supplier uncertainty: no field
+		// lineage proves which external occurrence supplies those rows.
+		if len(s.env.inputs) == 0 && len(rightEnvironment.inputs) == 0 {
 			continue
 		}
 		lo, lok := supplyingOccurrence(left.owners)

@@ -635,7 +635,7 @@ func (q *spl2ScopeScheduler) lowerSelectedJoin(s *spl2SemanticStage, command *sp
 		return
 	}
 
-	s.recordJoinCorrelations(command, joinReferenceIDs)
+	s.recordJoinCorrelations(command, joinReferenceIDs, right.Environment)
 	combinedTrace := s.rebasedSelectedChildTrace(baseAfterChild, right.Trace)
 	rightMatched := right.Environment.cloneWithRequirementTrace(combinedTrace)
 	matched, collisions, composed := composeFlowEnvironments(s.env, rightMatched)
