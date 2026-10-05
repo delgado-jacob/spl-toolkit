@@ -211,3 +211,29 @@ func requirementOwnerKey(entry requirementTraceReference) string {
 	}
 	return sourceOwnerKey(entry.owners)
 }
+
+// Held join output has both source sides as candidates. Existing trace facts
+// describe reads before this boundary; only the outgoing owner state changes.
+func (e *environment) retainHeldJoinCandidates(right *environment) {
+	if right == nil {
+		return
+	}
+	e.inputs = mergeInputFacts(e.inputs, right.inputs)
+	e.requirements.inputs = mergeInputFacts(e.requirements.inputs, right.requirements.inputs)
+	for key, field := range e.fields {
+		field.owners = mergeSourceOwners(field.owners, sourceOwnersForIdentity(e.inputs, field.identity))
+		for i := range field.owners {
+			field.owners[i].unresolved = true
+		}
+		field.ownerCollision = true
+		e.fields[key] = field
+	}
+	for key, field := range e.requirements.fields {
+		field.owners = mergeSourceOwners(field.owners, sourceOwnersForIdentity(e.requirements.inputs, field.identity))
+		for i := range field.owners {
+			field.owners[i].unresolved = true
+		}
+		field.ownerCollision = true
+		e.requirements.fields[key] = field
+	}
+}

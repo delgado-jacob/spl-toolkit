@@ -189,6 +189,14 @@ func cloneCorrelation(in analysis.CorrelationGraph) analysis.CorrelationGraph {
 		out.Edges[i].Right.FieldIdentity.Segments = copyInputIDs(in.Edges[i].Right.FieldIdentity.Segments)
 		out.Edges[i].Left.ReferenceIDs = copyInputIDs(in.Edges[i].Left.ReferenceIDs)
 		out.Edges[i].Right.ReferenceIDs = copyInputIDs(in.Edges[i].Right.ReferenceIDs)
+		out.Edges[i].Keys = append([]analysis.CorrelationKeyEvidence{}, in.Edges[i].Keys...)
+		for j := range out.Edges[i].Keys {
+			key := &out.Edges[i].Keys[j]
+			key.Left.FieldIdentity.Segments = copyInputIDs(in.Edges[i].Keys[j].Left.FieldIdentity.Segments)
+			key.Right.FieldIdentity.Segments = copyInputIDs(in.Edges[i].Keys[j].Right.FieldIdentity.Segments)
+			key.Left.ReferenceIDs = copyInputIDs(in.Edges[i].Keys[j].Left.ReferenceIDs)
+			key.Right.ReferenceIDs = copyInputIDs(in.Edges[i].Keys[j].Right.ReferenceIDs)
+		}
 	}
 	return out
 }

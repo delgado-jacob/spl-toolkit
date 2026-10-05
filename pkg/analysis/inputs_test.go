@@ -287,7 +287,7 @@ func addExactInputTestEvidence(want *Result, sourceReference Reference, fieldRef
 			item.Occurrences[j].Necessity = item.Necessity
 		}
 	}
-	want.Correlation = CorrelationGraph{Outcome: "not_applicable", Coverage: InputCoverage{State: "not_applicable", Reasons: []InputReason{}}, Nodes: []CorrelationNode{{InputID: want.Inputs[0].ID, OccurrenceID: fact.occurrence.ID}}, Edges: []CorrelationEdge{}, Components: [][]string{{fact.occurrence.ID}}}
+	want.Correlation = CorrelationGraph{Outcome: "not applicable", Coverage: InputCoverage{State: "not_applicable", Reasons: []InputReason{}}, Nodes: []CorrelationNode{{InputID: want.Inputs[0].ID, OccurrenceID: fact.occurrence.ID}}, Edges: []CorrelationEdge{}, Components: [][]string{{fact.occurrence.ID}}}
 	want.Requirements.Inputs = cloneInputs(want.Inputs)
 	want.Requirements.InputCoverage = cloneInputCoverage(want.InputCoverage)
 	want.Requirements.FieldAttributionCoverage = cloneInputCoverage(want.FieldAttributionCoverage)

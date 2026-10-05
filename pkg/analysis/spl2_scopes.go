@@ -342,6 +342,9 @@ func (q *spl2ScopeScheduler) runChildren(ctx antlr.ParserRuleContext, env *envir
 		}
 		merged := mergeRequirementTraces(env.requirements.trace, []requirementTracePath{{Ordinal: execution.Ordinal, Trace: execution.Trace, Reachable: true}})
 		*env.requirements.trace = *merged
+		if _, heldJoin := ctx.(*spl2.JoinCommandContext); heldJoin {
+			env.retainHeldJoinCandidates(execution.Environment)
+		}
 	}
 }
 

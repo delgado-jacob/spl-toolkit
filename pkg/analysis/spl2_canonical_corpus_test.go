@@ -581,7 +581,7 @@ func spl2CanonicalProjection(r *Result) spl2CanonicalExpectation {
 }
 
 func TestSPL2CanonicalForbiddenFieldIdentity(t *testing.T) {
-	r := spl2AnalyzeTest(t, `FROM main | join left=L right=R where L.id=R.id AND L.region=R.region [FROM other]`)
+	r := spl2AnalyzeTest(t, `FROM main | join max=1 max=2 left=L right=R where L.id=R.id AND L.region=R.region [FROM other]`)
 	a := &spl2CanonicalAssertions{
 		Status: r.Status, SyntaxComplete: r.Coverage.SyntaxComplete,
 		SemanticComplete: r.Coverage.SemanticComplete, MaxScopes: len(r.Scopes),

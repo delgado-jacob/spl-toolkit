@@ -137,7 +137,7 @@ func TestSPL2SQLLexicalStagesAndProjectionRead(t *testing.T) {
 			Language: "spl2", Profile: "splunkd", Version: "current",
 			QueryDigest: "sha256:aeacf92af76b0a8b74aacd3863908ec66d33802ee4cf5ea0ffa80f9c9d78129f",
 		},
-		CapabilityRevision: "sha256:6495f77a0747f04e9690f5360cf4d024cf95a727bf05ab7cb7c9e1a96e1383dc",
+		CapabilityRevision: "sha256:ee254f612293152dc2f6220ead4048c7abc0971382e5de91e3fb94872080b471",
 		QueryStatus:        Valid,
 		Coverage:           RequirementCoverage{Complete: true, Reasons: []string{}},
 		Items: []RequirementItem{

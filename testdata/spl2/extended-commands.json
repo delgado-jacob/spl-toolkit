@@ -40,12 +40,12 @@
     "canonical_evidence": "independent",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "C16/E.C16 plus ROOT qualified-read ruling: structural alias.field reads retain qualifier-typed source evidence; no atomic dotted or unqualified suffix identity, selected output merge, or catalogue claim. Actual typed right source is independent; merge remains U. Required aliases and integer/enum domains are independent contract checks. Damaged grammar leaves the survivor graph unasserted; held uppercase enum is incomplete, not a definite enum error. Controller-approved composition: existing exact T8.unknown-adjacent retained-known-state and ScopesAppendpipeInheritsBeforeMerge no-child-leak; sound qualified operands retain distinct qualifier-typed source-read evidence in the open/uncertain parent state; neither atomic dotted fields nor unqualified suffix identities or a selected join output merge are established. Child evidence remains scope-local; this does not claim the runtime result has no columns.",
+      "basis": "Milestone 15 selected pipeline join: omitted type is inner; nonnegative max and reversed AND equality keys are modeled on their declared sides. Output collisions remain ambiguous. Existing exact scope, reference, and spelling assertions are retained.",
       "status": "incomplete",
       "syntax_complete": true,
       "semantic_complete": false,
       "required_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
+        "SPL_AMBIGUOUS_FIELD"
       ],
       "forbidden_codes": [
         "SPL_SYNTAX_ERROR",
@@ -163,10 +163,6 @@
           {
             "name": "id",
             "conditional": false
-          },
-          {
-            "name": "id",
-            "conditional": false
           }
         ],
         "removed": [],
@@ -191,7 +187,7 @@
       "syntax_complete": true,
       "semantic_complete": false,
       "expected_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
+        "SPL_AMBIGUOUS_FIELD"
       ],
       "references": [
         {
@@ -232,10 +228,6 @@
         }
       ],
       "fields": [
-        {
-          "name": "id",
-          "conditional": false
-        },
         {
           "name": "id",
           "conditional": false
@@ -297,12 +289,12 @@
     "canonical_evidence": "independent",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "C16/E.C16 plus ROOT qualified-read ruling: structural alias.field reads retain qualifier-typed source evidence; no atomic dotted or unqualified suffix identity, selected output merge, or catalogue claim. Actual typed right source is independent; merge remains U. Required aliases and integer/enum domains are independent contract checks. Damaged grammar leaves the survivor graph unasserted; held uppercase enum is incomplete, not a definite enum error. Controller-approved composition: existing exact T8.unknown-adjacent retained-known-state and ScopesAppendpipeInheritsBeforeMerge no-child-leak; sound qualified operands retain distinct qualifier-typed source-read evidence in the open/uncertain parent state; neither atomic dotted fields nor unqualified suffix identities or a selected join output merge are established. Child evidence remains scope-local; this does not claim the runtime result has no columns.",
+      "basis": "Milestone 15 selected pipeline join: omitted type is inner; nonnegative max and reversed AND equality keys are modeled on their declared sides. Output collisions remain ambiguous. Existing exact scope, reference, and spelling assertions are retained.",
       "status": "incomplete",
       "syntax_complete": true,
       "semantic_complete": false,
       "required_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
+        "SPL_AMBIGUOUS_FIELD"
       ],
       "forbidden_codes": [
         "SPL_SYNTAX_ERROR",
@@ -442,12 +434,6 @@
       ],
       "forbidden_field_identities": [
         {
-          "kind": "atomic",
-          "segments": [
-            "region"
-          ]
-        },
-        {
           "kind": "path",
           "segments": [
             "region"
@@ -485,14 +471,6 @@
             "conditional": false
           },
           {
-            "name": "id",
-            "conditional": false
-          },
-          {
-            "name": "region",
-            "conditional": false
-          },
-          {
             "name": "region",
             "conditional": false
           }
@@ -519,7 +497,7 @@
       "syntax_complete": true,
       "semantic_complete": false,
       "expected_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
+        "SPL_AMBIGUOUS_FIELD"
       ],
       "references": [
         {
@@ -580,14 +558,6 @@
       "fields": [
         {
           "name": "id",
-          "conditional": false
-        },
-        {
-          "name": "id",
-          "conditional": false
-        },
-        {
-          "name": "region",
           "conditional": false
         },
         {
@@ -12074,13 +12044,11 @@
     "canonical_evidence": "independent",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "Task 5 selected fields contract closes each exact projection to its named selectors. Omitted child members do not survive into a surrounding unmodeled merge, while the surrounding command retains its prior incomplete status and scope boundary.",
-      "status": "incomplete",
+      "basis": "Milestone 15 selected pipeline join: omitted type is inner; nonnegative max and reversed AND equality keys are modeled on their declared sides. Output collisions remain ambiguous. Existing exact scope, reference, and spelling assertions are retained.",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "required_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "required_codes": [],
       "forbidden_codes": [
         "SPL_SYNTAX_ERROR",
         "SPL_UNAVAILABLE_FIELD"
@@ -12194,7 +12162,7 @@
         {
           "command": "join",
           "start": 12,
-          "semantic_complete": false,
+          "semantic_complete": true,
           "scope_start": 0,
           "scope_end": 77
         },
@@ -12237,18 +12205,16 @@
         ],
         "removed": [],
         "open": true,
-        "uncertain": true
+        "uncertain": false
       }
     },
     "canonical": {
       "phase": "analysis",
       "scope": "canonical-result",
-      "status": "incomplete",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "expected_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "expected_codes": [],
       "references": [
         {
           "original_name": "main",
@@ -12308,7 +12274,7 @@
       ],
       "removed": [],
       "open": true,
-      "uncertain": true,
+      "uncertain": false,
       "stage_commands": [
         "from",
         "join",
@@ -12317,7 +12283,7 @@
       ],
       "stage_complete": [
         true,
-        false,
+        true,
         true,
         true
       ]
@@ -22265,12 +22231,12 @@
     "canonical_evidence": "independent",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "C16/E.C16 plus ROOT qualified-read ruling: structural alias.field reads retain qualifier-typed source evidence; no atomic dotted or unqualified suffix identity, selected output merge, or catalogue claim. Actual typed right source is independent; merge remains U. Required aliases and integer/enum domains are independent contract checks. Damaged grammar leaves the survivor graph unasserted; held uppercase enum is incomplete, not a definite enum error. Controller-approved composition: existing exact T8.unknown-adjacent retained-known-state and ScopesAppendpipeInheritsBeforeMerge no-child-leak; sound qualified operands retain distinct qualifier-typed source-read evidence in the open/uncertain parent state; neither atomic dotted fields nor unqualified suffix identities or a selected join output merge are established. Child evidence remains scope-local; this does not claim the runtime result has no columns.",
+      "basis": "Milestone 15 selected pipeline join: omitted type is inner; nonnegative max and reversed AND equality keys are modeled on their declared sides. Output collisions remain ambiguous. Existing exact scope, reference, and spelling assertions are retained.",
       "status": "incomplete",
       "syntax_complete": true,
       "semantic_complete": false,
       "required_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
+        "SPL_AMBIGUOUS_FIELD"
       ],
       "forbidden_codes": [
         "SPL_SYNTAX_ERROR",
@@ -22398,10 +22364,6 @@
           {
             "name": "id",
             "conditional": false
-          },
-          {
-            "name": "id",
-            "conditional": false
           }
         ],
         "removed": [],
@@ -22426,7 +22388,7 @@
       "syntax_complete": true,
       "semantic_complete": false,
       "expected_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
+        "SPL_AMBIGUOUS_FIELD"
       ],
       "references": [
         {
@@ -22467,10 +22429,6 @@
         }
       ],
       "fields": [
-        {
-          "name": "id",
-          "conditional": false
-        },
         {
           "name": "id",
           "conditional": false
@@ -22532,12 +22490,12 @@
     "canonical_evidence": "independent",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "C16/E.C16 plus ROOT qualified-read ruling: structural alias.field reads retain qualifier-typed source evidence; no atomic dotted or unqualified suffix identity, selected output merge, or catalogue claim. Actual typed right source is independent; merge remains U. Required aliases and integer/enum domains are independent contract checks. Damaged grammar leaves the survivor graph unasserted; held uppercase enum is incomplete, not a definite enum error. Controller-approved composition: existing exact T8.unknown-adjacent retained-known-state and ScopesAppendpipeInheritsBeforeMerge no-child-leak; sound qualified operands retain distinct qualifier-typed source-read evidence in the open/uncertain parent state; neither atomic dotted fields nor unqualified suffix identities or a selected join output merge are established. Child evidence remains scope-local; this does not claim the runtime result has no columns.",
+      "basis": "Milestone 15 selected pipeline join: omitted type is inner; nonnegative max and reversed AND equality keys are modeled on their declared sides. Output collisions remain ambiguous. Existing exact scope, reference, and spelling assertions are retained.",
       "status": "incomplete",
       "syntax_complete": true,
       "semantic_complete": false,
       "required_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
+        "SPL_AMBIGUOUS_FIELD"
       ],
       "forbidden_codes": [
         "SPL_SYNTAX_ERROR",
@@ -22665,10 +22623,6 @@
           {
             "name": "id",
             "conditional": false
-          },
-          {
-            "name": "id",
-            "conditional": false
           }
         ],
         "removed": [],
@@ -22693,7 +22647,7 @@
       "syntax_complete": true,
       "semantic_complete": false,
       "expected_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
+        "SPL_AMBIGUOUS_FIELD"
       ],
       "references": [
         {
@@ -22734,10 +22688,6 @@
         }
       ],
       "fields": [
-        {
-          "name": "id",
-          "conditional": false
-        },
         {
           "name": "id",
           "conditional": false
@@ -23327,13 +23277,11 @@
     "canonical_evidence": "independent",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "C16/E.C16 plus ROOT qualified-read ruling: whole decoded alias.field name, read/indeterminate; no root literal-dotted field or unqualified suffix installation and no guessed catalogue/origins. Actual typed right source is independent; merge remains U. Required aliases and integer/enum domains are independent contract checks. Damaged grammar leaves the survivor graph unasserted; held uppercase enum is incomplete, not a definite enum error. Controller-approved composition: existing exact T8.unknown-adjacent retained-known-state and ScopesAppendpipeInheritsBeforeMerge no-child-leak; root qualified-join operands cannot install literal or suffix root members. Empty incoming tracked parent fields therefore stay empty/open/uncertain while child evidence remains scope-local; this does not claim the runtime result has no columns.",
-      "status": "incomplete",
+      "basis": "Milestone 15 selected pipeline join: omitted type is inner; nonnegative max and reversed AND equality keys are modeled on their declared sides. Output collisions remain ambiguous. Existing exact scope, reference, and spelling assertions are retained.",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "required_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "required_codes": [],
       "forbidden_codes": [
         "SPL_SYNTAX_ERROR",
         "SPL_UNAVAILABLE_FIELD"
@@ -23436,7 +23384,7 @@
         {
           "command": "join",
           "start": 12,
-          "semantic_complete": false,
+          "semantic_complete": true,
           "scope_start": 0,
           "scope_end": 65
         },
@@ -23462,7 +23410,7 @@
         ],
         "removed": [],
         "open": true,
-        "uncertain": true
+        "uncertain": false
       },
       "required_scopes": [
         {
@@ -23478,12 +23426,10 @@
     "canonical": {
       "phase": "analysis",
       "scope": "canonical-result",
-      "status": "incomplete",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "expected_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "expected_codes": [],
       "references": [
         {
           "original_name": "main",
@@ -23534,7 +23480,7 @@
       ],
       "removed": [],
       "open": true,
-      "uncertain": true,
+      "uncertain": false,
       "stage_commands": [
         "from",
         "join",
@@ -23542,7 +23488,7 @@
       ],
       "stage_complete": [
         true,
-        false,
+        true,
         true
       ]
     }
@@ -23582,12 +23528,12 @@
     "canonical_evidence": "independent",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "Task 5 selected fields contract closes each exact projection to its named selectors. Omitted child members do not survive into a surrounding unmodeled merge, while the surrounding command retains its prior incomplete status and scope boundary. Sound outer predicate reads retain distinct qualifier-typed input evidence while the unselected join output remains open and uncertain.",
+      "basis": "Milestone 15 selected pipeline join: omitted type is inner; nonnegative max and reversed AND equality keys are modeled on their declared sides. Output collisions remain ambiguous. Existing exact scope, reference, and spelling assertions are retained.",
       "status": "incomplete",
       "syntax_complete": true,
       "semantic_complete": false,
       "required_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
+        "SPL_AMBIGUOUS_FIELD"
       ],
       "forbidden_codes": [
         "SPL_SYNTAX_ERROR",
@@ -23787,10 +23733,6 @@
             "conditional": false
           },
           {
-            "name": "realm",
-            "conditional": false
-          },
-          {
             "name": "uid",
             "conditional": false
           }
@@ -23807,7 +23749,7 @@
       "syntax_complete": true,
       "semantic_complete": false,
       "expected_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
+        "SPL_AMBIGUOUS_FIELD"
       ],
       "references": [
         {
@@ -23886,10 +23828,6 @@
       "fields": [
         {
           "name": "id",
-          "conditional": false
-        },
-        {
-          "name": "realm",
           "conditional": false
         },
         {

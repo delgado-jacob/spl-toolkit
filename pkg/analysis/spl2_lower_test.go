@@ -620,7 +620,7 @@ func TestSPL2ExternalJobAndJoinIntentions(t *testing.T) {
 			}
 		}
 	}
-	r := spl2AnalyzeTest(t, `FROM main | join left=L right=R where L.id=R.uid [FROM other | table uid]`)
+	r := spl2AnalyzeTest(t, `FROM main | join max=1 max=2 left=L right=R where L.id=R.uid [FROM other | table uid]`)
 	if r.Status != Incomplete || len(r.Scopes) != 2 {
 		t.Fatalf("join scope: %+v", r)
 	}
@@ -875,7 +875,7 @@ func TestSPL2PipelineJoinSelectedTypes(t *testing.T) {
 	}{
 		{joinType: "inner"},
 		{joinType: "left", rightConditional: true},
-		{joinType: "outer", leftConditional: true, rightConditional: true},
+		{joinType: "outer", rightConditional: true},
 	} {
 		t.Run(tc.joinType, func(t *testing.T) {
 			query := `FROM [{left_key:1, left_value:2}] | join type=` + tc.joinType + ` left=L right=R where L.left_key=R.right_key [FROM [{right_key:1, right_value:3}]]`
@@ -912,10 +912,10 @@ func TestSPL2PipelineJoinSelectedTypes(t *testing.T) {
 
 func TestSPL2PipelineJoinRejectsUnselectedLayouts(t *testing.T) {
 	for _, query := range []string{
-		`FROM [{id:1}] | join left=L right=R where L.id=R.id [FROM [{id:1}]]`,
+		`FROM [{id:1}] | join left=L right=R max=-1 where L.id=R.id [FROM [{id:1}]]`,
 		`FROM [{id:1}] | join type=left left=L where L.id=R.id [FROM [{id:1}]]`,
 		`FROM [{id:1}] | join type=right left=L right=R where L.id=R.id [FROM [{id:1}]]`,
-		`FROM [{id:1}] | join type=inner left=L right=R max=2 where L.id=R.id [FROM [{id:1}]]`,
+		`FROM [{id:1}] | join type=inner left=L right=R max=1 max=2 where L.id=R.id [FROM [{id:1}]]`,
 	} {
 		r := spl2AnalyzeTest(t, query)
 		if r.Status == Valid || r.Coverage.SemanticComplete {
@@ -928,7 +928,7 @@ func TestSPL2PipelineJoinRejectsUnselectedLayouts(t *testing.T) {
 }
 
 func TestSPL2PipelineUnselectedJoinRetainsQualifiedInputEvidence(t *testing.T) {
-	r := spl2AnalyzeTest(t, `FROM main | join left=L right=R where L.id=R.id AND L.region=R.region [FROM other]`)
+	r := spl2AnalyzeTest(t, `FROM main | join left=L right=R max=1 max=2 where L.id=R.id AND L.region=R.region [FROM other]`)
 	if r.Status != Incomplete || r.Coverage.SemanticComplete || !spl2HasCode(r, CodeUnsupportedSemantics) || spl2HasCode(r, CodeAmbiguousField) {
 		t.Fatalf("unselected join claimed output ownership: status=%s coverage=%+v diagnostics=%+v", r.Status, r.Coverage, r.Diagnostics)
 	}
@@ -1180,7 +1180,7 @@ func TestSPL2PipelineJoinForwardViewsKeepTraceSuffixOnce(t *testing.T) {
 		valid         bool
 	}{
 		{name: "selected", options: "type=inner ", valid: true},
-		{name: "rejected", options: ""},
+		{name: "rejected", options: "max=1 max=2 "},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			query := `$out = FROM $left | join ` + tc.options + `left=L right=R where L.id=R.uid [FROM $right];
@@ -1441,7 +1441,7 @@ func TestSPL2SequentialFullState(t *testing.T) {
 			Language: "spl2", Profile: "splunkd", Version: "current",
 			QueryDigest: "sha256:159f5b7d4683ac55dd0efac524ba3ea30133c495a91e81af6c695b70d1e16afa",
 		},
-		CapabilityRevision: "sha256:6495f77a0747f04e9690f5360cf4d024cf95a727bf05ab7cb7c9e1a96e1383dc",
+		CapabilityRevision: "sha256:ee254f612293152dc2f6220ead4048c7abc0971382e5de91e3fb94872080b471",
 		QueryStatus:        Valid,
 		Coverage:           RequirementCoverage{Complete: true, Reasons: []string{}},
 		Items: []RequirementItem{

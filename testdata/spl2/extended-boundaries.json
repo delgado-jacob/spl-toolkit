@@ -955,12 +955,12 @@
     "canonical_evidence": "independent",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "C16/E.C16 plus ROOT qualified-read ruling: structural alias.field reads retain qualifier-typed source evidence; no atomic dotted or unqualified suffix identity, selected output merge, or catalogue claim. Actual typed right source is independent; merge remains U. Required aliases and integer/enum domains are independent contract checks. Damaged grammar leaves the survivor graph unasserted; held uppercase enum is incomplete, not a definite enum error. Controller-approved composition: existing exact T8.unknown-adjacent retained-known-state and ScopesAppendpipeInheritsBeforeMerge no-child-leak; sound qualified operands retain distinct qualifier-typed source-read evidence in the open/uncertain parent state; neither atomic dotted fields nor unqualified suffix identities or a selected join output merge are established. Child evidence remains scope-local; this does not claim the runtime result has no columns.",
+      "basis": "Milestone 15 selected pipeline join: omitted type is inner; nonnegative max and reversed AND equality keys are modeled on their declared sides. Output collisions remain ambiguous. Existing exact scope, reference, and spelling assertions are retained.",
       "status": "incomplete",
       "syntax_complete": true,
       "semantic_complete": false,
       "required_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
+        "SPL_AMBIGUOUS_FIELD"
       ],
       "forbidden_codes": [
         "SPL_SYNTAX_ERROR",
@@ -1078,10 +1078,6 @@
           {
             "name": "id",
             "conditional": false
-          },
-          {
-            "name": "id",
-            "conditional": false
           }
         ],
         "removed": [],
@@ -1106,7 +1102,7 @@
       "syntax_complete": true,
       "semantic_complete": false,
       "expected_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
+        "SPL_AMBIGUOUS_FIELD"
       ],
       "references": [
         {
@@ -1147,10 +1143,6 @@
         }
       ],
       "fields": [
-        {
-          "name": "id",
-          "conditional": false
-        },
         {
           "name": "id",
           "conditional": false

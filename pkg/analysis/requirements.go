@@ -387,7 +387,7 @@ func projectRequirements(document QueryDocument, trace *requirementTrace) (Requi
 		set.QueryStatus = Incomplete
 	}
 	set.FieldAttributionCoverage = inputAttributionCoverage(trace)
-	set.Correlation = initialCorrelation(set.Inputs, set.InputCoverage)
+	set.Correlation = projectCorrelation(trace, set.Inputs, set.InputCoverage)
 	return set, nil
 }
 

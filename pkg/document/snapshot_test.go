@@ -300,3 +300,20 @@ func TestSnapshotInputEvidenceDetached(t *testing.T) {
 		t.Fatal("snapshot query evidence aliases analysis result")
 	}
 }
+
+func TestSnapshotCorrelationKeyEvidenceDetached(t *testing.T) {
+	result, err := analysis.Analyze(analysis.QueryDocument{Text: `from $events | join left=e right=u where e.id=u.uid [from $users]`, Language: "spl2"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	snapshot, err := New(result, testRevisionContext("target-a"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	snapshot.Correlation.Edges[0].Keys[0].Left.ReferenceIDs[0] = "changed"
+	snapshot.Correlation.Edges[0].Keys[0].Right.FieldIdentity.Segments[0] = "changed"
+	snapshot.Requirements.Correlation.Edges[0].Keys[0].Right.ReferenceIDs[0] = "changed"
+	if result.Correlation.Edges[0].Keys[0].Left.ReferenceIDs[0] == "changed" || result.Requirements.Correlation.Edges[0].Keys[0].Right.ReferenceIDs[0] == "changed" || result.Correlation.Edges[0].Keys[0].Right.FieldIdentity.Segments[0] == "changed" {
+		t.Fatal("snapshot correlation keys alias analysis")
+	}
+}

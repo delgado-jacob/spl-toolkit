@@ -257,7 +257,7 @@ func TestSPL2StructuralRequirementBranchIdentityNecessity(t *testing.T) {
 }
 
 func TestSPL2PipelineJoinQualifiedRequirementOwnership(t *testing.T) {
-	query := `FROM main | join left=L right=R where L.id=R.uid [FROM other | table uid]`
+	query := `FROM main | join max=1 max=2 left=L right=R where L.id=R.uid [FROM other | table uid]`
 	result, trace, err := analyzeRewriteWithTrace(QueryDocument{Text: query, Language: "spl2"}, nil, nil)
 	if err != nil {
 		t.Fatal(err)

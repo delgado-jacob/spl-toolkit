@@ -139,7 +139,18 @@ func (p *spl2ParsedDocument) inspectSyntax(tree antlr.Tree, lambdaDepth int) {
 		}
 	case *spl2.SqlJoinFieldContext:
 		if len(ctx.AllAccessPart()) > 0 && spl2IntactSyntax(ctx) {
-			p.heldSyntax(ctx, "Deeper SQL join field paths remain unproved")
+			pipelineJoin := false
+			for owner := ctx.GetParent(); owner != nil; owner = owner.GetParent() {
+				if _, ok := owner.(*spl2.JoinCommandContext); ok {
+					pipelineJoin = true
+					break
+				}
+			}
+			// Pipeline predicates have sound grammar; selectedJoinPredicate owns
+			// their semantic boundary and its located requirement gap.
+			if !pipelineJoin {
+				p.heldSyntax(ctx, "Deeper SQL join field paths remain unproved")
+			}
 		}
 	case *spl2.SqlFromClauseContext:
 		if len(ctx.AllSqlJoinClause()) > 0 && ctx.SourceAlias() == nil && spl2IntactSyntax(ctx) {

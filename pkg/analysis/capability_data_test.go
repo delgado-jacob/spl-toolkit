@@ -1146,7 +1146,7 @@ func TestMilestone10CapabilityClaimsStayBounded(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	const wantSPL2Revision = "sha256:6495f77a0747f04e9690f5360cf4d024cf95a727bf05ab7cb7c9e1a96e1383dc"
+	const wantSPL2Revision = "sha256:ee254f612293152dc2f6220ead4048c7abc0971382e5de91e3fb94872080b471"
 	if spl2Revision != wantSPL2Revision {
 		t.Errorf("SPL2 capability revision = %q, want %q", spl2Revision, wantSPL2Revision)
 	}

@@ -9,6 +9,7 @@ import (
 
 type requirementTrace struct {
 	inputs                  []inputFact
+	correlations            []correlationEvent
 	sourceEvidenceBudget    *sourceEvidenceWorkBudget
 	references              []requirementTraceReference
 	diagnostics             []requirementTraceDiagnostic
@@ -66,6 +67,7 @@ type requirementEnvironment struct {
 func newRequirementTrace() *requirementTrace {
 	return &requirementTrace{
 		sourceEvidenceBudget:    &sourceEvidenceWorkBudget{},
+		correlations:            []correlationEvent{},
 		references:              []requirementTraceReference{},
 		diagnostics:             []requirementTraceDiagnostic{},
 		pendingReferenceIndexes: map[string]int{},
@@ -81,6 +83,7 @@ func (t *requirementTrace) clone() *requirementTrace {
 	}
 	out := &requirementTrace{
 		inputs:                  cloneInputFacts(t.inputs),
+		correlations:            cloneCorrelationEvents(t.correlations),
 		sourceEvidenceBudget:    t.sourceEvidenceBudget,
 		references:              make([]requirementTraceReference, len(t.references)),
 		diagnostics:             make([]requirementTraceDiagnostic, len(t.diagnostics)),
@@ -198,6 +201,7 @@ func mergeRequirementTraces(base *requirementTrace, paths []requirementTracePath
 	merged := base.clone()
 	for _, path := range reachable {
 		merged.inputs = mergeInputFacts(merged.inputs, path.Trace.inputs)
+		merged.correlations = mergeCorrelationEvents(merged.correlations, path.Trace.correlations)
 	}
 	for _, path := range reachable {
 		merged.syntaxComplete = merged.syntaxComplete && path.Trace.syntaxComplete
@@ -244,6 +248,7 @@ func rebaseRequirementTrace(oldBase, newBase, branch *requirementTrace) *require
 	assertRequirementTracePrefix(oldBase, branch)
 	rebased := newBase.clone()
 	rebased.inputs = mergeInputFacts(rebased.inputs, branch.inputs)
+	rebased.correlations = mergeCorrelationEvents(rebased.correlations, branch.correlations)
 	rebased.syntaxComplete = rebased.syntaxComplete && branch.syntaxComplete
 	rebased.semanticComplete = rebased.semanticComplete && branch.semanticComplete
 	for stageID := range branch.incompleteStageIDs {
@@ -344,6 +349,7 @@ func (t *requirementTrace) recordDiagnostic(diagnostic Diagnostic, incomplete bo
 
 func (t *requirementTrace) remapReferences(mapping map[string]string) {
 	remapInputReferences(t.inputs, mapping)
+	t.remapCorrelationReferences(mapping)
 	seen := map[string]bool{}
 	for i := range t.references {
 		entry := &t.references[i]
@@ -405,6 +411,7 @@ func (t *requirementTrace) remapStages(mapping map[string]string) {
 		}
 	}
 	remapInputStages(t.inputs, mapping)
+	t.remapCorrelationStages(mapping)
 	for i := range t.references {
 		remapSourceOwnerStages(t.references[i].owners, mapping)
 		if id := t.references[i].reference.StageID; id != "" {

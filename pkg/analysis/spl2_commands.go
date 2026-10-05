@@ -561,8 +561,8 @@ type spl2SelectedJoin struct {
 }
 
 func (s *spl2SemanticStage) selectedJoin(command *spl2.JoinCommandContext) spl2SelectedJoin {
-	selection := spl2SelectedJoin{selected: true}
-	leftCount, rightCount, typeCount := 0, 0, 0
+	selection := spl2SelectedJoin{selected: true, joinType: "inner"}
+	leftCount, rightCount, typeCount, maxCount := 0, 0, 0, 0
 	for _, option := range command.AllJoinOption() {
 		switch {
 		case option.LEFT() != nil:
@@ -579,6 +579,12 @@ func (s *spl2SemanticStage) selectedJoin(command *spl2.JoinCommandContext) spl2S
 			if operand.Sound {
 				selection.rightAlias = operand.Name
 			} else {
+				selection.selected = false
+			}
+		case option.MAX() != nil:
+			maxCount++
+			value := option.IntegerValue()
+			if value == nil || !s.parsed2.soundOperand(value) || !spl2SQLInteger(strings.TrimPrefix(value.GetText(), "+")) {
 				selection.selected = false
 			}
 		case option.TYPE_OPTION() != nil:
@@ -598,7 +604,7 @@ func (s *spl2SemanticStage) selectedJoin(command *spl2.JoinCommandContext) spl2S
 			selection.selected = false
 		}
 	}
-	selection.selected = selection.selected && leftCount == 1 && rightCount == 1 && typeCount == 1 && selection.leftAlias != "" && selection.rightAlias != "" && selection.leftAlias != selection.rightAlias
+	selection.selected = selection.selected && leftCount == 1 && rightCount == 1 && typeCount <= 1 && maxCount <= 1 && selection.leftAlias != "" && selection.rightAlias != "" && selection.leftAlias != selection.rightAlias
 	return selection
 }
 
@@ -613,6 +619,7 @@ func (q *spl2ScopeScheduler) lowerSelectedJoin(s *spl2SemanticStage, command *sp
 		joinReferenceIDs := s.joinPredicateIntentions(command)
 		if childOK {
 			s.retainSelectedChildTrace(baseAfterChild, right.Trace)
+			s.env.retainHeldJoinCandidates(right.Environment)
 		}
 		s.unsupportedOwned(command, "Join output merge and qualified input binding are unproved", joinReferenceIDs)
 		return
@@ -622,16 +629,19 @@ func (q *spl2ScopeScheduler) lowerSelectedJoin(s *spl2SemanticStage, command *sp
 	if !childOK || !predicateOK {
 		if childOK {
 			s.retainSelectedChildTrace(baseAfterChild, right.Trace)
+			s.env.retainHeldJoinCandidates(right.Environment)
 		}
 		s.unsupportedOwned(command, "Join layout is outside selected semantics", joinReferenceIDs)
 		return
 	}
 
+	s.recordJoinCorrelations(command, joinReferenceIDs)
 	combinedTrace := s.rebasedSelectedChildTrace(baseAfterChild, right.Trace)
 	rightMatched := right.Environment.cloneWithRequirementTrace(combinedTrace)
 	matched, collisions, composed := composeFlowEnvironments(s.env, rightMatched)
 	if !composed {
 		s.retainSelectedChildTrace(baseAfterChild, right.Trace)
+		s.env.retainHeldJoinCandidates(right.Environment)
 		s.unsupportedOwned(command, "Join child requirement trace does not extend the current parent", joinReferenceIDs)
 		return
 	}
@@ -643,14 +653,9 @@ func (q *spl2ScopeScheduler) lowerSelectedJoin(s *spl2SemanticStage, command *sp
 	mergeBase := s.env.cloneWithRequirementTrace(combinedTrace.clone())
 	paths := []flowMergePath{{Ordinal: 0, Environment: matched, Reachable: true}}
 	switch selection.joinType {
-	case "left":
+	case "left", "outer":
 		leftOnly := s.env.cloneWithRequirementTrace(combinedTrace.clone())
 		paths = append(paths, flowMergePath{Ordinal: 1, Environment: leftOnly, Reachable: true})
-	case "outer":
-		leftOnly := s.env.cloneWithRequirementTrace(combinedTrace.clone())
-		paths = append(paths, flowMergePath{Ordinal: 1, Environment: leftOnly, Reachable: true})
-		rightOnly := right.Environment.cloneWithRequirementTrace(combinedTrace.clone())
-		paths = append(paths, flowMergePath{Ordinal: 2, Environment: rightOnly, Reachable: true})
 	}
 	base := s.env
 	s.installSelectedFlowMerge(base, mergeFlowEnvironments(mergeBase, paths, false))
