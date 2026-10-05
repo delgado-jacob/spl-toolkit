@@ -655,9 +655,22 @@ func TestConfigurationArtifactBudgetIsFatal(t *testing.T) {
 		offset, _ := strconv.Atoi(r.URL.Query().Get("offset"))
 		json.NewEncoder(w).Encode(map[string]any{"entry": []any{configurationEntry(fmt.Sprintf("report-%d", offset), map[string]any{"search": text})}, "paging": map[string]int{"total": 9, "offset": offset, "perPage": 1}})
 	})
+	// Allow the large pages to arrive under race instrumentation so this tests
+	// the artifact budget rather than the fixture's short acquisition timeout.
+	c.options.RequestTimeout = 30 * time.Second
+	c.http.Timeout = 30 * time.Second
 	result := c.collectConfiguration(context.Background(), "synthetic")
 	if result.Err == nil || result.Err.Error() != "artifact_too_large" {
-		t.Fatalf("budget must stop export: %v", result.Err)
+		var collectionReasons, diagnosticCodes []string
+		for _, collection := range result.Collections {
+			if collection.Reason != "" {
+				collectionReasons = append(collectionReasons, collection.Kind+":"+collection.Reason)
+			}
+		}
+		for _, diagnostic := range result.Diagnostics {
+			diagnosticCodes = append(diagnosticCodes, diagnostic.Kind+":"+diagnostic.Code)
+		}
+		t.Fatalf("budget must stop export: err=%v objects=%d collection_reasons=%v diagnostic_codes=%v", result.Err, len(result.Objects), collectionReasons, diagnosticCodes)
 	}
 }
 
