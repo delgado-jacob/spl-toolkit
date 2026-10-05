@@ -446,6 +446,23 @@ func testInputSourceEvidenceResourceLimit(t *testing.T, maxDepth int) {
 	for depth := 1; depth <= maxDepth; depth++ {
 		query += fmt.Sprintf("$v%d = union $v%d, $v%d;", depth, depth-1, depth-1)
 	}
+	assertInputSourceEvidenceResourceLimit(t, query)
+}
+
+func TestInputSourceEvidenceLinearViewResourceLimit(t *testing.T) {
+	for _, depth := range []int{384, 512} {
+		t.Run(fmt.Sprintf("depth_%d", depth), func(t *testing.T) {
+			query := "$v0 = FROM $events;\n"
+			for link := 1; link <= depth; link++ {
+				query += fmt.Sprintf("$v%d=FROM$v%d;", link, link-1)
+			}
+			assertInputSourceEvidenceResourceLimit(t, query)
+		})
+	}
+}
+
+func assertInputSourceEvidenceResourceLimit(t *testing.T, query string) {
+	t.Helper()
 	result, trace, err := analyzeRewriteWithTrace(QueryDocument{Text: query, Language: "spl2"}, nil, nil)
 	if err != nil {
 		t.Fatal(err)
@@ -464,7 +481,17 @@ func testInputSourceEvidenceResourceLimit(t *testing.T, maxDepth int) {
 			t.Fatal("partial evidence has no located reason")
 		}
 	}
-	t.Logf("reserved units=%d, trace facts=%d, source inputs=%d", trace.sourceEvidenceBudget.units, len(trace.inputs), len(result.Inputs))
+	retainedUnits := 0
+	for _, fact := range trace.inputs {
+		if len(fact.occurrence.UseSiteLocations) != len(fact.occurrence.UseSiteReferenceIDs) {
+			t.Fatal("source context links lost pairing")
+		}
+		retainedUnits += 1 + len(fact.occurrence.UseSiteLocations)
+	}
+	if retainedUnits > sourceEvidenceWorkLimit {
+		t.Fatalf("retained source context is unbounded: %d units", retainedUnits)
+	}
+	t.Logf("reserved units=%d, retained fact/context units=%d, trace facts=%d, source inputs=%d", trace.sourceEvidenceBudget.units, retainedUnits, len(trace.inputs), len(result.Inputs))
 	if len(result.Inputs) != 1 || len(result.Inputs[0].Occurrences) == 0 || len(trace.inputs) > sourceEvidenceWorkLimit {
 		t.Fatalf("known facts missing or unbounded: inputs=%d facts=%d", len(result.Inputs), len(trace.inputs))
 	}

@@ -5,10 +5,20 @@ import "github.com/antlr4-go/antlr/v4"
 const lexerWorkLimit = 4096
 
 // Semantic source expansion uses the same bounded work scale as lexical input.
-// Each new active-source or discovery fact consumes one unit before copying.
+// Each copied active-source or discovery fact and each paired use-site
+// location/reference link consumes one unit, including the newly appended link.
 const sourceEvidenceWorkLimit = lexerWorkLimit
 
 const sourceEvidenceResourceLimitMessage = "source discovery stopped because further copying would exceed the 4,096-unit source-evidence work limit"
+
+func sourceEvidenceExpansionUnits(facts []inputFact) int {
+	units := 0
+	for _, fact := range facts {
+		// One fact, its existing context links, and the new use-site link.
+		units += 2 + len(fact.occurrence.UseSiteLocations)
+	}
+	return units
+}
 
 type sourceEvidenceWorkBudget struct {
 	units   int

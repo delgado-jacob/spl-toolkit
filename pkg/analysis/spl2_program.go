@@ -438,7 +438,7 @@ func (p *spl2Program) resolveViewSource(stage *spl2SemanticStage, parameter spl2
 		callerTrace = rebaseRequirementTrace(canonicalBefore, p.trace, callerTrace)
 		stage.env.requirements.trace = callerTrace
 	}
-	if summary != nil && !callerTrace.reserveSourceEvidence(len(summary.inputs)+len(view.sourceInputs), stage.result.Stages[stage.stage], location) {
+	if summary != nil && !callerTrace.reserveSourceEvidence(sourceEvidenceExpansionUnits(summary.inputs)+sourceEvidenceExpansionUnits(view.sourceInputs), stage.result.Stages[stage.stage], location) {
 		p.markStageIncomplete(stage)
 		return true
 	}
