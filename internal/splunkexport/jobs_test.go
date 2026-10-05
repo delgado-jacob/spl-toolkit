@@ -23,7 +23,7 @@ type jobFixture struct {
 	status          string
 	statusSequence  []string
 	results         string
-	submissionDelay time.Duration
+	submissionStall bool
 	unexpectedSID   bool
 	deleteFails     bool
 	rowCount        int
@@ -75,13 +75,11 @@ func newJobFixture(t *testing.T, f *jobFixture) (*Client, *jobFixture) {
 					return
 				}
 			}
-			if f.submissionDelay > 0 {
+			if f.submissionStall {
 				f.mu.Unlock()
-				select {
-				case <-r.Context().Done():
-				case <-time.After(f.submissionDelay):
-				}
+				<-r.Context().Done()
 				f.mu.Lock()
+				return
 			}
 			if f.unexpectedSID {
 				id = "unrelated-job"
@@ -298,14 +296,23 @@ func TestOwnedJobDeadlineFinalizesBeforeDelete(t *testing.T) {
 	}
 }
 func TestOwnedJobSubmissionTimeoutCleansKnownID(t *testing.T) {
-	c, f := newJobFixture(t, &jobFixture{submissionDelay: 50 * time.Millisecond})
-	c.options.RequestTimeout = 10 * time.Millisecond
-	c.http.Timeout = 10 * time.Millisecond
+	c, f := newJobFixture(t, &jobFixture{submissionStall: true})
+	// Leave headroom for TLS setup and the fresh cleanup connection; submission stalls.
+	c.options.RequestTimeout = 500 * time.Millisecond
+	c.http.Timeout = 500 * time.Millisecond
 	r := c.runDiscoveryJob(context.Background(), discoveryQuery{search: "fixture query"})
-	if r.Coverage == "complete" {
-		t.Fatal("submission timeout complete")
+	if r.Coverage != "unavailable" || r.Reason != "job_submission_failed" || len(r.Rows) != 0 || r.CleanupFailed {
+		t.Fatalf("submission timeout cleanup: %+v", r)
 	}
 	f.assertClean(t)
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	if strings.Join(f.operations, ",") != "submit,delete" {
+		t.Fatalf("submission was not received or owned cleanup misplaced: %v", f.operations)
+	}
+	if c.owns(f.dispatchForm.Get("id")) {
+		t.Fatal("successful DELETE retained submitted owned job")
+	}
 }
 func TestOwnedJobCancellationLeavesUnrelatedJob(t *testing.T) {
 	c, f := newJobFixture(t, &jobFixture{unexpectedSID: true})
