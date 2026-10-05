@@ -792,3 +792,50 @@ func TestRequirementSourceOwnershipViewNewFieldsHaveDetachedContexts(t *testing.
 		t.Fatalf("unexpected view field obligations: %+v", r.Requirements.Items)
 	}
 }
+
+func TestRequirementSourceOwnershipPreservesUnavailableTransfers(t *testing.T) {
+	for _, tc := range []struct{ name, transfer, unavailable string }{
+		{"removed", "fields - id", "id"},
+		{"closed aggregate", "stats count() AS total", "missing"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			query := `from $events | join type=inner left=e right=u where e.id=u.user_id [from $users] | ` + tc.transfer + ` | where ` + tc.unavailable + `=1`
+			r, err := Analyze(QueryDocument{Text: query, Language: "spl2"})
+			if err != nil {
+				t.Fatal(err)
+			}
+			last := r.References[len(r.References)-1]
+			if !r.Coverage.SyntaxComplete || last.NormalizedName != tc.unavailable || last.Binding != "unavailable" || r.Status != Invalid || r.Requirements.QueryStatus != Invalid {
+				t.Fatalf("unavailable transfer lost: reference=%+v status=%s/%s", last, r.Status, r.Requirements.QueryStatus)
+			}
+			for _, diagnostics := range [][]Diagnostic{r.Diagnostics, r.Requirements.Diagnostics} {
+				found := false
+				for _, diagnostic := range diagnostics {
+					if diagnostic.Code == CodeUnavailableField && diagnostic.Location == last.Location {
+						found = true
+					}
+				}
+				if !found {
+					t.Fatalf("missing located unavailable diagnostic: %+v", diagnostics)
+				}
+			}
+			initialID := false
+			for _, item := range r.Requirements.Items {
+				for _, occurrence := range item.Occurrences {
+					if occurrence.ReferenceID == last.ID {
+						t.Fatalf("unavailable destination became external obligation: %+v", item)
+					}
+				}
+				if item.Kind == "field" && item.Identity == "id" {
+					initialID = true
+					if item.InputID != r.Inputs[0].ID || item.Necessity != "required" || len(item.Occurrences) != 1 || item.Occurrences[0].OriginalName != "e.id" {
+						t.Fatalf("initial join source requirement changed: %+v", item)
+					}
+				}
+			}
+			if !initialID || !r.Requirements.Coverage.Complete {
+				t.Fatalf("canonical requirements lost source evidence: %+v", r.Requirements)
+			}
+		})
+	}
+}

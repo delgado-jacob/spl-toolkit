@@ -543,12 +543,13 @@ func (e *requirementEnvironment) readIdentity(reference Reference, identity fiel
 		owners = sourceOwnersForIdentity(e.inputs, identity)
 	}
 	switch {
-	case len(owners) > 0 && !sourceOwnersProved(owners) && (!known || field.source):
-		return classified("indeterminate", false, true)
 	case known && field.conditional:
 		return classified("indeterminate", false, true)
 	case known:
 		if field.source {
+			if len(owners) > 0 && !sourceOwnersProved(owners) {
+				return classified("indeterminate", false, true)
+			}
 			return classified("source", true, false)
 		}
 		return classified("derived", false, false)
@@ -557,6 +558,9 @@ func (e *requirementEnvironment) readIdentity(reference Reference, identity fiel
 	case exactIdentity && e.removed[key] || !e.open:
 		return classified("unavailable", false, false)
 	default:
+		if len(owners) > 0 && !sourceOwnersProved(owners) {
+			return classified("indeterminate", false, true)
+		}
 		if !nullTest {
 			e.fields[key] = requirementField{identity: identity.clone(), source: true, owners: cloneSourceOwners(owners), origins: []string{reference.ID}}
 			e.detectCollision(reference.NormalizedName)
