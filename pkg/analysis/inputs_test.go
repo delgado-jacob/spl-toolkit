@@ -319,3 +319,116 @@ func TestInputViewAndDynamicSourceAliases(t *testing.T) {
 		}
 	}
 }
+
+func TestInputJoinedSourcesAfterLexicalBaseResolution(t *testing.T) {
+	direct, err := Analyze(QueryDocument{Text: `FROM $events AS b JOIN $users AS u ON b.id=u.id | fields b.id`, Language: "spl2"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(direct.Inputs) != 2 {
+		t.Fatalf("direct source inputs: %#v", direct.Inputs)
+	}
+	for _, tc := range []struct {
+		name, query, coverage string
+		matchDirect           bool
+	}{
+		{"local view", `$base = FROM $events; $consumer = FROM $base AS b JOIN $users AS u ON b.id=u.id | fields b.id;`, "complete", true},
+		{"imported member", `import remote as source from vendor/security; $consumer = FROM source AS b JOIN $users AS u ON b.id=u.id | fields b.id;`, "partial", false},
+		{"imported container", `import * as external from vendor/security; $consumer = FROM external.events AS b JOIN $users AS u ON b.id=u.id | fields b.id;`, "partial", false},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			result, err := Analyze(QueryDocument{Text: tc.query, Language: "spl2"})
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(result.Inputs) != 2 {
+				t.Fatalf("joined source disappeared after lexical binding: %#v", result.Inputs)
+			}
+			if !reflect.DeepEqual(result.Inputs, result.Requirements.Inputs) || !reflect.DeepEqual(result.InputCoverage, result.Requirements.InputCoverage) || !reflect.DeepEqual(result.FieldAttributionCoverage, result.Requirements.FieldAttributionCoverage) || !reflect.DeepEqual(result.Correlation, result.Requirements.Correlation) {
+				t.Fatal("result/requirement query evidence differs")
+			}
+			if result.InputCoverage.State != tc.coverage {
+				t.Fatalf("discovery coverage %#v, want %s", result.InputCoverage, tc.coverage)
+			}
+			for i, input := range result.Inputs {
+				if len(input.Occurrences) != 1 {
+					t.Fatalf("unexpected source multiplicity: %#v", input)
+				}
+				if tc.matchDirect && (input.ID != direct.Inputs[i].ID || input.Identity != direct.Inputs[i].Identity || input.Kind != direct.Inputs[i].Kind) {
+					t.Fatalf("local source identity differs from direct source: %#v", input)
+				}
+			}
+			users := result.Inputs[1]
+			occurrence := users.Occurrences[0]
+			if users.ID != direct.Inputs[1].ID || users.Name != "$users" || occurrence.Alias != "u" || tc.query[occurrence.Location.Start.Offset:occurrence.Location.End.Offset] != "$users" || occurrence.ReferenceID == "" || occurrence.OriginalReferenceID != occurrence.ReferenceID || len(occurrence.UseSiteLocations) != 0 {
+				t.Fatalf("joined source occurrence mismatch: %#v", users)
+			}
+			if tc.matchDirect && len(result.Inputs[0].Occurrences[0].UseSiteLocations) != 1 {
+				t.Fatal("local view source context lost")
+			}
+			unsupported := false
+			for _, diagnostic := range result.Diagnostics {
+				unsupported = unsupported || diagnostic.Code == CodeUnsupportedSemantics && diagnostic.StageID == occurrence.StageID
+			}
+			if !unsupported || len(result.Correlation.Edges) != 0 || result.Correlation.Outcome != "indeterminate" {
+				t.Fatalf("unmodeled join gained proof: diagnostics=%#v graph=%#v", result.Diagnostics, result.Correlation)
+			}
+		})
+	}
+}
+
+func TestInputIndependentUnionHasNoImplicitParent(t *testing.T) {
+	result, err := Analyze(QueryDocument{Text: `union $events, $users`, Language: "spl2"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(result.Inputs) != 2 || result.Inputs[0].Name != "$events" || result.Inputs[1].Name != "$users" || result.InputCoverage.State != "complete" {
+		t.Fatalf("independent union fabricated a parent input: %#v", result.Inputs)
+	}
+	for _, input := range result.Inputs {
+		if input.Kind != "named_placeholder" || len(input.Occurrences) != 1 {
+			t.Fatalf("independent union input: %#v", input)
+		}
+	}
+}
+
+func TestInputViewSummarySituatesEveryUnderlyingSource(t *testing.T) {
+	for _, base := range []string{
+		`FROM $events | join left=e right=u where e.id=u.id [from $users]`,
+		`FROM $events | from $users`,
+	} {
+		t.Run(base, func(t *testing.T) {
+			query := `$unrelated = FROM $noise; $base = ` + base + `; $consumer = FROM $base; $other = FROM $base;`
+			result, err := Analyze(QueryDocument{Text: query, Language: "spl2"})
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(result.Inputs) != 3 {
+				t.Fatalf("view source discovery: %#v", result.Inputs)
+			}
+			for _, input := range result.Inputs {
+				if input.Name == "$noise" {
+					if len(input.Occurrences) != 1 || len(input.Occurrences[0].UseSiteLocations) != 0 {
+						t.Fatalf("unrelated declaration leaked into view source summary: %#v", input)
+					}
+					continue
+				}
+				if len(input.Occurrences) != 2 {
+					t.Fatalf("not every source received terminal view use contexts: %#v", input)
+				}
+				for _, occurrence := range input.Occurrences {
+					if len(occurrence.UseSiteLocations) != 1 || len(occurrence.UseSiteReferenceIDs) != 1 || occurrence.ReferenceID != occurrence.UseSiteReferenceIDs[0] || occurrence.OriginalReferenceID == "" || query[occurrence.Location.Start.Offset:occurrence.Location.End.Offset] != input.Name {
+						t.Fatalf("underlying source location/links missing: %#v", occurrence)
+					}
+					use := occurrence.UseSiteLocations[0]
+					if query[use.Start.Offset:use.End.Offset] != "$base" {
+						t.Fatalf("wrong terminal use location: %#v", occurrence)
+					}
+				}
+			}
+			if !reflect.DeepEqual(result.Inputs, result.Requirements.Inputs) {
+				t.Fatal("result and requirements source summaries differ")
+			}
+		})
+	}
+}

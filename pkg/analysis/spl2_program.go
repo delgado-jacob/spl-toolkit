@@ -338,6 +338,19 @@ func (p *spl2Program) bindView(view *spl2ViewSymbol) (*environment, bool) {
 	p.viewStack = p.viewStack[:len(p.viewStack)-1]
 	view.state = spl2BindingComplete
 	view.summary = env.clone()
+	view.sourceInputs = []inputFact{}
+	if trace := env.requirements.trace; trace != nil {
+		body := p.parsed.source.contextLocation(view.body)
+		for _, fact := range trace.inputs {
+			location := fact.occurrence.Location
+			if uses := fact.occurrence.UseSiteLocations; len(uses) > 0 {
+				location = uses[len(uses)-1]
+			}
+			if location.Start.Offset >= body.Start.Offset && location.End.Offset <= body.End.Offset {
+				view.sourceInputs = append(view.sourceInputs, cloneInputFacts([]inputFact{fact})...)
+			}
+		}
+	}
 	if view.cycle || view.invalid || view.parserTainted || view.summary.uncertain || view.summary.requirements.uncertain {
 		p.markDeclarationIncomplete(view.declaration)
 		view.summary.uncertain = true
@@ -432,7 +445,7 @@ func (p *spl2Program) resolveViewSource(stage *spl2SemanticStage, parameter spl2
 		}
 		stage.env.inputs = situatedViewInputs(summary.inputs, useReference, stage.result.Stages[stage.stage], location, alias)
 		if callerTrace != nil {
-			callerTrace.inputs = mergeInputFacts(callerTrace.inputs, stage.env.inputs)
+			callerTrace.inputs = mergeInputFacts(callerTrace.inputs, situatedViewInputs(view.sourceInputs, useReference, stage.result.Stages[stage.stage], location, alias))
 		}
 	}
 	if !complete {
@@ -532,6 +545,10 @@ func (p *spl2Program) bindCommand(stage *spl2SemanticStage, context antlr.Parser
 		p.resolveViewSource(stage, dataset.DatasetParameter())
 	} else {
 		p.resolveImportedDataset(stage, dataset)
+	}
+	stage.joinDatasetIntentions(from.SqlFromClause())
+	if len(from.SqlFromClause().AllSqlJoinClause()) > 0 {
+		stage.unsupported(from, "SQL clause field scheduling is not yet modeled")
 	}
 	if alias := from.SqlFromClause().SourceAlias(); alias != nil {
 		operand := stage.operand(alias.Identifier())

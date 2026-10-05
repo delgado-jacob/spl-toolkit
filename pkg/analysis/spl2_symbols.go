@@ -37,6 +37,7 @@ type spl2ViewSymbol struct {
 	scopeID       string
 	state         spl2BindingState
 	summary       *environment
+	sourceInputs  []inputFact // All underlying query sources, separate from active row owners.
 	cycle         bool
 	invalid       bool
 	parserTainted bool
