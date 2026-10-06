@@ -635,3 +635,134 @@ func TestFieldOwnershipCandidatesRemainAmbiguous(t *testing.T) {
 		}
 	}
 }
+
+func TestCheckInputConditionalAbsenceAggregation(t *testing.T) {
+	conditional := func(r *Request, kind string) {
+		for i := range r.Requirements.Items {
+			item := &r.Requirements.Items[i]
+			if item.Kind != kind {
+				continue
+			}
+			item.Necessity = "conditional"
+			for j := range item.Occurrences {
+				item.Occurrences[j].Necessity = "conditional"
+			}
+		}
+	}
+	missingObject := func(r *Request) { r.Snapshot.Objects = []environment.Object{} }
+	missingField := func(r *Request) {
+		r.SchemaBundle.Schemas[0].Catalog = json.RawMessage(`{"fields":["other"],"optional_fields":[],"identity":"fields"}`)
+	}
+	tests := []struct {
+		name, text, input, aggregate string
+		change                       func(*Request)
+	}{
+		{"conditional Dataset absence", "from $events", "indeterminate", "incomplete", func(r *Request) { conditional(r, "dataset"); missingObject(r) }},
+		{"required Dataset absence", "from $events", "missing", "unsatisfied", missingObject},
+		{"required field absence", "from $events | fields id", "missing", "unsatisfied", missingField},
+		{"conditional field absence", "from $events | fields id", "indeterminate", "incomplete", func(r *Request) { conditional(r, "field"); missingField(r) }},
+		{"conditional field positive", "from $events | fields id", "satisfied", "satisfied", func(r *Request) { conditional(r, "field") }},
+		{"required Dataset and conditional field absent", "from $events | fields id", "missing", "unsatisfied", func(r *Request) { conditional(r, "field"); missingObject(r); missingField(r) }},
+		{"conditional Dataset and required field absent", "from $events | fields id", "missing", "unsatisfied", func(r *Request) { conditional(r, "dataset"); missingObject(r); missingField(r) }},
+	}
+	for _, tt := range tests {
+		for _, reverse := range []bool{false, true} {
+			for _, api := range []string{"Check", "CheckJSON"} {
+				order := "source order"
+				if reverse {
+					order = "reversed order"
+				}
+				t.Run(tt.name+"/"+order+"/"+api, func(t *testing.T) {
+					r := assessmentFixture(t, tt.text)
+					tt.change(&r)
+					if reverse {
+						for i, j := 0, len(r.Requirements.Items)-1; i < j; i, j = i+1, j-1 {
+							r.Requirements.Items[i], r.Requirements.Items[j] = r.Requirements.Items[j], r.Requirements.Items[i]
+						}
+					}
+					var report *Report
+					var err error
+					if api == "CheckJSON" {
+						report, err = CheckJSON(requestRaw(t, r))
+					} else {
+						report, err = Check(r)
+					}
+					if err != nil {
+						t.Fatal(err)
+					}
+					if report.Outcome != tt.aggregate || len(report.Inputs) != 1 || report.Inputs[0].Outcome != tt.input {
+						t.Fatalf("got aggregate %s input %s; want %s %s", report.Outcome, report.Inputs[0].Outcome, tt.aggregate, tt.input)
+					}
+					for _, item := range r.Requirements.Items {
+						for _, out := range report.RequirementOutcomes {
+							if out.RequirementID != item.ID {
+								continue
+							}
+							absent := item.Kind == "dataset" && len(r.Snapshot.Objects) == 0 || item.Kind == "field" && tt.name != "conditional field positive"
+							if absent && out.Outcome != "missing" {
+								t.Fatal("per-requirement missing evidence lost")
+							}
+							if item.Necessity == "conditional" && out.Applicability != "indeterminate" {
+								t.Fatal("conditional applicability was fabricated")
+							}
+						}
+					}
+				})
+			}
+		}
+	}
+}
+
+func TestCheckInputConditionalAbsenceIsolation(t *testing.T) {
+	for _, api := range []string{"Check", "CheckJSON"} {
+		t.Run(api, func(t *testing.T) {
+			r := assessmentFixture(t, "from $events | union [from $users]")
+			r.SchemaBundle = nil
+			users := r.Snapshot.Objects[1]
+			r.Snapshot.Objects = []environment.Object{users}
+			names := map[string]string{}
+			for _, input := range r.Requirements.Inputs {
+				names[input.ID] = input.Name
+			}
+			for i := range r.InputBindings {
+				b := &r.InputBindings[i]
+				b.SchemaID = ""
+				if names[b.InputID] == "$users" {
+					b.ObjectID = users.ID
+					b.Expected = objectIdentity(users)
+				}
+			}
+			for i := range r.Requirements.Items {
+				item := &r.Requirements.Items[i]
+				if item.Kind == "dataset" && names[item.InputID] == "$events" {
+					item.Necessity = "conditional"
+					for j := range item.Occurrences {
+						item.Occurrences[j].Necessity = "conditional"
+					}
+				}
+			}
+			var report *Report
+			var err error
+			if api == "CheckJSON" {
+				report, err = CheckJSON(requestRaw(t, r))
+			} else {
+				report, err = Check(r)
+			}
+			if err != nil {
+				t.Fatal(err)
+			}
+			if report.Outcome != "incomplete" {
+				t.Fatal("conditional missing input became required blocker")
+			}
+			for _, input := range report.Inputs {
+				want := "satisfied"
+				if names[input.InputID] == "$events" {
+					want = "indeterminate"
+				}
+				if input.Outcome != want {
+					t.Fatalf("input %s got %s want %s", names[input.InputID], input.Outcome, want)
+				}
+			}
+		})
+	}
+}

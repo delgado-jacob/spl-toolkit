@@ -120,7 +120,6 @@ func (p *Prepared) assess(request AssessmentRequest, resolved map[string]resolve
 	for _, input := range set.Inputs {
 		out, coverage := p.assessInput(resolved[input.ID], request.QueryScope)
 		inputObjects[input.ID] = out
-		report.Inputs = append(report.Inputs, out)
 		report.Coverage = append(report.Coverage, coverage)
 		// Dataset requirement items carry necessity. Do not independently turn
 		// a conditional source obligation into an unconditional blocker.
@@ -131,9 +130,15 @@ func (p *Prepared) assess(request AssessmentRequest, resolved map[string]resolve
 				break
 			}
 		}
-		if !linked {
+		if linked {
+			// Seed compatibility aggregation independently of object existence.
+			// The linked requirement outcomes retain the object fact and decide
+			// whether absence is an applicable blocker or conditional unknown.
+			out.Outcome = "satisfied"
+		} else {
 			record(out.Outcome, "applicable", out.Reasons)
 		}
+		report.Inputs = append(report.Inputs, out)
 	}
 	for _, item := range set.Items {
 		var out RequirementOutcome
