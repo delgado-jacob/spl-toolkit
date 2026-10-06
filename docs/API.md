@@ -99,7 +99,7 @@ Requirements describe direct obligations visible in the submitted query. Extract
 
 Both digests use `sha256:<64 lowercase hex>`. `query_digest` is SHA-256 over the exact valid UTF-8 query-text bytes. It excludes source ID, language, profile, and compatibility version. Query text is not whitespace-normalized, repaired, or line-ending-normalized.
 
-`capability_revision` is SHA-256 over compact Go `encoding/json` output for the normalized semantic capability payload, without indentation or a trailing newline. It includes `schema_version`, the language/profile/version selectors, `documentation_snapshot` when present, the legacy `commands` and `functions` projections, `rewrite`, `records`, `summary`, and `evidence`. Of the fields in the emitted manifest, only `toolkit_version` is excluded. A source Go build may therefore report `toolkit_version: "dev"` while tagged CLI, server, native, and packaged surfaces report the exact `VERSION`; both retain the same semantic revision when their capability payloads match. The current SPL revision is `sha256:8a612f2064da24552a68faec261968731a6f1f1c7279ffabb77a59c7dfdb2008`; the SPL2 revision is `sha256:6495f77a0747f04e9690f5360cf4d024cf95a727bf05ab7cb7c9e1a96e1383dc`.
+`capability_revision` is SHA-256 over compact Go `encoding/json` output for the normalized semantic capability payload, without indentation or a trailing newline. It includes `schema_version`, the language/profile/version selectors, `documentation_snapshot` when present, the legacy `commands` and `functions` projections, `rewrite`, `records`, `summary`, and `evidence`. The normalized payload also includes private typed-field identity, ownership and occurrence proof that the public evidence projection omits. Of the fields in the emitted manifest, only `toolkit_version` is excluded. A source Go build may therefore report `toolkit_version: "dev"` while tagged CLI, server, native, and packaged surfaces report the exact `VERSION`; both retain the same semantic revision when their capability payloads match. The current SPL revision is `sha256:5b7c15002c426b163a5488d18ae0fb83c68809a194a15f9a6584ea95cbb3a09b`; the SPL2 revision is `sha256:7134e06d345f6b2c6e58c3d29c727868320b47ff1fc0a94842aec35615223d9f`.
 
 These digests identify supplied data. They are not authentication, authorization, signatures, proof of environment compatibility, or permission to execute a query.
 
@@ -408,7 +408,7 @@ For every dimension, `applicable = supported + partial + unsupported + unassesse
 | Language | Records | Evidence cases | Syntax | Semantics | Requirements | Linting | Safe rewriting |
 |---|---:|---:|---|---|---|---|---|
 | SPL | 106 | 107 | 77 supported, 1 unsupported, 28 unassessed | 68 supported, 10 unsupported, 28 unassessed | 19 supported, 6 unsupported, 81 unassessed | 106 unassessed | 17 supported, 2 unsupported, 87 unassessed |
-| SPL2 | 141 | 149 | 90 supported, 19 unsupported, 32 unassessed | 76 supported, 39 unsupported, 26 unassessed | 46 supported, 7 unsupported, 88 unassessed | 141 unassessed | 14 supported, 3 unsupported, 124 unassessed |
+| SPL2 | 142 | 163 | 90 supported, 19 unsupported, 33 unassessed | 76 supported, 39 unsupported, 27 unassessed | 46 supported, 1 partial, 7 unsupported, 88 unassessed | 142 unassessed | 14 supported, 3 unsupported, 125 unassessed |
 
 Evidence IDs resolve to typed local documents, observations, classifications, and provenance in the same manifest. Record and evidence IDs remain stable for the exact reviewed scope. A broadened form receives a new ID unless a reviewed scope correction establishes that the original ID was wrong. `grammar_registered` records parser registration only and never adds coverage. For example, SPL2 record `spl2.command.spl1.quoted-pipeline` has `grammar_registered: true`, but its syntax state is `unsupported`, so it contributes zero covered syntax. Linting is equally separate: analysis diagnostics do not become lint evidence. Both current manifests leave the full linting denominator unassessed.
 
@@ -639,3 +639,108 @@ Projection is bounded to 4096 visited states and 128 path segments; candidate en
 | `unrepresentable_source_name` | An admitted blank source name cannot be represented by the canonical source universe. |
 | `unresolved_ref` | The reference has no supplied local schema target. |
 | `unsupported_pattern` | The pattern is outside the supported ASCII subset. |
+
+## Offline compatibility assessment
+
+`analysis.Requirements(document)` describes query-only obligations. The current
+`Result` and `RequirementSet` always include `inputs`, `input_coverage`,
+`field_attribution_coverage`, and `correlation`. Inputs have logical source
+identity plus situated occurrences; aliases do not change source identity.
+Items retain proved/unproved ownership, candidate IDs and occurrence necessity.
+Renamed, created and aggregated destinations do not become extra source reads.
+Source-relative typed field identity stays distinct from public qualified spelling.
+
+`compatibility.Check(request)` and `CheckJSON(raw)` assess supplied evidence.
+`Prepare(snapshot, schemas)` prepares immutable evidence for repeated
+`Prepared.Check(AssessmentRequest)` calls. The canonical report has one outcome:
+`satisfied`, `unsatisfied`, `incomplete`, or `not assessed`. Requirement and input
+findings retain reasons, source locations, captured objects, schema projections
+and coverage. Invalid requests return structured `RequestErrorDetail` with code,
+path, message and optional byte offset instead of a partial report.
+
+Every discovered placeholder requires exactly one explicit binding. Explicit
+sources may use captured discovery when the full literal identity is proved.
+Supplied explicit bindings must match, and schemas are never auto-selected.
+Duplicate/unknown input bindings, stale
+capability revisions, contradictory expected identities, invalid cross-links and
+selected schemas without their matching object/identity pairing are request
+errors. Omit an unavailable schema bundle or document; explicit null is invalid.
+A paired object absent from the snapshot can be assessed using complete relevant
+negative evidence. Per-input schemas assess only proved owners; schema contents
+cannot resolve ambiguous ownership or be pooled across inputs.
+
+Exact captured objects and conclusive declarations remain positive evidence even
+when the capture is partial or other collections are unavailable. Missing objects
+need complete relevant collection and covered query scope; negative field evidence
+also needs complete selected source coverage. Unused evidence does not demote a
+proved finding. Observed `not_observed` never proves global configured absence.
+Reasons identify missing evidence and the obligation to repair or reanalyze.
+
+Correlation independently reports `connected`, `disconnected`, `indeterminate`,
+or `not applicable` across situated input occurrences. Finite qualified equality
+pipeline joins support default/explicit inner, left=outer and nonnegative integer
+`max`. Pipeline predicate keys stay required; nullable RHS postjoin reads can
+retain one unproved candidate. Bounded SQL LEFT key items are conditional, and
+conditional SELECT coverage can stay incomplete. Unsupported deeper, dynamic or
+disjunctive keys, duplicate options, ambiguous suppliers and repeated-source
+output collisions remain visible gaps. A satisfied assessment does not by itself
+require connected inputs or claim whole-query execution support.
+
+Supplying `document` optionally adds bounded closure over captured classic macro
+bodies and explicit named definitions/relations. Dependency choices and newly
+discovered placeholder inputs require explicit bindings. Useful incomplete roots
+retain findings; unassessable roots remain `not assessed` even beside hidden
+positive facts. Descriptor/placeholder-selected Dataset definitions stay incomplete
+rather than inventing aliasing or substitution. General macro analysis support
+remains held. Definition contexts retain object/edge identities and invocation
+provenance; source intervals preserve the original evidence.
+
+The assessment identity digest covers normalized query/artifact identities,
+bindings, scope and dependency choices. It is not a full-report hash, signature
+or execution approval. Report/schema integers remain 1. The reviewed pre-release
+current-input correction requires mandatory reanalysis of older evidence; adding
+schemas to stale requirements does not refresh them.
+
+The following recipe writes a complete JSON envelope with requirements produced
+by the canonical engine. It derives the opaque input ID from that result.
+
+```bash
+spl-toolkit requirements --query 'from $events | where host="web"' --language spl2 --profile splunkd --compatibility-version current --source-id demo.spl2 --format json > requirements.json
+python3 - <<'PYCODE'
+import json
+from pathlib import Path
+requirements = json.loads(Path("requirements.json").read_text())
+assert len(requirements["inputs"]) == 1
+input_id = requirements["inputs"][0]["id"]
+scope = {"namespace": {"all": True}, "app": {"all": True}, "owner": {"all": True}}
+provenance = {"source_kind": "authored_fixture", "source_id": "offline-demo", "observed_at": "2026-10-01T12:02:00Z"}
+identity = {"kind": "dataset", "name": "events", "namespace": "search", "app": "demo", "owner": "nobody"}
+envelope = {
+    "schema_version": 1,
+    "requirements": requirements,
+    "query_scope": scope,
+    "input_bindings": [{"input_id": input_id, "object_id": "dataset-events", "expected": identity, "schema_id": "schema-events"}],
+    "snapshot": {
+        "schema_version": 1, "scope_id": "demo-capture", "capture_scope": scope,
+        "origin": {"instance_id": "offline-demo", "product_version": "9.4", "producer": "authored_fixture", "producer_version": "1"},
+        "capture": {"start": "2026-10-01T12:00:00Z", "end": "2026-10-01T12:05:00Z"},
+        "capabilities": [{"id": "language:spl2:profile:splunkd", "version": "current", "state": "available", "provenance": provenance}],
+        "collections": [{"kind": "dataset", "coverage": "complete"}],
+        "objects": [{"id": "dataset-events", **identity, "provenance": provenance}]
+    },
+    "schema_bundle": {
+        "schema_version": 1, "bundle_id": "demo-fields", "provenance": provenance,
+        "schemas": [{"id": "schema-events", "kind": "field_list", "catalog": {"fields": ["host"], "optional_fields": [], "identity": "events", "version": "1"}, "provenance": provenance}],
+        "bindings": [{"schema_id": "schema-events", "object_id": "dataset-events", "expected": identity, "source_coverage": "complete"}]
+    }
+}
+Path("compatibility-request.json").write_text(json.dumps(envelope, indent=2) + "\n")
+PYCODE
+spl-toolkit compatibility --request compatibility-request.json --format json
+```
+
+This produces `satisfied` with correlation `not applicable`. Removing the bundle
+and the input binding's selected `schema_id` leaves field evidence incomplete; removing
+`host` from the complete field catalog proves a missing declaration. Retaining the
+schema pairing while omitting the captured object admits a scoped absence
+assessment when the relevant capture is complete. These are content outcomes.

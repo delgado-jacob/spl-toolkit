@@ -16,3 +16,7 @@ tests/acceptance/test_analysis_surfaces.py text eol=lf
 tests/acceptance/test_environment_surfaces.py text eol=lf
 testdata/spl2/linus-forms.json text eol=lf
 testdata/environment/cases.json text eol=lf
+python/tests/test_native_compatibility.py text eol=lf
+tests/acceptance/test_compatibility_surfaces.py text eol=lf
+testdata/compatibility/cases.json text eol=lf
+cmd/compatibility_cli.go text eol=lf

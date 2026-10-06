@@ -6187,10 +6187,16 @@
         "syntax": {
           "state": "supported",
           "evidence_ids": [
-            "spl2.join.qualified-subsearch.positive"
+            "spl2.join.qualified-subsearch.positive",
+            "spl2.ownership.chain.positive",
+            "spl2.ownership.default-inner.positive",
+            "spl2.ownership.explicit-inner.positive",
+            "spl2.ownership.max-two.positive",
+            "spl2.ownership.max-zero.positive",
+            "spl2.ownership.renamed-chain.positive"
           ],
           "limitations": [
-            "Dedicated grammar; child reads are retained where owned, but command output effects remain incomplete.",
+            "Finite qualified equality joins preserve source ownership and situated correlation: default/explicit inner, left=outer and nonnegative integer max; held keys, ambiguous suppliers and output collisions retain uncertainty.",
             "form C16: active; syntax obligations only; semantic support is restricted to modeled arguments and field evidence.",
             "form E.C16.type: active; syntax obligations only; semantic support is restricted to modeled arguments and field evidence.",
             "form E.C16.max: active; syntax obligations only; semantic support is restricted to modeled arguments and field evidence.",
@@ -6203,14 +6209,24 @@
           "evidence_ids": [
             "spl2.join.qualified-subsearch.positive"
           ],
-          "limitations": []
+          "limitations": [
+            "Qualified equality keys with distinct supplying occurrences; default/explicit inner, left=outer and nonnegative integer max only. Output collisions, deeper/dynamic/disjunctive keys and ambiguous suppliers retain uncertainty."
+          ]
         },
         "requirements": {
           "state": "supported",
           "evidence_ids": [
-            "spl2.join.qualified-subsearch.positive"
+            "spl2.join.qualified-subsearch.positive",
+            "spl2.ownership.chain.positive",
+            "spl2.ownership.default-inner.positive",
+            "spl2.ownership.explicit-inner.positive",
+            "spl2.ownership.max-two.positive",
+            "spl2.ownership.max-zero.positive",
+            "spl2.ownership.renamed-chain.positive"
           ],
-          "limitations": []
+          "limitations": [
+            "Source-relative ownership proved independently; pipeline predicate keys are required, nullable downstream RHS reads may retain unproved candidate evidence."
+          ]
         },
         "linting": {
           "state": "unassessed",
@@ -7013,10 +7029,12 @@
         "syntax": {
           "state": "supported",
           "evidence_ids": [
+            "spl2.ownership.sql-inner.positive",
+            "spl2.ownership.sql-reversed.positive",
             "spl2.select.projection.positive"
           ],
           "limitations": [
-            "SQL phases use source, filter, group, SELECT, HAVING, order and projection; joins, hidden visibility, sibling alias collisions and unproved compound outputs remain incomplete.",
+            "SQL phases preserve bounded qualified inner/LEFT equality joins and source ownership; LEFT RHS keys are conditional, while conditional SELECT coverage, hidden visibility, sibling alias collisions and unproved compound outputs retain uncertainty.",
             "form C02: active; syntax obligations only; semantic support is restricted to modeled arguments and field evidence.",
             "form L15: active; syntax obligations only; semantic support is restricted to modeled arguments and field evidence.",
             "form L16: active; syntax obligations only; semantic support is restricted to modeled arguments and field evidence.",
@@ -7063,9 +7081,13 @@
         "requirements": {
           "state": "supported",
           "evidence_ids": [
+            "spl2.ownership.sql-inner.positive",
+            "spl2.ownership.sql-reversed.positive",
             "spl2.select.projection.positive"
           ],
-          "limitations": []
+          "limitations": [
+            "Qualified bounded SQL inner joins and chains retain source owners; SQL LEFT keys are conditional and conditional SELECT coverage may remain incomplete."
+          ]
         },
         "linting": {
           "state": "unassessed",
@@ -8071,7 +8093,8 @@
         "syntax": {
           "state": "supported",
           "evidence_ids": [
-            "spl2.dataset.parameter.positive"
+            "spl2.dataset.parameter.positive",
+            "spl2.ownership.parameter.positive"
           ],
           "limitations": []
         },
@@ -8085,9 +8108,12 @@
         "requirements": {
           "state": "supported",
           "evidence_ids": [
-            "spl2.dataset.parameter.positive"
+            "spl2.dataset.parameter.positive",
+            "spl2.ownership.parameter.positive"
           ],
-          "limitations": []
+          "limitations": [
+            "A named Dataset parameter is a canonical source placeholder; environment/schema selection requires an explicit binding."
+          ]
         },
         "linting": {
           "state": "unassessed",
@@ -11693,10 +11719,12 @@
         "requirements": {
           "state": "unsupported",
           "evidence_ids": [
-            "spl2.join.output-collision.incomplete"
+            "spl2.join.output-collision.incomplete",
+            "spl2.ownership.independent.incomplete",
+            "spl2.ownership.repeated.incomplete"
           ],
           "limitations": [
-            "Neighboring dynamic or ambiguous form remains explicit and incomplete."
+            "Output-name collisions retain the source obligations and situated edges already proved; same logical source can remain owned while output semantics are incomplete."
           ]
         },
         "linting": {
@@ -11728,7 +11756,8 @@
         "syntax": {
           "state": "supported",
           "evidence_ids": [
-            "spl2.join.qualified-left-subsearch.positive"
+            "spl2.join.qualified-left-subsearch.positive",
+            "spl2.ownership.left.positive"
           ],
           "limitations": []
         },
@@ -11742,7 +11771,8 @@
         "requirements": {
           "state": "supported",
           "evidence_ids": [
-            "spl2.join.qualified-left-subsearch.positive"
+            "spl2.join.qualified-left-subsearch.positive",
+            "spl2.ownership.left.positive"
           ],
           "limitations": []
         },
@@ -11775,7 +11805,8 @@
         "syntax": {
           "state": "supported",
           "evidence_ids": [
-            "spl2.join.qualified-outer-subsearch.positive"
+            "spl2.join.qualified-outer-subsearch.positive",
+            "spl2.ownership.outer.positive"
           ],
           "limitations": []
         },
@@ -11789,9 +11820,56 @@
         "requirements": {
           "state": "supported",
           "evidence_ids": [
-            "spl2.join.qualified-outer-subsearch.positive"
+            "spl2.join.qualified-outer-subsearch.positive",
+            "spl2.ownership.outer.positive"
           ],
           "limitations": []
+        },
+        "linting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "safe_rewriting": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        }
+      }
+    },
+    {
+      "id": "spl2.pipeline.join.sql-source-ownership",
+      "language": "spl2",
+      "profile": "splunkd",
+      "kind": "pipeline",
+      "name": "join",
+      "form": "sql-source-ownership",
+      "grammar_registered": true,
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis/capability_ownership_external_test.go",
+        "note": "Finite qualified SQL inner/LEFT source ownership; conditional SELECT coverage remains incomplete."
+      },
+      "dimensions": {
+        "syntax": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "semantics": {
+          "state": "unassessed",
+          "evidence_ids": [],
+          "limitations": []
+        },
+        "requirements": {
+          "state": "partial",
+          "evidence_ids": [
+            "spl2.ownership.sql-inner.positive",
+            "spl2.ownership.sql-left.incomplete"
+          ],
+          "limitations": [
+            "SQL LEFT RHS keys and selected RHS fields are conditional; conditional SELECT binding retains requirement coverage uncertainty."
+          ]
         },
         "linting": {
           "state": "unassessed",

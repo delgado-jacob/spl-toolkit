@@ -225,12 +225,15 @@ func (observation CapabilitySemanticsObservation) MarshalJSON() ([]byte, error) 
 }
 
 type CapabilityRequirementExpectation struct {
-	Kind          string         `json:"kind"`
-	Identity      string         `json:"identity"`
-	FieldIdentity *FieldIdentity `json:"field_identity,omitempty" swaggerignore:"true"`
-	Role          string         `json:"role"`
-	Necessity     string         `json:"necessity"`
-	Resolution    string         `json:"resolution"`
+	InputID       string                  `json:"input_id,omitempty" swaggerignore:"true"`
+	Ownership     *InputOwnership         `json:"ownership,omitempty" swaggerignore:"true"`
+	Occurrences   []RequirementOccurrence `json:"occurrences,omitempty" swaggerignore:"true"`
+	Kind          string                  `json:"kind"`
+	Identity      string                  `json:"identity"`
+	FieldIdentity *FieldIdentity          `json:"field_identity,omitempty" swaggerignore:"true"`
+	Role          string                  `json:"role"`
+	Necessity     string                  `json:"necessity"`
+	Resolution    string                  `json:"resolution"`
 }
 
 func (expectation CapabilityRequirementExpectation) MarshalJSON() ([]byte, error) {
@@ -364,6 +367,15 @@ func cloneCapabilityEvidenceObservations(observations CapabilityEvidenceObservat
 		value.Items = cloneCapabilitySlice(value.Items)
 		for i := range value.Items {
 			value.Items[i].FieldIdentity = cloneFieldIdentityPointer(value.Items[i].FieldIdentity)
+			if value.Items[i].Ownership != nil {
+				ownership := *value.Items[i].Ownership
+				ownership.CandidateInputIDs = cloneCapabilitySlice(ownership.CandidateInputIDs)
+				value.Items[i].Ownership = &ownership
+			}
+			value.Items[i].Occurrences = cloneCapabilitySlice(value.Items[i].Occurrences)
+			for j := range value.Items[i].Occurrences {
+				value.Items[i].Occurrences[j].InputOccurrenceIDs = cloneCapabilitySlice(value.Items[i].Occurrences[j].InputOccurrenceIDs)
+			}
 		}
 		value.GapCodes = cloneCapabilitySlice(value.GapCodes)
 		observations.Requirements = &value

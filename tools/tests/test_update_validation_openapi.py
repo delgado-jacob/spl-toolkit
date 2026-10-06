@@ -73,6 +73,9 @@ class ValidationOpenAPITests(unittest.TestCase):
             ),
             "CapabilityRequirementExpectation": (
                 ("FieldIdentity", r"\*FieldIdentity", "field_identity,omitempty"),
+                ("InputID", "string", "input_id,omitempty"),
+                ("Ownership", r"\*InputOwnership", "ownership,omitempty"),
+                ("Occurrences", r"\[\]RequirementOccurrence", "occurrences,omitempty"),
             ),
         }
         for struct_name, fields in private_fields.items():
@@ -286,6 +289,23 @@ class ValidationOpenAPITests(unittest.TestCase):
             "records": {"type": "array", "items": {"$ref": "#/components/schemas/analysis.CapabilityRecord"}},
             "summary": {"$ref": "#/components/schemas/analysis.CapabilitySummary"},
             "evidence": {"type": "array", "items": {"$ref": "#/components/schemas/analysis.CapabilityEvidence"}}}}
+        shared = json.loads((SCRIPT.parents[1] / "contracts/v1/shared.schema.json").read_text())
+        origin = shared["$id"] + "#/$defs/"
+        def raw_projection(value):
+            if isinstance(value, list):
+                return [raw_projection(item) for item in value]
+            if not isinstance(value, dict):
+                return value
+            result = {key: raw_projection(item) for key, item in value.items()}
+            if "$ref" in result:
+                result["$ref"] = result["$ref"].replace(origin, "#/components/schemas/")
+            return result
+        for name, definition in shared["$defs"].items():
+            if name.startswith("analysis.") and name != "analysis.QueryDocument" and not name.startswith(("analysis.Capability", "analysis.Evidence")):
+                schemas[name] = raw_projection(definition)
+        for name, definition in shared["$defs"].items():
+            if name.startswith("compatibility.") and not name.startswith("compatibility.request.") or name == "validation.FieldProjection":
+                schemas[name] = raw_projection(definition)
         spec = {"openapi": "3.1.0", "components": {"schemas": schemas}, "paths": {
             "/unrelated": {},
             "/query/requirements": {"post": {"responses": {"200": {"content": {"application/json": {
@@ -318,7 +338,7 @@ class ValidationOpenAPITests(unittest.TestCase):
             self.assertEqual(set(spec["paths"]) - set(original["paths"]), {
                 "/corpus/scan", "/corpus/graph", "/corpus/sarif",
                 "/corpus/impact-schema", "/corpus/impact-mapping", "/query/document", "/query/closure",
-                "/environment/validate"})
+                "/environment/validate", "/query/compatibility"})
             self.assertEqual(spec["paths"]["/query/document"]["post"]["requestBody"]["content"]["application/json"]["schema"],
                              {"$ref": "#/components/schemas/tooling.QueryDocumentRequest"})
             self.assertIs(schemas["tooling.corpus.Request"]["additionalProperties"], False)
@@ -585,10 +605,10 @@ class ValidationOpenAPITests(unittest.TestCase):
             required = {
                 "analysis.RequirementQueryIdentity": ["source_id", "language", "profile", "version", "query_digest"],
                 "analysis.RequirementCoverage": ["complete", "reasons"],
-                "analysis.RequirementOccurrence": ["reference_id", "original_name", "binding", "stage_id", "scope_id", "location"],
-                "analysis.RequirementItem": ["id", "kind", "identity", "role", "necessity", "origin", "resolution", "occurrences"],
+                "analysis.RequirementOccurrence": ["reference_id", "original_name", "binding", "stage_id", "scope_id", "location", "input_occurrence_ids", "necessity"],
+                "analysis.RequirementItem": ["id", "kind", "identity", "role", "necessity", "origin", "resolution", "occurrences", "ownership"],
                 "analysis.RequirementGap": ["code", "message", "reference_ids", "diagnostic_codes"],
-                "analysis.RequirementSet": ["schema_version", "query", "capability_revision", "query_status", "coverage", "items", "gaps", "diagnostics"],
+                "analysis.RequirementSet": ["schema_version", "query", "capability_revision", "query_status", "coverage", "items", "gaps", "diagnostics", "inputs", "input_coverage", "field_attribution_coverage", "correlation"],
             }
             for name, members in required.items():
                 self.assertEqual(schemas[name]["required"], members)
@@ -1017,3 +1037,46 @@ class ObservedEnvironmentOpenAPITests(unittest.TestCase):
         description = spec["paths"]["/environment/validate"]["post"]["description"]
         self.assertIn("nested snapshot accepts schema_version 1 or 2", description)
         self.assertIn("Body limit is 8 MiB", description)
+
+
+def test_compatibility_openapi_uses_strict_request_additive_report_and_error_union(tmp_path):
+    helper = ValidationOpenAPITests()
+    helper.fixture(tmp_path)
+    result = helper.run_script(tmp_path)
+    assert result.returncode == 0, result.stderr
+    spec = json.loads((tmp_path / "swagger.json").read_text())
+    schemas = spec["components"]["schemas"]
+    route = spec["paths"]["/query/compatibility"]["post"]
+    assert route["requestBody"]["content"]["application/json"]["schema"] == {"$ref": "#/components/schemas/tooling.compatibility.Request"}
+    assert route["responses"]["200"]["content"]["application/json"]["schema"] == {"$ref": "#/components/schemas/tooling.compatibility.Report"}
+    assert route["responses"]["400"]["content"]["application/json"]["schema"]["oneOf"] == [
+        {"$ref": "#/components/schemas/tooling.compatibility.RequestErrorDetail"}, {"$ref": "#/components/schemas/api.ErrorResponse"}]
+    assert schemas["tooling.compatibility.Request"]["additionalProperties"] is False
+    assert schemas["tooling.compatibility.request.analysis.RequirementItem"]["additionalProperties"] is False
+    assert schemas["tooling.compatibility.Report"]["additionalProperties"] is True
+    assert not any(name.startswith("compatibility.") for name in schemas)
+    fixtures = json.loads((SCRIPT.parents[1] / "testdata/tooling/contracts.json").read_text())
+    for case in fixtures["cases"]:
+        if case["family"] not in ("compatibility", "compatibility-request"):
+            continue
+        document = copy.deepcopy(spec)
+        document["$ref"] = "#/components/schemas/tooling.compatibility." + ("Request" if case["family"].endswith("request") else "Report")
+        assert jsonschema.Draft202012Validator(document).is_valid(case["instance"]) == case["valid"], case["id"]
+    before = {path.name: path.read_bytes() for path in tmp_path.iterdir()}
+    assert helper.run_script(tmp_path).returncode == 0
+    assert before == {path.name: path.read_bytes() for path in tmp_path.iterdir()}
+
+
+def test_compatibility_shape_drift_rejects_before_generated_writes(tmp_path):
+    helper = ValidationOpenAPITests()
+    spec = helper.fixture(tmp_path)
+    del spec["components"]["schemas"]["compatibility.InputBinding"]["properties"]["expected"]
+    (tmp_path / "swagger.json").write_text(json.dumps(spec))
+    (tmp_path / "swagger.yaml").write_text(yaml.safe_dump(spec))
+    go = (tmp_path / "docs.go").read_text()
+    go = re.sub(r'^    "components": .*,$', lambda _: '    "components": ' + json.dumps(spec["components"]) + ',', go, flags=re.MULTILINE)
+    (tmp_path / "docs.go").write_text(go)
+    before = {path.name: path.read_bytes() for path in tmp_path.iterdir()}
+    result = helper.run_script(tmp_path)
+    assert result.returncode != 0 and "compatibility.InputBinding" in result.stderr
+    assert before == {path.name: path.read_bytes() for path in tmp_path.iterdir()}

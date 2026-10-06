@@ -41,7 +41,7 @@ Requirement items represent direct external obligations. Source-bound consuming 
 
 Grammar registration is stored separately from syntax claims. The legacy command/function projection may expose registration as `syntax_supported`, but the ledger grants coverage only from supported evidence. Linting also has its own evidence boundary; parser or semantic diagnostics do not establish lint coverage. Evidence IDs bind records to the embedded static cases. A broader form gets a new ID unless a reviewed scope correction changes the original boundary. The selected semantic revision covers selectors, snapshot, legacy projections, rewrite forms, records, summary, and evidence, excluding only the display-oriented toolkit version.
 
-Source Go builds may expose toolkit version `dev`; tagged CLI, server, native, and packaged builds use the exact `VERSION` while retaining the same semantic revision. The current SPL revision is `sha256:8a612f2064da24552a68faec261968731a6f1f1c7279ffabb77a59c7dfdb2008`; the SPL2 revision is `sha256:6495f77a0747f04e9690f5360cf4d024cf95a727bf05ab7cb7c9e1a96e1383dc`. The embedded corpus proves deterministic local toolkit behavior. The toolkit does not execute SPL, evaluate regular expressions, compare result rows, model acceleration, load macro definitions, or certify runtime compatibility. It also does not prove authorization or upstream support.
+Source Go builds may expose toolkit version `dev`; tagged CLI, server, native, and packaged builds use the exact `VERSION` while retaining the same semantic revision. The current SPL revision is `sha256:5b7c15002c426b163a5488d18ae0fb83c68809a194a15f9a6584ea95cbb3a09b`; the SPL2 revision is `sha256:7134e06d345f6b2c6e58c3d29c727868320b47ff1fc0a94842aec35615223d9f`. The embedded corpus proves deterministic local toolkit behavior. The toolkit does not execute SPL, evaluate regular expressions, compare result rows, model acceleration, load macro definitions, or certify runtime compatibility. It also does not prove authorization or upstream support.
 
 Lexer admission allows 4,096 work units. Real errors from one lexer call are counted in listener order before the returned non-EOF token; EOF does not count. SPL2 closure inspection runs after admitted EOF and accounts for its synthetic unterminated-literal error before parser construction. The first event that would consume unit 4,097 records the omitted source range and returns the canonical incomplete resource-limit result before parser prediction. Long sparse documents remain admitted when they stay within the work budget.
 
@@ -127,3 +127,23 @@ native/surface suite to collect tests with no required skips. The
 JSON Schema preparation builds local URI/anchor indexes. OCSF preparation reads normal compiler output and validates exact version, full extensions and explicit class/category/profile selection. Both use immutable prepared indexes and call-local recursion state. Preparation has no HTTP or file opener; CLI input file reads happen only at its explicit transport boundary. Neither runtime, package nor fixture loading depends on `_build_plan`.
 
 The schema C exports return owned `SPLResult` values using the existing result/free ABI. Python single/batch calls use the existing admitted-operation and close lifecycle. The complete 28-case schema corpus and 22 malformed raw requests run through native libraries installed outside the checkout; CLI and real HTTP surface checks compare the frozen full Go reports. The package checker records copied fixture, wheel payload, loaded native library, and rebuilt-sdist source hashes. See [schema semantics and bounded projection](API.md#json-schema-and-ocsf-field-validation).
+
+## Compatibility assessment ownership
+
+`pkg/analysis` owns query-only logical inputs, situated occurrences, typed source
+ownership, coverage and correlation. The same current values appear in analysis
+and standalone requirements. `pkg/compatibility` admits canonical evidence and
+compares it with prepared `pkg/environment` artifacts. It reuses bounded
+`pkg/validation` field projection for each proved input owner and `pkg/closure`
+for supplied document definitions, preserving invocation/source provenance.
+Schemas never supply missing query ownership or combine independent sources.
+
+Positive exact evidence survives unrelated capture gaps; negative evidence needs
+complete relevant scope/collection/source coverage. Correlation has its own
+connected/disconnected/indeterminate outcome and policy. CLI, REST, owned C
+results and native Python all call the canonical core. The assessment digest
+identifies normalized input choices, rather than hashing the full report.
+Runtime cross-link and raw-decoder checks supplement strict request schemas.
+All new production sources and v1/v2 contracts belong to native and release
+source closures; package evidence binds fixture and required-suite hashes.
+No runtime, fixture, generated artifact or package path reads `_build_plan`.

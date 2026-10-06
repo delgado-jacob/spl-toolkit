@@ -619,6 +619,119 @@ components:
       - operation
       - output
       type: object
+    analysis.CorrelationEdge:
+      additionalProperties: true
+      properties:
+        id:
+          type: string
+        keys:
+          items:
+            $ref: '#/components/schemas/analysis.CorrelationKeyEvidence'
+          type: array
+        left:
+          $ref: '#/components/schemas/analysis.CorrelationEndpoint'
+        location:
+          $ref: '#/components/schemas/analysis.Location'
+        right:
+          $ref: '#/components/schemas/analysis.CorrelationEndpoint'
+        scope_id:
+          type: string
+        stage_id:
+          type: string
+      required:
+      - id
+      - left
+      - right
+      - stage_id
+      - scope_id
+      - location
+      - keys
+      type: object
+    analysis.CorrelationEndpoint:
+      additionalProperties: true
+      properties:
+        field_identity:
+          $ref: '#/components/schemas/analysis.FieldIdentity'
+        input_id:
+          type: string
+        location:
+          $ref: '#/components/schemas/analysis.Location'
+        occurrence_id:
+          type: string
+        reference_ids:
+          items:
+            pattern: \S
+            type: string
+          type: array
+          uniqueItems: true
+      required:
+      - input_id
+      - occurrence_id
+      - field_identity
+      - reference_ids
+      - location
+      type: object
+    analysis.CorrelationGraph:
+      additionalProperties: true
+      properties:
+        components:
+          items:
+            items:
+              type: string
+            type: array
+          type: array
+        coverage:
+          $ref: '#/components/schemas/analysis.InputCoverage'
+        edges:
+          items:
+            $ref: '#/components/schemas/analysis.CorrelationEdge'
+          type: array
+        nodes:
+          items:
+            $ref: '#/components/schemas/analysis.CorrelationNode'
+          type: array
+        outcome:
+          enum:
+          - connected
+          - disconnected
+          - indeterminate
+          - not applicable
+          type: string
+      required:
+      - outcome
+      - coverage
+      - nodes
+      - edges
+      - components
+      type: object
+    analysis.CorrelationKeyEvidence:
+      additionalProperties: true
+      properties:
+        left:
+          $ref: '#/components/schemas/analysis.CorrelationEndpoint'
+        location:
+          $ref: '#/components/schemas/analysis.Location'
+        predicate:
+          type: string
+        right:
+          $ref: '#/components/schemas/analysis.CorrelationEndpoint'
+      required:
+      - predicate
+      - left
+      - right
+      - location
+      type: object
+    analysis.CorrelationNode:
+      additionalProperties: true
+      properties:
+        input_id:
+          type: string
+        occurrence_id:
+          type: string
+      required:
+      - input_id
+      - occurrence_id
+      type: object
     analysis.Coverage:
       properties:
         reasons:
@@ -714,16 +827,34 @@ components:
           uniqueItems: false
       type: object
     analysis.FieldIdentity:
+      additionalProperties: true
+      allOf:
+      - if:
+          properties:
+            kind:
+              const: atomic
+          required:
+          - kind
+        then:
+          properties:
+            segments:
+              maxItems: 1
       properties:
         kind:
+          enum:
+          - atomic
+          - path
           type: string
         qualifier:
           type: string
         segments:
           items:
             type: string
+          minItems: 1
           type: array
-          uniqueItems: false
+      required:
+      - kind
+      - segments
       type: object
     analysis.FieldRemoval:
       properties:
@@ -748,6 +879,124 @@ components:
           uniqueItems: false
         uncertain:
           type: boolean
+      type: object
+    analysis.InputCoverage:
+      additionalProperties: true
+      properties:
+        reasons:
+          items:
+            $ref: '#/components/schemas/analysis.InputReason'
+          type: array
+        state:
+          enum:
+          - complete
+          - partial
+          - not_applicable
+          type: string
+      required:
+      - state
+      - reasons
+      type: object
+    analysis.InputIdentity:
+      additionalProperties: true
+      properties:
+        form:
+          enum:
+          - parameter
+          - identifier
+          - dotted
+          - descriptor
+          - implicit
+          - unresolved
+          type: string
+        value:
+          type: string
+      required:
+      - form
+      - value
+      type: object
+    analysis.InputOccurrence:
+      additionalProperties: true
+      properties:
+        alias:
+          type: string
+        id:
+          type: string
+        location:
+          $ref: '#/components/schemas/analysis.Location'
+        original_reference_id:
+          type: string
+        reference_id:
+          type: string
+        scope_id:
+          type: string
+        stage_id:
+          type: string
+        use_site_locations:
+          items:
+            $ref: '#/components/schemas/analysis.Location'
+          type: array
+        use_site_reference_ids:
+          items:
+            pattern: \S
+            type: string
+          type: array
+          uniqueItems: true
+      required:
+      - id
+      - reference_id
+      - original_reference_id
+      - stage_id
+      - scope_id
+      - alias
+      - location
+      - use_site_locations
+      - use_site_reference_ids
+      type: object
+    analysis.InputOwnership:
+      additionalProperties: true
+      properties:
+        candidate_input_ids:
+          items:
+            pattern: \S
+            type: string
+          type: array
+          uniqueItems: true
+        state:
+          enum:
+          - proved
+          - unproved
+          type: string
+      required:
+      - state
+      - candidate_input_ids
+      type: object
+    analysis.InputReason:
+      additionalProperties: true
+      properties:
+        code:
+          type: string
+        location:
+          $ref: '#/components/schemas/tooling.analysis.EvidenceLocation'
+        message:
+          type: string
+        reference_ids:
+          items:
+            pattern: \S
+            type: string
+          type: array
+          uniqueItems: true
+        scope_id:
+          type: string
+        stage_id:
+          type: string
+      required:
+      - code
+      - message
+      - location
+      - stage_id
+      - scope_id
+      - reference_ids
       type: object
     analysis.Lineage:
       properties:
@@ -820,6 +1069,37 @@ components:
       - version
       - source_id
       type: object
+    analysis.QueryInput:
+      additionalProperties: true
+      properties:
+        evidence:
+          $ref: '#/components/schemas/analysis.InputCoverage'
+        id:
+          type: string
+        identity:
+          $ref: '#/components/schemas/analysis.InputIdentity'
+        kind:
+          enum:
+          - named_placeholder
+          - explicit_dataset
+          - implicit_stream
+          - unresolved_source
+          type: string
+        name:
+          type: string
+        occurrences:
+          items:
+            $ref: '#/components/schemas/analysis.InputOccurrence'
+          minItems: 1
+          type: array
+      required:
+      - id
+      - kind
+      - name
+      - identity
+      - evidence
+      - occurrences
+      type: object
     analysis.Reference:
       properties:
         binding:
@@ -887,6 +1167,38 @@ components:
       type: object
     analysis.RequirementItem:
       additionalProperties: true
+      allOf:
+      - else:
+          not:
+            required:
+            - field_identity
+        if:
+          properties:
+            kind:
+              const: field
+            resolution:
+              const: exact
+          required:
+          - kind
+          - resolution
+        then:
+          required:
+          - field_identity
+      - else:
+          not:
+            required:
+            - input_id
+        if:
+          properties:
+            ownership:
+              properties:
+                state:
+                  const: proved
+          required:
+          - ownership
+        then:
+          required:
+          - input_id
       properties:
         field_identity:
           $ref: '#/components/schemas/analysis.FieldIdentity'
@@ -894,6 +1206,8 @@ components:
           pattern: ^req-[1-9][0-9]*$
           type: string
         identity:
+          type: string
+        input_id:
           type: string
         kind:
           enum:
@@ -920,6 +1234,8 @@ components:
           type: array
         origin:
           const: direct
+        ownership:
+          $ref: '#/components/schemas/analysis.InputOwnership'
         resolution:
           enum:
           - exact
@@ -937,14 +1253,26 @@ components:
       - origin
       - resolution
       - occurrences
+      - ownership
       type: object
     analysis.RequirementOccurrence:
       additionalProperties: true
       properties:
         binding:
           type: string
+        input_occurrence_ids:
+          items:
+            pattern: \S
+            type: string
+          type: array
+          uniqueItems: true
         location:
           $ref: '#/components/schemas/analysis.Location'
+        necessity:
+          enum:
+          - required
+          - conditional
+          type: string
         original_name:
           type: string
         reference_id:
@@ -961,6 +1289,8 @@ components:
       - stage_id
       - scope_id
       - location
+      - input_occurrence_ids
+      - necessity
       type: object
     analysis.RequirementQueryIdentity:
       additionalProperties: true
@@ -992,15 +1322,25 @@ components:
         capability_revision:
           pattern: ^sha256:[0-9a-f]{64}$
           type: string
+        correlation:
+          $ref: '#/components/schemas/analysis.CorrelationGraph'
         coverage:
           $ref: '#/components/schemas/analysis.RequirementCoverage'
         diagnostics:
           items:
             $ref: '#/components/schemas/analysis.Diagnostic'
           type: array
+        field_attribution_coverage:
+          $ref: '#/components/schemas/analysis.InputCoverage'
         gaps:
           items:
             $ref: '#/components/schemas/analysis.RequirementGap'
+          type: array
+        input_coverage:
+          $ref: '#/components/schemas/analysis.InputCoverage'
+        inputs:
+          items:
+            $ref: '#/components/schemas/analysis.QueryInput'
           type: array
         items:
           items:
@@ -1026,9 +1366,16 @@ components:
       - items
       - gaps
       - diagnostics
+      - inputs
+      - input_coverage
+      - field_attribution_coverage
+      - correlation
       type: object
     analysis.Result:
+      additionalProperties: true
       properties:
+        correlation:
+          $ref: '#/components/schemas/analysis.CorrelationGraph'
         coverage:
           $ref: '#/components/schemas/analysis.Coverage'
         dependencies:
@@ -1037,35 +1384,58 @@ components:
           items:
             $ref: '#/components/schemas/analysis.Diagnostic'
           type: array
-          uniqueItems: false
         document:
           $ref: '#/components/schemas/analysis.QueryDocument'
+        field_attribution_coverage:
+          $ref: '#/components/schemas/analysis.InputCoverage'
+        input_coverage:
+          $ref: '#/components/schemas/analysis.InputCoverage'
+        inputs:
+          items:
+            $ref: '#/components/schemas/analysis.QueryInput'
+          type: array
         lineage:
           items:
             $ref: '#/components/schemas/analysis.Lineage'
           type: array
-          uniqueItems: false
         references:
           items:
             $ref: '#/components/schemas/analysis.Reference'
           type: array
-          uniqueItems: false
         requirements:
           $ref: '#/components/schemas/analysis.RequirementSet'
         schema_version:
+          const: 1
           type: integer
         scopes:
           items:
             $ref: '#/components/schemas/analysis.Scope'
           type: array
-          uniqueItems: false
         stages:
           items:
             $ref: '#/components/schemas/analysis.Stage'
           type: array
-          uniqueItems: false
         status:
-          $ref: '#/components/schemas/analysis.Status'
+          enum:
+          - valid
+          - invalid
+          - incomplete
+          type: string
+      required:
+      - schema_version
+      - document
+      - status
+      - coverage
+      - stages
+      - scopes
+      - references
+      - lineage
+      - dependencies
+      - diagnostics
+      - inputs
+      - input_coverage
+      - field_attribution_coverage
+      - correlation
       type: object
     analysis.RewriteCapabilityForm:
       properties:
@@ -1119,6 +1489,12 @@ components:
         stage_id:
           type: string
       type: object
+    analysis.SourceFieldAdmission:
+      type: integer
+      x-enum-varnames:
+      - SourceFieldIndeterminate
+      - SourceFieldAdmitted
+      - SourceFieldProhibited
     analysis.Stage:
       properties:
         command:
@@ -2637,6 +3013,119 @@ components:
         - catalog
         type: object
       - $ref: '#/components/schemas/tooling.SchemaTargetRequest'
+    tooling.analysis.CorrelationEdge:
+      additionalProperties: true
+      properties:
+        id:
+          type: string
+        keys:
+          items:
+            $ref: '#/components/schemas/tooling.analysis.CorrelationKeyEvidence'
+          type: array
+        left:
+          $ref: '#/components/schemas/tooling.analysis.CorrelationEndpoint'
+        location:
+          $ref: '#/components/schemas/tooling.analysis.Location'
+        right:
+          $ref: '#/components/schemas/tooling.analysis.CorrelationEndpoint'
+        scope_id:
+          type: string
+        stage_id:
+          type: string
+      required:
+      - id
+      - left
+      - right
+      - stage_id
+      - scope_id
+      - location
+      - keys
+      type: object
+    tooling.analysis.CorrelationEndpoint:
+      additionalProperties: true
+      properties:
+        field_identity:
+          $ref: '#/components/schemas/tooling.analysis.FieldIdentity'
+        input_id:
+          type: string
+        location:
+          $ref: '#/components/schemas/tooling.analysis.Location'
+        occurrence_id:
+          type: string
+        reference_ids:
+          items:
+            pattern: \S
+            type: string
+          type: array
+          uniqueItems: true
+      required:
+      - input_id
+      - occurrence_id
+      - field_identity
+      - reference_ids
+      - location
+      type: object
+    tooling.analysis.CorrelationGraph:
+      additionalProperties: true
+      properties:
+        components:
+          items:
+            items:
+              type: string
+            type: array
+          type: array
+        coverage:
+          $ref: '#/components/schemas/tooling.analysis.InputCoverage'
+        edges:
+          items:
+            $ref: '#/components/schemas/tooling.analysis.CorrelationEdge'
+          type: array
+        nodes:
+          items:
+            $ref: '#/components/schemas/tooling.analysis.CorrelationNode'
+          type: array
+        outcome:
+          enum:
+          - connected
+          - disconnected
+          - indeterminate
+          - not applicable
+          type: string
+      required:
+      - outcome
+      - coverage
+      - nodes
+      - edges
+      - components
+      type: object
+    tooling.analysis.CorrelationKeyEvidence:
+      additionalProperties: true
+      properties:
+        left:
+          $ref: '#/components/schemas/tooling.analysis.CorrelationEndpoint'
+        location:
+          $ref: '#/components/schemas/tooling.analysis.Location'
+        predicate:
+          type: string
+        right:
+          $ref: '#/components/schemas/tooling.analysis.CorrelationEndpoint'
+      required:
+      - predicate
+      - left
+      - right
+      - location
+      type: object
+    tooling.analysis.CorrelationNode:
+      additionalProperties: true
+      properties:
+        input_id:
+          type: string
+        occurrence_id:
+          type: string
+      required:
+      - input_id
+      - occurrence_id
+      type: object
     tooling.analysis.Coverage:
       additionalProperties: true
       properties:
@@ -2723,6 +3212,45 @@ components:
       - stage_id
       - scope_id
       type: object
+    tooling.analysis.EvidenceLocation:
+      additionalProperties: true
+      properties:
+        end:
+          $ref: '#/components/schemas/tooling.analysis.EvidencePosition'
+        start:
+          $ref: '#/components/schemas/tooling.analysis.EvidencePosition'
+      required:
+      - start
+      - end
+      type: object
+    tooling.analysis.EvidencePosition:
+      additionalProperties: true
+      oneOf:
+      - properties:
+          column:
+            const: 0
+          line:
+            const: 0
+      - properties:
+          column:
+            minimum: 1
+          line:
+            minimum: 1
+      properties:
+        column:
+          minimum: 0
+          type: integer
+        line:
+          minimum: 0
+          type: integer
+        offset:
+          minimum: 0
+          type: integer
+      required:
+      - offset
+      - line
+      - column
+      type: object
     tooling.analysis.FieldBinding:
       additionalProperties: true
       properties:
@@ -2744,6 +3272,17 @@ components:
       type: object
     tooling.analysis.FieldIdentity:
       additionalProperties: true
+      allOf:
+      - if:
+          properties:
+            kind:
+              const: atomic
+          required:
+          - kind
+        then:
+          properties:
+            segments:
+              maxItems: 1
       properties:
         kind:
           enum:
@@ -2792,6 +3331,106 @@ components:
       - removed
       - open
       - uncertain
+      type: object
+    tooling.analysis.InputCoverage:
+      additionalProperties: true
+      properties:
+        reasons:
+          items:
+            $ref: '#/components/schemas/tooling.analysis.InputReason'
+          type: array
+        state:
+          enum:
+          - complete
+          - partial
+          - not_applicable
+          type: string
+      required:
+      - state
+      - reasons
+      type: object
+    tooling.analysis.InputIdentity:
+      additionalProperties: true
+      properties:
+        form:
+          enum:
+          - parameter
+          - identifier
+          - dotted
+          - descriptor
+          - implicit
+          - unresolved
+          type: string
+        value:
+          type: string
+      required:
+      - form
+      - value
+      type: object
+    tooling.analysis.InputOccurrence:
+      additionalProperties: true
+      properties:
+        alias:
+          type: string
+        id:
+          type: string
+        location:
+          $ref: '#/components/schemas/tooling.analysis.Location'
+        original_reference_id:
+          type: string
+        reference_id:
+          type: string
+        scope_id:
+          type: string
+        stage_id:
+          type: string
+        use_site_locations:
+          items:
+            $ref: '#/components/schemas/tooling.analysis.Location'
+          type: array
+        use_site_reference_ids:
+          items:
+            pattern: \S
+            type: string
+          type: array
+          uniqueItems: true
+      required:
+      - id
+      - reference_id
+      - original_reference_id
+      - stage_id
+      - scope_id
+      - alias
+      - location
+      - use_site_locations
+      - use_site_reference_ids
+      type: object
+    tooling.analysis.InputReason:
+      additionalProperties: true
+      properties:
+        code:
+          type: string
+        location:
+          $ref: '#/components/schemas/tooling.analysis.EvidenceLocation'
+        message:
+          type: string
+        reference_ids:
+          items:
+            pattern: \S
+            type: string
+          type: array
+          uniqueItems: true
+        scope_id:
+          type: string
+        stage_id:
+          type: string
+      required:
+      - code
+      - message
+      - location
+      - stage_id
+      - scope_id
+      - reference_ids
       type: object
     tooling.analysis.Lineage:
       additionalProperties: true
@@ -2871,6 +3510,37 @@ components:
       - version
       - source_id
       type: object
+    tooling.analysis.QueryInput:
+      additionalProperties: true
+      properties:
+        evidence:
+          $ref: '#/components/schemas/tooling.analysis.InputCoverage'
+        id:
+          type: string
+        identity:
+          $ref: '#/components/schemas/tooling.analysis.InputIdentity'
+        kind:
+          enum:
+          - named_placeholder
+          - explicit_dataset
+          - implicit_stream
+          - unresolved_source
+          type: string
+        name:
+          type: string
+        occurrences:
+          items:
+            $ref: '#/components/schemas/tooling.analysis.InputOccurrence'
+          minItems: 1
+          type: array
+      required:
+      - id
+      - kind
+      - name
+      - identity
+      - evidence
+      - occurrences
+      type: object
     tooling.analysis.Reference:
       additionalProperties: true
       properties:
@@ -2916,6 +3586,8 @@ components:
     tooling.analysis.Result:
       additionalProperties: true
       properties:
+        correlation:
+          $ref: '#/components/schemas/tooling.analysis.CorrelationGraph'
         coverage:
           $ref: '#/components/schemas/tooling.analysis.Coverage'
         dependencies:
@@ -2926,6 +3598,14 @@ components:
           type: array
         document:
           $ref: '#/components/schemas/tooling.analysis.QueryDocument'
+        field_attribution_coverage:
+          $ref: '#/components/schemas/tooling.analysis.InputCoverage'
+        input_coverage:
+          $ref: '#/components/schemas/tooling.analysis.InputCoverage'
+        inputs:
+          items:
+            $ref: '#/components/schemas/tooling.analysis.QueryInput'
+          type: array
         lineage:
           items:
             $ref: '#/components/schemas/tooling.analysis.Lineage'
@@ -2964,6 +3644,10 @@ components:
       - lineage
       - dependencies
       - diagnostics
+      - inputs
+      - input_coverage
+      - field_attribution_coverage
+      - correlation
       type: object
     tooling.analysis.Scope:
       additionalProperties: true
@@ -3269,6 +3953,22 @@ components:
       - collections
       - objects
       type: object
+    tooling.closure.DefinitionContext:
+      additionalProperties: true
+      properties:
+        edge_id:
+          type: string
+        object_id:
+          type: string
+        provenance:
+          items:
+            $ref: '#/components/schemas/tooling.closure.ProvenanceSegment'
+          type: array
+      required:
+      - edge_id
+      - object_id
+      - provenance
+      type: object
     tooling.closure.DependencyGraph:
       additionalProperties: false
       properties:
@@ -3571,6 +4271,10 @@ components:
           items:
             $ref: '#/components/schemas/tooling.closure.DefinitionAnalysis'
           type: array
+        definition_contexts:
+          items:
+            $ref: '#/components/schemas/tooling.closure.DefinitionContext'
+          type: array
         diagnostics:
           items:
             $ref: '#/components/schemas/tooling.closure.Diagnostic'
@@ -3626,6 +4330,7 @@ components:
       - traversal
       - graph
       - bom
+      - definition_contexts
       type: object
     tooling.closure.Request:
       additionalProperties: false
@@ -3740,6 +4445,1036 @@ components:
       - cycle_path
       - invocation_chain
       - origins
+      type: object
+    tooling.compatibility.Coverage:
+      additionalProperties: true
+      properties:
+        collection_kind:
+          type: string
+        dimension:
+          type: string
+        input_id:
+          type: string
+        object_id:
+          type: string
+        reasons:
+          items:
+            $ref: '#/components/schemas/tooling.compatibility.Reason'
+          type: array
+        schema_id:
+          type: string
+        state:
+          enum:
+          - complete
+          - partial
+          - not_applicable
+          - unavailable
+          type: string
+      required:
+      - dimension
+      - state
+      - reasons
+      type: object
+    tooling.compatibility.InputBinding:
+      additionalProperties: false
+      properties:
+        expected:
+          $ref: '#/components/schemas/tooling.environment.ObjectIdentity'
+        input_id:
+          pattern: \S
+          type: string
+        object_id:
+          pattern: \S
+          type: string
+        schema_id:
+          pattern: \S
+          type: string
+      required:
+      - input_id
+      - object_id
+      - expected
+      type: object
+    tooling.compatibility.InputOccurrenceEvidence:
+      additionalProperties: true
+      properties:
+        definition_object_id:
+          type: string
+        invocation_provenance:
+          items:
+            $ref: '#/components/schemas/tooling.closure.InvocationFrame'
+          type: array
+        occurrence:
+          $ref: '#/components/schemas/tooling.analysis.InputOccurrence'
+        query:
+          $ref: '#/components/schemas/analysis.RequirementQueryIdentity'
+        source_intervals:
+          items:
+            $ref: '#/components/schemas/tooling.closure.SourceInterval'
+          type: array
+        traversal_edge_id:
+          type: string
+      required:
+      - query
+      - occurrence
+      - source_intervals
+      - invocation_provenance
+      type: object
+    tooling.compatibility.InputOutcome:
+      additionalProperties: true
+      properties:
+        input_id:
+          type: string
+        objects:
+          items:
+            $ref: '#/components/schemas/tooling.compatibility.ObjectEvidence'
+          type: array
+        occurrences:
+          items:
+            $ref: '#/components/schemas/tooling.compatibility.InputOccurrenceEvidence'
+          type: array
+        outcome:
+          enum:
+          - satisfied
+          - missing
+          - ambiguous
+          - indeterminate
+          type: string
+        reasons:
+          items:
+            $ref: '#/components/schemas/tooling.compatibility.Reason'
+          type: array
+        requirement_ids:
+          items:
+            type: string
+          type: array
+      required:
+      - input_id
+      - outcome
+      - objects
+      - requirement_ids
+      - reasons
+      type: object
+    tooling.compatibility.ObjectEvidence:
+      additionalProperties: true
+      properties:
+        expected:
+          $ref: '#/components/schemas/tooling.environment.ObjectIdentity'
+        object:
+          $ref: '#/components/schemas/tooling.environment.Object'
+        object_id:
+          type: string
+      required:
+      - object_id
+      - expected
+      type: object
+    tooling.compatibility.Provenance:
+      additionalProperties: true
+      properties:
+        analysis_contract_version:
+          minimum: 0
+          type: integer
+        assessment_identity_digest:
+          type: string
+        capability_revision:
+          type: string
+        environment_digest:
+          type: string
+        query_digest:
+          type: string
+        requirement_set_version:
+          minimum: 0
+          type: integer
+        schema_bundle_digest:
+          type: string
+        source_id:
+          type: string
+      required:
+      - query_digest
+      - source_id
+      - capability_revision
+      - analysis_contract_version
+      - requirement_set_version
+      - environment_digest
+      - assessment_identity_digest
+      type: object
+    tooling.compatibility.Reason:
+      additionalProperties: true
+      properties:
+        candidate_input_ids:
+          items:
+            type: string
+          type: array
+        code:
+          type: string
+        dimension:
+          type: string
+        input_id:
+          type: string
+        location:
+          $ref: '#/components/schemas/tooling.analysis.Location'
+        locations:
+          items:
+            $ref: '#/components/schemas/tooling.analysis.Location'
+          type: array
+        message:
+          type: string
+        object_id:
+          type: string
+        path:
+          type: string
+        reference_ids:
+          items:
+            type: string
+          type: array
+        requirement_id:
+          type: string
+        schema_id:
+          type: string
+      required:
+      - locations
+      - reference_ids
+      - candidate_input_ids
+      - code
+      - message
+      type: object
+    tooling.compatibility.Report:
+      additionalProperties: true
+      properties:
+        closure:
+          $ref: '#/components/schemas/tooling.closure.Report'
+        correlation:
+          $ref: '#/components/schemas/tooling.analysis.CorrelationGraph'
+        coverage:
+          items:
+            $ref: '#/components/schemas/tooling.compatibility.Coverage'
+          type: array
+        dependency_bindings:
+          items:
+            $ref: '#/components/schemas/tooling.closure.Binding'
+          type: array
+        diagnostics:
+          items:
+            $ref: '#/components/schemas/tooling.environment.Diagnostic'
+          type: array
+        effective_requirements:
+          $ref: '#/components/schemas/analysis.RequirementSet'
+        input_bindings:
+          items:
+            $ref: '#/components/schemas/tooling.compatibility.InputBinding'
+          type: array
+        inputs:
+          items:
+            $ref: '#/components/schemas/tooling.compatibility.InputOutcome'
+          type: array
+        observation:
+          $ref: '#/components/schemas/tooling.v2.environment.ObservationScope'
+        outcome:
+          enum:
+          - satisfied
+          - unsatisfied
+          - incomplete
+          - not assessed
+          type: string
+        provenance:
+          $ref: '#/components/schemas/tooling.compatibility.Provenance'
+        query_scope:
+          $ref: '#/components/schemas/tooling.environment.CaptureScope'
+        reasons:
+          items:
+            $ref: '#/components/schemas/tooling.compatibility.Reason'
+          type: array
+        requirement_outcomes:
+          items:
+            $ref: '#/components/schemas/tooling.compatibility.RequirementOutcome'
+          type: array
+        requirements:
+          $ref: '#/components/schemas/analysis.RequirementSet'
+        schema_version:
+          const: 1
+          type: integer
+      required:
+      - query_scope
+      - input_bindings
+      - schema_version
+      - outcome
+      - requirements
+      - inputs
+      - requirement_outcomes
+      - correlation
+      - coverage
+      - diagnostics
+      - reasons
+      - provenance
+      type: object
+    tooling.compatibility.Request:
+      additionalProperties: false
+      allOf:
+      - if:
+          properties:
+            dependency_bindings:
+              minItems: 1
+          required:
+          - dependency_bindings
+        then:
+          required:
+          - document
+      description: Strict offline request. Ownership, unique binding IDs, canonical
+        revision and graph/reference consistency are checked by the runtime. Duplicate
+        JSON keys, malformed Unicode and lexical fractional versions are rejected
+        by the decoder.
+      properties:
+        dependency_bindings:
+          items:
+            $ref: '#/components/schemas/tooling.closure.Binding'
+          type: array
+        document:
+          $ref: '#/components/schemas/tooling.QueryDocumentRequest'
+        input_bindings:
+          items:
+            $ref: '#/components/schemas/tooling.compatibility.InputBinding'
+          type: array
+          uniqueItems: true
+        query_scope:
+          $ref: '#/components/schemas/tooling.environment.CaptureScope'
+        requirements:
+          $ref: '#/components/schemas/tooling.compatibility.request.analysis.RequirementSet'
+        schema_bundle:
+          $ref: '#/components/schemas/tooling.environment.SchemaBundle'
+        schema_version:
+          const: 1
+          type: integer
+        snapshot:
+          oneOf:
+          - $ref: '#/components/schemas/tooling.environment.Snapshot'
+          - $ref: '#/components/schemas/tooling.v2.environment.SnapshotV2'
+      required:
+      - schema_version
+      - requirements
+      - query_scope
+      - input_bindings
+      - snapshot
+      type: object
+    tooling.compatibility.RequestErrorDetail:
+      additionalProperties: false
+      properties:
+        byte_offset:
+          minimum: 0
+          type: integer
+        code:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+      required:
+      - code
+      - path
+      - message
+      type: object
+    tooling.compatibility.RequirementOutcome:
+      additionalProperties: true
+      properties:
+        applicability:
+          enum:
+          - applicable
+          - inapplicable
+          - indeterminate
+          type: string
+        capabilities:
+          items:
+            $ref: '#/components/schemas/tooling.environment.Capability'
+          type: array
+        definition_object_id:
+          type: string
+        field_projection:
+          $ref: '#/components/schemas/tooling.validation.FieldProjection'
+        input_id:
+          type: string
+        invocation_provenance:
+          items:
+            $ref: '#/components/schemas/tooling.closure.InvocationFrame'
+          type: array
+        objects:
+          items:
+            $ref: '#/components/schemas/tooling.compatibility.ObjectEvidence'
+          type: array
+        outcome:
+          enum:
+          - satisfied
+          - missing
+          - ambiguous
+          - indeterminate
+          type: string
+        query:
+          $ref: '#/components/schemas/analysis.RequirementQueryIdentity'
+        reasons:
+          items:
+            $ref: '#/components/schemas/tooling.compatibility.Reason'
+          type: array
+        requirement_id:
+          type: string
+        schemas:
+          items:
+            $ref: '#/components/schemas/tooling.compatibility.SchemaEvidence'
+          type: array
+        source_intervals:
+          items:
+            $ref: '#/components/schemas/tooling.closure.SourceInterval'
+          type: array
+        traversal_edge_id:
+          type: string
+      required:
+      - query
+      - requirement_id
+      - applicability
+      - outcome
+      - reasons
+      - capabilities
+      - objects
+      - schemas
+      - source_intervals
+      - invocation_provenance
+      type: object
+    tooling.compatibility.SchemaEvidence:
+      additionalProperties: true
+      properties:
+        binding:
+          $ref: '#/components/schemas/tooling.environment.SchemaBinding'
+        schema_id:
+          type: string
+      required:
+      - schema_id
+      - binding
+      type: object
+    tooling.compatibility.request.analysis.CorrelationEdge:
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+        keys:
+          items:
+            $ref: '#/components/schemas/tooling.compatibility.request.analysis.CorrelationKeyEvidence'
+          type: array
+        left:
+          $ref: '#/components/schemas/tooling.compatibility.request.analysis.CorrelationEndpoint'
+        location:
+          $ref: '#/components/schemas/tooling.compatibility.request.analysis.Location'
+        right:
+          $ref: '#/components/schemas/tooling.compatibility.request.analysis.CorrelationEndpoint'
+        scope_id:
+          type: string
+        stage_id:
+          type: string
+      required:
+      - id
+      - left
+      - right
+      - stage_id
+      - scope_id
+      - location
+      - keys
+      type: object
+    tooling.compatibility.request.analysis.CorrelationEndpoint:
+      additionalProperties: false
+      properties:
+        field_identity:
+          $ref: '#/components/schemas/tooling.compatibility.request.analysis.FieldIdentity'
+        input_id:
+          type: string
+        location:
+          $ref: '#/components/schemas/tooling.compatibility.request.analysis.Location'
+        occurrence_id:
+          type: string
+        reference_ids:
+          items:
+            pattern: \S
+            type: string
+          type: array
+          uniqueItems: true
+      required:
+      - input_id
+      - occurrence_id
+      - field_identity
+      - reference_ids
+      - location
+      type: object
+    tooling.compatibility.request.analysis.CorrelationGraph:
+      additionalProperties: false
+      properties:
+        components:
+          items:
+            items:
+              type: string
+            type: array
+          type: array
+        coverage:
+          $ref: '#/components/schemas/tooling.compatibility.request.analysis.InputCoverage'
+        edges:
+          items:
+            $ref: '#/components/schemas/tooling.compatibility.request.analysis.CorrelationEdge'
+          type: array
+        nodes:
+          items:
+            $ref: '#/components/schemas/tooling.compatibility.request.analysis.CorrelationNode'
+          type: array
+        outcome:
+          enum:
+          - connected
+          - disconnected
+          - indeterminate
+          - not applicable
+          type: string
+      required:
+      - outcome
+      - coverage
+      - nodes
+      - edges
+      - components
+      type: object
+    tooling.compatibility.request.analysis.CorrelationKeyEvidence:
+      additionalProperties: false
+      properties:
+        left:
+          $ref: '#/components/schemas/tooling.compatibility.request.analysis.CorrelationEndpoint'
+        location:
+          $ref: '#/components/schemas/tooling.compatibility.request.analysis.Location'
+        predicate:
+          type: string
+        right:
+          $ref: '#/components/schemas/tooling.compatibility.request.analysis.CorrelationEndpoint'
+      required:
+      - predicate
+      - left
+      - right
+      - location
+      type: object
+    tooling.compatibility.request.analysis.CorrelationNode:
+      additionalProperties: false
+      properties:
+        input_id:
+          type: string
+        occurrence_id:
+          type: string
+      required:
+      - input_id
+      - occurrence_id
+      type: object
+    tooling.compatibility.request.analysis.Diagnostic:
+      additionalProperties: false
+      properties:
+        category:
+          type: string
+        code:
+          type: string
+        location:
+          $ref: '#/components/schemas/tooling.compatibility.request.analysis.Location'
+        message:
+          type: string
+        scope_id:
+          type: string
+        severity:
+          enum:
+          - error
+          - warning
+          - info
+          type: string
+        stage_id:
+          type: string
+      required:
+      - code
+      - severity
+      - category
+      - message
+      - location
+      - stage_id
+      - scope_id
+      type: object
+    tooling.compatibility.request.analysis.EvidenceLocation:
+      additionalProperties: false
+      properties:
+        end:
+          $ref: '#/components/schemas/tooling.compatibility.request.analysis.EvidencePosition'
+        start:
+          $ref: '#/components/schemas/tooling.compatibility.request.analysis.EvidencePosition'
+      required:
+      - start
+      - end
+      type: object
+    tooling.compatibility.request.analysis.EvidencePosition:
+      additionalProperties: false
+      oneOf:
+      - properties:
+          column:
+            const: 0
+          line:
+            const: 0
+      - properties:
+          column:
+            minimum: 1
+          line:
+            minimum: 1
+      properties:
+        column:
+          minimum: 0
+          type: integer
+        line:
+          minimum: 0
+          type: integer
+        offset:
+          minimum: 0
+          type: integer
+      required:
+      - offset
+      - line
+      - column
+      type: object
+    tooling.compatibility.request.analysis.FieldIdentity:
+      additionalProperties: false
+      allOf:
+      - if:
+          properties:
+            kind:
+              const: atomic
+          required:
+          - kind
+        then:
+          properties:
+            segments:
+              maxItems: 1
+      properties:
+        kind:
+          enum:
+          - atomic
+          - path
+          type: string
+        qualifier:
+          type: string
+        segments:
+          items:
+            type: string
+          minItems: 1
+          type: array
+      required:
+      - kind
+      - segments
+      type: object
+    tooling.compatibility.request.analysis.InputCoverage:
+      additionalProperties: false
+      properties:
+        reasons:
+          items:
+            $ref: '#/components/schemas/tooling.compatibility.request.analysis.InputReason'
+          type: array
+        state:
+          enum:
+          - complete
+          - partial
+          - not_applicable
+          type: string
+      required:
+      - state
+      - reasons
+      type: object
+    tooling.compatibility.request.analysis.InputIdentity:
+      additionalProperties: false
+      properties:
+        form:
+          enum:
+          - parameter
+          - identifier
+          - dotted
+          - descriptor
+          - implicit
+          - unresolved
+          type: string
+        value:
+          type: string
+      required:
+      - form
+      - value
+      type: object
+    tooling.compatibility.request.analysis.InputOccurrence:
+      additionalProperties: false
+      properties:
+        alias:
+          type: string
+        id:
+          type: string
+        location:
+          $ref: '#/components/schemas/tooling.compatibility.request.analysis.Location'
+        original_reference_id:
+          type: string
+        reference_id:
+          type: string
+        scope_id:
+          type: string
+        stage_id:
+          type: string
+        use_site_locations:
+          items:
+            $ref: '#/components/schemas/tooling.compatibility.request.analysis.Location'
+          type: array
+        use_site_reference_ids:
+          items:
+            pattern: \S
+            type: string
+          type: array
+          uniqueItems: true
+      required:
+      - id
+      - reference_id
+      - original_reference_id
+      - stage_id
+      - scope_id
+      - alias
+      - location
+      - use_site_locations
+      - use_site_reference_ids
+      type: object
+    tooling.compatibility.request.analysis.InputOwnership:
+      additionalProperties: false
+      properties:
+        candidate_input_ids:
+          items:
+            pattern: \S
+            type: string
+          type: array
+          uniqueItems: true
+        state:
+          enum:
+          - proved
+          - unproved
+          type: string
+      required:
+      - state
+      - candidate_input_ids
+      type: object
+    tooling.compatibility.request.analysis.InputReason:
+      additionalProperties: false
+      properties:
+        code:
+          type: string
+        location:
+          $ref: '#/components/schemas/tooling.compatibility.request.analysis.EvidenceLocation'
+        message:
+          type: string
+        reference_ids:
+          items:
+            pattern: \S
+            type: string
+          type: array
+          uniqueItems: true
+        scope_id:
+          type: string
+        stage_id:
+          type: string
+      required:
+      - code
+      - message
+      - location
+      - stage_id
+      - scope_id
+      - reference_ids
+      type: object
+    tooling.compatibility.request.analysis.Location:
+      additionalProperties: false
+      properties:
+        end:
+          $ref: '#/components/schemas/tooling.compatibility.request.analysis.Position'
+        start:
+          $ref: '#/components/schemas/tooling.compatibility.request.analysis.Position'
+      required:
+      - start
+      - end
+      type: object
+    tooling.compatibility.request.analysis.Position:
+      additionalProperties: false
+      properties:
+        column:
+          minimum: 1
+          type: integer
+        line:
+          minimum: 1
+          type: integer
+        offset:
+          minimum: 0
+          type: integer
+      required:
+      - offset
+      - line
+      - column
+      type: object
+    tooling.compatibility.request.analysis.QueryInput:
+      additionalProperties: false
+      properties:
+        evidence:
+          $ref: '#/components/schemas/tooling.compatibility.request.analysis.InputCoverage'
+        id:
+          type: string
+        identity:
+          $ref: '#/components/schemas/tooling.compatibility.request.analysis.InputIdentity'
+        kind:
+          enum:
+          - named_placeholder
+          - explicit_dataset
+          - implicit_stream
+          - unresolved_source
+          type: string
+        name:
+          type: string
+        occurrences:
+          items:
+            $ref: '#/components/schemas/tooling.compatibility.request.analysis.InputOccurrence'
+          minItems: 1
+          type: array
+      required:
+      - id
+      - kind
+      - name
+      - identity
+      - evidence
+      - occurrences
+      type: object
+    tooling.compatibility.request.analysis.RequirementCoverage:
+      additionalProperties: false
+      properties:
+        complete:
+          type: boolean
+        reasons:
+          items:
+            type: string
+          type: array
+      required:
+      - complete
+      - reasons
+      type: object
+    tooling.compatibility.request.analysis.RequirementGap:
+      additionalProperties: false
+      properties:
+        code:
+          type: string
+        diagnostic_codes:
+          items:
+            type: string
+          type: array
+        message:
+          type: string
+        reference_ids:
+          items:
+            pattern: ^ref-(0|[1-9][0-9]*)$
+            type: string
+          type: array
+      required:
+      - code
+      - message
+      - reference_ids
+      - diagnostic_codes
+      type: object
+    tooling.compatibility.request.analysis.RequirementItem:
+      additionalProperties: false
+      allOf:
+      - else:
+          not:
+            required:
+            - field_identity
+        if:
+          properties:
+            kind:
+              const: field
+            resolution:
+              const: exact
+          required:
+          - kind
+          - resolution
+        then:
+          required:
+          - field_identity
+      - else:
+          not:
+            required:
+            - input_id
+        if:
+          properties:
+            ownership:
+              properties:
+                state:
+                  const: proved
+          required:
+          - ownership
+        then:
+          required:
+          - input_id
+      properties:
+        field_identity:
+          $ref: '#/components/schemas/tooling.compatibility.request.analysis.FieldIdentity'
+        id:
+          pattern: ^req-[1-9][0-9]*$
+          type: string
+        identity:
+          type: string
+        input_id:
+          type: string
+        kind:
+          enum:
+          - field
+          - index
+          - source
+          - sourcetype
+          - dataset
+          - data_model
+          - lookup
+          - macro
+          - saved_search
+          - module
+          - function
+          type: string
+        necessity:
+          enum:
+          - required
+          - conditional
+          type: string
+        occurrences:
+          items:
+            $ref: '#/components/schemas/tooling.compatibility.request.analysis.RequirementOccurrence'
+          type: array
+        origin:
+          const: direct
+        ownership:
+          $ref: '#/components/schemas/tooling.compatibility.request.analysis.InputOwnership'
+        resolution:
+          enum:
+          - exact
+          - wildcard
+          - dynamic
+          type: string
+        role:
+          type: string
+      required:
+      - id
+      - kind
+      - identity
+      - role
+      - necessity
+      - origin
+      - resolution
+      - occurrences
+      - ownership
+      type: object
+    tooling.compatibility.request.analysis.RequirementOccurrence:
+      additionalProperties: false
+      properties:
+        binding:
+          type: string
+        input_occurrence_ids:
+          items:
+            pattern: \S
+            type: string
+          type: array
+          uniqueItems: true
+        location:
+          $ref: '#/components/schemas/tooling.compatibility.request.analysis.Location'
+        necessity:
+          enum:
+          - required
+          - conditional
+          type: string
+        original_name:
+          type: string
+        reference_id:
+          pattern: ^ref-(0|[1-9][0-9]*)$
+          type: string
+        scope_id:
+          type: string
+        stage_id:
+          type: string
+      required:
+      - reference_id
+      - original_name
+      - binding
+      - stage_id
+      - scope_id
+      - location
+      - input_occurrence_ids
+      - necessity
+      type: object
+    tooling.compatibility.request.analysis.RequirementQueryIdentity:
+      additionalProperties: false
+      properties:
+        language:
+          enum:
+          - spl
+          - spl2
+          type: string
+        profile:
+          const: splunkd
+        query_digest:
+          pattern: ^sha256:[0-9a-f]{64}$
+          type: string
+        source_id:
+          type: string
+        version:
+          const: current
+      required:
+      - source_id
+      - language
+      - profile
+      - version
+      - query_digest
+      type: object
+    tooling.compatibility.request.analysis.RequirementSet:
+      additionalProperties: false
+      properties:
+        capability_revision:
+          pattern: ^sha256:[0-9a-f]{64}$
+          type: string
+        correlation:
+          $ref: '#/components/schemas/tooling.compatibility.request.analysis.CorrelationGraph'
+        coverage:
+          $ref: '#/components/schemas/tooling.compatibility.request.analysis.RequirementCoverage'
+        diagnostics:
+          items:
+            $ref: '#/components/schemas/tooling.compatibility.request.analysis.Diagnostic'
+          type: array
+        field_attribution_coverage:
+          $ref: '#/components/schemas/tooling.compatibility.request.analysis.InputCoverage'
+        gaps:
+          items:
+            $ref: '#/components/schemas/tooling.compatibility.request.analysis.RequirementGap'
+          type: array
+        input_coverage:
+          $ref: '#/components/schemas/tooling.compatibility.request.analysis.InputCoverage'
+        inputs:
+          items:
+            $ref: '#/components/schemas/tooling.compatibility.request.analysis.QueryInput'
+          type: array
+        items:
+          items:
+            $ref: '#/components/schemas/tooling.compatibility.request.analysis.RequirementItem'
+          type: array
+        query:
+          $ref: '#/components/schemas/tooling.compatibility.request.analysis.RequirementQueryIdentity'
+        query_status:
+          enum:
+          - valid
+          - invalid
+          - incomplete
+          type: string
+        schema_version:
+          const: 1
+          type: integer
+      required:
+      - schema_version
+      - query
+      - capability_revision
+      - query_status
+      - coverage
+      - items
+      - gaps
+      - diagnostics
+      - inputs
+      - input_coverage
+      - field_attribution_coverage
+      - correlation
       type: object
     tooling.corpus.AcquisitionError:
       additionalProperties: true
@@ -6295,6 +8030,48 @@ components:
       - schema_complete
       - reasons
       type: object
+    tooling.validation.FieldProjection:
+      additionalProperties: true
+      properties:
+        admission:
+          enum:
+          - 0
+          - 1
+          - 2
+          type: integer
+        evidence:
+          items:
+            $ref: '#/components/schemas/tooling.schema.SchemaEvidence'
+          type: array
+        indeterminate_classes:
+          items:
+            $ref: '#/components/schemas/tooling.schema.SchemaClass'
+          type: array
+        missing_classes:
+          items:
+            $ref: '#/components/schemas/tooling.schema.SchemaClass'
+          type: array
+        outcome:
+          enum:
+          - required
+          - optional
+          - missing
+          - conditional
+          - permitted_unspecified
+          - indeterminate
+          type: string
+        supporting_classes:
+          items:
+            $ref: '#/components/schemas/tooling.schema.SchemaClass'
+          type: array
+      required:
+      - admission
+      - outcome
+      - evidence
+      - supporting_classes
+      - missing_classes
+      - indeterminate_classes
+      type: object
     tooling.validation.Match:
       additionalProperties: true
       properties:
@@ -7205,6 +8982,46 @@ paths:
                 $ref: '#/components/schemas/api.ErrorResponse'
           description: Malformed request
       summary: Evaluate knowledge-object dependency closure
+      tags:
+      - query
+  /query/compatibility:
+    post:
+      description: Strict inline canonical requirements, snapshot v1/v2, query scope
+        and input bindings; optional per-input schemas and dependency closure. No
+        retrieval or execution. Reject unknown/duplicate members, null optional artifacts,
+        malformed Unicode and trailing JSON. Runtime validates ownership, current
+        capability revision and graph/reference links. Exact 8 MiB body limit. All
+        content outcomes (satisfied, unsatisfied, incomplete, not assessed) return
+        200; connectedness is independent.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/tooling.compatibility.Request'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/tooling.compatibility.Report'
+          description: Canonical assessment, all content outcomes
+        '400':
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/tooling.compatibility.RequestErrorDetail'
+                - $ref: '#/components/schemas/api.ErrorResponse'
+          description: Structured core request failure or transport content type/body
+            limit failure
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api.ErrorResponse'
+          description: Internal failure
+      summary: Assess bound offline compatibility evidence
       tags:
       - query
   /query/discover:

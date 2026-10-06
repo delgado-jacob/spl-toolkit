@@ -95,11 +95,11 @@ The same ID keeps the same reviewed scope; a broadened form uses a new ID unless
 a reviewed scope correction changes the original boundary. `grammar_registered`
 records parser registration separately from syntax coverage, and ordinary parser
 or semantic diagnostics do not count as lint evidence. Current exact totals are
-106 SPL records with 107 evidence cases and 141 SPL2 records with 149 evidence
+106 SPL records with 107 evidence cases and 142 SPL2 records with 163 evidence
 cases. The current SPL revision is
-`sha256:8a612f2064da24552a68faec261968731a6f1f1c7279ffabb77a59c7dfdb2008`;
+`sha256:5b7c15002c426b163a5488d18ae0fb83c68809a194a15f9a6584ea95cbb3a09b`;
 the SPL2 revision is
-`sha256:6495f77a0747f04e9690f5360cf4d024cf95a727bf05ab7cb7c9e1a96e1383dc`.
+`sha256:7134e06d345f6b2c6e58c3d29c727868320b47ff1fc0a94842aec35615223d9f`.
 
 The SPL records cover bounded field-flow semantics for exact `tstats`, selected
 field commands, and selected function arities. Exact macro invocations emit a
@@ -134,3 +134,23 @@ positive/negative requests with a full validator, format checking and denied
 external retrieval. Decoder tests additionally cover duplicate JSON keys,
 integer spelling, unique IDs and semantic preparation constraints that a parsed
 JSON Schema instance alone cannot prove.
+
+## Current compatibility evidence
+
+`v1/compatibility-request.schema.json` is a recursively strict assessment envelope;
+`v1/compatibility.schema.json` describes additive reports for all four content
+outcomes. Snapshot remains exactly v1 or v2 and the optional schema bundle remains
+v1. Optional objects are omitted, never null; nonempty dependency bindings require
+a document. Runtime admission additionally verifies canonical source/ownership,
+reference/occurrence/graph links, capability revision and binding/schema pairing.
+An absent captured object can retain a valid explicit schema pairing for negative
+assessment. A schema cannot resolve ambiguous query ownership.
+
+The authorized pre-release current-input correction retains report integer 1:
+analysis and requirements require `inputs`, `input_coverage`,
+`field_attribution_coverage`, and `correlation`; requirement items require ownership,
+and occurrences require input occurrence IDs and necessity. Archived evidence
+without this shape must be reanalyzed before assessment. Historical receipts remain
+unchanged. Exact object/declaration positives, covered negatives and independent
+correlation have separate evidence obligations. See the
+[complete envelope recipe](API.md#offline-compatibility-assessment).

@@ -9,6 +9,8 @@ contracts/v1/capabilities.schema.json
 contracts/v1/closure-graph.schema.json
 contracts/v1/closure-request.schema.json
 contracts/v1/closure.schema.json
+contracts/v1/compatibility-request.schema.json
+contracts/v1/compatibility.schema.json
 contracts/v1/corpus.schema.json
 contracts/v1/definitions.schema.json
 contracts/v1/detection-bom.schema.json

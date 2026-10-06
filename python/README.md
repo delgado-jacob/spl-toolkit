@@ -54,9 +54,9 @@ Reports preserve source text and source ID and expose ordered stages/scopes, ref
 
 Capabilities expose `records`, `summary`, and `evidence` in addition to the legacy command/function projections. Records keep syntax, semantics, requirements, linting, and safe rewriting separate, using supported, partial, unsupported, not applicable, and unassessed states. For each dimension, applicable equals supported plus partial plus unsupported plus unassessed; records equal applicable plus not applicable; covered equals supported. The manifest has no percentage or composite score.
 
-The SPL snapshot contains 106 records and 107 evidence cases; SPL2 has 141 records and 149 evidence cases. SPL syntax is 77 supported, 1 unsupported, and 28 unassessed; semantics is 68 supported, 10 unsupported, and 28 unassessed; requirements are 19 supported, 6 unsupported, and 81 unassessed; linting has 106 unassessed records; and safe rewriting is 17 supported, 2 unsupported, and 87 unassessed. SPL2 syntax is 90 supported, 19 unsupported, and 32 unassessed; semantics is 76 supported, 39 unsupported, and 26 unassessed; requirements are 46 supported, 7 unsupported, and 88 unassessed; linting has 141 unassessed; and safe rewriting has 14 supported, 3 unsupported, and 124 unassessed. Evidence IDs resolve to typed local observations and provenance. A broadened form receives a new ID unless a reviewed scope correction changes the original boundary. `grammar_registered` records parser registration only. It does not grant syntax coverage, and ordinary analysis diagnostics do not grant lint coverage.
+The SPL snapshot contains 106 records and 107 evidence cases; SPL2 has 142 records and 163 evidence cases. SPL syntax is 77 supported, 1 unsupported, and 28 unassessed; semantics is 68 supported, 10 unsupported, and 28 unassessed; requirements are 19 supported, 6 unsupported, and 81 unassessed; linting has 106 unassessed records; and safe rewriting is 17 supported, 2 unsupported, and 87 unassessed. SPL2 syntax is 90 supported, 19 unsupported, and 33 unassessed; semantics is 76 supported, 39 unsupported, and 27 unassessed; requirements are 46 supported, 1 partial, 7 unsupported, and 88 unassessed; linting has 142 unassessed; and safe rewriting has 14 supported, 3 unsupported, and 125 unassessed. Evidence IDs resolve to typed local observations and provenance. A broadened form receives a new ID unless a reviewed scope correction changes the original boundary. `grammar_registered` records parser registration only. It does not grant syntax coverage, and ordinary analysis diagnostics do not grant lint coverage.
 
-Source Go tests may report toolkit version `dev`. Tagged native libraries and Python packages report the exact `VERSION` and retain the same semantic capability revision because `toolkit_version` is the only manifest field excluded from that revision. The revision includes selectors, documentation snapshot, legacy projections, rewrite, records, summary, and evidence. The SPL revision is `sha256:8a612f2064da24552a68faec261968731a6f1f1c7279ffabb77a59c7dfdb2008`; the SPL2 revision is `sha256:6495f77a0747f04e9690f5360cf4d024cf95a727bf05ab7cb7c9e1a96e1383dc`.
+Source Go tests may report toolkit version `dev`. Tagged native libraries and Python packages report the exact `VERSION` and retain the same semantic capability revision because `toolkit_version` is the only manifest field excluded from that revision. The revision includes selectors, documentation snapshot, legacy projections, rewrite, records, summary, and evidence. The SPL revision is `sha256:5b7c15002c426b163a5488d18ae0fb83c68809a194a15f9a6584ea95cbb3a09b`; the SPL2 revision is `sha256:7134e06d345f6b2c6e58c3d29c727868320b47ff1fc0a94842aec35615223d9f`.
 
 The bounded SPL field-flow semantics support exact `tstats` data-model sources, predicates, registered aggregates, aliases, groups, and supported literal options; exact modeled forms of `fillnull`, `rex`, `spath`, `bin`, `bucket`, `regex`, and `mvexpand`; and the selected evaluation and aggregate function arities. Exact macros produce direct macro requirements and source-located unresolved-expansion gaps. Branch children retain evidence and direct requirements, while merged output fields remain uncertain.
 
@@ -249,3 +249,31 @@ with SPLMapper() as mapper:
 Supply JSON Schema object/boolean `schema`, optional `base_uri` and URI-keyed inline `resources`. Draft 2020-12 is the default. For OCSF use `{"kind":"ocsf","catalog":catalog,"selection":{"version":"1.6.0","class":"authentication","profiles":[],"extensions":[]}}`, loading your prepared catalog explicitly with `json.loads(Path("base-catalog.json").read_text())`. The complete compiled extension set must match selection; Windows requires `["win"]`. Choose `category: "iam"` instead of `class` for category evidence, or select `profiles: ["cloud", "datetime"]` explicitly. Preparation uses the official compiler outside the toolkit runtime. No URI is retrieved and no process-global catalog is consulted.
 
 Nested optional ancestors, category/branch-dependent membership, open wildcard sets, unsupported patterns/keywords, array descendants and missing profile provenance remain qualified. A declared array is supported, but descent is incomplete. Requiredness is a schema statement, not event presence. This does not validate JSON event instances or expression types. See the [full schema contract and pinned compiler preparation](https://github.com/delgado-jacob/spl-toolkit/blob/main/docs/API.md#json-schema-and-ocsf-field-validation).
+
+## Offline compatibility assessment
+
+```python
+import json
+from pathlib import Path
+from spl_toolkit import SPLMapper
+
+request = json.loads(Path("compatibility-request.json").read_text())
+with SPLMapper() as mapper:
+    report = mapper.check_compatibility(request)
+    print(report["outcome"], report["correlation"]["outcome"])
+```
+
+Generate the complete envelope with the
+[canonical recipe](https://github.com/delgado-jacob/spl-toolkit/blob/main/docs/API.md#offline-compatibility-assessment).
+`check_compatibility(request)` uses native `spl_mapper_check_compatibility`; native
+results are freed after decoding on success or failure under the existing mapper
+close/admission lifecycle. Content outcomes return dictionaries; malformed/stale
+requirements, duplicate/unknown bindings and mismatched schema pairing raise
+request errors. Required current input arrays, ownership and occurrence evidence
+must come from reanalysis. Format integers remain 1.
+
+Bind each discovered placeholder explicitly and isolate schema evidence by proved
+input owner. Exact positives survive partial capture; covered negatives require
+complete relevant evidence. Independent connectedness does not alter the core
+compatibility outcome. This offline operation does not execute SPL or prove live
+runtime compatibility, authorization or deployment.

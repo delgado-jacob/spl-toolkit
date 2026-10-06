@@ -553,6 +553,8 @@ def test_requirement_fixture_copy_rejects_missing_or_changed_input(tmp_path: Pat
     ("source", "names", "changed_name"),
     [
         (ROOT / "python/tests", ("test_native_requirements.py",), "test_native_requirements.py"),
+        (ROOT / "python/tests", ("test_native_compatibility.py",), "test_native_compatibility.py"),
+        (ROOT / "tests/acceptance", ("test_compatibility_surfaces.py",), "test_compatibility_surfaces.py"),
         (
             ROOT / "tests/acceptance",
             ("test_requirements_surfaces.py",),
@@ -578,7 +580,7 @@ def test_required_test_copy_rejects_changed_requirement_test(
 
 def test_installed_runner_removes_source_injection(monkeypatch):
     checker = load_package_checker()
-    names = ("PYTHONPATH", "PYTHONHOME", "SPL_NATIVE_LIBRARY", "SPL_EXPECTED_VERSION", "SPL_MILESTONE11_DOCUMENTS")
+    names = ("SPL_COMPATIBILITY_FIXTURES", "PYTHONPATH", "PYTHONHOME", "SPL_NATIVE_LIBRARY", "SPL_EXPECTED_VERSION", "SPL_MILESTONE11_DOCUMENTS")
     for name in names:
         monkeypatch.setenv(name, "checkout-only")
     assert not set(names).intersection(checker.clean_env())
@@ -732,6 +734,9 @@ def test_installed_schema_fixtures_exist_before_both_suites(tmp_path: Path, monk
         closure = Path(env["SPL_CLOSURE_FIXTURES"])
         assert closure.is_relative_to(outside) and closure.read_bytes() == (ROOT / "testdata/closure/cases.json").read_bytes()
         assert Path(env["SPL_CLOSURE_GO_ROOT"]).is_relative_to(outside)
+        compatibility = Path(env["SPL_COMPATIBILITY_FIXTURES"])
+        assert compatibility.is_absolute() and compatibility.is_file() and compatibility.is_relative_to(outside)
+        assert compatibility.read_bytes() == (ROOT / "testdata/compatibility/cases.json").read_bytes()
         environment = Path(env["SPL_ENVIRONMENT_FIXTURES"])
         assert environment.is_absolute() and environment.is_relative_to(outside)
         assert (environment / "cases.json").read_bytes() == (ROOT / "testdata/environment/cases.json").read_bytes()
@@ -779,6 +784,7 @@ def test_installed_schema_fixtures_exist_before_both_suites(tmp_path: Path, monk
     assert result["fixture_hashes"]["environment"] == {
         "cases.json": checker.sha256(ROOT / "testdata/environment/cases.json")
     }
+    assert result["fixture_hashes"]["compatibility"] == {"cases.json": checker.sha256(ROOT / "testdata/compatibility/cases.json")}
     assert result["tooling_environment_fixture_hashes"] == result["fixture_hashes"]["environment"]
     assert result["fixture_hashes"]["milestone11_documents"] == checker.sha256(
         ROOT / "tests/acceptance/cli_examples.json"
@@ -803,6 +809,7 @@ def test_installed_schema_fixtures_exist_before_both_suites(tmp_path: Path, monk
             "test_native_environment.py": checker.sha256(
                 ROOT / "python/tests/test_native_environment.py"
             ),
+            "test_native_compatibility.py": checker.sha256(ROOT / "python/tests/test_native_compatibility.py"),
         },
         "acceptance": {
             "test_requirements_surfaces.py": checker.sha256(
@@ -814,6 +821,7 @@ def test_installed_schema_fixtures_exist_before_both_suites(tmp_path: Path, monk
             "test_environment_surfaces.py": checker.sha256(
                 ROOT / "tests/acceptance/test_environment_surfaces.py"
             ),
+            "test_compatibility_surfaces.py": checker.sha256(ROOT / "tests/acceptance/test_compatibility_surfaces.py"),
         },
     }
     assert result["wheel_payload_hashes"] == payload_hashes
@@ -836,7 +844,7 @@ def test_environment_source_override_is_removed(monkeypatch):
     assert "SPL_ENVIRONMENT_FIXTURES" not in checker.clean_env()
 
 
-@pytest.mark.parametrize("changed_name", ["_native_src/pkg/validation/schema_validate.go", "build_support.py", "requirements-contracts-local-hashed.lock"])
+@pytest.mark.parametrize("changed_name", ["_native_src/pkg/validation/schema_validate.go", "_native_src/pkg/compatibility/check.go", "tests/test_native_compatibility.py", "build_support.py", "requirements-contracts-local-hashed.lock"])
 def test_sdist_source_verification_requires_exact_handwritten_sources_and_native_test(tmp_path: Path, changed_name):
     checker = load_package_checker()
     support = load_build_support()
@@ -845,7 +853,7 @@ def test_sdist_source_verification_requires_exact_handwritten_sources_and_native
     command.ensure_finalized()
     release = tmp_path / "release"
     command.make_release_tree(str(release), [])
-    for relative in ("native-source-files.txt", "spl_toolkit/mapper.py", "spl_toolkit/libspl_toolkit.h", "tests/test_native_analysis.py", "tests/test_native_schema_validation.py", "tests/test_native_spl2.py", "tests/test_native_rewrite.py", "tests/test_native_requirements.py", "tests/test_native_tooling.py", "tests/test_native_closure.py", "tests/test_native_environment.py", "build_support.py", "MANIFEST.in", "setup.py", "pyproject.toml", "requirements-build.txt", "requirements-dev.txt", "requirements-contracts-local-hashed.lock"):
+    for relative in ("native-source-files.txt", "spl_toolkit/mapper.py", "spl_toolkit/libspl_toolkit.h", "tests/test_native_analysis.py", "tests/test_native_schema_validation.py", "tests/test_native_spl2.py", "tests/test_native_rewrite.py", "tests/test_native_requirements.py", "tests/test_native_tooling.py", "tests/test_native_closure.py", "tests/test_native_environment.py", "tests/test_native_compatibility.py", "build_support.py", "MANIFEST.in", "setup.py", "pyproject.toml", "requirements-build.txt", "requirements-dev.txt", "requirements-contracts-local-hashed.lock"):
         destination = release / relative
         destination.parent.mkdir(parents=True, exist_ok=True)
         destination.write_bytes((PYTHON_DIR / relative).read_bytes())
@@ -1151,7 +1159,7 @@ def test_spl2_fixture_copy_rejects_missing_or_changed_input(tmp_path, monkeypatc
         checker.copy_spl2_fixtures(ROOT / "testdata/spl2", tmp_path / "changed")
 
 
-@pytest.mark.parametrize("required", ["test_native_spl2.py", "test_native_rewrite.py"])
+@pytest.mark.parametrize("required", ["test_native_spl2.py", "test_native_rewrite.py", "test_native_compatibility.py", "test_compatibility_surfaces.py"])
 def test_required_pytest_plugin_rejects_uncollected_registered_suite(tmp_path, required):
     checker = load_package_checker()
     suite = tmp_path / 'suite'
@@ -1162,3 +1170,20 @@ def test_required_pytest_plugin_rejects_uncollected_registered_suite(tmp_path, r
     completed = subprocess.run([sys.executable, '-m', 'pytest', str(suite), '-q'],
         env=checker.clean_env() | {'SPL_REQUIRED_TEST_FILES': json.dumps(['test_existing.py', required])}, check=False)
     assert completed.returncode != 0
+
+
+def test_compatibility_fixture_copy_is_exact_and_rejects_missing_or_changed_input(tmp_path, monkeypatch):
+    checker = load_package_checker()
+    source = ROOT / "testdata/compatibility"
+    copied = tmp_path / "fixtures"
+    assert checker._copy_required_files(source, copied, ("cases.json",)) == {
+        "cases.json": checker.sha256(source / "cases.json")}
+    with pytest.raises(FileNotFoundError):
+        checker._copy_required_files(tmp_path / "missing", tmp_path / "absent", ("cases.json",))
+    real_copy = checker.shutil.copy2
+    def corrupt(original, destination):
+        real_copy(original, destination)
+        Path(destination).write_bytes(b"changed")
+    monkeypatch.setattr(checker.shutil, "copy2", corrupt)
+    with pytest.raises(AssertionError, match="hash"):
+        checker._copy_required_files(source, tmp_path / "damaged", ("cases.json",))

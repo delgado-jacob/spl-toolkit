@@ -51,7 +51,7 @@ def add_tooling(spec):
             if version == "v1" and name.startswith("analysis.Requirement"):
                 result["$ref"] = PREFIX + name + suffix
                 return result
-            if version == "v1" and preserve_analysis and name.startswith("analysis."):
+            if version == "v1" and preserve_analysis and name.startswith("analysis.") and not name.startswith("analysis.Evidence"):
                 if name not in schemas:
                     raise ValueError(f"missing generated analysis dependency: {name}")
                 result["$ref"] = PREFIX + name + suffix
@@ -71,6 +71,10 @@ def add_tooling(spec):
         "analysis.RequirementItem",
         "analysis.RequirementGap",
         "analysis.RequirementSet",
+        "analysis.InputIdentity", "analysis.InputReason", "analysis.InputCoverage",
+        "analysis.InputOccurrence", "analysis.QueryInput", "analysis.InputOwnership",
+        "analysis.CorrelationGraph", "analysis.CorrelationNode", "analysis.CorrelationEndpoint",
+        "analysis.CorrelationKeyEvidence", "analysis.CorrelationEdge", "analysis.FieldIdentity",
     )
     for name in ("analysis.Position", "analysis.Location", "analysis.Diagnostic"):
         generated = schemas.get(name)
@@ -86,6 +90,18 @@ def add_tooling(spec):
                 or set(generated.get("properties", {})) != set(canonical["properties"])):
             raise ValueError(f"unexpected pinned requirement schema shape: {name}")
         schemas[name] = convert(canonical, preserve_analysis=True)
+    for name, canonical in shared["$defs"].items():
+        if name.startswith("compatibility.") and not name.startswith("compatibility.request.") or name == "validation.FieldProjection":
+            generated = schemas.get(name)
+            if generated is None and component("v1", name) in schemas:
+                continue
+            # The pinned Swag resolver emits this Request annotation as an empty
+            # object. Replace that exact placeholder with the strict shared DTO;
+            # other generated shapes must match the complete Go projection.
+            if name == "compatibility.Request" and generated == {"type": "object"}:
+                continue
+            if not isinstance(generated, dict) or generated.get("type") != "object" or set(generated.get("properties", {})) != set(canonical["properties"]):
+                raise ValueError(f"unexpected pinned compatibility schema shape: {name}")
     requirement_ref = {"$ref": PREFIX + "analysis.RequirementSet"}
     for name in ("analysis.Result",):
         generated = schemas.get(name)
@@ -93,6 +109,12 @@ def add_tooling(spec):
                 or generated.get("properties", {}).get("requirements") != requirement_ref
                 or "requirements" in generated.get("required", [])):
             raise ValueError(f"unexpected optional requirement embedding: {name}")
+    # Current analysis reports require the same canonical source evidence as
+    # standalone requirements. Keep the optional requirements embedding.
+    generated_result = schemas["analysis.Result"]
+    if set(generated_result.get("properties", {})) != set(shared["$defs"]["analysis.Result"]["properties"]):
+        raise ValueError("unexpected pinned analysis.Result source evidence shape")
+    schemas["analysis.Result"] = convert(shared["$defs"]["analysis.Result"], preserve_analysis=True)
     response = spec.get("paths", {}).get("/query/requirements", {}).get("post", {}).get("responses", {}).get("200", {})
     if response.get("content", {}).get("application/json", {}).get("schema") != requirement_ref:
         raise ValueError("unexpected requirements response schema")
@@ -128,6 +150,17 @@ def add_tooling(spec):
             "400": {"description": "Malformed request", "content": {"application/json": {"schema": {"$ref": PREFIX + "api.ErrorResponse"}}}},
         },
     }}
+    spec["paths"]["/query/compatibility"] = {"post": {
+        "summary": "Assess bound offline compatibility evidence",
+        "description": "Strict inline canonical requirements, snapshot v1/v2, query scope and input bindings; optional per-input schemas and dependency closure. No retrieval or execution. Reject unknown/duplicate members, null optional artifacts, malformed Unicode and trailing JSON. Runtime validates ownership, current capability revision and graph/reference links. Exact 8 MiB body limit. All content outcomes (satisfied, unsatisfied, incomplete, not assessed) return 200; connectedness is independent.",
+        "tags": ["query"],
+        "requestBody": {"required": True, "content": {"application/json": {"schema": reference("compatibility.Request")}}},
+        "responses": {
+            "200": {"description": "Canonical assessment, all content outcomes", "content": {"application/json": {"schema": reference("compatibility.Report")}}},
+            "400": {"description": "Structured core request failure or transport content type/body limit failure", "content": {"application/json": {"schema": {"oneOf": [reference("compatibility.RequestErrorDetail"), {"$ref": PREFIX + "api.ErrorResponse"}]}}}},
+            "500": {"description": "Internal failure", "content": {"application/json": {"schema": {"$ref": PREFIX + "api.ErrorResponse"}}}},
+        },
+    }}
     spec["paths"]["/environment/validate"] = {"post": {
         "summary": "Validate offline environment artifacts",
         "description": "Strict inline snapshot and/or schema bundle. Request envelope, schema bundle, and validation report retain schema_version 1; nested snapshot accepts schema_version 1 or 2. Snapshot v2 observation shape does not prove remote exhaustiveness. Requires at least one artifact. Unknown or duplicate members, nulls, malformed Unicode, and trailing JSON are input errors. Body limit is 8 MiB. Valid and partial reports return 200; invalid artifacts return 400 with the canonical report.",
@@ -153,8 +186,9 @@ def add_tooling(spec):
     # Swag walks Go package imports while resolving the documentation-only
     # environment DTO. These generated types are superseded by the strict
     # tooling.environment definitions and are not referenced by any route.
-    generated_only = {name for name in schemas if name.startswith(("closure.", "environment."))}
+    generated_only = {name for name in schemas if name.startswith(("closure.", "environment.", "compatibility."))}
     generated_only.add("api.EnvironmentValidationRequest")
+    generated_only.add("validation.FieldProjection")
     def component_refs(value):
         if isinstance(value, dict):
             ref = value.get("$ref", "")

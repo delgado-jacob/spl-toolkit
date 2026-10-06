@@ -23,7 +23,9 @@ ROOT = Path(__file__).resolve().parents[2]
 CONTRACTS = ROOT / "contracts"
 FAMILIES = ("query-document", "capabilities", "analysis", "requirements", "field-validation",
             "schema-validation", "rewrite", "corpus", "manifest", "graph",
-            "impact", "document-view", "lsp-configuration")
+            "impact", "document-view", "lsp-configuration", "closure-request", "closure",
+            "environment-snapshot", "field-schema-bundle", "environment-validation",
+            "compatibility-request", "compatibility")
 
 
 def deny_unknown(uri):
@@ -200,6 +202,8 @@ import (
  "strings"
  "github.com/delgado-jacob/spl-toolkit/pkg/analysis"
  "github.com/delgado-jacob/spl-toolkit/pkg/validation"
+ "github.com/delgado-jacob/spl-toolkit/pkg/compatibility"
+ "github.com/delgado-jacob/spl-toolkit/pkg/environment"
  "github.com/delgado-jacob/spl-toolkit/pkg/rewrite"
  "github.com/delgado-jacob/spl-toolkit/pkg/corpus"
  "github.com/delgado-jacob/spl-toolkit/pkg/corpusio"
@@ -208,16 +212,30 @@ import (
  "github.com/delgado-jacob/spl-toolkit/pkg/impact"
  "github.com/delgado-jacob/spl-toolkit/pkg/sarif"
 )
+func boolptr(v bool)*bool{return &v}
 func must[T any](v T, e error) T { if e != nil { panic(e) }; return v }
+func compatibilityExamples() map[string]any {
+ path:=os.Getenv("SPL_COMPATIBILITY_FIXTURES"); if path=="" {path="testdata/compatibility/cases.json"}
+ raw:=must(os.ReadFile(path));var cases []struct{Name string `json:"name"`;Document analysis.QueryDocument `json:"document"`;Snapshot environment.Snapshot `json:"snapshot"`;SchemaBundle *environment.SchemaBundle `json:"schema_bundle"`;QueryScope environment.CaptureScope `json:"query_scope"`;Bindings map[string]compatibility.InputBinding `json:"bindings"`}
+ must(0,json.Unmarshal(raw,&cases));out:=map[string]any{}
+ selected:=map[string]string{"explicit-dataset":"satisfied","closed-schema-missing-field":"unsatisfied","schema-not-supplied":"incomplete","malformed-query":"not assessed","pipeline-three-input-renamed-key":"chain","select-first-left-joins":"sql-left","placeholder-binding-absent-object":"absent"}
+ for _,c:=range cases {label,ok:=selected[c.Name];if !ok {continue};req:=compatibility.Request{SchemaVersion:1,Requirements:*must(analysis.Requirements(c.Document)),Snapshot:c.Snapshot,SchemaBundle:c.SchemaBundle,QueryScope:c.QueryScope,InputBindings:[]compatibility.InputBinding{}}
+  for _,input:=range req.Requirements.Inputs {binding,ok:=c.Bindings[input.Kind+":"+input.Name];if !ok {continue};binding.InputID=input.ID;if binding.Expected.Kind=="" {for _,obj:=range c.Snapshot.Objects {if obj.ID==binding.ObjectID {binding.Expected=environment.ObjectIdentity{Kind:obj.Kind,Name:obj.Name,Namespace:obj.Namespace,App:obj.App,Owner:obj.Owner}}}};req.InputBindings=append(req.InputBindings,binding)}
+  out[label+"-request"]=req;out[label]=must(compatibility.Check(req))
+ }
+ return out
+}
 func main() {
  if len(os.Args)>1 {
   raw := []byte(os.Args[2]); var e error
   switch os.Args[1] {
+  case "compatibility-request": _,e=compatibility.CheckJSON(raw)
   case "corpus": _,e=corpus.DecodeRequest(raw)
   case "manifest": _,e=corpusio.DecodeManifest(raw)
   case "rewrite": _,e=rewrite.DecodeRequest(raw)
   case "impact": _,e=impact.DecodeSchemaRequest(raw)
   case "query-document": _,e=validation.DecodeDocuments(append(append([]byte{'['},raw...),']'))
+  default: panic("unknown decoder family: "+os.Args[1])
   }
   if e==nil { fmt.Print("accepted") } else { fmt.Print("rejected") }; return
  }
@@ -267,6 +285,12 @@ func main() {
  comparison:=must(impact.PrepareSchemas(*fieldTarget,*fieldTarget))
  m["failed-impact"]=must(comparison.Compare(failedInput))
  m["empty-impact"]=must(comparison.Compare(emptyInput))
+ scope:=environment.CaptureScope{Namespace:environment.Selector{All:boolptr(true)},App:environment.Selector{All:boolptr(true)},Owner:environment.Selector{All:boolptr(true)}}
+ snapshot:=environment.Snapshot{SchemaVersion:1,ScopeID:"offline",CaptureScope:scope,Origin:environment.Origin{InstanceID:"local",ProductVersion:"9.4",Producer:"fixture",ProducerVersion:"1"},Capture:environment.CaptureInterval{Start:"2026-10-01T12:00:00Z",End:"2026-10-01T12:05:00Z"},Capabilities:[]environment.Capability{},Collections:[]environment.Collection{},Objects:[]environment.Object{}}
+ request:=compatibility.Request{SchemaVersion:1,Requirements:*must(analysis.Requirements(analysis.QueryDocument{Text:"from [{id:1}]",Language:"spl2"})),QueryScope:scope,InputBindings:[]compatibility.InputBinding{},Snapshot:snapshot}
+ m["compatibility-examples"]=compatibilityExamples()
+ m["compatibility-request"]=request
+ m["compatibility"]=must(compatibility.Check(request))
  must(0,json.NewEncoder(os.Stdout).Encode(m))
 }
 '''
@@ -1011,3 +1035,69 @@ def test_observed_v2_shape_boundaries(schemas):
     # Shape success does not establish object linkage, capture rollups, or remote exhaustiveness.
     invalid_ref = next(c["snapshot"] for c in cases if c["name"] == "observed-v2-invalid-reference")
     assert not validate(invalid_ref)
+
+
+def test_compatibility_live_contracts_and_independent_source_facts(schemas, emitted):
+    examples = emitted["compatibility-examples"]
+    for outcome in ("satisfied", "unsatisfied", "incomplete", "not assessed"):
+        report = examples[outcome]
+        assert report["outcome"] == outcome
+        assert not errors(schemas, "compatibility", report)
+        assert not errors(schemas, "compatibility-request", examples[outcome + "-request"])
+    chain = examples["chain"]
+    assert chain["outcome"] == "satisfied"
+    assert chain["correlation"]["outcome"] == "connected"
+    assert len(chain["correlation"]["nodes"]) == 3 and len(chain["correlation"]["edges"]) == 2
+    inputs = {source["id"]: source["name"] for source in chain["requirements"]["inputs"]}
+    fields = {(inputs.get(item.get("input_id")), tuple(item["field_identity"]["segments"]))
+              for item in chain["requirements"]["items"] if item["kind"] == "field"}
+    assert fields == {("$events", ("user_id",)), ("$events", ("asset_id",)), ("$users", ("id",)), ("$assets", ("id",))}
+    for name in ("chain", "sql-left", "absent"):
+        assert not errors(schemas, "compatibility", examples[name]), name
+        assert not errors(schemas, "compatibility-request", examples[name + "-request"]), name
+    assert examples["absent"]["outcome"] == "unsatisfied"
+    assert any(reason["code"] == "schema_not_supplied" for reason in examples["absent"]["reasons"])
+
+
+def test_compatibility_shape_and_runtime_reference_admission(schemas, emitted, emitter):
+    request = emitted["compatibility-examples"]["satisfied-request"]
+    mutations = []
+    for member in ("inputs", "input_coverage", "field_attribution_coverage", "correlation"):
+        value = copy.deepcopy(request)
+        del value["requirements"][member]
+        mutations.append(("missing " + member, value, False))
+    for member in ("document", "schema_bundle", "dependency_bindings"):
+        value = copy.deepcopy(request)
+        value[member] = None
+        mutations.append(("null " + member, value, False))
+    value = copy.deepcopy(request)
+    value["requirements"]["future_annotation"] = True
+    mutations.append(("unknown requirements member", value, False))
+    value = copy.deepcopy(request)
+    value["input_bindings"].append(copy.deepcopy(value["input_bindings"][0]))
+    mutations.append(("duplicate binding", value, False))
+    value = copy.deepcopy(request)
+    value["input_bindings"][0]["input_id"] = "unknown"
+    mutations.append(("unknown binding link", value, True))
+    value = copy.deepcopy(request)
+    value["requirements"]["correlation"]["nodes"][0]["occurrence_id"] = "unknown"
+    mutations.append(("unknown graph link", value, True))
+    for name, value, shape_valid in mutations:
+        assert (not errors(schemas, "compatibility-request", value)) == shape_valid, name
+        assert subprocess.check_output([str(emitter), "compatibility-request", json.dumps(value)], text=True) == "rejected", name
+    assert subprocess.check_output([str(emitter), "compatibility-request", json.dumps(request)], text=True) == "accepted"
+    raw = json.dumps(request)
+    raw = raw.replace('"schema_version": 1', '"schema_version": 1, "schema_version": 1', 1)
+    assert subprocess.check_output([str(emitter), "compatibility-request", raw], text=True) == "rejected"
+    for member in ("inputs", "requirement_outcomes", "coverage", "reasons"):
+        value = copy.deepcopy(emitted["compatibility-examples"]["satisfied"])
+        value[member] = None
+        assert errors(schemas, "compatibility", value), member
+
+
+def test_compatibility_authored_runtime_cases(emitter):
+    fixture = json.loads((ROOT / "testdata/tooling/contracts.json").read_text())
+    for case in fixture["cases"]:
+        if case["family"] == "compatibility-request" and "runtime_valid" in case:
+            actual = subprocess.check_output([str(emitter), "compatibility-request", json.dumps(case["instance"])], text=True)
+            assert (actual == "accepted") == case["runtime_valid"], case["id"]

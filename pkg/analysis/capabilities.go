@@ -46,6 +46,8 @@ type capabilityRevisionEvidenceObservations struct {
 	SafeRewriting *CapabilityRewriteObservation              `json:"safe_rewriting,omitempty"`
 }
 
+// The revision includes private typed identity and full input/occurrence ownership proof.
+// An alias avoids the intentionally narrower public expectation MarshalJSON.
 type capabilityRevisionRequirementExpectation CapabilityRequirementExpectation
 
 type capabilityRevisionRequirementsObservation struct {

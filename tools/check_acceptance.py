@@ -22,10 +22,10 @@ REQUIRED_TEST_FILES = {
     "native": {"test_native_abi.py", "test_native_mapper.py", "test_native_analysis.py",
                "test_native_validation.py", "test_native_schema_validation.py", "test_native_spl2.py",
                "test_native_rewrite.py", "test_native_requirements.py", "test_native_closure.py",
-               "test_native_environment.py"},
+               "test_native_environment.py", "test_native_compatibility.py"},
     "acceptance": {"test_documented_cli.py", "test_surfaces.py", "test_analysis_surfaces.py",
                    "test_requirements_surfaces.py", "test_validation_surfaces.py", "test_schema_surfaces.py",
-                   "test_spl2_surfaces.py", "test_rewrite_surfaces.py", "test_environment_surfaces.py"},
+                   "test_spl2_surfaces.py", "test_rewrite_surfaces.py", "test_environment_surfaces.py", "test_compatibility_surfaces.py"},
 }
 REQUIRED_TEST_HASH_PATHS = {
     "native": {
@@ -34,11 +34,13 @@ REQUIRED_TEST_HASH_PATHS = {
         "test_native_analysis.py": ROOT / "python/tests/test_native_analysis.py",
         "test_native_spl2.py": ROOT / "python/tests/test_native_spl2.py",
         "test_native_environment.py": ROOT / "python/tests/test_native_environment.py",
+        "test_native_compatibility.py": ROOT / "python/tests/test_native_compatibility.py",
     },
     "acceptance": {
         "test_requirements_surfaces.py": ROOT / "tests/acceptance/test_requirements_surfaces.py",
         "test_analysis_surfaces.py": ROOT / "tests/acceptance/test_analysis_surfaces.py",
         "test_environment_surfaces.py": ROOT / "tests/acceptance/test_environment_surfaces.py",
+        "test_compatibility_surfaces.py": ROOT / "tests/acceptance/test_compatibility_surfaces.py",
     },
 }
 REQUIRED_TEST_HASHES = {
@@ -70,6 +72,9 @@ TOOLING_FIXTURE_KEYS = {
 }
 ENVIRONMENT_FIXTURE_HASHES = {
     "cases.json": hashlib.sha256((ROOT / "testdata/environment/cases.json").read_bytes()).hexdigest(),
+}
+COMPATIBILITY_FIXTURE_HASHES = {
+    "cases.json": hashlib.sha256((ROOT / "testdata/compatibility/cases.json").read_bytes()).hexdigest(),
 }
 LINUS_FIXTURE_SHA = hashlib.sha256((ROOT / "testdata/spl2/linus-forms.json").read_bytes()).hexdigest()
 COMMON_FIELDS = {"schema_version", "kind", "source_sha", "status"}
@@ -437,6 +442,9 @@ def validate_records(records: list[dict], source_sha: str) -> list[str]:
             environment_hashes = fixture_hashes.get("environment") if isinstance(fixture_hashes, dict) else None
             _validate_hash_map(environment_hashes, ENVIRONMENT_FIXTURE_HASHES,
                                "fixture_hashes.environment", errors, label)
+            compatibility_hashes = fixture_hashes.get("compatibility") if isinstance(fixture_hashes, dict) else None
+            _validate_hash_map(compatibility_hashes, COMPATIBILITY_FIXTURE_HASHES,
+                               "fixture_hashes.compatibility", errors, label)
             contract_counts = record.get("machine_contract_tests")
             count_fields = {"collected", "passed", "failed", "skipped"}
             if not isinstance(contract_counts, dict) or set(contract_counts) != count_fields:

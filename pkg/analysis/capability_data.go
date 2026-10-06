@@ -695,6 +695,22 @@ func validateCapabilityEvidenceObservation(evidence CapabilityEvidence, dimensio
 			if item.FieldIdentity != nil && (item.Kind != "field" || item.Resolution != "exact") {
 				return fmt.Errorf("item %d has identity outside an exact field", i)
 			}
+			if item.Ownership != nil {
+				owner := item.Ownership
+				if owner.State != "proved" && owner.State != "unproved" || owner.CandidateInputIDs == nil || item.Occurrences == nil {
+					return fmt.Errorf("item %d has incomplete ownership proof", i)
+				}
+				if owner.State == "proved" && (item.InputID == "" || len(owner.CandidateInputIDs) != 1 || owner.CandidateInputIDs[0] != item.InputID) || owner.State == "unproved" && item.InputID != "" {
+					return fmt.Errorf("item %d has contradictory ownership proof", i)
+				}
+				for _, occurrence := range item.Occurrences {
+					if occurrence.InputOccurrenceIDs == nil || occurrence.Necessity != "required" && occurrence.Necessity != "conditional" {
+						return fmt.Errorf("item %d has incomplete occurrence proof", i)
+					}
+				}
+			} else if item.InputID != "" || item.Occurrences != nil {
+				return fmt.Errorf("item %d has ownership fields without proof", i)
+			}
 		}
 		return validateNonemptyStrings("gap code", observation.GapCodes)
 	case "linting":

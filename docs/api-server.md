@@ -119,7 +119,7 @@ source ranges, and status rules.
 
 `GET /api/v1/capabilities?language=spl2&profile=splunkd&version=current` returns the selected manifest, including `documentation_snapshot` for SPL2. The only query parameters are `language`, `profile`, and `version`; omitted or empty values use defaults. Unknown parameters/values, malformed encodings/Unicode, and duplicate or conflicting keys return 400, including repeated equal values. With no selectors it returns the SPL manifest. Query body/source identity are not capability selectors.
 
-The manifest contains five evidence-backed dimensions per record: syntax, semantics, requirements, linting, and safe rewriting. Their states are supported, partial, unsupported, not applicable, and unassessed. Summary counts obey `applicable = supported + partial + unsupported + unassessed`, `records = applicable + not_applicable`, and `covered = supported`; no composite score is emitted. The SPL response contains 106 records and 107 evidence cases. SPL2 contains 141 records and 149 evidence cases. Every advertised rewrite form has a matching ledger record and replayed success or boundary evidence. `grammar_registered` is a parser fact, not syntax coverage, and the legacy command/function projections do not replace the ledger. A tagged server reports the exact `VERSION` in `toolkit_version`; source Go execution may report `dev` without changing the semantic capability revision. The SPL revision is `sha256:8a612f2064da24552a68faec261968731a6f1f1c7279ffabb77a59c7dfdb2008`; the SPL2 revision is `sha256:6495f77a0747f04e9690f5360cf4d024cf95a727bf05ab7cb7c9e1a96e1383dc`.
+The manifest contains five evidence-backed dimensions per record: syntax, semantics, requirements, linting, and safe rewriting. Their states are supported, partial, unsupported, not applicable, and unassessed. Summary counts obey `applicable = supported + partial + unsupported + unassessed`, `records = applicable + not_applicable`, and `covered = supported`; no composite score is emitted. The SPL response contains 106 records and 107 evidence cases. SPL2 contains 142 records and 163 evidence cases. Every advertised rewrite form has a matching ledger record and replayed success or boundary evidence. `grammar_registered` is a parser fact, not syntax coverage, and the legacy command/function projections do not replace the ledger. A tagged server reports the exact `VERSION` in `toolkit_version`; source Go execution may report `dev` without changing the semantic capability revision. The SPL revision is `sha256:5b7c15002c426b163a5488d18ae0fb83c68809a194a15f9a6584ea95cbb3a09b`; the SPL2 revision is `sha256:7134e06d345f6b2c6e58c3d29c727868320b47ff1fc0a94842aec35615223d9f`.
 
 Evidence IDs join claims to typed local observations and provenance. Broader forms receive new IDs unless a reviewed scope correction changes the original boundary. The bounded SPL field-flow semantics support exact `tstats` sources, predicates, aggregates, groups, and supported literal options; exact modeled forms of `fillnull`, `rex`, `spath`, `bin`, `bucket`, `regex`, and `mvexpand`; and the selected function arities. Exact macros and branch children retain direct requirements and evidence, while expansion and branch merging remain incomplete. Dynamic operands, wildcard groups, `PREFIX(...)`, true result-shape modes, unsupported options, ambiguous or sed-mode `rex`, and `spath` auto-extraction also remain incomplete.
 
@@ -208,3 +208,20 @@ Both schema routes use the same per-document language contract and their existin
 ```
 
 An exit or report status of `incomplete` is not itself a refusal: individual reports can have `committed: true` when their candidate is proven, while the ordered batch aggregate remains incomplete. The selected capability manifest exposes rewrite support per kind, role, and identity form; clients must inspect those optional entries rather than assume universal rewriting support.
+
+## Offline compatibility assessment endpoint
+
+`POST /api/v1/query/compatibility` accepts the strict complete JSON envelope in
+[the API recipe](API.md#offline-compatibility-assessment). Its body limit is 8 MiB
+and its content type is `application/json`. Snapshot v1/v2 and SchemaBundlev1
+remain separate evidence contracts. Optional bundle/document members are omitted,
+never null. Duplicate/unknown bindings, stale requirements, invalid source links
+and mismatched object/schema identities are admission errors.
+
+HTTP 200 carries the full report for satisfied, unsatisfied, incomplete and
+`not assessed`; content outcomes are not HTTP errors. Core admission errors return
+400 `RequestErrorDetail` (code/path/message, optional byte offset). Content-type
+and body-limit transport failures retain the legacy `ErrorResponse` shape; the
+OpenAPI 400 response declares both. Internal failures return legacy 500 errors.
+Inputs, per-input schema evidence and independent correlation are canonical Go
+values. This route reads no live service and makes no execution/authorization claim.

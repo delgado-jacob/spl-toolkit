@@ -40,9 +40,9 @@ The additive [structured analysis API](API.md) uses report format integer `1` an
 
 Capability manifests add an evidence-backed ledger without removing the v1 legacy `commands` and `functions` projections. Every record carries syntax, semantics, requirements, linting, and safe-rewriting claims in one of five states: supported, partial, unsupported, not applicable, or unassessed. The summary has strict integer denominators. Applicable equals supported plus partial plus unsupported plus unassessed; records equal applicable plus not applicable; covered equals supported. No percentage or composite score is part of the contract.
 
-The current SPL snapshot contains 106 records and 107 evidence cases; SPL2 has 141 records and 149 evidence cases. SPL syntax is 77 supported, 1 unsupported, and 28 unassessed; semantics is 68 supported, 10 unsupported, and 28 unassessed; requirements are 19 supported, 6 unsupported, and 81 unassessed; linting has 106 unassessed records; and safe rewriting is 17 supported, 2 unsupported, and 87 unassessed. Grammar registration is separate from evidence-backed syntax coverage. Every advertised rewrite form has a matching canonical record and executable success or boundary evidence. Linting remains a separate evidence boundary and is currently unassessed across both record sets. Stable record and evidence IDs retain their reviewed scope. Broader forms receive new IDs unless a reviewed scope correction fixes the original boundary.
+The current SPL snapshot contains 106 records and 107 evidence cases; SPL2 has 142 records and 163 evidence cases. SPL syntax is 77 supported, 1 unsupported, and 28 unassessed; semantics is 68 supported, 10 unsupported, and 28 unassessed; requirements are 19 supported, 6 unsupported, and 81 unassessed; linting has 106 unassessed records; and safe rewriting is 17 supported, 2 unsupported, and 87 unassessed. Grammar registration is separate from evidence-backed syntax coverage. Every advertised rewrite form has a matching canonical record and executable success or boundary evidence. Linting remains a separate evidence boundary and is currently unassessed across both record sets. Stable record and evidence IDs retain their reviewed scope. Broader forms receive new IDs unless a reviewed scope correction fixes the original boundary.
 
-`capability_revision` includes the selectors, documentation snapshot, legacy projections, rewrite manifest, records, summary, and evidence. It excludes only `toolkit_version`. Source Go tests may therefore report `dev`, while tagged CLI, server, native, and packaged artifacts report exact `VERSION` with the same semantic revision. The SPL revision is `sha256:8a612f2064da24552a68faec261968731a6f1f1c7279ffabb77a59c7dfdb2008`; the SPL2 revision is `sha256:6495f77a0747f04e9690f5360cf4d024cf95a727bf05ab7cb7c9e1a96e1383dc`.
+`capability_revision` includes the selectors, documentation snapshot, legacy projections, rewrite manifest, records, summary, and evidence. It also includes normalized private typed-field identity, ownership and occurrence proof; public evidence expectations omit that detail. Of emitted manifest fields, it excludes only `toolkit_version`. Source Go tests may therefore report `dev`, while tagged CLI, server, native, and packaged artifacts report exact `VERSION` with the same semantic revision. The SPL revision is `sha256:5b7c15002c426b163a5488d18ae0fb83c68809a194a15f9a6584ea95cbb3a09b`; the SPL2 revision is `sha256:7134e06d345f6b2c6e58c3d29c727868320b47ff1fc0a94842aec35615223d9f`.
 
 The bounded SPL field-flow semantics support exact `tstats` data-model sources, predicates, registered aggregates, aliases, groups, and supported literal options; exact modeled forms of `fillnull`, `rex`, `spath`, `bin`, `bucket`, `regex`, and `mvexpand`; and the selected evaluation and aggregate function arities. Dynamic catalog or field identities, wildcard `tstats` groups, `PREFIX(...)`, true result-shape modes, unsupported options, ambiguous or sed-mode `rex`, and `spath` auto-extraction remain incomplete. Exact macros retain one direct macro requirement and a source-located unresolved-expansion gap. Branch children retain evidence and direct requirements, while merged output fields remain uncertain. These forms add no safe-rewrite support.
 
@@ -56,7 +56,7 @@ These checks establish local analysis acceptance only. They do not establish hos
 
 ## Query requirements contract
 
-The additive [query requirements API](API.md#query-requirements) uses report format integer `1` and the existing SPL or explicit standalone SPL2 compatibility selectors. Current runtime analysis and document-snapshot reports always emit `requirements`. The version-1 analysis and snapshot schemas allow this property without adding it to their `required` arrays, so archived version-1 payloads that predate requirements still validate. The standalone requirement schema requires its complete shape. Consumers must continue to tolerate additive output properties under the version-1 policy.
+The additive [query requirements API](API.md#query-requirements) uses report format integer `1` and the existing SPL or explicit standalone SPL2 compatibility selectors. Current runtime analysis and document-snapshot reports always emit `requirements`. The version-1 analysis and snapshot schemas keep `requirements` optional, while current analysis and requirement shapes require canonical inputs, ownership, coverage and correlation. This authorized pre-release v1 correction retains integer format 1; older evidence must be reanalyzed before assessment. The standalone requirement schema requires its complete current shape. Consumers must continue to tolerate additive output properties under the version-1 policy.
 
 For one normalized document, standalone requirements and the requirements embedded in plain analysis, field-list or schema refinement, rewrite analysis, and document snapshots contain the same query-only value. CLI, REST, C, and Python serialize that canonical Go value without reclassification; only JSON object-key order is immaterial. Query status and requirement coverage are independent, so consumers must inspect both. An invalid query can have complete requirement coverage, while a valid query with dynamic or indeterminate obligations can have incomplete requirement coverage.
 
@@ -122,3 +122,29 @@ Each platform wheel passed under Python `3.11.9`, `3.12.10`, `3.13.7`, and `3.14
 Wheels contain the native library and do not require Go at installation or runtime. They are specific to the listed operating system and CPU architecture; the Linux wheel uses the `linux_x86_64` platform tag and does not claim manylinux portability. The macOS wheels target macOS 15.0 or newer. Source builds require Go 1.22.12 or newer, Python 3.11 or newer, and a C compiler.
 
 Checksums, exact environment identities, and installed-test counts are preserved in [the Milestone 1 acceptance record](evidence/milestone-1-acceptance.json).
+
+## Offline assessment boundary
+
+[Compatibility assessment](API.md#offline-compatibility-assessment) compares
+current query requirements with supplied Snapshot v1/v2 and per-input schema
+evidence. Analysis describes the query; assessment adds captured object,
+capability, schema and scope evidence. This operation establishes bounded offline
+findings only. Existing platform guarantees and historical acceptance above are
+unchanged; it establishes no live execution, authorization, deployment or UAT.
+
+An exact captured object or conclusive field declaration can satisfy its obligation
+within a partial capture. A negative finding needs complete relevant collection,
+scope and source-schema coverage. Unused collections and unrelated scope do not
+demote proved positives. Snapshot v2 `not_observed` remains scoped observation,
+not configured or global absence. A schema cannot pick an ambiguous field owner;
+separate input schemas never form one shared field universe. Correlation is a
+separate situated-occurrence graph: satisfied requirements can coexist with
+independent disconnected inputs.
+
+Finite qualified pipeline equality joins support default/explicit inner,
+left=outer and nonnegative integer `max`. Pipeline predicate keys remain required;
+nullable postjoin RHS reads may retain one unproved candidate. Bounded SQL LEFT
+key items are conditional; conditional SELECT coverage can remain incomplete.
+Repeated-source output collisions, deeper/dynamic/disjunctive keys and uncertain
+suppliers retain gaps. Capability evidence and ownership proof receive revision
+hashes without granting whole-query support or general macro expansion.

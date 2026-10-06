@@ -79,9 +79,9 @@ Exit 0; stdout is empty and the file contains the complete selected manifest. Te
 
 JSON capability output includes evidence-backed `records`, `summary`, and `evidence` alongside the legacy command/function projections. Each record reports syntax, semantics, requirements, linting, and safe rewriting as supported, partial, unsupported, not applicable, or unassessed. For each dimension, applicable equals supported plus partial plus unsupported plus unassessed; total records equal applicable plus not applicable; covered equals supported. Partial and unsupported records therefore receive zero covered credit. No percentage or composite score is printed.
 
-The SPL manifest has 106 records and 107 evidence cases. Its current syntax summary is 77 supported, 1 unsupported, and 28 unassessed; semantics is 68 supported, 10 unsupported, and 28 unassessed; requirements are 19 supported, 6 unsupported, and 81 unassessed; linting has 106 unassessed records; and safe rewriting is 17 supported, 2 unsupported, and 87 unassessed. The SPL2 manifest has 141 records and 149 evidence cases: syntax is 90 supported, 19 unsupported, and 32 unassessed; semantics is 76 supported, 39 unsupported, and 26 unassessed; requirements are 46 supported, 7 unsupported, and 88 unassessed. Linting has 141 unassessed records. Safe rewriting has 14 supported, 3 unsupported, and 124 unassessed records. Every advertised rewrite record cites a replayed local success or boundary case.
+The SPL manifest has 106 records and 107 evidence cases. Its current syntax summary is 77 supported, 1 unsupported, and 28 unassessed; semantics is 68 supported, 10 unsupported, and 28 unassessed; requirements are 19 supported, 6 unsupported, and 81 unassessed; linting has 106 unassessed records; and safe rewriting is 17 supported, 2 unsupported, and 87 unassessed. The SPL2 manifest has 142 records and 163 evidence cases: syntax is 90 supported, 19 unsupported, and 33 unassessed; semantics is 76 supported, 39 unsupported, and 27 unassessed; requirements are 46 supported, 1 partial, 7 unsupported, and 88 unassessed. Linting has 142 unassessed records. Safe rewriting has 14 supported, 3 unsupported, and 125 unassessed records. Every advertised rewrite record cites a replayed local success or boundary case.
 
-`grammar_registered` reports parser registration, not syntax coverage. Evidence IDs name typed local corpus cases; a broadened form receives a new ID unless a reviewed scope correction changes the original scope. Source Go execution may show toolkit version `dev`; tagged CLI output uses the exact `VERSION` and the same semantic revision. The SPL revision is `sha256:8a612f2064da24552a68faec261968731a6f1f1c7279ffabb77a59c7dfdb2008`; the SPL2 revision is `sha256:6495f77a0747f04e9690f5360cf4d024cf95a727bf05ab7cb7c9e1a96e1383dc`.
+`grammar_registered` reports parser registration, not syntax coverage. Evidence IDs name typed local corpus cases; a broadened form receives a new ID unless a reviewed scope correction changes the original scope. Source Go execution may show toolkit version `dev`; tagged CLI output uses the exact `VERSION` and the same semantic revision. The SPL revision is `sha256:5b7c15002c426b163a5488d18ae0fb83c68809a194a15f9a6584ea95cbb3a09b`; the SPL2 revision is `sha256:7134e06d345f6b2c6e58c3d29c727868320b47ff1fc0a94842aec35615223d9f`.
 
 The bounded SPL field-flow semantics cover exact `tstats` sources, predicates, registered aggregates, groups, aliases, and supported literal options; exact modeled forms of `fillnull`, `rex`, `spath`, `bin`, `bucket`, `regex`, and `mvexpand`; and the selected function arities. Exact macros produce direct macro requirements and source-located unresolved-expansion gaps. Branch children retain evidence and direct requirements, but merged output fields remain uncertain. Dynamic identities, wildcard groups, `PREFIX(...)`, true result-shape modes, unsupported options, ambiguous or sed-mode `rex`, `spath` auto-extraction, macro expansion, and branch merging remain incomplete. New typed operands are not safe-rewrite sites.
 
@@ -394,3 +394,19 @@ Build the CLI with `make build`, then run the maintained examples with the exist
 ```bash
 SPL_CLI="$PWD/build/spl-toolkit" SPL_DOCS_ROOT="$PWD" python -m pytest tests/acceptance/test_documented_cli.py -q
 ```
+
+## Offline compatibility assessment
+
+`spl-toolkit compatibility --request FILE --format text|json --output FILE`
+reads one complete local JSON envelope; `-` is not accepted. Use the
+[complete envelope recipe](API.md#offline-compatibility-assessment) to generate
+current requirements and derive input IDs before binding captured sources and
+per-input schemas. Binding/admission errors report code/path/message on stderr
+and exit 2; output failures also exit 2.
+
+The CLI writes the full canonical report before returning a content or policy
+exit: satisfied is 0, unsatisfied is 1, and incomplete or `not assessed` is 3.
+`--require-connected` adds exit 1 for disconnected inputs and 3 for indeterminate
+correlation; unsatisfied/disconnected take precedence. `not applicable` does not
+fail this policy. Positive object/declaration evidence, covered negative evidence,
+unknown ownership and independent correlation remain separate in the report.

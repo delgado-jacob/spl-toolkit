@@ -13,7 +13,7 @@ ROOT = Path(__file__).resolve().parents[2]
 def test_tooling_source_and_contract_closure_stages_offline(tmp_path):
     support = load_build_support()
     support.stage_native_source(ROOT, tmp_path / "source", ROOT / "python/native-source-files.txt")
-    for package in ("corpus", "corpusio", "document", "graph", "sarif", "impact"):
+    for package in ("corpus", "corpusio", "document", "graph", "sarif", "impact", "compatibility"):
         for source in (ROOT / "pkg" / package).glob("*.go"):
             if not source.name.endswith("_test.go"):
                 copied = tmp_path / "source" / source.relative_to(ROOT)
@@ -23,13 +23,14 @@ def test_tooling_source_and_contract_closure_stages_offline(tmp_path):
             assert (tmp_path / "source" / source.relative_to(ROOT)).read_bytes() == source.read_bytes()
 
 
-def test_tooling_contract_wheel_hashes_reject_missing_or_changed_schema(tmp_path):
+@pytest.mark.parametrize("contract", ["contracts/sarif/sarif-schema-2.1.0.json", "contracts/v1/compatibility-request.schema.json", "contracts/v1/compatibility.schema.json"])
+def test_tooling_contract_wheel_hashes_reject_missing_or_changed_schema(tmp_path, contract):
     wheel = tmp_path / "test.whl"
     expected = {"spl_toolkit/" + p.relative_to(ROOT).as_posix(): p.read_bytes()
                 for p in (ROOT / "contracts").rglob("*") if p.is_file()}
     for damage in (None, "missing", "changed"):
         entries = dict(expected)
-        key = "spl_toolkit/contracts/sarif/sarif-schema-2.1.0.json"
+        key = "spl_toolkit/" + contract
         if damage == "missing":
             del entries[key]
         elif damage == "changed":

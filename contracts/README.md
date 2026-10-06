@@ -25,6 +25,8 @@ nor allowed. Shared wire definitions reside in `v1/shared.schema.json` and
 | `v2/environment-snapshot.schema.json` | Strict offline observed Snapshot v2 input | |
 | `v1/environment-export-report.schema.json` | Exporter acquisition report v1 for Snapshot v2 | |
 | `field-schema-bundle.schema.json` | Strict independent field evidence input | |
+| `compatibility-request.schema.json` | Strict offline assessment envelope | |
+| `compatibility.schema.json` | Canonical assessment report, including all four outcomes | |
 | `environment-validation.schema.json` | Canonical artifact validation report | `Request` |
 | `field-validation.schema.json` | Field-list validation report | `Request`, `BatchRequest`, `BatchReport`, `Catalog` |
 | `schema-validation.schema.json` | JSON Schema or OCSF field-validation report | `Request`, `BatchRequest`, `BatchReport`, `Target` |
@@ -55,8 +57,12 @@ changing their meaning requires a new contract version. Strings without an enum
 Every member defined by the requirement-set schema is required, and its query and
 capability digests use `sha256:` followed by 64 lowercase hexadecimal characters.
 The `requirements` property remains optional in the analysis and document-view v1
-schemas so archived reports produced before this property existed continue to
-validate. Current producers always emit it.
+schemas; current producers always emit it. Current analysis and requirement sets
+require `inputs`, `input_coverage`, `field_attribution_coverage`, and `correlation`.
+This reviewed pre-release v1 correction also requires item ownership and occurrence
+input IDs/necessity. Reanalyze older evidence before assessment; an archived report
+without the current input shape does not validate as current evidence. Report
+format integers remain 1. Historical receipts retain their original bytes.
 
 The capability schema retains the legacy command/function projections and adds
 the evidence ledger. Each record requires syntax, semantics, requirements,
@@ -70,14 +76,14 @@ Evidence IDs must resolve to typed cases in the same manifest. Stable IDs retain
 the exact reviewed scope; a broadened form receives a new ID unless a reviewed
 scope correction changes the original boundary. `grammar_registered` is a parser
 fact independent of syntax coverage. Linting likewise requires its own evidence.
-The current manifests contain 106 SPL records with 107 evidence cases and 141 SPL2
-records with 149 evidence cases. SPL requirements have 19 supported, 6 unsupported,
+The current manifests contain 106 SPL records with 107 evidence cases and 142 SPL2
+records with 163 evidence cases. SPL requirements have 19 supported, 6 unsupported,
 and 81 unassessed records. Safe rewriting has 17 supported, 2 unsupported and 87
-unassessed SPL records; SPL2 has 14 supported, 3 unsupported and 124 unassessed
+unassessed SPL records; SPL2 has 14 supported, 3 unsupported and 125 unassessed
 records. The current SPL revision is
-`sha256:8a612f2064da24552a68faec261968731a6f1f1c7279ffabb77a59c7dfdb2008`;
+`sha256:5b7c15002c426b163a5488d18ae0fb83c68809a194a15f9a6584ea95cbb3a09b`;
 the SPL2 revision is
-`sha256:6495f77a0747f04e9690f5360cf4d024cf95a727bf05ab7cb7c9e1a96e1383dc`.
+`sha256:7134e06d345f6b2c6e58c3d29c727868320b47ff1fc0a94842aec35615223d9f`.
 
 The SPL ledger includes bounded field-flow semantics for exact `tstats`, selected
 field commands, and selected function arities. Exact macros produce direct macro
@@ -205,3 +211,27 @@ counts, capability truth and empty arrays, then validates the emitted instances.
 It also exercises durable authored positive/negative fixtures and actual strict
 decoders in `testdata/tooling/contracts.json`. It never blesses regenerated output
 as an expectation and never needs the native/Python binding or a running server.
+
+## Offline compatibility assessment
+
+`compatibility-request.schema.json` admits current requirements, exactly Snapshot
+v1 or v2, query scope and input bindings. SchemaBundlev1 and a query document are
+optional; omitted is valid and explicit null is invalid. Nonempty dependency
+bindings require a document. Selectors are exactly `all: true` or a nonempty list
+of unique values. Requests recursively reject unknown requirement members;
+reports retain additive extension points.
+
+Runtime admission also verifies the current capability revision, canonical input
+and ownership identities, occurrence/reference/graph links, duplicate or unknown
+bindings, expected object identities and schema pairing. JSON Schema cannot detect
+raw duplicate keys or enforce these cross-links. Every discovered placeholder
+requires one binding; explicit sources may use captured discovery. Selected schema
+IDs must exist in the supplied bundle and pair with the selected object's full
+expected identity. A paired object may be absent from the snapshot: absence is
+assessment evidence, not automatically a malformed request.
+
+Load all v1/v2 IDs offline, including unused reference branches. An assessment
+reports `satisfied`, `unsatisfied`, `incomplete`, or `not assessed`; independent
+correlation reports `connected`, `disconnected`, `indeterminate`, or
+`not applicable`. See the complete generated-envelope recipe in
+[the API guide](../docs/API.md#offline-compatibility-assessment).

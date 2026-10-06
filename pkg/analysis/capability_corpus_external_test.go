@@ -1124,6 +1124,9 @@ func requirementItemFacts(items []analysis.RequirementItem) []analysis.Capabilit
 	facts := make([]analysis.CapabilityRequirementExpectation, 0, len(items))
 	for _, item := range items {
 		facts = append(facts, analysis.CapabilityRequirementExpectation{
+			InputID:       item.InputID,
+			Ownership:     &analysis.InputOwnership{State: item.Ownership.State, CandidateInputIDs: append([]string{}, item.Ownership.CandidateInputIDs...)},
+			Occurrences:   cloneRequirementOccurrences(item.Occurrences),
 			Kind:          item.Kind,
 			Identity:      item.Identity,
 			FieldIdentity: clonePublicFieldIdentity(item.FieldIdentity),
@@ -1133,6 +1136,14 @@ func requirementItemFacts(items []analysis.RequirementItem) []analysis.Capabilit
 		})
 	}
 	return facts
+}
+
+func cloneRequirementOccurrences(in []analysis.RequirementOccurrence) []analysis.RequirementOccurrence {
+	out := append([]analysis.RequirementOccurrence{}, in...)
+	for i := range out {
+		out[i].InputOccurrenceIDs = append([]string{}, in[i].InputOccurrenceIDs...)
+	}
+	return out
 }
 
 func clonePublicFieldIdentity(identity *analysis.FieldIdentity) *analysis.FieldIdentity {
@@ -1294,6 +1305,9 @@ func containsAllRequirementFacts(actual, selected []analysis.CapabilityRequireme
 		found := false
 		for i, candidate := range actual {
 			if used[i] || exact && i != position || candidate.Kind != expected.Kind || candidate.Identity != expected.Identity || candidate.Role != expected.Role || candidate.Necessity != expected.Necessity || candidate.Resolution != expected.Resolution {
+				continue
+			}
+			if expected.Ownership != nil && (candidate.InputID != expected.InputID || !reflect.DeepEqual(candidate.Ownership, expected.Ownership) || !reflect.DeepEqual(candidate.Occurrences, expected.Occurrences)) {
 				continue
 			}
 			if expected.FieldIdentity != nil && !reflect.DeepEqual(candidate.FieldIdentity, expected.FieldIdentity) {

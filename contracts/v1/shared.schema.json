@@ -162,7 +162,10 @@
       "properties": {
         "kind": {
           "type": "string",
-          "enum": ["atomic", "path"]
+          "enum": [
+            "atomic",
+            "path"
+          ]
         },
         "segments": {
           "type": "array",
@@ -175,8 +178,32 @@
           "type": "string"
         }
       },
-      "required": ["kind", "segments"],
-      "additionalProperties": true
+      "required": [
+        "kind",
+        "segments"
+      ],
+      "additionalProperties": true,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "atomic"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "properties": {
+              "segments": {
+                "maxItems": 1
+              }
+            }
+          }
+        }
+      ]
     },
     "analysis.Reference": {
       "type": "object",
@@ -273,7 +300,10 @@
           "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.FieldIdentity"
         }
       },
-      "required": ["name", "field_identity"],
+      "required": [
+        "name",
+        "field_identity"
+      ],
       "additionalProperties": true
     },
     "analysis.FieldState": {
@@ -549,6 +579,21 @@
         },
         "location": {
           "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.Location"
+        },
+        "input_occurrence_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "\\S"
+          },
+          "uniqueItems": true
+        },
+        "necessity": {
+          "type": "string",
+          "enum": [
+            "required",
+            "conditional"
+          ]
         }
       },
       "required": [
@@ -557,7 +602,9 @@
         "binding",
         "stage_id",
         "scope_id",
-        "location"
+        "location",
+        "input_occurrence_ids",
+        "necessity"
       ],
       "additionalProperties": true
     },
@@ -616,6 +663,12 @@
           "items": {
             "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.RequirementOccurrence"
           }
+        },
+        "input_id": {
+          "type": "string"
+        },
+        "ownership": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.InputOwnership"
         }
       },
       "required": [
@@ -626,9 +679,68 @@
         "necessity",
         "origin",
         "resolution",
-        "occurrences"
+        "occurrences",
+        "ownership"
       ],
-      "additionalProperties": true
+      "additionalProperties": true,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "field"
+              },
+              "resolution": {
+                "const": "exact"
+              }
+            },
+            "required": [
+              "kind",
+              "resolution"
+            ]
+          },
+          "then": {
+            "required": [
+              "field_identity"
+            ]
+          },
+          "else": {
+            "not": {
+              "required": [
+                "field_identity"
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "ownership": {
+                "properties": {
+                  "state": {
+                    "const": "proved"
+                  }
+                }
+              }
+            },
+            "required": [
+              "ownership"
+            ]
+          },
+          "then": {
+            "required": [
+              "input_id"
+            ]
+          },
+          "else": {
+            "not": {
+              "required": [
+                "input_id"
+              ]
+            }
+          }
+        }
+      ]
     },
     "analysis.RequirementGap": {
       "type": "object",
@@ -703,6 +815,21 @@
           "items": {
             "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.Diagnostic"
           }
+        },
+        "inputs": {
+          "type": "array",
+          "items": {
+            "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.QueryInput"
+          }
+        },
+        "input_coverage": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.InputCoverage"
+        },
+        "field_attribution_coverage": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.InputCoverage"
+        },
+        "correlation": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.CorrelationGraph"
         }
       },
       "required": [
@@ -713,7 +840,11 @@
         "coverage",
         "items",
         "gaps",
-        "diagnostics"
+        "diagnostics",
+        "inputs",
+        "input_coverage",
+        "field_attribution_coverage",
+        "correlation"
       ],
       "additionalProperties": true
     },
@@ -773,6 +904,21 @@
         },
         "requirements": {
           "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.RequirementSet"
+        },
+        "inputs": {
+          "type": "array",
+          "items": {
+            "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.QueryInput"
+          }
+        },
+        "input_coverage": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.InputCoverage"
+        },
+        "field_attribution_coverage": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.InputCoverage"
+        },
+        "correlation": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.CorrelationGraph"
         }
       },
       "required": [
@@ -785,7 +931,11 @@
         "references",
         "lineage",
         "dependencies",
-        "diagnostics"
+        "diagnostics",
+        "inputs",
+        "input_coverage",
+        "field_attribution_coverage",
+        "correlation"
       ],
       "additionalProperties": true
     },
@@ -908,64 +1058,92 @@
         {
           "if": {
             "properties": {
-              "state": { "const": "supported" }
+              "state": {
+                "const": "supported"
+              }
             }
           },
           "then": {
             "properties": {
-              "evidence_ids": { "minItems": 1 }
+              "evidence_ids": {
+                "minItems": 1
+              }
             }
           }
         },
         {
           "if": {
             "properties": {
-              "state": { "const": "partial" }
+              "state": {
+                "const": "partial"
+              }
             }
           },
           "then": {
             "properties": {
-              "evidence_ids": { "minItems": 2 },
-              "limitations": { "minItems": 1 }
+              "evidence_ids": {
+                "minItems": 2
+              },
+              "limitations": {
+                "minItems": 1
+              }
             }
           }
         },
         {
           "if": {
             "properties": {
-              "state": { "const": "unsupported" }
+              "state": {
+                "const": "unsupported"
+              }
             }
           },
           "then": {
             "properties": {
-              "evidence_ids": { "minItems": 1 },
-              "limitations": { "minItems": 1 }
+              "evidence_ids": {
+                "minItems": 1
+              },
+              "limitations": {
+                "minItems": 1
+              }
             }
           }
         },
         {
           "if": {
             "properties": {
-              "state": { "const": "not_applicable" }
+              "state": {
+                "const": "not_applicable"
+              }
             }
           },
           "then": {
             "properties": {
-              "evidence_ids": { "maxItems": 0 },
-              "limitations": { "minItems": 1 }
+              "evidence_ids": {
+                "maxItems": 0
+              },
+              "limitations": {
+                "minItems": 1
+              }
             }
           }
         },
         {
           "if": {
             "properties": {
-              "state": { "const": "unassessed" }
+              "state": {
+                "const": "unassessed"
+              }
             }
           },
           "then": {
             "properties": {
-              "evidence_ids": { "maxItems": 0 },
-              "limitations": { "maxItems": 0 }
+              "evidence_ids": {
+                "maxItems": 0
+              },
+              "limitations": {
+                "maxItems": 0
+              }
             }
           }
         }
@@ -1354,11 +1532,41 @@
         "diagnostics"
       ],
       "anyOf": [
-        { "properties": { "stages": { "minItems": 1 } } },
-        { "properties": { "references": { "minItems": 1 } } },
-        { "properties": { "dependencies": { "minItems": 1 } } },
-        { "properties": { "transitions": { "minItems": 1 } } },
-        { "properties": { "diagnostics": { "minItems": 1 } } }
+        {
+          "properties": {
+            "stages": {
+              "minItems": 1
+            }
+          }
+        },
+        {
+          "properties": {
+            "references": {
+              "minItems": 1
+            }
+          }
+        },
+        {
+          "properties": {
+            "dependencies": {
+              "minItems": 1
+            }
+          }
+        },
+        {
+          "properties": {
+            "transitions": {
+              "minItems": 1
+            }
+          }
+        },
+        {
+          "properties": {
+            "diagnostics": {
+              "minItems": 1
+            }
+          }
+        }
       ],
       "additionalProperties": false
     },
@@ -5897,6 +6105,12 @@
           "items": {
             "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/closure.BOMEntry"
           }
+        },
+        "definition_contexts": {
+          "type": "array",
+          "items": {
+            "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/closure.DefinitionContext"
+          }
         }
       },
       "required": [
@@ -5915,7 +6129,8 @@
         "diagnostics",
         "traversal",
         "graph",
-        "bom"
+        "bom",
+        "definition_contexts"
       ],
       "additionalProperties": false
     },
@@ -5931,8 +6146,7 @@
         "dynamic",
         "wildcard"
       ]
-    }
-,
+    },
     "environment.Selector": {
       "oneOf": [
         {
@@ -6943,6 +7157,1969 @@
         "diagnostics"
       ],
       "additionalProperties": true
+    },
+    "analysis.EvidencePosition": {
+      "type": "object",
+      "properties": {
+        "offset": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "line": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "column": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "offset",
+        "line",
+        "column"
+      ],
+      "additionalProperties": true,
+      "oneOf": [
+        {
+          "properties": {
+            "line": {
+              "const": 0
+            },
+            "column": {
+              "const": 0
+            }
+          }
+        },
+        {
+          "properties": {
+            "line": {
+              "minimum": 1
+            },
+            "column": {
+              "minimum": 1
+            }
+          }
+        }
+      ]
+    },
+    "analysis.EvidenceLocation": {
+      "type": "object",
+      "properties": {
+        "start": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.EvidencePosition"
+        },
+        "end": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.EvidencePosition"
+        }
+      },
+      "required": [
+        "start",
+        "end"
+      ],
+      "additionalProperties": true
+    },
+    "analysis.InputIdentity": {
+      "type": "object",
+      "properties": {
+        "form": {
+          "type": "string",
+          "enum": [
+            "parameter",
+            "identifier",
+            "dotted",
+            "descriptor",
+            "implicit",
+            "unresolved"
+          ]
+        },
+        "value": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "form",
+        "value"
+      ],
+      "additionalProperties": true
+    },
+    "analysis.InputReason": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        },
+        "location": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.EvidenceLocation"
+        },
+        "stage_id": {
+          "type": "string"
+        },
+        "scope_id": {
+          "type": "string"
+        },
+        "reference_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "\\S"
+          },
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "code",
+        "message",
+        "location",
+        "stage_id",
+        "scope_id",
+        "reference_ids"
+      ],
+      "additionalProperties": true
+    },
+    "analysis.InputCoverage": {
+      "type": "object",
+      "properties": {
+        "state": {
+          "type": "string",
+          "enum": [
+            "complete",
+            "partial",
+            "not_applicable"
+          ]
+        },
+        "reasons": {
+          "type": "array",
+          "items": {
+            "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.InputReason"
+          }
+        }
+      },
+      "required": [
+        "state",
+        "reasons"
+      ],
+      "additionalProperties": true
+    },
+    "analysis.InputOccurrence": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "reference_id": {
+          "type": "string"
+        },
+        "original_reference_id": {
+          "type": "string"
+        },
+        "stage_id": {
+          "type": "string"
+        },
+        "scope_id": {
+          "type": "string"
+        },
+        "alias": {
+          "type": "string"
+        },
+        "location": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.Location"
+        },
+        "use_site_locations": {
+          "type": "array",
+          "items": {
+            "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.Location"
+          }
+        },
+        "use_site_reference_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "\\S"
+          },
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "id",
+        "reference_id",
+        "original_reference_id",
+        "stage_id",
+        "scope_id",
+        "alias",
+        "location",
+        "use_site_locations",
+        "use_site_reference_ids"
+      ],
+      "additionalProperties": true
+    },
+    "analysis.QueryInput": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "named_placeholder",
+            "explicit_dataset",
+            "implicit_stream",
+            "unresolved_source"
+          ]
+        },
+        "name": {
+          "type": "string"
+        },
+        "identity": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.InputIdentity"
+        },
+        "evidence": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.InputCoverage"
+        },
+        "occurrences": {
+          "type": "array",
+          "items": {
+            "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.InputOccurrence"
+          },
+          "minItems": 1
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "name",
+        "identity",
+        "evidence",
+        "occurrences"
+      ],
+      "additionalProperties": true
+    },
+    "analysis.CorrelationGraph": {
+      "type": "object",
+      "properties": {
+        "outcome": {
+          "type": "string",
+          "enum": [
+            "connected",
+            "disconnected",
+            "indeterminate",
+            "not applicable"
+          ]
+        },
+        "coverage": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.InputCoverage"
+        },
+        "nodes": {
+          "type": "array",
+          "items": {
+            "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.CorrelationNode"
+          }
+        },
+        "edges": {
+          "type": "array",
+          "items": {
+            "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.CorrelationEdge"
+          }
+        },
+        "components": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "required": [
+        "outcome",
+        "coverage",
+        "nodes",
+        "edges",
+        "components"
+      ],
+      "additionalProperties": true
+    },
+    "analysis.CorrelationNode": {
+      "type": "object",
+      "properties": {
+        "input_id": {
+          "type": "string"
+        },
+        "occurrence_id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "input_id",
+        "occurrence_id"
+      ],
+      "additionalProperties": true
+    },
+    "analysis.CorrelationEndpoint": {
+      "type": "object",
+      "properties": {
+        "input_id": {
+          "type": "string"
+        },
+        "occurrence_id": {
+          "type": "string"
+        },
+        "field_identity": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.FieldIdentity"
+        },
+        "reference_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "\\S"
+          },
+          "uniqueItems": true
+        },
+        "location": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.Location"
+        }
+      },
+      "required": [
+        "input_id",
+        "occurrence_id",
+        "field_identity",
+        "reference_ids",
+        "location"
+      ],
+      "additionalProperties": true
+    },
+    "analysis.CorrelationKeyEvidence": {
+      "type": "object",
+      "properties": {
+        "predicate": {
+          "type": "string"
+        },
+        "left": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.CorrelationEndpoint"
+        },
+        "right": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.CorrelationEndpoint"
+        },
+        "location": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.Location"
+        }
+      },
+      "required": [
+        "predicate",
+        "left",
+        "right",
+        "location"
+      ],
+      "additionalProperties": true
+    },
+    "analysis.CorrelationEdge": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "left": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.CorrelationEndpoint"
+        },
+        "right": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.CorrelationEndpoint"
+        },
+        "stage_id": {
+          "type": "string"
+        },
+        "scope_id": {
+          "type": "string"
+        },
+        "location": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.Location"
+        },
+        "keys": {
+          "type": "array",
+          "items": {
+            "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.CorrelationKeyEvidence"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "left",
+        "right",
+        "stage_id",
+        "scope_id",
+        "location",
+        "keys"
+      ],
+      "additionalProperties": true
+    },
+    "analysis.InputOwnership": {
+      "type": "object",
+      "properties": {
+        "state": {
+          "type": "string",
+          "enum": [
+            "proved",
+            "unproved"
+          ]
+        },
+        "candidate_input_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "\\S"
+          },
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "state",
+        "candidate_input_ids"
+      ],
+      "additionalProperties": true
+    },
+    "compatibility.InputBinding": {
+      "type": "object",
+      "properties": {
+        "input_id": {
+          "type": "string",
+          "pattern": "\\S"
+        },
+        "object_id": {
+          "type": "string",
+          "pattern": "\\S"
+        },
+        "expected": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/environment.ObjectIdentity"
+        },
+        "schema_id": {
+          "type": "string",
+          "pattern": "\\S"
+        }
+      },
+      "required": [
+        "input_id",
+        "object_id",
+        "expected"
+      ],
+      "additionalProperties": false
+    },
+    "compatibility.Request": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "type": "integer",
+          "const": 1
+        },
+        "requirements": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/compatibility.request.analysis.RequirementSet"
+        },
+        "query_scope": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/environment.CaptureScope"
+        },
+        "input_bindings": {
+          "type": "array",
+          "items": {
+            "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/compatibility.InputBinding"
+          },
+          "uniqueItems": true
+        },
+        "document": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/QueryDocumentRequest"
+        },
+        "dependency_bindings": {
+          "type": "array",
+          "items": {
+            "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/closure.Binding"
+          }
+        },
+        "snapshot": {
+          "oneOf": [
+            {
+              "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/environment.Snapshot"
+            },
+            {
+              "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v2/shared.schema.json#/$defs/environment.SnapshotV2"
+            }
+          ]
+        },
+        "schema_bundle": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/environment.SchemaBundle"
+        }
+      },
+      "required": [
+        "schema_version",
+        "requirements",
+        "query_scope",
+        "input_bindings",
+        "snapshot"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "dependency_bindings": {
+                "minItems": 1
+              }
+            },
+            "required": [
+              "dependency_bindings"
+            ]
+          },
+          "then": {
+            "required": [
+              "document"
+            ]
+          }
+        }
+      ],
+      "description": "Strict offline request. Ownership, unique binding IDs, canonical revision and graph/reference consistency are checked by the runtime. Duplicate JSON keys, malformed Unicode and lexical fractional versions are rejected by the decoder."
+    },
+    "compatibility.Reason": {
+      "type": "object",
+      "properties": {
+        "dimension": {
+          "type": "string"
+        },
+        "locations": {
+          "type": "array",
+          "items": {
+            "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.Location"
+          }
+        },
+        "reference_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "candidate_input_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "code": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        },
+        "input_id": {
+          "type": "string"
+        },
+        "requirement_id": {
+          "type": "string"
+        },
+        "object_id": {
+          "type": "string"
+        },
+        "schema_id": {
+          "type": "string"
+        },
+        "location": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.Location"
+        },
+        "path": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "locations",
+        "reference_ids",
+        "candidate_input_ids",
+        "code",
+        "message"
+      ],
+      "additionalProperties": true
+    },
+    "compatibility.ObjectEvidence": {
+      "type": "object",
+      "properties": {
+        "object_id": {
+          "type": "string"
+        },
+        "expected": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/environment.ObjectIdentity"
+        },
+        "object": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/environment.Object"
+        }
+      },
+      "required": [
+        "object_id",
+        "expected"
+      ],
+      "additionalProperties": true
+    },
+    "compatibility.SchemaEvidence": {
+      "type": "object",
+      "properties": {
+        "schema_id": {
+          "type": "string"
+        },
+        "binding": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/environment.SchemaBinding"
+        }
+      },
+      "required": [
+        "schema_id",
+        "binding"
+      ],
+      "additionalProperties": true
+    },
+    "compatibility.RequirementOutcome": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.RequirementQueryIdentity"
+        },
+        "requirement_id": {
+          "type": "string"
+        },
+        "traversal_edge_id": {
+          "type": "string"
+        },
+        "definition_object_id": {
+          "type": "string"
+        },
+        "input_id": {
+          "type": "string"
+        },
+        "applicability": {
+          "type": "string",
+          "enum": [
+            "applicable",
+            "inapplicable",
+            "indeterminate"
+          ]
+        },
+        "outcome": {
+          "type": "string",
+          "enum": [
+            "satisfied",
+            "missing",
+            "ambiguous",
+            "indeterminate"
+          ]
+        },
+        "reasons": {
+          "type": "array",
+          "items": {
+            "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/compatibility.Reason"
+          }
+        },
+        "capabilities": {
+          "type": "array",
+          "items": {
+            "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/environment.Capability"
+          }
+        },
+        "objects": {
+          "type": "array",
+          "items": {
+            "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/compatibility.ObjectEvidence"
+          }
+        },
+        "schemas": {
+          "type": "array",
+          "items": {
+            "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/compatibility.SchemaEvidence"
+          }
+        },
+        "field_projection": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/validation.FieldProjection"
+        },
+        "source_intervals": {
+          "type": "array",
+          "items": {
+            "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/closure.SourceInterval"
+          }
+        },
+        "invocation_provenance": {
+          "type": "array",
+          "items": {
+            "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/closure.InvocationFrame"
+          }
+        }
+      },
+      "required": [
+        "query",
+        "requirement_id",
+        "applicability",
+        "outcome",
+        "reasons",
+        "capabilities",
+        "objects",
+        "schemas",
+        "source_intervals",
+        "invocation_provenance"
+      ],
+      "additionalProperties": true
+    },
+    "compatibility.InputOccurrenceEvidence": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.RequirementQueryIdentity"
+        },
+        "definition_object_id": {
+          "type": "string"
+        },
+        "traversal_edge_id": {
+          "type": "string"
+        },
+        "occurrence": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.InputOccurrence"
+        },
+        "source_intervals": {
+          "type": "array",
+          "items": {
+            "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/closure.SourceInterval"
+          }
+        },
+        "invocation_provenance": {
+          "type": "array",
+          "items": {
+            "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/closure.InvocationFrame"
+          }
+        }
+      },
+      "required": [
+        "query",
+        "occurrence",
+        "source_intervals",
+        "invocation_provenance"
+      ],
+      "additionalProperties": true
+    },
+    "compatibility.InputOutcome": {
+      "type": "object",
+      "properties": {
+        "occurrences": {
+          "type": "array",
+          "items": {
+            "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/compatibility.InputOccurrenceEvidence"
+          }
+        },
+        "input_id": {
+          "type": "string"
+        },
+        "outcome": {
+          "type": "string",
+          "enum": [
+            "satisfied",
+            "missing",
+            "ambiguous",
+            "indeterminate"
+          ]
+        },
+        "objects": {
+          "type": "array",
+          "items": {
+            "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/compatibility.ObjectEvidence"
+          }
+        },
+        "requirement_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "reasons": {
+          "type": "array",
+          "items": {
+            "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/compatibility.Reason"
+          }
+        }
+      },
+      "required": [
+        "input_id",
+        "outcome",
+        "objects",
+        "requirement_ids",
+        "reasons"
+      ],
+      "additionalProperties": true
+    },
+    "compatibility.Coverage": {
+      "type": "object",
+      "properties": {
+        "collection_kind": {
+          "type": "string"
+        },
+        "dimension": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string",
+          "enum": [
+            "complete",
+            "partial",
+            "not_applicable",
+            "unavailable"
+          ]
+        },
+        "input_id": {
+          "type": "string"
+        },
+        "object_id": {
+          "type": "string"
+        },
+        "schema_id": {
+          "type": "string"
+        },
+        "reasons": {
+          "type": "array",
+          "items": {
+            "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/compatibility.Reason"
+          }
+        }
+      },
+      "required": [
+        "dimension",
+        "state",
+        "reasons"
+      ],
+      "additionalProperties": true
+    },
+    "compatibility.Provenance": {
+      "type": "object",
+      "properties": {
+        "query_digest": {
+          "type": "string"
+        },
+        "source_id": {
+          "type": "string"
+        },
+        "capability_revision": {
+          "type": "string"
+        },
+        "analysis_contract_version": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "requirement_set_version": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "environment_digest": {
+          "type": "string"
+        },
+        "schema_bundle_digest": {
+          "type": "string"
+        },
+        "assessment_identity_digest": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "query_digest",
+        "source_id",
+        "capability_revision",
+        "analysis_contract_version",
+        "requirement_set_version",
+        "environment_digest",
+        "assessment_identity_digest"
+      ],
+      "additionalProperties": true
+    },
+    "compatibility.Report": {
+      "type": "object",
+      "properties": {
+        "dependency_bindings": {
+          "type": "array",
+          "items": {
+            "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/closure.Binding"
+          }
+        },
+        "query_scope": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/environment.CaptureScope"
+        },
+        "input_bindings": {
+          "type": "array",
+          "items": {
+            "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/compatibility.InputBinding"
+          }
+        },
+        "observation": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v2/shared.schema.json#/$defs/environment.ObservationScope"
+        },
+        "schema_version": {
+          "type": "integer",
+          "const": 1
+        },
+        "outcome": {
+          "type": "string",
+          "enum": [
+            "satisfied",
+            "unsatisfied",
+            "incomplete",
+            "not assessed"
+          ]
+        },
+        "requirements": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.RequirementSet"
+        },
+        "effective_requirements": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.RequirementSet"
+        },
+        "closure": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/closure.Report"
+        },
+        "inputs": {
+          "type": "array",
+          "items": {
+            "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/compatibility.InputOutcome"
+          }
+        },
+        "requirement_outcomes": {
+          "type": "array",
+          "items": {
+            "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/compatibility.RequirementOutcome"
+          }
+        },
+        "correlation": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/analysis.CorrelationGraph"
+        },
+        "coverage": {
+          "type": "array",
+          "items": {
+            "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/compatibility.Coverage"
+          }
+        },
+        "diagnostics": {
+          "type": "array",
+          "items": {
+            "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/environment.Diagnostic"
+          }
+        },
+        "reasons": {
+          "type": "array",
+          "items": {
+            "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/compatibility.Reason"
+          }
+        },
+        "provenance": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/compatibility.Provenance"
+        }
+      },
+      "required": [
+        "query_scope",
+        "input_bindings",
+        "schema_version",
+        "outcome",
+        "requirements",
+        "inputs",
+        "requirement_outcomes",
+        "correlation",
+        "coverage",
+        "diagnostics",
+        "reasons",
+        "provenance"
+      ],
+      "additionalProperties": true
+    },
+    "compatibility.RequestErrorDetail": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        },
+        "byte_offset": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "message": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "path",
+        "message"
+      ],
+      "additionalProperties": false
+    },
+    "closure.DefinitionContext": {
+      "type": "object",
+      "properties": {
+        "edge_id": {
+          "type": "string"
+        },
+        "object_id": {
+          "type": "string"
+        },
+        "provenance": {
+          "type": "array",
+          "items": {
+            "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/closure.ProvenanceSegment"
+          }
+        }
+      },
+      "required": [
+        "edge_id",
+        "object_id",
+        "provenance"
+      ],
+      "additionalProperties": true
+    },
+    "validation.FieldProjection": {
+      "type": "object",
+      "properties": {
+        "admission": {
+          "type": "integer",
+          "enum": [
+            0,
+            1,
+            2
+          ]
+        },
+        "outcome": {
+          "type": "string",
+          "enum": [
+            "required",
+            "optional",
+            "missing",
+            "conditional",
+            "permitted_unspecified",
+            "indeterminate"
+          ]
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/schema.SchemaEvidence"
+          }
+        },
+        "supporting_classes": {
+          "type": "array",
+          "items": {
+            "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/schema.SchemaClass"
+          }
+        },
+        "missing_classes": {
+          "type": "array",
+          "items": {
+            "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/schema.SchemaClass"
+          }
+        },
+        "indeterminate_classes": {
+          "type": "array",
+          "items": {
+            "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/schema.SchemaClass"
+          }
+        }
+      },
+      "required": [
+        "admission",
+        "outcome",
+        "evidence",
+        "supporting_classes",
+        "missing_classes",
+        "indeterminate_classes"
+      ],
+      "additionalProperties": true
+    },
+    "compatibility.request.analysis.RequirementSet": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "type": "integer",
+          "const": 1
+        },
+        "query": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/compatibility.request.analysis.RequirementQueryIdentity"
+        },
+        "capability_revision": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "query_status": {
+          "type": "string",
+          "enum": [
+            "valid",
+            "invalid",
+            "incomplete"
+          ]
+        },
+        "coverage": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/compatibility.request.analysis.RequirementCoverage"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/compatibility.request.analysis.RequirementItem"
+          }
+        },
+        "gaps": {
+          "type": "array",
+          "items": {
+            "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/compatibility.request.analysis.RequirementGap"
+          }
+        },
+        "diagnostics": {
+          "type": "array",
+          "items": {
+            "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/compatibility.request.analysis.Diagnostic"
+          }
+        },
+        "inputs": {
+          "type": "array",
+          "items": {
+            "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/compatibility.request.analysis.QueryInput"
+          }
+        },
+        "input_coverage": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/compatibility.request.analysis.InputCoverage"
+        },
+        "field_attribution_coverage": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/compatibility.request.analysis.InputCoverage"
+        },
+        "correlation": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/compatibility.request.analysis.CorrelationGraph"
+        }
+      },
+      "required": [
+        "schema_version",
+        "query",
+        "capability_revision",
+        "query_status",
+        "coverage",
+        "items",
+        "gaps",
+        "diagnostics",
+        "inputs",
+        "input_coverage",
+        "field_attribution_coverage",
+        "correlation"
+      ],
+      "additionalProperties": false
+    },
+    "compatibility.request.analysis.RequirementQueryIdentity": {
+      "type": "object",
+      "properties": {
+        "source_id": {
+          "type": "string"
+        },
+        "language": {
+          "type": "string",
+          "enum": [
+            "spl",
+            "spl2"
+          ]
+        },
+        "profile": {
+          "const": "splunkd"
+        },
+        "version": {
+          "const": "current"
+        },
+        "query_digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        }
+      },
+      "required": [
+        "source_id",
+        "language",
+        "profile",
+        "version",
+        "query_digest"
+      ],
+      "additionalProperties": false
+    },
+    "compatibility.request.analysis.RequirementCoverage": {
+      "type": "object",
+      "properties": {
+        "complete": {
+          "type": "boolean"
+        },
+        "reasons": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "complete",
+        "reasons"
+      ],
+      "additionalProperties": false
+    },
+    "compatibility.request.analysis.RequirementItem": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^req-[1-9][0-9]*$"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "field",
+            "index",
+            "source",
+            "sourcetype",
+            "dataset",
+            "data_model",
+            "lookup",
+            "macro",
+            "saved_search",
+            "module",
+            "function"
+          ]
+        },
+        "identity": {
+          "type": "string"
+        },
+        "field_identity": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/compatibility.request.analysis.FieldIdentity"
+        },
+        "role": {
+          "type": "string"
+        },
+        "necessity": {
+          "type": "string",
+          "enum": [
+            "required",
+            "conditional"
+          ]
+        },
+        "origin": {
+          "const": "direct"
+        },
+        "resolution": {
+          "type": "string",
+          "enum": [
+            "exact",
+            "wildcard",
+            "dynamic"
+          ]
+        },
+        "occurrences": {
+          "type": "array",
+          "items": {
+            "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/compatibility.request.analysis.RequirementOccurrence"
+          }
+        },
+        "input_id": {
+          "type": "string"
+        },
+        "ownership": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/compatibility.request.analysis.InputOwnership"
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "identity",
+        "role",
+        "necessity",
+        "origin",
+        "resolution",
+        "occurrences",
+        "ownership"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "field"
+              },
+              "resolution": {
+                "const": "exact"
+              }
+            },
+            "required": [
+              "kind",
+              "resolution"
+            ]
+          },
+          "then": {
+            "required": [
+              "field_identity"
+            ]
+          },
+          "else": {
+            "not": {
+              "required": [
+                "field_identity"
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "ownership": {
+                "properties": {
+                  "state": {
+                    "const": "proved"
+                  }
+                }
+              }
+            },
+            "required": [
+              "ownership"
+            ]
+          },
+          "then": {
+            "required": [
+              "input_id"
+            ]
+          },
+          "else": {
+            "not": {
+              "required": [
+                "input_id"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "compatibility.request.analysis.FieldIdentity": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "atomic",
+            "path"
+          ]
+        },
+        "segments": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "qualifier": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "segments"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "atomic"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "properties": {
+              "segments": {
+                "maxItems": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    "compatibility.request.analysis.RequirementOccurrence": {
+      "type": "object",
+      "properties": {
+        "reference_id": {
+          "type": "string",
+          "pattern": "^ref-(0|[1-9][0-9]*)$"
+        },
+        "original_name": {
+          "type": "string"
+        },
+        "binding": {
+          "type": "string"
+        },
+        "stage_id": {
+          "type": "string"
+        },
+        "scope_id": {
+          "type": "string"
+        },
+        "location": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/compatibility.request.analysis.Location"
+        },
+        "input_occurrence_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "\\S"
+          },
+          "uniqueItems": true
+        },
+        "necessity": {
+          "type": "string",
+          "enum": [
+            "required",
+            "conditional"
+          ]
+        }
+      },
+      "required": [
+        "reference_id",
+        "original_name",
+        "binding",
+        "stage_id",
+        "scope_id",
+        "location",
+        "input_occurrence_ids",
+        "necessity"
+      ],
+      "additionalProperties": false
+    },
+    "compatibility.request.analysis.Location": {
+      "type": "object",
+      "properties": {
+        "start": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/compatibility.request.analysis.Position"
+        },
+        "end": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/compatibility.request.analysis.Position"
+        }
+      },
+      "required": [
+        "start",
+        "end"
+      ],
+      "additionalProperties": false
+    },
+    "compatibility.request.analysis.Position": {
+      "type": "object",
+      "properties": {
+        "offset": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "line": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "column": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "offset",
+        "line",
+        "column"
+      ],
+      "additionalProperties": false
+    },
+    "compatibility.request.analysis.InputOwnership": {
+      "type": "object",
+      "properties": {
+        "state": {
+          "type": "string",
+          "enum": [
+            "proved",
+            "unproved"
+          ]
+        },
+        "candidate_input_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "\\S"
+          },
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "state",
+        "candidate_input_ids"
+      ],
+      "additionalProperties": false
+    },
+    "compatibility.request.analysis.RequirementGap": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        },
+        "reference_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^ref-(0|[1-9][0-9]*)$"
+          }
+        },
+        "diagnostic_codes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "code",
+        "message",
+        "reference_ids",
+        "diagnostic_codes"
+      ],
+      "additionalProperties": false
+    },
+    "compatibility.request.analysis.Diagnostic": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "severity": {
+          "type": "string",
+          "enum": [
+            "error",
+            "warning",
+            "info"
+          ]
+        },
+        "category": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        },
+        "location": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/compatibility.request.analysis.Location"
+        },
+        "stage_id": {
+          "type": "string"
+        },
+        "scope_id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "severity",
+        "category",
+        "message",
+        "location",
+        "stage_id",
+        "scope_id"
+      ],
+      "additionalProperties": false
+    },
+    "compatibility.request.analysis.QueryInput": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "named_placeholder",
+            "explicit_dataset",
+            "implicit_stream",
+            "unresolved_source"
+          ]
+        },
+        "name": {
+          "type": "string"
+        },
+        "identity": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/compatibility.request.analysis.InputIdentity"
+        },
+        "evidence": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/compatibility.request.analysis.InputCoverage"
+        },
+        "occurrences": {
+          "type": "array",
+          "items": {
+            "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/compatibility.request.analysis.InputOccurrence"
+          },
+          "minItems": 1
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "name",
+        "identity",
+        "evidence",
+        "occurrences"
+      ],
+      "additionalProperties": false
+    },
+    "compatibility.request.analysis.InputIdentity": {
+      "type": "object",
+      "properties": {
+        "form": {
+          "type": "string",
+          "enum": [
+            "parameter",
+            "identifier",
+            "dotted",
+            "descriptor",
+            "implicit",
+            "unresolved"
+          ]
+        },
+        "value": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "form",
+        "value"
+      ],
+      "additionalProperties": false
+    },
+    "compatibility.request.analysis.InputCoverage": {
+      "type": "object",
+      "properties": {
+        "state": {
+          "type": "string",
+          "enum": [
+            "complete",
+            "partial",
+            "not_applicable"
+          ]
+        },
+        "reasons": {
+          "type": "array",
+          "items": {
+            "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/compatibility.request.analysis.InputReason"
+          }
+        }
+      },
+      "required": [
+        "state",
+        "reasons"
+      ],
+      "additionalProperties": false
+    },
+    "compatibility.request.analysis.InputReason": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        },
+        "location": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/compatibility.request.analysis.EvidenceLocation"
+        },
+        "stage_id": {
+          "type": "string"
+        },
+        "scope_id": {
+          "type": "string"
+        },
+        "reference_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "\\S"
+          },
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "code",
+        "message",
+        "location",
+        "stage_id",
+        "scope_id",
+        "reference_ids"
+      ],
+      "additionalProperties": false
+    },
+    "compatibility.request.analysis.EvidenceLocation": {
+      "type": "object",
+      "properties": {
+        "start": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/compatibility.request.analysis.EvidencePosition"
+        },
+        "end": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/compatibility.request.analysis.EvidencePosition"
+        }
+      },
+      "required": [
+        "start",
+        "end"
+      ],
+      "additionalProperties": false
+    },
+    "compatibility.request.analysis.EvidencePosition": {
+      "type": "object",
+      "properties": {
+        "offset": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "line": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "column": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "offset",
+        "line",
+        "column"
+      ],
+      "additionalProperties": false,
+      "oneOf": [
+        {
+          "properties": {
+            "line": {
+              "const": 0
+            },
+            "column": {
+              "const": 0
+            }
+          }
+        },
+        {
+          "properties": {
+            "line": {
+              "minimum": 1
+            },
+            "column": {
+              "minimum": 1
+            }
+          }
+        }
+      ]
+    },
+    "compatibility.request.analysis.InputOccurrence": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "reference_id": {
+          "type": "string"
+        },
+        "original_reference_id": {
+          "type": "string"
+        },
+        "stage_id": {
+          "type": "string"
+        },
+        "scope_id": {
+          "type": "string"
+        },
+        "alias": {
+          "type": "string"
+        },
+        "location": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/compatibility.request.analysis.Location"
+        },
+        "use_site_locations": {
+          "type": "array",
+          "items": {
+            "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/compatibility.request.analysis.Location"
+          }
+        },
+        "use_site_reference_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "\\S"
+          },
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "id",
+        "reference_id",
+        "original_reference_id",
+        "stage_id",
+        "scope_id",
+        "alias",
+        "location",
+        "use_site_locations",
+        "use_site_reference_ids"
+      ],
+      "additionalProperties": false
+    },
+    "compatibility.request.analysis.CorrelationGraph": {
+      "type": "object",
+      "properties": {
+        "outcome": {
+          "type": "string",
+          "enum": [
+            "connected",
+            "disconnected",
+            "indeterminate",
+            "not applicable"
+          ]
+        },
+        "coverage": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/compatibility.request.analysis.InputCoverage"
+        },
+        "nodes": {
+          "type": "array",
+          "items": {
+            "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/compatibility.request.analysis.CorrelationNode"
+          }
+        },
+        "edges": {
+          "type": "array",
+          "items": {
+            "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/compatibility.request.analysis.CorrelationEdge"
+          }
+        },
+        "components": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "required": [
+        "outcome",
+        "coverage",
+        "nodes",
+        "edges",
+        "components"
+      ],
+      "additionalProperties": false
+    },
+    "compatibility.request.analysis.CorrelationNode": {
+      "type": "object",
+      "properties": {
+        "input_id": {
+          "type": "string"
+        },
+        "occurrence_id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "input_id",
+        "occurrence_id"
+      ],
+      "additionalProperties": false
+    },
+    "compatibility.request.analysis.CorrelationEdge": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "left": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/compatibility.request.analysis.CorrelationEndpoint"
+        },
+        "right": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/compatibility.request.analysis.CorrelationEndpoint"
+        },
+        "stage_id": {
+          "type": "string"
+        },
+        "scope_id": {
+          "type": "string"
+        },
+        "location": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/compatibility.request.analysis.Location"
+        },
+        "keys": {
+          "type": "array",
+          "items": {
+            "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/compatibility.request.analysis.CorrelationKeyEvidence"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "left",
+        "right",
+        "stage_id",
+        "scope_id",
+        "location",
+        "keys"
+      ],
+      "additionalProperties": false
+    },
+    "compatibility.request.analysis.CorrelationEndpoint": {
+      "type": "object",
+      "properties": {
+        "input_id": {
+          "type": "string"
+        },
+        "occurrence_id": {
+          "type": "string"
+        },
+        "field_identity": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/compatibility.request.analysis.FieldIdentity"
+        },
+        "reference_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "\\S"
+          },
+          "uniqueItems": true
+        },
+        "location": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/compatibility.request.analysis.Location"
+        }
+      },
+      "required": [
+        "input_id",
+        "occurrence_id",
+        "field_identity",
+        "reference_ids",
+        "location"
+      ],
+      "additionalProperties": false
+    },
+    "compatibility.request.analysis.CorrelationKeyEvidence": {
+      "type": "object",
+      "properties": {
+        "predicate": {
+          "type": "string"
+        },
+        "left": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/compatibility.request.analysis.CorrelationEndpoint"
+        },
+        "right": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/compatibility.request.analysis.CorrelationEndpoint"
+        },
+        "location": {
+          "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/compatibility.request.analysis.Location"
+        }
+      },
+      "required": [
+        "predicate",
+        "left",
+        "right",
+        "location"
+      ],
+      "additionalProperties": false
     }
   }
 }

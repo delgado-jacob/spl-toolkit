@@ -416,6 +416,16 @@ func legacySPL2Capabilities() CapabilityManifest {
 	}
 	for _, entry := range spl2CommandInventory {
 		limitations := append([]string{entry.limitation}, spl2FormLimitations(entry.name)...)
+		// Published join ownership limitations extend these two legacy descriptions.
+		switch entry.name {
+		case "join":
+			limitations = append(limitations,
+				"Qualified equality keys with distinct supplying occurrences; default/explicit inner, left=outer and nonnegative integer max only. Output collisions, deeper/dynamic/disjunctive keys and ambiguous suppliers retain uncertainty.",
+				"Source-relative ownership proved independently; pipeline predicate keys are required, nullable downstream RHS reads may retain unproved candidate evidence.")
+		case "select":
+			limitations = append(limitations, "Qualified bounded SQL inner joins and chains retain source owners; SQL LEFT keys are conditional and conditional SELECT coverage may remain incomplete.")
+		}
+
 		manifest.Commands = append(manifest.Commands, Capability{Name: entry.name, SyntaxSupported: entry.syntax, SemanticSupported: entry.semantic || publishedCommands[entry.name], Limitations: limitations})
 	}
 	for name, function := range spl2Functions {

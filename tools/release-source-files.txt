@@ -4,6 +4,7 @@ VERSION
 cmd/analysis.go
 cmd/cli.go
 cmd/closure_cli.go
+cmd/compatibility_cli.go
 cmd/environment_cli.go
 cmd/main.go
 cmd/rewrite_cli.go
@@ -21,6 +22,8 @@ contracts/v1/capabilities.schema.json
 contracts/v1/closure-graph.schema.json
 contracts/v1/closure-request.schema.json
 contracts/v1/closure.schema.json
+contracts/v1/compatibility-request.schema.json
+contracts/v1/compatibility.schema.json
 contracts/v1/corpus.schema.json
 contracts/v1/definitions.schema.json
 contracts/v1/detection-bom.schema.json
@@ -119,12 +122,14 @@ pkg/analysis/capability_model.go
 pkg/analysis/capabilitydata/corpus.json
 pkg/analysis/capabilitydata/ledger.json
 pkg/analysis/commands.go
+pkg/analysis/correlation.go
 pkg/analysis/dependencies.go
 pkg/analysis/diagnostics.go
 pkg/analysis/field_identity.go
 pkg/analysis/flow.go
 pkg/analysis/flow_merge.go
 pkg/analysis/functions.go
+pkg/analysis/inputs.go
 pkg/analysis/model.go
 pkg/analysis/options.go
 pkg/analysis/parse.go
@@ -141,6 +146,7 @@ pkg/analysis/rewrite_render_spl2.go
 pkg/analysis/scopes.go
 pkg/analysis/source.go
 pkg/analysis/source_fields.go
+pkg/analysis/source_ownership.go
 pkg/analysis/spl2_capabilities.go
 pkg/analysis/spl2_commands.go
 pkg/analysis/spl2_expressions.go
@@ -158,6 +164,7 @@ pkg/analysis/spl_tstats.go
 pkg/analysis/transfers.go
 pkg/api/analysis.go
 pkg/api/closure.go
+pkg/api/compatibility.go
 pkg/api/environment.go
 pkg/api/handlers.go
 pkg/api/models.go
@@ -179,6 +186,17 @@ pkg/closure/model.go
 pkg/closure/provenance.go
 pkg/closure/report.go
 pkg/closure/resolve.go
+pkg/compatibility/check.go
+pkg/compatibility/closure.go
+pkg/compatibility/errors.go
+pkg/compatibility/fields.go
+pkg/compatibility/format.go
+pkg/compatibility/model.go
+pkg/compatibility/objects.go
+pkg/compatibility/prepare.go
+pkg/compatibility/report.go
+pkg/compatibility/request.go
+pkg/compatibility/requirements.go
 pkg/corpus/aggregate.go
 pkg/corpus/identity.go
 pkg/corpus/model.go
@@ -191,6 +209,7 @@ pkg/corpusio/manifest.go
 pkg/document/model.go
 pkg/document/query.go
 pkg/document/snapshot.go
+pkg/environment/admission.go
 pkg/environment/closure.go
 pkg/environment/decode.go
 pkg/environment/digest.go
@@ -236,6 +255,7 @@ pkg/validation/model.go
 pkg/validation/ocsf.go
 pkg/validation/ocsf_projection.go
 pkg/validation/prepared.go
+pkg/validation/projection.go
 pkg/validation/request.go
 pkg/validation/schema_batch.go
 pkg/validation/schema_model.go

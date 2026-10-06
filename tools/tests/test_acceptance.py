@@ -31,11 +31,13 @@ REQUIRED_TEST_HASH_PATHS = {
         "test_native_spl2.py": ROOT / "python/tests/test_native_spl2.py",
         "test_native_closure.py": ROOT / "python/tests/test_native_closure.py",
         "test_native_environment.py": ROOT / "python/tests/test_native_environment.py",
+        "test_native_compatibility.py": ROOT / "python/tests/test_native_compatibility.py",
     },
     "acceptance": {
         "test_requirements_surfaces.py": ROOT / "tests/acceptance/test_requirements_surfaces.py",
         "test_analysis_surfaces.py": ROOT / "tests/acceptance/test_analysis_surfaces.py",
         "test_environment_surfaces.py": ROOT / "tests/acceptance/test_environment_surfaces.py",
+        "test_compatibility_surfaces.py": ROOT / "tests/acceptance/test_compatibility_surfaces.py",
     },
 }
 ENVIRONMENT_FIXTURE_SHA = hashlib.sha256((ROOT / "testdata/environment/cases.json").read_bytes()).hexdigest()
@@ -135,7 +137,8 @@ def passing_records() -> list[dict]:
                     for suite, paths in REQUIRED_TEST_HASH_PATHS.items()
                 },
                 "fixture_hashes": {"requirements": HASH, "spl2": {"linus-forms.json": LINUS_FIXTURE_SHA},
-                                   "environment": {"cases.json": ENVIRONMENT_FIXTURE_SHA}},
+                                   "environment": {"cases.json": ENVIRONMENT_FIXTURE_SHA},
+                                   "compatibility": {"cases.json": hashlib.sha256((ROOT / "testdata/compatibility/cases.json").read_bytes()).hexdigest()}},
                 "packaged_fixture_hashes": {"spl2": {"linus-forms.json": LINUS_FIXTURE_SHA}},
                 "requirements_surface_evidence": {
                     "schema_version": 1,
@@ -154,10 +157,10 @@ def passing_records() -> list[dict]:
                     "native": ["test_native_abi.py", "test_native_mapper.py", "test_native_analysis.py",
                                "test_native_validation.py", "test_native_schema_validation.py", "test_native_spl2.py",
                                "test_native_rewrite.py", "test_native_requirements.py", "test_native_closure.py",
-                               "test_native_environment.py"],
+                               "test_native_environment.py", "test_native_compatibility.py"],
                     "acceptance": ["test_documented_cli.py", "test_surfaces.py", "test_analysis_surfaces.py",
                                    "test_validation_surfaces.py", "test_schema_surfaces.py", "test_spl2_surfaces.py",
-                                   "test_rewrite_surfaces.py", "test_requirements_surfaces.py", "test_environment_surfaces.py"],
+                                   "test_rewrite_surfaces.py", "test_requirements_surfaces.py", "test_environment_surfaces.py", "test_compatibility_surfaces.py"],
                 },
                 "cli_examples": "passed", "surface_parity": "passed", "version_agreement": "passed",
             })
@@ -215,6 +218,7 @@ def test_exact_source_hash_inputs_are_stable_in_windows_checkout(tmp_path: Path)
     relative_paths = set(check_acceptance.TOOLING_SOURCE_HASHES)
     relative_paths.add("testdata/spl2/linus-forms.json")
     relative_paths.add("testdata/environment/cases.json")
+    relative_paths.add("testdata/compatibility/cases.json")
     relative_paths.update(
         path.relative_to(ROOT).as_posix()
         for paths in check_acceptance.REQUIRED_TEST_HASH_PATHS.values()
@@ -493,3 +497,23 @@ def test_reproducibility_requires_exporter_payload(failure):
     else:
         payloads["exporter"] = ""
     assert any("accepted_payloads is invalid" in error for error in validate_records(records, SHA))
+
+
+def test_compatibility_evidence_requires_current_fixture_and_installed_tests():
+    original = passing_records()
+    index = next(i for i, record in enumerate(original) if record["kind"] == "installed-wheel")
+    for bad in (None, {}, {"cases.json": "d" * 64}, {"cases.json": "malformed"}, {"cases.json": "d" * 64, "extra.json": "d" * 64}):
+        records = copy.deepcopy(original)
+        records[index]["fixture_hashes"]["compatibility"] = bad
+        assert any("fixture_hashes.compatibility" in error for error in validate_records(records, SHA))
+    for suite, filename in (("native", "test_native_compatibility.py"), ("acceptance", "test_compatibility_surfaces.py")):
+        records = copy.deepcopy(original)
+        records[index]["required_test_files"][suite].remove(filename)
+        assert any(f"missing required suite {filename}" in error for error in validate_records(records, SHA))
+        for bad in (None, "d" * 64):
+            records = copy.deepcopy(original)
+            if bad is None:
+                del records[index]["required_test_hashes"][suite][filename]
+            else:
+                records[index]["required_test_hashes"][suite][filename] = bad
+            assert any("required_test_hashes" in error for error in validate_records(records, SHA))

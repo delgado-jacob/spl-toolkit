@@ -221,6 +221,53 @@ func TestCapabilityRevisionIncludesPrivateRequirementIdentity(t *testing.T) {
 	t.Fatal("missing identity collision evidence")
 }
 
+func TestCapabilityRevisionIncludesPrivateRequirementOwnership(t *testing.T) {
+	manifest, err := CapabilitiesFor(CapabilityOptions{Language: "spl2", Profile: "splunkd", Version: "current"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	baseline := capabilityRevisionTestDigest(t, manifest)
+	publicBaseline := string(mustJSON(t, manifest))
+	for _, mutate := range []func(*CapabilityRequirementExpectation){
+		func(item *CapabilityRequirementExpectation) { item.InputID += "-changed" },
+		func(item *CapabilityRequirementExpectation) { item.Ownership.CandidateInputIDs[0] += "-changed" },
+		func(item *CapabilityRequirementExpectation) { item.Occurrences[0].InputOccurrenceIDs[0] += "-changed" },
+	} {
+		cloned := cloneCapabilityManifest(manifest)
+		found := false
+		for i := range cloned.Evidence {
+			observation := cloned.Evidence[i].Observations.Requirements
+			if observation == nil {
+				continue
+			}
+			for j := range observation.Items {
+				item := &observation.Items[j]
+				if item.InputID == "" || item.Ownership == nil || len(item.Ownership.CandidateInputIDs) == 0 || len(item.Occurrences) == 0 || len(item.Occurrences[0].InputOccurrenceIDs) == 0 {
+					continue
+				}
+				mutate(item)
+				found = true
+				break
+			}
+			if found {
+				break
+			}
+		}
+		if !found {
+			t.Fatal("missing owned source requirement evidence")
+		}
+		if capabilityRevisionTestDigest(t, cloned) == baseline {
+			t.Fatal("private ownership mutation did not affect revision")
+		}
+		if string(mustJSON(t, cloned)) != publicBaseline {
+			t.Fatal("private ownership leaked into public JSON")
+		}
+		if capabilityRevisionTestDigest(t, manifest) != baseline {
+			t.Fatal("clone shared ownership vectors with source manifest")
+		}
+	}
+}
+
 func TestCapabilityStructuredSemanticExpectationsValidation(t *testing.T) {
 	valid := validStructuredCapabilityEvidence()
 	if err := validateCapabilityEvidenceObservation(valid, "semantics"); err != nil {
@@ -1087,7 +1134,7 @@ func TestMilestone10CapabilityClaimsStayBounded(t *testing.T) {
 					Kind: item.Kind, Identity: item.Identity, Role: item.Role, Necessity: item.Necessity, Resolution: item.Resolution,
 				})
 			}
-			if !actual.Coverage.Complete || !slices.Equal(observation.Items, actualItems) || len(actual.Gaps) != 0 {
+			if !actual.Coverage.Complete || !capabilityPublicRequirementItemsEqual(observation.Items, actualItems) || len(actual.Gaps) != 0 {
 				t.Errorf("%s supported requirements observation = %+v, actual = %+v; want exact item equality and no gaps", id, observation, actual)
 			}
 		}
@@ -1125,7 +1172,7 @@ func TestMilestone10CapabilityClaimsStayBounded(t *testing.T) {
 		{Kind: "index", Identity: "main", Role: "read", Necessity: "required", Resolution: "exact"},
 		{Kind: "field", Identity: "child", Role: "filter", Necessity: "required", Resolution: "exact"},
 	}
-	if got := appendpipe.Observations.Requirements; got == nil || !slices.Equal(got.Items, wantAppendpipeItems) || !slices.Equal(got.GapCodes, []string{"SPL_UNSUPPORTED_SEMANTICS"}) {
+	if got := appendpipe.Observations.Requirements; got == nil || !capabilityPublicRequirementItemsEqual(got.Items, wantAppendpipeItems) || !slices.Equal(got.GapCodes, []string{"SPL_UNSUPPORTED_SEMANTICS"}) {
 		t.Errorf("appendpipe retained requirements = %+v, want exact parent and child items plus merge gap", got)
 	}
 
@@ -1146,7 +1193,7 @@ func TestMilestone10CapabilityClaimsStayBounded(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	const wantSPL2Revision = "sha256:ee254f612293152dc2f6220ead4048c7abc0971382e5de91e3fb94872080b471"
+	const wantSPL2Revision = "sha256:7134e06d345f6b2c6e58c3d29c727868320b47ff1fc0a94842aec35615223d9f"
 	if spl2Revision != wantSPL2Revision {
 		t.Errorf("SPL2 capability revision = %q, want %q", spl2Revision, wantSPL2Revision)
 	}
@@ -2360,4 +2407,12 @@ func mustUnmarshal(t *testing.T, raw []byte, value any) {
 	if err := json.Unmarshal(raw, value); err != nil {
 		t.Fatal(err)
 	}
+}
+
+// Legacy public observations omit private typed source proof. The external
+// corpus replay separately verifies that complete proof.
+func capabilityPublicRequirementItemsEqual(a, b []CapabilityRequirementExpectation) bool {
+	return slices.EqualFunc(a, b, func(x, y CapabilityRequirementExpectation) bool {
+		return x.Kind == y.Kind && x.Identity == y.Identity && x.Role == y.Role && x.Necessity == y.Necessity && x.Resolution == y.Resolution
+	})
 }
