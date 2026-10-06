@@ -29,6 +29,7 @@ const toolingHelp = `Developer tooling (offline, read-only sources):
   impact-mapping --directory DIR | --manifest FILE --before-rules FILE --after-rules FILE [--before-target FILE] [--after-target FILE] [--format text|json] [--output FILE]
   document QUERY | --query QUERY | --file FILE | --stdin [--language spl|spl2] [--profile splunkd] [--compatibility-version current] [--source-id ID] [--format json] [--output FILE]
   closure QUERY | --query QUERY | --file FILE | --stdin --bundle FILE [--bindings FILE] [--language spl|spl2] [--profile splunkd] [--compatibility-version current] [--source-id ID] [--format text|json|graph|bom] [--output FILE]
+  compatibility --request FILE [--format text|json] [--output FILE] [--require-connected]
   lsp --stdio [--profile splunkd] [--compatibility-version current] [--target FILE]
 Targets are canonical inline field_list/json_schema/ocsf JSON wrappers; rule files are versioned rule sets.
 Manifest files are versioned documents with literal text or contained relative file paths.
@@ -41,7 +42,7 @@ Examples: spl-toolkit scan --directory queries --format sarif --output findings.
 
 func parseToolingOptions(command string, args []string) (map[string]string, error) {
 	allowed := map[string]bool{"help": true}
-	boolean := map[string]bool{"help": true, "stdio": true, "stdin": true}
+	boolean := map[string]bool{"help": true, "stdio": true, "stdin": true, "require-connected": true}
 	names := []string{"format", "output", "directory", "manifest"}
 	switch command {
 	case "scan", "graph":
@@ -56,6 +57,8 @@ func parseToolingOptions(command string, args []string) (map[string]string, erro
 		names = []string{"query", "file", "stdin", "bundle", "bindings", "language", "profile", "compatibility-version", "source-id", "format", "output"}
 	case "lsp":
 		names = []string{"stdio", "profile", "compatibility-version", "target"}
+	case "compatibility":
+		names = []string{"request", "format", "output", "require-connected"}
 	case "environment-validate":
 		names = []string{"snapshot", "schemas", "format", "output"}
 	}

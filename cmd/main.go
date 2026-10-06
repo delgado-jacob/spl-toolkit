@@ -28,6 +28,7 @@ Commands:
   validate-fields   Validate fields against a local catalog
   validate-schema   Validate fields against local JSON Schema or OCSF
   environment validate  Validate local environment snapshot and schema bundle
+  compatibility     Assess requirements against bound offline evidence
   rewrite           Safely preview or apply explicit rewrite rules
   closure           Evaluate caller-supplied knowledge-object dependencies
   capabilities      Show supported analysis commands and limitations
@@ -77,6 +78,11 @@ Environment validation options:
   environment validate --snapshot FILE [--schemas FILE] [--format text|json] [--output FILE]
   environment validate --schemas FILE [--format text|json] [--output FILE]
 Both inputs must be local files. Reports omit local paths.
+
+Compatibility assessment options:
+  compatibility --request FILE [--format text|json] [--output FILE] [--require-connected]
+The request is one complete local JSON envelope (not -).
+Exit: 0 satisfied, 1 unsatisfied or required disconnected, 3 incomplete/not assessed or required indeterminate, 2 request/write failure.
 
 Additional rewrite options:
   --rules FILE      Required local versioned rewrite rule set (not -)

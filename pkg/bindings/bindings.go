@@ -48,6 +48,7 @@ import (
 	"github.com/delgado-jacob/spl-toolkit/internal/jsoninput"
 	"github.com/delgado-jacob/spl-toolkit/pkg/analysis"
 	"github.com/delgado-jacob/spl-toolkit/pkg/closure"
+	"github.com/delgado-jacob/spl-toolkit/pkg/compatibility"
 	"github.com/delgado-jacob/spl-toolkit/pkg/corpus"
 	"github.com/delgado-jacob/spl-toolkit/pkg/document"
 	"github.com/delgado-jacob/spl-toolkit/pkg/environment"
@@ -290,6 +291,13 @@ func spl_mapper_validate_schema_batch(mapperID C.int, requestJSON *C.char) *C.SP
 			return nil, err
 		}
 		return validation.ValidateSchemaBatch(request.Documents, request.Target)
+	})
+}
+
+//export spl_mapper_check_compatibility
+func spl_mapper_check_compatibility(mapperID C.int, requestJSON *C.char) *C.SPLResult {
+	return ownedMapperJSONResult(mapperID, func() (any, error) {
+		return compatibility.CheckJSON([]byte(C.GoString(requestJSON)))
 	})
 }
 
