@@ -1569,3 +1569,94 @@ func TestSPL2SQLQualifiedGroupSuffixCollisionsKeepBothSources(t *testing.T) {
 		}
 	}
 }
+
+func TestSPL2SQLQualifiedSelectedVisibilityKeepsSourceIdentity(t *testing.T) {
+	for _, join := range []string{"JOIN", "LEFT JOIN"} {
+		for _, selectFirst := range []bool{false, true} {
+			for _, grouped := range []bool{false, true} {
+				for _, self := range []bool{false, true} {
+					from := `FROM alpha AS a ` + join + ` beta AS b ON a.id=b.uid`
+					if self {
+						from = `FROM $events AS a ` + join + ` $events AS b ON a.id=b.uid`
+					}
+					group := ""
+					if grouped {
+						group = ` GROUP BY a.host,b.host`
+					}
+					query := from + group + ` SELECT a.host,b.host AS bhost`
+					if selectFirst {
+						query = `SELECT a.host,b.host AS bhost ` + from + group
+					}
+					t.Run(query, func(t *testing.T) {
+						clauses := []string{` ORDER BY b.host`, ` ORDER BY a.host,b.host`}
+						if grouped {
+							clauses = append(clauses, ` HAVING b.host="x"`, ` HAVING a.host="x" AND b.host="x"`)
+						}
+						for _, clause := range clauses {
+							r := spl2AnalyzeTest(t, query+clause)
+							if r.Coverage.SemanticComplete {
+								t.Fatalf("another alias's suffix authorized hidden qualified read: %s", query+clause)
+							}
+							found := false
+							for i := len(r.References) - 1; i >= 0; i-- {
+								ref := r.References[i]
+								if ref.OriginalName != "b.host" || ref.Role != "read" {
+									continue
+								}
+								if ref.Binding != "indeterminate" {
+									t.Fatalf("hidden qualified read classification: %+v", ref)
+								}
+								for _, diagnostic := range r.Diagnostics {
+									if diagnostic.Code == CodeUnsupportedSemantics && diagnostic.Location == ref.Location && diagnostic.StageID == ref.StageID {
+										found = true
+									}
+								}
+								owned := false
+								for _, gap := range r.Requirements.Gaps {
+									if gap.Code == CodeUnsupportedSemantics && reflect.DeepEqual(gap.ReferenceIDs, []string{ref.ID}) {
+										owned = true
+									}
+								}
+								if !owned {
+									t.Fatalf("visibility gap lost the exact hidden alias reference: %+v", r.Requirements.Gaps)
+								}
+								break
+							}
+							if !found {
+								t.Fatal("hidden qualified read lost its located visibility diagnostic")
+							}
+						}
+						positive := spl2AnalyzeTest(t, query+` ORDER BY a.host,bhost`)
+						if positive.Status != Valid || !positive.Coverage.SemanticComplete {
+							t.Fatalf("selected qualified/unqualified labels lost visibility: %+v", positive.Diagnostics)
+						}
+						explicit := spl2AnalyzeTest(t, strings.Replace(query, "SELECT a.host,", "SELECT a.host AS host,", 1)+` ORDER BY a.host,bhost`)
+						if explicit.Status != Valid || !explicit.Coverage.SemanticComplete {
+							t.Fatalf("explicit suffix-retaining qualified label lost visibility: %+v", explicit.Diagnostics)
+						}
+						if grouped {
+							positive = spl2AnalyzeTest(t, query+` HAVING a.host="x" AND bhost="x"`)
+							if positive.Status != Valid || !positive.Coverage.SemanticComplete {
+								t.Fatalf("selected HAVING labels lost visibility: %+v", positive.Diagnostics)
+							}
+						}
+					})
+				}
+			}
+		}
+	}
+}
+
+func TestSPL2SQLQualifiedSelectedVisibilityKeepsTypedAtomicName(t *testing.T) {
+	query := `SELECT a.'payload.id',b.'payload.id' AS bvalue FROM alpha AS a JOIN beta AS b ON a.id=b.uid`
+	for _, suffix := range []string{` ORDER BY b.'payload.id'`, ` ORDER BY a.payload.id`} {
+		r := spl2AnalyzeTest(t, query+suffix)
+		if r.Coverage.SemanticComplete {
+			t.Fatalf("atomic label authorized a hidden alias/path: %s", suffix)
+		}
+	}
+	positive := spl2AnalyzeTest(t, query+` ORDER BY a.'payload.id',bvalue`)
+	if positive.Status != Valid || !positive.Coverage.SemanticComplete {
+		t.Fatalf("qualified atomic label lost visibility: %+v", positive.Diagnostics)
+	}
+}

@@ -15,6 +15,45 @@ type spl2SQLCommand interface {
 	SqlOrderClause() spl2.ISqlOrderClauseContext
 }
 
+// Public labels authorize unqualified reads. Qualified visibility additionally
+// retains the typed source identity and its supplying occurrence evidence.
+type spl2SQLVisibility struct {
+	labels    map[string]bool
+	qualified map[spl2SQLQualifiedVisibilityKey]bool
+}
+
+type spl2SQLQualifiedVisibilityKey struct {
+	identity fieldIdentityKey
+	owners   string
+}
+
+func sqlVisibilityOwnerKey(owners []sourceOwner) string {
+	occurrences := make([]string, 0, len(owners))
+	for _, owner := range owners {
+		occurrences = append(occurrences, inputOccurrenceID(owner.input))
+	}
+	sort.Strings(occurrences)
+	return orderedStringSliceKey(append([]string{sourceOwnerKey(owners)}, uniqueIDs(occurrences)...))
+}
+
+func (s *spl2SemanticStage) sqlQualifiedVisibilityKey(identity fieldIdentity) (spl2SQLQualifiedVisibilityKey, bool) {
+	binding, known := s.aliases[identity.Qualifier]
+	key, exact := identity.privateKey()
+	if !known || binding.environment == nil || !exact || identity.Qualifier == "" {
+		return spl2SQLQualifiedVisibilityKey{}, false
+	}
+	relative := pathFieldIdentity("", identity.Segments)
+	if len(identity.Segments) == 1 {
+		relative = atomicFieldIdentity(identity.Segments[0])
+	}
+	return spl2SQLQualifiedVisibilityKey{identity: key, owners: sqlVisibilityOwnerKey(binding.environment.requirements.sourceOwners(relative))}, true
+}
+
+func (s *spl2SemanticStage) sqlQualifiedVisible(visible spl2SQLVisibility, identity fieldIdentity) bool {
+	key, exact := s.sqlQualifiedVisibilityKey(identity)
+	return exact && visible.qualified[key]
+}
+
 func spl2ScheduledSQL(c spl2SQLCommand) bool {
 	return c.SqlFromClause() != nil && len(c.SqlFromClause().AllSqlJoinClause()) > 0 || c.SqlSelectClause() != nil || c.SqlWhereClause() != nil || c.SqlGroupClause() != nil || c.SqlHavingClause() != nil || c.SqlOrderClause() != nil || c.SqlLimitClause() != nil || c.SqlOffsetClause() != nil
 }
@@ -205,7 +244,7 @@ func executeSPL2SQL(result *Result, parsed *spl2ParsedDocument, refinement *sour
 		selectPhase = "aggregate"
 	}
 	selected := []preparedSelection{}
-	visible := map[string]bool{}
+	visible := spl2SQLVisibility{}
 	phase(c.SqlSelectClause(), selectPhase, func() {
 		selected, visible, selectedShape = s.prepareSQLSelection(c.SqlSelectClause(), pregroup, aggregate, c.SqlGroupClause() != nil)
 	})
@@ -315,7 +354,7 @@ func (s *spl2SemanticStage) sqlUnprovedAggregateExpression(tree antlr.Tree) spl2
 	return out
 }
 
-func (s *spl2SemanticStage) prepareSQLSelection(clause spl2.ISqlSelectClauseContext, pregroup *environment, aggregate, grouped bool) ([]preparedSelection, map[string]bool, bool) {
+func (s *spl2SemanticStage) prepareSQLSelection(clause spl2.ISqlSelectClauseContext, pregroup *environment, aggregate, grouped bool) ([]preparedSelection, spl2SQLVisibility, bool) {
 	type projection struct {
 		ctx          spl2.IProjectionContext
 		target       locatedOperand
@@ -333,6 +372,26 @@ func (s *spl2SemanticStage) prepareSQLSelection(clause spl2.ISqlSelectClauseCont
 	groups := map[string]bool{}
 	for _, field := range input.fields {
 		groups[field.Name] = true
+	}
+	groupVisibility := spl2SQLVisibility{labels: groups, qualified: map[spl2SQLQualifiedVisibilityKey]bool{}}
+	for alias, binding := range s.aliases {
+		if binding.environment == nil {
+			continue
+		}
+		for _, field := range input.requirements.fields {
+			identity := pathFieldIdentity(alias, field.identity.Segments)
+			key, exact := s.sqlQualifiedVisibilityKey(identity)
+			if exact && sourceOwnersProved(field.owners) && len(field.owners) > 0 && key.owners == sqlVisibilityOwnerKey(field.owners) {
+				groupVisibility.qualified[key] = true
+			}
+		}
+		if retained := s.sqlGroupedSources[alias]; retained != nil {
+			for _, field := range retained.fields {
+				if key, exact := s.sqlQualifiedVisibilityKey(pathFieldIdentity(alias, field.identity.Segments)); exact {
+					groupVisibility.qualified[key] = true
+				}
+			}
+		}
 	}
 	for _, p := range clause.AllProjection() {
 		item := projection{ctx: p}
@@ -357,7 +416,7 @@ func (s *spl2SemanticStage) prepareSQLSelection(clause spl2.ISqlSelectClauseCont
 			if !field.Sound || !groups[field.Name] {
 				s.unsupported(p, "Mixed SQL aggregate/non-grouped projection is unproved")
 			}
-			item.value = s.sqlRestrictedExpression(p.Expression(), groups, false)
+			item.value = s.sqlRestrictedExpression(p.Expression(), groupVisibility, false)
 		} else {
 			item.value = s.expression(p.Expression())
 		}
@@ -427,7 +486,7 @@ func (s *spl2SemanticStage) prepareSQLSelection(clause spl2.ISqlSelectClauseCont
 		}
 	}
 	selected := []preparedSelection{}
-	visible := map[string]bool{}
+	visible := spl2SQLVisibility{labels: map[string]bool{}, qualified: map[spl2SQLQualifiedVisibilityKey]bool{}}
 	finiteShape := !ambiguousDestination && len(collisions) == 0 && s.sqlProjectionEffectSound(clause)
 	incompleteInputs := map[string]bool{}
 	if s.refinement != nil {
@@ -446,7 +505,11 @@ func (s *spl2SemanticStage) prepareSQLSelection(clause spl2.ISqlSelectClauseCont
 		if item.field != nil {
 			item.field.Conditional = item.field.Conditional || collisions[item.field.Name]
 			selected = append(selected, preparedSelection{Field: *item.field, InputReferenceIDs: item.value.ids, EmitProjectTransition: true})
-			visible[item.field.Name] = true
+			visible.labels[item.field.Name] = true
+			field := s.sqlDirectField(item.ctx.Expression())
+			if key, exact := s.sqlQualifiedVisibilityKey(field.Identity); exact {
+				visible.qualified[key] = !collisions[item.field.Name]
+			}
 		}
 		if !item.target.Sound {
 			if item.field == nil {
@@ -472,7 +535,7 @@ func (s *spl2SemanticStage) prepareSQLSelection(clause spl2.ISqlSelectClauseCont
 		} else {
 			s.applyAssignmentWithRequirementConditional(item.target, item.value.ids, !item.value.nonnull || collisions[item.target.Name], !item.value.requirementNonnull || collisions[item.target.Name], item.value.exactNull)
 		}
-		visible[item.target.Name] = !collisions[item.target.Name]
+		visible.labels[item.target.Name] = !collisions[item.target.Name]
 		if !item.value.exactNull {
 			ids := []string{s.result.References[before].ID}
 			if f, ok := s.projectedField(item.target.Name, ids); ok {
@@ -505,7 +568,7 @@ func (s *spl2SemanticStage) prepareSQLSelection(clause spl2.ISqlSelectClauseCont
 		selected[i].Field.ownerCollision = true
 		selected[i].Field.owners = cloneSourceOwners(ownersByName[name])
 		selected[i].Field.OriginReferenceIDs = copyIDs(originsByName[name])
-		visible[name] = false
+		visible.labels[name] = false
 	}
 	return selected, visible, finiteShape
 }
@@ -570,10 +633,10 @@ func (s *spl2SemanticStage) sqlProjectionEffectSound(ctx antlr.ParserRuleContext
 // A temporary visibility view keeps hidden source/group origins without
 // claiming availability or mutating the actual phase state. The shared reader
 // still decides source/derived/null-test/conditional binding for every operand.
-func (s *spl2SemanticStage) sqlRestrictedExpression(tree antlr.Tree, visible map[string]bool, predicate bool) spl2ExpressionEvidence {
+func (s *spl2SemanticStage) sqlRestrictedExpression(tree antlr.Tree, visible spl2SQLVisibility, predicate bool) spl2ExpressionEvidence {
 	actual := s.env
 	previousVisibility := s.sqlVisibility
-	s.sqlVisibility = visible
+	s.sqlVisibility = &visible
 	defer func() { s.sqlVisibility = previousVisibility }()
 	s.env = actual.clone()
 	hidden := []locatedOperand{}
@@ -585,7 +648,7 @@ func (s *spl2SemanticStage) sqlRestrictedExpression(tree antlr.Tree, visible map
 		case spl2.IAccessContext:
 			operand := s.sqlQualifiedAccess(c)
 			if operand.Sound && operand.Identity.Qualifier != "" {
-				if !visible[operand.Name] {
+				if !s.sqlQualifiedVisible(visible, operand.Identity) {
 					hidden = append(hidden, operand)
 				}
 				return
@@ -593,7 +656,7 @@ func (s *spl2SemanticStage) sqlRestrictedExpression(tree antlr.Tree, visible map
 		case spl2.IFieldNameContext:
 			if c.Identifier() != nil {
 				o := s.operand(c.Identifier())
-				if o.Sound && !visible[o.Name] {
+				if o.Sound && !visible.labels[o.Name] {
 					key, _ := o.fieldIdentity().privateKey()
 					f := s.env.fields[key]
 					f.Name = o.Name
@@ -624,19 +687,19 @@ func (s *spl2SemanticStage) sqlRestrictedExpression(tree antlr.Tree, visible map
 	} else {
 		value = s.expression(tree)
 	}
-	hiddenIDs := map[string][]string{}
+	hiddenIDs := map[Location][]string{}
 	if trace := s.env.requirements.trace; trace != nil {
 		for _, id := range value.ids {
 			entry := trace.reference(id)
-			hiddenIDs[entry.reference.NormalizedName] = append(hiddenIDs[entry.reference.NormalizedName], id)
+			hiddenIDs[entry.reference.Location] = append(hiddenIDs[entry.reference.Location], id)
 		}
 	}
 	for _, operand := range hidden {
-		owners := hiddenIDs[operand.Name]
+		owners := hiddenIDs[operand.Location]
 		if len(owners) > 1 {
-			hiddenIDs[operand.Name] = owners[1:]
+			hiddenIDs[operand.Location] = owners[1:]
 		} else {
-			hiddenIDs[operand.Name] = nil
+			hiddenIDs[operand.Location] = nil
 		}
 		if len(owners) > 0 {
 			owners = owners[:1]
@@ -728,7 +791,7 @@ func (s *spl2SemanticStage) sqlQualifiedSource(alias string, segments []string) 
 				return source
 			}
 		}
-		if binding.conditional || s.sqlVisibility != nil && !s.sqlVisibility[identity.PublicName] {
+		if binding.conditional || s.sqlVisibility != nil && !s.sqlQualifiedVisible(*s.sqlVisibility, pathFieldIdentity(alias, segments)) {
 			field, present := source.field(identity)
 			if !present {
 				field = trackedField{FieldBinding: FieldBinding{Name: identity.PublicName, OriginReferenceIDs: []string{}}, identity: identity, source: true, owners: source.requirements.sourceOwners(identity)}

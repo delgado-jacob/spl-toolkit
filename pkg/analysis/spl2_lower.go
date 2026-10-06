@@ -29,7 +29,7 @@ type spl2SemanticStage struct {
 	functionSummary            *spl2FunctionSummary
 	program                    *spl2Program
 	readRole                   string
-	sqlVisibility              map[string]bool
+	sqlVisibility              *spl2SQLVisibility
 	sqlGroupedSources          map[string]*environment
 	suppressLocalCallReference bool
 }
