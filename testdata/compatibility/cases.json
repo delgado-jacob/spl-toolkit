@@ -5472,10 +5472,8 @@
         "edges": []
       },
       "compatibility": {
-        "outcome": "incomplete",
-        "reason_codes": [
-          "schema_partial"
-        ]
+        "outcome": "satisfied",
+        "reason_codes": []
       },
       "requirement_outcomes": [
         {
@@ -5977,10 +5975,8 @@
         "edges": []
       },
       "compatibility": {
-        "outcome": "incomplete",
-        "reason_codes": [
-          "environment_collection_partial"
-        ]
+        "outcome": "satisfied",
+        "reason_codes": []
       },
       "requirement_outcomes": [
         {
