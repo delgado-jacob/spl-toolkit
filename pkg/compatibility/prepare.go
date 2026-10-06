@@ -106,29 +106,7 @@ func (p *Prepared) checkNormalized(request AssessmentRequest) (*Report, error) {
 	if err != nil {
 		return nil, err
 	}
-	// Evaluation and aggregation are added by the assessment owner. Admission
-	// alone never claims that content obligations have been satisfied.
-	environmentReport := p.env.Report()
-	report := &Report{SchemaVersion: 1, Outcome: "incomplete", Requirements: request.Requirements, Correlation: detach(request.Requirements.Correlation), Inputs: []InputOutcome{}, RequirementOutcomes: []RequirementOutcome{}, Coverage: []Coverage{}, Diagnostics: environmentReport.Diagnostics, Reasons: []Reason{}, Provenance: Provenance{QueryDigest: request.Requirements.Query.QueryDigest, SourceID: request.Requirements.Query.SourceID, CapabilityRevision: request.Requirements.CapabilityRevision, AnalysisContractVersion: 1, RequirementSetVersion: request.Requirements.SchemaVersion, EnvironmentDigest: environmentReport.SnapshotDigest, SchemaBundleDigest: environmentReport.SchemaBundleDigest}}
-	for _, input := range request.Requirements.Inputs {
-		r := resolved[input.ID]
-		evidence := []ObjectEvidence{}
-		if r.binding != nil {
-			e := ObjectEvidence{ObjectID: r.binding.ObjectID, Expected: r.binding.Expected}
-			if len(r.objects) == 1 {
-				object := r.objects[0]
-				e.Object = &object
-			}
-			evidence = append(evidence, e)
-		} else {
-			for _, object := range r.objects {
-				o := object
-				evidence = append(evidence, ObjectEvidence{ObjectID: o.ID, Expected: objectIdentity(o), Object: &o})
-			}
-		}
-		report.Inputs = append(report.Inputs, InputOutcome{InputID: input.ID, Outcome: "indeterminate", Objects: evidence, RequirementIDs: []string{}, Reasons: []Reason{}})
-	}
-	return report, nil
+	return p.assess(request, resolved), nil
 }
 
 // validateBindingSet receives the discovered set rather than reading only the

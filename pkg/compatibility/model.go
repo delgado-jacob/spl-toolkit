@@ -35,14 +35,18 @@ type Request struct {
 
 // Reason locates the evidence limit or finding on the affected obligation.
 type Reason struct {
-	Code          string             `json:"code"`
-	Message       string             `json:"message"`
-	InputID       string             `json:"input_id,omitempty"`
-	RequirementID string             `json:"requirement_id,omitempty"`
-	ObjectID      string             `json:"object_id,omitempty"`
-	SchemaID      string             `json:"schema_id,omitempty"`
-	Location      *analysis.Location `json:"location,omitempty"`
-	Path          string             `json:"path,omitempty"`
+	Dimension         string              `json:"dimension,omitempty"`
+	Locations         []analysis.Location `json:"locations"`
+	ReferenceIDs      []string            `json:"reference_ids"`
+	CandidateInputIDs []string            `json:"candidate_input_ids"`
+	Code              string              `json:"code"`
+	Message           string              `json:"message"`
+	InputID           string              `json:"input_id,omitempty"`
+	RequirementID     string              `json:"requirement_id,omitempty"`
+	ObjectID          string              `json:"object_id,omitempty"`
+	SchemaID          string              `json:"schema_id,omitempty"`
+	Location          *analysis.Location  `json:"location,omitempty"`
+	Path              string              `json:"path,omitempty"`
 }
 type ObjectEvidence struct {
 	ObjectID string                     `json:"object_id"`
@@ -61,6 +65,7 @@ type RequirementOutcome struct {
 	Applicability        string                            `json:"applicability"`
 	Outcome              string                            `json:"outcome"`
 	Reasons              []Reason                          `json:"reasons"`
+	Capabilities         []environment.Capability          `json:"capabilities"`
 	Objects              []ObjectEvidence                  `json:"objects"`
 	Schemas              []SchemaEvidence                  `json:"schemas"`
 	FieldProjection      *validation.FieldProjection       `json:"field_projection,omitempty"`
@@ -75,12 +80,13 @@ type InputOutcome struct {
 	Reasons        []Reason         `json:"reasons"`
 }
 type Coverage struct {
-	Dimension string   `json:"dimension"`
-	State     string   `json:"state"`
-	InputID   string   `json:"input_id,omitempty"`
-	ObjectID  string   `json:"object_id,omitempty"`
-	SchemaID  string   `json:"schema_id,omitempty"`
-	Reasons   []Reason `json:"reasons"`
+	CollectionKind string   `json:"collection_kind,omitempty"`
+	Dimension      string   `json:"dimension"`
+	State          string   `json:"state"`
+	InputID        string   `json:"input_id,omitempty"`
+	ObjectID       string   `json:"object_id,omitempty"`
+	SchemaID       string   `json:"schema_id,omitempty"`
+	Reasons        []Reason `json:"reasons"`
 }
 type Provenance struct {
 	QueryDigest              string `json:"query_digest"`
@@ -94,16 +100,19 @@ type Provenance struct {
 }
 
 type Report struct {
-	SchemaVersion         int                       `json:"schema_version"`
-	Outcome               string                    `json:"outcome"`
-	Requirements          analysis.RequirementSet   `json:"requirements"`
-	EffectiveRequirements *analysis.RequirementSet  `json:"effective_requirements,omitempty"`
-	Closure               *closure.Report           `json:"closure,omitempty"`
-	Inputs                []InputOutcome            `json:"inputs"`
-	RequirementOutcomes   []RequirementOutcome      `json:"requirement_outcomes"`
-	Correlation           analysis.CorrelationGraph `json:"correlation"`
-	Coverage              []Coverage                `json:"coverage"`
-	Diagnostics           []environment.Diagnostic  `json:"diagnostics"`
-	Reasons               []Reason                  `json:"reasons"`
-	Provenance            Provenance                `json:"provenance"`
+	QueryScope            environment.CaptureScope      `json:"query_scope"`
+	InputBindings         []InputBinding                `json:"input_bindings"`
+	Observation           *environment.ObservationScope `json:"observation,omitempty"`
+	SchemaVersion         int                           `json:"schema_version"`
+	Outcome               string                        `json:"outcome"`
+	Requirements          analysis.RequirementSet       `json:"requirements"`
+	EffectiveRequirements *analysis.RequirementSet      `json:"effective_requirements,omitempty"`
+	Closure               *closure.Report               `json:"closure,omitempty"`
+	Inputs                []InputOutcome                `json:"inputs"`
+	RequirementOutcomes   []RequirementOutcome          `json:"requirement_outcomes"`
+	Correlation           analysis.CorrelationGraph     `json:"correlation"`
+	Coverage              []Coverage                    `json:"coverage"`
+	Diagnostics           []environment.Diagnostic      `json:"diagnostics"`
+	Reasons               []Reason                      `json:"reasons"`
+	Provenance            Provenance                    `json:"provenance"`
 }
