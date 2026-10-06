@@ -134,7 +134,8 @@ func executeSPL2SQL(result *Result, parsed *spl2ParsedDocument, refinement *sour
 	phase(c.SqlGroupClause(), "group", func() {
 		groups := []locatedOperand{}
 		qualified := []preparedSelection{}
-		requirements := map[fieldIdentityKey]requirementField{}
+		qualifiedSources := map[string]*environment{}
+		aliases := []string{}
 		for _, key := range c.SqlGroupClause().AllSqlGroupKey() {
 			field := s.sqlDirectField(key.Expression())
 			if provedKey != nil && key == provedKey.key {
@@ -150,11 +151,19 @@ func executeSPL2SQL(result *Result, parsed *spl2ParsedDocument, refinement *sour
 					identity := atomicFieldIdentity(field.Name)
 					id := s.sourceFieldReference(field, source, identity, "group")
 					if projected, ok := s.sqlProjectedField(field, []string{id}); ok {
-						qualified = append(qualified, preparedSelection{Field: projected, InputReferenceIDs: []string{id}, EmitProjectTransition: true})
-						if requirement, ok := source.requirements.exactIdentityProjection(identity, []string{id}); ok {
-							k, _ := identity.privateKey()
-							requirements[k] = requirement
+						alias := field.Identity.Qualifier
+						row := qualifiedSources[alias]
+						if row == nil {
+							row = newEnvironmentWithRequirementTrace(s.env.requirements.trace)
+							row.open, row.requirements.open = false, false
+							qualifiedSources[alias] = row
+							aliases = append(aliases, alias)
 						}
+						row.registerIdentityField(projected)
+						if requirement, ok := source.requirements.exactIdentityProjection(identity, []string{id}); ok {
+							row.requirements.registerIdentityField(requirement)
+						}
+						qualified = append(qualified, preparedSelection{Field: projected, InputReferenceIDs: []string{id}, EmitProjectTransition: true})
 					}
 					continue
 				}
@@ -163,16 +172,32 @@ func executeSPL2SQL(result *Result, parsed *spl2ParsedDocument, refinement *sour
 			s.unsupported(key, "SQL grouping expression output is unproved")
 		}
 		s.applyAggregation(nil, groups, false)
+		// Retain the proved per-alias group row separately from public suffix
+		// collisions. Compose once per alias, rather than cloning traces per key.
+		s.sqlGroupedSources = qualifiedSources
+		order := append([]fieldIdentityKey{}, s.env.fieldOrder...)
+		for _, alias := range aliases {
+			combined, _, ok := composeFlowEnvironments(s.env, qualifiedSources[alias])
+			if !ok {
+				s.unsupported(c.SqlGroupClause(), "SQL qualified grouping source facts are unproved")
+				delete(s.sqlGroupedSources, alias)
+				continue
+			}
+			s.installSelectedFlowMerge(s.env, combined)
+		}
+		seen := map[fieldIdentityKey]bool{}
+		for _, key := range order {
+			seen[key] = true
+		}
 		for _, selection := range qualified {
-			collision, owners := s.env.registerIdentityField(selection.Field)
-			if collision {
-				s.fieldIdentityCollision(selection.Field.Name, s.referenceLocation(selection.InputReferenceIDs), owners)
+			key, _ := selection.Field.identity.privateKey()
+			if !seen[key] {
+				order = append(order, key)
+				seen[key] = true
 			}
 			s.appendTransition(Transition{Operation: "project", Output: selection.Field.Name, OutputIdentity: transitionOutputIdentity(selection.Field.identity), InputReferenceIDs: selection.InputReferenceIDs})
 		}
-		for _, field := range requirements {
-			s.env.requirements.registerIdentityField(field)
-		}
+		s.env.fieldOrder = order
 	})
 	aggregate := s.sqlHasAggregate(c.SqlSelectClause())
 	selectPhase := "evaluate"
@@ -200,6 +225,7 @@ func executeSPL2SQL(result *Result, parsed *spl2ParsedDocument, refinement *sour
 	})
 	phase(c.SqlSelectClause(), "project", func() {
 		s.applyPreparedProjection(selected, "table")
+		s.sqlGroupedSources = nil
 		if selectedShape {
 			s.env.open, s.env.uncertain = false, false
 			fields := map[fieldIdentityKey]requirementField{}
@@ -665,9 +691,33 @@ func (s *spl2SemanticStage) sqlQualifiedSource(alias string, segments []string) 
 		identity = atomicFieldIdentity(segments[0])
 	}
 	key, _ := identity.privateKey()
+	// A source snapshot cannot restore a field removed from the active row.
+	if s.env.removed[key] || s.env.requirements.removed[key] {
+		unavailable := newEnvironmentWithRequirementTrace(s.env.requirements.trace)
+		unavailable.open, unavailable.requirements.open = false, false
+		return unavailable
+	}
+	// Explicit recreation belongs to the current row and keeps its new
+	// derived origins instead of reviving the original source's obligation.
+	if current, present := s.env.field(identity); present && !current.source && !current.ownerCollision {
+		for _, removed := range s.env.removedOrder {
+			if removed == key {
+				source = s.env
+				break
+			}
+		}
+	}
+	groupRetained := false
+	if !s.env.open {
+		if grouped := s.sqlGroupedSources[alias]; grouped != nil {
+			if _, retained := grouped.field(identity); retained {
+				source, groupRetained = grouped, true
+			}
+		}
+	}
 	if binding.conditional || !s.env.open || s.sqlVisibility != nil {
 		source = source.cloneWithRequirementTrace(s.env.requirements.trace)
-		if !s.env.open {
+		if !s.env.open && !groupRetained {
 			current, retained := s.env.requirements.field(identity)
 			expected := source.requirements.sourceOwners(identity)
 			if !retained || sourceOwnerKey(current.owners) != sourceOwnerKey(expected) {

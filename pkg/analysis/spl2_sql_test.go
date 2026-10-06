@@ -1434,3 +1434,138 @@ func TestSPL2SQLJoinConditionalAliasesPreserveDerivedFields(t *testing.T) {
 		}
 	}
 }
+
+func TestSPL2SQLQualifiedReadsRespectTypedRemovalAndRecreation(t *testing.T) {
+	for _, tc := range []struct {
+		name, query, original, binding string
+	}{
+		{"inner removed", `FROM alpha AS a JOIN beta AS b ON a.id=b.uid | fields - secret | eval later=a.secret`, "a.secret", "unavailable"},
+		{"left removed", `FROM alpha AS a LEFT JOIN beta AS b ON a.id=b.uid | fields - secret | eval later=b.secret`, "b.secret", "unavailable"},
+		{"atomic dotted removed", `FROM alpha AS a JOIN beta AS b ON a.id=b.uid | fields - 'payload.id' | eval later=a.'payload.id'`, "a.'payload.id'", "unavailable"},
+		{"structural removed", `FROM alpha AS a LEFT JOIN beta AS b ON a.id=b.uid | fields - payload.id | eval later=b.payload.id`, "b.payload.id", "unavailable"},
+		{"atomic removal keeps structural", `FROM alpha AS a JOIN beta AS b ON a.id=b.uid | fields - 'payload.id' | eval later=a.payload.id`, "a.payload.id", "source"},
+		{"structural removal keeps atomic", `FROM alpha AS a JOIN beta AS b ON a.id=b.uid | fields - payload.id | eval later=a.'payload.id'`, "a.'payload.id'", "source"},
+		{"recreated", `FROM alpha AS a JOIN beta AS b ON a.id=b.uid | fields - secret | eval secret=1 | eval later=a.secret`, "a.secret", "derived"},
+		{"atomic dotted recreated", `FROM alpha AS a JOIN beta AS b ON a.id=b.uid | fields - 'payload.id' | eval 'payload.id'=1 | eval later=a.'payload.id'`, "a.'payload.id'", "derived"},
+		{"atomic recreation keeps structural removal", `FROM alpha AS a JOIN beta AS b ON a.id=b.uid | fields - payload.id | eval 'payload.id'=1 | eval later=a.payload.id`, "a.payload.id", "unavailable"},
+		{"left recreated", `FROM alpha AS a LEFT JOIN beta AS b ON a.id=b.uid | fields - secret | eval secret=1 | eval later=b.secret`, "b.secret", "indeterminate"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			r := spl2AnalyzeTest(t, tc.query)
+			found := false
+			for _, ref := range r.References {
+				if ref.Role != "read" || ref.OriginalName != tc.original {
+					continue
+				}
+				found = true
+				if ref.Binding != tc.binding {
+					t.Fatalf("qualified active-row read: %+v, want %s", ref, tc.binding)
+				}
+				if strings.Contains(tc.name, "recreated") {
+					if len(ref.OriginReferenceIDs) == 0 {
+						t.Fatalf("recreated field lost its new origins: %+v", ref)
+					}
+					for _, id := range ref.OriginReferenceIDs {
+						origin := r.References[referenceOrdinal(t, id)]
+						expected := *ref.FieldIdentity
+						expected.Qualifier = ""
+						if len(expected.Segments) == 1 {
+							expected.Kind = "atomic"
+						}
+						if origin.NormalizedName != ref.NormalizedName || origin.Role != "create" || origin.FieldIdentity == nil || !reflect.DeepEqual(*origin.FieldIdentity, expected) {
+							t.Fatalf("recreated field resurrected source lineage: %+v", origin)
+						}
+					}
+				}
+			}
+			if !found {
+				t.Fatalf("missing qualified read %s", tc.original)
+			}
+			if tc.binding == "unavailable" || strings.Contains(tc.name, "recreated") {
+				for _, item := range r.Requirements.Items {
+					for _, occurrence := range item.Occurrences {
+						if item.Kind == "field" && occurrence.OriginalName == tc.original {
+							t.Fatalf("removed/recreated field became external obligation: %+v", item)
+						}
+					}
+				}
+			}
+		})
+	}
+}
+
+func TestSPL2SQLQualifiedGroupSuffixCollisionsKeepBothSources(t *testing.T) {
+	for _, join := range []string{"JOIN", "LEFT JOIN"} {
+		for _, groups := range []string{"a.host,b.host", "b.host,a.host"} {
+			t.Run(join+"/"+groups, func(t *testing.T) {
+				base := `SELECT a.host AS ahost,b.host AS bhost FROM alpha AS a ` + join + ` beta AS b ON a.id=b.uid GROUP BY ` + groups
+				r := spl2AnalyzeTest(t, base+` ORDER BY ahost,bhost`)
+				if r.Status != Valid || !r.Coverage.SemanticComplete || r.Correlation.Outcome != "connected" {
+					t.Fatalf("qualified grouping: status=%s diagnostics=%+v graph=%+v", r.Status, r.Diagnostics, r.Correlation)
+				}
+				seen := map[string]bool{}
+				for _, item := range r.Requirements.Items {
+					if item.Kind != "field" || item.Identity != "host" || item.Role != "read" {
+						continue
+					}
+					for _, input := range r.Inputs {
+						if input.ID != item.InputID {
+							continue
+						}
+						seen[input.Name] = true
+						want := "required"
+						if join == "LEFT JOIN" && input.Name == "beta" {
+							want = "conditional"
+						}
+						if item.Ownership.State != "proved" || item.Necessity != want {
+							t.Fatalf("grouped source ownership/necessity: %+v", item)
+						}
+					}
+				}
+				if len(seen) != 2 {
+					t.Fatalf("grouped source lost: %+v", r.Requirements.Items)
+				}
+				last := r.Lineage[len(r.Lineage)-1].After
+				if len(last.Fields) != 2 || last.Fields[0].Name != "ahost" || last.Fields[1].Name != "bhost" {
+					t.Fatalf("qualified grouping changed output labels: %+v", last)
+				}
+				held := spl2AnalyzeTest(t, base+` HAVING a.secret="x"`)
+				if spl2Ref(t, held, "secret", "read").Binding != "unavailable" {
+					t.Fatal("closed grouping admitted missing qualified HAVING field")
+				}
+				visibleGroup := `SELECT a.host,b.host AS bhost FROM alpha AS a ` + join + ` beta AS b ON a.id=b.uid GROUP BY ` + groups
+				visible := spl2AnalyzeTest(t, visibleGroup+` HAVING a.host="x" ORDER BY bhost`)
+				if visible.Status != Valid || !visible.Coverage.SemanticComplete {
+					t.Fatalf("visible qualified HAVING/order: %+v", visible.Diagnostics)
+				}
+				restricted := spl2AnalyzeTest(t, base+` HAVING a.host="x"`)
+				if restricted.Coverage.SemanticComplete {
+					t.Fatal("renamed group field bypassed HAVING visibility")
+				}
+				missing := spl2AnalyzeTest(t, `SELECT a.host AS ahost,b.host AS bhost FROM alpha AS a `+join+` beta AS b ON a.id=b.uid GROUP BY a.host`)
+				for _, ref := range missing.References {
+					if ref.Role == "read" && ref.OriginalName == "b.host" && ref.Binding != "unavailable" {
+						t.Fatalf("same suffix admitted an ungrouped alias: %+v", ref)
+					}
+				}
+				for _, query := range []string{base + ` | eval later=a.host`, visibleGroup + ` | fields - host | eval later=a.host`} {
+					closed := spl2AnalyzeTest(t, query)
+					for i := len(closed.References) - 1; i >= 0; i-- {
+						ref := closed.References[i]
+						if ref.Role == "read" && ref.OriginalName == "a.host" {
+							if ref.Binding != "unavailable" {
+								t.Fatalf("final projection/removal retained grouped source alias: %+v", ref)
+							}
+							break
+						}
+					}
+				}
+				ambiguous := spl2AnalyzeTest(t, `SELECT host AS chosen FROM alpha AS a `+join+` beta AS b ON a.id=b.uid GROUP BY `+groups)
+				item := requirementItem(ambiguous.Requirements, "field", "host", "read")
+				if item == nil || item.Ownership.State != "unproved" || len(item.Ownership.CandidateInputIDs) != 2 {
+					t.Fatalf("unqualified grouped collision picked an owner: %+v", item)
+				}
+			})
+		}
+	}
+}
