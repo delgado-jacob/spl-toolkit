@@ -1,7 +1,9 @@
 package analysis
 
 import (
+	"fmt"
 	"reflect"
+	"runtime"
 	"strings"
 	"testing"
 )
@@ -203,5 +205,98 @@ func TestPipelineJoinCorrelationGeneratedRowsStayNotApplicable(t *testing.T) {
 		if r.Correlation.Outcome != "not applicable" || r.Correlation.Coverage.State != "not_applicable" || len(r.Correlation.Coverage.Reasons) != 0 || len(r.Correlation.Edges) != 0 {
 			t.Fatalf("generated-only join gained source uncertainty: %+v", r.Correlation)
 		}
+	}
+}
+
+func correlationRepeatedViewQuery() string {
+	var query strings.Builder
+	query.WriteString(`$v0=from $events | join type=inner left=e right=u where `)
+	query.WriteString(strings.TrimSuffix(strings.Repeat(`e.id=u.uid AND `, 200), ` AND `))
+	query.WriteString(` [from $users];`)
+	for i := 1; i <= 7; i++ {
+		fmt.Fprintf(&query, `$v%d=from $v%d | union [from $v%d];`, i, i-1, i-1)
+	}
+	query.WriteString(`$out=from $v7;`)
+	return query.String()
+}
+func TestPipelineJoinCorrelationRepeatedViewsBoundedAllocation(t *testing.T) {
+	query := correlationRepeatedViewQuery()
+	runtime.GC()
+	var before, after runtime.MemStats
+	runtime.ReadMemStats(&before)
+	r := spl2AnalyzeTest(t, query)
+	runtime.ReadMemStats(&after)
+	allocated := after.TotalAlloc - before.TotalAlloc
+	// The query already reaches the source-evidence limit. This broad ceiling
+	// catches the measured >1 GiB inherited-event boxing regression without a
+	// timing assertion or a new production evidence limit.
+	if allocated > 512*1024*1024 {
+		t.Fatalf("bounded correlation query allocated %.1f MiB; want <=512 MiB", float64(allocated)/(1024*1024))
+	}
+	t.Logf("bounded correlation query allocated %.1f MiB", float64(allocated)/(1024*1024))
+	if len(r.Correlation.Nodes) != 128 || len(r.Correlation.Edges) != 64 {
+		t.Fatalf("bounded participants lost: nodes=%d edges=%d", len(r.Correlation.Nodes), len(r.Correlation.Edges))
+	}
+	keys := 0
+	for _, edge := range r.Correlation.Edges {
+		keys += len(edge.Keys)
+		if len(edge.Keys) != 200 {
+			t.Fatalf("equality occurrences collapsed: %d", len(edge.Keys))
+		}
+		ids := map[string]bool{}
+		for _, key := range edge.Keys {
+			if ids[key.Left.ReferenceIDs[0]] {
+				t.Fatal("distinct equality references collapsed")
+			}
+			ids[key.Left.ReferenceIDs[0]] = true
+		}
+	}
+	if keys != 12800 || r.Correlation.Outcome != "indeterminate" || r.Correlation.Coverage.State != "partial" {
+		t.Fatalf("bounded proof lost: keys=%d graph=%+v", keys, r.Correlation.Coverage)
+	}
+	repeated := spl2AnalyzeTest(t, query)
+	if !reflect.DeepEqual(r.Correlation, repeated.Correlation) {
+		t.Fatal("repeated view graph is nondeterministic")
+	}
+}
+func BenchmarkPipelineJoinCorrelationRepeatedViews(b *testing.B) {
+	document := QueryDocument{Text: correlationRepeatedViewQuery(), Language: "spl2"}
+	b.ReportAllocs()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		if _, err := Analyze(document); err != nil {
+			b.Fatal(err)
+		}
+	}
+}
+func TestCorrelationMergePreservesSituatedOwnerFacts(t *testing.T) {
+	_, trace, err := analyzeRewriteWithTrace(QueryDocument{Text: `from $events | join left=e right=u where e.id=u.uid [from $users]`, Language: "spl2"}, nil, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	original := cloneCorrelationEvents(trace.correlations)
+	situated := cloneCorrelationEvents(original)
+	situated[0].left.input.occurrence.UseSiteLocations = append(situated[0].left.input.occurrence.UseSiteLocations, Location{Start: Position{Offset: 100}, End: Position{Offset: 105}})
+	merged := mergeCorrelationEvents(original, append(cloneCorrelationEvents(original), situated...))
+	if len(merged) != 2 || !reflect.DeepEqual(merged[0], original[0]) || !reflect.DeepEqual(merged[1], situated[0]) {
+		t.Fatal("merge collapsed distinct situated owner facts or changed order")
+	}
+	merged[1].left.input.occurrence.UseSiteLocations[0].Start.Offset = 999
+	if situated[0].left.input.occurrence.UseSiteLocations[0].Start.Offset != 100 {
+		t.Fatal("merged owner aliases original event")
+	}
+}
+
+func TestCorrelationMergeNormalizesEmptyOwnerUseEvidence(t *testing.T) {
+	_, trace, err := analyzeRewriteWithTrace(QueryDocument{Text: `from $events | eval k=1 | join left=e right=u where e.k=u.uid [from $users]`, Language: "spl2"}, nil, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	event := trace.correlations[0]
+	event.left.input.occurrence.UseSiteLocations = nil
+	event.left.input.occurrence.UseSiteReferenceIDs = nil
+	normalized := cloneCorrelationEvents([]correlationEvent{event})
+	if merged := mergeCorrelationEvents(normalized, []correlationEvent{event}); len(merged) != 1 {
+		t.Fatalf("empty use evidence duplicated an inherited equality: %d", len(merged))
 	}
 }

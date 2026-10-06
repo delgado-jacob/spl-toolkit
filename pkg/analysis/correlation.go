@@ -1,7 +1,7 @@
 package analysis
 
 import (
-	"reflect"
+	"slices"
 	"sort"
 	"strings"
 
@@ -65,21 +65,65 @@ func cloneCorrelationEvents(in []correlationEvent) []correlationEvent {
 	}
 	return out
 }
+
+// Reference pairs identify equality occurrences, independently of projected
+// view use sites. Collision buckets retain any distinct situated owner facts.
+type correlationEventIdentity struct {
+	leftReference, rightReference, stageID, scopeID string
+	predicateLocation                               Location
+}
+
+func correlationIdentity(event *correlationEvent) correlationEventIdentity {
+	return correlationEventIdentity{event.leftReference, event.rightReference, event.stageID, event.scopeID, event.predicateLocation}
+}
 func mergeCorrelationEvents(base, additions []correlationEvent) []correlationEvent {
 	out := cloneCorrelationEvents(base)
-	for _, event := range cloneCorrelationEvents(additions) {
+	indexes := make(map[correlationEventIdentity][]int, len(base)+len(additions))
+	for i := range out {
+		key := correlationIdentity(&out[i])
+		indexes[key] = append(indexes[key], i)
+	}
+	for i := range additions {
+		event := &additions[i]
+		key := correlationIdentity(event)
 		found := false
-		for _, previous := range out {
-			if reflect.DeepEqual(previous, event) {
+		for _, index := range indexes[key] {
+			// Only candidates for this equality occurrence are compared. Explicit
+			// comparisons avoid boxing and preserve clone-normalized empty use lists.
+			if sameCorrelationEvent(&out[index], event) {
 				found = true
 				break
 			}
 		}
 		if !found {
-			out = append(out, event)
+			indexes[key] = append(indexes[key], len(out))
+			out = append(out, cloneCorrelationEvents(additions[i : i+1])[0])
 		}
 	}
 	return out
+}
+
+func sameCorrelationEvent(a, b *correlationEvent) bool {
+	return correlationIdentity(a) == correlationIdentity(b) && a.proved == b.proved &&
+		a.leftLocation == b.leftLocation && a.rightLocation == b.rightLocation && a.location == b.location &&
+		sameCorrelationFieldIdentity(a.leftIdentity, b.leftIdentity) && sameCorrelationFieldIdentity(a.rightIdentity, b.rightIdentity) &&
+		sameCorrelationOwner(a.left, b.left) && sameCorrelationOwner(a.right, b.right)
+}
+func sameCorrelationFieldIdentity(a, b fieldIdentity) bool {
+	return a.Kind == b.Kind && a.Qualifier == b.Qualifier && a.PublicName == b.PublicName && a.exact == b.exact &&
+		(a.Segments == nil) == (b.Segments == nil) && slices.Equal(a.Segments, b.Segments)
+}
+func sameCorrelationOwner(a, b sourceOwner) bool {
+	if a.unresolved != b.unresolved || !sameCorrelationFieldIdentity(a.identity, b.identity) ||
+		a.input.kind != b.input.kind || a.input.name != b.input.name || a.input.sourceID != b.input.sourceID || a.input.identity != b.input.identity {
+		return false
+	}
+	left, right := a.input.occurrence, b.input.occurrence
+	// cloneInputFacts makes empty use arrays non-nil, so nil and empty arrays
+	// represent the same inherited fact at this merge boundary.
+	return left.ID == right.ID && left.ReferenceID == right.ReferenceID && left.OriginalReferenceID == right.OriginalReferenceID &&
+		left.StageID == right.StageID && left.ScopeID == right.ScopeID && left.Alias == right.Alias && left.Location == right.Location &&
+		slices.Equal(left.UseSiteLocations, right.UseSiteLocations) && slices.Equal(left.UseSiteReferenceIDs, right.UseSiteReferenceIDs)
 }
 func supplyingOccurrence(owners []sourceOwner) (sourceOwner, bool) {
 	if len(owners) == 0 {
