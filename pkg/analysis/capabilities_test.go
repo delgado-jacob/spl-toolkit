@@ -75,6 +75,44 @@ func TestCapabilitiesPublicJSONRoundTripIsCanonical(t *testing.T) {
 	}
 }
 
+func TestCapabilitiesPublicRequirementProofProjection(t *testing.T) {
+	for _, language := range []string{"spl", "spl2"} {
+		t.Run(language, func(t *testing.T) {
+			manifest, err := CapabilitiesFor(CapabilityOptions{Language: language})
+			if err != nil {
+				t.Fatal(err)
+			}
+			before := cloneCapabilityManifest(manifest)
+			owned := 0
+			for _, evidence := range manifest.Evidence {
+				if evidence.Observations.Requirements == nil {
+					continue
+				}
+				for _, item := range evidence.Observations.Requirements.Items {
+					if item.InputID != "" && item.Ownership != nil && len(item.Occurrences) != 0 {
+						owned++
+					}
+					var public map[string]any
+					if err := json.Unmarshal(mustJSON(t, item), &public); err != nil {
+						t.Fatal(err)
+					}
+					assertCapabilityJSONKeys(t, evidence.ID+" requirement", public, []string{"identity", "kind", "necessity", "resolution", "role"})
+					want := map[string]any{"kind": item.Kind, "identity": item.Identity, "role": item.Role, "necessity": item.Necessity, "resolution": item.Resolution}
+					if !reflect.DeepEqual(public, want) {
+						t.Fatalf("public requirement values changed: got=%v want=%v", public, want)
+					}
+				}
+			}
+			if owned == 0 {
+				t.Fatal("manifest lacks private ownership proof to exercise projection")
+			}
+			if !reflect.DeepEqual(manifest, before) {
+				t.Fatal("public marshaling modified source proof")
+			}
+		})
+	}
+}
+
 func TestCapabilitiesPublicWirePreservesV1SemanticShape(t *testing.T) {
 	manifest, err := CapabilitiesFor(CapabilityOptions{Language: "spl2"})
 	if err != nil {

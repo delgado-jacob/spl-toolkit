@@ -268,6 +268,16 @@ func TestAnalysisRESTPreservesValidUnicodeEscapes(t *testing.T) {
 }
 
 func TestCapabilitiesRESTMatchesKernel(t *testing.T) {
+	encodedWant, err := json.Marshal(analysis.Capabilities())
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Normalize through the same public projection as the SPL2 response checks.
+	var publicWant analysis.CapabilityManifest
+	if err := json.Unmarshal(encodedWant, &publicWant); err != nil {
+		t.Fatal(err)
+	}
+
 	response := serveAnalysisRequest(t, http.MethodGet, "/api/v1/capabilities", nil, "")
 	if response.Code != http.StatusOK {
 		t.Fatalf("status=%d body=%s", response.Code, response.Body.Bytes())
@@ -276,8 +286,8 @@ func TestCapabilitiesRESTMatchesKernel(t *testing.T) {
 	if err := json.Unmarshal(response.Body.Bytes(), &got); err != nil {
 		t.Fatal(err)
 	}
-	if want := analysis.Capabilities(); !reflect.DeepEqual(got, want) {
-		t.Fatalf("manifest mismatch\ngot:  %#v\nwant: %#v", got, want)
+	if !reflect.DeepEqual(got, publicWant) {
+		t.Fatalf("manifest mismatch\ngot:  %#v\nwant: %#v", got, publicWant)
 	}
 	if got.ToolkitVersion == "" || len(got.Records) == 0 || len(got.Evidence) == 0 {
 		t.Fatalf("incomplete manifest: toolkit=%q records=%d evidence=%d", got.ToolkitVersion, len(got.Records), len(got.Evidence))
@@ -292,8 +302,8 @@ func TestCapabilitiesRESTMatchesKernel(t *testing.T) {
 	if err := json.Unmarshal(response.Body.Bytes(), &fresh); err != nil {
 		t.Fatal(err)
 	}
-	if want := analysis.Capabilities(); !reflect.DeepEqual(fresh, want) {
-		t.Fatalf("manifest mutation escaped into a later response\ngot:  %#v\nwant: %#v", fresh, want)
+	if !reflect.DeepEqual(fresh, publicWant) {
+		t.Fatalf("manifest mutation escaped into a later response\ngot:  %#v\nwant: %#v", fresh, publicWant)
 	}
 }
 

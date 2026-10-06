@@ -500,13 +500,8 @@ func TestCapabilitiesCLIFormatsAndOutput(t *testing.T) {
 	if code != 0 || stderr != "" {
 		t.Fatalf("code=%d stdout=%q stderr=%q", code, stdout, stderr)
 	}
-	var got analysis.CapabilityManifest
-	if err := json.Unmarshal([]byte(stdout), &got); err != nil {
-		t.Fatal(err)
-	}
-	if !reflect.DeepEqual(got, want) {
-		t.Fatalf("manifest mismatch\ngot:  %#v\nwant: %#v", got, want)
-	}
+	// Capability evidence has private proof; compare the complete public JSON.
+	dialectJSONEqual(t, []byte(stdout), want)
 
 	output := filepath.Join(t.TempDir(), "capabilities.txt")
 	code, stdout, stderr = runCLITest("capabilities", "--output", output)

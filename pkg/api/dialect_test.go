@@ -355,9 +355,9 @@ func TestDialectOpenAPISelectorsAndMetadata(t *testing.T) {
 			Schemas map[string]struct {
 				Required   []string `json:"required"`
 				Properties map[string]struct {
-					Type string   `json:"type"`
-					Enum []string `json:"enum"`
-					Ref  string   `json:"$ref"`
+					Type string `json:"type"`
+					Enum []any  `json:"enum"`
+					Ref  string `json:"$ref"`
 				} `json:"properties"`
 			} `json:"schemas"`
 		} `json:"components"`
@@ -377,10 +377,15 @@ func TestDialectOpenAPISelectorsAndMetadata(t *testing.T) {
 	}
 	schemas := spec.Components.Schemas
 	for _, name := range []string{"api.AnalysisRequest", "validation.QueryDocument"} {
-		if !reflect.DeepEqual(schemas[name].Properties["language"].Enum, []string{"", "spl", "spl2"}) {
+		if !reflect.DeepEqual(schemas[name].Properties["language"].Enum, []any{"", "spl", "spl2"}) {
 			t.Fatalf("missing strict SPL2 request schema: %s", name)
 		}
 	}
+	admission := schemas["tooling.validation.FieldProjection"].Properties["admission"]
+	if admission.Type != "integer" || !reflect.DeepEqual(admission.Enum, []any{float64(0), float64(1), float64(2)}) {
+		t.Fatalf("field projection admission must retain its numeric enum: %+v", admission)
+	}
+
 	for _, tc := range []struct{ schema, key, kind string }{{"analysis.CapabilityManifest", "documentation_snapshot", "string"}, {"analysis.Lineage", "phase", "string"}, {"analysis.Lineage", "execution_order", "integer"}} {
 		if schemas[tc.schema].Properties[tc.key].Type != tc.kind {
 			t.Fatalf("missing metadata %s.%s", tc.schema, tc.key)
