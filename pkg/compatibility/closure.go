@@ -91,6 +91,10 @@ func (p *Prepared) assessClosure(request AssessmentRequest) (*Report, error) {
 	active := request
 	active.Requirements = queries[0].set
 	report := p.assess(active, queryInputs(resolved, queries[0].set.Inputs), queries[0], evaluated)
+	if request.Requirements.QueryStatus == analysis.Invalid && report.Outcome != "not assessed" {
+		report.Outcome = "not assessed"
+		report.Reasons = append(report.Reasons, newReason("unsupported_semantics", "The original query is invalid; retained effective and hidden facts cannot establish its compatibility.", "query_semantics"))
+	}
 	report.Requirements = detach(request.Requirements)
 	effective := detach(queries[0].set)
 	report.EffectiveRequirements = &effective
@@ -145,9 +149,6 @@ func (p *Prepared) assessClosure(request AssessmentRequest) (*Report, error) {
 	}
 	replaceClosureCoverage(report, relevant, reasons)
 	p.selectedBodyLimits(report, resolved, evaluated)
-	if report.Outcome == "not assessed" && request.Requirements.QueryStatus != analysis.Invalid && len(request.Requirements.Items) != 0 && relevant {
-		report.Outcome = "incomplete"
-	}
 	finalizeReport(report)
 	return report, nil
 }
@@ -196,6 +197,11 @@ func aggregateOutcome(report *Report, outcome, applicability string, reasons []R
 		return
 	}
 	report.Reasons = append(report.Reasons, reasons...)
+	// An invalid or unassessable root retains priority while hidden evidence is
+	// recorded. Configuration admission has already completed before assessment.
+	if report.Outcome == "not assessed" {
+		return
+	}
 	if outcome == "missing" && applicability == "applicable" {
 		report.Outcome = "unsatisfied"
 		return
@@ -208,10 +214,12 @@ func mergeAssessment(report, fragment *Report) {
 	report.RequirementOutcomes = append(report.RequirementOutcomes, fragment.RequirementOutcomes...)
 	report.Coverage = append(report.Coverage, fragment.Coverage...)
 	report.Reasons = append(report.Reasons, fragment.Reasons...)
-	if fragment.Outcome == "unsatisfied" {
-		report.Outcome = "unsatisfied"
-	} else if fragment.Outcome != "satisfied" && report.Outcome != "unsatisfied" {
-		report.Outcome = "incomplete"
+	if report.Outcome != "not assessed" {
+		if fragment.Outcome == "unsatisfied" {
+			report.Outcome = "unsatisfied"
+		} else if fragment.Outcome != "satisfied" && report.Outcome != "unsatisfied" {
+			report.Outcome = "incomplete"
+		}
 	}
 	for _, input := range fragment.Inputs {
 		i := slices.IndexFunc(report.Inputs, func(prior InputOutcome) bool { return prior.InputID == input.InputID })

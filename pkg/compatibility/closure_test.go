@@ -44,7 +44,7 @@ func TestClosureHiddenBindingAdmission(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			if report.Outcome != "incomplete" || hasReason(report, "dependency_closure_incomplete") || len(report.Inputs) != 1 || report.Inputs[0].Outcome != "satisfied" {
+			if report.Outcome != "not assessed" || hasReason(report, "dependency_closure_incomplete") || len(report.Inputs) != 1 || report.Inputs[0].Outcome != "satisfied" {
 				t.Fatalf("%s", assessmentSummary(report))
 			}
 			if report.Closure == nil || report.EffectiveRequirements == nil {
@@ -464,5 +464,126 @@ func TestClosureNormalizedDependencyChoices(t *testing.T) {
 	second = checked(t, r)
 	if first.Provenance.AssessmentIdentityDigest != second.Provenance.AssessmentIdentityDigest {
 		t.Fatal("equivalent duplicate dependency choices are not canonical")
+	}
+}
+
+func TestClosureRootNotAssessedPrecedence(t *testing.T) {
+	for _, tc := range []struct {
+		name, root, body, want                            string
+		withoutDocument, macro, gap, unassessable, useful bool
+	}{
+		{name: "invalid root hidden present", root: "from view | where", body: "id", want: "not assessed"},
+		{name: "invalid root hidden missing", root: "from view | where", body: "missing", want: "not assessed"},
+		{name: "invalid root closure gap", root: "from view | where", body: "id", gap: true, want: "not assessed"},
+		{name: "invalid root without document", root: "from view | where", body: "id", withoutDocument: true, want: "not assessed"},
+		{name: "effective root invalid hidden missing", body: "missing", macro: true, want: "not assessed"},
+		{name: "effective root invalid closure gap", body: "id", macro: true, gap: true, want: "not assessed"},
+		{name: "effective root unassessable hidden missing", body: "missing", macro: true, unassessable: true, want: "not assessed"},
+		{name: "useful incomplete classic root hidden missing", body: "missing", macro: true, useful: true, want: "unsatisfied"},
+		{name: "useful incomplete classic root closure gap", body: "id", macro: true, useful: true, gap: true, want: "incomplete"},
+		{name: "valid root hidden missing", root: "from view | fields id", body: "missing", want: "unsatisfied"},
+		{name: "valid root closure gap", root: "from view | fields id", body: "id", gap: true, want: "incomplete"},
+		{name: "valid root without document", root: "from view | fields id", body: "id", withoutDocument: true, want: "incomplete"},
+		{name: "useful incomplete root hidden missing", root: "from view | where mystery(id)", body: "missing", want: "unsatisfied"},
+		{name: "useful incomplete root closure gap", root: "from view | where mystery(id)", body: "id", gap: true, want: "incomplete"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			r := definitionFixture(t)
+			bodyIndex := 2
+			bodyObjectID := "view"
+			if tc.macro {
+				r = closureFixture(t)
+				bodyIndex = 3
+				bodyObjectID = "daily"
+				r.Snapshot.Objects[2].Document.Text = "| where"
+				if tc.unassessable {
+					r.Snapshot.Objects[2].Document.Text = "| makeresults"
+				}
+				if tc.useful {
+					r.Snapshot.Objects[2].Document.Text = "search index=main"
+					r.Snapshot.Objects = append(r.Snapshot.Objects, environment.Object{ID: "main", Kind: "index", Name: "main", Provenance: r.Snapshot.Objects[0].Provenance})
+				}
+			} else {
+				doc := analysis.QueryDocument{Text: tc.root, Language: "spl2", SourceID: "root.spl"}
+				set, err := analysis.Requirements(doc)
+				if err != nil {
+					t.Fatal(err)
+				}
+				r.Requirements = *set
+				r.Document = &doc
+				if tc.withoutDocument {
+					r.Document = nil
+					r.InputBindings = r.InputBindings[1:]
+				}
+			}
+			r.Snapshot.Objects[bodyIndex].Document.Text = "from $events | fields " + tc.body
+			if tc.gap {
+				property := "/saved_search"
+				r.Snapshot.Objects[bodyIndex].Relations = []closure.Relation{{Kind: "saved_search", Name: "unrecorded", Property: &property}}
+			}
+			prepared, err := Prepare(r.Snapshot, r.SchemaBundle)
+			if err != nil {
+				t.Fatal(err)
+			}
+			checks := map[string]func() (*Report, error){"Check": func() (*Report, error) { return Check(r) }, "JSON": func() (*Report, error) { return CheckJSON(requestRaw(t, r)) }, "Prepared": func() (*Report, error) { return prepared.Check(r.assessment()) }}
+			for name, check := range checks {
+				t.Run(name, func(t *testing.T) {
+					report, err := check()
+					if err != nil {
+						t.Fatal(err)
+					}
+					if report.Outcome != tc.want {
+						effectiveStatus := report.Requirements.QueryStatus
+						if report.EffectiveRequirements != nil {
+							effectiveStatus = report.EffectiveRequirements.QueryStatus
+						}
+						t.Fatalf("root status=%s effective status=%s outcome=%s want=%s", report.Requirements.QueryStatus, effectiveStatus, report.Outcome, tc.want)
+					}
+					if !tc.withoutDocument {
+						active := report.EffectiveRequirements
+						if tc.unassessable && (active.QueryStatus != analysis.Incomplete || len(active.Inputs) != 0 || len(active.Items) != 0) {
+							t.Fatal("fixture did not establish an unassessable active root")
+						}
+						if tc.useful && (len(active.Inputs) == 0 || len(active.Items) == 0) {
+							t.Fatal("useful incomplete fixture has no trustworthy root obligations")
+						}
+						if tc.body == "missing" && !hasReason(report, "schema_field_missing") {
+							t.Fatal("hidden missing reason lost from report")
+						}
+						hidden := 0
+						for _, out := range report.RequirementOutcomes {
+							if out.DefinitionObjectID == bodyObjectID && out.FieldProjection != nil {
+								hidden++
+								want := "satisfied"
+								if tc.body == "missing" {
+									want = "missing"
+								}
+								if out.Outcome != want || len(out.SourceIntervals) == 0 || len(out.InvocationProvenance) == 0 {
+									t.Fatalf("hidden fact/provenance lost: %+v", out)
+								}
+							}
+						}
+						if hidden != 1 {
+							t.Fatal("hidden requirement fact absent")
+						}
+						if tc.gap && !hasReason(report, "dependency_closure_incomplete") {
+							t.Fatal("reachable closure gap reason lost")
+						}
+					} else if !hasReason(report, "dependency_closure_incomplete") {
+						t.Fatal("untraversed selected-body reason lost")
+					}
+				})
+			}
+			// Configuration admission still precedes the aggregate outcome.
+			if !tc.withoutDocument {
+				r.InputBindings = []InputBinding{}
+				for name, check := range checks {
+					t.Run(name+" missing binding", func(t *testing.T) {
+						_, err := check()
+						requireRequestError(t, err, "missing_input_binding", "/input_bindings")
+					})
+				}
+			}
+		})
 	}
 }
