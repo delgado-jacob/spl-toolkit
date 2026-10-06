@@ -57,13 +57,13 @@ func TestEnvironmentCLIAndHTTPParity(t *testing.T) {
 					t.Fatalf("complete source/sourcetype observation must retain unresolved warnings: %#v", want)
 				}
 			}
-			if tc.Name == "invalid" {
+			if tc.Name == "complete-absent-binding" {
 				found := false
 				for _, diagnostic := range want.Diagnostics {
-					found = found || diagnostic.Code == "binding_object_absent" && diagnostic.Severity == "error"
+					found = found || diagnostic.Code == "binding_object_absent" && diagnostic.Severity == "warning"
 				}
 				if !found {
-					t.Fatalf("configured absence must retain error semantics: %#v", want)
+					t.Fatalf("configured absence must retain warning evidence: %#v", want)
 				}
 			}
 			wantJSON, err := json.Marshal(want)

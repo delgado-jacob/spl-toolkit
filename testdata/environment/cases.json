@@ -58,8 +58,8 @@
     }
   },
   {
-    "name": "invalid",
-    "status": "invalid",
+    "name": "complete-absent-binding",
+    "status": "partial",
     "snapshot": {
       "schema_version": 1,
       "scope_id": "capture-a",

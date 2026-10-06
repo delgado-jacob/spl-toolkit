@@ -39,8 +39,15 @@ func Pair(snapshot *PreparedSnapshot, schemas *PreparedSchemaBundle) (*PreparedE
 		env.collections[collection.Kind] = collection
 	}
 	if schemas != nil {
+		expected := map[string]ObjectIdentity{}
 		for _, binding := range schemas.bundle.Bindings {
 			path := "/bindings"
+			if prior, found := expected[binding.ObjectID]; found && prior != binding.Expected {
+				report.Diagnostics = append(report.Diagnostics, Diagnostic{Code: "binding_identity_mismatch", Severity: "error", Artifact: "schema_bundle", Path: path, Message: fmt.Sprintf("object %q has contradictory expected binding identities", binding.ObjectID)})
+				report.Status = "invalid"
+				continue
+			}
+			expected[binding.ObjectID] = binding.Expected
 			if object, found := env.objects[binding.ObjectID]; found {
 				if !sameObjectIdentity(object, binding.Expected) {
 					report.Diagnostics = append(report.Diagnostics, Diagnostic{Code: "binding_identity_mismatch", Severity: "error", Artifact: "schema_bundle", Path: path, Message: fmt.Sprintf("object %q identity differs from schema %q binding", binding.ObjectID, binding.SchemaID)})
@@ -50,15 +57,15 @@ func Pair(snapshot *PreparedSnapshot, schemas *PreparedSchemaBundle) (*PreparedE
 				env.bindings[binding.ObjectID] = append(env.bindings[binding.ObjectID], binding)
 				continue
 			}
+			env.bindings[binding.ObjectID] = append(env.bindings[binding.ObjectID], binding)
 			collection, declared := env.collections[binding.Expected.Kind]
 			if bindingInScope(snapshot.snapshot.CaptureScope, binding.Expected) && declared && collection.Coverage == "complete" && !hasObservedAbsence(snapshot.snapshot, binding.Expected.Kind) {
-				report.Diagnostics = append(report.Diagnostics, Diagnostic{Code: "binding_object_absent", Severity: "error", Artifact: "schema_bundle", Path: path, Message: fmt.Sprintf("object %q is absent from complete %s collection", binding.ObjectID, binding.Expected.Kind)})
-				report.Status = "invalid"
+				report.Diagnostics = append(report.Diagnostics, Diagnostic{Code: "binding_object_absent", Severity: "warning", Artifact: "schema_bundle", Path: path, Message: fmt.Sprintf("object %q is absent from complete %s collection", binding.ObjectID, binding.Expected.Kind)})
 			} else {
 				report.Diagnostics = append(report.Diagnostics, Diagnostic{Code: "binding_unresolved", Severity: "warning", Artifact: "schema_bundle", Path: path, Message: fmt.Sprintf("object %q is not available in this snapshot", binding.ObjectID)})
-				if report.Status == "valid" {
-					report.Status = "partial"
-				}
+			}
+			if report.Status == "valid" {
+				report.Status = "partial"
 			}
 		}
 	}
@@ -135,13 +142,13 @@ func (p *PreparedEnvironment) boundTarget(objectID, schemaID string) (preparedBu
 	return preparedBundleTarget{}, false
 }
 
-// FieldCatalog returns the compiled field list for a resolved object binding.
+// FieldCatalog returns the compiled field list for a retained object binding.
 func (p *PreparedEnvironment) FieldCatalog(objectID, schemaID string) (*validation.PreparedFieldCatalog, bool) {
 	target, found := p.boundTarget(objectID, schemaID)
 	return target.field, found && target.field != nil
 }
 
-// SchemaTarget returns the compiled JSON Schema or OCSF target for a resolved object binding.
+// SchemaTarget returns the compiled JSON Schema or OCSF target for a retained object binding.
 func (p *PreparedEnvironment) SchemaTarget(objectID, schemaID string) (*validation.PreparedSchemaTarget, bool) {
 	target, found := p.boundTarget(objectID, schemaID)
 	return target.schema, found && target.schema != nil
@@ -153,4 +160,12 @@ func (p *PreparedEnvironment) Report() Report {
 		return Report{}
 	}
 	return copyEnvironmentReport(p.report)
+}
+
+// Snapshot returns a detached capture for scope, object, and capability assessment.
+func (p *PreparedEnvironment) Snapshot() Snapshot {
+	if p == nil || p.snapshot == nil {
+		return Snapshot{}
+	}
+	return p.snapshot.Snapshot()
 }

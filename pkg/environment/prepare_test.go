@@ -7,6 +7,8 @@ import (
 	"strings"
 	"sync"
 	"testing"
+
+	"github.com/delgado-jacob/spl-toolkit/pkg/analysis"
 )
 
 func preparedPairSnapshot(t *testing.T, name, definition string) *PreparedSnapshot {
@@ -94,6 +96,7 @@ func TestPairCoverageAndIsolation(t *testing.T) {
 				_, _ = env.Object("macro-a")
 				_ = env.Bindings("macro-a")
 				_ = env.Report()
+				_ = env.Snapshot()
 			}
 		}()
 	}
@@ -105,14 +108,14 @@ func TestPairCoverageAndIsolation(t *testing.T) {
 	}
 	missing, _, _ := PrepareSnapshot(value)
 	env, report, err = Pair(missing, bundle)
-	if err != nil || env != nil || report.Status != "invalid" || !hasDiagnostic(report, "binding_object_absent") {
+	if err != nil || env == nil || report.Status != "partial" || !hasDiagnostic(report, "binding_object_absent") {
 		t.Fatalf("complete absence: %v %#v", err, report)
 	}
 	for _, coverage := range []string{"partial", "unavailable"} {
 		value.Collections = []Collection{{Kind: "macro", Coverage: coverage, Reason: "limited"}}
 		missing, _, _ = PrepareSnapshot(value)
 		env, report, err = Pair(missing, bundle)
-		if err != nil || env == nil || report.Status != "partial" || !hasDiagnostic(report, "binding_unresolved") || len(env.Bindings("macro-a")) != 0 {
+		if err != nil || env == nil || report.Status != "partial" || !hasDiagnostic(report, "binding_unresolved") || len(env.Bindings("macro-a")) != 2 {
 			t.Fatalf("%s absence: %v %#v", coverage, err, report)
 		}
 	}
@@ -173,7 +176,7 @@ func TestPairRetainsValidBindingsAndValidationSurfaces(t *testing.T) {
 		t.Fatal(err)
 	}
 	env, report, err := Pair(partialSnapshot, prepared)
-	if err != nil || env == nil || report.Status != "partial" || len(env.Bindings("macro-a")) != 1 || len(env.Bindings("missing")) != 0 {
+	if err != nil || env == nil || report.Status != "partial" || len(env.Bindings("macro-a")) != 1 || len(env.Bindings("missing")) != 1 {
 		t.Fatalf("valid binding lost with unresolved neighbor: %v %#v", err, report)
 	}
 	if got := env.Report(); got.Status != "partial" || got.SchemaBundleDigest == "" || got.SnapshotDigest == "" {
@@ -208,7 +211,7 @@ func TestPairLinkageDiagnosticsUseStableBindingPath(t *testing.T) {
 	}
 	snapshot := snapshotFixture()
 	first, err := ValidateArtifacts(fixtureRaw(t, snapshot), fixtureRaw(t, bundle))
-	if err != nil || first.Status != "invalid" {
+	if err != nil || first.Status != "partial" {
 		t.Fatalf("first report: %v %#v", err, first)
 	}
 	linkages := 0
@@ -229,7 +232,7 @@ func TestPairLinkageDiagnosticsUseStableBindingPath(t *testing.T) {
 		t.Fatalf("binding order changed report: %v\nfirst=%#v\nsecond=%#v", err, first, second)
 	}
 	formatted := FormatReport(first)
-	for _, expected := range []string{"Status: invalid", "Snapshot digest: sha256:", "Schema bundle digest: sha256:", "Coverage: schema_bundle macro", "binding_object_absent"} {
+	for _, expected := range []string{"Status: partial", "Snapshot digest: sha256:", "Schema bundle digest: sha256:", "Coverage: schema_bundle macro", "binding_object_absent"} {
 		if !strings.Contains(formatted, expected) {
 			t.Fatalf("plain report omitted %q: %s", expected, formatted)
 		}
@@ -263,17 +266,17 @@ func TestPairObservedAbsence(t *testing.T) {
 					if err != nil || env == nil || report.Status != "partial" || !hasDiagnostic(report, "binding_unresolved") || hasDiagnostic(report, "binding_object_absent") {
 						t.Fatalf("observed absence must stay unresolved: %v %#v", err, report)
 					}
-					if len(env.Bindings("missing")) != 0 {
-						t.Fatal("unobserved object received bindings")
+					if len(env.Bindings("missing")) != 2 {
+						t.Fatal("unobserved object lost bindings")
 					}
-					if target, ok := env.FieldCatalog("missing", "fields"); ok || target != nil {
-						t.Fatal("unobserved object exposed a field catalog")
+					if target, ok := env.FieldCatalog("missing", "fields"); !ok || target == nil {
+						t.Fatal("unobserved object lost field catalog")
 					}
-					if target, ok := env.SchemaTarget("missing", "closed"); ok || target != nil {
-						t.Fatal("unobserved object exposed a schema target")
+					if target, ok := env.SchemaTarget("missing", "closed"); !ok || target == nil {
+						t.Fatal("unobserved object lost schema target")
 					}
-				} else if err != nil || env != nil || report.Status != "invalid" || !hasDiagnostic(report, "binding_object_absent") {
-					t.Fatalf("complete catalog absence must stay invalid: %v %#v", err, report)
+				} else if err != nil || env == nil || report.Status != "partial" || !hasDiagnostic(report, "binding_object_absent") {
+					t.Fatalf("complete catalog absence must remain usable: %v %#v", err, report)
 				}
 				if report.SchemaVersion != 1 || report.SnapshotDigest != snapshotReport.SnapshotDigest || report.SchemaBundleDigest != bundleReport.SchemaBundleDigest {
 					t.Fatalf("pair report changed artifact identities: %#v", report)
@@ -375,5 +378,120 @@ func TestPairReusesSchemaBundleAcrossSnapshotVersions(t *testing.T) {
 				t.Fatalf("same ID with wrong identity accepted: %v %#v", err, report)
 			}
 		})
+	}
+}
+
+func TestPairAbsentBindingsRetainIndependentTargets(t *testing.T) {
+	bundle := preparedPairBundle(t)
+	var value Snapshot
+	if err := json.Unmarshal(fixtureRaw(t, snapshotFixture()), &value); err != nil {
+		t.Fatal(err)
+	}
+	for _, coverage := range []string{"complete", "partial"} {
+		if coverage == "partial" {
+			value.Collections = []Collection{{Kind: "macro", Coverage: "partial", Reason: "sampled"}}
+		}
+		snapshot, _, err := PrepareSnapshot(value)
+		if err != nil {
+			t.Fatal(err)
+		}
+		for i := 0; i < 2; i++ {
+			env, report, err := Pair(snapshot, bundle)
+			if err != nil || env == nil || report.Status != "partial" || len(env.Bindings("macro-a")) != 2 {
+				t.Fatalf("%s: %v %#v", coverage, err, report)
+			}
+			if _, found := env.Object("macro-a"); found {
+				t.Fatal("schema binding invented an object")
+			}
+			fields, found := env.FieldCatalog("macro-a", "fields")
+			if !found || fields == nil {
+				t.Fatal("absent field catalog lost")
+			}
+			target, found := env.SchemaTarget("macro-a", "closed")
+			if !found || target == nil {
+				t.Fatal("absent schema target lost")
+			}
+			field := analysis.FieldIdentity{Kind: "atomic", Segments: []string{"host"}}
+			if got, err := fields.ProjectField(field); err != nil || got.Outcome != "required" {
+				t.Fatalf("absent object's selected catalog: %+v %v", got, err)
+			}
+			if got, err := target.ProjectField(field); err != nil || got.Outcome != "optional" {
+				t.Fatalf("absent object's selected schema: %+v %v", got, err)
+			}
+			if _, found := env.FieldCatalog("macro-a", "closed"); found {
+				t.Fatal("independent target kinds mixed")
+			}
+			copy := env.Snapshot()
+			*copy.CaptureScope.Namespace.All = false
+			if again := env.Snapshot(); !*again.CaptureScope.Namespace.All {
+				t.Fatal("snapshot accessor aliases prepared state")
+			}
+		}
+	}
+	conflicting := bundle.Bundle()
+	conflicting.Bindings[1].Expected.Name = "contradiction"
+	prepared, report, err := PrepareSchemaBundle(conflicting)
+	if err != nil || prepared == nil {
+		t.Fatalf("structurally valid bundle: %v %#v", err, report)
+	}
+	for _, coverage := range []string{"complete", "partial"} {
+		value.Collections = []Collection{{Kind: "macro", Coverage: coverage}}
+		if coverage == "partial" {
+			value.Collections[0].Reason = "limited"
+		}
+		snapshot, _, _ := PrepareSnapshot(value)
+		env, report, err := Pair(snapshot, prepared)
+		if err != nil || env != nil || report.Status != "invalid" || !hasDiagnostic(report, "binding_identity_mismatch") {
+			t.Fatalf("%s contradictory absent identities: %v %#v", coverage, err, report)
+		}
+	}
+}
+
+func TestPreparedEnvironmentSnapshotDetachedObservation(t *testing.T) {
+	value := observedFixture(t)
+	snapshot, report, err := PrepareSnapshot(value)
+	if err != nil || snapshot == nil {
+		t.Fatalf("snapshot: %v %#v", err, report)
+	}
+	env, report, err := Pair(snapshot, nil)
+	if err != nil || env == nil {
+		t.Fatalf("pair: %v %#v", err, report)
+	}
+	want := env.Snapshot()
+	copy := env.Snapshot()
+	*copy.CaptureScope.Namespace.All = false
+	copy.Objects[0].Name = "changed"
+	copy.Collections[0].Kind = "changed"
+	copy.Observation.Indexes[0].CatalogDatatypes[0] = "changed"
+	copy.Observation.Captures[1].ObjectIDs[0] = "changed"
+	if got := env.Snapshot(); !reflect.DeepEqual(want, got) {
+		t.Fatal("paired snapshot aliases observation or capture state")
+	}
+	var empty *PreparedEnvironment
+	if got := empty.Snapshot(); got.SchemaVersion != 0 {
+		t.Fatalf("nil accessor: %+v", got)
+	}
+}
+
+func TestPairCompleteCoverageDoesNotCloseProjection(t *testing.T) {
+	snapshot := preparedPairSnapshot(t, "first", "x=1")
+	bundle := bundleFixture(t)
+	bundle.Schemas = bundle.Schemas[2:3]
+	bundle.Bindings = []SchemaBinding{{SchemaID: "open", ObjectID: "macro-a", Expected: ObjectIdentity{Kind: "macro", Name: "first", Namespace: "search", App: "main", Owner: "nobody"}, SourceCoverage: "complete"}}
+	prepared, report, err := PrepareSchemaBundle(bundle)
+	if err != nil || prepared == nil {
+		t.Fatalf("bundle: %v %#v", err, report)
+	}
+	env, report, err := Pair(snapshot, prepared)
+	if err != nil || env == nil || report.Status != "valid" {
+		t.Fatalf("pair: %v %#v", err, report)
+	}
+	target, found := env.SchemaTarget("macro-a", "open")
+	if !found {
+		t.Fatal("missing selected target")
+	}
+	got, err := target.ProjectField(analysis.FieldIdentity{Kind: "path", Segments: []string{"unlisted", "child"}})
+	if err != nil || got.Admission != analysis.SourceFieldIndeterminate {
+		t.Fatalf("complete source coverage closed an open schema: %+v %v", got, err)
 	}
 }

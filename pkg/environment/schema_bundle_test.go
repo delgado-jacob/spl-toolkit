@@ -181,7 +181,7 @@ func TestSchemaBundleArtifactValidation(t *testing.T) {
 		t.Fatalf("standalone: %v %#v", err, standalone)
 	}
 	combined, err := ValidateArtifacts(snapshot, bundle)
-	if err != nil || combined.Status != "invalid" || !hasDiagnostic(combined, "binding_object_absent") || combined.SnapshotDigest == "" || combined.SchemaBundleDigest != standalone.SchemaBundleDigest {
+	if err != nil || combined.Status != "partial" || !hasDiagnostic(combined, "binding_object_absent") || combined.SnapshotDigest == "" || combined.SchemaBundleDigest != standalone.SchemaBundleDigest {
 		t.Fatalf("combined: %v %#v", err, combined)
 	}
 	inline, err := ValidateJSON(fixtureRaw(t, map[string]any{"schema_version": 1, "schema_bundle": json.RawMessage(bundle)}))

@@ -101,8 +101,8 @@ func TestPairedTargetsReuseAcrossDocuments(t *testing.T) {
 	if _, ok := paired.SchemaTarget("source-a", "events-fields"); ok {
 		t.Fatal("field catalog returned as schema target")
 	}
-	if _, ok := paired.SchemaTarget("missing", "closed"); ok {
-		t.Fatal("unresolved binding returned a target")
+	if _, ok := paired.SchemaTarget("missing", "closed"); !ok {
+		t.Fatal("unresolved binding lost its selected target")
 	}
 	if _, ok := paired.SchemaTarget("other", "closed"); ok {
 		t.Fatal("unbound object returned a target")
@@ -149,8 +149,8 @@ func TestPairedTargetsReuseAcrossDocuments(t *testing.T) {
 			if !fieldsOK || observedFields != fields || !schemaOK || observedClosed != closed {
 				t.Fatal("same v1 bundle lost reusable targets for a v2 captured identity")
 			}
-		} else if fieldsOK || observedFields != nil || schemaOK || observedClosed != nil || len(observedEnvironment.Bindings("source-a")) != 0 {
-			t.Fatal("schemas proved presence of an unobserved sourcetype")
+		} else if !fieldsOK || observedFields != fields || !schemaOK || observedClosed != closed || len(observedEnvironment.Bindings("source-a")) != 3 {
+			t.Fatal("unobserved sourcetype lost independently supplied schema declarations")
 		}
 	}
 }

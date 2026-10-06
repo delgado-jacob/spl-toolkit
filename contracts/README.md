@@ -149,7 +149,17 @@ from configured knowledge-object inventory. Its observation records selected
 indexes, event/metric datatype attempts, exporting-principal visibility, and
 bucket-overlap time bounds. Complete observed capture means a missing source or
 sourcetype was not observed; an absent binding remains an unresolved warning.
-Configured collection absence retains its existing semantics.
+Pre-release pairing correction: conclusive absence from a complete configured
+collection emits `binding_object_absent` as a warning and makes the pairing
+`partial`, rather than rejecting a structurally valid schema binding. Both known
+absence and unresolved absence retain their selected compiled schema targets;
+these declarations do not establish object presence. Captured identity mismatch
+or contradictory expected identities for the same object ID remain invalid.
+Typed field projection distinguishes an atomic dotted name from a structural
+path. Flat field lists cannot establish a multi-segment path. Optional field
+declarations establish schema membership without proving runtime event presence;
+open allowance, conditional membership, and unsupported or exhausted projection
+remain indeterminate for compatibility even with complete source coverage.
 
 The exporter acquisition report has its own version 1 schema and embeds the v2
 observation with fixed v1 origin/capture references. The

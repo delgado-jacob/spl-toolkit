@@ -33,13 +33,19 @@ func (p *ocsfTarget) evidence(m SchemaClass, pointer, keyword, basis, requiremen
 	return SchemaEvidence{ResourceURI: "urn:ocsf:" + p.catalog.Version, Pointer: pointer, Keyword: keyword, ClassKey: m.Key, ClassUID: &uid, DeclarationBasis: basis, Requirement: requirement, Reason: reason}
 }
 func (p *ocsfTarget) project(name string) fieldProjection {
+	return p.projectMembers(func(m SchemaClass, budget *int) fieldProjection { return p.projectClass(name, m, budget) })
+}
+func (p *ocsfTarget) projectTyped(parts []string) fieldProjection {
+	return p.projectMembers(func(m SchemaClass, budget *int) fieldProjection { return p.projectClassPath(parts, m, budget, true) })
+}
+func (p *ocsfTarget) projectMembers(project func(SchemaClass, *int) fieldProjection) fieldProjection {
 	result := newProjection(analysis.SourceFieldProhibited, "missing")
 	allRequired := true
 	anyUnspecified := false
 	unknownRequirement := false
 	budget := schemaProjectionBudget
 	for _, m := range p.members {
-		got := p.projectClass(name, m, &budget)
+		got := project(m, &budget)
 		result.Evidence = append(result.Evidence, got.Evidence...)
 		switch got.Admission {
 		case analysis.SourceFieldAdmitted:
@@ -75,15 +81,17 @@ func (p *ocsfTarget) project(name string) fieldProjection {
 	return result
 }
 func (p *ocsfTarget) projectClass(name string, m SchemaClass, budget *int) fieldProjection {
+	parts := strings.Split(name, ".")
+	if !validSchemaName(name) || len(parts) > schemaPathSegmentBudget {
+		return newProjection(analysis.SourceFieldIndeterminate, "indeterminate", p.evidence(m, "/classes/"+ocsfPointerName(m.Key), "attributes", "unknown", "unknown", "traversal_budget"))
+	}
+	return p.projectClassPath(parts, m, budget, false)
+}
+func (p *ocsfTarget) projectClassPath(parts []string, m SchemaClass, budget *int, typed bool) fieldProjection {
 	node := p.catalog.Classes[m.Key]
 	pointer := "/classes/" + ocsfPointerName(m.Key)
 	ev := []SchemaEvidence{}
 	finish := func(a analysis.SourceFieldAdmission, out string) fieldProjection { return newProjection(a, out, ev...) }
-	parts := strings.Split(name, ".")
-	if !validSchemaName(name) || len(parts) > schemaPathSegmentBudget {
-		ev = append(ev, p.evidence(m, pointer, "attributes", "unknown", "unknown", "traversal_budget"))
-		return finish(analysis.SourceFieldIndeterminate, "indeterminate")
-	}
 	// 0 optional, 1 required, 2 unknown requiredness. Admission is independent.
 	requirement := 1
 	forcedThrough := 0
@@ -95,27 +103,36 @@ func (p *ocsfTarget) projectClass(name string, m SchemaClass, budget *int) field
 		*budget--
 		part := parts[i]
 		advance := 1
-		remaining := strings.Join(parts[i:], ".")
-		forced, unknown, constraintEv := p.constraintFacts(node, remaining, m, pointer)
-		ev = append(ev, constraintEv...)
-		if forced > 0 && i+forced > forcedThrough {
-			forcedThrough = i + forced
-		}
-		// A compiled attribute key is an exact declaration, including literal
-		// dots. Multiple possible structural segmentations remain indeterminate.
-		candidates := []string{}
-		for key := range node.Attributes {
-			if remaining == key || strings.HasPrefix(remaining, key+".") {
-				candidates = append(candidates, key)
+		var forced int
+		var unknown bool
+		var constraintEv []SchemaEvidence
+		if typed {
+			forced, unknown, constraintEv = p.constraintFactsTyped(node, parts[i:], m, pointer, budget)
+		} else {
+			remaining := strings.Join(parts[i:], ".")
+			forced, unknown, constraintEv = p.constraintFacts(node, remaining, m, pointer)
+			ev = append(ev, constraintEv...)
+			// Legacy string validation explores alternate dotted declarations.
+			candidates := []string{}
+			for key := range node.Attributes {
+				if remaining == key || strings.HasPrefix(remaining, key+".") {
+					candidates = append(candidates, key)
+				}
+			}
+			if len(candidates) > 1 {
+				ev = append(ev, p.evidence(m, pointer, "attributes", "unknown", "unknown", "literal_path_collision"))
+				return finish(analysis.SourceFieldIndeterminate, "indeterminate")
+			}
+			if len(candidates) == 1 {
+				part = candidates[0]
+				advance = len(strings.Split(part, "."))
 			}
 		}
-		if len(candidates) > 1 {
-			ev = append(ev, p.evidence(m, pointer, "attributes", "unknown", "unknown", "literal_path_collision"))
-			return finish(analysis.SourceFieldIndeterminate, "indeterminate")
+		if typed {
+			ev = append(ev, constraintEv...)
 		}
-		if len(candidates) == 1 {
-			part = candidates[0]
-			advance = len(strings.Split(part, "."))
+		if forced > 0 && i+forced > forcedThrough {
+			forcedThrough = i + forced
 		}
 		a, ok := node.Attributes[part]
 		if !ok {
@@ -251,4 +268,92 @@ func (p *ocsfTarget) constraintPathSupported(n ocsfNode, path, class string) boo
 		n = p.catalog.Objects[a.ObjectType]
 	}
 	return false
+}
+
+// A constraint's flat spelling can prove a typed structural path only when
+// no literal dotted declaration or typed segment makes that spelling ambiguous.
+func (p *ocsfTarget) constraintFactsTyped(n ocsfNode, path []string, m SchemaClass, pointer string, budget *int) (int, bool, []SchemaEvidence) {
+	forced, unknown := 0, false
+	ev := []SchemaEvidence{}
+	for _, operator := range sortedKeys(n.Constraints) {
+		if *budget <= 0 {
+			return forced, true, append(ev, p.evidence(m, pointer, "constraints", "unknown", "unknown", "traversal_budget"))
+		}
+		*budget--
+		var names []string
+		parsed := json.Unmarshal(n.Constraints[operator], &names) == nil && len(names) > 0
+		relevant, ambiguous := !parsed, false
+		for _, name := range names {
+			if *budget <= 0 {
+				return forced, true, append(ev, p.evidence(m, pointer, "constraints", "unknown", "unknown", "traversal_budget"))
+			}
+			*budget--
+			if !constraintSpellingRelates(path, name) {
+				continue
+			}
+			relevant = true
+			for _, segment := range path {
+				ambiguous = ambiguous || strings.Contains(segment, ".")
+			}
+			node, remaining := n, name
+			for {
+				// Check prefixes of the constraint spelling for literal declarations;
+				// never reinterpret the supplied typed field segments.
+				for offset := 0; offset < len(remaining); {
+					if *budget <= 0 {
+						return forced, true, append(ev, p.evidence(m, pointer, "constraints", "unknown", "unknown", "traversal_budget"))
+					}
+					*budget--
+					next := strings.IndexByte(remaining[offset:], '.')
+					if next < 0 {
+						next = len(remaining)
+					} else {
+						next += offset
+					}
+					key := remaining[:next]
+					if strings.Contains(key, ".") {
+						if _, found := node.Attributes[key]; found {
+							ambiguous = true
+						}
+					}
+					offset = next + 1
+				}
+				part, rest, more := strings.Cut(remaining, ".")
+				a, found := node.Attributes[part]
+				if !more || !found || a.Type != "object_t" || a.IsArray || a.ObjectType == "object" {
+					break
+				}
+				node, remaining = p.catalog.Objects[a.ObjectType], rest
+			}
+		}
+		if !relevant {
+			continue
+		}
+		requirement, reason := "unknown", ""
+		supported := parsed && (operator == "at_least_one" || operator == "just_one") && !ambiguous
+		if !supported {
+			unknown = true
+			reason = "ocsf_constraint"
+		} else if len(names) == 1 && p.constraintPathSupported(n, names[0], m.Key) {
+			forced = max(forced, len(strings.Split(names[0], ".")))
+			requirement = "required"
+		}
+		e := p.evidence(m, pointer+"/constraints/"+ocsfPointerName(operator), "constraints", "ocsf_attribute", requirement, reason)
+		e.Operator = operator
+		ev = append(ev, e)
+	}
+	return forced, unknown, ev
+}
+
+func constraintSpellingRelates(path []string, name string) bool {
+	for _, segment := range path {
+		if name == segment || (strings.Contains(name, ".") && strings.HasPrefix(segment, name+".")) {
+			return true
+		}
+		if !strings.HasPrefix(name, segment+".") {
+			return false
+		}
+		name = name[len(segment)+1:]
+	}
+	return true
 }
