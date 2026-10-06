@@ -111,6 +111,7 @@ type projectionState struct {
 	path string
 }
 type projectionContext struct {
+	declarationOnly bool
 	active          map[projectionState]bool
 	seen            map[projectionState]bool
 	memo            map[projectionState]fieldProjection
@@ -176,6 +177,16 @@ func (p *jsonSchemaTarget) projectInterpretation(path []string, ctx *projectionC
 	result := p.walk(p.root, path, ctx)
 	if result.Admission == analysis.SourceFieldAdmitted {
 		facts := p.requirementFacts(p.root, path, ctx, map[projectionState]bool{})
+		if ctx.declarationOnly {
+			for _, fact := range facts {
+				if !fact.declared {
+					result.Admission = analysis.SourceFieldIndeterminate
+					result.Outcome = "indeterminate"
+					result.Evidence = append(result.Evidence, schemaEv(p.root, "properties", "unknown", "unknown", "undeclared_path"))
+					return result
+				}
+			}
+		}
 		allRequired, allObjects := true, true
 		for _, fact := range facts {
 			allRequired = allRequired && fact.required
@@ -615,8 +626,9 @@ var _ preparedSchemaTarget = (*jsonSchemaTarget)(nil)
 
 // Requirement facts combine per path level rather than flattening declarations.
 // Conjunction can supply required and object facts from different sibling schemas;
-// alternatives retain only common facts. This is presence projection, not a solver.
-type schemaRequirementFact struct{ required, object bool }
+// alternatives retain only common facts. Declaration facts distinguish complete typed
+// paths from additional-property allowances without changing legacy presence projection.
+type schemaRequirementFact struct{ required, object, declared bool }
 
 func schemaObjectOnly(n *schemaNode) bool {
 	v := n.object["type"]
@@ -660,13 +672,16 @@ func (p *jsonSchemaTarget) requirementFacts(n *schemaNode, path []string, ctx *p
 			facts[0].required = facts[0].required || v == path[0]
 		}
 	}
+	facts[0].declared = facts[0].required
 	merge := func(other []schemaRequirementFact) {
 		for i, v := range other {
 			facts[i].required = facts[i].required || v.required
 			facts[i].object = facts[i].object || v.object
+			facts[i].declared = facts[i].declared || v.declared
 		}
 	}
 	if child := n.children["properties/"+pointerEscape(path[0])]; child != nil {
+		facts[0].declared = true
 		copy(facts[1:], p.requirementFacts(child, path[1:], ctx, active))
 	}
 	matchedOrUnknown := n.children["properties/"+pointerEscape(path[0])] != nil
@@ -681,10 +696,12 @@ func (p *jsonSchemaTarget) requirementFacts(n *schemaNode, path []string, ctx *p
 	}
 	for _, pattern := range sortedKeys(n.patterns) {
 		if match, known := n.patterns[pattern].match(path[0]); known && match {
+			facts[0].declared = true
 			child := p.requirementFacts(n.children["patternProperties/"+pointerEscape(pattern)], path[1:], ctx, active)
 			for i, v := range child {
 				facts[i+1].required = facts[i+1].required || v.required
 				facts[i+1].object = facts[i+1].object || v.object
+				facts[i+1].declared = facts[i+1].declared || v.declared
 			}
 		}
 	}
@@ -704,6 +721,7 @@ func (p *jsonSchemaTarget) requirementFacts(n *schemaNode, path []string, ctx *p
 					for j := range common {
 						common[j].required = common[j].required && v[j].required
 						common[j].object = common[j].object && v[j].object
+						common[j].declared = common[j].declared && v[j].declared
 					}
 				}
 			}

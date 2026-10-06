@@ -85,7 +85,7 @@ func (p *PreparedSchemaTarget) ProjectField(field analysis.FieldIdentity) (Field
 	var value fieldProjection
 	switch target := p.target.(type) {
 	case *jsonSchemaTarget:
-		value = target.projectInterpretation(field.Segments, &projectionContext{active: map[projectionState]bool{}, seen: map[projectionState]bool{}})
+		value = target.projectInterpretation(field.Segments, &projectionContext{declarationOnly: true, active: map[projectionState]bool{}, seen: map[projectionState]bool{}})
 	case *ocsfTarget:
 		value = target.projectTyped(field.Segments)
 	default:

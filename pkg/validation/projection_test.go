@@ -274,3 +274,59 @@ func TestProjectionConditionalAndBoundedOCSF(t *testing.T) {
 		t.Fatalf("constraint budget: %+v %v", got, err)
 	}
 }
+
+func TestProjectionJSONWholePathDeclaration(t *testing.T) {
+	for _, c := range []struct {
+		name, schema, outcome string
+		admission             analysis.SourceFieldAdmission
+	}{
+		{"true ancestor", `{"type":"object","properties":{"actor":true},"additionalProperties":false}`, "indeterminate", analysis.SourceFieldIndeterminate},
+		{"open required ancestor", `{"type":"object","properties":{"actor":{"type":"object","additionalProperties":true}},"required":["actor"],"additionalProperties":false}`, "indeterminate", analysis.SourceFieldIndeterminate},
+		{"schema additional property", `{"type":"object","properties":{"actor":{"type":"object","additionalProperties":{"type":"string"}}},"additionalProperties":false}`, "indeterminate", analysis.SourceFieldIndeterminate},
+		{"explicit true leaf", `{"type":"object","properties":{"actor":{"type":"object","properties":{"name":true},"additionalProperties":false}},"additionalProperties":false}`, "optional", analysis.SourceFieldAdmitted},
+		{"generic conjunction with declaration", `{"allOf":[{"type":"object","properties":{"actor":true}},{"type":"object","properties":{"actor":{"type":"object","properties":{"name":true}}}}]}`, "optional", analysis.SourceFieldAdmitted},
+		{"conjunctive prefix and descendant", `{"allOf":[{"type":"object","properties":{"actor":true}},{"type":"object","additionalProperties":{"type":"object","properties":{"name":true}}}]}`, "optional", analysis.SourceFieldAdmitted},
+		{"pattern declaration", `{"type":"object","patternProperties":{"^actor$":{"type":"object","patternProperties":{"^name$":true},"additionalProperties":false}},"additionalProperties":false}`, "optional", analysis.SourceFieldAdmitted},
+		{"resolved declaration", `{"$defs":{"actor":{"type":"object","properties":{"name":true},"additionalProperties":false}},"type":"object","properties":{"actor":{"$ref":"#/$defs/actor"}},"additionalProperties":false}`, "optional", analysis.SourceFieldAdmitted},
+		{"unresolved ancestor", `{"type":"object","properties":{"actor":{"$ref":"urn:missing"}},"additionalProperties":false}`, "indeterminate", analysis.SourceFieldIndeterminate},
+		{"alternative generic ancestor", `{"anyOf":[{"type":"object","properties":{"actor":true}},{"type":"object","properties":{"actor":{"type":"object","properties":{"name":true}}}}]}`, "indeterminate", analysis.SourceFieldIndeterminate},
+		{"common alternative declarations", `{"anyOf":[{"type":"object","properties":{"actor":{"type":"object","properties":{"name":true}}}},{"type":"object","properties":{"actor":{"type":"object","properties":{"name":{"type":"string"}}}}}]}`, "optional", analysis.SourceFieldAdmitted},
+		{"recursive ancestor", `{"$defs":{"actor":{"$ref":"#/$defs/actor"}},"type":"object","properties":{"actor":{"$ref":"#/$defs/actor"}}}`, "indeterminate", analysis.SourceFieldIndeterminate},
+		{"unsupported leaf pattern", `{"type":"object","properties":{"actor":{"type":"object","patternProperties":{"(?=name)name":true},"additionalProperties":false}}}`, "indeterminate", analysis.SourceFieldIndeterminate},
+		{"required-only leaf", `{"type":"object","properties":{"actor":{"type":"object","required":["name"]}},"required":["actor"]}`, "required", analysis.SourceFieldAdmitted},
+		{"undeclared ancestor", `{"type":"object","additionalProperties":{"type":"object","properties":{"name":true}}}`, "indeterminate", analysis.SourceFieldIndeterminate},
+	} {
+		t.Run(c.name, func(t *testing.T) {
+			p, err := PrepareSchemaTarget(SchemaTarget{Kind: "json_schema", Schema: json.RawMessage(c.schema)})
+			if err != nil {
+				t.Fatal(err)
+			}
+			got, err := p.ProjectField(typedField("path", "actor", "name"))
+			if err != nil || got.Outcome != c.outcome || got.Admission != c.admission {
+				t.Fatalf("projection: %+v %v", got, err)
+			}
+		})
+	}
+}
+
+func TestProjectionJSONDeepDeclaration(t *testing.T) {
+	for _, declared := range []bool{false, true} {
+		child := any(true)
+		if declared {
+			child = map[string]any{"type": "object", "properties": map[string]any{"name": true}, "additionalProperties": false}
+		}
+		raw, _ := json.Marshal(map[string]any{"type": "object", "properties": map[string]any{"actor": map[string]any{"type": "object", "properties": map[string]any{"user": child}, "additionalProperties": false}}, "additionalProperties": false})
+		p, err := PrepareSchemaTarget(SchemaTarget{Kind: "json_schema", Schema: raw})
+		if err != nil {
+			t.Fatal(err)
+		}
+		got, err := p.ProjectField(typedField("path", "actor", "user", "name"))
+		want := analysis.SourceFieldIndeterminate
+		if declared {
+			want = analysis.SourceFieldAdmitted
+		}
+		if err != nil || got.Admission != want {
+			t.Fatalf("declared %v: %+v %v", declared, got, err)
+		}
+	}
+}
