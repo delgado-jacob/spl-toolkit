@@ -405,13 +405,8 @@ func ValidateArtifacts(snapshotJSON, schemaBundleJSON []byte) (*Report, error) {
 	var preparedSnapshot *PreparedSnapshot
 	var preparedBundle *PreparedSchemaBundle
 	if snapshotJSON != nil {
-		var snapshot Snapshot
-		var part *Report
-		if err := decodeStrictJSON(snapshotJSON, &snapshot); err != nil {
-			_, part, _ = invalidSnapshot("", err)
-		} else if err := validateSnapshotRawShape(snapshotJSON); err != nil {
-			_, part, _ = invalidSnapshot("", err)
-		} else {
+		snapshot, part := DecodeSnapshot(snapshotJSON)
+		if part == nil {
 			prepared, preparedReport, prepareErr := PrepareSnapshot(snapshot)
 			if prepareErr != nil {
 				return nil, prepareErr
@@ -422,13 +417,8 @@ func ValidateArtifacts(snapshotJSON, schemaBundleJSON []byte) (*Report, error) {
 		mergeEnvironmentReport(report, part)
 	}
 	if schemaBundleJSON != nil {
-		var bundle SchemaBundle
-		var part *Report
-		if err := decodeStrictJSON(schemaBundleJSON, &bundle); err != nil {
-			_, part, _ = invalidSchemaBundle("", err)
-		} else if err := validateSchemaBundleRawShape(schemaBundleJSON); err != nil {
-			_, part, _ = invalidSchemaBundle("", err)
-		} else {
+		bundle, part := DecodeSchemaBundle(schemaBundleJSON)
+		if part == nil {
 			prepared, preparedReport, prepareErr := PrepareSchemaBundle(bundle)
 			if prepareErr != nil {
 				return nil, prepareErr
