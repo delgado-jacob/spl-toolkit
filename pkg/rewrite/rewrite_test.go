@@ -108,21 +108,32 @@ func explicitAliasReport(mode Mode) *Result {
 	}
 	analyses := make([]*analysis.Result, 2)
 	for i, expected := range []struct {
-		text, name, digest string
-		ends               [3]int
-		starts             [3]int
-		refs               [4][2]int
+		text, name, digest, occurrenceID string
+		ends                             [3]int
+		starts                           [3]int
+		refs                             [4][2]int
 	}{
-		{"search src=x | stats sum(src) AS total | table total", "src", "sha256:bf7f94f7e98b4ee7bdd32070fa2f2738ebb75df11ceb5bd9ade0a30d64fae951", [3]int{12, 38, 52}, [3]int{0, 15, 41}, [4][2]int{{7, 10}, {25, 28}, {33, 38}, {47, 52}}},
-		{"search user=x | stats sum(user) AS total | table total", "user", "sha256:40e312d04c889b1fb1e8ef4f8996b5efe32606abd72ced915c8c0c3c15ee678b", [3]int{13, 40, 54}, [3]int{0, 16, 43}, [4][2]int{{7, 11}, {26, 30}, {35, 40}, {49, 54}}},
+		{"search src=x | stats sum(src) AS total | table total", "src", "sha256:bf7f94f7e98b4ee7bdd32070fa2f2738ebb75df11ceb5bd9ade0a30d64fae951", "occurrence-862788894b8ddd910878e0f0be056b5b38b080ae0f4c545ad295e2a84eb4dfeb", [3]int{12, 38, 52}, [3]int{0, 15, 41}, [4][2]int{{7, 10}, {25, 28}, {33, 38}, {47, 52}}},
+		{"search user=x | stats sum(user) AS total | table total", "user", "sha256:40e312d04c889b1fb1e8ef4f8996b5efe32606abd72ced915c8c0c3c15ee678b", "occurrence-e8f4996ab87fb6f425202267b10e626024ec70c9c4b3d463e401398d5939c6e2", [3]int{13, 40, 54}, [3]int{0, 16, 43}, [4][2]int{{7, 11}, {26, 30}, {35, 40}, {49, 54}}},
 	} {
 		identity := func(name string) *analysis.FieldIdentity {
 			return &analysis.FieldIdentity{Kind: "atomic", Segments: []string{name}}
 		}
+		// Both source reads belong to the one implicit stream established by search.
+		// Renaming src leaves that logical input unchanged, but moves its occurrence
+		// end from byte 12 to 13. The derived total adds no external input or edge.
+		const inputID = "input-8768c9c38cb771adfebcb7c59b03a4c9d6075ab5f537fa63f9b66c95ef49dfe2"
+		complete := analysis.InputCoverage{State: "complete", Reasons: []analysis.InputReason{}}
+		inputs := []analysis.QueryInput{{ID: inputID, Kind: "implicit_stream", Identity: analysis.InputIdentity{Form: "implicit"}, Evidence: complete,
+			Occurrences: []analysis.InputOccurrence{{ID: expected.occurrenceID, StageID: "stage-0", ScopeID: "scope-0", Location: loc(0, expected.ends[0]), UseSiteLocations: []analysis.Location{}, UseSiteReferenceIDs: []string{}}}}}
+		correlation := analysis.CorrelationGraph{Outcome: "not applicable", Coverage: analysis.InputCoverage{State: "not_applicable", Reasons: []analysis.InputReason{}},
+			Nodes: []analysis.CorrelationNode{{InputID: inputID, OccurrenceID: expected.occurrenceID}}, Edges: []analysis.CorrelationEdge{}, Components: [][]string{{expected.occurrenceID}}}
+		ownership := analysis.InputOwnership{State: "proved", CandidateInputIDs: []string{inputID}}
 		empty := analysis.FieldState{Fields: []analysis.FieldBinding{}, Removed: []analysis.FieldRemoval{}, Open: true}
 		source := analysis.FieldState{Fields: []analysis.FieldBinding{{Name: expected.name, FieldIdentity: *identity(expected.name), OriginReferenceIDs: []string{"ref-0"}}}, Removed: []analysis.FieldRemoval{}, Open: true}
 		total := analysis.FieldState{Fields: []analysis.FieldBinding{{Name: "total", FieldIdentity: *identity("total"), OriginReferenceIDs: []string{"ref-2", "ref-1", "ref-0"}}}, Removed: []analysis.FieldRemoval{}}
 		analyses[i] = &analysis.Result{
+			Inputs: inputs, InputCoverage: complete, FieldAttributionCoverage: complete, Correlation: correlation,
 			SchemaVersion: 1, Document: analysis.QueryDocument{Text: expected.text, Language: "spl", Profile: "splunkd", Version: "current", SourceID: "source.spl"}, Status: analysis.Valid,
 			Coverage: analysis.Coverage{SyntaxComplete: true, SemanticComplete: true, Reasons: []string{}},
 			Stages: []analysis.Stage{
@@ -144,16 +155,17 @@ func explicitAliasReport(mode Mode) *Result {
 			},
 			Dependencies: analysis.Dependencies{Indexes: []string{}, Sources: []string{}, SourceTypes: []string{}, Datasets: []string{}, Lookups: []string{}, DataModels: []string{}, Macros: []string{}}, Diagnostics: []analysis.Diagnostic{},
 			Requirements: analysis.RequirementSet{
+				Inputs: inputs, InputCoverage: complete, FieldAttributionCoverage: complete, Correlation: correlation,
 				SchemaVersion: 1,
 				Query: analysis.RequirementQueryIdentity{
 					SourceID: "source.spl", Language: "spl", Profile: "splunkd", Version: "current", QueryDigest: expected.digest,
 				},
-				CapabilityRevision: "sha256:8a612f2064da24552a68faec261968731a6f1f1c7279ffabb77a59c7dfdb2008",
+				CapabilityRevision: "sha256:5b7c15002c426b163a5488d18ae0fb83c68809a194a15f9a6584ea95cbb3a09b",
 				QueryStatus:        analysis.Valid,
 				Coverage:           analysis.RequirementCoverage{Complete: true, Reasons: []string{}},
 				Items: []analysis.RequirementItem{
-					{ID: "req-1", Kind: "field", Identity: expected.name, FieldIdentity: identity(expected.name), Role: "filter", Necessity: "required", Origin: "direct", Resolution: "exact", Occurrences: []analysis.RequirementOccurrence{{ReferenceID: "ref-0", OriginalName: expected.name, Binding: "source", StageID: "stage-0", ScopeID: "scope-0", Location: loc(expected.refs[0][0], expected.refs[0][1])}}},
-					{ID: "req-2", Kind: "field", Identity: expected.name, FieldIdentity: identity(expected.name), Role: "read", Necessity: "required", Origin: "direct", Resolution: "exact", Occurrences: []analysis.RequirementOccurrence{{ReferenceID: "ref-1", OriginalName: expected.name, Binding: "source", StageID: "stage-1", ScopeID: "scope-0", Location: loc(expected.refs[1][0], expected.refs[1][1])}}},
+					{InputID: inputID, Ownership: ownership, ID: "req-1", Kind: "field", Identity: expected.name, FieldIdentity: identity(expected.name), Role: "filter", Necessity: "required", Origin: "direct", Resolution: "exact", Occurrences: []analysis.RequirementOccurrence{{InputOccurrenceIDs: []string{expected.occurrenceID}, Necessity: "required", ReferenceID: "ref-0", OriginalName: expected.name, Binding: "source", StageID: "stage-0", ScopeID: "scope-0", Location: loc(expected.refs[0][0], expected.refs[0][1])}}},
+					{InputID: inputID, Ownership: ownership, ID: "req-2", Kind: "field", Identity: expected.name, FieldIdentity: identity(expected.name), Role: "read", Necessity: "required", Origin: "direct", Resolution: "exact", Occurrences: []analysis.RequirementOccurrence{{InputOccurrenceIDs: []string{expected.occurrenceID}, Necessity: "required", ReferenceID: "ref-1", OriginalName: expected.name, Binding: "source", StageID: "stage-1", ScopeID: "scope-0", Location: loc(expected.refs[1][0], expected.refs[1][1])}}},
 				},
 				Gaps:        []analysis.RequirementGap{},
 				Diagnostics: []analysis.Diagnostic{},
