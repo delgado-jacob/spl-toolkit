@@ -6435,10 +6435,8 @@
         "edges": []
       },
       "compatibility": {
-        "outcome": "incomplete",
-        "reason_codes": [
-          "environment_scope_not_covered"
-        ]
+        "outcome": "satisfied",
+        "reason_codes": []
       },
       "requirement_outcomes": [
         {
