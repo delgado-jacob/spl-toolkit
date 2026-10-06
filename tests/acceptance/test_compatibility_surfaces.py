@@ -583,6 +583,41 @@ def macro_request(mapper, repeated=False):
     return request, document
 
 
+def assert_repeated_invocations(report, hidden_input_id, root_source_id):
+    hidden = next(source for source in report["inputs"] if source["input_id"] == hidden_input_id)
+    occurrences = sorted(hidden["occurrences"], key=lambda o:
+                         o["invocation_provenance"][0]["invocation"][0]["start"])
+    assert len(occurrences) == 2
+    traversal = {edge["id"]: edge for edge in report["closure"]["traversal"]}
+    by_edge = {}
+    for occurrence, (start, end) in zip(occurrences, [(0, 11), (14, 25)]):
+        assert occurrence["definition_object_id"] == "daily"
+        assert occurrence["query"]["source_id"] == "daily.spl"
+        assert occurrence["source_intervals"] == [{"kind": "definition", "source_id": "compatibility:offline-evidence",
+                                                    "object_id": "daily", "start": 5, "end": 12}]
+        frames = occurrence["invocation_provenance"]
+        assert [frame["object_id"] for frame in frames] == ["macro", "daily"]
+        root_interval = {"kind": "query", "source_id": root_source_id, "start": start, "end": end}
+        assert frames[0]["invocation"] == [root_interval]
+        assert frames[1]["invocation"] == []
+        assert frames[1]["instance_id"] == occurrence["traversal_edge_id"]
+        macro = traversal[frames[0]["instance_id"]]
+        assert (macro["kind"], macro["to_object_id"], macro["source"]) == ("macro", "macro", root_interval)
+        daily = traversal[occurrence["traversal_edge_id"]]
+        assert (daily["kind"], daily["from_object_id"], daily["to_object_id"], daily["property"]) == (
+            "saved_search", "macro", "daily", "/dependency")
+        by_edge[occurrence["traversal_edge_id"]] = frames
+    assert len(by_edge) == 2
+    hidden_outcomes = [out for out in report["requirement_outcomes"] if out.get("input_id") == hidden_input_id]
+    assert len(hidden_outcomes) == 4
+    for out in hidden_outcomes:
+        assert out["definition_object_id"] == "daily"
+        start, end = (22, 24) if "field_projection" in out else (5, 12)
+        assert out["source_intervals"] == [{"kind": "definition", "source_id": "compatibility:offline-evidence",
+                                           "object_id": "daily", "start": start, "end": end}]
+        assert out["invocation_provenance"] == by_edge[out["traversal_edge_id"]]
+
+
 @pytest.mark.parametrize("name", ["effective-definition", "missing-hidden-binding", "missing-direct-binding",
                                     "opaque-macro", "definition-cycle", "repeated-formal", "missing-repeated-hidden-binding"])
 def test_closure_semantics(name, cli_path, server_url, compatibility_go_reporter, compatibility_temp_dir):
@@ -647,13 +682,7 @@ def test_closure_semantics(name, cli_path, server_url, compatibility_go_reporter
             hidden = [source for source in report["inputs"] if source["input_id"] == request["input_bindings"][0]["input_id"]]
             assert len(hidden) == 1 and hidden[0]["outcome"] == "satisfied"
             assert len([source for source in report["inputs"] if source["outcome"] == "indeterminate"]) == 1
-            occurrences = hidden[0]["occurrences"]
-            assert len({o["traversal_edge_id"] for o in occurrences}) == 2
-            for occurrence in occurrences:
-                assert occurrence["definition_object_id"] == "daily"
-                frames = occurrence["invocation_provenance"]
-                assert [frame["object_id"] for frame in frames] == ["macro", "daily"]
-                assert [len(frame["invocation"]) for frame in frames] == [1, 0]
+            assert_repeated_invocations(report, request["input_bindings"][0]["input_id"], document["source_id"])
             assert_field_facts(report, [])
         assert closure["direct_requirements"] == request["requirements"]
         assert closure["effective_analysis"]["requirements"] == report["effective_requirements"]
@@ -709,6 +738,44 @@ def test_transfers_and_join_options(name, text, outcome, fields, cli_path, serve
     exercise_request(request, authored, None, cli_path, server_url, compatibility_go_reporter, compatibility_temp_dir)
 
 
+def assert_selected_evidence(report, request):
+    # Expected selections come from independently authored requests, never from
+    # the report's echoed bindings or another execution of the same core.
+    selections = {binding["input_id"]: binding for binding in request["input_bindings"]}
+    assert {source["input_id"] for source in report["inputs"]} == set(selections)
+    for source in report["inputs"]:
+        selected = selections[source["input_id"]]
+        assert source["outcome"] == "satisfied"
+        assert len(source["objects"]) == 1
+        evidence = source["objects"][0]
+        assert evidence["object_id"] == selected["object_id"]
+        assert evidence["expected"] == selected["expected"]
+        assert evidence["object"]["id"] == selected["object_id"]
+        assert {key: evidence["object"][key] for key in ("kind", "name", "namespace", "app", "owner")} == selected["expected"]
+        outcomes = [out for out in report["requirement_outcomes"] if out.get("input_id") == source["input_id"]]
+        # Both Dataset and field obligations must select the authored object,
+        # including the hidden definition's independently selected source.
+        assert len(outcomes) == 2
+        assert sum("field_projection" in out for out in outcomes) == 1
+        for out in outcomes:
+            assert out["outcome"] == "satisfied"
+            assert out["objects"] == [evidence]
+            if "field_projection" in out:
+                assert len(out["schemas"]) == 1
+                schema = out["schemas"][0]
+                assert schema["schema_id"] == selected["schema_id"]
+                assert schema["binding"]["schema_id"] == selected["schema_id"]
+                assert schema["binding"]["object_id"] == selected["object_id"]
+                assert schema["binding"]["expected"] == selected["expected"]
+            else:
+                assert out["schemas"] == []
+        linked_coverage = [c for c in report["coverage"] if c.get("input_id") == source["input_id"] and c.get("object_id")]
+        assert {(c["dimension"], c["object_id"], c.get("schema_id")) for c in linked_coverage} == {
+            ("environment_collection", selected["object_id"], None),
+            ("field_schema", selected["object_id"], selected["schema_id"])}
+        assert all(c["state"] == "complete" for c in linked_coverage)
+
+
 @pytest.mark.parametrize("closure", [False, True], ids=["independent-bindings", "effective-definition"])
 def test_prepared_detach_reuse_and_concurrency(closure, cli_path, server_url, compatibility_go_reporter, compatibility_temp_dir):
     with open_mapper() as mapper:
@@ -723,16 +790,20 @@ def test_prepared_detach_reuse_and_concurrency(closure, cli_path, server_url, co
                                              "expected": expected, "source_coverage": "complete"})
     second = copy.deepcopy(first)
     second["input_bindings"][0].update(object_id="alternate", expected=expected)
-    def authored(report, mapper):
+    def authored(report, mapper, selected):
         assert report["outcome"] == "satisfied"
-        assert {b["object_id"] for b in report["input_bindings"]} <= {"dataset-events", "alternate", "view"}
+        assert_selected_evidence(report, selected)
         assert_field_facts(report, [("view" if closure else "$events", "id", "required")])
         assert_discovery_parity(mapper, document, cli_path, server_url, compatibility_go_reporter)
-    canonical = [exercise_request(request, authored, None, cli_path, server_url, compatibility_go_reporter, compatibility_temp_dir)
+    canonical = [exercise_request(request, lambda report, mapper: authored(report, mapper, request), None,
+                                  cli_path, server_url, compatibility_go_reporter, compatibility_temp_dir)
                  for request in (first, second)]
     assert canonical[0]["input_bindings"][0]["object_id"] == "dataset-events"
     assert canonical[1]["input_bindings"][0]["object_id"] == "alternate"
     prepared = json.loads(go_value(compatibility_go_reporter, json.dumps([first, second]).encode(), "prepared"))
+    for reports in (prepared["reports"], prepared["concurrent"]):
+        for index, report in enumerate(reports):
+            assert_selected_evidence(report, (first, second)[index % 2])
     assert prepared["reports"] == canonical
     assert prepared["concurrent"] == [canonical[i % 2] for i in range(8)]
 
