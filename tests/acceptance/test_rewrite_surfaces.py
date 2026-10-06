@@ -304,16 +304,15 @@ def test_rewrite_required_documented_example(mode, cli_path, rewrite_go_reports)
     case = next(c for c in CASES if c["id"] == "spl-alias-" + mode)
     rules_file = FIXTURES / "example-rules.json"
     assert json.loads(rules_file.read_text()) == {"schema_version": 1, "rules": case["request"]["rules"]}
-    args = [str(cli_path), "rewrite", "--rules", str(rules_file), "--query", case["request"]["document"]["text"], "--format", "json"]
+    args = [str(cli_path), "rewrite", "--rules", str(rules_file), "--query", case["request"]["document"]["text"],
+            "--source-id", case["request"]["document"]["source_id"], "--format", "json"]
     if mode == "apply":
         args.append("--apply")
     result = subprocess.run(args, capture_output=True, text=True, timeout=20)
     assert result.returncode == 0 and not result.stderr
-    expected = deepcopy(rewrite_go_reports["reports"][case["id"]])
-    for document in (expected["document"], expected["original_analysis"]["document"], expected["candidate_analysis"]["document"]):
-        document["source_id"] = ""
-    for analysis in (expected["original_analysis"], expected["candidate_analysis"]):
-        analysis["requirements"]["query"]["source_id"] = ""
+    # Situated source occurrences include source identity; compare the same
+    # complete request rather than changing identity after Go analysis.
+    expected = rewrite_go_reports["reports"][case["id"]]
     assert json.loads(result.stdout) == expected
 
 

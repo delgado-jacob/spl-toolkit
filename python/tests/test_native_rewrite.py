@@ -94,6 +94,13 @@ def expected_search(mode, language="spl"):
         return {"start": {"offset": start, "line": 1, "column": start + 1},
                 "end": {"offset": end, "line": 1, "column": end + 1}}
 
+    def evidence_id(prefix, *values):
+        # Canonical IDs hash byte-length-prefixed UTF-8 values. In particular,
+        # the Unicode/NUL source identity must not use character lengths.
+        payload = b"".join(str(len(value.encode())).encode() + b":" + value.encode() for value in values)
+        return prefix + hashlib.sha256(payload).hexdigest()
+
+    input_id = evidence_id("input-", "implicit_stream", "implicit", "")
     analyses = []
     for name, text, end in (("src", "search src=x", 12), ("user", "search user=x", 13)):
         document = {"text": text, "language": language, "profile": "splunkd", "version": "current", "source_id": "é😀\x00.spl"}
@@ -103,7 +110,23 @@ def expected_search(mode, language="spl"):
                               "origin_reference_ids": ["ref-0"], "conditional": False}],
                   "removed": [], "open": True, "uncertain": False}
         reference_location = location(7, end - 2)
+        # Both dialects read the one implicit search stream. The edit retains
+        # its logical identity and moves the situated end from byte 12 to 13.
+        occurrence_id = evidence_id("occurrence-", document["source_id"], input_id, "0", str(end), "scope-0")
+        complete = {"state": "complete", "reasons": []}
+        input_evidence = {
+            "inputs": [{"id": input_id, "kind": "implicit_stream", "name": "",
+                        "identity": {"form": "implicit", "value": ""}, "evidence": deepcopy(complete),
+                        "occurrences": [{"id": occurrence_id, "reference_id": "", "original_reference_id": "",
+                                         "stage_id": "stage-0", "scope_id": "scope-0", "alias": "",
+                                         "location": location(0, end), "use_site_locations": [], "use_site_reference_ids": []}]}],
+            "input_coverage": deepcopy(complete), "field_attribution_coverage": deepcopy(complete),
+            "correlation": {"outcome": "not applicable", "coverage": {"state": "not_applicable", "reasons": []},
+                            "nodes": [{"input_id": input_id, "occurrence_id": occurrence_id}],
+                            "edges": [], "components": [[occurrence_id]]},
+        }
         requirements = {
+            **deepcopy(input_evidence),
             "schema_version": 1,
             "query": {
                 "source_id": document["source_id"],
@@ -113,25 +136,28 @@ def expected_search(mode, language="spl"):
                 "query_digest": "sha256:" + hashlib.sha256(text.encode()).hexdigest(),
             },
             "capability_revision": {
-                "spl": "sha256:8a612f2064da24552a68faec261968731a6f1f1c7279ffabb77a59c7dfdb2008",
-                "spl2": "sha256:6495f77a0747f04e9690f5360cf4d024cf95a727bf05ab7cb7c9e1a96e1383dc",
+                "spl": "sha256:5b7c15002c426b163a5488d18ae0fb83c68809a194a15f9a6584ea95cbb3a09b",
+                "spl2": "sha256:7134e06d345f6b2c6e58c3d29c727868320b47ff1fc0a94842aec35615223d9f",
             }[language],
             "query_status": "valid",
             "coverage": {"complete": True, "reasons": []},
             "items": [{
                 "id": "req-1", "kind": "field", "identity": name,
+                "input_id": input_id, "ownership": {"state": "proved", "candidate_input_ids": [input_id]},
                 "field_identity": field_identity,
                 "role": "filter" if language == "spl" else "read",
                 "necessity": "required", "origin": "direct", "resolution": "exact",
                 "occurrences": [{
                     "reference_id": "ref-0", "original_name": name, "binding": "source",
                     "stage_id": "stage-0", "scope_id": "scope-0", "location": reference_location,
+                    "input_occurrence_ids": [occurrence_id], "necessity": "required",
                 }],
             }],
             "gaps": [],
             "diagnostics": [],
         }
         analyses.append({
+            **deepcopy(input_evidence),
             "schema_version": 1, "document": document, "status": "valid",
             "coverage": {"syntax_complete": True, "semantic_complete": True, "reasons": []},
             "stages": [{"id": "stage-0", "command": "search", "position": 0, "scope_id": "scope-0",
