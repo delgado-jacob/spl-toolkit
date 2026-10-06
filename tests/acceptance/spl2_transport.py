@@ -7,7 +7,8 @@ from pathlib import Path
 import subprocess
 import tempfile
 
-REPORT_KEYS = {"schema_version", "document", "status", "coverage", "stages", "scopes", "references", "lineage", "dependencies", "diagnostics", "requirements"}
+INPUT_EVIDENCE_KEYS = {"inputs", "input_coverage", "field_attribution_coverage", "correlation"}
+REPORT_KEYS = {"schema_version", "document", "status", "coverage", "stages", "scopes", "references", "lineage", "dependencies", "diagnostics", "requirements"} | INPUT_EVIDENCE_KEYS
 GO_HELPER = r'''
 package main
 
@@ -95,6 +96,37 @@ def assert_full_report(report, document):
     assert isinstance(report["requirements"], dict), "truncated Go requirements"
     for key in ("stages", "scopes", "references", "lineage", "diagnostics"):
         assert isinstance(report[key], list), f"truncated Go {key}"
+
+    # These are canonical transport facts, not independently authored expectations.
+    for key in INPUT_EVIDENCE_KEYS:
+        assert key in report["requirements"] and report[key] == report["requirements"][key], f"inconsistent Go {key}"
+    assert isinstance(report["inputs"], list), "truncated Go inputs"
+    correlation = report["correlation"]
+    assert isinstance(correlation, dict) and set(correlation) == {"outcome", "coverage", "nodes", "edges", "components"}
+    assert correlation["outcome"] in {"connected", "disconnected", "indeterminate", "not applicable"}
+    for key in ("nodes", "edges", "components"):
+        assert isinstance(correlation[key], list), f"truncated Go correlation {key}"
+    for coverage in (report["input_coverage"], report["field_attribution_coverage"], correlation["coverage"]):
+        assert isinstance(coverage, dict) and set(coverage) == {"state", "reasons"}
+        assert coverage["state"] in {"complete", "partial", "not_applicable"}
+        assert isinstance(coverage["reasons"], list) and all(isinstance(reason, dict) for reason in coverage["reasons"])
+    occurrences = set()
+    input_ids = set()
+    for source in report["inputs"]:
+        assert isinstance(source, dict) and set(source) == {"id", "kind", "name", "identity", "evidence", "occurrences"}
+        assert isinstance(source["id"], str) and source["id"] and source["id"] not in input_ids
+        input_ids.add(source["id"])
+        assert isinstance(source["occurrences"], list) and source["occurrences"]
+        for occurrence in source["occurrences"]:
+            assert isinstance(occurrence, dict) and isinstance(occurrence.get("id"), str) and occurrence["id"]
+            pair = (source["id"], occurrence["id"])
+            assert pair not in occurrences
+            occurrences.add(pair)
+    nodes = []
+    for node in correlation["nodes"]:
+        assert isinstance(node, dict) and set(node) == {"input_id", "occurrence_id"}
+        nodes.append((node["input_id"], node["occurrence_id"]))
+    assert len(nodes) == len(set(nodes)) and set(nodes) == occurrences, "inconsistent Go correlation source occurrences"
 
 
 def load_transport(path, fixtures, expected_sha256, source_root=None, expected_milestone11=None):

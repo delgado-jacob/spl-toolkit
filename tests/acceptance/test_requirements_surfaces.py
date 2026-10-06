@@ -47,8 +47,8 @@ DEPENDENCY_KEYS = (
     "macros",
 )
 CAPABILITY_REVISIONS = {
-    "spl": "sha256:8a612f2064da24552a68faec261968731a6f1f1c7279ffabb77a59c7dfdb2008",
-    "spl2": "sha256:6495f77a0747f04e9690f5360cf4d024cf95a727bf05ab7cb7c9e1a96e1383dc",
+    "spl": "sha256:5b7c15002c426b163a5488d18ae0fb83c68809a194a15f9a6584ea95cbb3a09b",
+    "spl2": "sha256:7134e06d345f6b2c6e58c3d29c727868320b47ff1fc0a94842aec35615223d9f",
 }
 DENSE_QUERY_DIGESTS = {
     ("spl", 65_536): "sha256:4ef76589e31ca84b778eb3e15f8cd320319dd03746fff5bf7ba21ba66865dace",
@@ -725,7 +725,26 @@ def expected_resource_limit(document: dict) -> tuple[dict, dict]:
         ],
         "diagnostics": [diagnostic],
     }
+    source_reason = {
+        key: copy.deepcopy(diagnostic[key])
+        for key in ("code", "message", "location", "stage_id", "scope_id")
+    } | {"reference_ids": []}
+    input_evidence = {
+        "inputs": [],
+        "input_coverage": {"state": "partial", "reasons": [source_reason]},
+        "field_attribution_coverage": {
+            "state": "partial",
+            "reasons": [copy.deepcopy(source_reason) | {"code": "field_attribution_incomplete"}],
+        },
+        "correlation": {
+            "outcome": "indeterminate",
+            "coverage": {"state": "partial", "reasons": [copy.deepcopy(source_reason)]},
+            "nodes": [], "edges": [], "components": [],
+        },
+    }
+    requirements.update(copy.deepcopy(input_evidence))
     analysis = {
+        **copy.deepcopy(input_evidence),
         "schema_version": 1,
         "document": normalized,
         "status": "incomplete",

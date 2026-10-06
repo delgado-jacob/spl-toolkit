@@ -30,6 +30,15 @@ def evidence(tmp_path):
                                "query_status": "incomplete", "coverage": {"complete": False, "reasons": []},
                                "items": [], "gaps": [], "diagnostics": []},
               "dependencies": {k: [] for k in ("indexes", "sources", "source_types", "datasets", "lookups", "data_models", "macros")}}
+    input_evidence = {
+        "inputs": [],
+        "input_coverage": {"state": "partial", "reasons": []},
+        "field_attribution_coverage": {"state": "partial", "reasons": []},
+        "correlation": {"outcome": "indeterminate", "coverage": {"state": "partial", "reasons": []},
+                        "nodes": [], "edges": [], "components": []},
+    }
+    report.update(deepcopy(input_evidence))
+    report["requirements"].update(deepcopy(input_evidence))
     milestone_document = {
         "text": "FROM {kind: \"index\"}",
         "language": "spl2",
@@ -116,6 +125,45 @@ def test_transport_hash_and_original_identity(tmp_path):
     with pytest.raises(AssertionError):
         transport.load_transport(path, fixtures, "0" * 64, source, milestone_documents)
     artifact["reports"][0]["document"]["source_id"] = "changed"
+    path.write_text(json.dumps(artifact))
+    with pytest.raises(AssertionError):
+        transport.load_transport(path, fixtures, sha(path), source, milestone_documents)
+
+
+@pytest.mark.parametrize("member", sorted(transport.INPUT_EVIDENCE_KEYS))
+@pytest.mark.parametrize("mutation", ["missing", "null", "embedded-mismatch"])
+def test_transport_rejects_invalid_input_evidence(tmp_path, member, mutation):
+    fixtures, source, artifact, milestone_documents = evidence(tmp_path)
+    report = artifact["reports"][0]["report"]
+    if mutation == "missing":
+        del report[member]
+    elif mutation == "null":
+        report[member] = report["requirements"][member] = None
+    else:
+        report["requirements"][member] = None
+    path = tmp_path / "transport.json"
+    path.write_text(json.dumps(artifact))
+    with pytest.raises(AssertionError):
+        transport.load_transport(path, fixtures, sha(path), source, milestone_documents)
+
+
+@pytest.mark.parametrize("mutation", ["coverage-state", "coverage-reasons", "correlation-outcome", "correlation-edges", "dangling-node"])
+def test_transport_rejects_malformed_input_structure(tmp_path, mutation):
+    fixtures, source, artifact, milestone_documents = evidence(tmp_path)
+    report = artifact["reports"][0]["report"]
+    if mutation == "coverage-state":
+        report["input_coverage"]["state"] = "unknown"
+    elif mutation == "coverage-reasons":
+        report["field_attribution_coverage"]["reasons"] = None
+    elif mutation == "correlation-outcome":
+        report["correlation"]["outcome"] = "unknown"
+    elif mutation == "correlation-edges":
+        report["correlation"]["edges"] = None
+    else:
+        report["correlation"]["nodes"] = [{"input_id": "absent", "occurrence_id": "absent"}]
+    for key in transport.INPUT_EVIDENCE_KEYS:
+        report["requirements"][key] = deepcopy(report[key])
+    path = tmp_path / "transport.json"
     path.write_text(json.dumps(artifact))
     with pytest.raises(AssertionError):
         transport.load_transport(path, fixtures, sha(path), source, milestone_documents)
