@@ -5,8 +5,8 @@ import json
 import os
 import subprocess
 import shutil
-from urllib.error import HTTPError
-from urllib.request import Request, urlopen
+from http.client import HTTPConnection
+from urllib.parse import urlsplit
 
 import pytest
 
@@ -67,15 +67,17 @@ def make_request(mapper, case):
 
 
 
-def post_raw(base_url, raw, content_type="application/json"):
-    request = Request(base_url + "/query/compatibility", data=raw,
-                      headers={"Content-Type": content_type}, method="POST")
+def post_raw(base_url, raw, content_type="application/json", *, chunked=False):
+    target = urlsplit(base_url + "/query/compatibility")
+    connection = HTTPConnection(target.hostname, target.port, timeout=10)
     try:
-        with urlopen(request, timeout=10) as response:
-            return response.status, json.load(response)
-    except HTTPError as response:
-        with response:
-            return response.code, json.load(response)
+        # Normal HTTP/1.1 lets the server drain a rejected body before responding.
+        connection.request("POST", target.path, body=iter([raw]) if chunked else raw,
+                           headers={"Content-Type": content_type}, encode_chunked=chunked)
+        response = connection.getresponse()
+        return response.status, json.loads(response.read())
+    finally:
+        connection.close()
 
 
 def native_raw(mapper, raw):
@@ -361,14 +363,21 @@ def test_compatibility_malformed_raw_parity(raw, cli_path, server_url, compatibi
     assert c_value["code"] == "request_invalid" and c_value["message"]
 
 
-def test_compatibility_real_http_body_boundaries(server_url):
+@pytest.mark.parametrize("chunked", [False, True])
+def test_compatibility_real_http_body_boundaries(chunked, server_url):
     with open_mapper() as mapper:
-        raw = json.dumps(make_request(mapper, CASES[0])).encode("utf-8")
-    assert post_raw(server_url, raw, "text/plain")[0] == 400
+        request = make_request(mapper, CASES[0])
+        raw = json.dumps(request).encode("utf-8")
+        expected = mapper.check_compatibility(request)
+    status, error = post_raw(server_url, raw, "text/plain", chunked=chunked)
+    assert status == 400
+    assert error == {"error": True, "message": "content-type must be application/json", "code": 400}
     exact = raw + b" " * ((8 << 20) - len(raw))
-    assert post_raw(server_url, exact)[0] == 200
-    status, error = post_raw(server_url, exact + b" ")
-    assert status == 400 and error["error"] is True and "8 MiB" in error["message"]
+    status, report = post_raw(server_url, exact, chunked=chunked)
+    assert status == 200 and report == expected
+    status, error = post_raw(server_url, exact + b" ", chunked=chunked)
+    assert status == 400
+    assert error == {"error": True, "message": "request body exceeds 8 MiB limit", "code": 400}
 
 
 # These controls extend evidence from the immutable corpus; queries and expected
