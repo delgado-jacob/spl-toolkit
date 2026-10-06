@@ -1378,3 +1378,59 @@ func TestSPL2SQLLeftJoinStaticStructuralReadsKeepTheirSource(t *testing.T) {
 		}
 	}
 }
+
+func TestSPL2SQLJoinConditionalAliasesPreserveDerivedFields(t *testing.T) {
+	for _, tc := range []struct {
+		name, query, outcome string
+		inputs, edges        int
+	}{
+		{"generated rows", `FROM [{id:1}] AS a %s [{id:1}] AS b ON b.id=a.id SELECT a.id AS aid,b.id AS bid`, "not applicable", 0, 0},
+		{"generated chain", `FROM [{id:1}] AS a %s [{id:1}] AS b ON b.id=a.id JOIN [{id:1}] AS c ON b.id=c.id SELECT b.id AS bid`, "not applicable", 0, 0},
+		{"constant view", `$v=FROM beta | eval id=1; $out=SELECT a.host,b.id AS constant_id FROM alpha AS a %s $v AS b ON b.id=a.id;`, "indeterminate", 2, 0},
+		{"source-derived view", `$v=FROM beta | eval id=uid; $out=SELECT a.host,b.id AS derived_id FROM alpha AS a %s $v AS b ON b.id=a.id;`, "connected", 2, 1},
+	} {
+		for _, join := range []string{"LEFT JOIN", "INNER JOIN"} {
+			t.Run(tc.name+"/"+join, func(t *testing.T) {
+				query := strings.Replace(tc.query, "%s", join, 1)
+				r := spl2AnalyzeTest(t, query)
+				if r.Status != Valid || len(r.Inputs) != tc.inputs || r.Correlation.Outcome != tc.outcome || len(r.Correlation.Edges) != tc.edges {
+					t.Fatalf("derived join: status=%s inputs=%+v graph=%+v diagnostics=%+v", r.Status, r.Inputs, r.Correlation, r.Diagnostics)
+				}
+				for _, item := range r.Requirements.Items {
+					if tc.inputs == 0 && item.Kind == "field" {
+						t.Fatalf("generated field became an external obligation: %+v", item)
+					}
+					for _, occurrence := range item.Occurrences {
+						if item.Kind == "field" && occurrence.OriginalName == "b.id" {
+							t.Fatalf("derived destination became an external obligation: %+v", item)
+						}
+					}
+				}
+				output := map[string]string{"generated rows": "bid", "generated chain": "bid", "constant view": "constant_id", "source-derived view": "derived_id"}[tc.name]
+				found := false
+				for _, field := range r.Lineage[len(r.Lineage)-1].After.Fields {
+					if field.Name == output {
+						found = true
+						if field.Conditional != (join == "LEFT JOIN") {
+							t.Fatalf("derived output conditionality changed: %+v", field)
+						}
+					}
+				}
+				if !found {
+					t.Fatalf("derived projection %s missing", output)
+				}
+				if tc.name == "source-derived view" {
+					item := requirementItem(r.Requirements, "field", "uid", "read")
+					if item == nil || item.Ownership.State != "proved" {
+						t.Fatalf("derived source obligation lost: %+v", item)
+					}
+					for _, ref := range r.References {
+						if ref.OriginalName == "b.id" && ref.Role == "read" && len(ref.OriginReferenceIDs) == 0 {
+							t.Fatalf("derived source lineage lost: %+v", ref)
+						}
+					}
+				}
+			})
+		}
+	}
+}

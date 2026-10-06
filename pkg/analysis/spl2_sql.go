@@ -685,9 +685,15 @@ func (s *spl2SemanticStage) sqlQualifiedSource(alias string, segments []string) 
 			}
 			field.Conditional = true
 			source.fields[key] = field
-			requirement := source.requirements.fields[key]
-			requirement.identity, requirement.source, requirement.conditional = identity, true, true
-			requirement.owners = source.requirements.sourceOwners(identity)
+			requirement, known := source.requirements.fields[key]
+			if !known {
+				requirement = requirementField{identity: identity, source: true, owners: source.requirements.sourceOwners(identity)}
+			}
+			// LEFT nullability changes the value's availability, but a known
+			// derived value keeps its existing requirement lineage and origin.
+			if requirement.source {
+				requirement.conditional = true
+			}
 			source.requirements.fields[key] = requirement
 		}
 	}
@@ -721,8 +727,10 @@ func (s *spl2SemanticStage) lowerSQLJoin(join spl2.ISqlJoinClauseContext) {
 					environment.fields[key] = field
 				}
 				for key, field := range environment.requirements.fields {
-					field.conditional = true
-					environment.requirements.fields[key] = field
+					if field.source {
+						field.conditional = true
+						environment.requirements.fields[key] = field
+					}
 				}
 			}
 			sources[name] = environment
