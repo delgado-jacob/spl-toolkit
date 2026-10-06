@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 
+	"github.com/delgado-jacob/spl-toolkit/pkg/closure"
 	"github.com/delgado-jacob/spl-toolkit/pkg/environment"
 	"github.com/delgado-jacob/spl-toolkit/pkg/validation"
 )
@@ -15,7 +16,12 @@ type RequestErrorDetail struct {
 	ByteOffset *int   `json:"byte_offset,omitempty"`
 	Message    string `json:"message"`
 }
-type requestError struct{ detail RequestErrorDetail }
+type requestError struct {
+	detail RequestErrorDetail
+	cause  error
+}
+
+func (e *requestError) Unwrap() error { return e.cause }
 
 func (e *requestError) Error() string { raw, _ := json.Marshal(e.detail); return string(raw) }
 func requestErrorAt(code, path, message string) error {
@@ -57,4 +63,14 @@ func artifactError(report *environment.Report, base string, offset int) error {
 		return requestErrorAt(d.Code, path, d.Message)
 	}
 	return requestErrorAt("request_invalid", base, "invalid environment artifact")
+}
+
+// Closure admission currently supplies an error class and message, without a
+// field path or code. Preserve that cause and message while supplying the
+// assessment envelope needed by adapters; do not classify internal errors.
+func closureRequestError(err error) error {
+	if !closure.IsInputError(err) {
+		return err
+	}
+	return &validation.InputError{Err: &requestError{detail: RequestErrorDetail{Code: "dependency_closure_invalid", Path: "", Message: err.Error()}, cause: err}}
 }

@@ -17,6 +17,7 @@ type Report struct {
 	DirectAnalysis     *analysis.Result                  `json:"direct_analysis"`
 	DirectRequirements analysis.RequirementSet           `json:"direct_requirements"`
 	EffectiveAnalysis  *analysis.Result                  `json:"effective_analysis"`
+	DefinitionContexts []DefinitionContext               `json:"definition_contexts"`
 	DefinitionAnalyses []DefinitionAnalysis              `json:"definition_analyses"`
 	Provenance         []ProvenanceSegment               `json:"provenance"`
 	Coverage           ClosureCoverage                   `json:"coverage"`
@@ -26,6 +27,15 @@ type Report struct {
 	Graph              DependencyGraph                   `json:"graph"`
 	BOM                []BOMEntry                        `json:"bom"`
 }
+
+// DefinitionContext retains body offsets for one actual traversal occurrence.
+// Object and edge identity disambiguate shared source IDs and memoized bodies.
+type DefinitionContext struct {
+	EdgeID     string              `json:"edge_id"`
+	ObjectID   string              `json:"object_id"`
+	Provenance []ProvenanceSegment `json:"provenance"`
+}
+
 type DefinitionAnalysis struct {
 	ObjectID          string           `json:"object_id"`
 	DirectAnalysis    *analysis.Result `json:"direct_analysis"`
@@ -165,7 +175,7 @@ func Evaluate(input Request) (*Report, error) {
 	if err != nil {
 		return nil, inputError("analyze effective document: %v", err)
 	}
-	report := &Report{SchemaVersion: 1, Query: direct.Requirements.Query, BundleDigest: digest, ScopeID: bundle.ScopeID, DirectAnalysis: direct, DirectRequirements: direct.Requirements, EffectiveAnalysis: effective, DefinitionAnalyses: []DefinitionAnalysis{}, Provenance: publicProvenance(expanded.Segments), Coverage: ClosureCoverage{EffectiveQuery: true, TraversedDefinitions: true, Resolution: true, Collections: true, Expansion: true, Reasons: []string{}}, Gaps: []ClosureGap{}, Diagnostics: []ClosureDiagnostic{}, Traversal: []TraversalEdge{}}
+	report := &Report{SchemaVersion: 1, Query: direct.Requirements.Query, BundleDigest: digest, ScopeID: bundle.ScopeID, DirectAnalysis: direct, DirectRequirements: direct.Requirements, EffectiveAnalysis: effective, DefinitionContexts: []DefinitionContext{}, DefinitionAnalyses: []DefinitionAnalysis{}, Provenance: publicProvenance(expanded.Segments), Coverage: ClosureCoverage{EffectiveQuery: true, TraversedDefinitions: true, Resolution: true, Collections: true, Expansion: true, Reasons: []string{}}, Gaps: []ClosureGap{}, Diagnostics: []ClosureDiagnostic{}, Traversal: []TraversalEdge{}}
 	e := &evaluator{req: req, report: report, objects: map[string]Definition{}, collections: map[string]string{}, directCache: cache, bodyCache: map[string]bodyEvaluation{}, bodyDone: map[string]bool{}, expandedByResult: map[*analysis.Result]expansion{effective: expanded}}
 	for _, o := range bundle.Objects {
 		e.objects[o.ID] = o

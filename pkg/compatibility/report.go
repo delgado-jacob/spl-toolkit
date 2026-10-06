@@ -4,8 +4,10 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"slices"
 	"sort"
 
+	"github.com/delgado-jacob/spl-toolkit/pkg/closure"
 	"github.com/delgado-jacob/spl-toolkit/pkg/environment"
 )
 
@@ -28,6 +30,7 @@ func finalizeReport(report *Report) {
 		sortObjects(input.Objects)
 		sort.Strings(input.RequirementIDs)
 		sortReasons(input.Reasons)
+		sort.Slice(input.Occurrences, func(i, j int) bool { return stableKey(input.Occurrences[i]) < stableKey(input.Occurrences[j]) })
 	}
 	sort.Slice(report.Inputs, func(i, j int) bool { return report.Inputs[i].InputID < report.Inputs[j].InputID })
 	for i := range report.RequirementOutcomes {
@@ -43,6 +46,12 @@ func finalizeReport(report *Report) {
 		if stableKey(a.Query) != stableKey(b.Query) {
 			return stableKey(a.Query) < stableKey(b.Query)
 		}
+		if a.DefinitionObjectID != b.DefinitionObjectID {
+			return a.DefinitionObjectID < b.DefinitionObjectID
+		}
+		if a.TraversalEdgeID != b.TraversalEdgeID {
+			return a.TraversalEdgeID < b.TraversalEdgeID
+		}
 		if a.RequirementID != b.RequirementID {
 			return a.RequirementID < b.RequirementID
 		}
@@ -55,6 +64,13 @@ func finalizeReport(report *Report) {
 	sort.Slice(report.Diagnostics, func(i, j int) bool { return stableKey(report.Diagnostics[i]) < stableKey(report.Diagnostics[j]) })
 	sortReasons(report.Reasons)
 	sort.Slice(report.InputBindings, func(i, j int) bool { return report.InputBindings[i].InputID < report.InputBindings[j].InputID })
+	if report.DependencyBindings == nil {
+		report.DependencyBindings = []closure.Binding{}
+	}
+	sort.Slice(report.DependencyBindings, func(i, j int) bool {
+		return stableKey(report.DependencyBindings[i]) < stableKey(report.DependencyBindings[j])
+	})
+	report.DependencyBindings = slices.Compact(report.DependencyBindings)
 	// Struct field order is explicit and stable; selectors and input bindings are
 	// normalized before hashing. No mutable query state enters Prepared.
 	identity := struct {
@@ -66,8 +82,9 @@ func finalizeReport(report *Report) {
 		EnvironmentDigest       string                   `json:"environment_digest"`
 		SchemaBundleDigest      string                   `json:"schema_bundle_digest,omitempty"`
 		QueryScope              environment.CaptureScope `json:"query_scope"`
+		DependencyBindings      []closure.Binding        `json:"dependency_bindings"`
 		InputBindings           []InputBinding           `json:"input_bindings"`
-	}{report.Provenance.QueryDigest, report.Provenance.SourceID, report.Provenance.CapabilityRevision, report.Provenance.AnalysisContractVersion, report.Provenance.RequirementSetVersion, report.Provenance.EnvironmentDigest, report.Provenance.SchemaBundleDigest, report.QueryScope, report.InputBindings}
+	}{report.Provenance.QueryDigest, report.Provenance.SourceID, report.Provenance.CapabilityRevision, report.Provenance.AnalysisContractVersion, report.Provenance.RequirementSetVersion, report.Provenance.EnvironmentDigest, report.Provenance.SchemaBundleDigest, report.QueryScope, report.DependencyBindings, report.InputBindings}
 	sum := sha256.Sum256([]byte(stableKey(identity)))
 	report.Provenance.AssessmentIdentityDigest = "sha256:" + hex.EncodeToString(sum[:])
 }

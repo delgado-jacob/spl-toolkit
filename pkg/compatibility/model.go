@@ -60,6 +60,7 @@ type SchemaEvidence struct {
 type RequirementOutcome struct {
 	Query                analysis.RequirementQueryIdentity `json:"query"`
 	RequirementID        string                            `json:"requirement_id"`
+	TraversalEdgeID      string                            `json:"traversal_edge_id,omitempty"`
 	DefinitionObjectID   string                            `json:"definition_object_id,omitempty"`
 	InputID              string                            `json:"input_id,omitempty"`
 	Applicability        string                            `json:"applicability"`
@@ -72,12 +73,22 @@ type RequirementOutcome struct {
 	SourceIntervals      []closure.SourceInterval          `json:"source_intervals"`
 	InvocationProvenance []closure.InvocationFrame         `json:"invocation_provenance"`
 }
+type InputOccurrenceEvidence struct {
+	Query                analysis.RequirementQueryIdentity `json:"query"`
+	DefinitionObjectID   string                            `json:"definition_object_id,omitempty"`
+	TraversalEdgeID      string                            `json:"traversal_edge_id,omitempty"`
+	Occurrence           analysis.InputOccurrence          `json:"occurrence"`
+	SourceIntervals      []closure.SourceInterval          `json:"source_intervals"`
+	InvocationProvenance []closure.InvocationFrame         `json:"invocation_provenance"`
+}
+
 type InputOutcome struct {
-	InputID        string           `json:"input_id"`
-	Outcome        string           `json:"outcome"`
-	Objects        []ObjectEvidence `json:"objects"`
-	RequirementIDs []string         `json:"requirement_ids"`
-	Reasons        []Reason         `json:"reasons"`
+	Occurrences    []InputOccurrenceEvidence `json:"occurrences,omitempty"`
+	InputID        string                    `json:"input_id"`
+	Outcome        string                    `json:"outcome"`
+	Objects        []ObjectEvidence          `json:"objects"`
+	RequirementIDs []string                  `json:"requirement_ids"`
+	Reasons        []Reason                  `json:"reasons"`
 }
 type Coverage struct {
 	CollectionKind string   `json:"collection_kind,omitempty"`
@@ -100,6 +111,7 @@ type Provenance struct {
 }
 
 type Report struct {
+	DependencyBindings    []closure.Binding             `json:"dependency_bindings,omitempty"`
 	QueryScope            environment.CaptureScope      `json:"query_scope"`
 	InputBindings         []InputBinding                `json:"input_bindings"`
 	Observation           *environment.ObservationScope `json:"observation,omitempty"`

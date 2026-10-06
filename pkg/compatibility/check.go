@@ -81,7 +81,7 @@ func (p *Prepared) assessCapability(query analysis.RequirementQueryIdentity) Req
 func correlationOnly(code string) bool {
 	return strings.HasPrefix(code, "correlation_") || strings.HasPrefix(code, "SPL_CORRELATION_")
 }
-func (p *Prepared) assess(request AssessmentRequest, resolved map[string]resolvedInput) *Report {
+func (p *Prepared) assess(request AssessmentRequest, resolved map[string]resolvedInput, query assessmentQuery, evaluated *closure.Report) *Report {
 	set := request.Requirements
 	envReport := p.env.Report()
 	report := &Report{SchemaVersion: 1, Outcome: "satisfied", QueryScope: detach(request.QueryScope), InputBindings: detach(request.InputBindings), Observation: detach(p.snapshot.Observation), Requirements: set, Correlation: detach(set.Correlation), Inputs: []InputOutcome{}, RequirementOutcomes: []RequirementOutcome{}, Coverage: []Coverage{}, Diagnostics: envReport.Diagnostics, Reasons: []Reason{}, Provenance: Provenance{QueryDigest: set.Query.QueryDigest, SourceID: set.Query.SourceID, CapabilityRevision: set.CapabilityRevision, AnalysisContractVersion: 1, RequirementSetVersion: set.SchemaVersion, EnvironmentDigest: envReport.SnapshotDigest, SchemaBundleDigest: envReport.SchemaBundleDigest}}
@@ -153,7 +153,7 @@ func (p *Prepared) assess(request AssessmentRequest, resolved map[string]resolve
 				out = outcomeReason(out, item, reason.Code, reason.Message, reason.Dimension)
 			}
 		} else {
-			out = p.assessObject(item, set.Query, request.QueryScope)
+			out = p.selectedObjectOutcome(p.assessObject(item, set.Query, request.QueryScope), item, query, evaluated)
 		}
 		if out.Outcome == "missing" && out.Applicability == "indeterminate" {
 			out = outcomeReason(out, item, "conditional_applicability_unproven", "The missing fact is retained, but query evidence has not proved that its condition applies. Schema evidence cannot decide query execution.", "conditionality")
@@ -325,10 +325,10 @@ func (p *Prepared) assess(request AssessmentRequest, resolved map[string]resolve
 			report.Reasons = append(report.Reasons, reason)
 		}
 	}
-	// Existence does not prove hidden expansion obligations. Task 9 can discharge
-	// this conservative limit using effective closure requirements.
+	// Direct existence does not prove hidden expansion obligations. An original
+	// document allows supported closure to discharge this evidence limit.
 	for _, item := range set.Items {
-		if item.Kind == "macro" || item.Kind == "saved_search" || item.Kind == "module" || item.Kind == "function" {
+		if request.Document == nil && expansionKind(item.Kind) {
 			reason := newReason("dependency_closure_incomplete", "Supply supported dependency closure evidence to assess reachable hidden requirements.", "dependency_closure")
 			reason.RequirementID = item.ID
 			for _, o := range item.Occurrences {

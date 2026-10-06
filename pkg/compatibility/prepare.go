@@ -82,7 +82,7 @@ func Check(request Request) (*Report, error) {
 	}
 	// Validate direct configuration before query content aggregation or optional
 	// closure discovery. Effective inputs are validated separately after discovery.
-	if err := validateBindingSet(assessment.Requirements.Inputs, assessment.InputBindings); err != nil {
+	if err := validateDirectBindings(assessment); err != nil {
 		return nil, err
 	}
 	prepared, err := Prepare(request.Snapshot, request.SchemaBundle)
@@ -102,16 +102,18 @@ func (p *Prepared) checkNormalized(request AssessmentRequest) (*Report, error) {
 	if p == nil || p.env == nil {
 		return nil, requestErrorAt("request_invalid", "/snapshot", "prepared environment is required")
 	}
-	resolved, err := p.resolveInputs(request.Requirements.Inputs, request.QueryScope, request.InputBindings)
-	if err != nil {
-		return nil, err
-	}
-	return p.assess(request, resolved), nil
+	return p.assessClosure(request)
 }
 
 // validateBindingSet receives the discovered set rather than reading only the
 // direct requirement set, so effective closure discovery can use the same gate.
 func validateBindingSet(inputs []analysis.QueryInput, bindings []InputBinding) error {
+	return validateBindings(inputs, bindings, false)
+}
+func validateDirectBindings(request AssessmentRequest) error {
+	return validateBindings(request.Requirements.Inputs, request.InputBindings, request.Document != nil)
+}
+func validateBindings(inputs []analysis.QueryInput, bindings []InputBinding, allowUnknown bool) error {
 	known := map[string]analysis.QueryInput{}
 	for _, input := range inputs {
 		known[input.ID] = input
@@ -120,7 +122,7 @@ func validateBindingSet(inputs []analysis.QueryInput, bindings []InputBinding) e
 	objects := map[string]environment.ObjectIdentity{}
 	for i, b := range bindings {
 		path := fmt.Sprintf("/input_bindings/%d", i)
-		if _, exists := known[b.InputID]; !exists || !nonblank(b.InputID) || seen[b.InputID] {
+		if _, exists := known[b.InputID]; (!exists && !allowUnknown) || !nonblank(b.InputID) || seen[b.InputID] {
 			return requestErrorAt("binding_invalid", path+"/input_id", "binding requires one known input id without duplicates")
 		}
 		seen[b.InputID] = true

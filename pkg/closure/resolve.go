@@ -282,7 +282,9 @@ func (e *evaluator) visit(def Definition, contextFreeMacro bool, occurrenceID st
 			e.addGap(ClosureGap{Code: "macro_context_missing", Kind: def.Kind, Name: def.Name, Source: publicInterval(owner), Path: append([]string{}, e.active...)}, "expansion")
 		}
 		if contextFreeMacro || def.Validation != nil && *def.Validation != "" {
-			e.inspectExpansion(directExpansion(def.Document.Text, owner), owner, direct, false)
+			expanded := directExpansion(def.Document.Text, owner)
+			e.report.DefinitionContexts = append(e.report.DefinitionContexts, DefinitionContext{EdgeID: occurrenceID, ObjectID: def.ID, Provenance: publicProvenance(expanded.Segments)})
+			e.inspectExpansion(expanded, owner, direct, false)
 			e.inspectOriginalMacros(*def.Document, owner, e.active, true)
 		}
 		return
@@ -307,6 +309,7 @@ func (e *evaluator) visit(def Definition, contextFreeMacro bool, occurrenceID st
 		e.bodyDone[def.ID] = true
 	}
 	expanded := body.expanded.forOccurrence(occurrenceID)
+	e.report.DefinitionContexts = append(e.report.DefinitionContexts, DefinitionContext{EdgeID: occurrenceID, ObjectID: def.ID, Provenance: publicProvenance(expanded.Segments)})
 	owner := sourceInterval{Kind: "definition", SourceID: def.SourceID, ObjectID: def.ID, Start: 0, End: len(def.Document.Text)}
 	e.inspectExpansion(expanded, owner, body.effective, false)
 	e.inspectOriginalMacros(*def.Document, owner, e.active, false)

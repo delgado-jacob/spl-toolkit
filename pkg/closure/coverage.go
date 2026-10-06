@@ -1,8 +1,10 @@
 package closure
 
 import (
-	"github.com/delgado-jacob/spl-toolkit/pkg/analysis"
+	"encoding/json"
 	"strings"
+
+	"github.com/delgado-jacob/spl-toolkit/pkg/analysis"
 )
 
 // diagnosticProvenance maps a point to the segment starting there, or to the
@@ -82,12 +84,16 @@ func (e *evaluator) inspectExpansion(expanded expansion, owner sourceInterval, r
 		}
 		e.report.Diagnostics = append(e.report.Diagnostics, ClosureDiagnostic{Source: source, Origins: origins, Diagnostic: d})
 	}
+	inputs := map[string]analysis.QueryInput{}
+	for _, input := range result.Requirements.Inputs {
+		inputs[input.ID] = input
+	}
 	refs := map[string]analysis.Reference{}
 	for _, r := range result.References {
 		refs[r.ID] = r
 	}
 	for _, item := range result.Requirements.Items {
-		if !isObjectKind(item.Kind) || item.Kind == "macro" {
+		if !isObjectKind(item.Kind) || item.Kind == "macro" || externalSourceRequirement(item, inputs) {
 			continue
 		}
 		kind, name := item.Kind, item.Identity
@@ -283,4 +289,30 @@ func (e *evaluator) expansionGapEdge(gap opaqueGap, owner sourceInterval, expand
 		e.resolve(edge, &arity, false)
 		return
 	}
+}
+
+// Canonical source intentions belong to source binding, not knowledge-object
+// name resolution. Quoted parameter spellings and dataset descriptors still
+// follow the normal dependency path.
+func externalSourceRequirement(item analysis.RequirementItem, inputs map[string]analysis.QueryInput) bool {
+	if item.Kind != "dataset" || item.InputID == "" {
+		return false
+	}
+	input, found := inputs[item.InputID]
+	if !found {
+		return false
+	}
+	if input.Kind == "named_placeholder" {
+		return true
+	}
+	if input.Kind != "explicit_dataset" || input.Identity.Form != "descriptor" {
+		return false
+	}
+	var descriptor struct {
+		Kind string `json:"kind"`
+	}
+	if json.Unmarshal([]byte(input.Identity.Value), &descriptor) != nil {
+		return false
+	}
+	return descriptor.Kind == "index" || descriptor.Kind == "source" || descriptor.Kind == "sourcetype"
 }
