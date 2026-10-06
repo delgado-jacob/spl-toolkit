@@ -501,3 +501,78 @@ func TestRequestViewReferenceCoordinates(t *testing.T) {
 		})
 	}
 }
+
+func TestRequestRepeatedReferenceTypedSourceIdentity(t *testing.T) {
+	for _, test := range []struct {
+		name          string
+		first, second analysis.FieldIdentity
+	}{
+		{"atomic dot versus path", analysis.FieldIdentity{Kind: "atomic", Segments: []string{"actor.id"}}, analysis.FieldIdentity{Kind: "path", Segments: []string{"actor", "id"}}},
+		{"different path qualifier", analysis.FieldIdentity{Kind: "path", Qualifier: "first", Segments: []string{"actor", "id"}}, analysis.FieldIdentity{Kind: "path", Qualifier: "second", Segments: []string{"actor", "id"}}},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			r := requestFixture(t, "from $events | fields id")
+			item := &r.Requirements.Items[1]
+			item.Identity = "actor.id"
+			item.FieldIdentity = &test.first
+			second := detach(*item)
+			second.ID = "req-typed-reuse"
+			second.FieldIdentity = &test.second
+			r.Requirements.Items = append(r.Requirements.Items, second)
+			requireBothRequestErrors(t, r, "requirements_inconsistent", "/requirements/items/2/occurrences/0/reference_id")
+		})
+	}
+}
+func TestRequestRepeatedReferenceAuthorityControls(t *testing.T) {
+	for _, unproved := range []bool{false, true} {
+		name := "identical proved source"
+		if unproved {
+			name = "unproved destination"
+		}
+		t.Run(name, func(t *testing.T) {
+			r := requestFixture(t, "from $events | fields id")
+			item := &r.Requirements.Items[1]
+			item.Identity = "actor.id"
+			item.FieldIdentity = &analysis.FieldIdentity{Kind: "atomic", Segments: []string{"actor.id"}}
+			if unproved {
+				item.InputID = ""
+				item.Ownership.State = "unproved"
+				item.Necessity = "conditional"
+				item.Occurrences[0].Binding = "indeterminate"
+				item.Occurrences[0].Necessity = "conditional"
+			}
+			second := detach(*item)
+			second.ID = "req-typed-reuse"
+			if unproved {
+				second.FieldIdentity = &analysis.FieldIdentity{Kind: "path", Segments: []string{"actor", "id"}}
+			}
+			r.Requirements.Items = append(r.Requirements.Items, second)
+			if _, err := Check(r); err != nil {
+				t.Fatal(err)
+			}
+			if _, err := CheckJSON(requestRaw(t, r)); err != nil {
+				t.Fatal(err)
+			}
+		})
+	}
+	r := requestFixture(t, "from $events | join left=e right=u where e.id=u.id [from $users]")
+	second := detach(r.Requirements.Items[1])
+	second.ID = "req-typed-reuse"
+	second.InputID = r.Requirements.Inputs[1].ID
+	second.Ownership.CandidateInputIDs = []string{second.InputID}
+	second.Occurrences[0].InputOccurrenceIDs = []string{r.Requirements.Inputs[1].Occurrences[0].ID}
+	r.Requirements.Items = append(r.Requirements.Items, second)
+	requireBothRequestErrors(t, r, "requirements_inconsistent", "/requirements/items/4/occurrences/0/reference_id")
+}
+func TestRequestRepeatedReferenceRetainsSourceAuthority(t *testing.T) {
+	r := requestFixture(t, "from $events | join left=e right=u where e.id=u.id [from $users]")
+	second := detach(r.Requirements.Items[1])
+	second.ID = "req-weaker-reuse"
+	second.Resolution = "wildcard"
+	second.FieldIdentity = nil
+	r.Requirements.Items = append(r.Requirements.Items, second)
+	e := &r.Requirements.Correlation.Edges[0]
+	e.Left.FieldIdentity.Segments = []string{"contradiction"}
+	e.Keys[0].Left.FieldIdentity.Segments = []string{"contradiction"}
+	requireBothRequestErrors(t, r, "requirements_inconsistent", "/requirements/correlation/edges/0/left/field_identity")
+}

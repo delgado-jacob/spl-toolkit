@@ -369,6 +369,15 @@ func validateRequirements(set analysis.RequirementSet) error {
 			if item.Kind == "field" && item.Resolution == "exact" && item.Ownership.State == "proved" && o.Binding == "source" {
 				evidence.sourceField = item.FieldIdentity
 			}
+			if prior, known := referenceEvidence[o.ReferenceID]; known && prior.sourceField != nil {
+				if evidence.sourceField != nil && !sameFieldIdentity(*prior.sourceField, *evidence.sourceField) {
+					return requirementError(p+"/reference_id", "contradictory proved source field identity")
+				}
+				// Later incomplete evidence cannot erase an available source proof.
+				if evidence.sourceField == nil {
+					evidence.sourceField = prior.sourceField
+				}
+			}
 			referenceEvidence[o.ReferenceID] = evidence
 			if inputRef, known := sourceRefs[o.ReferenceID]; known && (inputRef.location != o.Location || inputRef.stage != "" && inputRef.stage != o.StageID || inputRef.scope != "" && inputRef.scope != o.ScopeID) {
 				return requirementError(p+"/reference_id", "contradictory source reference location")
