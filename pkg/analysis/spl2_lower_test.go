@@ -1972,3 +1972,13 @@ func TestSPL2DeferredPatternNeverExpandsAndUnionDoesNotInstallRows(t *testing.T)
 		}
 	}
 }
+
+func TestSPL2SQLBareJoinSourceSchedulesBeforePipeline(t *testing.T) {
+	r := spl2AnalyzeTest(t, `FROM alpha AS a JOIN beta AS b ON a.id=b.uid | eval selected=a.host`)
+	if r.Status != Valid || r.Correlation.Outcome != "connected" || len(r.Lineage) != 2 || r.Lineage[0].Phase != "source" {
+		t.Fatalf("bare SQL source schedule: %+v", r)
+	}
+	if item := requirementItem(r.Requirements, "field", "host", "read"); item == nil || item.Ownership.State != "proved" {
+		t.Fatalf("source alias after SQL source: %+v", item)
+	}
+}

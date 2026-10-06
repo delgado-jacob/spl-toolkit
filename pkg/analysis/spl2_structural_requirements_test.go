@@ -17,7 +17,7 @@ func TestSPL2StructuralRequirementTraceParity(t *testing.T) {
 		{"navigation", `FROM main | eval x=actor.name`, "actor.name", "actor.name", "stage-1", 1, Valid},
 		{"deep navigation", `FROM main | eval x=actor.user.name`, "actor.user.name", "actor.user.name", "stage-1", 1, Valid},
 		{"repeated navigation", `FROM main | eval x=actor.name+actor.name`, "actor.name", "actor.name", "stage-1", 2, Valid},
-		{"qualified SQL projection", `SELECT actor.name FROM main AS actor`, "name", "actor.name", "stage-0", 1, Incomplete},
+		{"qualified SQL projection", `SELECT actor.name FROM main AS actor`, "name", "actor.name", "stage-0", 1, Valid},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			document := QueryDocument{Text: tc.query, Language: "spl2"}
@@ -336,37 +336,23 @@ func TestSPL2PipelineJoinRejectsUndeclaredQualifierOwnership(t *testing.T) {
 	assertTraceDiagnosticOwner(t, trace, "Join output merge and qualified input binding are unproved", []string{declared.ID})
 }
 
-func TestSPL2SQLJoinPredicateDoesNotGainReferences(t *testing.T) {
-	query := `SELECT host FROM main AS L JOIN users AS R ON L.id=R.id`
+func TestSPL2SQLJoinPredicateProvesSourceRelativeKeys(t *testing.T) {
+	query := `SELECT L.host AS selected_host FROM main AS L JOIN users AS R ON L.id=R.uid`
 	result, trace, err := analyzeRewriteWithTrace(QueryDocument{Text: query, Language: "spl2"}, nil, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, ref := range result.References {
-		if ref.NormalizedName == "L.id" || ref.NormalizedName == "R.id" {
-			t.Fatalf("SQL join predicate gained a reference: %+v", ref)
-		}
+	if result.Correlation.Outcome != "connected" {
+		t.Fatalf("join equality graph: %+v", result.Correlation)
 	}
-	for _, item := range result.Requirements.Items {
-		if item.Identity == "L.id" || item.Identity == "R.id" {
-			t.Fatalf("SQL join predicate gained a requirement: %+v", item)
+	for _, check := range []struct{ original, name string }{{"L.id", "id"}, {"R.uid", "uid"}} {
+		item := requirementItem(result.Requirements, "field", check.name, "read")
+		if item == nil || item.Necessity != "required" || item.Ownership.State != "proved" || len(item.Occurrences) != 1 || item.Occurrences[0].OriginalName != check.original {
+			t.Fatalf("qualified key requirement: %+v", item)
 		}
-	}
-	for _, diagnostic := range trace.diagnostics {
-		if diagnostic.diagnostic.Message == "SQL join field effects are not yet modeled" && len(diagnostic.pendingReferenceIDs) != 0 {
-			t.Fatalf("SQL join limitation gained reference owners: %+v", diagnostic)
-		}
-	}
-	session, err := PrepareRewrite(QueryDocument{Text: query, Language: "spl2"}, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	for _, site := range session.Evidence().Sites {
-		if site.Identity.Name != nil && (*site.Identity.Name == "L.id" || *site.Identity.Name == "R.id") {
-			t.Fatalf("SQL join predicate gained a rewrite site: %+v", site)
-		}
-		if reflect.DeepEqual(site.Identity.Path, []string{"L", "id"}) || reflect.DeepEqual(site.Identity.Path, []string{"R", "id"}) {
-			t.Fatalf("SQL join predicate gained a path rewrite site: %+v", site)
+		entry := requirementTraceReferencesByID(trace)[item.Occurrences[0].ReferenceID]
+		if entry.reference.Binding != "source" || !entry.directExternal || entry.fieldIdentity.Qualifier != "" {
+			t.Fatalf("source-relative trace: %+v", entry)
 		}
 	}
 }

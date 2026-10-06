@@ -1170,3 +1170,211 @@ func TestSPL2SQLRecoveredCountRequiresPairedOriginalEOF(t *testing.T) {
 		}
 	}
 }
+
+func TestSPL2SQLSelectedJoinChains(t *testing.T) {
+	for _, query := range []string{
+		`SELECT a.host AS first_host, b.owner AS second_owner, c.region AS third_region FROM alpha AS a JOIN beta AS b ON b.beta_key=a.alpha_key INNER JOIN gamma AS c ON b.next_key=c.gamma_key WHERE b.enabled=true`,
+		`FROM alpha AS a JOIN beta AS b ON a.alpha_key=b.beta_key JOIN gamma AS c ON c.gamma_key=b.next_key WHERE b.enabled=true SELECT a.host AS first_host, b.owner AS second_owner, c.region AS third_region`,
+	} {
+		t.Run(query, func(t *testing.T) {
+			r := spl2AnalyzeTest(t, query)
+			if r.Status != Valid || !r.Coverage.SemanticComplete || r.Correlation.Outcome != "connected" || len(r.Correlation.Nodes) != 3 || len(r.Correlation.Edges) != 2 {
+				t.Fatalf("selected SQL chain: status=%s coverage=%+v correlation=%+v diagnostics=%+v", r.Status, r.Coverage, r.Correlation, r.Diagnostics)
+			}
+			for name, inputName := range map[string]string{"host": "alpha", "owner": "beta", "region": "gamma", "enabled": "beta"} {
+				item := requirementItem(r.Requirements, "field", name, "read")
+				if item == nil || item.Ownership.State != "proved" || item.Necessity != "required" {
+					t.Fatalf("%s requirement: %+v", name, item)
+				}
+				found := false
+				for _, input := range r.Inputs {
+					if input.ID == item.InputID && input.Name == inputName {
+						found = true
+					}
+				}
+				if !found {
+					t.Fatalf("%s owner: %+v inputs=%+v", name, item, r.Inputs)
+				}
+			}
+			assertCorpusIntegrity(t, r)
+		})
+	}
+}
+
+func TestSPL2SQLLeftJoinConditionalReads(t *testing.T) {
+	for _, join := range []string{"LEFT JOIN", "LEFT OUTER JOIN"} {
+		r := spl2AnalyzeTest(t, `SELECT b.owner AS right_owner, a.host AS left_host FROM alpha AS a `+join+` beta AS b ON a.alpha_key=b.beta_key WHERE b.enabled=true`)
+		if r.Status != Valid || r.Correlation.Outcome != "connected" {
+			t.Fatalf("left join: %+v", r)
+		}
+		for _, name := range []string{"owner", "enabled"} {
+			item := requirementItem(r.Requirements, "field", name, "read")
+			if item == nil || item.Ownership.State != "proved" || item.Necessity != "conditional" {
+				t.Fatalf("right read %s: %+v", name, item)
+			}
+		}
+		if item := requirementItem(r.Requirements, "field", "host", "read"); item == nil || item.Necessity != "required" {
+			t.Fatalf("left read: %+v", item)
+		}
+	}
+}
+
+func TestSPL2SQLJoinGroupingAndVisibility(t *testing.T) {
+	r := spl2AnalyzeTest(t, `SELECT a.host, sum(b.bytes) AS total FROM alpha AS a JOIN beta AS b ON a.alpha_key=b.beta_key GROUP BY a.host HAVING a.host="x" ORDER BY total`)
+	if r.Status != Valid || !r.Coverage.SemanticComplete || r.Correlation.Outcome != "connected" {
+		t.Fatalf("grouped join: diagnostics=%+v refs=%+v", r.Diagnostics, r.References)
+	}
+	for _, check := range []struct{ name, role string }{{"host", "group"}, {"bytes", "read"}} {
+		if item := requirementItem(r.Requirements, "field", check.name, check.role); item == nil || item.Ownership.State != "proved" {
+			t.Fatalf("group requirement: %+v", item)
+		}
+	}
+	held := spl2AnalyzeTest(t, `SELECT a.host, sum(b.bytes) AS total FROM alpha AS a JOIN beta AS b ON a.alpha_key=b.beta_key GROUP BY a.host HAVING b.owner="x"`)
+	if held.Coverage.SemanticComplete {
+		t.Fatalf("ungrouped qualified read admitted: %+v", held)
+	}
+}
+
+func TestSPL2SQLJoinHeldOwnershipBoundaries(t *testing.T) {
+	for _, query := range []string{
+		`SELECT a.host FROM alpha AS a JOIN beta AS a ON a.key=a.key`,
+		`SELECT a.host FROM alpha AS a JOIN beta AS b ON a.key=a.key`,
+		`SELECT a.host FROM alpha AS a JOIN beta AS b ON c.key=b.key`,
+		`SELECT a.host FROM alpha AS a JOIN beta AS b ON a.key.child=b.key`,
+	} {
+		r := spl2AnalyzeTest(t, query)
+		if r.Coverage.SemanticComplete || r.Correlation.Outcome == "connected" || len(r.Inputs) != 2 {
+			t.Fatalf("held join: %s %+v", query, r)
+		}
+	}
+	r := spl2AnalyzeTest(t, `SELECT host FROM alpha AS a JOIN beta AS b ON a.key=b.key`)
+	item := requirementItem(r.Requirements, "field", "host", "read")
+	if item == nil || item.Ownership.State != "unproved" || len(item.Ownership.CandidateInputIDs) != 2 {
+		t.Fatalf("unqualified join read: %+v", item)
+	}
+	self := spl2AnalyzeTest(t, `SELECT a.host AS first_host, b.host AS second_host FROM alpha AS a JOIN alpha AS b ON a.key=b.key`)
+	if self.Correlation.Outcome != "connected" || len(self.Inputs) != 1 || len(self.Inputs[0].Occurrences) != 2 {
+		t.Fatalf("self join: %+v", self)
+	}
+}
+
+func TestSPL2SQLJoinQualifiedProjectionDisambiguatesSourceNames(t *testing.T) {
+	query := `FROM $events AS e JOIN $users AS u ON e.user_id=u.id JOIN $assets AS a ON e.asset_id=a.id SELECT e.user_id AS user_id, u.id AS user_record, a.id AS asset_record`
+	r := spl2AnalyzeTest(t, query)
+	if r.Status != Valid || !r.Requirements.Coverage.Complete || r.FieldAttributionCoverage.State != "complete" || r.Correlation.Outcome != "connected" {
+		t.Fatalf("qualified labels retain independent ownership: coverage=%+v requirements=%+v diagnostics=%+v", r.Coverage, r.Requirements, r.Diagnostics)
+	}
+	// Both id obligations remain independent despite the matched-row name clash.
+	ids := map[string]bool{}
+	for _, item := range r.Requirements.Items {
+		if item.Kind == "field" && item.Identity == "id" {
+			ids[item.InputID] = true
+		}
+	}
+	if len(ids) != 2 {
+		t.Fatalf("same-name source obligations coalesced: %+v", r.Requirements.Items)
+	}
+}
+
+func TestSPL2SQLJoinOutputCollisionRetainsCandidateOwners(t *testing.T) {
+	r := spl2AnalyzeTest(t, `SELECT a.host,b.host FROM alpha AS a JOIN beta AS b ON a.alpha_key=b.beta_key | where host="x"`)
+	if r.Coverage.SemanticComplete || r.Correlation.Outcome != "connected" {
+		t.Fatalf("output collision: coverage=%+v graph=%+v", r.Coverage, r.Correlation)
+	}
+	for _, item := range r.Requirements.Items {
+		for _, occurrence := range item.Occurrences {
+			if occurrence.OriginalName == "host" {
+				if item.InputID != "" || item.Ownership.State != "unproved" || len(item.Ownership.CandidateInputIDs) != 2 || occurrence.Necessity != "conditional" {
+					t.Fatalf("collision fabricated ownership: %+v", item)
+				}
+				return
+			}
+		}
+	}
+	t.Fatal("postprojection collision read missing")
+}
+
+func TestSPL2SQLJoinANDAndLeftChain(t *testing.T) {
+	r := spl2AnalyzeTest(t, `FROM alpha AS a LEFT JOIN beta AS b ON a.alpha_key=b.beta_key AND b.name=a.name JOIN gamma AS c ON b.next_key=c.gamma_key SELECT a.host AS left_host,b.owner AS right_owner,c.region AS last_region`)
+	if r.Status != Valid || r.Correlation.Outcome != "connected" || len(r.Correlation.Edges) != 2 || len(r.Correlation.Edges[0].Keys) != 2 {
+		t.Fatalf("AND/left chain: diagnostics=%+v graph=%+v", r.Diagnostics, r.Correlation)
+	}
+	item := requirementItem(r.Requirements, "field", "next_key", "read")
+	if item == nil || item.Necessity != "conditional" || item.Ownership.State != "proved" {
+		t.Fatalf("prior left side conditional key: %+v", item)
+	}
+}
+
+func TestSPL2SQLLeftJoinClosedQualifiedReadsRemainUnavailable(t *testing.T) {
+	for _, query := range []string{
+		`SELECT a.host AS selected_host FROM alpha AS a LEFT JOIN beta AS b ON a.id=b.uid | eval later=b.secret`,
+		`SELECT a.host,count() AS n FROM alpha AS a LEFT JOIN beta AS b ON a.id=b.uid GROUP BY a.host HAVING b.secret="x"`,
+	} {
+		r := spl2AnalyzeTest(t, query)
+		ref := spl2Ref(t, r, "secret", "read")
+		if ref.Binding != "unavailable" {
+			t.Fatalf("closed LEFT field restored: %+v", ref)
+		}
+		if item := requirementItem(r.Requirements, "field", "secret", "read"); item != nil {
+			t.Fatalf("unavailable field became external obligation: %+v", item)
+		}
+	}
+}
+
+func TestSPL2SQLJoinUnqualifiedKeyDoesNotSelectLastSource(t *testing.T) {
+	r := spl2AnalyzeTest(t, `FROM alpha AS a JOIN beta AS b ON a.id=b.id | where id>0`)
+	item := requirementItem(r.Requirements, "field", "id", "read")
+	// The unqualified read is separate from the two proved qualified obligations.
+	for _, candidate := range r.Requirements.Items {
+		for _, occurrence := range candidate.Occurrences {
+			if occurrence.OriginalName == "id" {
+				item = &candidate
+			}
+		}
+	}
+	if item == nil || item.InputID != "" || item.Ownership.State != "unproved" || len(item.Ownership.CandidateInputIDs) != 2 {
+		t.Fatalf("unqualified key selected a source: %+v", item)
+	}
+}
+
+func TestSPL2SQLLeftJoinStaticStructuralReadsKeepTheirSource(t *testing.T) {
+	r := spl2AnalyzeTest(t, `SELECT e.payload.id AS event_id,u.payload.id AS user_id FROM events AS e LEFT JOIN users AS u ON e.user_key=u.id`)
+	if r.Status != Valid || r.FieldAttributionCoverage.State != "complete" {
+		t.Fatalf("static source paths: diagnostics=%+v coverage=%+v", r.Diagnostics, r.FieldAttributionCoverage)
+	}
+	seen := map[string]bool{}
+	for _, item := range r.Requirements.Items {
+		if item.Kind != "field" || item.Identity != "payload.id" {
+			continue
+		}
+		if item.FieldIdentity == nil || !reflect.DeepEqual(*item.FieldIdentity, FieldIdentity{Kind: "path", Segments: []string{"payload", "id"}}) || item.Ownership.State != "proved" {
+			t.Fatalf("source-relative structural identity: %+v", item)
+		}
+		for _, input := range r.Inputs {
+			if input.ID == item.InputID {
+				want := "required"
+				if input.Name == "users" {
+					want = "conditional"
+				}
+				if item.Necessity != want {
+					t.Fatalf("structural source conditionality: %+v", item)
+				}
+				seen[input.Name] = true
+			}
+		}
+	}
+	if len(seen) != 2 {
+		t.Fatalf("structural source paths coalesced or disappeared: %+v", r.Requirements.Items)
+	}
+	for _, ref := range r.References {
+		if ref.OriginalName == "u.payload.id" || ref.OriginalName == "e.payload.id" {
+			wantQualifier := "e"
+			if ref.OriginalName == "u.payload.id" {
+				wantQualifier = "u"
+			}
+			if ref.FieldIdentity == nil || ref.FieldIdentity.Qualifier != wantQualifier || !reflect.DeepEqual(ref.FieldIdentity.Segments, []string{"payload", "id"}) {
+				t.Fatalf("original qualified path lost: %+v", ref)
+			}
+		}
+	}
+}

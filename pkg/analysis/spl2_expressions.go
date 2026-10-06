@@ -142,7 +142,7 @@ func (s *spl2SemanticStage) expression(node antlr.Tree) spl2ExpressionEvidence {
 		baseName := ""
 		if f := base.FieldName(); f != nil && f.Identifier() != nil {
 			baseName = s.operand(f.Identifier()).Name
-			alias = s.aliases[baseName]
+			alias = s.aliases.recognizes(baseName)
 		}
 		if s.program != nil && baseName != "" {
 			if binding := s.program.imports[baseName]; binding != nil && binding.container {
@@ -187,7 +187,16 @@ func (s *spl2SemanticStage) expression(node antlr.Tree) spl2ExpressionEvidence {
 			}
 			identity := pathFieldIdentity(qualifier, segments)
 			o := locatedOperand{Name: identity.PublicName, Identity: identity, Location: s.parsed2.source.contextLocation(c), Resolution: "exact", Sound: spl2IntactSyntax(c), UnresolvedSource: true, rewrite: s.rewriteNavigation(c)}
-			id := s.readAt(o, s.expressionRole())
+			id := ""
+			if source := s.sqlQualifiedSource(qualifier, segments); source != nil {
+				relative := pathFieldIdentity("", segments)
+				if len(segments) == 1 {
+					relative = atomicFieldIdentity(segments[0])
+				}
+				id = s.sourceFieldReference(o, source, relative, s.expressionRole())
+			} else {
+				id = s.readAt(o, s.expressionRole())
+			}
 			if id != "" {
 				out.ids = append(out.ids, id)
 				r := s.result.References[len(s.result.References)-1]

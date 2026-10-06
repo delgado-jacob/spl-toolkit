@@ -2497,13 +2497,11 @@
     "canonical_evidence": "regression_snapshot",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "The approved INNER/LEFT join is syntactically admitted and semantically incomplete. Every original joined dataset remains a dependency (not merely the left FROM source). Each exact ON/projected qualified operand is forbidden from gaining a source-required root binding; qualifiers cannot become invented prefixed output fields. FROM owns incomplete join effects; unproved implicit qualified SELECT output remains incomplete. Qualified reference multiplicity/access representation and final state remain snapshot details.",
-      "status": "incomplete",
+      "basis": "Milestone 15 selected SQL join contract: explicit unique aliases own their established source occurrences. Static qualified equality keys, reversed sides, AND and established-alias chains are source-relative reads with proved correlation. Qualified SELECT reads bind their declared source, LEFT unmatched fields retain conditionality, and the default output label is the field suffix. Shared matched-row names remain ambiguity evidence, while these distinct qualified projections select the written owner. Independent TestSPL2SQLSelectedJoinChains, TestSPL2SQLLeftJoinConditionalReads and TestSPL2SQLJoinQualifiedProjectionDisambiguatesSourceNames establish the behavior; parser-only expectations remain unchanged.",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "required_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "required_codes": [],
       "forbidden_codes": [
         "SPL_SYNTAX_ERROR",
         "SPL_UNAVAILABLE_FIELD",
@@ -2534,28 +2532,38 @@
           "normalized_name": "item",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 62,
           "end": 68,
           "scope_start": 0,
           "scope_end": 68
-        }
-      ],
-      "forbidden_references": [
+        },
         {
           "original_name": "p.item",
           "start": 43,
           "end": 49,
-          "binding": "source"
+          "binding": "source",
+          "normalized_name": "item",
+          "kind": "field",
+          "role": "read"
         },
         {
           "original_name": "i.id",
           "start": 50,
           "end": 54,
-          "binding": "source"
+          "binding": "source",
+          "normalized_name": "id",
+          "kind": "field",
+          "role": "read"
         }
       ],
-      "required_fields": [],
+      "forbidden_references": [],
+      "required_fields": [
+        {
+          "name": "item",
+          "conditional": false
+        }
+      ],
       "forbidden_field_names": [
         "i.id",
         "p.item"
@@ -2564,12 +2572,12 @@
         {
           "command": "from",
           "start": 0,
-          "semantic_complete": false
+          "semantic_complete": true
         },
         {
           "command": "select",
           "start": 55,
-          "semantic_complete": false
+          "semantic_complete": true
         }
       ],
       "max_scopes": 1,
@@ -2578,12 +2586,10 @@
     "canonical": {
       "phase": "analysis",
       "scope": "canonical-result",
-      "status": "incomplete",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "expected_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "expected_codes": [],
       "references": [
         {
           "original_name": "purchases",
@@ -2608,22 +2614,45 @@
           "normalized_name": "item",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
+          "start": 43,
+          "end": 49
+        },
+        {
+          "original_name": "i.id",
+          "normalized_name": "id",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 50,
+          "end": 54
+        },
+        {
+          "original_name": "p.item",
+          "normalized_name": "item",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
           "start": 62,
           "end": 68
         }
       ],
-      "fields": [],
+      "fields": [
+        {
+          "name": "item",
+          "conditional": false
+        }
+      ],
       "removed": [],
       "open": false,
-      "uncertain": true,
+      "uncertain": false,
       "stage_commands": [
         "from",
         "select"
       ],
       "stage_complete": [
-        false,
-        false
+        true,
+        true
       ]
     }
   },
@@ -2661,13 +2690,11 @@
     "canonical_evidence": "regression_snapshot",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "The approved INNER/LEFT join is syntactically admitted and semantically incomplete. Every original joined dataset remains a dependency (not merely the left FROM source). Each exact ON/projected qualified operand is forbidden from gaining a source-required root binding; qualifiers cannot become invented prefixed output fields. FROM owns incomplete join effects; unproved implicit qualified SELECT output remains incomplete. Qualified reference multiplicity/access representation and final state remain snapshot details.",
-      "status": "incomplete",
+      "basis": "Milestone 15 selected SQL join contract: explicit unique aliases own their established source occurrences. Static qualified equality keys, reversed sides, AND and established-alias chains are source-relative reads with proved correlation. Qualified SELECT reads bind their declared source, LEFT unmatched fields retain conditionality, and the default output label is the field suffix. Shared matched-row names remain ambiguity evidence, while these distinct qualified projections select the written owner. Independent TestSPL2SQLSelectedJoinChains, TestSPL2SQLLeftJoinConditionalReads and TestSPL2SQLJoinQualifiedProjectionDisambiguatesSourceNames establish the behavior; parser-only expectations remain unchanged.",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "required_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "required_codes": [],
       "forbidden_codes": [
         "SPL_SYNTAX_ERROR",
         "SPL_UNAVAILABLE_FIELD",
@@ -2698,40 +2725,56 @@
           "normalized_name": "item",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 7,
           "end": 13,
           "scope_start": 0,
           "scope_end": 97
-        }
-      ],
-      "forbidden_references": [
+        },
         {
           "original_name": "p.item",
           "start": 68,
           "end": 74,
-          "binding": "source"
+          "binding": "source",
+          "normalized_name": "item",
+          "kind": "field",
+          "role": "read"
         },
         {
           "original_name": "i.id",
           "start": 75,
           "end": 79,
-          "binding": "source"
+          "binding": "source",
+          "normalized_name": "id",
+          "kind": "field",
+          "role": "read"
         },
         {
           "original_name": "p.site",
           "start": 84,
           "end": 90,
-          "binding": "source"
+          "binding": "source",
+          "normalized_name": "site",
+          "kind": "field",
+          "role": "read"
         },
         {
           "original_name": "i.site",
           "start": 91,
           "end": 97,
-          "binding": "source"
+          "binding": "source",
+          "normalized_name": "site",
+          "kind": "field",
+          "role": "read"
         }
       ],
-      "required_fields": [],
+      "forbidden_references": [],
+      "required_fields": [
+        {
+          "name": "item",
+          "conditional": false
+        }
+      ],
       "forbidden_field_names": [
         "i.id",
         "i.site",
@@ -2742,12 +2785,12 @@
         {
           "command": "from",
           "start": 14,
-          "semantic_complete": false
+          "semantic_complete": true
         },
         {
           "command": "select",
           "start": 0,
-          "semantic_complete": false
+          "semantic_complete": true
         }
       ],
       "max_scopes": 1,
@@ -2756,11 +2799,11 @@
     "canonical": {
       "phase": "analysis",
       "scope": "canonical-result",
-      "status": "incomplete",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
+      "semantic_complete": true,
       "expected_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
+        "SPL_AMBIGUOUS_FIELD"
       ],
       "references": [
         {
@@ -2768,7 +2811,7 @@
           "normalized_name": "item",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 7,
           "end": 13
         },
@@ -2789,19 +2832,60 @@
           "binding": "not_applicable",
           "start": 50,
           "end": 59
+        },
+        {
+          "original_name": "p.item",
+          "normalized_name": "item",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 68,
+          "end": 74
+        },
+        {
+          "original_name": "i.id",
+          "normalized_name": "id",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 75,
+          "end": 79
+        },
+        {
+          "original_name": "p.site",
+          "normalized_name": "site",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 84,
+          "end": 90
+        },
+        {
+          "original_name": "i.site",
+          "normalized_name": "site",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 91,
+          "end": 97
         }
       ],
-      "fields": [],
+      "fields": [
+        {
+          "name": "item",
+          "conditional": false
+        }
+      ],
       "removed": [],
       "open": false,
-      "uncertain": true,
+      "uncertain": false,
       "stage_commands": [
         "select",
         "from"
       ],
       "stage_complete": [
-        false,
-        false
+        true,
+        true
       ]
     }
   },
@@ -2997,7 +3081,7 @@
     "canonical_evidence": "regression_snapshot",
     "canonical_assertions": {
       "category": "recovery",
-      "basis": "Intact SqlFromClause14:33 owns purchases Dataset19:28 and source alias p. RIGHT34:39, JOIN and inventory45:54/tail are root error nodes. No SqlJoinClause or inventory Dataset survives. Root scope ruling applied to design-spec:15,21,27,75: preserve independently sound surviving original typed-node/owner evidence, withhold findings depending on damaged or inserted nodes, and do not add span/WHERE/projection/late-JOIN or generalized missing-command reconstruction to satisfy a predicate. Earlier narrowly approved SELECT/Q06 recovery remains separate. Original invalidity, syntax errors and incomplete report coverage remain; stage completeness follows its actual owned typed range rather than a rejected root tail. Remove the invented inventory dependency. Require complete FROM for its actual intact14:33 source/alias prefix, not incompleteness attributed from the rejected RIGHT root tail; the overall document remains invalid and incomplete. Require purchases dependency and complete original FROM prefix; retain syntax error/invalid/false report coverage, located prohibitions on qualified source binding and RIGHT/ON references, forbidden qualified final fields and scope bound. Exact recovered arrays remain separately labelled regression representation; no observed report values establish these predicates.",
+      "basis": "Intact SqlFromClause14:33 owns purchases Dataset19:28 and source alias p. RIGHT34:39, JOIN and inventory45:54/tail are root error nodes. No SqlJoinClause or inventory Dataset survives. Root scope ruling applied to design-spec:15,21,27,75: preserve independently sound surviving original typed-node/owner evidence, withhold findings depending on damaged or inserted nodes, and do not add span/WHERE/projection/late-JOIN or generalized missing-command reconstruction to satisfy a predicate. Earlier narrowly approved SELECT/Q06 recovery remains separate. Original invalidity, syntax errors and incomplete report coverage remain; stage completeness follows its actual owned typed range rather than a rejected root tail. Remove the invented inventory dependency. Require complete FROM for its actual intact14:33 source/alias prefix, not incompleteness attributed from the rejected RIGHT root tail; the overall document remains invalid and incomplete. Require purchases dependency and complete original FROM prefix; retain syntax error/invalid/false report coverage, located prohibitions on qualified source binding and RIGHT/ON references, forbidden qualified final fields and scope bound. Exact recovered arrays remain separately labelled regression representation; no observed report values establish these predicates. Milestone 15 correction: independently intact original FROM and admitted first JOIN clauses now own selected join effects; real static qualified keys and SELECT reads in those intact clauses bind their source. Rejected RIGHT/FULL or misplaced late JOIN tails retain all original parser invalidity and lack typed source intentions. No rejected token is promoted to a dataset, field or positive grammar shape.",
       "status": "invalid",
       "syntax_complete": false,
       "semantic_complete": false,
@@ -3077,8 +3161,7 @@
       "syntax_complete": false,
       "semantic_complete": false,
       "expected_codes": [
-        "SPL_SYNTAX_ERROR",
-        "SPL_UNSUPPORTED_SEMANTICS"
+        "SPL_SYNTAX_ERROR"
       ],
       "references": [
         {
@@ -3100,16 +3183,21 @@
           "end": 28
         }
       ],
-      "fields": [],
+      "fields": [
+        {
+          "name": "item",
+          "conditional": false
+        }
+      ],
       "removed": [],
       "open": false,
-      "uncertain": true,
+      "uncertain": false,
       "stage_commands": [
         "select",
         "from"
       ],
       "stage_complete": [
-        false,
+        true,
         true
       ]
     }
@@ -13674,13 +13762,11 @@
     "canonical_evidence": "regression_snapshot",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "The approved INNER/LEFT join is syntactically admitted and semantically incomplete. Every original joined dataset remains a dependency (not merely the left FROM source). Each exact ON/projected qualified operand is forbidden from gaining a source-required root binding; qualifiers cannot become invented prefixed output fields. FROM owns incomplete join effects; unproved implicit qualified SELECT output remains incomplete. Qualified reference multiplicity/access representation and final state remain snapshot details.",
-      "status": "incomplete",
+      "basis": "Milestone 15 selected SQL join contract: explicit unique aliases own their established source occurrences. Static qualified equality keys, reversed sides, AND and established-alias chains are source-relative reads with proved correlation. Qualified SELECT reads bind their declared source, LEFT unmatched fields retain conditionality, and the default output label is the field suffix. Shared matched-row names remain ambiguity evidence, while these distinct qualified projections select the written owner. Independent TestSPL2SQLSelectedJoinChains, TestSPL2SQLLeftJoinConditionalReads and TestSPL2SQLJoinQualifiedProjectionDisambiguatesSourceNames establish the behavior; parser-only expectations remain unchanged.",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "required_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "required_codes": [],
       "forbidden_codes": [
         "SPL_SYNTAX_ERROR",
         "SPL_UNAVAILABLE_FIELD",
@@ -13711,28 +13797,38 @@
           "normalized_name": "uid",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 52,
           "end": 57,
           "scope_start": 0,
           "scope_end": 57
-        }
-      ],
-      "forbidden_references": [
+        },
         {
           "original_name": "m.uid",
           "start": 34,
           "end": 39,
-          "binding": "source"
+          "binding": "source",
+          "normalized_name": "uid",
+          "kind": "field",
+          "role": "read"
         },
         {
           "original_name": "u.id",
           "start": 40,
           "end": 44,
-          "binding": "source"
+          "binding": "source",
+          "normalized_name": "id",
+          "kind": "field",
+          "role": "read"
         }
       ],
-      "required_fields": [],
+      "forbidden_references": [],
+      "required_fields": [
+        {
+          "name": "uid",
+          "conditional": false
+        }
+      ],
       "forbidden_field_names": [
         "m.uid",
         "u.id"
@@ -13741,12 +13837,12 @@
         {
           "command": "from",
           "start": 0,
-          "semantic_complete": false
+          "semantic_complete": true
         },
         {
           "command": "select",
           "start": 45,
-          "semantic_complete": false
+          "semantic_complete": true
         }
       ],
       "max_scopes": 1,
@@ -13755,12 +13851,10 @@
     "canonical": {
       "phase": "analysis",
       "scope": "canonical-result",
-      "status": "incomplete",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "expected_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "expected_codes": [],
       "references": [
         {
           "original_name": "main",
@@ -13785,22 +13879,45 @@
           "normalized_name": "uid",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
+          "start": 34,
+          "end": 39
+        },
+        {
+          "original_name": "u.id",
+          "normalized_name": "id",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 40,
+          "end": 44
+        },
+        {
+          "original_name": "m.uid",
+          "normalized_name": "uid",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
           "start": 52,
           "end": 57
         }
       ],
-      "fields": [],
+      "fields": [
+        {
+          "name": "uid",
+          "conditional": false
+        }
+      ],
       "removed": [],
       "open": false,
-      "uncertain": true,
+      "uncertain": false,
       "stage_commands": [
         "from",
         "select"
       ],
       "stage_complete": [
-        false,
-        false
+        true,
+        true
       ]
     }
   },
@@ -13838,13 +13955,11 @@
     "canonical_evidence": "regression_snapshot",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "The approved INNER/LEFT join is syntactically admitted and semantically incomplete. Every original joined dataset remains a dependency (not merely the left FROM source). Each exact ON/projected qualified operand is forbidden from gaining a source-required root binding; qualifiers cannot become invented prefixed output fields. FROM owns incomplete join effects; unproved implicit qualified SELECT output remains incomplete. Qualified reference multiplicity/access representation and final state remain snapshot details.",
-      "status": "incomplete",
+      "basis": "Milestone 15 selected SQL join contract: explicit unique aliases own their established source occurrences. Static qualified equality keys, reversed sides, AND and established-alias chains are source-relative reads with proved correlation. Qualified SELECT reads bind their declared source, LEFT unmatched fields retain conditionality, and the default output label is the field suffix. Shared matched-row names remain ambiguity evidence, while these distinct qualified projections select the written owner. Independent TestSPL2SQLSelectedJoinChains, TestSPL2SQLLeftJoinConditionalReads and TestSPL2SQLJoinQualifiedProjectionDisambiguatesSourceNames establish the behavior; parser-only expectations remain unchanged.",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "required_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "required_codes": [],
       "forbidden_codes": [
         "SPL_SYNTAX_ERROR",
         "SPL_UNAVAILABLE_FIELD",
@@ -13875,40 +13990,56 @@
           "normalized_name": "uid",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 7,
           "end": 12,
           "scope_start": 0,
           "scope_end": 83
-        }
-      ],
-      "forbidden_references": [
+        },
         {
           "original_name": "m.uid",
           "start": 53,
           "end": 58,
-          "binding": "source"
+          "binding": "source",
+          "normalized_name": "uid",
+          "kind": "field",
+          "role": "read"
         },
         {
           "original_name": "u.id",
           "start": 59,
           "end": 63,
-          "binding": "source"
+          "binding": "source",
+          "normalized_name": "id",
+          "kind": "field",
+          "role": "read"
         },
         {
           "original_name": "m.realm",
           "start": 68,
           "end": 75,
-          "binding": "source"
+          "binding": "source",
+          "normalized_name": "realm",
+          "kind": "field",
+          "role": "read"
         },
         {
           "original_name": "u.realm",
           "start": 76,
           "end": 83,
-          "binding": "source"
+          "binding": "source",
+          "normalized_name": "realm",
+          "kind": "field",
+          "role": "read"
         }
       ],
-      "required_fields": [],
+      "forbidden_references": [],
+      "required_fields": [
+        {
+          "name": "uid",
+          "conditional": false
+        }
+      ],
       "forbidden_field_names": [
         "m.realm",
         "m.uid",
@@ -13919,12 +14050,12 @@
         {
           "command": "from",
           "start": 13,
-          "semantic_complete": false
+          "semantic_complete": true
         },
         {
           "command": "select",
           "start": 0,
-          "semantic_complete": false
+          "semantic_complete": true
         }
       ],
       "max_scopes": 1,
@@ -13933,11 +14064,11 @@
     "canonical": {
       "phase": "analysis",
       "scope": "canonical-result",
-      "status": "incomplete",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
+      "semantic_complete": true,
       "expected_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
+        "SPL_AMBIGUOUS_FIELD"
       ],
       "references": [
         {
@@ -13945,7 +14076,7 @@
           "normalized_name": "uid",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 7,
           "end": 12
         },
@@ -13966,19 +14097,60 @@
           "binding": "not_applicable",
           "start": 39,
           "end": 44
+        },
+        {
+          "original_name": "m.uid",
+          "normalized_name": "uid",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 53,
+          "end": 58
+        },
+        {
+          "original_name": "u.id",
+          "normalized_name": "id",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 59,
+          "end": 63
+        },
+        {
+          "original_name": "m.realm",
+          "normalized_name": "realm",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 68,
+          "end": 75
+        },
+        {
+          "original_name": "u.realm",
+          "normalized_name": "realm",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 76,
+          "end": 83
         }
       ],
-      "fields": [],
+      "fields": [
+        {
+          "name": "uid",
+          "conditional": false
+        }
+      ],
       "removed": [],
       "open": false,
-      "uncertain": true,
+      "uncertain": false,
       "stage_commands": [
         "select",
         "from"
       ],
       "stage_complete": [
-        false,
-        false
+        true,
+        true
       ]
     }
   },
@@ -14333,13 +14505,11 @@
     "canonical_evidence": "regression_snapshot",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "The approved INNER/LEFT join is syntactically admitted and semantically incomplete. Every original joined dataset remains a dependency (not merely the left FROM source). Each exact ON/projected qualified operand is forbidden from gaining a source-required root binding; qualifiers cannot become invented prefixed output fields. FROM owns incomplete join effects; unproved implicit qualified SELECT output remains incomplete. Qualified reference multiplicity/access representation and final state remain snapshot details.",
-      "status": "incomplete",
+      "basis": "Milestone 15 selected SQL join contract: explicit unique aliases own their established source occurrences. Static qualified equality keys, reversed sides, AND and established-alias chains are source-relative reads with proved correlation. Qualified SELECT reads bind their declared source, LEFT unmatched fields retain conditionality, and the default output label is the field suffix. Shared matched-row names remain ambiguity evidence, while these distinct qualified projections select the written owner. Independent TestSPL2SQLSelectedJoinChains, TestSPL2SQLLeftJoinConditionalReads and TestSPL2SQLJoinQualifiedProjectionDisambiguatesSourceNames establish the behavior; parser-only expectations remain unchanged.",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "required_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "required_codes": [],
       "forbidden_codes": [
         "SPL_SYNTAX_ERROR",
         "SPL_UNAVAILABLE_FIELD",
@@ -14370,28 +14540,38 @@
           "normalized_name": "uid",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 57,
           "end": 62,
           "scope_start": 0,
           "scope_end": 62
-        }
-      ],
-      "forbidden_references": [
+        },
         {
           "original_name": "m.uid",
           "start": 39,
           "end": 44,
-          "binding": "source"
+          "binding": "source",
+          "normalized_name": "uid",
+          "kind": "field",
+          "role": "read"
         },
         {
           "original_name": "u.id",
           "start": 45,
           "end": 49,
-          "binding": "source"
+          "binding": "source",
+          "normalized_name": "id",
+          "kind": "field",
+          "role": "read"
         }
       ],
-      "required_fields": [],
+      "forbidden_references": [],
+      "required_fields": [
+        {
+          "name": "uid",
+          "conditional": false
+        }
+      ],
       "forbidden_field_names": [
         "m.uid",
         "u.id"
@@ -14400,12 +14580,12 @@
         {
           "command": "from",
           "start": 0,
-          "semantic_complete": false
+          "semantic_complete": true
         },
         {
           "command": "select",
           "start": 50,
-          "semantic_complete": false
+          "semantic_complete": true
         }
       ],
       "max_scopes": 1,
@@ -14414,12 +14594,10 @@
     "canonical": {
       "phase": "analysis",
       "scope": "canonical-result",
-      "status": "incomplete",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "expected_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "expected_codes": [],
       "references": [
         {
           "original_name": "main",
@@ -14444,22 +14622,45 @@
           "normalized_name": "uid",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
+          "start": 39,
+          "end": 44
+        },
+        {
+          "original_name": "u.id",
+          "normalized_name": "id",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 45,
+          "end": 49
+        },
+        {
+          "original_name": "m.uid",
+          "normalized_name": "uid",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
           "start": 57,
           "end": 62
         }
       ],
-      "fields": [],
+      "fields": [
+        {
+          "name": "uid",
+          "conditional": false
+        }
+      ],
       "removed": [],
       "open": false,
-      "uncertain": true,
+      "uncertain": false,
       "stage_commands": [
         "from",
         "select"
       ],
       "stage_complete": [
-        false,
-        false
+        true,
+        true
       ]
     }
   },
@@ -14497,13 +14698,11 @@
     "canonical_evidence": "regression_snapshot",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "The approved INNER/LEFT join is syntactically admitted and semantically incomplete. Every original joined dataset remains a dependency (not merely the left FROM source). Each exact ON/projected qualified operand is forbidden from gaining a source-required root binding; qualifiers cannot become invented prefixed output fields. FROM owns incomplete join effects; unproved implicit qualified SELECT output remains incomplete. Qualified reference multiplicity/access representation and final state remain snapshot details.",
-      "status": "incomplete",
+      "basis": "Milestone 15 selected SQL join contract: explicit unique aliases own their established source occurrences. Static qualified equality keys, reversed sides, AND and established-alias chains are source-relative reads with proved correlation. Qualified SELECT reads bind their declared source, LEFT unmatched fields retain conditionality, and the default output label is the field suffix. Shared matched-row names remain ambiguity evidence, while these distinct qualified projections select the written owner. Independent TestSPL2SQLSelectedJoinChains, TestSPL2SQLLeftJoinConditionalReads and TestSPL2SQLJoinQualifiedProjectionDisambiguatesSourceNames establish the behavior; parser-only expectations remain unchanged.",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "required_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "required_codes": [],
       "forbidden_codes": [
         "SPL_SYNTAX_ERROR",
         "SPL_UNAVAILABLE_FIELD",
@@ -14534,28 +14733,38 @@
           "normalized_name": "uid",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 7,
           "end": 12,
           "scope_start": 0,
           "scope_end": 68
-        }
-      ],
-      "forbidden_references": [
+        },
         {
           "original_name": "m.uid",
           "start": 58,
           "end": 63,
-          "binding": "source"
+          "binding": "source",
+          "normalized_name": "uid",
+          "kind": "field",
+          "role": "read"
         },
         {
           "original_name": "u.id",
           "start": 64,
           "end": 68,
-          "binding": "source"
+          "binding": "source",
+          "normalized_name": "id",
+          "kind": "field",
+          "role": "read"
         }
       ],
-      "required_fields": [],
+      "forbidden_references": [],
+      "required_fields": [
+        {
+          "name": "uid",
+          "conditional": false
+        }
+      ],
       "forbidden_field_names": [
         "m.uid",
         "u.id"
@@ -14564,12 +14773,12 @@
         {
           "command": "from",
           "start": 13,
-          "semantic_complete": false
+          "semantic_complete": true
         },
         {
           "command": "select",
           "start": 0,
-          "semantic_complete": false
+          "semantic_complete": true
         }
       ],
       "max_scopes": 1,
@@ -14578,19 +14787,17 @@
     "canonical": {
       "phase": "analysis",
       "scope": "canonical-result",
-      "status": "incomplete",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "expected_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "expected_codes": [],
       "references": [
         {
           "original_name": "m.uid",
           "normalized_name": "uid",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 7,
           "end": 12
         },
@@ -14611,19 +14818,42 @@
           "binding": "not_applicable",
           "start": 44,
           "end": 49
+        },
+        {
+          "original_name": "m.uid",
+          "normalized_name": "uid",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 58,
+          "end": 63
+        },
+        {
+          "original_name": "u.id",
+          "normalized_name": "id",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 64,
+          "end": 68
         }
       ],
-      "fields": [],
+      "fields": [
+        {
+          "name": "uid",
+          "conditional": false
+        }
+      ],
       "removed": [],
       "open": false,
-      "uncertain": true,
+      "uncertain": false,
       "stage_commands": [
         "select",
         "from"
       ],
       "stage_complete": [
-        false,
-        false
+        true,
+        true
       ]
     }
   },
@@ -14819,7 +15049,7 @@
     "canonical_evidence": "regression_snapshot",
     "canonical_assertions": {
       "category": "recovery",
-      "basis": "Intact SqlFromClause13:27 owns main Dataset18:22 and source alias m. FULL28:32, JOIN and users38:43/tail are root error nodes. No SqlJoinClause or users Dataset survives. Root scope ruling applied to design-spec:15,21,27,75: preserve independently sound surviving original typed-node/owner evidence, withhold findings depending on damaged or inserted nodes, and do not add span/WHERE/projection/late-JOIN or generalized missing-command reconstruction to satisfy a predicate. Earlier narrowly approved SELECT/Q06 recovery remains separate. Original invalidity, syntax errors and incomplete report coverage remain; stage completeness follows its actual owned typed range rather than a rejected root tail. Remove the invented users dependency. Require complete FROM for its actual intact13:27 source/alias prefix, not incompleteness attributed from the rejected FULL root tail; the overall document remains invalid and incomplete. Require main dependency and complete original FROM prefix; retain syntax error/invalid/false report coverage, located prohibitions on qualified source binding and FULL/ON references, forbidden qualified final fields and scope bound. Exact recovered arrays remain separately labelled regression representation; no observed report values establish these predicates.",
+      "basis": "Intact SqlFromClause13:27 owns main Dataset18:22 and source alias m. FULL28:32, JOIN and users38:43/tail are root error nodes. No SqlJoinClause or users Dataset survives. Root scope ruling applied to design-spec:15,21,27,75: preserve independently sound surviving original typed-node/owner evidence, withhold findings depending on damaged or inserted nodes, and do not add span/WHERE/projection/late-JOIN or generalized missing-command reconstruction to satisfy a predicate. Earlier narrowly approved SELECT/Q06 recovery remains separate. Original invalidity, syntax errors and incomplete report coverage remain; stage completeness follows its actual owned typed range rather than a rejected root tail. Remove the invented users dependency. Require complete FROM for its actual intact13:27 source/alias prefix, not incompleteness attributed from the rejected FULL root tail; the overall document remains invalid and incomplete. Require main dependency and complete original FROM prefix; retain syntax error/invalid/false report coverage, located prohibitions on qualified source binding and FULL/ON references, forbidden qualified final fields and scope bound. Exact recovered arrays remain separately labelled regression representation; no observed report values establish these predicates. Milestone 15 correction: independently intact original FROM and admitted first JOIN clauses now own selected join effects; real static qualified keys and SELECT reads in those intact clauses bind their source. Rejected RIGHT/FULL or misplaced late JOIN tails retain all original parser invalidity and lack typed source intentions. No rejected token is promoted to a dataset, field or positive grammar shape.",
       "status": "invalid",
       "syntax_complete": false,
       "semantic_complete": false,
@@ -14899,8 +15129,7 @@
       "syntax_complete": false,
       "semantic_complete": false,
       "expected_codes": [
-        "SPL_SYNTAX_ERROR",
-        "SPL_UNSUPPORTED_SEMANTICS"
+        "SPL_SYNTAX_ERROR"
       ],
       "references": [
         {
@@ -14922,16 +15151,21 @@
           "end": 22
         }
       ],
-      "fields": [],
+      "fields": [
+        {
+          "name": "uid",
+          "conditional": false
+        }
+      ],
       "removed": [],
       "open": false,
-      "uncertain": true,
+      "uncertain": false,
       "stage_commands": [
         "select",
         "from"
       ],
       "stage_complete": [
-        false,
+        true,
         true
       ]
     }
@@ -14970,13 +15204,11 @@
     "canonical_evidence": "regression_snapshot",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "The approved INNER/LEFT join is syntactically admitted and semantically incomplete. Every original joined dataset remains a dependency (not merely the left FROM source). Each exact ON/projected qualified operand is forbidden from gaining a source-required root binding; qualifiers cannot become invented prefixed output fields. FROM owns incomplete join effects; unproved implicit qualified SELECT output remains incomplete. Qualified reference multiplicity/access representation and final state remain snapshot details.",
-      "status": "incomplete",
+      "basis": "Milestone 15 selected SQL join contract: explicit unique aliases own their established source occurrences. Static qualified equality keys, reversed sides, AND and established-alias chains are source-relative reads with proved correlation. Qualified SELECT reads bind their declared source, LEFT unmatched fields retain conditionality, and the default output label is the field suffix. Shared matched-row names remain ambiguity evidence, while these distinct qualified projections select the written owner. Independent TestSPL2SQLSelectedJoinChains, TestSPL2SQLLeftJoinConditionalReads and TestSPL2SQLJoinQualifiedProjectionDisambiguatesSourceNames establish the behavior; parser-only expectations remain unchanged.",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "required_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "required_codes": [],
       "forbidden_codes": [
         "SPL_SYNTAX_ERROR",
         "SPL_UNAVAILABLE_FIELD",
@@ -15016,40 +15248,56 @@
           "normalized_name": "uid",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 83,
           "end": 88,
           "scope_start": 0,
           "scope_end": 88
-        }
-      ],
-      "forbidden_references": [
+        },
         {
           "original_name": "m.uid",
           "start": 34,
           "end": 39,
-          "binding": "source"
+          "binding": "source",
+          "normalized_name": "uid",
+          "kind": "field",
+          "role": "read"
         },
         {
           "original_name": "u.id",
           "start": 40,
           "end": 44,
-          "binding": "source"
+          "binding": "source",
+          "normalized_name": "id",
+          "kind": "field",
+          "role": "read"
         },
         {
           "original_name": "u.team",
           "start": 64,
           "end": 70,
-          "binding": "source"
+          "binding": "source",
+          "normalized_name": "team",
+          "kind": "field",
+          "role": "read"
         },
         {
           "original_name": "t.id",
           "start": 71,
           "end": 75,
-          "binding": "source"
+          "binding": "source",
+          "normalized_name": "id",
+          "kind": "field",
+          "role": "read"
         }
       ],
-      "required_fields": [],
+      "forbidden_references": [],
+      "required_fields": [
+        {
+          "name": "uid",
+          "conditional": false
+        }
+      ],
       "forbidden_field_names": [
         "m.uid",
         "t.id",
@@ -15060,12 +15308,12 @@
         {
           "command": "from",
           "start": 0,
-          "semantic_complete": false
+          "semantic_complete": true
         },
         {
           "command": "select",
           "start": 76,
-          "semantic_complete": false
+          "semantic_complete": true
         }
       ],
       "max_scopes": 1,
@@ -15074,11 +15322,11 @@
     "canonical": {
       "phase": "analysis",
       "scope": "canonical-result",
-      "status": "incomplete",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
+      "semantic_complete": true,
       "expected_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
+        "SPL_AMBIGUOUS_FIELD"
       ],
       "references": [
         {
@@ -15100,6 +15348,24 @@
           "end": 25
         },
         {
+          "original_name": "m.uid",
+          "normalized_name": "uid",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 34,
+          "end": 39
+        },
+        {
+          "original_name": "u.id",
+          "normalized_name": "id",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 40,
+          "end": 44
+        },
+        {
           "original_name": "teams",
           "normalized_name": "teams",
           "kind": "dataset",
@@ -15109,26 +15375,49 @@
           "end": 55
         },
         {
+          "original_name": "u.team",
+          "normalized_name": "team",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 64,
+          "end": 70
+        },
+        {
+          "original_name": "t.id",
+          "normalized_name": "id",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 71,
+          "end": 75
+        },
+        {
           "original_name": "m.uid",
           "normalized_name": "uid",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 83,
           "end": 88
         }
       ],
-      "fields": [],
+      "fields": [
+        {
+          "name": "uid",
+          "conditional": false
+        }
+      ],
       "removed": [],
       "open": false,
-      "uncertain": true,
+      "uncertain": false,
       "stage_commands": [
         "from",
         "select"
       ],
       "stage_complete": [
-        false,
-        false
+        true,
+        true
       ]
     }
   },
@@ -15166,13 +15455,11 @@
     "canonical_evidence": "regression_snapshot",
     "canonical_assertions": {
       "category": "representation",
-      "basis": "The approved INNER/LEFT join is syntactically admitted and semantically incomplete. Every original joined dataset remains a dependency (not merely the left FROM source). Each exact ON/projected qualified operand is forbidden from gaining a source-required root binding; qualifiers cannot become invented prefixed output fields. FROM owns incomplete join effects; unproved implicit qualified SELECT output remains incomplete. Qualified reference multiplicity/access representation and final state remain snapshot details.",
-      "status": "incomplete",
+      "basis": "Milestone 15 selected SQL join contract: explicit unique aliases own their established source occurrences. Static qualified equality keys, reversed sides, AND and established-alias chains are source-relative reads with proved correlation. Qualified SELECT reads bind their declared source, LEFT unmatched fields retain conditionality, and the default output label is the field suffix. Shared matched-row names remain ambiguity evidence, while these distinct qualified projections select the written owner. Independent TestSPL2SQLSelectedJoinChains, TestSPL2SQLLeftJoinConditionalReads and TestSPL2SQLJoinQualifiedProjectionDisambiguatesSourceNames establish the behavior; parser-only expectations remain unchanged. The second LEFT join reads u.team from the earlier unmatched right side: occurrence ownership is proved, but binding and necessity remain conditional.",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
-      "required_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
-      ],
+      "semantic_complete": true,
+      "required_codes": [],
       "forbidden_codes": [
         "SPL_SYNTAX_ERROR",
         "SPL_UNAVAILABLE_FIELD",
@@ -15212,40 +15499,56 @@
           "normalized_name": "uid",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 7,
           "end": 12,
           "scope_start": 0,
           "scope_end": 98
-        }
-      ],
-      "forbidden_references": [
+        },
         {
           "original_name": "m.uid",
           "start": 52,
           "end": 57,
-          "binding": "source"
+          "binding": "source",
+          "normalized_name": "uid",
+          "kind": "field",
+          "role": "read"
         },
         {
           "original_name": "u.id",
           "start": 58,
           "end": 62,
-          "binding": "source"
+          "binding": "source",
+          "normalized_name": "id",
+          "kind": "field",
+          "role": "read"
         },
         {
           "original_name": "u.team",
           "start": 87,
           "end": 93,
-          "binding": "source"
+          "binding": "indeterminate",
+          "normalized_name": "team",
+          "kind": "field",
+          "role": "read"
         },
         {
           "original_name": "t.id",
           "start": 94,
           "end": 98,
-          "binding": "source"
+          "binding": "source",
+          "normalized_name": "id",
+          "kind": "field",
+          "role": "read"
         }
       ],
-      "required_fields": [],
+      "forbidden_references": [],
+      "required_fields": [
+        {
+          "name": "uid",
+          "conditional": false
+        }
+      ],
       "forbidden_field_names": [
         "m.uid",
         "t.id",
@@ -15256,12 +15559,12 @@
         {
           "command": "from",
           "start": 13,
-          "semantic_complete": false
+          "semantic_complete": true
         },
         {
           "command": "select",
           "start": 0,
-          "semantic_complete": false
+          "semantic_complete": true
         }
       ],
       "max_scopes": 1,
@@ -15270,11 +15573,11 @@
     "canonical": {
       "phase": "analysis",
       "scope": "canonical-result",
-      "status": "incomplete",
+      "status": "valid",
       "syntax_complete": true,
-      "semantic_complete": false,
+      "semantic_complete": true,
       "expected_codes": [
-        "SPL_UNSUPPORTED_SEMANTICS"
+        "SPL_AMBIGUOUS_FIELD"
       ],
       "references": [
         {
@@ -15282,7 +15585,7 @@
           "normalized_name": "uid",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 7,
           "end": 12
         },
@@ -15305,6 +15608,24 @@
           "end": 43
         },
         {
+          "original_name": "m.uid",
+          "normalized_name": "uid",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 52,
+          "end": 57
+        },
+        {
+          "original_name": "u.id",
+          "normalized_name": "id",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 58,
+          "end": 62
+        },
+        {
           "original_name": "teams",
           "normalized_name": "teams",
           "kind": "dataset",
@@ -15312,19 +15633,42 @@
           "binding": "not_applicable",
           "start": 73,
           "end": 78
+        },
+        {
+          "original_name": "u.team",
+          "normalized_name": "team",
+          "kind": "field",
+          "role": "read",
+          "binding": "indeterminate",
+          "start": 87,
+          "end": 93
+        },
+        {
+          "original_name": "t.id",
+          "normalized_name": "id",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 94,
+          "end": 98
         }
       ],
-      "fields": [],
+      "fields": [
+        {
+          "name": "uid",
+          "conditional": false
+        }
+      ],
       "removed": [],
       "open": false,
-      "uncertain": true,
+      "uncertain": false,
       "stage_commands": [
         "select",
         "from"
       ],
       "stage_complete": [
-        false,
-        false
+        true,
+        true
       ]
     }
   },
@@ -15504,7 +15848,7 @@
     "canonical_evidence": "regression_snapshot",
     "canonical_assertions": {
       "category": "recovery",
-      "basis": "Actual SqlFromClause13:57 owns main18:22 and admitted JOIN28:57/users33:38. SqlWhereClause58:76 contains JOIN72:76 as an Access error. teams77:82 and the rest are root error nodes; no second SqlJoinClause or teams Dataset survives. Root scope ruling applied to design-spec:15,21,27,75: preserve independently sound surviving original typed-node/owner evidence, withhold findings depending on damaged or inserted nodes, and do not add span/WHERE/projection/late-JOIN or generalized missing-command reconstruction to satisfy a predicate. Earlier narrowly approved SELECT/Q06 recovery remains separate. Original invalidity, syntax errors and incomplete report coverage remain; stage completeness follows its actual owned typed range rather than a rejected root tail. Remove only the late teams dependency. Preserve dependencies for both actual first-join datasets and the existing incomplete FROM requirement for that admitted but semantically held join owner. Require main and users dependencies and incomplete FROM; preserve original invalid/false coverage/syntax error, every located qualified-source-binding prohibition, ON prohibition, forbidden qualified output names and scope bound. Exact recovered arrays remain separately labelled regression representation; no observed report values establish these predicates.",
+      "basis": "Actual SqlFromClause13:57 owns main18:22 and admitted JOIN28:57/users33:38. SqlWhereClause58:76 contains JOIN72:76 as an Access error. teams77:82 and the rest are root error nodes; no second SqlJoinClause or teams Dataset survives. Root scope ruling applied to design-spec:15,21,27,75: preserve independently sound surviving original typed-node/owner evidence, withhold findings depending on damaged or inserted nodes, and do not add span/WHERE/projection/late-JOIN or generalized missing-command reconstruction to satisfy a predicate. Earlier narrowly approved SELECT/Q06 recovery remains separate. Original invalidity, syntax errors and incomplete report coverage remain; stage completeness follows its actual owned typed range rather than a rejected root tail. Remove only the late teams dependency. Preserve dependencies for both actual first-join datasets and the existing incomplete FROM requirement for that admitted but semantically held join owner. Require main and users dependencies and incomplete FROM; preserve original invalid/false coverage/syntax error, every located qualified-source-binding prohibition, ON prohibition, forbidden qualified output names and scope bound. Exact recovered arrays remain separately labelled regression representation; no observed report values establish these predicates. Milestone 15 correction: independently intact original FROM and admitted first JOIN clauses now own selected join effects; real static qualified keys and SELECT reads in those intact clauses bind their source. Rejected RIGHT/FULL or misplaced late JOIN tails retain all original parser invalidity and lack typed source intentions. No rejected token is promoted to a dataset, field or positive grammar shape.",
       "status": "invalid",
       "syntax_complete": false,
       "semantic_complete": false,
@@ -15540,30 +15884,36 @@
           "normalized_name": "uid",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 7,
           "end": 12,
           "scope_start": 0,
           "scope_end": 102
-        }
-      ],
-      "forbidden_references": [
+        },
         {
           "original_name": "m.uid",
           "start": 47,
           "end": 52,
-          "binding": "source"
-        },
-        {
-          "original_name": "m.uid",
-          "start": 64,
-          "end": 69,
-          "binding": "source"
+          "binding": "source",
+          "normalized_name": "uid",
+          "kind": "field",
+          "role": "read"
         },
         {
           "original_name": "u.id",
           "start": 53,
           "end": 57,
+          "binding": "source",
+          "normalized_name": "id",
+          "kind": "field",
+          "role": "read"
+        }
+      ],
+      "forbidden_references": [
+        {
+          "original_name": "m.uid",
+          "start": 64,
+          "end": 69,
           "binding": "source"
         },
         {
@@ -15595,7 +15945,7 @@
         {
           "command": "from",
           "start": 13,
-          "semantic_complete": false
+          "semantic_complete": true
         }
       ],
       "max_scopes": 1,
@@ -15617,7 +15967,7 @@
           "normalized_name": "uid",
           "kind": "field",
           "role": "read",
-          "binding": "indeterminate",
+          "binding": "source",
           "start": 7,
           "end": 12
         },
@@ -15638,20 +15988,43 @@
           "binding": "not_applicable",
           "start": 33,
           "end": 38
+        },
+        {
+          "original_name": "m.uid",
+          "normalized_name": "uid",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 47,
+          "end": 52
+        },
+        {
+          "original_name": "u.id",
+          "normalized_name": "id",
+          "kind": "field",
+          "role": "read",
+          "binding": "source",
+          "start": 53,
+          "end": 57
         }
       ],
-      "fields": [],
+      "fields": [
+        {
+          "name": "uid",
+          "conditional": false
+        }
+      ],
       "removed": [],
       "open": false,
-      "uncertain": true,
+      "uncertain": false,
       "stage_commands": [
         "select",
         "from",
         "where"
       ],
       "stage_complete": [
-        false,
-        false,
+        true,
+        true,
         false
       ]
     }

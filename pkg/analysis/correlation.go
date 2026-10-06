@@ -5,6 +5,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/antlr4-go/antlr/v4"
 	"github.com/delgado-jacob/spl-toolkit/parser/spl2"
 )
 
@@ -138,14 +139,17 @@ func supplyingOccurrence(owners []sourceOwner) (sourceOwner, bool) {
 	return cloneSourceOwners([]sourceOwner{first})[0], true
 }
 func (s *spl2SemanticStage) recordJoinCorrelations(command *spl2.JoinCommandContext, ids []string, rightEnvironment *environment) {
+	s.recordSourceJoinCorrelations(command, command.SqlJoinPredicate(), ids, s.selectedJoin(command).rightAlias, rightEnvironment)
+}
+
+func (s *spl2SemanticStage) recordSourceJoinCorrelations(owner antlr.ParserRuleContext, predicate spl2.ISqlJoinPredicateContext, ids []string, rightAlias string, rightEnvironment *environment) {
 	trace := s.env.requirements.trace
 	if trace == nil {
 		return
 	}
-	selection := s.selectedJoin(command)
-	for i, equality := range command.SqlJoinPredicate().AllSqlJoinEquality() {
+	for i, equality := range predicate.AllSqlJoinEquality() {
 		left, right := trace.reference(ids[2*i]), trace.reference(ids[2*i+1])
-		if left.reference.FieldIdentity.Qualifier != selection.leftAlias {
+		if left.reference.FieldIdentity.Qualifier == rightAlias {
 			left, right = right, left
 		}
 		// A generated-only join has no external occurrence obligation. Constant
@@ -161,7 +165,7 @@ func (s *spl2SemanticStage) recordJoinCorrelations(command *spl2.JoinCommandCont
 			left: lo, right: ro, leftReference: left.pendingID, rightReference: right.pendingID,
 			leftIdentity: left.fieldIdentity.clone(), rightIdentity: right.fieldIdentity.clone(),
 			leftLocation: left.reference.Location, rightLocation: right.reference.Location,
-			location: s.parsed2.source.contextLocation(command), predicateLocation: s.parsed2.source.contextLocation(equality),
+			location: s.parsed2.source.contextLocation(owner), predicateLocation: s.parsed2.source.contextLocation(equality),
 			stageID: stage.ID, scopeID: stage.ScopeID, proved: lok && rok && left.reference.Binding != "unavailable" && right.reference.Binding != "unavailable",
 		})
 	}

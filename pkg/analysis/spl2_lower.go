@@ -8,16 +8,28 @@ import (
 	"github.com/delgado-jacob/spl-toolkit/parser/spl2"
 )
 
+// Recognition is kept separate from a proved source environment. Non-SQL and
+// correlated aliases retain their existing qualifier behavior without claiming
+// ownership; SQL joins attach only the environment established for that alias.
+type spl2SourceAlias struct {
+	environment *environment
+	conditional bool
+}
+type spl2Aliases map[string]spl2SourceAlias
+
+func (a spl2Aliases) recognizes(name string) bool { _, ok := a[name]; return ok }
+
 // SPL2 retains its own typed tree and locations. The embedded stage is only the
 // shared field-transfer kernel; its legacy SPL parser pointer stays nil.
 type spl2SemanticStage struct {
 	*semanticStage
 	parsed2                    *spl2ParsedDocument
-	aliases                    map[string]bool
+	aliases                    spl2Aliases
 	locals                     map[string]bool
 	functionSummary            *spl2FunctionSummary
 	program                    *spl2Program
 	readRole                   string
+	sqlVisibility              map[string]bool
 	suppressLocalCallReference bool
 }
 
@@ -50,7 +62,7 @@ func analyzeSPL2(result *Result, parsed *spl2ParsedDocument, refinement *sourceR
 			}
 		}
 		scheduler := &spl2ScopeScheduler{result: result, parsed: parsed, refinement: refinement, trace: trace, initialDiagnosticCount: initialDiagnosticCount, children: spl2ChildScopesIn(parsed, trees), executed: map[int]bool{}}
-		scheduler.pipeline(sites, newEnvironmentWithRequirementTrace(trace), map[string]bool{}, "scope-0", -1)
+		scheduler.pipeline(sites, newEnvironmentWithRequirementTrace(trace), spl2Aliases{}, "scope-0", -1)
 		scheduler.syncParserDiagnostics()
 	}
 	if len(result.Scopes) > 1 {

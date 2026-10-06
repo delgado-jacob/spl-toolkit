@@ -125,7 +125,7 @@ func spl2PipelineContexts(tree antlr.Tree) []antlr.ParserRuleContext {
 	return contexts
 }
 
-func (q *spl2ScopeScheduler) pipeline(sites []spl2CommandSite, env *environment, aliases map[string]bool, scopeID string, parent int) *environment {
+func (q *spl2ScopeScheduler) pipeline(sites []spl2CommandSite, env *environment, aliases spl2Aliases, scopeID string, parent int) *environment {
 	position := 0
 	for siteIndex, site := range sites {
 		ctx := site.context
@@ -318,7 +318,7 @@ func (q *spl2ScopeScheduler) selectedFlowCommandContext(ctx antlr.ParserRuleCont
 	}
 }
 
-func (q *spl2ScopeScheduler) executeDirectChild(owner antlr.ParserRuleContext, env *environment, aliases map[string]bool, scopeID string, parent int) (spl2ChildExecution, bool) {
+func (q *spl2ScopeScheduler) executeDirectChild(owner antlr.ParserRuleContext, env *environment, aliases spl2Aliases, scopeID string, parent int) (spl2ChildExecution, bool) {
 	if owner == nil {
 		return spl2ChildExecution{}, false
 	}
@@ -331,7 +331,7 @@ func (q *spl2ScopeScheduler) executeDirectChild(owner antlr.ParserRuleContext, e
 	return spl2ChildExecution{}, false
 }
 
-func (q *spl2ScopeScheduler) runChildren(ctx antlr.ParserRuleContext, env *environment, aliases map[string]bool, scopeID string, parent int) {
+func (q *spl2ScopeScheduler) runChildren(ctx antlr.ParserRuleContext, env *environment, aliases spl2Aliases, scopeID string, parent int) {
 	for i, child := range q.children {
 		if child.parent != parent || q.executed[i] || !spl2Within(child.owner, ctx) {
 			continue
@@ -348,7 +348,7 @@ func (q *spl2ScopeScheduler) runChildren(ctx antlr.ParserRuleContext, env *envir
 	}
 }
 
-func (q *spl2ScopeScheduler) executeChild(index int, env *environment, aliases map[string]bool, scopeID string, parent int) (spl2ChildExecution, bool) {
+func (q *spl2ScopeScheduler) executeChild(index int, env *environment, aliases spl2Aliases, scopeID string, parent int) (spl2ChildExecution, bool) {
 	if index < 0 || index >= len(q.children) || env == nil || q.executed[index] {
 		return spl2ChildExecution{}, false
 	}
@@ -374,7 +374,7 @@ func (q *spl2ScopeScheduler) executeChild(index int, env *environment, aliases m
 	}
 	var fork *requirementTrace
 	input := newEnvironmentWithRequirementTrace(nil)
-	localAliases := map[string]bool{}
+	localAliases := spl2Aliases{}
 	if child.input == "inherited" {
 		input = env.forkBranch()
 		fork = input.requirements.trace
@@ -384,6 +384,9 @@ func (q *spl2ScopeScheduler) executeChild(index int, env *environment, aliases m
 	}
 	if child.input != "independent" {
 		for name, value := range aliases {
+			if value.environment != nil {
+				value.environment = value.environment.cloneWithRequirementTrace(input.requirements.trace)
+			}
 			localAliases[name] = value
 		}
 	}

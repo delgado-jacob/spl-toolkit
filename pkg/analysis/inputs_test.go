@@ -373,12 +373,12 @@ func TestInputJoinedSourcesAfterLexicalBaseResolution(t *testing.T) {
 			if tc.matchDirect && len(result.Inputs[0].Occurrences[0].UseSiteLocations) != 1 {
 				t.Fatal("local view source context lost")
 			}
-			unsupported := false
-			for _, diagnostic := range result.Diagnostics {
-				unsupported = unsupported || diagnostic.Code == CodeUnsupportedSemantics && diagnostic.StageID == occurrence.StageID
-			}
-			if !unsupported || len(result.Correlation.Edges) != 0 || result.Correlation.Outcome != "indeterminate" {
-				t.Fatalf("unmodeled join gained proof: diagnostics=%#v graph=%#v", result.Diagnostics, result.Correlation)
+			if tc.matchDirect {
+				if len(result.Correlation.Edges) != 1 || result.Correlation.Outcome != "connected" {
+					t.Fatalf("resolved SQL join graph: %#v", result.Correlation)
+				}
+			} else if len(result.Correlation.Edges) != 0 || result.Correlation.Outcome != "indeterminate" {
+				t.Fatalf("unresolved imported supplier gained proof: %#v", result.Correlation)
 			}
 		})
 	}

@@ -16,12 +16,12 @@ type spl2SQLCommand interface {
 }
 
 func spl2ScheduledSQL(c spl2SQLCommand) bool {
-	return c.SqlSelectClause() != nil || c.SqlWhereClause() != nil || c.SqlGroupClause() != nil || c.SqlHavingClause() != nil || c.SqlOrderClause() != nil || c.SqlLimitClause() != nil || c.SqlOffsetClause() != nil
+	return c.SqlFromClause() != nil && len(c.SqlFromClause().AllSqlJoinClause()) > 0 || c.SqlSelectClause() != nil || c.SqlWhereClause() != nil || c.SqlGroupClause() != nil || c.SqlHavingClause() != nil || c.SqlOrderClause() != nil || c.SqlLimitClause() != nil || c.SqlOffsetClause() != nil
 }
 
 // Stages retain lexical clause order. Each phase uses its real owning clause;
 // preparation and final restriction can therefore share the one SELECT stage.
-func executeSPL2SQL(result *Result, parsed *spl2ParsedDocument, refinement *sourceRefinement, c spl2SQLCommand, env *environment, aliases map[string]bool, scheduler *spl2ScopeScheduler, scopeID string, parent, position int) *environment {
+func executeSPL2SQL(result *Result, parsed *spl2ParsedDocument, refinement *sourceRefinement, c spl2SQLCommand, env *environment, aliases spl2Aliases, scheduler *spl2ScopeScheduler, scopeID string, parent, position int) *environment {
 	provedKey := parsed.proveGroupKeyBeforeEmptyHaving(c)
 	missingSelect := parsed.groupMissingSelectDiagnostic(c)
 	selectedShape := false
@@ -91,6 +91,7 @@ func executeSPL2SQL(result *Result, parsed *spl2ParsedDocument, refinement *sour
 			}
 			s.unsupported(ctx, "Recovered SQL clause effects are not yet modeled")
 		}
+
 		if !result.Stages[s.stage].SemanticComplete && !(name == "project" && selectedShape) {
 			s.env.uncertain = true
 		}
@@ -115,15 +116,14 @@ func executeSPL2SQL(result *Result, parsed *spl2ParsedDocument, refinement *sour
 		if !resolved && !s.exactDatasetSource(dataset) {
 			s.dataset(dataset)
 		}
-		s.joinDatasetIntentions(from)
 		if a := from.SourceAlias(); a != nil {
 			o := s.operand(a.Identifier())
 			if o.Sound {
-				aliases[o.Name] = true
+				aliases[o.Name] = spl2SourceAlias{environment: s.env.clone()}
 			}
 		}
-		if len(from.AllSqlJoinClause()) > 0 {
-			s.unsupported(from, "SQL join field effects are not yet modeled")
+		for _, join := range from.AllSqlJoinClause() {
+			s.lowerSQLJoin(join)
 		}
 	})
 	phase(c.SqlWhereClause(), "filter", func() {
@@ -133,19 +133,46 @@ func executeSPL2SQL(result *Result, parsed *spl2ParsedDocument, refinement *sour
 	pregroup := s.env
 	phase(c.SqlGroupClause(), "group", func() {
 		groups := []locatedOperand{}
+		qualified := []preparedSelection{}
+		requirements := map[fieldIdentityKey]requirementField{}
 		for _, key := range c.SqlGroupClause().AllSqlGroupKey() {
-			field := spl2SQLDirectField(key.Expression())
+			field := s.sqlDirectField(key.Expression())
 			if provedKey != nil && key == provedKey.key {
-				field = provedKey.identifier
+				field = s.selector(provedKey.identifier)
 			}
-			if field != nil && key.SqlSpanAssignment() == nil {
-				groups = append(groups, s.selector(field))
-			} else {
-				s.expression(key)
-				s.unsupported(key, "SQL grouping expression output is unproved")
+			if field.Sound && (field.Identity.Qualifier == "" || !strings.Contains(field.Name, "*")) && (provedKey != nil && key == provedKey.key || s.parsed2.soundOperand(key)) && key.SqlSpanAssignment() == nil {
+				if field.Identity.Qualifier == "" {
+					groups = append(groups, field)
+					continue
+				}
+				source := s.sqlQualifiedSource(field.Identity.Qualifier, field.Identity.Segments)
+				if source != nil {
+					identity := atomicFieldIdentity(field.Name)
+					id := s.sourceFieldReference(field, source, identity, "group")
+					if projected, ok := s.sqlProjectedField(field, []string{id}); ok {
+						qualified = append(qualified, preparedSelection{Field: projected, InputReferenceIDs: []string{id}, EmitProjectTransition: true})
+						if requirement, ok := source.requirements.exactIdentityProjection(identity, []string{id}); ok {
+							k, _ := identity.privateKey()
+							requirements[k] = requirement
+						}
+					}
+					continue
+				}
 			}
+			s.expression(key)
+			s.unsupported(key, "SQL grouping expression output is unproved")
 		}
 		s.applyAggregation(nil, groups, false)
+		for _, selection := range qualified {
+			collision, owners := s.env.registerIdentityField(selection.Field)
+			if collision {
+				s.fieldIdentityCollision(selection.Field.Name, s.referenceLocation(selection.InputReferenceIDs), owners)
+			}
+			s.appendTransition(Transition{Operation: "project", Output: selection.Field.Name, OutputIdentity: transitionOutputIdentity(selection.Field.identity), InputReferenceIDs: selection.InputReferenceIDs})
+		}
+		for _, field := range requirements {
+			s.env.requirements.registerIdentityField(field)
+		}
 	})
 	aggregate := s.sqlHasAggregate(c.SqlSelectClause())
 	selectPhase := "evaluate"
@@ -181,13 +208,22 @@ func executeSPL2SQL(result *Result, parsed *spl2ParsedDocument, refinement *sour
 				if _, exact := identity.privateKey(); !exact {
 					identity = atomicFieldIdentity(selection.Field.Name)
 				}
-				if field, ok := s.env.requirements.exactIdentityProjection(identity, selection.InputReferenceIDs); ok {
+				if field, ok := s.sqlSelectionRequirement(selection); ok {
 					key, _ := identity.privateKey()
 					fields[key] = field
 				}
 			}
 			s.env.requirements.fields = fields
 			s.env.requirements.open, s.env.requirements.uncertain = false, false
+		}
+		if !selectedShape {
+			for _, selection := range selected {
+				if selection.Field.ownerCollision {
+					field := requirementField{identity: selection.Field.identity.clone(), owners: cloneSourceOwners(selection.Field.owners), source: selection.Field.source, conditional: true, ownerCollision: true, origins: copyIDs(selection.Field.OriginReferenceIDs)}
+					key, _ := field.identity.privateKey()
+					s.env.requirements.fields[key] = field
+				}
+			}
 		}
 	})
 	phase(c.SqlLimitClause(), "limit", func() {})
@@ -274,7 +310,7 @@ func (s *spl2SemanticStage) prepareSQLSelection(clause spl2.ISqlSelectClauseCont
 	}
 	for _, p := range clause.AllProjection() {
 		item := projection{ctx: p}
-		field := spl2SQLDirectField(p.Expression())
+		field := s.sqlDirectField(p.Expression())
 		access := spl2SQLFieldAccess(p.Expression())
 		var call spl2.ICallContext
 		if access != nil && len(access.AllAccessPart()) == 0 {
@@ -292,7 +328,7 @@ func (s *spl2SemanticStage) prepareSQLSelection(clause spl2.ISqlSelectClauseCont
 			s.env = input
 			s.unsupported(p, "Compound SQL aggregate output is unproved")
 		} else if aggregate || grouped {
-			if field == nil || !groups[s.operand(field).Name] {
+			if !field.Sound || !groups[field.Name] {
 				s.unsupported(p, "Mixed SQL aggregate/non-grouped projection is unproved")
 			}
 			item.value = s.sqlRestrictedExpression(p.Expression(), groups, false)
@@ -301,6 +337,14 @@ func (s *spl2SemanticStage) prepareSQLSelection(clause spl2.ISqlSelectClauseCont
 		}
 		if p.ProjectionAlias() != nil {
 			item.target = s.operand(p.ProjectionAlias().Identifier())
+			// A qualified field explicitly retaining its suffix is the same
+			// projection, with no sibling alias or new destination binding.
+			if field.Sound && field.Identity.Qualifier != "" && item.target.Name == field.Name {
+				if projected, ok := s.sqlProjectedField(field, item.value.ids); ok {
+					item.field = &projected
+					item.target = locatedOperand{}
+				}
+			}
 		} else if item.aggregate {
 			name := call.Identifier().GetText()
 			label := ""
@@ -318,10 +362,13 @@ func (s *spl2SemanticStage) prepareSQLSelection(clause spl2.ISqlSelectClauseCont
 			} else {
 				s.unsupported(p, "Implicit aggregate output label is unproved; use AS")
 			}
-		} else if field != nil {
-			if f, ok := s.projectedField(s.operand(field).Name, item.value.ids); ok {
+		} else if field.Sound {
+			if f, ok := s.sqlProjectedField(field, item.value.ids); ok {
 				item.field = &f
 			}
+		} else if spl2SQLDirectField(p.Expression()) != nil {
+			// A damaged identifier cannot supply a field or output, and the
+			// original parser finding already owns that absent proof.
 		} else {
 			s.unsupported(p, "Implicit SQL expression output label is unproved; use AS")
 		}
@@ -340,6 +387,10 @@ func (s *spl2SemanticStage) prepareSQLSelection(clause spl2.ISqlSelectClauseCont
 	}
 	collisions := map[string]bool{}
 	for _, item := range items {
+		if item.field != nil && counts[item.field.Name] > 1 {
+			collisions[item.field.Name] = true
+			s.unsupported(item.ctx, "SQL projection output field collision is unproved")
+		}
 		if !item.target.Sound {
 			continue
 		}
@@ -405,12 +456,37 @@ func (s *spl2SemanticStage) prepareSQLSelection(clause spl2.ISqlSelectClauseCont
 			}
 		}
 	}
+	// Repeated labels preserve all supplying owners as candidates; the final
+	// output cannot select an owner by whichever projection was visited last.
+	ownersByName := map[string][]sourceOwner{}
+	originsByName := map[string][]string{}
+	for _, selection := range selected {
+		name := selection.Field.Name
+		if collisions[name] {
+			ownersByName[name] = append(ownersByName[name], selection.Field.owners...)
+			originsByName[name] = append(originsByName[name], selection.Field.OriginReferenceIDs...)
+		}
+	}
+	for name, owners := range ownersByName {
+		ownersByName[name] = mergeSourceOwners(nil, owners)
+		originsByName[name] = uniqueIDs(originsByName[name])
+	}
+	for i := range selected {
+		name := selected[i].Field.Name
+		if !collisions[name] {
+			continue
+		}
+		selected[i].Field.ownerCollision = true
+		selected[i].Field.owners = cloneSourceOwners(ownersByName[name])
+		selected[i].Field.OriginReferenceIDs = copyIDs(originsByName[name])
+		visible[name] = false
+	}
 	return selected, visible, finiteShape
 }
 
-// A potential SQL destination participates in collision checks even when its
-// field state is unproved. L19's static alias-qualified suffix policy is used
-// only here: it cannot install a suffix field or authorize a source binding.
+// Potential SQL destinations participate before field creation, including
+// projections whose binding is unproved. Qualified labels use the same static
+// suffix policy as selected projections; this check itself proves no owner.
 func (s *spl2SemanticStage) sqlProjectionCollisionName(p spl2.IProjectionContext, target locatedOperand) (string, bool) {
 	local, _ := s.parsed2.recoveredCountView(p)
 	if !local.soundOperand(p) {
@@ -434,7 +510,7 @@ func (s *spl2SemanticStage) sqlProjectionCollisionName(p spl2.IProjectionContext
 	if len(parts) == 0 {
 		return base.Name, true
 	}
-	if len(parts) != 1 || !s.aliases[base.Name] || parts[0].DOT() == nil || parts[0].Identifier() == nil {
+	if len(parts) != 1 || !s.aliases.recognizes(base.Name) || parts[0].DOT() == nil || parts[0].Identifier() == nil {
 		return "", false
 	}
 	suffix := s.operand(parts[0].Identifier())
@@ -470,6 +546,9 @@ func (s *spl2SemanticStage) sqlProjectionEffectSound(ctx antlr.ParserRuleContext
 // still decides source/derived/null-test/conditional binding for every operand.
 func (s *spl2SemanticStage) sqlRestrictedExpression(tree antlr.Tree, visible map[string]bool, predicate bool) spl2ExpressionEvidence {
 	actual := s.env
+	previousVisibility := s.sqlVisibility
+	s.sqlVisibility = visible
+	defer func() { s.sqlVisibility = previousVisibility }()
 	s.env = actual.clone()
 	hidden := []locatedOperand{}
 	var inspect func(antlr.Tree)
@@ -477,6 +556,14 @@ func (s *spl2SemanticStage) sqlRestrictedExpression(tree antlr.Tree, visible map
 		switch c := node.(type) {
 		case spl2.IExistsPredicateContext, spl2.ISearchLiteralContext:
 			return
+		case spl2.IAccessContext:
+			operand := s.sqlQualifiedAccess(c)
+			if operand.Sound && operand.Identity.Qualifier != "" {
+				if !visible[operand.Name] {
+					hidden = append(hidden, operand)
+				}
+				return
+			}
 		case spl2.IFieldNameContext:
 			if c.Identifier() != nil {
 				o := s.operand(c.Identifier())
@@ -563,4 +650,218 @@ func (s *spl2SemanticStage) recoveredSQLInputs(ctx antlr.ParserRuleContext) {
 			}
 		}
 	}
+}
+
+// Alias ownership comes only from an already established SQL source. A closed
+// phase can authorize only a retained field with that same source lineage.
+func (s *spl2SemanticStage) sqlQualifiedSource(alias string, segments []string) *environment {
+	binding, known := s.aliases[alias]
+	if !known || binding.environment == nil || len(segments) == 0 {
+		return nil
+	}
+	source := binding.environment
+	identity := pathFieldIdentity("", segments)
+	if len(segments) == 1 {
+		identity = atomicFieldIdentity(segments[0])
+	}
+	key, _ := identity.privateKey()
+	if binding.conditional || !s.env.open || s.sqlVisibility != nil {
+		source = source.cloneWithRequirementTrace(s.env.requirements.trace)
+		if !s.env.open {
+			current, retained := s.env.requirements.field(identity)
+			expected := source.requirements.sourceOwners(identity)
+			if !retained || sourceOwnerKey(current.owners) != sourceOwnerKey(expected) {
+				source.open, source.requirements.open = false, false
+				source.fields = map[fieldIdentityKey]trackedField{}
+				source.requirements.fields = map[fieldIdentityKey]requirementField{}
+				source.uncertain, source.requirements.uncertain = false, false
+				return source
+			}
+		}
+		if binding.conditional || s.sqlVisibility != nil && !s.sqlVisibility[identity.PublicName] {
+			field, present := source.field(identity)
+			if !present {
+				field = trackedField{FieldBinding: FieldBinding{Name: identity.PublicName, OriginReferenceIDs: []string{}}, identity: identity, source: true, owners: source.requirements.sourceOwners(identity)}
+			}
+			field.Conditional = true
+			source.fields[key] = field
+			requirement := source.requirements.fields[key]
+			requirement.identity, requirement.source, requirement.conditional = identity, true, true
+			requirement.owners = source.requirements.sourceOwners(identity)
+			source.requirements.fields[key] = requirement
+		}
+	}
+	return source
+}
+
+func (s *spl2SemanticStage) lowerSQLJoin(join spl2.ISqlJoinClauseContext) {
+	left := s.env
+	source := *s
+	semantic := *s.semanticStage
+	semantic.env = newEnvironmentWithRequirementTrace(left.requirements.trace)
+	source.semanticStage = &semantic
+	if !source.exactDatasetSource(join.Dataset()) {
+		source.dataset(join.Dataset())
+	}
+	right := source.env
+	alias := locatedOperand{}
+	if join.SourceAlias() != nil {
+		alias = s.operand(join.SourceAlias().Identifier())
+	}
+	_, repeated := s.aliases[alias.Name]
+	sources := map[string]*environment{}
+	for name, binding := range s.aliases {
+		if binding.environment != nil {
+			environment := binding.environment
+			if binding.conditional {
+				environment = environment.cloneWithRequirementTrace(left.requirements.trace)
+				environment.uncertain, environment.requirements.uncertain = true, true
+				for key, field := range environment.fields {
+					field.Conditional = true
+					environment.fields[key] = field
+				}
+				for key, field := range environment.requirements.fields {
+					field.conditional = true
+					environment.requirements.fields[key] = field
+				}
+			}
+			sources[name] = environment
+		}
+	}
+	valid := s.commandEffectSound(join) && alias.Sound && !repeated && len(sources) > 0
+	// ANTLR may retain a clean equality prefix before a rejected OR/XOR tail.
+	// That prefix cannot prove the Boolean join predicate written by the user.
+	if token := s.nextCommandToken(join); token != nil && (token.GetTokenType() == spl2.SPL2ParserOR || token.GetTokenType() == spl2.SPL2ParserXOR) {
+		valid = false
+	}
+	if valid {
+		sources[alias.Name] = right
+	}
+	ids, predicateOK := []string{}, false
+	if valid {
+		ids, predicateOK = s.sourceJoinPredicate(join.SqlJoinPredicate(), sources, alias.Name)
+	}
+	if !valid || !predicateOK {
+		left.retainHeldJoinCandidates(right)
+		// Recognize a written qualifier while withholding its source ownership.
+		if alias.Sound {
+			s.aliases[alias.Name] = spl2SourceAlias{}
+		}
+		s.unsupportedOwned(join, "SQL join layout or qualified input binding is unproved", ids)
+		return
+	}
+	s.recordSourceJoinCorrelations(join, join.SqlJoinPredicate(), ids, alias.Name, right)
+	// Key reads teach each isolated source its field facts. Include those
+	// facts in the active left row before simultaneous composition, so an
+	// unqualified key cannot inherit only the last visited source's owner.
+	preparedLeft := left
+	names := make([]string, 0, len(sources))
+	for name := range sources {
+		if name != alias.Name {
+			names = append(names, name)
+		}
+	}
+	sort.Strings(names)
+	for _, name := range names {
+		sourceRow := sources[name].cloneWithRequirementTrace(left.requirements.trace)
+		sourceRow.uncertain = s.aliases[name].environment.uncertain
+		sourceRow.requirements.uncertain = s.aliases[name].environment.requirements.uncertain
+		combined, _, ok := composeFlowEnvironments(preparedLeft, sourceRow)
+		if !ok {
+			left.retainHeldJoinCandidates(right)
+			s.unsupportedOwned(join, "SQL join source facts are unproved", ids)
+			return
+		}
+		preparedLeft = combined
+	}
+	matched, collisions, composed := composeFlowEnvironments(preparedLeft, right)
+	if !composed {
+		left.retainHeldJoinCandidates(right)
+		s.unsupportedOwned(join, "SQL join source composition is unproved", ids)
+		return
+	}
+	paths := []flowMergePath{{Ordinal: 0, Environment: matched, Reachable: true}}
+	if join.LEFT() != nil {
+		paths = append(paths, flowMergePath{Ordinal: 1, Environment: preparedLeft.clone(), Reachable: true})
+	}
+	s.installSelectedFlowMerge(left, mergeFlowEnvironments(left, paths, false))
+	s.aliases[alias.Name] = spl2SourceAlias{environment: right, conditional: join.LEFT() != nil}
+	for _, name := range collisions {
+		s.diagnosticAtOwned(CodeAmbiguousField, "warning", "unsupported_semantics", "Join output contains fields with the same public name", s.parsed2.source.contextLocation(join), false, selectedFlowFieldOrigins(s.env, name))
+	}
+}
+
+// SQL labels use the static field suffix; a qualifier never becomes label text.
+func (s *spl2SemanticStage) sqlDirectField(tree antlr.Tree) locatedOperand {
+	if field := spl2SQLDirectField(tree); field != nil {
+		return s.selector(field)
+	}
+	access := spl2SQLFieldAccess(tree)
+	if access == nil || access.Primary().FieldName() == nil || len(access.AllAccessPart()) != 1 {
+		return locatedOperand{}
+	}
+	base := s.operand(access.Primary().FieldName().Identifier())
+	part := access.AccessPart(0)
+	if !base.Sound || !s.aliases.recognizes(base.Name) || part.DOT() == nil || part.Identifier() == nil {
+		return locatedOperand{}
+	}
+	field := s.operand(part.Identifier())
+	field.Identity = pathFieldIdentity(base.Name, []string{field.Name})
+	field.Location = s.parsed2.source.contextLocation(access)
+	return field
+}
+
+func (s *spl2SemanticStage) sqlProjectedField(field locatedOperand, ids []string) (trackedField, bool) {
+	if field.Identity.Qualifier == "" {
+		return s.projectedField(field.Name, ids)
+	}
+	source := s.sqlQualifiedSource(field.Identity.Qualifier, field.Identity.Segments)
+	if source == nil {
+		return trackedField{}, false
+	}
+	identity := atomicFieldIdentity(field.Name)
+	result, known := source.field(identity)
+	if !known {
+		return trackedField{}, false
+	}
+	result.identity = identity
+	result.Name = field.Name
+	return result, true
+}
+
+func (s *spl2SemanticStage) sqlSelectionRequirement(selection preparedSelection) (requirementField, bool) {
+	for _, id := range selection.InputReferenceIDs {
+		if trace := s.env.requirements.trace; trace != nil {
+			entry := trace.reference(id)
+			if entry.reference.Kind == "field" && entry.reference.FieldIdentity != nil && entry.reference.FieldIdentity.Qualifier != "" {
+				return requirementField{identity: selection.Field.identity.clone(), owners: cloneSourceOwners(selection.Field.owners), source: selection.Field.source, conditional: entry.conditional, ownerCollision: selection.Field.ownerCollision, origins: copyIDs(selection.Field.OriginReferenceIDs)}, true
+			}
+		}
+	}
+	return s.env.requirements.exactIdentityProjection(selection.Field.identity, selection.InputReferenceIDs)
+}
+
+// Static expression paths retain typed segments independently of the narrower
+// one-suffix SQL default label and GROUP selector contract.
+func (s *spl2SemanticStage) sqlQualifiedAccess(access spl2.IAccessContext) locatedOperand {
+	if access.Primary().FieldName() == nil {
+		return locatedOperand{}
+	}
+	base := s.operand(access.Primary().FieldName().Identifier())
+	if !base.Sound || !s.aliases.recognizes(base.Name) || len(access.AllAccessPart()) == 0 {
+		return locatedOperand{}
+	}
+	segments := []string{}
+	for _, part := range access.AllAccessPart() {
+		if part.DOT() == nil || part.Identifier() == nil {
+			return locatedOperand{}
+		}
+		field := s.operand(part.Identifier())
+		if !field.Sound {
+			return locatedOperand{}
+		}
+		segments = append(segments, field.Name)
+	}
+	identity := pathFieldIdentity(base.Name, segments)
+	return locatedOperand{Name: identity.PublicName, Identity: identity, Location: s.parsed2.source.contextLocation(access), Resolution: "exact", Sound: true}
 }

@@ -159,7 +159,7 @@ func (s *spl2SemanticStage) rewriteNavigation(access spl2.IAccessContext) rewrit
 	owner := rewriteOwner{role: "navigation", location: s.parsed2.source.contextLocation(access)}
 	if field := access.Primary().FieldName(); field != nil && field.Identifier() != nil {
 		name, ok := spl2DecodeKey(field.Identifier().GetText())
-		if !ok || s.aliases[name] {
+		if !ok || s.aliases.recognizes(name) {
 			return owner
 		}
 		path := []string{name}

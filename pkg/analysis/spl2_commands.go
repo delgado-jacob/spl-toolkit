@@ -190,7 +190,7 @@ func (s *spl2SemanticStage) command(ctx antlr.ParserRuleContext) {
 		if alias := source.SourceAlias(); alias != nil {
 			o := s.operand(alias.Identifier())
 			if o.Sound {
-				s.aliases[o.Name] = true
+				s.aliases[o.Name] = spl2SourceAlias{}
 			}
 		}
 		if len(source.AllSqlJoinClause()) > 0 || c.SqlSelectClause() != nil || c.SqlWhereClause() != nil || c.SqlGroupClause() != nil || c.SqlHavingClause() != nil || c.SqlOrderClause() != nil || c.SqlLimitClause() != nil || c.SqlOffsetClause() != nil {
@@ -352,7 +352,7 @@ func (s *spl2SemanticStage) command(ctx antlr.ParserRuleContext) {
 	}
 }
 
-func (q *spl2ScopeScheduler) lowerSelectedFlowCommand(s *spl2SemanticStage, ctx antlr.ParserRuleContext, aliases map[string]bool, scopeID string, parent int) {
+func (q *spl2ScopeScheduler) lowerSelectedFlowCommand(s *spl2SemanticStage, ctx antlr.ParserRuleContext, aliases spl2Aliases, scopeID string, parent int) {
 	switch command := ctx.(type) {
 	case *spl2.IfCommandContext:
 		q.lowerSelectedIf(s, command, aliases, scopeID, parent)
@@ -367,7 +367,7 @@ func (q *spl2ScopeScheduler) lowerSelectedFlowCommand(s *spl2SemanticStage, ctx 
 	}
 }
 
-func (q *spl2ScopeScheduler) lowerRecoveredSelectedFlowCommand(s *spl2SemanticStage, ctx antlr.ParserRuleContext, aliases map[string]bool, scopeID string, parent int, location Location) {
+func (q *spl2ScopeScheduler) lowerRecoveredSelectedFlowCommand(s *spl2SemanticStage, ctx antlr.ParserRuleContext, aliases spl2Aliases, scopeID string, parent int, location Location) {
 	base := s.env
 	paths := []flowMergePath{}
 	schedule := func(ordinal int, child antlr.ParserRuleContext) {
@@ -411,7 +411,7 @@ func (q *spl2ScopeScheduler) lowerRecoveredSelectedFlowCommand(s *spl2SemanticSt
 	s.diagnosticAtOwned(CodeUnsupportedSemantics, "warning", "unsupported_semantics", "Recovered SPL2 command effects are not yet modeled", location, true, nil)
 }
 
-func (q *spl2ScopeScheduler) lowerSelectedIf(s *spl2SemanticStage, command *spl2.IfCommandContext, aliases map[string]bool, scopeID string, parent int) {
+func (q *spl2ScopeScheduler) lowerSelectedIf(s *spl2SemanticStage, command *spl2.IfCommandContext, aliases spl2Aliases, scopeID string, parent int) {
 	for _, condition := range command.AllExpression() {
 		s.expression(condition)
 	}
@@ -430,7 +430,7 @@ func (q *spl2ScopeScheduler) lowerSelectedIf(s *spl2SemanticStage, command *spl2
 	s.installSelectedAlternativeMerge(command, base, paths, command.ELSE() == nil)
 }
 
-func (q *spl2ScopeScheduler) lowerSelectedBranch(s *spl2SemanticStage, command *spl2.BranchCommandContext, aliases map[string]bool, scopeID string, parent int) {
+func (q *spl2ScopeScheduler) lowerSelectedBranch(s *spl2SemanticStage, command *spl2.BranchCommandContext, aliases spl2Aliases, scopeID string, parent int) {
 	base := s.env
 	for _, arm := range command.AllBranchArm() {
 		s.expression(arm.Expression())
@@ -449,7 +449,7 @@ func (q *spl2ScopeScheduler) lowerSelectedBranch(s *spl2SemanticStage, command *
 	s.installSelectedAlternativeMerge(command, base, paths, false)
 }
 
-func (q *spl2ScopeScheduler) lowerSelectedUnion(s *spl2SemanticStage, command *spl2.UnionCommandContext, aliases map[string]bool, scopeID string, parent int) {
+func (q *spl2ScopeScheduler) lowerSelectedUnion(s *spl2SemanticStage, command *spl2.UnionCommandContext, aliases spl2Aliases, scopeID string, parent int) {
 	base := s.env
 	paths := make([]flowMergePath, 0, len(command.AllUnionDataset()))
 	for ordinal, input := range command.AllUnionDataset() {
@@ -473,7 +473,7 @@ func (q *spl2ScopeScheduler) lowerSelectedUnion(s *spl2SemanticStage, command *s
 		branchStage := &spl2SemanticStage{
 			semanticStage: &semanticStage{result: s.result, stage: s.stage, env: branch, transitions: []Transition{}, refinement: s.refinement},
 			parsed2:       s.parsed2,
-			aliases:       map[string]bool{},
+			aliases:       spl2Aliases{},
 			locals:        map[string]bool{},
 			program:       s.program,
 		}
@@ -608,7 +608,7 @@ func (s *spl2SemanticStage) selectedJoin(command *spl2.JoinCommandContext) spl2S
 	return selection
 }
 
-func (q *spl2ScopeScheduler) lowerSelectedJoin(s *spl2SemanticStage, command *spl2.JoinCommandContext, aliases map[string]bool, scopeID string, parent int) {
+func (q *spl2ScopeScheduler) lowerSelectedJoin(s *spl2SemanticStage, command *spl2.JoinCommandContext, aliases spl2Aliases, scopeID string, parent int) {
 	right, childOK := q.executeDirectChild(command.IndependentSearch(), s.env, aliases, scopeID, parent)
 	baseAfterChild := (*requirementTrace)(nil)
 	if s.env.requirements.trace != nil {
@@ -735,12 +735,16 @@ func (s *spl2SemanticStage) rebasedSelectedChildTrace(oldBase, child *requiremen
 }
 
 func (s *spl2SemanticStage) selectedJoinPredicate(command *spl2.JoinCommandContext, selection spl2SelectedJoin, left, right *environment) ([]string, bool) {
+	return s.sourceJoinPredicate(command.SqlJoinPredicate(), map[string]*environment{selection.leftAlias: left, selection.rightAlias: right}, selection.rightAlias)
+}
+
+func (s *spl2SemanticStage) sourceJoinPredicate(predicate spl2.ISqlJoinPredicateContext, sources map[string]*environment, rightAlias string) ([]string, bool) {
 	ids := []string{}
-	if command == nil || command.SqlJoinPredicate() == nil || left == nil || right == nil {
+	if predicate == nil {
 		return ids, false
 	}
-	valid := selection.leftAlias != "" && selection.rightAlias != ""
-	for _, equality := range command.SqlJoinPredicate().AllSqlJoinEquality() {
+	valid := rightAlias != "" && len(sources) > 1
+	for _, equality := range predicate.AllSqlJoinEquality() {
 		fields := equality.AllSqlJoinField()
 		if len(fields) != 2 {
 			valid = false
@@ -759,18 +763,17 @@ func (s *spl2SemanticStage) selectedJoinPredicate(command *spl2.JoinCommandConte
 				valid = false
 				continue
 			}
-			var source *environment
-			switch qualifier.Name {
-			case selection.leftAlias:
-				source = left
-				sides["left"] = true
-			case selection.rightAlias:
-				source = right
-				sides["right"] = true
-			default:
+			source := sources[qualifier.Name]
+			if source == nil {
 				valid = false
 				continue
 			}
+			if qualifier.Name == rightAlias {
+				sides["right"] = true
+			} else {
+				sides["left"] = true
+			}
+
 			operand := locatedOperand{
 				Name:       name.Name,
 				Identity:   pathFieldIdentity(qualifier.Name, []string{name.Name}),
@@ -793,7 +796,11 @@ func (s *spl2SemanticStage) selectedJoinPredicate(command *spl2.JoinCommandConte
 }
 
 func (s *spl2SemanticStage) selectedJoinReference(operand locatedOperand, source *environment, identity fieldIdentity) string {
-	id := s.referenceAt(operand.Location, operand.Name, "field", "read", operand.Resolution)
+	return s.sourceFieldReference(operand, source, identity, "read")
+}
+
+func (s *spl2SemanticStage) sourceFieldReference(operand locatedOperand, source *environment, identity fieldIdentity, role string) string {
+	id := s.referenceAt(operand.Location, operand.Name, "field", role, operand.Resolution)
 	if id == "" {
 		return ""
 	}
@@ -816,7 +823,10 @@ func (s *spl2SemanticStage) selectedJoinReference(operand locatedOperand, source
 
 	binding, origins := "source", []string{}
 	field, known := source.field(identity)
+	key, _ := identity.privateKey()
 	switch {
+	case !known && (source.removed[key] || !source.open):
+		binding = "unavailable"
 	case known && (field.Conditional || field.ownerCollision) || source.uncertain:
 		binding = "indeterminate"
 		if known {
@@ -830,6 +840,7 @@ func (s *spl2SemanticStage) selectedJoinReference(operand locatedOperand, source
 		origins = copyIDs(field.OriginReferenceIDs)
 	case !source.open:
 		binding = "unavailable"
+	case role == "null_test":
 	default:
 		collision, owners := source.installIdentity(identity, []string{id}, false, true)
 		if collision {
@@ -838,11 +849,12 @@ func (s *spl2SemanticStage) selectedJoinReference(operand locatedOperand, source
 	}
 	ref.Binding = binding
 	ref.OriginReferenceIDs = origins
-	s.rewriteReference(id, operand, "field", "read")
+	s.rewriteReference(id, operand, "field", role)
 	s.rewriteIdentityCoverage(operand, "field")
 	s.rewriteBinding(id, ref.Binding, origins)
-	message := "join equality field is unavailable on its declared side"
+	message := "qualified field is unavailable on its declared source"
 	switch {
+	case role == "null_test":
 	case binding == "unavailable" && requirementBinding == "unavailable":
 		s.diagnosticAtOwned(CodeUnavailableField, "error", "unavailable_field", message, operand.Location, false, []string{id})
 	case binding == "unavailable":

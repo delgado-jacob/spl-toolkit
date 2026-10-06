@@ -582,3 +582,41 @@ func publicTransitionIdentities(t *testing.T, transitions []Transition) []struct
 	}
 	return public
 }
+
+func TestFieldIdentitySQLJoinKeepsQualifiedReferenceAndRelativeRequirement(t *testing.T) {
+	result := spl2AnalyzeTest(t, `SELECT a.host AS selected_host, object.leaf AS selected_leaf FROM alpha AS a JOIN beta AS b ON a.id=b.uid`)
+	for _, ref := range result.References {
+		if ref.OriginalName == "a.host" {
+			want := FieldIdentity{Kind: "path", Qualifier: "a", Segments: []string{"host"}}
+			if ref.FieldIdentity == nil || !reflect.DeepEqual(*ref.FieldIdentity, want) {
+				t.Fatalf("qualified identity: %+v", ref)
+			}
+		}
+		if ref.OriginalName == "object.leaf" && (ref.FieldIdentity == nil || ref.FieldIdentity.Qualifier != "" || !reflect.DeepEqual(ref.FieldIdentity.Segments, []string{"object", "leaf"})) {
+			t.Fatalf("schema path reinterpreted as alias: %+v", ref)
+		}
+	}
+	item := requirementItem(result.Requirements, "field", "host", "read")
+	if item == nil || item.FieldIdentity == nil || !reflect.DeepEqual(*item.FieldIdentity, testAtomicIdentity("host")) || item.Ownership.State != "proved" {
+		t.Fatalf("source-relative requirement: %+v", item)
+	}
+}
+
+func TestFieldIdentitySQLQualifiedQuotedDottedSuffixIsAtomic(t *testing.T) {
+	r := spl2AnalyzeTest(t, `SELECT e.'user.name' FROM events AS e JOIN users AS u ON e.user_id=u.id`)
+	if r.Status != Valid {
+		t.Fatalf("quoted suffix SQL: %+v", r.Diagnostics)
+	}
+	item := requirementItem(r.Requirements, "field", "user.name", "read")
+	if item == nil || item.FieldIdentity == nil || !reflect.DeepEqual(*item.FieldIdentity, testAtomicIdentity("user.name")) {
+		t.Fatalf("quoted atomic source identity: %+v", item)
+	}
+	last := r.Lineage[len(r.Lineage)-1].After
+	if len(last.Fields) != 1 || last.Fields[0].Name != "user.name" || !reflect.DeepEqual(last.Fields[0].FieldIdentity, testAtomicIdentity("user.name")) {
+		t.Fatalf("quoted suffix label split or prefixed: %+v", last)
+	}
+	deep := spl2AnalyzeTest(t, `SELECT e.user.name FROM events AS e JOIN users AS u ON e.user_id=u.id`)
+	if deep.Coverage.SemanticComplete {
+		t.Fatalf("deeper alias path promoted: %+v", deep)
+	}
+}

@@ -108,7 +108,7 @@ func TestSPL2ScopeSchedulerReturnsChildEnvironmentAndTraceFork(t *testing.T) {
 	root := atomicFieldIdentity("root")
 	installMergeField(parent, root, []string{"pending-root"})
 
-	execution, ok := scheduler.executeChild(0, parent, map[string]bool{}, "scope-0", -1)
+	execution, ok := scheduler.executeChild(0, parent, spl2Aliases{}, "scope-0", -1)
 	if !ok || execution.Environment == nil || execution.Trace == nil {
 		t.Fatalf("child execution = %+v ok=%t", execution, ok)
 	}

@@ -179,7 +179,7 @@ func (p *spl2Program) declarationStage(declaration *spl2ProgramDeclaration) *spl
 	return &spl2SemanticStage{
 		semanticStage: &semanticStage{result: p.result, stage: declaration.stage, env: env, transitions: []Transition{}, refinement: p.refinement},
 		parsed2:       p.parsed,
-		aliases:       map[string]bool{},
+		aliases:       spl2Aliases{},
 		locals:        map[string]bool{},
 		program:       p,
 	}
@@ -327,7 +327,7 @@ func (p *spl2Program) bindView(view *spl2ViewSymbol) (*environment, bool) {
 		program:                p,
 	}
 	lineageStart := len(p.result.Lineage)
-	env := scheduler.pipeline(spl2Sites(spl2PipelineContexts(view.body), p.parsed.source), newEnvironmentWithRequirementTrace(p.trace), map[string]bool{}, view.scopeID, -1)
+	env := scheduler.pipeline(spl2Sites(spl2PipelineContexts(view.body), p.parsed.source), newEnvironmentWithRequirementTrace(p.trace), spl2Aliases{}, view.scopeID, -1)
 	scheduler.syncParserDiagnostics()
 	p.assignParserDiagnosticsToOwner(view.declaration.stage, p.parsed.source.contextLocation(view.declaration.ctx))
 	if p.claimedParserDiagnosticWithin(p.parsed.source.contextLocation(view.body)) {
@@ -559,7 +559,7 @@ func (p *spl2Program) bindCommand(stage *spl2SemanticStage, context antlr.Parser
 	if alias := from.SqlFromClause().SourceAlias(); alias != nil {
 		operand := stage.operand(alias.Identifier())
 		if operand.Sound {
-			stage.aliases[operand.Name] = true
+			stage.aliases[operand.Name] = spl2SourceAlias{}
 		}
 	}
 	return true
