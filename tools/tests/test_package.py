@@ -680,18 +680,22 @@ def test_schema_fixture_copy_rejects_changed_copy(tmp_path: Path, monkeypatch):
         checker.copy_schema_fixtures(ROOT / "testdata/schemas", tmp_path / "copy")
 
 
-def test_installed_schema_fixtures_exist_before_both_suites(tmp_path: Path, monkeypatch):
+@pytest.mark.parametrize("environment_name", ["wheel-venv", "sdist-venv"])
+def test_installed_schema_fixtures_exist_before_both_suites(tmp_path: Path, monkeypatch, environment_name):
     checker = load_package_checker()
     outside = tmp_path / "outside"
     outside.mkdir()
     wheel = tmp_path / "wheel.whl"
     wheel.write_bytes(b"wheel")
-    directory = tmp_path / "venv"
+    directory = tmp_path / environment_name
     library = directory / "lib" / checker.native_library_name()
     library.parent.mkdir(parents=True)
     library.write_bytes(b"native")
     payload_hashes = {"spl_toolkit/" + library.name: checker.sha256(library)}
     monkeypatch.setenv("SPL_SCHEMA_FIXTURES", "checkout-only")
+    checkout_library = tmp_path / "checkout-library"
+    checkout_library.write_bytes(b"unrelated inherited native library")
+    monkeypatch.setenv("SPL_NATIVE_LIBRARY", str(checkout_library))
     monkeypatch.setattr(checker, "create_test_environment", lambda _: directory / "bin/python")
     commands = []
     monkeypatch.setattr(checker, "run", lambda command, **kwargs: commands.append(command))
@@ -701,9 +705,13 @@ def test_installed_schema_fixtures_exist_before_both_suites(tmp_path: Path, monk
         checker, "verify_wheel_linus_fixture",
         lambda *args: checker.sha256(ROOT / "testdata/spl2/linus-forms.json"),
     )
-    monkeypatch.setattr(checker.subprocess, "run", lambda *args, **kwargs: subprocess.CompletedProcess(
-        args, 0, stdout=json.dumps({"installed_module": str(directory / "module.py"),
-                                   "loaded_library": str(library), "native_sha256": checker.sha256(library)}) + "\n"))
+    def installed_metadata(*args, **kwargs):
+        assert "SPL_NATIVE_LIBRARY" not in kwargs["env"]
+        return subprocess.CompletedProcess(
+            args, 0, stdout=json.dumps({"installed_module": str(directory / "module.py"),
+                                       "loaded_library": str(library), "native_sha256": checker.sha256(library)}) + "\n")
+
+    monkeypatch.setattr(checker.subprocess, "run", installed_metadata)
     go_transport = tmp_path / "go-transport.json"
     go_transport.write_text("{\"kind\":\"spl2-go-transport\"}")
     rewrite_transport = tmp_path / "rewrite-transport.json"
@@ -715,6 +723,11 @@ def test_installed_schema_fixtures_exist_before_both_suites(tmp_path: Path, monk
 
     def suite(python, tests, result, cwd, env):
         assert env["SPL_EXPECTED_VERSION"] == "0.1.1"
+        selected_library = Path(env["SPL_NATIVE_LIBRARY"])
+        assert selected_library == library and selected_library.is_file()
+        assert selected_library.is_relative_to(directory) and not selected_library.is_relative_to(ROOT)
+        assert selected_library != checkout_library
+        assert checker.sha256(selected_library) == payload_hashes["spl_toolkit/" + library.name]
         fixtures = Path(env["SPL_SCHEMA_FIXTURES"])
         assert fixtures.is_absolute() and fixtures.is_relative_to(outside)
         assert not fixtures.is_relative_to(ROOT)

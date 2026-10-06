@@ -637,6 +637,7 @@ def install_and_check(
     runtime_env = {key: "http://127.0.0.1:9" for key in ("HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY", "http_proxy", "https_proxy", "all_proxy")}
     runtime_env.update(NO_PROXY="127.0.0.1,localhost", no_proxy="127.0.0.1,localhost")
     analysis_env = runtime_env | {
+        "SPL_NATIVE_LIBRARY": metadata["loaded_library"],
         "SPL_EXPECTED_VERSION": expected_version,
         "SPL_ANALYSIS_FIXTURES": str(analysis_fixture.resolve()),
         "SPL_REQUIREMENTS_FIXTURES": str((requirements_fixtures / "cases.json").resolve()),
