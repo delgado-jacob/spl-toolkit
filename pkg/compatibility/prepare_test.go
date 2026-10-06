@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/delgado-jacob/spl-toolkit/pkg/analysis"
+	"github.com/delgado-jacob/spl-toolkit/pkg/closure"
 	"github.com/delgado-jacob/spl-toolkit/pkg/environment"
 )
 
@@ -214,7 +215,7 @@ func TestRequestBindingRequiredBeforeInvalidQueryAggregation(t *testing.T) {
 	}
 	r.InputBindings = []InputBinding{}
 	_, err := Check(r)
-	requireRequestError(t, err, "binding_missing", "/input_bindings")
+	requireRequestError(t, err, "missing_input_binding", "/input_bindings")
 }
 func TestRequestStrictNestedSchemaAdmission(t *testing.T) {
 	r := requestFixture(t, "from $events | fields id")
@@ -285,4 +286,218 @@ func TestPrepareConcurrentBindingIsolation(t *testing.T) {
 		}()
 	}
 	group.Wait()
+}
+
+func TestRequestCorrelationKnownReferenceEvidence(t *testing.T) {
+	for _, test := range []struct {
+		name, path string
+		mutate     func(*analysis.CorrelationEdge)
+	}{
+		{"known field identity", "/requirements/correlation/edges/0/left/field_identity", func(e *analysis.CorrelationEdge) {
+			e.Left.FieldIdentity.Segments = []string{"contradiction"}
+			e.Keys[0].Left.FieldIdentity.Segments = []string{"contradiction"}
+		}},
+		{"known source location", "/requirements/correlation/edges/0/left/location", func(e *analysis.CorrelationEdge) {
+			e.Left.Location.Start.Offset++
+			e.Keys[0].Left.Location.Start.Offset++
+		}},
+		{"known non-field reference", "/requirements/correlation/edges/0/left/reference_ids", func(e *analysis.CorrelationEdge) {
+			e.Left.ReferenceIDs = []string{"ref-0"}
+			e.Keys[0].Left.ReferenceIDs = []string{"ref-0"}
+		}},
+		{"first key unknown reference", "/requirements/correlation/edges/0/keys/0/left", func(e *analysis.CorrelationEdge) { e.Keys[0].Left.ReferenceIDs = []string{"unknown-derived-reference"} }},
+		{"first key unknown field", "/requirements/correlation/edges/0/keys/0/left", func(e *analysis.CorrelationEdge) {
+			e.Left.ReferenceIDs = []string{"unknown-derived-reference"}
+			e.Keys[0].Left.ReferenceIDs = []string{"unknown-derived-reference"}
+			e.Keys[0].Left.FieldIdentity.Segments = []string{"different"}
+		}},
+		{"first key unknown location", "/requirements/correlation/edges/0/keys/0/left", func(e *analysis.CorrelationEdge) {
+			e.Left.ReferenceIDs = []string{"unknown-derived-reference"}
+			e.Keys[0].Left.ReferenceIDs = []string{"unknown-derived-reference"}
+			e.Keys[0].Left.Location.Start.Offset++
+		}},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			r := requestFixture(t, "from $events | join left=e right=u where e.id=u.id [from $users]")
+			test.mutate(&r.Requirements.Correlation.Edges[0])
+			requireBothRequestErrors(t, r, "requirements_inconsistent", test.path)
+		})
+	}
+}
+func TestRequestCorrelationAvailableReferenceAuthority(t *testing.T) {
+	for _, text := range []string{
+		`from $events | join left=e right=u where e.id=u.uid AND u.region=e.region [from $users]`,
+		`from $events | join left=e right=u where e.id=u.asset_key [from $users | rename id AS asset_key]`,
+		`from $events | eval key=id+region | join left=e right=u where e.key=u.uid [from $users]`,
+		`from $events | eval k=1 | join left=e right=u where e.k=u.uid [from $users]`,
+		`$left = from $events; $right = from $users; $pair = from $left | join left=e right=u where e.id=u.uid [from $right]; $out = from $pair | union [from $pair];`,
+	} {
+		t.Run(text, func(t *testing.T) {
+			r := requestFixture(t, text)
+			if _, err := Check(r); err != nil {
+				t.Fatal(err)
+			}
+			if _, err := CheckJSON(requestRaw(t, r)); err != nil {
+				t.Fatal(err)
+			}
+		})
+	}
+	// A requirement may retain a conditional destination identity without proving
+	// a source identity. Its exact reference location still remains authoritative.
+	r := requestFixture(t, "from $events | join left=e right=u where e.id=u.id [from $users]")
+	for i := range r.Requirements.Items {
+		item := &r.Requirements.Items[i]
+		for _, o := range item.Occurrences {
+			if o.ReferenceID == r.Requirements.Correlation.Edges[0].Left.ReferenceIDs[0] {
+				item.InputID = ""
+				item.Ownership.State = "unproved"
+				item.Necessity = "conditional"
+				item.Identity = "destination"
+				item.FieldIdentity.Segments = []string{"destination"}
+				item.Occurrences[0].Binding = "indeterminate"
+				item.Occurrences[0].Necessity = "conditional"
+			}
+		}
+	}
+	if _, err := Check(r); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := CheckJSON(requestRaw(t, r)); err != nil {
+		t.Fatal(err)
+	}
+	conditional := detach(r)
+	conditional.Requirements.Correlation.Edges[0].Left.Location.Start.Offset++
+	conditional.Requirements.Correlation.Edges[0].Keys[0].Left.Location.Start.Offset++
+	requireBothRequestErrors(t, conditional, "requirements_inconsistent", "/requirements/correlation/edges/0/left/location")
+	// Unknown derived references are intentionally outside the partial Items inventory.
+	r = requestFixture(t, "from $events | join left=e right=u where e.id=u.id [from $users]")
+	e := &r.Requirements.Correlation.Edges[0]
+	e.Left.ReferenceIDs = []string{"unknown-derived-reference"}
+	e.Keys[0].Left.ReferenceIDs = []string{"unknown-derived-reference"}
+	if _, err := Check(r); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := CheckJSON(requestRaw(t, r)); err != nil {
+		t.Fatal(err)
+	}
+}
+func TestRequestCorrelationAtomicDotDistinctFromPath(t *testing.T) {
+	r := requestFixture(t, "from $events | join left=e right=u where e.id=u.id [from $users]")
+	e := &r.Requirements.Correlation.Edges[0]
+	for i := range r.Requirements.Items {
+		item := &r.Requirements.Items[i]
+		for _, o := range item.Occurrences {
+			if o.ReferenceID == e.Left.ReferenceIDs[0] {
+				item.Identity = "actor.id"
+				item.FieldIdentity = &analysis.FieldIdentity{Kind: "atomic", Segments: []string{"actor.id"}}
+			}
+		}
+	}
+	e.Left.FieldIdentity = analysis.FieldIdentity{Kind: "path", Segments: []string{"actor", "id"}}
+	e.Keys[0].Left.FieldIdentity = detach(e.Left.FieldIdentity)
+	requireBothRequestErrors(t, r, "requirements_inconsistent", "/requirements/correlation/edges/0/left/field_identity")
+}
+
+func requireBothRequestErrors(t *testing.T, r Request, code, path string) {
+	t.Helper()
+	t.Run("typed", func(t *testing.T) { _, err := Check(r); requireRequestError(t, err, code, path) })
+	t.Run("json", func(t *testing.T) { _, err := CheckJSON(requestRaw(t, r)); requireRequestError(t, err, code, path) })
+}
+func TestRequestMissingInputBindingCode(t *testing.T) {
+	r := requestFixture(t, "from $events | fields id")
+	r.InputBindings = []InputBinding{}
+	requireBothRequestErrors(t, r, "missing_input_binding", "/input_bindings")
+}
+
+func TestPrepareAutomaticObjectEvidenceDetached(t *testing.T) {
+	r := requestFixture(t, "from events | fields id")
+	r.Snapshot.Objects[0].Document = &analysis.QueryDocument{Text: "search"}
+	start, end := 0, 6
+	r.Snapshot.Objects[0].Relations = []closure.Relation{{Kind: "lookup", Name: "table", Start: &start, End: &end}}
+	p, err := Prepare(r.Snapshot, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	first, err := p.Check(r.assessment())
+	if err != nil {
+		t.Fatal(err)
+	}
+	object := first.Inputs[0].Objects[0].Object
+	object.Document.Text = "report changed"
+	*object.Relations[0].Start = 1
+	object.Relations[0].Name = "report changed"
+	second, err := p.Check(r.assessment())
+	if err != nil {
+		t.Fatal(err)
+	}
+	object = second.Inputs[0].Objects[0].Object
+	if object.Document.Text != "search" || *object.Relations[0].Start != 0 || object.Relations[0].Name != "table" {
+		t.Fatalf("returned automatic object evidence aliases prepared snapshot: %#v %#v", object.Document, object.Relations)
+	}
+}
+
+func TestRequestCorrelationAuthoredPositiveChecks(t *testing.T) {
+	raw, err := os.ReadFile("../../testdata/compatibility/cases.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var fixtures []struct {
+		Name         string                    `json:"name"`
+		Document     analysis.QueryDocument    `json:"document"`
+		Snapshot     environment.Snapshot      `json:"snapshot"`
+		SchemaBundle *environment.SchemaBundle `json:"schema_bundle"`
+		QueryScope   environment.CaptureScope  `json:"query_scope"`
+		Bindings     map[string]struct {
+			ObjectID string                     `json:"object_id"`
+			Expected environment.ObjectIdentity `json:"expected"`
+			SchemaID string                     `json:"schema_id"`
+		} `json:"bindings"`
+	}
+	if err := json.Unmarshal(raw, &fixtures); err != nil {
+		t.Fatal(err)
+	}
+	checked := 0
+	for _, fixture := range fixtures {
+		if fixture.Name != "pipeline-three-input-renamed-key" && fixture.Name != "same-name-key-chain-proved-rename" {
+			continue
+		}
+		checked++
+		t.Run(fixture.Name, func(t *testing.T) {
+			requirements, err := analysis.Requirements(fixture.Document)
+			if err != nil {
+				t.Fatal(err)
+			}
+			r := Request{SchemaVersion: 1, Requirements: *requirements, QueryScope: fixture.QueryScope, InputBindings: []InputBinding{}, Snapshot: fixture.Snapshot, SchemaBundle: fixture.SchemaBundle}
+			for _, input := range requirements.Inputs {
+				if binding, found := fixture.Bindings[input.Kind+":"+input.Name]; found {
+					r.InputBindings = append(r.InputBindings, InputBinding{InputID: input.ID, ObjectID: binding.ObjectID, Expected: binding.Expected, SchemaID: binding.SchemaID})
+				}
+			}
+			if _, err := Check(r); err != nil {
+				t.Fatal(err)
+			}
+			if _, err := CheckJSON(requestRaw(t, r)); err != nil {
+				t.Fatal(err)
+			}
+		})
+	}
+	if checked != 2 {
+		t.Fatalf("missing authored positive fixtures: %d", checked)
+	}
+}
+func TestRequestViewReferenceCoordinates(t *testing.T) {
+	text := `$left = from $events; $right = from $users; $pair = from $left | join left=e right=u where e.id=u.uid [from $right]; $out = from $pair | union [from $pair];`
+	for _, test := range []struct {
+		name, path string
+		mutate     func(*Request)
+	}{
+		{"original source", "/requirements/inputs/0/occurrences/1/original_reference_id", func(r *Request) { r.Requirements.Inputs[0].Occurrences[1].Location.Start.Offset++ }},
+		{"terminal source", "/requirements/inputs/1/occurrences/0/use_site_locations/1", func(r *Request) { r.Requirements.Inputs[1].Occurrences[0].UseSiteLocations[1].Start.Offset++ }},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			r := requestFixture(t, text)
+			test.mutate(&r)
+			requireBothRequestErrors(t, r, "requirements_inconsistent", test.path)
+		})
+	}
 }

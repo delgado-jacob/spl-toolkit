@@ -159,7 +159,7 @@ func validateBindingSet(inputs []analysis.QueryInput, bindings []InputBinding) e
 	}
 	for _, input := range inputs {
 		if input.Kind == "named_placeholder" && !seen[input.ID] {
-			return requestErrorAt("binding_missing", "/input_bindings", "each discovered placeholder requires exactly one binding")
+			return requestErrorAt("missing_input_binding", "/input_bindings", "each discovered placeholder requires exactly one binding")
 		}
 	}
 	return nil
@@ -254,7 +254,7 @@ func (p *Prepared) resolveInputs(inputs []analysis.QueryInput, scope environment
 			for _, object := range p.snapshot.Objects {
 				identity := objectIdentity(object)
 				if consistentExplicit(input, intended, identity) && identityInScope(scope, identity) {
-					value.objects = append(value.objects, object)
+					value.objects = append(value.objects, detach(object))
 				}
 			}
 			value.explicitSourceEvidence = true

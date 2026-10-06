@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"slices"
 	"strings"
 
 	"github.com/delgado-jacob/spl-toolkit/internal/capabilityselector"
@@ -133,7 +134,30 @@ func validateRequirements(set analysis.RequirementSet) error {
 	}
 	inputs := map[string]analysis.QueryInput{}
 	occurrences := map[string]string{}
-	sourceRefs := map[string]analysis.InputOccurrence{}
+	type sourceReferenceFact struct {
+		location     analysis.Location
+		stage, scope string
+	}
+	sourceRefs := map[string]sourceReferenceFact{}
+	recordSourceReference := func(id string, location analysis.Location, stage, scope, path string) error {
+		if id == "" {
+			return nil
+		}
+		prior, known := sourceRefs[id]
+		if known && (prior.location != location || prior.stage != "" && stage != "" && prior.stage != stage || prior.scope != "" && scope != "" && prior.scope != scope) {
+			return requirementError(path, "contradictory source reference")
+		}
+		if known {
+			if stage == "" {
+				stage = prior.stage
+			}
+			if scope == "" {
+				scope = prior.scope
+			}
+		}
+		sourceRefs[id] = sourceReferenceFact{location: location, stage: stage, scope: scope}
+		return nil
+	}
 	identities := map[analysis.InputIdentity]map[string]bool{}
 	for i, input := range set.Inputs {
 		path := fmt.Sprintf("/inputs/%d", i)
@@ -204,11 +228,28 @@ func validateRequirements(set analysis.RequirementSet) error {
 					return requirementError(p+"/use_site_locations", "invalid use-site location")
 				}
 			}
-			if prior, known := sourceRefs[o.ReferenceID]; known && o.ReferenceID != "" && (prior.Location != o.Location || prior.StageID != o.StageID || prior.ScopeID != o.ScopeID) {
-				return requirementError(p+"/reference_id", "contradictory source reference")
+			// Situated views retain the original source location while replacing
+			// reference/stage/scope with the terminal use. Original coordinates
+			// have no corresponding original stage/scope in this public shape.
+			if err := recordSourceReference(o.OriginalReferenceID, o.Location, "", "", p+"/original_reference_id"); err != nil {
+				return err
 			}
-			if o.ReferenceID != "" {
-				sourceRefs[o.ReferenceID] = o
+			if len(o.UseSiteReferenceIDs) > 0 && o.ReferenceID != o.UseSiteReferenceIDs[len(o.UseSiteReferenceIDs)-1] {
+				return requirementError(p+"/reference_id", "terminal reference disagrees with the use-site chain")
+			}
+			for k, id := range o.UseSiteReferenceIDs {
+				stage, scope := "", ""
+				if k == len(o.UseSiteReferenceIDs)-1 {
+					stage, scope = o.StageID, o.ScopeID
+				}
+				if err := recordSourceReference(id, o.UseSiteLocations[k], stage, scope, fmt.Sprintf("%s/use_site_locations/%d", p, k)); err != nil {
+					return err
+				}
+			}
+			if len(o.UseSiteLocations) == 0 {
+				if err := recordSourceReference(o.ReferenceID, o.Location, o.StageID, o.ScopeID, p+"/reference_id"); err != nil {
+					return err
+				}
 			}
 			occurrences[o.ID] = input.ID
 		}
@@ -220,7 +261,7 @@ func validateRequirements(set analysis.RequirementSet) error {
 	}
 	referenceFacts := map[string]referenceFact{}
 	itemIDs := map[string]bool{}
-	referenceOwners := map[string]string{}
+	referenceEvidence := map[string]correlationReferenceFact{}
 	for i, item := range set.Items {
 		path := fmt.Sprintf("/items/%d", i)
 		if !nonblank(item.ID) || itemIDs[item.ID] {
@@ -319,11 +360,17 @@ func validateRequirements(set analysis.RequirementSet) error {
 				return requirementError(p+"/reference_id", "contradictory reference identity or location")
 			}
 			referenceFacts[o.ReferenceID] = fact
-			if prior, known := referenceOwners[o.ReferenceID]; known && prior != item.InputID {
+			if prior, known := referenceEvidence[o.ReferenceID]; known && prior.inputID != item.InputID {
 				return requirementError(p+"/reference_id", "contradictory proved reference owner")
 			}
-			referenceOwners[o.ReferenceID] = item.InputID
-			if inputRef, known := sourceRefs[o.ReferenceID]; known && (inputRef.Location != o.Location || inputRef.StageID != o.StageID || inputRef.ScopeID != o.ScopeID) {
+			evidence := correlationReferenceFact{inputID: item.InputID, kind: item.Kind, location: o.Location}
+			// A conditional or derived destination can retain a requirement without
+			// establishing the source field identity used by this reference.
+			if item.Kind == "field" && item.Resolution == "exact" && item.Ownership.State == "proved" && o.Binding == "source" {
+				evidence.sourceField = item.FieldIdentity
+			}
+			referenceEvidence[o.ReferenceID] = evidence
+			if inputRef, known := sourceRefs[o.ReferenceID]; known && (inputRef.location != o.Location || inputRef.stage != "" && inputRef.stage != o.StageID || inputRef.scope != "" && inputRef.scope != o.ScopeID) {
 				return requirementError(p+"/reference_id", "contradictory source reference location")
 			}
 		}
@@ -345,9 +392,24 @@ func validateRequirements(set analysis.RequirementSet) error {
 			return requirementError(fmt.Sprintf("/diagnostics/%d/location", i), "invalid diagnostic location")
 		}
 	}
-	return validateCorrelation(set.Correlation, occurrences, referenceOwners)
+	return validateCorrelation(set.Correlation, occurrences, referenceEvidence)
 }
-func validateCorrelation(graph analysis.CorrelationGraph, occurrences map[string]string, referenceOwners map[string]string) error {
+
+// The Items projection is a partial reference inventory. Retain only facts
+// actually submitted there; absent derived-key references remain unknown.
+type correlationReferenceFact struct {
+	inputID, kind string
+	location      analysis.Location
+	sourceField   *analysis.FieldIdentity
+}
+
+func sameFieldIdentity(a, b analysis.FieldIdentity) bool {
+	return a.Kind == b.Kind && a.Qualifier == b.Qualifier && slices.Equal(a.Segments, b.Segments)
+}
+func sameCorrelationEndpoint(a, b analysis.CorrelationEndpoint) bool {
+	return a.InputID == b.InputID && a.OccurrenceID == b.OccurrenceID && sameFieldIdentity(a.FieldIdentity, b.FieldIdentity) && slices.Equal(a.ReferenceIDs, b.ReferenceIDs) && a.Location == b.Location
+}
+func validateCorrelation(graph analysis.CorrelationGraph, occurrences map[string]string, referenceEvidence map[string]correlationReferenceFact) error {
 	if graph.Nodes == nil {
 		return refreshError("/correlation/nodes")
 	}
@@ -391,8 +453,21 @@ func validateCorrelation(graph analysis.CorrelationGraph, occurrences map[string
 			return requirementError(path+"/reference_ids", "endpoint requires unique reference links")
 		}
 		for _, id := range e.ReferenceIDs {
-			if owner := referenceOwners[id]; owner != "" && owner != e.InputID {
+			fact, known := referenceEvidence[id]
+			if !known {
+				continue
+			}
+			if fact.inputID != "" && fact.inputID != e.InputID {
 				return requirementError(path+"/reference_ids", "endpoint contradicts a proved reference owner")
+			}
+			if fact.kind != "field" {
+				return requirementError(path+"/reference_ids", "endpoint names a known non-field reference")
+			}
+			if fact.location != e.Location {
+				return requirementError(path+"/location", "endpoint contradicts the known reference location")
+			}
+			if fact.sourceField != nil && !sameFieldIdentity(*fact.sourceField, e.FieldIdentity) {
+				return requirementError(path+"/field_identity", "endpoint contradicts the proved source field identity")
 			}
 		}
 		return nil
@@ -464,6 +539,16 @@ func validateCorrelation(graph analysis.CorrelationGraph, occurrences map[string
 			}
 			if err := endpoint(key.Right, kp+"/right"); err != nil {
 				return err
+			}
+			// Edge endpoints are a copy of the first predicate endpoints. Later
+			// AND predicates retain their own fields, references, and locations.
+			if j == 0 {
+				if !sameCorrelationEndpoint(key.Left, e.Left) {
+					return requirementError(kp+"/left", "first key endpoint contradicts its edge endpoint")
+				}
+				if !sameCorrelationEndpoint(key.Right, e.Right) {
+					return requirementError(kp+"/right", "first key endpoint contradicts its edge endpoint")
+				}
 			}
 			if key.Left.InputID != e.Left.InputID || key.Left.OccurrenceID != e.Left.OccurrenceID || key.Right.InputID != e.Right.InputID || key.Right.OccurrenceID != e.Right.OccurrenceID {
 				return requirementError(kp, "key endpoints contradict their edge")

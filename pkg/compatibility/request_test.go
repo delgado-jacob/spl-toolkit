@@ -118,7 +118,7 @@ func TestRequestSemanticParity(t *testing.T) {
 		{"missing captured array", "snapshot_invalid", "/snapshot/objects", func(r *Request) { r.Snapshot.Objects = nil }},
 		{"duplicate binding", "binding_invalid", "/input_bindings/1/input_id", func(r *Request) { r.InputBindings = append(r.InputBindings, r.InputBindings[0]) }},
 		{"unknown input", "binding_invalid", "/input_bindings/0/input_id", func(r *Request) { r.InputBindings[0].InputID = "unknown" }},
-		{"missing binding", "binding_missing", "/input_bindings", func(r *Request) { r.InputBindings = []InputBinding{} }},
+		{"missing binding", "missing_input_binding", "/input_bindings", func(r *Request) { r.InputBindings = []InputBinding{} }},
 		{"identity mismatch", "binding_invalid", "/input_bindings/0/expected", func(r *Request) { r.InputBindings[0].Expected.Name = "users" }},
 		{"blank object", "binding_invalid", "/input_bindings/0/object_id", func(r *Request) { r.InputBindings[0].ObjectID = " " }},
 		{"wrong kind", "binding_invalid", "/input_bindings/0/expected/kind", func(r *Request) { r.InputBindings[0].Expected.Kind = "lookup" }},
