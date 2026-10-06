@@ -750,6 +750,17 @@ func (s *spl2SemanticStage) lowerSQLJoin(join spl2.ISqlJoinClauseContext) {
 		s.unsupportedOwned(join, "SQL join layout or qualified input binding is unproved", ids)
 		return
 	}
+	// The right key is consumed only by the matched alternative of a LEFT
+	// join. Keep its exact source binding for equality proof, but classify
+	// its external requirement by that alternative's conditional reachability.
+	if join.LEFT() != nil {
+		for _, id := range ids {
+			entry := left.requirements.trace.reference(id)
+			if entry.directExternal && entry.reference.FieldIdentity != nil && entry.reference.FieldIdentity.Qualifier == alias.Name {
+				entry.directExternal, entry.pathConditional = false, true
+			}
+		}
+	}
 	s.recordSourceJoinCorrelations(join, join.SqlJoinPredicate(), ids, alias.Name, right)
 	// Key reads teach each isolated source its field facts. Include those
 	// facts in the active left row before simultaneous composition, so an

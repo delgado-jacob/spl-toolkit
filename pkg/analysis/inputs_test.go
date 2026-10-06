@@ -269,6 +269,88 @@ func TestInputCompatibilityCorpusSources(t *testing.T) {
 	}
 }
 
+func TestSQLInputAuthoredLeftJoinFieldNecessity(t *testing.T) {
+	var cases []struct {
+		Name     string        `json:"name"`
+		Document QueryDocument `json:"document"`
+		Expected struct {
+			Pairs []struct {
+				Input         string        `json:"input"`
+				FieldIdentity FieldIdentity `json:"field_identity"`
+				Necessity     string        `json:"necessity"`
+			} `json:"field_input_pairs"`
+		} `json:"expected"`
+	}
+	data, err := os.ReadFile("../../testdata/compatibility/cases.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := json.Unmarshal(data, &cases); err != nil {
+		t.Fatal(err)
+	}
+	for _, c := range cases {
+		if c.Name != "select-first-left-joins" {
+			continue
+		}
+		for _, inner := range []bool{false, true} {
+			name := "authored LEFT joins"
+			document := c.Document
+			if inner {
+				name = "INNER keys remain required"
+				document.Text = strings.ReplaceAll(strings.ReplaceAll(document.Text, "LEFT OUTER JOIN", "INNER JOIN"), "LEFT JOIN", "INNER JOIN")
+			}
+			t.Run(name, func(t *testing.T) {
+				result, err := Analyze(document)
+				if err != nil {
+					t.Fatal(err)
+				}
+				inputs := map[string]string{}
+				for _, input := range result.Inputs {
+					inputs[input.ID] = input.Kind + ":" + input.Name
+				}
+				items := []RequirementItem{}
+				for _, item := range result.Requirements.Items {
+					if item.Kind == "field" && item.Role == "read" {
+						items = append(items, item)
+					}
+				}
+				if len(items) != len(c.Expected.Pairs) {
+					t.Fatalf("field requirements=%#v, want exactly %d authored pairs", items, len(c.Expected.Pairs))
+				}
+				for _, expected := range c.Expected.Pairs {
+					necessity := expected.Necessity
+					if inner {
+						necessity = "required"
+					}
+					found := false
+					for _, item := range items {
+						if inputs[item.InputID] != expected.Input || item.FieldIdentity == nil || !reflect.DeepEqual(*item.FieldIdentity, expected.FieldIdentity) {
+							continue
+						}
+						found = true
+						if item.Ownership.State != "proved" || item.Necessity != necessity {
+							t.Fatalf("%s/%v ownership=%s necessity=%s, want proved/%s", expected.Input, expected.FieldIdentity, item.Ownership.State, item.Necessity, necessity)
+						}
+						for _, occurrence := range item.Occurrences {
+							if occurrence.Necessity != necessity {
+								t.Fatalf("%s/%v occurrence necessity=%s, want %s", expected.Input, expected.FieldIdentity, occurrence.Necessity, necessity)
+							}
+						}
+					}
+					if !found {
+						t.Fatalf("missing authored pair %s/%v", expected.Input, expected.FieldIdentity)
+					}
+				}
+				if result.Correlation.Outcome != "connected" || len(result.Correlation.Nodes) != 3 || len(result.Correlation.Edges) != 2 || !reflect.DeepEqual(result.Correlation, result.Requirements.Correlation) {
+					t.Fatalf("join proof changed: %#v", result.Correlation)
+				}
+			})
+		}
+		return
+	}
+	t.Fatal("independently authored LEFT join fixture missing")
+}
+
 // Hand-built full-state oracles retain their independently authored field
 // transfers and add the exact external source and pending ownership evidence.
 func addExactInputTestEvidence(want *Result, sourceReference Reference, fieldReferences ...Reference) {
