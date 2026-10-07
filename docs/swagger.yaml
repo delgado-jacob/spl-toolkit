@@ -10158,7 +10158,7 @@ components:
           $ref: '#/components/schemas/tooling.compatibility.ResolutionAssessment'
         max_variants:
           maximum: 18446744073709551615
-          minimum: 1
+          minimum: 0
           type: integer
         resolutions:
           items:

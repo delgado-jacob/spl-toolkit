@@ -330,6 +330,7 @@ func main() {
  m["workflow-failed-comparison"]=must(workflow.Compare(workflow.CompareRequest{SchemaVersion:1,Before:*wf,After:*wf}))
  m["workflow-failed-evidence"]=must(workflow.Evidence(workflow.EvidenceRequest{SchemaVersion:1,Report:wf,Include:[]string{"diagnostic_details"}}))
  badq:=must(workflow.DecodeRequest(wr));zero:=uint64(0);badq.Settings.Entries[1].Resolution.MaxVariants=&zero
+ m["workflow-zero-limit-request"]=badq
  m["workflow-configuration-failure"]=must(workflow.Assess(badq))
  m["compatibility-examples"]=compatibilityExamples()
  m["compatibility-request"]=request
@@ -1309,14 +1310,20 @@ def test_workflow_strict_requests_and_runtime_controls(schemas, emitted, emitter
         wrong = copy.deepcopy(request); wrong[member] = None
         assert errors(schemas, "workflow-request", wrong)
         assert admission("workflow-request", wrong) == "rejected"
-    for value in (None, 0, -1, 1.5, 2**64):
+    for value in (None, -1, 1.5, 2**64):
         wrong = copy.deepcopy(request)
         wrong["settings"]["entries"][1]["resolution"]["max_variants"] = value
         assert errors(schemas, "workflow-request", wrong)
-        # Configuration failure is retained by assessment; strict wire admission
-        # rejects null, noninteger and overflow before it reaches that stage.
-        if value != 0:
-            assert admission("workflow-request", wrong) == "rejected"
+        assert admission("workflow-request", wrong) == "rejected"
+    zero = emitted["workflow-zero-limit-request"]
+    assert not errors(schemas, "workflow-request", zero)
+    assert admission("workflow-request", zero) == "accepted"
+    failed = emitted["workflow-configuration-failure"]
+    assert not errors(schemas, "workflow", failed)
+    assert failed["ci_exit_code"] == 2 and not failed["execution_complete"]
+    assert failed["counts"]["selected"] == 2 and failed["counts"]["assessed"] == 1
+    assert failed["entries"][0]["status"] == "valid"
+    assert failed["entries"][1]["failure"]["phase"] == "configuration"
     wrong = copy.deepcopy(request)
     wrong["settings"]["entries"][0]["resolution"] = wrong["settings"]["entries"][1]["resolution"]
     assert errors(schemas, "workflow-request", wrong)

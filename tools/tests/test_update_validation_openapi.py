@@ -1165,6 +1165,13 @@ func main(){q:=must(os.ReadFile("examples/workflow/request.json"));r:=must(workf
         assert accepts(name, value), name
     request = json.loads((root / "examples/workflow/request.json").read_text())
     assert accepts("Request", request)
+    zero = copy.deepcopy(request)
+    zero["settings"]["entries"][1]["resolution"]["max_variants"] = 0
+    assert accepts("Request", zero)
+    for limit in (None, -1, 1.5, 2**64):
+        malformed = copy.deepcopy(zero)
+        malformed["settings"]["entries"][1]["resolution"]["max_variants"] = limit
+        assert not accepts("Request", malformed)
     bad = copy.deepcopy(request)
     bad["settings"]["entries"][0]["resolution"] = request["settings"]["entries"][1]["resolution"]
     assert not accepts("Request", bad)
