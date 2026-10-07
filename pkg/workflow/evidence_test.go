@@ -290,3 +290,136 @@ func TestEvidenceUnknownInputKindPropagatesCompleteness(t *testing.T) {
 		})
 	}
 }
+
+func TestEvidenceUnknownAssessmentLabelsPropagate(t *testing.T) {
+	r, err := Assess(boundComparisonRequest(t, "from events_good | fields id"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, tc := range []struct {
+		name   string
+		mutate func(*Report)
+	}{
+		{"input outcome", func(r *Report) { r.Entries[0].Compatibility.Inputs[0].Outcome = "PRIVATE_UNKNOWN_OUTCOME" }},
+		{"requirement outcome", func(r *Report) { r.Entries[0].Compatibility.RequirementOutcomes[0].Outcome = "PRIVATE_UNKNOWN_OUTCOME" }},
+		{"requirement applicability", func(r *Report) {
+			r.Entries[0].Compatibility.RequirementOutcomes[0].Applicability = "PRIVATE_UNKNOWN_APPLICABILITY"
+		}},
+		{"schema projection outcome", func(r *Report) {
+			for i := range r.Entries[0].Compatibility.RequirementOutcomes {
+				outcome := &r.Entries[0].Compatibility.RequirementOutcomes[i]
+				if outcome.FieldProjection != nil {
+					outcome.FieldProjection.Outcome = "PRIVATE_UNKNOWN_OUTCOME"
+					return
+				}
+			}
+			t.Fatal("fixture has no field projection")
+		}},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			imported, err := exportCopy(*r)
+			if err != nil {
+				t.Fatal(err)
+			}
+			tc.mutate(&imported)
+			got, raw := evidenceBytes(t, EvidenceRequest{SchemaVersion: 1, Report: &imported, Include: []string{}})
+			if strings.Contains(raw, "PRIVATE_UNKNOWN") {
+				t.Fatal("unknown assessment label disclosed")
+			}
+			for _, item := range got.Items {
+				if (item.Kind == "detection" || item.Kind == "compatibility") && item.Complete {
+					t.Errorf("unknown child assessment label did not propagate: %+v", item)
+				}
+			}
+			c, err := Compare(CompareRequest{SchemaVersion: 1, Before: imported, After: imported})
+			if err != nil {
+				t.Fatal(err)
+			}
+			got, _ = evidenceBytes(t, EvidenceRequest{SchemaVersion: 1, Comparison: c, Include: []string{}})
+			for _, item := range got.Items {
+				if item.Kind == "comparison" && item.Complete {
+					t.Errorf("comparison complete with unknown assessment: %+v", item)
+				}
+			}
+		})
+	}
+	rr, err := Assess(seedResolutionRequest(t))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, tc := range []struct {
+		name   string
+		mutate func(*compatibility.ResolutionReport)
+	}{
+		{"wrapped input outcome", func(c *compatibility.ResolutionReport) { c.Inputs[0].Evidence.Outcome = "PRIVATE_UNKNOWN_OUTCOME" }},
+		{"wrapped requirement outcome", func(c *compatibility.ResolutionReport) {
+			c.RequirementOutcomes[0].Evidence.Outcome = "PRIVATE_UNKNOWN_OUTCOME"
+		}},
+		{"wrapped requirement applicability", func(c *compatibility.ResolutionReport) {
+			c.RequirementOutcomes[0].Evidence.Applicability = "PRIVATE_UNKNOWN_APPLICABILITY"
+		}},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			imported, err := exportCopy(*rr)
+			if err != nil {
+				t.Fatal(err)
+			}
+			tc.mutate(imported.Entries[0].Resolution.Variants[0].Compatibility)
+			got, _ := evidenceBytes(t, EvidenceRequest{SchemaVersion: 1, Report: &imported, Include: []string{}})
+			for _, item := range got.Items {
+				if (item.Kind == "detection" || (item.Kind == "variant" && strings.HasSuffix(item.Pointer, "/variants/0")) || (item.Kind == "compatibility" && strings.Contains(item.Pointer, "/variants/0/"))) && item.Complete {
+					t.Errorf("wrapped unknown child assessment label did not propagate: %+v", item)
+				}
+			}
+			c, err := Compare(CompareRequest{SchemaVersion: 1, Before: imported, After: imported})
+			if err != nil {
+				t.Fatal(err)
+			}
+			got, _ = evidenceBytes(t, EvidenceRequest{SchemaVersion: 1, Comparison: c, Include: []string{}})
+			for _, item := range got.Items {
+				if item.Kind == "comparison" && item.Complete {
+					t.Errorf("comparison complete with wrapped unknown assessment: %+v", item)
+				}
+			}
+
+		})
+	}
+}
+
+func TestEvidenceKnownAssessmentOutcomesRemainComplete(t *testing.T) {
+	for _, req := range []Request{seedRequest(t, "from [{id:1}]"), boundComparisonRequest(t, "from events_good | fields id"), boundComparisonRequest(t, "from events_good | fields absent"), seedResolutionRequest(t)} {
+		r, err := Assess(req)
+		if err != nil {
+			t.Fatal(err)
+		}
+		got, _ := evidenceBytes(t, EvidenceRequest{SchemaVersion: 1, Report: r, Include: []string{}})
+		for _, item := range got.Items {
+			if item.Kind == "detection" || item.Kind == "compatibility" || item.Kind == "variant" {
+				if !item.Complete {
+					t.Fatalf("canonical terminal evidence incomplete: %+v", item)
+				}
+			}
+			if item.Kind == "requirement_assessment" && item.Outcome == "missing" && !item.Complete {
+				t.Fatalf("known negative finding incomplete: %+v", item)
+			}
+		}
+	}
+	r, err := Assess(seedRequest(t, "from [{id:1}]"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, outcome := range []string{"neutral", "indeterminate"} {
+		imported, err := exportCopy(*r)
+		if err != nil {
+			t.Fatal(err)
+		}
+		imported.Entries[0].Compatibility.RequirementOutcomes[0].Outcome = outcome
+		imported.Entries[0].Compatibility.RequirementOutcomes[0].Applicability = "inapplicable"
+		got, _ := evidenceBytes(t, EvidenceRequest{SchemaVersion: 1, Report: &imported, Include: []string{}})
+		for _, item := range got.Items {
+			if (item.Kind == "detection" || item.Kind == "compatibility" || item.Kind == "requirement_assessment") && !item.Complete {
+				t.Fatalf("known inapplicable obligation incomplete: %+v", item)
+			}
+		}
+	}
+}

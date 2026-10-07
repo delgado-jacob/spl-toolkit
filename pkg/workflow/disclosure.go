@@ -34,7 +34,7 @@ func publicEnum(value string, allowed ...string) string {
 	return "unrecognized"
 }
 func publicOutcome(value string) string {
-	return publicEnum(value, "valid", "invalid", "incomplete", "satisfied", "unsatisfied", "not assessed", "not_applicable", "indeterminate", "verified", "failed", "affected", "unchanged", "missing", "ambiguous", "conditional", "required", "optional")
+	return publicEnum(value, "valid", "invalid", "incomplete", "satisfied", "unsatisfied", "not assessed", "not_applicable", "indeterminate", "verified", "failed", "affected", "unchanged", "missing", "ambiguous", "neutral", "conditional", "required", "optional")
 }
 func publicState(value string) string {
 	return publicEnum(value, "complete", "partial", "not_applicable", "unavailable", "incomplete", "omitted", "unknown", "not_captured")

@@ -258,19 +258,15 @@ func (p *evidenceProjector) walkCovered(v reflect.Value, path string, definition
 	case analysis.RequirementItem:
 		p.add(path, publicRequirementKind(x.Kind), publicEnum(x.Resolution, "exact", "dynamic", "wildcard", "unresolved"), false)
 	case compatibility.Report:
-		complete = complete && compatibilityEvidenceComplete(x.Outcome, x.Coverage, x.Closure, x.Requirements, x.EffectiveRequirements)
+		complete = complete && compatibilityReportEvidenceComplete(&x)
 		p.add(path, "compatibility", publicOutcome(x.Outcome), complete)
 	case compatibility.ResolutionReport:
-		coverage := []compatibility.Coverage{}
-		for _, c := range x.Coverage {
-			coverage = append(coverage, c.Evidence)
-		}
-		complete = complete && compatibilityEvidenceComplete(x.Outcome, coverage, x.Closure, x.Requirements, x.EffectiveRequirements)
+		complete = complete && resolutionReportEvidenceComplete(&x)
 		p.add(path, "compatibility", publicOutcome(x.Outcome), complete)
 	case compatibility.InputOutcome:
-		p.add(path, "input_assessment", publicOutcome(x.Outcome), complete && (x.Outcome == "satisfied" || x.Outcome == "unsatisfied"))
+		p.add(path, "input_assessment", publicOutcome(x.Outcome), complete && knownAssessmentOutcome(x.Outcome) && (x.Outcome == "satisfied" || x.Outcome == "missing" || x.Outcome == "neutral"))
 	case compatibility.RequirementOutcome:
-		p.add(path, "requirement_assessment", publicOutcome(x.Outcome), complete && (x.Outcome == "satisfied" || x.Outcome == "unsatisfied"))
+		p.add(path, "requirement_assessment", publicOutcome(x.Outcome), complete && requirementAssessmentLabelsRecognized(x) && (x.Outcome == "satisfied" || x.Outcome == "neutral" || x.Applicability == "inapplicable" || (x.Outcome == "missing" && x.Applicability == "applicable")))
 	case compatibility.Coverage:
 		item := p.add(path, "coverage", publicState(x.State), publicDimension(x.Dimension) != "unrecognized" && (x.State == "complete" || x.State == "not_applicable"))
 		item.Coverage = []EvidenceCoverage{{publicDimension(x.Dimension), publicState(x.State)}}
@@ -293,11 +289,7 @@ func (p *evidenceProjector) walkCovered(v reflect.Value, path string, definition
 	case resolution.Variant:
 		variantComplete := (x.Outcome == "verified" || x.Outcome == "failed") && (x.CandidateAnalysis == nil || analysisLabelsRecognized(x.CandidateAnalysis))
 		if x.Compatibility != nil {
-			coverage := []compatibility.Coverage{}
-			for _, c := range x.Compatibility.Coverage {
-				coverage = append(coverage, c.Evidence)
-			}
-			variantComplete = variantComplete && compatibilityEvidenceComplete(x.Compatibility.Outcome, coverage, x.Compatibility.Closure, x.Compatibility.Requirements, x.Compatibility.EffectiveRequirements)
+			variantComplete = variantComplete && resolutionReportEvidenceComplete(x.Compatibility)
 		}
 		p.add(path, "variant", publicOutcome(x.Outcome), variantComplete)
 	case Failure:
@@ -388,21 +380,15 @@ func entryEvidenceComplete(e ReportEntry) bool {
 		return false
 	}
 	if e.Compatibility != nil {
-		return compatibilityEvidenceComplete(e.Compatibility.Outcome, e.Compatibility.Coverage, e.Compatibility.Closure, e.Compatibility.Requirements, e.Compatibility.EffectiveRequirements)
+		return compatibilityReportEvidenceComplete(e.Compatibility)
 	}
 	if e.Resolution != nil {
 		for _, v := range e.Resolution.Variants {
 			if v.CandidateAnalysis != nil && !analysisLabelsRecognized(v.CandidateAnalysis) {
 				return false
 			}
-			if v.Compatibility != nil {
-				coverage := []compatibility.Coverage{}
-				for _, c := range v.Compatibility.Coverage {
-					coverage = append(coverage, c.Evidence)
-				}
-				if !compatibilityEvidenceComplete(v.Compatibility.Outcome, coverage, v.Compatibility.Closure, v.Compatibility.Requirements, v.Compatibility.EffectiveRequirements) {
-					return false
-				}
+			if v.Compatibility != nil && !resolutionReportEvidenceComplete(v.Compatibility) {
+				return false
 			}
 		}
 	}
@@ -461,4 +447,50 @@ func inputLabelsRecognized(inputs []analysis.QueryInput) bool {
 
 func knownInputState(state string) bool {
 	return publicEnum(state, "complete", "partial", "not_applicable") != "unrecognized"
+}
+
+func knownAssessmentOutcome(outcome string) bool {
+	return publicEnum(outcome, "satisfied", "missing", "ambiguous", "indeterminate", "neutral") != "unrecognized"
+}
+func requirementAssessmentLabelsRecognized(outcome compatibility.RequirementOutcome) bool {
+	if outcome.FieldProjection != nil && publicEnum(outcome.FieldProjection.Outcome, "required", "optional", "missing", "conditional", "indeterminate") == "unrecognized" {
+		return false
+	}
+	return knownAssessmentOutcome(outcome.Outcome) && publicEnum(outcome.Applicability, "applicable", "inapplicable", "indeterminate") != "unrecognized"
+}
+func compatibilityReportEvidenceComplete(c *compatibility.Report) bool {
+	if !compatibilityEvidenceComplete(c.Outcome, c.Coverage, c.Closure, c.Requirements, c.EffectiveRequirements) {
+		return false
+	}
+	for _, input := range c.Inputs {
+		if !knownAssessmentOutcome(input.Outcome) {
+			return false
+		}
+	}
+	for _, outcome := range c.RequirementOutcomes {
+		if !requirementAssessmentLabelsRecognized(outcome) {
+			return false
+		}
+	}
+	return true
+}
+func resolutionReportEvidenceComplete(c *compatibility.ResolutionReport) bool {
+	coverage := make([]compatibility.Coverage, 0, len(c.Coverage))
+	for _, item := range c.Coverage {
+		coverage = append(coverage, item.Evidence)
+	}
+	if !compatibilityEvidenceComplete(c.Outcome, coverage, c.Closure, c.Requirements, c.EffectiveRequirements) {
+		return false
+	}
+	for _, input := range c.Inputs {
+		if !knownAssessmentOutcome(input.Evidence.Outcome) {
+			return false
+		}
+	}
+	for _, outcome := range c.RequirementOutcomes {
+		if !requirementAssessmentLabelsRecognized(outcome.Evidence) {
+			return false
+		}
+	}
+	return true
 }
