@@ -147,7 +147,7 @@ func (p *Prepared) Resolve(request PreparedRequest) (*Report, error) {
 			assessment, err := p.compatibility.CheckResolution(proof, request.Compatibility)
 			if err != nil {
 				if detail, ok := compatibility.RequestErrorDetails(err); ok {
-					variant.Diagnostics = append(variant.Diagnostics, Diagnostic{Code: detail.Code, Message: detail.Message})
+					return requestErrorAt(detail.Code, "/compatibility"+detail.Path, detail.Message)
 				} else {
 					return requestErrorAt("assessment_invariant", "/compatibility", err.Error())
 				}

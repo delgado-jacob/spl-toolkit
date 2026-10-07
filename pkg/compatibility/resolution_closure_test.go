@@ -425,3 +425,21 @@ func TestResolutionClosurePreflightSourceDependencyConflict(t *testing.T) {
 		t.Fatalf("absent source=%+v error=%v", report, err)
 	}
 }
+
+func TestResolutionPreflightRejectsDependencyOnSubstitutedRoot(t *testing.T) {
+	proof, r, a := resolutionCheckFixture(t, `FROM '$events' | fields id`)
+	original, _, _, _ := proof.AssessmentEvidence()
+	value := "events"
+	a.InputBindings = []ResolutionBinding{{OriginalInputID: original.Analysis.Inputs[0].ID, ResolvedValue: &value, ObjectID: r.Snapshot.Objects[0].ID, Expected: objectIdentity(r.Snapshot.Objects[0]), SchemaID: "fields"}}
+	captured := r.Snapshot.Objects[0]
+	captured.ID = "placeholder-object"
+	captured.Name = "$events"
+	r.Snapshot.Objects = append(r.Snapshot.Objects, captured)
+	a.DependencyBindings = []closure.Binding{{DocumentDigest: queryDigest(original.Analysis.Document.Text), Kind: "dataset", Start: 5, End: 14, ObjectID: captured.ID}}
+	prepared, err := Prepare(r.Snapshot, r.SchemaBundle)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = prepared.ValidateResolutionBindings(original, []analysis.ResolutionChoice{{Placeholder: "$events", Kind: "dataset", Value: "events"}}, a)
+	requireRequestError(t, err, "binding_invalid", "/dependency_bindings/0")
+}

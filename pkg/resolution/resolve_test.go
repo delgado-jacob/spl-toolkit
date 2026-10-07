@@ -2,11 +2,14 @@ package resolution_test
 
 import (
 	"bytes"
+	"crypto/sha256"
 	"encoding/json"
+	"fmt"
 	"sync"
 	"testing"
 
 	"github.com/delgado-jacob/spl-toolkit/pkg/analysis"
+	"github.com/delgado-jacob/spl-toolkit/pkg/closure"
 	"github.com/delgado-jacob/spl-toolkit/pkg/compatibility"
 	"github.com/delgado-jacob/spl-toolkit/pkg/resolution"
 )
@@ -258,4 +261,39 @@ func TestResolveVariantIdentityIncludesOriginalQueryIdentity(t *testing.T) {
 	if first.Variants[0].ID == next.Variants[0].ID || first.Variants[0].Provenance.QueryDigest != next.Variants[0].Provenance.QueryDigest {
 		t.Fatal("variant identity must distinguish documents while query digest identifies exact bytes")
 	}
+}
+
+func TestResolveRejectsDependencyBindingOnSubstitutedRoot(t *testing.T) {
+	r := acceptanceNamed(t, "single-value")
+	r.Document = analysis.QueryDocument{Language: "spl2", Text: `FROM '$events' | fields id`}
+	a, err := analysis.Analyze(r.Document)
+	if err != nil {
+		t.Fatal(err)
+	}
+	r.Compatibility.InputBindings[0].OriginalInputID = a.Inputs[0].ID
+	captured := r.Compatibility.Snapshot.Objects[0]
+	captured.ID = "placeholder-object"
+	captured.Name = "$events"
+	r.Compatibility.Snapshot.Objects = append(r.Compatibility.Snapshot.Objects, captured)
+	r.Compatibility.DependencyBindings = []closure.Binding{{DocumentDigest: fmt.Sprintf("sha256:%x", sha256.Sum256([]byte(r.Document.Text))), Kind: "dataset", Start: 5, End: 14, ObjectID: captured.ID}}
+	report, err := resolution.Resolve(r)
+	detail, ok := resolution.RequestErrorDetails(err)
+	if report != nil || !ok || detail.Code != "binding_invalid" || detail.Path != "/compatibility/dependency_bindings/0" {
+		t.Fatalf("contradictory config became variant: report=%v error=%v", report != nil, err)
+	}
+	// Even an unchanged decoded identity may acquire a different typed encoding.
+	// Its configuration error remains global when detected after rendering.
+	value := "$events"
+	r.Resolutions[0].Values = []string{value}
+	r.Compatibility.InputBindings[0].ResolvedValue = &value
+	r.Compatibility.InputBindings[0].ObjectID = captured.ID
+	r.Compatibility.InputBindings[0].Expected.Name = value
+	r.Compatibility.InputBindings[0].SchemaID = ""
+	r.Compatibility.SchemaBundle = nil
+	report, err = resolution.Resolve(r)
+	detail, ok = resolution.RequestErrorDetails(err)
+	if report != nil || !ok || detail.Code != "binding_invalid" || detail.Path != "/compatibility/dependency_bindings/0" {
+		t.Fatalf("late configuration error became variant: report=%v error=%v", report != nil, err)
+	}
+
 }

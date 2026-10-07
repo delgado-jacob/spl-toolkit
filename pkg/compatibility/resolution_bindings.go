@@ -3,6 +3,7 @@ package compatibility
 import (
 	"fmt"
 	"reflect"
+	"slices"
 
 	"github.com/delgado-jacob/spl-toolkit/pkg/analysis"
 	"github.com/delgado-jacob/spl-toolkit/pkg/environment"
@@ -108,6 +109,30 @@ func (p *Prepared) ValidateResolutionBindings(original analysis.ResolutionEviden
 		}
 	}
 	if len(assessment.DependencyBindings) > 0 {
+		// A submitted root dependency binding preserves the original reference
+		// identity. It cannot also select a marker that a supplied alternative
+		// changes. Admit this configuration from exact canonical owners before any
+		// combination exists; definition-only bindings remain independent.
+		for i, binding := range assessment.DependencyBindings {
+			if binding.DocumentDigest != queryDigest(original.Analysis.Document.Text) {
+				continue
+			}
+			for _, ref := range original.Analysis.References {
+				if ref.Kind != binding.Kind || !resolutionBindingReference(binding, ref, original.Analysis.Document.Text) {
+					continue
+				}
+				for _, group := range original.Placeholders {
+					if group.Kind != ref.Kind || !slices.Contains(group.ReferenceIDs, ref.ID) {
+						continue
+					}
+					for _, choice := range values {
+						if choice.Placeholder == group.Placeholder && choice.Kind == group.Kind && choice.Value != ref.NormalizedName {
+							return requestErrorAt("binding_invalid", fmt.Sprintf("/dependency_bindings/%d", i), "root dependency binding conflicts with a supplied resolution value")
+						}
+					}
+				}
+			}
+		}
 		if _, err := p.validateResolutionDependencies(original, assessment); err != nil {
 			return err
 		}
