@@ -1209,3 +1209,18 @@ def test_compatibility_fixture_copy_is_exact_and_rejects_missing_or_changed_inpu
     monkeypatch.setattr(checker.shutil, "copy2", corrupt)
     with pytest.raises(AssertionError, match="hash"):
         checker._copy_required_files(source, tmp_path / "damaged", ("cases.json",))
+
+
+def test_python_test_uses_distinct_run_owned_evidence_paths():
+    import shlex
+    paths = []
+    for _ in range(2):
+        result = subprocess.run(["make", "-n", "python-test", f"PYTHON={sys.executable}"],
+                                cwd=ROOT, check=True, capture_output=True, text=True)
+        checker = next(shlex.split(line) for line in result.stdout.splitlines()
+                       if "tools/check_package.py" in line)
+        path = Path(checker[checker.index("--evidence") + 1])
+        assert path.parent == Path("build") and path.suffix == ".json"
+        assert not (ROOT / path).exists()
+        paths.append(path)
+    assert paths[0] != paths[1]
