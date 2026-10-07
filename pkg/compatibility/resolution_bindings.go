@@ -107,5 +107,10 @@ func (p *Prepared) ValidateResolutionBindings(original analysis.ResolutionEviden
 			return err
 		}
 	}
+	if len(assessment.DependencyBindings) > 0 {
+		if _, err := p.validateResolutionDependencies(original, assessment); err != nil {
+			return err
+		}
+	}
 	return nil
 }

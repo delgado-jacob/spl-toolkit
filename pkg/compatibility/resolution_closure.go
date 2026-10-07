@@ -3,6 +3,7 @@ package compatibility
 import (
 	"fmt"
 	"slices"
+	"sort"
 
 	"github.com/delgado-jacob/spl-toolkit/pkg/analysis"
 	"github.com/delgado-jacob/spl-toolkit/pkg/closure"
@@ -17,14 +18,9 @@ func (p *Prepared) checkResolutionClosure(original, candidate analysis.Resolutio
 	if _, err := p.checkResolutionDirect(original, candidate, roles, references, admission); err != nil {
 		return nil, err
 	}
-	bundle, err := p.env.DefinitionBundle(assessment.QueryScope)
+	bundle, err := p.validateResolutionDependencies(original, assessment)
 	if err != nil {
 		return nil, err
-	}
-	// The closure owner validates all submitted digest/range/kind/target evidence
-	// against the original root and supplied definitions, including unreachable ones.
-	if _, err := closure.Evaluate(closure.Request{SchemaVersion: 1, Document: original.Analysis.Document, Bundle: bundle, Bindings: assessment.DependencyBindings}); err != nil {
-		return nil, closureRequestError(err)
 	}
 	bindings, err := translateResolutionBindings(original.Analysis, candidate.Analysis, references, assessment.DependencyBindings, bundle)
 	if err != nil {
@@ -45,6 +41,7 @@ func (p *Prepared) checkResolutionClosure(original, candidate analysis.Resolutio
 		}
 		bindings = selectedBindings
 	}
+	sort.Slice(bindings, func(i, j int) bool { return stableKey(bindings[i]) < stableKey(bindings[j]) })
 	evaluated, err := closure.Evaluate(closure.Request{SchemaVersion: 1, Document: candidate.Analysis.Document, Bundle: bundle, Bindings: bindings})
 	if err != nil {
 		return nil, closureRequestError(err)
@@ -226,12 +223,14 @@ func translateResolutionBindings(original, candidate analysis.Result, pairs []an
 			out = append(out, b)
 			continue
 		}
-		// A shared digest cannot express which document context was intended. Preserve
-		// immutable definition bindings only if root and candidate text are identical.
-		if original.Document.Text != candidate.Document.Text && slices.ContainsFunc(bundle.Objects, func(d closure.Definition) bool {
+		// Digest bindings apply to every matching supplied document. Retain the
+		// submitted coordinates for immutable definitions and independently
+		// translate any matching root reference.
+		sharedDefinition := slices.ContainsFunc(bundle.Objects, func(d closure.Definition) bool {
 			return d.Document != nil && queryDigest(d.Document.Text) == b.DocumentDigest
-		}) {
-			return nil, requestErrorAt("binding_invalid", fmt.Sprintf("/dependency_bindings/%d", i), "root and definition share a digest; binding context is ambiguous after rendering")
+		})
+		if sharedDefinition && !slices.Contains(out, b) {
+			out = append(out, b)
 		}
 		found := false
 		for _, pair := range pairs {
@@ -255,10 +254,12 @@ func translateResolutionBindings(original, candidate analysis.Result, pairs []an
 				}
 			}
 		}
-		if !found {
+		if !found && !sharedDefinition {
 			return nil, requestErrorAt("binding_invalid", fmt.Sprintf("/dependency_bindings/%d", i), "binding has no exact session-proved candidate reference")
 		}
-		out = append(out, b)
+		if found && !slices.Contains(out, b) {
+			out = append(out, b)
+		}
 	}
 	return out, nil
 }
@@ -422,4 +423,19 @@ func resolutionSourceLocation(text string, start, end int) analysis.Location {
 		return p
 	}
 	return analysis.Location{Start: position(start), End: position(end)}
+}
+
+// The closure owner admits submitted bindings against original root bytes and
+// every immutable supplied definition before any rendered variant is assessed.
+func (p *Prepared) validateResolutionDependencies(original analysis.ResolutionEvidence, assessment ResolutionAssessment) (closure.DefinitionBundle, error) {
+	bundle, err := p.env.DefinitionBundle(assessment.QueryScope)
+	if err != nil {
+		return bundle, err
+	}
+	if len(assessment.DependencyBindings) > 0 {
+		if _, err := closure.Evaluate(closure.Request{SchemaVersion: 1, Document: original.Analysis.Document, Bundle: bundle, Bindings: assessment.DependencyBindings}); err != nil {
+			return bundle, closureRequestError(err)
+		}
+	}
+	return bundle, nil
 }
