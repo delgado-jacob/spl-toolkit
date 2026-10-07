@@ -77,13 +77,13 @@ the exact reviewed scope; a broadened form receives a new ID unless a reviewed
 scope correction changes the original boundary. `grammar_registered` is a parser
 fact independent of syntax coverage. Linting likewise requires its own evidence.
 The current manifests contain 106 SPL records with 107 evidence cases and 142 SPL2
-records with 163 evidence cases. SPL requirements have 19 supported, 6 unsupported,
+records with 164 evidence cases. SPL requirements have 19 supported, 6 unsupported,
 and 81 unassessed records. Safe rewriting has 17 supported, 2 unsupported and 87
-unassessed SPL records; SPL2 has 14 supported, 3 unsupported and 125 unassessed
+unassessed SPL records; SPL2 has 15 supported, 3 unsupported and 124 unassessed
 records. The current SPL revision is
 `sha256:5b7c15002c426b163a5488d18ae0fb83c68809a194a15f9a6584ea95cbb3a09b`;
 the SPL2 revision is
-`sha256:7134e06d345f6b2c6e58c3d29c727868320b47ff1fc0a94842aec35615223d9f`.
+`sha256:216bb4be25e623d48098144be8bf006b80b4c1b4b6eeec05a2b7b4c2c3559842`.
 
 The SPL ledger includes bounded field-flow semantics for exact `tstats`, selected
 field commands, and selected function arities. Exact macros produce direct macro
@@ -235,3 +235,5 @@ reports `satisfied`, `unsatisfied`, `incomplete`, or `not assessed`; independent
 correlation reports `connected`, `disconnected`, `indeterminate`, or
 `not applicable`. See the complete generated-envelope recipe in
 [the API guide](../docs/API.md#offline-compatibility-assessment).
+
+Resolution v1 publishes [strict requests](v1/resolution-request.schema.json) and [additive reports](v1/resolution.schema.json). Shared definitions cover selection, original/candidate proof roles, separate compatibility bindings, provenance, counts, and request errors. Only verified variants may contain `resolved_query`; runtime admission owns cross-query membership and proof authority.

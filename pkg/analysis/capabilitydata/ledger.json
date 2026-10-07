@@ -8038,7 +8038,7 @@
       "provenance": {
         "source_family": "toolkit",
         "reference": "pkg/analysis",
-        "note": "Narrow Milestone 11 form proved by canonical replay."
+        "note": "Narrow Milestone 11 form proved by canonical replay. Resolution controls reject dynamic descriptors as named Dataset slots; grammar registration does not establish rendering or source assessment."
       },
       "dimensions": {
         "syntax": {
@@ -8121,9 +8121,13 @@
           "limitations": []
         },
         "safe_rewriting": {
-          "state": "unassessed",
-          "evidence_ids": [],
-          "limitations": []
+          "state": "supported",
+          "evidence_ids": [
+            "spl2.dataset.parameter.resolution-render"
+          ],
+          "limitations": [
+            "Only named Dataset parameter slots with session-proved correspondence; compatibility and downstream publication require separate bound offline evidence."
+          ]
         }
       }
     },

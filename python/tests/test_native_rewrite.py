@@ -137,7 +137,7 @@ def expected_search(mode, language="spl"):
             },
             "capability_revision": {
                 "spl": "sha256:5b7c15002c426b163a5488d18ae0fb83c68809a194a15f9a6584ea95cbb3a09b",
-                "spl2": "sha256:7134e06d345f6b2c6e58c3d29c727868320b47ff1fc0a94842aec35615223d9f",
+                "spl2": "sha256:216bb4be25e623d48098144be8bf006b80b4c1b4b6eeec05a2b7b4c2c3559842",
             }[language],
             "query_status": "valid",
             "coverage": {"complete": True, "reasons": []},

@@ -12,6 +12,8 @@ class DocumentationTests(unittest.TestCase):
     def check(self, files):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
+            files = {"docs/resolution.md": "---\ntitle: Resolution\n---\n",
+                     "examples/resolution/request.json": "{}"} | files
             for name, content in files.items():
                 path = root / name
                 path.parent.mkdir(parents=True, exist_ok=True)
@@ -59,6 +61,82 @@ class DocumentationTests(unittest.TestCase):
         self.assertNotEqual(result.returncode, 0, result.stdout)
         self.assertIn(evidence + "public.md", result.stdout)
         self.assertNotIn(evidence + "README.md", result.stdout)
+
+
+class RenderedDocumentationTests(unittest.TestCase):
+    def check(self, files):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            site = root / "site"
+            site.mkdir()
+            # An existing sibling must not satisfy a link escaping the build.
+            (root / "secret.html").write_text("secret", encoding="utf-8")
+            for name, content in files.items():
+                path = site / name
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text(content, encoding="utf-8")
+            return subprocess.run(
+                [sys.executable, str(CHECKER), "--site-dir", str(site),
+                 "--site-url", "https://example.org/project/"],
+                text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                check=False,
+            )
+
+    def test_published_links_resolve_against_build(self):
+        result = self.check({
+            "index.html": '<link rel="canonical" href="https://example.org/project/index.html">'
+                          '<a href="/project/api/">API</a>'
+                          '<img src="/project/assets/style.css">'
+                          '<a href="https://other.example/missing.html">External</a>'
+                          '<a href="//other.example/missing.html">External</a>'
+                          '<a href="mailto:owner@example.org">Mail</a>',
+            "api/index.html": '<a href="go.html?view=all#usage">Go</a>'
+                              '<a href="../index.html">Home</a>',
+            "api/go.html": '<meta property="og:url" content="https://example.org/project/api/go.html">',
+            "assets/style.css": "body {}",
+        })
+        self.assertEqual(result.returncode, 0, result.stdout)
+
+    def test_missing_same_site_destinations_fail(self):
+        for link in ("missing.html", "/project/missing.html", "/project/missing/",
+                     "https://example.org/project/missing.html",
+                     "//example.org/project/missing.html"):
+            with self.subTest(link=link):
+                result = self.check({"api/index.html": f'<a href="{link}">Broken</a>'})
+                self.assertNotEqual(result.returncode, 0, result.stdout)
+                self.assertIn(link, result.stdout)
+
+    def test_missing_project_prefix_cannot_match_existing_asset(self):
+        for link in ("/assets/style.css", "//example.org/assets/style.css", "../assets/style.css"):
+            with self.subTest(link=link):
+                result = self.check({
+                    "index.html": f'<img src="{link}">',
+                    "assets/style.css": "body {}",
+                })
+                self.assertNotEqual(result.returncode, 0, result.stdout)
+                self.assertIn("outside published site prefix", result.stdout)
+
+    def test_absolute_same_host_url_outside_project_is_left_for_lychee(self):
+        result = self.check({
+            "index.html": '<img src="https://example.org/assets/style.css">',
+        })
+        self.assertEqual(result.returncode, 0, result.stdout)
+
+    def test_project_root_with_or_without_slash_uses_index(self):
+        result = self.check({
+            "index.html": '<a href="/project">Home</a><a href="/project/">Home</a>',
+        })
+        self.assertEqual(result.returncode, 0, result.stdout)
+
+    def test_escaping_link_cannot_use_file_outside_build(self):
+        result = self.check({"index.html": '<a href="/project/%2e%2e/secret.html">Escapes</a>'})
+        self.assertNotEqual(result.returncode, 0, result.stdout)
+        self.assertIn("escapes rendered site", result.stdout)
+
+    def test_empty_rendered_site_fails(self):
+        result = self.check({})
+        self.assertNotEqual(result.returncode, 0, result.stdout)
+        self.assertIn("no rendered HTML pages", result.stdout)
 
 
 if __name__ == "__main__":

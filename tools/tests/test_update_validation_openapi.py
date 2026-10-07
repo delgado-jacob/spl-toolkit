@@ -304,7 +304,7 @@ class ValidationOpenAPITests(unittest.TestCase):
             if name.startswith("analysis.") and name != "analysis.QueryDocument" and not name.startswith(("analysis.Capability", "analysis.Evidence")):
                 schemas[name] = raw_projection(definition)
         for name, definition in shared["$defs"].items():
-            if name.startswith("compatibility.") and not name.startswith("compatibility.request.") or name == "validation.FieldProjection":
+            if name.startswith("resolution.") or name.startswith("compatibility.") and not name.startswith("compatibility.request.") or name == "validation.FieldProjection":
                 schemas[name] = raw_projection(definition)
         spec = {"openapi": "3.1.0", "components": {"schemas": schemas}, "paths": {
             "/unrelated": {},
@@ -338,7 +338,7 @@ class ValidationOpenAPITests(unittest.TestCase):
             self.assertEqual(set(spec["paths"]) - set(original["paths"]), {
                 "/corpus/scan", "/corpus/graph", "/corpus/sarif",
                 "/corpus/impact-schema", "/corpus/impact-mapping", "/query/document", "/query/closure",
-                "/environment/validate", "/query/compatibility"})
+                "/environment/validate", "/query/compatibility", "/query/resolve"})
             self.assertEqual(spec["paths"]["/query/document"]["post"]["requestBody"]["content"]["application/json"]["schema"],
                              {"$ref": "#/components/schemas/tooling.QueryDocumentRequest"})
             self.assertIs(schemas["tooling.corpus.Request"]["additionalProperties"], False)
@@ -1080,3 +1080,62 @@ def test_compatibility_shape_drift_rejects_before_generated_writes(tmp_path):
     result = helper.run_script(tmp_path)
     assert result.returncode != 0 and "compatibility.InputBinding" in result.stderr
     assert before == {path.name: path.read_bytes() for path in tmp_path.iterdir()}
+
+
+def test_resolution_openapi_semantic_boundary_and_shape_guard(tmp_path):
+    helper = ValidationOpenAPITests()
+    spec = helper.fixture(tmp_path)
+    result = helper.run_script(tmp_path)
+    assert result.returncode == 0, result.stderr
+    generated = json.loads((tmp_path / "swagger.json").read_text())
+    components = generated["components"]
+    def accepts(name, value):
+        return jsonschema.Draft202012Validator({"components": components, "$ref": "#/components/schemas/tooling." + name}).is_valid(value)
+    request = json.loads((SCRIPT.parents[1] / "examples/resolution/request.json").read_text())
+    assert accepts("resolution.Request", request)
+    for limit in (None, 0, 1.5, 2**64):
+        changed = copy.deepcopy(request)
+        changed["max_variants"] = limit
+        assert not accepts("resolution.Request", changed)
+    assert accepts("resolution.Counts", {"verified": 0, "failed": 2**64-1, "incomplete": 0})
+    assert not accepts("resolution.Counts", {"verified": -1, "failed": 0, "incomplete": 0})
+    proof = {"proven": True, "references": [], "roles": [], "limitations": []}
+    assert accepts("analysis.ResolutionProofEvidence", proof)
+    for member in ("references", "roles", "limitations"):
+        changed = copy.deepcopy(proof)
+        changed[member] = None
+        assert not accepts("analysis.ResolutionProofEvidence", changed)
+    assert "effective_dependency_bindings" in components["schemas"]["tooling.compatibility.ResolutionReport"]["properties"]
+    variant = {"id": "variant", "ordinal": 1, "selection": [], "changes": [],
+               "outcome": "verified", "resolved_query": "from events", "proof": proof,
+               "diagnostics": [], "provenance": {
+                   "query_digest": "query", "capability_revision": "capability",
+                   "analysis_contract_version": 1, "requirement_set_version": 1,
+                   "environment_digest": "environment", "resolution_input_digest": "resolution",
+                   "assessment_input_digest": "assessment"}}
+    assert accepts("resolution.Variant", variant)
+    for member in ("proof", "selection", "provenance", "resolved_query"):
+        changed = copy.deepcopy(variant)
+        del changed[member]
+        assert not accepts("resolution.Variant", changed)
+    for outcome in ("failed", "incomplete"):
+        changed = copy.deepcopy(variant)
+        changed["outcome"] = outcome
+        assert not accepts("resolution.Variant", changed)
+        del changed["resolved_query"]
+        assert accepts("resolution.Variant", changed)
+    for ordinal in (0, 1.5, 2**64):
+        changed = copy.deepcopy(variant)
+        changed["ordinal"] = ordinal
+        assert not accepts("resolution.Variant", changed)
+    helper.fixture(tmp_path)
+    del spec["components"]["schemas"]["resolution.Counts"]["properties"]["failed"]
+    (tmp_path / "swagger.json").write_text(json.dumps(spec))
+    (tmp_path / "swagger.yaml").write_text(yaml.safe_dump(spec))
+    go = (tmp_path / "docs.go").read_text()
+    go = re.sub(r'^    "components": .*,$', lambda _: '    "components": ' + json.dumps(spec["components"]) + ',', go, flags=re.MULTILINE)
+    (tmp_path / "docs.go").write_text(go)
+    before = {p.name: p.read_bytes() for p in tmp_path.iterdir()}
+    result = helper.run_script(tmp_path)
+    assert result.returncode != 0 and "resolution.Counts" in result.stderr
+    assert before == {p.name: p.read_bytes() for p in tmp_path.iterdir()}

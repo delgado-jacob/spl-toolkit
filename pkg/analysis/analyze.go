@@ -121,7 +121,7 @@ func finalizeResult(result *Result) {
 	if result.Status != Invalid && (!result.Coverage.SyntaxComplete || !result.Coverage.SemanticComplete) {
 		result.Status = Incomplete
 	}
-	if result.rewrite != nil && result.rewrite.identityCoverageIncomplete && !result.Coverage.SemanticComplete {
+	if result.rewrite != nil && !result.rewrite.preserveCanonicalResult && result.rewrite.identityCoverageIncomplete && !result.Coverage.SemanticComplete {
 		hasSemanticDiagnostic := false
 		for _, diagnostic := range result.Diagnostics {
 			hasSemanticDiagnostic = hasSemanticDiagnostic || diagnostic.Code == CodeUnsupportedSemantics

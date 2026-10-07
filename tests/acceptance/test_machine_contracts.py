@@ -25,7 +25,7 @@ FAMILIES = ("query-document", "capabilities", "analysis", "requirements", "field
             "schema-validation", "rewrite", "corpus", "manifest", "graph",
             "impact", "document-view", "lsp-configuration", "closure-request", "closure",
             "environment-snapshot", "field-schema-bundle", "environment-validation",
-            "compatibility-request", "compatibility")
+            "compatibility-request", "compatibility", "resolution-request", "resolution")
 
 
 def deny_unknown(uri):
@@ -205,6 +205,7 @@ import (
  "github.com/delgado-jacob/spl-toolkit/pkg/compatibility"
  "github.com/delgado-jacob/spl-toolkit/pkg/environment"
  "github.com/delgado-jacob/spl-toolkit/pkg/rewrite"
+ "github.com/delgado-jacob/spl-toolkit/pkg/resolution"
  "github.com/delgado-jacob/spl-toolkit/pkg/corpus"
  "github.com/delgado-jacob/spl-toolkit/pkg/corpusio"
  "github.com/delgado-jacob/spl-toolkit/pkg/document"
@@ -226,6 +227,7 @@ func compatibilityExamples() map[string]any {
  return out
 }
 func main() {
+ if len(os.Args)>2 && os.Args[1]=="resolution-request" { _,err:=resolution.ResolveJSON([]byte(os.Args[2]));if err!=nil{fmt.Print("rejected")}else{fmt.Print("accepted")};return }
  if len(os.Args)>1 {
   raw := []byte(os.Args[2]); var e error
   switch os.Args[1] {
@@ -288,6 +290,14 @@ func main() {
  scope:=environment.CaptureScope{Namespace:environment.Selector{All:boolptr(true)},App:environment.Selector{All:boolptr(true)},Owner:environment.Selector{All:boolptr(true)}}
  snapshot:=environment.Snapshot{SchemaVersion:1,ScopeID:"offline",CaptureScope:scope,Origin:environment.Origin{InstanceID:"local",ProductVersion:"9.4",Producer:"fixture",ProducerVersion:"1"},Capture:environment.CaptureInterval{Start:"2026-10-01T12:00:00Z",End:"2026-10-01T12:05:00Z"},Capabilities:[]environment.Capability{},Collections:[]environment.Collection{},Objects:[]environment.Object{}}
  request:=compatibility.Request{SchemaVersion:1,Requirements:*must(analysis.Requirements(analysis.QueryDocument{Text:"from [{id:1}]",Language:"spl2"})),QueryScope:scope,InputBindings:[]compatibility.InputBinding{},Snapshot:snapshot}
+ rawResolution:=must(os.ReadFile("examples/resolution/request.json"))
+ resolutionRequest:=must(resolution.DecodeRequest(rawResolution))
+ m["resolution-request"]=resolutionRequest
+ m["resolution"]=must(resolution.Resolve(resolutionRequest))
+ resolutionRequest.Document=analysis.QueryDocument{Text:"from [{id:1}]",Language:"spl2"}
+ resolutionRequest.Resolutions=[]resolution.Resolution{}
+ resolutionRequest.Compatibility.InputBindings=[]compatibility.ResolutionBinding{}
+ m["resolution-noop"]=must(resolution.Resolve(resolutionRequest))
  m["compatibility-examples"]=compatibilityExamples()
  m["compatibility-request"]=request
  m["compatibility"]=must(compatibility.Check(request))
@@ -1101,3 +1111,95 @@ def test_compatibility_authored_runtime_cases(emitter):
         if case["family"] == "compatibility-request" and "runtime_valid" in case:
             actual = subprocess.check_output([str(emitter), "compatibility-request", json.dumps(case["instance"])], text=True)
             assert (actual == "accepted") == case["runtime_valid"], case["id"]
+
+
+def test_resolution_runtime_reports_and_conditional_publication(schemas, emitted):
+    report = emitted["resolution"]
+    assert not errors(schemas, "resolution-request", emitted["resolution-request"])
+    assert report["counts"] == {"verified": 1, "failed": 1, "incomplete": 0}
+    assert report["total_combinations"] == "2" and report["generated_count"] == 2
+    assert [v["ordinal"] for v in report["variants"]] == [1, 2]
+    assert [v["selection"][0]["value"] for v in report["variants"]] == ["events_good", "events_missing"]
+    for name in ("resolution", "resolution-noop"):
+        instance = emitted[name]
+        assert not errors(schemas, "resolution", instance), [e.message for e in errors(schemas, "resolution", instance)]
+        for variant in instance["variants"]:
+            assert ("resolved_query" in variant) == (variant["outcome"] == "verified")
+            for member in ("proof", "selection", "provenance"):
+                wrong = copy.deepcopy(instance)
+                del wrong["variants"][variant["ordinal"] - 1][member]
+                assert errors(schemas, "resolution", wrong), member
+            for member in ("selection", "changes", "diagnostics"):
+                wrong = copy.deepcopy(instance)
+                wrong["variants"][variant["ordinal"] - 1][member] = None
+                assert errors(schemas, "resolution", wrong), member
+        for member in ("resolutions", "variants"):
+            wrong = copy.deepcopy(instance)
+            wrong[member] = None
+            assert errors(schemas, "resolution", wrong)
+    assert emitted["resolution-noop"]["total_combinations"] == "1"
+    assert emitted["resolution-noop"]["variants"][0]["changes"] == []
+    failed = copy.deepcopy(report)
+    failed["variants"][1]["resolved_query"] = failed["variants"][1]["candidate_text"]
+    assert errors(schemas, "resolution", failed)
+    failed["variants"][1]["outcome"] = "incomplete"
+    assert errors(schemas, "resolution", failed)
+    wrong = copy.deepcopy(report)
+    del wrong["variants"][0]["resolved_query"]
+    assert errors(schemas, "resolution", wrong)
+    for member in ("references", "roles", "limitations"):
+        wrong = copy.deepcopy(report)
+        wrong["variants"][0]["proof"][member] = None
+        assert errors(schemas, "resolution", wrong)
+    for member in ("input_bindings", "dependency_bindings", "inputs", "requirement_outcomes", "coverage", "reasons", "diagnostics"):
+        wrong = copy.deepcopy(report)
+        wrong["variants"][0]["compatibility"][member] = None
+        assert errors(schemas, "resolution", wrong), member
+    wrong = copy.deepcopy(report)
+    wrong["variants"][0]["compatibility"]["effective_dependency_bindings"] = None
+    assert errors(schemas, "resolution", wrong)
+
+
+def test_resolution_strict_requests_and_runtime_membership(schemas, emitted, emitter):
+    request = emitted["resolution-request"]
+    for value in (None, 0, -1, 1.5, 2**64):
+        wrong = copy.deepcopy(request)
+        wrong["max_variants"] = value
+        assert errors(schemas, "resolution-request", wrong)
+        assert subprocess.check_output([str(emitter), "resolution-request", json.dumps(wrong)], text=True) == "rejected"
+    for member in ("document", "resolutions", "compatibility"):
+        wrong = copy.deepcopy(request)
+        wrong[member] = None
+        assert errors(schemas, "resolution-request", wrong)
+    wrong = copy.deepcopy(request)
+    wrong["compatibility"]["input_bindings"][0]["original_input_id"] = "unknown-role"
+    assert not errors(schemas, "resolution-request", wrong)  # Membership belongs to Go.
+    assert subprocess.check_output([str(emitter), "resolution-request", json.dumps(wrong)], text=True) == "rejected"
+    for member, value in (("values", []), ("values", [""]), ("kind", "field")):
+        wrong = copy.deepcopy(request)
+        wrong["resolutions"][0][member] = value
+        assert errors(schemas, "resolution-request", wrong)
+    assert subprocess.check_output([str(emitter), "resolution-request", json.dumps(request)], text=True) == "accepted"
+
+
+def test_resolution_native_cli_go_contract_parity(schemas, emitted):
+    library = os.environ.get("SPL_NATIVE_LIBRARY")
+    cli = os.environ.get("SPL_CLI")
+    if not library or not cli:
+        pytest.skip("SPL_NATIVE_LIBRARY and SPL_CLI select built transport artifacts")
+    from spl_toolkit import SPLMapper
+    request = json.loads((ROOT / "examples/resolution/request.json").read_text())
+    with SPLMapper(library_path=library) as mapper:
+        native = mapper.resolve(request)
+        assert not errors(schemas, "resolution", native)
+        assert native == emitted["resolution"]
+        request["document"] = {"text": "from [{id:1}]", "language": "spl2"}
+        request["resolutions"] = []
+        request["compatibility"]["input_bindings"] = []
+        noop = mapper.resolve(request)
+        assert not errors(schemas, "resolution", noop)
+        assert noop == emitted["resolution-noop"]
+    result = subprocess.run([cli, "resolve", "--request", str(ROOT / "examples/resolution/request.json"),
+                             "--format", "json"], capture_output=True, text=True)
+    assert result.returncode == 1 and result.stderr == ""
+    assert json.loads(result.stdout) == native

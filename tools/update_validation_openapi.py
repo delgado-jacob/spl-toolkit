@@ -90,8 +90,22 @@ def add_tooling(spec):
                 or set(generated.get("properties", {})) != set(canonical["properties"])):
             raise ValueError(f"unexpected pinned requirement schema shape: {name}")
         schemas[name] = convert(canonical, preserve_analysis=True)
+    resolution_names = {name for name in shared["$defs"]
+                        if name.startswith(("resolution.", "analysis.Resolution", "compatibility.Resolution"))
+                        or name == "compatibility.ArtifactIdentity"}
+    for name in sorted(resolution_names):
+        generated = schemas.get(name)
+        canonical = shared["$defs"][name]
+        if generated is None and (component("v1", name) in schemas or name in {"resolution.PreparedRequest", "compatibility.ResolutionAssessment", "compatibility.ArtifactIdentity"}):
+            continue
+        # Pinned Swag emits Request as an empty imported-package annotation.
+        if name == "resolution.Request" and generated == {"type": "object"}:
+            continue
+        if (not isinstance(generated, dict) or generated.get("type") != "object"
+                or set(generated.get("properties", {})) != set(canonical["properties"])):
+            raise ValueError(f"unexpected pinned resolution schema shape: {name}")
     for name, canonical in shared["$defs"].items():
-        if name.startswith("compatibility.") and not name.startswith("compatibility.request.") or name == "validation.FieldProjection":
+        if (name.startswith("compatibility.") and not name.startswith("compatibility.request.") or name == "validation.FieldProjection") and name not in resolution_names:
             generated = schemas.get(name)
             if generated is None and component("v1", name) in schemas:
                 continue
@@ -161,6 +175,20 @@ def add_tooling(spec):
             "500": {"description": "Internal failure", "content": {"application/json": {"schema": {"$ref": PREFIX + "api.ErrorResponse"}}}},
         },
     }}
+    spec["paths"]["/query/resolve"] = {"post": {
+        "summary": "Resolve names against separate offline compatibility evidence",
+        "description": "Strict inline names-only request; exact 8 MiB application/json boundary. Default max_variants 100; an oversized Cartesian product is rejected atomically. All verified/failed/incomplete content reports return 200. Only verified variants publish resolved_query. No retrieval or execution.",
+        "tags": ["query"],
+        "requestBody": {"required": True, "content": {"application/json": {"schema": reference("resolution.Request")}}},
+        "responses": {
+            "200": {"description": "Canonical per-variant report", "content": {"application/json": {"schema": reference("resolution.Report")}}},
+            "400": {"description": "Request/configuration or transport failure", "content": {"application/json": {"schema": {"oneOf": [reference("resolution.RequestErrorDetail"), {"$ref": PREFIX + "api.ErrorResponse"}]}}}},
+            "500": {"description": "Internal failure", "content": {"application/json": {"schema": {"$ref": PREFIX + "api.ErrorResponse"}}}},
+        },
+    }}
+    # Publish detached prepared DTOs and artifact identities as well as route DTOs.
+    for name in sorted(resolution_names):
+        reference(name)
     spec["paths"]["/environment/validate"] = {"post": {
         "summary": "Validate offline environment artifacts",
         "description": "Strict inline snapshot and/or schema bundle. Request envelope, schema bundle, and validation report retain schema_version 1; nested snapshot accepts schema_version 1 or 2. Snapshot v2 observation shape does not prove remote exhaustiveness. Requires at least one artifact. Unknown or duplicate members, nulls, malformed Unicode, and trailing JSON are input errors. Body limit is 8 MiB. Valid and partial reports return 200; invalid artifacts return 400 with the canonical report.",
@@ -187,6 +215,7 @@ def add_tooling(spec):
     # environment DTO. These generated types are superseded by the strict
     # tooling.environment definitions and are not referenced by any route.
     generated_only = {name for name in schemas if name.startswith(("closure.", "environment.", "compatibility."))}
+    generated_only.update(resolution_names)
     generated_only.add("api.EnvironmentValidationRequest")
     generated_only.add("validation.FieldProjection")
     def component_refs(value):

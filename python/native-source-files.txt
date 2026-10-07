@@ -1,4 +1,5 @@
 cmd/compatibility_cli.go
+cmd/resolution_cli.go
 contracts/README.md
 contracts/sarif/LICENSE.txt
 contracts/sarif/PROVENANCE.md
@@ -25,6 +26,8 @@ contracts/v1/lsp-configuration.schema.json
 contracts/v1/manifest.schema.json
 contracts/v1/query-document.schema.json
 contracts/v1/requirements.schema.json
+contracts/v1/resolution-request.schema.json
+contracts/v1/resolution.schema.json
 contracts/v1/rewrite.schema.json
 contracts/v1/schema-validation.schema.json
 contracts/v1/shared.schema.json
@@ -74,6 +77,10 @@ pkg/analysis/recovery.go
 pkg/analysis/references.go
 pkg/analysis/requirements.go
 pkg/analysis/requirements_trace.go
+pkg/analysis/resolution.go
+pkg/analysis/resolution_discovery.go
+pkg/analysis/resolution_proof.go
+pkg/analysis/resolution_render.go
 pkg/analysis/resource_limit.go
 pkg/analysis/rewrite_correspondence.go
 pkg/analysis/rewrite_evidence.go
@@ -100,6 +107,7 @@ pkg/analysis/spl_field_commands.go
 pkg/analysis/spl_tstats.go
 pkg/analysis/transfers.go
 pkg/api/compatibility.go
+pkg/api/resolution.go
 pkg/bindings/bindings.go
 pkg/bindings/registry.go
 pkg/closure/coverage.go
@@ -124,6 +132,10 @@ pkg/compatibility/prepare.go
 pkg/compatibility/report.go
 pkg/compatibility/request.go
 pkg/compatibility/requirements.go
+pkg/compatibility/resolution_bindings.go
+pkg/compatibility/resolution_check.go
+pkg/compatibility/resolution_closure.go
+pkg/compatibility/resolution_model.go
 pkg/corpus/aggregate.go
 pkg/corpus/identity.go
 pkg/corpus/model.go
@@ -160,6 +172,13 @@ pkg/mapper/field_mapping_listener.go
 pkg/mapper/mapper.go
 pkg/mapper/parser.go
 pkg/mapper/schema.go
+pkg/resolution/errors.go
+pkg/resolution/fanout.go
+pkg/resolution/format.go
+pkg/resolution/model.go
+pkg/resolution/prepare.go
+pkg/resolution/request.go
+pkg/resolution/resolve.go
 pkg/rewrite/batch.go
 pkg/rewrite/conditions.go
 pkg/rewrite/diagnostics.go

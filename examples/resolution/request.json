@@ -1,0 +1,267 @@
+{
+  "compatibility": {
+    "input_bindings": [
+      {
+        "expected": {
+          "app": "resolution",
+          "kind": "dataset",
+          "name": "events_good",
+          "namespace": "search",
+          "owner": "nobody"
+        },
+        "object_id": "object-good",
+        "original_input_id": "input-e1ec7ae2eda73071a3725e6e1d25c8625bc30e0aeb66c7ab65bfbc59b3a62b3e",
+        "resolved_value": "events_good",
+        "schema_id": "schema-0"
+      },
+      {
+        "expected": {
+          "app": "resolution",
+          "kind": "dataset",
+          "name": "events_missing",
+          "namespace": "search",
+          "owner": "nobody"
+        },
+        "object_id": "object-bad",
+        "original_input_id": "input-e1ec7ae2eda73071a3725e6e1d25c8625bc30e0aeb66c7ab65bfbc59b3a62b3e",
+        "resolved_value": "events_missing",
+        "schema_id": "schema-1"
+      }
+    ],
+    "query_scope": {
+      "app": {
+        "values": [
+          "resolution"
+        ]
+      },
+      "namespace": {
+        "values": [
+          "search"
+        ]
+      },
+      "owner": {
+        "values": [
+          "nobody"
+        ]
+      }
+    },
+    "schema_bundle": {
+      "bindings": [
+        {
+          "expected": {
+            "app": "resolution",
+            "kind": "dataset",
+            "name": "events_good",
+            "namespace": "search",
+            "owner": "nobody"
+          },
+          "object_id": "object-good",
+          "schema_id": "schema-0",
+          "source_coverage": "complete"
+        },
+        {
+          "expected": {
+            "app": "resolution",
+            "kind": "dataset",
+            "name": "events_missing",
+            "namespace": "search",
+            "owner": "nobody"
+          },
+          "object_id": "object-bad",
+          "schema_id": "schema-1",
+          "source_coverage": "complete"
+        }
+      ],
+      "bundle_id": "missing-field-sibling",
+      "provenance": {
+        "observed_at": "2026-10-06T12:02:00Z",
+        "source_id": "resolution:offline-evidence",
+        "source_kind": "authored_fixture"
+      },
+      "schema_version": 1,
+      "schemas": [
+        {
+          "catalog": {
+            "fields": [
+              "id"
+            ],
+            "identity": "schema-0",
+            "optional_fields": [],
+            "version": "1"
+          },
+          "id": "schema-0",
+          "kind": "field_list",
+          "provenance": {
+            "observed_at": "2026-10-06T12:02:00Z",
+            "source_id": "resolution:offline-evidence",
+            "source_kind": "authored_fixture"
+          }
+        },
+        {
+          "catalog": {
+            "fields": [
+              "other"
+            ],
+            "identity": "schema-1",
+            "optional_fields": [],
+            "version": "1"
+          },
+          "id": "schema-1",
+          "kind": "field_list",
+          "provenance": {
+            "observed_at": "2026-10-06T12:02:00Z",
+            "source_id": "resolution:offline-evidence",
+            "source_kind": "authored_fixture"
+          }
+        }
+      ]
+    },
+    "snapshot": {
+      "capabilities": [
+        {
+          "id": "language:spl2:profile:splunkd",
+          "provenance": {
+            "observed_at": "2026-10-06T12:02:00Z",
+            "source_id": "resolution:offline-evidence",
+            "source_kind": "authored_fixture"
+          },
+          "state": "available",
+          "version": "current"
+        }
+      ],
+      "capture": {
+        "end": "2026-10-06T12:05:00Z",
+        "start": "2026-10-06T12:00:00Z"
+      },
+      "capture_scope": {
+        "app": {
+          "all": true
+        },
+        "namespace": {
+          "all": true
+        },
+        "owner": {
+          "all": true
+        }
+      },
+      "collections": [
+        {
+          "coverage": "complete",
+          "kind": "index"
+        },
+        {
+          "coverage": "complete",
+          "kind": "source"
+        },
+        {
+          "coverage": "complete",
+          "kind": "sourcetype"
+        },
+        {
+          "coverage": "complete",
+          "kind": "dataset"
+        },
+        {
+          "coverage": "complete",
+          "kind": "data_model"
+        },
+        {
+          "coverage": "complete",
+          "kind": "lookup"
+        },
+        {
+          "coverage": "complete",
+          "kind": "macro"
+        },
+        {
+          "coverage": "complete",
+          "kind": "saved_search"
+        },
+        {
+          "coverage": "complete",
+          "kind": "event_type"
+        },
+        {
+          "coverage": "complete",
+          "kind": "tag"
+        },
+        {
+          "coverage": "complete",
+          "kind": "calculated_field"
+        },
+        {
+          "coverage": "complete",
+          "kind": "field_extraction"
+        },
+        {
+          "coverage": "complete",
+          "kind": "module"
+        },
+        {
+          "coverage": "complete",
+          "kind": "function"
+        },
+        {
+          "coverage": "complete",
+          "kind": "external_command"
+        }
+      ],
+      "objects": [
+        {
+          "app": "resolution",
+          "id": "object-good",
+          "kind": "dataset",
+          "name": "events_good",
+          "namespace": "search",
+          "owner": "nobody",
+          "provenance": {
+            "observed_at": "2026-10-06T12:02:00Z",
+            "source_id": "resolution:offline-evidence",
+            "source_kind": "authored_fixture"
+          },
+          "sharing": "app"
+        },
+        {
+          "app": "resolution",
+          "id": "object-bad",
+          "kind": "dataset",
+          "name": "events_missing",
+          "namespace": "search",
+          "owner": "nobody",
+          "provenance": {
+            "observed_at": "2026-10-06T12:02:00Z",
+            "source_id": "resolution:offline-evidence",
+            "source_kind": "authored_fixture"
+          },
+          "sharing": "app"
+        }
+      ],
+      "origin": {
+        "instance_id": "offline-fixture",
+        "producer": "authored_fixture",
+        "producer_version": "1",
+        "product_version": "9.4"
+      },
+      "schema_version": 1,
+      "scope_id": "resolution-capture"
+    }
+  },
+  "document": {
+    "language": "spl2",
+    "profile": "splunkd",
+    "source_id": "resolution:missing-field-sibling",
+    "text": "from $events | fields id",
+    "version": "current"
+  },
+  "resolutions": [
+    {
+      "kind": "dataset",
+      "placeholder": "$events",
+      "values": [
+        "events_good",
+        "events_missing"
+      ]
+    }
+  ],
+  "schema_version": 1
+}

@@ -98,7 +98,7 @@ python-build: python-deps ## Build self-contained Python wheel and sdist
 	$(PYTHON_BUILD_ENV) $(PYTHON) -m build --no-isolation --sdist --wheel --outdir $(DIST_DIR) python
 
 python-test: python-build ## Test installed wheels outside the checkout
-	$(PYTHON) tools/check_package.py --sdist $(DIST_DIR)/spl_toolkit-$(VERSION).tar.gz --wheel-dir $(DIST_DIR)
+	$(PYTHON) tools/check_package.py --sdist $(DIST_DIR)/spl_toolkit-$(VERSION).tar.gz --wheel-dir $(DIST_DIR) --evidence $(BUILD_DIR)/package-check-$(shell $(PYTHON) -c "import uuid; print(uuid.uuid4().hex)").json
 
 python-install: python-wheel ## Install the built native wheel; rebuild after source changes
 	$(PIP) install --force-reinstall --no-deps $(DIST_DIR)/spl_toolkit-$(VERSION)-*.whl

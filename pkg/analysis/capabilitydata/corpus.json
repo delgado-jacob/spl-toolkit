@@ -11639,6 +11639,54 @@
       }
     },
     {
+      "id": "spl2.dataset.parameter.resolution-render",
+      "classification": "positive",
+      "document": {
+        "text": "from $events | fields id",
+        "language": "spl2",
+        "profile": "splunkd",
+        "version": "current",
+        "source_id": "capability:spl2.dataset.parameter.resolution-render"
+      },
+      "observations": {
+        "safe_rewriting": {
+          "status": "valid",
+          "committed": true,
+          "rewrite_complete": true,
+          "text": "from events | fields id",
+          "candidate_text": "from events | fields id",
+          "coverage_reasons": [],
+          "change_reasons": [
+            "matched"
+          ],
+          "rule_evaluation_reasons": [
+            "matched"
+          ]
+        }
+      },
+      "rewrite_request": {
+        "schema_version": 1,
+        "mode": "apply",
+        "rules": [
+          {
+            "id": "capability",
+            "kind": "dataset",
+            "source": {
+              "name": "$events"
+            },
+            "target": {
+              "name": "events"
+            }
+          }
+        ]
+      },
+      "provenance": {
+        "source_family": "toolkit",
+        "reference": "pkg/analysis/capability_ownership_external_test.go",
+        "note": "Narrow named Dataset marker rendering replay. Session proof is checked independently; compatibility requires separate environment/schema bindings."
+      }
+    },
+    {
       "id": "spl2.dataset.static-descriptor.positive",
       "classification": "positive",
       "document": {

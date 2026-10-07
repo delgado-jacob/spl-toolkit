@@ -6,6 +6,12 @@ import (
 )
 
 func (p *Prepared) assessField(item analysis.RequirementItem, query analysis.RequirementQueryIdentity, resolved map[string]resolvedInput) RequirementOutcome {
+	return p.assessResolvedField(item, query, resolved[item.InputID])
+}
+
+// assessResolvedField accepts one supplying input. The ordinary facade above
+// retains map lookup; resolution assessment supplies a separately proved role.
+func (p *Prepared) assessResolvedField(item analysis.RequirementItem, query analysis.RequirementQueryIdentity, r resolvedInput) RequirementOutcome {
 	out := baseOutcome(item, query)
 	if item.Ownership.State != "proved" {
 		if len(item.Ownership.CandidateInputIDs) > 1 {
@@ -13,7 +19,6 @@ func (p *Prepared) assessField(item analysis.RequirementItem, query analysis.Req
 		}
 		return outcomeReason(out, item, "field_ownership_ambiguous", "The query has not proved one supplying input. Recheck with supported ownership evidence; schema contents cannot choose the owner.", "field_attribution")
 	}
-	r := resolved[item.InputID]
 	out.Objects = objectEvidence(r)
 	if !r.explicitSourceEvidence {
 		return outcomeReason(out, item, "target_discovery_incomplete", "The logical owner is proved but its full supplying source is not. Supply supported source-selection evidence.", "target_discovery")

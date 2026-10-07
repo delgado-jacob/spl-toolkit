@@ -52,7 +52,14 @@ def test_documented_cli_examples(cli_path: Path, tmp_path: Path) -> None:
             text=True,
         )
         assert completed.returncode == case["exit"], case["id"]
-        assert completed.stdout == case["stdout"], case["id"]
+        if "report_counts" in case:
+            report = json.loads(completed.stdout)
+            assert report["counts"] == case["report_counts"], case["id"]
+            assert [v["outcome"] for v in report["variants"]] == ["verified", "failed"]
+            assert "resolved_query" in report["variants"][0]
+            assert "resolved_query" not in report["variants"][1]
+        else:
+            assert completed.stdout == case["stdout"], case["id"]
         if "stderr_contains" in case:
             assert case["stderr_contains"] in completed.stderr, case["id"]
         else:
