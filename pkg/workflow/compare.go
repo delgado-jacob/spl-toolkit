@@ -397,6 +397,12 @@ func validateLocations(v reflect.Value, text, path string) error {
 		for i := 0; i < v.NumField(); i++ {
 			f := v.Type().Field(i)
 			if f.IsExported() {
+				// Canonical input discovery emits unlocated reasons when discovery
+				// stops without an attributable source interval. Other location
+				// owners, and partially populated reasons, still require a range.
+				if v.Type() == reflect.TypeOf(analysis.InputReason{}) && f.Name == "Location" && v.Field(i).IsZero() {
+					continue
+				}
 				if err := validateLocations(v.Field(i), text, path+"/"+strings.Split(f.Tag.Get("json"), ",")[0]); err != nil {
 					return err
 				}
