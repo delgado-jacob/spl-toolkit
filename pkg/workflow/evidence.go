@@ -258,14 +258,14 @@ func (p *evidenceProjector) walkCovered(v reflect.Value, path string, definition
 	case analysis.RequirementItem:
 		p.add(path, publicRequirementKind(x.Kind), publicEnum(x.Resolution, "exact", "dynamic", "wildcard", "unresolved"), false)
 	case compatibility.Report:
-		complete = complete && compatibilityEvidenceComplete(x.Outcome, x.Coverage, x.Closure)
+		complete = complete && compatibilityEvidenceComplete(x.Outcome, x.Coverage, x.Closure, x.Requirements, x.EffectiveRequirements)
 		p.add(path, "compatibility", publicOutcome(x.Outcome), complete)
 	case compatibility.ResolutionReport:
 		coverage := []compatibility.Coverage{}
 		for _, c := range x.Coverage {
 			coverage = append(coverage, c.Evidence)
 		}
-		complete = complete && compatibilityEvidenceComplete(x.Outcome, coverage, x.Closure)
+		complete = complete && compatibilityEvidenceComplete(x.Outcome, coverage, x.Closure, x.Requirements, x.EffectiveRequirements)
 		p.add(path, "compatibility", publicOutcome(x.Outcome), complete)
 	case compatibility.InputOutcome:
 		p.add(path, "input_assessment", publicOutcome(x.Outcome), complete && (x.Outcome == "satisfied" || x.Outcome == "unsatisfied"))
@@ -291,13 +291,13 @@ func (p *evidenceProjector) walkCovered(v reflect.Value, path string, definition
 		item := p.add(path, "coverage", booleanCoverage(x.Complete), complete && x.Complete)
 		item.Coverage = []EvidenceCoverage{{"dependency_closure", booleanCoverage(x.Complete)}}
 	case resolution.Variant:
-		variantComplete := x.Outcome == "verified" || x.Outcome == "failed"
+		variantComplete := (x.Outcome == "verified" || x.Outcome == "failed") && (x.CandidateAnalysis == nil || analysisLabelsRecognized(x.CandidateAnalysis))
 		if x.Compatibility != nil {
 			coverage := []compatibility.Coverage{}
 			for _, c := range x.Compatibility.Coverage {
 				coverage = append(coverage, c.Evidence)
 			}
-			variantComplete = variantComplete && compatibilityEvidenceComplete(x.Compatibility.Outcome, coverage, x.Compatibility.Closure)
+			variantComplete = variantComplete && compatibilityEvidenceComplete(x.Compatibility.Outcome, coverage, x.Compatibility.Closure, x.Compatibility.Requirements, x.Compatibility.EffectiveRequirements)
 		}
 		p.add(path, "variant", publicOutcome(x.Outcome), variantComplete)
 	case Failure:
@@ -340,7 +340,10 @@ func (p *evidenceProjector) walkCovered(v reflect.Value, path string, definition
 	}
 }
 
-func compatibilityEvidenceComplete(outcome string, coverage []compatibility.Coverage, c *closure.Report) bool {
+func compatibilityEvidenceComplete(outcome string, coverage []compatibility.Coverage, c *closure.Report, requirements analysis.RequirementSet, effective *analysis.RequirementSet) bool {
+	if !requirementLabelsRecognized(requirements) || (effective != nil && !requirementLabelsRecognized(*effective)) {
+		return false
+	}
 	if len(coverage) == 0 || (outcome != "satisfied" && outcome != "unsatisfied") {
 		return false
 	}
@@ -359,7 +362,7 @@ func knownInputKind(kind string) bool {
 	return publicEnum(kind, "explicit_dataset", "named_placeholder", "unresolved_source", "implicit_stream", "index", "source", "sourcetype") != "unrecognized"
 }
 func analysisEvidenceComplete(a *analysis.Result) bool {
-	if a == nil || a.Status == analysis.Incomplete || !a.Coverage.SyntaxComplete || !a.Coverage.SemanticComplete || !a.Requirements.Coverage.Complete {
+	if !analysisLabelsRecognized(a) || a.Status == analysis.Incomplete || !a.Coverage.SyntaxComplete || !a.Coverage.SemanticComplete || !a.Requirements.Coverage.Complete {
 		return false
 	}
 	if publicEnum(a.Document.Language, "spl", "spl2") == "unrecognized" || a.Document.Profile != "splunkd" || a.Document.Version != "current" {
@@ -381,20 +384,23 @@ func entryEvidenceComplete(e ReportEntry) bool {
 	if !comparisonComplete(e) {
 		return false
 	}
-	if e.Analysis == nil || publicEnum(e.Analysis.Document.Language, "spl", "spl2") == "unrecognized" || e.Analysis.Document.Profile != "splunkd" || e.Analysis.Document.Version != "current" {
+	if !analysisLabelsRecognized(e.Analysis) {
 		return false
 	}
 	if e.Compatibility != nil {
-		return compatibilityEvidenceComplete(e.Compatibility.Outcome, e.Compatibility.Coverage, e.Compatibility.Closure)
+		return compatibilityEvidenceComplete(e.Compatibility.Outcome, e.Compatibility.Coverage, e.Compatibility.Closure, e.Compatibility.Requirements, e.Compatibility.EffectiveRequirements)
 	}
 	if e.Resolution != nil {
 		for _, v := range e.Resolution.Variants {
+			if v.CandidateAnalysis != nil && !analysisLabelsRecognized(v.CandidateAnalysis) {
+				return false
+			}
 			if v.Compatibility != nil {
 				coverage := []compatibility.Coverage{}
 				for _, c := range v.Compatibility.Coverage {
 					coverage = append(coverage, c.Evidence)
 				}
-				if !compatibilityEvidenceComplete(v.Compatibility.Outcome, coverage, v.Compatibility.Closure) {
+				if !compatibilityEvidenceComplete(v.Compatibility.Outcome, coverage, v.Compatibility.Closure, v.Compatibility.Requirements, v.Compatibility.EffectiveRequirements) {
 					return false
 				}
 			}
@@ -407,5 +413,52 @@ func entryEvidenceComplete(e ReportEntry) bool {
 // canonical status is missing or unknown. Historical known statuses remain
 // independent of the currently installed capability revision.
 func closureEvidenceComplete(c *closure.Report) bool {
-	return c.Coverage.Complete && (c.Status == analysis.Valid || c.Status == analysis.Invalid)
+	if !c.Coverage.Complete || (c.Status != analysis.Valid && c.Status != analysis.Invalid) || !analysisLabelsRecognized(c.DirectAnalysis) || !analysisLabelsRecognized(c.EffectiveAnalysis) {
+		return false
+	}
+	for _, definition := range c.DefinitionAnalyses {
+		for _, a := range []*analysis.Result{definition.DirectAnalysis, definition.EffectiveAnalysis} {
+			if a != nil && !analysisLabelsRecognized(a) {
+				return false
+			}
+		}
+	}
+	for _, edge := range c.Traversal {
+		if publicRequirementKind(edge.Kind) == "unrecognized" || publicEnum(edge.Resolution, "resolved", "bound", "missing", "unknown", "ambiguous", "cycle", "dynamic", "wildcard", "unavailable", "incomplete") == "unrecognized" {
+			return false
+		}
+	}
+	return true
+}
+
+// Recognition is separate from completeness: supported closure may discharge
+// a known gap in original analysis, but cannot assign meaning to imported labels.
+func analysisLabelsRecognized(a *analysis.Result) bool {
+	if a == nil || publicEnum(string(a.Status), "valid", "invalid", "incomplete") == "unrecognized" || publicEnum(a.Document.Language, "spl", "spl2") == "unrecognized" || a.Document.Profile != "splunkd" || a.Document.Version != "current" {
+		return false
+	}
+	return requirementLabelsRecognized(a.Requirements) && inputLabelsRecognized(a.Inputs) && knownInputState(a.InputCoverage.State) && knownInputState(a.FieldAttributionCoverage.State) && knownInputState(a.Correlation.Coverage.State)
+}
+func requirementLabelsRecognized(set analysis.RequirementSet) bool {
+	if publicEnum(string(set.QueryStatus), "valid", "invalid", "incomplete") == "unrecognized" || publicEnum(set.Query.Language, "spl", "spl2") == "unrecognized" || set.Query.Profile != "splunkd" || set.Query.Version != "current" || !inputLabelsRecognized(set.Inputs) || !knownInputState(set.InputCoverage.State) || !knownInputState(set.FieldAttributionCoverage.State) || !knownInputState(set.Correlation.Coverage.State) {
+		return false
+	}
+	for _, item := range set.Items {
+		if publicRequirementKind(item.Kind) == "unrecognized" || publicEnum(item.Resolution, "exact", "dynamic", "wildcard", "unresolved") == "unrecognized" {
+			return false
+		}
+	}
+	return true
+}
+func inputLabelsRecognized(inputs []analysis.QueryInput) bool {
+	for _, in := range inputs {
+		if !knownInputKind(in.Kind) || !knownInputState(in.Evidence.State) {
+			return false
+		}
+	}
+	return true
+}
+
+func knownInputState(state string) bool {
+	return publicEnum(state, "complete", "partial", "not_applicable") != "unrecognized"
 }

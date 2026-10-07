@@ -240,3 +240,53 @@ func TestEvidenceCoverageAndUnknownClosureCompleteness(t *testing.T) {
 		})
 	}
 }
+
+func TestEvidenceUnknownInputKindPropagatesCompleteness(t *testing.T) {
+	for _, tc := range []struct {
+		name    string
+		request Request
+	}{
+		{"bound", boundComparisonRequest(t, "from events_good | fields id")},
+		{"supported closure", definitionComparisonRequest(t, "from events_good | fields id")},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			r, err := Assess(tc.request)
+			if err != nil {
+				t.Fatal(err)
+			}
+			got, _ := evidenceBytes(t, EvidenceRequest{SchemaVersion: 1, Report: r, Include: []string{}})
+			for _, item := range got.Items {
+				if item.Kind == "detection" || item.Kind == "compatibility" || item.Kind == "closure" {
+					if !item.Complete {
+						t.Fatalf("canonical closure discharge lost: %+v", item)
+					}
+				}
+			}
+			saved, _ := json.Marshal(r)
+			for _, mutation := range []struct{ old, replacement string }{
+				{"explicit_dataset", "PRIVATE_UNKNOWN_KIND_17"},
+				{`"kind":"field"`, `"kind":"PRIVATE_UNKNOWN_FIELD_KIND_17"`},
+				{`"resolution":"exact"`, `"resolution":"PRIVATE_UNKNOWN_RESOLUTION_17"`},
+				{`"state":"complete"`, `"state":"PRIVATE_UNKNOWN_STATE_17"`},
+			} {
+				changed := strings.ReplaceAll(string(saved), mutation.old, mutation.replacement)
+				if changed == string(saved) {
+					t.Fatal("fixture has no target label")
+				}
+				var imported Report
+				if err := json.Unmarshal([]byte(changed), &imported); err != nil {
+					t.Fatal(err)
+				}
+				got, raw := evidenceBytes(t, EvidenceRequest{SchemaVersion: 1, Report: &imported, Include: []string{}})
+				if strings.Contains(raw, "PRIVATE_UNKNOWN_") {
+					t.Fatal("unknown label leaked")
+				}
+				for _, item := range got.Items {
+					if (item.Kind == "detection" || item.Kind == "compatibility" || item.Kind == "closure") && item.Complete {
+						t.Errorf("unknown label %s did not propagate: %+v", mutation.old, item)
+					}
+				}
+			}
+		})
+	}
+}
