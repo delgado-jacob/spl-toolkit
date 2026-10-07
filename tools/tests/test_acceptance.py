@@ -33,6 +33,7 @@ REQUIRED_TEST_HASH_PATHS = {
         "test_native_environment.py": ROOT / "python/tests/test_native_environment.py",
         "test_native_compatibility.py": ROOT / "python/tests/test_native_compatibility.py",
         "test_native_resolution.py": ROOT / "python/tests/test_native_resolution.py",
+        "test_native_workflow.py": ROOT / "python/tests/test_native_workflow.py",
     },
     "acceptance": {
         "test_requirements_surfaces.py": ROOT / "tests/acceptance/test_requirements_surfaces.py",
@@ -40,6 +41,7 @@ REQUIRED_TEST_HASH_PATHS = {
         "test_environment_surfaces.py": ROOT / "tests/acceptance/test_environment_surfaces.py",
         "test_compatibility_surfaces.py": ROOT / "tests/acceptance/test_compatibility_surfaces.py",
         "test_resolution_surfaces.py": ROOT / "tests/acceptance/test_resolution_surfaces.py",
+        "test_workflow_surfaces.py": ROOT / "tests/acceptance/test_workflow_surfaces.py",
     },
 }
 ENVIRONMENT_FIXTURE_SHA = hashlib.sha256((ROOT / "testdata/environment/cases.json").read_bytes()).hexdigest()
@@ -128,9 +130,9 @@ def passing_records() -> list[dict]:
                     "contracts.json", "graph-cases.json", "impact-cases.json", "requests.json",
                     "sarif-cases.json", "example-corpus.json", "example-target.json",
                     "example-corpus-missing-file.json", "../rewrite/forms.json",
-                )} | {"../../examples/resolution/request.json": check_acceptance.RESOLUTION_EXAMPLE_SHA},
+                )} | {"../../examples/resolution/request.json": check_acceptance.RESOLUTION_EXAMPLE_SHA} | check_acceptance.WORKFLOW_EXAMPLE_HASHES,
                 "tooling_environment_fixture_hashes": {"cases.json": ENVIRONMENT_FIXTURE_SHA},
-                "machine_contract_tests": {"collected": 13, "passed": 13, "failed": 0, "skipped": 0},
+                "machine_contract_tests": {"collected": 35, "passed": 35, "failed": 0, "skipped": 0},
                 "required_test_hashes": {
                     suite: {
                         name: hashlib.sha256(path.read_bytes()).hexdigest()
@@ -141,8 +143,16 @@ def passing_records() -> list[dict]:
                 "fixture_hashes": {"requirements": HASH, "spl2": {"linus-forms.json": LINUS_FIXTURE_SHA},
                                    "environment": {"cases.json": ENVIRONMENT_FIXTURE_SHA},
                                    "compatibility": {"cases.json": hashlib.sha256((ROOT / "testdata/compatibility/cases.json").read_bytes()).hexdigest()},
-                                   "resolution": dict(check_acceptance.RESOLUTION_FIXTURE_HASHES)},
+                                   "resolution": dict(check_acceptance.RESOLUTION_FIXTURE_HASHES),
+                                   "workflow": dict(check_acceptance.WORKFLOW_FIXTURE_HASHES)},
                 "packaged_fixture_hashes": {"spl2": {"linus-forms.json": LINUS_FIXTURE_SHA}},
+                "workflow_surface_evidence": {
+                    "schema_version": 1, "source_sha": SHA,
+                    "fixture_hashes": dict(check_acceptance.WORKFLOW_FIXTURE_HASHES),
+                    "operations": {op: 1 for op in ("assess", "compare", "evidence", "recheck")},
+                    "controls": {name: "passed" for name in check_acceptance.WORKFLOW_CONTROLS},
+                    "surfaces": ["go", "cli", "http", "c", "python"],
+                },
                 "resolution_surface_evidence": {
                     "schema_version": 1, "source_sha": SHA,
                     "fixture_sha256": check_acceptance.RESOLUTION_FIXTURE_HASHES["cases.json"],
@@ -166,10 +176,10 @@ def passing_records() -> list[dict]:
                     "native": ["test_native_abi.py", "test_native_mapper.py", "test_native_analysis.py",
                                "test_native_validation.py", "test_native_schema_validation.py", "test_native_spl2.py",
                                "test_native_rewrite.py", "test_native_requirements.py", "test_native_closure.py",
-                               "test_native_environment.py", "test_native_compatibility.py", "test_native_resolution.py"],
+                               "test_native_environment.py", "test_native_compatibility.py", "test_native_resolution.py", "test_native_workflow.py"],
                     "acceptance": ["test_documented_cli.py", "test_surfaces.py", "test_analysis_surfaces.py",
                                    "test_validation_surfaces.py", "test_schema_surfaces.py", "test_spl2_surfaces.py",
-                                   "test_rewrite_surfaces.py", "test_requirements_surfaces.py", "test_environment_surfaces.py", "test_compatibility_surfaces.py", "test_resolution_surfaces.py"],
+                                   "test_rewrite_surfaces.py", "test_requirements_surfaces.py", "test_environment_surfaces.py", "test_compatibility_surfaces.py", "test_resolution_surfaces.py", "test_workflow_surfaces.py"],
                 },
                 "cli_examples": "passed", "surface_parity": "passed", "version_agreement": "passed",
             })
@@ -230,6 +240,8 @@ def test_exact_source_hash_inputs_are_stable_in_windows_checkout(tmp_path: Path)
     relative_paths.add("testdata/compatibility/cases.json")
     relative_paths.add("testdata/resolution/cases.json")
     relative_paths.add("examples/resolution/request.json")
+    relative_paths.update("testdata/workflow/" + name for name in check_acceptance.WORKFLOW_FIXTURE_HASHES)
+    relative_paths.update(key.removeprefix("../../") for key in check_acceptance.WORKFLOW_EXAMPLE_HASHES)
     relative_paths.update(
         path.relative_to(ROOT).as_posix()
         for paths in check_acceptance.REQUIRED_TEST_HASH_PATHS.values()
@@ -552,4 +564,22 @@ def test_resolution_evidence_rejects_incomplete_or_stale_records(damage):
         del installed["resolution_surface_evidence"]
         del installed["fixture_hashes"]["resolution"]
         installed["required_test_files"]["native"].remove("test_native_resolution.py")
+    assert validate_records(records, SHA)
+
+
+@pytest.mark.parametrize("damage", ["suite", "native", "fixture", "operation", "surface", "skip", "disclosure", "source", "example", "test_hash"])
+def test_workflow_evidence_rejects_incomplete_or_stale_records(damage):
+    records = passing_records()
+    installed = next(r for r in records if r["kind"] == "installed-wheel")
+    evidence = installed["workflow_surface_evidence"]
+    if damage == "suite": installed["required_test_files"]["acceptance"].remove("test_workflow_surfaces.py")
+    elif damage == "native": installed["required_test_files"]["native"].remove("test_native_workflow.py")
+    elif damage == "fixture": installed["fixture_hashes"]["workflow"]["cases.json"] = HASH
+    elif damage == "operation": del evidence["operations"]["recheck"]
+    elif damage == "surface": evidence["surfaces"].remove("c")
+    elif damage == "skip": installed["tests"]["surface_acceptance"]["skipped"] = 1
+    elif damage == "disclosure": del evidence["controls"]["disclosure"]
+    elif damage == "source": evidence["source_sha"] = "c" * 40
+    elif damage == "example": del installed["tooling_fixture_hashes"]["../../examples/workflow/request.json"]
+    elif damage == "test_hash": installed["required_test_hashes"]["acceptance"]["test_workflow_surfaces.py"] = HASH
     assert validate_records(records, SHA)

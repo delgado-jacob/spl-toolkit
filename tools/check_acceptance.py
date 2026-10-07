@@ -17,15 +17,15 @@ CONFIG = json.loads((ROOT / "tools" / "release-env.json").read_text(encoding="ut
 TARGETS = CONFIG["targets"]
 PYTHON_VERSIONS = tuple(CONFIG["test_python"])
 EXPECTED_COUNTS = {"required_native": 11, "surface_acceptance": 6}
-EXPECTED_MACHINE_CONTRACT_COUNT = 13
+EXPECTED_MACHINE_CONTRACT_COUNT = 35
 REQUIRED_TEST_FILES = {
     "native": {"test_native_abi.py", "test_native_mapper.py", "test_native_analysis.py",
                "test_native_validation.py", "test_native_schema_validation.py", "test_native_spl2.py",
                "test_native_rewrite.py", "test_native_requirements.py", "test_native_closure.py",
-               "test_native_environment.py", "test_native_compatibility.py", "test_native_resolution.py"},
+               "test_native_environment.py", "test_native_compatibility.py", "test_native_resolution.py", "test_native_workflow.py"},
     "acceptance": {"test_documented_cli.py", "test_surfaces.py", "test_analysis_surfaces.py",
                    "test_requirements_surfaces.py", "test_validation_surfaces.py", "test_schema_surfaces.py",
-                   "test_spl2_surfaces.py", "test_rewrite_surfaces.py", "test_environment_surfaces.py", "test_compatibility_surfaces.py", "test_resolution_surfaces.py"},
+                   "test_spl2_surfaces.py", "test_rewrite_surfaces.py", "test_environment_surfaces.py", "test_compatibility_surfaces.py", "test_resolution_surfaces.py", "test_workflow_surfaces.py"},
 }
 REQUIRED_TEST_HASH_PATHS = {
     "native": {
@@ -36,6 +36,7 @@ REQUIRED_TEST_HASH_PATHS = {
         "test_native_environment.py": ROOT / "python/tests/test_native_environment.py",
         "test_native_compatibility.py": ROOT / "python/tests/test_native_compatibility.py",
         "test_native_resolution.py": ROOT / "python/tests/test_native_resolution.py",
+        "test_native_workflow.py": ROOT / "python/tests/test_native_workflow.py",
     },
     "acceptance": {
         "test_requirements_surfaces.py": ROOT / "tests/acceptance/test_requirements_surfaces.py",
@@ -43,6 +44,7 @@ REQUIRED_TEST_HASH_PATHS = {
         "test_environment_surfaces.py": ROOT / "tests/acceptance/test_environment_surfaces.py",
         "test_compatibility_surfaces.py": ROOT / "tests/acceptance/test_compatibility_surfaces.py",
         "test_resolution_surfaces.py": ROOT / "tests/acceptance/test_resolution_surfaces.py",
+        "test_workflow_surfaces.py": ROOT / "tests/acceptance/test_workflow_surfaces.py",
     },
 }
 REQUIRED_TEST_HASHES = {
@@ -82,6 +84,16 @@ RESOLUTION_EXAMPLE_SHA = hashlib.sha256((ROOT / "examples/resolution/request.jso
 RESOLUTION_FIXTURE_HASHES = {
     "cases.json": hashlib.sha256((ROOT / "testdata/resolution/cases.json").read_bytes()).hexdigest(),
 }
+WORKFLOW_FIXTURE_HASHES = {
+    name: hashlib.sha256((ROOT / "testdata/workflow" / name).read_bytes()).hexdigest()
+    for name in ("cases.json", "comparisons.json", "disclosure.json")
+}
+WORKFLOW_CONTROLS = {"disclosure", "role_isolation", "locations", "graph_pointers", "bom_occurrences", "source_immutability", "native_detachment"}
+WORKFLOW_EXAMPLE_HASHES = {
+    "../../examples/workflow/" + name: hashlib.sha256((ROOT / "examples/workflow" / name).read_bytes()).hexdigest()
+    for name in ("request.json", "recheck-query.json", "recheck-resolution.json")
+}
+TOOLING_FIXTURE_KEYS.update(WORKFLOW_EXAMPLE_HASHES)
 LINUS_FIXTURE_SHA = hashlib.sha256((ROOT / "testdata/spl2/linus-forms.json").read_bytes()).hexdigest()
 COMMON_FIELDS = {"schema_version", "kind", "source_sha", "status"}
 KIND_FIELDS = {
@@ -98,7 +110,7 @@ KIND_FIELDS = {
         "wheel_contract_hashes", "tooling_source_hashes", "tooling_fixture_hashes",
         "tooling_environment_fixture_hashes",
         "packaged_fixture_hashes",
-        "machine_contract_tests", "fixture_hashes", "requirements_surface_evidence", "resolution_surface_evidence",
+        "machine_contract_tests", "fixture_hashes", "requirements_surface_evidence", "resolution_surface_evidence", "workflow_surface_evidence",
     },
     "go-floor": {"go_version"},
     "native-memory": {"compiler", "sanitizer"},
@@ -271,6 +283,34 @@ def _validate_resolution_evidence(record: dict, errors: list[str], label: str) -
             errors.append(f"{label}: resolution_surface_evidence {field} is below {minimum}")
     if evidence.get("surfaces") != ["go", "cli", "http", "c", "python"]:
         errors.append(f"{label}: resolution_surface_evidence must exercise all five surfaces")
+
+
+def _validate_workflow_evidence(record: dict, errors: list[str], label: str) -> None:
+    fixtures = record.get("fixture_hashes")
+    _validate_hash_map(fixtures.get("workflow") if isinstance(fixtures, dict) else None, WORKFLOW_FIXTURE_HASHES,
+                       "fixture_hashes.workflow", errors, label)
+    evidence = record.get("workflow_surface_evidence")
+    fields = {"schema_version", "source_sha", "fixture_hashes", "operations", "controls", "surfaces"}
+    if not isinstance(evidence, dict) or set(evidence) != fields:
+        errors.append(f"{label}: workflow_surface_evidence has incorrect fields")
+        return
+    if evidence.get("schema_version") != 1 or evidence.get("source_sha") != record.get("source_sha"):
+        errors.append(f"{label}: workflow source identity/version mismatch")
+    _validate_hash_map(evidence.get("fixture_hashes"), WORKFLOW_FIXTURE_HASHES,
+                       "workflow_surface_evidence.fixture_hashes", errors, label)
+    operations = evidence.get("operations")
+    if not isinstance(operations, dict) or set(operations) != {"assess", "compare", "evidence", "recheck"}:
+        errors.append(f"{label}: workflow requires all operation families")
+    elif any(type(v) is not int or v <= 0 for v in operations.values()):
+        errors.append(f"{label}: workflow operation coverage must be nonempty")
+    if evidence.get("surfaces") != ["go", "cli", "http", "c", "python"]:
+        errors.append(f"{label}: workflow requires all five surfaces")
+    controls = evidence.get("controls")
+    if not isinstance(controls, dict) or set(controls) != WORKFLOW_CONTROLS or any(v != "passed" for v in controls.values()):
+        errors.append(f"{label}: workflow behavioral controls must all pass")
+    tooling = record.get("tooling_fixture_hashes", {})
+    if not isinstance(tooling, dict) or any(tooling.get(k) != v for k, v in WORKFLOW_EXAMPLE_HASHES.items()):
+        errors.append(f"{label}: workflow example hashes differ from current source")
 
 
 def _validate_packaged_fixture_evidence(record: dict, errors: list[str], label: str) -> None:
@@ -459,6 +499,7 @@ def validate_records(records: list[dict], source_sha: str) -> list[str]:
             _validate_counts(record, errors, label)
             _validate_requirements_evidence(record, errors, label)
             _validate_resolution_evidence(record, errors, label)
+            _validate_workflow_evidence(record, errors, label)
             _validate_packaged_fixture_evidence(record, errors, label)
             _validate_required_test_hashes(record, errors, label)
             for field, expected in (

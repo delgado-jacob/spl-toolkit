@@ -191,3 +191,33 @@ def test_assessment_export_objects_and_unicode(format):
         result = mapper.workflow_assess(value)
         assert isinstance(result, dict)
         assert raw_result(mapper, "assess", json.dumps(value, ensure_ascii=False).encode()) == ("report", result)
+
+
+def test_authored_workflow_fixture_statuses_and_detached_reports():
+    directory = Path(os.environ["SPL_WORKFLOW_FIXTURES"])
+    assert directory.is_absolute() and directory.is_dir()
+    cases = json.loads((directory / "cases.json").read_text())
+    with open_mapper() as mapper:
+        reports = []
+        for case in cases:
+            value = copy.deepcopy(case["request"])
+            if case.get("selectors"):
+                doc = value["documents"][0]["document"]
+                reqs = mapper.requirements_query(doc["text"], **{k: doc[k] for k in ("language", "profile", "version", "source_id")})
+                for selector in case["selectors"]:
+                    matches = [i for i in reqs["inputs"] if i["kind"] == selector["kind"] and i["name"] == selector["name"]]
+                    assert len(matches) == 1
+                    binding = copy.deepcopy(selector["binding"])
+                    binding["input_id"] = matches[0]["id"]
+                    value["settings"]["entries"][0]["compatibility"]["input_bindings"].append(binding)
+            original = copy.deepcopy(value)
+            result = mapper.workflow_assess(value)
+            assert result["ci_exit_code"] == case["expected"]["ci_exit_code"]
+            assert result["execution_complete"] == case["expected"]["execution_complete"]
+            assert [e["status"] for e in result["entries"]] == case["expected"]["statuses"]
+            assert raw_result(mapper, "assess", json.dumps(value).encode()) == ("report", result)
+            assert value == original
+            reports.append(result)
+        reports[0]["entries"][0]["analysis"]["document"]["text"] = "DETACHED"
+        assert mapper.workflow_assess(cases[0]["request"])["entries"][0]["analysis"]["document"]["text"] != "DETACHED"
+    assert reports[0]["entries"][0]["analysis"]["document"]["text"] == "DETACHED"

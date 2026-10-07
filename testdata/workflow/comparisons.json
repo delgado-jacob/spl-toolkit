@@ -1,0 +1,43 @@
+[
+  {
+    "id": "same-complete",
+    "assessment": "literal-complete",
+    "expected": {
+      "classification": "unchanged",
+      "ci_exit_code": 0
+    }
+  },
+  {
+    "id": "same-incomplete",
+    "assessment": "closure-implicit-source",
+    "expected": {
+      "classification": "indeterminate",
+      "ci_exit_code": 3
+    }
+  },
+  {
+    "id": "acquisition-failure",
+    "manifest": {
+      "schema_version": 1,
+      "documents": [
+        {
+          "id": "complete",
+          "path": "missing.spl2",
+          "language": "spl2",
+          "profile": "splunkd",
+          "version": "current"
+        }
+      ]
+    },
+    "expected": {
+      "acquisition_failed": 1,
+      "assessed": 0,
+      "ci_exit_code": 2,
+      "execution_complete": false,
+      "classification": "failed",
+      "reasons": [
+        "entry_failure"
+      ]
+    }
+  }
+]

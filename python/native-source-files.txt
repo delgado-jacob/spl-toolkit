@@ -31,6 +31,16 @@ contracts/v1/resolution.schema.json
 contracts/v1/rewrite.schema.json
 contracts/v1/schema-validation.schema.json
 contracts/v1/shared.schema.json
+contracts/v1/workflow-bom.schema.json
+contracts/v1/workflow-comparison-request.schema.json
+contracts/v1/workflow-comparison.schema.json
+contracts/v1/workflow-evidence-request.schema.json
+contracts/v1/workflow-evidence.schema.json
+contracts/v1/workflow-graph.schema.json
+contracts/v1/workflow-recheck-request.schema.json
+contracts/v1/workflow-recheck.schema.json
+contracts/v1/workflow-request.schema.json
+contracts/v1/workflow.schema.json
 contracts/v2/environment-snapshot.schema.json
 contracts/v2/shared.schema.json
 go.mod

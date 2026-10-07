@@ -25,3 +25,7 @@ python/tests/test_native_resolution.py text eol=lf
 tests/acceptance/test_resolution_surfaces.py text eol=lf
 testdata/resolution/cases.json text eol=lf
 examples/resolution/request.json text eol=lf
+python/tests/test_native_workflow.py text eol=lf
+tests/acceptance/test_workflow_surfaces.py text eol=lf
+testdata/workflow/*.json text eol=lf
+examples/workflow/*.json text eol=lf

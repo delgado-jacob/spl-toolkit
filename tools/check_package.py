@@ -39,7 +39,7 @@ SDIST_FIXED_FILES = {
     "tests/test_mapper.py", "tests/test_native_abi.py", "tests/test_native_mapper.py",
     "tests/test_native_analysis.py", "tests/test_native_validation.py", "tests/test_native_schema_validation.py",
     "tests/test_native_spl2.py", "tests/test_native_rewrite.py", "tests/test_native_requirements.py",
-    "tests/test_native_tooling.py", "tests/test_native_closure.py", "tests/test_native_environment.py", "tests/test_native_compatibility.py", "tests/test_native_resolution.py",
+    "tests/test_native_tooling.py", "tests/test_native_closure.py", "tests/test_native_environment.py", "tests/test_native_compatibility.py", "tests/test_native_resolution.py", "tests/test_native_workflow.py",
     "tests/test_closure_surfaces.py",
 }
 INSTALL_SCRIPT = """
@@ -54,7 +54,7 @@ with SPLMapper() as mapper:
     mapper.load_mappings([{'source':'src_ip','target':'source_ip'}])
     assert mapper.map_query('search src_ip=1') == 'search source_ip=1'
 """
-NATIVE_TESTS = ("test_native_abi.py", "test_native_mapper.py", "test_native_analysis.py", "test_native_validation.py", "test_native_schema_validation.py", "test_native_spl2.py", "test_native_rewrite.py", "test_native_requirements.py", "test_native_tooling.py", "test_native_closure.py", "test_native_environment.py", "test_native_compatibility.py", "test_native_resolution.py")
+NATIVE_TESTS = ("test_native_abi.py", "test_native_mapper.py", "test_native_analysis.py", "test_native_validation.py", "test_native_schema_validation.py", "test_native_spl2.py", "test_native_rewrite.py", "test_native_requirements.py", "test_native_tooling.py", "test_native_closure.py", "test_native_environment.py", "test_native_compatibility.py", "test_native_resolution.py", "test_native_workflow.py")
 REQUIREMENTS_FIXTURE_FILES = ("cases.json",)
 REWRITE_FIXTURE_FILES = ("cases.json", "conditions.json", "corpus.json", "edits.json", "example-rules.json", "forms.json", "requests.json")
 SCHEMA_FIXTURE_FILES = (
@@ -70,7 +70,7 @@ SPL2_FIXTURE_FILES = (
     "extended-commands.json", "extended-boundaries.json", "functions.json", "canonical-core.json",
     "recovery-core.json", "linus-forms.json",
 )
-ACCEPTANCE_FILES = ("test_documented_cli.py", "test_surfaces.py", "test_analysis_surfaces.py", "test_requirements_surfaces.py", "test_validation_surfaces.py", "test_schema_surfaces.py", "test_spl2_surfaces.py", "test_rewrite_surfaces.py", "test_tooling_surfaces.py", "test_environment_surfaces.py", "test_compatibility_surfaces.py", "test_resolution_surfaces.py", "test_machine_contracts.py", "spl2_transport.py", "cli_examples.json")
+ACCEPTANCE_FILES = ("test_documented_cli.py", "test_surfaces.py", "test_analysis_surfaces.py", "test_requirements_surfaces.py", "test_validation_surfaces.py", "test_schema_surfaces.py", "test_spl2_surfaces.py", "test_rewrite_surfaces.py", "test_tooling_surfaces.py", "test_environment_surfaces.py", "test_compatibility_surfaces.py", "test_resolution_surfaces.py", "test_workflow_surfaces.py", "test_machine_contracts.py", "spl2_transport.py", "cli_examples.json")
 REQUIRED_PYTEST_PLUGIN = r'''\
 import json
 import os
@@ -161,7 +161,7 @@ def clean_env() -> dict[str, str]:
     env = os.environ.copy()
     for name in ("SPL_TOOLING_FIXTURES", "SPL_TOOLING_SOURCE_ROOT", "SPL_TOOLING_GO", "SPL_CONTRACT_GO", "SPL_REQUIREMENTS_GO_ROOT"):
         env.pop(name, None)
-    for name in ("PYTHONPATH", "PYTHONHOME", "SPL_NATIVE_LIBRARY", "SPL_EXPECTED_VERSION", "SPL_SCHEMA_FIXTURES", "SPL_REQUIREMENTS_FIXTURES", "SPL_REQUIREMENTS_EVIDENCE", "SPL_SPL2_FIXTURES", "SPL_SPL2_GO_REPORTS", "SPL_SPL2_GO_SHA256", "SPL_MILESTONE11_DOCUMENTS", "SPL_REWRITE_FIXTURES", "SPL_REWRITE_GO_REPORTS", "SPL_REWRITE_GO_SHA256", "SPL_REWRITE_EVIDENCE", "SPL_CLOSURE_FIXTURES", "SPL_CLOSURE_GO_ROOT", "SPL_ENVIRONMENT_FIXTURES", "SPL_COMPATIBILITY_FIXTURES", "SPL_RESOLUTION_FIXTURES", "SPL_RESOLUTION_SOURCE_SHA", "SPL_RESOLUTION_EVIDENCE"):
+    for name in ("PYTHONPATH", "PYTHONHOME", "SPL_NATIVE_LIBRARY", "SPL_EXPECTED_VERSION", "SPL_SCHEMA_FIXTURES", "SPL_REQUIREMENTS_FIXTURES", "SPL_REQUIREMENTS_EVIDENCE", "SPL_SPL2_FIXTURES", "SPL_SPL2_GO_REPORTS", "SPL_SPL2_GO_SHA256", "SPL_MILESTONE11_DOCUMENTS", "SPL_REWRITE_FIXTURES", "SPL_REWRITE_GO_REPORTS", "SPL_REWRITE_GO_SHA256", "SPL_REWRITE_EVIDENCE", "SPL_CLOSURE_FIXTURES", "SPL_CLOSURE_GO_ROOT", "SPL_ENVIRONMENT_FIXTURES", "SPL_COMPATIBILITY_FIXTURES", "SPL_RESOLUTION_FIXTURES", "SPL_RESOLUTION_SOURCE_SHA", "SPL_RESOLUTION_EVIDENCE", "SPL_WORKFLOW_FIXTURES", "SPL_WORKFLOW_SOURCE_SHA", "SPL_WORKFLOW_EVIDENCE", "SPL_WORKFLOW_SEED"):
         env.pop(name, None)
     return env
 
@@ -489,7 +489,7 @@ def verify_sdist_sources(source: Path, root: Path) -> dict[str, str]:
             "requirements-build.txt", "requirements-dev.txt", "requirements-contracts-local-hashed.lock",
             "tests/test_native_analysis.py", "tests/test_native_schema_validation.py", "tests/test_native_spl2.py", "tests/test_native_rewrite.py",
             "tests/test_native_requirements.py", "tests/test_native_tooling.py",
-            "tests/test_native_closure.py", "tests/test_native_environment.py", "tests/test_native_compatibility.py", "tests/test_native_resolution.py",
+            "tests/test_native_closure.py", "tests/test_native_environment.py", "tests/test_native_compatibility.py", "tests/test_native_resolution.py", "tests/test_native_workflow.py",
         )
     }
     for relative in manifest.read_text(encoding="utf-8").splitlines():
@@ -588,6 +588,9 @@ def install_and_check(
     resolution_hashes = _copy_required_files(
         docs_root / "testdata/resolution", resolution_fixtures, ("cases.json",)
     )
+    workflow_fixtures = outside_checkout / f"workflow-fixtures-{directory.name}"
+    workflow_hashes = _copy_required_files(docs_root / "testdata/workflow", workflow_fixtures,
+                                           ("cases.json", "comparisons.json", "disclosure.json"))
     schema_fixtures = outside_checkout / f"schema-fixtures-{directory.name}"
     schema_hashes = copy_schema_fixtures(docs_root / "testdata/schemas", schema_fixtures)
     spl2_fixtures = outside_checkout / f"spl2-fixtures-{directory.name}"
@@ -635,6 +638,12 @@ def install_and_check(
         docs_root / "examples/resolution", resolution_examples, ("request.json",)
     )
     tooling_hashes["../../examples/resolution/request.json"] = resolution_example_hashes["request.json"]
+    workflow_examples = tooling_root / "examples/workflow"
+    workflow_example_hashes = _copy_required_files(
+        docs_root / "examples/workflow", workflow_examples,
+        ("request.json", "recheck-query.json", "recheck-resolution.json"))
+    tooling_hashes.update({"../../examples/workflow/" + name: digest
+                          for name, digest in workflow_example_hashes.items()})
     copied_go_transport = outside_checkout / f"spl2-go-transport-{directory.name}.json"
     shutil.copy2(go_transport, copied_go_transport)
     go_transport_hash = sha256(go_transport)
@@ -658,6 +667,9 @@ def install_and_check(
         "SPL_COMPATIBILITY_FIXTURES": str((compatibility_fixtures / "cases.json").resolve()),
         "SPL_RESOLUTION_FIXTURES": str((resolution_fixtures / "cases.json").resolve()),
         "SPL_RESOLUTION_SOURCE_SHA": source_sha,
+        "SPL_WORKFLOW_SOURCE_SHA": source_sha,
+        "SPL_WORKFLOW_FIXTURES": str(workflow_fixtures.resolve()),
+        "SPL_WORKFLOW_SEED": str((resolution_examples / "request.json").resolve()),
         "SPL_SCHEMA_FIXTURES": str(schema_fixtures.resolve()),
         "SPL_SPL2_FIXTURES": str(spl2_fixtures.resolve()),
         "SPL_MILESTONE11_DOCUMENTS": str(milestone11_documents.resolve()),
@@ -687,10 +699,12 @@ def install_and_check(
     spl2_evidence = outside_checkout / f"spl2-surface-evidence-{directory.name}.json"
     rewrite_evidence = outside_checkout / f"rewrite-surface-evidence-{directory.name}.json"
     requirements_evidence = outside_checkout / f"requirements-surface-evidence-{directory.name}.json"
+    workflow_evidence = outside_checkout / f"workflow-surface-evidence-{directory.name}.json"
     resolution_evidence = outside_checkout / f"resolution-surface-evidence-{directory.name}.json"
     documentation = outside_checkout / f"docs-{directory.name}"
     documentation_hashes = copy_documentation(docs_root, documentation)
     acceptance_env = install_env | analysis_env | {
+        "SPL_WORKFLOW_EVIDENCE": str(workflow_evidence),
         "SPL_RESOLUTION_EVIDENCE": str(resolution_evidence),
         "SPL_SCHEMA_EVIDENCE": str(schema_evidence),
         "SPL_SPL2_EVIDENCE": str(spl2_evidence),
@@ -721,6 +735,7 @@ def install_and_check(
     surface_counts = {key: value + contract_counts[key] for key, value in surface_counts.items()}
     return metadata | {
         "source_sha": source_sha,
+        "workflow_surface_evidence": json.loads(workflow_evidence.read_text(encoding="utf-8")),
         "resolution_surface_evidence": json.loads(resolution_evidence.read_text(encoding="utf-8")),
         "schema_surface_evidence": json.loads(schema_evidence.read_text(encoding="utf-8")),
         "spl2_surface_evidence": json.loads(spl2_evidence.read_text(encoding="utf-8")),
@@ -736,7 +751,7 @@ def install_and_check(
         "tooling_environment_fixture_hashes": tooling_environment_hashes,
         "machine_contract_tests": contract_counts,
         "source_header_sha256": sha256(docs_root / "python/spl_toolkit/libspl_toolkit.h"),
-        "fixture_hashes": {"baseline": sha256(fixture), "analysis": sha256(analysis_fixture), "requirements": requirements_hashes["cases.json"], "validation": sha256(validation_fixture), "schema": schema_hashes, "spl2": spl2_hashes, "milestone11_documents": milestone11_documents_hash, "rewrite": rewrite_hashes, "environment": environment_hashes, "compatibility": compatibility_hashes, "resolution": resolution_hashes, "spl2_go_transport": go_transport_hash, "rewrite_go_transport": rewrite_transport_hash},
+        "fixture_hashes": {"baseline": sha256(fixture), "analysis": sha256(analysis_fixture), "requirements": requirements_hashes["cases.json"], "validation": sha256(validation_fixture), "schema": schema_hashes, "spl2": spl2_hashes, "milestone11_documents": milestone11_documents_hash, "rewrite": rewrite_hashes, "environment": environment_hashes, "compatibility": compatibility_hashes, "resolution": resolution_hashes, "workflow": workflow_hashes, "spl2_go_transport": go_transport_hash, "rewrite_go_transport": rewrite_transport_hash},
         "tests": {"required_native": native_counts, "surface_acceptance": surface_counts},
         "required_test_files": {"native": list(NATIVE_TESTS),
                                 "acceptance": [name for name in ACCEPTANCE_FILES if name.startswith("test_") and name.endswith(".py")]},
@@ -751,6 +766,7 @@ def install_and_check(
                     "test_native_environment.py",
                     "test_native_compatibility.py",
                     "test_native_resolution.py",
+                    "test_native_workflow.py",
                 )
             },
             "acceptance": {
@@ -761,6 +777,7 @@ def install_and_check(
                     "test_environment_surfaces.py",
                     "test_compatibility_surfaces.py",
                     "test_resolution_surfaces.py",
+                    "test_workflow_surfaces.py",
                 )
             },
         },

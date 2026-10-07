@@ -636,3 +636,13 @@ def test_release_build_includes_cgo_free_versioned_exporter(tmp_path: Path, monk
     assert exporter_env["CGO_ENABLED"] == "0"
     assert f"-X={release.VERSION_SYMBOL}=0.1.1" in exporter_command[exporter_command.index("-ldflags") + 1]
     assert environment["artifacts"][exporter.name] == hashlib.sha256(b"binary").hexdigest()
+
+
+def test_workflow_production_contracts_and_examples_are_release_inputs():
+    required = {p.relative_to(ROOT).as_posix() for p in (ROOT / "contracts/v1").glob("workflow*.json")}
+    required |= {p.relative_to(ROOT).as_posix() for p in (ROOT / "examples/workflow").rglob("*") if p.is_file()}
+    required.add("examples/go/workflow/main.go")
+    for manifest in ("release-source-files.txt", "release-content-files.txt"):
+        entries = set((ROOT / "tools" / manifest).read_text().splitlines())
+        assert required <= entries
+        assert not any("testdata/workflow" in p or "docs/superpowers" in p for p in entries)
