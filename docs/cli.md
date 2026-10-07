@@ -419,4 +419,4 @@ unknown ownership and independent correlation remain separate in the report.
 spl-toolkit resolve --request examples/resolution/request.json --format json
 ```
 
-The committed [resolution request](../examples/resolution/request.json) produces two variants, one verified and one failed, and intentionally exits 1. Read the [resolution contract](resolution.md) before passing verified `resolved_query` text downstream.
+The committed [resolution request](https://github.com/delgado-jacob/spl-toolkit/blob/e8d6fb5ea18887dabaa2ec717b980f9137ebbe8e/examples/resolution/request.json) produces two variants, one verified and one failed, and intentionally exits 1. Read the [resolution contract](resolution.md) before passing verified `resolved_query` text downstream.

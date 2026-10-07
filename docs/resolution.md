@@ -7,7 +7,7 @@ layout: page
 
 Resolution substitutes explicitly selected names, proves correspondence to the original query roles, and assesses each candidate against separately supplied offline environment and schema evidence. It does not discover objects, consult a registry, retrieve remote data, or execute queries.
 
-The [complete request](../examples/resolution/request.json) selects `$events` from `events_good` and `events_missing`. The first object's complete schema contains required `id`; the second complete schema contains `other` and lacks `id`. Original role IDs were obtained from canonical `analysis.Analyze` on the exact submitted document, rather than invented opaque identifiers. The resulting report contains two variants: one verified, one failed, zero incomplete.
+The [complete request](https://github.com/delgado-jacob/spl-toolkit/blob/e8d6fb5ea18887dabaa2ec717b980f9137ebbe8e/examples/resolution/request.json) selects `$events` from `events_good` and `events_missing`. The first object's complete schema contains required `id`; the second complete schema contains `other` and lacks `id`. Original role IDs were obtained from canonical `analysis.Analyze` on the exact submitted document, rather than invented opaque identifiers. The resulting report contains two variants: one verified, one failed, zero incomplete.
 
 ## Input and publication contract
 

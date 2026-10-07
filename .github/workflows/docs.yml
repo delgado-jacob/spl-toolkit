@@ -129,10 +129,20 @@ jobs:
           cd docs/_site
           tar -xf artifact.tar
 
+      - name: Check rendered site destinations
+        run: |
+          python3 -m unittest tools.tests.test_docs.RenderedDocumentationTests -v
+          python3 tools/check_docs.py --site-dir docs/_site --site-url https://delgado-jacob.github.io/spl-toolkit/
+
       - name: Check internal links
         uses: lycheeverse/lychee-action@v1
         with:
-          args: --verbose --no-progress --exclude-all-private 'docs/_site/**/*.html'
+          # Check same-site destinations in this build, including canonical URLs,
+          # while retaining network checks for external destinations.
+          args: >-
+            --verbose --no-progress --exclude-all-private
+            --remap '^https?://delgado-jacob\.github\.io/spl-toolkit(?:/(.*))?$ file://${{ github.workspace }}/docs/_site/$1'
+            'docs/_site/**/*.html'
           fail: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
