@@ -183,3 +183,48 @@ type ComparisonReport struct {
 	Counts            ComparisonCounts  `json:"counts"`
 	Entries           []ComparisonEntry `json:"entries"`
 }
+
+// EvidenceRequest selects a minimal projection of one saved source. Optional
+// disclosure categories must always be supplied explicitly as an array.
+type EvidenceRequest struct {
+	SchemaVersion int               `json:"schema_version"`
+	Report        *Report           `json:"report,omitempty"`
+	Comparison    *ComparisonReport `json:"comparison,omitempty"`
+	Include       []string          `json:"include"`
+}
+type Disclosure struct {
+	Requested            []string `json:"requested"`
+	Emitted              []string `json:"emitted"`
+	Omitted              []string `json:"omitted"`
+	PotentiallySensitive []string `json:"potentially_sensitive"`
+}
+type PublicCapability struct {
+	Language string `json:"language"`
+	Profile  string `json:"profile"`
+	Version  string `json:"version"`
+	Revision string `json:"revision"`
+}
+type EvidenceCoverage struct {
+	Dimension string `json:"dimension"`
+	State     string `json:"state"`
+}
+type EvidenceItem struct {
+	Token      string                     `json:"token"`
+	Pointer    string                     `json:"pointer"`
+	Kind       string                     `json:"kind"`
+	Outcome    string                     `json:"outcome"`
+	Codes      []string                   `json:"codes"`
+	Complete   bool                       `json:"complete"`
+	Capability *PublicCapability          `json:"capability,omitempty"`
+	Coverage   []EvidenceCoverage         `json:"coverage"`
+	Details    map[string]json.RawMessage `json:"details,omitempty"`
+}
+type EvidenceReport struct {
+	SchemaVersion     int               `json:"schema_version"`
+	SourceKind        string            `json:"source_kind"`
+	SourceCIExitCode  int               `json:"source_ci_exit_code"`
+	ExecutionComplete bool              `json:"execution_complete"`
+	Counts            map[string]uint64 `json:"counts"`
+	Items             []EvidenceItem    `json:"items"`
+	Disclosure        Disclosure        `json:"disclosure"`
+}

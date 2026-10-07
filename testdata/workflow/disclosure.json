@@ -1,0 +1,12 @@
+{
+ "query_text":"PRIVATE_QUERY_TEXT_17",
+ "requirement_names":"PRIVATE_REQUIREMENT_NAME_17",
+ "source_identity":"PRIVATE_SOURCE_ID_17",
+ "environment_metadata":"PRIVATE_ENVIRONMENT_METADATA_17",
+ "definitions":"PRIVATE_DEFINITION_BODY_17",
+ "diagnostic_details":"PRIVATE_DIAGNOSTIC_DETAIL_17",
+ "artifact_identity":"PRIVATE_ARTIFACT_DIGEST_17",
+ "unknown_code":"PRIVATE_UNKNOWN_CODE_17",
+ "unknown_dimension":"PRIVATE_UNKNOWN_DIMENSION_17",
+ "unknown_state":"PRIVATE_UNKNOWN_STATE_17"
+}
