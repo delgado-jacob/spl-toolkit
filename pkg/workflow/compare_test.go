@@ -409,3 +409,39 @@ func TestWorkflowCompareUnmatchedBodyWithOriginalRequirementRenumbering(t *testi
 		t.Fatalf("recorded requirement IDs became definite: %s %v", got.Entries[0].Classification, deltaKeys(got.Entries[0]))
 	}
 }
+
+func TestWorkflowCompareUnmatchedBodyTransitiveSelectedObjectFact(t *testing.T) {
+	before := definitionComparisonRequest(t, "from events_good | fields id")
+	after := definitionComparisonRequest(t, "from  events_good | fields id")
+	for i := range after.Settings.Snapshot.Objects {
+		if after.Settings.Snapshot.Objects[i].Name == "events_good" {
+			after.Settings.Snapshot.Objects[i].Sharing = "global"
+		}
+	}
+	got := compareAssessed(t, before, after)
+	if got.Entries[0].Before.Status != analysis.Valid || got.Entries[0].After.Status != analysis.Valid || got.Entries[0].Classification != impact.Affected {
+		t.Fatalf("transitive selected fact: %s before %s after %s %v", got.Entries[0].Classification, got.Entries[0].Before.Status, got.Entries[0].After.Status, deltaKeys(got.Entries[0]))
+	}
+}
+func TestWorkflowCompareUnmatchedDatasetBodyOnly(t *testing.T) {
+	got := compareAssessed(t, definitionComparisonRequest(t, "from events_good | fields id"), definitionComparisonRequest(t, "from  events_good | fields id"))
+	if got.Entries[0].Classification != impact.Indeterminate {
+		t.Fatalf("body-only derived deltas became definite: %s %v", got.Entries[0].Classification, deltaKeys(got.Entries[0]))
+	}
+}
+
+func TestWorkflowCompareUnmatchedBodyTransitiveSelectedSchemaFact(t *testing.T) {
+	before := definitionComparisonRequest(t, "from events_good | fields id")
+	after := definitionComparisonRequest(t, "from  events_good | fields id")
+	for i := range after.Settings.SchemaBundle.Bindings {
+		b := &after.Settings.SchemaBundle.Bindings[i]
+		if b.ObjectID == "object-good" {
+			b.SourceCoverage = "partial"
+			b.Reason = "captured subset"
+		}
+	}
+	got := compareAssessed(t, before, after)
+	if got.Entries[0].Classification != impact.Affected {
+		t.Fatalf("transitive selected schema binding: %s %v", got.Entries[0].Classification, deltaKeys(got.Entries[0]))
+	}
+}

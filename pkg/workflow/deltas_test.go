@@ -5,6 +5,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/delgado-jacob/spl-toolkit/pkg/compatibility"
 	"github.com/delgado-jacob/spl-toolkit/pkg/environment"
 	"github.com/delgado-jacob/spl-toolkit/pkg/impact"
 )
@@ -33,5 +34,28 @@ func TestComparisonNormalizationPreservesCapturedAndRawIdentity(t *testing.T) {
 	_ = json.Unmarshal(target, &want)
 	if got := normalizeFinding(target, ids, "", false); !reflect.DeepEqual(got, want) {
 		t.Fatal("raw schema facts erased or renamed")
+	}
+}
+
+func TestCapturedSelectionDoesNotInferAddedOrAmbiguousSources(t *testing.T) {
+	object := environment.Object{ID: "object", Kind: "dataset", Name: "events", Sharing: "app"}
+	selected := compatibility.ObjectEvidence{ObjectID: object.ID, Expected: environment.ObjectIdentity{Kind: object.Kind, Name: object.Name}, Object: &object}
+	before := []compatibility.InputOutcome{{InputID: "before", Objects: []compatibility.ObjectEvidence{selected, selected}}}
+	same := []compatibility.InputOutcome{{InputID: "after", Objects: []compatibility.ObjectEvidence{selected}}}
+	if changedCapturedSelection(before, same, nil) {
+		t.Fatal("local input IDs and repeated selection affected captured facts")
+	}
+	changed := object
+	changed.Sharing = "global"
+	different := selected
+	different.Object = &changed
+	ambiguous := []compatibility.InputOutcome{{Objects: []compatibility.ObjectEvidence{selected, different}}}
+	if changedCapturedSelection(before, ambiguous, nil) {
+		t.Fatal("conflicting captured records treated as unique correspondence")
+	}
+	different.ObjectID = "other"
+	changed.ID = "other"
+	if changedCapturedSelection(before, []compatibility.InputOutcome{{Objects: []compatibility.ObjectEvidence{different}}}, nil) {
+		t.Fatal("new selected captured identity treated as established source correspondence")
 	}
 }

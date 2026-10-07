@@ -591,6 +591,77 @@ func independentlyChangedFinding(b, a comparisonFinding, bp, ap string, e *Compa
 		}
 		return out
 	}
+	// Captured facts selected through a definition still describe their recorded
+	// object/schema. Their binding identity includes the expected namespace,
+	// app and owner, independently of expanded offsets or local requirement IDs.
+	if changedCapturedSelection(b.value, a.value, unresolved) {
+		return true
+	}
 	x, y := independent(b.value, originalBefore), independent(a.value, originalAfter)
 	return !reflect.DeepEqual(normalizeFinding(x, beforeIDs, pairedPath(b.pointer), true), normalizeFinding(y, afterIDs, a.pointer, true))
+}
+
+// Compare only uniquely established captured selections present on both sides.
+// Repeated identical uses share one captured fact; conflicting records with the
+// same selection remain ambiguous. Definition text is excluded only for the
+// definitions whose source correspondence was not established.
+func changedCapturedSelection(before, after any, unresolved map[string]bool) bool {
+	collect := func(value any) map[string]map[string]bool {
+		out := map[string]map[string]bool{}
+		add := func(key string, fact any) {
+			normalized := normalizeFinding(fact, func(string) map[string]string { return nil }, "", false)
+			if out[key] == nil {
+				out[key] = map[string]bool{}
+			}
+			out[key][factKey(normalized)] = true
+		}
+		objects := func(items []compatibility.ObjectEvidence) {
+			for _, x := range items {
+				if x.ObjectID == "" || x.Object == nil {
+					continue
+				}
+				if unresolved[x.ObjectID] {
+					copy := *x.Object
+					copy.Document = nil
+					x.Object = &copy
+				}
+				add("object:"+factKey([]any{x.ObjectID, x.Expected}), x)
+			}
+		}
+		requirements := func(items []compatibility.RequirementOutcome) {
+			for _, o := range items {
+				objects(o.Objects)
+				for _, x := range o.Schemas {
+					if x.SchemaID == "" || x.Binding.ObjectID == "" {
+						continue
+					}
+					add("schema:"+factKey([]any{x.SchemaID, x.Binding.ObjectID, x.Binding.Expected}), x)
+				}
+			}
+		}
+		switch items := value.(type) {
+		case []compatibility.RequirementOutcome:
+			requirements(items)
+		case []compatibility.ResolutionRequirementOutcome:
+			for _, x := range items {
+				requirements([]compatibility.RequirementOutcome{x.Evidence})
+			}
+		case []compatibility.InputOutcome:
+			for _, x := range items {
+				objects(x.Objects)
+			}
+		case []compatibility.ResolutionInputOutcome:
+			for _, x := range items {
+				objects(x.Evidence.Objects)
+			}
+		}
+		return out
+	}
+	b, a := collect(before), collect(after)
+	for key, values := range b {
+		if len(values) == 1 && len(a[key]) == 1 && !reflect.DeepEqual(values, a[key]) {
+			return true
+		}
+	}
+	return false
 }
