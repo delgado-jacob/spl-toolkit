@@ -25,7 +25,7 @@ func artifactPath(path string) bool {
 }
 func readWire(raw []byte, typ reflect.Type) (any, map[string]json.RawMessage, map[string]int, error) {
 	if err := jsoninput.ValidateUnicode(raw); err != nil {
-		return nil, nil, nil, requestErrorAt("request_invalid", "", err.Error())
+		return nil, nil, nil, requestErrorOffset("request_invalid", "", err.Error(), unicodeErrorOffset(raw))
 	}
 	d := json.NewDecoder(bytes.NewReader(raw))
 	d.UseNumber()
@@ -260,13 +260,7 @@ func normalizeSettingsAt(input Settings, base string) (Settings, error) {
 				if len(v.Values) == 0 {
 					return Settings{}, requestErrorAt("request_invalid", path+"/"+sel.name, "selector requires nonempty values")
 				}
-				values := map[string]bool{}
-				for _, s := range v.Values {
-					if strings.TrimSpace(s) == "" || values[s] {
-						return Settings{}, requestErrorAt("request_invalid", path+"/"+sel.name, "selector requires unique nonblank values")
-					}
-					values[s] = true
-				}
+
 			}
 		}
 	}
@@ -449,4 +443,56 @@ func copyValue(value reflect.Value) reflect.Value {
 	default:
 		return value
 	}
+}
+
+// unicodeErrorOffset locates the encoding fault already identified by ValidateUnicode.
+// It reads source bytes rather than depending on the owner's human-readable error.
+func unicodeErrorOffset(raw []byte) int {
+	if !utf8.Valid(raw) {
+		for i := 0; i < len(raw); {
+			_, size := utf8.DecodeRune(raw[i:])
+			if size == 1 && raw[i] >= 0x80 {
+				return i
+			}
+			i += size
+		}
+	}
+	escape := func(i int) (uint64, bool) {
+		if i+6 > len(raw) || raw[i] != '\\' || raw[i+1] != 'u' {
+			return 0, false
+		}
+		n, err := strconv.ParseUint(string(raw[i+2:i+6]), 16, 16)
+		return n, err == nil
+	}
+	inString := false
+	for i := 0; i < len(raw); i++ {
+		switch raw[i] {
+		case '"':
+			inString = !inString
+		case '\\':
+			if !inString || i+1 >= len(raw) {
+				continue
+			}
+			if raw[i+1] != 'u' {
+				i++
+				continue
+			}
+			n, ok := escape(i)
+			if !ok {
+				continue
+			}
+			if n >= 0xd800 && n <= 0xdbff {
+				low, paired := escape(i + 6)
+				if !paired || low < 0xdc00 || low > 0xdfff {
+					return i
+				}
+				i += 11
+			} else if n >= 0xdc00 && n <= 0xdfff {
+				return i
+			} else {
+				i += 5
+			}
+		}
+	}
+	return 0
 }

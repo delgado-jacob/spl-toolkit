@@ -177,3 +177,30 @@ func TestDecodeWorkflowResolutionRequiredArrays(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestDecodeWorkflowUnicodeOffsets(t *testing.T) {
+	for _, raw := range [][]byte{append([]byte(`{"format":"`), 0xff), []byte(`{"format":"\ud800"}`), []byte(`{"format":"ok\udc00"}`), []byte(`{"format":"\ud800\udc00\ud800"}`)} {
+		expected := bytes.IndexByte(raw, 0xff)
+		if expected < 0 {
+			expected = bytes.LastIndex(raw, []byte(`\u`))
+		}
+		_, err := DecodeRequest(raw)
+		detail, ok := RequestErrorDetails(err)
+		if !ok || detail.ByteOffset == nil || *detail.ByteOffset != expected {
+			t.Fatalf("offset for %q: %#v", raw, detail)
+		}
+	}
+}
+func TestDecodeWorkflowDelegatesSelectorValueSemantics(t *testing.T) {
+	for _, values := range [][]string{{" "}, {"app", "app"}} {
+		r := seedRequest(t, "from main")
+		r.Settings.Entries[0].Compatibility.QueryScope.App = environment.Selector{Values: values}
+		raw, _ := json.Marshal(r)
+		if _, err := DecodeRequest(raw); err != nil {
+			t.Fatal(err)
+		}
+		if _, err := normalizeRequest(r); err != nil {
+			t.Fatal(err)
+		}
+	}
+}
