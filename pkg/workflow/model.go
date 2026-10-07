@@ -228,3 +228,27 @@ type EvidenceReport struct {
 	Items             []EvidenceItem    `json:"items"`
 	Disclosure        Disclosure        `json:"disclosure"`
 }
+
+// RecheckContext links a proposal to exact original source bytes and offline artifacts.
+// The source link does not prove that a proposal preserves detection intent.
+type RecheckContext struct {
+	Original     corpus.RequestDocument    `json:"original"`
+	Snapshot     environment.Snapshot      `json:"snapshot"`
+	SchemaBundle *environment.SchemaBundle `json:"schema_bundle,omitempty"`
+}
+type Proposal struct {
+	Document *analysis.QueryDocument `json:"document,omitempty"`
+	Settings EntrySettings           `json:"settings"`
+}
+type RecheckRequest struct {
+	SchemaVersion int            `json:"schema_version"`
+	Context       RecheckContext `json:"context"`
+	Proposal      Proposal       `json:"proposal"`
+}
+type RecheckReport struct {
+	SchemaVersion      int    `json:"schema_version"`
+	DetectionID        string `json:"detection_id"`
+	OriginalSourceHash string `json:"original_source_hash"`
+	ProposedSourceHash string `json:"proposed_source_hash"`
+	Assessment         Report `json:"assessment"`
+}

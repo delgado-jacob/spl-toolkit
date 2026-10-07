@@ -41,3 +41,11 @@ func FormatComparison(report *ComparisonReport) string {
 	}
 	return text + "\nOffline evidence comparison:\n" + string(raw) + "\n"
 }
+
+// FormatRecheck retains the fresh canonical assessment and exact source links.
+func FormatRecheck(report *RecheckReport) string {
+	if report == nil {
+		return ""
+	}
+	return fmt.Sprintf("Detection: %s\nOriginal source hash: %s\nProposed source hash: %s\nSource links do not prove preserved detection intent.\n\n%s", report.DetectionID, report.OriginalSourceHash, report.ProposedSourceHash, FormatReport(&report.Assessment))
+}

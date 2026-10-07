@@ -22,7 +22,7 @@ func pointerPart(s string) string {
 	return strings.ReplaceAll(strings.ReplaceAll(s, "~", "~0"), "/", "~1")
 }
 func artifactPath(path string) bool {
-	return path == "/snapshot" || path == "/schema_bundle" || path == "/settings/snapshot" || path == "/settings/schema_bundle"
+	return path == "/snapshot" || path == "/schema_bundle" || path == "/settings/snapshot" || path == "/settings/schema_bundle" || path == "/context/snapshot" || path == "/context/schema_bundle"
 }
 func readWire(raw []byte, typ reflect.Type) (any, map[string]json.RawMessage, map[string]int, error) {
 	if err := jsoninput.ValidateUnicode(raw); err != nil {
