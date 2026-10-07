@@ -244,7 +244,14 @@ func validateWireShape(value any, typ reflect.Type, path string) error {
 }
 
 // normalizeRequest admits typed Go input before any query parsing or enumeration.
-func normalizeRequest(input Request) (Request, error) {
+func normalizeRequest(input Request) (Request, error) { return normalizeRequestArtifacts(input, true) }
+
+// Shape admission leaves reusable artifact compilation to Prepare at the operation boundary.
+func normalizeRequestShape(input Request) (Request, error) {
+	return normalizeRequestArtifacts(input, false)
+}
+
+func normalizeRequestArtifacts(input Request, validateArtifacts bool) (Request, error) {
 	if !validUTF8(reflect.ValueOf(input)) {
 		return Request{}, requestErrorAt("request_invalid", "", "request contains invalid UTF-8")
 	}
@@ -268,20 +275,22 @@ func normalizeRequest(input Request) (Request, error) {
 	if input.Compatibility.SchemaBundle != nil && (input.Compatibility.SchemaBundle.Schemas == nil || input.Compatibility.SchemaBundle.Bindings == nil) {
 		return Request{}, requestErrorAt("request_invalid", "/compatibility/schema_bundle", "schemas and bindings must be arrays")
 	}
-	_, report, err := environment.PrepareSnapshot(input.Compatibility.Snapshot)
-	if err != nil {
-		return Request{}, err
-	}
-	if err := artifactError(report, "/compatibility/snapshot", 0); err != nil {
-		return Request{}, err
-	}
-	if input.Compatibility.SchemaBundle != nil {
-		_, report, err := environment.PrepareSchemaBundle(*input.Compatibility.SchemaBundle)
+	if validateArtifacts {
+		_, report, err := environment.PrepareSnapshot(input.Compatibility.Snapshot)
 		if err != nil {
 			return Request{}, err
 		}
-		if err := artifactError(report, "/compatibility/schema_bundle", 0); err != nil {
+		if err := artifactError(report, "/compatibility/snapshot", 0); err != nil {
 			return Request{}, err
+		}
+		if input.Compatibility.SchemaBundle != nil {
+			_, report, err := environment.PrepareSchemaBundle(*input.Compatibility.SchemaBundle)
+			if err != nil {
+				return Request{}, err
+			}
+			if err := artifactError(report, "/compatibility/schema_bundle", 0); err != nil {
+				return Request{}, err
+			}
 		}
 	}
 	normalized, err := normalizePreparedRequest(PreparedRequest{SchemaVersion: input.SchemaVersion, Document: input.Document, Resolutions: input.Resolutions, MaxVariants: input.MaxVariants, Compatibility: compatibility.ResolutionAssessment{QueryScope: input.Compatibility.QueryScope, InputBindings: input.Compatibility.InputBindings, DependencyBindings: input.Compatibility.DependencyBindings}})
