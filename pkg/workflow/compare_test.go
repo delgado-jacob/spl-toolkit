@@ -134,6 +134,53 @@ func TestWorkflowCompareResolutionEnumeration(t *testing.T) {
 	}
 }
 
+func TestWorkflowCompareResolutionCandidateInputRenumbering(t *testing.T) {
+	r, err := Assess(seedResolutionRequest(t))
+	if err != nil {
+		t.Fatal(err)
+	}
+	q := CompareRequest{SchemaVersion: 1, Before: *r, After: *r}
+	q, _ = exportCopy(q)
+	baseline, err := Compare(q)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(baseline.Entries[0].Deltas) != 0 {
+		t.Fatalf("baseline deltas %v", deltaKeys(baseline.Entries[0]))
+	}
+	old := q.After.Entries[0].Resolution.Variants[0].CandidateAnalysis.Inputs[0].ID
+	raw, _ := json.Marshal(q.After)
+	var wire any
+	_ = json.Unmarshal(raw, &wire)
+	var rename func(any) any
+	rename = func(v any) any {
+		switch x := v.(type) {
+		case map[string]any:
+			for key, value := range x {
+				x[key] = rename(value)
+			}
+		case []any:
+			for i, value := range x {
+				x[i] = rename(value)
+			}
+		case string:
+			if x == old {
+				return "historical-" + old
+			}
+		}
+		return v
+	}
+	raw, _ = json.Marshal(rename(wire))
+	_ = json.Unmarshal(raw, &q.After)
+	got, err := Compare(q)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got.Entries[0].Classification != baseline.Entries[0].Classification || got.CIExitCode != baseline.CIExitCode || len(got.Entries[0].Deltas) != 0 {
+		t.Fatalf("candidate input renumbering: %s deltas %v", got.Entries[0].Classification, deltaKeys(got.Entries[0]))
+	}
+}
+
 func deltaKeys(e ComparisonEntry) []string {
 	out := []string{}
 	for _, d := range e.Deltas {
@@ -203,6 +250,7 @@ func TestWorkflowCompareHistoricalCanonicalRenumbering(t *testing.T) {
 	if got.CIExitCode != 0 || got.Entries[0].Classification != impact.Unchanged || len(got.Entries[0].Deltas) != 0 {
 		t.Fatalf("renumber classification %s CI%d deltas %v unmatched %v", got.Entries[0].Classification, got.CIExitCode, deltaKeys(got.Entries[0]), got.Entries[0].Unmatched)
 	}
+
 }
 func TestWorkflowCompareProofDecisionAndExactDeltas(t *testing.T) {
 	r, err := Assess(seedResolutionRequest(t))
@@ -443,5 +491,119 @@ func TestWorkflowCompareUnmatchedBodyTransitiveSelectedSchemaFact(t *testing.T) 
 	got := compareAssessed(t, before, after)
 	if got.Entries[0].Classification != impact.Affected {
 		t.Fatalf("transitive selected schema binding: %s %v", got.Entries[0].Classification, deltaKeys(got.Entries[0]))
+	}
+}
+
+func TestReviewClosureHistoricalRenumbering(t *testing.T) {
+	req := definitionComparisonRequest(t, "from events_good | fields id")
+	req.Documents[0].Document.Text = "from view"
+	r, err := Assess(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	baseline, baselineErr := Compare(CompareRequest{SchemaVersion: 1, Before: *r, After: *r})
+	if baselineErr != nil || baseline.Entries[0].Classification != impact.Unchanged {
+		t.Fatalf("baseline not unchanged: %v %+v", baselineErr, baseline)
+	}
+	q := CompareRequest{SchemaVersion: 1, Before: *r, After: *r}
+	q, _ = exportCopy(q)
+	ids := map[string]string{}
+	a := q.After.Entries[0].Analysis
+	for _, v := range a.Stages {
+		ids[v.ID] = "historical-" + v.ID
+	}
+	for _, v := range a.Scopes {
+		ids[v.ID] = "historical-" + v.ID
+	}
+	for _, v := range a.References {
+		ids[v.ID] = "historical-" + v.ID
+	}
+	for _, v := range a.Inputs {
+		ids[v.ID] = "historical-" + v.ID
+		for _, o := range v.Occurrences {
+			ids[o.ID] = "historical-" + o.ID
+		}
+	}
+	for _, v := range a.Requirements.Items {
+		ids[v.ID] = "historical-" + v.ID
+	}
+	for _, result := range []*analysis.Result{q.After.Entries[0].Compatibility.Closure.DirectAnalysis, q.After.Entries[0].Compatibility.Closure.EffectiveAnalysis, q.After.Entries[0].Compatibility.Closure.DefinitionAnalyses[0].DirectAnalysis, q.After.Entries[0].Compatibility.Closure.DefinitionAnalyses[0].EffectiveAnalysis} {
+		for _, x := range result.Stages {
+			ids[x.ID] = "historical-" + x.ID
+		}
+		for _, x := range result.Scopes {
+			ids[x.ID] = "historical-" + x.ID
+		}
+		for _, x := range result.References {
+			ids[x.ID] = "historical-" + x.ID
+		}
+		for _, x := range result.Inputs {
+			ids[x.ID] = "historical-" + x.ID
+			for _, o := range x.Occurrences {
+				ids[o.ID] = "historical-" + o.ID
+			}
+		}
+		for _, x := range result.Requirements.Items {
+			ids[x.ID] = "historical-" + x.ID
+		}
+	}
+	raw, _ := json.Marshal(q.After)
+	var wire any
+	_ = json.Unmarshal(raw, &wire)
+	var rename func(any) any
+	rename = func(v any) any {
+		switch x := v.(type) {
+		case map[string]any:
+			for k, v := range x {
+				if k == "capability_revision" {
+					x[k] = "sha256:" + strings.Repeat("a", 64)
+				} else {
+					x[k] = rename(v)
+				}
+			}
+		case []any:
+			for i, v := range x {
+				x[i] = rename(v)
+			}
+		case string:
+			if y, ok := ids[x]; ok {
+				return y
+			}
+		}
+		return v
+	}
+	raw, _ = json.Marshal(rename(wire))
+	_ = json.Unmarshal(raw, &q.After)
+	got, err := Compare(q)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got.CIExitCode != 0 || got.Entries[0].Classification != impact.Unchanged || len(got.Entries[0].Deltas) != 0 {
+		t.Fatalf("renumber classification %s CI%d deltas %v unmatched %v", got.Entries[0].Classification, got.CIExitCode, deltaKeys(got.Entries[0]), got.Entries[0].Unmatched)
+	}
+	changed, _ := exportCopy(q)
+	selected := false
+	for i := range changed.After.Entries[0].Compatibility.RequirementOutcomes {
+		for j := range changed.After.Entries[0].Compatibility.RequirementOutcomes[i].Objects {
+			object := changed.After.Entries[0].Compatibility.RequirementOutcomes[i].Objects[j].Object
+			if object != nil {
+				object.Sharing = "global"
+				selected = true
+				break
+			}
+		}
+		if selected {
+			break
+		}
+	}
+	if !selected {
+		t.Fatal("fixture has no selected captured object")
+	}
+	got, err = Compare(changed)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got.Entries[0].Classification != impact.Affected || got.CIExitCode != 1 {
+		t.Fatalf("renumbered selected fact: %s CI%d deltas %v", got.Entries[0].Classification, got.CIExitCode, deltaKeys(got.Entries[0]))
 	}
 }

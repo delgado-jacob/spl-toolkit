@@ -363,7 +363,102 @@ func evidenceDeltas(e *ComparisonEntry, index int) bool {
 	// Stages/scopes have no public pair list; exact unique source intervals and
 	// typed owners establish their local renumbering correspondence.
 	addSituatedIDs(bm["analysis"].(map[string]any), am["analysis"].(map[string]any), ap+"/analysis", mappings)
+	// A compatibility report aggregates IDs from the original query and paired
+	// closure definitions. Query-bearing evidence can select its source domain;
+	// records without a query use an ID only when all applicable domains agree.
+	compatibilityIDs := func(path string) map[string]string {
+		base := path[:strings.LastIndex(path, "/compatibility/")]
+		candidateDomain := base + "/candidate_analysis"
+		var query any
+		definitionID := ""
+		if i := strings.Index(path, "/requirement_outcomes/"); i >= 0 {
+			owner := path[:i] + "/requirement_outcomes/" + strings.Split(path[i+len("/requirement_outcomes/"):], "/")[0]
+			if record, ok := pointerValue(am, strings.TrimPrefix(owner, ap)).(map[string]any); ok {
+				if evidence, ok := record["evidence"].(map[string]any); ok {
+					record = evidence
+				}
+				query, _ = record["query"]
+				definitionID, _ = record["definition_object_id"].(string)
+			}
+		} else if i := strings.Index(path, "/inputs/"); i >= 0 {
+			owner := path[:i] + "/inputs/" + strings.Split(path[i+len("/inputs/"):], "/")[0]
+			if record, ok := pointerValue(am, strings.TrimPrefix(owner, ap)).(map[string]any); ok {
+				if evidence, ok := record["evidence"].(map[string]any); ok {
+					record = evidence
+				}
+				if occurrences, ok := record["occurrences"].([]any); ok && len(occurrences) > 0 {
+					if j := strings.Index(path, owner+"/evidence/occurrences/"); j >= 0 {
+						var n int
+						if _, err := fmt.Sscan(strings.Split(path[j+len(owner+"/evidence/occurrences/"):], "/")[0], &n); err == nil && n >= 0 && n < len(occurrences) {
+							occurrence := occurrences[n].(map[string]any)
+							query = occurrence["query"]
+							definitionID, _ = occurrence["definition_object_id"].(string)
+						}
+					} else if j := strings.Index(path, owner+"/occurrences/"); j >= 0 {
+						var n int
+						if _, err := fmt.Sscan(strings.Split(path[j+len(owner+"/occurrences/"):], "/")[0], &n); err == nil && n >= 0 && n < len(occurrences) {
+							occurrence := occurrences[n].(map[string]any)
+							query = occurrence["query"]
+							definitionID, _ = occurrence["definition_object_id"].(string)
+						}
+					}
+					if query == nil {
+						for _, raw := range occurrences {
+							occurrence := raw.(map[string]any)
+							if query == nil {
+								query = occurrence["query"]
+								definitionID, _ = occurrence["definition_object_id"].(string)
+							} else if !reflect.DeepEqual(query, occurrence["query"]) || definitionID != occurrence["definition_object_id"] {
+								query = nil
+								break
+							}
+						}
+					}
+				}
+			}
+		}
+		out, conflicts := map[string]string{}, map[string]bool{}
+		for domain, ids := range mappings {
+			if domain != ap+"/analysis" && domain != candidateDomain && !strings.HasPrefix(domain, base+"/compatibility/closure/") {
+				continue
+			}
+			if query != nil {
+				owner, ok := pointerValue(am, strings.TrimPrefix(domain, ap)).(map[string]any)
+				if !ok || !reflect.DeepEqual(query, pointerValue(owner, "/requirements/query")) {
+					continue
+				}
+				if j := strings.Index(domain, "/definition_analyses/"); j >= 0 {
+					prefix := domain[:j] + "/definition_analyses/" + strings.Split(domain[j+len("/definition_analyses/"):], "/")[0]
+					definition, _ := pointerValue(am, strings.TrimPrefix(prefix, ap)).(map[string]any)
+					if definitionID == "" || definition["object_id"] != definitionID {
+						continue
+					}
+				} else if definitionID != "" {
+					continue
+				}
+			}
+			for id, before := range ids {
+				if previous, ok := out[id]; ok && previous != before {
+					conflicts[id] = true
+				}
+				out[id] = before
+			}
+		}
+		for id := range conflicts {
+			delete(out, id)
+		}
+		return out
+	}
 	idsFor := func(path string) map[string]string {
+		if strings.Contains(path, "/compatibility/") && !strings.Contains(path, "/compatibility/closure/") {
+			if strings.Contains(path, "/original_") {
+				return mappings[ap+"/analysis"]
+			}
+			if i := strings.LastIndex(path, "/compatibility/"); i >= 0 && strings.Contains(path[:i], "/resolution/variants/") && strings.Contains(path, "/candidate_") {
+				return mappings[path[:i]+"/candidate_analysis"]
+			}
+			return compatibilityIDs(path)
+		}
 		best := ap + "/analysis"
 		if strings.Contains(path, "/original_") {
 			return mappings[best]

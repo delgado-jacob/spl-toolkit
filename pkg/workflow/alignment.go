@@ -208,6 +208,14 @@ func alignClosure(e *ComparisonEntry, b, a *closure.Report, bp, ap string) {
 	if b == nil || a == nil {
 		return
 	}
+	// The closure's original and expanded analyses have their own ID domains.
+	// Admit them only when the retained query bytes identify the same owner.
+	if b.DirectAnalysis != nil && a.DirectAnalysis != nil && sameQuery(b.DirectAnalysis.Document, a.DirectAnalysis.Document) {
+		alignAnalysis(e, b.DirectAnalysis, a.DirectAnalysis, bp+"/direct_analysis", ap+"/direct_analysis")
+	}
+	if b.EffectiveAnalysis != nil && a.EffectiveAnalysis != nil && sameQuery(b.EffectiveAnalysis.Document, a.EffectiveAnalysis.Document) {
+		alignAnalysis(e, b.EffectiveAnalysis, a.EffectiveAnalysis, bp+"/effective_analysis", ap+"/effective_analysis")
+	}
 	facts := func(c *closure.Report, p string) []alignmentFact {
 		out := []alignmentFact{}
 		for i, d := range c.DefinitionAnalyses {
