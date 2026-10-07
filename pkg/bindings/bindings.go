@@ -55,6 +55,7 @@ import (
 	"github.com/delgado-jacob/spl-toolkit/pkg/graph"
 	"github.com/delgado-jacob/spl-toolkit/pkg/impact"
 	"github.com/delgado-jacob/spl-toolkit/pkg/mapper"
+	"github.com/delgado-jacob/spl-toolkit/pkg/resolution"
 	"github.com/delgado-jacob/spl-toolkit/pkg/rewrite"
 	"github.com/delgado-jacob/spl-toolkit/pkg/sarif"
 	"github.com/delgado-jacob/spl-toolkit/pkg/validation"
@@ -291,6 +292,13 @@ func spl_mapper_validate_schema_batch(mapperID C.int, requestJSON *C.char) *C.SP
 			return nil, err
 		}
 		return validation.ValidateSchemaBatch(request.Documents, request.Target)
+	})
+}
+
+//export spl_mapper_resolve
+func spl_mapper_resolve(mapperID C.int, requestJSON *C.char) *C.SPLResult {
+	return ownedMapperJSONResult(mapperID, func() (any, error) {
+		return resolution.ResolveJSON([]byte(C.GoString(requestJSON)))
 	})
 }
 
