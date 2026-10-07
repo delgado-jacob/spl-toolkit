@@ -60,3 +60,12 @@ type ResolutionReport struct {
 	Diagnostics           []environment.Diagnostic       `json:"diagnostics"`
 	Provenance            Provenance                     `json:"provenance"`
 }
+
+// ArtifactIdentity uses the artifact owners' normalized digests.
+func (p *Prepared) ArtifactIdentity() ArtifactIdentity {
+	if p == nil || p.env == nil {
+		return ArtifactIdentity{}
+	}
+	report := p.env.Report()
+	return ArtifactIdentity{EnvironmentDigest: report.SnapshotDigest, SchemaBundleDigest: report.SchemaBundleDigest}
+}

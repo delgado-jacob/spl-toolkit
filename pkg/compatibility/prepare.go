@@ -209,23 +209,11 @@ func (p *Prepared) resolveInputs(inputs []analysis.QueryInput, scope environment
 					return nil, requestErrorAt("binding_invalid", path+"/expected", "binding is not consistent with the exact query identity and scope")
 				}
 			}
-			if object, found := p.env.Object(b.ObjectID); found {
-				if objectIdentity(object) != b.Expected {
-					return nil, requestErrorAt("binding_invalid", path+"/expected", "captured object disagrees with expected identity")
-				}
-				value.objects = append(value.objects, object)
+			if err := p.validateSelection(b.ObjectID, b.Expected, b.SchemaID, path); err != nil {
+				return nil, err
 			}
-			if b.SchemaID != "" {
-				linked := false
-				for _, schemaBinding := range p.env.Bindings(b.ObjectID) {
-					if schemaBinding.SchemaID == b.SchemaID && schemaBinding.Expected == b.Expected {
-						linked = true
-						break
-					}
-				}
-				if !linked {
-					return nil, requestErrorAt("binding_invalid", path+"/schema_id", "selected schema requires a matching bundle entry and object identity binding")
-				}
+			if object, found := p.env.Object(b.ObjectID); found {
+				value.objects = append(value.objects, object)
 			}
 			value.binding = &b
 			value.identityMapped = true
@@ -297,4 +285,20 @@ func explicitIdentity(input analysis.QueryInput) (environment.ObjectIdentity, bo
 		return environment.ObjectIdentity{}, false
 	}
 	return identity, true
+}
+
+// validateSelection checks artifact linkage without requiring captured existence.
+func (p *Prepared) validateSelection(objectID string, expected environment.ObjectIdentity, schemaID, path string) error {
+	if object, found := p.env.Object(objectID); found && objectIdentity(object) != expected {
+		return requestErrorAt("binding_invalid", path+"/expected", "captured object disagrees with expected identity")
+	}
+	if schemaID != "" {
+		for _, binding := range p.env.Bindings(objectID) {
+			if binding.SchemaID == schemaID && binding.Expected == expected {
+				return nil
+			}
+		}
+		return requestErrorAt("binding_invalid", path+"/schema_id", "selected schema requires a matching bundle entry and object identity binding")
+	}
+	return nil
 }

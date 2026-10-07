@@ -17,6 +17,7 @@ import (
 	"github.com/delgado-jacob/spl-toolkit/internal/capabilityselector"
 	"github.com/delgado-jacob/spl-toolkit/internal/jsoninput"
 	"github.com/delgado-jacob/spl-toolkit/pkg/analysis"
+	"github.com/delgado-jacob/spl-toolkit/pkg/compatibility"
 	"github.com/delgado-jacob/spl-toolkit/pkg/environment"
 )
 
@@ -283,29 +284,52 @@ func normalizeRequest(input Request) (Request, error) {
 			return Request{}, err
 		}
 	}
+	normalized, err := normalizePreparedRequest(PreparedRequest{SchemaVersion: input.SchemaVersion, Document: input.Document, Resolutions: input.Resolutions, MaxVariants: input.MaxVariants, Compatibility: compatibility.ResolutionAssessment{QueryScope: input.Compatibility.QueryScope, InputBindings: input.Compatibility.InputBindings, DependencyBindings: input.Compatibility.DependencyBindings}})
+	if err != nil {
+		return Request{}, err
+	}
+	out := detach(input)
+	out.Document, out.Resolutions, out.MaxVariants = normalized.Document, normalized.Resolutions, normalized.MaxVariants
+	out.Compatibility.QueryScope, out.Compatibility.InputBindings, out.Compatibility.DependencyBindings = normalized.Compatibility.QueryScope, normalized.Compatibility.InputBindings, normalized.Compatibility.DependencyBindings
+	return out, nil
+}
+
+func normalizePreparedRequest(input PreparedRequest) (PreparedRequest, error) {
+	if !validUTF8(reflect.ValueOf(input)) {
+		return PreparedRequest{}, requestErrorAt("request_invalid", "", "request contains invalid UTF-8")
+	}
+	if input.SchemaVersion != 1 {
+		return PreparedRequest{}, requestErrorAt("request_invalid", "/schema_version", "schema_version must be integer 1")
+	}
+	if input.Resolutions == nil {
+		return PreparedRequest{}, requestErrorAt("request_invalid", "/resolutions", "resolutions must be an array")
+	}
+	if input.Compatibility.InputBindings == nil {
+		return PreparedRequest{}, requestErrorAt("request_invalid", "/compatibility/input_bindings", "input_bindings must be an array")
+	}
 	out := detach(input)
 	selection, err := capabilityselector.Normalize(out.Document.Language, out.Document.Profile, out.Document.Version)
 	if err != nil {
-		return Request{}, requestErrorAt("request_invalid", "/document", err.Error())
+		return PreparedRequest{}, requestErrorAt("request_invalid", "/document", err.Error())
 	}
 	out.Document.Language, out.Document.Profile, out.Document.Version = selection.Language, selection.Profile, selection.Version
 	seen := map[string]bool{}
 	for i, r := range out.Resolutions {
 		path := fmt.Sprintf("/resolutions/%d", i)
 		if !markerPattern.MatchString(r.Placeholder) || seen[r.Placeholder] {
-			return Request{}, requestErrorAt("request_invalid", path+"/placeholder", "placeholder must be a unique named marker")
+			return PreparedRequest{}, requestErrorAt("request_invalid", path+"/placeholder", "placeholder must be a unique named marker")
 		}
 		seen[r.Placeholder] = true
 		if !supportedChoiceKind(r.Kind) {
-			return Request{}, requestErrorAt("request_invalid", path+"/kind", "unsupported resolution kind")
+			return PreparedRequest{}, requestErrorAt("request_invalid", path+"/kind", "unsupported resolution kind")
 		}
 		if len(r.Values) == 0 {
-			return Request{}, requestErrorAt("request_invalid", path+"/values", "values must be nonempty")
+			return PreparedRequest{}, requestErrorAt("request_invalid", path+"/values", "values must be nonempty")
 		}
 		values := map[string]bool{}
 		for j, v := range r.Values {
 			if !nonblank(v) || values[v] {
-				return Request{}, requestErrorAt("request_invalid", fmt.Sprintf("%s/values/%d", path, j), "values must be unique and nonblank")
+				return PreparedRequest{}, requestErrorAt("request_invalid", fmt.Sprintf("%s/values/%d", path, j), "values must be unique and nonblank")
 			}
 			values[v] = true
 		}
@@ -316,7 +340,7 @@ func normalizeRequest(input Request) (Request, error) {
 	}{{"namespace", &out.Compatibility.QueryScope.Namespace}, {"app", &out.Compatibility.QueryScope.App}, {"owner", &out.Compatibility.QueryScope.Owner}} {
 		normalized, err := normalizeSelector(*sel.value, "/compatibility/query_scope/"+sel.name)
 		if err != nil {
-			return Request{}, err
+			return PreparedRequest{}, err
 		}
 		*sel.value = normalized
 	}
@@ -325,7 +349,7 @@ func normalizeRequest(input Request) (Request, error) {
 	for i, b := range out.Compatibility.InputBindings {
 		path := fmt.Sprintf("/compatibility/input_bindings/%d", i)
 		if !nonblank(b.OriginalInputID) || !nonblank(b.ObjectID) || !supportedBindingKind(b.Expected.Kind) || !nonblank(b.Expected.Name) || (b.Expected.Kind != "dataset" && (b.Expected.Namespace != "" || b.Expected.App != "" || b.Expected.Owner != "")) || (b.ResolvedValue != nil && !nonblank(*b.ResolvedValue)) {
-			return Request{}, requestErrorAt("binding_invalid", path, "invalid resolution binding")
+			return PreparedRequest{}, requestErrorAt("binding_invalid", path, "invalid resolution binding")
 		}
 		if bindings[b.OriginalInputID] == nil {
 			bindings[b.OriginalInputID] = map[string]bool{}
@@ -336,11 +360,11 @@ func normalizeRequest(input Request) (Request, error) {
 		}
 		entries := bindings[b.OriginalInputID]
 		if entries[key] || (key == "plain" && len(entries) > 0) || entries["plain"] {
-			return Request{}, requestErrorAt("binding_invalid", path, "duplicate or contradictory binding key")
+			return PreparedRequest{}, requestErrorAt("binding_invalid", path, "duplicate or contradictory binding key")
 		}
 		entries[key] = true
 		if previous, ok := objects[b.ObjectID]; ok && previous != b.Expected {
-			return Request{}, requestErrorAt("binding_invalid", path+"/object_id", "contradictory expected identities")
+			return PreparedRequest{}, requestErrorAt("binding_invalid", path+"/object_id", "contradictory expected identities")
 		}
 		objects[b.ObjectID] = b.Expected
 	}
@@ -350,12 +374,12 @@ func normalizeRequest(input Request) (Request, error) {
 		digest, e := hex.DecodeString(strings.TrimPrefix(b.DocumentDigest, "sha256:"))
 		key := fmt.Sprintf("%s/%s/%d/%d", b.DocumentDigest, b.Kind, b.Start, b.End)
 		if !strings.HasPrefix(b.DocumentDigest, "sha256:") || b.DocumentDigest != strings.ToLower(b.DocumentDigest) || e != nil || len(digest) != sha256.Size || !nonblank(b.Kind) || !nonblank(b.ObjectID) || b.Start < 0 || b.End <= b.Start || dependencies[key] {
-			return Request{}, requestErrorAt("binding_invalid", path, "invalid dependency binding")
+			return PreparedRequest{}, requestErrorAt("binding_invalid", path, "invalid dependency binding")
 		}
 		dependencies[key] = true
 	}
 	if _, _, err := admitFanout(out.Resolutions, out.MaxVariants); err != nil {
-		return Request{}, err
+		return PreparedRequest{}, err
 	}
 	return out, nil
 }
