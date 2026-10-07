@@ -231,6 +231,8 @@ func compatibilityExamples() map[string]any {
  return out
 }
 func main() {
+ if len(os.Args)>2 && os.Args[1]=="workflow-evidence-environment-project" { r:=must(workflow.AssessJSON([]byte(os.Args[2])));raw:=must(json.Marshal(workflow.EvidenceRequest{SchemaVersion:1,Report:r,Include:[]string{"environment_metadata"}}));e:=must(workflow.EvidenceJSON(raw));must(0,json.NewEncoder(os.Stdout).Encode(e));return }
+ if len(os.Args)>2 && os.Args[1]=="workflow-evidence-project" { r:=must(workflow.EvidenceJSON([]byte(os.Args[2])));must(0,json.NewEncoder(os.Stdout).Encode(r));return }
  if len(os.Args)>2 && os.Args[1]=="resolution-request" { _,err:=resolution.ResolveJSON([]byte(os.Args[2]));if err!=nil{fmt.Print("rejected")}else{fmt.Print("accepted")};return }
  if len(os.Args)>1 {
   raw := []byte(os.Args[2]); var e error
@@ -1336,6 +1338,37 @@ def test_workflow_strict_requests_and_runtime_controls(schemas, emitted, emitter
     del wrong["proposal"]["document"]
     assert errors(schemas, "workflow-recheck-request", wrong)
     assert admission("workflow-recheck-request", wrong) == "rejected"
+
+
+def test_workflow_opted_diagnostic_raw_values_match_actual_projection(schemas, emitted, emitter):
+    for detail in (7, True, [7, False, {"captured": "diagnostic"}]):
+        report = copy.deepcopy(emitted["workflow-configuration-failure"])
+        report["entries"][1]["failure"]["detail"] = detail
+        request = {"schema_version": 1, "report": report, "include": ["diagnostic_details"]}
+        assert not errors(schemas, "workflow-evidence-request", request)
+        assert subprocess.check_output([str(emitter), "workflow-evidence-request", json.dumps(request)], text=True) == "accepted"
+        projected = json.loads(subprocess.check_output([str(emitter), "workflow-evidence-project", json.dumps(request)], text=True))
+        assert not errors(schemas, "workflow-evidence", projected)
+        item = next(item for item in projected["items"] if item["pointer"] == "/report/entries/1/failure/detail")
+        assert item["details"]["diagnostic_details"] == detail
+    report["entries"][1]["failure"]["detail"] = None
+    assert errors(schemas, "workflow-evidence-request", request)
+    assert subprocess.check_output([str(emitter), "workflow-evidence-request", json.dumps(request)], text=True) == "rejected"
+
+
+def test_workflow_environment_relation_projection_uses_canonical_relation_array(schemas, emitted, emitter):
+    request = copy.deepcopy(emitted["workflow-request"])
+    relations = [{"kind": "lookup", "name": "users", "property": "/relation"}]
+    request["settings"]["snapshot"]["objects"][0]["relations"] = relations
+    assert not errors(schemas, "workflow-request", request)
+    evidence = json.loads(subprocess.check_output([str(emitter), "workflow-evidence-environment-project", json.dumps(request)], text=True))
+    assert not errors(schemas, "workflow-evidence", evidence)
+    assert any(item.get("details", {}).get("environment_metadata") == relations for item in evidence["items"])
+    # The environment category still accepts a disclosed empty string/relation
+    # array without oneOf ambiguity; raw arrays use the relation owner schema.
+    details = next(item["details"] for item in evidence["items"] if item.get("details", {}).get("environment_metadata") == relations)
+    details["environment_metadata"] = []
+    assert not errors(schemas, "workflow-evidence", evidence)
 
 
 def test_workflow_saved_failure_mode_and_publication_controls(schemas, emitted, emitter):

@@ -11761,21 +11761,10 @@
           "type": "string"
         },
         "diagnostic_details": {
-          "description": "Explicitly opted-in diagnostic field, including caller-supplied structured failure detail.",
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            {
-              "type": "object"
-            }
-          ]
+          "description": "Explicitly opted-in diagnostic field, including arbitrary non-null caller-supplied structured failure detail.",
+          "not": {
+            "type": "null"
+          }
         },
         "environment_metadata": {
           "description": "Explicitly opted-in captured metadata field or authored schema; does not restore a complete report.",
@@ -11806,6 +11795,12 @@
             },
             {
               "type": "object"
+            },
+            {
+              "type": "array",
+              "items": {
+                "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/closure.Relation"
+              }
             }
           ]
         }

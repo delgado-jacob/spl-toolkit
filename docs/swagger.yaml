@@ -9335,14 +9335,10 @@ components:
           - $ref: '#/components/schemas/tooling.validation.Target'
           - $ref: '#/components/schemas/tooling.validation.FieldCatalog'
         diagnostic_details:
-          anyOf:
-          - type: string
-          - items:
-              type: string
-            type: array
-          - type: object
-          description: Explicitly opted-in diagnostic field, including caller-supplied
-            structured failure detail.
+          description: Explicitly opted-in diagnostic field, including arbitrary non-null
+            caller-supplied structured failure detail.
+          not:
+            type: 'null'
         environment_metadata:
           anyOf:
           - type: string
@@ -9355,6 +9351,9 @@ components:
           - $ref: '#/components/schemas/tooling.validation.FieldCatalog'
           - $ref: '#/components/schemas/tooling.validation.Target'
           - type: object
+          - items:
+              $ref: '#/components/schemas/tooling.closure.Relation'
+            type: array
           description: Explicitly opted-in captured metadata field or authored schema;
             does not restore a complete report.
         query_text:
