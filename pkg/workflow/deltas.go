@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/delgado-jacob/spl-toolkit/pkg/analysis"
+	"github.com/delgado-jacob/spl-toolkit/pkg/compatibility"
 	"github.com/delgado-jacob/spl-toolkit/pkg/impact"
 )
 
@@ -98,6 +99,15 @@ func entryFindings(entry ReportEntry, p string) []comparisonFinding {
 			out = append(out, comparisonFinding{category, p + path, typedPointer(entry, path)})
 		}
 	}
+	addAnalysis := func(base string, raw any) {
+		a, ok := raw.(map[string]any)
+		if !ok {
+			return
+		}
+		for _, name := range []string{"requirements", "diagnostics", "coverage", "correlation"} {
+			add(name, base+"/"+name, a[name])
+		}
+	}
 	addClosure := func(base string, raw any) {
 		c, ok := raw.(map[string]any)
 		if !ok {
@@ -113,8 +123,18 @@ func entryFindings(entry ReportEntry, p string) []comparisonFinding {
 		for _, key := range keys {
 			if key == "definition_analyses" {
 				for i, v := range c[key].([]any) {
-					add("closure", fmt.Sprintf("%s/%s/%d", base, key, i), v)
+					d := v.(map[string]any)
+					dp := fmt.Sprintf("%s/%s/%d", base, key, i)
+					add("closure", dp+"/object_id", d["object_id"])
+					for _, name := range []string{"direct_analysis", "effective_analysis"} {
+						addAnalysis(dp+"/"+name, d[name])
+						if a, ok := d[name].(map[string]any); ok {
+							add("closure", dp+"/"+name+"/document", a["document"])
+						}
+					}
 				}
+			} else if key == "direct_analysis" || key == "effective_analysis" {
+				addAnalysis(base+"/"+key, c[key])
 			} else {
 				add("closure", base+"/"+key, c[key])
 			}
@@ -392,6 +412,20 @@ func evidenceDeltas(e *ComparisonEntry, index int) bool {
 	for _, f := range after {
 		af[f.pointer] = f
 	}
+	unresolvedObjects := map[string]bool{}
+	for _, pointer := range append(append([]string{}, e.Unmatched...), e.Ambiguous...) {
+		if strings.Contains(pointer, "/closure/definition_analyses/") {
+			side, base := bm, bp
+			if strings.HasPrefix(pointer, ap) {
+				side, base = am, ap
+			}
+			if d, ok := pointerValue(side, strings.TrimPrefix(pointer, base)).(map[string]any); ok {
+				if id, ok := d["object_id"].(string); ok {
+					unresolvedObjects[id] = true
+				}
+			}
+		}
+	}
 	definite := false
 	emit := func(b, a *comparisonFinding) {
 		f := a
@@ -423,7 +457,10 @@ func evidenceDeltas(e *ComparisonEntry, index int) bool {
 		a, ok := af[path]
 		if !ok {
 			emit(&b, nil)
-			definite = true
+			absent := comparisonFinding{category: b.category, pointer: pairedPath(b.pointer)}
+			if len(unresolvedObjects) == 0 || independentlyChangedFinding(b, absent, bp, ap, e, unresolvedObjects, beforeIDs, idsFor, pairedPath) {
+				definite = true
+			}
 			continue
 		}
 		delete(af, path)
@@ -442,21 +479,17 @@ func evidenceDeltas(e *ComparisonEntry, index int) bool {
 		if !semanticChange {
 			e.Unmatched = append(e.Unmatched, b.pointer)
 		}
-		unresolvedDefinition := false
-		for _, p := range append(append([]string{}, e.Unmatched...), e.Ambiguous...) {
-			if strings.Contains(p, "/closure/definition_analyses/") {
-				unresolvedDefinition = true
-			}
-		}
-		definitionContent := strings.Contains(b.pointer, "/definition_analyses/") || strings.HasSuffix(b.pointer, "/effective_analysis")
-		if semanticChange && !(b.category == "closure" && definitionContent && unresolvedDefinition) {
+		if semanticChange && (len(unresolvedObjects) == 0 || independentlyChangedFinding(b, a, bp, ap, e, unresolvedObjects, beforeIDs, idsFor, pairedPath)) {
 			definite = true
 		}
 	}
 	for _, a := range after {
 		if _, ok := af[a.pointer]; ok {
 			emit(nil, &a)
-			definite = true
+			absent := comparisonFinding{category: a.category, pointer: bp + strings.TrimPrefix(a.pointer, ap)}
+			if len(unresolvedObjects) == 0 || independentlyChangedFinding(absent, a, bp, ap, e, unresolvedObjects, beforeIDs, idsFor, pairedPath) {
+				definite = true
+			}
 		}
 	}
 	return definite
@@ -497,4 +530,67 @@ func variantMembership(value any) []string {
 	}
 	sort.Strings(out)
 	return out
+}
+
+// Once a definition loses correspondence, its expanded offsets, inferred
+// obligations and aggregate decisions are uncertainty. Original-query evidence
+// and selected captured facts can still establish an independent change.
+func independentlyChangedFinding(b, a comparisonFinding, bp, ap string, e *ComparisonEntry, unresolved map[string]bool, beforeIDs, afterIDs func(string) map[string]string, pairedPath func(string) string) bool {
+	p := strings.TrimPrefix(b.pointer, bp)
+	if strings.HasPrefix(p, "/analysis/") || strings.Contains(p, "/candidate_analysis/") || strings.Contains(p, "/closure/direct_analysis/") || strings.HasSuffix(p, "/closure/direct_requirements") {
+		return true
+	}
+	for _, name := range []string{"input_bindings", "dependency_bindings", "query_scope", "resolutions", "max_variants", "total_combinations", "generated_count", "proof", "changes", "candidate_text", "resolved_query"} {
+		if strings.HasSuffix(p, "/"+name) {
+			return true
+		}
+	}
+	if strings.Contains(p, "/definition_analyses/") && strings.HasSuffix(p, "/object_id") {
+		return true
+	}
+	if b.category != "supporting_fact" {
+		return false
+	}
+	originalBefore, originalAfter := e.Before.Analysis.Requirements.Query, e.After.Analysis.Requirements.Query
+	// Candidate assessments retain a separate exact input query domain.
+	if strings.Contains(p, "/resolution/variants/") {
+		base := p[:strings.Index(p, "/compatibility/")]
+		if v, ok := typedPointer(e.Before, base+"/candidate_analysis").(*analysis.Result); ok && v != nil {
+			originalBefore = v.Requirements.Query
+		}
+		apath := strings.TrimPrefix(a.pointer, ap)
+		abase := apath[:strings.Index(apath, "/compatibility/")]
+		if v, ok := typedPointer(e.After, abase+"/candidate_analysis").(*analysis.Result); ok && v != nil {
+			originalAfter = v.Requirements.Query
+		}
+	}
+	independent := func(value any, query analysis.RequirementQueryIdentity) any {
+		outcomes := []compatibility.RequirementOutcome{}
+		switch v := value.(type) {
+		case []compatibility.RequirementOutcome:
+			outcomes = v
+		case []compatibility.ResolutionRequirementOutcome:
+			for _, x := range v {
+				outcomes = append(outcomes, x.Evidence)
+			}
+		}
+		out := []any{}
+		for _, o := range outcomes {
+			if o.Query != query {
+				continue
+			}
+			objects := append([]compatibility.ObjectEvidence{}, o.Objects...)
+			for i, x := range objects {
+				if x.Object != nil && unresolved[x.ObjectID] {
+					copy := *x.Object
+					copy.Document = nil
+					objects[i].Object = &copy
+				}
+			}
+			out = append(out, compatibility.RequirementOutcome{RequirementID: o.RequirementID, Capabilities: o.Capabilities, Objects: objects, Schemas: o.Schemas, FieldProjection: o.FieldProjection})
+		}
+		return out
+	}
+	x, y := independent(b.value, originalBefore), independent(a.value, originalAfter)
+	return !reflect.DeepEqual(normalizeFinding(x, beforeIDs, pairedPath(b.pointer), true), normalizeFinding(y, afterIDs, a.pointer, true))
 }

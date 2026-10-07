@@ -296,3 +296,116 @@ func TestWorkflowCompareFailedSiblingPrecedesAffected(t *testing.T) {
 		t.Fatalf("failure precedence/counts: %+v", got.Counts)
 	}
 }
+
+func macroComparisonRequest(t *testing.T, body string) Request {
+	t.Helper()
+	req := seedRequest(t, "`source`")
+	req.Documents[0].Document.Language = "spl"
+	n := 0
+	no := false
+	doc := analysis.QueryDocument{Text: body, Language: "spl", SourceID: "macro.spl"}
+	req.Settings.Snapshot.Objects = append(req.Settings.Snapshot.Objects, environment.Object{ID: "macro", Kind: "macro", Name: "source", Namespace: "search", App: "resolution", Owner: "nobody", Provenance: req.Settings.Snapshot.Objects[0].Provenance, Arity: &n, EvalBased: &no, Arguments: []string{}, Document: &doc})
+	return req
+}
+func TestWorkflowCompareClosureIncidentalStagePosition(t *testing.T) {
+	r, err := Assess(macroComparisonRequest(t, "| makeresults"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	q := CompareRequest{SchemaVersion: 1, Before: *r, After: *r}
+	q, _ = exportCopy(q)
+	q.After.Entries[0].Compatibility.Closure.DirectAnalysis.Stages[0].Position = 99
+	got, err := Compare(q)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got.Entries[0].Classification == impact.Affected || len(got.Entries[0].Deltas) != 0 {
+		t.Fatalf("incidental positioning: %s %v", got.Entries[0].Classification, deltaKeys(got.Entries[0]))
+	}
+}
+func TestWorkflowCompareUnmatchedDefinitionBodyUncertainty(t *testing.T) {
+	got := compareAssessed(t, macroComparisonRequest(t, "| makeresults"), macroComparisonRequest(t, "|  makeresults"))
+	if got.Entries[0].Classification != impact.Indeterminate || got.CIExitCode != 3 {
+		t.Fatalf("unmatched body: %s CI%d %v", got.Entries[0].Classification, got.CIExitCode, deltaKeys(got.Entries[0]))
+	}
+}
+
+func definitionComparisonRequest(t *testing.T, body string) Request {
+	t.Helper()
+	req := boundComparisonRequest(t, "from events_good | fields id")
+	req.Documents[0].Document.Text = "from view | fields id"
+	doc := analysis.QueryDocument{Text: body, Language: "spl2", SourceID: "view.spl"}
+	view := environment.Object{ID: "view", Kind: "dataset", Name: "view", Namespace: "search", App: "resolution", Owner: "nobody", Provenance: req.Settings.Snapshot.Objects[0].Provenance, Document: &doc}
+	identity := environment.ObjectIdentity{Kind: view.Kind, Name: view.Name, Namespace: view.Namespace, App: view.App, Owner: view.Owner}
+	req.Settings.Snapshot.Objects = append(req.Settings.Snapshot.Objects, view)
+	req.Settings.SchemaBundle.Bindings = append(req.Settings.SchemaBundle.Bindings, environment.SchemaBinding{ObjectID: view.ID, SchemaID: "schema-0", Expected: identity, SourceCoverage: "complete"})
+	root, err := analysis.Analyze(req.Documents[0].Document)
+	if err != nil {
+		t.Fatal(err)
+	}
+	hidden, err := analysis.Analyze(doc)
+	if err != nil {
+		t.Fatal(err)
+	}
+	req.Settings.Entries[0].Compatibility.InputBindings[0].InputID = hidden.Inputs[0].ID
+	req.Settings.Entries[0].Compatibility.InputBindings = append(req.Settings.Entries[0].Compatibility.InputBindings, compatibility.InputBinding{InputID: root.Inputs[0].ID, ObjectID: view.ID, Expected: identity, SchemaID: "schema-0"})
+	return req
+}
+func TestWorkflowCompareDefinitionUncertaintyPreservesSchemaRegression(t *testing.T) {
+	before := definitionComparisonRequest(t, "from events_good | fields id")
+	after := definitionComparisonRequest(t, "from  events_good | fields id")
+	after.Settings.SchemaBundle.Schemas[0].Catalog = json.RawMessage(`{"fields":["other"],"identity":"schema-0","optional_fields":[],"version":"1"}`)
+	got := compareAssessed(t, before, after)
+	if got.Entries[0].Classification != impact.Affected || len(got.Entries[0].Unmatched) == 0 {
+		t.Fatalf("independent schema regression: %s unmatched %v deltas %v", got.Entries[0].Classification, got.Entries[0].Unmatched, deltaKeys(got.Entries[0]))
+	}
+}
+
+func TestWorkflowCompareDefinitionUncertaintyPreservesSelectedObjectFact(t *testing.T) {
+	before := macroComparisonRequest(t, "| makeresults")
+	after := macroComparisonRequest(t, "|  makeresults")
+	after.Settings.Snapshot.Objects[len(after.Settings.Snapshot.Objects)-1].Sharing = "global"
+	got := compareAssessed(t, before, after)
+	if got.Entries[0].Classification != impact.Affected || len(got.Entries[0].Unmatched) == 0 {
+		t.Fatalf("selected captured fact: %s unmatched %v deltas %v", got.Entries[0].Classification, got.Entries[0].Unmatched, deltaKeys(got.Entries[0]))
+	}
+}
+
+func TestWorkflowCompareUnmatchedBodyWithOriginalRequirementRenumbering(t *testing.T) {
+	before, err := Assess(macroComparisonRequest(t, "| makeresults"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	after, err := Assess(macroComparisonRequest(t, "|  makeresults"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	q := CompareRequest{SchemaVersion: 1, Before: *before, After: *after}
+	q, _ = exportCopy(q)
+	e := &q.After.Entries[0]
+	c := e.Compatibility
+	ids := map[string]string{}
+	for i := range e.Analysis.Requirements.Items {
+		r := &e.Analysis.Requirements.Items[i]
+		ids[r.ID] = "recorded-" + r.ID
+		r.ID = ids[r.ID]
+	}
+	c.Requirements = e.Analysis.Requirements
+	c.Closure.DirectAnalysis.Requirements = e.Analysis.Requirements
+	c.Closure.DirectRequirements = e.Analysis.Requirements
+	for i := range c.RequirementOutcomes {
+		o := &c.RequirementOutcomes[i]
+		if o.Query == e.Analysis.Requirements.Query {
+			if id, ok := ids[o.RequirementID]; ok {
+				o.RequirementID = id
+			}
+		}
+	}
+	got, err := Compare(q)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got.Entries[0].Classification != impact.Indeterminate {
+		t.Fatalf("recorded requirement IDs became definite: %s %v", got.Entries[0].Classification, deltaKeys(got.Entries[0]))
+	}
+}
