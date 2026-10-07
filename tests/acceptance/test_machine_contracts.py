@@ -1357,6 +1357,18 @@ def test_workflow_saved_failure_mode_and_publication_controls(schemas, emitted, 
     wrong = copy.deepcopy(request)
     del wrong["before"]["entries"][1]["resolution"]["variants"][0]["resolved_query"]
     reject(wrong)
+    failed = emitted["workflow-acquisition-failure"]
+    failed_request = {"schema_version": 1, "before": copy.deepcopy(failed), "after": copy.deepcopy(failed)}
+    assert not errors(schemas, "workflow-comparison-request", failed_request)
+    assert subprocess.check_output([str(emitter), "workflow-comparison-request", json.dumps(failed_request)], text=True) == "accepted"
+    for detail in ({}, 7):
+        changed = copy.deepcopy(failed_request)
+        changed["before"]["entries"][0]["failure"]["detail"] = detail
+        assert not errors(schemas, "workflow-comparison-request", changed)
+        assert subprocess.check_output([str(emitter), "workflow-comparison-request", json.dumps(changed)], text=True) == "accepted"
+    changed = copy.deepcopy(failed_request)
+    changed["before"]["entries"][0]["failure"]["detail"] = None
+    reject(changed)
     # Historical revisions remain capturable, while changed provenance cannot
     # become current engine authority merely by passing a structural schema.
     wrong = copy.deepcopy(request)

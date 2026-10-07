@@ -9677,7 +9677,9 @@ components:
         code:
           pattern: \S
           type: string
-        detail: {}
+        detail:
+          not:
+            type: 'null'
         message:
           type: string
         phase:

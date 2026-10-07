@@ -10277,7 +10277,11 @@
         "message": {
           "type": "string"
         },
-        "detail": {}
+        "detail": {
+          "not": {
+            "type": "null"
+          }
+        }
       },
       "required": [
         "phase",
