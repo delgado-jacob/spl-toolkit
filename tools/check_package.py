@@ -629,6 +629,12 @@ def install_and_check(
     environment_examples.parent.mkdir(parents=True, exist_ok=True)
     _copy_required_files(docs_root / "examples/environment", environment_examples,
                          ("observed-partial-snapshot.json", "export-report.json"))
+    resolution_examples = tooling_root / "examples/resolution"
+    resolution_examples.parent.mkdir(parents=True, exist_ok=True)
+    resolution_example_hashes = _copy_required_files(
+        docs_root / "examples/resolution", resolution_examples, ("request.json",)
+    )
+    tooling_hashes["../../examples/resolution/request.json"] = resolution_example_hashes["request.json"]
     copied_go_transport = outside_checkout / f"spl2-go-transport-{directory.name}.json"
     shutil.copy2(go_transport, copied_go_transport)
     go_transport_hash = sha256(go_transport)

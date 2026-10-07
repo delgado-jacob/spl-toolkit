@@ -128,7 +128,7 @@ def passing_records() -> list[dict]:
                     "contracts.json", "graph-cases.json", "impact-cases.json", "requests.json",
                     "sarif-cases.json", "example-corpus.json", "example-target.json",
                     "example-corpus-missing-file.json", "../rewrite/forms.json",
-                )},
+                )} | {"../../examples/resolution/request.json": check_acceptance.RESOLUTION_EXAMPLE_SHA},
                 "tooling_environment_fixture_hashes": {"cases.json": ENVIRONMENT_FIXTURE_SHA},
                 "machine_contract_tests": {"collected": 13, "passed": 13, "failed": 0, "skipped": 0},
                 "required_test_hashes": {
@@ -229,6 +229,7 @@ def test_exact_source_hash_inputs_are_stable_in_windows_checkout(tmp_path: Path)
     relative_paths.add("testdata/environment/cases.json")
     relative_paths.add("testdata/compatibility/cases.json")
     relative_paths.add("testdata/resolution/cases.json")
+    relative_paths.add("examples/resolution/request.json")
     relative_paths.update(
         path.relative_to(ROOT).as_posix()
         for paths in check_acceptance.REQUIRED_TEST_HASH_PATHS.values()
@@ -529,7 +530,7 @@ def test_compatibility_evidence_requires_current_fixture_and_installed_tests():
             assert any("required_test_hashes" in error for error in validate_records(records, SHA))
 
 
-@pytest.mark.parametrize("damage", ["missing_suite", "zero_cases", "skips", "unregistered_fixture", "wrong_sha", "older_payload"])
+@pytest.mark.parametrize("damage", ["missing_suite", "zero_cases", "skips", "unregistered_fixture", "wrong_sha", "older_payload", "missing_example", "stale_example"])
 def test_resolution_evidence_rejects_incomplete_or_stale_records(damage):
     records = passing_records()
     installed = next(record for record in records if record["kind"] == "installed-wheel")
@@ -543,6 +544,10 @@ def test_resolution_evidence_rejects_incomplete_or_stale_records(damage):
         installed["fixture_hashes"]["resolution"] = {}
     elif damage == "wrong_sha":
         installed["resolution_surface_evidence"]["source_sha"] = "c" * 40
+    elif damage == "missing_example":
+        del installed["tooling_fixture_hashes"]["../../examples/resolution/request.json"]
+    elif damage == "stale_example":
+        installed["tooling_fixture_hashes"]["../../examples/resolution/request.json"] = HASH
     else:
         del installed["resolution_surface_evidence"]
         del installed["fixture_hashes"]["resolution"]

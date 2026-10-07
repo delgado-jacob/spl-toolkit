@@ -70,7 +70,7 @@ TOOLING_SOURCE_HASHES = {
 TOOLING_FIXTURE_KEYS = {
     "contracts.json", "graph-cases.json", "impact-cases.json", "requests.json",
     "sarif-cases.json", "example-corpus.json", "example-target.json",
-    "example-corpus-missing-file.json", "../rewrite/forms.json",
+    "example-corpus-missing-file.json", "../rewrite/forms.json", "../../examples/resolution/request.json",
 }
 ENVIRONMENT_FIXTURE_HASHES = {
     "cases.json": hashlib.sha256((ROOT / "testdata/environment/cases.json").read_bytes()).hexdigest(),
@@ -78,6 +78,7 @@ ENVIRONMENT_FIXTURE_HASHES = {
 COMPATIBILITY_FIXTURE_HASHES = {
     "cases.json": hashlib.sha256((ROOT / "testdata/compatibility/cases.json").read_bytes()).hexdigest(),
 }
+RESOLUTION_EXAMPLE_SHA = hashlib.sha256((ROOT / "examples/resolution/request.json").read_bytes()).hexdigest()
 RESOLUTION_FIXTURE_HASHES = {
     "cases.json": hashlib.sha256((ROOT / "testdata/resolution/cases.json").read_bytes()).hexdigest(),
 }
@@ -253,6 +254,9 @@ def _validate_resolution_evidence(record: dict, errors: list[str], label: str) -
     fixtures = record.get("fixture_hashes")
     hashes = fixtures.get("resolution") if isinstance(fixtures, dict) else None
     _validate_hash_map(hashes, RESOLUTION_FIXTURE_HASHES, "fixture_hashes.resolution", errors, label)
+    tooling = record.get("tooling_fixture_hashes")
+    if not isinstance(tooling, dict) or tooling.get("../../examples/resolution/request.json") != RESOLUTION_EXAMPLE_SHA:
+        errors.append(f"{label}: resolution example hash differs from current source")
     evidence = record.get("resolution_surface_evidence")
     fields = {"schema_version", "source_sha", "fixture_sha256", "corpus_cases", "malformed_cases", "surfaces"}
     if not isinstance(evidence, dict) or set(evidence) != fields:

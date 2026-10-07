@@ -768,6 +768,8 @@ def test_installed_schema_fixtures_exist_before_both_suites(tmp_path: Path, monk
         assert (requirement_go_root / "testdata/environment/cases.json").read_bytes() == (
             ROOT / "testdata/environment/cases.json"
         ).read_bytes()
+        assert (requirement_go_root / "examples/resolution/request.json").read_bytes() == (
+            ROOT / "examples/resolution/request.json").read_bytes()
         for filename in ("observed-partial-snapshot.json", "export-report.json"):
             assert (requirement_go_root / "examples/environment" / filename).read_bytes() == (
                 ROOT / "examples/environment" / filename
