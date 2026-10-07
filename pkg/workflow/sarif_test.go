@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/delgado-jacob/spl-toolkit/pkg/analysis"
 	"github.com/delgado-jacob/spl-toolkit/pkg/closure"
+	"github.com/delgado-jacob/spl-toolkit/pkg/compatibility"
 	"github.com/delgado-jacob/spl-toolkit/pkg/corpus"
 	"testing"
 )
@@ -170,5 +171,88 @@ func TestWorkflowSARIFClosureLocationsStayInTheirSourceDomain(t *testing.T) {
 	}
 	if !direct || !definition {
 		t.Fatal("fixture failed to exercise both closure source domains")
+	}
+}
+
+func TestWorkflowSARIFReasonlessNestedFindingsRemainVisible(t *testing.T) {
+	for _, domain := range []string{"original", "candidate"} {
+		t.Run(domain, func(t *testing.T) {
+			requirements := []compatibility.RequirementOutcome{
+				{Outcome: "missing", Applicability: "applicable", Reasons: []compatibility.Reason{}},
+				{Outcome: "indeterminate", Applicability: "inapplicable", Reasons: []compatibility.Reason{}},
+				{Outcome: "satisfied", Applicability: "applicable", Reasons: []compatibility.Reason{}},
+				{Outcome: "missing", Applicability: "applicable", Reasons: []compatibility.Reason{{Code: "HAS_REASON", Message: "already explained"}}},
+			}
+			inputs := []compatibility.InputOutcome{{Outcome: "indeterminate", Reasons: []compatibility.Reason{}}, {Outcome: "satisfied", Reasons: []compatibility.Reason{}}, {Outcome: "missing", Reasons: []compatibility.Reason{{Code: "HAS_REASON", Message: "already explained"}}}}
+			coverage := []compatibility.Coverage{{Dimension: "field_schema", State: "partial", Reasons: []compatibility.Reason{}}, {Dimension: "query_semantics", State: "complete", Reasons: []compatibility.Reason{}}, {Dimension: "dependency_closure", State: "not_applicable", Reasons: []compatibility.Reason{}}, {Dimension: "field_schema", State: "unavailable", Reasons: []compatibility.Reason{{Code: "HAS_REASON", Message: "already explained"}}}}
+			req := seedRequest(t, "from [{id:1}]")
+			if domain == "candidate" {
+				req = seedResolutionRequest(t)
+			}
+			r, err := Assess(req)
+			if err != nil {
+				t.Fatal(err)
+			}
+			pointer := "/entries/0/compatibility"
+			unrelated := compatibility.Reason{Code: "UNRELATED", Message: "unrelated finding"}
+			if domain == "original" {
+				c := r.Entries[0].Compatibility
+				c.Outcome = "incomplete"
+				c.Reasons = []compatibility.Reason{unrelated}
+				c.RequirementOutcomes, c.Inputs, c.Coverage = requirements, inputs, coverage
+			} else {
+				pointer = "/entries/0/resolution/variants/0/compatibility"
+				c := r.Entries[0].Resolution.Variants[0].Compatibility
+				c.Outcome = "incomplete"
+				c.Reasons = []compatibility.ResolutionReason{{Evidence: unrelated}}
+				c.RequirementOutcomes = []compatibility.ResolutionRequirementOutcome{}
+				for _, o := range requirements {
+					c.RequirementOutcomes = append(c.RequirementOutcomes, compatibility.ResolutionRequirementOutcome{Evidence: o})
+				}
+				c.Inputs = []compatibility.ResolutionInputOutcome{}
+				for _, o := range inputs {
+					c.Inputs = append(c.Inputs, compatibility.ResolutionInputOutcome{Evidence: o})
+				}
+				c.Coverage = []compatibility.ResolutionCoverage{}
+				for _, cov := range coverage {
+					c.Coverage = append(c.Coverage, compatibility.ResolutionCoverage{Evidence: cov})
+				}
+			}
+			log, err := ExportSARIF(r)
+			if err != nil {
+				t.Fatal(err)
+			}
+			suffix := ""
+			if domain == "candidate" {
+				suffix = "/evidence"
+			}
+			expected := map[string]string{pointer + "/requirement_outcomes/0" + suffix: "missing", pointer + "/inputs/0" + suffix: "indeterminate", pointer + "/coverage/0" + suffix: "partial"}
+			summaries := 0
+			for _, result := range log.Runs[0].Results {
+				if result.RuleID != "SPL_WORKFLOW_REQUIREMENT_OUTCOME" && result.RuleID != "SPL_WORKFLOW_INPUT_OUTCOME" && result.RuleID != "SPL_WORKFLOW_COVERAGE_INCOMPLETE" {
+					continue
+				}
+				ptr, _ := result.Properties["evidence_pointer"].(string)
+				state, ok := expected[ptr]
+				if !ok {
+					t.Fatalf("unexpected nested fallback %s", ptr)
+				}
+				if result.Properties["outcome"] != state && result.Properties["coverage_state"] != state {
+					t.Fatalf("missing nested state: %+v", result)
+				}
+				if result.Properties["domain"] != domain || len(result.Locations) != 0 {
+					t.Fatalf("domain/location: %+v", result)
+				}
+				if domain == "candidate" && len(result.Properties["variant_selection"].([]any)) == 0 {
+					t.Fatal("candidate selection lost")
+				}
+				workflowPointer(t, r, ptr)
+				summaries++
+				delete(expected, ptr)
+			}
+			if summaries != 3 || len(expected) != 0 {
+				t.Fatalf("nested evidence omitted alongside unrelated finding: %v", expected)
+			}
+		})
 	}
 }

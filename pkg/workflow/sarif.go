@@ -91,6 +91,33 @@ func ExportSARIF(source *Report) (*sarif.Log, error) {
 			reason(s, r, fmt.Sprintf("%s/%d", pointer, i), outcome, query)
 		}
 	}
+	// Fallbacks are scoped to each nested entry; a sibling finding cannot
+	// conceal a reasonless failed obligation or evidence coverage gap.
+	requirementFinding := func(s exportSubject, o compatibility.RequirementOutcome, pointer string) {
+		before := len(findings)
+		reasons(s, o.Reasons, pointer+"/reasons", o.Outcome, o.Query)
+		if len(findings) == before && o.Outcome != "satisfied" && o.Outcome != "not_applicable" && o.Applicability != "inapplicable" && o.Applicability != "not_applicable" {
+			level := outcomeLevel(o.Outcome)
+			if o.Outcome == "missing" && o.Applicability == "applicable" {
+				level = "error"
+			}
+			add(s, "SPL_WORKFLOW_REQUIREMENT_OUTCOME", level, "Requirement evidence outcome: "+o.Outcome, pointer, nil, map[string]any{"outcome": o.Outcome, "applicability": o.Applicability, "requirement_id": o.RequirementID, "input_id": o.InputID})
+		}
+	}
+	inputFinding := func(s exportSubject, o compatibility.InputOutcome, pointer string, query analysis.RequirementQueryIdentity) {
+		before := len(findings)
+		reasons(s, o.Reasons, pointer+"/reasons", o.Outcome, query)
+		if len(findings) == before && o.Outcome != "satisfied" && o.Outcome != "not_applicable" {
+			add(s, "SPL_WORKFLOW_INPUT_OUTCOME", outcomeLevel(o.Outcome), "Input evidence outcome: "+o.Outcome, pointer, nil, map[string]any{"outcome": o.Outcome, "input_id": o.InputID})
+		}
+	}
+	coverageFinding := func(s exportSubject, cov compatibility.Coverage, pointer string, query analysis.RequirementQueryIdentity) {
+		before := len(findings)
+		reasons(s, cov.Reasons, pointer+"/reasons", "incomplete", query)
+		if len(findings) == before && cov.State != "complete" && cov.State != "not_applicable" {
+			add(s, "SPL_WORKFLOW_COVERAGE_INCOMPLETE", "warning", "Evidence coverage state: "+cov.State, pointer, nil, map[string]any{"coverage_state": cov.State, "dimension": cov.Dimension, "input_id": cov.InputID, "object_id": cov.ObjectID, "schema_id": cov.SchemaID})
+		}
+	}
 	for _, s := range subjects {
 		if s.domain == "candidate" && s.analysis != nil {
 			before := len(findings)
@@ -120,13 +147,13 @@ func ExportSARIF(source *Report) (*sarif.Log, error) {
 			before := len(findings)
 			reasons(s, c.Reasons, base+"/compatibility/reasons", c.Outcome, c.Requirements.Query)
 			for j, o := range c.RequirementOutcomes {
-				reasons(s, o.Reasons, fmt.Sprintf("%s/compatibility/requirement_outcomes/%d/reasons", base, j), o.Outcome, o.Query)
+				requirementFinding(s, o, fmt.Sprintf("%s/compatibility/requirement_outcomes/%d", base, j))
 			}
 			for j, o := range c.Inputs {
-				reasons(s, o.Reasons, fmt.Sprintf("%s/compatibility/inputs/%d/reasons", base, j), o.Outcome, c.Requirements.Query)
+				inputFinding(s, o, fmt.Sprintf("%s/compatibility/inputs/%d", base, j), c.Requirements.Query)
 			}
 			for j, cov := range c.Coverage {
-				reasons(s, cov.Reasons, fmt.Sprintf("%s/compatibility/coverage/%d/reasons", base, j), "incomplete", c.Requirements.Query)
+				coverageFinding(s, cov, fmt.Sprintf("%s/compatibility/coverage/%d", base, j), c.Requirements.Query)
 			}
 			for j, d := range c.Diagnostics {
 				add(s, d.Code, sarifLevel(d.Severity), d.Message, fmt.Sprintf("%s/compatibility/diagnostics/%d", base, j), nil, map[string]any{"diagnostic": d})
@@ -157,13 +184,13 @@ func ExportSARIF(source *Report) (*sarif.Log, error) {
 					reason(s, r.Evidence, fmt.Sprintf("%s/compatibility/reasons/%d/evidence", vp, k), c.Outcome, c.Requirements.Query)
 				}
 				for k, o := range c.RequirementOutcomes {
-					reasons(s, o.Evidence.Reasons, fmt.Sprintf("%s/compatibility/requirement_outcomes/%d/evidence/reasons", vp, k), o.Evidence.Outcome, o.Evidence.Query)
+					requirementFinding(s, o.Evidence, fmt.Sprintf("%s/compatibility/requirement_outcomes/%d/evidence", vp, k))
 				}
 				for k, o := range c.Inputs {
-					reasons(s, o.Evidence.Reasons, fmt.Sprintf("%s/compatibility/inputs/%d/evidence/reasons", vp, k), o.Evidence.Outcome, c.Requirements.Query)
+					inputFinding(s, o.Evidence, fmt.Sprintf("%s/compatibility/inputs/%d/evidence", vp, k), c.Requirements.Query)
 				}
 				for k, cov := range c.Coverage {
-					reasons(s, cov.Evidence.Reasons, fmt.Sprintf("%s/compatibility/coverage/%d/evidence/reasons", vp, k), "incomplete", c.Requirements.Query)
+					coverageFinding(s, cov.Evidence, fmt.Sprintf("%s/compatibility/coverage/%d/evidence", vp, k), c.Requirements.Query)
 				}
 				for k, d := range c.Diagnostics {
 					add(s, d.Code, sarifLevel(d.Severity), d.Message, fmt.Sprintf("%s/compatibility/diagnostics/%d", vp, k), nil, map[string]any{"diagnostic": d})
