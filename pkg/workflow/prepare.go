@@ -9,6 +9,7 @@ import (
 
 	"github.com/delgado-jacob/spl-toolkit/internal/buildinfo"
 	"github.com/delgado-jacob/spl-toolkit/pkg/compatibility"
+	"github.com/delgado-jacob/spl-toolkit/pkg/resolution"
 	"github.com/delgado-jacob/spl-toolkit/pkg/validation"
 )
 
@@ -17,6 +18,7 @@ type Prepared struct {
 	settings      Settings
 	entries       map[string]EntrySettings
 	compatibility *compatibility.Prepared
+	resolution    *resolution.Prepared
 	provenance    Provenance
 }
 
@@ -51,6 +53,12 @@ func Prepare(settings Settings) (*Prepared, error) {
 	prepared := &Prepared{settings: admitted, compatibility: evidence, provenance: provenance, entries: make(map[string]EntrySettings, len(admitted.Entries))}
 	for _, entry := range admitted.Entries {
 		prepared.entries[entry.ID] = entry
+		if entry.Resolution != nil && prepared.resolution == nil {
+			prepared.resolution, err = resolution.Prepare(admitted.Snapshot, admitted.SchemaBundle)
+			if err != nil {
+				return nil, preparationError(err)
+			}
+		}
 	}
 	return prepared, nil
 }

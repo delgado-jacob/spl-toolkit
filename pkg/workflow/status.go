@@ -3,6 +3,7 @@ package workflow
 import (
 	"github.com/delgado-jacob/spl-toolkit/pkg/analysis"
 	"github.com/delgado-jacob/spl-toolkit/pkg/compatibility"
+	"github.com/delgado-jacob/spl-toolkit/pkg/resolution"
 )
 
 // Compatibility owns closure evidence. Original proved defects always remain findings.
@@ -18,6 +19,17 @@ func compatibilityStatus(original *analysis.Result, evidence *compatibility.Repo
 	default:
 		return analysis.Incomplete
 	}
+}
+
+// Resolution owns variant proof, closure, and publication decisions.
+func resolutionStatus(original *analysis.Result, evidence *resolution.Report) analysis.Status {
+	if original.Status == analysis.Invalid || evidence.Counts.Failed > 0 {
+		return analysis.Invalid
+	}
+	if evidence.Counts.Incomplete > 0 || evidence.Counts.Verified == 0 {
+		return analysis.Incomplete
+	}
+	return analysis.Valid
 }
 
 func finalize(report *Report) {

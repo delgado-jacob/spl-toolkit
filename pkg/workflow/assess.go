@@ -10,6 +10,7 @@ import (
 	"github.com/delgado-jacob/spl-toolkit/pkg/analysis"
 	"github.com/delgado-jacob/spl-toolkit/pkg/compatibility"
 	"github.com/delgado-jacob/spl-toolkit/pkg/corpus"
+	"github.com/delgado-jacob/spl-toolkit/pkg/resolution"
 	"github.com/delgado-jacob/spl-toolkit/pkg/validation"
 )
 
@@ -53,6 +54,15 @@ func (p *Prepared) admit(input corpus.Input) (corpus.Input, error) {
 		return corpus.Input{}, requestErrorAt("request_invalid", "/entries", "complete selection must be nonempty")
 	}
 	out := detach(input)
+	if out.Selection.IgnoredNames == nil {
+		out.Selection.IgnoredNames = []string{}
+	}
+	if out.Selection.SkippedSymlinks == nil {
+		out.Selection.SkippedSymlinks = []string{}
+	}
+	if out.Selection.TraversalFailures == nil {
+		out.Selection.TraversalFailures = []corpus.AcquisitionError{}
+	}
 	seen := map[string]bool{}
 	for i := range out.Entries {
 		entry := &out.Entries[i]
@@ -111,8 +121,14 @@ func (p *Prepared) Assess(input corpus.Input) (*Report, error) {
 			out.Analysis, err = analysis.Analyze(*entry.Document)
 			if err != nil {
 				out.Failure = operationFailure(err, "analysis")
-			} else if setting.Compatibility == nil {
-				out.Failure = &Failure{Phase: "configuration", Code: "mode_unavailable", Message: "resolution orchestration is not available"}
+			} else if setting.Resolution != nil {
+				resolve := detach(*setting.Resolution)
+				out.Resolution, err = p.resolution.Resolve(resolution.PreparedRequest{SchemaVersion: 1, Document: *entry.Document, Resolutions: resolve.Resolutions, MaxVariants: resolve.MaxVariants, Compatibility: resolve.Compatibility})
+				if err != nil {
+					out.Failure = operationFailure(err, "resolution")
+				} else {
+					out.Status = resolutionStatus(out.Analysis, out.Resolution)
+				}
 			} else {
 				check := detach(*setting.Compatibility)
 				out.Compatibility, err = p.compatibility.Check(compatibility.AssessmentRequest{SchemaVersion: 1, Requirements: out.Analysis.Requirements, Document: entry.Document, QueryScope: check.QueryScope, InputBindings: check.InputBindings, DependencyBindings: check.DependencyBindings})
@@ -135,7 +151,10 @@ func operationFailure(err error, operation string) *Failure {
 		phase, code = "configuration", "configuration_invalid"
 	}
 	failure := &Failure{Phase: phase, Code: code, Message: operation + ": " + err.Error()}
-	if detail, ok := compatibility.RequestErrorDetails(err); ok {
+	if detail, ok := resolution.RequestErrorDetails(err); ok {
+		failure.Code, failure.Message = detail.Code, detail.Message
+		failure.Detail, _ = json.Marshal(detail)
+	} else if detail, ok := compatibility.RequestErrorDetails(err); ok {
 		failure.Code, failure.Message = detail.Code, detail.Message
 		failure.Detail, _ = json.Marshal(detail)
 	}
