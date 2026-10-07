@@ -296,7 +296,7 @@ func normalizeRequest(input Request) (Request, error) {
 			return Request{}, requestErrorAt("request_invalid", path+"/placeholder", "placeholder must be a unique named marker")
 		}
 		seen[r.Placeholder] = true
-		if !supportedKind(r.Kind) {
+		if !supportedChoiceKind(r.Kind) {
 			return Request{}, requestErrorAt("request_invalid", path+"/kind", "unsupported resolution kind")
 		}
 		if len(r.Values) == 0 {
@@ -324,7 +324,7 @@ func normalizeRequest(input Request) (Request, error) {
 	objects := map[string]environment.ObjectIdentity{}
 	for i, b := range out.Compatibility.InputBindings {
 		path := fmt.Sprintf("/compatibility/input_bindings/%d", i)
-		if !nonblank(b.OriginalInputID) || !nonblank(b.ObjectID) || !supportedKind(b.Expected.Kind) || !nonblank(b.Expected.Name) || (b.Expected.Kind != "dataset" && (b.Expected.Namespace != "" || b.Expected.App != "" || b.Expected.Owner != "")) || (b.ResolvedValue != nil && !nonblank(*b.ResolvedValue)) {
+		if !nonblank(b.OriginalInputID) || !nonblank(b.ObjectID) || !supportedBindingKind(b.Expected.Kind) || !nonblank(b.Expected.Name) || (b.Expected.Kind != "dataset" && (b.Expected.Namespace != "" || b.Expected.App != "" || b.Expected.Owner != "")) || (b.ResolvedValue != nil && !nonblank(*b.ResolvedValue)) {
 			return Request{}, requestErrorAt("binding_invalid", path, "invalid resolution binding")
 		}
 		if bindings[b.OriginalInputID] == nil {
@@ -362,7 +362,10 @@ func normalizeRequest(input Request) (Request, error) {
 
 var markerPattern = regexp.MustCompile(`^\$[A-Za-z_][A-Za-z0-9_]*$`)
 
-func supportedKind(kind string) bool {
+func supportedChoiceKind(kind string) bool {
+	return supportedBindingKind(kind) || kind == "lookup" || kind == "data_model"
+}
+func supportedBindingKind(kind string) bool {
 	return kind == "dataset" || kind == "index" || kind == "source" || kind == "sourcetype"
 }
 func normalizeSelector(input environment.Selector, path string) (environment.Selector, error) {

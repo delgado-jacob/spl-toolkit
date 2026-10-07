@@ -157,3 +157,42 @@ func TestResolutionRequestNestedShapeAndOffsets(t *testing.T) {
 		t.Fatal("error offset aliases")
 	}
 }
+
+func TestResolutionRequestChoiceKinds(t *testing.T) {
+	for _, kind := range []string{"dataset", "index", "source", "sourcetype", "lookup", "data_model"} {
+		t.Run(kind, func(t *testing.T) {
+			request := requestFixture(t)
+			request.Resolutions = []Resolution{{Placeholder: "$target", Kind: kind, Values: []string{"selected"}}}
+			if _, err := normalizeRequest(request); err != nil {
+				t.Fatalf("typed choice rejected: %v", err)
+			}
+			raw, err := json.Marshal(request)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if _, err := DecodeRequest(raw); err != nil {
+				t.Fatalf("wire choice rejected: %v", err)
+			}
+		})
+	}
+	request := requestFixture(t)
+	request.Resolutions = []Resolution{{Placeholder: "$target", Kind: "field", Values: []string{"selected"}}}
+	if _, err := normalizeRequest(request); err == nil {
+		t.Fatal("field choice admitted")
+	}
+	raw, _ := json.Marshal(request)
+	if _, err := DecodeRequest(raw); err == nil {
+		t.Fatal("wire field choice admitted")
+	}
+	for _, kind := range []string{"lookup", "data_model"} {
+		request := requestFixture(t)
+		request.Compatibility.InputBindings[0].Expected.Kind = kind
+		if _, err := normalizeRequest(request); err == nil {
+			t.Fatalf("%s binding identity admitted", kind)
+		}
+		raw, _ := json.Marshal(request)
+		if _, err := DecodeRequest(raw); err == nil {
+			t.Fatalf("wire %s binding identity admitted", kind)
+		}
+	}
+}
