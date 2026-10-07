@@ -432,6 +432,19 @@ func (p *Prepared) validateResolutionDependencies(original analysis.ResolutionEv
 	if err != nil {
 		return bundle, err
 	}
+	unchanged := []InputBinding{}
+	for _, binding := range assessment.InputBindings {
+		if binding.ResolvedValue != nil {
+			continue
+		}
+		unchanged = append(unchanged, InputBinding{InputID: binding.OriginalInputID, ObjectID: binding.ObjectID, Expected: binding.Expected, SchemaID: binding.SchemaID})
+	}
+	// Exact unchanged root selections must agree with submitted dependency
+	// selections before variant iteration. Missing captured source objects are
+	// deliberately skipped by their owner and retain ordinary evidence findings.
+	if _, err := sourceDependencyBindings(AssessmentRequest{Document: &original.Analysis.Document, QueryScope: assessment.QueryScope, InputBindings: unchanged}, []assessmentQuery{{set: original.Analysis.Requirements}}, assessment.DependencyBindings, p); err != nil {
+		return bundle, err
+	}
 	if len(assessment.DependencyBindings) > 0 {
 		if _, err := closure.Evaluate(closure.Request{SchemaVersion: 1, Document: original.Analysis.Document, Bundle: bundle, Bindings: assessment.DependencyBindings}); err != nil {
 			return bundle, closureRequestError(err)

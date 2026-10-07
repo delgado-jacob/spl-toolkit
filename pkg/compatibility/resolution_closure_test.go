@@ -382,3 +382,46 @@ func TestResolutionClosureRootMacroRoleAndArgumentEnvelope(t *testing.T) {
 		}
 	}
 }
+
+func TestResolutionClosurePreflightSourceDependencyConflict(t *testing.T) {
+	proof, r, a := resolutionCheckFixture(t, `from events | fields id`)
+	original, _, _, _ := proof.AssessmentEvidence()
+	first := r.Snapshot.Objects[0]
+	first.ID = "A"
+	first.App = "a"
+	second := first
+	second.ID = "B"
+	second.App = "b"
+	r.Snapshot.Objects = []environment.Object{first, second}
+	r.SchemaBundle = nil
+	a.InputBindings = []ResolutionBinding{{OriginalInputID: original.Analysis.Inputs[0].ID, ObjectID: first.ID, Expected: objectIdentity(first)}}
+	a.DependencyBindings = []closure.Binding{{DocumentDigest: queryDigest(original.Analysis.Document.Text), Kind: "dataset", Start: 5, End: 11, ObjectID: second.ID}}
+	prepared, err := Prepare(r.Snapshot, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = prepared.ValidateResolutionBindings(original, []analysis.ResolutionChoice{}, a)
+	requireRequestError(t, err, "binding_invalid", "/dependency_bindings")
+	// An exact matching source/dependency selection remains valid across the full scope.
+	a.DependencyBindings[0].ObjectID = first.ID
+	if err := prepared.ValidateResolutionBindings(original, []analysis.ResolutionChoice{}, a); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := prepared.CheckResolution(proof, a); err != nil {
+		t.Fatal(err)
+	}
+	// Missing captured source objects remain ordinary evidence findings.
+	r.Snapshot.Objects = []environment.Object{second}
+	a.DependencyBindings[0].ObjectID = second.ID
+	prepared, err = Prepare(r.Snapshot, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := prepared.ValidateResolutionBindings(original, []analysis.ResolutionChoice{}, a); err != nil {
+		t.Fatal(err)
+	}
+	report, err := prepared.CheckResolution(proof, a)
+	if err != nil || report.Outcome != "unsatisfied" {
+		t.Fatalf("absent source=%+v error=%v", report, err)
+	}
+}
