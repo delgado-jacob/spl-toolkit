@@ -10,7 +10,7 @@ var resolutionMarker = regexp.MustCompile(`^\$[A-Za-z_][A-Za-z_0-9]*$`)
 // PrepareResolution discovers whole markers in external typed owners of the
 // submitted document. Definitions and ordinary string values are not owners.
 func PrepareResolution(document QueryDocument) (*ResolutionSession, error) {
-	rewrite := &RewriteSession{sites: []*rewriteSite{}, preserveCanonicalResult: true}
+	rewrite := &RewriteSession{sites: []*rewriteSite{}, preserveCanonicalResult: true, renderUnchangedIdentities: true}
 	result, trace, err := analyzeRewriteWithTrace(document, nil, rewrite)
 	if err != nil {
 		return nil, err

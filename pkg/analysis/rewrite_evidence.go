@@ -86,6 +86,8 @@ type RewriteSession struct {
 	epoch                      int
 	identityCoverageIncomplete bool
 	preserveCanonicalResult    bool
+	// Resolution atoms must be encoded even when equal to the original marker.
+	renderUnchangedIdentities bool
 }
 type rewriteSite struct {
 	public   RewriteSite

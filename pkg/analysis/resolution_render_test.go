@@ -160,3 +160,40 @@ func TestResolutionRenderRetainsContentLimitation(t *testing.T) {
 		t.Fatal("non-renderable newline not limited")
 	}
 }
+
+func TestResolutionRenderSelfMarkerIsAtomic(t *testing.T) {
+	for _, text := range []string{`FROM $events | fields id`, `FROM '$events' | fields id`} {
+		s, err := PrepareResolution(QueryDocument{Language: "spl2", Text: text})
+		if err != nil {
+			t.Fatal(err)
+		}
+		r, err := s.Render([]ResolutionChoice{{"$events", "dataset", "$events"}})
+		if err != nil {
+			t.Fatal(err)
+		}
+		ordinary := rewriteTestSession(t, "spl2", text)
+		site := rewriteFind(t, ordinary, "dataset", "$events", 0)
+		unchanged, err := ordinary.Render([]RewriteReplacement{{SiteID: site.ID, Target: rewriteAtom("$events")}})
+		if err != nil || len(unchanged.Edits()) != 0 {
+			t.Fatalf("ordinary rewrite equal-identity behavior changed: %+v %v", unchanged, err)
+		}
+		want := `FROM '\u0024events' | fields id`
+		if r.CandidateDocument().Text != want {
+			t.Fatalf("self marker retained variable syntax: %q", r.CandidateDocument().Text)
+		}
+		if decoded, ok := spl2DecodeKey(`'\u0024events'`); !ok || decoded != "$events" {
+			t.Fatalf("decoded atom=%q exact=%v", decoded, ok)
+		}
+		changes := r.Changes()
+		if len(changes) != 1 {
+			t.Fatalf("self marker missing audit: %+v", changes)
+		}
+		c := changes[0]
+		if text[c.OriginalLocation.Start.Offset:c.OriginalLocation.End.Offset] != c.Before {
+			t.Fatal("original audit slice mismatch")
+		}
+		if rewriteCandidateText(text, []RewriteTextEdit{{Location: c.OriginalLocation, Before: c.Before, After: c.After}}) != want {
+			t.Fatal("self marker audit does not reconstruct candidate")
+		}
+	}
+}

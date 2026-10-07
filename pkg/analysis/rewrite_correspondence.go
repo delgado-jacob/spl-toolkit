@@ -90,7 +90,7 @@ func (s *RewriteSession) Render(changes []RewriteReplacement) (*RewriteRendering
 	}
 	for _, site := range s.sites {
 		target, ok := selected[site.public.ID]
-		if !ok || rewriteIdentityEqual(target, site.public.Identity) {
+		if !ok || (!s.renderUnchangedIdentities && rewriteIdentityEqual(target, site.public.Identity)) {
 			continue
 		}
 		ids := []string{site.public.ID}
