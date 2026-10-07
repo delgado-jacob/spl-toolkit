@@ -37,25 +37,17 @@ func comparisonComplete(e ReportEntry) bool {
 		return false
 	}
 	if e.Compatibility != nil {
-		// A supported closure can discharge gaps in the original unexpanded query.
-		for _, coverage := range e.Compatibility.Coverage {
-			if coverage.State != "complete" && coverage.State != "not_applicable" {
-				return false
-			}
-		}
-		return e.Compatibility.Outcome == "satisfied" || e.Compatibility.Outcome == "unsatisfied"
+		// Captured obligations and recognized labels establish completeness; a
+		// supported closure can discharge gaps in the original unexpanded query.
+		return compatibilityReportEvidenceComplete(e.Compatibility)
 	}
 	if e.Resolution != nil {
 		if len(e.Resolution.Variants) == 0 || e.Resolution.Counts.Incomplete > 0 {
 			return false
 		}
 		for _, v := range e.Resolution.Variants {
-			if v.Compatibility != nil {
-				for _, coverage := range v.Compatibility.Coverage {
-					if coverage.Evidence.State != "complete" && coverage.Evidence.State != "not_applicable" {
-						return false
-					}
-				}
+			if v.Compatibility != nil && !resolutionReportEvidenceComplete(v.Compatibility) {
+				return false
 			}
 			if v.CandidateAnalysis != nil && v.CandidateAnalysis.Status == analysis.Incomplete && (v.Compatibility == nil || (v.Compatibility.Outcome != "satisfied" && v.Compatibility.Outcome != "unsatisfied")) {
 				return false

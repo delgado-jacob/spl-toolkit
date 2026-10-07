@@ -607,3 +607,90 @@ func TestReviewClosureHistoricalRenumbering(t *testing.T) {
 		t.Fatalf("renumbered selected fact: %s CI%d deltas %v", got.Entries[0].Classification, got.CIExitCode, deltaKeys(got.Entries[0]))
 	}
 }
+
+// Imported evidence can retain an outcome without the obligations that establish
+// completeness. Equality of those saved facts must not imply unchanged CI.
+func TestWorkflowCompareJSONIncompleteCapturedEvidence(t *testing.T) {
+	for _, mode := range []string{"compatibility", "resolution"} {
+		t.Run(mode, func(t *testing.T) {
+			for _, change := range []string{"missing coverage", "unknown coverage", "unknown input outcome", "unknown requirement outcome", "incomplete closure", "unknown closure status"} {
+				t.Run(change, func(t *testing.T) {
+					req := boundComparisonRequest(t, "from events_good | fields id")
+					if mode == "resolution" {
+						req = seedResolutionRequest(t)
+					}
+					r, err := Assess(req)
+					if err != nil {
+						t.Fatal(err)
+					}
+					if mode == "compatibility" {
+						c := r.Entries[0].Compatibility
+						switch change {
+						case "missing coverage":
+							c.Coverage = []compatibility.Coverage{}
+						case "unknown coverage":
+							c.Coverage[0].Dimension = "historical_unknown"
+						case "unknown input outcome":
+							c.Inputs[0].Outcome = "historical_unknown"
+						case "unknown requirement outcome":
+							c.RequirementOutcomes[0].Outcome = "historical_unknown"
+						case "incomplete closure":
+							c.Closure.Coverage.Complete = false
+						case "unknown closure status":
+							c.Closure.Status = "historical_unknown"
+						}
+					} else {
+						c := r.Entries[0].Resolution.Variants[0].Compatibility
+						switch change {
+						case "missing coverage":
+							c.Coverage = c.Coverage[:0]
+						case "unknown coverage":
+							c.Coverage[0].Evidence.Dimension = "historical_unknown"
+						case "unknown input outcome":
+							c.Inputs[0].Evidence.Outcome = "historical_unknown"
+						case "unknown requirement outcome":
+							c.RequirementOutcomes[0].Evidence.Outcome = "historical_unknown"
+						case "incomplete closure":
+							c.Closure.Coverage.Complete = false
+						case "unknown closure status":
+							c.Closure.Status = "historical_unknown"
+						}
+					}
+					raw, err := json.Marshal(CompareRequest{SchemaVersion: 1, Before: *r, After: *r})
+					if err != nil {
+						t.Fatal(err)
+					}
+					got, err := CompareJSON(raw)
+					if err != nil {
+						t.Fatal(err)
+					}
+					if got.CIExitCode != 3 || got.Entries[0].Classification != impact.Indeterminate || len(got.Entries[0].Deltas) != 0 {
+						t.Fatalf("incomplete equality: classification %s CI%d deltas %v", got.Entries[0].Classification, got.CIExitCode, deltaKeys(got.Entries[0]))
+					}
+				})
+			}
+		})
+	}
+}
+
+func TestWorkflowCompareJSONCompleteCapturedEvidence(t *testing.T) {
+	supportedClosure := definitionComparisonRequest(t, "from events_good | fields id")
+	supportedClosure.Documents[0].Document.Text = "from view"
+	for _, req := range []Request{seedResolutionRequest(t), supportedClosure} {
+		r, err := Assess(req)
+		if err != nil {
+			t.Fatal(err)
+		}
+		raw, err := json.Marshal(CompareRequest{SchemaVersion: 1, Before: *r, After: *r})
+		if err != nil {
+			t.Fatal(err)
+		}
+		got, err := CompareJSON(raw)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if got.CIExitCode != 0 || got.Entries[0].Classification != impact.Unchanged {
+			t.Fatalf("complete equality: classification %s CI%d", got.Entries[0].Classification, got.CIExitCode)
+		}
+	}
+}
