@@ -7,6 +7,7 @@ cmd/closure_cli.go
 cmd/compatibility_cli.go
 cmd/environment_cli.go
 cmd/main.go
+cmd/resolution_cli.go
 cmd/rewrite_cli.go
 cmd/schema_validation_cli.go
 cmd/server/main.go
@@ -39,6 +40,8 @@ contracts/v1/lsp-configuration.schema.json
 contracts/v1/manifest.schema.json
 contracts/v1/query-document.schema.json
 contracts/v1/requirements.schema.json
+contracts/v1/resolution-request.schema.json
+contracts/v1/resolution.schema.json
 contracts/v1/rewrite.schema.json
 contracts/v1/schema-validation.schema.json
 contracts/v1/shared.schema.json
@@ -50,6 +53,7 @@ docs/cli.md
 docs/compatibility.md
 docs/contracts.md
 docs/docs.go
+docs/resolution.md
 docs/rewrite.md
 docs/spl2.md
 docs/splunk-exporter.md
@@ -60,6 +64,7 @@ examples/environment/observed-partial-snapshot.json
 examples/environment/partial-snapshot.json
 examples/go/basic/main.go
 examples/go/tooling/main.go
+examples/resolution/request.json
 examples/tooling/after-rules.json
 examples/tooling/after-target.json
 examples/tooling/before-rules.json
@@ -137,6 +142,10 @@ pkg/analysis/recovery.go
 pkg/analysis/references.go
 pkg/analysis/requirements.go
 pkg/analysis/requirements_trace.go
+pkg/analysis/resolution.go
+pkg/analysis/resolution_discovery.go
+pkg/analysis/resolution_proof.go
+pkg/analysis/resolution_render.go
 pkg/analysis/resource_limit.go
 pkg/analysis/rewrite_correspondence.go
 pkg/analysis/rewrite_evidence.go
@@ -168,6 +177,7 @@ pkg/api/compatibility.go
 pkg/api/environment.go
 pkg/api/handlers.go
 pkg/api/models.go
+pkg/api/resolution.go
 pkg/api/rewrite.go
 pkg/api/schema_validation.go
 pkg/api/server.go
@@ -197,6 +207,10 @@ pkg/compatibility/prepare.go
 pkg/compatibility/report.go
 pkg/compatibility/request.go
 pkg/compatibility/requirements.go
+pkg/compatibility/resolution_bindings.go
+pkg/compatibility/resolution_check.go
+pkg/compatibility/resolution_closure.go
+pkg/compatibility/resolution_model.go
 pkg/corpus/aggregate.go
 pkg/corpus/identity.go
 pkg/corpus/model.go
@@ -233,6 +247,13 @@ pkg/mapper/field_mapping_listener.go
 pkg/mapper/mapper.go
 pkg/mapper/parser.go
 pkg/mapper/schema.go
+pkg/resolution/errors.go
+pkg/resolution/fanout.go
+pkg/resolution/format.go
+pkg/resolution/model.go
+pkg/resolution/prepare.go
+pkg/resolution/request.go
+pkg/resolution/resolve.go
 pkg/rewrite/batch.go
 pkg/rewrite/conditions.go
 pkg/rewrite/diagnostics.go

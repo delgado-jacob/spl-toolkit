@@ -12,6 +12,8 @@ class DocumentationTests(unittest.TestCase):
     def check(self, files):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
+            files = {"docs/resolution.md": "---\ntitle: Resolution\n---\n",
+                     "examples/resolution/request.json": "{}"} | files
             for name, content in files.items():
                 path = root / name
                 path.parent.mkdir(parents=True, exist_ok=True)

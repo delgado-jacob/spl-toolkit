@@ -22,10 +22,10 @@ REQUIRED_TEST_FILES = {
     "native": {"test_native_abi.py", "test_native_mapper.py", "test_native_analysis.py",
                "test_native_validation.py", "test_native_schema_validation.py", "test_native_spl2.py",
                "test_native_rewrite.py", "test_native_requirements.py", "test_native_closure.py",
-               "test_native_environment.py", "test_native_compatibility.py"},
+               "test_native_environment.py", "test_native_compatibility.py", "test_native_resolution.py"},
     "acceptance": {"test_documented_cli.py", "test_surfaces.py", "test_analysis_surfaces.py",
                    "test_requirements_surfaces.py", "test_validation_surfaces.py", "test_schema_surfaces.py",
-                   "test_spl2_surfaces.py", "test_rewrite_surfaces.py", "test_environment_surfaces.py", "test_compatibility_surfaces.py"},
+                   "test_spl2_surfaces.py", "test_rewrite_surfaces.py", "test_environment_surfaces.py", "test_compatibility_surfaces.py", "test_resolution_surfaces.py"},
 }
 REQUIRED_TEST_HASH_PATHS = {
     "native": {
@@ -35,12 +35,14 @@ REQUIRED_TEST_HASH_PATHS = {
         "test_native_spl2.py": ROOT / "python/tests/test_native_spl2.py",
         "test_native_environment.py": ROOT / "python/tests/test_native_environment.py",
         "test_native_compatibility.py": ROOT / "python/tests/test_native_compatibility.py",
+        "test_native_resolution.py": ROOT / "python/tests/test_native_resolution.py",
     },
     "acceptance": {
         "test_requirements_surfaces.py": ROOT / "tests/acceptance/test_requirements_surfaces.py",
         "test_analysis_surfaces.py": ROOT / "tests/acceptance/test_analysis_surfaces.py",
         "test_environment_surfaces.py": ROOT / "tests/acceptance/test_environment_surfaces.py",
         "test_compatibility_surfaces.py": ROOT / "tests/acceptance/test_compatibility_surfaces.py",
+        "test_resolution_surfaces.py": ROOT / "tests/acceptance/test_resolution_surfaces.py",
     },
 }
 REQUIRED_TEST_HASHES = {
@@ -76,6 +78,9 @@ ENVIRONMENT_FIXTURE_HASHES = {
 COMPATIBILITY_FIXTURE_HASHES = {
     "cases.json": hashlib.sha256((ROOT / "testdata/compatibility/cases.json").read_bytes()).hexdigest(),
 }
+RESOLUTION_FIXTURE_HASHES = {
+    "cases.json": hashlib.sha256((ROOT / "testdata/resolution/cases.json").read_bytes()).hexdigest(),
+}
 LINUS_FIXTURE_SHA = hashlib.sha256((ROOT / "testdata/spl2/linus-forms.json").read_bytes()).hexdigest()
 COMMON_FIELDS = {"schema_version", "kind", "source_sha", "status"}
 KIND_FIELDS = {
@@ -92,7 +97,7 @@ KIND_FIELDS = {
         "wheel_contract_hashes", "tooling_source_hashes", "tooling_fixture_hashes",
         "tooling_environment_fixture_hashes",
         "packaged_fixture_hashes",
-        "machine_contract_tests", "fixture_hashes", "requirements_surface_evidence",
+        "machine_contract_tests", "fixture_hashes", "requirements_surface_evidence", "resolution_surface_evidence",
     },
     "go-floor": {"go_version"},
     "native-memory": {"compiler", "sanitizer"},
@@ -242,6 +247,26 @@ def _validate_requirements_evidence(record: dict, errors: list[str], label: str)
     for field, minimum in minimums.items():
         if type(evidence.get(field)) is not int or evidence[field] < minimum:
             errors.append(f"{label}: requirements_surface_evidence {field} is below {minimum}")
+
+
+def _validate_resolution_evidence(record: dict, errors: list[str], label: str) -> None:
+    fixtures = record.get("fixture_hashes")
+    hashes = fixtures.get("resolution") if isinstance(fixtures, dict) else None
+    _validate_hash_map(hashes, RESOLUTION_FIXTURE_HASHES, "fixture_hashes.resolution", errors, label)
+    evidence = record.get("resolution_surface_evidence")
+    fields = {"schema_version", "source_sha", "fixture_sha256", "corpus_cases", "malformed_cases", "surfaces"}
+    if not isinstance(evidence, dict) or set(evidence) != fields:
+        errors.append(f"{label}: resolution_surface_evidence has incorrect fields")
+        return
+    if evidence.get("schema_version") != 1 or evidence.get("source_sha") != record.get("source_sha"):
+        errors.append(f"{label}: resolution_surface_evidence source identity/version mismatch")
+    if evidence.get("fixture_sha256") != RESOLUTION_FIXTURE_HASHES["cases.json"]:
+        errors.append(f"{label}: resolution_surface_evidence fixture hash differs from current source")
+    for field, minimum in (("corpus_cases", 16), ("malformed_cases", 5)):
+        if type(evidence.get(field)) is not int or evidence[field] < minimum:
+            errors.append(f"{label}: resolution_surface_evidence {field} is below {minimum}")
+    if evidence.get("surfaces") != ["go", "cli", "http", "c", "python"]:
+        errors.append(f"{label}: resolution_surface_evidence must exercise all five surfaces")
 
 
 def _validate_packaged_fixture_evidence(record: dict, errors: list[str], label: str) -> None:
@@ -429,6 +454,7 @@ def validate_records(records: list[dict], source_sha: str) -> list[str]:
                     errors.append(f"{label}: {gate} must be passed")
             _validate_counts(record, errors, label)
             _validate_requirements_evidence(record, errors, label)
+            _validate_resolution_evidence(record, errors, label)
             _validate_packaged_fixture_evidence(record, errors, label)
             _validate_required_test_hashes(record, errors, label)
             for field, expected in (

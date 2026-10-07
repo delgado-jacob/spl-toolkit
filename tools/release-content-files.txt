@@ -26,6 +26,8 @@ contracts/v1/lsp-configuration.schema.json
 contracts/v1/manifest.schema.json
 contracts/v1/query-document.schema.json
 contracts/v1/requirements.schema.json
+contracts/v1/resolution-request.schema.json
+contracts/v1/resolution.schema.json
 contracts/v1/rewrite.schema.json
 contracts/v1/schema-validation.schema.json
 contracts/v1/shared.schema.json
@@ -36,6 +38,7 @@ docs/architecture.md
 docs/cli.md
 docs/compatibility.md
 docs/contracts.md
+docs/resolution.md
 docs/rewrite.md
 docs/spl2.md
 docs/splunk-exporter.md
@@ -46,6 +49,7 @@ examples/environment/observed-partial-snapshot.json
 examples/environment/partial-snapshot.json
 examples/go/basic/main.go
 examples/go/tooling/main.go
+examples/resolution/request.json
 examples/tooling/after-rules.json
 examples/tooling/after-target.json
 examples/tooling/before-rules.json

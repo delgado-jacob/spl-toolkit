@@ -32,12 +32,14 @@ REQUIRED_TEST_HASH_PATHS = {
         "test_native_closure.py": ROOT / "python/tests/test_native_closure.py",
         "test_native_environment.py": ROOT / "python/tests/test_native_environment.py",
         "test_native_compatibility.py": ROOT / "python/tests/test_native_compatibility.py",
+        "test_native_resolution.py": ROOT / "python/tests/test_native_resolution.py",
     },
     "acceptance": {
         "test_requirements_surfaces.py": ROOT / "tests/acceptance/test_requirements_surfaces.py",
         "test_analysis_surfaces.py": ROOT / "tests/acceptance/test_analysis_surfaces.py",
         "test_environment_surfaces.py": ROOT / "tests/acceptance/test_environment_surfaces.py",
         "test_compatibility_surfaces.py": ROOT / "tests/acceptance/test_compatibility_surfaces.py",
+        "test_resolution_surfaces.py": ROOT / "tests/acceptance/test_resolution_surfaces.py",
     },
 }
 ENVIRONMENT_FIXTURE_SHA = hashlib.sha256((ROOT / "testdata/environment/cases.json").read_bytes()).hexdigest()
@@ -138,8 +140,15 @@ def passing_records() -> list[dict]:
                 },
                 "fixture_hashes": {"requirements": HASH, "spl2": {"linus-forms.json": LINUS_FIXTURE_SHA},
                                    "environment": {"cases.json": ENVIRONMENT_FIXTURE_SHA},
-                                   "compatibility": {"cases.json": hashlib.sha256((ROOT / "testdata/compatibility/cases.json").read_bytes()).hexdigest()}},
+                                   "compatibility": {"cases.json": hashlib.sha256((ROOT / "testdata/compatibility/cases.json").read_bytes()).hexdigest()},
+                                   "resolution": dict(check_acceptance.RESOLUTION_FIXTURE_HASHES)},
                 "packaged_fixture_hashes": {"spl2": {"linus-forms.json": LINUS_FIXTURE_SHA}},
+                "resolution_surface_evidence": {
+                    "schema_version": 1, "source_sha": SHA,
+                    "fixture_sha256": check_acceptance.RESOLUTION_FIXTURE_HASHES["cases.json"],
+                    "corpus_cases": 16, "malformed_cases": 5,
+                    "surfaces": ["go", "cli", "http", "c", "python"],
+                },
                 "requirements_surface_evidence": {
                     "schema_version": 1,
                     "fixture_sha256": HASH,
@@ -157,10 +166,10 @@ def passing_records() -> list[dict]:
                     "native": ["test_native_abi.py", "test_native_mapper.py", "test_native_analysis.py",
                                "test_native_validation.py", "test_native_schema_validation.py", "test_native_spl2.py",
                                "test_native_rewrite.py", "test_native_requirements.py", "test_native_closure.py",
-                               "test_native_environment.py", "test_native_compatibility.py"],
+                               "test_native_environment.py", "test_native_compatibility.py", "test_native_resolution.py"],
                     "acceptance": ["test_documented_cli.py", "test_surfaces.py", "test_analysis_surfaces.py",
                                    "test_validation_surfaces.py", "test_schema_surfaces.py", "test_spl2_surfaces.py",
-                                   "test_rewrite_surfaces.py", "test_requirements_surfaces.py", "test_environment_surfaces.py", "test_compatibility_surfaces.py"],
+                                   "test_rewrite_surfaces.py", "test_requirements_surfaces.py", "test_environment_surfaces.py", "test_compatibility_surfaces.py", "test_resolution_surfaces.py"],
                 },
                 "cli_examples": "passed", "surface_parity": "passed", "version_agreement": "passed",
             })
@@ -219,6 +228,7 @@ def test_exact_source_hash_inputs_are_stable_in_windows_checkout(tmp_path: Path)
     relative_paths.add("testdata/spl2/linus-forms.json")
     relative_paths.add("testdata/environment/cases.json")
     relative_paths.add("testdata/compatibility/cases.json")
+    relative_paths.add("testdata/resolution/cases.json")
     relative_paths.update(
         path.relative_to(ROOT).as_posix()
         for paths in check_acceptance.REQUIRED_TEST_HASH_PATHS.values()
@@ -517,3 +527,24 @@ def test_compatibility_evidence_requires_current_fixture_and_installed_tests():
             else:
                 records[index]["required_test_hashes"][suite][filename] = bad
             assert any("required_test_hashes" in error for error in validate_records(records, SHA))
+
+
+@pytest.mark.parametrize("damage", ["missing_suite", "zero_cases", "skips", "unregistered_fixture", "wrong_sha", "older_payload"])
+def test_resolution_evidence_rejects_incomplete_or_stale_records(damage):
+    records = passing_records()
+    installed = next(record for record in records if record["kind"] == "installed-wheel")
+    if damage == "missing_suite":
+        installed["required_test_files"]["acceptance"].remove("test_resolution_surfaces.py")
+    elif damage == "zero_cases":
+        installed["resolution_surface_evidence"]["corpus_cases"] = 0
+    elif damage == "skips":
+        installed["tests"]["surface_acceptance"]["skipped"] = 1
+    elif damage == "unregistered_fixture":
+        installed["fixture_hashes"]["resolution"] = {}
+    elif damage == "wrong_sha":
+        installed["resolution_surface_evidence"]["source_sha"] = "c" * 40
+    else:
+        del installed["resolution_surface_evidence"]
+        del installed["fixture_hashes"]["resolution"]
+        installed["required_test_files"]["native"].remove("test_native_resolution.py")
+    assert validate_records(records, SHA)
