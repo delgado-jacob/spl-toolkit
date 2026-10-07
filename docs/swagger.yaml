@@ -3583,6 +3583,232 @@ components:
       - binding
       - origin_reference_ids
       type: object
+    tooling.analysis.ResolutionChange:
+      additionalProperties: true
+      properties:
+        after:
+          type: string
+        before:
+          type: string
+        candidate_location:
+          $ref: '#/components/schemas/tooling.analysis.Location'
+        candidate_reference_ids:
+          items:
+            type: string
+          type: array
+        kind:
+          enum:
+          - index
+          - source
+          - sourcetype
+          - lookup
+          - dataset
+          - data_model
+          type: string
+        original_location:
+          $ref: '#/components/schemas/tooling.analysis.Location'
+        original_reference_ids:
+          items:
+            type: string
+          type: array
+        placeholder:
+          minLength: 1
+          pattern: \S
+          type: string
+        value:
+          type: string
+      required:
+      - placeholder
+      - kind
+      - value
+      - original_reference_ids
+      - candidate_reference_ids
+      - original_location
+      - before
+      - after
+      type: object
+    tooling.analysis.ResolutionChoice:
+      additionalProperties: true
+      properties:
+        kind:
+          enum:
+          - index
+          - source
+          - sourcetype
+          - lookup
+          - dataset
+          - data_model
+          type: string
+        placeholder:
+          minLength: 1
+          pattern: \S
+          type: string
+        value:
+          minLength: 1
+          pattern: \S
+          type: string
+      required:
+      - placeholder
+      - kind
+      - value
+      type: object
+    tooling.analysis.ResolutionEvidence:
+      additionalProperties: true
+      properties:
+        analysis:
+          $ref: '#/components/schemas/tooling.analysis.Result'
+        coverage:
+          $ref: '#/components/schemas/tooling.analysis.InputCoverage'
+        placeholders:
+          items:
+            $ref: '#/components/schemas/tooling.analysis.ResolutionPlaceholder'
+          type: array
+      required:
+      - analysis
+      - placeholders
+      - coverage
+      type: object
+    tooling.analysis.ResolutionLimitation:
+      additionalProperties: true
+      properties:
+        code:
+          type: string
+        location:
+          $ref: '#/components/schemas/tooling.analysis.Location'
+        message:
+          type: string
+      required:
+      - code
+      - message
+      - location
+      type: object
+    tooling.analysis.ResolutionOccurrencePair:
+      additionalProperties: true
+      properties:
+        candidate_input_id:
+          type: string
+        candidate_occurrence_id:
+          type: string
+        original_input_id:
+          type: string
+        original_occurrence_id:
+          type: string
+      required:
+      - original_input_id
+      - candidate_input_id
+      - original_occurrence_id
+      - candidate_occurrence_id
+      type: object
+    tooling.analysis.ResolutionPlaceholder:
+      additionalProperties: true
+      properties:
+        kind:
+          enum:
+          - index
+          - source
+          - sourcetype
+          - lookup
+          - dataset
+          - data_model
+          type: string
+        locations:
+          items:
+            $ref: '#/components/schemas/tooling.analysis.Location'
+          type: array
+        original_input_ids:
+          items:
+            type: string
+          type: array
+        placeholder:
+          minLength: 1
+          pattern: \S
+          type: string
+        reference_ids:
+          items:
+            type: string
+          type: array
+      required:
+      - placeholder
+      - kind
+      - reference_ids
+      - original_input_ids
+      - locations
+      type: object
+    tooling.analysis.ResolutionProofEvidence:
+      additionalProperties: true
+      properties:
+        limitations:
+          items:
+            $ref: '#/components/schemas/tooling.analysis.ResolutionLimitation'
+          type: array
+        proven:
+          type: boolean
+        references:
+          items:
+            $ref: '#/components/schemas/tooling.analysis.ResolutionReferencePair'
+          type: array
+        roles:
+          items:
+            $ref: '#/components/schemas/tooling.analysis.ResolutionRole'
+          type: array
+      required:
+      - proven
+      - references
+      - roles
+      - limitations
+      type: object
+    tooling.analysis.ResolutionReferencePair:
+      additionalProperties: true
+      properties:
+        candidate_id:
+          type: string
+        original_id:
+          type: string
+      required:
+      - original_id
+      - candidate_id
+      type: object
+    tooling.analysis.ResolutionRequirementPair:
+      additionalProperties: true
+      properties:
+        candidate_occurrence:
+          $ref: '#/components/schemas/analysis.RequirementOccurrence'
+        candidate_requirement_id:
+          type: string
+        original_occurrence:
+          $ref: '#/components/schemas/analysis.RequirementOccurrence'
+        original_requirement_id:
+          type: string
+      required:
+      - original_requirement_id
+      - candidate_requirement_id
+      - original_occurrence
+      - candidate_occurrence
+      type: object
+    tooling.analysis.ResolutionRole:
+      additionalProperties: true
+      properties:
+        candidate_input:
+          $ref: '#/components/schemas/tooling.analysis.QueryInput'
+        coverage:
+          $ref: '#/components/schemas/tooling.analysis.InputCoverage'
+        occurrences:
+          items:
+            $ref: '#/components/schemas/tooling.analysis.ResolutionOccurrencePair'
+          type: array
+        original_input:
+          $ref: '#/components/schemas/tooling.analysis.QueryInput'
+        requirements:
+          items:
+            $ref: '#/components/schemas/tooling.analysis.ResolutionRequirementPair'
+          type: array
+      required:
+      - original_input
+      - candidate_input
+      - occurrences
+      - requirements
+      - coverage
+      type: object
     tooling.analysis.Result:
       additionalProperties: true
       properties:
@@ -4446,6 +4672,16 @@ components:
       - invocation_chain
       - origins
       type: object
+    tooling.compatibility.ArtifactIdentity:
+      additionalProperties: true
+      properties:
+        environment_digest:
+          type: string
+        schema_bundle_digest:
+          type: string
+      required:
+      - environment_digest
+      type: object
     tooling.compatibility.Coverage:
       additionalProperties: true
       properties:
@@ -4834,6 +5070,173 @@ components:
       - schemas
       - source_intervals
       - invocation_provenance
+      type: object
+    tooling.compatibility.ResolutionAssessment:
+      additionalProperties: false
+      properties:
+        dependency_bindings:
+          items:
+            $ref: '#/components/schemas/tooling.closure.Binding'
+          type: array
+        input_bindings:
+          items:
+            $ref: '#/components/schemas/tooling.compatibility.ResolutionBinding'
+          type: array
+        query_scope:
+          $ref: '#/components/schemas/tooling.environment.CaptureScope'
+      required:
+      - query_scope
+      - input_bindings
+      type: object
+    tooling.compatibility.ResolutionBinding:
+      additionalProperties: false
+      properties:
+        expected:
+          $ref: '#/components/schemas/tooling.environment.ObjectIdentity'
+        object_id:
+          minLength: 1
+          pattern: \S
+          type: string
+        original_input_id:
+          minLength: 1
+          pattern: \S
+          type: string
+        resolved_value:
+          minLength: 1
+          pattern: \S
+          type: string
+        schema_id:
+          minLength: 1
+          pattern: \S
+          type: string
+      required:
+      - original_input_id
+      - object_id
+      - expected
+      type: object
+    tooling.compatibility.ResolutionCoverage:
+      additionalProperties: true
+      properties:
+        evidence:
+          $ref: '#/components/schemas/tooling.compatibility.Coverage'
+        original_input_id:
+          type: string
+      required:
+      - evidence
+      type: object
+    tooling.compatibility.ResolutionInputOutcome:
+      additionalProperties: true
+      properties:
+        candidate_input_id:
+          type: string
+        evidence:
+          $ref: '#/components/schemas/tooling.compatibility.InputOutcome'
+        occurrences:
+          items:
+            $ref: '#/components/schemas/tooling.analysis.ResolutionOccurrencePair'
+          type: array
+        original_input_id:
+          type: string
+      required:
+      - candidate_input_id
+      - occurrences
+      - evidence
+      type: object
+    tooling.compatibility.ResolutionReason:
+      additionalProperties: true
+      properties:
+        evidence:
+          $ref: '#/components/schemas/tooling.compatibility.Reason'
+        original_input_id:
+          type: string
+      required:
+      - evidence
+      type: object
+    tooling.compatibility.ResolutionReport:
+      additionalProperties: true
+      properties:
+        closure:
+          $ref: '#/components/schemas/tooling.closure.Report'
+        correlation:
+          $ref: '#/components/schemas/tooling.analysis.CorrelationGraph'
+        coverage:
+          items:
+            $ref: '#/components/schemas/tooling.compatibility.ResolutionCoverage'
+          type: array
+        dependency_bindings:
+          items:
+            $ref: '#/components/schemas/tooling.closure.Binding'
+          type: array
+        diagnostics:
+          items:
+            $ref: '#/components/schemas/tooling.environment.Diagnostic'
+          type: array
+        effective_dependency_bindings:
+          items:
+            $ref: '#/components/schemas/tooling.closure.Binding'
+          type: array
+        effective_requirements:
+          $ref: '#/components/schemas/analysis.RequirementSet'
+        input_bindings:
+          items:
+            $ref: '#/components/schemas/tooling.compatibility.ResolutionBinding'
+          type: array
+        inputs:
+          items:
+            $ref: '#/components/schemas/tooling.compatibility.ResolutionInputOutcome'
+          type: array
+        outcome:
+          type: string
+        provenance:
+          $ref: '#/components/schemas/tooling.compatibility.Provenance'
+        reasons:
+          items:
+            $ref: '#/components/schemas/tooling.compatibility.ResolutionReason'
+          type: array
+        requirement_outcomes:
+          items:
+            $ref: '#/components/schemas/tooling.compatibility.ResolutionRequirementOutcome'
+          type: array
+        requirements:
+          $ref: '#/components/schemas/analysis.RequirementSet'
+        schema_version:
+          const: 1
+          type: integer
+      required:
+      - schema_version
+      - outcome
+      - requirements
+      - input_bindings
+      - dependency_bindings
+      - inputs
+      - requirement_outcomes
+      - correlation
+      - coverage
+      - reasons
+      - diagnostics
+      - provenance
+      type: object
+    tooling.compatibility.ResolutionRequirementOutcome:
+      additionalProperties: true
+      properties:
+        assessed_occurrences:
+          items:
+            $ref: '#/components/schemas/analysis.RequirementOccurrence'
+          type: array
+        candidate_input_id:
+          type: string
+        candidate_requirement_id:
+          type: string
+        evidence:
+          $ref: '#/components/schemas/tooling.compatibility.RequirementOutcome'
+        original_input_id:
+          type: string
+        original_requirement_id:
+          type: string
+      required:
+      - candidate_requirement_id
+      - assessed_occurrences
+      - evidence
       type: object
     tooling.compatibility.SchemaEvidence:
       additionalProperties: true
@@ -7154,6 +7557,307 @@ components:
       - before_target
       - after_target
       type: object
+    tooling.resolution.CompatibilityInputs:
+      additionalProperties: false
+      properties:
+        dependency_bindings:
+          items:
+            $ref: '#/components/schemas/tooling.closure.Binding'
+          type: array
+        input_bindings:
+          items:
+            $ref: '#/components/schemas/tooling.compatibility.ResolutionBinding'
+          type: array
+        query_scope:
+          $ref: '#/components/schemas/tooling.environment.CaptureScope'
+        schema_bundle:
+          $ref: '#/components/schemas/tooling.environment.SchemaBundle'
+        snapshot:
+          oneOf:
+          - $ref: '#/components/schemas/tooling.environment.Snapshot'
+          - $ref: '#/components/schemas/tooling.v2.environment.SnapshotV2'
+      required:
+      - snapshot
+      - query_scope
+      - input_bindings
+      type: object
+    tooling.resolution.Counts:
+      additionalProperties: true
+      properties:
+        failed:
+          maximum: 18446744073709551615
+          minimum: 0
+          type: integer
+        incomplete:
+          maximum: 18446744073709551615
+          minimum: 0
+          type: integer
+        verified:
+          maximum: 18446744073709551615
+          minimum: 0
+          type: integer
+      required:
+      - verified
+      - failed
+      - incomplete
+      type: object
+    tooling.resolution.Diagnostic:
+      additionalProperties: true
+      properties:
+        code:
+          type: string
+        location:
+          $ref: '#/components/schemas/tooling.analysis.Location'
+        message:
+          type: string
+        placeholder:
+          type: string
+      required:
+      - code
+      - message
+      type: object
+    tooling.resolution.PreparedRequest:
+      additionalProperties: false
+      description: Strict names-only resolution input. Runtime checks marker/site
+        and original-role key membership, duplicate JSON keys, malformed Unicode,
+        lexical integer encoding, and cross-query references; schemas cannot establish
+        proof authority.
+      properties:
+        compatibility:
+          $ref: '#/components/schemas/tooling.compatibility.ResolutionAssessment'
+        document:
+          $ref: '#/components/schemas/tooling.QueryDocumentRequest'
+        max_variants:
+          maximum: 18446744073709551615
+          minimum: 1
+          type: integer
+        resolutions:
+          items:
+            $ref: '#/components/schemas/tooling.resolution.Resolution'
+          type: array
+        schema_version:
+          const: 1
+          type: integer
+      required:
+      - schema_version
+      - document
+      - resolutions
+      - compatibility
+      type: object
+    tooling.resolution.Provenance:
+      additionalProperties: true
+      properties:
+        analysis_contract_version:
+          type: integer
+        assessment_input_digest:
+          type: string
+        capability_revision:
+          type: string
+        environment_digest:
+          type: string
+        query_digest:
+          type: string
+        requirement_set_version:
+          type: integer
+        resolution_input_digest:
+          type: string
+        schema_bundle_digest:
+          type: string
+      required:
+      - query_digest
+      - capability_revision
+      - analysis_contract_version
+      - requirement_set_version
+      - environment_digest
+      - resolution_input_digest
+      - assessment_input_digest
+      type: object
+    tooling.resolution.Report:
+      additionalProperties: true
+      properties:
+        counts:
+          $ref: '#/components/schemas/tooling.resolution.Counts'
+        generated_count:
+          maximum: 18446744073709551615
+          minimum: 0
+          type: integer
+        max_variants:
+          maximum: 18446744073709551615
+          minimum: 1
+          type: integer
+        original:
+          $ref: '#/components/schemas/tooling.analysis.ResolutionEvidence'
+        provenance:
+          $ref: '#/components/schemas/tooling.resolution.Provenance'
+        resolutions:
+          items:
+            $ref: '#/components/schemas/tooling.resolution.Resolution'
+          type: array
+        schema_version:
+          const: 1
+          type: integer
+        total_combinations:
+          pattern: ^[0-9]+$
+          type: string
+        variants:
+          items:
+            $ref: '#/components/schemas/tooling.resolution.Variant'
+          type: array
+      required:
+      - schema_version
+      - original
+      - resolutions
+      - max_variants
+      - total_combinations
+      - generated_count
+      - counts
+      - variants
+      - provenance
+      type: object
+    tooling.resolution.Request:
+      additionalProperties: false
+      description: Strict names-only resolution input. Runtime checks marker/site
+        and original-role key membership, duplicate JSON keys, malformed Unicode,
+        lexical integer encoding, and cross-query references; schemas cannot establish
+        proof authority.
+      properties:
+        compatibility:
+          $ref: '#/components/schemas/tooling.resolution.CompatibilityInputs'
+        document:
+          $ref: '#/components/schemas/tooling.QueryDocumentRequest'
+        max_variants:
+          maximum: 18446744073709551615
+          minimum: 1
+          type: integer
+        resolutions:
+          items:
+            $ref: '#/components/schemas/tooling.resolution.Resolution'
+          type: array
+        schema_version:
+          const: 1
+          type: integer
+      required:
+      - schema_version
+      - document
+      - resolutions
+      - compatibility
+      type: object
+    tooling.resolution.RequestErrorDetail:
+      additionalProperties: true
+      properties:
+        byte_offset:
+          minimum: 0
+          type: integer
+        code:
+          type: string
+        max_variants:
+          maximum: 18446744073709551615
+          minimum: 1
+          type: integer
+        message:
+          type: string
+        path:
+          type: string
+        total_combinations:
+          pattern: ^[0-9]+$
+          type: string
+      required:
+      - code
+      - path
+      - message
+      type: object
+    tooling.resolution.Resolution:
+      additionalProperties: false
+      properties:
+        kind:
+          enum:
+          - index
+          - source
+          - sourcetype
+          - lookup
+          - dataset
+          - data_model
+          type: string
+        placeholder:
+          minLength: 1
+          pattern: \S
+          type: string
+        values:
+          items:
+            minLength: 1
+            pattern: \S
+            type: string
+          minItems: 1
+          type: array
+          uniqueItems: true
+      required:
+      - placeholder
+      - kind
+      - values
+      type: object
+    tooling.resolution.Variant:
+      additionalProperties: true
+      allOf:
+      - else:
+          not:
+            required:
+            - resolved_query
+        if:
+          properties:
+            outcome:
+              const: verified
+          required:
+          - outcome
+        then:
+          required:
+          - resolved_query
+      properties:
+        candidate_analysis:
+          $ref: '#/components/schemas/tooling.analysis.Result'
+        candidate_text:
+          type: string
+        changes:
+          items:
+            $ref: '#/components/schemas/tooling.analysis.ResolutionChange'
+          type: array
+        compatibility:
+          $ref: '#/components/schemas/tooling.compatibility.ResolutionReport'
+        diagnostics:
+          items:
+            $ref: '#/components/schemas/tooling.resolution.Diagnostic'
+          type: array
+        id:
+          type: string
+        ordinal:
+          maximum: 18446744073709551615
+          minimum: 1
+          type: integer
+        outcome:
+          enum:
+          - verified
+          - failed
+          - incomplete
+          type: string
+        proof:
+          $ref: '#/components/schemas/tooling.analysis.ResolutionProofEvidence'
+        provenance:
+          $ref: '#/components/schemas/tooling.resolution.Provenance'
+        resolved_query:
+          type: string
+        selection:
+          items:
+            $ref: '#/components/schemas/tooling.analysis.ResolutionChoice'
+          type: array
+      required:
+      - id
+      - ordinal
+      - selection
+      - outcome
+      - changes
+      - proof
+      - diagnostics
+      - provenance
+      type: object
     tooling.rewrite.Change:
       additionalProperties: true
       properties:
@@ -9157,6 +9861,42 @@ paths:
                 $ref: '#/components/schemas/api.ErrorResponse'
           description: Malformed JSON or unsupported document options
       summary: Report direct external query requirements
+      tags:
+      - query
+  /query/resolve:
+    post:
+      description: Strict inline names-only request; exact 8 MiB application/json
+        boundary. Default max_variants 100; an oversized Cartesian product is rejected
+        atomically. All verified/failed/incomplete content reports return 200. Only
+        verified variants publish resolved_query. No retrieval or execution.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/tooling.resolution.Request'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/tooling.resolution.Report'
+          description: Canonical per-variant report
+        '400':
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/tooling.resolution.RequestErrorDetail'
+                - $ref: '#/components/schemas/api.ErrorResponse'
+          description: Request/configuration or transport failure
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api.ErrorResponse'
+          description: Internal failure
+      summary: Resolve names against separate offline compatibility evidence
       tags:
       - query
   /query/rewrite:

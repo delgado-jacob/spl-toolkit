@@ -79,9 +79,9 @@ Exit 0; stdout is empty and the file contains the complete selected manifest. Te
 
 JSON capability output includes evidence-backed `records`, `summary`, and `evidence` alongside the legacy command/function projections. Each record reports syntax, semantics, requirements, linting, and safe rewriting as supported, partial, unsupported, not applicable, or unassessed. For each dimension, applicable equals supported plus partial plus unsupported plus unassessed; total records equal applicable plus not applicable; covered equals supported. Partial and unsupported records therefore receive zero covered credit. No percentage or composite score is printed.
 
-The SPL manifest has 106 records and 107 evidence cases. Its current syntax summary is 77 supported, 1 unsupported, and 28 unassessed; semantics is 68 supported, 10 unsupported, and 28 unassessed; requirements are 19 supported, 6 unsupported, and 81 unassessed; linting has 106 unassessed records; and safe rewriting is 17 supported, 2 unsupported, and 87 unassessed. The SPL2 manifest has 142 records and 163 evidence cases: syntax is 90 supported, 19 unsupported, and 33 unassessed; semantics is 76 supported, 39 unsupported, and 27 unassessed; requirements are 46 supported, 1 partial, 7 unsupported, and 88 unassessed. Linting has 142 unassessed records. Safe rewriting has 14 supported, 3 unsupported, and 125 unassessed records. Every advertised rewrite record cites a replayed local success or boundary case.
+The SPL manifest has 106 records and 107 evidence cases. Its current syntax summary is 77 supported, 1 unsupported, and 28 unassessed; semantics is 68 supported, 10 unsupported, and 28 unassessed; requirements are 19 supported, 6 unsupported, and 81 unassessed; linting has 106 unassessed records; and safe rewriting is 17 supported, 2 unsupported, and 87 unassessed. The SPL2 manifest has 142 records and 164 evidence cases: syntax is 90 supported, 19 unsupported, and 33 unassessed; semantics is 76 supported, 39 unsupported, and 27 unassessed; requirements are 46 supported, 1 partial, 7 unsupported, and 88 unassessed. Linting has 142 unassessed records. Safe rewriting has 15 supported, 3 unsupported, and 124 unassessed records. Every advertised rewrite record cites a replayed local success or boundary case.
 
-`grammar_registered` reports parser registration, not syntax coverage. Evidence IDs name typed local corpus cases; a broadened form receives a new ID unless a reviewed scope correction changes the original scope. Source Go execution may show toolkit version `dev`; tagged CLI output uses the exact `VERSION` and the same semantic revision. The SPL revision is `sha256:5b7c15002c426b163a5488d18ae0fb83c68809a194a15f9a6584ea95cbb3a09b`; the SPL2 revision is `sha256:7134e06d345f6b2c6e58c3d29c727868320b47ff1fc0a94842aec35615223d9f`.
+`grammar_registered` reports parser registration, not syntax coverage. Evidence IDs name typed local corpus cases; a broadened form receives a new ID unless a reviewed scope correction changes the original scope. Source Go execution may show toolkit version `dev`; tagged CLI output uses the exact `VERSION` and the same semantic revision. The SPL revision is `sha256:5b7c15002c426b163a5488d18ae0fb83c68809a194a15f9a6584ea95cbb3a09b`; the SPL2 revision is `sha256:216bb4be25e623d48098144be8bf006b80b4c1b4b6eeec05a2b7b4c2c3559842`.
 
 The bounded SPL field-flow semantics cover exact `tstats` sources, predicates, registered aggregates, groups, aliases, and supported literal options; exact modeled forms of `fillnull`, `rex`, `spath`, `bin`, `bucket`, `regex`, and `mvexpand`; and the selected function arities. Exact macros produce direct macro requirements and source-located unresolved-expansion gaps. Branch children retain evidence and direct requirements, but merged output fields remain uncertain. Dynamic identities, wildcard groups, `PREFIX(...)`, true result-shape modes, unsupported options, ambiguous or sed-mode `rex`, `spath` auto-extraction, macro expansion, and branch merging remain incomplete. New typed operands are not safe-rewrite sites.
 
@@ -410,3 +410,13 @@ exit: satisfied is 0, unsatisfied is 1, and incomplete or `not assessed` is 3.
 correlation; unsatisfied/disconnected take precedence. `not applicable` does not
 fail this policy. Positive object/declaration evidence, covered negative evidence,
 unknown ownership and independent correlation remain separate in the report.
+
+
+## Resolve named inputs
+
+<!-- cli-example: resolve-mixed -->
+```bash
+spl-toolkit resolve --request examples/resolution/request.json --format json
+```
+
+The committed [resolution request](../examples/resolution/request.json) produces two variants, one verified and one failed, and intentionally exits 1. Read the [resolution contract](resolution.md) before passing verified `resolved_query` text downstream.

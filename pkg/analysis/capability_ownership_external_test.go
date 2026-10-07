@@ -181,3 +181,47 @@ func TestCapabilityPublicationConditionalAndHeldOwnership(t *testing.T) {
 		t.Fatalf("held downstream read lost candidates: %+v", held.Requirements.Items)
 	}
 }
+
+// Publication uses the existing Dataset denominator and independent proof controls.
+// Environment evidence cannot promote a grammar-only descriptor to a named slot.
+func TestCapabilityPublicationResolutionControls(t *testing.T) {
+	manifest, err := analysis.CapabilitiesFor(analysis.CapabilityOptions{Language: "spl2"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	found := false
+	for _, record := range manifest.Records {
+		if record.ID == "spl2.dataset.dataset.parameter" {
+			found = record.Dimensions.SafeRewriting.State == "supported" &&
+				reflect.DeepEqual(record.Dimensions.SafeRewriting.EvidenceIDs, []string{"spl2.dataset.parameter.resolution-render"})
+		}
+	}
+	if !found {
+		t.Fatal("named Dataset publication lacks narrow replay evidence")
+	}
+	session, err := analysis.PrepareResolution(analysis.QueryDocument{Text: "from $events | fields id", Language: "spl2"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	rendering, err := session.Render([]analysis.ResolutionChoice{{Placeholder: "$events", Kind: "dataset", Value: "events"}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	proof, err := session.Verify(rendering)
+	if err != nil || !proof.Evidence().Proven || len(proof.Evidence().Roles) != 1 {
+		t.Fatalf("named slot proof: %v", err)
+	}
+	if rendering.CandidateDocument().Text != "from events | fields id" {
+		t.Fatal("candidate text")
+	}
+	dynamic, err := analysis.PrepareResolution(analysis.QueryDocument{Text: `FROM {kind: lower("index"), properties: {name: dataset_name}}`, Language: "spl2"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(dynamic.Evidence().Placeholders) != 0 {
+		t.Fatal("dynamic descriptor advertised as a named slot")
+	}
+	if _, err := dynamic.Render([]analysis.ResolutionChoice{{Placeholder: "$events", Kind: "dataset", Value: "events"}}); err == nil {
+		t.Fatal("dynamic descriptor accepted an unrelated resolution selection")
+	}
+}

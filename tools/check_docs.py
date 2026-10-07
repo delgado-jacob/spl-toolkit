@@ -7,6 +7,18 @@ from pathlib import Path
 
 errors = []
 
+# The resolution landing page and committed request are part of published docs.
+resolution_page = Path('docs/resolution.md')
+resolution_request = Path('examples/resolution/request.json')
+if not resolution_page.is_file() or not resolution_request.is_file():
+    errors.append('resolution documentation or complete request missing')
+else:
+    import json
+    try:
+        json.loads(resolution_request.read_text(encoding='utf-8'))
+    except (ValueError, OSError) as error:
+        errors.append(f'resolution example: {error}')
+
 def check_yaml_frontmatter(file_path):
     try:
         with open(file_path, 'r', encoding='utf-8') as f:

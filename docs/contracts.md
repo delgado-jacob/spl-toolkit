@@ -95,11 +95,11 @@ The same ID keeps the same reviewed scope; a broadened form uses a new ID unless
 a reviewed scope correction changes the original boundary. `grammar_registered`
 records parser registration separately from syntax coverage, and ordinary parser
 or semantic diagnostics do not count as lint evidence. Current exact totals are
-106 SPL records with 107 evidence cases and 142 SPL2 records with 163 evidence
+106 SPL records with 107 evidence cases and 142 SPL2 records with 164 evidence
 cases. The current SPL revision is
 `sha256:5b7c15002c426b163a5488d18ae0fb83c68809a194a15f9a6584ea95cbb3a09b`;
 the SPL2 revision is
-`sha256:7134e06d345f6b2c6e58c3d29c727868320b47ff1fc0a94842aec35615223d9f`.
+`sha256:216bb4be25e623d48098144be8bf006b80b4c1b4b6eeec05a2b7b4c2c3559842`.
 
 The SPL records cover bounded field-flow semantics for exact `tstats`, selected
 field commands, and selected function arities. Exact macro invocations emit a
@@ -154,3 +154,7 @@ without this shape must be reanalyzed before assessment. Historical receipts rem
 unchanged. Exact object/declaration positives, covered negatives and independent
 correlation have separate evidence obligations. See the
 [complete envelope recipe](API.md#offline-compatibility-assessment).
+
+## Resolution v1
+
+[Resolution requests](../contracts/v1/resolution-request.schema.json) and [reports](../contracts/v1/resolution.schema.json) publish names-only selection and detached evidence. Required arrays are non-null, counts/ordinals are bounded uint64, and the Cartesian product is an arbitrary-size decimal string. `resolved_query` is required for verified variants and forbidden for failed/incomplete variants. The [complete resolution example](resolution.md) explains runtime membership checks and publication semantics.

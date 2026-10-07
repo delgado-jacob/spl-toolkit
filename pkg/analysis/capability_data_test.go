@@ -1045,6 +1045,13 @@ func TestSPL2Milestone11CapabilityClaimsDoNotBroadenLintingOrRewriting(t *testin
 			"linting":        record.Dimensions.Linting,
 			"safe_rewriting": record.Dimensions.SafeRewriting,
 		} {
+			// Milestone 16 adds only the independently replayed named Dataset slot.
+			if record.ID == "spl2.dataset.dataset.parameter" && dimension == "safe_rewriting" {
+				if claim.State != CapabilitySupported || !slices.Equal(claim.EvidenceIDs, []string{"spl2.dataset.parameter.resolution-render"}) || len(claim.Limitations) != 1 {
+					t.Errorf("named Dataset resolution evidence missing: %+v", claim)
+				}
+				continue
+			}
 			if claim.State != CapabilityUnassessed || len(claim.EvidenceIDs) != 0 || len(claim.Limitations) != 0 {
 				t.Errorf("%s %s broadened without independent evidence: %+v", record.ID, dimension, claim)
 			}
@@ -1193,7 +1200,7 @@ func TestMilestone10CapabilityClaimsStayBounded(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	const wantSPL2Revision = "sha256:7134e06d345f6b2c6e58c3d29c727868320b47ff1fc0a94842aec35615223d9f"
+	const wantSPL2Revision = "sha256:216bb4be25e623d48098144be8bf006b80b4c1b4b6eeec05a2b7b4c2c3559842"
 	if spl2Revision != wantSPL2Revision {
 		t.Errorf("SPL2 capability revision = %q, want %q", spl2Revision, wantSPL2Revision)
 	}
