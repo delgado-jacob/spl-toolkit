@@ -8,6 +8,7 @@ import (
 	"github.com/delgado-jacob/spl-toolkit/pkg/compatibility"
 	"github.com/delgado-jacob/spl-toolkit/pkg/corpus"
 	"github.com/delgado-jacob/spl-toolkit/pkg/environment"
+	"github.com/delgado-jacob/spl-toolkit/pkg/graph"
 	"github.com/delgado-jacob/spl-toolkit/pkg/resolution"
 )
 
@@ -92,4 +93,52 @@ type Report struct {
 	Counts            Counts           `json:"counts"`
 	Entries           []ReportEntry    `json:"entries"`
 	Provenance        Provenance       `json:"provenance"`
+}
+
+// GraphSubject projects one original query or resolution candidate. All pointers
+// address the input workflow Report, and IDs are local to its subject context.
+type GraphSubject struct {
+	DetectionID      string                      `json:"detection_id"`
+	Domain           string                      `json:"domain"`
+	VariantSelection []analysis.ResolutionChoice `json:"variant_selection,omitempty"`
+	EvidencePointer  string                      `json:"evidence_pointer"`
+	Analysis         *graph.Report               `json:"analysis,omitempty"`
+	Closure          *closure.DependencyGraph    `json:"closure,omitempty"`
+	ClosureCoverage  string                      `json:"closure_coverage"`
+	CoverageReasons  []string                    `json:"coverage_reasons"`
+	Failure          *Failure                    `json:"failure,omitempty"`
+}
+type GraphReport struct {
+	SchemaVersion     int              `json:"schema_version"`
+	Status            analysis.Status  `json:"status"`
+	ExecutionComplete bool             `json:"execution_complete"`
+	CIExitCode        int              `json:"ci_exit_code"`
+	Selection         corpus.Selection `json:"selection"`
+	Counts            Counts           `json:"counts"`
+	Subjects          []GraphSubject   `json:"subjects"`
+}
+type BOMSubject struct {
+	DetectionID      string                      `json:"detection_id"`
+	Domain           string                      `json:"domain"`
+	VariantSelection []analysis.ResolutionChoice `json:"variant_selection,omitempty"`
+	EvidencePointer  string                      `json:"evidence_pointer"`
+	Entries          []closure.BOMEntry          `json:"entries"`
+	ClosureCoverage  string                      `json:"closure_coverage"`
+	CoverageReasons  []string                    `json:"coverage_reasons"`
+	Failure          *Failure                    `json:"failure,omitempty"`
+}
+type SharedDependency struct {
+	EnvironmentDigest  string   `json:"environment_digest"`
+	ObjectID           string   `json:"object_id"`
+	OccurrencePointers []string `json:"occurrence_pointers"`
+}
+type BOMReport struct {
+	SchemaVersion      int                `json:"schema_version"`
+	Status             analysis.Status    `json:"status"`
+	ExecutionComplete  bool               `json:"execution_complete"`
+	CIExitCode         int                `json:"ci_exit_code"`
+	Selection          corpus.Selection   `json:"selection"`
+	Counts             Counts             `json:"counts"`
+	Subjects           []BOMSubject       `json:"subjects"`
+	SharedDependencies []SharedDependency `json:"shared_dependencies"`
 }
