@@ -420,3 +420,7 @@ spl-toolkit resolve --request examples/resolution/request.json --format json
 ```
 
 The committed [resolution request](https://github.com/delgado-jacob/spl-toolkit/blob/e8d6fb5ea18887dabaa2ec717b980f9137ebbe8e/examples/resolution/request.json) produces two variants, one verified and one failed, and intentionally exits 1. Read the [resolution contract](resolution.md) before passing verified `resolved_query` text downstream.
+
+## Offline detection workflows
+
+`workflow assess`, `compare`, `evidence`, and `recheck` expose offline detection workflows. Assessment supports text, JSON, SARIF, graph, and BOM; CI codes distinguish definite findings, tooling failures, and incomplete evidence. See the [workflow guide](workflow.md) for runnable examples, CI status and source disclosure controls.

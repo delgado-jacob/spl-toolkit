@@ -338,7 +338,8 @@ class ValidationOpenAPITests(unittest.TestCase):
             self.assertEqual(set(spec["paths"]) - set(original["paths"]), {
                 "/corpus/scan", "/corpus/graph", "/corpus/sarif",
                 "/corpus/impact-schema", "/corpus/impact-mapping", "/query/document", "/query/closure",
-                "/environment/validate", "/query/compatibility", "/query/resolve"})
+                "/environment/validate", "/query/compatibility", "/query/resolve",
+                "/workflow/assess", "/workflow/compare", "/workflow/evidence", "/workflow/recheck"})
             self.assertEqual(spec["paths"]["/query/document"]["post"]["requestBody"]["content"]["application/json"]["schema"],
                              {"$ref": "#/components/schemas/tooling.QueryDocumentRequest"})
             self.assertIs(schemas["tooling.corpus.Request"]["additionalProperties"], False)
@@ -1139,3 +1140,46 @@ def test_resolution_openapi_semantic_boundary_and_shape_guard(tmp_path):
     result = helper.run_script(tmp_path)
     assert result.returncode != 0 and "resolution.Counts" in result.stderr
     assert before == {p.name: p.read_bytes() for p in tmp_path.iterdir()}
+
+
+def test_workflow_openapi_runtime_contracts_and_union_translation(tmp_path):
+    helper = ValidationOpenAPITests()
+    helper.fixture(tmp_path)
+    result = helper.run_script(tmp_path)
+    assert result.returncode == 0, result.stderr
+    spec = json.loads((tmp_path / "swagger.json").read_text())
+    root = SCRIPT.parents[1]
+    # Emit real assessment, comparison, projection, fresh recheck and exports;
+    # validate the importer rather than restating literal generated fields.
+    source = tmp_path / "emit.go"
+    source.write_text(r'''
+package main
+import("encoding/json";"os";"github.com/delgado-jacob/spl-toolkit/pkg/workflow")
+func must[T any](v T,e error)T{if e!=nil{panic(e)};return v}
+func main(){q:=must(os.ReadFile("examples/workflow/request.json"));r:=must(workflow.AssessJSON(q));c:=must(workflow.Compare(workflow.CompareRequest{SchemaVersion:1,Before:*r,After:*r}));e:=must(workflow.Evidence(workflow.EvidenceRequest{SchemaVersion:1,Report:r,Include:[]string{}}));rq:=must(os.ReadFile("examples/workflow/recheck-query.json"));rr:=must(workflow.RecheckJSON(rq));json.NewEncoder(os.Stdout).Encode(map[string]any{"Report":r,"ComparisonReport":c,"EvidenceReport":e,"RecheckReport":rr,"GraphReport":must(workflow.ExportGraph(r)),"BOMReport":must(workflow.ExportBOM(r))})}
+''')
+    emitted = json.loads(subprocess.check_output([os.environ.get("SPL_CONTRACT_GO", "go"), "run", "-mod=readonly", str(source)], cwd=root, text=True))
+    def accepts(name, value):
+        return jsonschema.Draft202012Validator({"components": spec["components"], "$ref": "#/components/schemas/tooling.workflow." + name}).is_valid(value)
+    for name, value in emitted.items():
+        assert accepts(name, value), name
+    request = json.loads((root / "examples/workflow/request.json").read_text())
+    assert accepts("Request", request)
+    bad = copy.deepcopy(request)
+    bad["settings"]["entries"][0]["resolution"] = request["settings"]["entries"][1]["resolution"]
+    assert not accepts("Request", bad)
+    evidence = {"schema_version": 1, "report": emitted["Report"], "include": []}
+    assert accepts("EvidenceRequest", evidence)
+    evidence["include"] = ["unrecognized_category"]
+    assert not accepts("EvidenceRequest", evidence)
+    bad = copy.deepcopy(emitted["Report"])
+    bad["entries"][1]["resolution"]["variants"][1]["resolved_query"] = "from events_missing"
+    assert not accepts("Report", bad)
+    # JSON route references resolve to the same canonical imported schemas.
+    for route, request_name, report_name in (("compare", "CompareRequest", "ComparisonReport"), ("evidence", "EvidenceRequest", "EvidenceReport"), ("recheck", "RecheckRequest", "RecheckReport")):
+        operation = spec["paths"]["/workflow/" + route]["post"]
+        request_schema = operation["requestBody"]["content"]["application/json"]["schema"]
+        response_schema = operation["responses"]["200"]["content"]["application/json"]["schema"]
+        response = jsonschema.Draft202012Validator({"components": spec["components"], **response_schema})
+        assert response.is_valid(emitted[report_name])
+        assert request_schema["$ref"].endswith("workflow." + request_name)

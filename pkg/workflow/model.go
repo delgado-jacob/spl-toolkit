@@ -44,7 +44,7 @@ type Failure struct {
 	Phase   string          `json:"phase"`
 	Code    string          `json:"code"`
 	Message string          `json:"message"`
-	Detail  json.RawMessage `json:"detail,omitempty"`
+	Detail  json.RawMessage `json:"detail,omitempty" swaggertype:"object"`
 }
 type RequestErrorDetail struct {
 	Code       string `json:"code"`
@@ -160,7 +160,7 @@ type ComparisonEntry struct {
 	Before         ReportEntry            `json:"before"`
 	After          ReportEntry            `json:"after"`
 	Classification impact.Classification  `json:"classification"`
-	Deltas         []impact.EvidenceDelta `json:"deltas"`
+	Deltas         []impact.EvidenceDelta `json:"deltas" swaggerignore:"true"`
 	Pairs          []EvidencePair         `json:"pairs"`
 	Unmatched      []string               `json:"unmatched"`
 	Ambiguous      []string               `json:"ambiguous"`
@@ -217,7 +217,7 @@ type EvidenceItem struct {
 	Complete   bool                       `json:"complete"`
 	Capability *PublicCapability          `json:"capability,omitempty"`
 	Coverage   []EvidenceCoverage         `json:"coverage"`
-	Details    map[string]json.RawMessage `json:"details,omitempty"`
+	Details    map[string]json.RawMessage `json:"details,omitempty" swaggertype:"object"`
 }
 type EvidenceReport struct {
 	SchemaVersion     int               `json:"schema_version"`

@@ -138,3 +138,7 @@ sdist remains independently rebuildable through its native-source manifest.
 All release payloads, including normalized source archives, enter SHA256SUMS and
 the existing two-build reproducibility comparison. Release versions and the four
 configured targets remain controlled by VERSION and tools/release-env.json.
+
+## Offline detection workflows
+
+Detection workflows combine explicit selection and offline evidence with CI results, saved comparison, minimal evidence projection, and fresh rechecks. See the [workflow guide](workflow.md) for runnable examples, CI status and source disclosure controls.

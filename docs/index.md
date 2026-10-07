@@ -16,3 +16,7 @@ The current discovery result has `datamodels`, `datasets`, `lookups`, `macros`, 
 The [rewrite guide](rewrite.md) explains preview/apply, exact audit evidence, linked source bindings, destination validation and held forms. The [API reference](API.md) describes structured analysis and schema validation; the [SPL2 guide](spl2.md) defines its separate supported grammar and effects.
 
 This build does not claim complete Splunk syntax, arbitrary semantic equivalence, event-instance validation, raw-to-data-model translation, learned mappings, or external SPL2 module resolution or execution. Read report coverage rather than treating partial results as complete. Local verification is distinct from the historical release matrix and external Splunk execution.
+
+## Offline detection workflows
+
+Assess detections for CI, compare saved evidence, project minimal assistant evidence, and freshly recheck proposals. See the [workflow guide](workflow.md) for runnable examples, CI status and source disclosure controls.

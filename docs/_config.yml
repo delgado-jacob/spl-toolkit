@@ -27,6 +27,7 @@ header_pages:
   - installation.md
   - quickstart.md
   - cli.md
+  - workflow.md
   - rewrite.md
   - splunk-exporter.md
   - configuration.md

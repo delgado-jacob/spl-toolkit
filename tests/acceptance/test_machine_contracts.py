@@ -25,7 +25,10 @@ FAMILIES = ("query-document", "capabilities", "analysis", "requirements", "field
             "schema-validation", "rewrite", "corpus", "manifest", "graph",
             "impact", "document-view", "lsp-configuration", "closure-request", "closure",
             "environment-snapshot", "field-schema-bundle", "environment-validation",
-            "compatibility-request", "compatibility", "resolution-request", "resolution")
+            "compatibility-request", "compatibility", "resolution-request", "resolution", "workflow-request", "workflow",
+            "workflow-comparison-request", "workflow-comparison", "workflow-evidence-request",
+            "workflow-evidence", "workflow-recheck-request", "workflow-recheck",
+            "workflow-graph", "workflow-bom")
 
 
 def deny_unknown(uri):
@@ -206,6 +209,7 @@ import (
  "github.com/delgado-jacob/spl-toolkit/pkg/environment"
  "github.com/delgado-jacob/spl-toolkit/pkg/rewrite"
  "github.com/delgado-jacob/spl-toolkit/pkg/resolution"
+ "github.com/delgado-jacob/spl-toolkit/pkg/workflow"
  "github.com/delgado-jacob/spl-toolkit/pkg/corpus"
  "github.com/delgado-jacob/spl-toolkit/pkg/corpusio"
  "github.com/delgado-jacob/spl-toolkit/pkg/document"
@@ -231,6 +235,10 @@ func main() {
  if len(os.Args)>1 {
   raw := []byte(os.Args[2]); var e error
   switch os.Args[1] {
+  case "workflow-request": _,e=workflow.DecodeRequest(raw)
+  case "workflow-comparison-request": _,e=workflow.CompareJSON(raw)
+  case "workflow-evidence-request": _,e=workflow.EvidenceJSON(raw)
+  case "workflow-recheck-request": _,e=workflow.RecheckJSON(raw)
   case "compatibility-request": _,e=compatibility.CheckJSON(raw)
   case "corpus": _,e=corpus.DecodeRequest(raw)
   case "manifest": _,e=corpusio.DecodeManifest(raw)
@@ -298,6 +306,31 @@ func main() {
  resolutionRequest.Resolutions=[]resolution.Resolution{}
  resolutionRequest.Compatibility.InputBindings=[]compatibility.ResolutionBinding{}
  m["resolution-noop"]=must(resolution.Resolve(resolutionRequest))
+ wr:=must(os.ReadFile("examples/workflow/request.json"))
+ wq:=must(workflow.DecodeRequest(wr));w:=must(workflow.Assess(wq))
+ m["workflow-request"],m["workflow"]=wq,w
+ m["workflow-graph"],m["workflow-bom"],m["workflow-sarif"]=must(workflow.ExportGraph(w)),must(workflow.ExportBOM(w)),must(workflow.ExportSARIF(w))
+ cq:=workflow.CompareRequest{SchemaVersion:1,Before:*w,After:*w};wc:=must(workflow.Compare(cq))
+ m["workflow-comparison-request"],m["workflow-comparison"]=cq,wc
+ eq:=workflow.EvidenceRequest{SchemaVersion:1,Report:w,Include:[]string{}}
+ m["workflow-evidence-request"],m["workflow-evidence"]=eq,must(workflow.Evidence(eq))
+ eq.Include=[]string{"query_text","requirement_names","source_identity","environment_metadata","definitions","diagnostic_details","artifact_identity"}
+ m["workflow-evidence-included"]=must(workflow.Evidence(eq))
+ eq.Report=nil;eq.Comparison=wc
+ m["workflow-evidence-comparison"]=must(workflow.Evidence(eq))
+ rqraw:=must(os.ReadFile("examples/workflow/recheck-query.json"));var rq workflow.RecheckRequest;must(0,json.Unmarshal(rqraw,&rq))
+ m["workflow-recheck-request"],m["workflow-recheck"]=rq,must(workflow.RecheckJSON(rqraw))
+ rqraw=must(os.ReadFile("examples/workflow/recheck-resolution.json"))
+ m["workflow-recheck-resolution"]=must(workflow.RecheckJSON(rqraw))
+ wq.Documents=wq.Documents[:1];wq.Settings.Entries=wq.Settings.Entries[:1]
+ complete:=must(workflow.Assess(wq));m["workflow-complete"]=complete
+ m["workflow-comparison-complete"]=must(workflow.Compare(workflow.CompareRequest{SchemaVersion:1,Before:*complete,After:*complete}))
+ wp:=must(workflow.Prepare(wq.Settings));wf:=must(wp.Assess(corpus.Input{Selection:selection,Entries:[]corpus.Entry{{ID:wq.Documents[0].ID,Origin:corpus.Origin{Kind:"file",RelativePath:"missing.spl2",BaseURI:"file:///queries/"},Failure:&corpus.AcquisitionError{Code:"not_found",Phase:"open",Message:"missing"}}}}))
+ m["workflow-acquisition-failure"]=wf
+ m["workflow-failed-comparison"]=must(workflow.Compare(workflow.CompareRequest{SchemaVersion:1,Before:*wf,After:*wf}))
+ m["workflow-failed-evidence"]=must(workflow.Evidence(workflow.EvidenceRequest{SchemaVersion:1,Report:wf,Include:[]string{"diagnostic_details"}}))
+ badq:=must(workflow.DecodeRequest(wr));zero:=uint64(0);badq.Settings.Entries[1].Resolution.MaxVariants=&zero
+ m["workflow-configuration-failure"]=must(workflow.Assess(badq))
  m["compatibility-examples"]=compatibilityExamples()
  m["compatibility-request"]=request
  m["compatibility"]=must(compatibility.Check(request))
@@ -1203,3 +1236,122 @@ def test_resolution_native_cli_go_contract_parity(schemas, emitted):
                              "--format", "json"], capture_output=True, text=True)
     assert result.returncode == 1 and result.stderr == ""
     assert json.loads(result.stdout) == native
+
+
+def test_workflow_emitted_families_exports_and_privacy(schemas, emitted):
+    for family in ("workflow-request", "workflow", "workflow-comparison-request",
+                   "workflow-comparison", "workflow-evidence-request", "workflow-evidence",
+                   "workflow-recheck-request", "workflow-recheck", "workflow-graph", "workflow-bom"):
+        failures = errors(schemas, family, emitted[family])
+        assert not failures, (family, [e.message for e in failures])
+    for name in ("workflow-evidence-included", "workflow-evidence-comparison"):
+        failures = errors(schemas, "workflow-evidence", emitted[name])
+        assert not failures, [e.message for e in failures]
+    assert not errors(schemas, "workflow-recheck", emitted["workflow-recheck-resolution"])
+    assert not errors(schemas, "sarif", emitted["workflow-sarif"])
+    for name in ("workflow-acquisition-failure", "workflow-configuration-failure"):
+        assert not errors(schemas, "workflow", emitted[name])
+        assert emitted[name]["ci_exit_code"] == 2
+    assert not errors(schemas, "workflow-comparison", emitted["workflow-failed-comparison"])
+    assert emitted["workflow-failed-comparison"]["ci_exit_code"] == 2
+    assert not errors(schemas, "workflow-evidence", emitted["workflow-failed-evidence"])
+    report = emitted["workflow"]
+    assert report["execution_complete"] and report["ci_exit_code"] == 1
+    variants = report["entries"][1]["resolution"]["variants"]
+    assert [v["outcome"] for v in variants] == ["verified", "failed"]
+    assert "resolved_query" in variants[0] and "resolved_query" not in variants[1]
+    assert emitted["workflow-comparison-complete"]["ci_exit_code"] == 0
+    evidence = emitted["workflow-evidence"]
+    assert evidence["source_ci_exit_code"] == report["ci_exit_code"]
+    assert evidence["disclosure"]["requested"] == evidence["disclosure"]["emitted"] == []
+    assert all("details" not in item for item in evidence["items"])
+    private_values = [entry["analysis"]["document"]["text"] for entry in report["entries"]]
+    private_values += [entry["analysis"]["document"]["source_id"] for entry in report["entries"]]
+    raw = json.dumps(evidence)
+    assert all(value not in raw for value in private_values)
+    included = emitted["workflow-evidence-included"]
+    assert any("query_text" in item.get("details", {}) for item in included["items"])
+    # The strict category boundary does not accept a complete raw report key.
+    wrong = copy.deepcopy(included)
+    next(item for item in wrong["items"] if "details" in item)["details"] = {"report": report}
+    assert errors(schemas, "workflow-evidence", wrong)
+    wrong = copy.deepcopy(evidence)
+    wrong["items"][0]["details"] = {"query_text": private_values[0]}
+    assert errors(schemas, "workflow-evidence", wrong)
+    for name in ("workflow-evidence", "workflow-evidence-comparison"):
+        wrong = copy.deepcopy(emitted[name])
+        del wrong["counts"][next(iter(wrong["counts"]))]
+        assert errors(schemas, "workflow-evidence", wrong)
+
+
+def test_workflow_strict_requests_and_runtime_controls(schemas, emitted, emitter):
+    def admission(family, value):
+        return subprocess.check_output([str(emitter), family, json.dumps(value)], text=True)
+    families = ("workflow-request", "workflow-comparison-request",
+                "workflow-evidence-request", "workflow-recheck-request")
+    for family in families:
+        request = emitted[family]
+        assert admission(family, request) == "accepted"
+        for member in request:
+            wrong = copy.deepcopy(request)
+            wrong[member] = None
+            assert errors(schemas, family, wrong), (family, member)
+            assert admission(family, wrong) == "rejected", (family, member)
+        wrong = copy.deepcopy(request)
+        wrong["unexpected"] = True
+        assert errors(schemas, family, wrong)
+        assert admission(family, wrong) == "rejected"
+        raw = json.dumps(request)
+        raw = raw[:-1] + ',"schema_version":1}'
+        assert subprocess.check_output([str(emitter), family, raw], text=True) == "rejected"
+    request = emitted["workflow-request"]
+    for member in ("format",):
+        wrong = copy.deepcopy(request); wrong[member] = None
+        assert errors(schemas, "workflow-request", wrong)
+        assert admission("workflow-request", wrong) == "rejected"
+    for value in (None, 0, -1, 1.5, 2**64):
+        wrong = copy.deepcopy(request)
+        wrong["settings"]["entries"][1]["resolution"]["max_variants"] = value
+        assert errors(schemas, "workflow-request", wrong)
+        # Configuration failure is retained by assessment; strict wire admission
+        # rejects null, noninteger and overflow before it reaches that stage.
+        if value != 0:
+            assert admission("workflow-request", wrong) == "rejected"
+    wrong = copy.deepcopy(request)
+    wrong["settings"]["entries"][0]["resolution"] = wrong["settings"]["entries"][1]["resolution"]
+    assert errors(schemas, "workflow-request", wrong)
+    assert admission("workflow-request", wrong) == "rejected"
+    for include in (["unknown"], ["query_text", "query_text"]):
+        wrong = copy.deepcopy(emitted["workflow-evidence-request"]); wrong["include"] = include
+        assert errors(schemas, "workflow-evidence-request", wrong)
+        assert admission("workflow-evidence-request", wrong) == "rejected"
+    wrong = copy.deepcopy(emitted["workflow-recheck-request"])
+    del wrong["proposal"]["document"]
+    assert errors(schemas, "workflow-recheck-request", wrong)
+    assert admission("workflow-recheck-request", wrong) == "rejected"
+
+
+def test_workflow_saved_failure_mode_and_publication_controls(schemas, emitted, emitter):
+    request = emitted["workflow-comparison-request"]
+    def reject(value):
+        assert errors(schemas, "workflow-comparison-request", value)
+        assert subprocess.check_output([str(emitter), "workflow-comparison-request", json.dumps(value)], text=True) == "rejected"
+    wrong = copy.deepcopy(request)
+    wrong["before"]["entries"][0]["resolution"] = wrong["before"]["entries"][1]["resolution"]
+    reject(wrong)
+    wrong = copy.deepcopy(request)
+    entry = wrong["before"]["entries"][0]
+    entry["failure"] = {"phase": "acquisition", "code": "not_found", "message": "missing"}
+    entry["status"] = "incomplete"
+    reject(wrong)  # An acquisition failure cannot claim retained analysis.
+    wrong = copy.deepcopy(request)
+    wrong["before"]["entries"][1]["resolution"]["variants"][1]["resolved_query"] = "from events_missing | fields id"
+    reject(wrong)
+    wrong = copy.deepcopy(request)
+    del wrong["before"]["entries"][1]["resolution"]["variants"][0]["resolved_query"]
+    reject(wrong)
+    # Historical revisions remain capturable, while changed provenance cannot
+    # become current engine authority merely by passing a structural schema.
+    wrong = copy.deepcopy(request)
+    wrong["before"]["entries"][0]["analysis"]["requirements"]["capability_revision"] = "sha256:" + "a" * 64
+    assert not errors(schemas, "workflow-comparison-request", wrong)

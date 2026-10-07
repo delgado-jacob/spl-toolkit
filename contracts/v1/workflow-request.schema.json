@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/workflow-request.schema.json",
+  "title": "SPL Toolkit workflow-request v1",
+  "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/workflow.Request",
+  "$defs": {
+    "Settings": {
+      "$ref": "https://github.com/delgado-jacob/spl-toolkit/contracts/v1/shared.schema.json#/$defs/workflow.Settings"
+    }
+  }
+}

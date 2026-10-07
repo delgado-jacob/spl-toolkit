@@ -744,3 +744,7 @@ and the input binding's selected `schema_id` leaves field evidence incomplete; r
 `host` from the complete field catalog proves a missing declaration. Retaining the
 schema pairing while omitting the captured object admits a scoped absence
 assessment when the relevant capture is complete. These are content outcomes.
+
+## Offline detection workflows
+
+`pkg/workflow` owns `AssessJSON`, `CompareJSON`, `EvidenceJSON`, and `RecheckJSON`, typed equivalents, and canonical exports. Results retain content CI status independently of errors. See the [workflow guide](workflow.md) for runnable examples, CI status and source disclosure controls.

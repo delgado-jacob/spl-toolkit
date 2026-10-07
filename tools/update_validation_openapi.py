@@ -205,6 +205,34 @@ def add_tooling(spec):
             "500": {"description": "Internal failure", "content": {"application/json": {"schema": {"$ref": PREFIX + "api.ErrorResponse"}}}},
         },
     }}
+    for route, request, report in (
+        ("assess", "Request", "Report"),
+        ("compare", "CompareRequest", "ComparisonReport"),
+        ("evidence", "EvidenceRequest", "EvidenceReport"),
+        ("recheck", "RecheckRequest", "RecheckReport"),
+    ):
+        response = reference("workflow." + report)
+        content = {"application/json": {"schema": response}}
+        if route == "assess":
+            content["application/json"]["schema"] = {"oneOf": [
+                response, reference("workflow.GraphReport"), reference("workflow.BOMReport"),
+                {"$ref": "https://docs.oasis-open.org/sarif/sarif/v2.1.0/errata01/os/schemas/sarif-schema-2.1.0.json"},
+            ]}
+            content["text/plain"] = {"schema": {"type": "string"}}
+        spec["paths"]["/workflow/" + route] = {"post": {
+            "summary": "Offline workflow " + route,
+            "description": "Strict inline JSON only; exact 8 MiB body limit. Reject unknown or duplicate members, nulls, malformed Unicode and trailing JSON. Content outcomes and retained entry failures return 200. Assessment formats preserve CI outcome; comparison retains saved facts; evidence requires explicit disclosure choices; recheck performs a fresh assessment without proving intent. No query execution or remote retrieval.",
+            "tags": ["workflow"],
+            "requestBody": {"required": True, "content": {"application/json": {"schema": reference("workflow." + request)}}},
+            "responses": {
+                "200": {"description": "Canonical workflow result", "content": content},
+                "400": {"description": "Request or transport failure", "content": {"application/json": {"schema": {"oneOf": [reference("workflow.RequestErrorDetail"), {"$ref": PREFIX + "api.ErrorResponse"}]}}}},
+                "500": {"description": "Internal failure", "content": {"application/json": {"schema": {"$ref": PREFIX + "api.ErrorResponse"}}}},
+            },
+        }}
+    for name in sorted(shared["$defs"]):
+        if name.startswith("workflow."):
+            reference(name)
     visited = set()
     while needed - visited:
         base, name = sorted(needed - visited)[0]
@@ -216,6 +244,8 @@ def add_tooling(spec):
     # tooling.environment definitions and are not referenced by any route.
     generated_only = {name for name in schemas if name.startswith(("closure.", "environment.", "compatibility."))}
     generated_only.update(resolution_names)
+    generated_only.update(name for name in schemas if name.startswith("workflow."))
+    generated_only.update({"corpus.AcquisitionError", "corpus.Origin", "corpus.RequestDocument", "corpus.Selection", "impact.Classification"})
     generated_only.add("api.EnvironmentValidationRequest")
     generated_only.add("validation.FieldProjection")
     def component_refs(value):

@@ -281,3 +281,7 @@ runtime compatibility, authorization or deployment.
 ### Named-input resolution
 
 `SPLMapper.resolve(request)` returns all canonical verified/failed/incomplete variants as a detached dictionary; request errors raise `SPLMapperError`. Pass only verified variants’ `resolved_query` downstream. See the [complete Python example and names-only input contract](../docs/resolution.md), including separate offline environment/schema bindings and native result ownership.
+
+## Offline detection workflows
+
+`SPLMapper.workflow_assess(request)`, `workflow_compare(request)`, `workflow_evidence(request)`, and `workflow_recheck(request)` delegate to the native workflow owner. Assessment text format returns a string; canonical JSON formats and other operations return dictionaries. Successful evidence projection preserves `source_ci_exit_code` without treating it as a Python error. Run `python3 examples/workflow/native.py` from the repository root with the installed package. See the [workflow guide](../docs/workflow.md) for runnable examples, CI status and source disclosure controls.

@@ -27,6 +27,16 @@ nor allowed. Shared wire definitions reside in `v1/shared.schema.json` and
 | `field-schema-bundle.schema.json` | Strict independent field evidence input | |
 | `compatibility-request.schema.json` | Strict offline assessment envelope | |
 | `compatibility.schema.json` | Canonical assessment report, including all four outcomes | |
+| `workflow-request.schema.json` | Strict inline workflow selection and settings | `Settings` |
+| `workflow.schema.json` | Canonical workflow assessment |  |
+| `workflow-comparison-request.schema.json` | Two saved assessments |  |
+| `workflow-comparison.schema.json` | Captured evidence comparison |  |
+| `workflow-evidence-request.schema.json` | Exactly one saved source and explicit disclosure array |  |
+| `workflow-evidence.schema.json` | Minimal projection with explicit sensitive categories |  |
+| `workflow-recheck-request.schema.json` | Fresh context and one proposal |  |
+| `workflow-recheck.schema.json` | Fresh assessment and byte-exact source links |  |
+| `workflow-graph.schema.json` | Original/candidate graph subjects |  |
+| `workflow-bom.schema.json` | Original/candidate dependency subjects |  |
 | `environment-validation.schema.json` | Canonical artifact validation report | `Request` |
 | `field-validation.schema.json` | Field-list validation report | `Request`, `BatchRequest`, `BatchReport`, `Catalog` |
 | `schema-validation.schema.json` | JSON Schema or OCSF field-validation report | `Request`, `BatchRequest`, `BatchReport`, `Target` |
@@ -48,7 +58,9 @@ as initialization options; configuration notifications wrap it under
 
 ## Compatibility rules
 
-Outputs tolerate additive properties at object extension points, including nested
+Workflow envelopes are strict, while their nested canonical report definitions retain the original compatibility rules. Workflow requests and saved reports require typed optional members (never null), exclusive entry modes, and conditional failure/result shapes. Runtime additionally validates source hashes, evidence consistency, and identity membership. Evidence details use only explicitly selected category keys; an empty selection emits no details.
+
+Other outputs tolerate additive properties at object extension points, including nested
 canonical evidence. They retain required known fields and types. Unknown properties
 cannot substitute for a required union member or permit conflicting known members.
 Adding a value to an explicitly closed enum, removing required output fields, or

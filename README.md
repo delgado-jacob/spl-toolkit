@@ -200,3 +200,7 @@ The REST service is offline during query processing. Its Swagger page loads asse
 Structured analysis, field-list validation and JSON Schema/OCSF validation support explicitly selected SPL2. See the [SPL2 contract](docs/spl2.md) for syntax, effects and held boundaries, and [compatibility](docs/compatibility.md) for the exact local evidence and remaining platform gates.
 
 Safe named-input [resolution](docs/resolution.md) produces bounded candidate combinations with explicit offline bindings, session-proved correspondence, and per-variant compatibility outcomes. The [complete mixed example](examples/resolution/request.json) publishes only its verified candidate and intentionally exits 1. See [CLI usage](docs/cli.md).
+
+## Offline detection workflows
+
+Offline detection workflows coordinate assessment, saved comparison, controlled evidence projection, and fresh proposal rechecks across CLI, Go, HTTP, and native Python. See the [workflow guide](docs/workflow.md) for runnable examples, CI status and source disclosure controls.

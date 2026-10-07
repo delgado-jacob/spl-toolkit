@@ -158,3 +158,7 @@ correlation have separate evidence obligations. See the
 ## Resolution v1
 
 [Resolution requests](https://github.com/delgado-jacob/spl-toolkit/blob/e8d6fb5ea18887dabaa2ec717b980f9137ebbe8e/contracts/v1/resolution-request.schema.json) and [reports](https://github.com/delgado-jacob/spl-toolkit/blob/e8d6fb5ea18887dabaa2ec717b980f9137ebbe8e/contracts/v1/resolution.schema.json) publish names-only selection and detached evidence. Required arrays are non-null, counts/ordinals are bounded uint64, and the Cartesian product is an arbitrary-size decimal string. `resolved_query` is required for verified variants and forbidden for failed/incomplete variants. The [complete resolution example](resolution.md) explains runtime membership checks and publication semantics.
+
+## Offline detection workflows
+
+Workflow request/report, comparison, evidence, recheck, graph, and BOM schemas use strict Draft 2020-12 envelopes. Entry settings select exactly one mode; optional members cannot be null; only verified resolution variants publish `resolved_query`. Saved reports preserve captured revision digests. Evidence detail keys are limited to seven explicit disclosure categories. See the [workflow guide](workflow.md) for runnable examples, CI status and source disclosure controls.

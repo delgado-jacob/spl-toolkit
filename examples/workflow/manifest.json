@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "documents": [
+    {
+      "id": "complete",
+      "path": "queries/complete.spl2",
+      "language": "spl2",
+      "profile": "splunkd",
+      "version": "current"
+    },
+    {
+      "id": "portable",
+      "path": "queries/portable.spl2",
+      "language": "spl2",
+      "profile": "splunkd",
+      "version": "current"
+    }
+  ]
+}

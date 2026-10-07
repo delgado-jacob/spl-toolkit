@@ -29,3 +29,7 @@ with SPLMapper(config=config) as mapper:
 Python mapping errors use the existing `SPLMapperError` hierarchy. Invalid configuration uses `ConfigurationError`; parse failures use `ParseError`; operations after `close()` use `MapperNotFoundError`.
 
 Discovery fields use Python names `data_models`, `datasets`, `lookups`, `macros`, `sources`, `source_types`, and `input_fields`. REST and CLI JSON use `datamodels` and `sourcetypes`. The acceptance suite normalizes empty arrays and category order when checking parity; mapped query text remains byte-exact.
+
+## Offline detection workflows
+
+Offline detection workflows are available through Go, HTTP, CLI, and native Python. See the [workflow guide](../workflow.md) for runnable examples, CI status and source disclosure controls.

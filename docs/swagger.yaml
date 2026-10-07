@@ -8734,6 +8734,27 @@ components:
       - schema_complete
       - reasons
       type: object
+    tooling.validation.FieldCatalog:
+      additionalProperties: true
+      properties:
+        fields:
+          items:
+            type: string
+          type: array
+        identity:
+          type: string
+        optional_fields:
+          items:
+            type: string
+          type: array
+        version:
+          type: string
+      required:
+      - fields
+      - optional_fields
+      - identity
+      - version
+      type: object
     tooling.validation.FieldProjection:
       additionalProperties: true
       properties:
@@ -8864,6 +8885,1326 @@ components:
       - optional_fields
       - identity
       - version
+      type: object
+    tooling.workflow.BOMEntry:
+      additionalProperties: false
+      properties:
+        direct:
+          type: boolean
+        incomplete:
+          type: boolean
+        kind:
+          $ref: '#/components/schemas/tooling.closure.ObjectKind'
+        name:
+          pattern: \S
+          type: string
+        object_id:
+          pattern: \S
+          type: string
+        occurrences:
+          items:
+            $ref: '#/components/schemas/tooling.workflow.BOMOccurrence'
+          minItems: 1
+          type: array
+        transitive:
+          type: boolean
+      required:
+      - object_id
+      - kind
+      - name
+      - direct
+      - transitive
+      - incomplete
+      - occurrences
+      type: object
+    tooling.workflow.BOMOccurrence:
+      additionalProperties: false
+      description: Canonical BOM occurrence with edge ID scoped to its original/candidate
+        workflow subject.
+      properties:
+        edge_id:
+          pattern: ^/entries/(0|[1-9][0-9]*)(?:/resolution/variants/(0|[1-9][0-9]*))?:edge-[1-9][0-9]*$
+          type: string
+        instance_ids:
+          items:
+            pattern: \S
+            type: string
+          type: array
+        path:
+          items:
+            pattern: \S
+            type: string
+          minItems: 1
+          type: array
+      required:
+      - edge_id
+      - path
+      - instance_ids
+      type: object
+    tooling.workflow.BOMReport:
+      additionalProperties: false
+      properties:
+        ci_exit_code:
+          enum:
+          - 0
+          - 1
+          - 2
+          - 3
+          type: integer
+        counts:
+          $ref: '#/components/schemas/tooling.workflow.Counts'
+        execution_complete:
+          type: boolean
+        schema_version:
+          const: 1
+          type: integer
+        selection:
+          $ref: '#/components/schemas/tooling.corpus.Selection'
+        shared_dependencies:
+          items:
+            $ref: '#/components/schemas/tooling.workflow.SharedDependency'
+          type: array
+        status:
+          enum:
+          - valid
+          - invalid
+          - incomplete
+          type: string
+        subjects:
+          items:
+            $ref: '#/components/schemas/tooling.workflow.BOMSubject'
+          type: array
+      required:
+      - schema_version
+      - status
+      - execution_complete
+      - ci_exit_code
+      - selection
+      - counts
+      - subjects
+      - shared_dependencies
+      type: object
+    tooling.workflow.BOMSubject:
+      additionalProperties: false
+      properties:
+        closure_coverage:
+          enum:
+          - complete
+          - incomplete
+          - unavailable
+          - not_applicable
+          type: string
+        coverage_reasons:
+          items:
+            type: string
+          type: array
+        detection_id:
+          pattern: \S
+          type: string
+        domain:
+          enum:
+          - original
+          - candidate
+          type: string
+        entries:
+          items:
+            $ref: '#/components/schemas/tooling.workflow.BOMEntry'
+          type: array
+        evidence_pointer:
+          type: string
+        failure:
+          $ref: '#/components/schemas/tooling.workflow.Failure'
+        variant_selection:
+          items:
+            $ref: '#/components/schemas/tooling.analysis.ResolutionChoice'
+          type: array
+      required:
+      - detection_id
+      - domain
+      - evidence_pointer
+      - entries
+      - closure_coverage
+      - coverage_reasons
+      type: object
+    tooling.workflow.CheckSettings:
+      additionalProperties: false
+      properties:
+        dependency_bindings:
+          items:
+            $ref: '#/components/schemas/tooling.closure.Binding'
+          type: array
+        input_bindings:
+          items:
+            $ref: '#/components/schemas/tooling.compatibility.InputBinding'
+          type: array
+        query_scope:
+          $ref: '#/components/schemas/tooling.environment.CaptureScope'
+      required:
+      - query_scope
+      - input_bindings
+      type: object
+    tooling.workflow.CompareRequest:
+      additionalProperties: false
+      properties:
+        after:
+          $ref: '#/components/schemas/tooling.workflow.Report'
+        before:
+          $ref: '#/components/schemas/tooling.workflow.Report'
+        schema_version:
+          const: 1
+          type: integer
+      required:
+      - schema_version
+      - before
+      - after
+      type: object
+    tooling.workflow.ComparisonCounts:
+      additionalProperties: false
+      properties:
+        affected:
+          minimum: 0
+          type: integer
+        compared:
+          minimum: 0
+          type: integer
+        failed:
+          minimum: 0
+          type: integer
+        indeterminate:
+          minimum: 0
+          type: integer
+        selected:
+          minimum: 0
+          type: integer
+        unchanged:
+          minimum: 0
+          type: integer
+      required:
+      - selected
+      - compared
+      - affected
+      - unchanged
+      - indeterminate
+      - failed
+      type: object
+    tooling.workflow.ComparisonEntry:
+      additionalProperties: false
+      properties:
+        after:
+          $ref: '#/components/schemas/tooling.workflow.ReportEntry'
+        ambiguous:
+          items:
+            type: string
+          type: array
+        before:
+          $ref: '#/components/schemas/tooling.workflow.ReportEntry'
+        classification:
+          enum:
+          - affected
+          - unchanged
+          - indeterminate
+          - failed
+          type: string
+        deltas:
+          items:
+            $ref: '#/components/schemas/tooling.impact.EvidenceDelta'
+          type: array
+        id:
+          pattern: \S
+          type: string
+        pairs:
+          items:
+            $ref: '#/components/schemas/tooling.workflow.EvidencePair'
+          type: array
+        reasons:
+          items:
+            type: string
+          type: array
+        unmatched:
+          items:
+            type: string
+          type: array
+      required:
+      - id
+      - before
+      - after
+      - classification
+      - deltas
+      - pairs
+      - unmatched
+      - ambiguous
+      - reasons
+      type: object
+    tooling.workflow.ComparisonReport:
+      additionalProperties: false
+      properties:
+        after_provenance:
+          $ref: '#/components/schemas/tooling.workflow.Provenance'
+        before_provenance:
+          $ref: '#/components/schemas/tooling.workflow.Provenance'
+        ci_exit_code:
+          enum:
+          - 0
+          - 1
+          - 2
+          - 3
+          type: integer
+        counts:
+          $ref: '#/components/schemas/tooling.workflow.ComparisonCounts'
+        entries:
+          items:
+            $ref: '#/components/schemas/tooling.workflow.ComparisonEntry'
+          type: array
+        execution_complete:
+          type: boolean
+        schema_version:
+          const: 1
+          type: integer
+      required:
+      - schema_version
+      - execution_complete
+      - ci_exit_code
+      - before_provenance
+      - after_provenance
+      - counts
+      - entries
+      type: object
+    tooling.workflow.Counts:
+      additionalProperties: false
+      properties:
+        acquisition_failed:
+          minimum: 0
+          type: integer
+        assessed:
+          minimum: 0
+          type: integer
+        configuration_failed:
+          minimum: 0
+          type: integer
+        incomplete:
+          minimum: 0
+          type: integer
+        internal_failed:
+          minimum: 0
+          type: integer
+        invalid:
+          minimum: 0
+          type: integer
+        selected:
+          minimum: 0
+          type: integer
+        traversal_failed:
+          minimum: 0
+          type: integer
+        valid:
+          minimum: 0
+          type: integer
+      required:
+      - selected
+      - assessed
+      - acquisition_failed
+      - configuration_failed
+      - internal_failed
+      - traversal_failed
+      - valid
+      - invalid
+      - incomplete
+      type: object
+    tooling.workflow.DependencyGraph:
+      additionalProperties: false
+      properties:
+        edges:
+          items:
+            $ref: '#/components/schemas/tooling.workflow.GraphEdge'
+          type: array
+        nodes:
+          items:
+            $ref: '#/components/schemas/tooling.closure.GraphNode'
+          minItems: 1
+          type: array
+      required:
+      - nodes
+      - edges
+      type: object
+    tooling.workflow.Disclosure:
+      additionalProperties: false
+      properties:
+        emitted:
+          items:
+            enum:
+            - query_text
+            - requirement_names
+            - source_identity
+            - environment_metadata
+            - definitions
+            - diagnostic_details
+            - artifact_identity
+            type: string
+          type: array
+          uniqueItems: true
+        omitted:
+          items:
+            enum:
+            - query_text
+            - requirement_names
+            - source_identity
+            - environment_metadata
+            - definitions
+            - diagnostic_details
+            - artifact_identity
+            type: string
+          type: array
+          uniqueItems: true
+        potentially_sensitive:
+          items:
+            enum:
+            - query_text
+            - requirement_names
+            - source_identity
+            - environment_metadata
+            - definitions
+            - diagnostic_details
+            - artifact_identity
+            type: string
+          type: array
+          uniqueItems: true
+        requested:
+          items:
+            enum:
+            - query_text
+            - requirement_names
+            - source_identity
+            - environment_metadata
+            - definitions
+            - diagnostic_details
+            - artifact_identity
+            type: string
+          type: array
+          uniqueItems: true
+      required:
+      - requested
+      - emitted
+      - omitted
+      - potentially_sensitive
+      type: object
+    tooling.workflow.EntrySettings:
+      additionalProperties: false
+      oneOf:
+      - not:
+          required:
+          - resolution
+        required:
+        - compatibility
+      - not:
+          required:
+          - compatibility
+        required:
+        - resolution
+      properties:
+        compatibility:
+          $ref: '#/components/schemas/tooling.workflow.CheckSettings'
+        id:
+          pattern: \S
+          type: string
+        resolution:
+          $ref: '#/components/schemas/tooling.workflow.ResolveSettings'
+      required:
+      - id
+      type: object
+    tooling.workflow.EvidenceCoverage:
+      additionalProperties: false
+      properties:
+        dimension:
+          type: string
+        state:
+          type: string
+      required:
+      - dimension
+      - state
+      type: object
+    tooling.workflow.EvidenceDetails:
+      additionalProperties: false
+      maxProperties: 1
+      minProperties: 1
+      properties:
+        artifact_identity:
+          type: string
+        definitions:
+          anyOf:
+          - type: string
+          - $ref: '#/components/schemas/tooling.validation.Target'
+          - $ref: '#/components/schemas/tooling.validation.FieldCatalog'
+        diagnostic_details:
+          anyOf:
+          - type: string
+          - items:
+              type: string
+            type: array
+          - type: object
+          description: Explicitly opted-in diagnostic field, including caller-supplied
+            structured failure detail.
+        environment_metadata:
+          anyOf:
+          - type: string
+          - items:
+              type: string
+            type: array
+          - type: integer
+          - type: boolean
+          - $ref: '#/components/schemas/tooling.environment.CaptureScope'
+          - $ref: '#/components/schemas/tooling.validation.FieldCatalog'
+          - $ref: '#/components/schemas/tooling.validation.Target'
+          - type: object
+          description: Explicitly opted-in captured metadata field or authored schema;
+            does not restore a complete report.
+        query_text:
+          type: string
+        requirement_names:
+          anyOf:
+          - type: string
+          - items:
+              type: string
+            type: array
+          - $ref: '#/components/schemas/tooling.analysis.FieldIdentity'
+          - $ref: '#/components/schemas/tooling.analysis.InputIdentity'
+        source_identity:
+          anyOf:
+          - type: string
+          - items:
+              type: string
+            type: array
+      required: []
+      type: object
+    tooling.workflow.EvidenceItem:
+      additionalProperties: false
+      properties:
+        capability:
+          $ref: '#/components/schemas/tooling.workflow.PublicCapability'
+        codes:
+          items:
+            type: string
+          type: array
+        complete:
+          type: boolean
+        coverage:
+          items:
+            $ref: '#/components/schemas/tooling.workflow.EvidenceCoverage'
+          type: array
+        details:
+          $ref: '#/components/schemas/tooling.workflow.EvidenceDetails'
+        kind:
+          type: string
+        outcome:
+          type: string
+        pointer:
+          type: string
+        token:
+          type: string
+      required:
+      - token
+      - pointer
+      - kind
+      - outcome
+      - codes
+      - complete
+      - coverage
+      type: object
+    tooling.workflow.EvidencePair:
+      additionalProperties: false
+      properties:
+        after_pointer:
+          type: string
+        basis:
+          type: string
+        before_pointer:
+          type: string
+      required:
+      - before_pointer
+      - after_pointer
+      - basis
+      type: object
+    tooling.workflow.EvidenceReport:
+      additionalProperties: false
+      allOf:
+      - if:
+          properties:
+            disclosure:
+              properties:
+                requested:
+                  maxItems: 0
+              required:
+              - requested
+        then:
+          properties:
+            disclosure:
+              properties:
+                emitted:
+                  maxItems: 0
+                potentially_sensitive:
+                  maxItems: 0
+            items:
+              items:
+                not:
+                  required:
+                  - details
+      - else:
+          properties:
+            counts:
+              additionalProperties: false
+              properties:
+                affected:
+                  maximum: 18446744073709551615
+                  minimum: 0
+                  type: integer
+                compared:
+                  maximum: 18446744073709551615
+                  minimum: 0
+                  type: integer
+                failed:
+                  maximum: 18446744073709551615
+                  minimum: 0
+                  type: integer
+                indeterminate:
+                  maximum: 18446744073709551615
+                  minimum: 0
+                  type: integer
+                selected:
+                  maximum: 18446744073709551615
+                  minimum: 0
+                  type: integer
+                unchanged:
+                  maximum: 18446744073709551615
+                  minimum: 0
+                  type: integer
+              required:
+              - selected
+              - compared
+              - affected
+              - unchanged
+              - indeterminate
+              - failed
+        if:
+          properties:
+            source_kind:
+              const: report
+          required:
+          - source_kind
+        then:
+          properties:
+            counts:
+              additionalProperties: false
+              properties:
+                acquisition_failed:
+                  maximum: 18446744073709551615
+                  minimum: 0
+                  type: integer
+                assessed:
+                  maximum: 18446744073709551615
+                  minimum: 0
+                  type: integer
+                configuration_failed:
+                  maximum: 18446744073709551615
+                  minimum: 0
+                  type: integer
+                incomplete:
+                  maximum: 18446744073709551615
+                  minimum: 0
+                  type: integer
+                internal_failed:
+                  maximum: 18446744073709551615
+                  minimum: 0
+                  type: integer
+                invalid:
+                  maximum: 18446744073709551615
+                  minimum: 0
+                  type: integer
+                selected:
+                  maximum: 18446744073709551615
+                  minimum: 0
+                  type: integer
+                traversal_failed:
+                  maximum: 18446744073709551615
+                  minimum: 0
+                  type: integer
+                valid:
+                  maximum: 18446744073709551615
+                  minimum: 0
+                  type: integer
+              required:
+              - selected
+              - assessed
+              - acquisition_failed
+              - configuration_failed
+              - internal_failed
+              - traversal_failed
+              - valid
+              - invalid
+              - incomplete
+      properties:
+        counts:
+          additionalProperties: false
+          properties:
+            acquisition_failed:
+              maximum: 18446744073709551615
+              minimum: 0
+              type: integer
+            affected:
+              maximum: 18446744073709551615
+              minimum: 0
+              type: integer
+            assessed:
+              maximum: 18446744073709551615
+              minimum: 0
+              type: integer
+            compared:
+              maximum: 18446744073709551615
+              minimum: 0
+              type: integer
+            configuration_failed:
+              maximum: 18446744073709551615
+              minimum: 0
+              type: integer
+            failed:
+              maximum: 18446744073709551615
+              minimum: 0
+              type: integer
+            incomplete:
+              maximum: 18446744073709551615
+              minimum: 0
+              type: integer
+            indeterminate:
+              maximum: 18446744073709551615
+              minimum: 0
+              type: integer
+            internal_failed:
+              maximum: 18446744073709551615
+              minimum: 0
+              type: integer
+            invalid:
+              maximum: 18446744073709551615
+              minimum: 0
+              type: integer
+            selected:
+              maximum: 18446744073709551615
+              minimum: 0
+              type: integer
+            traversal_failed:
+              maximum: 18446744073709551615
+              minimum: 0
+              type: integer
+            unchanged:
+              maximum: 18446744073709551615
+              minimum: 0
+              type: integer
+            valid:
+              maximum: 18446744073709551615
+              minimum: 0
+              type: integer
+          type: object
+        disclosure:
+          $ref: '#/components/schemas/tooling.workflow.Disclosure'
+        execution_complete:
+          type: boolean
+        items:
+          items:
+            $ref: '#/components/schemas/tooling.workflow.EvidenceItem'
+          type: array
+        schema_version:
+          const: 1
+          type: integer
+        source_ci_exit_code:
+          enum:
+          - 0
+          - 1
+          - 2
+          - 3
+          type: integer
+        source_kind:
+          enum:
+          - report
+          - comparison
+          type: string
+      required:
+      - schema_version
+      - source_kind
+      - source_ci_exit_code
+      - execution_complete
+      - counts
+      - items
+      - disclosure
+      type: object
+    tooling.workflow.EvidenceRequest:
+      additionalProperties: false
+      oneOf:
+      - not:
+          required:
+          - comparison
+        required:
+        - report
+      - not:
+          required:
+          - report
+        required:
+        - comparison
+      properties:
+        comparison:
+          $ref: '#/components/schemas/tooling.workflow.ComparisonReport'
+        include:
+          items:
+            enum:
+            - query_text
+            - requirement_names
+            - source_identity
+            - environment_metadata
+            - definitions
+            - diagnostic_details
+            - artifact_identity
+            type: string
+          type: array
+          uniqueItems: true
+        report:
+          $ref: '#/components/schemas/tooling.workflow.Report'
+        schema_version:
+          const: 1
+          type: integer
+      required:
+      - schema_version
+      - include
+      type: object
+    tooling.workflow.Failure:
+      additionalProperties: false
+      properties:
+        code:
+          pattern: \S
+          type: string
+        detail: {}
+        message:
+          type: string
+        phase:
+          enum:
+          - acquisition
+          - configuration
+          - internal
+          type: string
+      required:
+      - phase
+      - code
+      - message
+      type: object
+    tooling.workflow.GraphEdge:
+      additionalProperties: false
+      allOf:
+      - else:
+          required:
+          - to
+        if:
+          properties:
+            unknown:
+              const: true
+          required:
+          - unknown
+        then:
+          not:
+            required:
+            - to
+      description: Workflow closure edges retain canonical fields, with IDs scoped
+        to the original/candidate subject and traversal pointers rebased into the
+        source workflow report.
+      properties:
+        cycle_path:
+          items:
+            pattern: \S
+            type: string
+          type: array
+        from:
+          pattern: \S
+          type: string
+        id:
+          pattern: ^/entries/(0|[1-9][0-9]*)(?:/resolution/variants/(0|[1-9][0-9]*))?:edge-[1-9][0-9]*$
+          type: string
+        invocation_node_ids:
+          items:
+            pattern: \S
+            type: string
+          type: array
+        kind:
+          $ref: '#/components/schemas/tooling.closure.ObjectKind'
+        name:
+          pattern: \S
+          type: string
+        origins:
+          items:
+            $ref: '#/components/schemas/tooling.closure.SourceInterval'
+          type: array
+        path:
+          items:
+            pattern: \S
+            type: string
+          type: array
+        property:
+          pattern: ^/(?:[^~]|~[01])*$
+          type: string
+        resolution:
+          $ref: '#/components/schemas/tooling.closure.Resolution'
+        source:
+          $ref: '#/components/schemas/tooling.closure.SourceInterval'
+        to:
+          pattern: \S
+          type: string
+        traversal_pointer:
+          pattern: ^/entries/(0|[1-9][0-9]*)(?:/resolution/variants/(0|[1-9][0-9]*))?/compatibility/closure/traversal/(0|[1-9][0-9]*)$
+          type: string
+        unknown:
+          type: boolean
+      required:
+      - id
+      - from
+      - unknown
+      - kind
+      - name
+      - resolution
+      - traversal_pointer
+      - source
+      - origins
+      - path
+      - cycle_path
+      - invocation_node_ids
+      type: object
+    tooling.workflow.GraphReport:
+      additionalProperties: false
+      properties:
+        ci_exit_code:
+          enum:
+          - 0
+          - 1
+          - 2
+          - 3
+          type: integer
+        counts:
+          $ref: '#/components/schemas/tooling.workflow.Counts'
+        execution_complete:
+          type: boolean
+        schema_version:
+          const: 1
+          type: integer
+        selection:
+          $ref: '#/components/schemas/tooling.corpus.Selection'
+        status:
+          enum:
+          - valid
+          - invalid
+          - incomplete
+          type: string
+        subjects:
+          items:
+            $ref: '#/components/schemas/tooling.workflow.GraphSubject'
+          type: array
+      required:
+      - schema_version
+      - status
+      - execution_complete
+      - ci_exit_code
+      - selection
+      - counts
+      - subjects
+      type: object
+    tooling.workflow.GraphSubject:
+      additionalProperties: false
+      properties:
+        analysis:
+          $ref: '#/components/schemas/tooling.graph.Report'
+        closure:
+          $ref: '#/components/schemas/tooling.workflow.DependencyGraph'
+        closure_coverage:
+          enum:
+          - complete
+          - incomplete
+          - unavailable
+          - not_applicable
+          type: string
+        coverage_reasons:
+          items:
+            type: string
+          type: array
+        detection_id:
+          pattern: \S
+          type: string
+        domain:
+          enum:
+          - original
+          - candidate
+          type: string
+        evidence_pointer:
+          type: string
+        failure:
+          $ref: '#/components/schemas/tooling.workflow.Failure'
+        variant_selection:
+          items:
+            $ref: '#/components/schemas/tooling.analysis.ResolutionChoice'
+          type: array
+      required:
+      - detection_id
+      - domain
+      - evidence_pointer
+      - closure_coverage
+      - coverage_reasons
+      type: object
+    tooling.workflow.Proposal:
+      additionalProperties: false
+      oneOf:
+      - properties:
+          settings:
+            required:
+            - compatibility
+        required:
+        - document
+      - not:
+          required:
+          - document
+        properties:
+          settings:
+            required:
+            - resolution
+      properties:
+        document:
+          $ref: '#/components/schemas/tooling.QueryDocumentRequest'
+        settings:
+          $ref: '#/components/schemas/tooling.workflow.EntrySettings'
+      required:
+      - settings
+      type: object
+    tooling.workflow.Provenance:
+      additionalProperties: false
+      properties:
+        environment_digest:
+          pattern: ^sha256:[0-9a-f]{64}$
+          type: string
+        schema_bundle_digest:
+          pattern: ^sha256:[0-9a-f]{64}$
+          type: string
+        settings_digest:
+          pattern: ^[0-9a-f]{64}$
+          type: string
+        toolkit_version:
+          type: string
+        vcs_modified:
+          type: boolean
+        vcs_revision:
+          type: string
+      required:
+      - toolkit_version
+      - environment_digest
+      - settings_digest
+      type: object
+    tooling.workflow.PublicCapability:
+      additionalProperties: false
+      properties:
+        language:
+          type: string
+        profile:
+          type: string
+        revision:
+          type: string
+        version:
+          type: string
+      required:
+      - language
+      - profile
+      - version
+      - revision
+      type: object
+    tooling.workflow.RecheckContext:
+      additionalProperties: false
+      properties:
+        original:
+          $ref: '#/components/schemas/tooling.corpus.RequestDocument'
+        schema_bundle:
+          $ref: '#/components/schemas/tooling.environment.SchemaBundle'
+        snapshot:
+          oneOf:
+          - $ref: '#/components/schemas/tooling.environment.Snapshot'
+          - $ref: '#/components/schemas/tooling.v2.environment.SnapshotV2'
+      required:
+      - original
+      - snapshot
+      type: object
+    tooling.workflow.RecheckReport:
+      additionalProperties: false
+      properties:
+        assessment:
+          $ref: '#/components/schemas/tooling.workflow.Report'
+        detection_id:
+          pattern: \S
+          type: string
+        original_source_hash:
+          pattern: ^[0-9a-f]{64}$
+          type: string
+        proposed_source_hash:
+          pattern: ^[0-9a-f]{64}$
+          type: string
+        schema_version:
+          const: 1
+          type: integer
+      required:
+      - schema_version
+      - detection_id
+      - original_source_hash
+      - proposed_source_hash
+      - assessment
+      type: object
+    tooling.workflow.RecheckRequest:
+      additionalProperties: false
+      properties:
+        context:
+          $ref: '#/components/schemas/tooling.workflow.RecheckContext'
+        proposal:
+          $ref: '#/components/schemas/tooling.workflow.Proposal'
+        schema_version:
+          const: 1
+          type: integer
+      required:
+      - schema_version
+      - context
+      - proposal
+      type: object
+    tooling.workflow.Report:
+      additionalProperties: false
+      properties:
+        ci_exit_code:
+          enum:
+          - 0
+          - 1
+          - 2
+          - 3
+          type: integer
+        counts:
+          $ref: '#/components/schemas/tooling.workflow.Counts'
+        entries:
+          items:
+            $ref: '#/components/schemas/tooling.workflow.ReportEntry'
+          type: array
+        execution_complete:
+          type: boolean
+        provenance:
+          $ref: '#/components/schemas/tooling.workflow.Provenance'
+        schema_version:
+          const: 1
+          type: integer
+        selection:
+          $ref: '#/components/schemas/tooling.corpus.Selection'
+        status:
+          enum:
+          - valid
+          - invalid
+          - incomplete
+          type: string
+      required:
+      - schema_version
+      - status
+      - execution_complete
+      - ci_exit_code
+      - selection
+      - counts
+      - entries
+      - provenance
+      type: object
+    tooling.workflow.ReportEntry:
+      additionalProperties: false
+      allOf:
+      - else:
+          not:
+            required:
+            - compatibility
+        if:
+          properties:
+            mode:
+              const: compatibility
+          required:
+          - mode
+        then:
+          not:
+            required:
+            - resolution
+      - else:
+          oneOf:
+          - required:
+            - compatibility
+          - required:
+            - resolution
+          required:
+          - analysis
+          - source_hash
+        if:
+          required:
+          - failure
+        then:
+          properties:
+            status:
+              const: incomplete
+      - if:
+          properties:
+            failure:
+              properties:
+                phase:
+                  const: acquisition
+              required:
+              - phase
+          required:
+          - failure
+        then:
+          not:
+            anyOf:
+            - required:
+              - analysis
+            - required:
+              - source_hash
+            - required:
+              - compatibility
+            - required:
+              - resolution
+      - if:
+          anyOf:
+          - required:
+            - analysis
+          - required:
+            - compatibility
+          - required:
+            - resolution
+        then:
+          required:
+          - analysis
+          - source_hash
+      properties:
+        analysis:
+          $ref: '#/components/schemas/tooling.analysis.Result'
+        compatibility:
+          $ref: '#/components/schemas/tooling.compatibility.Report'
+        failure:
+          $ref: '#/components/schemas/tooling.workflow.Failure'
+        id:
+          pattern: \S
+          type: string
+        mode:
+          enum:
+          - compatibility
+          - resolution
+          type: string
+        origin:
+          $ref: '#/components/schemas/tooling.corpus.Origin'
+        resolution:
+          $ref: '#/components/schemas/tooling.resolution.Report'
+        source_hash:
+          pattern: ^[0-9a-f]{64}$
+          type: string
+        status:
+          enum:
+          - valid
+          - invalid
+          - incomplete
+          type: string
+      required:
+      - id
+      - origin
+      - mode
+      - status
+      type: object
+    tooling.workflow.Request:
+      additionalProperties: false
+      properties:
+        documents:
+          items:
+            $ref: '#/components/schemas/tooling.corpus.RequestDocument'
+          minItems: 1
+          type: array
+        format:
+          enum:
+          - ''
+          - text
+          - json
+          - sarif
+          - graph
+          - bom
+          type: string
+        schema_version:
+          const: 1
+          type: integer
+        settings:
+          $ref: '#/components/schemas/tooling.workflow.Settings'
+      required:
+      - schema_version
+      - documents
+      - settings
+      type: object
+    tooling.workflow.RequestErrorDetail:
+      additionalProperties: false
+      properties:
+        byte_offset:
+          type: integer
+        code:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+      required:
+      - code
+      - path
+      - message
+      type: object
+    tooling.workflow.ResolveSettings:
+      additionalProperties: false
+      properties:
+        compatibility:
+          $ref: '#/components/schemas/tooling.compatibility.ResolutionAssessment'
+        max_variants:
+          maximum: 18446744073709551615
+          minimum: 1
+          type: integer
+        resolutions:
+          items:
+            $ref: '#/components/schemas/tooling.resolution.Resolution'
+          type: array
+      required:
+      - resolutions
+      - compatibility
+      type: object
+    tooling.workflow.Settings:
+      additionalProperties: false
+      properties:
+        entries:
+          items:
+            $ref: '#/components/schemas/tooling.workflow.EntrySettings'
+          type: array
+        schema_bundle:
+          $ref: '#/components/schemas/tooling.environment.SchemaBundle'
+        schema_version:
+          const: 1
+          type: integer
+        snapshot:
+          oneOf:
+          - $ref: '#/components/schemas/tooling.environment.Snapshot'
+          - $ref: '#/components/schemas/tooling.v2.environment.SnapshotV2'
+      required:
+      - schema_version
+      - snapshot
+      - entries
+      type: object
+    tooling.workflow.SharedDependency:
+      additionalProperties: false
+      properties:
+        environment_digest:
+          pattern: ^sha256:[0-9a-f]{64}$
+          type: string
+        object_id:
+          type: string
+        occurrence_pointers:
+          items:
+            type: string
+          type: array
+      required:
+      - environment_digest
+      - object_id
+      - occurrence_pointers
       type: object
     validation.BatchReport:
       properties:
@@ -10168,6 +11509,165 @@ paths:
       summary: Validate an ordered batch against an offline JSON Schema or OCSF target
       tags:
       - query
+  /workflow/assess:
+    post:
+      description: Strict inline JSON only; exact 8 MiB body limit. Reject unknown
+        or duplicate members, nulls, malformed Unicode and trailing JSON. Content
+        outcomes and retained entry failures return 200. Assessment formats preserve
+        CI outcome; comparison retains saved facts; evidence requires explicit disclosure
+        choices; recheck performs a fresh assessment without proving intent. No query
+        execution or remote retrieval.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/tooling.workflow.Request'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/tooling.workflow.Report'
+                - $ref: '#/components/schemas/tooling.workflow.GraphReport'
+                - $ref: '#/components/schemas/tooling.workflow.BOMReport'
+                - $ref: https://docs.oasis-open.org/sarif/sarif/v2.1.0/errata01/os/schemas/sarif-schema-2.1.0.json
+            text/plain:
+              schema:
+                type: string
+          description: Canonical workflow result
+        '400':
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/tooling.workflow.RequestErrorDetail'
+                - $ref: '#/components/schemas/api.ErrorResponse'
+          description: Request or transport failure
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api.ErrorResponse'
+          description: Internal failure
+      summary: Offline workflow assess
+      tags:
+      - workflow
+  /workflow/compare:
+    post:
+      description: Strict inline JSON only; exact 8 MiB body limit. Reject unknown
+        or duplicate members, nulls, malformed Unicode and trailing JSON. Content
+        outcomes and retained entry failures return 200. Assessment formats preserve
+        CI outcome; comparison retains saved facts; evidence requires explicit disclosure
+        choices; recheck performs a fresh assessment without proving intent. No query
+        execution or remote retrieval.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/tooling.workflow.CompareRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/tooling.workflow.ComparisonReport'
+          description: Canonical workflow result
+        '400':
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/tooling.workflow.RequestErrorDetail'
+                - $ref: '#/components/schemas/api.ErrorResponse'
+          description: Request or transport failure
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api.ErrorResponse'
+          description: Internal failure
+      summary: Offline workflow compare
+      tags:
+      - workflow
+  /workflow/evidence:
+    post:
+      description: Strict inline JSON only; exact 8 MiB body limit. Reject unknown
+        or duplicate members, nulls, malformed Unicode and trailing JSON. Content
+        outcomes and retained entry failures return 200. Assessment formats preserve
+        CI outcome; comparison retains saved facts; evidence requires explicit disclosure
+        choices; recheck performs a fresh assessment without proving intent. No query
+        execution or remote retrieval.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/tooling.workflow.EvidenceRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/tooling.workflow.EvidenceReport'
+          description: Canonical workflow result
+        '400':
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/tooling.workflow.RequestErrorDetail'
+                - $ref: '#/components/schemas/api.ErrorResponse'
+          description: Request or transport failure
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api.ErrorResponse'
+          description: Internal failure
+      summary: Offline workflow evidence
+      tags:
+      - workflow
+  /workflow/recheck:
+    post:
+      description: Strict inline JSON only; exact 8 MiB body limit. Reject unknown
+        or duplicate members, nulls, malformed Unicode and trailing JSON. Content
+        outcomes and retained entry failures return 200. Assessment formats preserve
+        CI outcome; comparison retains saved facts; evidence requires explicit disclosure
+        choices; recheck performs a fresh assessment without proving intent. No query
+        execution or remote retrieval.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/tooling.workflow.RecheckRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/tooling.workflow.RecheckReport'
+          description: Canonical workflow result
+        '400':
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/tooling.workflow.RequestErrorDetail'
+                - $ref: '#/components/schemas/api.ErrorResponse'
+          description: Request or transport failure
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api.ErrorResponse'
+          description: Internal failure
+      summary: Offline workflow recheck
+      tags:
+      - workflow
 servers:
 - description: Development server
   url: http://localhost:8080/api/v1

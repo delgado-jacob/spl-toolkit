@@ -61,3 +61,7 @@ func RewriteBatch(BatchRequest) (*BatchResult, error)
 ```
 
 Requests carry explicit rules and preview/apply mode independently of legacy mapper configuration. Query findings return reports; malformed requests return errors. The [rewrite contract](../rewrite.md) defines original/candidate/returned text, the single commit gate, ordered batches, supported identities and strict optional destination targets.
+
+## Offline detection workflows
+
+Use `pkg/workflow` for `AssessJSON`, `CompareJSON`, `EvidenceJSON`, and `RecheckJSON`; typed `Assess`, `Compare`, `Evidence`, and `Recheck` return detached reports. The runnable example is `examples/go/workflow/main.go`. See the [workflow guide](../workflow.md) for runnable examples, CI status and source disclosure controls.

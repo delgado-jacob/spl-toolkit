@@ -229,3 +229,7 @@ values. This route reads no live service and makes no execution/authorization cl
 ## Named-input resolution
 
 `POST /api/v1/query/resolve` accepts one strict inline request within the 8 MiB application/json limit. Content outcomes return 200 with all variants; inspect each outcome and use only verified `resolved_query`. Request/configuration errors return 400 structured details; transport errors retain ErrorResponse. See [HTTP example and publication contract](resolution.md).
+
+## Offline detection workflows
+
+The four `POST /workflow/{assess,compare,evidence,recheck}` routes accept strict inline JSON (8 MiB limit). Assessment format selects its rendering; retained content results return 200 and malformed requests return 400. See the [workflow guide](workflow.md) for runnable examples, CI status and source disclosure controls.
