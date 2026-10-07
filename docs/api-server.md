@@ -228,4 +228,4 @@ values. This route reads no live service and makes no execution/authorization cl
 
 ## Named-input resolution
 
-`POST /query/resolve` accepts one strict inline request within the 8 MiB application/json limit. Content outcomes return 200 with all variants; inspect each outcome and use only verified `resolved_query`. Request/configuration errors return 400 structured details; transport errors retain ErrorResponse. See [HTTP example and publication contract](resolution.md).
+`POST /api/v1/query/resolve` accepts one strict inline request within the 8 MiB application/json limit. Content outcomes return 200 with all variants; inspect each outcome and use only verified `resolved_query`. Request/configuration errors return 400 structured details; transport errors retain ErrorResponse. See [HTTP example and publication contract](resolution.md).
