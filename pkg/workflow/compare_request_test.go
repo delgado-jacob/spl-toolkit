@@ -162,3 +162,56 @@ func TestCompareAdmissionStrictSavedWire(t *testing.T) {
 		})
 	}
 }
+
+func TestCompareAdmissionResolutionTampering(t *testing.T) {
+	for _, name := range []string{"candidate_provenance", "candidate_requirement", "proof_requirement", "change_location", "verified_unsatisfied"} {
+		t.Run(name, func(t *testing.T) {
+			r, err := Assess(seedResolutionRequest(t))
+			if err != nil {
+				t.Fatal(err)
+			}
+			q := CompareRequest{SchemaVersion: 1, Before: *r, After: *r}
+			q, _ = exportCopy(q)
+			v := &q.After.Entries[0].Resolution.Variants[0]
+			switch name {
+			case "candidate_provenance":
+				v.Compatibility.Provenance.QueryDigest = "wrong"
+			case "candidate_requirement":
+				v.Compatibility.RequirementOutcomes[0].CandidateRequirementID = "dangling"
+			case "proof_requirement":
+				v.Proof.Roles[0].Requirements[0].OriginalRequirementID = "missing"
+			case "change_location":
+				v.Changes[0].OriginalLocation.Start.Offset = -1
+			case "verified_unsatisfied":
+				v = &q.After.Entries[0].Resolution.Variants[1]
+				v.Outcome = "verified"
+				q.After.Entries[0].Resolution.Counts.Verified++
+				q.After.Entries[0].Resolution.Counts.Failed--
+				q.After.Entries[0].Status = resolutionStatus(q.After.Entries[0].Analysis, q.After.Entries[0].Resolution)
+				q.After.Counts = Counts{Selected: 1}
+				q.After.Status = analysis.Valid
+				finalize(&q.After)
+			}
+			if _, err := Compare(q); err == nil {
+				t.Fatal("accepted contradictory retained resolution evidence")
+			}
+		})
+	}
+}
+func TestCompareAdmissionTraversalExecution(t *testing.T) {
+	q := comparisonSeed(t)
+	q.Before.Selection.Mode = "directory"
+	q.Before.Selection.Complete = false
+	q.Before.Selection.TraversalFailures = []corpus.AcquisitionError{{Code: "traversal_failed", Phase: "traverse", Path: "sub", Message: "unreadable"}}
+	q.Before.Counts = Counts{Selected: 1, TraversalFailed: 1}
+	q.Before.Status = analysis.Valid
+	q.Before.ExecutionComplete = false
+	finalize(&q.Before)
+	got, err := Compare(q)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got.ExecutionComplete || got.CIExitCode != 2 {
+		t.Fatalf("source traversal failure hidden: %+v", got)
+	}
+}

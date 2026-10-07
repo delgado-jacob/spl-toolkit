@@ -60,7 +60,7 @@ func Compare(q CompareRequest) (*ComparisonReport, error) {
 			return nil, requestErrorAt("selection_mismatch", "/after/entries", "selected ID sets differ")
 		}
 	}
-	out := &ComparisonReport{SchemaVersion: 1, ExecutionComplete: true, BeforeProvenance: q.Before.Provenance, AfterProvenance: q.After.Provenance, Counts: ComparisonCounts{Selected: len(before)}, Entries: []ComparisonEntry{}}
+	out := &ComparisonReport{SchemaVersion: 1, ExecutionComplete: q.Before.ExecutionComplete && q.After.ExecutionComplete, BeforeProvenance: q.Before.Provenance, AfterProvenance: q.After.Provenance, Counts: ComparisonCounts{Selected: len(before)}, Entries: []ComparisonEntry{}}
 	for i, a := range q.After.Entries {
 		b := before[a.ID]
 		e := ComparisonEntry{ID: a.ID, Before: b, After: a, Classification: impact.Indeterminate, Deltas: []impact.EvidenceDelta{}, Pairs: []EvidencePair{}, Unmatched: []string{}, Ambiguous: []string{}, Reasons: []string{}}
@@ -538,6 +538,9 @@ func admitResolution(r *resolution.Report, a *analysis.Result, path string) erro
 		default:
 			return fail("invalid variant outcome")
 		}
+		if err := admitResolutionVariant(v, r, a, path+"/variants"); err != nil {
+			return err
+		}
 		if v.CandidateAnalysis != nil {
 			if err := admitAnalysis(v.CandidateAnalysis, path+"/variants"); err != nil {
 				return err
@@ -602,4 +605,227 @@ func admitSourceIntervals(v reflect.Value, sources map[string]string, path strin
 		}
 	}
 	return nil
+}
+
+// These checks validate links and consistency in exposed evidence. They do not
+// restore a ResolutionSession or certify an imported proof as engine authority.
+func admitResolutionVariant(v resolution.Variant, r *resolution.Report, original *analysis.Result, path string) error {
+	fail := func(m string) error { return requestErrorAt("request_invalid", path, m) }
+	candidate := v.CandidateAnalysis
+	if candidate == nil {
+		if v.Compatibility != nil || v.ResolvedQuery != nil || v.Proof.Proven {
+			return fail("candidate evidence required for proof or publication")
+		}
+		return nil
+	}
+	if v.Provenance.QueryDigest != candidate.Requirements.Query.QueryDigest || v.Provenance.CapabilityRevision != candidate.Requirements.CapabilityRevision || v.Provenance.AnalysisContractVersion != 1 || v.Provenance.RequirementSetVersion != 1 || v.Provenance.EnvironmentDigest != r.Provenance.EnvironmentDigest || v.Provenance.SchemaBundleDigest != r.Provenance.SchemaBundleDigest || v.Provenance.ResolutionInputDigest != r.Provenance.ResolutionInputDigest || v.Provenance.AssessmentInputDigest != r.Provenance.AssessmentInputDigest {
+		return fail("variant provenance disagrees with retained candidate or artifacts")
+	}
+	oi, ci := inputIndex(original), inputIndex(candidate)
+	or, cr := requirementIndex(original), requirementIndex(candidate)
+	orefs, crefs := referenceIndex(original), referenceIndex(candidate)
+	for _, p := range v.Proof.References {
+		if _, ok := orefs[p.OriginalID]; !ok {
+			return fail("unresolved original proof reference")
+		}
+		if _, ok := crefs[p.CandidateID]; !ok {
+			return fail("unresolved candidate proof reference")
+		}
+	}
+	checkOccurrence := func(in analysis.QueryInput, id string) bool {
+		for _, o := range in.Occurrences {
+			if o.ID == id {
+				return true
+			}
+		}
+		return false
+	}
+	checkReqOccurrence := func(in analysis.RequirementItem, o analysis.RequirementOccurrence) bool {
+		for _, x := range in.Occurrences {
+			if reflect.DeepEqual(x, o) {
+				return true
+			}
+		}
+		return false
+	}
+	for _, role := range v.Proof.Roles {
+		x, xok := oi[role.OriginalInput.ID]
+		y, yok := ci[role.CandidateInput.ID]
+		if !xok || !yok || !reflect.DeepEqual(x, role.OriginalInput) || !reflect.DeepEqual(y, role.CandidateInput) {
+			return fail("proof role disagrees with retained inputs")
+		}
+		for _, p := range role.Occurrences {
+			if p.OriginalInputID != x.ID || p.CandidateInputID != y.ID || !checkOccurrence(x, p.OriginalOccurrenceID) || !checkOccurrence(y, p.CandidateOccurrenceID) {
+				return fail("unresolved proof input occurrence")
+			}
+		}
+		for _, p := range role.Requirements {
+			before, bok := or[p.OriginalRequirementID]
+			after, aok := cr[p.CandidateRequirementID]
+			if !bok || !aok || !checkReqOccurrence(before, p.OriginalOccurrence) || !checkReqOccurrence(after, p.CandidateOccurrence) {
+				return fail("unresolved proof requirement occurrence")
+			}
+		}
+	}
+	for _, change := range v.Changes {
+		if err := validateLocations(reflect.ValueOf(change.OriginalLocation), original.Document.Text, path+"/changes/original_location"); err != nil {
+			return err
+		}
+		if original.Document.Text[change.OriginalLocation.Start.Offset:change.OriginalLocation.End.Offset] != change.Before {
+			return fail("change original bytes disagree with source interval")
+		}
+		if change.CandidateLocation != nil {
+			if err := validateLocations(reflect.ValueOf(*change.CandidateLocation), candidate.Document.Text, path+"/changes/candidate_location"); err != nil {
+				return err
+			}
+			if candidate.Document.Text[change.CandidateLocation.Start.Offset:change.CandidateLocation.End.Offset] != change.After {
+				return fail("change candidate bytes disagree with source interval")
+			}
+		}
+		for _, id := range change.OriginalReferenceIDs {
+			if _, ok := orefs[id]; !ok {
+				return fail("unresolved change original reference")
+			}
+		}
+		for _, id := range change.CandidateReferenceIDs {
+			if _, ok := crefs[id]; !ok {
+				return fail("unresolved change candidate reference")
+			}
+		}
+	}
+	definitive := candidate.Status == analysis.Invalid
+	for _, l := range v.Proof.Limitations {
+		if l.Code == "target_not_renderable" || l.Code == "render_conflict" {
+			definitive = true
+		}
+	}
+	if v.Compatibility != nil {
+		c := v.Compatibility
+		adapted := compatibility.Report{SchemaVersion: c.SchemaVersion, Outcome: c.Outcome, Requirements: c.Requirements, EffectiveRequirements: c.EffectiveRequirements, Closure: c.Closure, Provenance: c.Provenance}
+		for _, o := range c.RequirementOutcomes {
+			adapted.RequirementOutcomes = append(adapted.RequirementOutcomes, o.Evidence)
+		}
+		if err := admitCompatibility(&adapted, candidate, path+"/compatibility"); err != nil {
+			return err
+		}
+		if c.Provenance.SourceID != candidate.Document.SourceID || c.Provenance.EnvironmentDigest != r.Provenance.EnvironmentDigest || c.Provenance.SchemaBundleDigest != r.Provenance.SchemaBundleDigest {
+			return fail("candidate assessment provenance disagrees with source or artifacts")
+		}
+		assessmentInputs := map[string][]analysis.QueryInput{}
+		addAssessmentInputs := func(set analysis.RequirementSet) {
+			for _, in := range set.Inputs {
+				assessmentInputs[in.ID] = append(assessmentInputs[in.ID], in)
+			}
+		}
+		addAssessmentInputs(candidate.Requirements)
+		if c.EffectiveRequirements != nil {
+			addAssessmentInputs(*c.EffectiveRequirements)
+		}
+		if c.Closure != nil {
+			addAssessmentInputs(c.Closure.EffectiveAnalysis.Requirements)
+			for _, d := range c.Closure.DefinitionAnalyses {
+				if d.DirectAnalysis != nil {
+					addAssessmentInputs(d.DirectAnalysis.Requirements)
+				}
+				if d.EffectiveAnalysis != nil {
+					addAssessmentInputs(d.EffectiveAnalysis.Requirements)
+				}
+			}
+		}
+		assessmentOccurrence := func(inputID, occurrenceID string) bool {
+			for _, in := range assessmentInputs[inputID] {
+				if checkOccurrence(in, occurrenceID) {
+					return true
+				}
+			}
+			return false
+		}
+		for _, in := range c.Inputs {
+			if in.OriginalInputID != "" {
+				if _, ok := oi[in.OriginalInputID]; !ok {
+					return fail("unresolved assessment original input")
+				}
+			}
+			if len(assessmentInputs[in.CandidateInputID]) == 0 {
+				return fail("unresolved assessment candidate input")
+			}
+			for _, p := range in.Occurrences {
+				before, bok := oi[p.OriginalInputID]
+				if !bok || !checkOccurrence(before, p.OriginalOccurrenceID) || !assessmentOccurrence(p.CandidateInputID, p.CandidateOccurrenceID) {
+					return fail("unresolved assessment input occurrence")
+				}
+			}
+		}
+		for _, o := range c.RequirementOutcomes {
+			if o.OriginalInputID != "" {
+				if _, ok := oi[o.OriginalInputID]; !ok {
+					return fail("unresolved assessment original input")
+				}
+			}
+			if o.OriginalRequirementID != "" {
+				if _, ok := or[o.OriginalRequirementID]; !ok {
+					return fail("unresolved assessment original requirement")
+				}
+			}
+			if o.CandidateRequirementID != o.Evidence.RequirementID || o.CandidateInputID != o.Evidence.InputID {
+				return fail("candidate assessment link disagrees with retained outcome")
+			}
+			// Closure-defined requirements belong to their own query domain, validated
+			// by admitCompatibility above rather than the candidate's local ID table.
+			if o.Evidence.Query == candidate.Requirements.Query {
+				if o.CandidateInputID != "" {
+					if _, ok := ci[o.CandidateInputID]; !ok {
+						return fail("unresolved assessment candidate input")
+					}
+				}
+				if item, ok := cr[o.CandidateRequirementID]; ok {
+					for _, occ := range o.AssessedOccurrences {
+						if !checkReqOccurrence(item, occ) {
+							return fail("assessment occurrence disagrees with candidate")
+						}
+					}
+				}
+			}
+		}
+		if c.Outcome == "unsatisfied" {
+			definitive = true
+		}
+	}
+	if definitive && v.Outcome != "failed" {
+		return fail("variant outcome hides retained failure")
+	}
+	if v.Outcome == "verified" {
+		if !v.Proof.Proven || v.Compatibility == nil || v.Compatibility.Outcome != "satisfied" || v.ResolvedQuery == nil || v.CandidateText == nil || *v.ResolvedQuery != *v.CandidateText {
+			return fail("verified variant lacks consistent proof, assessment or publication")
+		}
+		for _, d := range v.Diagnostics {
+			if d.Code == "substitution_incomplete" {
+				return fail("verified variant retains incomplete substitution")
+			}
+		}
+	} else if v.ResolvedQuery != nil {
+		return fail("unverified variant publishes a query")
+	}
+	return nil
+}
+func inputIndex(a *analysis.Result) map[string]analysis.QueryInput {
+	out := map[string]analysis.QueryInput{}
+	for _, x := range a.Inputs {
+		out[x.ID] = x
+	}
+	return out
+}
+func requirementIndex(a *analysis.Result) map[string]analysis.RequirementItem {
+	out := map[string]analysis.RequirementItem{}
+	for _, x := range a.Requirements.Items {
+		out[x.ID] = x
+	}
+	return out
+}
+func referenceIndex(a *analysis.Result) map[string]analysis.Reference {
+	out := map[string]analysis.Reference{}
+	for _, x := range a.References {
+		out[x.ID] = x
+	}
+	return out
 }
