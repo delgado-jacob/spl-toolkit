@@ -158,11 +158,11 @@ func exportClosureCoverage(s exportSubject) (string, []string) {
 	if s.analysis == nil {
 		return "unavailable", []string{"analysis_unavailable"}
 	}
-	// Only knowledge-object kinds belong to closure. Direct source references
-	// retain their analysis graph but do not invent captured knowledge objects.
+	// A retained resource reference needs closure evidence for BOM coverage.
+	// Direct sources remain in the analysis graph without inventing captured objects.
 	for _, ref := range s.analysis.References {
 		switch ref.Kind {
-		case "macro", "lookup", "dataset", "data_model", "saved_search":
+		case "index", "source", "sourcetype", "macro", "lookup", "dataset", "data_model", "saved_search":
 			return "unavailable", []string{"closure_unavailable"}
 		}
 	}

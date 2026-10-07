@@ -242,3 +242,67 @@ func TestWorkflowDatasetDefinitionExportsAssessedEvidence(t *testing.T) {
 		}
 	}
 }
+
+func TestWorkflowDirectResourcesWithoutClosureRemainUnavailable(t *testing.T) {
+	for _, resource := range []struct{ kind, text string }{{"index", "search index=main"}, {"source", "search source=events"}, {"sourcetype", "search sourcetype=access"}} {
+		t.Run(resource.kind, func(t *testing.T) {
+			req := seedResolutionRequest(t)
+			req.Documents[0].Document.Text = resource.text
+			req.Documents[0].Document.Language = "spl"
+			req.Settings.Entries[0].Resolution.Resolutions = req.Settings.Entries[0].Resolution.Resolutions[:0]
+			req.Settings.Entries[0].Resolution.Compatibility.InputBindings = []compatibility.ResolutionBinding{}
+			r, err := Assess(req)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if r.Entries[0].Failure != nil || r.Entries[0].Resolution == nil || len(r.Entries[0].Resolution.Variants) != 1 {
+				t.Fatalf("resource resolution: %+v", r.Entries[0])
+			}
+			v := &r.Entries[0].Resolution.Variants[0]
+			if v.CandidateAnalysis == nil {
+				t.Fatal("missing canonical candidate")
+			}
+			if v.Compatibility != nil {
+				v.Compatibility.Closure = nil
+			}
+			before, _ := json.Marshal(r)
+			g, err := ExportGraph(r)
+			if err != nil {
+				t.Fatal(err)
+			}
+			b, err := ExportBOM(r)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(g.Subjects) != 2 || len(b.Subjects) != 2 {
+				t.Fatal("original/candidate subjects lost")
+			}
+			for i, s := range g.Subjects {
+				if s.Closure != nil || s.ClosureCoverage != "unavailable" || b.Subjects[i].ClosureCoverage != "unavailable" {
+					t.Fatalf("resource without closure coverage: graph=%+v BOM=%+v", s, b.Subjects[i])
+				}
+				dependency := false
+				for _, n := range s.Analysis.Nodes {
+					workflowPointer(t, r, n.ReportPointer)
+					dependency = dependency || n.Kind == "dependency" && n.DependencyKind == resource.kind
+				}
+				if !dependency {
+					t.Fatalf("direct dependency lost from %s graph", s.Domain)
+				}
+				for _, e := range s.Analysis.Edges {
+					workflowPointer(t, r, e.ReportPointer)
+				}
+				if len(b.Subjects[i].Entries) != 0 {
+					t.Fatal("direct resource invented captured BOM object")
+				}
+			}
+			if len(b.SharedDependencies) != 0 {
+				t.Fatal("direct resources invented shared captured identities")
+			}
+			after, _ := json.Marshal(r)
+			if !bytes.Equal(before, after) {
+				t.Fatal("export mutated source report")
+			}
+		})
+	}
+}
