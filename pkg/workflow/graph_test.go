@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"github.com/delgado-jacob/spl-toolkit/pkg/closure"
+	"github.com/delgado-jacob/spl-toolkit/pkg/corpus"
 	"strconv"
 	"strings"
 	"testing"
@@ -146,6 +147,24 @@ func assertClosureGraph(t *testing.T, r *Report, g *closure.DependencyGraph) {
 			if !nodes[id] {
 				t.Fatalf("dangling invocation %s", id)
 			}
+		}
+	}
+}
+
+func TestWorkflowGraphRejectsContradictoryOriginalSourceHash(t *testing.T) {
+	for _, hash := range []string{corpus.SourceHash("from [{id:2}]"), ""} {
+		r, err := Assess(seedRequest(t, "from [{id:1}]"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		r.Entries[0].SourceHash = hash
+		before, _ := json.Marshal(r)
+		if _, err := ExportGraph(r); err == nil {
+			t.Fatalf("recorded original source hash %q silently repaired", hash)
+		}
+		after, _ := json.Marshal(r)
+		if !bytes.Equal(before, after) {
+			t.Fatal("rejected graph mutated source")
 		}
 	}
 }

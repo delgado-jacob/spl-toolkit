@@ -14,6 +14,7 @@ import (
 
 type exportSubject struct {
 	id, domain, pointer, analysisPointer, closurePointer string
+	sourceHash                                           string
 	selection                                            []analysis.ResolutionChoice
 	analysis                                             *analysis.Result
 	closure                                              *closure.Report
@@ -29,7 +30,7 @@ func exportSubjects(r *Report) ([]exportSubject, error) {
 	subjects := []exportSubject{}
 	for i, e := range r.Entries {
 		base := fmt.Sprintf("/entries/%d", i)
-		s := exportSubject{id: e.ID, domain: "original", pointer: base, analysisPointer: base + "/analysis", analysis: e.Analysis, failure: e.Failure}
+		s := exportSubject{id: e.ID, domain: "original", pointer: base, analysisPointer: base + "/analysis", analysis: e.Analysis, sourceHash: e.SourceHash, failure: e.Failure}
 		if e.Compatibility != nil {
 			s.closure = e.Compatibility.Closure
 			s.closurePointer = base + "/compatibility/closure"
@@ -41,6 +42,11 @@ func exportSubjects(r *Report) ([]exportSubject, error) {
 		for j, v := range e.Resolution.Variants {
 			vp := fmt.Sprintf("%s/resolution/variants/%d", base, j)
 			s := exportSubject{id: e.ID, domain: "candidate", pointer: vp, analysisPointer: vp + "/candidate_analysis", analysis: v.CandidateAnalysis, selection: v.Selection}
+			// Candidate reports have no source_hash field. Their canonical analysis
+			// supplies exact candidate bytes; originals retain the recorded entry hash.
+			if v.CandidateAnalysis != nil {
+				s.sourceHash = corpus.SourceHash(v.CandidateAnalysis.Document.Text)
+			}
 			if v.Compatibility != nil {
 				s.closure = v.Compatibility.Closure
 				s.closurePointer = vp + "/compatibility/closure"
@@ -193,7 +199,7 @@ func exportAnalysis(s exportSubject, prefix string) (*graph.Report, error) {
 			item.count.Incomplete = 1
 		}
 	}
-	c := &corpus.Report{SchemaVersion: 1, Status: a.Status, ExecutionComplete: true, Mode: "analysis", Coverage: coverage, CoverageReasons: append([]string{}, a.Coverage.Reasons...), Counts: corpus.Counts{Selected: 1, Analyzed: 1}, Entries: []corpus.ReportEntry{{ID: s.id, SourceHash: corpus.SourceHash(a.Document.Text), AnalysisRevision: ar, Evaluation: &corpus.Evaluation{Kind: "analysis", Analysis: a}}}, Dependencies: []corpus.DependencySummary{}}
+	c := &corpus.Report{SchemaVersion: 1, Status: a.Status, ExecutionComplete: true, Mode: "analysis", Coverage: coverage, CoverageReasons: append([]string{}, a.Coverage.Reasons...), Counts: corpus.Counts{Selected: 1, Analyzed: 1}, Entries: []corpus.ReportEntry{{ID: s.id, SourceHash: s.sourceHash, AnalysisRevision: ar, Evaluation: &corpus.Evaluation{Kind: "analysis", Analysis: a}}}, Dependencies: []corpus.DependencySummary{}}
 	known := map[string][]string{"index": a.Dependencies.Indexes, "source": a.Dependencies.Sources, "sourcetype": a.Dependencies.SourceTypes, "dataset": a.Dependencies.Datasets, "lookup": a.Dependencies.Lookups, "data_model": a.Dependencies.DataModels, "macro": a.Dependencies.Macros}
 	firstReference := map[string]int{}
 	for i, ref := range a.References {
