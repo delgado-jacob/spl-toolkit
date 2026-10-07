@@ -9,6 +9,7 @@ import (
 	"github.com/delgado-jacob/spl-toolkit/pkg/corpus"
 	"github.com/delgado-jacob/spl-toolkit/pkg/environment"
 	"github.com/delgado-jacob/spl-toolkit/pkg/graph"
+	"github.com/delgado-jacob/spl-toolkit/pkg/impact"
 	"github.com/delgado-jacob/spl-toolkit/pkg/resolution"
 )
 
@@ -141,4 +142,44 @@ type BOMReport struct {
 	Counts             Counts             `json:"counts"`
 	Subjects           []BOMSubject       `json:"subjects"`
 	SharedDependencies []SharedDependency `json:"shared_dependencies"`
+}
+
+// CompareRequest supplies saved evidence. Comparison never reruns the query.
+type CompareRequest struct {
+	SchemaVersion int    `json:"schema_version"`
+	Before        Report `json:"before"`
+	After         Report `json:"after"`
+}
+type EvidencePair struct {
+	BeforePointer string `json:"before_pointer"`
+	AfterPointer  string `json:"after_pointer"`
+	Basis         string `json:"basis"`
+}
+type ComparisonEntry struct {
+	ID             string                 `json:"id"`
+	Before         ReportEntry            `json:"before"`
+	After          ReportEntry            `json:"after"`
+	Classification impact.Classification  `json:"classification"`
+	Deltas         []impact.EvidenceDelta `json:"deltas"`
+	Pairs          []EvidencePair         `json:"pairs"`
+	Unmatched      []string               `json:"unmatched"`
+	Ambiguous      []string               `json:"ambiguous"`
+	Reasons        []string               `json:"reasons"`
+}
+type ComparisonCounts struct {
+	Selected      int `json:"selected"`
+	Compared      int `json:"compared"`
+	Affected      int `json:"affected"`
+	Unchanged     int `json:"unchanged"`
+	Indeterminate int `json:"indeterminate"`
+	Failed        int `json:"failed"`
+}
+type ComparisonReport struct {
+	SchemaVersion     int               `json:"schema_version"`
+	ExecutionComplete bool              `json:"execution_complete"`
+	CIExitCode        int               `json:"ci_exit_code"`
+	BeforeProvenance  Provenance        `json:"before_provenance"`
+	AfterProvenance   Provenance        `json:"after_provenance"`
+	Counts            ComparisonCounts  `json:"counts"`
+	Entries           []ComparisonEntry `json:"entries"`
 }

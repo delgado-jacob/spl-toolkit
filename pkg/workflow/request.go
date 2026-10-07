@@ -14,6 +14,7 @@ import (
 	"github.com/delgado-jacob/spl-toolkit/internal/capabilityselector"
 	"github.com/delgado-jacob/spl-toolkit/internal/jsoninput"
 	"github.com/delgado-jacob/spl-toolkit/pkg/analysis"
+	"github.com/delgado-jacob/spl-toolkit/pkg/closure"
 	"github.com/delgado-jacob/spl-toolkit/pkg/environment"
 )
 
@@ -324,6 +325,11 @@ func validateWireShape(value any, typ reflect.Type, path string) error {
 				if required {
 					return requestErrorAt("request_invalid", path+"/"+key, "missing property "+key)
 				}
+				continue
+			}
+			// Canonical closure definition slots are required but nullable when
+			// a captured definition has no analyzable/effective body.
+			if nested == nil && typ == reflect.TypeOf(closure.DefinitionAnalysis{}) && (key == "direct_analysis" || key == "effective_analysis") {
 				continue
 			}
 			if err := validateWireShape(nested, f.Type, path+"/"+pointerPart(key)); err != nil {

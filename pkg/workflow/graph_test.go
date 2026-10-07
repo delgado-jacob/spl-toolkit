@@ -100,7 +100,7 @@ func TestWorkflowGraphEvidenceVariantsAndIsolation(t *testing.T) {
 	}
 }
 
-func workflowPointer(t *testing.T, r *Report, ptr string) any {
+func workflowPointer(t *testing.T, r any, ptr string) any {
 	t.Helper()
 	raw, _ := json.Marshal(r)
 	var v any
