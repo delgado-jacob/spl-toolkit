@@ -579,3 +579,71 @@ func TestResolutionCheckDisconnectedCorrelationSeparate(t *testing.T) {
 		t.Fatalf("disconnected sources blocked compatibility: %s %+v", report.Outcome, report.Reasons)
 	}
 }
+
+func TestResolutionCheckUnboundExplicitIdentity(t *testing.T) {
+	for _, tc := range []struct {
+		name, query, outcome string
+		missing, partial     bool
+	}{
+		{"captured-no-fields", "from $left", "satisfied", false, false},
+		{"complete-absence", "from $left", "unsatisfied", true, false},
+		{"partial-absence", "from $left", "incomplete", true, true},
+		{"unbound-field-schema", "from $left | fields id", "incomplete", false, false},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			proof, r, a := resolutionCheckFixture(t, tc.query)
+			a.InputBindings = []ResolutionBinding{}
+			r.SchemaBundle = nil
+			if tc.missing {
+				r.Snapshot.Objects = []environment.Object{}
+			}
+			if tc.partial {
+				for i := range r.Snapshot.Collections {
+					if r.Snapshot.Collections[i].Kind == "dataset" {
+						r.Snapshot.Collections[i].Coverage = "partial"
+						r.Snapshot.Collections[i].Reason = "bounded capture"
+					}
+				}
+			}
+			report := checkedResolution(t, proof, r, a)
+			if report.Outcome != tc.outcome {
+				t.Fatalf("unbound explicit identity outcome = %s, want %s: %+v", report.Outcome, tc.outcome, report.Reasons)
+			}
+			_, candidate, _, _ := proof.AssessmentEvidence()
+			ordinary := r
+			ordinary.Requirements = candidate.Analysis.Requirements
+			ordinary.InputBindings = []InputBinding{}
+			baseline := checked(t, ordinary)
+			if report.Outcome != baseline.Outcome {
+				t.Fatalf("resolution %s disagrees with ordinary identity assessment %s", report.Outcome, baseline.Outcome)
+			}
+		})
+	}
+}
+
+func TestResolutionCheckUnboundEqualNameDoesNotBorrowExplicitSchema(t *testing.T) {
+	proof, r, a := resolutionCheckFixture(t, `from $left | join type=inner left=L right=R where L.id=R.id [from $right]`)
+	unboundID := a.InputBindings[1].OriginalInputID
+	boundID := a.InputBindings[0].OriginalInputID
+	a.InputBindings = a.InputBindings[:1]
+	report := checkedResolution(t, proof, r, a)
+	if report.Outcome != "incomplete" {
+		t.Fatalf("unbound role borrowed explicit schema: %+v", report)
+	}
+	boundSatisfied, unboundIndeterminate := false, false
+	for _, out := range report.RequirementOutcomes {
+		if out.OriginalInputID == boundID && out.Evidence.FieldProjection != nil && out.Evidence.Outcome == "satisfied" {
+			boundSatisfied = true
+		}
+		if out.OriginalInputID == unboundID {
+			for _, reason := range out.Evidence.Reasons {
+				if reason.Code == "schema_not_supplied" && out.Evidence.Outcome == "indeterminate" && len(out.Evidence.Schemas) == 0 {
+					unboundIndeterminate = true
+				}
+			}
+		}
+	}
+	if !boundSatisfied || !unboundIndeterminate {
+		t.Fatalf("role-specific schema assessment lost: %+v", report.RequirementOutcomes)
+	}
+}

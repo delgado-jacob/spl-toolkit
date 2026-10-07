@@ -279,10 +279,6 @@ func (p *Prepared) resolveResolutionRole(original analysis.ResolutionEvidence, r
 		return resolvedInput{}, err
 	}
 	r := resolved[input.ID]
-	if substituted && len(bindings) == 0 {
-		r.objects = []environment.Object{}
-		r.explicitSourceEvidence = false
-	}
 	return r, nil
 }
 func resolutionLocalSet(set analysis.RequirementSet, input analysis.QueryInput, item analysis.RequirementItem) analysis.RequirementSet {
