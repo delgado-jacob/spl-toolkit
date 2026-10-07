@@ -281,13 +281,14 @@ func (p *evidenceProjector) walkCovered(v reflect.Value, path string, definition
 		item := p.add(path, "coverage", booleanCoverage(x.Complete), x.Complete)
 		item.Coverage = []EvidenceCoverage{{"requirements", booleanCoverage(x.Complete)}}
 	case closure.Report:
-		p.add(path, "closure", publicOutcome(string(x.Status)), x.Coverage.Complete && x.Status != analysis.Incomplete)
+		complete = complete && closureEvidenceComplete(&x)
+		p.add(path, "closure", publicOutcome(string(x.Status)), complete)
 	case closure.TraversalEdge:
-		p.add(path, publicRequirementKind(x.Kind), publicEnum(x.Resolution, "resolved", "missing", "ambiguous", "cycle", "dynamic", "unavailable", "incomplete"), x.Resolution == "resolved")
+		p.add(path, publicRequirementKind(x.Kind), publicEnum(x.Resolution, "resolved", "bound", "missing", "unknown", "ambiguous", "cycle", "dynamic", "wildcard", "unavailable", "incomplete"), publicRequirementKind(x.Kind) != "unrecognized" && (x.Resolution == "resolved" || x.Resolution == "bound"))
 	case validation.FieldProjection:
 		p.add(path, "schema_projection", publicOutcome(x.Outcome), complete && (x.Outcome == "required" || x.Outcome == "optional" || x.Outcome == "missing"))
 	case closure.ClosureCoverage:
-		item := p.add(path, "coverage", booleanCoverage(x.Complete), x.Complete)
+		item := p.add(path, "coverage", booleanCoverage(x.Complete), complete && x.Complete)
 		item.Coverage = []EvidenceCoverage{{"dependency_closure", booleanCoverage(x.Complete)}}
 	case resolution.Variant:
 		variantComplete := x.Outcome == "verified" || x.Outcome == "failed"
@@ -340,7 +341,7 @@ func (p *evidenceProjector) walkCovered(v reflect.Value, path string, definition
 }
 
 func compatibilityEvidenceComplete(outcome string, coverage []compatibility.Coverage, c *closure.Report) bool {
-	if outcome != "satisfied" && outcome != "unsatisfied" {
+	if len(coverage) == 0 || (outcome != "satisfied" && outcome != "unsatisfied") {
 		return false
 	}
 	for _, item := range coverage {
@@ -348,7 +349,7 @@ func compatibilityEvidenceComplete(outcome string, coverage []compatibility.Cove
 			return false
 		}
 	}
-	return c == nil || c.Coverage.Complete
+	return c == nil || closureEvidenceComplete(c)
 }
 
 func publicRequirementKind(kind string) string {
@@ -400,4 +401,11 @@ func entryEvidenceComplete(e ReportEntry) bool {
 		}
 	}
 	return true
+}
+
+// A saved coverage flag cannot establish completeness when its enclosing
+// canonical status is missing or unknown. Historical known statuses remain
+// independent of the currently installed capability revision.
+func closureEvidenceComplete(c *closure.Report) bool {
+	return c.Coverage.Complete && (c.Status == analysis.Valid || c.Status == analysis.Invalid)
 }

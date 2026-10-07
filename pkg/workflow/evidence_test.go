@@ -3,6 +3,7 @@ package workflow
 import (
 	"encoding/json"
 	"github.com/delgado-jacob/spl-toolkit/pkg/analysis"
+	"github.com/delgado-jacob/spl-toolkit/pkg/compatibility"
 	"github.com/delgado-jacob/spl-toolkit/pkg/impact"
 	"strings"
 	"testing"
@@ -182,5 +183,60 @@ func TestEvidenceHistoricalRevisionAndUnknownSelectors(t *testing.T) {
 	}
 	if !found {
 		t.Fatal("no capability")
+	}
+}
+
+func TestEvidenceCoverageAndUnknownClosureCompleteness(t *testing.T) {
+	for _, tc := range []struct {
+		name    string
+		request func(*testing.T) Request
+	}{
+		{"literal", func(t *testing.T) Request { return seedRequest(t, "from [{id:1}]") }},
+		{"bound", func(t *testing.T) Request { return boundComparisonRequest(t, "from events_good | fields id") }},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			r, err := Assess(tc.request(t))
+			if err != nil {
+				t.Fatal(err)
+			}
+			got, _ := evidenceBytes(t, EvidenceRequest{SchemaVersion: 1, Report: r, Include: []string{}})
+			for _, item := range got.Items {
+				if item.Kind == "detection" || item.Kind == "compatibility" || item.Kind == "closure" {
+					if !item.Complete {
+						t.Errorf("canonical captured evidence incomplete: %+v", item)
+					}
+				}
+				for _, coverage := range item.Coverage {
+					if coverage.Dimension == "unrecognized" {
+						t.Errorf("canonical dimension unrecognized: %+v", item)
+					}
+				}
+			}
+			empty, err := exportCopy(*r)
+			if err != nil {
+				t.Fatal(err)
+			}
+			empty.Entries[0].Compatibility.Coverage = []compatibility.Coverage{}
+			got, _ = evidenceBytes(t, EvidenceRequest{SchemaVersion: 1, Report: &empty, Include: []string{}})
+			for _, item := range got.Items {
+				if (item.Kind == "detection" || item.Kind == "compatibility") && item.Complete {
+					t.Errorf("missing obligations marked complete: %+v", item)
+				}
+			}
+			unknown, err := exportCopy(*r)
+			if err != nil {
+				t.Fatal(err)
+			}
+			unknown.Entries[0].Compatibility.Closure.Status = "PRIVATE_CLOSURE_STATUS_17"
+			got, raw := evidenceBytes(t, EvidenceRequest{SchemaVersion: 1, Report: &unknown, Include: []string{}})
+			if strings.Contains(raw, "PRIVATE_CLOSURE_STATUS_17") {
+				t.Fatal("unknown closure label disclosed")
+			}
+			for _, item := range got.Items {
+				if (item.Kind == "detection" || item.Kind == "compatibility" || item.Kind == "closure") && item.Complete {
+					t.Errorf("unknown closure marked complete: %+v", item)
+				}
+			}
+		})
 	}
 }

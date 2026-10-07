@@ -40,7 +40,7 @@ func publicState(value string) string {
 	return publicEnum(value, "complete", "partial", "not_applicable", "unavailable", "incomplete", "omitted", "unknown", "not_captured")
 }
 func publicDimension(value string) string {
-	return publicEnum(value, "environment_collection", "environment_capability", "field_schema", "target_discovery", "field_attribution", "query_semantics", "dependency_closure", "correlation", "requirements", "syntax", "semantics", "resolution", "collections", "expansion", "definitions", "effective_query", "traversed_definitions")
+	return publicEnum(value, "environment_collection", "environment_capability", "field_schema", "target_discovery", "field_attribution", "query_semantics", "dependency_closure", "correlation", "correlation_analysis", "requirements", "syntax", "semantics", "resolution", "collections", "expansion", "definitions", "effective_query", "traversed_definitions")
 }
 func booleanCoverage(complete bool) string {
 	if complete {
