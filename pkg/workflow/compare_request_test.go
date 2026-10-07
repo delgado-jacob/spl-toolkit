@@ -215,3 +215,20 @@ func TestCompareAdmissionTraversalExecution(t *testing.T) {
 		t.Fatalf("source traversal failure hidden: %+v", got)
 	}
 }
+
+func TestCompareAdmissionVerifiedWithoutCandidate(t *testing.T) {
+	r, err := Assess(seedResolutionRequest(t))
+	if err != nil {
+		t.Fatal(err)
+	}
+	q := CompareRequest{SchemaVersion: 1, Before: *r, After: *r}
+	q, _ = exportCopy(q)
+	v := &q.After.Entries[0].Resolution.Variants[0]
+	v.CandidateAnalysis = nil
+	v.Compatibility = nil
+	v.ResolvedQuery = nil
+	v.Proof.Proven = false
+	if _, err := Compare(q); err == nil {
+		t.Fatal("accepted verified variant without candidate/proof/assessment/publication")
+	}
+}

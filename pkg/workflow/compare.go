@@ -613,8 +613,16 @@ func admitResolutionVariant(v resolution.Variant, r *resolution.Report, original
 	fail := func(m string) error { return requestErrorAt("request_invalid", path, m) }
 	candidate := v.CandidateAnalysis
 	if candidate == nil {
-		if v.Compatibility != nil || v.ResolvedQuery != nil || v.Proof.Proven {
-			return fail("candidate evidence required for proof or publication")
+		if v.Outcome == "verified" || v.Compatibility != nil || v.ResolvedQuery != nil || v.Proof.Proven || len(v.Proof.References) > 0 || len(v.Proof.Roles) > 0 {
+			return fail("candidate evidence required for verification, proof or publication")
+		}
+		for _, change := range v.Changes {
+			if change.CandidateLocation != nil || len(change.CandidateReferenceIDs) > 0 {
+				return fail("candidate change evidence requires candidate analysis")
+			}
+			if err := validateLocations(reflect.ValueOf(change.OriginalLocation), original.Document.Text, path+"/changes/original_location"); err != nil {
+				return err
+			}
 		}
 		return nil
 	}
