@@ -88,7 +88,9 @@ func (s *semanticStage) rewriteIdentityCoverage(operand locatedOperand, kind str
 		}
 	}
 	s.result.rewrite.identityCoverageIncomplete = true
-	s.result.Coverage.Reasons = append(s.result.Coverage.Reasons, CodeUnsupportedSemantics)
+	if !s.result.rewrite.preserveCanonicalResult {
+		s.result.Coverage.Reasons = append(s.result.Coverage.Reasons, CodeUnsupportedSemantics)
+	}
 }
 
 func (e *environment) rewriteProject(fields map[fieldIdentityKey]trackedField) {

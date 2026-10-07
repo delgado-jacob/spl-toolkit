@@ -85,6 +85,7 @@ type RewriteSession struct {
 	sites                      []*rewriteSite
 	epoch                      int
 	identityCoverageIncomplete bool
+	preserveCanonicalResult    bool
 }
 type rewriteSite struct {
 	public   RewriteSite

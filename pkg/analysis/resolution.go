@@ -62,3 +62,12 @@ type ResolutionProofEvidence struct {
 	Roles       []ResolutionRole          `json:"roles"`
 	Limitations []ResolutionLimitation    `json:"limitations"`
 }
+
+// ResolutionSession holds authority from the submitted document's canonical
+// typed owners. Reporting snapshots cannot create or modify that authority.
+type ResolutionSession struct {
+	rewrite  *RewriteSession
+	trace    *requirementTrace
+	evidence ResolutionEvidence
+	sites    map[string][]*rewriteSite
+}
