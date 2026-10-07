@@ -59,6 +59,7 @@ import (
 	"github.com/delgado-jacob/spl-toolkit/pkg/rewrite"
 	"github.com/delgado-jacob/spl-toolkit/pkg/sarif"
 	"github.com/delgado-jacob/spl-toolkit/pkg/validation"
+	"github.com/delgado-jacob/spl-toolkit/pkg/workflow"
 )
 
 var registry = newMapperRegistry()
@@ -428,6 +429,34 @@ func spl_mapper_rewrite_batch(mapperID C.int, requestJSON *C.char) *C.SPLResult 
 			return nil, err
 		}
 		return rewrite.RewriteBatch(request)
+	})
+}
+
+//export spl_mapper_workflow_assess
+func spl_mapper_workflow_assess(mapperID C.int, requestJSON *C.char) *C.SPLResult {
+	return ownedMapperJSONResult(mapperID, func() (any, error) {
+		return workflow.AssessOutputJSON([]byte(C.GoString(requestJSON)))
+	})
+}
+
+//export spl_mapper_workflow_compare
+func spl_mapper_workflow_compare(mapperID C.int, requestJSON *C.char) *C.SPLResult {
+	return ownedMapperJSONResult(mapperID, func() (any, error) {
+		return workflow.CompareJSON([]byte(C.GoString(requestJSON)))
+	})
+}
+
+//export spl_mapper_workflow_evidence
+func spl_mapper_workflow_evidence(mapperID C.int, requestJSON *C.char) *C.SPLResult {
+	return ownedMapperJSONResult(mapperID, func() (any, error) {
+		return workflow.EvidenceJSON([]byte(C.GoString(requestJSON)))
+	})
+}
+
+//export spl_mapper_workflow_recheck
+func spl_mapper_workflow_recheck(mapperID C.int, requestJSON *C.char) *C.SPLResult {
+	return ownedMapperJSONResult(mapperID, func() (any, error) {
+		return workflow.RecheckJSON([]byte(C.GoString(requestJSON)))
 	})
 }
 

@@ -163,7 +163,8 @@ class SPLMapper:
         self._lib.spl_mapper_rewrite_batch.argtypes = [ctypes.c_int, ctypes.c_char_p]
         self._lib.spl_mapper_rewrite_batch.restype = ctypes.POINTER(SPLResult)
         for operation in ("resolve", "check_compatibility", "closure_query", "scan_corpus", "export_graph", "export_sarif", "impact_schema",
-                          "impact_mapping", "document_view"):
+                          "impact_mapping", "document_view", "workflow_assess", "workflow_compare",
+                          "workflow_evidence", "workflow_recheck"):
             native = getattr(self._lib, "spl_mapper_" + operation)
             native.argtypes = [ctypes.c_int, ctypes.c_char_p]
             native.restype = ctypes.POINTER(SPLResult)
@@ -459,6 +460,22 @@ class SPLMapper:
     def document_view(self, document: dict) -> dict:
         """Return a detached advanced view of a canonical QueryDocument dictionary."""
         return self._validate_fields_request(self._lib.spl_mapper_document_view, document, operation="document view")
+
+    def workflow_assess(self, request: dict) -> dict | str:
+        """Assess explicit offline workflow inputs; text format returns a string."""
+        return self._validate_fields_request(self._lib.spl_mapper_workflow_assess, request, operation="workflow assess")
+
+    def workflow_compare(self, request: dict) -> dict:
+        """Compare saved workflow assessments using their canonical evidence."""
+        return self._validate_fields_request(self._lib.spl_mapper_workflow_compare, request, operation="workflow compare")
+
+    def workflow_evidence(self, request: dict) -> dict:
+        """Project minimal evidence by default; disclosures require explicit include choices."""
+        return self._validate_fields_request(self._lib.spl_mapper_workflow_evidence, request, operation="workflow evidence")
+
+    def workflow_recheck(self, request: dict) -> dict:
+        """Freshly assess a proposal against explicit original context and offline evidence."""
+        return self._validate_fields_request(self._lib.spl_mapper_workflow_recheck, request, operation="workflow recheck")
 
     def _validate_fields_request(self, native, request, *, operation="validation") -> dict:
         with self._operation() as handle:

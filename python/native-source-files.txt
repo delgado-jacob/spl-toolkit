@@ -192,6 +192,7 @@ pkg/rewrite/verify.go
 pkg/sarif/export.go
 pkg/sarif/locations.go
 pkg/sarif/model.go
+pkg/sarif/workflow.go
 pkg/validation/batch.go
 pkg/validation/catalog.go
 pkg/validation/json_schema.go
@@ -209,3 +210,19 @@ pkg/validation/schema_request.go
 pkg/validation/schema_target.go
 pkg/validation/schema_validate.go
 pkg/validation/validate.go
+pkg/workflow/alignment.go
+pkg/workflow/assess.go
+pkg/workflow/compare.go
+pkg/workflow/deltas.go
+pkg/workflow/disclosure.go
+pkg/workflow/errors.go
+pkg/workflow/evidence.go
+pkg/workflow/exports.go
+pkg/workflow/format.go
+pkg/workflow/model.go
+pkg/workflow/prepare.go
+pkg/workflow/recheck.go
+pkg/workflow/render.go
+pkg/workflow/request.go
+pkg/workflow/sarif.go
+pkg/workflow/status.go
