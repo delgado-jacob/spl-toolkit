@@ -81,6 +81,8 @@ func runCLIWithInput(args []string, stdin io.Reader, stdout, stderr io.Writer) i
 		return writeGeneratedCLIResult(payload.Bytes(), stdout, stderr)
 	case "validate-schema":
 		return runSchemaValidationCLI(args[1:], stdin, stdout, stderr)
+	case "workflow":
+		return runWorkflowCLI(args[1:], stdout, stderr)
 	case "resolve":
 		return runResolutionCLI(args[1:], stdout, stderr)
 	case "compatibility":

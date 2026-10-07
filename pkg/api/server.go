@@ -210,6 +210,12 @@ func (s *Server) setupRoutes() {
 	s.mux.HandleFunc("POST /api/v1/environment/validate", s.handleValidateEnvironment)
 	s.mux.HandleFunc("GET /api/v1/capabilities", s.handleCapabilities)
 
+	// Stateless offline workflow endpoints
+	s.mux.HandleFunc("POST /api/v1/workflow/assess", s.handleWorkflowAssess)
+	s.mux.HandleFunc("POST /api/v1/workflow/compare", s.handleWorkflowCompare)
+	s.mux.HandleFunc("POST /api/v1/workflow/evidence", s.handleWorkflowEvidence)
+	s.mux.HandleFunc("POST /api/v1/workflow/recheck", s.handleWorkflowRecheck)
+
 	// Mapping configuration endpoints
 	s.mux.HandleFunc("POST /api/v1/mappings", s.handleLoadMappings)
 

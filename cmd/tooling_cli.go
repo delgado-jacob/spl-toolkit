@@ -23,6 +23,12 @@ import (
 )
 
 const toolingHelp = `Developer tooling (offline, read-only sources):
+  workflow assess --request FILE [--format text|json|sarif|graph|bom] [--output FILE]
+  workflow assess (--directory DIR | --manifest FILE) --settings FILE [--format text|json|sarif|graph|bom] [--output FILE]
+  workflow compare --before FILE --after FILE [--format text|json] [--output FILE]
+  workflow evidence --report FILE [--include CATEGORY]... [--output FILE]
+  workflow evidence --comparison FILE [--include CATEGORY]... [--output FILE]
+  workflow recheck --request FILE [--format text|json] [--output FILE]
   scan --directory DIR | --manifest FILE [--target FILE] [--format text|json|sarif] [--output FILE]
   graph --directory DIR | --manifest FILE [--target FILE] [--format json] [--output FILE]
   impact-schema --directory DIR | --manifest FILE --before-target FILE --after-target FILE [--format text|json] [--output FILE]
