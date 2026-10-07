@@ -235,7 +235,7 @@ func TestResolutionCheckEvidenceLimits(t *testing.T) {
 			r.Snapshot.Collections[0].Coverage = "partial"
 			r.Snapshot.Collections[0].Reason = "bounded"
 		}},
-		{"hidden selected dataset", "incomplete", func(r *Request, a *ResolutionAssessment) {
+		{"hidden selected dataset", "satisfied", func(r *Request, a *ResolutionAssessment) {
 			r.Snapshot.Objects[0].Document = &analysis.QueryDocument{Language: "spl2", Text: "from users"}
 		}},
 	} {
@@ -243,6 +243,44 @@ func TestResolutionCheckEvidenceLimits(t *testing.T) {
 			proof, r, a := resolutionCheckFixture(t, `from $left | fields id`)
 			tc.change(&r, &a)
 			report := checkedResolution(t, proof, r, a)
+			if tc.name == "hidden selected dataset" {
+				rootField, hiddenDataset := false, false
+				for _, out := range report.RequirementOutcomes {
+					if out.OriginalInputID != "" && out.Evidence.FieldProjection != nil {
+						rootField = out.Evidence.Outcome == "satisfied" && len(out.Evidence.Schemas) == 1 && out.Evidence.Schemas[0].SchemaID == "fields"
+					}
+					if out.Evidence.DefinitionObjectID == "events" && len(out.AssessedOccurrences) > 0 && out.AssessedOccurrences[0].OriginalName == "users" {
+						hiddenDataset = out.OriginalInputID == "" && out.Evidence.Outcome == "satisfied" && len(out.Evidence.Schemas) == 0 && len(out.Evidence.InvocationProvenance) > 0
+					}
+				}
+				_, candidate, _, _ := proof.AssessmentEvidence()
+				if report.Closure.EffectiveAnalysis.Document.Text != candidate.Analysis.Document.Text || len(report.EffectiveRequirements.Inputs) != 1 || report.EffectiveRequirements.Inputs[0].Name != "events" {
+					t.Fatal("dataset body changed effective root supplier")
+				}
+				ordinaryBindings := []InputBinding{}
+				for _, binding := range a.InputBindings {
+					ordinaryBindings = append(ordinaryBindings, InputBinding{InputID: candidate.Analysis.Inputs[0].ID, ObjectID: binding.ObjectID, Expected: binding.Expected, SchemaID: binding.SchemaID})
+				}
+				prepared, err := Prepare(r.Snapshot, r.SchemaBundle)
+				if err != nil {
+					t.Fatal(err)
+				}
+				doc := candidate.Analysis.Document
+				ordinary, err := prepared.Check(AssessmentRequest{SchemaVersion: 1, Document: &doc, Requirements: candidate.Analysis.Requirements, QueryScope: a.QueryScope, InputBindings: ordinaryBindings})
+				if err != nil || ordinary.Outcome != "satisfied" {
+					t.Fatalf("ordinary closure parity: %+v %v", ordinary, err)
+				}
+				for _, out := range report.RequirementOutcomes {
+					if out.OriginalInputID != "" && out.Evidence.FieldProjection != nil {
+						if len(out.Evidence.SourceIntervals) != 1 || out.Evidence.SourceIntervals[0].Kind != "query" || out.Evidence.SourceIntervals[0].Start != 21 || out.Evidence.SourceIntervals[0].End != 23 {
+							t.Fatalf("root field interval=%+v", out.Evidence.SourceIntervals)
+						}
+					}
+				}
+				if !rootField || !hiddenDataset {
+					t.Fatalf("root field or independent hidden dataset evidence lost: %+v", report.RequirementOutcomes)
+				}
+			}
 			if report.Outcome != tc.want {
 				t.Fatalf("got %s want %s: %+v", report.Outcome, tc.want, report.Reasons)
 			}

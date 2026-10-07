@@ -13,17 +13,21 @@ import (
 )
 
 // CheckResolution consumes session authority, never serialized proof evidence.
-// Closure integration uses checkResolutionDirect after establishing its own
-// effective-query correspondence; this path assesses direct obligations only.
+// Closure integration establishes effective-query correspondence before
+// reusing the direct role evaluator.
 func (p *Prepared) CheckResolution(proof *analysis.ResolutionProof, assessment ResolutionAssessment) (*ResolutionReport, error) {
 	original, candidate, roles, authorized := proof.AssessmentEvidence()
 	if !authorized {
 		return nil, requestErrorAt("resolution_proof_invalid", "/proof", "session-bound substitution authority is required")
 	}
-	return p.checkResolutionDirect(original, candidate, roles, proof.Evidence().References, assessment)
+	return p.checkResolutionClosure(original, candidate, roles, proof.Evidence().References, assessment)
 }
 
 func (p *Prepared) checkResolutionDirect(original, candidate analysis.ResolutionEvidence, roles []analysis.ResolutionRole, references []analysis.ResolutionReferencePair, assessment ResolutionAssessment) (*ResolutionReport, error) {
+	return p.checkResolutionRoles(original, candidate, roles, references, assessment, nil)
+}
+
+func (p *Prepared) checkResolutionRoles(original, candidate analysis.ResolutionEvidence, roles []analysis.ResolutionRole, references []analysis.ResolutionReferencePair, assessment ResolutionAssessment, evaluated *closure.Report) (*ResolutionReport, error) {
 	// Admission sees all flattened selections, including alternatives belonging to
 	// other variants. Only the exact role/value for this proof is used below.
 	choices := []analysis.ResolutionChoice{}
@@ -121,7 +125,7 @@ func (p *Prepared) checkResolutionDirect(original, candidate analysis.Resolution
 			paired[resolutionOccurrenceKey(item.ID, pair.CandidateOccurrence)] = true
 		}
 		limits := &Report{Outcome: "satisfied", Inputs: []InputOutcome{inputOut}, Coverage: []Coverage{{Dimension: "dependency_closure", State: "not_applicable", Reasons: []Reason{}}}}
-		p.selectedBodyLimits(limits, map[string]resolvedInput{input.ID: r}, nil)
+		p.selectedBodyLimits(limits, map[string]resolvedInput{input.ID: r}, evaluated)
 		if limits.Outcome != "satisfied" {
 			unknown = true
 			for _, reason := range limits.Reasons {
@@ -172,8 +176,12 @@ func (p *Prepared) checkResolutionDirect(original, candidate analysis.Resolution
 	global.Gaps = slices.DeleteFunc(global.Gaps, func(gap analysis.RequirementGap) bool {
 		return gap.Code == analysis.CodeRequirementIndeterminate && resolutionGapSatisfied(gap, report.RequirementOutcomes)
 	})
-	child := p.assess(AssessmentRequest{SchemaVersion: 1, Requirements: global, QueryScope: assessment.QueryScope, InputBindings: []InputBinding{}}, map[string]resolvedInput{}, assessmentQuery{set: global}, nil)
-	p.selectedBodyLimits(child, map[string]resolvedInput{}, nil)
+	globalQuery := assessmentQuery{set: global}
+	if evaluated != nil {
+		globalQuery.provenance = evaluated.Provenance
+	}
+	child := p.assess(AssessmentRequest{SchemaVersion: 1, Requirements: global, QueryScope: assessment.QueryScope, InputBindings: []InputBinding{}}, map[string]resolvedInput{}, globalQuery, evaluated)
+	p.selectedBodyLimits(child, map[string]resolvedInput{}, evaluated)
 	// A conservative local ownership projection changes assessment, never the
 	// canonical reporting coordinates of the obligation it assesses.
 	canonicalReason := func(reason Reason) Reason {

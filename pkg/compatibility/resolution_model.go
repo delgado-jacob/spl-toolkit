@@ -45,20 +45,21 @@ type ResolutionCoverage struct {
 	Evidence        Coverage `json:"evidence"`
 }
 type ResolutionReport struct {
-	SchemaVersion         int                            `json:"schema_version"`
-	Outcome               string                         `json:"outcome"`
-	Requirements          analysis.RequirementSet        `json:"requirements"`
-	EffectiveRequirements *analysis.RequirementSet       `json:"effective_requirements,omitempty"`
-	Closure               *closure.Report                `json:"closure,omitempty"`
-	InputBindings         []ResolutionBinding            `json:"input_bindings"`
-	DependencyBindings    []closure.Binding              `json:"dependency_bindings"`
-	Inputs                []ResolutionInputOutcome       `json:"inputs"`
-	RequirementOutcomes   []ResolutionRequirementOutcome `json:"requirement_outcomes"`
-	Correlation           analysis.CorrelationGraph      `json:"correlation"`
-	Coverage              []ResolutionCoverage           `json:"coverage"`
-	Reasons               []ResolutionReason             `json:"reasons"`
-	Diagnostics           []environment.Diagnostic       `json:"diagnostics"`
-	Provenance            Provenance                     `json:"provenance"`
+	SchemaVersion               int                            `json:"schema_version"`
+	Outcome                     string                         `json:"outcome"`
+	Requirements                analysis.RequirementSet        `json:"requirements"`
+	EffectiveRequirements       *analysis.RequirementSet       `json:"effective_requirements,omitempty"`
+	Closure                     *closure.Report                `json:"closure,omitempty"`
+	InputBindings               []ResolutionBinding            `json:"input_bindings"`
+	EffectiveDependencyBindings []closure.Binding              `json:"effective_dependency_bindings,omitempty"`
+	DependencyBindings          []closure.Binding              `json:"dependency_bindings"`
+	Inputs                      []ResolutionInputOutcome       `json:"inputs"`
+	RequirementOutcomes         []ResolutionRequirementOutcome `json:"requirement_outcomes"`
+	Correlation                 analysis.CorrelationGraph      `json:"correlation"`
+	Coverage                    []ResolutionCoverage           `json:"coverage"`
+	Reasons                     []ResolutionReason             `json:"reasons"`
+	Diagnostics                 []environment.Diagnostic       `json:"diagnostics"`
+	Provenance                  Provenance                     `json:"provenance"`
 }
 
 // ArtifactIdentity uses the artifact owners' normalized digests.
