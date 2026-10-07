@@ -76,16 +76,35 @@ func Compare(q CompareRequest) (*ComparisonReport, error) {
 			out.Counts.Indeterminate++
 		default:
 			alignEntry(&e, i)
-			// Task 7 supplies semantic deltas and final classification. Correspondence
-			// alone cannot establish that all meaningful evidence is unchanged.
-			e.Reasons = append(e.Reasons, "comparison_semantics_pending")
+			definite := evidenceDeltas(&e, i)
+			complete := comparisonComplete(b) && comparisonComplete(a)
+			aligned := len(e.Unmatched) == 0 && len(e.Ambiguous) == 0
+			e.Classification = classifyComparison(false, definite, complete, aligned)
+			if definite {
+				e.Reasons = append(e.Reasons, "meaningful_evidence_changed")
+			}
+			if !complete {
+				e.Reasons = append(e.Reasons, "evidence_incomplete")
+			}
+			if !aligned {
+				e.Reasons = append(e.Reasons, "correspondence_unresolved")
+			}
 			out.Counts.Compared++
-			out.Counts.Indeterminate++
+			switch e.Classification {
+			case impact.Affected:
+				out.Counts.Affected++
+			case impact.Unchanged:
+				out.Counts.Unchanged++
+			default:
+				out.Counts.Indeterminate++
+			}
 		}
 		out.Entries = append(out.Entries, e)
 	}
 	if !out.ExecutionComplete {
 		out.CIExitCode = 2
+	} else if out.Counts.Affected > 0 {
+		out.CIExitCode = 1
 	} else if out.Counts.Indeterminate > 0 {
 		out.CIExitCode = 3
 	}
