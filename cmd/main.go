@@ -28,6 +28,7 @@ Commands:
   validate-fields   Validate fields against a local catalog
   validate-schema   Validate fields against local JSON Schema or OCSF
   environment validate  Validate local environment snapshot and schema bundle
+  resolve           Resolve named inputs using bound offline evidence
   compatibility     Assess requirements against bound offline evidence
   rewrite           Safely preview or apply explicit rewrite rules
   closure           Evaluate caller-supplied knowledge-object dependencies
@@ -83,6 +84,12 @@ Compatibility assessment options:
   compatibility --request FILE [--format text|json] [--output FILE] [--require-connected]
 The request is one complete local JSON envelope (not -).
 Exit: 0 satisfied, 1 unsatisfied or required disconnected, 3 incomplete/not assessed or required indeterminate, 2 request/write failure.
+
+Resolution options:
+  resolve --request FILE [--format text|json] [--output FILE]
+The request is one complete local JSON envelope (not -).
+Exit: 0 all verified, 1 any failed, 3 incomplete with none failed, 2 request/write failure.
+Every admitted variant is emitted before the content exit status.
 
 Additional rewrite options:
   --rules FILE      Required local versioned rewrite rule set (not -)
