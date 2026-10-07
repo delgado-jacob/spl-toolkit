@@ -1,6 +1,8 @@
 // Package sarif projects canonical corpus findings into SARIF 2.1.0.
 package sarif
 
+import "github.com/delgado-jacob/spl-toolkit/pkg/analysis"
+
 // Log and its children intentionally use SARIF's standardized member names.
 // Tool-specific status, provenance, and coverage stay in property bags.
 type Log struct {
@@ -82,4 +84,15 @@ type Notification struct {
 type Invocation struct {
 	ExecutionSuccessful        bool           `json:"executionSuccessful"`
 	ToolExecutionNotifications []Notification `json:"toolExecutionNotifications,omitempty"`
+}
+
+// AdditionalFinding projects caller-owned evidence against an existing document.
+// A nil Location deliberately produces an unlocated SARIF result.
+type AdditionalFinding struct {
+	DocumentID string             `json:"document_id"`
+	RuleID     string             `json:"rule_id"`
+	Level      string             `json:"level"`
+	Message    string             `json:"message"`
+	Location   *analysis.Location `json:"location,omitempty"`
+	Properties map[string]any     `json:"properties"`
 }
