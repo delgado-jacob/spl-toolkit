@@ -201,6 +201,7 @@ package main
 import (
  "encoding/json"
  "fmt"
+ "io"
  "os"
  "strings"
  "github.com/delgado-jacob/spl-toolkit/pkg/analysis"
@@ -231,11 +232,16 @@ func compatibilityExamples() map[string]any {
  return out
 }
 func main() {
- if len(os.Args)>2 && os.Args[1]=="workflow-evidence-environment-project" { r:=must(workflow.AssessJSON([]byte(os.Args[2])));raw:=must(json.Marshal(workflow.EvidenceRequest{SchemaVersion:1,Report:r,Include:[]string{"environment_metadata"}}));e:=must(workflow.EvidenceJSON(raw));must(0,json.NewEncoder(os.Stdout).Encode(e));return }
- if len(os.Args)>2 && os.Args[1]=="workflow-evidence-project" { r:=must(workflow.EvidenceJSON([]byte(os.Args[2])));must(0,json.NewEncoder(os.Stdout).Encode(r));return }
+ // Workflow reports may exceed process argument limits; receive them on stdin.
+ var raw []byte
+ if len(os.Args)>1 {
+  if len(os.Args)>2 { raw=[]byte(os.Args[2]) } else { raw=must(io.ReadAll(os.Stdin)) }
+ }
+ if len(os.Args)>1 && os.Args[1]=="workflow-evidence-environment-project" { r:=must(workflow.AssessJSON(raw));raw:=must(json.Marshal(workflow.EvidenceRequest{SchemaVersion:1,Report:r,Include:[]string{"environment_metadata"}}));e:=must(workflow.EvidenceJSON(raw));must(0,json.NewEncoder(os.Stdout).Encode(e));return }
+ if len(os.Args)>1 && os.Args[1]=="workflow-evidence-project" { r:=must(workflow.EvidenceJSON(raw));must(0,json.NewEncoder(os.Stdout).Encode(r));return }
  if len(os.Args)>2 && os.Args[1]=="resolution-request" { _,err:=resolution.ResolveJSON([]byte(os.Args[2]));if err!=nil{fmt.Print("rejected")}else{fmt.Print("accepted")};return }
  if len(os.Args)>1 {
-  raw := []byte(os.Args[2]); var e error
+  var e error
   switch os.Args[1] {
   case "workflow-request": _,e=workflow.DecodeRequest(raw)
   case "workflow-comparison-request": _,e=workflow.CompareJSON(raw)
@@ -1289,7 +1295,7 @@ def test_workflow_emitted_families_exports_and_privacy(schemas, emitted):
 
 def test_workflow_strict_requests_and_runtime_controls(schemas, emitted, emitter):
     def admission(family, value):
-        return subprocess.check_output([str(emitter), family, json.dumps(value)], text=True)
+        return subprocess.check_output([str(emitter), family], input=json.dumps(value), text=True)
     families = ("workflow-request", "workflow-comparison-request",
                 "workflow-evidence-request", "workflow-recheck-request")
     for family in families:
@@ -1306,7 +1312,7 @@ def test_workflow_strict_requests_and_runtime_controls(schemas, emitted, emitter
         assert admission(family, wrong) == "rejected"
         raw = json.dumps(request)
         raw = raw[:-1] + ',"schema_version":1}'
-        assert subprocess.check_output([str(emitter), family, raw], text=True) == "rejected"
+        assert subprocess.check_output([str(emitter), family], input=raw, text=True) == "rejected"
     request = emitted["workflow-request"]
     for member in ("format",):
         wrong = copy.deepcopy(request); wrong[member] = None
@@ -1346,14 +1352,14 @@ def test_workflow_opted_diagnostic_raw_values_match_actual_projection(schemas, e
         report["entries"][1]["failure"]["detail"] = detail
         request = {"schema_version": 1, "report": report, "include": ["diagnostic_details"]}
         assert not errors(schemas, "workflow-evidence-request", request)
-        assert subprocess.check_output([str(emitter), "workflow-evidence-request", json.dumps(request)], text=True) == "accepted"
-        projected = json.loads(subprocess.check_output([str(emitter), "workflow-evidence-project", json.dumps(request)], text=True))
+        assert subprocess.check_output([str(emitter), "workflow-evidence-request"], input=json.dumps(request), text=True) == "accepted"
+        projected = json.loads(subprocess.check_output([str(emitter), "workflow-evidence-project"], input=json.dumps(request), text=True))
         assert not errors(schemas, "workflow-evidence", projected)
         item = next(item for item in projected["items"] if item["pointer"] == "/report/entries/1/failure/detail")
         assert item["details"]["diagnostic_details"] == detail
     report["entries"][1]["failure"]["detail"] = None
     assert errors(schemas, "workflow-evidence-request", request)
-    assert subprocess.check_output([str(emitter), "workflow-evidence-request", json.dumps(request)], text=True) == "rejected"
+    assert subprocess.check_output([str(emitter), "workflow-evidence-request"], input=json.dumps(request), text=True) == "rejected"
 
 
 def test_workflow_environment_relation_projection_uses_canonical_relation_array(schemas, emitted, emitter):
@@ -1361,7 +1367,7 @@ def test_workflow_environment_relation_projection_uses_canonical_relation_array(
     relations = [{"kind": "lookup", "name": "users", "property": "/relation"}]
     request["settings"]["snapshot"]["objects"][0]["relations"] = relations
     assert not errors(schemas, "workflow-request", request)
-    evidence = json.loads(subprocess.check_output([str(emitter), "workflow-evidence-environment-project", json.dumps(request)], text=True))
+    evidence = json.loads(subprocess.check_output([str(emitter), "workflow-evidence-environment-project"], input=json.dumps(request), text=True))
     assert not errors(schemas, "workflow-evidence", evidence)
     assert any(item.get("details", {}).get("environment_metadata") == relations for item in evidence["items"])
     # The environment category still accepts a disclosed empty string/relation
@@ -1375,7 +1381,7 @@ def test_workflow_saved_failure_mode_and_publication_controls(schemas, emitted, 
     request = emitted["workflow-comparison-request"]
     def reject(value):
         assert errors(schemas, "workflow-comparison-request", value)
-        assert subprocess.check_output([str(emitter), "workflow-comparison-request", json.dumps(value)], text=True) == "rejected"
+        assert subprocess.check_output([str(emitter), "workflow-comparison-request"], input=json.dumps(value), text=True) == "rejected"
     wrong = copy.deepcopy(request)
     wrong["before"]["entries"][0]["resolution"] = wrong["before"]["entries"][1]["resolution"]
     reject(wrong)
@@ -1393,12 +1399,12 @@ def test_workflow_saved_failure_mode_and_publication_controls(schemas, emitted, 
     failed = emitted["workflow-acquisition-failure"]
     failed_request = {"schema_version": 1, "before": copy.deepcopy(failed), "after": copy.deepcopy(failed)}
     assert not errors(schemas, "workflow-comparison-request", failed_request)
-    assert subprocess.check_output([str(emitter), "workflow-comparison-request", json.dumps(failed_request)], text=True) == "accepted"
+    assert subprocess.check_output([str(emitter), "workflow-comparison-request"], input=json.dumps(failed_request), text=True) == "accepted"
     for detail in ({}, 7):
         changed = copy.deepcopy(failed_request)
         changed["before"]["entries"][0]["failure"]["detail"] = detail
         assert not errors(schemas, "workflow-comparison-request", changed)
-        assert subprocess.check_output([str(emitter), "workflow-comparison-request", json.dumps(changed)], text=True) == "accepted"
+        assert subprocess.check_output([str(emitter), "workflow-comparison-request"], input=json.dumps(changed), text=True) == "accepted"
     changed = copy.deepcopy(failed_request)
     changed["before"]["entries"][0]["failure"]["detail"] = None
     reject(changed)
