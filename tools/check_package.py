@@ -795,12 +795,12 @@ def build_surface_binaries(root: Path, output: Path, version: str) -> tuple[Path
     ldflags = f"-X=github.com/delgado-jacob/spl-toolkit/internal/buildinfo.Version={version}"
     env = clean_env() | {"GOTOOLCHAIN": "local"}
     run(
-        ["go", "build", "-mod=readonly", "-trimpath", "-ldflags", ldflags, "-o", str(cli), "./cmd"],
+        ["go", "build", "-mod=readonly", "-trimpath", "-buildvcs=false", "-ldflags", ldflags, "-o", str(cli), "./cmd"],
         cwd=root,
         env=env,
     )
     run(
-        ["go", "build", "-mod=readonly", "-trimpath", "-ldflags", ldflags, "-o", str(server), "./cmd/server"],
+        ["go", "build", "-mod=readonly", "-trimpath", "-buildvcs=false", "-ldflags", ldflags, "-o", str(server), "./cmd/server"],
         cwd=root,
         env=env,
     )
